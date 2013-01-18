@@ -361,7 +361,7 @@ public:
                 for (index = 0; index < common; index++) {
                     sum += matrix1[rowIndex][index] * matrix2[index][colIndex];
                 }
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(matrix3[rowIndex][colIndex], sum, tolerance * common);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(matrix3[rowIndex][colIndex]), static_cast<double>(sum), static_cast<double>(tolerance * common));
             }
         }
         
@@ -372,7 +372,7 @@ public:
                 for (index = 0; index < common; index++) {
                     sum += matrix1[rowIndex][index] * matrix2[index][colIndex];
                 }
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(matrix3[rowIndex][colIndex], sum, tolerance * common);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(matrix3[rowIndex][colIndex]), static_cast<double>(sum), static_cast<double>(tolerance * common));
             }
         }
 
@@ -380,7 +380,7 @@ public:
         matrix3.OuterProductOf(matrix1.Column(0), matrix2.Row(0));
         for (rowIndex = 0; rowIndex < matrix3.rows(); ++rowIndex) {
             for (colIndex = 0; colIndex < matrix3.cols(); ++colIndex) {
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(matrix3[rowIndex][colIndex], matrix1[rowIndex][0] * matrix2[0][colIndex], tolerance);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(matrix3[rowIndex][colIndex]), static_cast<double>(matrix1[rowIndex][0] * matrix2[0][colIndex]), static_cast<double>(tolerance));
             }
         }
     }
@@ -430,7 +430,7 @@ public:
             for (index = 0; index < common; index++) {
                 sum += matrix1[rowIndex][index] * vector1[index];
             }
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(vector2[rowIndex], sum, tolerance * common);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(vector2[rowIndex]), static_cast<double>(sum), static_cast<double>(tolerance * common));
         }
 
         vector2 = matrix1 * vector1;
@@ -439,7 +439,7 @@ public:
             for (index = 0; index < common; index++) {
                 sum += matrix1[rowIndex][index] * vector1[index];
             }
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(vector2[rowIndex], sum, tolerance * common);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(vector2[rowIndex]), static_cast<double>(sum), static_cast<double>(tolerance * common));
         }
     }
 
@@ -464,7 +464,7 @@ public:
             for (index = 0; index < common; index++) {
                 sum += vector1[index] * matrix1[index][colIndex];
             }
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(vector2[colIndex], sum, tolerance * common);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(vector2[colIndex]), static_cast<double>(sum), static_cast<double>(tolerance * common));
         }
 
         vector2 = vector1 * matrix1;
@@ -473,7 +473,7 @@ public:
             for (index = 0; index < common; index++) {
                 sum += vector1[index] * matrix1[index][colIndex];
             }
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(vector2[colIndex], sum, tolerance * common);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(vector2[colIndex]), static_cast<double>(sum), static_cast<double>(tolerance * common));
         }
     }
     
@@ -481,4 +481,3 @@ public:
 
 
 #endif // _vctGenericMatrixTest_h
-

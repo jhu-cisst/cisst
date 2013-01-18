@@ -35,6 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <stdexcept>
 
 
+#define VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(goal, actual, tolerance) \
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(actual), static_cast<double>(tolerance));
 
 template <class _containerType>
 void RemoveQuasiZero(_containerType & container) {
@@ -104,12 +106,12 @@ class vctGenericContainerTest
             goal += (*iter1);
         }
         CPPUNIT_ASSERT(!cmnTypeTraits<value_type>::IsNaN(resultScalar));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(goal, resultScalar, tolerance);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(goal, resultScalar, tolerance);
 
         container2.Zeros();
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(0), container2.SumOfElements(), tolerance);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(value_type(0), container2.SumOfElements(), tolerance);
         container2 = value_type(1);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(container2.size()), container2.SumOfElements(), tolerance);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(value_type(container2.size()), container2.SumOfElements(), tolerance);
 
         resultScalar = container1.ProductOfElements();
         goal = value_type(1);
@@ -117,10 +119,10 @@ class vctGenericContainerTest
             goal *= (*iter1);
         }
         CPPUNIT_ASSERT(!cmnTypeTraits<value_type>::IsNaN(resultScalar));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(goal, resultScalar, tolerance * container1.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(resultScalar), static_cast<double>(tolerance * container1.size()));
 
         container2.SetAll(value_type(1));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(1), container2.ProductOfElements(), tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(1.0), static_cast<double>(container2.ProductOfElements()), static_cast<double>(tolerance));
 
         resultScalar = container1.L1Norm();
         goal = value_type(0);
@@ -129,12 +131,12 @@ class vctGenericContainerTest
             goal += abs;
         }
         CPPUNIT_ASSERT(!cmnTypeTraits<value_type>::IsNaN(resultScalar));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(goal, resultScalar, tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(resultScalar), static_cast<double>(tolerance));
 
         container2 = value_type(0);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(0), container2.L1Norm(), tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(0), container2.L1Norm(), tolerance);
         container2.SetAll(value_type(1));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(container2.size()), container2.L1Norm(), tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(container2.size()), container2.L1Norm(), tolerance);
 
         resultScalar = container1.LinfNorm();
         goal = cmnTypeTraits<value_type>::MinPositiveValue();
@@ -145,7 +147,7 @@ class vctGenericContainerTest
             }
         }
         CPPUNIT_ASSERT(!cmnTypeTraits<value_type>::IsNaN(resultScalar));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(goal, resultScalar, tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), resultScalar, tolerance);
         resultScalar = container1.MaxAbsElement();
 
         container2.Zeros();

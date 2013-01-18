@@ -146,7 +146,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
     position = 0;
     for (row = 0; row < mInt.rows(); ++row) {
         for (col = 0; col < mInt.cols(); ++col) {
-            mInt.Element(row, col) = row * 10 + col;
+            mInt.Element(row, col) = static_cast<int>(row * 10 + col);
             CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * 10 + col), cmnDataScalar(mInt, position));
             position++;
         }
@@ -157,7 +157,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
         for (col = 0; col < mmDouble.cols(); ++col) {
             for (subRow = 0; subRow < mmDouble.Element(row, col).rows(); ++subRow) {
                 for (subCol = 0; subCol < mmDouble.Element(row, col).cols(); ++subCol) {
-                    mmDouble.Element(row, col).Element(subRow, subCol) = row * col * 100 + subRow * subCol;
+                    mmDouble.Element(row, col).Element(subRow, subCol) = static_cast<double>(row * col * 100 + subRow * subCol);
                     CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * col * 100 + subRow * subCol),
                                          cmnDataScalar(mmDouble, position));
                     position++;
@@ -172,7 +172,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
         for (col = 0; col < mmMixed.cols(); ++col) {
             for (subRow = 0; subRow < mmMixed.Element(row, col).rows(); ++subRow) {
                 for (subCol = 0; subCol < mmMixed.Element(row, col).cols(); ++subCol) {
-                    mmMixed.Element(row, col).Element(subRow, subCol) = row * col * 100 + subRow * subCol;
+                    mmMixed.Element(row, col).Element(subRow, subCol) = static_cast<double>(row * col * 100 + subRow * subCol);
                     CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * col * 100 + subRow * subCol),
                                          cmnDataScalar(mmMixed, position));
                     position++;

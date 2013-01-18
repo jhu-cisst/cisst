@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 void vctVarStrideNArrayIteratorTest::TestIncrementDecrementForNArray(void) {
     NArrayType::const_iterator iterator = MyNArray.begin();
-    NArrayType::size_type position = RandomGenerator.ExtractRandomInt(0, MyNArray.size());
+    NArrayType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyNArray.size());
     iterator += position;
     NArrayIteratorTest::TestIncrementDecrement(iterator);
 }
@@ -35,7 +35,7 @@ void vctVarStrideNArrayIteratorTest::TestIncrementDecrementForNArray(void) {
 
 void vctVarStrideNArrayIteratorTest::TestDecrementIncrementForNArray(void) {
     NArrayType::const_iterator iterator = MyNArray.begin();
-    NArrayType::size_type position = RandomGenerator.ExtractRandomInt(0, MyNArray.size());
+    NArrayType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyNArray.size());
     iterator += position;
     NArrayIteratorTest::TestDecrementIncrement(iterator);
 }
@@ -43,7 +43,7 @@ void vctVarStrideNArrayIteratorTest::TestDecrementIncrementForNArray(void) {
 
 void vctVarStrideNArrayIteratorTest::TestPreAndPostIncrementAndDecrementForNArray(void) {
     NArrayType::const_iterator iterator = MyNArray.begin();
-    NArrayType::size_type position = RandomGenerator.ExtractRandomInt(2, MyNArray.size() - 2);
+    NArrayType::size_type position = RandomGenerator.ExtractRandomSizeT(2, MyNArray.size() - 2);
     iterator += position;
     NArrayIteratorTest::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -71,34 +71,34 @@ void vctVarStrideNArrayIteratorTest::TestContainerSizeForReverseDecrementNArray(
 
 void vctVarStrideNArrayIteratorTest::TestAdditionAndSubtractionSymmetryForNArray(void) {
     NArrayType::const_iterator iterator = MyNArray.begin();
-    NArrayType::difference_type position = RandomGenerator.ExtractRandomInt(0, MyNArray.size());
+    NArrayType::difference_type position = RandomGenerator.ExtractRandomSizeT(0, MyNArray.size());
     iterator += position;
-    NArrayType::difference_type difference = RandomGenerator.ExtractRandomInt(-position, MyNArray.size() - position);
+    NArrayType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, MyNArray.size() - position);
     NArrayIteratorTest::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestAdditionAndIncrementEquivalenceForNArray(void) {
     NArrayType::const_iterator iterator = MyNArray.begin();
-    NArrayType::size_type position = RandomGenerator.ExtractRandomInt(0, MyNArray.size());
+    NArrayType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyNArray.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, MyNArray.size() - position) );
+	NArrayType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, MyNArray.size() - position) );
     NArrayIteratorTest::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestOrderingForNArray(void) {
     NArrayType::const_iterator iterator = MyNArray.begin();
-    NArrayType::size_type position = RandomGenerator.ExtractRandomInt(0, MyNArray.size());
+    NArrayType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyNArray.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, MyNArray.size() - position) );
+	NArrayType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, MyNArray.size() - position) );
     NArrayIteratorTest::TestOrdering(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestIncrementDecrementForNArrayConstRef1(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef1.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef1.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef1.size());
     iterator += position;
     NArrayConstRef1Test::TestIncrementDecrement(iterator);
 }
@@ -106,7 +106,7 @@ void vctVarStrideNArrayIteratorTest::TestIncrementDecrementForNArrayConstRef1(vo
 
 void vctVarStrideNArrayIteratorTest::TestDecrementIncrementForNArrayConstRef1(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef1.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef1.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef1.size());
     iterator += position;
     NArrayConstRef1Test::TestDecrementIncrement(iterator);
 }
@@ -114,7 +114,7 @@ void vctVarStrideNArrayIteratorTest::TestDecrementIncrementForNArrayConstRef1(vo
 
 void vctVarStrideNArrayIteratorTest::TestPreAndPostIncrementAndDecrementForNArrayConstRef1(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef1.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(2, NArrayConstRef1.size() - 2);
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(2, NArrayConstRef1.size() - 2);
     iterator += position;
     NArrayConstRef1Test::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -142,34 +142,34 @@ void vctVarStrideNArrayIteratorTest::TestContainerSizeForReverseDecrementNArrayC
 
 void vctVarStrideNArrayIteratorTest::TestAdditionAndSubtractionSymmetryForNArrayConstRef1(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef1.begin();
-    NArrayConstRefType::difference_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef1.size());
+    NArrayConstRefType::difference_type position = RandomGenerator.ExtractRandomPtrdiffT(0, NArrayConstRef1.size());
     iterator += position;
-    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomInt(-position, NArrayConstRef1.size() - position);
+    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, NArrayConstRef1.size() - position);
     NArrayConstRef1Test::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestAdditionAndIncrementEquivalenceForNArrayConstRef1(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef1.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef1.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef1.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, NArrayConstRef1.size() - position) );
+    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, NArrayConstRef1.size() - position) );
     NArrayConstRef1Test::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestOrderingForNArrayConstRef1(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef1.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef1.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef1.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, NArrayConstRef1.size() - position) );
+    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, NArrayConstRef1.size() - position) );
     NArrayConstRef1Test::TestOrdering(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestIncrementDecrementForNArrayConstRef2(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef2.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef2.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef2.size());
     iterator += position;
     NArrayConstRef2Test::TestIncrementDecrement(iterator);
 }
@@ -177,7 +177,7 @@ void vctVarStrideNArrayIteratorTest::TestIncrementDecrementForNArrayConstRef2(vo
 
 void vctVarStrideNArrayIteratorTest::TestDecrementIncrementForNArrayConstRef2(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef2.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef2.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef2.size());
     iterator += position;
     NArrayConstRef2Test::TestDecrementIncrement(iterator);
 }
@@ -185,7 +185,7 @@ void vctVarStrideNArrayIteratorTest::TestDecrementIncrementForNArrayConstRef2(vo
 
 void vctVarStrideNArrayIteratorTest::TestPreAndPostIncrementAndDecrementForNArrayConstRef2(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef2.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(2, NArrayConstRef2.size() - 2);
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(2, NArrayConstRef2.size() - 2);
     iterator += position;
     NArrayConstRef2Test::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -213,34 +213,34 @@ void vctVarStrideNArrayIteratorTest::TestContainerSizeForReverseDecrementNArrayC
 
 void vctVarStrideNArrayIteratorTest::TestAdditionAndSubtractionSymmetryForNArrayConstRef2(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef2.begin();
-    NArrayConstRefType::difference_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef2.size());
+    NArrayConstRefType::difference_type position = RandomGenerator.ExtractRandomPtrdiffT(0, NArrayConstRef2.size());
     iterator += position;
-    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomInt(-position, NArrayConstRef2.size() - position);
+    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, NArrayConstRef2.size() - position);
     NArrayConstRef2Test::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestAdditionAndIncrementEquivalenceForNArrayConstRef2(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef2.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef2.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef2.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, NArrayConstRef2.size() - position) );
+    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, NArrayConstRef2.size() - position) );
     NArrayConstRef2Test::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestOrderingForNArrayConstRef2(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef2.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef2.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef2.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, NArrayConstRef2.size() - position) );
+    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, NArrayConstRef2.size() - position) );
     NArrayConstRef2Test::TestOrdering(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestIncrementDecrementForNArrayConstRef3(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef3.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef3.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef3.size());
     iterator += position;
     NArrayConstRef3Test::TestIncrementDecrement(iterator);
 }
@@ -248,7 +248,7 @@ void vctVarStrideNArrayIteratorTest::TestIncrementDecrementForNArrayConstRef3(vo
 
 void vctVarStrideNArrayIteratorTest::TestDecrementIncrementForNArrayConstRef3(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef3.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef3.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef3.size());
     iterator += position;
     NArrayConstRef3Test::TestDecrementIncrement(iterator);
 }
@@ -256,7 +256,7 @@ void vctVarStrideNArrayIteratorTest::TestDecrementIncrementForNArrayConstRef3(vo
 
 void vctVarStrideNArrayIteratorTest::TestPreAndPostIncrementAndDecrementForNArrayConstRef3(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef3.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(2, NArrayConstRef3.size() - 2);
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(2, NArrayConstRef3.size() - 2);
     iterator += position;
     NArrayConstRef3Test::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -284,30 +284,29 @@ void vctVarStrideNArrayIteratorTest::TestContainerSizeForReverseDecrementNArrayC
 
 void vctVarStrideNArrayIteratorTest::TestAdditionAndSubtractionSymmetryForNArrayConstRef3(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef3.begin();
-    NArrayConstRefType::difference_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef3.size());
+    NArrayConstRefType::difference_type position = RandomGenerator.ExtractRandomPtrdiffT(0, NArrayConstRef3.size());
     iterator += position;
-    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomInt(-position, NArrayConstRef3.size() - position);
+    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, NArrayConstRef3.size() - position);
     NArrayConstRef3Test::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestAdditionAndIncrementEquivalenceForNArrayConstRef3(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef3.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef3.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef3.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, NArrayConstRef3.size() - position) );
+    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, NArrayConstRef3.size() - position) );
     NArrayConstRef3Test::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctVarStrideNArrayIteratorTest::TestOrderingForNArrayConstRef3(void) {
     NArrayConstRefType::const_iterator iterator = NArrayConstRef3.begin();
-    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomInt(0, NArrayConstRef3.size());
+    NArrayConstRefType::size_type position = RandomGenerator.ExtractRandomSizeT(0, NArrayConstRef3.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, NArrayConstRef3.size() - position) );
+    NArrayConstRefType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, NArrayConstRef3.size() - position) );
     NArrayConstRef3Test::TestOrdering(iterator, difference);
 }
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctVarStrideNArrayIteratorTest);
-

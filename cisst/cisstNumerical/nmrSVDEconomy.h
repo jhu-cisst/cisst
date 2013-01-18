@@ -843,12 +843,22 @@ inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, 
 
     // for versions based on gfortran/lapack, CISSTNETLIB_VERSION is
     // defined
-#if defined(CISSTNETLIB_VERSION) || CISST_CMAKE_COMPILER_IS_MSVC_64
+#if defined(CISSTNETLIB_VERSION)
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstnetlib_dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
+                        A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
+                        UPtr, &m_Ldu,
+                        VtPtr, &m_Ldvt,
+                        dataFriend.Workspace().Pointer(), &m_Lwork, &Info);
+#endif
+#else // no major version
     dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
             A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
             UPtr, &m_Ldu,
             VtPtr, &m_Ldvt,
             dataFriend.Workspace().Pointer(), &m_Lwork, &Info);
+#endif // CISSTNETLIB_VERSION
 #else
    ftnlen jobu_len = (ftnlen)1, jobvt_len = (ftnlen)1;
    la_dzlapack_MP_sgesvd_nat(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
@@ -858,7 +868,6 @@ inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, 
                              dataFriend.Workspace().Pointer(), &m_Lwork, &Info,
                              jobu_len, jobvt_len);
 #endif
-
     return Info;
 }
 

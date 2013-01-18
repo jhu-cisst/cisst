@@ -3,10 +3,10 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2006-01-10
-  
+
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -28,17 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 
 
 void nmrLUTest::TestDynamicDataColumnMajor(void) {
-#if CISST_CMAKE_COMPILER_IS_MSVC_64
-    int rows, cols;
-    cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    randomSequence.ExtractRandomValue(10, 20, rows);
-    randomSequence.ExtractRandomValue(10, 20, cols);
-#else
     vct::size_type rows, cols;
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), rows);
-    randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), cols);
-#endif
+    rows = randomSequence.ExtractRandomSizeT(10, 20);
+    cols = randomSequence.ExtractRandomSizeT(10, 20);
+
     vctDynamicMatrix<double> input(rows, cols , VCT_COL_MAJOR);
     vctRandom(input, 0.0, 10.0);
     vctDynamicMatrix<double> output(rows, cols, VCT_COL_MAJOR);
@@ -50,17 +44,11 @@ void nmrLUTest::TestDynamicDataColumnMajor(void) {
 
 
 void nmrLUTest::TestDynamicUserOutputColumnMajor(void) {
-#if CISST_CMAKE_COMPILER_IS_MSVC_64
-    int rows, cols;
-    cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    randomSequence.ExtractRandomValue(10, 20, rows);
-    randomSequence.ExtractRandomValue(10, 20, cols);
-#else
     vct::size_type rows, cols;
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), rows);
-    randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), cols);
-#endif
+    rows = randomSequence.ExtractRandomSizeT(10, 20);
+    cols = randomSequence.ExtractRandomSizeT(10, 20);
+
     vctDynamicMatrix<double> input(rows, cols , VCT_COL_MAJOR);
     vctRandom(input, 0.0, 10.0);
     vctDynamicMatrix<double> output(rows, cols, VCT_COL_MAJOR);
@@ -75,7 +63,7 @@ void nmrLUTest::TestDynamicUserOutputColumnMajor(void) {
 
 
 
-template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn> 
+template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn>
 void nmrLUTest::GenericTestFixedSize(const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & input,
                                      const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & output,
                                      const vctFixedSizeVector<CISSTNETLIB_INTEGER, _minmn> & pivotIndices) {
@@ -139,4 +127,3 @@ void nmrLUTest::TestFixedSizeUserOutputColumnMajorMGeqN(void) {
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(nmrLUTest);
-

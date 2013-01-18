@@ -44,8 +44,8 @@ class vctGenericVectorTest
     template <class _containerType1, class _containerType2>
     static void TestAssignment(const _containerType1 & vector1,
                                _containerType2 & vector2) {
-        unsigned int index;
-        const unsigned int size = vector1.size();
+        size_t index;
+        const size_t size = vector1.size();
         vector2.Assign(vector1);
         CPPUNIT_ASSERT(vector2.size() == size);
         for (index = 0; index < size; index++) {
@@ -58,8 +58,8 @@ class vctGenericVectorTest
     template <class _containerType1, class _containerType2>
         static void TestAccessMethods(_containerType1 & vector1,
                                       const _containerType2 & vector2) {
-        unsigned int index;
-        const unsigned int size = vector1.size();
+        size_t index;
+        const size_t size = vector1.size();
         typedef typename _containerType1::value_type value_type;
         value_type element;
 
@@ -284,19 +284,19 @@ class vctGenericVectorTest
         CPPUNIT_ASSERT(vector1.size() == vector2.size());
         typedef typename _containerType1::value_type value_type;
 
-        const unsigned int size = vector1.size();
+        const size_t size = vector1.size();
         value_type result = value_type(0);
-        unsigned int index;
+        size_t index;
         for (index = 0; index < size; index++) {
             result += (vector1[index] * vector2[index]);
         }
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(result, vector1.DotProduct(vector2), tolerance * size);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(result, vector2.DotProduct(vector1), tolerance * size);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(result, vctDotProduct(vector1, vector2), tolerance * size);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(result, vctDotProduct(vector2, vector1), tolerance * size);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(result, vector1 * vector2, tolerance * size);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(result, vector2 * vector1, tolerance * size);        
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vector1.DotProduct(vector2), tolerance * size);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vector2.DotProduct(vector1), tolerance * size);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vctDotProduct(vector1, vector2), tolerance * size);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vctDotProduct(vector2, vector1), tolerance * size);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vector1 * vector2, tolerance * size);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vector2 * vector1, tolerance * size);        
     }
 
     /*! Store copies of vector1 and vector2 in local variables.  Swap
