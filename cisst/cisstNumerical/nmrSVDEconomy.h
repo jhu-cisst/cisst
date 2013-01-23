@@ -846,7 +846,7 @@ inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, 
 #if defined(CISSTNETLIB_VERSION)
 #if defined(CISSTNETLIB_VERSION_MAJOR)
 #if (CISSTNETLIB_VERSION_MAJOR >= 3)
-    cisstnetlib_dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
+    cisstNetlib_dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
                         A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
                         UPtr, &m_Ldu,
                         VtPtr, &m_Ldvt,
