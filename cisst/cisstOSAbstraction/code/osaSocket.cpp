@@ -33,11 +33,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <sys/types.h>
 #include <errno.h>
 #include <string.h>  // for memset
+#include <unistd.h> // for gethostname
 #if (CISST_OS == CISST_QNX)
 #include <sys/select.h>
 #endif
 #if (CISST_OS == CISST_DARWIN)
-#include <unistd.h> // for gethostname
 #include <sys/types.h>
 #include <ifaddrs.h>
 #endif
