@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
+
+#include "mtsProxyConfig.h"
 #if IMPROVE_ICE_THREADING
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #endif
