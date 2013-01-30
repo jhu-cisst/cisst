@@ -777,42 +777,42 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
         )
 
     SET(FFMPEG_FOUND "NO")
-    FIND_PATH(FFMPEG_avcodec_INCLUDE_DIR avcodec.h
+    FIND_PATH(FFMPEG_avcodec_INCLUDE_DIR libavcodec/avcodec.h
               PATHS
-                "/usr/include/libavcodec"
+                "/usr/include"
                 "/usr/include/ffmpeg"
                 "/usr/include"
-                "/opt/local/include/libavcodec"
+                "/opt/local/include"
                 "/opt/local/include/ffmpeg"
                 "/opt/local/include"
               DOC "What is the path where avcodec.h can be found"
               )
-    FIND_PATH(FFMPEG_avformat_INCLUDE_DIR avformat.h
+    FIND_PATH(FFMPEG_avformat_INCLUDE_DIR libavformat/avformat.h
               PATHS
-                "/usr/include/libavformat"
+                "/usr/include"
                 "/usr/include/ffmpeg"
                 "/usr/include"
-                "/opt/local/include/libavformat"
+                "/opt/local/include"
                 "/opt/local/include/ffmpeg"
                 "/opt/local/include"
               DOC "What is the path where avformat.h can be found"
               )
-    FIND_PATH(FFMPEG_avutil_INCLUDE_DIR avutil.h
+    FIND_PATH(FFMPEG_avutil_INCLUDE_DIR libavutil/avutil.h
               PATHS
-                "/usr/include/libavutil"
+                "/usr/include"
                 "/usr/include/ffmpeg"
                 "/usr/include"
-                "/opt/local/include/libavutil"
+                "/opt/local/include"
                 "/opt/local/include/ffmpeg"
                 "/opt/local/include"
               DOC "What is the path where avutil.h can be found"
               )
-    FIND_PATH(FFMPEG_swscale_INCLUDE_DIR swscale.h
+    FIND_PATH(FFMPEG_swscale_INCLUDE_DIR libswscale/swscale.h
               PATHS
-                "/usr/include/libswscale"
+                "/usr/include"
                 "/usr/include/ffmpeg"
                 "/usr/include"
-                "/opt/local/include/libswscale"
+                "/opt/local/include"
                 "/opt/local/include/ffmpeg"
                 "/opt/local/include"
               DOC "What is the path where swscale.h can be found"
