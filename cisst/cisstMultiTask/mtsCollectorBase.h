@@ -141,7 +141,7 @@ protected:
     CollectorFileFloatingNotation FloatingNotation;
 
     /*! Collector File precision [DEFAULT = 10] */
-    int Precision;
+    std::streamsize Precision;
 
     /*! Collector File fill value [DEFAULT = ' '] */
     char FillCharacter;
