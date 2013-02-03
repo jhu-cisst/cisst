@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -115,7 +115,7 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
-    typedef enum {REQUIRED, OPTIONAL} RequiredType;
+    typedef enum {REQUIRED, OPTIONAL, SQUASH_REQUIRED} RequiredType;
 
  protected:
     class OptionBase {
@@ -137,7 +137,7 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
     class CISST_EXPORT OptionNoValue: public OptionBase {
         friend class cmnCommandLineOptions;
         OptionNoValue(const std::string & shortOption, const std::string & longOption,
-                      const std::string & description);
+                      const std::string & description, RequiredType required = OPTIONAL);
         bool SetValue(const char * value);
     };
 
@@ -175,7 +175,7 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
     cmnCommandLineOptions(void);
 
     bool AddOptionNoValue(const std::string & shortOption, const std::string & longOption,
-                          const std::string & description);
+                          const std::string & description, RequiredType required = OPTIONAL);
 
     template <typename _elementType>
     bool AddOptionOneValue(const std::string & shortOption, const std::string & longOption,
