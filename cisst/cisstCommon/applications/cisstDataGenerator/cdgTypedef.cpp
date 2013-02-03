@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -26,14 +26,16 @@ CMN_IMPLEMENT_SERVICES(cdgTypedef);
 
 
 cdgTypedef::cdgTypedef(size_t lineNumber):
-    cdgScope(lineNumber)
+    cdgScope("typedef", lineNumber)
 {
     cdgField * field;
-    field = this->AddField("name", "", true);
+    field = this->AddField("name", "", true, "name of the new type defined");
     CMN_ASSERT(field);
 
-    field = this->AddField("type", "", true);
+    field = this->AddField("type", "", true, "C/C++ type used to define the new type");
     CMN_ASSERT(field);
+
+    this->AddKnownScope(*this);
 }
 
 
@@ -43,11 +45,15 @@ cdgScope::Type cdgTypedef::GetScope(void) const
 }
 
 
-bool cdgTypedef::HasScope(const std::string & CMN_UNUSED(keyword),
-                          cdgScope::Stack & CMN_UNUSED(scopes),
-                          size_t CMN_UNUSED(lineNumber))
+cdgScope * cdgTypedef::Create(size_t lineNumber) const
 {
-    return false;
+    return new cdgTypedef(lineNumber);
+}
+
+
+bool cdgTypedef::Validate(void)
+{
+    return true;
 }
 
 

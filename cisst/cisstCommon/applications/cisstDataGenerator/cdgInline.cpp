@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -26,12 +26,17 @@ CMN_IMPLEMENT_SERVICES(cdgInline);
 
 
 cdgInline::cdgInline(size_t lineNumber, InlineType type):
-    cdgScope(lineNumber),
+    cdgScope(((type == CDG_INLINE_HEADER) ? "inline-header" : "inline-code"), lineNumber),
     Type(type)
 {
     cdgField * field;
-    field = this->AddField("", "", false);
+    field = this->AddField("", "", false,
+                           (type == CDG_INLINE_HEADER)
+                           ? "code that will be placed as-is in the generated header file"
+                           : "code that will be placed as-is in the generated source file");
     CMN_ASSERT(field);
+    
+    this->AddKnownScope(*this);
 }
 
 
@@ -41,11 +46,15 @@ cdgScope::Type cdgInline::GetScope(void) const
 }
 
 
-bool cdgInline::HasScope(const std::string & CMN_UNUSED(keyword),
-                         cdgScope::Stack & CMN_UNUSED(scopes),
-                         size_t CMN_UNUSED(lineNumber))
+cdgScope * cdgInline::Create(size_t lineNumber) const
 {
-    return false;
+    return new cdgInline(lineNumber, this->Type);
+}
+
+
+bool cdgInline::Validate(void)
+{
+    return true;
 }
 
 

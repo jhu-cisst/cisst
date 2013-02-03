@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -22,51 +22,30 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "cdgScope.h"
 
-const std::string cdgScopeNames[] = {"global",
-                                     "class",
-                                     "base-class",
-                                     "typedef",
-                                     "member",
-                                     "code"};
 
-cdgScope::cdgScope(size_t lineNumber):
-    LineNumber(lineNumber)
+cdgScope::KnownScopesContainer cdgScope::KnownScopes;
+cdgScope::SubScopesContainer cdgScope::SubScopes;
+
+cdgScope::cdgScope(const std::string & name, size_t lineNumber):
+    LineNumber(lineNumber),
+    Name(name)
 {
 }
 
 
 const std::string & cdgScope::GetScopeName(void) const
 {
-    return cdgScopeNames[this->GetScope()];
+    return this->Name;
 }
 
 
-std::string cdgScope::GetDescription(void) const
-{
-    std::string result = "Scope \"" + this->GetScopeName() + "\"";
-    if (!this->Fields.empty()) {
-        result.append("\nPossible fields:");
-        const FieldsContainer::const_iterator end = this->Fields.end();
-        FieldsContainer::const_iterator iter;
-        for (iter = this->Fields.begin();
-             iter != end;
-             iter++) {
-            result.append("\n- ");
-            result.append(iter->second->GetDescription());
-        }
-        result.append("\n");
-    }
-    return result;
-}
-
-
-cdgField * cdgScope::AddField(const std::string & fieldName, const std::string & defaultValue, const bool required)
+cdgField * cdgScope::AddField(const std::string & fieldName, const std::string & defaultValue, const bool required, const std::string & description)
 {
     if (this->Fields.FindItem(fieldName)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddField: field name \"" << fieldName << "\" already defined." << std::endl;
         return 0;
     }
-    cdgField * result = new cdgField(fieldName, defaultValue, required);
+    cdgField * result = new cdgField(fieldName, defaultValue, required, description);
     Fields.AddItem(fieldName, result);
     return result;
 }
@@ -138,7 +117,119 @@ void cdgScope::FillInDefaults(void)
 }
 
 
+bool cdgScope::AddKnownScope(const cdgScope & newScope)
+{
+	const std::string newScopeName = newScope.GetScopeName();
+    if (this->KnownScopes.FindItem(newScopeName)) {
+        return false;
+    }
+	// add a dummy pointer to make sure we don't enter an infinite loop
+	this->KnownScopes.AddItem(newScopeName, this);
+    cdgScope * copy = newScope.Create(0);
+	this->KnownScopes.RemoveItem(newScopeName);
+    this->KnownScopes.AddItem(copy->GetScopeName(), copy);
+	return true;
+}
+
+
+bool cdgScope::AddSubScope(const cdgScope & subScope)
+{
+    const std::string & subScopeName = subScope.GetScopeName();
+    SubScopesContainer::const_iterator iter;
+    for (iter = this->SubScopes.equal_range(this->GetScopeName()).first;
+         iter != this->SubScopes.equal_range(this->GetScopeName()).second;
+         ++iter) {
+        if (iter->second == subScopeName) {
+            // subscope has already been added
+            return false;
+        }
+    }
+    this->SubScopes.insert(std::make_pair(this->GetScopeName(), subScopeName));
+    return true;
+}
+
+
+bool cdgScope::HasSubScope(const std::string & keyword,
+                           cdgScope::Stack & scopes,
+                           size_t lineNumber)
+{
+    SubScopesContainer::const_iterator iter;
+    for (iter = this->SubScopes.equal_range(this->GetScopeName()).first;
+         iter != this->SubScopes.equal_range(this->GetScopeName()).second;
+         ++iter) {
+        if (iter->second == keyword) {
+            cdgScope * subScopeFactory = this->KnownScopes.GetItem(keyword);
+            cdgScope * newScope = subScopeFactory->Create(lineNumber);
+            scopes.push_back(newScope);
+            Scopes.push_back(newScope);
+            return true;
+        }
+    }
+    return false;
+}
+
+
+bool cdgScope::ValidateRecursion(void)
+{
+    bool valid = true;
+    const ScopesContainer::iterator end = Scopes.end();
+    ScopesContainer::iterator iter;
+    for (iter = Scopes.begin();
+         iter != end;
+         ++iter) {
+        valid = valid && ((*iter)->Validate());
+        valid = valid && ((*iter)->ValidateRecursion());
+    }
+    return valid;
+}
+
+
 void cdgScope::GenerateLineComment(std::ostream & outputStream) const
 {
     outputStream << "/* source line: " << LineNumber << " */" << std::endl;
+}
+
+
+void cdgScope::DisplaySyntax(std::ostream & outputStream, size_t offset, bool recursive, bool skipScopeName) const
+{
+    const std::string indent(offset, ' ');
+    if (!skipScopeName) {
+        outputStream << indent << this->GetScopeName() << " {" << std::endl;
+    }
+    SubScopesContainer::const_iterator iter;
+    if (recursive) {
+        for (iter = this->SubScopes.equal_range(this->GetScopeName()).first;
+             iter != this->SubScopes.equal_range(this->GetScopeName()).second;
+             ++iter) {
+            cdgScope * subScope = KnownScopes.GetItem(iter->second);
+            if (subScope) {
+                subScope->DisplaySyntax(outputStream, offset + cdgScope::DISPLAY_OFFSET, true);
+            }
+        }
+    } else {
+        for (iter = this->SubScopes.equal_range(this->GetScopeName()).first;
+             iter != this->SubScopes.equal_range(this->GetScopeName()).second;
+             ++iter) {
+            const std::string subIndent(offset + cdgScope::DISPLAY_OFFSET, ' ');
+            outputStream << subIndent << iter->second << " {}" << std::endl;
+        }
+    }
+    DisplayFieldsSyntax(outputStream, offset + cdgScope::DISPLAY_OFFSET);
+    if (!skipScopeName) {
+        outputStream << indent << "}" << std::endl;
+    }
+}
+
+
+void cdgScope::DisplayFieldsSyntax(std::ostream & outputStream, size_t offset) const
+{
+
+    const FieldsContainer::const_iterator end = this->Fields.end();
+    FieldsContainer::const_iterator iter;
+    for (iter = this->Fields.begin();
+         iter != end;
+         iter++) {
+        iter->second->DisplaySyntax(outputStream, offset);
+        outputStream << std::endl;
+    }
 }

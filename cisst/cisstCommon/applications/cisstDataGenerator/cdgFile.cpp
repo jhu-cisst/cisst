@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -157,14 +157,16 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                         value.clear();
                         if (scopes.back()->HasField(word)) {
                             keyword = word;
-                        } else if (scopes.back()->HasScope(word, scopes, lineNumber)) {
+                        } else if (scopes.back()->HasSubScope(word, scopes, lineNumber)) {
                             keyword.clear();
                             if (!curlyOpen) {
                                 curlyOpenExpected = true;
                             }
                         } else if (!word.empty()) {
                             std::cerr << filename << ":" << lineNumber << ": error: unexpected keyword \""
-                                      << word << "\" in " << scopes.back()->GetDescription() << std::endl;
+                                      << word << "\" in " << std::endl;
+                            scopes.back()->DisplaySyntax(std::cerr, 0, false);
+                            std::cerr << std::endl;
                             errorFound = true;
                         }
                         if (curlyClose) {
@@ -295,6 +297,11 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
 }
 
 
+bool cdgFile::Validate(void)
+{
+    return this->Global->ValidateRecursion();
+}
+
 
 void cdgFile::RemoveTrailingSpaces(std::string & value)
 {
@@ -333,4 +340,13 @@ void cdgFile::GenerateCode(std::ostream & outputStream) const
                  << "#include <cisstCommon/cmnDataFunctions.h>" << std::endl << std::endl;
 
     this->Global->GenerateCode(outputStream);
+}
+
+
+void cdgFile::DisplaySyntax(std::ostream & outputStream) const
+{
+    cdgGlobal * global = new cdgGlobal(0);
+    outputStream << "File syntax:" << std::endl;
+    global->DisplaySyntax(outputStream, 0, true, true); // no offset, recursive and hide top scope
+    delete global;
 }

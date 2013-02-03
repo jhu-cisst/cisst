@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -34,9 +34,8 @@ class cdgTypedef: public cdgScope {
 public:
     cdgTypedef(size_t lineNumber);
     cdgScope::Type GetScope(void) const;
-    bool HasScope(const std::string & keyword,
-                  cdgScope::Stack & scopes,
-                  size_t lineNumber);
+    cdgScope * Create(size_t lineNumber) const;
+    bool Validate(void);
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & CMN_UNUSED(outputStream)) const {};
 

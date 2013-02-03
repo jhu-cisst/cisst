@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -37,10 +37,10 @@ public:
 
     bool ParseFile(std::ifstream & input,
                    const std::string & filename);
-
+    bool Validate(void);
     void GenerateHeader(std::ostream & outputStream) const;
-
     void GenerateCode(std::ostream & outputStream) const;
+    void DisplaySyntax(std::ostream & outputStream) const;
 
 protected:
     static void RemoveTrailingSpaces(std::string & value);

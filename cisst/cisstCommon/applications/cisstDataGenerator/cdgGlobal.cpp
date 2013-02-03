@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -26,8 +26,18 @@ CMN_IMPLEMENT_SERVICES(cdgGlobal);
 
 
 cdgGlobal::cdgGlobal(size_t lineNumber):
-    cdgScope(lineNumber)
+    cdgScope("global", lineNumber)
 {
+    this->AddKnownScope(*this);
+
+    cdgClass newClass(0);
+    this->AddSubScope(newClass);
+
+    cdgInline newInline(0, cdgInline::CDG_INLINE_HEADER);
+    this->AddSubScope(newInline);
+
+    cdgInline newCode(0, cdgInline::CDG_INLINE_CODE);
+    this->AddSubScope(newCode);
 }
 
 
@@ -37,28 +47,15 @@ cdgScope::Type cdgGlobal::GetScope(void) const
 }
 
 
-bool cdgGlobal::HasScope(const std::string & keyword,
-                         cdgScope::Stack & scopes,
-                         size_t lineNumber)
+cdgScope * cdgGlobal::Create(size_t lineNumber) const
 {
-    if (keyword == "class") {
-        cdgClass * newClass = new cdgClass(lineNumber);
-        scopes.push_back(newClass);
-        Scopes.push_back(newClass);
-        Classes.push_back(newClass);
-        return true;
-    } else if (keyword == "inline-header") {
-        cdgInline * newCode = new cdgInline(lineNumber, cdgInline::CDG_INLINE_HEADER);
-        scopes.push_back(newCode);
-        Scopes.push_back(newCode);
-        return true;
-    } else if (keyword == "inline-code") {
-        cdgInline * newCode = new cdgInline(lineNumber, cdgInline::CDG_INLINE_CODE);
-        scopes.push_back(newCode);
-        Scopes.push_back(newCode);
-        return true;
-    }
-    return false;
+    return new cdgGlobal(lineNumber);
+}
+
+
+bool cdgGlobal::Validate(void)
+{
+    return true;
 }
 
 
