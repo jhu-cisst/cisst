@@ -102,7 +102,7 @@ void cdgField::DisplaySyntax(std::ostream & outputStream, size_t offsetSize) con
     const std::string offset(offsetSize, ' ');
     if (this->Keyword != "") {
         outputStream << offset << this->Keyword
-                     << " = [";
+                     << " = <";
         if (!this->PossibleValues.empty()) {
             outputStream << "value must be one of";
             const ValuesContainer::const_iterator end = this->PossibleValues.end();
@@ -114,9 +114,9 @@ void cdgField::DisplaySyntax(std::ostream & outputStream, size_t offsetSize) con
             outputStream << "user defined string";
         }
         if (this->Default != "") {
-            outputStream << ", default is '" << this->Default << "'";
+            outputStream << ": default is '" << this->Default << "'";
         }
-        outputStream << "] // " << (this->Required ? "(required)" : "(optional)");
+        outputStream << ">; // " << (this->Required ? "(required)" : "(optional)");
     } else {
         outputStream << offset << "C++ code snippet";
     }
