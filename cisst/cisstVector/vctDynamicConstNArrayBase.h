@@ -233,8 +233,7 @@ protected:
     {
         if (! ValidDimensionIndex(dimensionIndex))
         {
-            cmnThrow(std::out_of_range("vctDynamicNArray: Invalid dimension index of "
-                + dimensionIndex));
+            cmnThrow(std::out_of_range("vctDynamicNArray: Invalid index"));
         }
     }
 
@@ -264,8 +263,7 @@ protected:
     {
         if (! ValidIndex(dimension, index))
         {
-            cmnThrow(std::out_of_range("vctDynamicNArray: Invalid index in dimension "
-                + dimension));
+            cmnThrow(std::out_of_range("vctDynamicNArray: Invalid index"));
         }
     }
 
