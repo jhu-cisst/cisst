@@ -96,7 +96,7 @@ void * mtsManagerGlobal::ThreadDisconnectProcess(void * CMN_UNUSED(arg))
     return 0;
 }
 
-mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInterfaceProvidedOrOutput(
+mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInterfaceProvided(
     const std::string & severProcessName, const std::string & serverComponentName,
     const std::string & interfaceProvidedName) const
 {
@@ -106,10 +106,10 @@ mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInter
     InterfaceMapType * interfaceMap = componentMap->GetItem(serverComponentName);
     if (interfaceMap == 0) return 0;
 
-    return interfaceMap->InterfaceProvidedOrOutputMap.GetItem(interfaceProvidedName);
+    return interfaceMap->InterfaceProvidedMap.GetItem(interfaceProvidedName);
 }
 
-mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInterfaceProvidedOrOutput(
+mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInterfaceProvided(
     const std::string & severProcessName, const std::string & serverComponentName,
     const std::string & interfaceProvidedName, InterfaceMapType ** interfaceMap) const
 {
@@ -119,10 +119,10 @@ mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInter
     *interfaceMap = componentMap->GetItem(serverComponentName);
     if (*interfaceMap == 0) return 0;
 
-    return (*interfaceMap)->InterfaceProvidedOrOutputMap.GetItem(interfaceProvidedName);
+    return (*interfaceMap)->InterfaceProvidedMap.GetItem(interfaceProvidedName);
 }
 
-mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInterfaceRequiredOrInput(
+mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInterfaceRequired(
     const std::string & clientProcessName, const std::string & clientComponentName,
     const std::string & interfaceRequiredName) const
 {
@@ -132,10 +132,10 @@ mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInter
     InterfaceMapType * interfaceMap = componentMap->GetItem(clientComponentName);
     if (interfaceMap == 0) return 0;
 
-    return interfaceMap->InterfaceRequiredOrInputMap.GetItem(interfaceRequiredName);
+    return interfaceMap->InterfaceRequiredMap.GetItem(interfaceRequiredName);
 }
 
-mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInterfaceRequiredOrInput(
+mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInterfaceRequired(
     const std::string & clientProcessName, const std::string & clientComponentName,
     const std::string & interfaceRequiredName, InterfaceMapType ** interfaceMap) const
 {
@@ -145,10 +145,10 @@ mtsManagerGlobal::ConnectionIDListType * mtsManagerGlobal::GetConnectionsOfInter
     *interfaceMap = componentMap->GetItem(clientComponentName);
     if (*interfaceMap == 0) return 0;
 
-    return (*interfaceMap)->InterfaceRequiredOrInputMap.GetItem(interfaceRequiredName);
+    return (*interfaceMap)->InterfaceRequiredMap.GetItem(interfaceRequiredName);
 }
 
-bool mtsManagerGlobal::AddConnectionToInterfaceProvidedOrOutput(
+bool mtsManagerGlobal::AddConnectionToInterfaceProvided(
     const std::string & serverProcessName, const std::string & serverComponentName,
     const std::string & interfaceProvidedName, const ConnectionIDType connectionID)
 {
@@ -156,14 +156,14 @@ bool mtsManagerGlobal::AddConnectionToInterfaceProvidedOrOutput(
 
     ProcessMapChange.Lock();
 
-    mtsManagerGlobal::ConnectionIDListType * list = GetConnectionsOfInterfaceProvidedOrOutput(
+    mtsManagerGlobal::ConnectionIDListType * list = GetConnectionsOfInterfaceProvided(
         serverProcessName, serverComponentName, interfaceProvidedName, &interfaceMap);
     CMN_ASSERT(interfaceMap);
 
     if (!list) {
         // If this connection is the first one
         list = new ConnectionIDListType;
-        (interfaceMap->InterfaceProvidedOrOutputMap.GetMap())[interfaceProvidedName] = list;
+        (interfaceMap->InterfaceProvidedMap.GetMap())[interfaceProvidedName] = list;
     } else {
         // Check duplicate connection id
         mtsManagerGlobal::ConnectionIDListType::const_iterator it = list->begin();
@@ -199,7 +199,7 @@ bool mtsManagerGlobal::AddConnectionToInterfaceProvidedOrOutput(
     return true;
 }
 
-bool mtsManagerGlobal::AddConnectionToInterfaceRequiredOrInput(
+bool mtsManagerGlobal::AddConnectionToInterfaceRequired(
     const std::string & clientProcessName, const std::string & clientComponentName,
     const std::string & interfaceRequiredName, const ConnectionIDType connectionID)
 {
@@ -207,14 +207,14 @@ bool mtsManagerGlobal::AddConnectionToInterfaceRequiredOrInput(
 
     ProcessMapChange.Lock();
 
-    mtsManagerGlobal::ConnectionIDListType * list = GetConnectionsOfInterfaceRequiredOrInput(
+    mtsManagerGlobal::ConnectionIDListType * list = GetConnectionsOfInterfaceRequired(
         clientProcessName, clientComponentName, interfaceRequiredName, &interfaceMap);
     CMN_ASSERT(interfaceMap);
 
     if (!list) {
         // If this connection is the first one
         list = new ConnectionIDListType;
-        (interfaceMap->InterfaceRequiredOrInputMap.GetMap())[interfaceRequiredName] = list;
+        (interfaceMap->InterfaceRequiredMap.GetMap())[interfaceRequiredName] = list;
     } else {
         // Check duplicate connection id
         mtsManagerGlobal::ConnectionIDListType::const_iterator it = list->begin();
@@ -250,11 +250,11 @@ bool mtsManagerGlobal::AddConnectionToInterfaceRequiredOrInput(
     return true;
 }
 
-bool mtsManagerGlobal::RemoveConnectionOfInterfaceProvidedOrOutput(
+bool mtsManagerGlobal::RemoveConnectionOfInterfaceProvided(
     const std::string & serverProcessName, const std::string & serverComponentName,
     const std::string & interfaceProvidedName, const ConnectionIDType connectionID)
 {
-    if (!FindInterfaceProvidedOrOutput(serverProcessName, serverComponentName, interfaceProvidedName)) {
+    if (!FindInterfaceProvided(serverProcessName, serverComponentName, interfaceProvidedName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveConnectionOfInterfaceProvidedOrOutput: no interface found: [ " << connectionID << " ] "
             << "\"" << GetInterfaceUID(serverProcessName, serverComponentName, interfaceProvidedName) << "\"" << std::endl;
         return false;
@@ -264,7 +264,7 @@ bool mtsManagerGlobal::RemoveConnectionOfInterfaceProvidedOrOutput(
 
     ProcessMapChange.Lock();
 
-    mtsManagerGlobal::ConnectionIDListType * list = GetConnectionsOfInterfaceProvidedOrOutput(
+    mtsManagerGlobal::ConnectionIDListType * list = GetConnectionsOfInterfaceProvided(
         serverProcessName, serverComponentName, interfaceProvidedName, &interfaceMap);
 
     if (!list) {
@@ -295,11 +295,11 @@ bool mtsManagerGlobal::RemoveConnectionOfInterfaceProvidedOrOutput(
     }
 }
 
-bool mtsManagerGlobal::RemoveConnectionOfInterfaceRequiredOrInput(
+bool mtsManagerGlobal::RemoveConnectionOfInterfaceRequired(
     const std::string & clientProcessName, const std::string & clientComponentName,
     const std::string & interfaceRequiredName, const ConnectionIDType connectionID)
 {
-    if (!FindInterfaceRequiredOrInput(clientProcessName, clientComponentName, interfaceRequiredName)) {
+    if (!FindInterfaceRequired(clientProcessName, clientComponentName, interfaceRequiredName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveConnectionOfInterfaceRequiredOrInput: no interface found: [ " << connectionID << " ] "
             << "\"" << GetInterfaceUID(clientProcessName, clientComponentName, interfaceRequiredName) << "\"" << std::endl;
         return false;
@@ -309,7 +309,7 @@ bool mtsManagerGlobal::RemoveConnectionOfInterfaceRequiredOrInput(
 
     ProcessMapChange.Lock();
 
-    mtsManagerGlobal::ConnectionIDListType * list = GetConnectionsOfInterfaceRequiredOrInput(
+    mtsManagerGlobal::ConnectionIDListType * list = GetConnectionsOfInterfaceRequired(
         clientProcessName, clientComponentName, interfaceRequiredName, &interfaceMap);
 
     if (!list) {
@@ -380,7 +380,7 @@ bool mtsManagerGlobal::IsAlreadyConnected(const mtsDescriptionConnection & descr
     const std::string clientInterfaceName = description.Client.InterfaceName;
 
     // Check if provided interface exists
-    if (!FindInterfaceProvidedOrOutput(serverProcessName, serverComponentName, serverInterfaceName)) {
+    if (!FindInterfaceProvided(serverProcessName, serverComponentName, serverInterfaceName)) {
         CMN_LOG_CLASS_RUN_ERROR << "IsAlreadyConnected: invalid provided interface: \""
             << GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceName)
             << "\"" << std::endl;
@@ -388,7 +388,7 @@ bool mtsManagerGlobal::IsAlreadyConnected(const mtsDescriptionConnection & descr
     }
 
     // Check if required interface exists
-    if (!FindInterfaceRequiredOrInput(clientProcessName, clientComponentName, clientInterfaceName)) {
+    if (!FindInterfaceRequired(clientProcessName, clientComponentName, clientInterfaceName)) {
         CMN_LOG_CLASS_RUN_ERROR << "IsAlreadyConnected: invalid required interface: \""
             << GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceName)
             << "\"" << std::endl;
@@ -401,7 +401,7 @@ bool mtsManagerGlobal::IsAlreadyConnected(const mtsDescriptionConnection & descr
     // connection id that corresponds to the required interface from a list of connection
     // id that the provided interface has.
     mtsManagerGlobal::ConnectionIDListType * list =
-        GetConnectionsOfInterfaceProvidedOrOutput(serverProcessName, serverComponentName, serverInterfaceName);
+        GetConnectionsOfInterfaceProvided(serverProcessName, serverComponentName, serverInterfaceName);
     if (!list) {
         // no connection
         return false;
@@ -440,8 +440,8 @@ int mtsManagerGlobal::GetNumberOfInterfaces(const std::string & processName, con
         return -1;
     }
 
-    numberOfInterfaceProvided += interfaceMap->InterfaceProvidedOrOutputMap.size();
-    numberOfInterfaceRequired += interfaceMap->InterfaceRequiredOrInputMap.size();
+    numberOfInterfaceProvided += interfaceMap->InterfaceProvidedMap.size();
+    numberOfInterfaceRequired += interfaceMap->InterfaceRequiredMap.size();
 
     // Exclude internal interfaces
     std::string interfaceName;
@@ -449,16 +449,16 @@ int mtsManagerGlobal::GetNumberOfInterfaces(const std::string & processName, con
         InterfaceMapElementType::const_iterator it, itEnd;
         if (mtsManagerComponentBase::IsManagerComponentServer(componentName)) {
             // InterfaceGCMRequired
-            it = interfaceMap->InterfaceRequiredOrInputMap.begin();
-            itEnd = interfaceMap->InterfaceRequiredOrInputMap.end();
+            it = interfaceMap->InterfaceRequiredMap.begin();
+            itEnd = interfaceMap->InterfaceRequiredMap.end();
             for (; it != itEnd; ++it) {
                 if (mtsManagerComponentBase::IsNameOfInterfaceGCMRequired(it->first)) {
                     --numberOfInterfaceRequired;
                 }
             }
             // InterfaceGCMProvided
-            it = interfaceMap->InterfaceProvidedOrOutputMap.begin();
-            itEnd = interfaceMap->InterfaceProvidedOrOutputMap.end();
+            it = interfaceMap->InterfaceProvidedMap.begin();
+            itEnd = interfaceMap->InterfaceProvidedMap.end();
             for (; it != itEnd; ++it) {
                 if (mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(it->first)) {
                     --numberOfInterfaceProvided;
@@ -466,8 +466,8 @@ int mtsManagerGlobal::GetNumberOfInterfaces(const std::string & processName, con
             }
         } else if (mtsManagerComponentBase::IsManagerComponentClient(componentName)) {
             // InterfaceLCMRequired or InterfaceComponentRequired
-            it = interfaceMap->InterfaceRequiredOrInputMap.begin();
-            itEnd = interfaceMap->InterfaceRequiredOrInputMap.end();
+            it = interfaceMap->InterfaceRequiredMap.begin();
+            itEnd = interfaceMap->InterfaceRequiredMap.end();
             for (; it != itEnd; ++it) {
                 if (mtsManagerComponentBase::IsNameOfInterfaceLCMRequired(it->first) ||
                     mtsManagerComponentBase::IsNameOfInterfaceComponentRequired(it->first))
@@ -476,8 +476,8 @@ int mtsManagerGlobal::GetNumberOfInterfaces(const std::string & processName, con
                 }
             }
             // InterfaceLCMProvided or InterfaceComponentProvided
-            it = interfaceMap->InterfaceProvidedOrOutputMap.begin();
-            itEnd = interfaceMap->InterfaceProvidedOrOutputMap.end();
+            it = interfaceMap->InterfaceProvidedMap.begin();
+            itEnd = interfaceMap->InterfaceProvidedMap.end();
             for (; it != itEnd; ++it) {
                 if (mtsManagerComponentBase::IsNameOfInterfaceLCMProvided(it->first) ||
                     mtsManagerComponentBase::IsNameOfInterfaceComponentProvided(it->first))
@@ -487,16 +487,16 @@ int mtsManagerGlobal::GetNumberOfInterfaces(const std::string & processName, con
             }
         } else {
             // InterfaceInternalRequired
-            it = interfaceMap->InterfaceRequiredOrInputMap.begin();
-            itEnd = interfaceMap->InterfaceRequiredOrInputMap.end();
+            it = interfaceMap->InterfaceRequiredMap.begin();
+            itEnd = interfaceMap->InterfaceRequiredMap.end();
             for (; it != itEnd; ++it) {
                 if (mtsManagerComponentBase::IsNameOfInterfaceInternalRequired(it->first)) {
                     --numberOfInterfaceRequired;
                 }
             }
             // InterfaceInternalProvided
-            it = interfaceMap->InterfaceProvidedOrOutputMap.begin();
-            itEnd = interfaceMap->InterfaceProvidedOrOutputMap.end();
+            it = interfaceMap->InterfaceProvidedMap.begin();
+            itEnd = interfaceMap->InterfaceProvidedMap.end();
             for (; it != itEnd; ++it) {
                 if (mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(it->first)) {
                     --numberOfInterfaceProvided;
@@ -839,17 +839,17 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
         InterfaceMapElementType::iterator it;
 
         // Remove all the required interfaces that the component has
-        it = interfaceMap->InterfaceRequiredOrInputMap.GetMap().begin();
-        while (it != interfaceMap->InterfaceRequiredOrInputMap.GetMap().end()) {
-            ret &= RemoveInterfaceRequiredOrInput(processName, componentName, it->first, false);
-            it = interfaceMap->InterfaceRequiredOrInputMap.GetMap().begin();
+        it = interfaceMap->InterfaceRequiredMap.GetMap().begin();
+        while (it != interfaceMap->InterfaceRequiredMap.GetMap().end()) {
+            ret &= RemoveInterfaceRequired(processName, componentName, it->first, false);
+            it = interfaceMap->InterfaceRequiredMap.GetMap().begin();
         }
 
         // Remove all the provided interfaces that the component has
-        it = interfaceMap->InterfaceProvidedOrOutputMap.GetMap().begin();
-        while (it != interfaceMap->InterfaceProvidedOrOutputMap.GetMap().end()) {
-            ret &= RemoveInterfaceProvidedOrOutput(processName, componentName, it->first, false);
-            it = interfaceMap->InterfaceProvidedOrOutputMap.GetMap().begin();
+        it = interfaceMap->InterfaceProvidedMap.GetMap().begin();
+        while (it != interfaceMap->InterfaceProvidedMap.GetMap().end()) {
+            ret &= RemoveInterfaceProvided(processName, componentName, it->first, false);
+            it = interfaceMap->InterfaceProvidedMap.GetMap().begin();
         }
 
         delete interfaceMap;
@@ -889,7 +889,7 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
 //-------------------------------------------------------------------------
 //  Interface Management
 //-------------------------------------------------------------------------
-bool mtsManagerGlobal::AddInterfaceProvidedOrOutput(const std::string & processName,
+bool mtsManagerGlobal::AddInterfaceProvided(const std::string & processName,
     const std::string & componentName, const std::string & interfaceName)
 {
     if (!FindComponent(processName, componentName)) {
@@ -911,7 +911,7 @@ bool mtsManagerGlobal::AddInterfaceProvidedOrOutput(const std::string & processN
     }
 
     // Add the provided interface
-    if (!interfaceMap->InterfaceProvidedOrOutputMap.AddItem(interfaceName, 0)) {
+    if (!interfaceMap->InterfaceProvidedMap.AddItem(interfaceName, 0)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddInterfaceProvidedOrOutput: failed to add provided/output interface: "
             << "\"" << processName << ":" << componentName << ":" << interfaceName << "\"" << std::endl;
         ProcessMapChange.Unlock();
@@ -924,7 +924,7 @@ bool mtsManagerGlobal::AddInterfaceProvidedOrOutput(const std::string & processN
 }
 
 
-bool mtsManagerGlobal::AddInterfaceRequiredOrInput(const std::string & processName,
+bool mtsManagerGlobal::AddInterfaceRequired(const std::string & processName,
     const std::string & componentName, const std::string & interfaceName)
 {
     if (!FindComponent(processName, componentName)) {
@@ -946,7 +946,7 @@ bool mtsManagerGlobal::AddInterfaceRequiredOrInput(const std::string & processNa
     }
 
     // Add the required interface
-    if (!interfaceMap->InterfaceRequiredOrInputMap.AddItem(interfaceName, 0)) {
+    if (!interfaceMap->InterfaceRequiredMap.AddItem(interfaceName, 0)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddInterfaceRequiredOrInput: failed to add required/input interface: "
             << "\"" << processName << ":" << componentName << ":" << interfaceName << "\"" << std::endl;
         ProcessMapChange.Unlock();
@@ -958,9 +958,9 @@ bool mtsManagerGlobal::AddInterfaceRequiredOrInput(const std::string & processNa
     return true;
 }
 
-bool mtsManagerGlobal::FindInterfaceProvidedOrOutput(const std::string & processName,
-                                                     const std::string & componentName,
-                                                     const std::string & interfaceName) const
+bool mtsManagerGlobal::FindInterfaceProvided(const std::string & processName,
+                                             const std::string & componentName,
+                                             const std::string & interfaceName) const
 {
     if (!FindComponent(processName, componentName)) {
         //CMN_LOG_CLASS_RUN_ERROR << "FindInterfaceProvidedOrOutput: failed to find component: "
@@ -974,12 +974,12 @@ bool mtsManagerGlobal::FindInterfaceProvidedOrOutput(const std::string & process
     InterfaceMapType * interfaceMap = componentMap->GetItem(componentName);
     if (!interfaceMap) return false;
 
-    return interfaceMap->InterfaceProvidedOrOutputMap.FindItem(interfaceName);
+    return interfaceMap->InterfaceProvidedMap.FindItem(interfaceName);
 }
 
-bool mtsManagerGlobal::FindInterfaceRequiredOrInput(const std::string & processName,
-                                                    const std::string & componentName,
-                                                    const std::string & interfaceName) const
+bool mtsManagerGlobal::FindInterfaceRequired(const std::string & processName,
+                                             const std::string & componentName,
+                                             const std::string & interfaceName) const
 {
     if (!FindComponent(processName, componentName)) {
         //CMN_LOG_CLASS_RUN_ERROR << "FindInterfaceRequiredOrInput: failed to find component: "
@@ -993,13 +993,13 @@ bool mtsManagerGlobal::FindInterfaceRequiredOrInput(const std::string & processN
     InterfaceMapType * interfaceMap = componentMap->GetItem(componentName);
     if (!interfaceMap) return false;
 
-    return interfaceMap->InterfaceRequiredOrInputMap.FindItem(interfaceName);
+    return interfaceMap->InterfaceRequiredMap.FindItem(interfaceName);
 }
 
-bool mtsManagerGlobal::RemoveInterfaceProvidedOrOutput(const std::string & processName,
-                                                       const std::string & componentName,
-                                                       const std::string & interfaceName,
-                                                       const bool lock)
+bool mtsManagerGlobal::RemoveInterfaceProvided(const std::string & processName,
+                                               const std::string & componentName,
+                                               const std::string & interfaceName,
+                                               const bool lock)
 {
     // Check if the process exists
     if (!ProcessMap.FindItem(processName)) {
@@ -1031,7 +1031,7 @@ bool mtsManagerGlobal::RemoveInterfaceProvidedOrOutput(const std::string & proce
     InterfaceMapType * interfaceMap = componentMap->GetItem(componentName);
     CMN_ASSERT(interfaceMap);
 
-    if (!interfaceMap->InterfaceProvidedOrOutputMap.FindItem(interfaceName)) {
+    if (!interfaceMap->InterfaceProvidedMap.FindItem(interfaceName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvidedOrOutput: no provided interface found: \""
             << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
         if (lock) {
@@ -1043,7 +1043,7 @@ bool mtsManagerGlobal::RemoveInterfaceProvidedOrOutput(const std::string & proce
     // When connectionMap is not NULL, all the connections that the provided
     // interface has should be removed first
     bool ret = true;
-    ConnectionIDListType * list = interfaceMap->InterfaceProvidedOrOutputMap.GetItem(interfaceName);
+    ConnectionIDListType * list = interfaceMap->InterfaceProvidedMap.GetItem(interfaceName);
     if (list) {
         if (list->size()) {
             ConnectionIDListType::iterator it = list->begin();
@@ -1063,7 +1063,7 @@ bool mtsManagerGlobal::RemoveInterfaceProvidedOrOutput(const std::string & proce
     const std::string interfaceUID = mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName);
 
     // Remove the provided interface from provided interface map
-    ret &= interfaceMap->InterfaceProvidedOrOutputMap.RemoveItem(interfaceName);
+    ret &= interfaceMap->InterfaceProvidedMap.RemoveItem(interfaceName);
 
     if (lock) {
         ProcessMapChange.Unlock();
@@ -1078,10 +1078,10 @@ bool mtsManagerGlobal::RemoveInterfaceProvidedOrOutput(const std::string & proce
     return ret;
 }
 
-bool mtsManagerGlobal::RemoveInterfaceRequiredOrInput(const std::string & processName,
-                                                      const std::string & componentName,
-                                                      const std::string & interfaceName,
-                                                      const bool lock)
+bool mtsManagerGlobal::RemoveInterfaceRequired(const std::string & processName,
+                                               const std::string & componentName,
+                                               const std::string & interfaceName,
+                                               const bool lock)
 {
     // Check if the process exists
     if (!ProcessMap.FindItem(processName)) {
@@ -1113,7 +1113,7 @@ bool mtsManagerGlobal::RemoveInterfaceRequiredOrInput(const std::string & proces
     InterfaceMapType * interfaceMap = componentMap->GetItem(componentName);
     CMN_ASSERT(interfaceMap);
 
-    if (!interfaceMap->InterfaceRequiredOrInputMap.FindItem(interfaceName)) {
+    if (!interfaceMap->InterfaceRequiredMap.FindItem(interfaceName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequiredOrInput: no required interface found: \""
             << mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName) << "\"" << std::endl;
         if (lock) {
@@ -1125,7 +1125,7 @@ bool mtsManagerGlobal::RemoveInterfaceRequiredOrInput(const std::string & proces
     // When connectionMap is not NULL, a connection that the required interface
     // has should be removed first
     bool ret = true;
-    ConnectionIDListType * list = interfaceMap->InterfaceRequiredOrInputMap.GetItem(interfaceName);
+    ConnectionIDListType * list = interfaceMap->InterfaceRequiredMap.GetItem(interfaceName);
     if (list) {
         if (list->size()) {
             const ConnectionIDType id = *list->begin();
@@ -1141,7 +1141,7 @@ bool mtsManagerGlobal::RemoveInterfaceRequiredOrInput(const std::string & proces
     const std::string interfaceUID = mtsManagerGlobal::GetInterfaceUID(processName, componentName, interfaceName);
 
     // Remove the required interface from required interface map
-    ret &= interfaceMap->InterfaceRequiredOrInputMap.RemoveItem(interfaceName);
+    ret &= interfaceMap->InterfaceRequiredMap.RemoveItem(interfaceName);
 
     if (lock) {
         ProcessMapChange.Unlock();
@@ -1178,9 +1178,9 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
     //}
 
     // Check if the required interface specified exists
-    if (!FindInterfaceRequiredOrInput(clientProcessName, clientComponentName, clientInterfaceRequiredName)) {
+    if (!FindInterfaceRequired(clientProcessName, clientComponentName, clientInterfaceRequiredName)) {
         // Check if by any chance the parameters have been swapped
-        if (FindInterfaceRequiredOrInput(clientProcessName, serverComponentName, serverInterfaceProvidedName)) {
+        if (FindInterfaceRequired(clientProcessName, serverComponentName, serverInterfaceProvidedName)) {
             interfacesSwapped = true;
         } else {
             GetNamesOfInterfacesRequiredOrInput(clientProcessName, clientComponentName, options);
@@ -1198,9 +1198,9 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
     }
 
     // Check if the provided interface specified exists
-    if (!FindInterfaceProvidedOrOutput(serverProcessName, serverComponentName, serverInterfaceProvidedName)) {
+    if (!FindInterfaceProvided(serverProcessName, serverComponentName, serverInterfaceProvidedName)) {
         // Check if the interfaces have really been swapped
-        if (interfacesSwapped && FindInterfaceProvidedOrOutput(serverProcessName, clientComponentName, clientInterfaceRequiredName)) {
+        if (interfacesSwapped && FindInterfaceProvided(serverProcessName, clientComponentName, clientInterfaceRequiredName)) {
             interfacesSwapped = true;
         } else {
             interfacesSwapped = false;
@@ -1351,13 +1351,13 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
         const std::string providedInterfaceInstanceName(
             mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
                 serverInterfaceProvidedNameActual, ConnectionID));
-        bool foundProvidedInterfaceProxy = FindInterfaceProvidedOrOutput(
+        bool foundProvidedInterfaceProxy = FindInterfaceProvided(
             //clientProcessName, serverComponentProxyName, serverInterfaceProvidedNameActual);
             clientProcessName, serverComponentProxyName, providedInterfaceInstanceName);
         CMN_ASSERT(!foundProvidedInterfaceProxy);
 
         // Check if a required interface proxy already exists at server side.
-        bool foundRequiredInterfaceProxy = FindInterfaceRequiredOrInput(
+        bool foundRequiredInterfaceProxy = FindInterfaceRequired(
             serverProcessName, clientComponentProxyName, clientInterfaceRequiredNameActual);
 
         // Extract information about the two interfaces specified. The GCM then
@@ -1513,7 +1513,7 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
     // STEP 3. Update ProcessMap
     //
     // Add this connection to required interface's connection list
-    if (!AddConnectionToInterfaceRequiredOrInput(
+    if (!AddConnectionToInterfaceRequired(
             clientProcessName, clientComponentNameActual, clientInterfaceRequiredNameActual, thisConnectionID))
     {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to add connection information to required interface: \""
@@ -1524,7 +1524,7 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
     }
 
     // Add this connection to provided interface's connection list
-    if (!AddConnectionToInterfaceProvidedOrOutput(
+    if (!AddConnectionToInterfaceProvided(
             serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual, thisConnectionID))
     {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to add connection information to provided interface: \""
@@ -1747,13 +1747,13 @@ void mtsManagerGlobal::DisconnectInternal(void)
             osaSleep(100 * cmn_ms); // Give time to the GCM to actually process disconnection request
 
             // Step 2. Clean up GCM's internal data structure - Remove connection between user components
-            if (!RemoveConnectionOfInterfaceRequiredOrInput(processName, clientComponentName, clientInterfaceName, connectionID)) {
+            if (!RemoveConnectionOfInterfaceRequired(processName, clientComponentName, clientInterfaceName, connectionID)) {
                 CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove required interface's connection info: "
                     << "[ " << connectionID << " ] - "
                     << mtsManagerGlobal::GetInterfaceUID(processName, clientComponentName, clientInterfaceName)
                     << std::endl;
             }
-            if (!RemoveConnectionOfInterfaceProvidedOrOutput(processName, serverComponentName, serverInterfaceName, connectionID)) {
+            if (!RemoveConnectionOfInterfaceProvided(processName, serverComponentName, serverInterfaceName, connectionID)) {
                 CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove provided interface's connection info: "
                     << "[ " << connectionID << " ] - "
                     << mtsManagerGlobal::GetInterfaceUID(processName, serverComponentName, serverInterfaceName)
@@ -1776,7 +1776,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
                 // Remove from LCM: see mtsManagerComponentClient::DisconnectLocally
                 // Remove from GCM
-                if (!RemoveInterfaceRequiredOrInput(processName, clientComponentName, interfaceName)) {
+                if (!RemoveInterfaceRequired(processName, clientComponentName, interfaceName)) {
                     CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove InterfaceComponent's required interface from GCM: "
                         << "[ " << connectionID << " ] - \"" << interfaceUID << "\"" << std::endl;
                 }
@@ -1802,8 +1802,8 @@ void mtsManagerGlobal::DisconnectInternal(void)
             }
 
             // Remove connection information of provided interface proxy from GCM
-            if (FindInterfaceProvidedOrOutput(clientProcessName, serverComponentProxyName, serverInterfaceName)) {
-                if (!RemoveConnectionOfInterfaceProvidedOrOutput(
+            if (FindInterfaceProvided(clientProcessName, serverComponentProxyName, serverInterfaceName)) {
+                if (!RemoveConnectionOfInterfaceProvided(
                         clientProcessName, serverComponentProxyName, serverInterfaceName, connectionID))
                 {
                     CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove provided interface connection info from client: "
@@ -1812,8 +1812,8 @@ void mtsManagerGlobal::DisconnectInternal(void)
                         << "\"" << std::endl;
                 }
             }
-            if (FindInterfaceRequiredOrInput(clientProcessName, clientComponentName, clientInterfaceName)) {
-                if (!RemoveConnectionOfInterfaceRequiredOrInput(
+            if (FindInterfaceRequired(clientProcessName, clientComponentName, clientInterfaceName)) {
+                if (!RemoveConnectionOfInterfaceRequired(
                         clientProcessName, clientComponentName, clientInterfaceName, connectionID))
                 {
                     CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove required interface connection info from client: "
@@ -1835,7 +1835,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
                 // From GCM
                 if (FindProcess(clientProcessName))
-                    RemoveInterfaceProvidedOrOutput(clientProcessName, serverComponentProxyName, serverInterfaceName);
+                    RemoveInterfaceProvided(clientProcessName, serverComponentProxyName, serverInterfaceName);
 
                 // Remove server component proxy if necessary
                 int numOfInterfaces = GetNumberOfInterfaces(clientProcessName, serverComponentProxyName, false);
@@ -1872,8 +1872,8 @@ void mtsManagerGlobal::DisconnectInternal(void)
             }
 
             // Remove connection information of required interface proxy from GCM
-            if (FindInterfaceRequiredOrInput(serverProcessName, clientComponentProxyName, clientInterfaceName)) {
-                if (!RemoveConnectionOfInterfaceRequiredOrInput(
+            if (FindInterfaceRequired(serverProcessName, clientComponentProxyName, clientInterfaceName)) {
+                if (!RemoveConnectionOfInterfaceRequired(
                         serverProcessName, clientComponentProxyName, clientInterfaceName, connectionID))
                 {
                     CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove required interface connection info from server: "
@@ -1890,8 +1890,8 @@ void mtsManagerGlobal::DisconnectInternal(void)
                 serverInterfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided;
             }
 
-            if (FindInterfaceProvidedOrOutput(serverProcessName, serverComponentName, serverInterfaceName)) {
-                if (!RemoveConnectionOfInterfaceProvidedOrOutput(
+            if (FindInterfaceProvided(serverProcessName, serverComponentName, serverInterfaceName)) {
+                if (!RemoveConnectionOfInterfaceProvided(
                         serverProcessName, serverComponentName, serverInterfaceName, connectionID))
                 {
                     CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove provided interface connection info from server: "
@@ -1913,7 +1913,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
                 // From GCM
                 if (FindProcess(serverProcessName))
-                    RemoveInterfaceRequiredOrInput(serverProcessName, clientComponentProxyName, clientInterfaceName);
+                    RemoveInterfaceRequired(serverProcessName, clientComponentProxyName, clientInterfaceName);
 
                 // Remove client component proxy
                 // From LCM
@@ -1959,7 +1959,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
                 }
                 // Remove required interface from GCM
                 if (FindProcess(clientProcessName))
-                    RemoveInterfaceRequiredOrInput(clientProcessName, componentName, interfaceName);
+                    RemoveInterfaceRequired(clientProcessName, componentName, interfaceName);
             }
             // Remove InterfaceComponentRequired instance (InterfaceComponentRequired - InterfaceInternalProvided)
             else if (mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(serverInterfaceName)) {
@@ -1983,7 +1983,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
                     }
                     // Remove required interface from GCM
                     if (FindProcess(clientProcessName))
-                        RemoveInterfaceRequiredOrInput(clientProcessName, componentName, interfaceName);
+                        RemoveInterfaceRequired(clientProcessName, componentName, interfaceName);
                 } else {
                     //CMN_ASSERT(serverProcessName == clientProcessName);
                     //CMN_ASSERT(clientComponentName ==
@@ -1997,7 +1997,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
                         LocalManagerConnected->RemoveInterfaceRequiredProxy(clientComponentName, clientInterfaceName, clientProcessName);
                     // Remove required interface from GCM
                     if (FindComponent(clientProcessName, clientComponentName))
-                        RemoveInterfaceRequiredOrInput(clientProcessName, clientComponentName, clientInterfaceName);
+                        RemoveInterfaceRequired(clientProcessName, clientComponentName, clientInterfaceName);
                 }
             }
         }
@@ -2145,7 +2145,7 @@ void mtsManagerGlobal::GetNamesOfInterfacesProvidedOrOutput(const std::string & 
     InterfaceMapType * interfaces = components->GetItem(componentName);
     if (!interfaces) return;
 
-    interfaces->InterfaceProvidedOrOutputMap.GetNames(namesOfInterfacesProvided);
+    interfaces->InterfaceProvidedMap.GetNames(namesOfInterfacesProvided);
 }
 
 void mtsManagerGlobal::GetNamesOfInterfacesRequiredOrInput(const std::string & processName,
@@ -2158,7 +2158,7 @@ void mtsManagerGlobal::GetNamesOfInterfacesRequiredOrInput(const std::string & p
     InterfaceMapType * interfaces = components->GetItem(componentName);
     if (!interfaces) return;
 
-    interfaces->InterfaceRequiredOrInputMap.GetNames(namesOfInterfacesRequired);
+    interfaces->InterfaceRequiredMap.GetNames(namesOfInterfacesRequired);
 
 }
 
@@ -2525,8 +2525,8 @@ void mtsManagerGlobal::ShowInternalStructure(void)
                 ss << "\t|C| " << itComponent->first << std::endl;
                 InterfaceMapType * intfcMap = itComponent->second;
                 if (intfcMap) {
-                    InterfaceMapElementType::const_iterator itPrvInt = intfcMap->InterfaceProvidedOrOutputMap.begin();
-                    for (; itPrvInt != intfcMap->InterfaceProvidedOrOutputMap.end(); ++itPrvInt) {
+                    InterfaceMapElementType::const_iterator itPrvInt = intfcMap->InterfaceProvidedMap.begin();
+                    for (; itPrvInt != intfcMap->InterfaceProvidedMap.end(); ++itPrvInt) {
                         ss << "\t\t|IP| " << itPrvInt->first << ": ";
                         ConnectionIDListType * list = itPrvInt->second;
                         if (list) {
@@ -2537,8 +2537,8 @@ void mtsManagerGlobal::ShowInternalStructure(void)
                         }
                         ss << std::endl;
                     }
-                    InterfaceMapElementType::const_iterator itReqInt = intfcMap->InterfaceRequiredOrInputMap.begin();
-                    for (; itReqInt != intfcMap->InterfaceRequiredOrInputMap.end(); ++itReqInt) {
+                    InterfaceMapElementType::const_iterator itReqInt = intfcMap->InterfaceRequiredMap.begin();
+                    for (; itReqInt != intfcMap->InterfaceRequiredMap.end(); ++itReqInt) {
                         ss << "\t\t|IR| " << itReqInt->first << ": ";
                         ConnectionIDListType * list = itReqInt->second;
                         if (list) {

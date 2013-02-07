@@ -264,38 +264,38 @@ bool mtsManagerProxyClient::RemoveComponent(const std::string & processName, con
     return SendRemoveComponent(processName, componentName);
 }
 
-bool mtsManagerProxyClient::AddInterfaceProvidedOrOutput(const std::string & processName,
+bool mtsManagerProxyClient::AddInterfaceProvided(const std::string & processName,
     const std::string & componentName, const std::string & interfaceName)
 {
     return SendAddInterfaceProvided(processName, componentName, interfaceName);
 }
 
-bool mtsManagerProxyClient::AddInterfaceRequiredOrInput(const std::string & processName,
+bool mtsManagerProxyClient::AddInterfaceRequired(const std::string & processName,
     const std::string & componentName, const std::string & interfaceName)
 {
     return SendAddInterfaceRequired(processName, componentName, interfaceName);
 }
 
-bool mtsManagerProxyClient::FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                                          const std::string & interfaceName) const
+bool mtsManagerProxyClient::FindInterfaceProvided(const std::string & processName, const std::string & componentName,
+                                                  const std::string & interfaceName) const
 {
     return const_cast<mtsManagerProxyClient*>(this)->SendFindInterfaceProvided(processName, componentName, interfaceName);
 }
 
-bool mtsManagerProxyClient::FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                                         const std::string & interfaceName) const
+bool mtsManagerProxyClient::FindInterfaceRequired(const std::string & processName, const std::string & componentName,
+                                                  const std::string & interfaceName) const
 {
     return const_cast<mtsManagerProxyClient*>(this)->SendFindInterfaceRequired(processName, componentName, interfaceName);
 }
 
-bool mtsManagerProxyClient::RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
-                                                            const std::string & interfaceName, const bool CMN_UNUSED(lock))
+bool mtsManagerProxyClient::RemoveInterfaceProvided(const std::string & processName, const std::string & componentName,
+                                                    const std::string & interfaceName, const bool CMN_UNUSED(lock))
 {
     return SendRemoveInterfaceProvided(processName, componentName, interfaceName);
 }
 
-bool mtsManagerProxyClient::RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
-                                                           const std::string & interfaceName, const bool CMN_UNUSED(lock))
+bool mtsManagerProxyClient::RemoveInterfaceRequired(const std::string & processName, const std::string & componentName,
+                                                    const std::string & interfaceName, const bool CMN_UNUSED(lock))
 {
     return SendRemoveInterfaceRequired(processName, componentName, interfaceName);
 }

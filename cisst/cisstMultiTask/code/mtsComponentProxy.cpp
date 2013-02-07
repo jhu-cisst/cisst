@@ -1087,8 +1087,7 @@ bool mtsComponentProxy::GetEventGeneratorProxyPointer(const std::string & client
         CMN_LOG_CLASS_INIT_ERROR << "GetEventGeneratorProxyPointer: no required interface found: " << requiredInterfaceName << std::endl;
         return false;
     }
-    mtsInterfaceProvided * providedInterface = dynamic_cast<mtsInterfaceProvided *>(
-                                                                                    const_cast<mtsInterfaceProvidedOrOutput*>(requiredInterface->GetConnectedInterface()));
+    mtsInterfaceProvided * providedInterface = const_cast<mtsInterfaceProvided*>(requiredInterface->GetConnectedInterface());
     if (!providedInterface) {
         CMN_LOG_CLASS_INIT_ERROR << "GetEventGeneratorProxyPointer: failed to get connected provided interface: "
                                  << clientComponentName << ":" << requiredInterfaceName << std::endl;

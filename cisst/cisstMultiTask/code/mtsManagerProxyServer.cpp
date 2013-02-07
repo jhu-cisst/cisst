@@ -834,32 +834,32 @@ bool mtsManagerProxyServer::ReceiveRemoveComponent(const std::string & processNa
 
 bool mtsManagerProxyServer::ReceiveAddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName)
 {
-    return ProxyOwner->AddInterfaceProvidedOrOutput(processName, componentName, interfaceName);
+    return ProxyOwner->AddInterfaceProvided(processName, componentName, interfaceName);
 }
 
 bool mtsManagerProxyServer::ReceiveFindInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const
 {
-    return ProxyOwner->FindInterfaceProvidedOrOutput(processName, componentName, interfaceName);
+    return ProxyOwner->FindInterfaceProvided(processName, componentName, interfaceName);
 }
 
 bool mtsManagerProxyServer::ReceiveRemoveInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName)
 {
-    return ProxyOwner->RemoveInterfaceProvidedOrOutput(processName, componentName, interfaceName);
+    return ProxyOwner->RemoveInterfaceProvided(processName, componentName, interfaceName);
 }
 
 bool mtsManagerProxyServer::ReceiveAddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName)
 {
-    return ProxyOwner->AddInterfaceRequiredOrInput(processName, componentName, interfaceName);
+    return ProxyOwner->AddInterfaceRequired(processName, componentName, interfaceName);
 }
 
 bool mtsManagerProxyServer::ReceiveFindInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const
 {
-    return ProxyOwner->FindInterfaceRequiredOrInput(processName, componentName, interfaceName);
+    return ProxyOwner->FindInterfaceRequired(processName, componentName, interfaceName);
 }
 
 bool mtsManagerProxyServer::ReceiveRemoveInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName)
 {
-    return ProxyOwner->RemoveInterfaceRequiredOrInput(processName, componentName, interfaceName);
+    return ProxyOwner->RemoveInterfaceRequired(processName, componentName, interfaceName);
 }
 
 ::Ice::Int mtsManagerProxyServer::ReceiveConnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet)

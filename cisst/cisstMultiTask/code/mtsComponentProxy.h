@@ -55,7 +55,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsComponentProxy_h
 
 #include <cisstMultiTask/mtsComponent.h>
-#include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionRead.h>

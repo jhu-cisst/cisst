@@ -58,8 +58,8 @@ void mtsManagerComponentClient::Cleanup(void)
 {
 }
 
-bool mtsManagerComponentClient::ConnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                                               const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+bool mtsManagerComponentClient::ConnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceName,
+                                               const std::string & serverComponentName, const std::string & serverInterfaceName,
                                                const std::string & clientProcessName)
 {
     // At this point, it is guaranteed that all components and interfaces exist
@@ -78,31 +78,33 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
         return false;
     }
 
-    mtsInterfaceProvidedOrOutput * serverInterfaceProvidedOrOutput = serverComponent->GetInterfaceProvidedOrOutput(serverInterfaceProvidedName);
-    if (!serverInterfaceProvidedOrOutput) {
+    // first, try to figure out if the interface is either provided or output
+    mtsInterfaceProvided * serverInterfaceProvided = serverComponent->GetInterfaceProvided(serverInterfaceName);
+    mtsInterfaceOutput * serverInterfaceOutput = serverComponent->GetInterfaceOutput(serverInterfaceName);
+    if (!serverInterfaceProvided && !serverInterfaceOutput) {
         // test for swapped interfaces
         // TODO: This duplicates a test already done in the GCM
         CMN_LOG_CLASS_INIT_DEBUG << "ConnectLocally: looking for provided/output interface in first component as well" << std::endl;
-        serverInterfaceProvidedOrOutput = clientComponent->GetInterfaceProvidedOrOutput(clientInterfaceRequiredName);
-        if (!serverInterfaceProvidedOrOutput) {
-            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to get provided/output interface \"" << serverInterfaceProvidedName << "\""
+        serverInterfaceProvided = clientComponent->GetInterfaceProvided(clientInterfaceName);
+        serverInterfaceOutput = clientComponent->GetInterfaceOutput(clientInterfaceName);
+        if (!serverInterfaceProvided && !serverInterfaceOutput) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to get provided/output interface \"" << serverInterfaceName << "\""
                                      << " in component \"" << serverComponentName << "\"" << std::endl;
             return false;
         } else {
             CMN_LOG_CLASS_INIT_DEBUG << "ConnectLocally: Swapping client/server" << std::endl;
-            return ConnectLocally(serverComponentName, serverInterfaceProvidedName, clientComponentName, clientInterfaceRequiredName, clientProcessName);
+            return ConnectLocally(serverComponentName, serverInterfaceName, clientComponentName, clientInterfaceName, clientProcessName);
         }
     }
 
     // Now, handle the connections.  First, we look for connection between required/provided interfaces.  Then, we look
     // for connection between input/output interfaces.
-    mtsInterfaceProvided *serverInterfaceProvided = dynamic_cast<mtsInterfaceProvided *>(serverInterfaceProvidedOrOutput);
     if (serverInterfaceProvided) {
-        mtsInterfaceRequired *clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceRequiredName);
+        mtsInterfaceRequired * clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceName);
         if (!clientInterfaceRequired) {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", client does not have required interface." << std::endl;
             return false;
         }
@@ -120,8 +122,8 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
             InterfaceComponentFunctionType * serverFunctionSet = InterfaceComponentFunctionMap.GetItem(serverComponentName);
             if (!serverFunctionSet) {
                 CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
-                                         << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                         << serverComponentName << ":" << serverInterfaceProvidedName
+                                         << clientComponentName << ":" << clientInterfaceName << " - "
+                                         << serverComponentName << ":" << serverInterfaceName
                                          << ", failed to get function set for " << serverComponentName << std::endl;
                 return false;
             }
@@ -133,8 +135,8 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                 CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: AddObserverList invalid for " << serverComponentName << std::endl;
                 return false;
             }
-            mtsEndUserInterfaceArg endUserInterfaceArg(serverInterfaceProvided, clientInterfaceRequiredName);
-
+            mtsEndUserInterfaceArg endUserInterfaceArg(serverInterfaceProvided, clientInterfaceName);
+            
 #if (CISST_OS == CISST_LINUX_XENOMAI && CISST_MTS_64BIT)
             {
                 // See void mtsComponent::InterfaceInternalCommands_GetEndUserInterface()
@@ -143,7 +145,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
 #else
             serverFunctionSet->GetEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
 #endif
-
+            
             mtsInterfaceProvided *endUserInterface = endUserInterfaceArg.EndUserInterface;
             if (!endUserInterface) {
                 CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: failed to get end-user interface for " << serverComponentName << std::endl;
@@ -152,7 +154,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
             success = clientInterfaceRequired->BindCommands(endUserInterface);
             mtsEventHandlerList eventList(endUserInterface);
             clientInterfaceRequired->GetEventList(eventList);
-
+            
 #if (CISST_OS == CISST_LINUX_XENOMAI && CISST_MTS_64BIT)
             {
                 // From void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout)
@@ -172,15 +174,15 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
         }
         if (success) {
             CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: successfully connected required/provided: "
-                                       << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                       << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                                       << clientComponentName << ":" << clientInterfaceName << " - "
+                                       << serverComponentName << ":" << serverInterfaceName << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect required/provided: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName << std::endl;
             return false;
         }
-
+        
         // Post-connect processing to handle the special case 1:
         // When the manager component server's provided interface (InterfaceGCM's
         // provided interface) gets connected with a manager component client's
@@ -191,45 +193,44 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
         // component clients, i.e., multiple processes.
         mtsManagerComponentServer * MCS = dynamic_cast<mtsManagerComponentServer*>(serverComponent);
         if (MCS) {
-            if (mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(serverInterfaceProvidedName)) {
+            if (mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(serverInterfaceName)) {
                 if (!MCS->AddNewClientProcess(clientProcessName)) {
                     CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to create new set of InterfaceGCM function objects: "
-                        << clientProcessName << std::endl;
+                                             << clientProcessName << std::endl;
                     return false;
                 }
             }
         }
-
+        
     }
     else {  // Input/Output connection
-        mtsInterfaceOutput *serverInterfaceOutput = dynamic_cast<mtsInterfaceOutput *>(serverInterfaceProvidedOrOutput);
         if (!serverInterfaceOutput) {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", server does not have provided or output interface." << std::endl;
             return false;
         }
-        mtsInterfaceInput *clientInterfaceInput = clientComponent->GetInterfaceInput(clientInterfaceRequiredName);
+        mtsInterfaceInput * clientInterfaceInput = clientComponent->GetInterfaceInput(clientInterfaceName);
         if (!clientInterfaceInput) {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", client does not have input interface." << std::endl;
             return false;
         }
         if (clientInterfaceInput->ConnectTo(serverInterfaceOutput)) {
             CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: component \""
                                        << this->GetName()
-                                       << "\" input interface \"" << clientInterfaceRequiredName
+                                       << "\" input interface \"" << clientInterfaceName
                                        << "\" successfully connected to output interface \""
-                                       << serverInterfaceProvidedName << "\"" << std::endl;
+                                       << serverInterfaceName << "\"" << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: component \""
                                      << this->GetName()
-                                     << "\" input interface \"" << clientInterfaceRequiredName
+                                     << "\" input interface \"" << clientInterfaceName
                                      << "\" failed to connect to output interface \""
-                                     << serverInterfaceProvidedName << "\"" << std::endl;
+                                     << serverInterfaceName << "\"" << std::endl;
             return false;
         }
     }
@@ -237,10 +238,11 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
     return true;
 }
 
+
 // This implementation of DisconnectLocally does not rely on any data saved about the connection, such as the end-user
 // interface pointer or the connection id.  I think it would be better to first look up this information.
-bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                                                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
+bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceName,
+                                                  const std::string & serverComponentName, const std::string & serverInterfaceName)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     mtsComponent * clientComponent = LCM->GetComponent(clientComponentName);
@@ -255,31 +257,32 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
         return false;
     }
 
-    mtsInterfaceProvidedOrOutput * serverInterfaceProvidedOrOutput = serverComponent->GetInterfaceProvidedOrOutput(serverInterfaceProvidedName);
-    if (!serverInterfaceProvidedOrOutput) {
+    mtsInterfaceProvided * serverInterfaceProvided = serverComponent->GetInterfaceProvided(serverInterfaceName);
+    mtsInterfaceOutput * serverInterfaceOutput = serverComponent->GetInterfaceOutput(serverInterfaceName);
+    if (!serverInterfaceProvided && !serverInterfaceOutput) {
         // test for swapped interfaces
         // TODO: This duplicates a test already done in the GCM
         CMN_LOG_CLASS_INIT_DEBUG << "DisconnectLocally: looking for provided/output interface in first component as well" << std::endl;
-        serverInterfaceProvidedOrOutput = clientComponent->GetInterfaceProvidedOrOutput(clientInterfaceRequiredName);
-        if (!serverInterfaceProvidedOrOutput) {
-            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to get provided/output interface \"" << serverInterfaceProvidedName << "\""
+        serverInterfaceProvided = clientComponent->GetInterfaceProvided(clientInterfaceName);
+        serverInterfaceOutput = clientComponent->GetInterfaceOutput(clientInterfaceName);
+        if (!serverInterfaceProvided && !serverInterfaceOutput) {
+            CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to get provided/output interface \"" << serverInterfaceName << "\""
                                      << " in component \"" << serverComponentName << "\"" << std::endl;
             return false;
         } else {
             CMN_LOG_CLASS_INIT_DEBUG << "DisconnectLocally: Swapping client/server" << std::endl;
-            return DisconnectLocally(serverComponentName, serverInterfaceProvidedName, clientComponentName, clientInterfaceRequiredName);
+            return DisconnectLocally(serverComponentName, serverInterfaceName, clientComponentName, clientInterfaceName);
         }
     }
 
     // Now, handle the disconnection.  First, we look for connection between required/provided interfaces.  Then, we look
     // for connection between input/output interfaces.
-    mtsInterfaceProvided *serverInterfaceProvided = dynamic_cast<mtsInterfaceProvided *>(serverInterfaceProvidedOrOutput);
     if (serverInterfaceProvided) {
-        mtsInterfaceRequired *clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceRequiredName);
+        mtsInterfaceRequired *clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceName);
         if (!clientInterfaceRequired) {
             CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", client does not have required interface." << std::endl;
             return false;
         }
@@ -287,17 +290,17 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
         // because we obtained it via a string query.
         if (serverInterfaceProvided->GetOriginalInterface()) {
             CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", did not get original interface." << std::endl;
             return false;
         }
         // Now, get the end-user interface for this client
-        mtsInterfaceProvided *endUserInterface = serverInterfaceProvided->FindEndUserInterfaceByName(clientInterfaceRequiredName);
+        mtsInterfaceProvided *endUserInterface = serverInterfaceProvided->FindEndUserInterfaceByName(clientInterfaceName);
         if (!endUserInterface) {
             CMN_LOG_CLASS_RUN_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", could not find end-user interface." << std::endl;
             return false;
         }
@@ -314,7 +317,7 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
             // running if the required interface is MTS_OPTIONAL.
             clientComponent->Suspend();
             clientInterfaceRequired->DetachCommands();
-            if (serverInterfaceProvided->RemoveEndUserInterface(endUserInterface, clientInterfaceRequiredName) != 0)
+            if (serverInterfaceProvided->RemoveEndUserInterface(endUserInterface, clientInterfaceName) != 0)
                 success = false;
         }
         else {
@@ -345,7 +348,7 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
             // running if the required interface is MTS_OPTIONAL.
             clientComponent->Suspend(); // Could instead use serverFunctionSet->ComponentStop
             clientInterfaceRequired->DetachCommands();
-            mtsEndUserInterfaceArg endUserInterfaceArg(serverInterfaceProvided, clientInterfaceRequiredName, endUserInterface);
+            mtsEndUserInterfaceArg endUserInterfaceArg(serverInterfaceProvided, clientInterfaceName, endUserInterface);
             serverFunctionSet->RemoveEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
             if (endUserInterfaceArg.EndUserInterface != 0) {
                 CMN_LOG_CLASS_RUN_WARNING << "DisconnectLocally: failed to remove end-user interface for " << serverComponentName << std::endl;
@@ -354,44 +357,43 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
         }
         if (success) {
             CMN_LOG_CLASS_INIT_VERBOSE << "DisconnectLocally: successfully disconnected required/provided: "
-                                       << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                       << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                                       << clientComponentName << ":" << clientInterfaceName << " - "
+                                       << serverComponentName << ":" << serverInterfaceName << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect required/provided: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName << std::endl;
             return false;
         }
     }
     else {  // Input/Output connection
-        mtsInterfaceOutput *serverInterfaceOutput = dynamic_cast<mtsInterfaceOutput *>(serverInterfaceProvidedOrOutput);
         if (!serverInterfaceOutput) {
             CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", server does not have provided or output interface." << std::endl;
             return false;
         }
-        mtsInterfaceInput *clientInterfaceInput = clientComponent->GetInterfaceInput(clientInterfaceRequiredName);
+        mtsInterfaceInput *clientInterfaceInput = clientComponent->GetInterfaceInput(clientInterfaceName);
         if (!clientInterfaceInput) {
             CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", client does not have input interface." << std::endl;
             return false;
         }
         if (clientInterfaceInput->Disconnect()) {
             CMN_LOG_CLASS_INIT_VERBOSE << "DisconnectLocally: component \""
                                        << this->GetName()
-                                       << "\" input interface \"" << clientInterfaceRequiredName
+                                       << "\" input interface \"" << clientInterfaceName
                                        << "\" successfully disconnected from output interface \""
-                                       << serverInterfaceProvidedName << "\"" << std::endl;
+                                       << serverInterfaceName << "\"" << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: component \""
                                      << this->GetName()
-                                     << "\" input interface \"" << clientInterfaceRequiredName
+                                     << "\" input interface \"" << clientInterfaceName
                                      << "\" failed to disconnect from output interface \""
-                                     << serverInterfaceProvidedName << "\"" << std::endl;
+                                     << serverInterfaceName << "\"" << std::endl;
             return false;
         }
     }
@@ -399,20 +401,20 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
     // Special handling for connections which MCC is involved with
     //
     // Remove InterfaceComponentRequired instance (InterfaceComponentRequired - InterfaceInternalProvided)
-    if (mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(serverInterfaceProvidedName)) {
+    if (mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(serverInterfaceName)) {
         const std::string nameOfInterfaceComponentRequired = GetNameOfInterfaceComponentRequiredFor(serverComponentName);
         if (!RemoveInterfaceRequired(nameOfInterfaceComponentRequired)) {
             CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", failed to remove InterfaceComponent's required interface: "
                                      << "\"" << nameOfInterfaceComponentRequired << "\"" << std::endl;
             return false;
         }
         if (!DisconnectCleanup(serverComponentName)) {
             CMN_LOG_CLASS_INIT_ERROR << "DisconnectLocally: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName
+                                     << clientComponentName << ":" << clientInterfaceName << " - "
+                                     << serverComponentName << ":" << serverInterfaceName
                                      << ", failed to clean up InterfaceComponent's required interface" << std::endl;
             return false;
         }

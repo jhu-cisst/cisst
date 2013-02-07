@@ -149,12 +149,12 @@ public:
     bool RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock = true);
 
     //  Interface Management
-    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
-    bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
-    bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
-    bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
+    bool AddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool AddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool FindInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool FindInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool RemoveInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
+    bool RemoveInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
 
     //  Connection Management
     ConnectionIDType Connect(const std::string & requestProcessName,
