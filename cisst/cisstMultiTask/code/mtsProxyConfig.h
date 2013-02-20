@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 
-#define IMPROVE_ICE_THREADING 0 // MJ TEMP
+#define IMPROVE_ICE_THREADING 1 // MJ TEMP
 
 namespace mtsProxyConfig
 {
