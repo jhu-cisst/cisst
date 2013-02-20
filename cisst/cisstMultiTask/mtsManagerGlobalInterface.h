@@ -86,41 +86,41 @@ public:
         \param processName Name of process 
         \param componentName Name of component 
         \param interfaceName Name of provided interface to be added */
-    virtual bool AddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
+    virtual bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
 
     /*! \brief Register required interface. Can be called at run-time.
         \param processName Name of process 
         \param componentName Name of component 
         \param interfaceName Name of required interface to be added */
-    virtual bool AddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
+    virtual bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
 
     /*! \brief Find provided interface using process name, component name, and interface name
         \param processName Name of process 
         \param componentName Name of component 
         \param interfaceName Name of provided interface */
-    virtual bool FindInterfaceProvided(const std::string & processName, const std::string & componentName,
-                                       const std::string & interfaceName) const = 0;
+    virtual bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
+                                               const std::string & interfaceName) const = 0;
 
     /*! \brief Find required interface using process name, component name, and interface name
         \param processName Name of process 
         \param componentName Name of component 
         \param interfaceName Name of required interface */
-    virtual bool FindInterfaceRequired(const std::string & processName, const std::string & componentName,
-                                       const std::string & interfaceName) const = 0;
+    virtual bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
+                                              const std::string & interfaceName) const = 0;
 
     /*! \brief Remove provided interface. Can be called at run-time.
         \param processName Name of process 
         \param componentName Name of component 
         \param interfaceName Name of provided interface to be removed */
-    virtual bool RemoveInterfaceProvided(const std::string & processName, const std::string & componentName,
-                                         const std::string & interfaceName, const bool lock = true) = 0;
+    virtual bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName,
+                                                 const std::string & interfaceName, const bool lock = true) = 0;
 
     /*! \brief Remove required interface. Can be called at run-time.
         \param processName Name of process 
         \param componentName Name of component 
         \param interfaceName Name of required interface to be removed */
-    virtual bool RemoveInterfaceRequired(const std::string & processName, const std::string & componentName,
-                                         const std::string & interfaceName, const bool lock = true) = 0;
+    virtual bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName,
+                                                const std::string & interfaceName, const bool lock = true) = 0;
 
     //-------------------------------------------------------------------------
     //  Connection Management

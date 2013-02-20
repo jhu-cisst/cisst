@@ -149,25 +149,25 @@ public:
     bool RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock = true);
 
     //  Interface Management
-    bool AddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool AddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool FindInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
-    bool FindInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
-    bool RemoveInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
-    bool RemoveInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
+    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
+    bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
 
     //  Connection Management
     ConnectionIDType Connect(const std::string & requestProcessName,
                              const std::string & clientProcessName, const std::string & clientComponentName,
-                             const std::string & clientInterfaceRequiredName,
+                             const std::string & clientInterfaceName,
                              const std::string & serverProcessName, const std::string & serverComponentName,
-                             const std::string & serverInterfaceProvidedName);
+                             const std::string & serverInterfaceName);
     bool ConnectConfirm(const ConnectionIDType connectionID);
     bool Disconnect(const ConnectionIDType connectionID);
     bool Disconnect(const std::string & clientProcessName, const std::string & clientComponentName,
-                    const std::string & clientInterfaceRequiredName,
+                    const std::string & clientInterfaceName,
                     const std::string & serverProcessName, const std::string & serverComponentName,
-                    const std::string & serverInterfaceProvidedName);
+                    const std::string & serverInterfaceName);
 
     //  Networking
     bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
@@ -176,7 +176,7 @@ public:
 
     bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName,
-        const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
+        const std::string & serverInterfaceName, std::string & endpointInfo);
 
     bool InitiateConnect(const ConnectionIDType connectionID);
 
@@ -199,13 +199,13 @@ public:
     bool SendFindComponent(const std::string & processName, const std::string & componentName);
     bool SendRemoveComponent(const std::string & processName, const std::string & componentName);
 
-    bool SendAddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool SendFindInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool SendRemoveInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool SendAddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool SendFindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool SendRemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
-    bool SendAddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool SendFindInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool SendRemoveInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool SendAddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool SendFindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool SendRemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
     // Connection Management
     ::Ice::Int SendConnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet);
@@ -218,7 +218,7 @@ public:
     bool SendGetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
     bool SendGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName,
-        const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
+        const std::string & serverInterfaceName, std::string & endpointInfo);
     bool SendInitiateConnect(::Ice::Int connectionID);
     bool SendConnectServerSideInterfaceRequest(const ConnectionIDType connectionID);
 

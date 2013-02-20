@@ -127,9 +127,9 @@ void mtsManagerLocalTest::TestAddComponent(void)
 
     // Check if all the existing required interfaces and provided interfaces are
     // added to the global component manager.
-    CPPUNIT_ASSERT(localManager1.ManagerGlobal->FindInterfaceRequired(DEFAULT_PROCESS_NAME, device2->GetName(), "r1"));
-    CPPUNIT_ASSERT(localManager1.ManagerGlobal->FindInterfaceProvided(DEFAULT_PROCESS_NAME, device2->GetName(), "p1"));
-    CPPUNIT_ASSERT(localManager1.ManagerGlobal->FindInterfaceProvided(DEFAULT_PROCESS_NAME, device2->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager1.ManagerGlobal->FindInterfaceRequiredOrInput(DEFAULT_PROCESS_NAME, device2->GetName(), "r1"));
+    CPPUNIT_ASSERT(localManager1.ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p1"));
+    CPPUNIT_ASSERT(localManager1.ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p2"));
 
     mtsManagerLocal localManager2;
 
@@ -151,9 +151,9 @@ void mtsManagerLocalTest::TestAddComponent(void)
 
     // Check if all the existing required interfaces and provided interfaces are
     // added to the global component manager.
-    CPPUNIT_ASSERT(localManager2.ManagerGlobal->FindInterfaceRequired(DEFAULT_PROCESS_NAME, continuous1->GetName(), "r1"));
-    CPPUNIT_ASSERT(localManager2.ManagerGlobal->FindInterfaceProvided(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p1"));
-    CPPUNIT_ASSERT(localManager2.ManagerGlobal->FindInterfaceProvided(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager2.ManagerGlobal->FindInterfaceRequiredOrInput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "r1"));
+    CPPUNIT_ASSERT(localManager2.ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p1"));
+    CPPUNIT_ASSERT(localManager2.ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p2"));
 }
 
 void mtsManagerLocalTest::TestFindComponent(void)
@@ -219,9 +219,9 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
     const std::string componentName = component->GetName();
 
     // Check initial values of GCM
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceRequired("LCM", componentName, "r1"));
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceProvided("LCM", componentName, "p1"));
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceProvided("LCM", componentName, "p2"));
+    CPPUNIT_ASSERT(!globalManager->FindInterfaceRequiredOrInput("LCM", componentName, "r1"));
+    CPPUNIT_ASSERT(!globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p1"));
+    CPPUNIT_ASSERT(!globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p2"));
     // This should fail because no component is registered yet
     CPPUNIT_ASSERT(!localManager.RegisterInterfaces(component));
 
@@ -229,9 +229,9 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
     CPPUNIT_ASSERT(localManager.AddComponent(component));
 
     // Check updated values of GCM
-    CPPUNIT_ASSERT(globalManager->FindInterfaceRequired("LCM", componentName, "r1"));
-    CPPUNIT_ASSERT(globalManager->FindInterfaceProvided("LCM", componentName, "p1"));
-    CPPUNIT_ASSERT(globalManager->FindInterfaceProvided("LCM", componentName, "p2"));
+    CPPUNIT_ASSERT(globalManager->FindInterfaceRequiredOrInput("LCM", componentName, "r1"));
+    CPPUNIT_ASSERT(globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p1"));
+    CPPUNIT_ASSERT(globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p2"));
 
     // Now, create a new required and provided interface which have not been added.
     mtsInterfaceRequired * requiredInterface = component->AddInterfaceRequired("newRequiredInterface");
@@ -240,15 +240,15 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
     CPPUNIT_ASSERT(providedInterface);
 
     // Check initial values of GCM
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceRequired("LCM", componentName, requiredInterface->GetName()));
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceProvided("LCM", componentName, providedInterface->GetName()));
+    CPPUNIT_ASSERT(!globalManager->FindInterfaceRequiredOrInput("LCM", componentName, requiredInterface->GetName()));
+    CPPUNIT_ASSERT(!globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, providedInterface->GetName()));
 
     // Register the new interfaces
     CPPUNIT_ASSERT(localManager.RegisterInterfaces(component));
 
     // Check updated values of GCM
-    CPPUNIT_ASSERT(globalManager->FindInterfaceRequired("LCM", componentName, requiredInterface->GetName()));
-    CPPUNIT_ASSERT(globalManager->FindInterfaceProvided("LCM", componentName, providedInterface->GetName()));
+    CPPUNIT_ASSERT(globalManager->FindInterfaceRequiredOrInput("LCM", componentName, requiredInterface->GetName()));
+    CPPUNIT_ASSERT(globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, providedInterface->GetName()));
 }
 
 

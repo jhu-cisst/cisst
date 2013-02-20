@@ -137,22 +137,22 @@ public:
     bool ComponentConfigure(
         const std::string& processName, const std::string & componentName, const std::string & configString) const;
 
-    bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
+    bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceName,
+                 const std::string & serverComponentName, const std::string & serverInterfaceName) const;
     bool Connect(const std::string & clientProcessName,
-                 const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                 const std::string & clientComponentName, const std::string & clientInterfaceName,
                  const std::string & serverProcessName,
-                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
+                 const std::string & serverComponentName, const std::string & serverInterfaceName) const;
     bool Connect(const mtsDescriptionConnection & connection) const;
 
     bool Disconnect(
-        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
+        const std::string & clientComponentName, const std::string & clientInterfaceName,
+        const std::string & serverComponentName, const std::string & serverInterfaceName) const;
     bool Disconnect(
         const std::string & clientProcessName,
-        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+        const std::string & clientComponentName, const std::string & clientInterfaceName,
         const std::string & serverProcessName,
-        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const;
+        const std::string & serverComponentName, const std::string & serverInterfaceName) const;
     bool Disconnect(const mtsDescriptionConnection & connection) const;
     bool Disconnect(ConnectionIDType connectionID) const;
 

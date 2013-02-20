@@ -89,9 +89,39 @@ if (CISST_HAS_FLTK)
   # OpenGL
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)
-  # FLTK is now required, but FindFLTK can't be used twice?
+  # FLTK is now required
   if (NOT FLTK_FOUND)
-    find_package (FLTK REQUIRED)
+    # Try to build as external project
+    if (CISST_USE_EXTERNAL)
+      include (ExternalProject)
+      set (cisstFltk_PREFIX cisstFltkExternal)
+      # FLTK released versions have a broken CMake for Mac
+      if (NOT APPLE)
+        set (CISST_FLTK_URL http://ftp.easysw.com/pub/fltk/1.3.2/fltk-1.3.2-source.tar.gz)
+        set (CISST_FLTK_URL_MD5 9f7e707d4fb7a5a76f0f9b73ff70623d)
+        ExternalProject_Add (cisstFltk
+                             PREFIX ${cisstFltk_PREFIX}
+                             URL ${CISST_FLTK_URL}
+                             URL_MD5 ${CISST_FLTK_URL_MD5}
+                             CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                              -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                              -DOPTION_BUILD_EXAMPLES:BOOL=OFF
+#                             PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory
+#                                           ${CMAKE_CURRENT_SOURCE_DIR}/cisstTestsDriver/fltk-patch
+#                                         "."
+                             INSTALL_COMMAND ""
+                             )
+        set (FLTK_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstFltk_PREFIX}/src/cisstFltk/include")
+        set (FLTK_LIBRARIES "fltk")
+        set (FLTK_DEBUG_LIBRARIES "fltk")
+        set (FLTK_RELEASE_LIBRARIES "fltk")
+        link_directories ("${CMAKE_CURRENT_BINARY_DIR}/${cisstFltk_PREFIX}/src/cisstFltk-build")
+        set (FLTK_FOUND ON)
+      endif (NOT APPLE)  
+    else (CISST_USE_EXTERNAL)
+      # don't want to use external project, now set package as required
+      find_package (FLTK REQUIRED)
+    endif (CISST_USE_EXTERNAL)
   endif (NOT FLTK_FOUND)
   cisst_set_package_settings (cisstFLTK FLTK INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
   cisst_set_package_settings (cisstFLTK FLTK LIBRARIES           FLTK_LIBRARIES)

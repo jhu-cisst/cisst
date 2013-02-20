@@ -211,6 +211,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     std::vector<std::string> GetNamesOfInterfacesOutput(void) const;
     //@}
 
+    /*! Check if there ia any interface with the given name */
+    bool InterfaceExists(const std::string & interfaceName, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_VERBOSE) const;
+
     /*! Get a provided interface identified by its name */
     mtsInterfaceProvided * GetInterfaceProvided(const std::string & interfaceProvidedName) const;
 

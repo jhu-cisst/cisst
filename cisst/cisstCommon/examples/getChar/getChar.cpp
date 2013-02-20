@@ -10,9 +10,10 @@ int main(void) {
     std::cout << "Hit any key, this will end when you hit \"q\"" << std::endl;
     cmnGetCharEnvironment environment;
     environment.Activate();
-    int character;
+    char character;
     do {
         character = environment.GetChar();
+        std::cout << " " << character << " " << std::flush;
     } while (character != 'q');
     environment.DeActivate();
 

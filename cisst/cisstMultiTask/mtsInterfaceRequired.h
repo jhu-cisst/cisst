@@ -214,11 +214,13 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     virtual mtsCommandWriteBase * GetEventHandlerWrite(const std::string & eventName) const;
     //@}
 
+    /* adeguet - seems deprecated or at least not used anywhere?
     inline bool CouldConnectTo(mtsInterfaceProvided * CMN_UNUSED(interfaceProvidedOrOutput)) {
         return true;
-    }
-    bool ConnectTo(mtsInterfaceProvided * interfaceProvided);  // Should be deprecated -- adeguet1 OrOutput
-    bool Disconnect(void) { return DetachCommands(); }  // Should be deprecated -- adeguet1 OrOutput
+        } */
+
+    bool ConnectTo(mtsInterfaceProvided * interfaceProvided);  // used by mtsManagerComponentClient.cpp
+    //    bool Disconnect(void) { return DetachCommands(); }  // Should be deprecated -- adeguet1 OrOutput
 
     /*! Check if this interface is required or not for the component to function. */
     mtsRequiredType IsRequired(void) const;
@@ -237,7 +239,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     void BlockingCommandReturnExecutedHandler(void);
 
     bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
-    bool DetachCommands(void);
+    bool DetachCommands(void); // used by mtsManagerComponentClient
 
     void GetEventList(mtsEventHandlerList & eventList);
     bool CheckEventList(mtsEventHandlerList & eventList) const;
