@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
-  Author(s):	Ankur Kapoor
+
+  Author(s):  Ankur Kapoor
   Created on: 2004-10-26
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -40,13 +40,13 @@ http://www.cisst.org/cisst/license.txt.
    This solves overdetermined or underdetermined real linear systems
    involving an M-by-N matrix A, or its transpose, using a QR or LQ
    factorization of A.  It is assumed that A has full rank.
- 
+
    The following options are provided:
- 
+
    1. If m >= n:  find the least squares solution of
       an overdetermined system, i.e., solve the least squares problem
                   \f$ \mbox {minimize} \| B - A*X \| \f$
- 
+
    2. If m < n:  find the minimum norm solution of
       an underdetermined system \f$ A * X = B \f$
 
@@ -58,7 +58,7 @@ http://www.cisst.org/cisst/license.txt.
              columns of the matrices B and X. \f$ NRHS >=0 \f$.
   - Lda: The leading dimension of the array A.  \f$ Lda \geq \mbox{max}(1,M) \f$.
   - Ldb: The leading dimension of the array B.  \f$ Ldb \geq \mbox{max}(1,M,N). \f$.
-  - Lwork: The dimension of the matrix Work. 
+  - Lwork: The dimension of the matrix Work.
             \f$ Lwork \geq \mbox{max}( 1, MN + max( MN, NRHS ) )\f$.
             For optimal performance,
             \f$ Lwork \geq \mbox{max}( 1, MN + max( MN, NRHS )*NB )\f$.
@@ -73,7 +73,7 @@ http://www.cisst.org/cisst/license.txt.
             if M >= N, A is overwritten by details of its QR factorization
             if M <  N, A is overwritten by details of its LQ factorization
   - B: On entry, the matrix B of right hand side vectors, stored
-             columnwise; B is M-by-NRHS 
+             columnwise; B is M-by-NRHS
        On exit, B is overwritten by the solution vectors, stored
              columnwise:
              if m >= n, rows 1 to n of B contain the least
@@ -137,7 +137,7 @@ public:
         Allocate(m, n, nrhs, storageOrder);
     }
 
-    
+
     /*! Constructor with memory allocation.  This constructor
        allocates the memory based on the actual input of the Solve()
        method.  It relies on the method Allocate().  The next call to
@@ -153,7 +153,7 @@ public:
     /*! This method allocates the memory based on M and N.  The next
       call to the Solve() method will check that the parameters match
       the dimension.
-      
+
       \param m Number of rows of A
       \param n Number of columns of A
       \param nrhs Number of columns of B
@@ -207,13 +207,13 @@ public:
             if ((M != static_cast<CISSTNETLIB_INTEGER>(A.rows())) || (N != static_cast<CISSTNETLIB_INTEGER>(A.cols()))) {
                 cmnThrow(std::runtime_error("nmrLSSolver Solve: Size used for Allocate was different"));
             }
-        } 
+        }
         if (B.IsColMajor()) {
             if ((M != static_cast<CISSTNETLIB_INTEGER>(B.rows())) || (NRHS != static_cast<CISSTNETLIB_INTEGER>(B.cols()))) {
                 cmnThrow(std::runtime_error("nmrLSSolver Solve: Size used for Allocate was different"));
             }
-        } 
-        
+        }
+
         /* check that the matrices are Fortran like */
         if (! A.IsCompact()) {
             cmnThrow(std::runtime_error("nmrLSSolver Solve: Requires a compact matrix"));
@@ -223,13 +223,22 @@ public:
         }
 
         /* call the LAPACK C function */
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+        cisstNetlib_dgels_(&Trans, &M, &N, &NRHS,
+                           A.Pointer(), &Lda,
+                           B.Pointer(), &Ldb,
+                           Work.Pointer(), &Lwork, &Info);
+#endif
+#else // no major version
         dgels_(&Trans, &M, &N, &NRHS,
-               A.Pointer(), &Lda, 
+               A.Pointer(), &Lda,
                B.Pointer(), &Ldb,
                Work.Pointer(), &Lwork, &Info);
+#endif // CISSTNETLIB_VERSION
     }
     //@}
-  
+
 };
 
 

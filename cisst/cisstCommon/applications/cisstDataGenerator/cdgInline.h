@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -41,17 +41,19 @@ class cdgInline: public cdgScope
 
 public:
     typedef enum {CDG_INLINE_HEADER, CDG_INLINE_CODE} InlineType;
-    cdgInline(unsigned int lineNumber, InlineType type);
-
+    cdgInline(size_t lineNumber, InlineType type);
     cdgScope::Type GetScope(void) const;
-    bool HasScope(const std::string & keyword,
-                  cdgScope::Stack & scopes,
-                  unsigned int lineNumber);
-
+    cdgScope * Create(size_t lineNumber) const;
+    bool Validate(void);
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
+
 protected:
     InlineType Type;
+
+private:
+    cdgInline(void); // make sure constructor with line number is always used.
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(cdgInline);

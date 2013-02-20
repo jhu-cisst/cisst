@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,6 +18,17 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 
 */
+
+#include <cisstCommon/cmnPortability.h>
+
+// If not using MingW, compile as a single file.
+#if (CISST_OS != CISST_WINDOWS) || (CISST_COMPILER != CISST_GCC)
+#define MTS_CLASS_SERVICES_PART1
+#define MTS_CLASS_SERVICES_PART2
+#define MTS_CLASS_SERVICES_PART3
+#endif
+
+#ifdef MTS_CLASS_SERVICES_PART1
 
 #include <cisstMultiTask/mtsCollectorEvent.h>
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorEvent, mtsCollectorBase)   // derives from mtsTaskFromSignal
@@ -65,6 +75,10 @@ CMN_IMPLEMENT_SERVICES_DERIVED(mtsTaskFromSignal, mtsTaskContinuous)
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsTaskPeriodic, mtsTaskContinuous)
 
+#endif  // MTS_CLASS_SERVICES_PART1
+
+#ifdef MTS_CLASS_SERVICES_PART2
+
 #include <cisstMultiTask/mtsFixedSizeVectorTypes.h>
 #define MTS_FIXED_SIZE_VECTOR_IMPLEMENT(ElementType)   \
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mts##ElementType##1); \
@@ -98,6 +112,11 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdString)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdStringVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdDoubleVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdCharVecProxy)
+
+#endif  // MTS_CLASS_SERVICES_PART2
+
+#ifdef MTS_CLASS_SERVICES_PART3
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVct1)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVct2)
@@ -203,6 +222,22 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVct2x2)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVct3x3)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVct4x4)
 
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctDoubleVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctFloatVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctIntVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctUIntVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctCharVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctUCharVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctBoolVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctShortVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctUShortVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctLongVec)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctULongVec)
+
+#endif // MTS_CLASS_SERVICES_PART3
+
+#ifdef MTS_CLASS_SERVICES_PART2
+
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctMatRot3)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVctFrm3)
 
@@ -254,6 +289,10 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsUShortMat)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsCharMat)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsUCharMat)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsBoolMat)
+
+#endif  // MTS_CLASS_SERVICES_PART2
+
+#ifdef MTS_CLASS_SERVICES_PART1
 
 #include <cisstMultiTask/mtsHistory.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDoubleHistory)
@@ -326,3 +365,5 @@ CMN_IMPLEMENT_SERVICES(mtsManagerProxyClient)
 CMN_IMPLEMENT_SERVICES(mtsManagerProxyServer)
 
 #endif // CISST_MTS_HAS_ICE
+
+#endif  // MTS_CLASS_SERVICES_PART1

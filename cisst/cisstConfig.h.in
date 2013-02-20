@@ -68,4 +68,7 @@ http://www.cisst.org/cisst/license.txt.
 // Support for Safety Framework Plug-ins
 #cmakedefine01 CISST_HAS_SAFETY_PLUGINS
 
+// Using IOS or not
+#cmakedefine01 CISST_HAS_IOS
+
 #endif // _cisstConfig_h

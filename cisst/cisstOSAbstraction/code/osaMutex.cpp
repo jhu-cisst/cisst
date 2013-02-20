@@ -7,7 +7,7 @@
   Author(s): Anton Deguet, Min Yang Jung
   Created on: 2008-01-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -55,35 +55,23 @@ struct osaMutexInternals {
 
     //RT_MUTEX RTMutex;
     pthread_mutex_t POSIXMutex;
-    
+
 #elif (CISST_OS == CISST_WINDOWS)
 	HANDLE Mutex;
 #endif
 };
 
-
-#define INTERNALS(A) (reinterpret_cast<osaMutexInternals*>(Internals)->A)
-
-
-// #if (CISST_OS == CISST_LINUX_RTAI)
-// osaMutex::osaMutex(void)
-// {
-//    int semName = (int)((osaMutex*)this);
-//    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
-//    INTERNALS(Mutex) = rt_typed_sem_init(semName, 1, BIN_SEM);
-//}
-//#endif // CISST_LINUX_RTAI
-
-osaMutex::osaMutex(void) : Locked(false)
+osaMutex::osaMutex(void):
+    Internals(0),
+    Locked(false)
 {
+    this->Internals = new osaMutexInternals;
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
-    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
-    if (pthread_mutex_init(&INTERNALS(Mutex), 0) != 0) {
+    if (pthread_mutex_init(&(Internals->Mutex), 0) != 0) {
         CMN_LOG_INIT_ERROR << "Class osaMutex: error in constructor \"" << strerror(errno) << "\"" << std::endl;
     }
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
-    
-    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
+
     /*
     if( rt_task_self() != NULL ){
         int retval = 0;
@@ -100,16 +88,15 @@ osaMutex::osaMutex(void) : Locked(false)
     //else{
     //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
     //  std::cout<< "pthread_mutex_init"  << Internals << std::endl;
-        if( pthread_mutex_init( &INTERNALS(POSIXMutex), 0 ) != 0 ) {
-            CMN_LOG_INIT_ERROR << "Class osaMutex: error in constructor \"" 
+    if( pthread_mutex_init( &(Internals->POSIXMutex), 0 ) != 0 ) {
+            CMN_LOG_INIT_ERROR << "Class osaMutex: error in constructor \""
                                << strerror(errno) << "\"" << std::endl;
         }
         //  std::cout << __FILE__ << ": " << __LINE__ << std::endl;
         //}
 
 #elif (CISST_OS == CISST_WINDOWS)
-    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
-    INTERNALS(Mutex) = CreateMutex(NULL, FALSE, NULL);
+    Internals->Mutex = CreateMutex(NULL, FALSE, NULL);
 #endif
 }
 
@@ -119,10 +106,10 @@ osaMutex::osaMutex(void) : Locked(false)
 //}
 //#endif // CISST_LINUX_RTAI
 
-osaMutex::~osaMutex() 
+osaMutex::~osaMutex()
 {
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
-    pthread_mutex_destroy(&INTERNALS(Mutex));
+    pthread_mutex_destroy(&(Internals->Mutex));
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
     /*
     if( rt_task_self() != NULL ){
@@ -137,22 +124,18 @@ osaMutex::~osaMutex()
     }
     else{
     */
-    //std::cout << __FILE__ << ": " << __LINE__ << std::endl; 
-            pthread_mutex_destroy( &INTERNALS(POSIXMutex) ); 
-            //      std::cout << __FILE__ << ": " << __LINE__ << std::endl; 
+    //std::cout << __FILE__ << ": " << __LINE__ << std::endl;
+    pthread_mutex_destroy( &(Internals->POSIXMutex) );
+            //      std::cout << __FILE__ << ": " << __LINE__ << std::endl;
             //}
 
 #elif (CISST_OS == CISST_WINDOWS)
-    if (INTERNALS(Mutex)) {
-        CloseHandle(INTERNALS(Mutex));
+    if (Internals->Mutex) {
+        CloseHandle(Internals->Mutex);
     }
 #endif
+    delete this->Internals;
 }
-
-unsigned int osaMutex::SizeOfInternals(void) {
-    return sizeof(osaMutexInternals);
-}
-
 
 // #if (CISST_OS == CISST_LINUX_RTAI)
 // void osaMutex::Lock(void) {
@@ -160,14 +143,14 @@ unsigned int osaMutex::SizeOfInternals(void) {
 // }
 //#endif // CISST_LINUX_RTAI
 
-void osaMutex::Lock(void) 
+void osaMutex::Lock(void)
 {
     // Remember locker id
     LockerId = osaGetCurrentThreadId();
     Locked = true;
 
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
-    pthread_mutex_lock(&INTERNALS(Mutex));
+    pthread_mutex_lock(&(Internals->Mutex));
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
     /*
     if( rt_task_self() != NULL ){
@@ -201,15 +184,15 @@ void osaMutex::Lock(void)
                               << errstr << std::endl;
         }
     }
-    else { 
+    else {
     */
     //            std::cout << __FILE__ << ": " << __LINE__ << std::endl;
-            pthread_mutex_lock( &INTERNALS( POSIXMutex ) ); 
+    pthread_mutex_lock( &(Internals->POSIXMutex) );
             //      std::cout << __FILE__ << ": " << __LINE__ << std::endl;
             //  }
 
 #elif (CISST_OS == CISST_WINDOWS)
-    WaitForSingleObject(INTERNALS(Mutex), INFINITE);
+    WaitForSingleObject(Internals->Mutex, INFINITE);
 #endif
 }
 
@@ -219,13 +202,13 @@ void osaMutex::Lock(void)
 // }
 // #endif // CISST_LINUX_RTAI
 
-void osaMutex::Unlock(void) 
+void osaMutex::Unlock(void)
 {
     // Reset locker id.  LockerId gets invalidated.
     Locked = false;
 
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
-    pthread_mutex_unlock(&INTERNALS(Mutex));
+    pthread_mutex_unlock(&(Internals->Mutex));
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
     /*
     if( rt_task_self() != NULL ){
@@ -245,19 +228,19 @@ void osaMutex::Unlock(void)
                 break;
             }
             CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                              << "Failed to release mutex: " 
+                              << "Failed to release mutex: "
                               << errstr << std::endl;
         }
     }
-    else  { 
+    else  {
     */
     //            std::cout << __FILE__ << ": " << __LINE__ << std::endl;
-            pthread_mutex_unlock( &INTERNALS( POSIXMutex ) ); 
+    pthread_mutex_unlock( &(Internals->POSIXMutex) );
             //      std::cout << __FILE__ << ": " << __LINE__ << std::endl;
             //}
 
 #elif (CISST_OS == CISST_WINDOWS)
-    ReleaseMutex(INTERNALS(Mutex));
+    ReleaseMutex(Internals->Mutex);
 #endif
 }
 
@@ -273,19 +256,19 @@ bool osaMutex::IsLocker(void) const
 osaMutex::ReturnType osaMutex::TryLock(int timeout) {
     ReturnType result;
     if (timeout == NO_WAIT) {
-        if (rt_sem_wait_if(INTERNALS(Mutex)) > 0) {
+        if (rt_sem_wait_if(Internals->Mutex) > 0) {
             result = SUCCESS;
         } else {
             result = LOCK_FAILED;
         }
     } else if (timeout == WAIT_FOREVER) {
-        if (rt_sem_wait(INTERNALS(Mutex)) < SEM_TIMOUT) {
+        if (rt_sem_wait(Internals->Mutex) < SEM_TIMOUT) {
             result = SUCCESS;
         } else {
             result = LOCK_FAILED;
         }
     } else {
-        if (rt_sem_wait_timed(INTERNALS(Mutex), nano2count(timeout)) < SEM_TIMOUT) {
+        if (rt_sem_wait_timed(Internals->Mutex, nano2count(timeout)) < SEM_TIMOUT) {
             result = SUCCESS;
         } else {
             result = TIMED_OUT;

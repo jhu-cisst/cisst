@@ -57,6 +57,7 @@ public:
     virtual void DeSerializeRaw(std::istream & inputStream) = 0;
 
     virtual IplImage* IplImageRef(const unsigned int videochannel = 0) const = 0;
+    virtual cv::Mat CvMatRef(const unsigned int videochannel = 0) const = 0;
     virtual unsigned char* GetUCharPointer(const unsigned int videochannel) = 0;
     virtual const unsigned char* GetUCharPointer(const unsigned int videochannel) const = 0;
     virtual unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) = 0;
@@ -64,7 +65,9 @@ public:
     virtual void SetSize(const unsigned int width, const unsigned int height) = 0;
     virtual void SetSize(const unsigned int videochannel, const unsigned int width, const unsigned int height) = 0;
     virtual int SetSize(const IplImage* ipl_image, const unsigned int videochannel = 0) = 0;
+    virtual int SetSize(const cv::Mat& cv_mat, const unsigned int videochannel = 0) = 0;
     virtual int CopyOf(const IplImage* ipl_image, const unsigned int videochannel = 0) = 0;
+    virtual int CopyOf(const cv::Mat& cv_mat, const unsigned int videochannel = 0) = 0;
     virtual unsigned int GetVideoChannels() const = 0;
     virtual unsigned int GetDataChannels() const = 0;
     virtual unsigned int GetBPP() const = 0;

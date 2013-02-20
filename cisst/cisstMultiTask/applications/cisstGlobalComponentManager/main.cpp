@@ -106,6 +106,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     }
     std::cout << "Quitting ..." << std::endl;
 
+
     // Cleanup global component manager
     if (!globalComponentManager->StopServer()) {
         CMN_LOG_RUN_ERROR << "Failed to stop global component manager." << std::endl;
@@ -116,6 +117,5 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     componentManager->WaitForStateAll(mtsComponentState::FINISHED, 5.0 * cmn_s);
 
     componentManager->Cleanup();
-
     return 0;
 }

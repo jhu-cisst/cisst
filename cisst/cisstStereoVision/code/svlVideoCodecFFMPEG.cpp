@@ -37,6 +37,16 @@ http://www.cisst.org/cisst/license.txt.
     #define AVMEDIA_TYPE_VIDEO  CODEC_TYPE_VIDEO
 #endif
 
+#if LIBAVCODEC_VERSION_INT >= ((53 << 16) + (35 << 8))
+    extern "C" {
+        #include <libavutil/mathematics.h>
+    }
+#endif
+
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (2 << 8))
+    #define av_open_input_file  avformat_open_input
+#endif
+
 #ifndef AVSEEK_FLAG_FRAME
     #define AVSEEK_FLAG_FRAME   8
 #endif
@@ -50,7 +60,6 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlVideoCodecFFMPEG class ***/
 /*********************************/
 
-//CMN_IMPLEMENT_SERVICES(svlVideoCodecFFMPEG)
 CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecFFMPEG, svlVideoCodecBase)
 
 svlVideoCodecFFMPEG::svlVideoCodecFFMPEG() :
@@ -114,14 +123,25 @@ int svlVideoCodecFFMPEG::Open(const std::string &filename, unsigned int &width, 
     while (1) {
         AVCodec *av_codec = 0;
         unsigned int i;
+        int ret;
 
         // Open video file
-        if (av_open_input_file(&pFormatCtx, filename.c_str(), 0, 0, 0) != 0) {
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (2 << 8))
+        ret = av_open_input_file(&pFormatCtx, filename.c_str(), 0, 0, 0);
+#else
+        ret = avformat_open_input(&pFormatCtx, filename.c_str(), 0, 0);
+#endif
+        if (ret != 0) {
             CMN_LOG_CLASS_INIT_ERROR << "Open - failed to open file: " << filename << std::endl;
             break;
         }
         // Retrieve stream information
-        if (av_find_stream_info(pFormatCtx) < 0) {
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (6 << 8))
+        ret = av_find_stream_info(pFormatCtx);
+#else
+        ret = avformat_find_stream_info(pFormatCtx, 0);
+#endif
+        if ((pFormatCtx) < 0) {
             CMN_LOG_CLASS_INIT_ERROR << "Open - failed to find stream info" << std::endl;
             break;
         }
@@ -134,7 +154,7 @@ int svlVideoCodecFFMPEG::Open(const std::string &filename, unsigned int &width, 
 
         // Find the first video stream
         for (i = 0; i < pFormatCtx->nb_streams; i ++) {
-            if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) {
+            if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
                 VideoStreamID = i;
                 break;
             }
@@ -155,7 +175,12 @@ int svlVideoCodecFFMPEG::Open(const std::string &filename, unsigned int &width, 
         }
 
         // Open codec
-        if(avcodec_open(pDecoderCtx, av_codec) < 0) {
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (8 << 8))
+        ret = avcodec_open(pDecoderCtx, av_codec);
+#else
+        ret = avcodec_open2(pDecoderCtx, av_codec, 0);
+#endif
+        if (ret < 0) {
             CMN_LOG_CLASS_INIT_ERROR << "Open - failed to open FFMPEG decoder" << std::endl;
             break;
         }
@@ -273,6 +298,7 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
 
     AVCodec *av_codec = 0;
     bool error = false;
+    int ret;
 
     while (1) {
 
@@ -298,7 +324,11 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
         }
         pFormatCtx->oformat = output_format;
 
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (10 << 8))
         pStream = av_new_stream(pFormatCtx, 0);
+#else
+        pStream = avformat_new_stream(pFormatCtx, 0);
+#endif
         if (!pStream || !pStream->codec) {
             CMN_LOG_CLASS_INIT_ERROR << "Create - failed to allocate video stream" << std::endl;
             break;
@@ -326,15 +356,22 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
             break;
         }
 
-        if (avcodec_open(pEncoderCtx, av_codec) < 0) {
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (8 << 8))
+        ret = avcodec_open(pEncoderCtx, av_codec);
+#else
+        ret = avcodec_open2(pEncoderCtx, av_codec, 0);
+#endif
+        if (ret < 0) {
             CMN_LOG_CLASS_INIT_ERROR << "Create - failed to open encoder" << std::endl;
             break;
         }
 
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (2 << 8))
         if (av_set_parameters(pFormatCtx, 0) < 0) {
             CMN_LOG_CLASS_INIT_ERROR << "Create - invalid output format parameters" << std::endl;
             break;
         }
+#endif
 
 #ifdef __FFMPEG_VERBOSE__
         std::cerr << "svlVideoCodecFFMPEG::Create - calling `dump_format`:" << std::endl;
@@ -342,12 +379,22 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
         dump_format(pFormatCtx, 0, filename.c_str(), 1);
 #endif // __FFMPEG_VERBOSE__
 
-        if (url_fopen(&pFormatCtx->pb, filename.c_str(), URL_WRONLY) < 0) {
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (2 << 8))
+        ret = url_fopen(&pFormatCtx->pb, filename.c_str(), URL_WRONLY);
+#else
+        ret = avio_open(&pFormatCtx->pb, filename.c_str(), AVIO_FLAG_WRITE);
+#endif
+        if (ret < 0) {
             CMN_LOG_CLASS_INIT_ERROR << "Create - failed to create file" << std::endl;
             break;
         }
 
-        if (av_write_header(pFormatCtx) != 0) {
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (2 << 8))
+        ret = av_write_header(pFormatCtx);
+#else
+        ret = avformat_write_header(pFormatCtx, 0);
+#endif
+        if (ret != 0) {
             CMN_LOG_CLASS_INIT_ERROR << "Create - failed to write file header" << std::endl;
             break;
         }
@@ -440,11 +487,19 @@ int svlVideoCodecFFMPEG::Close()
     }
     if (pFormatCtx) {
         if (Writing) {
+#if LIBAVCODEC_VERSION_INT < ((52 << 16) + (105 << 8))
             url_fclose(pFormatCtx->pb);
+#else
+            avio_close(pFormatCtx->pb);
+#endif
             av_free(pFormatCtx);
         }
         else {
+#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (17 << 8))
             av_close_input_file(pFormatCtx);
+#else
+            avformat_close_input(&pFormatCtx);
+#endif
         }
         pFormatCtx = 0;
     }
@@ -1024,7 +1079,6 @@ int svlVideoCodecFFMPEG::Read(svlProcInfo* procInfo, svlSampleImage &image, cons
 #if LIBAVCODEC_VERSION_INT < ((52 << 16) + (25 << 8))
             if (avcodec_decode_video(pDecoderCtx, pFrame, &frameFinished, packet.data, packet.size) < 0) {
 #else
-// libAVCodec version >= 52.25.0
             if (avcodec_decode_video2(pDecoderCtx, pFrame, &frameFinished, &packet) < 0) {
 #endif
                 CMN_LOG_CLASS_INIT_ERROR << "Read - failed to decode video frame" << std::endl;
@@ -1108,37 +1162,49 @@ int svlVideoCodecFFMPEG::Write(svlProcInfo* procInfo, const svlSampleImage &imag
 
     while (1) {
         AVFrame *frame = pFrame;
+        int ret;
+
+        AVPacket packet;
+        av_init_packet(&packet);
+        if (pEncoderCtx->coded_frame->pts != static_cast<int64_t>(AV_NOPTS_VALUE)) {
+            packet.pts= av_rescale_q(pEncoderCtx->coded_frame->pts, pEncoderCtx->time_base, pStream->time_base);
+        }
+        if(pEncoderCtx->coded_frame->key_frame) {
+            packet.flags |= AV_PKT_FLAG_KEY;
+        }
+        packet.stream_index= pStream->index;
+        packet.data = OutputBuffer.Pointer();
+        packet.size = OutputBuffer.size();
 
         // Encode the image
+#if LIBAVCODEC_VERSION_INT < ((54 << 16) + (1 << 8))
         int out_size = avcodec_encode_video(pEncoderCtx, OutputBuffer.Pointer(), OutputBuffer.size(), frame);
-        if (out_size >= 0) {
-            if (out_size == 0) {
+        if (out_size >= 0) { // Success
+            packet.size = out_size;
+            ret = 0;
+        }
+        else { // Error
+            ret = out_size;
+        }
+#else
+        int nonempty;
+        ret = avcodec_encode_video2(pEncoderCtx, &packet, frame, &nonempty);
+#endif
+        if (ret >= 0) {
+            if (packet.size == 0) {
 #ifdef __FFMPEG_VERBOSE__
-                std::cerr << "svlVideoCodecFFMPEG::Write - `avcodec_encode_video` returned 0; need to call again" << std::endl;
+                std::cerr << "svlVideoCodecFFMPEG::Write - `avcodec_encode_video` output packet is empty; need to call again" << std::endl;
 #endif // __FFMPEG_VERBOSE__
                 frame = 0;
                 continue;
             }
             else {
 #ifdef __FFMPEG_VERBOSE__
-                std::cerr << "svlVideoCodecFFMPEG::Write - `avcodec_encode_video` compressed frame to " << out_size
-                          << " bytes (" << std::fixed << (100.0 * out_size / image.GetDataSize(videoch)) << "%)" << std::endl;
+                std::cerr << "svlVideoCodecFFMPEG::Write - `avcodec_encode_video` compressed frame to " << packet.size
+                          << " bytes (" << std::fixed << (100.0 * packet.size / image.GetDataSize(videoch)) << "%)" << std::endl;
 #endif // __FFMPEG_VERBOSE__
 
-                AVPacket pkt;
-                av_init_packet(&pkt);
-
-                if (pEncoderCtx->coded_frame->pts != static_cast<int64_t>(AV_NOPTS_VALUE)) {
-                    pkt.pts= av_rescale_q(pEncoderCtx->coded_frame->pts, pEncoderCtx->time_base, pStream->time_base);
-                }
-                if(pEncoderCtx->coded_frame->key_frame) {
-                    pkt.flags |= AV_PKT_FLAG_KEY;
-                }
-                pkt.stream_index= pStream->index;
-                pkt.data= OutputBuffer.Pointer();
-                pkt.size= out_size;
-
-                if (av_interleaved_write_frame(pFormatCtx, &pkt) != 0) {
+                if (av_interleaved_write_frame(pFormatCtx, &packet) != 0) {
                     CMN_LOG_CLASS_INIT_ERROR << "Write - failed to write encoded data to disk" << std::endl;
                     break;
                 }
@@ -1147,7 +1213,7 @@ int svlVideoCodecFFMPEG::Write(svlProcInfo* procInfo, const svlSampleImage &imag
             }
         }
         else {
-            CMN_LOG_CLASS_INIT_ERROR << "Write - failed to encode video frame (`avcodec_encode_video` returned " << out_size << ")" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Write - failed to encode video frame (`avcodec_encode_video` returned " << packet.size << ")" << std::endl;
             break;
         }
     }

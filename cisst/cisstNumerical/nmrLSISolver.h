@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
-  Author(s):	Ankur Kapoor
-  Created on:	2004-10-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  Author(s):  Ankur Kapoor
+  Created on: 2004-10-30
+
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Declaration of nmrLSISolver
  */
 
@@ -52,7 +52,7 @@ http://www.cisst.org/cisst/license.txt.
 
   The data members of this class are:
   - Ma, Na: Dimension of input matrix C
-  - Mg, Na: Dimension of input matrix A     
+  - Mg, Na: Dimension of input matrix A
   - VSiUtb: \f$ \mbox{max}(Ma, Na) \times 1 \f$ contains \f$ VS^{-1}U^{T}d \f$
   - GTilde: \f$ Mg \times Na \f$ contains \f$ \tilde{G} \f$. See L&H book for definition of \f$ \tilde{G} \f$.
   - HTilde: \f$ Mg \times 1 \f$ contains \f$ \tilde{H} \f$. See L&H book for definition of \f$ \tilde{H} \f$.
@@ -105,7 +105,7 @@ public:
       allocates the memory based on Ma, Na and Mg.  It relies on the
       method Allocate().  The next call to the Solve() method will
       check that the parameters match the dimension.
-      
+
       \param ma Number of rows of C
       \param na Number of columns of C
       \param mg Number of rows of A
@@ -113,8 +113,8 @@ public:
     nmrLSISolver(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER na, CISSTNETLIB_INTEGER mg) {
         Allocate(ma, na, mg);
     }
-    
-    
+
+
     /*! Constructor with memory allocation.  This constructor
       allocates the memory based on the actual input of the Solve()
       method.  It relies on the method Allocate().  The next call to
@@ -129,7 +129,7 @@ public:
     /*! This method allocates the memory based on Ma, Na and Mg.  The
       next call to the Solve() method will check that the parameters
       match the dimension.
-      
+
       \param ma Number of rows of C
       \param na Number of columns of C
       \param mg Number of rows of A
@@ -147,7 +147,7 @@ public:
         VSi.SetSize(Na, Na, VCT_COL_MAJOR);
         SVDRS.Allocate(Ma, Na);
         LDP.Allocate(Mg, Na);
-    }        
+    }
 
 
     /*! Allocate memory to solve this problem.  This method provides a
@@ -175,7 +175,7 @@ public:
     */
     CISST_EXPORT void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &d,
                             vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &b) throw (std::runtime_error);
-    
+
     /*! Get X.  This method must be used after Solve(). */
     inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetX(void) const {
         return X;

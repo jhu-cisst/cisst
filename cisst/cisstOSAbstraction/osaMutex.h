@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2008-01-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -33,12 +33,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaExport.h>
 
+struct osaMutexInternals;
 
 /*!
   \brief Define a Mutex object
 
   \ingroup cisstOSAbstraction
- 
+
   Mutex class provided to create mutual exclusion around critical
   sections.  This class relies on Posix threads mutex when possible.
   On Windows, it uses an actual Mutex which provides a locking
@@ -48,13 +49,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT osaMutex {
 
     /*! Internals that are OS-dependent */
-    enum {INTERNALS_SIZE = 64};
-    char Internals[INTERNALS_SIZE];
-
-    /*! Return the size of the actual object used by the OS.  This is
-      used for testing only. */ 
-    static unsigned int SizeOfInternals(void);
-    friend class osaMutexTest;
+    osaMutexInternals * Internals;
 
     /*! Locker thread id */
     osaThreadId LockerId;
@@ -69,26 +64,26 @@ public:
 		NO_WAIT = 0 	   /*! The calling function will not wait for
                              the function */
 	};
-    
+
 	/*! Enum type for return values of a lock operation. */
 	enum ReturnType {
 		LOCK_FAILED, /*! The lock operation failed because the semaphore couldn't be obtained */
 		SUCCESS,     /*! The lock operation was successful */
 		TIMED_OUT	 /*! The lock operation timed out after waiting for specified time */
-	};  
+	};
 
     /*! Enum type for current lock state */
     enum LockStateType {
         LOCKED,
         UNLOCKED
     };
-    
+
 	/*! Default constructor.  Initialize the underlying mutex. */
 	osaMutex(void);
-    
+
 	/*! Default destructor.  Cleanup the underlying mutex. */
 	~osaMutex(void);
-    
+
 	/*! Mutex lock operation.  This class doesn't use recursive
         mutexes therefore you must make sure the mutex is not already
         locked.  Locking the same mutex twice from the same threads
@@ -103,14 +98,14 @@ public:
 	void Unlock(void);
 
 	/*! Mutex lock operation with timeout
-	 
+
     \param timeout If timeout == WAIT_FOREVER then the calling
 	thread is blocked (this is same as calling Lock()).  If timeout ==
 	NO_WAIT then the function returns after checking if the mutex
 	can be locked or not.  If timeout > 0 then the function waits for
 	the specified amount of time (units to be specified later) before
 	returning.
-	 
+
     \return An enumerated type representing if a lock was obtained, or
     operation timed out or lock failed
     */

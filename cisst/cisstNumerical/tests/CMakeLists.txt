@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstNumerical tests
 #
-# (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -13,9 +13,6 @@
 # http://www.cisst.org/cisst/license.txt.
 #
 # --- end cisst license ---
-
-# paths for headers/libraries
-cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical)
 
 # all source files
 set (SOURCE_FILES
@@ -48,31 +45,14 @@ if (CISST_HAS_CISSTNETLIB)
        nmrInverseTest.cpp
        nmrIsOrthonormalTest.cpp
        nmrLUTest.cpp
-#      nmrLUSolverTest.cpp
+       # deprecated nmrLUSolverTest.cpp
        nmrPInverseTest.cpp
-#      nmrPInverseSolverTest.cpp
+       # deprecated nmrPInverseSolverTest.cpp
        nmrSVDTest.cpp
-#      nmrSVDSolverTest.cpp
-       )
-
-  set (HEADER_FILES
-       ${HEADER_FILES}
-       nmrInverseTest.h
-       nmrIsOrthonormalTest.h
-       nmrLUTest.h
-#      nmrLUSolverTest.h
-       nmrPInverseTest.h
-#      nmrPInverseSolverTest.h
-       nmrSVDTest.h
-#      nmrSVDSolverTest.h
-       )
-
-if (NOT CMAKE_CL_64)
-  set (SOURCE_FILES
-       ${SOURCE_FILES}
+       # deprecated nmrSVDSolverTest.cpp
        nmrLDPSolverTest.cpp
-#      nmrLSSolverTest.cpp
-#      nmrLSISolverTest.cpp
+       nmrLSSolverTest.cpp
+       # deprecated nmrLSISolverTest.cpp
        nmrLSqLinTest.cpp
        nmrNNLSSolverTest.cpp
        nmrSVDRSSolverTest.cpp
@@ -80,15 +60,21 @@ if (NOT CMAKE_CL_64)
 
   set (HEADER_FILES
        ${HEADER_FILES}
+       nmrInverseTest.h
+       nmrIsOrthonormalTest.h
+       nmrLUTest.h
+       # deprecated nmrLUSolverTest.h
+       nmrPInverseTest.h
+       nmrPInverseSolverTest.h
+       nmrSVDTest.h
+       # deprecated nmrSVDSolverTest.h
        nmrLDPSolverTest.h
-#      nmrLSSolverTest.h
-#      nmrLSISolverTest.h
+       nmrLSSolverTest.h
+       # deprecated nmrLSISolverTest.h
        nmrLSqLinTest.h
        nmrNNLSSolverTest.h
-       nmrSVDRSSolverTest.h
+       # deprecated nmrSVDRSSolverTest.h
        )
-endif (NOT CMAKE_CL_64)
-
 endif (CISST_HAS_CISSTNETLIB)
 
 # add files if cnetlib is used
@@ -106,6 +92,9 @@ endif (CISST_HAS_CISSTNETLIB)
 #      )
 #
 # ENDIF(CISST_HAS_CNETLIB)
+
+# paths for headers/libraries
+cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical)
 
 # CppUnit include directories
 include_directories (${CPPUNIT_INCLUDE_DIR})

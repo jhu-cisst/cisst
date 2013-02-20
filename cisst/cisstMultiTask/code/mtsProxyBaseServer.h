@@ -23,7 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsProxyBaseServer_h
 
 #include <cisstOSAbstraction/osaMutex.h>
-#include "mtsProxyConfig.h"
 #include "mtsProxyBaseCommon.h"
 
 #include <cisstMultiTask/mtsExport.h>

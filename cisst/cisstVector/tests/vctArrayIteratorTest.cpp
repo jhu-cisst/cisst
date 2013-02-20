@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 void vctArrayIteratorTest::TestIncrementDecrementForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyVector.size());
     iterator += position;
     VectorIteratorTest::TestIncrementDecrement(iterator);
 }
@@ -35,7 +35,7 @@ void vctArrayIteratorTest::TestIncrementDecrementForVector(void) {
 
 void vctArrayIteratorTest::TestIncrementDecrementForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
     Subsequence1Test::TestIncrementDecrement(iterator);
 }
@@ -43,7 +43,7 @@ void vctArrayIteratorTest::TestIncrementDecrementForSubsequence1(void) {
 
 void vctArrayIteratorTest::TestDecrementIncrementForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyVector.size());
     iterator += position;
     VectorIteratorTest::TestDecrementIncrement(iterator);
 }
@@ -51,7 +51,7 @@ void vctArrayIteratorTest::TestDecrementIncrementForVector(void) {
 
 void vctArrayIteratorTest::TestDecrementIncrementForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
     Subsequence1Test::TestDecrementIncrement(iterator);
 }
@@ -59,7 +59,7 @@ void vctArrayIteratorTest::TestDecrementIncrementForSubsequence1(void) {
 
 void vctArrayIteratorTest::TestPreAndPostIncrementAndDecrementForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(2, MyVector.size() - 2);
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(2, MyVector.size() - 2);
     iterator += position;
     VectorIteratorTest::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -67,7 +67,7 @@ void vctArrayIteratorTest::TestPreAndPostIncrementAndDecrementForVector(void) {
 
 void vctArrayIteratorTest::TestPreAndPostIncrementAndDecrementForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(2, Subsequence1.size() - 2);
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(2, Subsequence1.size() - 2);
     iterator += position;
     Subsequence1Test::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -95,27 +95,27 @@ void vctArrayIteratorTest::TestContainerSizeForReverseDecrementVector(void) {
 
 void vctArrayIteratorTest::TestAdditionAndSubtractionSymmetryForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::difference_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::difference_type position = RandomGenerator.ExtractRandomPtrdiffT(0, MyVector.size());
     iterator += position;
-    VectorType::difference_type difference = RandomGenerator.ExtractRandomInt(-position, MyVector.size() - position);
+    VectorType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, MyVector.size() - position);
     VectorIteratorTest::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctArrayIteratorTest::TestAdditionAndIncrementEquivalenceForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyVector.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, MyVector.size() - position) );
+	VectorType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, MyVector.size() - position) );
     VectorIteratorTest::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctArrayIteratorTest::TestOrderingForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyVector.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, MyVector.size() - position) );
+	VectorType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, MyVector.size() - position) );
     VectorIteratorTest::TestOrdering(iterator, difference);
 }
 
@@ -142,27 +142,27 @@ void vctArrayIteratorTest::TestContainerSizeForReverseDecrementSubsequence1(void
 
 void vctArrayIteratorTest::TestAdditionAndSubtractionSymmetryForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::difference_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::difference_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
-    Subsequence1Type::difference_type difference = RandomGenerator.ExtractRandomInt(-position, Subsequence1.size() - position);
+    Subsequence1Type::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, Subsequence1.size() - position);
     Subsequence1Test::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctArrayIteratorTest::TestAdditionAndIncrementEquivalenceForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, Subsequence1.size() - position) );
+    Subsequence1Type::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, Subsequence1.size() - position) );
     Subsequence1Test::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctArrayIteratorTest::TestOrderingForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, Subsequence1.size() - position) );
+	Subsequence1Test::difference_type difference = RandomGenerator.ExtractRandomInt(0, std::min(position, Subsequence1.size() - position) );
     Subsequence1Test::TestOrdering(iterator, difference);
 }
 

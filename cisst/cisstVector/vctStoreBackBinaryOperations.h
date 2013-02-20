@@ -153,7 +153,7 @@ class vctStoreBackBinaryOperations {
           \param input1 First operand (input and output).
           \param input2 Second operand.
         */
-        static inline InputOutputType & Operate(InputOutputType & input1, const Input2Type & input2) {
+        static inline InputOutputType & Operate(InputOutputType & input1, const Input2Type & CMN_UNUSED(input2)) {
             return (input1);
         }
     };

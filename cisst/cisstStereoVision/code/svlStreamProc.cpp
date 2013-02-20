@@ -95,14 +95,20 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
                 while (source->PlayCounter == 0 && baseref->StopThread == false) {
                     osaSleep(0.1); // check 10 times a second
                 }
-                if (baseref->StopThread) break;
+                if (baseref->StopThread) {
+                    CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): stream stopped while paused" << std::endl;
+                    break;
+                }
             }
 
             if (ThreadCount > 1) {
             // Execute only if multi-threaded - BEGIN
 
                 // Synchronization point, wait for other threads
-                if (sync->Sync(ThreadID) != SVL_SYNC_OK) break;
+                if (sync->Sync(ThreadID) != SVL_SYNC_OK) {
+                    CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): Sync() returned error (#1)" << std::endl;
+                    break;
+                }
 
             // Execute only if multi-threaded - END
             }
@@ -120,7 +126,14 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
     // Starting from the stream source
 
         status = source->Process(&info, outputsample);
-        if (status < 0 || status == SVL_STOP_REQUEST) break;
+        if (status == SVL_STOP_REQUEST) {
+            CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): SVL_STOP_REQUEST received" << std::endl;
+            break;
+        }
+        else if (status < 0) {
+            CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): svlFilterSourceBase::Process() returned error (" << status << ")" << std::endl;
+            break;
+        }
 
         if (ThreadID == 0) {
         // Execute only on one thread - BEGIN
@@ -137,7 +150,10 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
         // Execute only if multi-threaded - BEGIN
 
             // Synchronization point, wait for other threads
-            if (sync->Sync(ThreadID) != SVL_SYNC_OK) break;
+            if (sync->Sync(ThreadID) != SVL_SYNC_OK) {
+                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): Sync() returned error (#2)" << std::endl;
+                break;
+            }
 
         // Execute only if multi-threaded - END
         }
@@ -146,7 +162,14 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
         // source filters. Use Pause and Play instead.
 
         // Check for errors and stop request
-        if (baseref->StopThread || baseref->StreamStatus != SVL_OK) break;
+        if (baseref->StopThread) {
+            CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): StopThread flag is true (#1)" << std::endl;
+            break;
+        }
+        else if (baseref->StreamStatus != SVL_OK) {
+            CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): StreamStatus signals error (" << baseref->StreamStatus << ") (#1)" << std::endl;
+            break;
+        }
 
         prevfilter = source;
 
@@ -163,9 +186,11 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
                 // If connected input is not trunk
                 else if (ThreadID == 0 && outputsample) input->Buffer->Push(outputsample);
                 // Store timestamps on both the filter input and the filter output
-                timestamp = outputsample->GetTimestamp();
-                output->Timestamp = timestamp;
-                input->Timestamp = timestamp;
+                if (outputsample) {
+                    timestamp = outputsample->GetTimestamp();
+                    output->Timestamp = timestamp;
+                    input->Timestamp = timestamp;
+                }
             }
         }
 
@@ -180,16 +205,25 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
 
             // Check if the previous output is valid input for the next filter
             status = filter->IsDataValid(filter->GetInput()->Type, inputsample);
-            if (status != SVL_OK) break;
+            if (status != SVL_OK) {
+                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): svlFilterBase::IsDataValid() returned error (" << status << ")" << std::endl;
+                break;
+            }
 
             status = filter->Process(&info, inputsample, outputsample);
-            if (status < 0) break;
+            if (status < 0) {
+                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): svlFilterBase::Process() returned error (" << status << ")" << std::endl;
+                break;
+            }
 
             if (ThreadCount > 1) {
             // Execute only if multi-threaded - BEGIN
 
                 // Synchronization point, wait for other threads
-                if (sync->Sync(ThreadID) != SVL_SYNC_OK) break;
+                if (sync->Sync(ThreadID) != SVL_SYNC_OK) {
+                    CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): Sync() returned error (#3)" << std::endl;
+                    break;
+                }
 
             // Execute only if multi-threaded - END
             }
@@ -201,7 +235,14 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
             }
 
             // Check for errors and stop request
-            if (baseref->StopThread || baseref->StreamStatus != SVL_OK) break;
+            if (baseref->StopThread) {
+                CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): StopThread flag is true (#2)" << std::endl;
+                break;
+            }
+            else if (baseref->StreamStatus != SVL_OK) {
+                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): StreamStatus signals error (" << baseref->StreamStatus << ") (#2)" << std::endl;
+                break;
+            }
 
             // Store input time stamp
             filter->PrevInputTimestamp = inputsample->GetTimestamp();
@@ -224,9 +265,11 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
                     // If connected input is not trunk
                     else if (ThreadID == 0 && outputsample) input->Buffer->Push(outputsample);
                     // Store timestamps on both the filter input and the filter output
-                    timestamp = outputsample->GetTimestamp();
-                    output->Timestamp = timestamp;
-                    input->Timestamp = timestamp;
+                    if (outputsample) {
+                        timestamp = outputsample->GetTimestamp();
+                        output->Timestamp = timestamp;
+                        input->Timestamp = timestamp;
+                    }
                 }
             }
         }

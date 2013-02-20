@@ -51,7 +51,7 @@ class prmVelocityCartesianSet;
 class prmForceCartesianGet;
 class prmForceCartesianSet;
 
-class prmPositionJoinGet;
+class prmPositionJointGet;
 class prmPositionJointSet;
 class prmVelocityJointGet;
 class prmVelocityJointSet;

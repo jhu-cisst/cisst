@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 void vctVarStrideMatrixIteratorTest::TestIncrementDecrementForMatrix(void) {
     MatrixType::const_iterator iterator = MyMatrix.begin();
-    MatrixType::size_type position = RandomGenerator.ExtractRandomInt(0, MyMatrix.size());
+    MatrixType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyMatrix.size());
     iterator += position;
     MatrixIteratorTest::TestIncrementDecrement(iterator);
 }
@@ -35,7 +35,7 @@ void vctVarStrideMatrixIteratorTest::TestIncrementDecrementForMatrix(void) {
 
 void vctVarStrideMatrixIteratorTest::TestIncrementDecrementForSubmatrix1(void) {
     Submatrix1Type::const_iterator iterator = Submatrix1.begin();
-    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Submatrix1.size());
+    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Submatrix1.size());
     iterator += position;
     Submatrix1Test::TestIncrementDecrement(iterator);
 }
@@ -43,7 +43,7 @@ void vctVarStrideMatrixIteratorTest::TestIncrementDecrementForSubmatrix1(void) {
 
 void vctVarStrideMatrixIteratorTest::TestDecrementIncrementForMatrix(void) {
     MatrixType::const_iterator iterator = MyMatrix.begin();
-    MatrixType::size_type position = RandomGenerator.ExtractRandomInt(0, MyMatrix.size());
+    MatrixType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyMatrix.size());
     iterator += position;
     MatrixIteratorTest::TestDecrementIncrement(iterator);
 }
@@ -51,7 +51,7 @@ void vctVarStrideMatrixIteratorTest::TestDecrementIncrementForMatrix(void) {
 
 void vctVarStrideMatrixIteratorTest::TestDecrementIncrementForSubmatrix1(void) {
     Submatrix1Type::const_iterator iterator = Submatrix1.begin();
-    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Submatrix1.size());
+    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Submatrix1.size());
     iterator += position;
     Submatrix1Test::TestDecrementIncrement(iterator);
 }
@@ -59,7 +59,7 @@ void vctVarStrideMatrixIteratorTest::TestDecrementIncrementForSubmatrix1(void) {
 
 void vctVarStrideMatrixIteratorTest::TestPreAndPostIncrementAndDecrementForMatrix(void) {
     MatrixType::const_iterator iterator = MyMatrix.begin();
-    MatrixType::size_type position = RandomGenerator.ExtractRandomInt(2, MyMatrix.size() - 2);
+    MatrixType::size_type position = RandomGenerator.ExtractRandomSizeT(2, MyMatrix.size() - 2);
     iterator += position;
     MatrixIteratorTest::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -67,7 +67,7 @@ void vctVarStrideMatrixIteratorTest::TestPreAndPostIncrementAndDecrementForMatri
 
 void vctVarStrideMatrixIteratorTest::TestPreAndPostIncrementAndDecrementForSubmatrix1(void) {
     Submatrix1Type::const_iterator iterator = Submatrix1.begin();
-    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomInt(2, Submatrix1.size() - 2);
+    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomSizeT(2, Submatrix1.size() - 2);
     iterator += position;
     Submatrix1Test::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -95,27 +95,27 @@ void vctVarStrideMatrixIteratorTest::TestContainerSizeForReverseDecrementMatrix(
 
 void vctVarStrideMatrixIteratorTest::TestAdditionAndSubtractionSymmetryForMatrix(void) {
     MatrixType::const_iterator iterator = MyMatrix.begin();
-    MatrixType::difference_type position = RandomGenerator.ExtractRandomInt(0, MyMatrix.size());
+    MatrixType::difference_type position = RandomGenerator.ExtractRandomPtrdiffT(0, MyMatrix.size());
     iterator += position;
-    MatrixType::difference_type difference = RandomGenerator.ExtractRandomInt(-position, MyMatrix.size() - position);
+    MatrixType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, MyMatrix.size() - position);
     MatrixIteratorTest::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctVarStrideMatrixIteratorTest::TestAdditionAndIncrementEquivalenceForMatrix(void) {
     MatrixType::const_iterator iterator = MyMatrix.begin();
-    MatrixType::size_type position = RandomGenerator.ExtractRandomInt(0, MyMatrix.size());
+    MatrixType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyMatrix.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, MyMatrix.size() - position) );
+	MatrixType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, MyMatrix.size() - position) );
     MatrixIteratorTest::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctVarStrideMatrixIteratorTest::TestOrderingForMatrix(void) {
     MatrixType::const_iterator iterator = MyMatrix.begin();
-    MatrixType::size_type position = RandomGenerator.ExtractRandomInt(0, MyMatrix.size());
+    MatrixType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyMatrix.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, MyMatrix.size() - position) );
+	MatrixType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, MyMatrix.size() - position) );
     MatrixIteratorTest::TestOrdering(iterator, difference);
 }
 
@@ -142,27 +142,27 @@ void vctVarStrideMatrixIteratorTest::TestContainerSizeForReverseDecrementSubmatr
 
 void vctVarStrideMatrixIteratorTest::TestAdditionAndSubtractionSymmetryForSubmatrix1(void) {
     Submatrix1Type::const_iterator iterator = Submatrix1.begin();
-    Submatrix1Type::difference_type position = RandomGenerator.ExtractRandomInt(0, Submatrix1.size());
+    Submatrix1Type::difference_type position = RandomGenerator.ExtractRandomPtrdiffT(0, Submatrix1.size());
     iterator += position;
-    Submatrix1Type::difference_type difference = RandomGenerator.ExtractRandomInt(-position, Submatrix1.size() - position);
+    Submatrix1Type::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, Submatrix1.size() - position);
     Submatrix1Test::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctVarStrideMatrixIteratorTest::TestAdditionAndIncrementEquivalenceForSubmatrix1(void) {
     Submatrix1Type::const_iterator iterator = Submatrix1.begin();
-    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Submatrix1.size());
+    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Submatrix1.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, Submatrix1.size() - position) );
+	Submatrix1Type::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, Submatrix1.size() - position) );
     Submatrix1Test::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctVarStrideMatrixIteratorTest::TestOrderingForSubmatrix1(void) {
     Submatrix1Type::const_iterator iterator = Submatrix1.begin();
-    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Submatrix1.size());
+    Submatrix1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Submatrix1.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, Submatrix1.size() - position) );
+	Submatrix1Type::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, Submatrix1.size() - position) );
     Submatrix1Test::TestOrdering(iterator, difference);
 }
 

@@ -19,7 +19,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstOSAbstraction/osaSleep.h>
+
 #include "mtsProxyConfig.h"
+#if IMPROVE_ICE_THREADING
+#include <cisstOSAbstraction/osaThreadSignal.h>
+#endif
+
 #include "mtsComponentProxy.h"
 #include "mtsComponentInterfaceProxyClient.h"
 #include <cisstMultiTask/mtsFunctionVoid.h>
@@ -29,8 +35,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsFunctionVoidReturnProxy.h"
 #include "mtsFunctionWriteReturnProxy.h"
 
-#include <cisstOSAbstraction/osaSleep.h>
-
 unsigned int mtsComponentInterfaceProxyClient::InstanceCounter = 0;
 
 mtsComponentInterfaceProxyClient::mtsComponentInterfaceProxyClient(
@@ -38,13 +42,24 @@ mtsComponentInterfaceProxyClient::mtsComponentInterfaceProxyClient(
     : BaseClientType("config.client", serverEndpointInfo),
       ComponentInterfaceServerProxy(0),
       ConnectionID(connectionID)
+#if IMPROVE_ICE_THREADING
+      , IceThreadInitEvent(0)
+#endif
 {
     ProxyName = "ComponentInterfaceProxyServer";
+
+#if IMPROVE_ICE_THREADING
+    IceThreadInitEvent = new osaThreadSignal;
+#endif
 }
 
 mtsComponentInterfaceProxyClient::~mtsComponentInterfaceProxyClient()
 {
     StopProxy();
+
+#if IMPROVE_ICE_THREADING
+    delete IceThreadInitEvent;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -103,6 +118,11 @@ bool mtsComponentInterfaceProxyClient::StartProxy(mtsComponentProxy * proxyOwner
     WorkerThread.Create<ProxyWorker<mtsComponentProxy>, ThreadArguments<mtsComponentProxy>*>(
         &ProxyWorkerInfo, &ProxyWorker<mtsComponentProxy>::Run, &ThreadArgumentsInfo, threadName.c_str());
 
+#if IMPROVE_ICE_THREADING
+    // Wait for Ice thread to start
+    IceThreadInitEvent->Wait();
+#endif
+
     return true;
 }
 
@@ -127,6 +147,11 @@ void mtsComponentInterfaceProxyClient::StartClient(void)
 {
     Server->Start();
 
+    ChangeProxyState(PROXY_STATE_ACTIVE);
+#if IMPROVE_ICE_THREADING
+    IceThreadInitEvent->Raise();
+#endif
+
     // This is a blocking call that should run in a different thread.
     IceCommunicator->waitForShutdown();
 }
@@ -143,7 +168,6 @@ void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy>
     ProxyClient->GetLogger()->trace("mtsComponentInterfaceProxyClient", "proxy client starts");
 
     try {
-        ProxyClient->ChangeProxyState(PROXY_STATE_ACTIVE);
         ProxyClient->StartClient();
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyClient: ");
@@ -613,9 +637,6 @@ mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ComponentInterfaceC
 mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::~ComponentInterfaceClientI()
 {
     Stop();
-
-    // Sleep for some time enough for Run() loop to terminate
-    osaSleep(1 * cmn_s);
 }
 
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Start()
@@ -641,8 +662,15 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
         ComponentInterfaceProxyClient->SendTestMessageFromClientToServer(ss.str());
     }
 #else
+    double lastTickChecked = 0.0, now;
     while (IsActiveProxy()) {
-        osaSleep(mtsProxyConfig::RefreshPeriodForInterfaces);
+        now = osaGetTime();
+        if (now < lastTickChecked + mtsProxyConfig::RefreshPeriodForInterfaces) {
+            osaSleep(10 * cmn_ms);
+            continue;
+        }
+        lastTickChecked = now;
+
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {

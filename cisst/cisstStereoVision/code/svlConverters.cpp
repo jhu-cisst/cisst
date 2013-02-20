@@ -1477,6 +1477,122 @@ void svlConverter::YUV422PtoRGB24(unsigned char* input, unsigned char* output, c
     }
 }
 
+void svlConverter::NV21toRGB24(unsigned char* input, unsigned char* output, const unsigned int width, const unsigned int height)
+{
+    // This is just like YUV420 (2x2 chroma subsampling) but the UV channels are interleaved
+
+    int y, u, v, r, g, b, rcr, gcr, bcr;
+    const unsigned int pixelcount = width * height;
+    const unsigned int out_stride = width * 3;
+    const unsigned int width_half = width >> 1;
+    const unsigned int height_half = height >> 1;
+    unsigned char* iny1 = input;
+    unsigned char* iny2 = input + width;
+    unsigned char* inuv = input + pixelcount;
+    unsigned char* output2 = output + out_stride;
+
+    unsigned int i, j;
+
+    for (j = 0; j < height_half; j ++) {
+        for (i = 0; i < width_half; i ++) {
+
+            u = *inuv; inuv ++;
+            v = *inuv; inuv ++;
+            u -=  128;
+            v -=  128;
+
+            rcr = v * 13074;
+            gcr = v * 6660 + u * 3203;
+            bcr = u * 16531;
+
+            // upper left
+            y = *iny1; iny1 ++;
+            y = (y - 16) * 9535;
+
+            r = (y + rcr) >> 13;
+            if (r < 0) r = 0;
+            else if (r > 255) r = 255;
+
+            g = (y - gcr) >> 13;
+            if (g < 0) g = 0;
+            else if (g > 255) g = 255;
+
+            b = (y + bcr) >> 13;
+            if (b < 0) b = 0;
+            else if (b > 255) b = 255;
+
+            *output = static_cast<unsigned char>(r); output ++;
+            *output = static_cast<unsigned char>(g); output ++;
+            *output = static_cast<unsigned char>(b); output ++;
+
+            // upper right
+            y = *iny1; iny1 ++;
+            y = (y - 16) * 9535;
+
+            r = (y + rcr) >> 13;
+            if (r < 0) r = 0;
+            else if (r > 255) r = 255;
+
+            g = (y - gcr) >> 13;
+            if (g < 0) g = 0;
+            else if (g > 255) g = 255;
+
+            b = (y + bcr) >> 13;
+            if (b < 0) b = 0;
+            else if (b > 255) b = 255;
+
+            *output = static_cast<unsigned char>(r); output ++;
+            *output = static_cast<unsigned char>(g); output ++;
+            *output = static_cast<unsigned char>(b); output ++;
+
+            // lower left
+            y = *iny2; iny2 ++;
+            y = (y - 16) * 9535;
+
+            r = (y + rcr) >> 13;
+            if (r < 0) r = 0;
+            else if (r > 255) r = 255;
+
+            g = (y - gcr) >> 13;
+            if (g < 0) g = 0;
+            else if (g > 255) g = 255;
+
+            b = (y + bcr) >> 13;
+            if (b < 0) b = 0;
+            else if (b > 255) b = 255;
+
+            *output2 = static_cast<unsigned char>(r); output2 ++;
+            *output2 = static_cast<unsigned char>(g); output2 ++;
+            *output2 = static_cast<unsigned char>(b); output2 ++;
+
+            // lower right
+            y = *iny2; iny2 ++;
+            y = (y - 16) * 9535;
+
+            r = (y + rcr) >> 13;
+            if (r < 0) r = 0;
+            else if (r > 255) r = 255;
+
+            g = (y - gcr) >> 13;
+            if (g < 0) g = 0;
+            else if (g > 255) g = 255;
+
+            b = (y + bcr) >> 13;
+            if (b < 0) b = 0;
+            else if (b > 255) b = 255;
+
+            *output2 = static_cast<unsigned char>(r); output2 ++;
+            *output2 = static_cast<unsigned char>(g); output2 ++;
+            *output2 = static_cast<unsigned char>(b); output2 ++;
+        }
+
+        iny1 += width;
+        iny2 += width;
+        output  += out_stride;
+        output2 += out_stride;
+    }
+}
+
 void svlConverter::UYVYtoRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1, bool ch2, bool ch3)
 {
     const unsigned int pixelcounthalf = pixelcount >> 1;

@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -44,8 +44,10 @@ int main(int argc, char* argv[])
     std::string codeName;
     options.AddOptionOneValue("c", "code-file", "generated code filename",
                               cmnCommandLineOptions::REQUIRED, &codeName);
-    bool verbose;
+
     options.AddOptionNoValue("v", "verbose", "verbose output");
+
+    options.AddOptionNoValue("s", "syntax-only", "display the data description syntax and exit", cmnCommandLineOptions::SQUASH_REQUIRED);
 
     std::string errorMessage;
     if (!options.Parse(argc, argv, errorMessage)) {
@@ -53,6 +55,14 @@ int main(int argc, char* argv[])
         options.PrintUsage(std::cerr);
         return -1;
     }
+
+    cdgFile file;
+    if (options.IsSet("syntax-only")) {
+        file.DisplaySyntax(std::cout);
+        exit(1);
+    }
+
+    bool verbose;
     verbose = options.IsSet("verbose");
 
     std::string headerFull = headerDir + "/" + headerName;
@@ -62,7 +72,6 @@ int main(int argc, char* argv[])
         std::cout << "cisstDataGenerator: generating " << headerFull << " and " << codeFull << " from " << inputName << std::endl;
     }
 
-    cdgFile file;
     file.SetHeader(headerName);
     std::ifstream input(inputName.c_str());
     bool parseSucceeded;
@@ -79,6 +88,8 @@ int main(int argc, char* argv[])
         std::cout << "Error, can't open file (read mode)\"" << inputName << "\"" << std::endl;
         return -1;
     }
+
+    file.Validate();
 
     std::ofstream header(headerFull.c_str());
     if (header.is_open()) {

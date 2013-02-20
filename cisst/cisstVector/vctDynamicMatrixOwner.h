@@ -256,7 +256,7 @@ protected:
 
 private:
     // copy constructor private to prevent any call
-    vctDynamicMatrixOwner(const ThisType & other) {};
+    vctDynamicMatrixOwner(const ThisType & CMN_UNUSED(other)) {};
 };
 
 

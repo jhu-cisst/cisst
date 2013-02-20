@@ -1054,7 +1054,7 @@ void svlCCCalibrationGrid::printCalibrationParameters()
 
 svlSampleCameraGeometry* svlCCCalibrationGrid::GetCameraGeometry()
 {
-    svlSampleCameraGeometry* cameraGeometry;
+    svlSampleCameraGeometry* cameraGeometry = new svlSampleCameraGeometry;
     double alpha = 0.0;//assumed to be square pixels
     vct2 f = vct2(cameraMatrix.at<double>(0,0),cameraMatrix.at<double>(1,1));
     vct2 c = vct2(cameraMatrix.at<double>(0,2),cameraMatrix.at<double>(1,2));

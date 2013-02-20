@@ -83,6 +83,7 @@ namespace svlConverter
     CISST_EXPORT void YUV444PtoRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     CISST_EXPORT void YUV422toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     CISST_EXPORT void YUV422PtoRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
+    CISST_EXPORT void NV21toRGB24(unsigned char* input, unsigned char* output, const unsigned int width, const unsigned int height);
     CISST_EXPORT void UYVYtoRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     CISST_EXPORT void HSV24toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
 }

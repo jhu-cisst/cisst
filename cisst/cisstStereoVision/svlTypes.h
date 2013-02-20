@@ -38,6 +38,12 @@ http://www.cisst.org/cisst/license.txt.
     #pragma warning(disable : 4996)
 #endif // _MSC_VER
 
+#if (CISST_COMPILER == CISST_CLANG)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wunused-parameter"
+    #pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif // (CISST_COMPILER == CISST_CLANG)
+
 #if CISST_SVL_HAS_OPENCV2
     #include <opencv2/core/core_c.h>
     #include <opencv2/core/core.hpp>
@@ -72,8 +78,15 @@ http://www.cisst.org/cisst/license.txt.
     #else // CISST_SVL_HAS_OPENCV
         // to compile the same API
         typedef void IplImage;
+        namespace cv{
+            typedef int Mat;
+        }
     #endif // CISST_SVL_HAS_OPENCV
 #endif // CISST_SVL_HAS_OPENCV2
+
+#if (CISST_COMPILER == CISST_CLANG)
+    #pragma clang diagnostic pop
+#endif // (CISST_COMPILER == CISST_CLANG)
 
 #ifdef _MSC_VER
     // Resume C4996 warnings

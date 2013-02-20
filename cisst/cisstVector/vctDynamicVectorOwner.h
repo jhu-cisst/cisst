@@ -169,7 +169,7 @@ protected:
 
 private:
     // copy constructor private to prevent any call
-    vctDynamicVectorOwner(const ThisType & other) {};
+    vctDynamicVectorOwner(const ThisType & CMN_UNUSED(other)) {};
 
 };
 

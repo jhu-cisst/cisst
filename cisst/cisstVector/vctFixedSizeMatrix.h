@@ -422,7 +422,7 @@ template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStrid
 const typename vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::MatrixValueType &
 vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::Eye(void) {
     static MatrixValueType result(_elementType(0));
-#if (CISST_COMPILER == CISST_GCC)
+#if (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_CLANG)
     result.Diagonal().SetAll(_elementType(1));
 #else
     static _elementType value(result.Diagonal().SetAll(_elementType(1)));

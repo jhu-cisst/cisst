@@ -3,9 +3,9 @@
 
 /*
   $Id$
-  
-  Author(s):	Ankur Kapoor
-  Created on:	2004-10-30
+
+  Author(s):  Ankur Kapoor
+  Created on: 2004-10-30
 
   (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstNumerical/nmrLDPSolver.h>
 
 void nmrLDPSolver::Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h)
-    throw (std::runtime_error) 
+    throw (std::runtime_error)
 {
     /* check that the size matches with Allocate() */
     if ((M != static_cast<CISSTNETLIB_INTEGER>( G.rows()))
@@ -34,45 +34,60 @@ void nmrLDPSolver::Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatr
     if (G.rows() != h.rows()) {
         cmnThrow(std::runtime_error("nmrLDPSolver Solve: Sizes of parameters are incompatible"));
     }
-    
+
     /* check that the matrices are Fortran like */
     if (! (G.IsFortran()
            && h.IsFortran())) {
         cmnThrow(std::runtime_error("nmrLDPSolver Solve: All parameters must be Fortran compatible"));
     }
-    
+
     int i, j;
-    for (j = 0; j < M; j++) { 
+    for (j = 0; j < M; j++) {
         for (i = 0; i < N; i++) {
             E(i,j) = G(j,i);
         }
         E(N,j) = h(j,0);
     }
     CopyE = E;
-    
+
     CISSTNETLIB_INTEGER mda = N+1;
     CISSTNETLIB_INTEGER m_nnls = N+1;
     CISSTNETLIB_INTEGER n_nnls = M;
     CISSTNETLIB_INTEGER mode;
     CISSTNETLIB_DOUBLE rnorm;
-    
+
     F.SetAll(0.0);
     F(N, 0) = 1.0;
+
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_nnls_(E.Pointer(), &mda, &m_nnls, &n_nnls, F.Pointer(), U.Pointer(), &rnorm,
+                      W.Pointer(), Zz.Pointer(), Index.Pointer(), &mode);
+#endif
+#else // no major version
     nnls_(E.Pointer(), &mda, &m_nnls, &n_nnls, F.Pointer(), U.Pointer(), &rnorm,
           W.Pointer(), Zz.Pointer(), Index.Pointer(), &mode);
+#endif // CISSTNETLIB_VERSION
+
     if (mode != 1) {
         return;
     }
     for (i = 0; i <= N;i++) {
         R(i,0) = (i==N)?-1.0:0.0;
         for (j = 0; j < M; j++)
-            R(i,0) += CopyE(i,j)*U(j,0);          
+            R(i,0) += CopyE(i,j)*U(j,0);
     }
     CISSTNETLIB_DOUBLE one_plus_fac = 1 + R(N,0);
     CISSTNETLIB_DOUBLE fac =  R(N,0);
-    
+
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    if ((one_plus_fac - fac) <= 0) return;
+#endif
+#else // no major version
     if (diff_(&one_plus_fac, &fac) <= 0) return;
-    for (int k = 0; k < N; k++) { 
+#endif // CISSTNETLIB_VERSION
+    for (int k = 0; k < N; k++) {
         X(k,0) = -R(k,0) / R(N,0);
     }
 }

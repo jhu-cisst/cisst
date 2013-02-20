@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2006-01-10
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -743,9 +743,17 @@ inline CISSTNETLIB_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerType, CISSTNET
     CISSTNETLIB_INTEGER lda = (m > 1) ? m : 1;
 
     /* call the LAPACK C function */
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgetrf_(&m, &n,
+                        A.Pointer(), &lda,
+                        dataFriend.PivotIndices().Pointer(), &info);
+#endif
+#else // no major version
     dgetrf_(&m, &n,
             A.Pointer(), &lda,
             dataFriend.PivotIndices().Pointer(), &info);
+#endif // CISSTNETLIB_VERSION
     return info;
 }
 
@@ -814,9 +822,17 @@ inline CISSTNETLIB_INTEGER nmrLU(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _
     CISSTNETLIB_INTEGER n = _cols;
 
     /* call the LAPACK C function */
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgetrf_(&m, &n,
+                        A.Pointer(), &lda,
+                        pivotIndices.Pointer(), &info);
+#endif
+#else // no major version
     dgetrf_(&m, &n,
             A.Pointer(), &lda,
             pivotIndices.Pointer(), &info);
+#endif // CISSTNETLIB_VERSION
     return info;
 }
 

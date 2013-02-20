@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     bool ok = false;
     bool runHandEye = true;
     int ch;
-    int index = 1;
+    unsigned int index = 1;
 
     string imageDirectory = "./Images/SD/";
     string imagePrefix = "image";

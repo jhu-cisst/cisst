@@ -520,9 +520,10 @@ void svlDraw::Crosshair(svlSampleImage* image,
                         unsigned int videoch,
                         svlPoint2D pos,
                         svlRGB color,
-                        unsigned int radius)
+                        unsigned int radius,
+                        unsigned int thickness)
 {
-    Crosshair(image, videoch, pos.x, pos.y, color.r, color.g, color.g, radius);
+    Crosshair(image, videoch, pos.x, pos.y, color.r, color.g, color.g, radius, thickness);
 }
 
 void svlDraw::Crosshair(svlSampleImage* image,
@@ -532,29 +533,23 @@ void svlDraw::Crosshair(svlSampleImage* image,
                         unsigned char r,
                         unsigned char g,
                         unsigned char b,
-                        unsigned int radius)
+                        unsigned int radius,
+                        unsigned int thickness)
 {
     if (!image || videoch >= image->GetVideoChannels()) return;
 
     const int in_rad = radius / 3 + 1;
-    svlPoint2D from, to;
-    svlRGB color(r, g, b);
+    const int thickness_half1 = thickness >> 1;
+    const int thickness_half2 = thickness - thickness_half1;
 
-    from.Assign(x - radius, y);
-    to.Assign(x - in_rad, y);
-    Line(image, videoch, from, to, color);
-
-    from.Assign(x + in_rad, y);
-    to.Assign(x + radius, y);
-    Line(image, videoch, from, to, color);
-
-    from.Assign(x, y - radius);
-    to.Assign(x, y - in_rad);
-    Line(image, videoch, from, to, color);
-
-    from.Assign(x, y + in_rad);
-    to.Assign(x, y + radius);
-    Line(image, videoch, from, to, color);
+    Rectangle(image, videoch, x - radius, y - thickness_half1, x - in_rad + 1, y + thickness_half2, r, g, b);
+    Rectangle(image, videoch, x + in_rad, y - thickness_half1, x + radius + 1, y + thickness_half2, r, g, b);
+    Rectangle(image, videoch, x - thickness_half1, y - radius, x + thickness_half2, y - in_rad + 1, r, g, b);
+    Rectangle(image, videoch, x - thickness_half1, y + in_rad, x + thickness_half2, y + radius + 1, r, g, b);
+    Pixel(image, videoch, x - in_rad + 1, y, r, g, b);
+    Pixel(image, videoch, x + in_rad - 1, y, r, g, b);
+    Pixel(image, videoch, x, y - in_rad + 1, r, g, b);
+    Pixel(image, videoch, x, y + in_rad - 1, r, g, b);
 }
 
 #if CISST_SVL_HAS_OPENCV

@@ -237,7 +237,7 @@ macro (cisst_add_library ...)
        DEPENDENCIES
        SETTINGS
        SOURCE_FILES HEADER_FILES
-       ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES)
+       ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES ADDITIONAL_HEADER_FILES_RELATIVE)
 
   # reset local variables
   foreach(keyword ${FUNCTION_KEYWORDS})
@@ -283,6 +283,10 @@ macro (cisst_add_library ...)
     set (HEADERS ${HEADERS} ${${PROJECT}_SOURCE_DIR}/${LIBRARY_DIR}/${file})
     set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}include <${LIBRARY_DIR}/${file}>\n")
   endforeach (file)
+  foreach (file ${ADDITIONAL_HEADER_FILES_RELATIVE})
+    set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}include <${LIBRARY_DIR}/${file}>\n")
+  endforeach (file)
+
   set (FILE_CONTENT ${FILE_CONTENT} "\n${CISST_STRING_POUND}endif // _${LIBRARY}_h\n")
   file (WRITE ${LIBRARY_MAIN_HEADER} ${FILE_CONTENT})
 
@@ -683,7 +687,8 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     set (header_absolute "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h")
     set (code_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.cpp")
     cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute}")
-    set (GENERATED_FILES ${GENERATED_FILES} ${header_absolute} ${code_absolute})
+    set (GENERATED_FILES ${GENERATED_FILES} ${code_absolute} ${header_absolute})
+    set (GENERATED_FILES_HDRS ${GENERATED_FILES_HDRS} "${INPUT_WE}.h")
     # tell cmake the output is generated and how to generate it
     set_source_files_properties (${header_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
@@ -698,8 +703,9 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
                         COMMENT "cisstDataGenerator for ${INPUT_WE}")
   endforeach(input)
 
-  # create variable to store all generated files names
+  # create variables to store all generated files names
   set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_SRCS ${GENERATED_FILES} PARENT_SCOPE)
+  set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_HDRS ${GENERATED_FILES_HDRS} PARENT_SCOPE)
 
 endfunction (cisst_data_generator)
 
@@ -798,7 +804,7 @@ endfunction (cisst_add_test)
 # macro to generated standardized message explaining why optional code will not be compiled
 macro (cisst_information_message_missing_libraries ...)
   set (_cimml_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
-  set (_cimml_MISSING_LIBRARIES "")
+  unset (_cimml_MISSING_LIBRARIES)
   foreach (lib ${ARGV})
     list (FIND _cimml_LIBRARIES_AND_SETTINGS ${lib} FOUND_IT)
     if (${FOUND_IT} EQUAL -1 )
@@ -806,11 +812,11 @@ macro (cisst_information_message_missing_libraries ...)
     endif (${FOUND_IT} EQUAL -1 )
   endforeach (lib)
   # it is possible all libraries are here but cisst-config.cmake was not found
-  if (${_cimml_MISSING_LIBRARIES})
+  if (_cimml_MISSING_LIBRARIES)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${_cimml_MISSING_LIBRARIES}.  You have to change your cisst configuration if you need these features.")
-  else (${_cimml_MISSING_LIBRARIES})
+  else (_cimml_MISSING_LIBRARIES)
     message ("Information: all libraries and settings have been found for ${CMAKE_CURRENT_SOURCE_DIR}, it is possible cisst-config.cmake has not been found yet,  make sure the CMake configuration is complete first.")
-  endif (${_cimml_MISSING_LIBRARIES})
+  endif (_cimml_MISSING_LIBRARIES)
   foreach (lib ${_cimml_MISSING_LIBRARIES})
     if (DEFINED ${lib}_OPTION_NAME)
       message ("Information: to compile ${lib}, you need to use the flag ${${lib}_OPTION_NAME}")

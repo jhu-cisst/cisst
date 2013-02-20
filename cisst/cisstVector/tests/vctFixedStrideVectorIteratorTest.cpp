@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 void vctFixedStrideVectorIteratorTest::TestIncrementDecrementForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyVector.size());
     iterator += position;
     VectorIteratorTest::TestIncrementDecrement(iterator);
 }
@@ -35,7 +35,7 @@ void vctFixedStrideVectorIteratorTest::TestIncrementDecrementForVector(void) {
 
 void vctFixedStrideVectorIteratorTest::TestIncrementDecrementForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
     Subsequence1Test::TestIncrementDecrement(iterator);
 }
@@ -43,7 +43,7 @@ void vctFixedStrideVectorIteratorTest::TestIncrementDecrementForSubsequence1(voi
 
 void vctFixedStrideVectorIteratorTest::TestDecrementIncrementForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyVector.size());
     iterator += position;
     VectorIteratorTest::TestDecrementIncrement(iterator);
 }
@@ -51,7 +51,7 @@ void vctFixedStrideVectorIteratorTest::TestDecrementIncrementForVector(void) {
 
 void vctFixedStrideVectorIteratorTest::TestDecrementIncrementForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
     Subsequence1Test::TestDecrementIncrement(iterator);
 }
@@ -59,7 +59,7 @@ void vctFixedStrideVectorIteratorTest::TestDecrementIncrementForSubsequence1(voi
 
 void vctFixedStrideVectorIteratorTest::TestPreAndPostIncrementAndDecrementForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(2, MyVector.size() - 2);
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(2, MyVector.size() - 2);
     iterator += position;
     VectorIteratorTest::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -67,7 +67,7 @@ void vctFixedStrideVectorIteratorTest::TestPreAndPostIncrementAndDecrementForVec
 
 void vctFixedStrideVectorIteratorTest::TestPreAndPostIncrementAndDecrementForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(2, Subsequence1.size() - 2);
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(2, Subsequence1.size() - 2);
     iterator += position;
     Subsequence1Test::TestPreAndPostIncrementAndDecrement(iterator);
 }
@@ -95,27 +95,27 @@ void vctFixedStrideVectorIteratorTest::TestContainerSizeForReverseDecrementVecto
 
 void vctFixedStrideVectorIteratorTest::TestAdditionAndSubtractionSymmetryForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::difference_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::difference_type position = RandomGenerator.ExtractRandomPtrdiffT(0, MyVector.size());
     iterator += position;
-    VectorType::difference_type difference = RandomGenerator.ExtractRandomInt(-position, MyVector.size() - position);
+    VectorType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, MyVector.size() - position);
     VectorIteratorTest::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctFixedStrideVectorIteratorTest::TestAdditionAndIncrementEquivalenceForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyVector.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, MyVector.size() - position) );
+	VectorType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, MyVector.size() - position) );
     VectorIteratorTest::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctFixedStrideVectorIteratorTest::TestOrderingForVector(void) {
     VectorType::const_iterator iterator = MyVector.begin();
-    VectorType::size_type position = RandomGenerator.ExtractRandomInt(0, MyVector.size());
+    VectorType::size_type position = RandomGenerator.ExtractRandomSizeT(0, MyVector.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, MyVector.size() - position) );
+	VectorType::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, MyVector.size() - position) );
     VectorIteratorTest::TestOrdering(iterator, difference);
 }
 
@@ -142,30 +142,29 @@ void vctFixedStrideVectorIteratorTest::TestContainerSizeForReverseDecrementSubse
 
 void vctFixedStrideVectorIteratorTest::TestAdditionAndSubtractionSymmetryForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::difference_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::difference_type position = RandomGenerator.ExtractRandomPtrdiffT(0, Subsequence1.size());
     iterator += position;
-    Subsequence1Type::difference_type difference = RandomGenerator.ExtractRandomInt(-position, Subsequence1.size() - position);
+    Subsequence1Type::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(-position, Subsequence1.size() - position);
     Subsequence1Test::TestAdditionAndSubtractionSymmetry(iterator, difference);
 }
 
 
 void vctFixedStrideVectorIteratorTest::TestAdditionAndIncrementEquivalenceForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, Subsequence1.size() - position) );
+	Subsequence1Type::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, Subsequence1.size() - position) );
     Subsequence1Test::TestAdditionAndIncrementEquivalence(iterator, difference);
 }
 
 
 void vctFixedStrideVectorIteratorTest::TestOrderingForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
-    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomInt(0, Subsequence1.size());
+    Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
-    unsigned int difference = RandomGenerator.ExtractRandomInt(0, std::min(position, Subsequence1.size() - position) );
+	Subsequence1Type::difference_type difference = RandomGenerator.ExtractRandomPtrdiffT(0, std::min(position, Subsequence1.size() - position) );
     Subsequence1Test::TestOrdering(iterator, difference);
 }
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctFixedStrideVectorIteratorTest);
-

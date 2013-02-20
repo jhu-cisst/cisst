@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
-  Author(s):	Ankur Kapoor
-  Created on:	2004-10-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  Author(s):  Ankur Kapoor
+  Created on: 2004-10-30
+
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Declaration of nmrNNLSSolver
  */
 
@@ -46,7 +46,7 @@ http://www.cisst.org/cisst/license.txt.
   problem:
 
   \f$ \mbox{min} \; 1 / 2 \| AX - B \| \; \mbox{subject to} \; X \geq 0\f$
-     
+
   The data members of this class are:
   - M, N: Dimension of input matrix.
   - MDA: Is the first dimension parameter for the matrix A.
@@ -116,12 +116,12 @@ public:
     nmrNNLSSolver(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &d) {
         Allocate(C, d);
     }
-		
+
 
     /*! This method allocates the memory based on M and N.  The next
       call to the Solve() method will check that the parameters match
       the dimension.
-      
+
       \param m Number of rows of C
       \param n Number of columns of C
     */
@@ -143,7 +143,7 @@ public:
     inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> & CMN_UNUSED(d)) {
         Allocate(C.rows(), C.cols());
     }
-		
+
 
     /*! Given a \f$ M \times N\f$ matrix A, and a \f$ M \times 1 \f$ vector B,
       compute a \f$ N \times 1 \f$ vector X, that solves the least squares
@@ -157,43 +157,51 @@ public:
       If the parameters don't meet all the requirements, an exception
       is thrown (std::runtime_error).
     */
-    inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> d) 
+    inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> d)
         throw (std::runtime_error)
     {
         /* check that the size matches with Allocate() */
       if ((M != static_cast<CISSTNETLIB_INTEGER>(C.rows()))
-	  || (N != static_cast<CISSTNETLIB_INTEGER>(C.cols()))) {
+          || (N != static_cast<CISSTNETLIB_INTEGER>(C.cols()))) {
             cmnThrow(std::runtime_error("nmrNNLSSolver Solve: Sizes used for Allocate were different"));
         }
-        
+
         /* check other dimensions */
         if (C.rows() != d.rows()) {
             cmnThrow(std::runtime_error("nmrNNLSSolver Solve: Sizes of parameters are incompatible"));
         }
-        
+
         /* check that the matrices are Fortran like */
         if (! (C.IsFortran()
                && d.IsFortran())) {
             cmnThrow(std::runtime_error("nmrNNLSSolver Solve: All parameters must be Fortran compatible"));
         }
-        
+
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+        cisstNetlib_nnls_(C.Pointer(), &Mda, &M, &N, d.Pointer(), X.Pointer(), &RNorm,
+              W.Pointer(), Zz.Pointer(), Index.Pointer(), &Mode);
+#endif
+#else // no major version
         nnls_(C.Pointer(), &Mda, &M, &N, d.Pointer(), X.Pointer(), &RNorm,
               W.Pointer(), Zz.Pointer(), Index.Pointer(), &Mode);
+#endif // CISSTNETLIB_VERSION
+
         //error handling??
     }
 
-    
+
     /*! Get X.  This method must be used after Solve(). */
     inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetX(void) const {
         return X;
     }
-    
+
 
     /* Get W.  This method must be used after Solve(). */
     inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetDual(void) const {
         return W;
     }
-    
+
 
     /* Get RNorm.  This method must be used after Solve(). */
     inline CISSTNETLIB_DOUBLE GetRNorm(void) const {

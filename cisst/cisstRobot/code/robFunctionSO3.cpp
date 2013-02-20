@@ -10,8 +10,8 @@ robFunctionSO3::robFunctionSO3( double t1,
 				const vctFixedSizeVector<double,3>&    w2,
 				const vctFixedSizeVector<double,3>&   w2d ) : 
   robFunction( t1, t2 ),
-  qw1( qw1 ), w1( w1 ), w1d( w1d ),
-  qw2( qw2 ), w2( w2 ), w2d( w2d ){}
+  qw1( qw1, VCT_NORMALIZE ), w1( w1 ), w1d( w1d ),
+  qw2( qw2, VCT_NORMALIZE ), w2( w2 ), w2d( w2d ){}
 
 robFunctionSO3::robFunctionSO3( double t1, 
 				const vctMatrixRotation3<double>&   Rw1,
@@ -22,8 +22,8 @@ robFunctionSO3::robFunctionSO3( double t1,
 				const vctFixedSizeVector<double,3>&  w2,
 				const vctFixedSizeVector<double,3>& w2d ) : 
   robFunction( t1, t2 ),
-  qw1( Rw1 ), w1( w1 ), w1d( w1d ),
-  qw2( Rw2 ), w2( w2 ), w2d( w2d ){}
+  qw1( Rw1, VCT_NORMALIZE ), w1( w1 ), w1d( w1d ),
+  qw2( Rw2, VCT_NORMALIZE ), w2( w2 ), w2d( w2d ){}
 
 
 void robFunctionSO3::InitialState( vctQuaternionRotation3<double>& q,

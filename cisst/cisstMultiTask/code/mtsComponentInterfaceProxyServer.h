@@ -65,6 +65,11 @@ class CISST_EXPORT mtsComponentInterfaceProxyServer :
     typedef std::map<ClientIDType, ConnectionIDType> ClientConnectionIDMapType;
     ClientConnectionIDMapType ClientConnectionIDMap;
 
+#if IMPROVE_ICE_THREADING
+    /*! Signal to wait for internal Ice threads to run */
+    osaThreadSignal * IceThreadInitEvent;
+#endif
+
     /*! String key to set implicit per-proxy context for connection id */
     static std::string ConnectionIDKey;
 

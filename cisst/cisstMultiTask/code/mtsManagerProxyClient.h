@@ -47,6 +47,11 @@ protected:
     typedef IceUtil::Handle<ManagerClientI> ManagerClientIPtr;
     ManagerClientIPtr Server;
 
+#if IMPROVE_ICE_THREADING
+    /*! Signal to wait for internal Ice threads to run */
+    osaThreadSignal * IceThreadInitEvent;
+#endif
+
     /*! Instance counter used to set a short name of this thread */
     static unsigned int InstanceCounter;
 

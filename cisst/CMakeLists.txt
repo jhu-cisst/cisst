@@ -42,6 +42,9 @@ set (CISST_CMAKE_SOURCE_DIR "${CISST_SOURCE_DIR}/cmake")
 set (CISST_CMAKE_BINARY_DIR "${CISST_BINARY_DIR}/${CISST_CMAKE_INSTALL_SUFFIX}")
 set (CISST_CMAKE_DIRS "${CISST_CMAKE_SOURCE_DIR}" "${CISST_CMAKE_BINARY_DIR}")
 
+# Option to download and build as CMake External projects external dependencies when not found automatically
+option (CISST_USE_EXTERNAL "Try to build dependencies using CMake external projects (download and build along cisst)" OFF)
+
 # Add include directories
 set (CISST_INCLUDE_DIR
      ${cisst_BINARY_DIR}/include
@@ -244,8 +247,40 @@ include_directories (${CISST_INCLUDE_DIR})
 # Build test driver if needed
 if (CISST_BUILD_TESTS)
   find_package (CppUnit REQUIRED)
-  # TO DO, check if CPPUNIT Found
-  add_subdirectory (cisstTestsDriver)
+  if (NOT CPPUNIT_FOUND)
+    # Try to build as external project
+    if (CISST_USE_EXTERNAL)
+      include (ExternalProject)
+      set (cisstCppUnit_PREFIX cisstCppUnitExternal)
+      ExternalProject_Add (cisstCppUnit
+                           PREFIX ${cisstCppUnit_PREFIX}
+                           URL http://downloads.sourceforge.net/cppunit/cppunit-1.12.1.tar.gz
+                           URL_MD5 bd30e9cf5523cdfc019b94f5e1d7fd19
+                           CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                           PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                                         ${CMAKE_CURRENT_SOURCE_DIR}/cisstTestsDriver/cppunit-patch
+                                         "."
+                           INSTALL_COMMAND ""
+                           )
+      set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit/include")
+      set (CPPUNIT_LIBRARIES "cppunit")
+      set (CPPUNIT_DEBUG_LIBRARIES "cppunit")
+      set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
+      link_directories ("${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
+      set (CPPUNIT_FOUND ON)
+    endif (CISST_USE_EXTERNAL)
+  endif (NOT CPPUNIT_FOUND)
+
+  if (CPPUNIT_FOUND)
+    add_subdirectory (cisstTestsDriver)
+    # add dependency to external project if needed
+    if (cisstCppUnit_PREFIX)
+      add_dependencies (cisstTestsDriver cisstCppUnit)
+    endif (cisstCppUnit_PREFIX)
+  else (CPPUNIT_FOUND)
+    message (SEND_ERROR "CppUnit is needed for CISST_BUILD_TESTS, you can either install it or turn ON the option CISST_USE_EXTERNAL")
+  endif (CPPUNIT_FOUND)
 endif (CISST_BUILD_TESTS)
 
 # Find native threads

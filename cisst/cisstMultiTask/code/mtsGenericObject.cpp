@@ -191,7 +191,7 @@ bool cmnDataScalarNumberIsFixed(const mtsGenericObject & CMN_UNUSED(data))
 }
 
 
-size_t cmnDataScalarNumber(const mtsGenericObject & data)
+size_t cmnDataScalarNumber(const mtsGenericObject & CMN_UNUSED(data))
 {
     return 3;
 }

@@ -189,7 +189,16 @@ namespace svlImageProcessing
                                         double min_compactness = 0.0,
                                         double max_compactness = 0.0);
 
+    int CISST_EXPORT FitEllipse(vctDynamicVector<vctInt2> & points,
+                                svlEllipse & ellipse,
+                                Internals& internals);
+
     int CISST_EXPORT FitEllipse(vctDynamicVectorRef<vctInt2> & points,
+                                svlEllipse & ellipse,
+                                Internals& internals);
+
+    int CISST_EXPORT FitEllipse(vctDynamicVector<int> & xs,
+                                vctDynamicVector<int> & ys,
                                 svlEllipse & ellipse,
                                 Internals& internals);
 

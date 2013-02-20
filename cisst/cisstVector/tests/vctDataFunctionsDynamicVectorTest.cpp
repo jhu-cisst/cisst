@@ -148,7 +148,7 @@ void vctDataFunctionsDynamicVectorTest::TestScalar(void)
     // get scalar
     position = 0;
     for (index = 0; index < vInt.size(); ++index) {
-        vInt.Element(index) = index;
+        vInt.Element(index) = static_cast<int>(index);
         CPPUNIT_ASSERT_EQUAL(static_cast<double>(index), cmnDataScalar(vInt, position));
         position++;
     }
@@ -156,7 +156,7 @@ void vctDataFunctionsDynamicVectorTest::TestScalar(void)
     position = 0;
     for (index = 0; index < vvDouble.size(); ++index) {
         for (subIndex = 0; subIndex < vvDouble.Element(index).size(); ++subIndex) {
-            vvDouble.Element(index).Element(subIndex) = index * 100 + subIndex;
+            vvDouble.Element(index).Element(subIndex) = static_cast<double>(index * 100 + subIndex);
             CPPUNIT_ASSERT_EQUAL(static_cast<double>(index * 100 + subIndex),
                                  cmnDataScalar(vvDouble, position));
             position++;

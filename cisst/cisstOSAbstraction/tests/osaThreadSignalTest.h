@@ -26,7 +26,6 @@ class osaThreadSignalTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(osaThreadSignalTest);
     {
-        CPPUNIT_TEST(TestInternalsSize);
         CPPUNIT_TEST(TestWaitBlocks);
     }
     CPPUNIT_TEST_SUITE_END();
@@ -37,9 +36,6 @@ public:
 
     void tearDown(void) {
     }
-
-    /*! Test that structure for internal size is large enough */
-    void TestInternalsSize(void);
 
     /*! Check that waits do block */
     void TestWaitBlocks(void);

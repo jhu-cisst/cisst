@@ -137,7 +137,9 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
     }
 
     // Give proxies some time to start up
+#if !IMPROVE_ICE_THREADING
     osaSleep(2.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+#endif
 
     SetGCMConnected(true);
 
@@ -198,7 +200,9 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
     }
 
     // Wait for proxies to be in active state (PROXY_STATE_ACTIVE)
+#if !IMPROVE_ICE_THREADING
     osaSleep(1.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+#endif
 
     // Register process name to the global component manager.
     if (!globalComponentManagerProxy->AddProcess(ProcessName)) {
@@ -1026,7 +1030,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     if (componentName.size() == 0) {
         componentName.assign(component->Services()->GetName());
         char buf[20];
-        sprintf(buf, "_%lx", reinterpret_cast<unsigned long>(component));
+        sprintf(buf, "_%p", component);
         componentName.append(buf);
         CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: assigning name \"" << componentName << "\"" << std::endl;
         component->SetName(componentName);

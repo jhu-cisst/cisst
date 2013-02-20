@@ -37,24 +37,24 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
     // 100~199, append array
     j = 0;
     for (i = 0; i < dataElements * pointSize; i += pointSize) {
-        arrayToAppend[i] = dataElements + j;
-        arrayToAppend[i + 1] = dataElements + j;
+        arrayToAppend[i] = static_cast<double>(dataElements + j);
+        arrayToAppend[i + 1] = static_cast<double>(dataElements + j);
         j++;
     }
 
     // 0 ~ 99, default array
     j = 0;
     for (i = 0; i < dataElements * pointSize; i += pointSize) {
-        defaultArray[i] = j;
-        defaultArray[i + 1] = j;
+        defaultArray[i] = static_cast<double>(j);
+        defaultArray[i + 1] = static_cast<double>(j);
         j++;
     }
 
     // -100 ~ -1, prepend array
     j = 0-dataElements;
     for (i = 0; i < dataElements * pointSize; i += pointSize) {
-        arrayToPrepend[i] = j;
-        arrayToPrepend[i + 1] = j;
+        arrayToPrepend[i] = static_cast<double>(j);
+        arrayToPrepend[i + 1] = static_cast<double>(j);
         j++;
     }
 
@@ -147,7 +147,7 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
     CPPUNIT_ASSERT(numberOfPoints == dataElements * 2);
     CPPUNIT_ASSERT(bufferSize == dataElements * 2);
     for (i = dataElements; i < dataElements * 2 ; i++) {
-        signal->SetPointAt(i, vctDouble2(i - dataElements, i - dataElements));
+        signal->SetPointAt(i, vctDouble2(static_cast<double>(i - dataElements), static_cast<double>(i - dataElements)));
     }
     // -100 ~ 99
     for (i = 0; i < dataElements * 2; i++) {
@@ -157,7 +157,7 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
     }
     // test by overflowing  buffer
     // -99 ~ 100
-    signal->AppendPoint(vctDouble2(dataElements, dataElements));
+    signal->AppendPoint(vctDouble2(static_cast<double>(dataElements), static_cast<double>(dataElements)));
     signal->PrependArray(arrayToPrepend, dataElements * pointSize);
     // -100~-1, -99 ~ 0
     for (i = 0; i < dataElements; i++) {
@@ -211,24 +211,23 @@ void vctPlot2DBaseTest::TestRangeComputation(void){
     // 100~199, append array
     j = 0;
     for (i = 0; i < dataElements * pointSize; i += pointSize) {
-        arrayToAppend[i] = dataElements + j;
-        arrayToAppend[i+1] = dataElements + j;
+        arrayToAppend[i] = static_cast<double>(dataElements + j);
         j++;
     }
 
     // 0 ~ 99, default array
     j = 0;
     for (i = 0; i < dataElements * pointSize; i += pointSize) {
-        defaultArray[i] = j;
-        defaultArray[i + 1] = j;
+        defaultArray[i] = static_cast<double>(j);
+        defaultArray[i + 1] = static_cast<double>(j);
         j++;
     }
 
     // -100 ~ -1, prepend array
     j = 0 - dataElements;
     for (i = 0; i < dataElements * pointSize; i += pointSize) {
-        arrayToPrepend[i] = j;
-        arrayToPrepend[i + 1] = j;
+        arrayToPrepend[i] = static_cast<double>(j);
+        arrayToPrepend[i + 1] = static_cast<double>(j);
         j++;
     }
 

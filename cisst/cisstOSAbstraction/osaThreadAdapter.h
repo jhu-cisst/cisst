@@ -122,7 +122,11 @@ g
         osaHeapCallBack* _this = (osaHeapCallBack*) obj;
         _callBackReturnType result = (_this->Obj->*_this->CallBackFunction)(_this->UserData );
         delete _this;
+#if (CISST_COMPILER == CISST_GCC)
+        return (unsigned long)(unsigned long long)result;  // For MingW64
+#else
         return (unsigned long)result;
+#endif
     }
 #endif
 

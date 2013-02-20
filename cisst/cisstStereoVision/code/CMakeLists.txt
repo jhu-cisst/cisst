@@ -321,6 +321,8 @@ IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
         ENDIF(WIN32 AND NOT SVL_GNU_OPTIONS)
 
     ELSE(JPEG_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVision JPEG)
+
         IF(CISST_SVL_HAS_JPEG)
             MARK_AS_ADVANCED(CLEAR ${JPEG_OPTIONS})
             MESSAGE(FATAL_ERROR "JPEG required. Please specify its location.")
@@ -331,6 +333,8 @@ IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
     ENDIF(JPEG_FOUND)
 
 ELSE(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
+    cisst_unset_all_package_settings (cisstStereoVision JPEG)
+
     MARK_AS_ADVANCED(FORCE ${JPEG_OPTIONS})
     OPTION(CISST_SVL_HAS_JPEG "Use JPEG extensions" OFF)
 ENDIF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
@@ -405,6 +409,69 @@ ELSE(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
     MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
     OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" OFF)
 ENDIF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
+
+
+##OpenCV
+#IF(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
+#    FIND_PACKAGE(OpenCV)
+#    IF(OpenCV_FOUND)
+#        MESSAGE("Version: " ${OpenCV_VERSION})
+#        MESSAGE("Major: " ${OpenCV_VERSION_MAJOR})
+#        MESSAGE("Minor: " ${OpenCV_VERSION_MINOR})
+#
+#        cisst_set_package_settings(cisstStereoVision OpenCV INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIR)
+#        cisst_set_package_settings(cisstStereoVision OpenCV LIBRARIES           OpenCV_LIBS)
+#        SET(SOURCE_FILES
+#            ${SOURCE_FILES}
+#            svlFilterImageZoom.cpp
+#            svlFilterToolTracker.cpp
+#            #svlVideoCodecOpenCV.h       # private header
+#            #svlVideoCodecOpenCV.cpp
+#            svlTrackerOCVMeanShift.cpp
+#            )
+#        IF(NOT WIN32)
+#            SET(SOURCE_FILES
+#                ${SOURCE_FILES}
+#                svlVidCapSrcOpenCV.h        # private header
+#                svlVidCapSrcOpenCV.cpp
+#            )
+#        ENDIF(NOT WIN32)
+#        SET(HEADER_FILES
+#            ${HEADER_FILES}
+#            svlFilterImageZoom.h
+#            svlFilterToolTracker.h
+#            svlTrackerOCVMeanShift.h
+#            )
+#        IF(OpenCV21_FOUND)
+#            SET(SOURCE_FILES
+#                ${SOURCE_FILES}
+#                svlCCCalibrationGrid.cpp
+#                svlCCCornerDetector.cpp
+#                svlCCFileIO.cpp
+#                svlCCHandEyeCalibration.cpp
+#                svlCCOriginDetector.cpp
+#                svlFilterImageCameraCalibrationOpenCV.cpp
+#            )
+#            SET(HEADER_FILES
+#                ${HEADER_FILES}
+#                svlCCCalibrationGrid.h
+#                svlCCCornerDetector.h
+#                svlCCFileIO.h
+#                svlCCHandEyeCalibration.h
+#                svlCCOriginDetector.h
+#                svlFilterImageCameraCalibrationOpenCV.h
+#            )
+#        ENDIF(OpenCV21_FOUND)
+#        MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
+#        OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
+#    ELSE(OpenCV_FOUND)
+#    ENDIF(OpenCV_FOUND)
+#ELSE(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
+#    cisst_unset_all_package_settings (cisstStereoVision OpenCV)
+#
+#    MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
+#    OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
+#ENDIF(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
 
 
 # OpenCV
@@ -605,6 +672,8 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
         OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" ON)
 
         IF(WIN32 AND NOT SVL_GNU_OPTIONS)
+            cisst_unset_all_package_settings (cisstStereoVision ZLIB)
+
             SET(SVL_GNU_OPTIONS
                 SVL_GNU_INCLUDE_DIR
                 SVL_GNU_LIBRARY_DIR
@@ -616,6 +685,8 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
         ENDIF(WIN32 AND NOT SVL_GNU_OPTIONS)
 
     ELSE(ZLIB_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVision ZLIB)
+
         IF(CISST_SVL_HAS_ZLIB)
             MARK_AS_ADVANCED(CLEAR ${ZLIB_OPTIONS})
             MESSAGE(FATAL_ERROR "ZLIB required. Please specify its location.")
@@ -676,11 +747,15 @@ IF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
         ENDIF(PNG_FOUND)
 
     ELSE(CISST_SVL_HAS_PNG OR NOT PNG_OPTIONS)
+        cisst_unset_all_package_settings (cisstStereoVision PNG)
+
         MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
         OPTION(CISST_SVL_HAS_PNG "Use PNG extensions" OFF)
     ENDIF(CISST_SVL_HAS_PNG OR NOT PNG_OPTIONS)
 
 ELSE(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
+    cisst_unset_all_package_settings (cisstStereoVision PNG)
+
     MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
     OPTION(CISST_SVL_HAS_PNG "Use PNG extensions" OFF)
     SET(CISST_SVL_HAS_PNG OFF CACHE BOOL "PNG disabled" FORCE)
@@ -702,42 +777,42 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
         )
 
     SET(FFMPEG_FOUND "NO")
-    FIND_PATH(FFMPEG_avcodec_INCLUDE_DIR avcodec.h
+    FIND_PATH(FFMPEG_avcodec_INCLUDE_DIR libavcodec/avcodec.h
               PATHS
-                "/usr/include/libavcodec"
+                "/usr/include"
                 "/usr/include/ffmpeg"
                 "/usr/include"
-                "/opt/local/include/libavcodec"
+                "/opt/local/include"
                 "/opt/local/include/ffmpeg"
                 "/opt/local/include"
               DOC "What is the path where avcodec.h can be found"
               )
-    FIND_PATH(FFMPEG_avformat_INCLUDE_DIR avformat.h
+    FIND_PATH(FFMPEG_avformat_INCLUDE_DIR libavformat/avformat.h
               PATHS
-                "/usr/include/libavformat"
+                "/usr/include"
                 "/usr/include/ffmpeg"
                 "/usr/include"
-                "/opt/local/include/libavformat"
+                "/opt/local/include"
                 "/opt/local/include/ffmpeg"
                 "/opt/local/include"
               DOC "What is the path where avformat.h can be found"
               )
-    FIND_PATH(FFMPEG_avutil_INCLUDE_DIR avutil.h
+    FIND_PATH(FFMPEG_avutil_INCLUDE_DIR libavutil/avutil.h
               PATHS
-                "/usr/include/libavutil"
+                "/usr/include"
                 "/usr/include/ffmpeg"
                 "/usr/include"
-                "/opt/local/include/libavutil"
+                "/opt/local/include"
                 "/opt/local/include/ffmpeg"
                 "/opt/local/include"
               DOC "What is the path where avutil.h can be found"
               )
-    FIND_PATH(FFMPEG_swscale_INCLUDE_DIR swscale.h
+    FIND_PATH(FFMPEG_swscale_INCLUDE_DIR libswscale/swscale.h
               PATHS
-                "/usr/include/libswscale"
+                "/usr/include"
                 "/usr/include/ffmpeg"
                 "/usr/include"
-                "/opt/local/include/libswscale"
+                "/opt/local/include"
                 "/opt/local/include/ffmpeg"
                 "/opt/local/include"
               DOC "What is the path where swscale.h can be found"
@@ -771,7 +846,7 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
     IF(FFMPEG_FOUND)
         MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
 
-	set (CISST_SVL_ALL_FFMPEG_INCLUDE "${FFMPEG_avcodec_INCLUDE_DIR}"
+        set (CISST_SVL_ALL_FFMPEG_INCLUDE "${FFMPEG_avcodec_INCLUDE_DIR}"
                                           "${FFMPEG_avformat_INCLUDE_DIR}"
                                           "${FFMPEG_avutil_INCLUDE_DIR}"
                                           "${FFMPEG_swscale_INCLUDE_DIR}")
@@ -791,6 +866,8 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
         OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" ON)
 
     ELSE(FFMPEG_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVision FFMPEG)
+
         IF(CISST_SVL_HAS_FFMPEG)
             MARK_AS_ADVANCED(CLEAR ${FFMPEG_OPTIONS})
             MESSAGE(FATAL_ERROR "FFMPEG required. Please specify its location.")
@@ -801,8 +878,12 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
     ENDIF(FFMPEG_FOUND)
 
 ELSE(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
+    cisst_unset_all_package_settings (cisstStereoVision FFMPEG)
+
     MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
     OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" OFF)
+    SET(CISST_SVL_HAS_FFMPEG OFF CACHE BOOL "FFMPEG disabled" FORCE)
+    MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_FFMPEG)
 ENDIF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
 
 
@@ -847,6 +928,8 @@ IF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
         OPTION(CISST_SVL_HAS_MIL "Compile MIL extensions" ON)
 
     ELSE(MIL_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVision MIL)
+
         IF(CISST_SVL_HAS_MIL)
             MARK_AS_ADVANCED(CLEAR ${MIL_OPTIONS})
             MESSAGE(FATAL_ERROR "Matrox Imaging Library (MIL) required. Please specify its location.")
@@ -857,6 +940,8 @@ IF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
     ENDIF(MIL_FOUND)
 
 ELSE(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
+    cisst_unset_all_package_settings (cisstStereoVision MIL)
+
     MARK_AS_ADVANCED(FORCE ${MIL_OPTIONS})
     OPTION(CISST_SVL_HAS_MIL "Compile Matrox Imaging Library (MIL) extensions" OFF)
 ENDIF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
@@ -913,6 +998,8 @@ IF(WIN32)
             OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" ON)
 
         ELSE(DIRECTSHOW_FOUND)
+            cisst_unset_all_package_settings (cisstStereoVision DirectShow)
+
             IF(CISST_SVL_HAS_DIRECTSHOW)
                 MARK_AS_ADVANCED(CLEAR ${DIRECTSHOW_OPTIONS})
                 MESSAGE(FATAL_ERROR "DirectShow required. Please specify its location.")
@@ -923,6 +1010,8 @@ IF(WIN32)
         ENDIF(DIRECTSHOW_FOUND)
 
     ELSE(CISST_SVL_HAS_DIRECTSHOW OR NOT DIRECTSHOW_OPTIONS)
+        cisst_unset_all_package_settings (cisstStereoVision DirectShow)
+
         MARK_AS_ADVANCED(FORCE ${DIRECTSHOW_OPTIONS})
         OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" OFF)
     ENDIF(CISST_SVL_HAS_DIRECTSHOW OR NOT DIRECTSHOW_OPTIONS)
@@ -990,6 +1079,8 @@ IF(WIN32)
             OPTION(CISST_SVL_HAS_SVS "Compile Videre Design (SVS) extensions" ON)
 
         ELSE(SVS_FOUND)
+            cisst_unset_all_package_settings (cisstStereoVision SVS)
+
             IF(CISST_SVL_HAS_SVS)
                 MARK_AS_ADVANCED(CLEAR ${SVS_OPTIONS})
                 MESSAGE(FATAL_ERROR "Videre Design SVS (SVS) required. Please specify its location.")
@@ -1000,6 +1091,8 @@ IF(WIN32)
         ENDIF(SVS_FOUND)
 
     ELSE(CISST_SVL_HAS_SVS OR NOT SVS_OPTIONS)
+        cisst_unset_all_package_settings (cisstStereoVision SVS)
+
         MARK_AS_ADVANCED(FORCE ${SVS_OPTIONS})
         OPTION(CISST_SVL_HAS_SVS "Compile Videre Design (SVS) extensions" OFF)
     ENDIF(CISST_SVL_HAS_SVS OR NOT SVS_OPTIONS)
@@ -1086,6 +1179,8 @@ IF(UNIX)
             ENDIF(CMAKE_SYSTEM_NAME MATCHES Darwin)
 
         ELSE(DC1394_FOUND)
+            cisst_unset_all_package_settings (cisstStereoVision dc1394)
+
             IF(CISST_SVL_HAS_DC1394)
                 MARK_AS_ADVANCED(CLEAR ${DC1394_OPTIONS})
                 MESSAGE(FATAL_ERROR "DC1394 required. Please specify its location.")
@@ -1096,6 +1191,8 @@ IF(UNIX)
         ENDIF(DC1394_FOUND)
 
     ELSE(CISST_SVL_HAS_DC1394 OR NOT DC1394_OPTIONS)
+        cisst_unset_all_package_settings (cisstStereoVision dc1394)
+
         MARK_AS_ADVANCED(FORCE ${DC1394_OPTIONS})
         OPTION(CISST_SVL_HAS_DC1394 "Compile LibDC1394 extensions" OFF)
     ENDIF(CISST_SVL_HAS_DC1394 OR NOT DC1394_OPTIONS)
@@ -1137,6 +1234,8 @@ IF(UNIX)
 
         ELSE(X11_FOUND)
             cisst_unset_all_package_settings (cisstStereoVision X11)
+            cisst_unset_all_package_settings (cisstStereoVision Xext)
+            cisst_unset_all_package_settings (cisstStereoVision Xv)
 
             IF(CISST_SVL_HAS_X11)
                 MESSAGE(FATAL_ERROR "X11 required. Please specify its location.")
@@ -1147,6 +1246,8 @@ IF(UNIX)
 
     ELSE(CISST_SVL_HAS_X11 OR NOT DEFINED SVL_X11_FOUND)
         cisst_unset_all_package_settings (cisstStereoVision X11)
+        cisst_unset_all_package_settings (cisstStereoVision Xext)
+        cisst_unset_all_package_settings (cisstStereoVision Xv)
 
         OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
         SET(CISST_SVL_HAS_XV "OFF" CACHE INTERNAL "SVL Has Xvideo")
@@ -1181,79 +1282,101 @@ ENDMACRO(SVL_CUDA_ADD_LIBRARY generated_files cuda_target)
 
 #IF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
 IF(CISST_SVL_HAS_CUDA)
-    SET(CUDA_OPTIONS
-        CUDA_SDK_ROOT_DIR
-        CUDA_INCLUDE_DIRS
-        CUDA_LIBRARIES
-        CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
-        CUDA_BUILD_CUBIN
-        CUDA_BUILD_EMULATION
-        CUDA_TOOLKIT_ROOT_DIR
-        CUDA_VERBOSE_BUILD
-        CACHE INTERNAL "List of CUDA options"
-        )
+#    SET(CUDA_OPTIONS
+#        CUDA_SDK_ROOT_DIR
+#        CUDA_INCLUDE_DIRS
+#        CUDA_LIBRARIES
+#        CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
+#        CUDA_BUILD_CUBIN
+#        CUDA_BUILD_EMULATION
+#        CUDA_TOOLKIT_ROOT_DIR
+#        CUDA_VERBOSE_BUILD
+#        CACHE INTERNAL "List of CUDA options"
+#        )
 
     FIND_PACKAGE(CUDA)
     IF(CUDA_FOUND)
-        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc"
-                                 "${CUDA_SDK_ROOT_DIR}/../shared/inc")
-        SET(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON)
-        SET(CUDA_SOURCES
-            cuda/svlCUDACommon.cu
-            )
-        # Add a special target to clean 'nvcc' generated files.
-        CUDA_BUILD_CLEAN_TARGET()
-        SVL_CUDA_ADD_LIBRARY(CUDA_GENERATED_LIBRARIES
-                             cisstStereoVisionCUDA
-                             "${CUDA_SOURCES}"
-                             STATIC
-                             OPTIONS ""#-DSTUFF=aaa"
-                             RELEASE --use_fast_math -DNDEBUG
-                             DEBUG -g -DDEBUG
-                             )
+        FIND_LIBRARY(CUDA_CUTIL_LIBRARY cutil "${CUDA_SDK_ROOT_DIR}/C/lib")
 
-        MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+        CUDA_ADD_LIBRARY(cisstStereoVisionCUDA
+                         cuda/svlCUDACommon.cu
+#                         ../svlCUDACommon.h
+#                         cuda/svlCUDACommon.cpp
+                         STATIC
+                         )
 
-        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-            "${CUDA_SDK_ROOT_DIR}/common/inc"
-            "${CUDA_SDK_ROOT_DIR}/../shared/inc"
-            "${CUDA_INCLUDE_DIRS}"
-            )
-        SET(SVL_ADDITIONAL_LIBRARIES
-            "${SVL_ADDITIONAL_LIBRARIES}"
-            "${CUDA_LIBRARIES}"
-#            "${CUDA_GENERATED_LIBRARIES}"
-            )
+        cisst_set_package_settings (cisstStereoVisionCUDA CUDA INCLUDE_DIRECTORIES CUDA_INCLUDE_DIRS)
+        cisst_set_package_settings (cisstStereoVisionCUDA CUDA LIBRARIES CUDA_CUTIL_LIBRARY)
+
+#        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc"
+#                                 "${CUDA_SDK_ROOT_DIR}/../shared/inc")
+#        SET(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON)
+#        SET(CUDA_SOURCES
+#            cuda/svlCUDACommon.cu
+#            )
+#        # Add a special target to clean 'nvcc' generated files.
+#        CUDA_BUILD_CLEAN_TARGET()
+#        SVL_CUDA_ADD_LIBRARY(CUDA_GENERATED_LIBRARIES
+#                             cisstStereoVisionCUDA
+#                             "${CUDA_SOURCES}"
+#                             STATIC
+#                             OPTIONS ""#-DSTUFF=aaa"
+#                             RELEASE --use_fast_math -DNDEBUG
+#                             DEBUG -g -DDEBUG
+#                             )
+#
+#        MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+#
+#        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+#            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+#            "${CUDA_SDK_ROOT_DIR}/common/inc"
+#            "${CUDA_SDK_ROOT_DIR}/../shared/inc"
+#            "${CUDA_INCLUDE_DIRS}"
+#            )
+#        SET(SVL_ADDITIONAL_LIBRARIES
+#            "${SVL_ADDITIONAL_LIBRARIES}"
+#            "${CUDA_LIBRARIES}"
+##            "${CUDA_GENERATED_LIBRARIES}"
+#            )
+
+#        SET(SVL_ADDITIONAL_LIBRARIES
+#            "${SVL_ADDITIONAL_LIBRARIES}"
+#            cisstStereoVisionCUDA
+#            )
         SET(HEADER_FILES
             ${HEADER_FILES}
             svlSampleCUDAImageTypes.h
             svlSampleCUDAImageCustom.h
             svlSampleCUDAImage.h
             svlFilterCUDATest.h
+#            svlCUDACommon.h
             )
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlSampleCUDAImageTypes.cpp
             svlSampleCUDAImage.cpp
             svlFilterCUDATest.cpp
+#            cuda/svlCUDACommon.cpp
             )
         MESSAGE(STATUS "CUDA found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" ON)
 
     ELSE(CUDA_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVisionCUDA CUDA)
+
         IF(CISST_SVL_HAS_CUDA)
-            MARK_AS_ADVANCED(CLEAR ${CUDA_OPTIONS})
+#            MARK_AS_ADVANCED(CLEAR ${CUDA_OPTIONS})
             MESSAGE(FATAL_ERROR "CUDA required. Please specify its location.")
         ELSE(CISST_SVL_HAS_CUDA)
-            MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+#            MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
             OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
         ENDIF(CISST_SVL_HAS_CUDA)
     ENDIF(CUDA_FOUND)
 
 #ELSE(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
 ELSE(CISST_SVL_HAS_CUDA)
-    MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
+    cisst_unset_all_package_settings (cisstStereoVisionCUDA CUDA)
+#    MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
     OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
 #ENDIF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
 ENDIF(CISST_SVL_HAS_CUDA)
@@ -1273,9 +1396,11 @@ if (CISST_SVL_HAS_BM_DECKLINK)
         mark_as_advanced (DeckLink_INCLUDE_DIR DeckLink_LIBRARIES)
         cisst_set_package_settings (cisstStereoVision decklink INCLUDE_DIRECTORIES DeckLink_INCLUDE_DIR)
         cisst_set_package_settings (cisstStereoVision decklink LIBRARIES           DeckLink_LIBRARIES)
+    else (DeckLink_FOUND)
+        cisst_unset_all_package_settings (cisstStereoVision decklink)
     endif (DeckLink_FOUND)
 else (CISST_SVL_HAS_BM_DECKLINK)
- cisst_unset_all_package_settings (cisstStereoVision decklink)	
+    cisst_unset_all_package_settings (cisstStereoVision decklink)	
 endif (CISST_SVL_HAS_BM_DECKLINK)
 
 
@@ -1354,5 +1479,9 @@ cisst_add_library (
 
 # Link `cisstStereoVision` against CUDA generated libraries
 IF(CISST_SVL_HAS_CUDA)
-    TARGET_LINK_LIBRARIES(cisstStereoVision ${CUDA_GENERATED_LIBRARIES})
+#    TARGET_LINK_LIBRARIES(cisstStereoVision
+#                          ${CUDA_CUTIL_LIBRARY}
+#                          ${CUDA_GENERATED_LIBRARIES}
+#                          )
 ENDIF(CISST_SVL_HAS_CUDA)
+
