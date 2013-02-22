@@ -110,6 +110,9 @@ inline bool cmnCommandLineOptionsConvert<std::string>(const char * value, std::s
 
   \ingroup cisstCommon
 */
+
+#undef OPTIONAL   // work-around for Windows
+
 class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);

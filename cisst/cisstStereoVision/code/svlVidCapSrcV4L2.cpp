@@ -760,7 +760,7 @@ int svlVidCapSrcV4L2::GetFormatList(unsigned int deviceid, svlFilterSourceVideoC
 
     GetFormat(formatlist[0][0]);
 
-    for(unsigned int i; i < formats.size();i++){
+    for(unsigned int i = 0; i < formats.size();i++){
         memcpy(&formatlist[0][i+1],formats.at(i),sizeof(svlFilterSourceVideoCapture::ImageFormat));
         delete formats.at(i);
         formats.at(i) = NULL;
