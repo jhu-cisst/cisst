@@ -156,6 +156,13 @@ std::vector<std::string> mtsComponent::GetNamesOfInterfacesOutput(void) const
 
 bool mtsComponent::InterfaceExists(const std::string & interfaceName, cmnLogLevel lod) const
 {
+    return (InterfaceProvidedOrOutputExists(interfaceName, lod)
+            || InterfaceRequiredOrInputExists(interfaceName, lod));
+}
+
+
+bool mtsComponent::InterfaceProvidedOrOutputExists(const std::string & interfaceName, cmnLogLevel lod) const
+{
     if (this->InterfacesProvided.FindItem(interfaceName)) {
         CMN_LOG_CLASS(lod) << "InterfaceExists: found a provided interface with name \"" << interfaceName << "\"" << std::endl;
         return true;
@@ -164,6 +171,12 @@ bool mtsComponent::InterfaceExists(const std::string & interfaceName, cmnLogLeve
         CMN_LOG_CLASS(lod) << "InterfaceExists: found an output interface with name \"" << interfaceName << "\"" << std::endl;
         return true;
     }
+    return false;
+}
+
+
+bool mtsComponent::InterfaceRequiredOrInputExists(const std::string & interfaceName, cmnLogLevel lod) const
+{
     if (this->InterfacesRequired.FindItem(interfaceName)) {
         CMN_LOG_CLASS(lod) << "InterfaceExists: found a required interface with name \"" << interfaceName << "\"" << std::endl;
         return true;
@@ -193,7 +206,7 @@ mtsInterfaceProvided * mtsComponent::AddInterfaceProvidedWithoutSystemEvents(con
                                                                              mtsInterfaceQueueingPolicy queueingPolicy,
                                                                              bool isProxy)
 {
-    if (this->InterfaceExists(interfaceProvidedName, CMN_LOG_LEVEL_INIT_ERROR)) {
+    if (this->InterfaceProvidedOrOutputExists(interfaceProvidedName, CMN_LOG_LEVEL_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: component " << this->GetName() << " already has an interface named \""
                                  << interfaceProvidedName << "\"" << std::endl;
         return 0;
@@ -420,7 +433,7 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
 mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredExisting(const std::string & interfaceRequiredName,
                                                                   mtsInterfaceRequired * interfaceRequired)
 {
-    if (this->InterfaceExists(interfaceRequiredName, CMN_LOG_LEVEL_INIT_ERROR)) {
+    if (this->InterfaceRequiredOrInputExists(interfaceRequiredName, CMN_LOG_LEVEL_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceRequired: component " << this->GetName() << " already has an interface named \""
                                  << interfaceRequiredName << "\"" << std::endl;
         return 0;
@@ -436,7 +449,7 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredUsingMailbox(const std:
                                                                       mtsMailBox * mailBox,
                                                                       mtsRequiredType required)
 {
-    if (this->InterfaceExists(interfaceRequiredName, CMN_LOG_LEVEL_INIT_ERROR)) {
+    if (this->InterfaceRequiredOrInputExists(interfaceRequiredName, CMN_LOG_LEVEL_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceRequired: component " << this->GetName() << " already has an interface named \""
                                  << interfaceRequiredName << "\"" << std::endl;
         return 0;
@@ -462,7 +475,7 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredUsingMailbox(const std:
 mtsInterfaceRequired * mtsComponent::AddInterfaceRequired(const std::string & interfaceRequiredName,
                                                           mtsRequiredType required)
 {
-    if (this->InterfaceExists(interfaceRequiredName, CMN_LOG_LEVEL_INIT_ERROR)) {
+    if (this->InterfaceRequiredOrInputExists(interfaceRequiredName, CMN_LOG_LEVEL_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceRequired: component " << this->GetName() << " already has an interface named \""
                                  << interfaceRequiredName << "\"" << std::endl;
         return 0;
@@ -496,7 +509,7 @@ mtsInterfaceInput * mtsComponent::AddInterfaceInput(const std::string & interfac
 
 mtsInterfaceInput * mtsComponent::AddInterfaceInputExisting(const std::string & interfaceInputName,
                                                             mtsInterfaceInput * interfaceInput) {
-    if (this->InterfaceExists(interfaceInputName, CMN_LOG_LEVEL_INIT_ERROR)) {
+    if (this->InterfaceRequiredOrInputExists(interfaceInputName, CMN_LOG_LEVEL_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInput: component " << this->GetName() << " already has an interface named \""
                                  << interfaceInputName << "\"" << std::endl;
         return 0;
@@ -513,7 +526,7 @@ mtsInterfaceInput * mtsComponent::AddInterfaceInputExisting(const std::string & 
 
 mtsInterfaceOutput * mtsComponent::AddInterfaceOutputExisting(const std::string & interfaceOutputName,
                                                               mtsInterfaceOutput * interfaceOutput) {
-    if (this->InterfaceExists(interfaceOutputName, CMN_LOG_LEVEL_INIT_ERROR)) {
+    if (this->InterfaceProvidedOrOutputExists(interfaceOutputName, CMN_LOG_LEVEL_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceOutput: component " << this->GetName() << " already has an interface named \""
                                  << interfaceOutputName << "\"" << std::endl;
         return 0;
