@@ -1037,7 +1037,7 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
 
     symv(&LOW, &N,
          &ALPHA, &A[0][0], &LDA, 
-	 qddv, &INC,
+         qddv, &INC,
          &BETA, Inertterm, &INC);
 
     free_rmatrix(A, 0, 0);
