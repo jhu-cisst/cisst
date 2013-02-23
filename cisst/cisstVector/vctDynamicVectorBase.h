@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
+  Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -460,7 +460,7 @@ public:
     template <class __vectorOwnerType, class __elementType>
     inline ThisType & ConcatenationOf(const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & otherVector,
                                       __elementType lastElement) {
-	vctDynamicVectorRef<value_type> firstElements(*this, 0, otherVector.size() - 1);
+    vctDynamicVectorRef<value_type> firstElements(*this, 0, otherVector.size() - 1);
         vctDynamicVectorLoopEngines::
             VoVi<typename vctUnaryOperations<value_type, __elementType>::Identity>::
             Run(firstElements, otherVector);
@@ -1100,6 +1100,18 @@ public:
             typename vctStoreBackBinaryOperations<value_type>::Addition,
             typename vctBinaryOperations<value_type>::Multiplication >::
             Run(*this, scalar, otherVector);
+        return *this;
+    }
+
+    template <class __vectorOwnerType1, class __vectorOwnerType2>
+    inline ThisType & AddElementwiseProductOf(const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & vector1,
+                                              const vctDynamicConstVectorBase<__vectorOwnerType2, _elementType> & vector2)
+    {
+        vctDynamicVectorLoopEngines::
+            VioViVi<
+            typename vctStoreBackBinaryOperations<value_type>::Addition,
+            typename vctBinaryOperations<value_type>::Multiplication >::
+            Run(*this, vector1, vector2);
         return *this;
     }
 

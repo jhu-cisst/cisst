@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2004-11-17
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -180,6 +180,34 @@ void vctDynamicVectorRefTest::TestVioSiViOperationsFloat(void) {
 }
 void vctDynamicVectorRefTest::TestVioSiViOperationsInt(void) {
     TestVioSiViOperations<int>();
+}
+
+
+
+template <class _elementType>
+void vctDynamicVectorRefTest::TestVioViViOperations(void) {
+    enum {SIZE = 8, STRIDE1 = 3, STRIDE2 = 2, STRIDE3 = 2, STRIDE4 = 1};
+    typedef _elementType value_type;
+    CREATE_STORAGE_AND_REF(1);
+    CREATE_STORAGE_AND_REF(2);
+    CREATE_STORAGE_AND_REF(3);
+    CREATE_STORAGE_AND_REF(4);
+    vctRandom(vector1, value_type(-10), value_type(10));
+    vctRandom(vector2, value_type(-10), value_type(10));
+    vctRandom(vector3, value_type(-10), value_type(10));
+    RemoveQuasiZero(vector3);
+
+    vctGenericContainerTest::TestCioCiCiOperations(vector1, vector2, vector3, vector4);
+}
+
+void vctDynamicVectorRefTest::TestVioViViOperationsDouble(void) {
+    TestVioViViOperations<double>();
+}
+void vctDynamicVectorRefTest::TestVioViViOperationsFloat(void) {
+    TestVioViViOperations<float>();
+}
+void vctDynamicVectorRefTest::TestVioViViOperationsInt(void) {
+    TestVioViViOperations<int>();
 }
 
 
@@ -408,7 +436,7 @@ template <class _elementType>
 void vctDynamicVectorRefTest::TestSoViSiOperations(void) {
     enum {SIZE = 9, STRIDE1 = 1, STRIDE2 = 2};
     typedef _elementType value_type;
-    
+
     CREATE_STORAGE_AND_REF(1);
     CREATE_STORAGE_AND_REF(2);
     value_type scalar;
