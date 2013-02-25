@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-11-12
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -36,7 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #define VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(goal, actual, tolerance) \
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(actual), static_cast<double>(tolerance));
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(actual), static_cast<double>(tolerance));
 
 template <class _containerType>
 void RemoveQuasiZero(_containerType & container) {
@@ -667,7 +667,7 @@ class vctGenericContainerTest
 
     /*! Test CioSiCi based operations. */
     template <class _containerType1, class _containerType2, class _containerType3>
-        static void TestCioSiCiOperations(
+    static void TestCioSiCiOperations(
         const _containerType1 & container1,
         const typename _containerType1::value_type scalar,
         const _containerType2 & container2,
@@ -689,6 +689,37 @@ class vctGenericContainerTest
         iter3 = container3.begin();
         for (; iter1 != end1; ++iter1, ++iter2, ++iter3) {
             CPPUNIT_ASSERT_DOUBLES_EQUAL((*iter3), (*iter2) + scalar * (*iter1), tolerance);
+        }
+    }
+
+
+    /*! Test CioCiCi based operations. */
+    template <class _containerType1, class _containerType2, class _containerType3, class _containerType4>
+    static void TestCioCiCiOperations(
+        const _containerType1 & container1,
+        const _containerType2 & container2,
+        const _containerType3 & container3,
+        _containerType4 & container4,
+        typename _containerType1::value_type tolerance
+        = cmnTypeTraits<typename _containerType1::value_type>::Tolerance())
+    {
+        CPPUNIT_ASSERT(container1.size() == container2.size());
+        CPPUNIT_ASSERT(container1.size() == container3.size());
+
+        const typename _containerType1::const_iterator end1 = container1.end();
+        typename _containerType1::const_iterator iter1;
+        typename _containerType2::const_iterator iter2;
+        typename _containerType3::const_iterator iter3;
+        typename _containerType4::const_iterator iter4;
+
+        container4.Assign(container1);
+        container4.AddElementwiseProductOf(container2, container3);
+        iter1 = container1.begin();
+        iter2 = container2.begin();
+        iter3 = container3.begin();
+        iter4 = container4.begin();
+        for (; iter1 != end1; ++iter1, ++iter2, ++iter3, ++iter4) {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((*iter4), (*iter1) + (*iter2) * (*iter3), tolerance);
         }
     }
 

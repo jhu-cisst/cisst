@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2004-11-17
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -51,6 +51,10 @@ class vctDynamicMatrixRefTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestMioSiMiOperationsDouble);
     CPPUNIT_TEST(TestMioSiMiOperationsFloat);
     CPPUNIT_TEST(TestMioSiMiOperationsInt);
+
+    CPPUNIT_TEST(TestMioMiMiOperationsDouble);
+    CPPUNIT_TEST(TestMioMiMiOperationsFloat);
+    CPPUNIT_TEST(TestMioMiMiOperationsInt);
 
     CPPUNIT_TEST(TestMoMiMiOperationsDouble);
     CPPUNIT_TEST(TestMoMiMiOperationsFloat);
@@ -97,14 +101,14 @@ class vctDynamicMatrixRefTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestSTLFunctionsInt);
 
     CPPUNIT_TEST_SUITE_END();
-    
+
  public:
     void setUp(void) {
     }
-    
+
     void tearDown(void) {
     }
-    
+
     /*! Test SoMi operations */
     template<class _elementType>
         void TestAssignment(void);
@@ -146,6 +150,13 @@ class vctDynamicMatrixRefTest : public CppUnit::TestFixture
     void TestMioSiMiOperationsDouble(void);
     void TestMioSiMiOperationsFloat(void);
     void TestMioSiMiOperationsInt(void);
+
+    /*! Test MioMiMi operations */
+    template<class _elementType>
+        void TestMioMiMiOperations(void);
+    void TestMioMiMiOperationsDouble(void);
+    void TestMioMiMiOperationsFloat(void);
+    void TestMioMiMiOperationsInt(void);
 
     /*! Test MoMiMi operations */
     template<class _elementType>

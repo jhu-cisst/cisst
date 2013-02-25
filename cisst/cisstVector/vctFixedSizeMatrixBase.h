@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky
-  Created on:	2003-11-04
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-11-04
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -547,11 +547,11 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
       \return a reference to this object.
     */
-	template <class __matrixOwnerType>
+    template <class __matrixOwnerType>
     inline ThisType & Assign(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & other) {
         vctFixedSizeMatrixBaseAssignDynamicConstMatrixBase(*this, other);
         return *this;
-	}
+    }
 
 
     /*!  \name Forced assignment operation between matrices of
@@ -578,10 +578,10 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         return this->Assign(other);
     }
 
-	template <class __matrixOwnerType>
+    template <class __matrixOwnerType>
     inline ThisType & ForceAssign(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & other) {
         return this->Assign(other);
-	}
+   }
     //@}
 
 
@@ -1105,6 +1105,21 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
             Run(*this, scalar,  otherMatrix);
         return *this;
     }
+
+
+    template <stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1,
+              stride_type __rowStride2, stride_type __colStride2, class __dataPtrType2>
+    inline ThisType & AddElementwiseProductOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride1, __colStride1, value_type, __dataPtrType1> & matrix1,
+                                              const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride2, __colStride2, value_type, __dataPtrType2> & matrix2)
+    {
+        vctFixedSizeMatrixLoopEngines::
+            MioMiMi<
+            typename vctStoreBackBinaryOperations<value_type>::Addition,
+            typename vctBinaryOperations<value_type>::Multiplication >::
+            Run(*this, matrix1,  matrix2);
+        return *this;
+    }
+
 
     /*! \name Unary elementwise operations.
       Store the result of op(matrix) to another matrix. */

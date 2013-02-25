@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2003-12-16
-  
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -131,7 +131,7 @@ void vctFixedSizeMatrixTest::TestExchangeAndPermutation(void)
     randomSequence.ExtractRandomPermutation(ROWS, rowPermutation);
     vct::index_type colPermutation[COLS];
     randomSequence.ExtractRandomPermutation(COLS, colPermutation);
-    vctGenericMatrixTest::TestExchangeAndPermutationOperations(matrix, row1, row2, 
+    vctGenericMatrixTest::TestExchangeAndPermutationOperations(matrix, row1, row2,
                                                                col1, col2, rowPermutation, colPermutation);
 }
 
@@ -240,7 +240,7 @@ void vctFixedSizeMatrixTest::TestMioMiOperations(void) {
     vctFixedSizeMatrix<value_type, ROWS, COLS> matrix1;
     vctFixedSizeMatrix<value_type, ROWS, COLS> matrix2;
     vctFixedSizeMatrix<value_type, ROWS, COLS> result;
-    
+
     vctRandom(matrix1, value_type(-10), value_type(10));
     vctRandom(matrix2, value_type(-10), value_type(10));
     RemoveQuasiZero(matrix2);
@@ -268,7 +268,7 @@ void vctFixedSizeMatrixTest::TestMioSiMiOperations(void) {
     value_type scalar;
     vctFixedSizeMatrix<value_type, ROWS, COLS> matrix2;
     vctFixedSizeMatrix<value_type, ROWS, COLS> result;
-    
+
     vctRandom(matrix1, value_type(-10), value_type(10));
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
     randomSequence.ExtractRandomValue(value_type(-10),
@@ -293,13 +293,42 @@ void vctFixedSizeMatrixTest::TestMioSiMiOperationsInt(void) {
 
 
 template <class _elementType>
+void vctFixedSizeMatrixTest::TestMioMiMiOperations(void) {
+    enum {ROWS = 5, COLS = 6};
+    typedef _elementType value_type;
+    vctFixedSizeMatrix<value_type, ROWS, COLS> matrix1;
+    vctFixedSizeMatrix<value_type, ROWS, COLS> matrix2;
+    vctFixedSizeMatrix<value_type, ROWS, COLS> matrix3;
+    vctFixedSizeMatrix<value_type, ROWS, COLS> result;
+
+    vctRandom(matrix1, value_type(-10), value_type(10));
+    vctRandom(matrix2, value_type(-10), value_type(10));
+    vctRandom(matrix3, value_type(-10), value_type(10));
+    RemoveQuasiZero(matrix3);
+
+    vctGenericContainerTest::TestCioCiCiOperations(matrix1, matrix2, matrix3, result);
+}
+
+void vctFixedSizeMatrixTest::TestMioMiMiOperationsDouble(void) {
+    TestMioMiMiOperations<double>();
+}
+void vctFixedSizeMatrixTest::TestMioMiMiOperationsFloat(void) {
+    TestMioMiMiOperations<float>();
+}
+void vctFixedSizeMatrixTest::TestMioMiMiOperationsInt(void) {
+    TestMioMiMiOperations<int>();
+}
+
+
+
+template <class _elementType>
 void vctFixedSizeMatrixTest::TestMoMiMiOperations(void) {
     enum {ROWS = 4, COLS = 5};
     typedef _elementType value_type;
     vctFixedSizeMatrix<value_type, ROWS, COLS> matrix1;
     vctFixedSizeMatrix<value_type, ROWS, COLS> matrix2;
     vctFixedSizeMatrix<value_type, ROWS, COLS> result;
-    
+
     vctRandom(matrix1, value_type(-10), value_type(10));
     vctRandom(matrix2, value_type(-10), value_type(10));
     RemoveQuasiZero(matrix2);
@@ -329,14 +358,14 @@ void vctFixedSizeMatrixTest::TestProductOperations(void) {
     vctFixedSizeMatrix<value_type, ROWS, COLS> matrix3;
     vctFixedSizeVector<value_type, COMSIZE> vector1;
     vctFixedSizeVector<value_type, ROWS> vector2;
-    
+
     vctRandom(matrix1, value_type(-10), value_type(10));
     vctRandom(matrix2, value_type(-10), value_type(10));
     vctRandom(vector1, value_type(-10), value_type(10));
 
     vctGenericMatrixTest::TestMatrixMatrixProductOperations(matrix1, matrix2, matrix3);
     vctGenericMatrixTest::TestMatrixVectorProductOperations(matrix1, vector1, vector2);
-    
+
     vctRandom(vector2, value_type(-10), value_type(10));
     vctGenericMatrixTest::TestVectorMatrixProductOperations(matrix1, vector2, vector1);
 
@@ -589,7 +618,7 @@ template <class _elementType, bool _storageOrder>
 void vctFixedSizeMatrixTest::TestFastCopyOf(void) {
     enum {ROWS = 3, COLS = 5};
     typedef _elementType value_type;
-    
+
     // dynamic matrix
     vctFixedSizeMatrix<value_type, ROWS, COLS, _storageOrder> destination;
     vctDynamicMatrix<value_type> validSource(ROWS, COLS, _storageOrder);
@@ -606,7 +635,7 @@ void vctFixedSizeMatrixTest::TestFastCopyOf(void) {
     vctRandom(largerMatrix, value_type(-10), value_type(10));
     vctGenericContainerTest::TestFastCopyOfException(largerMatrix, destination);
 
-    // test for compact by row or col    
+    // test for compact by row or col
     vctDynamicMatrixRef<value_type> compactSub(largerMatrix, 0, 0, ROWS, COLS);
     vctGenericContainerTest::TestFastCopyOf(compactSub, destination);
 

@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2004-07-09
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -92,7 +92,7 @@ void vctDynamicVectorTest::TestSizingMethods(void) {
 
     vctDynamicVector<_elementType> vector3(vector1);
     CPPUNIT_ASSERT(vector3.size() == size);
-    CPPUNIT_ASSERT(vector3.Pointer() != 0);    
+    CPPUNIT_ASSERT(vector3.Pointer() != 0);
     CPPUNIT_ASSERT(vector3.Pointer() != vector1.Pointer());
 
 
@@ -124,7 +124,7 @@ void vctDynamicVectorTest::TestSizingMethods(void) {
     CPPUNIT_ASSERT(vector2.size() == 0);
     CPPUNIT_ASSERT(vector2.Pointer() == 0);
 
-    // call again to make sure 
+    // call again to make sure
     vector1.SetSize(0);
     CPPUNIT_ASSERT(vector1.size() == 0);
     CPPUNIT_ASSERT(vector1.Pointer() == 0);
@@ -368,7 +368,7 @@ void vctDynamicVectorTest::TestVioViOperations(void) {
     vctDynamicVector<value_type> vector1(SIZE);
     vctDynamicVector<value_type> vector2(SIZE);
     vctDynamicVector<value_type> result(SIZE);
-    
+
     vctRandom(vector1, value_type(-10), value_type(10));
     vctRandom(vector2, value_type(-10), value_type(10));
     RemoveQuasiZero(vector2);
@@ -396,7 +396,7 @@ void vctDynamicVectorTest::TestVioSiViOperations(void) {
     value_type scalar;
     vctDynamicVector<value_type> vector2(SIZE);
     vctDynamicVector<value_type> result(SIZE);
-    
+
     vctRandom(vector1, value_type(-10), value_type(10));
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
     randomSequence.ExtractRandomValue(value_type(-10),
@@ -421,13 +421,40 @@ void vctDynamicVectorTest::TestVioSiViOperationsInt(void) {
 
 
 template <class _elementType>
+void vctDynamicVectorTest::TestVioViViOperations(void) {
+    enum {SIZE = 8};
+    typedef _elementType value_type;
+    vctDynamicVector<value_type> vector1(SIZE);
+    vctDynamicVector<value_type> vector2(SIZE);
+    vctDynamicVector<value_type> vector3(SIZE);
+    vctDynamicVector<value_type> result(SIZE);
+
+    vctRandom(vector1, value_type(-10), value_type(10));
+    vctRandom(vector2, value_type(-10), value_type(10));
+    vctRandom(vector3, value_type(-10), value_type(10));
+    vctGenericContainerTest::TestCioCiCiOperations(vector1, vector2, vector3, result);
+}
+
+void vctDynamicVectorTest::TestVioViViOperationsDouble(void) {
+    TestVioViViOperations<double>();
+}
+void vctDynamicVectorTest::TestVioViViOperationsFloat(void) {
+    TestVioViViOperations<float>();
+}
+void vctDynamicVectorTest::TestVioViViOperationsInt(void) {
+    TestVioViViOperations<int>();
+}
+
+
+
+template <class _elementType>
 void vctDynamicVectorTest::TestVoViViOperations(void) {
     enum {SIZE = 4};
     typedef _elementType value_type;
     vctDynamicVector<value_type> vector1(SIZE);
     vctDynamicVector<value_type> vector2(SIZE);
     vctDynamicVector<value_type> result(SIZE);
-    
+
     vctRandom(vector1, value_type(-10), value_type(10));
     vctRandom(vector2, value_type(-10), value_type(10));
     RemoveQuasiZero(vector2);
@@ -478,7 +505,7 @@ void vctDynamicVectorTest::TestDotProduct(void) {
     typedef _elementType value_type;
     vctDynamicVector<value_type> vector1(SIZE);
     vctDynamicVector<value_type> vector2(SIZE);
-    
+
     vctRandom(vector1, value_type(-10), value_type(10));
     vctRandom(vector2, value_type(-10), value_type(10));
 
@@ -730,7 +757,7 @@ template <class _elementType>
 void vctDynamicVectorTest::TestFastCopyOf(void) {
     enum {SIZE = 7};
     typedef _elementType value_type;
-    
+
     // dynamic vector
     vctDynamicVector<value_type> destination(SIZE);
     vctDynamicVector<value_type> validSource(SIZE);
@@ -742,7 +769,7 @@ void vctDynamicVectorTest::TestFastCopyOf(void) {
     vctDynamicVector<value_type> largerVector(SIZE * 2);
     vctGenericContainerTest::TestFastCopyOfException(largerVector, destination);
 
-    // test for not compact    
+    // test for not compact
     vctDynamicVectorRef<value_type> invalidRef(SIZE, largerVector.Pointer(), 2);
     CPPUNIT_ASSERT(!destination.FastCopyCompatible(invalidRef));
     CPPUNIT_ASSERT(!destination.FastCopyOf(invalidRef));
@@ -789,7 +816,7 @@ template <class _elementType>
 void vctDynamicVectorTest::TestZeros(void) {
     enum {SIZE = 7};
     typedef _elementType value_type;
-    
+
     // dynamic vector
     vctDynamicVector<value_type> destination(2 * SIZE);
     CPPUNIT_ASSERT(destination.Zeros());

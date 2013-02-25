@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2004-07-09
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -72,6 +72,10 @@ class vctDynamicVectorTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestVioSiViOperationsFloat);
     CPPUNIT_TEST(TestVioSiViOperationsInt);
 
+    CPPUNIT_TEST(TestVioViViOperationsDouble);
+    CPPUNIT_TEST(TestVioViViOperationsFloat);
+    CPPUNIT_TEST(TestVioViViOperationsInt);
+
     CPPUNIT_TEST(TestVoViViOperationsDouble);
     CPPUNIT_TEST(TestVoViViOperationsFloat);
     CPPUNIT_TEST(TestVoViViOperationsInt);
@@ -128,15 +132,15 @@ class vctDynamicVectorTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestNormalizationFloat);
 
     CPPUNIT_TEST_SUITE_END();
-    
+
  public:
-    
+
     void setUp(void) {
     }
-    
+
     void tearDown(void) {
     }
-    
+
     /*! Test assignment methods */
     template <class _elementType>
         void TestAssignment(void);
@@ -178,7 +182,7 @@ class vctDynamicVectorTest : public CppUnit::TestFixture
     void TestSelectFloat(void);
     void TestSelectInt(void);
 
-    /*! Test the SwapElementsWith methods: First swap elements of two vectors, then swap one 
+    /*! Test the SwapElementsWith methods: First swap elements of two vectors, then swap one
     half of a vector with the other half.  Finally swap the alternating sequence starting at
     0 with the alternating sequence starting at 1. */
     template<class _elementType>
@@ -214,6 +218,13 @@ class vctDynamicVectorTest : public CppUnit::TestFixture
     void TestVioSiViOperationsDouble(void);
     void TestVioSiViOperationsFloat(void);
     void TestVioSiViOperationsInt(void);
+
+    /*! Test VioViVi operations */
+    template<class _elementType>
+        void TestVioViViOperations(void);
+    void TestVioViViOperationsDouble(void);
+    void TestVioViViOperationsFloat(void);
+    void TestVioViViOperationsInt(void);
 
     /*! Test VoViVi operations */
     template<class _elementType>

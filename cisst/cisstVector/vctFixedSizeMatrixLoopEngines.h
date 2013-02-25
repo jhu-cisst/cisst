@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2003-12-16
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-12-16
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -37,7 +37,7 @@ class vctFixedSizeMatrixLoopEngines {
 
 public:
 
-	/*! Helper function to throw an exception whenever the output has
+    /*! Helper function to throw an exception whenever the output has
       the same base pointer as the output.  This enforces that a
       standard message is sent. */
     inline static void ThrowSharedPointersException(void) throw(std::runtime_error) {
@@ -500,41 +500,41 @@ public:
       \f]
 
       where \f$m_{io}\f$ is an input-output (store-back) matrix;
-	  \f$s\f$ is a scalar; and \f$m_i\f$ is an input matrix.  A
-	  typical example is: \f$m_{io} += s \cdot m_i\f$.  The matrices
-	  have a fixed size, determined at compilation time; \f$op_{sm}\f$
-	  is an operation between \f$s\f$ and the elements of \f$m_i\f$;
-	  \f$op_{io}\f$ is an operation between the output of
-	  \f$op_{sm}\f$ and the elements of \f$m_{io}\f$.
+      \f$s\f$ is a scalar; and \f$m_i\f$ is an input matrix.  A
+      typical example is: \f$m_{io} += s \cdot m_i\f$.  The matrices
+      have a fixed size, determined at compilation time; \f$op_{sm}\f$
+      is an operation between \f$s\f$ and the elements of \f$m_i\f$;
+      \f$op_{io}\f$ is an operation between the output of
+      \f$op_{sm}\f$ and the elements of \f$m_{io}\f$.
 
       \param _ioOperationType The type of the store-back operation.
 
       \param _scalarMatrixElementOperationType The type of the
-	  operation between scalar and input matrix.
+      operation between scalar and input matrix.
 
       \sa vctFixedSizeMatrixRecursiveEngines
     */
-	template<class _ioElementOperationType, class _scalarMatrixElementOperationType>
-	class
-		MioSiMi {
-	public:
+    template<class _ioElementOperationType, class _scalarMatrixElementOperationType>
+    class
+        MioSiMi {
+    public:
 
         template<class _ioMatrixType, class _inputScalarType, class _inputMatrixType>
             static inline void Run(_ioMatrixType & ioMatrix,
-			const _inputScalarType & inputScalar, const _inputMatrixType & inputMatrix)
-		{
+            const _inputScalarType & inputScalar, const _inputMatrixType & inputMatrix)
+        {
             typedef _ioMatrixType IoMatrixType;
             typedef typename IoMatrixType::size_type size_type;
-			typedef typename IoMatrixType::pointer IoPointerType;
-			typedef _inputMatrixType InputMatrixType;
+            typedef typename IoMatrixType::pointer IoPointerType;
+            typedef _inputMatrixType InputMatrixType;
             typedef typename InputMatrixType::const_pointer InputPointerType;
 
             enum {
                 ROWS = IoMatrixType::ROWS,
                 COLS = IoMatrixType::COLS,
-				IO_COL_STRIDE = IoMatrixType::COLSTRIDE,
-				IO_ROW_STRIDE = IoMatrixType::ROWSTRIDE,
-				IO_STRIDE_TO_NEXT_ROW = IO_ROW_STRIDE - COLS * IO_COL_STRIDE,
+                IO_COL_STRIDE = IoMatrixType::COLSTRIDE,
+                IO_ROW_STRIDE = IoMatrixType::ROWSTRIDE,
+                IO_STRIDE_TO_NEXT_ROW = IO_ROW_STRIDE - COLS * IO_COL_STRIDE,
                 INPUT_COL_STRIDE = InputMatrixType::COLSTRIDE,
                 INPUT_ROW_STRIDE = InputMatrixType::ROWSTRIDE,
                 INPUT_STRIDE_TO_NEXT_ROW = INPUT_ROW_STRIDE - COLS * INPUT_COL_STRIDE
@@ -552,15 +552,97 @@ public:
                     ioPointer += IO_COL_STRIDE,
                     inputPointer += INPUT_COL_STRIDE)
                 {
-					_ioElementOperationType::Operate(
-						*ioPointer,
-						_scalarMatrixElementOperationType::Operate(inputScalar, *inputPointer)
-						);
+                    _ioElementOperationType::Operate(
+                        *ioPointer,
+                        _scalarMatrixElementOperationType::Operate(inputScalar, *inputPointer)
+                        );
                 }
             }
-		}
+        }
+    };
 
-	};
+
+    /*!  \brief Implement operation of the form \f$m_{io} =
+      op_{io}(m_{io}, op_{mm}(m_{i1}, m_{i2}))\f$ for fixed size matrices
+
+      This class uses template specialization to perform store-back
+      matrix-matrix-matrix operations
+
+      \f[
+      m_{io} = \mathrm{op_{io}}(m_{io}, \mathrm{op_{mm}}(m_{i1}, m_{i2}))
+      \f]
+
+      where \f$m_{io}\f$ is an input-output (store-back) matrix;
+      \f$m_{i1}\f$ and \f$m_{i2}\f$ are input matrices.  A typical
+      example is: \f$m_{io} += m_{i1} \cdot m_{i2}\f$.  The matrices
+      have a fixed size, determined at compilation time; \f$op_{,m}\f$
+      is an element wise operation between the elements of
+      \f$m_{i1}\f$ and \f$m_{i2}\f$; \f$op_{io}\f$ is an operation
+      between the output of \f$op_{mm}\f$ and the elements of
+      \f$m_{io}\f$.
+
+      \param _ioOperationType The type of the store-back operation.
+
+      \param _matrixElementOperationType The type of the
+      element wise operation between scalar and input matrix.
+
+      \sa vctFixedSizeMatrixRecursiveEngines
+    */
+    template<class _ioElementOperationType, class _matrixElementOperationType>
+    class
+        MioMiMi {
+    public:
+
+        template<class _ioMatrixType, class _input1MatrixType, class _input2MatrixType>
+        static inline void Run(_ioMatrixType & ioMatrix,
+                               const _input1MatrixType & input1Matrix,
+                               const _input2MatrixType & input2Matrix)
+        {
+            typedef _ioMatrixType IoMatrixType;
+            typedef typename IoMatrixType::size_type size_type;
+            typedef typename IoMatrixType::pointer IoPointerType;
+            typedef _input1MatrixType Input1MatrixType;
+            typedef typename Input1MatrixType::const_pointer Input1PointerType;
+            typedef _input2MatrixType Input2MatrixType;
+            typedef typename Input2MatrixType::const_pointer Input2PointerType;
+
+            enum {
+                ROWS = IoMatrixType::ROWS,
+                COLS = IoMatrixType::COLS,
+                IO_COL_STRIDE = IoMatrixType::COLSTRIDE,
+                IO_ROW_STRIDE = IoMatrixType::ROWSTRIDE,
+                IO_STRIDE_TO_NEXT_ROW = IO_ROW_STRIDE - COLS * IO_COL_STRIDE,
+                INPUT1_COL_STRIDE = Input1MatrixType::COLSTRIDE,
+                INPUT1_ROW_STRIDE = Input1MatrixType::ROWSTRIDE,
+                INPUT1_STRIDE_TO_NEXT_ROW = INPUT1_ROW_STRIDE - COLS * INPUT1_COL_STRIDE,
+                INPUT2_COL_STRIDE = Input2MatrixType::COLSTRIDE,
+                INPUT2_ROW_STRIDE = Input2MatrixType::ROWSTRIDE,
+                INPUT2_STRIDE_TO_NEXT_ROW = INPUT2_ROW_STRIDE - COLS * INPUT2_COL_STRIDE
+            };
+
+            IoPointerType ioPointer = ioMatrix.Pointer();
+            Input1PointerType input1Pointer = input1Matrix.Pointer();
+            Input2PointerType input2Pointer = input2Matrix.Pointer();
+
+            size_type rowIndex, colIndex;
+            for (rowIndex = 0; rowIndex < ROWS; ++rowIndex,
+                     ioPointer += IO_STRIDE_TO_NEXT_ROW,
+                     input1Pointer += INPUT1_STRIDE_TO_NEXT_ROW,
+                     input2Pointer += INPUT2_STRIDE_TO_NEXT_ROW)
+            {
+                for (colIndex = 0; colIndex < COLS; ++colIndex,
+                         ioPointer += IO_COL_STRIDE,
+                         input1Pointer += INPUT1_COL_STRIDE,
+                         input2Pointer += INPUT2_COL_STRIDE)
+                {
+                    _ioElementOperationType::Operate(
+                        *ioPointer,
+                        _matrixElementOperationType::Operate(*input1Pointer, *input2Pointer)
+                        );
+                }
+            }
+        }
+    };
 
 
     template<class _incrementalOperationType, class _elementOperationType>

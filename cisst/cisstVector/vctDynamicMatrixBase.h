@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
+  Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -1161,6 +1161,19 @@ public:
             typename vctStoreBackBinaryOperations<value_type>::Addition,
             typename vctBinaryOperations<value_type>::Multiplication >::
             Run(*this, scalar, otherMatrix);
+        return *this;
+    }
+
+
+    template <class __matrixOwnerType1, class __matrixOwnerType2>
+    inline ThisType & AddElementwiseProductOf(const vctDynamicConstMatrixBase<__matrixOwnerType1, _elementType> & matrix1,
+                                              const vctDynamicConstMatrixBase<__matrixOwnerType2, _elementType> & matrix2)
+    {
+        vctDynamicMatrixLoopEngines::
+            MioMiMi<
+            typename vctStoreBackBinaryOperations<value_type>::Addition,
+            typename vctBinaryOperations<value_type>::Multiplication >::
+            Run(*this, matrix1, matrix2);
         return *this;
     }
 

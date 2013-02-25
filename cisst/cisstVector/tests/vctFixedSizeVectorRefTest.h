@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2003-08-20
-  
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -98,14 +98,14 @@ class vctFixedSizeVectorRefTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestNormalizationFloat);
 
     CPPUNIT_TEST_SUITE_END();
-    
+
  public:
     void setUp(void) {
     }
-    
+
     void tearDown(void) {
     }
-    
+
    /*! Test assignment methods */
     template<class _elementType>
         void TestAssignment(void);

@@ -7,7 +7,7 @@
   Author(s):  Daniel Li, Ofri Sadowsky, Anton Deguet
   Created on: 2006-07-10
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -996,6 +996,19 @@ public:
             NioSiNi<typename vctStoreBackBinaryOperations<value_type>::Addition,
             typename vctBinaryOperations<value_type>::Multiplication >::
             Run(*this, scalar, otherNArray);
+
+        return *this;
+    }
+
+
+    template <class __nArrayOwnerType1, class __nArrayOwnerType2>
+    inline ThisType & AddElementwiseProductOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
+                                              const vctDynamicConstNArrayBase<__nArrayOwnerType2, value_type, DIMENSION> & nArray2)
+    {
+        vctDynamicNArrayLoopEngines<DIMENSION>::template
+            NioNiNi<typename vctStoreBackBinaryOperations<value_type>::Addition,
+            typename vctBinaryOperations<value_type>::Multiplication >::
+            Run(*this, nArray1, nArray2);
 
         return *this;
     }
