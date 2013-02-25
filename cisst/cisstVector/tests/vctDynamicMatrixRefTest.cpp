@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2004-11-17
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -183,6 +183,33 @@ void vctDynamicMatrixRefTest::TestMioSiMiOperationsInt(void) {
 
 
 template <class _elementType>
+void vctDynamicMatrixRefTest::TestMioMiMiOperations(void) {
+    typedef _elementType value_type;
+    CREATE_STORAGE_AND_REF(1);
+    CREATE_STORAGE_AND_REF(2);
+    CREATE_STORAGE_AND_REF(3);
+    CREATE_STORAGE_AND_REF(4);
+    vctRandom(matrix1, value_type(-10), value_type(10));
+    vctRandom(matrix2, value_type(-10), value_type(10));
+    vctRandom(matrix3, value_type(-10), value_type(10));
+    RemoveQuasiZero(matrix3);
+
+    vctGenericContainerTest::TestCioCiCiOperations(matrix1, matrix2, matrix3, matrix4);
+}
+
+void vctDynamicMatrixRefTest::TestMioMiMiOperationsDouble(void) {
+    TestMioMiMiOperations<double>();
+}
+void vctDynamicMatrixRefTest::TestMioMiMiOperationsFloat(void) {
+    TestMioMiMiOperations<float>();
+}
+void vctDynamicMatrixRefTest::TestMioMiMiOperationsInt(void) {
+    TestMioMiMiOperations<int>();
+}
+
+
+
+template <class _elementType>
 void vctDynamicMatrixRefTest::TestMoMiMiOperations(void) {
     typedef _elementType value_type;
     CREATE_STORAGE_AND_REF(1);
@@ -216,7 +243,7 @@ void vctDynamicMatrixRefTest::TestProductOperations(void) {
     vctDynamicMatrix<value_type> matrix3(ROWS, COLS);
     vctDynamicVector<value_type> vector1(COMSIZE);
     vctDynamicVector<value_type> vector2(ROWS);
-    
+
     vctRandom(matrix1, value_type(-10), value_type(10));
     vctRandom(matrix2, value_type(-10), value_type(10));
     vctRandom(vector1, value_type(-10), value_type(10));

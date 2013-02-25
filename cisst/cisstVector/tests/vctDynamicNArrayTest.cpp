@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
-  Author(s):	Daniel Li
-  Created on:	2006-07-10
-  
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+
+  Author(s):  Daniel Li, Anton Deguet
+  Created on: 2006-07-10
+
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -207,6 +207,37 @@ void vctDynamicNArrayTest::TestNioSiNiOperationsFloat(void) {
 }
 void vctDynamicNArrayTest::TestNioSiNiOperationsInt(void) {
     TestNioSiNiOperations<int>();
+}
+
+
+
+template <class _elementType>
+void vctDynamicNArrayTest::TestNioNiNiOperations(void) {
+   typedef _elementType value_type;
+    enum {DIMENSION = 5};
+    typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
+    typename ArrayType::nsize_type sizes;
+    vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
+    ArrayType nArray1(sizes);
+    ArrayType nArray2(sizes);
+    ArrayType nArray3(sizes);
+    ArrayType result(sizes);
+    vctRandom(nArray1, static_cast<value_type>(-10), static_cast<value_type>(10));
+    vctRandom(nArray2, static_cast<value_type>(-10), static_cast<value_type>(10));
+    vctRandom(nArray3, static_cast<value_type>(-10), static_cast<value_type>(10));
+    RemoveQuasiZero(nArray3);
+
+    vctGenericContainerTest::TestCioCiCiOperations(nArray1, nArray2, nArray3, result);
+}
+
+void vctDynamicNArrayTest::TestNioNiNiOperationsDouble(void) {
+    TestNioNiNiOperations<double>();
+}
+void vctDynamicNArrayTest::TestNioNiNiOperationsFloat(void) {
+    TestNioNiNiOperations<float>();
+}
+void vctDynamicNArrayTest::TestNioNiNiOperationsInt(void) {
+    TestNioNiNiOperations<int>();
 }
 
 
@@ -582,7 +613,7 @@ void vctDynamicNArrayTest::TestFastCopyOf(void) {
     typedef typename ArrayType::nsize_type nsize_type;
 
     const nsize_type baseSize(DIM0, DIM1, DIM2, DIM3);
-    
+
     // dynamic nArray
     ArrayType destination(baseSize);
     ArrayType validSource(baseSize);

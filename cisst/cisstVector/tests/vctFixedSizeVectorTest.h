@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2003-08-20
-  
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -110,6 +110,10 @@ class vctFixedSizeVectorTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestVioSiViOperationsFloat);
     CPPUNIT_TEST(TestVioSiViOperationsInt);
 
+    CPPUNIT_TEST(TestVioViViOperationsDouble);
+    CPPUNIT_TEST(TestVioViViOperationsFloat);
+    CPPUNIT_TEST(TestVioViViOperationsInt);
+
     CPPUNIT_TEST(TestVioOperationsDouble);
     CPPUNIT_TEST(TestVioOperationsFloat);
     CPPUNIT_TEST(TestVioOperationsInt);
@@ -142,11 +146,11 @@ class vctFixedSizeVectorTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestNormalizationFloat);
 
     CPPUNIT_TEST_SUITE_END();
-    
+
  public:
     void setUp(void) {
     }
-    
+
     void tearDown(void) {
     }
 
@@ -197,7 +201,7 @@ class vctFixedSizeVectorTest : public CppUnit::TestFixture
     void TestSelectFloat(void);
     void TestSelectInt(void);
 
-    /*! Test the SwapElementsWith methods: First swap elements of two vectors, then swap one 
+    /*! Test the SwapElementsWith methods: First swap elements of two vectors, then swap one
     half of a vector with the other half.  Finally swap the alternating sequence starting at
     0 with the alternating sequence starting at 1. */
     template<class _elementType>
@@ -282,6 +286,13 @@ class vctFixedSizeVectorTest : public CppUnit::TestFixture
     void TestVioSiViOperationsDouble(void);
     void TestVioSiViOperationsFloat(void);
     void TestVioSiViOperationsInt(void);
+
+    /*! Test VioViVi operations */
+    template<class _elementType>
+        void TestVioViViOperations(void);
+    void TestVioViViOperationsDouble(void);
+    void TestVioViViOperationsFloat(void);
+    void TestVioViViOperationsInt(void);
 
     /*! Test Vio operations */
     template<class _elementType>

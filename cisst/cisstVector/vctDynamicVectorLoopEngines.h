@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2004-07-01
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on:  2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -68,7 +68,7 @@ class vctDynamicVectorLoopEngines {
 
  public:
 
-	/*! Helper function to throw an exception whenever sizes mismatch.
+    /*! Helper function to throw an exception whenever sizes mismatch.
       This enforces that a standard message is sent. */
     inline static void ThrowException(void) throw(std::runtime_error) {
         cmnThrow(std::runtime_error("vctDynamicVectorLoopEngines: Sizes of vectors don't match"));
@@ -805,31 +805,31 @@ class vctDynamicVectorLoopEngines {
       \f]
 
       where \f$v_{io}\f$ is an input-output (store-back) vector;
-	  \f$s\f$ is a scalar; and \f$v_i\f$ is an input vector.  A
-	  typical example is: \f$v_{io} += s \cdot v_i\f$.  \f$op_{sv}\f$
-	  is an operation between \f$s\f$ and the elements of \f$v_i\f$;
-	  \f$op_{io}\f$ is an operation between the output of
-	  \f$op_{sv}\f$ and the elements of \f$v_{io}\f$.
+      \f$s\f$ is a scalar; and \f$v_i\f$ is an input vector.  A
+      typical example is: \f$v_{io} += s \cdot v_i\f$.  \f$op_{sv}\f$
+      is an operation between \f$s\f$ and the elements of \f$v_i\f$;
+      \f$op_{io}\f$ is an operation between the output of
+      \f$op_{sv}\f$ and the elements of \f$v_{io}\f$.
 
       \param _ioOperationType The type of the store-back operation.
 
       \param _scalarVectorElementOperationType The type of the
-	  operation between scalar and input vector.
+      operation between scalar and input vector.
 
     */
-	template<class _ioElementOperationType, class _scalarVectorElementOperationType>
-	class VioSiVi {
-	public:
+    template<class _ioElementOperationType, class _scalarVectorElementOperationType>
+    class VioSiVi {
+    public:
         template<class _ioVectorType, class _inputScalarType, class _inputVectorType>
         static inline void Run(_ioVectorType & ioVector,
                                const _inputScalarType inputScalar, const _inputVectorType & inputVector)
-		{
+        {
             // check sizes
-			typedef _ioVectorType IoVectorType;
+            typedef _ioVectorType IoVectorType;
             typedef typename IoVectorType::OwnerType IoOwnerType;
-			typedef typename IoOwnerType::pointer IoPointerType;
-			typedef typename IoOwnerType::size_type size_type;
-			typedef typename IoOwnerType::stride_type stride_type;
+            typedef typename IoOwnerType::pointer IoPointerType;
+            typedef typename IoOwnerType::size_type size_type;
+            typedef typename IoOwnerType::stride_type stride_type;
 
             typedef _inputVectorType InputVectorType;
             typedef typename InputVectorType::OwnerType InputOwnerType;
@@ -865,8 +865,92 @@ class vctDynamicVectorLoopEngines {
                                                      );
                 }
             }
-		}
-	};
+        }
+    };
+
+
+    /*!  \brief Implement operation of the form \f$v_{io} =
+      op_{io}(v_{io}, op_{v}(v_{i1}, v_{i2}))\f$ for dynamic vectors
+
+      This class uses template specialization to perform store-back
+      vector-vector-vector operations
+
+      \f[
+      v_{io} = \mathrm{op_{io}}(V_{io}, \mathrm{op_{vv}}(v_{i1}, v_{i2}))
+      \f]
+
+      where \f$v_{io}\f$ is an input-output (store-back) vector;
+      \f$v_{i1}\f$ and \f$v_{i2}\f$ are two input vectors.  A
+      typical example is: \f$v_{io} += v_{i1} \cdot v_{i2}\f$.  \f$op_{vv}\f$
+      is an operation between the elements of \f$v_{i1}\f$ and \f$v_{i2}\f$;
+      \f$op_{io}\f$ is an operation between the output of
+      \f$op_{vv}\f$ and the elements of \f$v_{io}\f$.
+
+      \param _ioOperationType The type of the store-back operation.
+
+      \param _scalarVectorElementOperationType The type of the
+      element wise operation between input vectors.
+
+    */
+    template<class _ioElementOperationType, class _vectorElementOperationType>
+    class VioViVi {
+    public:
+        template<class _ioVectorType, class _input1VectorType, class _input2VectorType>
+        static inline void Run(_ioVectorType & ioVector,
+                               const _input1VectorType & input1Vector, const _input2VectorType & input2Vector)
+        {
+            // check sizes
+            typedef _ioVectorType IoVectorType;
+            typedef typename IoVectorType::OwnerType IoOwnerType;
+            typedef typename IoOwnerType::pointer IoPointerType;
+            typedef typename IoOwnerType::size_type size_type;
+            typedef typename IoOwnerType::stride_type stride_type;
+
+            typedef _input1VectorType Input1VectorType;
+            typedef typename Input1VectorType::OwnerType Input1OwnerType;
+            typedef typename Input1OwnerType::const_pointer Input1PointerType;
+
+            typedef _input2VectorType Input2VectorType;
+            typedef typename Input2VectorType::OwnerType Input2OwnerType;
+            typedef typename Input2OwnerType::const_pointer Input2PointerType;
+
+            // retrieve owners
+            IoOwnerType & ioOwner = ioVector.Owner();
+            const Input1OwnerType & input1Owner = input1Vector.Owner();
+            const Input2OwnerType & input2Owner = input2Vector.Owner();
+
+            const size_type size = ioOwner.size();
+            if ((size != input1Owner.size())
+                || (size != input2Owner.size())) {
+                ThrowException();
+            }
+
+            const stride_type ioStride = ioOwner.stride();
+            const stride_type input1Stride = input1Owner.stride();
+            const stride_type input2Stride = input2Owner.stride();
+
+            if ((ioStride == 1) && (input1Stride == 1) && (input2Stride == 1)) {
+                vctDynamicCompactLoopEngines::CioCiCi<_ioElementOperationType, _vectorElementOperationType>
+                    ::Run(ioOwner, input1Owner, input2Owner);
+            } else {
+                IoPointerType ioPointer = ioOwner.Pointer();
+                const IoPointerType ioEnd = ioPointer + size * ioStride;
+
+                Input1PointerType input1Pointer = input1Owner.Pointer();
+                Input2PointerType input2Pointer = input2Owner.Pointer();
+
+                for (;
+                     ioPointer != ioEnd;
+                     ioPointer += ioStride,
+                         input1Pointer += input1Stride,
+                         input2Pointer += input2Stride) {
+                    _ioElementOperationType::Operate(*ioPointer,
+                                                     _vectorElementOperationType::Operate(*input1Pointer, *input2Pointer)
+                                                     );
+                }
+            }
+        }
+    };
 
 
     /*!  \brief Implement operation of the form \f$s_o =

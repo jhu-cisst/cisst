@@ -7,7 +7,7 @@
   Author(s):  Daniel Li, Ofri Sadowsky, Anton Deguet
   Created on: 2006-07-05
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -911,8 +911,94 @@ public:
                 }
             }
         }   // Run method
-
     };  // NioSiNi class
+
+
+
+    template <class _inputOutputElementOperationType, class _nArrayElementOperationType>
+    class NioNiNi
+    {
+    public:
+        template <class _inputOutputNArrayType, class _input1NArrayType, class _input2NArrayType>
+        static void Run(_inputOutputNArrayType & inputOutputNArray,
+                        const _input1NArrayType & input1NArray,
+                        const _input2NArrayType & input2NArray)
+        {
+            typedef _inputOutputNArrayType InputOutputNArrayType;
+            typedef typename InputOutputNArrayType::OwnerType InputOutputOwnerType;
+            typedef typename InputOutputOwnerType::const_pointer InputOutputConstPointerType;
+            typedef typename InputOutputOwnerType::pointer InputOutputPointerType;
+
+            typedef _input1NArrayType Input1NArrayType;
+            typedef typename Input1NArrayType::OwnerType Input1OwnerType;
+            typedef typename Input1OwnerType::const_pointer Input1PointerType;
+
+            typedef _input2NArrayType Input2NArrayType;
+            typedef typename Input2NArrayType::OwnerType Input2OwnerType;
+            typedef typename Input2OwnerType::const_pointer Input2PointerType;
+
+            // retrieve owners
+            InputOutputOwnerType & inputOutputOwner = inputOutputNArray.Owner();
+            const Input1OwnerType & input1Owner = input1NArray.Owner();
+            const Input2OwnerType & input2Owner = input2NArray.Owner();
+
+            // check sizes
+            const nsize_type & inputOutputSizes = inputOutputOwner.sizes();
+            const nsize_type & input1Sizes = input1Owner.sizes();
+            const nsize_type & input2Sizes = input2Owner.sizes();
+            if (inputOutputSizes.NotEqual(input1Sizes) || inputOutputSizes.NotEqual(input2Sizes)) {
+                ThrowSizeMismatchException();
+            }
+
+            // if compact and same strides
+            const nstride_type & inputOutputStrides = inputOutputOwner.strides();
+            const nstride_type & input1Strides = input1Owner.strides();
+            const nstride_type & input2Strides = input2Owner.strides();
+
+            if (inputOutputOwner.IsCompact() && input1Owner.IsCompact() && input2Owner.IsCompact()
+                && (inputOutputOwner.strides() == input1Owner.strides())
+                && (inputOutputOwner.strides() == input2Owner.strides())) {
+                vctDynamicCompactLoopEngines::CioCiCi<_inputOutputElementOperationType, _nArrayElementOperationType>::Run(inputOutputOwner, input1Owner, input2Owner);
+            } else {
+                // otherwise
+                // declare all variables used for inputOutputNArray
+                nstride_type inputOutputSTND;
+                vctFixedSizeVector<InputOutputConstPointerType, _dimension> inputOutputTargets;
+                InputOutputPointerType inputOutputPointer = inputOutputNArray.Pointer();
+
+                // declare all variables used for input1NArray
+                nstride_type input1STND;
+                nstride_type input1OTND;
+                Input1PointerType input1Pointer = input1NArray.Pointer();
+
+                // declare all variables used for input2NArray
+                nstride_type input2STND;
+                nstride_type input2OTND;
+                Input2PointerType input2Pointer = input2NArray.Pointer();
+
+                dimension_type numberOfWrappedDimensions = 0;
+                const dimension_type maxWrappedDimensions = inputOutputNArray.dimension();
+
+                CalculateSTND(inputOutputSTND, inputOutputSizes, inputOutputStrides);
+                CalculateSTND(input1STND, input1Sizes, input1Strides);
+                CalculateOTND(input1OTND, input1Strides, input1STND);
+                CalculateSTND(input2STND, input2Sizes, input2Strides);
+                CalculateOTND(input2OTND, input2Strides, input2STND);
+                InitializeTargets(inputOutputTargets, inputOutputSizes, inputOutputStrides, inputOutputPointer);
+
+                while (numberOfWrappedDimensions != maxWrappedDimensions) {
+                    _inputOutputElementOperationType::Operate(*inputOutputPointer,
+                                                              _nArrayElementOperationType::Operate(*input1Pointer, *input2Pointer) );
+
+                    numberOfWrappedDimensions =
+                        IncrementPointers(inputOutputTargets, inputOutputPointer, inputOutputStrides, inputOutputSTND);
+
+                    SyncCurrentPointer(input1Pointer, input1OTND, numberOfWrappedDimensions);
+                    SyncCurrentPointer(input2Pointer, input2OTND, numberOfWrappedDimensions);
+                }
+            }
+        }   // Run method
+    };  // NioNiNi class
 
 
     class MinAndMax

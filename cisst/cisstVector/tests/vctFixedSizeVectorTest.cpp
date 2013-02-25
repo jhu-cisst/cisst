@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2003-08-20
-  
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -47,7 +47,7 @@ void vctFixedSizeVectorTest::TestSubsequence(void)
 
     /* build an initial array */
     VectorType initialArray;
-	unsigned int i;
+    unsigned int i;
     for (i = 0; i < initialArray.size(); ++i) {
         initialArray[i] = (ElementType) i;
     }
@@ -113,20 +113,20 @@ void vctFixedSizeVectorTest::TestConcatenation(void) {
     typedef vctFixedSizeVector<_elementType, 3> VectorType3;
     typedef vctFixedSizeVector<_elementType, 4> VectorType4;
     unsigned int i;
-    
+
     VectorType3 testVector3;
     VectorType4 testVector4;
-    
+
     _elementType refVector[4] = {_elementType(122),
                                  _elementType(-25),
                                  _elementType(33),
                                  _elementType(-10)};
-    
+
     testVector3.Assign(refVector[0],
                        refVector[1],
                        refVector[2]);
     testVector4.ConcatenationOf(testVector3, -10);
-    
+
     for (i = 0; i < testVector4.size(); i++) {
         CPPUNIT_ASSERT(refVector[i] == testVector4[i]);
     }
@@ -318,12 +318,12 @@ void vctFixedSizeVectorTest::TestSwapElements(void)
     vctRandom(v1, value_type(-10), value_type(10));
     vctRandom(v2, value_type(-10), value_type(10));
     vctGenericVectorTest::TestSwapElements(v1, v2);
-    
+
     typedef vctFixedSizeVectorRef<_elementType, SIZE/2, 1> Sequence1Type;
     Sequence1Type h1(v1.Pointer(0));
     Sequence1Type h2(v1.Pointer(SIZE/2));
     vctGenericVectorTest::TestSwapElements(h1, h2);
-    
+
     typedef vctFixedSizeVectorRef<_elementType, SIZE/2, 2> Sequence2Type;
     Sequence2Type s1(v2.Pointer(0));
     Sequence2Type s2(v2.Pointer(1));
@@ -400,7 +400,7 @@ void vctFixedSizeVectorTest::TestVioViOperations(void) {
     vctFixedSizeVector<value_type, SIZE> vector1;
     vctFixedSizeVector<value_type, SIZE> vector2;
     vctFixedSizeVector<value_type, SIZE> result;
-    
+
     vctRandom(vector1, value_type(-10), value_type(10));
     vctRandom(vector2, value_type(-10), value_type(10));
     RemoveQuasiZero(vector2);
@@ -427,7 +427,7 @@ void vctFixedSizeVectorTest::TestVoViViOperations(void) {
     vctFixedSizeVector<value_type, SIZE> vector1;
     vctFixedSizeVector<value_type, SIZE> vector2;
     vctFixedSizeVector<value_type, SIZE> result;
-    
+
     vctRandom(vector1, value_type(-10), value_type(10));
     vctRandom(vector2, value_type(-10), value_type(10));
     RemoveQuasiZero(vector2);
@@ -479,7 +479,7 @@ void vctFixedSizeVectorTest::TestDotProduct(void) {
     typedef _elementType value_type;
     vctFixedSizeVector<value_type, SIZE> vector1;
     vctFixedSizeVector<value_type, SIZE> vector2;
-    
+
     vctRandom(vector1, value_type(-10), value_type(10));
     vctRandom(vector2, value_type(-10), value_type(10));
 
@@ -620,7 +620,7 @@ void vctFixedSizeVectorTest::TestVioSiViOperations(void) {
     value_type scalar;
     vctFixedSizeVector<value_type, SIZE> vector2;
     vctFixedSizeVector<value_type, SIZE> result;
-    
+
     vctRandom(vector1, value_type(-10), value_type(10));
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
     randomSequence.ExtractRandomValue(value_type(-10),
@@ -640,6 +640,35 @@ void vctFixedSizeVectorTest::TestVioSiViOperationsFloat(void) {
 }
 void vctFixedSizeVectorTest::TestVioSiViOperationsInt(void) {
     TestVioSiViOperations<int>();
+}
+
+
+
+template <class _elementType>
+void vctFixedSizeVectorTest::TestVioViViOperations(void) {
+    enum {SIZE = 7};
+    typedef _elementType value_type;
+    vctFixedSizeVector<value_type, SIZE> vector1;
+    vctFixedSizeVector<value_type, SIZE> vector2;
+    vctFixedSizeVector<value_type, SIZE> vector3;
+    vctFixedSizeVector<value_type, SIZE> result;
+
+    vctRandom(vector1, value_type(-10), value_type(10));
+    vctRandom(vector2, value_type(-10), value_type(10));
+    vctRandom(vector3, value_type(-10), value_type(10));
+    RemoveQuasiZero(vector3);
+
+    vctGenericContainerTest::TestCioCiCiOperations(vector1, vector2, vector3, result);
+}
+
+void vctFixedSizeVectorTest::TestVioViViOperationsDouble(void) {
+    TestVioViViOperations<double>();
+}
+void vctFixedSizeVectorTest::TestVioViViOperationsFloat(void) {
+    TestVioViViOperations<float>();
+}
+void vctFixedSizeVectorTest::TestVioViViOperationsInt(void) {
+    TestVioViViOperations<int>();
 }
 
 
@@ -761,7 +790,7 @@ template <class _elementType>
 void vctFixedSizeVectorTest::TestFastCopyOf(void) {
     enum {SIZE = 6};
     typedef _elementType value_type;
-    
+
     // dynamic vector
     vctFixedSizeVector<value_type, SIZE> destination;
     vctDynamicVector<value_type> validSource(SIZE);
@@ -772,7 +801,7 @@ void vctFixedSizeVectorTest::TestFastCopyOf(void) {
     vctDynamicVector<value_type> largerVector(SIZE * 2);
     vctGenericContainerTest::TestFastCopyOfException(largerVector, destination);
 
-    // test for not compact    
+    // test for not compact
     vctDynamicVectorRef<value_type> invalidRef(SIZE, largerVector.Pointer(), 2);
     CPPUNIT_ASSERT(!destination.FastCopyCompatible(invalidRef));
     CPPUNIT_ASSERT(!destination.FastCopyOf(invalidRef));
@@ -802,7 +831,7 @@ template <class _elementType>
 void vctFixedSizeVectorTest::TestZeros(void) {
     enum {SIZE = 7};
     typedef _elementType value_type;
-    
+
     // dynamic vector
     vctFixedSizeVector<value_type, 2 * SIZE> destination;
     CPPUNIT_ASSERT(destination.Zeros());

@@ -421,6 +421,35 @@ void vctDynamicMatrixTest::TestMioSiMiOperationsInt(void) {
 
 
 template <class _elementType>
+void vctDynamicMatrixTest::TestMioMiMiOperations(void) {
+    enum {ROWS = 5, COLS = 6};
+    typedef _elementType value_type;
+    vctDynamicMatrix<value_type> matrix1(ROWS, COLS);
+    vctDynamicMatrix<value_type> matrix2(ROWS, COLS);
+    vctDynamicMatrix<value_type> matrix3(ROWS, COLS);
+    vctDynamicMatrix<value_type> result(ROWS, COLS);
+    
+    vctRandom(matrix1, value_type(-10), value_type(10));
+    vctRandom(matrix2, value_type(-10), value_type(10));
+    vctRandom(matrix3, value_type(-10), value_type(10));
+    RemoveQuasiZero(matrix3);
+
+    vctGenericContainerTest::TestCioCiCiOperations(matrix1, matrix2, matrix3, result);
+}
+
+void vctDynamicMatrixTest::TestMioMiMiOperationsDouble(void) {
+    TestMioMiMiOperations<double>();
+}
+void vctDynamicMatrixTest::TestMioMiMiOperationsFloat(void) {
+    TestMioMiMiOperations<float>();
+}
+void vctDynamicMatrixTest::TestMioMiMiOperationsInt(void) {
+    TestMioMiMiOperations<int>();
+}
+
+
+
+template <class _elementType>
 void vctDynamicMatrixTest::TestMoMiMiOperations(void) {
     enum {ROWS = 4, COLS = 5};
     typedef _elementType value_type;

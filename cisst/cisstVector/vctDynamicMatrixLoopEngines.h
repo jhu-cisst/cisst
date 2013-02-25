@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2003-12-16
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-12-16
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -41,13 +41,13 @@ class vctDynamicMatrixLoopEngines {
 
 public:
 
-	/*! Helper function to throw an exception whenever sizes mismatch.
+    /*! Helper function to throw an exception whenever sizes mismatch.
       This enforces that a standard message is sent. */
     inline static void ThrowSizeMismatchException(void) throw(std::runtime_error) {
         cmnThrow(std::runtime_error("vctDynamicMatrixLoopEngines: Sizes of matrices don't match"));
     }
 
-	/*! Helper function to throw an exception whenever the output has
+    /*! Helper function to throw an exception whenever the output has
       the same base pointer as the output.  This enforces that a
       standard message is sent. */
     inline static void ThrowSharedPointersException(void) throw(std::runtime_error) {
@@ -641,35 +641,35 @@ public:
       \f]
 
       where \f$m_{io}\f$ is an input-output (store-back) matrix;
-	  \f$s\f$ is a scalar; and \f$m_i\f$ is an input matrix.  A
-	  typical example is: \f$m_{io} += s \cdot m_i\f$.  The matrices
-	  have a fixed size, determined at compilation time; \f$op_{sm}\f$
-	  is an operation between \f$s\f$ and the elements of \f$m_i\f$;
-	  \f$op_{io}\f$ is an operation between the output of
-	  \f$op_{sm}\f$ and the elements of \f$m_{io}\f$.
+      \f$s\f$ is a scalar; and \f$m_i\f$ is an input matrix.  A
+      typical example is: \f$m_{io} += s \cdot m_i\f$.  The matrices
+      have a fixed size, determined at compilation time; \f$op_{sm}\f$
+      is an operation between \f$s\f$ and the elements of \f$m_i\f$;
+      \f$op_{io}\f$ is an operation between the output of
+      \f$op_{sm}\f$ and the elements of \f$m_{io}\f$.
 
       \param _ioOperationType The type of the store-back operation.
 
       \param _scalarMatrixElementOperationType The type of the
-	  operation between scalar and input matrix.
+      operation between scalar and input matrix.
 
       \sa vctFixedSizeMatrixRecursiveEngines
     */
-	template<class _ioElementOperationType, class _scalarMatrixElementOperationType>
-	class MioSiMi
+    template<class _ioElementOperationType, class _scalarMatrixElementOperationType>
+    class MioSiMi
     {
-	public:
+    public:
 
         template<class _ioMatrixType, class _inputScalarType, class _inputMatrixType>
         static inline void Run(_ioMatrixType & ioMatrix,
                                const _inputScalarType & inputScalar,
                                const _inputMatrixType & inputMatrix)
-		{
+        {
             typedef _ioMatrixType IoMatrixType;
             typedef typename IoMatrixType::OwnerType IoOwnerType;
             typedef typename IoOwnerType::size_type size_type;
             typedef typename IoOwnerType::stride_type stride_type;
-			typedef typename IoOwnerType::pointer IoPointerType;
+            typedef typename IoOwnerType::pointer IoPointerType;
 
             typedef _inputMatrixType InputMatrixType;
             typedef typename InputMatrixType::OwnerType InputOwnerType;
@@ -716,9 +716,116 @@ public:
                     }
                 }
             }
-		}
+        }
+    };
 
-	};
+
+    /*!  \brief Implement operation of the form \f$m_{io} =
+      op_{io}(m_{io}, op_{mm}(m_{i1}, m_{i2}))\f$ for fixed size matrices
+
+      This class uses template specialization to perform store-back
+      matrix-matrix-matrix operations
+
+      \f[
+      m_{io} = \mathrm{op_{io}}(m_{io}, \mathrm{op_{mm}}(m_{i1}, m_{i2}))
+      \f]
+
+      where \f$m_{io}\f$ is an input-output (store-back) matrix;
+      \f$m_{i1}\f$ and \f$m_{i2}\f$ are input matrices.  A typical
+      example is: \f$m_{io} += m_{i1} \cdot m_{i2}\f$.  The matrices
+      have a fixed size, determined at compilation time; \f$op_{,m}\f$
+      is an element wise operation between the elements of
+      \f$m_{i1}\f$ and \f$m_{i2}\f$; \f$op_{io}\f$ is an operation
+      between the output of \f$op_{mm}\f$ and the elements of
+      \f$m_{io}\f$.
+
+      \param _ioOperationType The type of the store-back operation.
+
+      \param _matrixElementOperationType The type of the
+      element wise operation between scalar and input matrix.
+
+      \sa vctFixedSizeMatrixRecursiveEngines
+    */
+    template<class _ioElementOperationType, class _matrixElementOperationType>
+    class MioMiMi
+    {
+    public:
+
+        template<class _ioMatrixType, class _input1MatrixType, class _input2MatrixType>
+        static inline void Run(_ioMatrixType & ioMatrix,
+                               const _input1MatrixType & input1Matrix,
+                               const _input2MatrixType & input2Matrix)
+        {
+            typedef _ioMatrixType IoMatrixType;
+            typedef typename IoMatrixType::OwnerType IoOwnerType;
+            typedef typename IoOwnerType::size_type size_type;
+            typedef typename IoOwnerType::stride_type stride_type;
+            typedef typename IoOwnerType::pointer IoPointerType;
+
+            typedef _input1MatrixType Input1MatrixType;
+            typedef typename Input1MatrixType::OwnerType Input1OwnerType;
+            typedef typename Input1OwnerType::const_pointer Input1PointerType;
+
+            typedef _input2MatrixType Input2MatrixType;
+            typedef typename Input2MatrixType::OwnerType Input2OwnerType;
+            typedef typename Input2OwnerType::const_pointer Input2PointerType;
+
+            // retrieve owners
+            IoOwnerType & ioOwner = ioMatrix.Owner();
+            const Input1OwnerType & input1Owner = input1Matrix.Owner();
+            const Input2OwnerType & input2Owner = input2Matrix.Owner();
+
+            const size_type rows = ioOwner.rows();
+            const size_type cols = ioOwner.cols();
+
+            // check sizes
+            if ((rows != input1Owner.rows()) || (cols != input1Owner.cols())
+                || (rows != input2Owner.rows()) || (cols != input2Owner.cols())
+                ) {
+                ThrowSizeMismatchException();
+            }
+
+            // if compact and same strides
+            if (ioOwner.IsCompact() && input1Owner.IsCompact()  && input2Owner.IsCompact()
+                && (ioOwner.strides() == input1Owner.strides())
+                && (ioOwner.strides() == input2Owner.strides())) {
+                vctDynamicCompactLoopEngines::CioCiCi<_ioElementOperationType, _matrixElementOperationType>::Run(ioOwner, input1Owner, input2Owner);
+            } else {
+                // otherwise
+                const stride_type ioColStride = ioOwner.col_stride();
+                const stride_type ioRowStride = ioOwner.row_stride();
+                const stride_type ioStrideToNextRow = ioRowStride - cols * ioColStride;
+
+                const stride_type input1ColStride = input1Owner.col_stride();
+                const stride_type input1RowStride = input1Owner.row_stride();
+                const stride_type input1StrideToNextRow = input1RowStride - cols * input1ColStride;
+
+                const stride_type input2ColStride = input2Owner.col_stride();
+                const stride_type input2RowStride = input2Owner.row_stride();
+                const stride_type input2StrideToNextRow = input2RowStride - cols * input2ColStride;
+
+                IoPointerType ioPointer = ioOwner.Pointer();
+                Input1PointerType input1Pointer = input1Owner.Pointer();
+                Input2PointerType input2Pointer = input2Owner.Pointer();
+
+                size_type rowIndex, colIndex;
+                for (rowIndex = 0;
+                     rowIndex < rows;
+                     ++rowIndex, ioPointer += ioStrideToNextRow,
+                         input1Pointer += input1StrideToNextRow,
+                         input2Pointer += input2StrideToNextRow) {
+                    for (colIndex = 0;
+                         colIndex < cols;
+                         ++colIndex, ioPointer += ioColStride,
+                             input1Pointer += input1ColStride,
+                             input2Pointer += input2ColStride) {
+                        _ioElementOperationType::Operate(*ioPointer,
+                                                         _matrixElementOperationType::Operate(*input1Pointer, *input2Pointer));
+                    }
+                }
+            }
+        }
+    };
 
 
     template<class _incrementalOperationType, class _elementOperationType>

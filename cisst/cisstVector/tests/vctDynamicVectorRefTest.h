@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2004-11-17
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -53,6 +53,10 @@ class vctDynamicVectorRefTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestVioSiViOperationsDouble);
     CPPUNIT_TEST(TestVioSiViOperationsFloat);
     CPPUNIT_TEST(TestVioSiViOperationsInt);
+
+    CPPUNIT_TEST(TestVioViViOperationsDouble);
+    CPPUNIT_TEST(TestVioViViOperationsFloat);
+    CPPUNIT_TEST(TestVioViViOperationsInt);
 
     CPPUNIT_TEST(TestVoViViOperationsDouble);
     CPPUNIT_TEST(TestVoViViOperationsFloat);
@@ -106,14 +110,14 @@ class vctDynamicVectorRefTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestNormalizationFloat);
 
     CPPUNIT_TEST_SUITE_END();
-    
+
  public:
     void setUp(void) {
     }
-    
+
     void tearDown(void) {
     }
-    
+
    /*! Test assignment methods */
     template<class _elementType>
         void TestAssignment(void);
@@ -155,6 +159,13 @@ class vctDynamicVectorRefTest : public CppUnit::TestFixture
     void TestVioSiViOperationsDouble(void);
     void TestVioSiViOperationsFloat(void);
     void TestVioSiViOperationsInt(void);
+
+    /*! Test VioViVi operations */
+    template<class _elementType>
+        void TestVioViViOperations(void);
+    void TestVioViViOperationsDouble(void);
+    void TestVioViViOperationsFloat(void);
+    void TestVioViViOperationsInt(void);
 
     /*! Test VoViVi operations */
     template<class _elementType>
