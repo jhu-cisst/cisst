@@ -36,7 +36,8 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SF DEFAULT_MSG SF_CONFIG_FILE SF_LIBRARY_FILE)
 
 if (SF_FOUND)
-    set (SF_CONFIG_FILE ${SF_CONFIG_FILE} PARENT_SCOPE)
-    set (SF_LIBRARY_FILE ${SF_LIBRARY_FILE} PARENT_SCOPE)
+    # MJ: PARENT_SCOPE appears to be redundant here
+    #set (SF_CONFIG_FILE ${SF_CONFIG_FILE} PARENT_SCOPE)
+    #set (SF_LIBRARY_FILE ${SF_LIBRARY_FILE} PARENT_SCOPE)
     include(${SF_CONFIG_FILE})
 endif(SF_FOUND)
