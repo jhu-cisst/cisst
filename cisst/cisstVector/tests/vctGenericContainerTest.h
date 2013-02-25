@@ -36,7 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #define VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(goal, actual, tolerance) \
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(actual), static_cast<double>(tolerance));
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(actual), static_cast<double>(tolerance));
 
 template <class _containerType>
 void RemoveQuasiZero(_containerType & container) {
