@@ -18,6 +18,14 @@ project (cisstGlobalComponentManagerFLTK)
 # set all libraries needed
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask cisstFLTK)
 
+set (IS_MAC ${CMAKE_SYSTEM_NAME} matches "Darwin")
+
+if(UNIX OR IS_MAC)
+  add_definitions(-Wno-write-strings)
+  add_definitions(-Wno-pointer-arith)  # NULL used in arithmetic
+  add_definitions(-Wunused-parameter)
+ENDIF(UNIX OR IS_MAC)
+
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
