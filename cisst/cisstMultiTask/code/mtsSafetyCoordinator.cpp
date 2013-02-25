@@ -454,9 +454,9 @@ bool mtsSafetyCoordinator::DeployMonitorsAndFDDs(void)
 
 bool mtsSafetyCoordinator::CreateMonitor(void)
 {
-    // MJ: For now, keep monitor component only one that monitor all components in the
-    // same process.  More monitor components can be dynamically deployed later
-    // considering run-time overhead of fault detection and diagnosis methods.
+    // MJ: For now, only one monitor instance is used to monitor all the components 
+    // in the same process.  More monitor components can be deployed later considering 
+    // the run-time overhead of fault detection and diagnosis methods.
     if (!Monitors.empty()) {
         CMN_LOG_CLASS_RUN_WARNING << "Monitor was already intialized" << std::endl;
         return true;

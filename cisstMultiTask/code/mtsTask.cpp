@@ -70,6 +70,7 @@ void mtsTask::DoRunInternal(void)
 #endif
 
     // advance all state tables (if automatic)
+    // MJ: Filters installed are processed by mtsStateTable::Advance
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
     RunEvent();  // only generates event if RunEventCalled is false
 }
