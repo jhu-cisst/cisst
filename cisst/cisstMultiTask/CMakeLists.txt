@@ -29,12 +29,12 @@ if (CISST_HAS_SAFETY_PLUGINS)
     if (SF_FOUND)
         # Include safety framework configurations
         include(${SF_USE_FILE})
+        set (SF_INCLUDE_DIR ${SF_INCLUDE_DIR} # where to find include files for SF
+                            ${SF_LIB_DEPENDENCY_INCLUDE_DIR}) # paths to SF dependencies
         cisst_set_package_settings (cisstMultiTask SafetyFramework INCLUDE_DIRECTORIES SF_INCLUDE_DIR)
         cisst_set_package_settings (cisstMultiTask SafetyFramework LIBRARIES SF_LIBRARY_FILE)
-        # Include Safety Framework build tree
-        #find_package(JSONCPP REQUIRED)
-        #cisst_set_package_settings (cisstMultiTask JSONCPP INCLUDE_DIRECTORIES JSONCPP_INCLUDE_DIR)
-        #cisst_set_package_settings (cisstMultiTask JSONCPP LIBRARIES JSONCPP_LIBRARIES)
+        # set compiler flags
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SF_CXX_FLAGS}")
     else (SF_FOUND)
         message(FATAL_ERROR "Safety Framework is not found.")
     endif (SF_FOUND)
