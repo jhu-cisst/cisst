@@ -253,7 +253,7 @@ if (CISST_BUILD_TESTS)
     if (CISST_USE_EXTERNAL)
       include (ExternalProject)
       set (cisstCppUnit_PREFIX cisstCppUnitExternal)
-      ExternalProject_Add (cisstCppUnit
+      ExternalProject_Add (cisstCppUnitExternal
                            PREFIX ${cisstCppUnit_PREFIX}
                            URL http://downloads.sourceforge.net/cppunit/cppunit-1.12.1.tar.gz
                            URL_MD5 bd30e9cf5523cdfc019b94f5e1d7fd19
@@ -264,12 +264,13 @@ if (CISST_BUILD_TESTS)
                                          "."
                            INSTALL_COMMAND ""
                            )
-      set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit/include")
+      set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnitExternal/include")
       set (CPPUNIT_LIBRARIES "cppunit")
       set (CPPUNIT_DEBUG_LIBRARIES "cppunit")
       set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
-      link_directories ("${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
+      link_directories ("${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnitExternal-build")
       set (CPPUNIT_FOUND ON)
+      mark_as_advanced (CPPUNIT_INCLUDE_DIR CPPUNIT_LIBRARIES CPPUNIT_DEBUG_LIBRARIES CPPUNIT_RELEASE_LIBRARIES CPPUNIT_FOUND)
     endif (CISST_USE_EXTERNAL)
   endif (NOT CPPUNIT_FOUND)
 
@@ -277,7 +278,7 @@ if (CISST_BUILD_TESTS)
     add_subdirectory (cisstTestsDriver)
     # add dependency to external project if needed
     if (cisstCppUnit_PREFIX)
-      add_dependencies (cisstTestsDriver cisstCppUnit)
+      add_dependencies (cisstTestsDriver cisstCppUnitExternal)
     endif (cisstCppUnit_PREFIX)
   else (CPPUNIT_FOUND)
     message (SEND_ERROR "CppUnit is needed for CISST_BUILD_TESTS, you can either install it or turn ON the option CISST_USE_EXTERNAL")
@@ -416,6 +417,11 @@ foreach (lib ${CISST_LIBS})
     add_subdirectory (${lib})
   endif (CISST_${lib})
 endforeach (lib)
+
+# Create an artificial dependency on cisstFltkExternal if it exists
+if (TARGET cisstFltkExternal)
+  add_dependencies (cisstCommon cisstFltkExternal)
+endif (TARGET cisstFltkExternal)
 
 # Create misc. config files
 set (CISST_INCLUDE_DIR_FOR_CONFIG ${CISST_INCLUDE_DIR})

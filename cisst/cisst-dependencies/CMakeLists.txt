@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -91,38 +91,65 @@ if (CISST_HAS_FLTK)
   mark_as_advanced (CISST_HAS_OPENGL)
   # FLTK is now required
   if (NOT FLTK_FOUND)
-    # Try to build as external project
-    if (CISST_USE_EXTERNAL)
-      include (ExternalProject)
-      set (cisstFltk_PREFIX cisstFltkExternal)
-      # FLTK released versions have a broken CMake for Mac
-      if (NOT APPLE)
+    # FLTK released versions have a broken CMake for Mac
+    if (NOT APPLE)
+      # Try to build as external project
+      if (CISST_USE_EXTERNAL)
+        include (ExternalProject)
+        set (cisstFltk_PREFIX cisstFltkExternal)
         set (CISST_FLTK_URL http://ftp.easysw.com/pub/fltk/1.3.2/fltk-1.3.2-source.tar.gz)
         set (CISST_FLTK_URL_MD5 9f7e707d4fb7a5a76f0f9b73ff70623d)
-        ExternalProject_Add (cisstFltk
+        ExternalProject_Add (cisstFltkExternal
                              PREFIX ${cisstFltk_PREFIX}
                              URL ${CISST_FLTK_URL}
                              URL_MD5 ${CISST_FLTK_URL_MD5}
                              CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                               -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                                               -DOPTION_BUILD_EXAMPLES:BOOL=OFF
-#                             PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory
-#                                           ${CMAKE_CURRENT_SOURCE_DIR}/cisstTestsDriver/fltk-patch
-#                                         "."
-                             INSTALL_COMMAND ""
+                                              -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstFltk
+                             INSTALL_DIR ${cisst_BINARY_DIR}/cisstFltk
                              )
-        set (FLTK_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstFltk_PREFIX}/src/cisstFltk/include")
-        set (FLTK_LIBRARIES "fltk")
-        set (FLTK_DEBUG_LIBRARIES "fltk")
-        set (FLTK_RELEASE_LIBRARIES "fltk")
-        link_directories ("${CMAKE_CURRENT_BINARY_DIR}/${cisstFltk_PREFIX}/src/cisstFltk-build")
+
+        # Set all FLTK variables based on install directory
+        set (FLTK_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstFltk/include")
+        set (FLTK_INCLUDE_DIR ${FLTK_INCLUDE_DIR} PARENT_SCOPE)
+
+	set (FLTK_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstFLTK/lib")
+        set (FLTK_LIBRARY_DIRS ${FLTK_LIBRARY_DIRS} PARENT_SCOPE)
+
+        if (WIN32)
+          set (FLTK_LIBRARIES debug fltkd optimized fltk
+                              debug fltkformsd optimized fltkforms
+                              debug fltkgld optimized fltkgl
+                              debug fltkimagesd optimized fltkimages)
+        else (WIN32)
+          set (FLTK_LIBRARIES fltk fltk_forms fltk_gl fltk_images)
+          if (UNIX)
+            include (FindX11)
+            find_library (FLTK_MATH_LIBRARY m)
+            set (FLTK_LIBRARIES ${FLTK_LIBRARIES} ${X11_LIBRARIES} ${FLTK_MATH_LIBRARY})
+          endif()
+
+	endif (WIN32)
+        set (FLTK_LIBRARIES ${FLTK_LIBRARIES} PARENT_SCOPE)
+
+	set (FLTK_FLUID_EXECUTABLE "${cisst_BINARY_DIR}/cisstFltk/bin/fluid${CMAKE_EXECUTABLE_SUFFIX}")
+	set (FLTK_FLUID_EXECUTABLE ${FLTK_FLUID_EXECUTABLE} PARENT_SCOPE)
+
         set (FLTK_FOUND ON)
-      endif (NOT APPLE)  
-    else (CISST_USE_EXTERNAL)
-      # don't want to use external project, now set package as required
+        set (FLTK_FOUND ON PARENT_SCOPE)
+
+      else (CISST_USE_EXTERNAL)
+        # don't want to use external project, now set package as required
+        find_package (FLTK REQUIRED)
+      endif (CISST_USE_EXTERNAL)
+    else (NOT APPLE)
+      # now set package as required
       find_package (FLTK REQUIRED)
-    endif (CISST_USE_EXTERNAL)
+    endif (NOT APPLE)
   endif (NOT FLTK_FOUND)
+
+  # save settings for external projects
   cisst_set_package_settings (cisstFLTK FLTK INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
   cisst_set_package_settings (cisstFLTK FLTK LIBRARIES           FLTK_LIBRARIES)
   if (FLTK_LIBRARY_DIRS)
