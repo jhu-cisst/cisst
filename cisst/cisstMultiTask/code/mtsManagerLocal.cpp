@@ -263,6 +263,8 @@ void mtsManagerLocal::Initialize(void)
 #if CISST_HAS_SAFETY_PLUGINS
     if (InstallCoordinator)
         SafetyCoordinator = new mtsSafetyCoordinator;
+    else
+        SafetyCoordinator = 0;
 #endif
 }
 
@@ -1727,11 +1729,12 @@ bool mtsManagerLocal::CreateInternalComponents(void)
 
     // Add monitoring components
 #if CISST_HAS_SAFETY_PLUGINS
-    if (SafetyCoordinator)
+    if (SafetyCoordinator && InstallCoordinator) {
         if (!SafetyCoordinator->CreateMonitor()) {
             CMN_LOG_CLASS_INIT_ERROR << "CreateInternalComponents: failed to add monitoring component" << std::endl;
             return false;
         }
+    }
 #endif
 
     return true;
