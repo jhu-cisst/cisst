@@ -389,6 +389,14 @@ cisst_add_library (LIBRARY cisstMultiTask
                    ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 #set_target_properties(cisstMultiTask PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
 
+# For Safety Framework
+if (CISST_HAS_SAFETY_PLUGINS)
+  include (${SF_CONFIG_FILE})
+  include_directories (${SF_INCLUDE_DIR} ${SF_LIB_DEPENDENCY_INCLUDE_DIR})
+  link_directories (${SF_LIBRARY_DIR})
+  target_link_libraries (cisstMultiTask ${SF_LIBRARY_FILE} ${SF_LIB_DEPENDENCY_LIBS})
+endif (CISST_HAS_SAFETY_PLUGINS)
+
 # Add linking to external libraries
 if (CISST_MTS_HAS_ICE)
   if (WIN32)
