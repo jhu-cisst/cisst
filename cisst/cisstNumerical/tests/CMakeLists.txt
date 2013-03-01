@@ -94,10 +94,7 @@ endif (CISST_HAS_CISSTNETLIB)
 # ENDIF(CISST_HAS_CNETLIB)
 
 # paths for headers/libraries
-cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical)
-
-# CppUnit include directories
-include_directories (${CPPUNIT_INCLUDE_DIR})
+cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical cisstTestsDriver)
 
 # Add executable for C++ tests
 add_executable (cisstNumericalTests ${SOURCE_FILES} ${HEADER_FILES})
@@ -108,17 +105,12 @@ target_link_libraries (cisstNumericalTests cisstTestsDriver)
 # and link differently
 if (CISST_cisstOSAbstraction)
   add_definitions (-DBUILD_MULTITHREADED_TESTS)
-  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstOSAbstraction)
+  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstOSAbstraction cisstTestsDriver)
   target_link_libraries (cisstNumericalTests
                          ${CMAKE_THREAD_LIBS_INIT})
 else (CISST_cisstOSAbstraction)
-  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical)
+  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstTestsDriver)
 endif (CISST_cisstOSAbstraction)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstNumericalTests ITERATIONS 10 INSTANCES 2)
-
-# CppUnit libraries
-target_link_libraries (cisstNumericalTests
-                       optimized ${CPPUNIT_LIBRARIES}
-                       debug ${CPPUNIT_DEBUG_LIBRARIES})
