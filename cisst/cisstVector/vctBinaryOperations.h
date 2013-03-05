@@ -258,7 +258,7 @@ class vctBinaryOperations {
           \param input1 First operand.
           \param input2 Second operand.
         */
-        static inline const OutputType Operate(const OutputType & input, const OutputType & bound) {
+        static inline const OutputType Operate(const OutputType & bound, const OutputType & input) {
             if (input > bound) {
                 return bound;
             } else if (input < -bound) {

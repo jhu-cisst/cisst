@@ -756,11 +756,11 @@ public:
 
     /* documented above */
     template <class __vectorOwnerType1, class __vectorOwnerType2>
-    inline ThisType & ElementwiseClippedInOf(const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & vector,
-                                             const vctDynamicConstVectorBase<__vectorOwnerType2, _elementType> & boundVector) {
+    inline ThisType & ElementwiseClippedInOf(const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & boundVector,
+                                             const vctDynamicConstVectorBase<__vectorOwnerType2, _elementType> & vector) {
         vctDynamicVectorLoopEngines::
             VoViVi< typename vctBinaryOperations<value_type>::ClipIn >
-            ::Run(*this, vector, boundVector);
+            ::Run(*this, boundVector, vector);
         return *this;
     }
     //@}
@@ -950,10 +950,10 @@ public:
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & ClippedInOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector,
-                                  const value_type boundVector) {
+                                  const value_type bound) {
         vctDynamicVectorLoopEngines::
             VoViSi< typename vctBinaryOperations<value_type>::ClipIn >::
-            Run(*this, vector, boundVector);
+            Run(*this, vector, bound);
         return *this;
     }
     //@}
@@ -1031,6 +1031,16 @@ public:
         vctDynamicVectorLoopEngines::
             VoSiVi< typename vctBinaryOperations<value_type>::Maximum >::
             Run(*this, lowerBound, vector);
+        return *this;
+    }
+
+    /* documented above */
+    template <class __vectorOwnerType>
+    inline ThisType & ClippedInOf(const value_type bound,
+                                  const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector) {
+        vctDynamicVectorLoopEngines::
+            VoSiVi< typename vctBinaryOperations<value_type>::ClipIn >::
+            Run(*this, bound, vector);
         return *this;
     }
     //@}
