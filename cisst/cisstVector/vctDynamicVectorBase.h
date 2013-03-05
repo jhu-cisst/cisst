@@ -753,6 +753,16 @@ public:
             ::Run(*this, vector1, vector2);
         return *this;
     }
+
+    /* documented above */
+    template <class __vectorOwnerType1, class __vectorOwnerType2>
+    inline ThisType & ElementwiseClippedInOf(const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & vector,
+                                             const vctDynamicConstVectorBase<__vectorOwnerType2, _elementType> & boundVector) {
+        vctDynamicVectorLoopEngines::
+            VoViVi< typename vctBinaryOperations<value_type>::ClipIn >
+            ::Run(*this, vector, boundVector);
+        return *this;
+    }
     //@}
 
 
@@ -823,6 +833,15 @@ public:
         vctDynamicVectorLoopEngines::
             VioVi< typename vctStoreBackBinaryOperations<value_type>::Maximum >::
             Run(*this, otherVector);
+        return *this;
+    }
+
+    /* documented above */
+    template <class __vectorOwnerType>
+    inline ThisType & ElementwiseClipIn(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & boundVector) {
+        vctDynamicVectorLoopEngines::
+            VioVi< typename vctStoreBackBinaryOperations<value_type>::ClipIn >::
+            Run(*this, boundVector);
         return *this;
     }
 
@@ -925,6 +944,16 @@ public:
         vctDynamicVectorLoopEngines::
             VoViSi< typename vctBinaryOperations<value_type>::Maximum >::
             Run(*this, vector, lowerBound);
+        return *this;
+    }
+
+    /* documented above */
+    template <class __vectorOwnerType>
+    inline ThisType & ClippedInOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector,
+                                  const value_type boundVector) {
+        vctDynamicVectorLoopEngines::
+            VoViSi< typename vctBinaryOperations<value_type>::ClipIn >::
+            Run(*this, vector, boundVector);
         return *this;
     }
     //@}
@@ -1067,6 +1096,14 @@ public:
         vctDynamicVectorLoopEngines::
             VioSi< typename vctStoreBackBinaryOperations<value_type>::Maximum >::
             Run(*this, lowerBound);
+        return *this;
+    }
+
+    /* documented above */
+    inline ThisType & ClipIn(const value_type bound) {
+        vctDynamicVectorLoopEngines::
+            VioSi< typename vctStoreBackBinaryOperations<value_type>::ClipIn >::
+            Run(*this, bound);
         return *this;
     }
 
