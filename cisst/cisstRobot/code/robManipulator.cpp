@@ -516,7 +516,9 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
   vctFrame4x4<double> U;  // set identity
-  //if( tool != NULL ) U = tool->ForwardKinematics();
+  if( !tools.empty() ){
+    if( tools[0] != NULL ){  U = tools[0]->ForwardKinematics( q ); }
+  }
 
   for(int j=(int)links.size()-1; 0<=j; j--){
 
