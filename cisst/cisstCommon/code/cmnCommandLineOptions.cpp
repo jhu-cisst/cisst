@@ -59,6 +59,13 @@ cmnCommandLineOptions::OptionOneValueBase::OptionOneValueBase(const std::string 
 }
 
 
+cmnCommandLineOptions::OptionMultipleValuesBase::OptionMultipleValuesBase(const std::string & shortOption, const std::string & longOption,
+                                                                          const std::string & description, RequiredType required):
+    cmnCommandLineOptions::OptionBase(shortOption, longOption, description, required)
+{
+}
+
+
 cmnCommandLineOptions::cmnCommandLineOptions(void)
 {
 }
@@ -117,7 +124,7 @@ bool cmnCommandLineOptions::Parse(int argc, const char * argv[], std::string & e
         }
 
         // check that the option has not been already set
-        if (option->Set) {
+        if (option->Set && !(dynamic_cast<OptionMultipleValuesBase *>(option))) {
             errorMessage = "Option --" + option->Long + " already set";
             return false;
         }
@@ -126,8 +133,8 @@ bool cmnCommandLineOptions::Parse(int argc, const char * argv[], std::string & e
         if (dynamic_cast<OptionNoValue *>(option)) {
             option->SetValue(0);
         }
-        // -- one value option
-        else if (dynamic_cast<OptionOneValueBase *>(option)) {
+        // -- one or multiple values option
+        else if (dynamic_cast<OptionOneValueBase *>(option) || dynamic_cast<OptionMultipleValuesBase *>(option)) {
             if (argc == 0) {
                 errorMessage = "Not enough command line parameters while parsing value for option --" + option->Long;
                 return false;
@@ -194,11 +201,11 @@ void cmnCommandLineOptions::PrintUsage(std::ostream & outputStream)
         }
         outputStream << " -" << option->Short << value << ", --" << option->Long << value << " : " << option->Description;
         if (option->Required == REQUIRED) {
-            outputStream << "(required)";
+            outputStream << " (required)";
         } else if (option->Required == OPTIONAL) {
-            outputStream << "(optional)";
+            outputStream << " (optional)";
         } else if (option->Required == SQUASH_REQUIRED) {
-            outputStream << "(optional, no other option required when set)";
+            outputStream << " (optional, no other option required when set)";
         }
         outputStream << std::endl;
     }
