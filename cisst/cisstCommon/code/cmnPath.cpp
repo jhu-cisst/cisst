@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -252,6 +252,15 @@ bool cmnPath::GetCisstShare(std::string & result)
 {
     if (cmnPath::GetCisstRoot(result)) {
         result = result + "/share/cisst-" + CISST_VERSION;
+        return true;
+    }
+    return false;
+}
+
+
+bool cmnPath::Exists(const std::string & fullPath, short mode)
+{
+    if (access(fullPath.c_str(), mode) == 0) {
         return true;
     }
     return false;
