@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-04-13
 
-  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -138,6 +138,7 @@ public:
     std::string ScalarDescription(const size_t index, const std::string & userDescription = "") const throw (std::out_of_range);
 };
 
+void CISST_EXPORT cmnDataCopy(mtsGenericObject & destination, const mtsGenericObject & source);
 
 void CISST_EXPORT cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data) throw (std::runtime_error);
 

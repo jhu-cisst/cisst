@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -54,6 +54,10 @@ cmnDataFormat::cmnDataFormat(void)
 
 
 // size_t specializations
+void cmnDataCopy_size_t(size_t & destination, const size_t & source) {
+    destination = source;
+}
+
 std::string cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const std::string & userDescription)
     throw (std::out_of_range) {
     return userDescription;
