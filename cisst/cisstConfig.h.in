@@ -68,4 +68,7 @@ http://www.cisst.org/cisst/license.txt.
 // Using IOS or not
 #cmakedefine01 CISST_HAS_IOS
 
+// Using JSonCpp, compiled along cisst
+#cmakedefine01 CISST_HAS_JSON
+
 #endif // _cisstConfig_h

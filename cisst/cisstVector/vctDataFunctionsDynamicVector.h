@@ -295,4 +295,40 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
     vector.SerializeRaw(outputStream);
 }
 
+
+#if CISST_HAS_JSON
+template <typename _elementType, typename _vectorOwnerType>
+void cmnDataToJSON(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector,
+                   Json::Value & jsonValue) {
+    typedef vctDynamicConstVectorBase<_vectorOwnerType, _elementType> VectorType;
+    typedef typename VectorType::const_iterator const_iterator;
+    const const_iterator end = vector.end();
+    const_iterator iter;
+    int index = 0;
+    for (iter = vector.begin();
+         iter != end;
+         ++index, ++iter) {
+        cmnDataToJSON(*iter, jsonValue[index]);
+    }
+}
+
+template <typename _elementType>
+void cmnDataFromJSON(vctDynamicVector<_elementType> & vector,
+                     Json::Value & jsonValue) {
+    // get the vector size from JSON and resize
+    vector.SetSize(jsonValue.size());
+    typedef vctDynamicVector<_elementType> VectorType;
+    typedef typename VectorType::iterator iterator;
+    const iterator end = vector.end();
+    iterator iter;
+    int index = 0;
+    for (iter = vector.begin();
+         iter != end;
+         ++index, ++iter) {
+        cmnDataFromJSON(*iter, jsonValue[index]);
+    }
+}
+#endif
+
+
 #endif // _vctDataFunctionsDynamicVector_h

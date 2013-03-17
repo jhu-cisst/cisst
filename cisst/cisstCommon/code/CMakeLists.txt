@@ -87,3 +87,7 @@ cisst_add_library (
   HEADER_FILES ${HEADER_FILES})
 
 add_dependencies (cisstCommon cisstRevision cisstBuildType)
+
+if (CISST_HAS_JSON)
+  cisst_library_use_settings (cisstCommon cisstJSON)
+endif (CISST_HAS_JSON)

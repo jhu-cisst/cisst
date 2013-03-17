@@ -429,4 +429,18 @@ void CISST_EXPORT cmnDataDeSerializeTextDelimiter(std::istream & inputStream, co
     throw (std::runtime_error);
 
 
+
+
+#if CISST_HAS_JSON
+#include <json/json.h>
+
+inline void cmnDataToJSON(const double value, Json::Value & jsonValue) {
+    jsonValue = value;
+}
+inline void cmnDataFromJSON(double & placeHolder, const Json::Value & jsonValue) {
+    placeHolder = jsonValue.asDouble();
+}
+
+#endif // CISST_HAS_JSON
+
 #endif // _cmnDataFunctions_h
