@@ -48,11 +48,11 @@ int main(void)
     vctDynamicVector<double> vector(4);
     vctRandom(vector, -10.0, 10.0);
     cmnDataToJSON(vector, jsonValue["vector"]);
-    std::cout << jsonValue << std::endl;
+    std::cout << "JSON\n" << jsonValue << std::endl;
 
     vctDynamicVector<double> result;
     cmnDataFromJSON(result, jsonValue["vector"]);
-    std::cout << result.size() << " -> " << result << std::endl;
+    std::cout << "Vector\n" << result << std::endl;
 
     vctDynamicVector<vctDynamicVector<double> > VofV(2);
     VofV[0].SetSize(3);
@@ -60,11 +60,16 @@ int main(void)
     VofV[1].SetSize(4);
     VofV[1].SetAll(2.231);
     cmnDataToJSON(VofV, jsonValue["VofV"]);
-    std::cout << jsonValue << std::endl;
+    std::cout << "JSON\n" << jsonValue << std::endl;
 
     vctDynamicVector<vctDynamicVector<double> > VofVResult;
     cmnDataFromJSON(VofVResult, jsonValue["VofV"]);
-    std::cout << VofVResult << std::endl;
+    std::cout << "Vector of vectors\n" << VofVResult << std::endl;
+
+    vctDynamicMatrix<double> matrix(4, 6);
+    matrix.SetAll(0.0);
+    cmnDataFromJSON(matrix.Diagonal(), jsonValue["vector"]);
+    std::cout << "Matrix\n" << matrix << std::endl;
 
     return 0;
 

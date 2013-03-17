@@ -314,10 +314,29 @@ void cmnDataToJSON(const vctDynamicConstVectorBase<_vectorOwnerType, _elementTyp
 
 template <typename _elementType>
 void cmnDataFromJSON(vctDynamicVector<_elementType> & vector,
-                     Json::Value & jsonValue) {
+                     Json::Value & jsonValue) throw (std::runtime_error) {
     // get the vector size from JSON and resize
     vector.SetSize(jsonValue.size());
     typedef vctDynamicVector<_elementType> VectorType;
+    typedef typename VectorType::iterator iterator;
+    const iterator end = vector.end();
+    iterator iter;
+    int index = 0;
+    for (iter = vector.begin();
+         iter != end;
+         ++index, ++iter) {
+        cmnDataFromJSON(*iter, jsonValue[index]);
+    }
+}
+
+template <typename _elementType>
+void cmnDataFromJSON(vctDynamicVectorRef<_elementType> vector,
+                     Json::Value & jsonValue) throw (std::runtime_error) {
+    // make sure both vectors have the same size
+    if (vector.size() != jsonValue.size()) {
+        cmnThrow("cmnDataFromJSON: vector sizes don't match");
+    }
+    typedef vctDynamicVectorRef<_elementType> VectorType;
     typedef typename VectorType::iterator iterator;
     const iterator end = vector.end();
     iterator iter;

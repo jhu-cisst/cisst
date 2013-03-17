@@ -212,3 +212,36 @@ void cmnDataDeSerializeTextDelimiter(std::istream & inputStream, const char deli
         }
     }
 }
+
+
+#if CISST_HAS_JSON
+
+void cmnDataToJSON(const double value, Json::Value & jsonValue) {
+    jsonValue = value;
+}
+void cmnDataFromJSON(double & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
+    placeHolder = jsonValue.asDouble();
+}
+
+void cmnDataToJSON(const float value, Json::Value & jsonValue) {
+    jsonValue = value;
+}
+void cmnDataFromJSON(float & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
+    placeHolder = jsonValue.asFloat();
+}
+
+void cmnDataToJSON(const int value, Json::Value & jsonValue) {
+    jsonValue = value;
+}
+void cmnDataFromJSON(int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
+    placeHolder = jsonValue.asInt();
+}
+
+void cmnDataToJSON(const unsigned int value, Json::Value & jsonValue) {
+    jsonValue = value;
+}
+void cmnDataFromJSON(unsigned int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
+    placeHolder = jsonValue.asUInt();
+}
+
+#endif // CISST_HAS_JSON
