@@ -141,4 +141,25 @@ cmnDataScalar(const vctFrameBase<_rotationType> & data,
 }
 
 
+#if CISST_HAS_JSON
+template <class _rotationType>
+void
+cmnDataToJSON(const vctFrameBase<_rotationType> & data,
+              Json::Value & jsonValue)
+{
+    cmnDataToJSON(data.Translation(), jsonValue["Translation"]);
+    cmnDataToJSON(data.Rotation(), jsonValue["Rotation"]);
+}
+
+template <class _rotationType>
+void
+cmnDataFromJSON(vctFrameBase<_rotationType> & data,
+                const Json::Value & jsonValue)
+    throw (std::runtime_error)
+{
+    cmnDataFromJSON(data.Translation(), jsonValue["Translation"]);
+    cmnDataFromJSON(data.Rotation(), jsonValue["Rotation"]);
+}
+#endif // CISST_HAS_JSON
+
 #endif // _vctDataFunctionsTransformations_h

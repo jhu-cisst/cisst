@@ -248,4 +248,18 @@ void cmnDataFromJSON(unsigned int & placeHolder, const Json::Value & jsonValue) 
     placeHolder = jsonValue.asUInt();
 }
 
+void cmnDataToJSON(const bool value, Json::Value & jsonValue) {
+    jsonValue = value;
+}
+void cmnDataFromJSON(bool & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
+    placeHolder = jsonValue.asBool();
+}
+
+void cmnDataToJSON_size_t(const size_t value, Json::Value & jsonValue) {
+    jsonValue = static_cast<Json::UInt64>(value);
+}
+void cmnDataFromJSON_size_t(size_t & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
+    placeHolder = jsonValue.asUInt64();
+}
+
 #endif // CISST_HAS_JSON

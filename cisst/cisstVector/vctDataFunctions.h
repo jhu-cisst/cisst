@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctDataFunctions_h
 #define _vctDataFunctions_h
 
+#include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 #include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
 #include <cisstVector/vctDataFunctionsDynamicVector.h>

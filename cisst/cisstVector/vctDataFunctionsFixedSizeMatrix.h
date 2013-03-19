@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDataFunctionsMatrix.h>
 #include <cisstVector/vctFixedSizeMatrixBase.h>
 
-
 template <vct::size_type _rows, vct::size_type _cols, class _elementType,
           vct::stride_type _rowStrideDestination, vct::stride_type _colStrideDestination, class _dataPtrTypeDestination,
           vct::stride_type _rowStrideSource, vct::stride_type _colStrideSource, class _dataPtrTypeSource>
@@ -258,5 +257,43 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
 {
     matrix.SerializeRaw(outputStream);
 }
+
+// ----------------------- end of older functions
+
+#if CISST_HAS_JSON
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType>
+void cmnDataToJSON(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
+                   Json::Value & jsonValue) {
+    const size_t numberOfRows = matrix.rows();
+    int jsonRowIndex = 0;
+    for (size_t rowIndex = 0;
+         rowIndex < numberOfRows;
+         ++rowIndex, ++jsonRowIndex) {
+        cmnDataToJSON(matrix.Row(rowIndex), jsonValue[jsonRowIndex]);
+    }
+}
+
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType>
+inline void cmnDataFromJSON(vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
+                            const Json::Value & jsonValue)
+    throw (std::runtime_error)
+{
+    // make sure both matrices have the same number of rows
+    if (matrix.rows() != jsonValue.size()) {
+        cmnThrow("cmnDataFromJSON: matrix number of rows don't match");
+    }
+    const size_t numberOfRows = matrix.rows();
+    int jsonRowIndex = 0;
+    for (size_t rowIndex = 0;
+         rowIndex < numberOfRows;
+         ++rowIndex, ++jsonRowIndex) {
+        cmnDataFromJSON(matrix.Row(rowIndex), jsonValue[jsonRowIndex]);
+    }
+}
+#endif // CISST_HAS_JSON
 
 #endif // _vctDataFunctionsFixedSizeMatrix_h

@@ -159,5 +159,10 @@ double CISST_EXPORT cmnDataScalar(const mtsGenericObject & data, const size_t in
 
 std::string CISST_EXPORT cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const std::string & userDescription = "") throw (std::out_of_range);
 
+#if CISST_HAS_JSON
+void CISST_EXPORT cmnDataToJSON(const mtsGenericObject & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataFromJSON(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error);
+#endif // CISST_HAS_JSON
+
 #endif // _mtsGenericObject_h
 

@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <string.h> // for memcpy
 #include <iostream>
 #include <limits>
+#include <cisstConfig.h> // for CISST_HAS_JSON
 #include <cisstCommon/cmnThrow.h>
 
 // always include last
@@ -448,6 +449,12 @@ void cmnDataFromJSON(int & placeHolder, const Json::Value & jsonValue) throw (st
 
 void cmnDataToJSON(const unsigned int value, Json::Value & jsonValue);
 void cmnDataFromJSON(unsigned int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
+
+void cmnDataToJSON(const bool value, Json::Value & jsonValue);
+void cmnDataFromJSON(bool & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
+
+void cmnDataToJSON_size_t(const size_t value, Json::Value & jsonValue);
+void cmnDataFromJSON_size_t(size_t & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
 
 #endif // CISST_HAS_JSON
 

@@ -31,6 +31,16 @@ void prmPositionCartesianGetTest::TestConstructors(void)
 {
     // make sure the constructors call the mtsGenericObject constructor
     prmPositionCartesianGet position;
+	vctRandom(position.Position().Rotation());
+	position.SetValid(false);
+	position.SetTimestamp(21.0);
+    Json::Value jsonValue;
+    cmnDataToJSON(position, jsonValue["prm"]);
+    std::cout << jsonValue << std::endl;
+	prmPositionCartesianGet newp;
+	cmnDataFromJSON(newp, jsonValue["prm"]);
+	std::cout << newp << std::endl;
+
     prmTestGenericObjectConstructor(position);
 
     // modify some values and then use copy constructor
