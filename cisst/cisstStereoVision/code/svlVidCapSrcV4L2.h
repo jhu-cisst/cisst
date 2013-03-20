@@ -60,6 +60,7 @@ public:
 
     int GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist);
     int GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
+    int SetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
 
 private:
     unsigned int NumOfStreams;
@@ -79,6 +80,7 @@ private:
     int* FrameBufferSize;
     FrameBufferType** FrameBuffer;
     svlBufferImage** OutputBuffer;
+    svlFilterSourceVideoCapture::ImageFormat** Format;
 
     int ReadFrame(unsigned int videoch);
 
@@ -87,6 +89,10 @@ private:
     void HM12_de_macro_y(unsigned char* dst, unsigned char* src, int dstride, const int w, const int h);
     void HM12_de_macro_uv(unsigned char* dstu, unsigned char* dstv, unsigned char* src, int dstride, const int w, const int h);
     void YUV420p_to_BGR24(unsigned char* dst, unsigned char* src, int dststride, int srcstride, const int w, const int h);
+
+    int V4L2_color_to_internal_color(int color_in);
+    int svlPixelType_to_V4L2_color(svlFilterSourceVideoCapture::PixelType color_in);
+    svlFilterSourceVideoCapture::PixelType V4L2_color_to_svlPixelType(int color_in);
 };
 
 

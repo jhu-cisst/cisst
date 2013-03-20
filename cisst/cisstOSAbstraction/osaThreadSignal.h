@@ -7,7 +7,7 @@
   Author(s): Ankur Kapoor, Peter Kazanzides, Balazs Vagvolgyi, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -35,37 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 
 class osaThreadId;
 
-//class CISST_EXPORT osaThreadSignal {
-//
-//    /*! Internals that are OS-dependent in some way */
-//    enum {INTERNALS_SIZE = 128};    // BALAZS: OS X 10.6 x86_64 requires 120 bytes
-//    char Internals[INTERNALS_SIZE];
-//
-//    /*! Return the size of the actual object used by the OS.  This is
-//        used for testing only. */
-//    static unsigned int SizeOfInternals(void);
-//
-//public:
-//
-//    /*! Default constructor.  Checks that the internal structure
-//        is large enough using CMN_ASSERT, then creates and initializes
-//        the internal data structures. */
-//    osaThreadSignal();
-//
-//    /*! Default destructor.  Destroys the internal data structures. */
-//    ~osaThreadSignal();
-//
-//    /*! The calling thread is blocked (waits indefinitely) until another thread calls Raise. */
-//    void Wait(void);
-//
-//    /*! The calling thread is blocked until either the timeout expires or another thread calls Raise.
-//        \param timeoutInSec the timeout in seconds
-//        \returns false if timeout occurred, true otherwise */
-//    bool Wait(double timeoutInSec);
-//
-//    /*! Wakeup any thread that is waiting on this signal. */
-//    void Raise(void);
-//};
+/* forward declaration for OS dependent internals */
+struct osaThreadSignalInternals;
 
 class CISST_EXPORT osaThreadSignal
 {
@@ -75,7 +46,7 @@ public:
 
     void Wait(void);
     bool Wait(double timeoutInSec);
-    void Raise();
+    void Raise(void);
 
     static void SetWaitCallbacks(const osaThreadId &threadId, void (*pre)(void), void (*post)(void));
 
@@ -84,13 +55,7 @@ public:
 
 private:
     /*! Internals that are OS-dependent in some way */
-    enum {INTERNALS_SIZE = 128};    // BALAZS: OS X 10.6 x86_64 requires 120 bytes
-    char Internals[INTERNALS_SIZE];
-
-    /*! Return the size of the actual object used by the OS.  This is
-      used for testing only. */ 
-    static unsigned int SizeOfInternals(void);
-    friend class osaThreadSignalTest;
+    osaThreadSignalInternals * Internals;
 
     static void (*PreCallback)(void);
     static void (*PostCallback)(void);

@@ -118,8 +118,11 @@ protected:
     /*! ExecOut provided interface. */
     mtsInterfaceProvided * ExecOut;
 
-    /*! Event generator used to pass thread of execution to another task. */
-    mtsFunctionVoid RunEvent;
+    /*! Event generator used to pass thread of execution to another task.
+      User code should not call this directly (call RunEvent instead). */
+    mtsFunctionVoid RunEventInternal;
+    bool RunEventCalled;
+    mtsExecutionResult RunEvent(bool check = true);
 
     /*! Event generator used to change state of dependent tasks. */
     mtsFunctionWrite ChangeStateEvent;

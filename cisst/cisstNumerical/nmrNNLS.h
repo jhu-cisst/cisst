@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Ankur Kapoor, Anton Deguet
+  Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2006-01-29
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -144,7 +144,7 @@ protected:
     /*! Memory allocated for the input.  This is used only if the user
       provides separate A and b and the class needs to copy them in
       the single matrix Ab. */
-    vctDynamicMatrix<CISSTNETLIB_DOUBLE> AbMemory; 
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> AbMemory;
 
     /*! References to workspaces or return containers, these point
       either to user allocated memory or our memory chunks if needed.
@@ -359,7 +359,7 @@ public:
         AbMemory.SetSize(0);
     }
 
-    
+
     /*! Constructor where the user provides the input matrix to
       specify the size and storage order.  Memory allocation is
       performed for the output matrices and vectors as well as
@@ -518,10 +518,10 @@ public:
                                  vctDynamicVectorBase<_vectorOwnerTypeWorkspaceInt, CISSTNETLIB_INTEGER> & workspaceInt)
     {
         this->SetDimension(Ab.rows(), (Ab.cols() - 1));
-        
+
         // allocate output and set references
         this->AllocateOutputWorkspaces(true, false);
-        
+
         // set reference on user provided workspace
         this->ThrowUnlessWorkspacesSizeIsCorrect(workspace, workspaceInt);
         this->WorkspaceReference.SetRef(workspace);
@@ -535,10 +535,10 @@ public:
                                  vctDynamicVectorBase<_vectorOwnerTypeWorkspaceInt, CISSTNETLIB_INTEGER> & workspaceInt)
     {
         this->SetDimension(A.rows(), A.cols());
-        
+
         // allocate output and set references
         this->AllocateOutputWorkspaces(true, false);
-        
+
         // set reference on user provided workspace
         this->ThrowUnlessWorkspacesSizeIsCorrect(workspace, workspaceInt);
         this->WorkspaceReference.SetRef(workspace);
@@ -548,7 +548,7 @@ public:
     }
     //@}
 
-        
+
     /*! This method doesn't allocate any memory as it relies on user
       provided vectors for the output as well as the
       workspaces.
@@ -573,7 +573,7 @@ public:
         this->AllocateOutputWorkspace(false, false);
         this->ThrowUnlessOutputSizeIsCorrect(X, W);
         this->ThrowUnlessWorkspacesSizeIsCorrect(workspace, workspaceInt);
-        
+
         this->XReference.SetRef(X);
         this->WReference.SetRef(W);
         this->WorkspaceReference.SetRef(workspace);
@@ -594,7 +594,7 @@ public:
         this->AllocateOutputWorkspace(false, false);
         this->ThrowUnlessOutputSizeIsCorrect(X, W);
         this->ThrowUnlessWorkspacesSizeIsCorrect(workspace, workspaceInt);
-        
+
         this->XReference.SetRef(X);
         this->WReference.SetRef(W);
         this->WorkspaceReference.SetRef(workspace);
@@ -603,7 +603,7 @@ public:
         this->AbMemory.SetSize(MMember, NMember + 1, VCT_COL_MAJOR);
     }
     //@}
-    
+
     /*! This method allocates the memory for the workspaces.  The
       output memory is provided by the user.  The method computes the
       size of the problem based on the user provided output and
@@ -620,10 +620,10 @@ public:
     {
         this->SetDimension(Ab.rows(), (Ab.cols() - 1));
         this->ThrowUnlessOutputSizeIsCorrect(X, W);
-        
+
         this->XReference.SetRef(X);
         this->WReference.SetRef(W);
-        
+
         AllocateOutputWorkspaces(false, true);
     }
     template <class _matrixOwnerTypeA, class _vectorOwnerTypeB,
@@ -636,10 +636,10 @@ public:
     {
         this->SetDimension(A.rows(), A.cols());
         this->ThrowUnlessOutputSizeIsCorrect(X, W);
-        
+
         this->XReference.SetRef(X);
         this->WReference.SetRef(W);
-        
+
         AllocateOutputWorkspaces(false, true);
 
         this->AbMemory.SetSize(MMember, NMember + 1, VCT_COL_MAJOR);
@@ -665,7 +665,7 @@ public:
 
 
 /*!
-  \name Algorithm NNLS: 
+  \name Algorithm NNLS:
 
 
   --- update this doc ---
@@ -789,7 +789,7 @@ public:
   This function checks for valid input (size, storage order and
   compact) and calls the LAPACK function.  If the input doesn't match
   the data, an exception is thrown (\c std::runtime_error).
-  
+
   This function modifies the input matrix A and stores the results in
   the data.  Each component of the result can be obtained via the
   const methods nmrNNLSDynamicData::U(), nmrNNLSDynamicData::S()
@@ -826,11 +826,11 @@ inline CISSTNETLIB_INTEGER nmrNNLS(vctDynamicMatrixBase<_matrixOwnerType, CISSTN
     if (! A.IsCompact()) {
         cmnThrow(std::runtime_error("nmrNNLS: Requires a compact matrix"));
     }
-    
+
     /* Based on storage order, permute U and Vt as well as dimension */
     CISSTNETLIB_DOUBLE *UPtr, *VtPtr;
     CISSTNETLIB_INTEGER m_Lda, m_Ldu, m_Ldvt;
-    
+
     if (A.IsColMajor()) {
         m_Lda = (1 > dataFriend.M()) ? 1 : dataFriend.M();
         m_Ldu = dataFriend.M();
@@ -847,12 +847,22 @@ inline CISSTNETLIB_INTEGER nmrNNLS(vctDynamicMatrixBase<_matrixOwnerType, CISSTN
 
    // for versions based on gfortran/lapack, CISSTNETLIB_VERSION is
     // defined
-#ifdef CISSTNETLIB_VERSION
-     dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
+#if defined(CISSTNETLIB_VERSION)
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
+                        A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
+                        UPtr, &m_Ldu,
+                        VtPtr, &m_Ldvt,
+                        dataFriend.Workspace().Pointer(), &m_Lwork, &Info);
+#endif
+#else // no major version
+    dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
             A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
             UPtr, &m_Ldu,
             VtPtr, &m_Ldvt,
             dataFriend.Workspace().Pointer(), &m_Lwork, &Info);
+#endif // CISSTNETLIB_VERSION
 #else
     ftnlen jobu_len = (ftnlen)1, jobvt_len = (ftnlen)1;
     la_dzlapack_MP_sgesvd_nat(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
@@ -874,7 +884,7 @@ inline CISSTNETLIB_INTEGER nmrNNLS(vctDynamicMatrixBase<_matrixOwnerType, CISSTN
   user (see nmrNNLSDynamicData::SetRef).  While the data is
   being build, the consistency of the output and workspace is checked.
   Then, the nmrNNLS(A, data) function can be used safely.
- 
+
   \param A is a reference to a dynamic matrix of size MxN
   \param U, S, Vt The output matrices and vector for NNLS
   \param Workspace The workspace for LAPACK.
@@ -904,7 +914,7 @@ inline CISSTNETLIB_INTEGER nmrNNLS(vctDynamicMatrixBase<_matrixOwnerTypeA, CISST
   user (see nmrNNLSDynamicData::SetRefOutput).  While the data
   is being build, the consistency of the output is checked.  Then, the
   nmrNNLS(A, data) function can be used safely.
- 
+
   \param A is a reference to a dynamic matrix of size MxN
   \param U, S, Vt The output matrices and vector for NNLS
 

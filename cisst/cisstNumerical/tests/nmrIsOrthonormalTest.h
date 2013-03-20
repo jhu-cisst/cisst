@@ -75,12 +75,12 @@ public:
         vctDynamicVector<double> SDynamic;
         cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
         randomSequence.ExtractRandomValue(storageOrder);
-        randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), rows);
-        randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), cols);
+        rows = randomSequence.ExtractRandomSizeT(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20));
+        cols = randomSequence.ExtractRandomSizeT(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20));
         ADynamic.SetSize(rows, cols, storageOrder);
         vctRandom(ADynamic, -10.0, 10.0);
         UDynamic.SetSize(rows, rows, storageOrder);
-        SDynamic.SetSize(std::min(rows, cols));
+        SDynamic.SetSize((std::min)(rows, cols));
         VtDynamic.SetSize(cols, cols, storageOrder);
         // Decompose, after this U and Vt can be used
         nmrSVD(ADynamic, UDynamic, SDynamic, VtDynamic);

@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky
-  Created on:	2003-08-18
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-08-18
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -240,6 +240,38 @@ class vctBinaryOperations {
             return cmnTypeTraits<OutputType>::MaxPositiveValue();
         }
     };
+
+    /*!  \brief Return the -input2 in input1 is lesser than -input2,
+      input2 if input 1 is greater than input2 and input1 otherwise.
+      The operator doesn't test if input2 is negative.
+
+      \sa vctBinaryOperations
+      input1 capped in range [-input2, input2].  Note that here all
+      arguments are of the same type, because they have to be
+      compared.
+    */
+    class ClipIn {
+    public:
+        typedef _outputType OutputType;
+        /*!
+          Execute the operation.
+          \param input1 First operand.
+          \param input2 Second operand.
+        */
+        static inline const OutputType Operate(const OutputType & bound, const OutputType & input) {
+            if (input > bound) {
+                return bound;
+            } else if (input < -bound) {
+                return -bound;
+            }
+            return input;
+        }
+
+        static inline OutputType NeutralElement(void) {
+            return cmnTypeTraits<OutputType>::MaxPositiveValue();
+        }
+    };
+
 
     /*!
       \brief Test for equality between input1 and input2

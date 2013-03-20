@@ -181,6 +181,29 @@ int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInpu
 
     _OnSingleThread(procInfo)
     {
+        for (idx = 0; idx < videochannels; idx ++) {
+            if (Codec[idx]) {
+                FramesWritten[idx] ++;
+
+                if (TimestampsFile[idx]) {
+                    double time = syncInput->GetTimestamp();
+                    if (FramesWritten[idx] > 1) {
+                        time -= FirstTimestamp[idx];
+                    }
+                    else {
+                        FirstTimestamp[idx] = time;
+                    }
+
+                    std::stringstream ts;
+                    ts << (FramesWritten[idx] - 1) << " " << std::fixed << std::setprecision(4) << time << "\r\n";
+                    long long int len = ts.str().length();
+                    if (TimestampsFile[idx]->Write(ts.str().c_str(), len) < len) {
+                        CMN_LOG_CLASS_INIT_WARNING << "Process: failed to write timestamp on channel: " << idx << std::endl;
+                    }
+                }
+            }
+        }
+
         CS.Leave();
 
         if (ErrorInProcess) {
@@ -298,6 +321,15 @@ int svlFilterVideoFileWriter::SetFramerate(const double framerate, unsigned int 
     UpdateCodecCount(videoch + 1);
 
     Framerate[videoch] = framerate;
+
+    return SVL_OK;
+}
+
+int svlFilterVideoFileWriter::SetEnableTimestampsFile(bool enable, unsigned int videoch)
+{
+    UpdateCodecCount(videoch + 1);
+
+    EnableTimestampsFile[videoch] = enable;
 
     return SVL_OK;
 }
@@ -437,6 +469,24 @@ int svlFilterVideoFileWriter::GetFilePath(std::string &filepath, unsigned int vi
     return SVL_OK;
 }
 
+double svlFilterVideoFileWriter::GetFramerate(unsigned int videoch)
+{
+    if (videoch >= CodecParam.size()) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetFramerate: video channel out of range: " << videoch << std::endl;
+        return -1.0;
+    }
+    return Framerate[videoch];
+}
+
+bool svlFilterVideoFileWriter::GetEnableTimestampsFile(unsigned int videoch) const
+{
+    if (videoch >= CodecParam.size()) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetEnableTimestampsFile: video channel out of range: " << videoch << std::endl;
+        return -1.0;
+    }
+    return EnableTimestampsFile[videoch];
+}
+
 std::string svlFilterVideoFileWriter::GetCodecName(unsigned int videoch) const
 {
     if (videoch >= CodecParam.size()) {
@@ -445,7 +495,7 @@ std::string svlFilterVideoFileWriter::GetCodecName(unsigned int videoch) const
     }
     if (!CodecParam[videoch] ||
         CodecParam[videoch]->size < sizeof(svlVideoIO::Compression)) {
-        CMN_LOG_CLASS_INIT_ERROR << "SaveCodec: invalid compression structure" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetCodecName: invalid compression structure" << std::endl;
         return "";
     }
 
@@ -462,12 +512,12 @@ int svlFilterVideoFileWriter::GetCodecName(std::string &encoder, unsigned int vi
 svlVideoIO::Compression* svlFilterVideoFileWriter::GetCodecParams(unsigned int videoch) const
 {
     if (videoch >= CodecParam.size()) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetCodec: video channel out of range: " << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetCodecParams: video channel out of range: " << videoch << std::endl;
         return 0;
     }
     if (!CodecParam[videoch] ||
         CodecParam[videoch]->size < sizeof(svlVideoIO::Compression)) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetCodec: invalid compression structure" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "GetCodecParams: invalid compression structure" << std::endl;
         return 0;
     }
 
@@ -502,6 +552,10 @@ int svlFilterVideoFileWriter::OpenFile(unsigned int videoch)
         // Close video file if currently open
         if (Codec[videoch]) {
             svlVideoIO::ReleaseCodec(Codec[videoch]);
+        }
+        if (TimestampsFile[videoch]) {
+            delete TimestampsFile[videoch];
+            TimestampsFile[videoch] = 0;
         }
 
         // Get video codec for file extension
@@ -544,6 +598,26 @@ int svlFilterVideoFileWriter::OpenFile(unsigned int videoch)
         }
         CodecsMultithreaded = multithreaded;
 
+        if (EnableTimestampsFile[videoch]) {
+            // Extract file name without extension
+            std::string filepath(FilePath[videoch]);
+            std::string extension;
+            std::string::size_type pos = filepath.rfind('.');
+            if (pos != std::string::npos) {
+                extension = filepath.substr(pos + 1);
+                filepath.erase(pos);
+            }
+
+            filepath.append("_" + extension + "_ts.txt");
+            TimestampsFile[videoch] = new svlFile(filepath, svlFile::W);
+            if (!TimestampsFile[videoch]->IsOpen()) {
+                delete TimestampsFile[videoch];
+                TimestampsFile[videoch] = 0;
+                CMN_LOG_CLASS_INIT_WARNING << "OpenFile: failed to create timestamp file \"" << filepath
+                                           << "\" on channel: " << videoch << std::endl;
+            }
+        }
+
         CS.Leave();
 
         std::stringstream strstr;
@@ -554,6 +628,7 @@ int svlFilterVideoFileWriter::OpenFile(unsigned int videoch)
         CMN_LOG_CLASS_INIT_VERBOSE << strstr.str() << std::endl;
 
         ErrorOnChannel[videoch] = false;
+        FramesWritten[videoch] = 0;
 
         return SVL_OK;
     }
@@ -584,6 +659,10 @@ int svlFilterVideoFileWriter::CloseFile(unsigned int videoch)
     if (Codec[videoch]) {
         svlVideoIO::ReleaseCodec(Codec[videoch]);
         Codec[videoch] = 0;
+    }
+    if (TimestampsFile[videoch]) {
+        delete TimestampsFile[videoch];
+        TimestampsFile[videoch] = 0;
     }
 
     CS.Leave();
@@ -649,14 +728,22 @@ void svlFilterVideoFileWriter::UpdateCodecCount(const unsigned int count)
         CodecParam.resize(count);
         FilePath.resize(count);
         Framerate.resize(count);
+        FramesWritten.resize(count);
+        EnableTimestampsFile.resize(count);
+        TimestampsFile.resize(count);
+        FirstTimestamp.resize(count);
         for (unsigned int i = prevsize; i < count; i ++) {
-            ErrorOnChannel[i] = false;
+            ErrorOnChannel[i]       = false;
             ImageDimensions[i].SetAll(0);
-            Codec[i]          = 0;
-            CodecProto[i]     = 0;
-            CodecParam[i]     = 0;
-            FilePath[i]       = "";
-            Framerate[i]      = 30.0;
+            Codec[i]                = 0;
+            CodecProto[i]           = 0;
+            CodecParam[i]           = 0;
+            FilePath[i]             = "";
+            Framerate[i]            = 30.0;
+            FramesWritten[i]        = 0;
+            EnableTimestampsFile[i] = false;
+            TimestampsFile[i]       = 0;
+            FirstTimestamp[i]       = 0.0;
         }
     }
 }

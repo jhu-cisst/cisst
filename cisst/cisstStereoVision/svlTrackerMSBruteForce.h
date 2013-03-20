@@ -71,12 +71,16 @@ protected:
     bool OverwriteTemplates;
     bool TemplateUpdateEnabled;
     unsigned int FrameCounter;
+    unsigned int ThreadCounter;
     unsigned int TemplateRadiusRequested;
     unsigned int SearchRadiusRequested;
     unsigned int TemplateRadius;
     unsigned int SearchRadius;
     vctDynamicVector<unsigned char*> OrigTemplates;
     vctDynamicMatrix<int> MatchMap;
+    vctFixedSizeVector<vctDynamicMatrix<unsigned int>, 3> SumTable;
+    vctFixedSizeVector<vctDynamicMatrix<unsigned int>, 3> SqSumTable;
+    vctFixedSizeVector<vctDynamicVector<int>, 128> ZeroMeanTemplate;
 
     svlErrorMetric Metric;
     unsigned int Scale;
@@ -91,8 +95,11 @@ protected:
     virtual void MatchTemplateSAD(unsigned char* img, unsigned char* tmp, int x, int y);
     virtual void MatchTemplateSSD(unsigned char* img, unsigned char* tmp, int x, int y);
     virtual void MatchTemplateNCC(unsigned char* img, unsigned char* tmp, int x, int y);
+    virtual void MatchTemplateFastNCC(unsigned char* img, unsigned char* tmp, int* zero_mean_tmp, int x, int y);
+    virtual void MatchTemplateNotQuiteNCC(unsigned char* img, unsigned char* tmp, int x, int y);
     virtual void GetBestMatch(int &x, int &y, unsigned char &conf, bool higherbetter);
     virtual void ShrinkImage(unsigned char* src, unsigned char* dst);
+    virtual void CalculateSumTables(unsigned char* img);
 };
 
 #endif //_svlTrackerMSBruteForce_h

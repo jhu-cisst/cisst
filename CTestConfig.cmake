@@ -108,9 +108,9 @@ mark_as_advanced (BUILDNAME)
 # Options for CDash
 set (CTEST_PROJECT_NAME "cisst")
 set (CTEST_DROP_METHOD "http")
-set (CTEST_DROP_SITE "www.cisst.org")
-set (CTEST_DROP_LOCATION "/cisst/CDash/submit.php?project=cisst")
-# set (CTEST_TRIGGER_SITE "")
+set (CTEST_DROP_SITE "unittest.lcsr.jhu.edu")
+set (CTEST_DROP_LOCATION "/CDash/submit.php?project=cisst")
+set (CTEST_DROP_SITE_CDASH TRUE)
 
 # Set maximum execution time
 set (DART_TESTING_TIMEOUT 120) # in seconds

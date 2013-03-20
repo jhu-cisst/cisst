@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-11-12
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -35,6 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <stdexcept>
 
 
+#define VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(goal, actual, tolerance) \
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(actual), static_cast<double>(tolerance));
 
 template <class _containerType>
 void RemoveQuasiZero(_containerType & container) {
@@ -104,12 +106,12 @@ class vctGenericContainerTest
             goal += (*iter1);
         }
         CPPUNIT_ASSERT(!cmnTypeTraits<value_type>::IsNaN(resultScalar));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(goal, resultScalar, tolerance);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(goal, resultScalar, tolerance);
 
         container2.Zeros();
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(0), container2.SumOfElements(), tolerance);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(value_type(0), container2.SumOfElements(), tolerance);
         container2 = value_type(1);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(container2.size()), container2.SumOfElements(), tolerance);
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(value_type(container2.size()), container2.SumOfElements(), tolerance);
 
         resultScalar = container1.ProductOfElements();
         goal = value_type(1);
@@ -117,10 +119,10 @@ class vctGenericContainerTest
             goal *= (*iter1);
         }
         CPPUNIT_ASSERT(!cmnTypeTraits<value_type>::IsNaN(resultScalar));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(goal, resultScalar, tolerance * container1.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(resultScalar), static_cast<double>(tolerance * container1.size()));
 
         container2.SetAll(value_type(1));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(1), container2.ProductOfElements(), tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(1.0), static_cast<double>(container2.ProductOfElements()), static_cast<double>(tolerance));
 
         resultScalar = container1.L1Norm();
         goal = value_type(0);
@@ -129,12 +131,12 @@ class vctGenericContainerTest
             goal += abs;
         }
         CPPUNIT_ASSERT(!cmnTypeTraits<value_type>::IsNaN(resultScalar));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(goal, resultScalar, tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), static_cast<double>(resultScalar), static_cast<double>(tolerance));
 
         container2 = value_type(0);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(0), container2.L1Norm(), tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(0), container2.L1Norm(), tolerance);
         container2.SetAll(value_type(1));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(container2.size()), container2.L1Norm(), tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(container2.size()), container2.L1Norm(), tolerance);
 
         resultScalar = container1.LinfNorm();
         goal = cmnTypeTraits<value_type>::MinPositiveValue();
@@ -145,7 +147,7 @@ class vctGenericContainerTest
             }
         }
         CPPUNIT_ASSERT(!cmnTypeTraits<value_type>::IsNaN(resultScalar));
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(goal, resultScalar, tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(goal), resultScalar, tolerance);
         resultScalar = container1.MaxAbsElement();
 
         container2.Zeros();
@@ -665,7 +667,7 @@ class vctGenericContainerTest
 
     /*! Test CioSiCi based operations. */
     template <class _containerType1, class _containerType2, class _containerType3>
-        static void TestCioSiCiOperations(
+    static void TestCioSiCiOperations(
         const _containerType1 & container1,
         const typename _containerType1::value_type scalar,
         const _containerType2 & container2,
@@ -687,6 +689,37 @@ class vctGenericContainerTest
         iter3 = container3.begin();
         for (; iter1 != end1; ++iter1, ++iter2, ++iter3) {
             CPPUNIT_ASSERT_DOUBLES_EQUAL((*iter3), (*iter2) + scalar * (*iter1), tolerance);
+        }
+    }
+
+
+    /*! Test CioCiCi based operations. */
+    template <class _containerType1, class _containerType2, class _containerType3, class _containerType4>
+    static void TestCioCiCiOperations(
+        const _containerType1 & container1,
+        const _containerType2 & container2,
+        const _containerType3 & container3,
+        _containerType4 & container4,
+        typename _containerType1::value_type tolerance
+        = cmnTypeTraits<typename _containerType1::value_type>::Tolerance())
+    {
+        CPPUNIT_ASSERT(container1.size() == container2.size());
+        CPPUNIT_ASSERT(container1.size() == container3.size());
+
+        const typename _containerType1::const_iterator end1 = container1.end();
+        typename _containerType1::const_iterator iter1;
+        typename _containerType2::const_iterator iter2;
+        typename _containerType3::const_iterator iter3;
+        typename _containerType4::const_iterator iter4;
+
+        container4.Assign(container1);
+        container4.AddElementwiseProductOf(container2, container3);
+        iter1 = container1.begin();
+        iter2 = container2.begin();
+        iter3 = container3.begin();
+        iter4 = container4.begin();
+        for (; iter1 != end1; ++iter1, ++iter2, ++iter3, ++iter4) {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((*iter4), (*iter1) + (*iter2) * (*iter3), tolerance);
         }
     }
 

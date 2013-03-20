@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstNumerical
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -50,37 +50,34 @@ set (HEADER_FILES
 if (CISST_HAS_CISSTNETLIB)
   set (SOURCE_FILES
        ${SOURCE_FILES}
-       nmrLDPSolver.cpp
-#      lsi solver is included in nmrLSqLin
-#      nmrLSISolver.cpp
-       nmrLSqLin.cpp
        nmrPInverse.cpp
        nmrPInverseEconomy.cpp
        nmrRegistrationRigid.cpp
        nmrSVD.cpp
        nmrSVDEconomy.cpp
+       nmrLDPSolver.cpp
+       # deprecated nmrLSISolver.cpp
+       nmrLSqLin.cpp
       )
   set (HEADER_FILES
        ${HEADER_FILES}
        nmrNetlib.h
        nmrInverse.h
-       nmrLDPSolver.h
-#     dgels solver is include in nmrLSqLin
-#      nmrLSSolver.h
-#     lsi solver is include in nmrLSqLin
-#      nmrLSISolver.h
-       nmrLSqLin.h
        nmrLU.h
-#      nmrLUSolver.h
-       nmrHFTISolver.h
-       nmrNNLSSolver.h
-       nmrCallBack.h
+       # deprecated: nmrLUSolver.h
        nmrPInverse.h
        nmrPInverseEconomy.h
        nmrRegistrationRigid.h
        nmrSVD.h
        nmrSVDEconomy.h
-#       nmrSVDSolver.h
+       # deprecated nmrSVDSolver.h
+       nmrLDPSolver.h
+       nmrLSSolver.h
+       # deprecated nmrLSISolver.h
+       nmrLSqLin.h
+       nmrHFTISolver.h
+       nmrNNLSSolver.h
+       nmrCallBack.h
        nmrSVDRSSolver.h
        )
 endif (CISST_HAS_CISSTNETLIB)

@@ -99,12 +99,11 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
             
     }
     std::cout << "Quitting ..." << std::endl;
+
     // cleanup
     localManager->KillAll();
     localManager->WaitForStateAll(mtsComponentState::FINISHED, 20.0 * cmn_s);
     localManager->Cleanup();
-
-    delete globalComponentManager;
 
     return 0;
 }

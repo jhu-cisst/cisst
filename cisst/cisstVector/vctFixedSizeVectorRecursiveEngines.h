@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2003-08-18
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-08-18
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -24,14 +24,14 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctFixedSizeVectorRecursiveEngines_h
 
 /*!
-  \file 
+  \file
   \brief Declaration of vctFixedSizeVectorRecursiveEngines
  */
 
 
 /*!
   \brief Container class for the recursive engines.
-  
+
   Recursive engines can be used for fixed size vectors (see
   vctFixedSizeVector) to apply similar operations (see
   vctBinaryOperations, vctUnaryOperations,
@@ -76,23 +76,23 @@ http://www.cisst.org/cisst/license.txt.
 template <vct::size_type _size>
 class vctFixedSizeVectorRecursiveEngines {
 
- public:    
-    
+ public:
+
     /*!  \brief Implement operation of the form \f$v_o = op(v_{i1},
       v_{i2})\f$ for fixed size vectors
 
       This class uses template specialization to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_o = \mathrm{op}(v_{i1}, v_{i2})
       \f]
-      
+
       where \f$v_o\f$ is the output vector, and \f$v_{i1}, v_{i2}\f$
       are input vectors, all of an equal fixed size, determined at
       compilation time, \em op stands for the a binary operation
       performed elementwise between \f$v_{i1}\f$ and \f$v_{i2}\f$, and
       whose result is stored elementwise into \f$v_o\f$.
-      
+
       The operation type operationType must have a static method with
       the signature
 
@@ -108,18 +108,18 @@ class vctFixedSizeVectorRecursiveEngines {
       defined for the class operationType.
 
       For examples of binary operations, see vctBinaryOperations.h.
-      
+
       Usage example for vctFixedSizeVectorRecursiveEngines::VoViVi:
       <PRE>
       enum {SIZE = 3};
       int input1[SIZE];
       float input2[SIZE];
       double output[SIZE];
-      
+
       vctFixedSizeVectorRecursiveEngines<SIZE>::VoViVi<vctBinaryOperations<int,float,double>::Addition, SIZE>::Unfold(output, input1, input2);
       </PRE>
       stores the sum of elements from input1 and input2 into output.
-      
+
       \param _elementOperationType The type of the binary operation.
 
       \sa vctFixedSizeVectorRecursiveEngines
@@ -142,7 +142,7 @@ class vctFixedSizeVectorRecursiveEngines {
         */
         template <class _outputVectorType, class _inputVector1Type, class _inputVector2Type>
         static inline void Unfold(_outputVectorType & output,
-                                  const _inputVector1Type & input1, 
+                                  const _inputVector1Type & input1,
                                   const _inputVector2Type & input2) {
             RecursiveStep::Unfold(output, input1, input2);
             output[_size-1] = _elementOperationType::Operate(input1[_size-1], input2[_size-1]);
@@ -156,11 +156,11 @@ class vctFixedSizeVectorRecursiveEngines {
       v_i)\f$ for fixed size vectors
 
       This class uses template specialization to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_{io} = \mathrm{op}(v_{io}, v_{i})
       \f]
-      
+
       where \f$v_{io}\f$ is the input output vector, and \f$v_{i}\f$
       is the second input vector, all of an equal fixed size,
       determined at compilation time, \em op stands for the a binary
@@ -188,7 +188,7 @@ class vctFixedSizeVectorRecursiveEngines {
         \param input2 The second input vector.
         */
         template <class _inputOutputVectorType, class _inputVector2Type>
-        static inline void Unfold(_inputOutputVectorType & inputOutput, 
+        static inline void Unfold(_inputOutputVectorType & inputOutput,
                                   const _inputVector2Type & input2) {
             RecursiveStep::Unfold(inputOutput, input2);
             _elementOperationType::Operate(inputOutput[_size-1], input2[_size-1]);
@@ -200,18 +200,18 @@ class vctFixedSizeVectorRecursiveEngines {
       v_{2})\f$ for fixed size vectors
 
       This class uses template specialization to perform binary vector operations
-      of the form 
+      of the form
       \f[
       (v_{1}, v_{2}) = \mathrm{op}(v_{1}, v_{2})
       \f]
-      
+
       where both \f$v_{1}, v_{2}\f$ are input and output vectors
       of an equal fixed size, determined at compilation time.  The
       operation is evaluated elementwise, that is, \f$(v_{1}[i], v_{2}[i] =
       \mathrm{op}(v_{1}[i], v_{2}[i])\f$.  The typical operation in this case
       is swapping the elements of the two vectors.
-      
-      \param _elementOperationType The type of the binary operation that inputs and 
+
+      \param _elementOperationType The type of the binary operation that inputs and
       rewrites corresponding elements in both vectors.
 
       \sa vctFixedSizeVectorRecursiveEngines
@@ -222,7 +222,7 @@ class vctFixedSizeVectorRecursiveEngines {
         typedef typename
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template VioVio<_elementOperationType> RecursiveStep;
-        
+
         /*! Unfold the recursion.  Performs the operation
         _elementOperationType elementwise on the last elements of the
         input/output vector(s) and call Unfold for the _size - 1
@@ -232,7 +232,7 @@ class vctFixedSizeVectorRecursiveEngines {
         \param inputOutput2 The second input-output vector.
         */
         template <class _inputOutputVector1Type, class _inputOutputVector2Type>
-        static inline void Unfold(_inputOutputVector1Type & inputOutput1, 
+        static inline void Unfold(_inputOutputVector1Type & inputOutput1,
                                   _inputOutputVector2Type & inputOutput2) {
             RecursiveStep::Unfold(inputOutput1, inputOutput2);
             _elementOperationType::Operate(inputOutput1[_size-1], inputOutput2[_size-1]);
@@ -243,19 +243,19 @@ class vctFixedSizeVectorRecursiveEngines {
 
     /*!  \brief Implement operation of the form \f$vo = op(vi, si)\f$ for
       fixed size vectors
-      
+
       This class uses template specialization to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_o = \mathrm{op}(v_i, s_i)
       \f]
-      
+
       where \f$v_o\f$ is the output vector, and \f$v_i, s_i\f$ are
       input vector and scalar, all vectors are of an equal fixed size,
       determined at compilation time, \em op stands for the a binary
       operation performed elementwise between \f$v_i\f$ and \f$s_i\f$,
       and whose result is stored elementwise into \f$v_o\f$.
-      
+
       The operation type operationType must have a static method with
       the signature
 
@@ -270,19 +270,19 @@ class vctFixedSizeVectorRecursiveEngines {
       each of the vector types.  However, they may need to be defined
       for the class operationType.
 
-      For examples of binary operations, see vctBinaryOperations.h . 
-      
+      For examples of binary operations, see vctBinaryOperations.h .
+
       Usage example for vctFixedSizeVectorRecursiveEngines::VoViSi:
       <PRE>
       enum {SIZE = 3};
       int input1[SIZE];
       float a;
       double output[SIZE];
-      
+
       vctFixedSizeVectorRecursiveEngines<SIZE>::VoViSi<vctBinaryOperations<int,float,double>::Addition>::Unfold(output, input1, scalar);
       </PRE>
       stores the sum of elements of input1 and s into output.
-      
+
       \param _elementOperationType The type of the binary operation.
 
       \sa vctFixedSizeVectorRecursiveEngines
@@ -293,7 +293,7 @@ class vctFixedSizeVectorRecursiveEngines {
         typedef typename
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template VoViSi<_elementOperationType> RecursiveStep;
-        
+
         /*! Unfold the recursion.  Performs the operation
         _elementOperationType elementwise on the last elements of the
         input vector and scalar and call Unfold for the _size - 1
@@ -305,7 +305,7 @@ class vctFixedSizeVectorRecursiveEngines {
         */
         template <class _outputVectorType, class _inputVectorType, class _inputScalarType>
         static inline void Unfold(_outputVectorType & output,
-                                  const _inputVectorType & inputVector, 
+                                  const _inputVectorType & inputVector,
                                   const _inputScalarType inputScalar) {
             RecursiveStep::Unfold(output, inputVector, inputScalar);
             output[_size-1] = _elementOperationType::Operate(inputVector[_size-1], inputScalar);
@@ -315,19 +315,19 @@ class vctFixedSizeVectorRecursiveEngines {
 
     /*!  \brief Implement operation of the form \f$v_o = op(s_i,
       v_i)\f$ for fixed size vectors
-      
+
       This class uses template specialization to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_o = \mathrm{op}(s_i, v_i)
       \f]
-      
+
       where \f$v_o\f$ is the output vector, and \f$s_i, v_i\f$ are
       input scalar and vector, all vectors are of an equal fixed size,
       determined at compilation time, \em op stands for the a binary
       operation performed elementwise between \f$s_i\f$ and \f$v_i\f$,
       and whose result is stored elementwise into \f$v_o\f$.
-      
+
       The operation type operationType must have a static method with
       the signature
 
@@ -342,19 +342,19 @@ class vctFixedSizeVectorRecursiveEngines {
       each of the vector types.  However, they may need to be defined
       for the class operationType.
 
-      For examples of binary operations, see vctBinaryOperations.h . 
-      
+      For examples of binary operations, see vctBinaryOperations.h .
+
       Usage example for vctFixedSizeVectorRecursiveEngines::VoSiVi:
       <PRE>
       enum {SIZE = 3};
       int input1[SIZE];
       float a;
       double output[SIZE];
-      
+
       vctFixedSizeVectorRecursiveEngines<SIZE>::VoSiVi<vctBinaryOperations<int,float,double>::Addition>::Unfold(output, scalar, input1);
       </PRE>
       stores the sum of elements of s and input1 into output.
-      
+
       \param _elementOperationType The type of the binary operation.
 
       \sa vctFixedSizeVectorRecursiveEngines
@@ -365,7 +365,7 @@ class vctFixedSizeVectorRecursiveEngines {
         typedef typename
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template VoSiVi<_elementOperationType> RecursiveStep;
-        
+
         /*! Unfold the recursion.  Performs the operation
         _elementOperationType elementwise on the last elements of the
         input vector and scalar and call Unfold for the _size - 1
@@ -377,7 +377,7 @@ class vctFixedSizeVectorRecursiveEngines {
         */
         template <class _outputVectorType, class _inputScalarType, class _inputVectorType>
         static inline void Unfold(_outputVectorType & output,
-                                  const _inputScalarType & inputScalar, 
+                                  const _inputScalarType & inputScalar,
                                   const _inputVectorType inputVector) {
             RecursiveStep::Unfold(output, inputScalar, inputVector);
             output[_size-1] = _elementOperationType::Operate(inputScalar, inputVector[_size-1]);
@@ -396,7 +396,7 @@ class vctFixedSizeVectorRecursiveEngines {
       \f[
       v_{io} = \mathrm{op}(v_{io}, s_{i})
       \f]
-      
+
       where \f$v_{io}\f$ is the input output vector, and \f$s_{i}\f$
       is the scalar input.  The vector has a fixed size, determined at
       compilation time, \em op stands for the binary operation
@@ -414,7 +414,7 @@ class vctFixedSizeVectorRecursiveEngines {
         typedef typename
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template VioSi<_elementOperationType> RecursiveStep;
-        
+
         /*! Unfold the recursion.  Performs the operation
           _elementOperationType elementwise on the last elements of the
           input output vector and the input scalar and call Unfold for
@@ -424,7 +424,7 @@ class vctFixedSizeVectorRecursiveEngines {
         \param inputScalar The input scalar (second operand).
         */
         template <class _inputOutputVectorType, class _inputScalarType>
-        static inline void Unfold(_inputOutputVectorType & inputOutput, 
+        static inline void Unfold(_inputOutputVectorType & inputOutput,
                                   const _inputScalarType inputScalar) {
             RecursiveStep::Unfold(inputOutput, inputScalar);
             _elementOperationType::Operate(inputOutput[_size-1], inputScalar);
@@ -435,13 +435,13 @@ class vctFixedSizeVectorRecursiveEngines {
 
     /*!  \brief Implement operation of the form \f$v_o = op(v_i)\f$ for
       fixed size vectors
-      
+
       This class uses template specialization to perform unary vector operations
-      of the form 
+      of the form
       \f[
       v_{o} = \mathrm{op}(v_{i})
       \f]
-      
+
       where \f$v_{o}\f$ is the output vector, and \f$v_{i}\f$ is the
       input vector both of a fixed size, determined at compilation
       time, \em op stands for the a unary operation performed
@@ -458,7 +458,7 @@ class vctFixedSizeVectorRecursiveEngines {
         typedef typename
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template VoVi<_elementOperationType> RecursiveStep;
-        
+
         /*! Unfold the recursion.  Performs the operation
         _elementOperationType elementwise on the last elements of the
         input vector and call Unfold for the _size - 1 elements left
@@ -468,7 +468,7 @@ class vctFixedSizeVectorRecursiveEngines {
         \param inputVector The input vector.
         */
         template <class _outputVectorType, class _inputVectorType>
-        static inline void Unfold(_outputVectorType & outputVector, 
+        static inline void Unfold(_outputVectorType & outputVector,
                                   const _inputVectorType & inputVector) {
             RecursiveStep::Unfold(outputVector, inputVector);
             outputVector[_size-1] = _elementOperationType::Operate(inputVector[_size-1]);
@@ -479,14 +479,14 @@ class vctFixedSizeVectorRecursiveEngines {
 
     /*!  \brief Implement operation of the form \f$v_{io} =
       op(v_{io})\f$ for fixed size vectors
-      
+
       This class uses template specialization to perform unary store
       back vector operations of the form
 
       \f[
       v_{io} = \mathrm{op}(v_{io})
       \f]
-      
+
       where \f$v_{io}\f$ is the input output vector.  The vector has a
       fixed size, determined at compilation time, \em op stands for
       the unary operation performed elementwise on \f$v_{io}\f$ and
@@ -502,7 +502,7 @@ class vctFixedSizeVectorRecursiveEngines {
         typedef typename
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template Vio<_elementOperationType> RecursiveStep;
-        
+
         /*! Unfold the recursion.  Performs the operation
         _elementOperationType elementwise on the last elements of the
         input output vector and call Unfold for the _size - 1 elements
@@ -522,14 +522,14 @@ class vctFixedSizeVectorRecursiveEngines {
 
     /*!  \brief Implement operation of the form \f$s_o =
       op_{incr}(op(v_i))\f$ for fixed size vectors
-      
+
       This class uses template specialization to perform incremental
       unary vector operations of the form
 
       \f[
       s_o = \mathrm{op_{incr}(\mathrm{op}(v_i))}
       \f]
-      
+
       where \f$v_i\f$ is the input vector and \f$s_o\f$ is the scalar
       output.  The vector has a fixed size, determined at compilation
       time, \em op stands for the unary operation performed
@@ -537,7 +537,7 @@ class vctFixedSizeVectorRecursiveEngines {
       as input for \f$op_{incr}\f$.  For a vector of size 3, the
       result is \f$s_o = op_{incr}(op_{incr}(op(v[1]), op(v[0])),
       op(v[2])) \f$.
-      
+
       \param _incrementalOperationType The type of the incremental
       operation.
 
@@ -552,7 +552,7 @@ class vctFixedSizeVectorRecursiveEngines {
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template SoVi<_incrementalOperationType, _elementOperationType> RecursiveStep;
         typedef typename _incrementalOperationType::OutputType OutputType;
-        
+
         /*! Unfold the recursion.  Performs the operation
         _elementOperationType elementwise on the last elements of the
         input vector and call Unfold for the _size - 1 elements left
@@ -570,21 +570,21 @@ class vctFixedSizeVectorRecursiveEngines {
                           _elementOperationType::Operate(inputVector[_size-1]));
         }
     };
-    
+
 
 
 
 
     /*!  \brief Implement operation of the form \f$s_o =
       op_{incr}(op(v_{i1}, v_{i2}))\f$ for fixed size vectors
-      
+
       This class uses template specialization to perform incremental
       binary vector operations of the form
 
       \f[
       s_o = \mathrm{op_{incr}(\mathrm{op}(v_{i1}, v_{i2}))}
       \f]
-      
+
       where \f$v_{i1}\f$ and \f$v_{i2}\f$ are the input vectors and
       \f$s_o\f$ is the scalar output.  The vectors have a fixed size,
       determined at compilation time, \em op stands for the unary
@@ -593,10 +593,10 @@ class vctFixedSizeVectorRecursiveEngines {
       \f$op_{incr}\f$.  For a vector of size 3, the result is \f$s_o =
       op_{incr}(op_{incr}(op(v1[1], v2[1]), op(v1[0], v2[0])),
       op(v1[2], v2[2]))\f$.
-      
+
       \param _incrementalOperationType The type of the incremental
       operation.
-      
+
       \param _elementOperationType The type of the unary operation.
 
       \sa vctFixedSizeVectorRecursiveEngines
@@ -608,7 +608,7 @@ class vctFixedSizeVectorRecursiveEngines {
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template SoViVi<_incrementalOperationType, _elementOperationType> RecursiveStep;
         typedef typename _incrementalOperationType::OutputType OutputType;
-        
+
         /*! Unfold the recursion.  Performs the operation
         _elementOperationType elementwise on the last elements of the
         input vectors and call Unfold for the _size - 1 elements left
@@ -636,37 +636,37 @@ class vctFixedSizeVectorRecursiveEngines {
 
     /*!  \brief Implement operation of the form \f$v_{io} =
       op_{io}(v_{io}, op_{sv}(s, v_i))\f$ for fixed size vectors
-      
+
       This class uses template specialization to perform store-back
       vector-scalar-vector operations
 
       \f[
       v_{io} = \mathrm{op_{io}}(V_{io}, \mathrm{op_{sv}}(s, v_i))
       \f]
-      
+
       where \f$v_{io}\f$ is an input-output (store-back) vector;
-	  \f$s\f$ is a scalar; and \f$v_i\f$ is an input vector.  A
-	  typical example is: \f$v_{io} += s \cdot v_i\f$.  The vectors
-	  have a fixed size, determined at compilation time; \f$op_{sv}\f$
-	  is an operation between \f$s\f$ and the elements of \f$v_i\f$;
-	  \f$op_{io}\f$ is an operation between the output of
-	  \f$op_{sv}\f$ and the elements of \f$v_{io}\f$.
-      
+      \f$s\f$ is a scalar; and \f$v_i\f$ is an input vector.  A
+      typical example is: \f$v_{io} += s \cdot v_i\f$.  The vectors
+      have a fixed size, determined at compilation time; \f$op_{sv}\f$
+      is an operation between \f$s\f$ and the elements of \f$v_i\f$;
+      \f$op_{io}\f$ is an operation between the output of
+      \f$op_{sv}\f$ and the elements of \f$v_{io}\f$.
+
       \param _ioOperationType The type of the store-back operation.
-      
+
       \param _scalarVectorElementOperationType The type of the
-	  operation between scalar and input vector.
+      operation between scalar and input vector.
 
       \sa vctFixedSizeVectorRecursiveEngines
     */
-	template <class _ioElementOperationType, class _scalarVectorElementOperationType>
-	class VioSiVi {
-	public:
-		typedef typename
+    template <class _ioElementOperationType, class _scalarVectorElementOperationType>
+    class VioSiVi {
+    public:
+        typedef typename
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template VioSiVi<_ioElementOperationType, _scalarVectorElementOperationType>
         RecursiveStep;
-        
+
         /*! Unfold the recursion.  Performs the operation
         _elementOperationType elementwise on the last elements of the
         input vector and the input scalar and call Unfold for the
@@ -683,28 +683,90 @@ class vctFixedSizeVectorRecursiveEngines {
         for _elementOperationType).
         */
         template <class _ioVectorType, class _inputScalarType, class _inputVectorType>
-        static inline void Unfold(_ioVectorType & ioVector, 
+        static inline void Unfold(_ioVectorType & ioVector,
                                   const _inputScalarType & inputScalar, const _inputVectorType & inputVector)
-		{
-			RecursiveStep::Unfold(ioVector, inputScalar, inputVector);
-			_ioElementOperationType::Operate( ioVector[_size-1],
-				_scalarVectorElementOperationType::Operate(inputScalar, inputVector[_size-1]) );
-		}
+        {
+            RecursiveStep::Unfold(ioVector, inputScalar, inputVector);
+            _ioElementOperationType::Operate( ioVector[_size-1],
+                _scalarVectorElementOperationType::Operate(inputScalar, inputVector[_size-1]) );
+        }
 
-	};
+    };
+
+
+
+    /*!  \brief Implement operation of the form \f$v_{io} =
+      op_{io}(v_{io}, op_{vv}(v_{i1}, v_{i2}))\f$ for fixed size vectors
+
+      This class uses template specialization to perform store-back
+      vector-vector-vector operations
+
+      \f[
+      v_{io} = \mathrm{op_{io}}(V_{io}, \mathrm{op_{vv}}(v_{i1}, v_{i2}))
+      \f]
+
+      where \f$v_{io}\f$ is an input-output (store-back) vector;
+      \f$v_{i1}\f$ and \f$v_{i2}\f$ are input vectors.  A typical
+      example is: \f$v_{io} += v_{i1} \cdot v_{i2}\f$.  The vectors
+      have a fixed size, determined at compilation time; \f$op_{vv}\f$
+      is an element wise operation between the elements of
+      \f$v_{i1}\f$ and the elements of \f$v_{i2}\f$; \f$op_{io}\f$ is
+      an operation between the output of \f$op_{vv}\f$ and the
+      elements of \f$v_{io}\f$.
+
+      \param _ioOperationType The type of the store-back operation.
+
+      \param _vectorElementOperationType The type of the
+      operation between scalar and input vector.
+
+      \sa vctFixedSizeVectorRecursiveEngines
+    */
+    template <class _ioElementOperationType, class _vectorElementOperationType>
+    class VioViVi {
+    public:
+        typedef typename
+        vctFixedSizeVectorRecursiveEngines<_size-1>
+        ::template VioViVi<_ioElementOperationType, _vectorElementOperationType>
+        RecursiveStep;
+
+        /*! Unfold the recursion.  Performs the operation
+        _elementOperationType elementwise on the last elements of the
+        input vector and the input scalar and call Unfold for the
+        _size - 1 elements left (i.e. unfold the recursive calls).
+        The incremental operation is applied to the result of the
+        recursive Unfold call and the result of
+        _elementOperationType(inputVector[_size],
+        inputScalar[_size]).
+
+        \param inputVector The input vector (first operand for
+        _elementOperationType).
+
+        \param inputScalar The input scalar (second operand
+        for _elementOperationType).
+        */
+        template <class _ioVectorType, class _inputVectorType1, class _inputVectorType2>
+        static inline void Unfold(_ioVectorType & ioVector,
+                                  const _inputVectorType1 & vector1, const _inputVectorType2 & vector2)
+        {
+            RecursiveStep::Unfold(ioVector, vector1, vector2);
+            _ioElementOperationType::Operate( ioVector[_size-1],
+                _vectorElementOperationType::Operate(vector1[_size-1], vector2[_size-1]) );
+        }
+
+    };
 
 
 
     /*!  \brief Implement operation of the form \f$s_o =
       op_{incr}(op(v_i, s_i))\f$ for fixed size vectors
-      
+
       This class uses template specialization to perform incremental
       binary vector operations of the form
 
       \f[
       s_o = \mathrm{op_{incr}(\mathrm{op}(v_i, s_i))}
       \f]
-      
+
       where \f$v_i\f$ and \f$s_i\f$ are the input vector and scalar
       and \f$s_o\f$ is the scalar output.  The vector has a fixed
       size, determined at compilation time, \em op stands for the
@@ -712,10 +774,10 @@ class vctFixedSizeVectorRecursiveEngines {
       and whose result are used incrementally as input for
       \f$op_{incr}\f$.  For a vector of size 3, the result is \f$s_o =
       op_{incr}(op_{incr}(op(v[1], s), op(v[0], s)), op(v, s))\f$.
-      
+
       \param _incrementalOperationType The type of the incremental
       operation.
-      
+
       \param _elementOperationType The type of the unary operation.
 
       \sa vctFixedSizeVectorRecursiveEngines
@@ -727,7 +789,7 @@ class vctFixedSizeVectorRecursiveEngines {
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template SoViSi<_incrementalOperationType, _elementOperationType> RecursiveStep;
         typedef typename _incrementalOperationType::OutputType OutputType;
-        
+
         /*! Unfold the recursion.  Performs the operation
         _elementOperationType elementwise on the last elements of the
         input vector and the input scalar and call Unfold for the
@@ -758,14 +820,14 @@ class vctFixedSizeVectorRecursiveEngines {
 
     /*!  \brief Implement operation of the form \f$s_o =
       op_{incr}(op(v_o, s_i)\f$ for fixed size vectors.
-      
+
       This class uses template specialization to perform incremental
       binary vector operations of the form
 
       \f[
       s_o = \mathrm{op_{incr}(v_{o}, s_i)}
       \f]
-      
+
       where \f$v_{o}\f$ is the output vector and \f$s_o\f$ and
       \f$s_i\f$ are the scalar output and input.  The vector has a
       fixed size, determined at compilation time. \f$op_{incr}\f$ is
@@ -777,7 +839,7 @@ class vctFixedSizeVectorRecursiveEngines {
       This engines is currently used by vctFixedSizeVector::SetAll
       with vctBinaryOperations::SecondOperand.  For a vector of size
       3, the result is: \f$s_o = v_o[2] = v_o[1] = v_o[0] = s_i\f$.
-      
+
       \param _incrementalOperationType The type of the incremental
       operation.
 
@@ -790,7 +852,7 @@ class vctFixedSizeVectorRecursiveEngines {
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template SoVoSi<_incrementalOperationType> RecursiveStep;
         typedef typename _incrementalOperationType::OutputType OutputType;
-        
+
         /*! Unfold the recursion.  The incremental operation is
         applied to the result of the recursive Unfold call and the
         result of _incrementalOperationType(outputVector[_size],
@@ -820,7 +882,7 @@ class vctFixedSizeVectorRecursiveEngines {
     {
     public:
         typedef typename vctFixedSizeVectorRecursiveEngines<_size-1>::MinAndMax RecursiveStep;
-        
+
         template <class _inputVectorType>
         static inline void Unfold(const _inputVectorType & inputVector,
                                   typename _inputVectorType::value_type & minValue,
@@ -845,7 +907,7 @@ class vctFixedSizeVectorRecursiveEngines {
     public:
         typedef typename
         vctFixedSizeVectorRecursiveEngines<_size-1>::SelectByIndex RecursiveStep;
-        
+
         /*! Unfold the recursion: call Unfold for the first (_size - 1)
         elements, then assign value to the _size element.
 
@@ -890,9 +952,9 @@ class vctFixedSizeVectorRecursiveEngines {
         typedef typename
         vctFixedSizeVectorRecursiveEngines<_size-1>
         ::template Find<_conditionOperationType, _currentIndex+1> RecursiveStep;
-        
+
         template <class _inputVectorType, class _inputScalarType>
-        static inline vct::index_type Unfold(const _inputVectorType * inputVector, 
+        static inline vct::index_type Unfold(const _inputVectorType * inputVector,
                                              const _inputScalarType & inputScalar) {
             return ( _conditionOperationType::Operarate(inputVector[_currentIndex], inputScalar) )
                 ? _currentIndex
@@ -917,13 +979,13 @@ class vctFixedSizeVectorRecursiveEngines<0>
     public:
         template <class _outputVectorType, class _inputVector1Type, class _inputVector2Type>
         static inline void Unfold(_outputVectorType & CMN_UNUSED(output),
-                                  const _inputVector1Type & CMN_UNUSED(input1), 
+                                  const _inputVector1Type & CMN_UNUSED(input1),
                                   const _inputVector2Type & CMN_UNUSED(input2)) {
             return;
         }
     };
-    
-    
+
+
     template <class _elementOperationType>
     class VioVi {
     public:
@@ -934,7 +996,7 @@ class vctFixedSizeVectorRecursiveEngines<0>
         }
     };
 
-    
+
     template <class _elementOperationType>
     class VioVio {
     public:
@@ -944,54 +1006,54 @@ class vctFixedSizeVectorRecursiveEngines<0>
             return;
         }
     };
-    
-    
+
+
     template <class _elementOperationType>
     class VoViSi {
     public:
         template <class _outputVectorType, class _inputVectorType, class _inputScalarType>
         static inline void Unfold(_outputVectorType & CMN_UNUSED(output),
-                                  const _inputVectorType & CMN_UNUSED(inputVector), 
+                                  const _inputVectorType & CMN_UNUSED(inputVector),
                                   const _inputScalarType & CMN_UNUSED(inputScalar)) {
             return;
         }
     };
-    
-    
+
+
     template <class _elementOperationType>
     class VoSiVi {
     public:
         template <class _outputVectorType, class _inputScalarType, class _inputVectorType>
         static inline void Unfold(_outputVectorType & CMN_UNUSED(output),
-                                  const _inputScalarType & CMN_UNUSED(inputScalar), 
+                                  const _inputScalarType & CMN_UNUSED(inputScalar),
                                   const _inputVectorType & CMN_UNUSED(inputVector)) {
             return;
         }
     };
-    
-    
+
+
     template <class _elementOperationType>
     class VioSi {
     public:
         template <class _inputOutputVectorType, class _inputScalarType>
-        static inline void Unfold(_inputOutputVectorType & CMN_UNUSED(inputOutput), 
+        static inline void Unfold(_inputOutputVectorType & CMN_UNUSED(inputOutput),
                                   const _inputScalarType & CMN_UNUSED(inputScalar)) {
             return;
         }
     };
-    
-    
+
+
     template <class _elementOperationType>
     class VoVi {
     public:
         template <class _outputVectorType, class _inputVectorType>
-        static inline void Unfold(_outputVectorType & CMN_UNUSED(outputVector), 
+        static inline void Unfold(_outputVectorType & CMN_UNUSED(outputVector),
                                   const _inputVectorType & CMN_UNUSED(inputVector)) {
             return;
         }
     };
-    
-    
+
+
     template <class _elementOperationType>
     class Vio {
     public:
@@ -1000,8 +1062,8 @@ class vctFixedSizeVectorRecursiveEngines<0>
             return;
         }
     };
-    
-    
+
+
     template <class _incrementalOperationType, class _elementOperationType>
     class SoVi {
     public:
@@ -1011,8 +1073,8 @@ class vctFixedSizeVectorRecursiveEngines<0>
             return _incrementalOperationType::NeutralElement();
         }
     };
-    
-    
+
+
     template <class _incrementalOperationType, class _elementOperationType>
     class SoViVi {
     public:
@@ -1024,7 +1086,7 @@ class vctFixedSizeVectorRecursiveEngines<0>
         }
     };
 
-    
+
     class MinAndMax
     {
     public:
@@ -1036,8 +1098,8 @@ class vctFixedSizeVectorRecursiveEngines<0>
             maxValue = minValue = inputVector[0];
         }
     };
-    
-    
+
+
     class SelectByIndex {
     public:
         template <class _outputVectorType, class _inputVectorType, class _indexVectorType>
@@ -1048,7 +1110,7 @@ class vctFixedSizeVectorRecursiveEngines<0>
             return;
         }
     };
-    
+
 
     template <class _incrementalOperationType, class _elementOperationType>
     class SoViSi {
@@ -1060,22 +1122,34 @@ class vctFixedSizeVectorRecursiveEngines<0>
             return _incrementalOperationType::NeutralElement();
         }
     };
-    
-    
-	template <class _ioElementOperationType, class _scalarVectorElementOperationType>
-	class VioSiVi {
-	public:
+
+
+    template <class _ioElementOperationType, class _scalarVectorElementOperationType>
+    class VioSiVi {
+    public:
         template <class _ioVectorType, class _inputScalarType, class _inputVectorType>
-        static inline void Unfold(_ioVectorType & CMN_UNUSED(ioVector), 
+        static inline void Unfold(_ioVectorType & CMN_UNUSED(ioVector),
                                   const _inputScalarType & CMN_UNUSED(inputScalar),
                                   const _inputVectorType & CMN_UNUSED(inputVector))
-		{
-			return;
-		}
-        
-	};
-  
-  
+        {
+            return;
+        }
+    };
+
+
+    template <class _ioElementOperationType, class _vectorElementOperationType>
+    class VioViVi {
+    public:
+        template <class _ioVectorType, class _inputVectorType1, class _inputVectorType2>
+        static inline void Unfold(_ioVectorType & CMN_UNUSED(ioVector),
+                                  const _inputVectorType1 & CMN_UNUSED(vector1),
+                                  const _inputVectorType2 & CMN_UNUSED(vector2))
+        {
+            return;
+        }
+    };
+
+
     template <class _incrementalOperationType>
     class SoVoSi {
     public:
@@ -1086,19 +1160,19 @@ class vctFixedSizeVectorRecursiveEngines<0>
             return OutputType(inputScalar);
         }
     };
-    
-    
+
+
     template <class _conditionOperationType, vct::index_type _currentIndex>
     class Find
     {
     public:
         template <class _inputVectorType, class _inputScalarType>
-        static inline vct::index_type Unfold(const _inputVectorType * CMN_UNUSED(inputVector), 
+        static inline vct::index_type Unfold(const _inputVectorType * CMN_UNUSED(inputVector),
                                              const _inputScalarType & CMN_UNUSED(inputScalar)) {
             return _currentIndex + 1;
-        }  
+        }
     };
-    
+
 };
 
 #endif  // DOXYGEN

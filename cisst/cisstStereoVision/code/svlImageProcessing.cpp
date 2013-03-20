@@ -979,6 +979,14 @@ int svlImageProcessing::GetBlobsFromLabels(const svlSampleImageMono8Stereo* imag
 
 #if CISST_SVL_HAS_CISSTNETLIB || CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
 
+int svlImageProcessing::FitEllipse(vctDynamicVector<vctInt2> & points,
+                                   svlEllipse & ellipse,
+                                   Internals& internals)
+{
+    vctDynamicVectorRef<vctInt2> ref(points);
+    return FitEllipse(ref, ellipse, internals);
+}
+
 int svlImageProcessing::FitEllipse(vctDynamicVectorRef<vctInt2> & points,
                                    svlEllipse & ellipse,
                                    Internals& internals)
@@ -993,6 +1001,16 @@ int svlImageProcessing::FitEllipse(vctDynamicVectorRef<vctInt2> & points,
 
     if (fitter->FitEllipse(xs, ys, ellipse)) return SVL_OK;
     return SVL_FAIL;
+}
+
+int svlImageProcessing::FitEllipse(vctDynamicVector<int> & xs,
+                                   vctDynamicVector<int> & ys,
+                                   svlEllipse & ellipse,
+                                   Internals& internals)
+{
+    vctDynamicVectorRef<int> x_ref(xs);
+    vctDynamicVectorRef<int> y_ref(ys);
+    return FitEllipse(x_ref, y_ref, ellipse, internals);
 }
 
 int svlImageProcessing::FitEllipse(vctDynamicVectorRef<int> & xs,

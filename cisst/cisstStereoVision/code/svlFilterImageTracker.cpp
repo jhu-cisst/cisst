@@ -53,7 +53,7 @@ svlFilterImageTracker::svlFilterImageTracker() :
     RigidBodyScaleHigh(100.0),
     Iterations(1),
     WarpedImage(0),
-    RigidBodyIterations(3),
+    RigidBodyIterations(2),
     Mosaic(0),
     MosaicWidth(1000),
     MosaicHeight(1000)
@@ -516,7 +516,9 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
         if (RigidBody) {
 
-            LinkChannelsVertically();
+            // It can be put back once the two mosaic images are registered to each other
+//            LinkChannelsVertically();
+
             for (i = 0; i < RigidBodyIterations; i ++) RigidBodyError[i] = ReconstructRigidBody();
             //ComputeHomography();
             BackprojectRigidBody();
@@ -1004,7 +1006,6 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
     const int targetcount = static_cast<int>(Targets.cols());
     const int tmpl_radius = tracker->GetTemplateRadius();
     const int tmpl_size = tmpl_radius * 2 + 1;
-    const int feather_rounding = 5;
 
     svlTarget2D *target = 0;
     unsigned char *tdata, *count_buffer, *cdata, *out_mos_buffer;
@@ -1084,10 +1085,9 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
                 else {
                     dx = tmpl_radius - k;
                 }
-                if (dx > dy) weight = dx;
-                else         weight = dy;
+                if (dx > dy) weight = tmpl_radius - dx;
+                else         weight = tmpl_radius - dy;
 
-                weight = tmpl_size - dx - dy - feather_rounding;
                 if (weight < 0) weight = 0;
 
                 *mdata += weight * (*tdata); mdata ++; tdata ++;

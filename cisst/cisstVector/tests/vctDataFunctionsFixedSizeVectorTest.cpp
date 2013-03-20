@@ -49,6 +49,44 @@ void vctDataFunctionsFixedSizeVectorTest::TestBinarySerializationStream(void)
     v1.SetAll(0);
     cmnDataDeSerializeBinary(stream, v2, remote, local);
     CPPUNIT_ASSERT_EQUAL(vReference, v2);
+    CPPUNIT_ASSERT(!stream.fail());
+}
+
+
+
+void vctDataFunctionsFixedSizeVectorTest::TestTextSerializationStream(void)
+{
+    std::stringstream stream;
+    vctFixedSizeVector<double, 12> v1, v2, vReference;
+    vctRandom(vReference, -10.0, 10.0);
+    v1 = vReference;
+    cmnDataSerializeText(stream, v1, ',');
+    v1.SetAll(0);
+    cmnDataDeSerializeText(stream, v2, ',');
+    CPPUNIT_ASSERT(vReference.AlmostEqual(v2, 0.01)); // low precision due to stream out loss
+    CPPUNIT_ASSERT(!stream.fail());
+    // try without delimiter, using space
+    stream.clear();
+    vctRandom(vReference, -20.0, 20.0);
+    v1 = vReference;
+    cmnDataSerializeText(stream, v1, ' ');
+    v2.SetAll(0.0);
+    cmnDataDeSerializeText(stream, v2, ' ');
+    CPPUNIT_ASSERT(vReference.AlmostEqual(v2, 0.01)); // low precision due to stream out loss
+    CPPUNIT_ASSERT(!stream.fail());
+    // try with the wrong delimiter
+    bool exceptionReceived = false;
+    stream.clear();
+    vctRandom(vReference, -20.0, 20.0);
+    v1 = vReference;
+    cmnDataSerializeText(stream, v1, ',');
+    v2.SetAll(0.0);
+    try {
+        cmnDataDeSerializeText(stream, v2, '!');
+    } catch (std::runtime_error) {
+        exceptionReceived = true;
+    }
+    CPPUNIT_ASSERT(exceptionReceived);
 }
 
 
@@ -105,7 +143,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
     // get scalar
     position = 0;
     for (index = 0; index < vInt.size(); ++index) {
-        vInt.Element(index) = index;
+        vInt.Element(index) = static_cast<int>(index);
         CPPUNIT_ASSERT_EQUAL(static_cast<double>(index), cmnDataScalar(vInt, position));
         position++;
     }
@@ -113,7 +151,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
     position = 0;
     for (index = 0; index < vvDouble.size(); ++index) {
         for (subIndex = 0; subIndex < vvDouble.Element(index).size(); ++subIndex) {
-            vvDouble.Element(index).Element(subIndex) = index * 100 + subIndex;
+            vvDouble.Element(index).Element(subIndex) = static_cast<double>(index * 100 + subIndex);
             CPPUNIT_ASSERT_EQUAL(static_cast<double>(index * 100 + subIndex),
                                  cmnDataScalar(vvDouble, position));
             position++;
@@ -124,7 +162,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
     position = 0;
     for (index = 0; index < vvMixed.size(); ++index) {
         for (subIndex = 0; subIndex < vvMixed.Element(index).size(); ++subIndex) {
-            vvMixed.Element(index).Element(subIndex) = index * 100 + subIndex;
+            vvMixed.Element(index).Element(subIndex) = static_cast<double>(index * 100 + subIndex);
             CPPUNIT_ASSERT_EQUAL(static_cast<double>(index * 100 + subIndex),
                                  cmnDataScalar(vvMixed, position));
             position++;

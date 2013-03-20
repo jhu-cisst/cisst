@@ -24,6 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 
+#define IMPROVE_ICE_THREADING 1 // MJ TEMP
+
 namespace mtsProxyConfig
 {
     // After the GCM issues a new connection id, a LCM should inform the GCM

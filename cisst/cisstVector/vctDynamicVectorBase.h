@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
+  Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -460,7 +460,7 @@ public:
     template <class __vectorOwnerType, class __elementType>
     inline ThisType & ConcatenationOf(const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & otherVector,
                                       __elementType lastElement) {
-	vctDynamicVectorRef<value_type> firstElements(*this, 0, otherVector.size() - 1);
+    vctDynamicVectorRef<value_type> firstElements(*this, 0, otherVector.size() - 1);
         vctDynamicVectorLoopEngines::
             VoVi<typename vctUnaryOperations<value_type, __elementType>::Identity>::
             Run(firstElements, otherVector);
@@ -753,6 +753,16 @@ public:
             ::Run(*this, vector1, vector2);
         return *this;
     }
+
+    /* documented above */
+    template <class __vectorOwnerType1, class __vectorOwnerType2>
+    inline ThisType & ElementwiseClippedInOf(const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & boundVector,
+                                             const vctDynamicConstVectorBase<__vectorOwnerType2, _elementType> & vector) {
+        vctDynamicVectorLoopEngines::
+            VoViVi< typename vctBinaryOperations<value_type>::ClipIn >
+            ::Run(*this, boundVector, vector);
+        return *this;
+    }
     //@}
 
 
@@ -823,6 +833,15 @@ public:
         vctDynamicVectorLoopEngines::
             VioVi< typename vctStoreBackBinaryOperations<value_type>::Maximum >::
             Run(*this, otherVector);
+        return *this;
+    }
+
+    /* documented above */
+    template <class __vectorOwnerType>
+    inline ThisType & ElementwiseClipIn(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & boundVector) {
+        vctDynamicVectorLoopEngines::
+            VioVi< typename vctStoreBackBinaryOperations<value_type>::ClipIn >::
+            Run(*this, boundVector);
         return *this;
     }
 
@@ -927,6 +946,16 @@ public:
             Run(*this, vector, lowerBound);
         return *this;
     }
+
+    /* documented above */
+    template <class __vectorOwnerType>
+    inline ThisType & ClippedInOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector,
+                                  const value_type bound) {
+        vctDynamicVectorLoopEngines::
+            VoViSi< typename vctBinaryOperations<value_type>::ClipIn >::
+            Run(*this, vector, bound);
+        return *this;
+    }
     //@}
 
 
@@ -1004,6 +1033,16 @@ public:
             Run(*this, lowerBound, vector);
         return *this;
     }
+
+    /* documented above */
+    template <class __vectorOwnerType>
+    inline ThisType & ClippedInOf(const value_type bound,
+                                  const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector) {
+        vctDynamicVectorLoopEngines::
+            VoSiVi< typename vctBinaryOperations<value_type>::ClipIn >::
+            Run(*this, bound, vector);
+        return *this;
+    }
     //@}
 
 
@@ -1071,6 +1110,14 @@ public:
     }
 
     /* documented above */
+    inline ThisType & ClipIn(const value_type bound) {
+        vctDynamicVectorLoopEngines::
+            VioSi< typename vctStoreBackBinaryOperations<value_type>::ClipIn >::
+            Run(*this, bound);
+        return *this;
+    }
+
+    /* documented above */
     inline ThisType & operator += (const value_type scalar) {
         return this->Add(scalar);
     }
@@ -1100,6 +1147,18 @@ public:
             typename vctStoreBackBinaryOperations<value_type>::Addition,
             typename vctBinaryOperations<value_type>::Multiplication >::
             Run(*this, scalar, otherVector);
+        return *this;
+    }
+
+    template <class __vectorOwnerType1, class __vectorOwnerType2>
+    inline ThisType & AddElementwiseProductOf(const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & vector1,
+                                              const vctDynamicConstVectorBase<__vectorOwnerType2, _elementType> & vector2)
+    {
+        vctDynamicVectorLoopEngines::
+            VioViVi<
+            typename vctStoreBackBinaryOperations<value_type>::Addition,
+            typename vctBinaryOperations<value_type>::Multiplication >::
+            Run(*this, vector1, vector2);
         return *this;
     }
 

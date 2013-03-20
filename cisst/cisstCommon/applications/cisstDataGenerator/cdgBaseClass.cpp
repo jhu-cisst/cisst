@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -25,23 +25,25 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(cdgBaseClass);
 
 
-cdgBaseClass::cdgBaseClass(unsigned int lineNumber):
-    cdgScope(lineNumber)
+cdgBaseClass::cdgBaseClass(size_t lineNumber):
+    cdgScope("base-class", lineNumber)
 {
     cdgField * field;
-    field = this->AddField("type", "", true);
+    field = this->AddField("type", "", true, "C++ type for the base class, e.g. cmnGenericObject");
     CMN_ASSERT(field);
-    
-    field = this->AddField("visibility", "public", false);
+
+    field = this->AddField("visibility", "public", false, "determines if the base class should be public, ...");
     CMN_ASSERT(field);
     field->AddPossibleValue("public");
     field->AddPossibleValue("private");
     field->AddPossibleValue("protected");
 
-    field = this->AddField("is-data", "true", false);
+    field = this->AddField("is-data", "true", false, "indicates if the base class is a cisst data type itself");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");
+
+    this->AddKnownScope(*this);
 }
 
 
@@ -51,11 +53,15 @@ cdgScope::Type cdgBaseClass::GetScope(void) const
 }
 
 
-bool cdgBaseClass::HasScope(const std::string & CMN_UNUSED(keyword),
-                            cdgScope::Stack & CMN_UNUSED(scopes),
-                            unsigned int CMN_UNUSED(lineNumber))
+cdgScope * cdgBaseClass::Create(size_t lineNumber) const
 {
-    return false;
+    return new cdgBaseClass(lineNumber);
+}
+
+
+bool cdgBaseClass::Validate(void)
+{
+    return true;
 }
 
 

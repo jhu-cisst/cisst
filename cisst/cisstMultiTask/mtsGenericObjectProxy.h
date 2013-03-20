@@ -967,4 +967,29 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctMatRot3)
 typedef mtsGenericObjectProxy<vctFrm3> mtsVctFrm3;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFrm3)
 
+// Dynamic vectors (see also mtsVector.h, which uses
+// multiple inheritance)
+#include <cisstVector/vctDynamicVectorTypes.h>
+typedef mtsGenericObjectProxy<vctDoubleVec> mtsVctDoubleVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctDoubleVec)
+typedef mtsGenericObjectProxy<vctFloatVec> mtsVctFloatVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloatVec)
+typedef mtsGenericObjectProxy<vctIntVec> mtsVctIntVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctIntVec)
+typedef mtsGenericObjectProxy<vctUIntVec> mtsVctUIntVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUIntVec)
+typedef mtsGenericObjectProxy<vctCharVec> mtsVctCharVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctCharVec)
+typedef mtsGenericObjectProxy<vctUCharVec> mtsVctUCharVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUCharVec)
+typedef mtsGenericObjectProxy<vctBoolVec> mtsVctBoolVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBoolVec)
+typedef mtsGenericObjectProxy<vctShortVec> mtsVctShortVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShortVec)
+typedef mtsGenericObjectProxy<vctUShortVec> mtsVctUShortVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShortVec)
+typedef mtsGenericObjectProxy<vctLongVec> mtsVctLongVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLongVec)
+typedef mtsGenericObjectProxy<vctULongVec> mtsVctULongVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULongVec)
 #endif

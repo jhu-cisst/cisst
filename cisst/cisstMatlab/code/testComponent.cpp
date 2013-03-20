@@ -29,6 +29,7 @@ testComponent::testComponent(const std::string & name):
   
 void testComponent::Startup(void)
 {
+    CMN_LOG_CLASS_INIT_ERROR << "---- in startup ----" << std::endl;
 }
 
 

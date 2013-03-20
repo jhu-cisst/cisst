@@ -77,10 +77,10 @@ void osaPipeExecTest::TestPipe(void)
     CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
     std::string current;
-    while (static_cast<int>(current.length()) < length-1) {
-        current += pipe1.Read(length-current.length());
+    while (current.length() < (length-1)) {
+        current += pipe1.Read(length - static_cast<int>(current.length()));
     }
-    CPPUNIT_ASSERT_EQUAL(static_cast<int>(current.length()), length-1);
+    CPPUNIT_ASSERT_EQUAL(static_cast<int>(current.length()), (length-1));
     CPPUNIT_ASSERT_EQUAL(test, current);
 
     /* Test closing twice, make sure it fails the second time */

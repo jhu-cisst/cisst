@@ -21,7 +21,8 @@ robLinearSE3::robLinearSE3( const vctFrame4x4<double>& Rtw1,
   vctFrame4x4<double> Rt12 = Rt1w * Rtw2;
   vctMatrixRotation3<double> R12( Rt12[0][0], Rt12[0][1], Rt12[0][2], 
 				  Rt12[1][0], Rt12[1][1], Rt12[1][2], 
-				  Rt12[2][0], Rt12[2][1], Rt12[2][2] );
+				  Rt12[2][0], Rt12[2][1], Rt12[2][2],
+				  VCT_NORMALIZE  );
 
   vctFixedSizeVector<double,3> t12 = Rt12.Translation();
   vctAxisAngleRotation3<double> r12( R12 );
@@ -46,10 +47,12 @@ robLinearSE3::robLinearSE3( const vctFrame4x4<double>& Rtw1,
 
   vctMatrixRotation3<double> Rw1( Rtw1[0][0], Rtw1[0][1], Rtw1[0][2], 
 				  Rtw1[1][0], Rtw1[1][1], Rtw1[1][2], 
-				  Rtw1[2][0], Rtw1[2][1], Rtw1[2][2] );
+				  Rtw1[2][0], Rtw1[2][1], Rtw1[2][2],
+				  VCT_NORMALIZE );
   vctMatrixRotation3<double> Rw2( Rtw2[0][0], Rtw2[0][1], Rtw2[0][2], 
 				  Rtw2[1][0], Rtw2[1][1], Rtw2[1][2], 
-				  Rtw2[2][0], Rtw2[2][1], Rtw2[2][2] );
+				  Rtw2[2][0], Rtw2[2][1], Rtw2[2][2],
+				  VCT_NORMALIZE );
   rotation = new robSLERP( Rw1, Rw2, wmax, t1 );  
 
   if( translation != NULL )

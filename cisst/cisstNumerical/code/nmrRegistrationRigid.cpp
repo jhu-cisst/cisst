@@ -40,9 +40,9 @@ bool nmrRegistrationRigid(vctDynamicConstVectorBase<_vectorOwnerType, vct3> &dat
     }
     // Compute averages
     vct3 avg1 = dataSet1.SumOfElements();
-	avg1.Divide(npoints);
+	avg1.Divide(static_cast<double>(npoints));
     vct3 avg2 = dataSet2.SumOfElements();
-	avg2.Divide(npoints);
+	avg2.Divide(static_cast<double>(npoints));
 
     // Compute the sum of the outer products of (dataSet1-avg1) and (dataSet2-avg2)
     vctDouble3x3 H, sumH;

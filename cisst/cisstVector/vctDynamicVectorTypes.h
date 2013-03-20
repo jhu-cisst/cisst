@@ -44,6 +44,8 @@ typedef vctDynamicVector<unsigned char> vctUCharVec;
 typedef vctDynamicVector<bool> vctBoolVec;
 typedef vctDynamicVector<short> vctShortVec;
 typedef vctDynamicVector<unsigned short> vctUShortVec;
+typedef vctDynamicVector<long> vctLongVec;
+typedef vctDynamicVector<unsigned long> vctULongVec;
 //@}
 
 

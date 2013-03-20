@@ -153,12 +153,12 @@ if (CISST_HAS_SWIG_PYTHON)
   # We also need numpy if we have cisstVector
   if (CISST_cisstVector)
     find_package (Numpy REQUIRED)
-    if (PYTHON_NUMPY_FOUND)
+    if (NUMPY_FOUND)
       cisst_set_package_settings (cisstPython NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
       mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
-    else (PYTHON_NUMPY_FOUND)
+    else (NUMPY_FOUND)
       cisst_unset_all_package_settings (cisstPython NumPy)
-    endif (PYTHON_NUMPY_FOUND)
+    endif (NUMPY_FOUND)
   endif (CISST_cisstVector)
 
   # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and PYTHON_EXECUTABLE.

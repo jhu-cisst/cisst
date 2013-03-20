@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-28
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -36,6 +36,7 @@ class cmnCommandLineOptionsTest : public CppUnit::TestFixture
         CPPUNIT_TEST(TestOneRequiredStringIntDouble);
         CPPUNIT_TEST(TestRepeatedOptions);
         CPPUNIT_TEST(TestIsSet);
+        CPPUNIT_TEST(TestMultipleValues);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -53,6 +54,7 @@ class cmnCommandLineOptionsTest : public CppUnit::TestFixture
     void TestOneRequiredStringIntDouble(void);
     void TestRepeatedOptions(void);
     void TestIsSet(void);
+    void TestMultipleValues(void);
 };
 
 

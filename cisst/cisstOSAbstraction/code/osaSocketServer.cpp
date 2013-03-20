@@ -33,11 +33,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h> // for close
 #if (CISST_OS == CISST_QNX)
 #include <sys/select.h>
-#endif
-#if (CISST_OS == CISST_DARWIN)
-#include <unistd.h> // for close
 #endif
 #endif
 

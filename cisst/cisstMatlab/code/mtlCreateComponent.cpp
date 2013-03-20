@@ -30,6 +30,7 @@ extern "C" {
 
 // this is for testing/development
 #include "testComponent.h"
+#include <cisstOSAbstraction/osaSleep.h>
 
 const char * mtlCreateComponent(const char * componentName)
 {
@@ -133,6 +134,8 @@ const char * mtlCreateComponent(const char * componentName)
          << inter << ", x);";
     mexEvalString(code.str().c_str());
     code.str("");
+
+    osaSleep(10.0 * cmn_s);
 
     return "no error";
 }

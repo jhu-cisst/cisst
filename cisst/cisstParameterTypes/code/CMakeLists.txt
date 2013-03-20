@@ -89,4 +89,5 @@ cisst_add_library (LIBRARY cisstParameterTypes
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${cisstParameterTypes_CISST_DG_SRCS}
+                   ADDITIONAL_HEADER_FILES_RELATIVE ${cisstParameterTypes_CISST_DG_HDRS}
                    )

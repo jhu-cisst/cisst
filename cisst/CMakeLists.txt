@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -15,10 +15,6 @@
 
 # Backward compatibility
 cmake_minimum_required (VERSION 2.6.2)
-
-# todo: modify cisst-config.cmake to set CISST_BINARY_DIR based on current dir
-# todo: what to do with DOXYGEN_DIR and LIBRARY_DIR in cisst-config.cmake, needed?
-# todo: get rid of CISST_ROOT_DIR in cisstConfig.h, Simon uses it a lot, should provide short function to help
 
 # cisst libraries (Computer Integrated Surgical Systems and Technology)
 project (cisst)
@@ -41,6 +37,9 @@ set (CISST_CMAKE_MODULES_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake/Mod
 set (CISST_CMAKE_SOURCE_DIR "${CISST_SOURCE_DIR}/cmake")
 set (CISST_CMAKE_BINARY_DIR "${CISST_BINARY_DIR}/${CISST_CMAKE_INSTALL_SUFFIX}")
 set (CISST_CMAKE_DIRS "${CISST_CMAKE_SOURCE_DIR}" "${CISST_CMAKE_BINARY_DIR}")
+
+# Option to download and build as CMake External projects external dependencies when not found automatically
+option (CISST_USE_EXTERNAL "Try to build dependencies using CMake external projects (download and build along cisst)" OFF)
 
 # Add include directories
 set (CISST_INCLUDE_DIR
@@ -191,6 +190,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+# Check on Apple only
+if (APPLE)
+  # User option for IOS
+  option (CISST_HAS_IOS "Compile for IOS." OFF)
+endif (APPLE)
 
 # Determine if cmnThrow uses "throw" or "abort"
 option (CISST_CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)
@@ -240,8 +244,41 @@ include_directories (${CISST_INCLUDE_DIR})
 # Build test driver if needed
 if (CISST_BUILD_TESTS)
   find_package (CppUnit REQUIRED)
-  # TO DO, check if CPPUNIT Found
-  add_subdirectory (cisstTestsDriver)
+  if (NOT CPPUNIT_FOUND)
+    # Try to build as external project
+    if (CISST_USE_EXTERNAL)
+      include (ExternalProject)
+      set (cisstCppUnit_PREFIX cisstCppUnitExternal)
+      ExternalProject_Add (cisstCppUnit
+                           PREFIX ${cisstCppUnit_PREFIX}
+                           URL http://downloads.sourceforge.net/cppunit/cppunit-1.12.1.tar.gz
+                           URL_MD5 bd30e9cf5523cdfc019b94f5e1d7fd19
+                           CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                           PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                                         ${CMAKE_CURRENT_SOURCE_DIR}/cisstTestsDriver/cppunit-patch
+                                         "."
+                           INSTALL_COMMAND ""
+                           )
+      set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit/include")
+      set (CPPUNIT_LIBRARIES "cppunit")
+      set (CPPUNIT_DEBUG_LIBRARIES "cppunit")
+      set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
+      link_directories ("${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
+      set (CPPUNIT_FOUND ON)
+    endif (CISST_USE_EXTERNAL)
+  endif (NOT CPPUNIT_FOUND)
+
+  if (CPPUNIT_FOUND)
+    # set variable to confirm that cisstTestsDriver is being build
+    set (CISST_cisstTestsDriver ON)
+    # save settings for cisstTestsDriver
+    cisst_set_package_settings (cisstTestsDriver CppUnit INCLUDE_DIRECTORIES CPPUNIT_INCLUDE_DIR)
+  else (CPPUNIT_FOUND)
+    message (SEND_ERROR "CppUnit is needed for CISST_BUILD_TESTS, you can either install it or turn ON the option CISST_USE_EXTERNAL")
+  endif (CPPUNIT_FOUND)
+else (CISST_BUILD_TESTS)
+  cisst_unset_all_package_settings (cisstTestsDriver CppUnit)
 endif (CISST_BUILD_TESTS)
 
 # Find native threads
@@ -274,6 +311,11 @@ set (CISST_LIBRARIES_OPTIONAL
 set (CISST_LIBS
      ${CISST_LIBRARIES_DEFAULT}
      ${CISST_LIBRARIES_OPTIONAL})
+
+# Add test driver if needed
+if (CISST_BUILD_TESTS)
+  set (CISST_LIBS ${CISST_LIBS} cisstTestsDriver)
+endif (CISST_BUILD_TESTS)
 
 # Which librairies have Qt Widgets
 set (CISST_LIBS_WITH_QT

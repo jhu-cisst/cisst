@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -24,11 +24,12 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(cdgField);
 
-cdgField::cdgField(const std::string & keyword, const std::string & defaultValue, const bool required):
+cdgField::cdgField(const std::string & keyword, const std::string & defaultValue, const bool required, const std::string & description):
     Keyword(keyword),
     Value(""),
     Default(defaultValue),
-    Required(required)
+    Required(required),
+    Description(description)
 {
 }
 
@@ -42,33 +43,6 @@ void cdgField::AddPossibleValue(const std::string & possibleValue)
 const std::string & cdgField::GetValue(void) const
 {
     return this->Value;
-}
-
-
-std::string cdgField::GetDescription(void) const
-{
-    std::string result = "\"" + this->Keyword + "\" can be ";
-    if (this->PossibleValues.empty()) {
-        result.append("anything");
-    } else {
-        result.append("must be one of [");
-        const ValuesContainer::const_iterator end = this->PossibleValues.end();
-        ValuesContainer::const_iterator iter;
-        for (iter = this->PossibleValues.begin();
-             iter != end;
-             iter++) {
-            result.append(" ");
-            result.append(*iter);
-            result.append(" ");
-        }
-        result.append("]");
-    }
-    if (this->Required) {
-        result.append(".  This is required.");
-    } else {
-        result.append(".  This is optional.");
-    }
-    return result;
 }
 
 
@@ -90,7 +64,10 @@ bool cdgField::SetValue(const std::string & value, std::string & errorMessage)
             iter++;
         }
         if (!found) {
-            errorMessage = value + " not supported. " + this->GetDescription();
+            errorMessage = value + " not supported. ";
+            std::stringstream temp;
+            this->DisplaySyntax(temp, 0);
+            errorMessage.append(temp.str());
             return false;
         }
     }
@@ -117,4 +94,31 @@ void cdgField::FillInDefaults(void)
     if ((this->Default != "") && this->Value.empty()) {
         this->Value = this->Default;
     }
+}
+
+
+void cdgField::DisplaySyntax(std::ostream & outputStream, size_t offsetSize) const
+{
+    const std::string offset(offsetSize, ' ');
+    if (this->Keyword != "") {
+        outputStream << offset << this->Keyword
+                     << " = <";
+        if (!this->PossibleValues.empty()) {
+            outputStream << "value must be one of";
+            const ValuesContainer::const_iterator end = this->PossibleValues.end();
+            ValuesContainer::const_iterator iter = this->PossibleValues.begin();
+            for (;iter != end; ++iter) {
+                outputStream << " '" << *iter << "'";
+            }
+        } else {
+            outputStream << "user defined string";
+        }
+        if (this->Default != "") {
+            outputStream << ": default is '" << this->Default << "'";
+        }
+        outputStream << ">; // " << (this->Required ? "(required)" : "(optional)");
+    } else {
+        outputStream << offset << "C++ code snippet";
+    }
+    outputStream << " - " << this->Description;
 }

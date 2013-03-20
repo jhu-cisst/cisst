@@ -33,11 +33,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <sys/types.h>
 #include <errno.h>
 #include <string.h>  // for memset
+#include <unistd.h> // for gethostname
 #if (CISST_OS == CISST_QNX)
 #include <sys/select.h>
 #endif
 #if (CISST_OS == CISST_DARWIN)
-#include <unistd.h> // for gethostname
+#include <sys/types.h>
+#include <ifaddrs.h>
 #endif
 #endif
 
@@ -129,7 +131,7 @@ osaSocket::~osaSocket(void)
 
 std::string osaSocket::GetLocalhostIP(void)
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
     
     struct ifaddrs *ifaddr;
     
@@ -194,7 +196,7 @@ std::string osaSocket::GetLocalhostIP(void)
 
 int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
 {    
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
     
     struct ifaddrs *ifaddr, *ifa;
     char host[255];
@@ -207,11 +209,22 @@ int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
     }
 
     for( ifa=ifaddr; ifa!=NULL; ifa=ifa->ifa_next) {
+        if (!ifa->ifa_addr) continue;
         int family = ifa->ifa_addr->sa_family;
         
         // Only keep AF_INET interfaces
         if( family == AF_INET ){
 
+#if (CISST_OS == CISST_DARWIN)
+            if (inet_ntop(AF_INET, &(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr), 
+                        host, sizeof host) == NULL)
+            {
+                CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                                    << "Failed to retrieve socket address."
+                                    << std::endl;
+                continue;
+            }
+#else
             int s = getnameinfo( ifa->ifa_addr,
                                 (family==AF_INET) ? sizeof(struct sockaddr_in) :
                                  sizeof(struct sockaddr_in6),
@@ -220,8 +233,9 @@ int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
                 CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                                   << "Failed to convert socket address."
                                   << std::endl;
-                return 0;
+                continue;
             }
+#endif
             IPaddress.push_back( host );
         }
     }

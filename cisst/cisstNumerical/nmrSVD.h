@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Ankur Kapoor, Anton Deguet
+  Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -1043,12 +1043,22 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DO
 
     // for versions based on gfortran/lapack, CISSTNETLIB_VERSION is
     // defined
-#ifdef CISSTNETLIB_VERSION
+#if defined(CISSTNETLIB_VERSION)
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
+                        A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
+                        UPtr, &m_Ldu,
+                        VtPtr, &m_Ldvt,
+                        dataFriend.Workspace().Pointer(), &m_Lwork, &Info);
+#endif
+#else // no major version
     dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
             A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
             UPtr, &m_Ldu,
             VtPtr, &m_Ldvt,
             dataFriend.Workspace().Pointer(), &m_Lwork, &Info);
+#endif // CISSTNETLIB_VERSION
 #else
     ftnlen jobu_len = (ftnlen)1, jobvt_len = (ftnlen)1;
     la_dzlapack_MP_sgesvd_nat(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
@@ -1192,13 +1202,23 @@ CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, 
 
     // for versions based on gfortran/lapack, CISSTNETLIB_VERSION is
     // defined
-#ifdef CISSTNETLIB_VERSION
+#if defined(CISSTNETLIB_VERSION)
     /* call the LAPACK C function */
-    dgesvd_( &jobu, &jobvt, &ldu, &ldvt,
-             A.Pointer(), &lda, S.Pointer(),
-             UPtr, &ldu,
-             VtPtr, &ldvt,
-             workspace.Pointer(), &lwork, &info );
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgesvd_(&jobu, &jobvt, &ldu, &ldvt,
+                        A.Pointer(), &lda, S.Pointer(),
+                        UPtr, &ldu,
+                        VtPtr, &ldvt,
+                        workspace.Pointer(), &lwork, &info);
+#endif
+#else // no major version
+      dgesvd_(&jobu, &jobvt, &ldu, &ldvt,
+              A.Pointer(), &lda, S.Pointer(),
+              UPtr, &ldu,
+              VtPtr, &ldvt,
+              workspace.Pointer(), &lwork, &info);
+#endif // CISSTNETLIB_VERSION
 #else
     ftnlen jobu_len = (ftnlen)1, jobvt_len = (ftnlen)1;
     la_dzlapack_MP_sgesvd_nat(&jobu, &jobvt, &ldu, &ldvt,

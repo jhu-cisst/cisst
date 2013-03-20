@@ -34,24 +34,24 @@
 #
 #
 if(PYTHON_EXECUTABLE)
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/determineNumpyPath.py "try: import numpy; print numpy.get_include()\nexcept: pass\n")
-    exec_program("${PYTHON_EXECUTABLE}"
-                 ARGS "\"${CMAKE_CURRENT_BINARY_DIR}/determineNumpyPath.py\""
-                 OUTPUT_VARIABLE NUMPY_PATH
-                 )
-endif(PYTHON_EXECUTABLE)
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print(numpy.get_include())"
+                    ERROR_QUIET
+                    OUTPUT_VARIABLE NUMPY_PATH
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    )
+endif()
 
 find_path(PYTHON_NUMPY_INCLUDE_DIR arrayobject.h
-          "${NUMPY_PATH}/numpy/"
-          "${PYTHON_INCLUDE_PATH}/numpy/"
-          /usr/include/python2.6/numpy/
-          /usr/include/python2.5/numpy/
-          /usr/include/python2.4/numpy/
-          /usr/include/python2.3/numpy/
+          HINTS "${NUMPY_PATH}/numpy/"
+                "${PYTHON_INCLUDE_PATH}/numpy/"
+          PATHS "/usr/include/python2.7/numpy/"
+                "/usr/include/python2.6/numpy/"
+                "/usr/include/python2.5/numpy/"
+                "/usr/include/python2.4/numpy/"
+                "/usr/include/python2.3/numpy/"
           DOC "Directory where the arrayobject.h header file can be found. This file is part of the numpy package"
-    )
+          )
 
-if(PYTHON_NUMPY_INCLUDE_DIR)
-    set(PYTHON_NUMPY_FOUND 1 CACHE INTERNAL "Python numpy development package is available")
-endif(PYTHON_NUMPY_INCLUDE_DIR)
-
+# handle the REQUIRED and QUIET arguments to find_package()
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Numpy DEFAULT_MSG PYTHON_NUMPY_INCLUDE_DIR)

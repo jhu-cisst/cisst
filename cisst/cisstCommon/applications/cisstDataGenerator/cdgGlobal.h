@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -46,13 +46,12 @@ class cdgGlobal: public cdgScope
     ClassesType Classes;
 
 public:
-    cdgGlobal(unsigned int lineNumber);
+    cdgGlobal(size_t lineNumber);
     cdgScope::Type GetScope(void) const;
-    bool HasScope(const std::string & keyword,
-                  cdgScope::Stack & scopes,
-                  unsigned int lineNumber);
+    cdgScope * Create(size_t lineNumber) const;
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
+    bool Validate(void);
     void GenerateHeader(std::ostream & output) const;
     void GenerateCode(std::ostream & output) const;
 

@@ -29,6 +29,7 @@ class vctDataFunctionsFixedSizeMatrixTest : public CppUnit::TestFixture
     {
         CPPUNIT_TEST(TestDataCopy);
         CPPUNIT_TEST(TestBinarySerializationStream);
+        CPPUNIT_TEST(TestTextSerializationStream);
         CPPUNIT_TEST(TestScalar);
     }
     CPPUNIT_TEST_SUITE_END();
@@ -42,5 +43,6 @@ class vctDataFunctionsFixedSizeMatrixTest : public CppUnit::TestFixture
 
     void TestDataCopy(void);
     void TestBinarySerializationStream(void);
+    void TestTextSerializationStream(void);
     void TestScalar(void);
 };

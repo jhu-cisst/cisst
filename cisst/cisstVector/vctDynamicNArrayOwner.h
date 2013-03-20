@@ -308,7 +308,7 @@ protected:
 
 private:
     // copy constructor private to prevent any call
-    vctDynamicNArrayOwner(const ThisType & other) {};
+    vctDynamicNArrayOwner(const ThisType & CMN_UNUSED(other)) {};
 
 };
 

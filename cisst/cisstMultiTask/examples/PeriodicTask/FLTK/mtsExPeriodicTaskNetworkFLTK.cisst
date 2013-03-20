@@ -1,7 +1,7 @@
 # Create and run the mtsExPeriodicTaskFLTK example in network configuration
 # using cisstComponentManager.
-# From command line:  cisstComponentManager global GCM -e mtsExPeriodicTaskFLTK.cisst
-# From component manager:  execute mtsExPeriodicTaskFLTK.cisst
+# From command line:  cisstComponentManager global GCM -e mtsExPeriodicTaskNetworkFLTK.cisst
+# From component manager:  execute mtsExPeriodicTaskNetworkFLTK.cisst
 
 # For Linux (gnome desktop)
 #system "gnome-terminal -x ./cisstComponentManager localhost ProcessServer"

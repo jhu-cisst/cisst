@@ -68,5 +68,7 @@ http://www.cisst.org/cisst/license.txt.
 // Using OpenGL or not
 #cmakedefine01 CISST_HAS_OPENGL
 
+// Using IOS or not
+#cmakedefine01 CISST_HAS_IOS
 
 #endif // _cisstConfig_h

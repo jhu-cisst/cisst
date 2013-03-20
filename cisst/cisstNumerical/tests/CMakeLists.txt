@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstNumerical tests
 #
-# (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -13,9 +13,6 @@
 # http://www.cisst.org/cisst/license.txt.
 #
 # --- end cisst license ---
-
-# paths for headers/libraries
-cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical)
 
 # all source files
 set (SOURCE_FILES
@@ -47,17 +44,17 @@ if (CISST_HAS_CISSTNETLIB)
        ${SOURCE_FILES}
        nmrInverseTest.cpp
        nmrIsOrthonormalTest.cpp
-       nmrLDPSolverTest.cpp
-#      nmrLSSolverTest.cpp
-#      nmrLSISolverTest.cpp
-       nmrLSqLinTest.cpp
        nmrLUTest.cpp
-#      nmrLUSolverTest.cpp
-       nmrNNLSSolverTest.cpp
+       # deprecated nmrLUSolverTest.cpp
        nmrPInverseTest.cpp
-#      nmrPInverseSolverTest.cpp
+       # deprecated nmrPInverseSolverTest.cpp
        nmrSVDTest.cpp
-#      nmrSVDSolverTest.cpp
+       # deprecated nmrSVDSolverTest.cpp
+       nmrLDPSolverTest.cpp
+       nmrLSSolverTest.cpp
+       # deprecated nmrLSISolverTest.cpp
+       nmrLSqLinTest.cpp
+       nmrNNLSSolverTest.cpp
        nmrSVDRSSolverTest.cpp
        )
 
@@ -65,20 +62,19 @@ if (CISST_HAS_CISSTNETLIB)
        ${HEADER_FILES}
        nmrInverseTest.h
        nmrIsOrthonormalTest.h
-       nmrLDPSolverTest.h
-#      nmrLSSolverTest.h
-#      nmrLSISolverTest.h
-       nmrLSqLinTest.h
        nmrLUTest.h
-#      nmrLUSolverTest.h
-       nmrNNLSSolverTest.h
+       # deprecated nmrLUSolverTest.h
        nmrPInverseTest.h
-#      nmrPInverseSolverTest.h
+       nmrPInverseSolverTest.h
        nmrSVDTest.h
-#      nmrSVDSolverTest.h
-       nmrSVDRSSolverTest.h
+       # deprecated nmrSVDSolverTest.h
+       nmrLDPSolverTest.h
+       nmrLSSolverTest.h
+       # deprecated nmrLSISolverTest.h
+       nmrLSqLinTest.h
+       nmrNNLSSolverTest.h
+       # deprecated nmrSVDRSSolverTest.h
        )
-
 endif (CISST_HAS_CISSTNETLIB)
 
 # add files if cnetlib is used
@@ -97,8 +93,8 @@ endif (CISST_HAS_CISSTNETLIB)
 #
 # ENDIF(CISST_HAS_CNETLIB)
 
-# CppUnit include directories
-include_directories (${CPPUNIT_INCLUDE_DIR})
+# paths for headers/libraries
+cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical cisstTestsDriver)
 
 # Add executable for C++ tests
 add_executable (cisstNumericalTests ${SOURCE_FILES} ${HEADER_FILES})
@@ -109,17 +105,12 @@ target_link_libraries (cisstNumericalTests cisstTestsDriver)
 # and link differently
 if (CISST_cisstOSAbstraction)
   add_definitions (-DBUILD_MULTITHREADED_TESTS)
-  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstOSAbstraction)
+  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstOSAbstraction cisstTestsDriver)
   target_link_libraries (cisstNumericalTests
                          ${CMAKE_THREAD_LIBS_INIT})
 else (CISST_cisstOSAbstraction)
-  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical)
+  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstTestsDriver)
 endif (CISST_cisstOSAbstraction)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstNumericalTests ITERATIONS 10 INSTANCES 2)
-
-# CppUnit libraries
-target_link_libraries (cisstNumericalTests
-                       optimized ${CPPUNIT_LIBRARIES}
-                       debug ${CPPUNIT_DEBUG_LIBRARIES})

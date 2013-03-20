@@ -29,6 +29,7 @@ class prmPositionCartesianGetTest: public CppUnit::TestFixture
         CPPUNIT_TEST(TestConstructors);
         CPPUNIT_TEST(TestSerialize);
         CPPUNIT_TEST(TestBinarySerializationStream);
+        CPPUNIT_TEST(TestTextSerializationStream);
         CPPUNIT_TEST(TestScalars);
     }
     CPPUNIT_TEST_SUITE_END();
@@ -41,6 +42,7 @@ public:
     void TestConstructors(void);
     void TestSerialize(void);
     void TestBinarySerializationStream(void);
+    void TestTextSerializationStream(void);
     void TestScalars(void);
 };
 

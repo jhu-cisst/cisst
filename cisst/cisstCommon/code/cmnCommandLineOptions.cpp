@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -38,8 +38,8 @@ cmnCommandLineOptions::OptionBase::OptionBase(const std::string & shortOption, c
 
 
 cmnCommandLineOptions::OptionNoValue::OptionNoValue(const std::string & shortOption, const std::string & longOption,
-                                                    const std::string & description):
-    cmnCommandLineOptions::OptionBase(shortOption, longOption, description, cmnCommandLineOptions::OPTIONAL)
+                                                    const std::string & description, RequiredType required):
+    cmnCommandLineOptions::OptionBase(shortOption, longOption, description, required)
 {
 }
 
@@ -59,19 +59,26 @@ cmnCommandLineOptions::OptionOneValueBase::OptionOneValueBase(const std::string 
 }
 
 
+cmnCommandLineOptions::OptionMultipleValuesBase::OptionMultipleValuesBase(const std::string & shortOption, const std::string & longOption,
+                                                                          const std::string & description, RequiredType required):
+    cmnCommandLineOptions::OptionBase(shortOption, longOption, description, required)
+{
+}
+
+
 cmnCommandLineOptions::cmnCommandLineOptions(void)
 {
 }
 
 
 bool cmnCommandLineOptions::AddOptionNoValue(const std::string & shortOption, const std::string & longOption,
-                                             const std::string & description)
+                                             const std::string & description, RequiredType required)
 {
     std::string cleanedShort, cleanedLong;
     if (!this->ValidOptions(shortOption, longOption, cleanedShort, cleanedLong)) {
         return false;
     }
-    OptionNoValue * option = new OptionNoValue(cleanedShort, cleanedLong, description);
+    OptionNoValue * option = new OptionNoValue(cleanedShort, cleanedLong, description, required);
     this->Options.push_back(option);
     return true;
 }
@@ -97,6 +104,8 @@ bool cmnCommandLineOptions::Parse(int argc, const char * argv[], std::string & e
         return false;
     }
 
+    bool foundOneSquash = false;
+
     // parse options
     OptionBase * option;
     while (argc != 0) {
@@ -109,8 +118,13 @@ bool cmnCommandLineOptions::Parse(int argc, const char * argv[], std::string & e
         --argc; // parsed one parameter
         ++argv;
 
+        // if the option is a squash requirement, save that
+        if (option->Required == SQUASH_REQUIRED) {
+            foundOneSquash = true;
+        }
+
         // check that the option has not been already set
-        if (option->Set) {
+        if (option->Set && !(dynamic_cast<OptionMultipleValuesBase *>(option))) {
             errorMessage = "Option --" + option->Long + " already set";
             return false;
         }
@@ -119,8 +133,8 @@ bool cmnCommandLineOptions::Parse(int argc, const char * argv[], std::string & e
         if (dynamic_cast<OptionNoValue *>(option)) {
             option->SetValue(0);
         }
-        // -- one value option
-        else if (dynamic_cast<OptionOneValueBase *>(option)) {
+        // -- one or multiple values option
+        else if (dynamic_cast<OptionOneValueBase *>(option) || dynamic_cast<OptionMultipleValuesBase *>(option)) {
             if (argc == 0) {
                 errorMessage = "Not enough command line parameters while parsing value for option --" + option->Long;
                 return false;
@@ -138,14 +152,16 @@ bool cmnCommandLineOptions::Parse(int argc, const char * argv[], std::string & e
         }
     }
 
-    // check required
-    const OptionsType::const_iterator end = this->Options.end();
-    OptionsType::const_iterator iter = this->Options.begin();
-    for (; iter != end; ++iter) {
-        option = *iter;
-        if ((option->Required == REQUIRED) && !(option->Set)) {
-            errorMessage = "Option --" + option->Long + " required but not set";
-            return false;
+    // check required if needed
+    if (!foundOneSquash) {
+        const OptionsType::const_iterator end = this->Options.end();
+        OptionsType::const_iterator iter = this->Options.begin();
+        for (; iter != end; ++iter) {
+            option = *iter;
+            if ((option->Required == REQUIRED) && !(option->Set)) {
+                errorMessage = "Option --" + option->Long + " required but not set";
+                return false;
+            }
         }
     }
 
@@ -183,8 +199,15 @@ void cmnCommandLineOptions::PrintUsage(std::ostream & outputStream)
         } else {
             value = "";
         }
-        outputStream << " -" << option->Short << value << ", --" << option->Long << value << " : " << option->Description
-                     << ((option->Required == REQUIRED) ? " (required)" : " (optional)") << std::endl;
+        outputStream << " -" << option->Short << value << ", --" << option->Long << value << " : " << option->Description;
+        if (option->Required == REQUIRED) {
+            outputStream << " (required)";
+        } else if (option->Required == OPTIONAL) {
+            outputStream << " (optional)";
+        } else if (option->Required == SQUASH_REQUIRED) {
+            outputStream << " (optional, no other option required when set)";
+        }
+        outputStream << std::endl;
     }
 }
 

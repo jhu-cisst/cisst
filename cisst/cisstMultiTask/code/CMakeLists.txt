@@ -199,6 +199,19 @@ set (HEADER_FILES
      mtsVector.h
      )
 
+if (MINGW)
+  message("Information: splitting mtsClassServices.cpp for MINGW")
+  file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/mtsClassServices1.cpp
+        "#define MTS_CLASS_SERVICES_PART1\n#include \"${CMAKE_CURRENT_SOURCE_DIR}/mtsClassServices.cpp\"\n")
+  file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/mtsClassServices2.cpp
+        "#define MTS_CLASS_SERVICES_PART2\n#include \"${CMAKE_CURRENT_SOURCE_DIR}/mtsClassServices.cpp\"\n")
+  file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/mtsClassServices3.cpp
+        "#define MTS_CLASS_SERVICES_PART3\n#include \"${CMAKE_CURRENT_SOURCE_DIR}/mtsClassServices.cpp\"\n")
+  set (ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
+       ${CMAKE_CURRENT_BINARY_DIR}/mtsClassServices1.cpp
+       ${CMAKE_CURRENT_BINARY_DIR}/mtsClassServices2.cpp
+       ${CMAKE_CURRENT_BINARY_DIR}/mtsClassServices3.cpp)
+endif (MINGW)
 
 if (CISST_MTS_HAS_ICE)
 

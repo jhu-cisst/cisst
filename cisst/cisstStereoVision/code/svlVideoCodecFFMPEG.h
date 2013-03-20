@@ -26,11 +26,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlVideoIO.h>
 #include <cisstStereoVision/svlTypes.h>
 
+#ifndef INT64_C
+    #define INT64_C(c) (c ## LL)
+    #define UINT64_C(c) (c ## ULL)
+#endif
+
 extern "C" {
-    #include <avcodec.h>
-    #include <avformat.h>
-    #include <avio.h>
-    #include <swscale.h>
+    #include <libavcodec/avcodec.h>
+    #include <libavformat/avformat.h>
+    #include <libavformat/avio.h>
+    #include <libswscale/swscale.h>
 }
 
 

@@ -41,6 +41,7 @@ public:
     virtual void SetEnableAdd(bool enable);
     virtual void SetEnableModify(bool enable);
     virtual void SetAlwaysSendTargets(bool enable);
+    virtual void SetCrosshairStyle(svlRGB color, unsigned int radius, unsigned int thickness);
 
     virtual void SetTargets(const svlSampleTargets& targets);
     virtual void GetTargets(svlSampleTargets& targets) const;
@@ -60,6 +61,9 @@ private:
     svlFilterImageWindow Window;
     svlSample* DisplayImage;
 
+    svlRGB CrosshairColor;
+    unsigned int CrosshairRadius;
+    unsigned int CrosshairThickness;
     bool SendTargets;
     bool AlwaysSend;
     bool EnableAdd;

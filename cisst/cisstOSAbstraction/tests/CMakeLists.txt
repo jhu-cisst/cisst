@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstOSAbstraction tests
 #
-# (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -15,7 +15,7 @@
 # --- end cisst license ---
 
 # paths for headers/libraries
-cisst_set_directories (cisstCommon cisstOSAbstraction)
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstTestsDriver)
 
 # all source files
 set (SOURCE_FILES
@@ -43,15 +43,12 @@ set (HEADER_FILES
 add_executable (cisstOSAbstractionTestsPipeExecUtility osaPipeExecUtility.cpp)
 set_property (TARGET cisstOSAbstractionTestsPipeExecUtility PROPERTY FOLDER "cisstOSAbstraction/tests")
 
-# CppUnit include directories
-include_directories (${CPPUNIT_INCLUDE_DIR})
-
 # to find executables generated, provide internal configuration
 add_definitions(-DCMAKE_CFG_INTDIR_WITH_QUOTES="${CMAKE_CFG_INTDIR}")
 add_executable (cisstOSAbstractionTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstOSAbstractionTests PROPERTY FOLDER "cisstOSAbstraction/tests")
 target_link_libraries (cisstOSAbstractionTests cisstTestsDriver )
-cisst_target_link_libraries (cisstOSAbstractionTests cisstCommon cisstOSAbstraction)
+cisst_target_link_libraries (cisstOSAbstractionTests cisstCommon cisstOSAbstraction cisstTestsDriver)
 add_dependencies(cisstOSAbstractionTests cisstOSAbstractionTestsPipeExecUtility)
 
 # threads
@@ -60,11 +57,6 @@ target_link_libraries (cisstOSAbstractionTests ${CMAKE_THREAD_LIBS_INIT})
 
 # to generate a CTest list of tests
 cisst_add_test (cisstOSAbstractionTests INSTANCES 2 ITERATIONS 2)
-
-# CppUnit libraries
-target_link_libraries (cisstOSAbstractionTests
-                       optimized ${CPPUNIT_LIBRARIES}
-                       debug ${CPPUNIT_DEBUG_LIBRARIES})
 
 # To find generated executables
 set_target_properties (cisstOSAbstractionTests

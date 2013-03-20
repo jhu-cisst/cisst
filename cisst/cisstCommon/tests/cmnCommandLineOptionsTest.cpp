@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-28
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -126,4 +126,44 @@ void cmnCommandLineOptionsTest::TestIsSet(void) {
     CPPUNIT_ASSERT(!options.IsSet("not-set"));
     CPPUNIT_ASSERT(!options.IsSet("-n"));
     CPPUNIT_ASSERT(!options.IsSet("--not-set"));
+}
+
+
+void cmnCommandLineOptionsTest::TestMultipleValues(void) {
+   // add one required string option
+    cmnCommandLineOptions options;
+    std::list<std::string> resultStrings;
+    std::list<int> resultInts;
+    std::list<double> resultDoubles;
+    CPPUNIT_ASSERT(options.AddOptionMultipleValues("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultStrings));
+    CPPUNIT_ASSERT(options.AddOptionMultipleValues("i", "integer", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultInts));
+    CPPUNIT_ASSERT(options.AddOptionMultipleValues("d", "double", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultDoubles));
+    const char * argv[] = {"programName", "-s", "string1", "-i", "99", "-d", "3.14", "--string", "string2", "--double", "3.1", "-d", "-3.14", 0};
+    int argc = 13;
+    std::string errorMessage;
+    CPPUNIT_ASSERT(options.Parse(argc, argv, errorMessage));
+    CPPUNIT_ASSERT_EQUAL(size_t(2), resultStrings.size());
+    CPPUNIT_ASSERT_EQUAL(size_t(1), resultInts.size());
+    CPPUNIT_ASSERT_EQUAL(size_t(3), resultDoubles.size());
+
+    std::string resultString = resultStrings.front();
+    resultStrings.pop_front();
+    CPPUNIT_ASSERT_EQUAL(std::string("string1"), resultString);
+    resultString = resultStrings.front();
+    resultStrings.pop_front();
+    CPPUNIT_ASSERT_EQUAL(std::string("string2"), resultString);
+
+    int resultInt = resultInts.front();
+    resultInts.pop_front();
+    CPPUNIT_ASSERT_EQUAL(99, resultInt);
+
+    double resultDouble = resultDoubles.front();
+    resultDoubles.pop_front();
+    CPPUNIT_ASSERT_EQUAL(3.14, resultDouble);
+    resultDouble = resultDoubles.front();
+    resultDoubles.pop_front();
+    CPPUNIT_ASSERT_EQUAL(3.1, resultDouble);
+    resultDouble = resultDoubles.front();
+    resultDoubles.pop_front();
+    CPPUNIT_ASSERT_EQUAL(-3.14, resultDouble);
 }

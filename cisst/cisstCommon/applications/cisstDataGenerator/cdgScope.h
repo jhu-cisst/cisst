@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -47,14 +47,17 @@ public:
 
     typedef cmnNamedMap<cdgField> FieldsContainer;
 
-    cdgScope(unsigned int lineNumber);
+    // To store the possible scopes and subscopes
+    typedef cmnNamedMap<cdgScope> KnownScopesContainer;
+    typedef std::multimap<std::string, std::string> SubScopesContainer;
 
-    std::string GetDescription(void) const;
+    cdgScope(const std::string & name, size_t lineNumber);
 
     const std::string & GetScopeName(void) const;
     virtual Type GetScope(void) const = 0;
 
-    cdgField * AddField(const std::string & fieldName, const std::string & defaultValue, const bool required);
+    // Add a field to that scope
+    cdgField * AddField(const std::string & fieldName, const std::string & defaultValue, const bool required, const std::string & description);
     bool HasField(const std::string & fieldName) const;
     bool SetFieldValue(const std::string & fieldName,
                        const std::string & value,
@@ -63,18 +66,43 @@ public:
     bool IsValid(std::string & errorMessage) const;
     void FillInDefaults(void);
 
-    virtual bool HasScope(const std::string & fieldName,
-                          Stack & scopes,
-                          unsigned int lineNumber) = 0;
+    bool AddKnownScope(const cdgScope & newScope);
+    bool AddSubScope(const cdgScope & subScope);
+    bool HasSubScope(const std::string & fieldName,
+                     Stack & scopes,
+                     size_t lineNumber);
+
+    virtual bool ValidateRecursion(void);
+    virtual bool Validate(void) = 0;
 
     virtual void GenerateHeader(std::ostream & outputStream) const = 0;
     virtual void GenerateCode(std::ostream & outputStream) const = 0;
+    void DisplaySyntax(std::ostream & outputStream, size_t offset, bool recursive, bool skipScopeName = false) const;
+    void DisplayFieldsSyntax(std::ostream & outputStream, size_t offset) const;
+
+    // Dynamic creation of a new scope, should return an object of
+    // "this" type.
+    virtual cdgScope * Create(size_t lineNumber) const = 0;
 
 protected:
+    // List of possible fields and value
     FieldsContainer Fields;
+
+    // List all possible scopes
+    static KnownScopesContainer KnownScopes;
+    // List of possible scopes for each scope
+    static SubScopesContainer SubScopes;
+
+    // List actual sub scopes found
     ScopesContainer Scopes; // list of "scopes" found in this scope
-    unsigned int LineNumber;
+
+    // Line number in description file for beginning of scope
+    size_t LineNumber;
     void GenerateLineComment(std::ostream & outputStream) const;
+
+    enum {DISPLAY_OFFSET = 2};
+
+    std::string Name;
 
 private:
     cdgScope(void); // make sure constructor with line number is always used.

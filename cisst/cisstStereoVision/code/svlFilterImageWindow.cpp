@@ -45,9 +45,11 @@ class svlWindowManagerThreadProc
 public:
     void* Proc(svlFilterImageWindow* obj)
     {
-        bool fullscreen;
+        bool fullscreen = false;
+        bool isVisible = false;
         obj->GetFullScreen(fullscreen);
-        obj->WindowManager->DoModal(true, fullscreen);
+        obj->GetIsVisible(isVisible);
+        obj->WindowManager->DoModal(isVisible, fullscreen);
         return this;
     }
 };
@@ -63,6 +65,7 @@ svlFilterImageWindow::svlFilterImageWindow() :
     svlFilterBase(),
     FullScreenFlag(false),
     PositionSetFlag(false),
+    IsVisible(true),
     Thread(0),
     ThreadProc(0),
     WindowManager(0),
@@ -137,12 +140,16 @@ void svlFilterImageWindow::GetTitle(std::string & title) const
 
 void svlFilterImageWindow::Show(unsigned int videoch)
 {
-    WindowManager->Show(true, videoch);
+    IsVisible = true;
+    if(WindowManager)
+        WindowManager->Show(IsVisible, videoch);
 }
 
 void svlFilterImageWindow::Hide(unsigned int videoch)
 {
-    WindowManager->Show(false, videoch);
+    IsVisible = false;
+    if(WindowManager)
+        WindowManager->Show(IsVisible, videoch);
 }
 
 int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutput)

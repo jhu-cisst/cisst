@@ -80,11 +80,6 @@ public:
         return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
-    /*! Set an argument prototype */
-    void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        ArgumentPrototype = argumentPrototype;
-    }
-
     /*! Test if all arguments are supported.  See ArgumentsSupportedFlag. */
     inline bool ArgumentsSupported(void) const {
         return this->ArgumentsSupportedFlag;

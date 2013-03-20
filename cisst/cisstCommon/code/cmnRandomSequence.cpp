@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky
-  Created on:	2003-06-09
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-06-09
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -29,33 +29,17 @@ const cmnRandomSequence::ElementaryRandomNumber cmnRandomSequence::UpperRandomBo
 
 cmnRandomSequence cmnRandomSequence::RandomInstance;
 
-void cmnRandomSequence::ExtractRandomPermutation(const size_t length, unsigned int * array)
+void cmnRandomSequence::ExtractRandomPermutation(const size_t length, size_t * array)
 {
     size_t i;
-    for (i = 0; i < length; ++i)
-        array[i] = ExtractRandomInt(0, length);
-
-    unsigned int next;
-    unsigned int tmp;
     for (i = 0; i < length; ++i) {
-        next = ExtractRandomInt(i, length);
-        tmp = array[i];
-        array[i] = array[next];
-        array[next] = tmp;
+        array[i] = ExtractRandomSizeT(0, length);
     }
-}
 
-
-void cmnRandomSequence::ExtractRandomPermutation(const size_t length, unsigned long int * array)
-{
-    size_t i;
-    for (i = 0; i < length; ++i)
-        array[i] = ExtractRandomUnsignedLong(0, length);
-
-    unsigned long long next;
-    unsigned long long tmp;
+    size_t next;
+    size_t tmp;
     for (i = 0; i < length; ++i) {
-        next = ExtractRandomUnsignedLong(i, length);
+        next = ExtractRandomSizeT(i, length);
         tmp = array[i];
         array[i] = array[next];
         array[next] = tmp;

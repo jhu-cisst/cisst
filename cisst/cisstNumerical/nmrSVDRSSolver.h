@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
-  Author(s):	Ankur Kapoor
-  Created on:	2004-10-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  Author(s):  Ankur Kapoor
+  Created on: 2004-10-30
+
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Declaration of nmrSVDRSSolver
  */
 
@@ -77,7 +77,7 @@ http://www.cisst.org/cisst/license.txt.
   by computing the sum for i = 1, ..., R of the outer products
 
   (Col i of V) * (1/S(i)) * (Row i of G)
-  
+
   Here R denotes the pseudorank of A which the user may choose in the
   range 0 through \f$ \mbox{min}(M, N) \f$ based on the sizes of the
   singular values.
@@ -141,24 +141,24 @@ public:
       allocates the memory based on M, N and Nb.  It relies on the
       method Allocate().  The next call to the Solve() method will
       check that the parameters match the dimension.
-      
+
       \param m Number of rows of A
       \param n Number of columns of A
       \param nb Number of columns of B
     */
-    nmrSVDRSSolver( CISSTNETLIB_INTEGER m, 
-                    CISSTNETLIB_INTEGER n, 
+    nmrSVDRSSolver( CISSTNETLIB_INTEGER m,
+                    CISSTNETLIB_INTEGER n,
                     CISSTNETLIB_INTEGER nb = 1) {
         Allocate(m, n, nb);
     }
 
-    
+
     /*! Constructor with memory allocation.  This constructor
       allocates the memory based on the actual input of the Solve()
       method.  It relies on the method Allocate().  The next call to
       the Solve() method will check that the parameters match the
       dimension. */
-    nmrSVDRSSolver( vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, 
+    nmrSVDRSSolver( vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
                     vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B )
     { Allocate(A, B); }
 
@@ -166,13 +166,13 @@ public:
     /*! This method allocates the memory based on M, N and Nb.  The
       next call to the Solve() method will check that the parameters
       match the dimension.
-      
+
       \param m Number of rows of A
       \param n Number of columns of A
       \param nb Number of columns of B
     */
-    inline void Allocate( CISSTNETLIB_INTEGER m, 
-                          CISSTNETLIB_INTEGER n, 
+    inline void Allocate( CISSTNETLIB_INTEGER m,
+                          CISSTNETLIB_INTEGER n,
                           CISSTNETLIB_INTEGER nb = 1) {
         M = m;
         N = n;
@@ -188,7 +188,7 @@ public:
       convenient way to extract the required sizes from the input
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
-    inline void Allocate( vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, 
+    inline void Allocate( vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
                           vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B )
     { Allocate(A.rows(), A.cols(), B.cols()); }
 
@@ -198,44 +198,51 @@ public:
       transformations from the left to the \f$ Nb \f$ column vectors of
       the \f$ Mb \times Nb \f$ matrix B.  Either \f$ M > N \f$ or \f$ M <
       N \f$ is permitted.
-      
+
       The singular value decomposition of A is of the form:
-      
+
       \f$ A  =  U  S  V^{T} \f$
-      
+
       \note This method verifies that the input parameters are using a
       column major storage order and that they are compact.  Both
       conditions are tested using vctDynamicMatrix::IsFortran().
       If the parameters don't meet all the requirements, an exception
       is thrown (std::runtime_error).
     */
-    inline void Solve( vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, 
+    inline void Solve( vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
                        vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B )
         throw (std::runtime_error)
     {
         /* check that the size matches with Allocate() */
-        if ((M  != static_cast<CISSTNETLIB_INTEGER>(A.rows())) || 
-            (N  != static_cast<CISSTNETLIB_INTEGER>(A.cols())) || 
+        if ((M  != static_cast<CISSTNETLIB_INTEGER>(A.rows())) ||
+            (N  != static_cast<CISSTNETLIB_INTEGER>(A.cols())) ||
             (Nb != static_cast<CISSTNETLIB_INTEGER>(B.cols()))) {
             cmnThrow(std::runtime_error("nmrSVDRSSolver Solve: Sizes used for Allocate were different"));
         }
-        
+
         /* check other dimensions */
         if (M != static_cast<CISSTNETLIB_INTEGER>(B.rows())) {
             cmnThrow(std::runtime_error("nmrSVDRSSolver Solve: Sizes of parameters are incompatible"));
         }
-        
+
         /* check that the matrices are Fortran like */
         if (! (A.IsFortran() && B.IsFortran())) {
             cmnThrow(std::runtime_error("nmrSVDRSSolver Solve: All parameters must be Fortran compatible"));
         }
 
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+        cisstNetlib_svdrs_(A.Pointer(), &Lda, &M, &N, B.Pointer(),
+                           &Ldb, &Nb, S.Pointer(), Work.Pointer());
+#endif
+#else // no major version
         svdrs_(A.Pointer(), &Lda, &M, &N, B.Pointer(),
                &Ldb, &Nb, S.Pointer(), Work.Pointer());
+#endif // CISSTNETLIB_VERSION
     }
-    
 
-    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetS(void)const
+
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> & GetS(void) const
     { return S; }
 
 };

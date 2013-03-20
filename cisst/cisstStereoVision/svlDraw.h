@@ -88,8 +88,8 @@ namespace svlDraw
     void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, const svlEllipse & ellipse, unsigned char r, unsigned char g, unsigned char b, double from_angle = 0.0, double to_angle = 360.0, int thickness = 1);
 
     // RGB
-    void CISST_EXPORT Crosshair(svlSampleImage* image, unsigned int videoch, svlPoint2D pos, svlRGB color, unsigned int radius = 5);
-    void CISST_EXPORT Crosshair(svlSampleImage* image, unsigned int videoch, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned int radius = 5);
+    void CISST_EXPORT Crosshair(svlSampleImage* image, unsigned int videoch, svlPoint2D pos, svlRGB color, unsigned int radius = 5, unsigned int thickness = 2);
+    void CISST_EXPORT Crosshair(svlSampleImage* image, unsigned int videoch, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned int radius = 5, unsigned int thickness = 2);
 
     // RGB
     void CISST_EXPORT Text(svlSampleImage* image, unsigned int videoch, svlPoint2D pos, const std::string & text, double fontsize, svlRGB color);

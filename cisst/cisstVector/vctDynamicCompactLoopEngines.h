@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-07-07
 
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -521,6 +521,59 @@ class vctDynamicCompactLoopEngines {
 			{
 				_ioElementOperationType::Operate(*ioPointer,
                                                  _scalarElementOperationType::Operate(inputScalar, *inputPointer));
+            }
+		}
+
+	};
+
+
+
+    /*!  \brief Implement operation of the form \f$v_{io} =
+      op_{io}(v_{io}, op_{vv}(v_{i1}, v_{i2}))\f$ for compact containers.
+
+      This class uses template specialization to perform store-back
+      vector-vector-vector operations
+
+      \f[
+      v_{io} = \mathrm{op_{io}}(V_{io}, \mathrm{op_{vv}}(v_{i1}, v_{i2}))
+      \f]
+
+      \param _ioOperationType The type of the store-back operation.
+
+      \param _ownerElementOperationType The type of the
+	  element wise operation between input vectors.
+    */
+	template<class _ioElementOperationType, class _ownerElementOperationType>
+	class CioCiCi {
+	public:
+        template<class _ioOwnerType, class _input1OwnerType, class _input2OwnerType>
+        static inline void Run(_ioOwnerType & ioOwner,
+                               const _input1OwnerType & input1Owner, const _input2OwnerType & input2Owner)
+		{
+			typedef _ioOwnerType IoOwnerType;
+			typedef typename IoOwnerType::pointer IoPointerType;
+			typedef typename IoOwnerType::size_type size_type;
+
+            typedef _input1OwnerType Input1OwnerType;
+            typedef typename Input1OwnerType::const_pointer Input1PointerType;
+
+            typedef _input2OwnerType Input2OwnerType;
+            typedef typename Input2OwnerType::const_pointer Input2PointerType;
+
+            const size_type size = ioOwner.size();
+
+            IoPointerType ioPointer = ioOwner.Pointer();
+            const IoPointerType ioEnd = ioPointer + size;
+
+            Input1PointerType input1Pointer = input1Owner.Pointer();
+            Input2PointerType input2Pointer = input2Owner.Pointer();
+
+            for (;
+                 ioPointer != ioEnd;
+                 ioPointer++, input1Pointer++, input2Pointer++)
+			{
+				_ioElementOperationType::Operate(*ioPointer,
+                                                 _ownerElementOperationType::Operate(*input1Pointer, *input2Pointer));
             }
 		}
 

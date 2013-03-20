@@ -44,6 +44,7 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     OutputHeaderFile(0),
     FloatingNotation(COLLECTOR_FILE_FLOATING_NOTATION_NONE),
     Precision(10),
+    FillCharacter(' '),
     FileOpened(false),
     Serializer(0)
 {
@@ -183,7 +184,7 @@ void mtsCollectorBase::CloseOutput(void)
         this->FileOpened = false;
     }
     else {
-        CMN_LOG_CLASS_INIT_ERROR << "CloseOutput: file not open." << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "CloseOutput: file not open for \"" << this->GetName() << "\"" << std::endl;
     }
 }
 
@@ -273,6 +274,7 @@ void mtsCollectorBase::SetOutput(std::ostream & outputStream, const CollectorFil
     this->FileFormat = fileFormat;
     this->SetDelimiter();
     this->Precision = outputStream.precision();
+    this->FillCharacter = outputStream.fill();
     this->FirstRunningFlag = true;
     this->SampleCounter = 0;
     this->SampleCounterForEvent = 0;
@@ -350,6 +352,17 @@ void mtsCollectorBase::SetOutputStreamPrecision(const int precision)
     }
     else {
         this->OutputStream->precision(precision);
+    }
+}
+
+void mtsCollectorBase::SetOutputStreamFill(const char fillCharacter) 
+{
+    this->FillCharacter = fillCharacter;
+    if (this->Status == COLLECTOR_COLLECTING) {
+        CMN_LOG_CLASS_RUN_WARNING << "SetOutputStreamFill: fill character modified while collecting, the setting will only be applied to future files" << std::endl;
+    }
+    else {
+        this->OutputStream->fill(fillCharacter);
     }
 }
 

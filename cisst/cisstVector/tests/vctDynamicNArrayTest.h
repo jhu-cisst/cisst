@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
-  Author(s):	Daniel Li
-  Created on:	2006-07-10
-  
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+
+  Author(s):  Daniel Li, Anton Deguet
+  Created on: 2006-07-10
+
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctForwardDeclarations.h>
 
 
-class vctDynamicNArrayTest : public CppUnit::TestFixture
+class vctDynamicNArrayTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(vctDynamicNArrayTest);
 
@@ -55,6 +55,10 @@ class vctDynamicNArrayTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestNioSiNiOperationsDouble);
     CPPUNIT_TEST(TestNioSiNiOperationsFloat);
     CPPUNIT_TEST(TestNioSiNiOperationsInt);
+
+    CPPUNIT_TEST(TestNioNiNiOperationsDouble);
+    CPPUNIT_TEST(TestNioNiNiOperationsFloat);
+    CPPUNIT_TEST(TestNioNiNiOperationsInt);
 
     CPPUNIT_TEST(TestNoNiNiOperationsDouble);
     CPPUNIT_TEST(TestNoNiNiOperationsFloat);
@@ -105,18 +109,18 @@ class vctDynamicNArrayTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestFastCopyOfInt);
 
     CPPUNIT_TEST_SUITE_END();
-    
+
  public:
 
     enum {MIN_DIM = 2, MAX_DIM = 6};
     enum {MIN_SIZE = 3, MAX_SIZE = 8};
-    
+
     void setUp(void) {
     }
-    
+
     void tearDown(void) {
     }
-    
+
     typedef vct::size_type size_type;
     typedef vct::size_type dimension_type;
     typedef vct::stride_type stride_type;
@@ -164,6 +168,13 @@ class vctDynamicNArrayTest : public CppUnit::TestFixture
     void TestNioSiNiOperationsDouble(void);
     void TestNioSiNiOperationsFloat(void);
     void TestNioSiNiOperationsInt(void);
+
+    /*! Test NioNiNi operations */
+    template<class _elementType>
+        void TestNioNiNiOperations(void);
+    void TestNioNiNiOperationsDouble(void);
+    void TestNioNiNiOperationsFloat(void);
+    void TestNioNiNiOperationsInt(void);
 
     /*! Test NoNiNi operations */
     template<class _elementType>

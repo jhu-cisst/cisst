@@ -76,19 +76,23 @@ else (CISST_BUILD_SHARED_LIBS)
 endif (CISST_BUILD_SHARED_LIBS)
 
 # To allow mixing static and dynamic libraries
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-endif (CMAKE_COMPILER_IS_GNUCXX)
+endif (CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
 
-# To have more warnings with gcc
-if (CMAKE_COMPILER_IS_GNUCXX)
+# To have more warnings (mostly for GCC and CLANG)
+if (NOT MSVC)
   include (CheckCXXCompilerFlag)
   check_cxx_compiler_flag ("-Wextra" CXX_SUPPORTS_WEXTRA)
   if (CXX_SUPPORTS_WEXTRA)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
   endif (CXX_SUPPORTS_WEXTRA)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-endif (CMAKE_COMPILER_IS_GNUCXX)
+
+  check_cxx_compiler_flag ("-Wall" CXX_SUPPORTS_WALL)
+  if (CXX_SUPPORTS_WALL)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+  endif (CXX_SUPPORTS_WALL)
+endif (NOT MSVC)
 
 # Finally, create lib targets
 add_subdirectory (cisst)

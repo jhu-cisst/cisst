@@ -261,6 +261,8 @@ enum svlErrorMetric
     ,svlSSD
     ,svlWSSD
     ,svlNCC
+    ,svlFastNCC
+    ,svlNotQuiteNCC
 };
 
 

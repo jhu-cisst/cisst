@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -33,20 +33,21 @@ class cdgField: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    cdgField(const std::string & keyword, const std::string & defaultValue, const bool required);
+    cdgField(const std::string & keyword, const std::string & defaultValue, const bool required, const std::string & description);
 
     void AddPossibleValue(const std::string & possibleValue);
     const std::string & GetValue(void) const;
-    std::string GetDescription(void) const;
     bool SetValue(const std::string & value, std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
     void FillInDefaults(void);
+    void DisplaySyntax(std::ostream & outputStream, size_t offsetSize) const;
 
 protected:
     std::string Keyword;
     std::string Value;
     std::string Default;
     bool Required;
+    std::string Description;
     typedef std::vector<std::string> ValuesContainer;
     ValuesContainer PossibleValues;
 

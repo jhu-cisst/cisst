@@ -23,6 +23,7 @@
 @set CISST_BUILD_SAW=${CISST_BUILD_SAW}
 
 @if "%CMAKE_GENERATOR%" == "NMake Makefiles" goto nmake
+@if "%CMAKE_GENERATOR%" == "MinGW Makefiles" goto nmake
 @goto visual
 
 

@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Anton Deguet
+  Author(s):  Anton Deguet
   Created on: 2006-01-27
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -91,7 +91,7 @@ public:
     typedef vct::size_type size_type;
 
     enum {NB = 64};
- 
+
 protected:
     /*! Memory allocated for pivot indices vector if needed. */
     vctDynamicVector<CISSTNETLIB_INTEGER> PivotIndicesMemory;
@@ -200,7 +200,7 @@ protected:
             cmnThrow(std::runtime_error("nmrInverseDynamicData: Vector workspace must be compact."));
         }
     }
-    
+
 
 public:
 
@@ -218,7 +218,7 @@ public:
 
 
     /*! Helper method to compute the size of the workspace vector.
-      
+
       \param A The matrix to be used by ::nmrInverse (it is used only
       to determine the size).
     */
@@ -289,7 +289,7 @@ public:
     {
         this->Allocate(size, storageOrder);
     }
-    
+
     /*! Constructor where the user provides the input matrix to
       specify the size and storage order.  Memory allocation is
       performed for pivot indices vector and workspace. This should be
@@ -304,17 +304,17 @@ public:
     {
         this->Allocate(A);
     }
-    
+
     /*! Constructor where the user provides the vector to store the
       pivot indices and the workspace.  The data object now acts as a
       composite container to hold, pass and manipulate a convenient
       storage for ::nmrInverse algorithm. Checks are made on the
       validity of the input and its consitency in terms of size.
-      
+
       \param A The matrix to be inversed, used to verify the sizes.
       \param pivotIndices Vector created by the user to store the pivot indices.
       \param workspace Vector created by the user for the workspace.
- 
+
       \sa nmrInverseDynamicData::SetRef
     */
     template <class _matrixOwnerTypeA,
@@ -342,7 +342,7 @@ public:
     {
         this->Allocate(A.rows(), A.StorageOrder());
     }
-    
+
     /*! This method allocates the memory for the pivot indices and the
       workspace.  This method is not meant to be a top-level user API,
       but is used by other overloaded Allocate methods.
@@ -355,7 +355,7 @@ public:
         this->SetDimension(size, storageOrder);
         this->AllocatePivotIndicesWorkspace(true, true);
     }
-    
+
     /*! This method doesn't allocate any memory as it relies on the
       user provided vectors (pivotIndices and workspace).
 
@@ -388,7 +388,7 @@ public:
 
 
 
-/*! 
+/*!
   \ingroup cisstNumerical
 
   \brief Data for Inverse problem (Fixed size).
@@ -401,7 +401,7 @@ public:
   \code
   nmrInverseFixedSizeData<4, VCT_COL_MAJOR> data;
   \endcode
-  
+
   \note An object of type nmrInverseFixedSizeData contains the memory
   required for the pivot indices and the workspace, i.e. its actual
   size will be equal to the memory required to store these vectors.
@@ -422,7 +422,7 @@ public:
     enum {MAX_SIZE_1 = (_size > 1) ? _size : 1};
     enum {NB = 64};
     enum {LWORK = _size * NB};
-    
+
 #endif // DOXYGEN
     /*! Type of the input matrix A (size computed from the data
       template parameters). */
@@ -437,7 +437,7 @@ public:
 protected:
     VectorTypePivotIndices PivotIndicesMember; /*!< Data member used to store the vector pivotIndices. */
     VectorTypeWorkspace WorkspaceMember; /*!< Data member used to store the workspace vector. */
-    
+
 public:
 #ifndef DOXYGEN
     /*! This class is not intended to be a top-level API.  It has been
@@ -461,7 +461,7 @@ public:
     };
     friend class Friend;
 #endif // DOXYGEN
-    
+
     /*! Default constructor.  Does nothing since the allocation is
       performed on the stack. */
     nmrInverseFixedSizeData() {};
@@ -561,7 +561,7 @@ public:
   This function checks for valid input (size and compact) and calls
   the LAPACK function.  If the input doesn't match the data, an
   exception is thrown (\c std::runtime_error).
-  
+
   This function modifies the input matrix A and stores the results in
   the data.
 
@@ -596,6 +596,20 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerType, CIS
     CISSTNETLIB_INTEGER lda = (size > 1) ? size : 1;
     CISSTNETLIB_INTEGER lwork = dataFriend.Workspace().size();
     /* call the LAPACK C function */
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgetrf_(&size, &size,
+                        A.Pointer(), &lda,
+                        dataFriend.PivotIndices().Pointer(),
+                        &info);
+    cisstNetlib_dgetri_(&size,
+                        A.Pointer(), &lda,
+                        dataFriend.PivotIndices().Pointer(),
+                        dataFriend.Workspace().Pointer(),
+                        &lwork,
+                        &info);
+#endif
+#else // no major version
     dgetrf_(&size, &size,
             A.Pointer(), &lda,
             dataFriend.PivotIndices().Pointer(),
@@ -606,6 +620,7 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerType, CIS
             dataFriend.Workspace().Pointer(),
             &lwork,
             &info);
+#endif // CISSTNETLIB_VERSION
     return info;
 }
 
@@ -618,7 +633,7 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerType, CIS
   user (see nmrInverseDynamicData::SetRef).  While the data is
   being build, the consistency of the output is checked.  Then, the
   nmrInverse(A, data) function can be used safely.
- 
+
   \param A is a reference to a dynamic square matrix
   \param pivotIndices Vector created by the user to store the pivot indices.
   \param workspace Vector created by the user for the workspace.
@@ -643,7 +658,7 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, CI
   Internally, a data object is created.  This forces the dynamic
   allocation of the pivot indices vector as well as the workspace
   vector.  Then, the nmrInverse(A, data) function can be used safely.
- 
+
   \param A is a reference to a dynamic square matrix
 */
 template <class _matrixOwnerTypeA>
@@ -668,7 +683,7 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, CI
   do if the sizes don't match.  By default CMN_ASSERT calls \c abort()
   but it can be configured to be ignored or to throw an exception (see
   #CMN_ASSERT for details).
-  
+
   This function modifies the input matrix A.
 
   \param A is a fixed size square matrix.
@@ -679,7 +694,7 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, CI
         TestFixedSizeRowMajorUserAlloc
  */
 template <vct::size_type _size, vct::size_type _maxSize1, vct::size_type _lWork, bool _storageOrder>
-inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _size, _size, _storageOrder> & A, 
+inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _size, _size, _storageOrder> & A,
                             vctFixedSizeVector<CISSTNETLIB_INTEGER, _maxSize1> & pivotIndices,
                             vctFixedSizeVector<CISSTNETLIB_DOUBLE, _lWork> & workspace)
 {
@@ -695,6 +710,20 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _si
     CISSTNETLIB_INTEGER lwork = lWork;
 
     /* call the LAPACK C function */
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgetrf_(&size, &size,
+                        A.Pointer(), &lda,
+                        pivotIndices.Pointer(),
+                        &info);
+    cisstNetlib_dgetri_(&size,
+                        A.Pointer(), &lda,
+                        pivotIndices.Pointer(),
+                        workspace.Pointer(),
+                        &lwork,
+                        &info);
+#endif
+#else // no major version
     dgetrf_(&size, &size,
             A.Pointer(), &lda,
             pivotIndices.Pointer(),
@@ -705,6 +734,7 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _si
             workspace.Pointer(),
             &lwork,
             &info);
+#endif // CISSTNETLIB_VERSION
     return info;
 }
 
@@ -740,11 +770,11 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _si
   Internally, a data object is created.  This forces the allocation
   (stack) of the pivot indices vector as well as the workspace vector.
   Then, the nmrInverse(A, data) function can be used safely.
- 
+
   \param A A fixed size square matrix.
 */
 template <vct::size_type _size, bool _storageOrder>
-inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _size, _size, _storageOrder> & A) 
+inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _size, _size, _storageOrder> & A)
 {
     nmrInverseFixedSizeData<_size, _storageOrder> data;
     return nmrInverse(A, data);
