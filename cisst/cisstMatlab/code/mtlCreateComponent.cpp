@@ -73,7 +73,10 @@ const char * mtlCreateComponent(const char * componentName)
     std::stringstream code;
 
     // create component proxy
-    code << componentName << " = eval('dynamicprops');";
+    mexEvalString(code.str().c_str());
+    code.str("");
+    
+    code << componentName << " = eval('mtlDynamicProps');";
     mexEvalString(code.str().c_str());
     code.str("");
 
@@ -81,7 +84,7 @@ const char * mtlCreateComponent(const char * componentName)
     code << componentName << ".addprop('interface1');";
     mexEvalString(code.str().c_str());
     code.str("");
-    code << componentName << ".interface1 = eval('dynamicprops');";
+    code << componentName << ".interface1 = eval('mtlDynamicProps');";
     mexEvalString(code.str().c_str());
     code.str("");
 
@@ -95,7 +98,7 @@ const char * mtlCreateComponent(const char * componentName)
     code << componentName << ".addprop('interface2');";
     mexEvalString(code.str().c_str());
     code.str("");
-    code << componentName << ".interface2 = eval('dynamicprops');";
+    code << componentName << ".interface2 = eval('mtlDynamicProps');";
     mexEvalString(code.str().c_str());
     code.str("");
 

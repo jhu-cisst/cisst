@@ -15,9 +15,5 @@
 %
 % --- end cisst license ---
 
-function mtlCreateComponent(componentName)
-    calllib('libcisstMatlab', 'mtlCreateComponent', componentName);
-    % push the newly created component to caller
-    command = ['assignin(''caller'', ''' componentName ''', ' componentName ');'];
-    eval(command);
+classdef mtlDynamicProps < dynamicprops
 end
