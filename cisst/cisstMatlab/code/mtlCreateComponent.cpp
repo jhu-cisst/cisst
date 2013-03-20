@@ -66,8 +66,13 @@ const char * mtlCreateComponent(const char * componentName)
         mexPrintf("failed to connect interface 2");
     }
 
+    osaSleep(1.0 * cmn_s);
+
     component->Create();
     componentProxy->Create();
+
+    osaSleep(1.0 * cmn_s);
+
     component->Start();
     componentProxy->Start();
 
