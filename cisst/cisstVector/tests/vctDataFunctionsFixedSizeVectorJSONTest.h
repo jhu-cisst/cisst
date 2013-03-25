@@ -19,16 +19,26 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#pragma once
-#ifndef _vctDataFunctions_h
-#define _vctDataFunctions_h
 
-#include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
-#include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
-#include <cisstVector/vctDataFunctionsDynamicVector.h>
-#include <cisstVector/vctDataFunctionsDynamicMatrix.h>
-#include <cisstVector/vctDataFunctionsTransformations.h>
+#include <cppunit/TestCase.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#endif  // _vctDataFunctions_h
+class vctDataFunctionsFixedSizeVectorJSONTest: public CppUnit::TestFixture
+{
+    CPPUNIT_TEST_SUITE(vctDataFunctionsFixedSizeVectorJSONTest);
+    {
+        CPPUNIT_TEST(TestVector);
+        CPPUNIT_TEST(TestVectorRef);
+    }
+    CPPUNIT_TEST_SUITE_END();
 
+ public:
+    void setUp(void) {
+    }
+
+    void tearDown(void) {
+    }
+
+    void TestVector(void);
+    void TestVectorRef(void);
+};

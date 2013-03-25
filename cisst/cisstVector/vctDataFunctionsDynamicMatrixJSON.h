@@ -17,18 +17,19 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
+
 */
 
 #pragma once
-#ifndef _vctDataFunctions_h
-#define _vctDataFunctions_h
 
-#include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
-#include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
-#include <cisstVector/vctDataFunctionsDynamicVector.h>
-#include <cisstVector/vctDataFunctionsDynamicMatrix.h>
-#include <cisstVector/vctDataFunctionsTransformations.h>
+#ifndef _vctDataFunctionsDynamicMatrixJSON_h
+#define _vctDataFunctionsDynamicMatrixJSON_h
 
-#endif  // _vctDataFunctions_h
+#include <cisstCommon/cmnDataFunctionsJSON.h>
+#include <cisstVector/vctDynamicMatrixBase.h>
 
+#if CISST_HAS_JSON
+
+#endif CISST_HAS_JSON
+
+#endif // _vctDataFunctionsDynamicMatrixJSON_h

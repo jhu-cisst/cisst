@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsMatrix.h>
 #include <cisstVector/vctFixedSizeMatrixBase.h>
+#include <cisstVector/vctDataFunctionsFixedSizeMatrixJSON.h>
 
 template <vct::size_type _rows, vct::size_type _cols, class _elementType,
           vct::stride_type _rowStrideDestination, vct::stride_type _colStrideDestination, class _dataPtrTypeDestination,
@@ -112,7 +113,7 @@ std::string cmnDataSerializeTextDescription(const vctFixedSizeConstMatrixBase<_r
     const vct::size_type myCols = data.cols();
     vct::size_type indexRow, indexCol;
     const char separator = (delimiter == ',') ? ':' : ',';
-        
+
     for (indexRow = 0; indexRow < myRows; ++indexRow) {
         for (indexCol = 0; indexCol < myCols; ++indexCol) {
             if (indexRow != 0 || indexCol != 0) {
@@ -259,41 +260,5 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
 }
 
 // ----------------------- end of older functions
-
-#if CISST_HAS_JSON
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-void cmnDataToJSON(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
-                   Json::Value & jsonValue) {
-    const size_t numberOfRows = matrix.rows();
-    int jsonRowIndex = 0;
-    for (size_t rowIndex = 0;
-         rowIndex < numberOfRows;
-         ++rowIndex, ++jsonRowIndex) {
-        cmnDataToJSON(matrix.Row(rowIndex), jsonValue[jsonRowIndex]);
-    }
-}
-
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-inline void cmnDataFromJSON(vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
-                            const Json::Value & jsonValue)
-    throw (std::runtime_error)
-{
-    // make sure both matrices have the same number of rows
-    if (matrix.rows() != jsonValue.size()) {
-        cmnThrow("cmnDataFromJSON: matrix number of rows don't match");
-    }
-    const size_t numberOfRows = matrix.rows();
-    int jsonRowIndex = 0;
-    for (size_t rowIndex = 0;
-         rowIndex < numberOfRows;
-         ++rowIndex, ++jsonRowIndex) {
-        cmnDataFromJSON(matrix.Row(rowIndex), jsonValue[jsonRowIndex]);
-    }
-}
-#endif // CISST_HAS_JSON
 
 #endif // _vctDataFunctionsFixedSizeMatrix_h

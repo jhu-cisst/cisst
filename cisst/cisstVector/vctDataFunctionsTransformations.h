@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 #include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
+#include <cisstVector/vctDataFunctionsTransformationsJSON.h>
 
 template <class _rotationType>
 void cmnDataCopy(vctFrameBase<_rotationType> & destination,
@@ -139,27 +140,5 @@ cmnDataScalar(const vctFrameBase<_rotationType> & data,
     }
     return cmnDataScalar(data.Rotation(), index - scalarNumberTranslation);
 }
-
-
-#if CISST_HAS_JSON
-template <class _rotationType>
-void
-cmnDataToJSON(const vctFrameBase<_rotationType> & data,
-              Json::Value & jsonValue)
-{
-    cmnDataToJSON(data.Translation(), jsonValue["Translation"]);
-    cmnDataToJSON(data.Rotation(), jsonValue["Rotation"]);
-}
-
-template <class _rotationType>
-void
-cmnDataFromJSON(vctFrameBase<_rotationType> & data,
-                const Json::Value & jsonValue)
-    throw (std::runtime_error)
-{
-    cmnDataFromJSON(data.Translation(), jsonValue["Translation"]);
-    cmnDataFromJSON(data.Rotation(), jsonValue["Rotation"]);
-}
-#endif // CISST_HAS_JSON
 
 #endif // _vctDataFunctionsTransformations_h

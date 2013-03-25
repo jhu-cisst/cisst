@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -79,6 +79,15 @@ set (HEADER_FILES
      cmnTypeTraits.h
      cmnUnits.h
      )
+
+if (CISST_HAS_JSON)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       cmnDataFunctionsJSON.cpp)
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       cmnDataFunctionsJSON.h)
+endif (CISST_HAS_JSON)
 
 cisst_add_library (
   LIBRARY cisstCommon

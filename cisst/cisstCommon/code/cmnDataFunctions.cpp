@@ -182,8 +182,6 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     // retrieve size of string
     cmnDataDeSerializeBinary_size_t(inputStream, size, remoteFormat, localFormat);
     data.resize(size);
-    // this const_cast is a bit alarming, lets be verbose until we are sure this is safe
-    std::cerr << CMN_LOG_DETAILS << " - not really sure about the following const cast" << std::endl;
     inputStream.read(const_cast<char *>(data.data()), size);
     if (inputStream.fail()) {
         cmnThrow("cmnDataDeSerializeBinary(std::string): error occured with std::istream::read");
@@ -216,50 +214,3 @@ void cmnDataDeSerializeTextDelimiter(std::istream & inputStream, const char deli
         }
     }
 }
-
-
-#if CISST_HAS_JSON
-
-void cmnDataToJSON(const double value, Json::Value & jsonValue) {
-    jsonValue = value;
-}
-void cmnDataFromJSON(double & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asDouble();
-}
-
-void cmnDataToJSON(const float value, Json::Value & jsonValue) {
-    jsonValue = value;
-}
-void cmnDataFromJSON(float & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asFloat();
-}
-
-void cmnDataToJSON(const int value, Json::Value & jsonValue) {
-    jsonValue = value;
-}
-void cmnDataFromJSON(int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asInt();
-}
-
-void cmnDataToJSON(const unsigned int value, Json::Value & jsonValue) {
-    jsonValue = value;
-}
-void cmnDataFromJSON(unsigned int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asUInt();
-}
-
-void cmnDataToJSON(const bool value, Json::Value & jsonValue) {
-    jsonValue = value;
-}
-void cmnDataFromJSON(bool & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asBool();
-}
-
-void cmnDataToJSON_size_t(const size_t value, Json::Value & jsonValue) {
-    jsonValue = static_cast<Json::UInt64>(value);
-}
-void cmnDataFromJSON_size_t(size_t & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asUInt64();
-}
-
-#endif // CISST_HAS_JSON

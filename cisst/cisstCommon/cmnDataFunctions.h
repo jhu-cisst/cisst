@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-
 #pragma once
 #ifndef _cmnDataFunctions_h
 #define _cmnDataFunctions_h
@@ -28,8 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <string.h> // for memcpy
 #include <iostream>
 #include <limits>
-#include <cisstConfig.h> // for CISST_HAS_JSON
 #include <cisstCommon/cmnThrow.h>
+#include <cisstCommon/cmnDataFunctionsJSON.h>
 
 // always include last
 #include <cisstCommon/cmnExport.h>
@@ -430,32 +429,5 @@ inline std::string cmnDataScalarDescription(const std::string & CMN_UNUSED(data)
 /*! Utility used to extract delimiter for functions cmnDataDeSerializeText */
 void CISST_EXPORT cmnDataDeSerializeTextDelimiter(std::istream & inputStream, const char delimiter, const char * className)
     throw (std::runtime_error);
-
-
-
-
-#if CISST_HAS_JSON
-
-#include <json/json.h>
-
-void cmnDataToJSON(const double value, Json::Value & jsonValue);
-void cmnDataFromJSON(double & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
-
-void cmnDataToJSON(const float value, Json::Value & jsonValue);
-void cmnDataFromJSON(float & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
-
-void cmnDataToJSON(const int value, Json::Value & jsonValue);
-void cmnDataFromJSON(int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
-
-void cmnDataToJSON(const unsigned int value, Json::Value & jsonValue);
-void cmnDataFromJSON(unsigned int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
-
-void cmnDataToJSON(const bool value, Json::Value & jsonValue);
-void cmnDataFromJSON(bool & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
-
-void cmnDataToJSON_size_t(const size_t value, Json::Value & jsonValue);
-void cmnDataFromJSON_size_t(size_t & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
-
-#endif // CISST_HAS_JSON
 
 #endif // _cmnDataFunctions_h

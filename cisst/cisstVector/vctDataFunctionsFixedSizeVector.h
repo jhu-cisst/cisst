@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsVector.h>
 #include <cisstVector/vctFixedSizeVectorBase.h>
-
+#include <cisstVector/vctDataFunctionsFixedSizeVectorJSON.h>
 
 template <vct::size_type _size, class _elementType,
           vct::stride_type _strideDestination, class _dataPtrTypeDestination,
@@ -225,65 +225,5 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
     vector.SerializeRaw(outputStream);
 }
 // ----------------------- end of older functions
-
-#if CISST_HAS_JSON
-template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-void cmnDataToJSON(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector,
-                   Json::Value & jsonValue) {
-    typedef vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> VectorType;
-    typedef typename VectorType::const_iterator const_iterator;
-    const const_iterator end = vector.end();
-    const_iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataToJSON(*iter, jsonValue[index]);
-    }
-}
-
-template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline void cmnDataFromJSON(vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType> & vector,
-                            const Json::Value & jsonValue)
-    throw (std::runtime_error)
-{
-    // make sure both vectors have the same size
-    if (vector.size() != jsonValue.size()) {
-        cmnThrow("cmnDataFromJSON: vector sizes don't match");
-    }
-    typedef vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType> VectorType;
-    typedef typename VectorType::iterator iterator;
-    const iterator end = vector.end();
-    iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataFromJSON(*iter, jsonValue[index]);
-    }
-}
-
-template <class _elementType, vct::size_type _size, vct::stride_type _stride>
-inline void cmnDataFromJSON(vctFixedSizeVectorRef<_elementType, _size, _stride> vector,
-                            const Json::Value & jsonValue)
-    throw (std::runtime_error)
-{
-    // make sure both vectors have the same size
-    if (vector.size() != jsonValue.size()) {
-        cmnThrow("cmnDataFromJSON: vector sizes don't match");
-    }
-    typedef vctFixedSizeVectorRef<_elementType, _size, _stride> VectorType;
-    typedef typename VectorType::iterator iterator;
-    const iterator end = vector.end();
-    iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataFromJSON(*iter, jsonValue[index]);
-    }
-}
-
-#endif // CISST_HAS_JSON
 
 #endif // _vctDataFunctionsFixedSizeVector_h

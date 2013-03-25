@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsVector.h>
 #include <cisstVector/vctDynamicVectorBase.h>
-
+#include <cisstVector/vctDataFunctionsDynamicVectorJSON.h>
 
 // there are two different specialization for vectors, dynamic vectors can be resized while references can't
 template <typename _elementType, class _vectorOwnerTypeSource>
@@ -294,60 +294,5 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
 {
     vector.SerializeRaw(outputStream);
 }
-
-
-#if CISST_HAS_JSON
-template <typename _elementType, typename _vectorOwnerType>
-void cmnDataToJSON(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector,
-                   Json::Value & jsonValue) {
-    typedef vctDynamicConstVectorBase<_vectorOwnerType, _elementType> VectorType;
-    typedef typename VectorType::const_iterator const_iterator;
-    const const_iterator end = vector.end();
-    const_iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataToJSON(*iter, jsonValue[index]);
-    }
-}
-
-template <typename _elementType>
-void cmnDataFromJSON(vctDynamicVector<_elementType> & vector,
-                     const Json::Value & jsonValue) throw (std::runtime_error) {
-    // get the vector size from JSON and resize
-    vector.SetSize(jsonValue.size());
-    typedef vctDynamicVector<_elementType> VectorType;
-    typedef typename VectorType::iterator iterator;
-    const iterator end = vector.end();
-    iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataFromJSON(*iter, jsonValue[index]);
-    }
-}
-
-template <typename _elementType>
-void cmnDataFromJSON(vctDynamicVectorRef<_elementType> vector,
-                     const Json::Value & jsonValue) throw (std::runtime_error) {
-    // make sure both vectors have the same size
-    if (vector.size() != jsonValue.size()) {
-        cmnThrow("cmnDataFromJSON: vector sizes don't match");
-    }
-    typedef vctDynamicVectorRef<_elementType> VectorType;
-    typedef typename VectorType::iterator iterator;
-    const iterator end = vector.end();
-    iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataFromJSON(*iter, jsonValue[index]);
-    }
-}
-#endif
-
 
 #endif // _vctDataFunctionsDynamicVector_h
