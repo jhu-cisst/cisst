@@ -41,7 +41,7 @@ class CISST_EXPORT vctQtWidgetFrame4x4DoubleRead: public QTableWidget
 
     template <class _rotationType>
     bool SetValue(const vctFrameBase<_rotationType> & value) {
-        SetValue(vctFrame4x4<double>(value));
+        return SetValue(vctFrame4x4<double>(value));
     }
 };
 
