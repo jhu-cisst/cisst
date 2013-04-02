@@ -47,6 +47,8 @@ set (QT_UI_FILES
 if (CISST_HAS_OPENGL)
   set (HEADER_FILES
        ${HEADER_FILES}
+       svlFilterImageWindowQt.h
+       svlFilterImageWindowQtStereo.h
        svlFilterImageOpenGLQtWidget.h
        )
   set (SOURCE_FILES
@@ -91,13 +93,13 @@ endforeach (UI)
 
 # The following two files are added after Qt wrapping
 # because they have to Qt symbols to wrap
-if (CISST_HAS_OPENGL)
-  set (HEADER_FILES
-       ${HEADER_FILES}
-       svlFilterImageWindowQt.h
-       svlFilterImageWindowQtStereo.h
-       )
-endif (CISST_HAS_OPENGL)
+#if (CISST_HAS_OPENGL)
+#  set (HEADER_FILES
+#       ${HEADER_FILES}
+#       svlFilterImageWindowQt.h
+#       svlFilterImageWindowQtStereo.h
+#       )
+#endif (CISST_HAS_OPENGL)
 
 cisst_add_library (LIBRARY cisstStereoVisionQt
                    LIBRARY_DIR cisstStereoVision
