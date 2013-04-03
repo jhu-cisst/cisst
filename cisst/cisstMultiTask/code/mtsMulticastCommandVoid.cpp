@@ -34,6 +34,11 @@ mtsMulticastCommandVoid::~mtsMulticastCommandVoid()
 
 void mtsMulticastCommandVoid::AddCommand(BaseType * command) {
     if (command) {
+        VectorType::iterator it = std::find(Commands.begin(), Commands.end(), command);
+        if (it != Commands.end()) {
+            CMN_LOG_INIT_DEBUG << "Class mtsMulticastCommandVoid: AddCommand: command already added" << std::endl;
+            return;
+        }
         this->Commands.push_back(command);
     }
 }
