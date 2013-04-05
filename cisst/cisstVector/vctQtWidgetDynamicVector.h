@@ -30,31 +30,51 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
-
-template <class _elementType>
-class CISST_EXPORT vctQtWidgetDynamicVectorRead
+class CISST_EXPORT vctQtWidgetDynamicVectorReadBase
 {
-    typedef _elementType value_type;
+protected:
     QTableWidget * Table;
-
- public:
-    vctQtWidgetDynamicVectorRead(void);
+public:
+    vctQtWidgetDynamicVectorReadBase(void);
     QWidget * GetWidget(void);
-    virtual bool SetValue(const vctDynamicVector<value_type> & value);
 };
 
-typedef vctQtWidgetDynamicVectorRead<double> vctQtWidgetDynamicVectorDoubleRead;
-typedef vctQtWidgetDynamicVectorRead<float> vctQtWidgetDynamicVectorFloatRead;
-typedef vctQtWidgetDynamicVectorRead<int> vctQtWidgetDynamicVectorIntRead;
-typedef vctQtWidgetDynamicVectorRead<unsigned int> vctQtWidgetDynamicVectorUIntRead;
-typedef vctQtWidgetDynamicVectorRead<bool> vctQtWidgetDynamicVectorBoolRead;
+template <class _elementType>
+class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating: public vctQtWidgetDynamicVectorReadBase
+{
+    typedef _elementType value_type;
+    int Precision;
+    char Format;
+public:
+    vctQtWidgetDynamicVectorReadFloating(void);
+    virtual bool SetValue(const vctDynamicVector<value_type> & value);
+    void SetPrecision(const int precision);
+    void SetFormat(const char format);
+};
+
+template <class _elementType>
+class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger: public vctQtWidgetDynamicVectorReadBase
+{
+    typedef _elementType value_type;
+    int Base;
+public:
+    vctQtWidgetDynamicVectorReadInteger(void);
+    virtual bool SetValue(const vctDynamicVector<value_type> & value);
+    void SetBase(const int base);
+};
+
+typedef vctQtWidgetDynamicVectorReadFloating<double> vctQtWidgetDynamicVectorDoubleRead;
+typedef vctQtWidgetDynamicVectorReadFloating<float> vctQtWidgetDynamicVectorFloatRead;
+typedef vctQtWidgetDynamicVectorReadInteger<int> vctQtWidgetDynamicVectorIntRead;
+typedef vctQtWidgetDynamicVectorReadInteger<unsigned int> vctQtWidgetDynamicVectorUIntRead;
+typedef vctQtWidgetDynamicVectorReadInteger<bool> vctQtWidgetDynamicVectorBoolRead;
 
 #if ((CISST_OS == CISST_WINDOWS) && (CISST_COMPILER != CISST_GCC))
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<double>;
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<float>;
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<int>;
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<unsigned int>;
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<bool>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<double>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<float>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<int>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<unsigned int>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadInterger<bool>;
 #endif // CISST_WINDOWS
 
 // -- for doubles

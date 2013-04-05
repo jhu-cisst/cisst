@@ -29,8 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 
-template <class _elementType>
-vctQtWidgetDynamicVectorRead<_elementType>::vctQtWidgetDynamicVectorRead(void):
+vctQtWidgetDynamicVectorReadBase::vctQtWidgetDynamicVectorReadBase(void):
     Table(0)
 {
     this->Table = new QTableWidget();
@@ -45,40 +44,94 @@ vctQtWidgetDynamicVectorRead<_elementType>::vctQtWidgetDynamicVectorRead(void):
     this->Table->setFixedHeight(verticalHeight);
 }
 
-template <class _elementType>
-QWidget * vctQtWidgetDynamicVectorRead<_elementType>::GetWidget(void)
+QWidget * vctQtWidgetDynamicVectorReadBase::GetWidget(void)
 {
     return this->Table;
 }
 
+
 template <class _elementType>
-bool vctQtWidgetDynamicVectorRead<_elementType>::SetValue(const vctDynamicVector<_elementType> & vector)
+vctQtWidgetDynamicVectorReadFloating<_elementType>::vctQtWidgetDynamicVectorReadFloating(void):
+    vctQtWidgetDynamicVectorReadBase(),
+    Precision(2),
+    Format('f')
+{
+}
+
+template <class _elementType>
+void vctQtWidgetDynamicVectorReadFloating<_elementType>::SetPrecision(const int precision)
+{
+    Precision = precision;
+}
+
+template <class _elementType>
+void vctQtWidgetDynamicVectorReadFloating<_elementType>::SetFormat(const char format)
+{
+    Format = format;
+}
+
+template <class _elementType>
+bool vctQtWidgetDynamicVectorReadFloating<_elementType>::SetValue(const vctDynamicVector<_elementType> & vector)
 {
     const size_t size = vector.size();
     if (static_cast<size_t>(this->Table->columnCount()) != size) {
         this->Table->setColumnCount(size);
     }
     QTableWidgetItem * tableItem;
-    QString itemValue;
     for (size_t index = 0; index < size; ++index) {
         tableItem = this->Table->item(0, index);
         if (tableItem == 0) {
             tableItem = new QTableWidgetItem();
-            tableItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+            tableItem->setTextAlignment(Qt::AlignRight);
+            tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
             this->Table->setItem(0, index, tableItem);
         }
-        itemValue.setNum(vector.Element(index));
-        tableItem->setText(itemValue);
+        tableItem->setText(QString::number(vector.Element(index), Format, Precision));
+    }
+    return true;
+}
+
+template <class _elementType>
+vctQtWidgetDynamicVectorReadInteger<_elementType>::vctQtWidgetDynamicVectorReadInteger(void):
+    vctQtWidgetDynamicVectorReadBase(),
+    Base(10)
+{
+}
+
+template <class _elementType>
+void vctQtWidgetDynamicVectorReadInteger<_elementType>::SetBase(const int base)
+{
+    Base = base;
+}
+
+
+template <class _elementType>
+bool vctQtWidgetDynamicVectorReadInteger<_elementType>::SetValue(const vctDynamicVector<_elementType> & vector)
+{
+    const size_t size = vector.size();
+    if (static_cast<size_t>(this->Table->columnCount()) != size) {
+        this->Table->setColumnCount(size);
+    }
+    QTableWidgetItem * tableItem;
+    for (size_t index = 0; index < size; ++index) {
+        tableItem = this->Table->item(0, index);
+        if (tableItem == 0) {
+            tableItem = new QTableWidgetItem();
+            tableItem->setTextAlignment(Qt::AlignRight);
+            tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
+            this->Table->setItem(0, index, tableItem);
+        }
+        tableItem->setText(QString::number(vector.Element(index), Base));
     }
     return true;
 }
 
 
-template class vctQtWidgetDynamicVectorRead<double>;
-template class vctQtWidgetDynamicVectorRead<float>;
-template class vctQtWidgetDynamicVectorRead<int>;
-template class vctQtWidgetDynamicVectorRead<unsigned int>;
-template class vctQtWidgetDynamicVectorRead<bool>;
+template class vctQtWidgetDynamicVectorReadFloating<double>;
+template class vctQtWidgetDynamicVectorReadFloating<float>;
+template class vctQtWidgetDynamicVectorReadInteger<int>;
+template class vctQtWidgetDynamicVectorReadInteger<unsigned int>;
+template class vctQtWidgetDynamicVectorReadInteger<bool>;
 
 
 
