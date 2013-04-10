@@ -74,7 +74,7 @@ template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<double>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<float>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<int>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<unsigned int>;
-template class CISST_EXPORT vctQtWidgetDynamicVectorReadInterger<bool>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<bool>;
 #endif // CISST_WINDOWS
 
 // -- for doubles
