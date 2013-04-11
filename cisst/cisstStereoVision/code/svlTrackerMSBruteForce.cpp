@@ -212,6 +212,11 @@ int svlTrackerMSBruteForce::GetFeatureRef(unsigned int targetid, vctDynamicVecto
     return SVL_OK;
 }
 
+int svlTrackerMSBruteForce::GetROIMargin()
+{
+    return SearchRadius + TemplateRadius;
+}
+
 int svlTrackerMSBruteForce::SetTarget(unsigned int targetid, const svlTarget2D & target)
 {
     if (targetid >= Targets.size()) return SVL_FAIL;
@@ -325,7 +330,13 @@ int svlTrackerMSBruteForce::PreProcessImage(svlSampleImage & image, unsigned int
     if (LowerScale) {
         // shirinking image for the lower scales recursively
         ShrinkImage(image.GetUCharPointer(videoch), LowerScaleImage->GetUCharPointer());
-        LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
+        LowerScale->SetROI(svlQuad(ROIRect.x1 / 2, ROIRect.y1 / 2,
+                                   ROIRect.x2 / 2, ROIRect.y2 / 2,
+                                   ROIRect.x3 / 2, ROIRect.y3 / 2,
+                                   ROIRect.x4 / 2, ROIRect.y4 / 2));
+        LowerScale->SetROI(svlEllipse(ROIEllipse.cx / 2, ROIEllipse.cy / 2,
+                                      ROIEllipse.rx / 2, ROIEllipse.ry / 2,
+                                      ROIEllipse.angle));
         LowerScale->PreProcessImage(*LowerScaleImage);
     }
 
@@ -336,12 +347,16 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
 {
     if (!Initialized) return SVL_FAIL;
 
-    const int leftborder   = ROI.left   + TemplateRadius;
-    const int topborder    = ROI.top    + TemplateRadius;
-    const int rightborder  = ROI.right  - TemplateRadius;
-    const int bottomborder = ROI.bottom - TemplateRadius;
+    int roi_margin = GetROIMargin();
+    svlRect image_roi(roi_margin, roi_margin, image.GetWidth() - roi_margin, image.GetHeight() - roi_margin);
+    bool ellipse_roi = false;
+    if (ROIEllipse.rx > 0 && ROIEllipse.ry > 0) ellipse_roi = true;
+
     const unsigned int targetcount = static_cast<unsigned int>(Targets.size());
     const unsigned int scalem1 = Scale - 1;
+    const int s_tmp_rad = TemplateRadius;
+    const int s_wdth = Width;
+    const int s_hght = Height;
     unsigned int templatesize = TemplateRadius * 2 + 1;
     templatesize *= templatesize * 3;
 
@@ -369,7 +384,10 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
         // Determine target visibility
         x = ptgt->pos.x;
         y = ptgt->pos.y;
-        if (x < leftborder || x >= rightborder || y < topborder  || y >= bottomborder) {
+
+        if (!image_roi.IsWithin(x, y) || !ROIRect.IsWithin(x, y) ||
+            (ellipse_roi && !ROIEllipse.IsWithin(x, y))) {
+
             ptgt->visible = false;
             ptgt->conf    = 0;
             // Skip target if not visible
@@ -377,7 +395,10 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
         }
         ptgt->visible = true;
 
-        if (TemplateUpdateEnabled) {
+        if (TemplateUpdateEnabled &&
+            x >= s_tmp_rad && y >= s_tmp_rad &&
+            (x + s_tmp_rad) <= s_wdth && (y + s_tmp_rad) <= s_hght) {
+
             // Check if this scale already has a template
             // Acquire target templates if necessary
             if (ptgt->feature_quality == -1) {
@@ -388,12 +409,12 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
                 // filter
                 CopyTemplate(p_img,
                              OrigTemplates[i],
-                             ptgt->pos.x - TemplateRadius,
-                             ptgt->pos.y - TemplateRadius);
+                             x - TemplateRadius,
+                             y - TemplateRadius);
                 CopyTemplate(p_img,
                              ptgt->feature_data.Pointer(),
-                             ptgt->pos.x - TemplateRadius,
-                             ptgt->pos.y - TemplateRadius);
+                             x - TemplateRadius,
+                             y - TemplateRadius);
 
                 ptgt->conf            = 255;
                 ptgt->feature_quality = 256;
@@ -403,8 +424,8 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
                 UpdateTemplate(p_img,
                                OrigTemplates[i],
                                ptgt->feature_data.Pointer(),
-                               ptgt->pos.x - TemplateRadius,
-                               ptgt->pos.y - TemplateRadius);
+                               x - TemplateRadius,
+                               y - TemplateRadius);
             }
         }
     }
@@ -413,7 +434,6 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
     if (LowerScale) {
 
         // Call lower scales recursively
-        LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
         LowerScale->Track(*LowerScaleImage);
 
         // Scale up the tracking results from the
@@ -459,50 +479,66 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
         ypre = ptgt->pos.y;
 
         if (Scale == 1) {
-            if (Metric == svlSAD) {
-                MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, false);
+            switch (Metric) {
+                case svlSAD:
+                    MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, false);
+                break;
+
+                case svlSSD:
+                    MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, false);
+                break;
+
+                case svlNCC:
+                    MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, true);
+                break;
+
+                case svlFastNCC:
+                    MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[0].Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, true);
+                break;
+
+                case svlNotQuiteNCC:
+                    MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, true);
+                break;
+
+                default:
+                    return SVL_FAIL;
             }
-            else if (Metric == svlSSD) {
-                MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, false);
-            }
-            else if (Metric == svlNCC) {
-                MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, true);
-            }
-            else if (Metric == svlFastNCC) {
-                MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[0].Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, true);
-            }
-            else if (Metric == svlNotQuiteNCC) {
-                MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, true);
-            }
-            else return SVL_FAIL;
         }
         else {
-            if (Metric == svlSAD) {
-                MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, false);
+            switch (Metric) {
+                case svlSAD:
+                    MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, false);
+                break;
+
+                case svlSSD:
+                    MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, false);
+                break;
+
+                case svlNCC:
+                    MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, true);
+                break;
+
+                case svlFastNCC:
+                    MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[0].Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, true);
+                break;
+
+                case svlNotQuiteNCC:
+                    MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, true);
+                break;
+
+                default:
+                    return SVL_FAIL;
             }
-            else if (Metric == svlSSD) {
-                MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, false);
-            }
-            else if (Metric == svlNCC) {
-                MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, true);
-            }
-            else if (Metric == svlFastNCC) {
-                MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[0].Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, true);
-            }
-            else if (Metric == svlNotQuiteNCC) {
-                MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, true);
-            }
-            else return SVL_FAIL;
 
             if (ptgt->conf < ConfidenceThreshold) ptgt->conf = 0;
             ptgt->conf = (static_cast<int>(ptgt->conf) * scalem1 + conf) / Scale;
@@ -513,21 +549,27 @@ int svlTrackerMSBruteForce::Track(svlSampleImage & image, unsigned int videoch)
             ptgt->feature_quality = ptgt->conf;
         }
 
-        ptgt->pos.x = x + xpre;
-        ptgt->pos.y = y + ypre;
+        x += xpre;
+        y += ypre;
+        ptgt->pos.x = x;
+        ptgt->pos.y = y;
 
 #ifdef __DEBUG_TRACKER
         cvNamedWindow(ScaleName.c_str(), CV_WINDOW_AUTOSIZE); 
         cvShowImage(ScaleName.c_str(), image.IplImageRef(videoch));
         cvWaitKey(1);
 #endif
-        if (TemplateUpdateEnabled && !OverwriteTemplates) {
+
+        if (TemplateUpdateEnabled && !OverwriteTemplates &&
+            x >= s_tmp_rad && y >= s_tmp_rad &&
+            (x + s_tmp_rad) <= s_wdth && (y + s_tmp_rad) <= s_hght) {
+
             // Update template temporarily based on updated position
             UpdateTemplate(image.GetUCharPointer(videoch),
                            OrigTemplates[i],
                            ptgt->feature_data.Pointer(),
-                           ptgt->pos.x - TemplateRadius,
-                           ptgt->pos.y - TemplateRadius);
+                           x - TemplateRadius,
+                           y - TemplateRadius);
        }
     }
 
@@ -550,14 +592,18 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
         }
     }
 
-    const int leftborder   = ROI.left   + TemplateRadius;
-    const int topborder    = ROI.top    + TemplateRadius;
-    const int rightborder  = ROI.right  - TemplateRadius;
-    const int bottomborder = ROI.bottom - TemplateRadius;
+    int roi_margin = GetROIMargin();
+    svlRect image_roi(roi_margin, roi_margin, image.GetWidth() - roi_margin, image.GetHeight() - roi_margin);
+    bool ellipse_roi = false;
+    if (ROIEllipse.rx > 0 && ROIEllipse.ry > 0) ellipse_roi = true;
+
     const unsigned int targetcount = static_cast<unsigned int>(Targets.size());
     const unsigned int target_from = procInfo->ID;
     const unsigned int target_step = procInfo->count;
     const unsigned int scalem1 = Scale - 1;
+    const int s_tmp_rad = TemplateRadius;
+    const int s_wdth = Width;
+    const int s_hght = Height;
     unsigned int templatesize = TemplateRadius * 2 + 1;
     templatesize *= templatesize * 3;
 
@@ -588,7 +634,10 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
         // Determine target visibility
         x = ptgt->pos.x;
         y = ptgt->pos.y;
-        if (x < leftborder || x >= rightborder || y < topborder  || y >= bottomborder) {
+
+        if (!image_roi.IsWithin(x, y) || !ROIRect.IsWithin(x, y) ||
+            (ellipse_roi && !ROIEllipse.IsWithin(x, y))) {
+
             ptgt->visible = false;
             ptgt->conf    = 0;
             // Skip target if not visible
@@ -596,7 +645,10 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
         }
         ptgt->visible = true;
 
-        if (TemplateUpdateEnabled) {
+        if (TemplateUpdateEnabled &&
+            x >= s_tmp_rad && y >= s_tmp_rad &&
+            (x + s_tmp_rad) <= s_wdth && (y + s_tmp_rad) <= s_hght) {
+
             // Check if this scale already has a template
             // Acquire target templates if necessary
             if (ptgt->feature_quality == -1) {
@@ -607,12 +659,12 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
                 // filter
                 CopyTemplate(p_img,
                              OrigTemplates[i],
-                             ptgt->pos.x - TemplateRadius,
-                             ptgt->pos.y - TemplateRadius);
+                             x - TemplateRadius,
+                             y - TemplateRadius);
                 CopyTemplate(p_img,
                              ptgt->feature_data.Pointer(),
-                             ptgt->pos.x - TemplateRadius,
-                             ptgt->pos.y - TemplateRadius);
+                             x - TemplateRadius,
+                             y - TemplateRadius);
 
                 ptgt->conf            = 255;
                 ptgt->feature_quality = 256;
@@ -622,8 +674,8 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
                 UpdateTemplate(p_img,
                                OrigTemplates[i],
                                ptgt->feature_data.Pointer(),
-                               ptgt->pos.x - TemplateRadius,
-                               ptgt->pos.y - TemplateRadius);
+                               x - TemplateRadius,
+                               y - TemplateRadius);
                 memcpy(OrigTemplates[i], ptgt->feature_data.Pointer(), ptgt->feature_data.size());
             }
         }
@@ -633,7 +685,6 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
     if (LowerScale) {
 
         // Call lower scales recursively
-        LowerScale->SetROI(ROI.left / 2, ROI.top / 2, ROI.right / 2, ROI.bottom / 2);
         LowerScale->Track(procInfo, *LowerScaleImage);
 
         // Scale up the tracking results from the
@@ -684,50 +735,66 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
         ypre = ptgt->pos.y;
 
         if (Scale == 1) {
-            if (Metric == svlSAD) {
-                MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, false);
+            switch (Metric) {
+                case svlSAD:
+                    MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, false);
+                break;
+
+                case svlSSD:
+                    MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, false);
+                break;
+
+                case svlNCC:
+                    MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, true);
+                break;
+
+                case svlFastNCC:
+                    MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[procInfo->ID].Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, true);
+                break;
+
+                case svlNotQuiteNCC:
+                    MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, ptgt->conf, true);
+                break;
+
+                default:
+                    return SVL_FAIL;
             }
-            else if (Metric == svlSSD) {
-                MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, false);
-            }
-            else if (Metric == svlNCC) {
-                MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, true);
-            }
-            else if (Metric == svlFastNCC) {
-                MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[procInfo->ID].Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, true);
-            }
-            else if (Metric == svlNotQuiteNCC) {
-                MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, ptgt->conf, true);
-            }
-            else return SVL_FAIL;
         }
         else {
-            if (Metric == svlSAD) {
-                MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, false);
+            switch (Metric) {
+                case svlSAD:
+                    MatchTemplateSAD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, false);
+                break;
+
+                case svlSSD:
+                    MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, false);
+                break;
+
+                case svlNCC:
+                    MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, true);
+                break;
+
+                case svlFastNCC:
+                    MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[procInfo->ID].Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, true);
+                break;
+
+                case svlNotQuiteNCC:
+                    MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
+                    GetBestMatch(x, y, conf, true);
+                break;
+
+                default:
+                    return SVL_FAIL;
             }
-            else if (Metric == svlSSD) {
-                MatchTemplateSSD(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, false);
-            }
-            else if (Metric == svlNCC) {
-                MatchTemplateNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, true);
-            }
-            else if (Metric == svlFastNCC) {
-                MatchTemplateFastNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), ZeroMeanTemplate[procInfo->ID].Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, true);
-            }
-            else if (Metric == svlNotQuiteNCC) {
-                MatchTemplateNotQuiteNCC(image.GetUCharPointer(videoch), ptgt->feature_data.Pointer(), xpre, ypre);
-                GetBestMatch(x, y, conf, true);
-            }
-            else return SVL_FAIL;
 
             if (ptgt->conf < ConfidenceThreshold) ptgt->conf = 0;
             ptgt->conf = (static_cast<int>(ptgt->conf) * scalem1 + conf) / Scale;
@@ -738,8 +805,10 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
             ptgt->feature_quality = ptgt->conf;
         }
 
-        ptgt->pos.x = x + xpre;
-        ptgt->pos.y = y + ypre;
+        x += xpre;
+        y += ypre;
+        ptgt->pos.x = x;
+        ptgt->pos.y = y;
 
 #ifdef __DEBUG_TRACKER
         cvNamedWindow(ScaleName.c_str(), CV_WINDOW_AUTOSIZE); 
@@ -747,13 +816,16 @@ int svlTrackerMSBruteForce::Track(svlProcInfo* procInfo, svlSampleImage & image,
         cvWaitKey(1);
 #endif
 
-        if (TemplateUpdateEnabled && !OverwriteTemplates) {
+        if (TemplateUpdateEnabled && !OverwriteTemplates &&
+            x >= s_tmp_rad && y >= s_tmp_rad &&
+            (x + s_tmp_rad) <= s_wdth && (y + s_tmp_rad) <= s_hght) {
+
             // Update template temporarily based on updated position
             UpdateTemplate(image.GetUCharPointer(videoch),
                            OrigTemplates[i],
                            ptgt->feature_data.Pointer(),
-                           ptgt->pos.x - TemplateRadius,
-                           ptgt->pos.y - TemplateRadius);
+                           x - TemplateRadius,
+                           y - TemplateRadius);
         }
     }
 
@@ -828,7 +900,7 @@ void svlTrackerMSBruteForce::UpdateTemplate(unsigned char* img, unsigned char* o
     const unsigned int tmpwidth = tmpheight * 3;
     const unsigned int endstride = imstride - tmpwidth;
     const unsigned int origweight = 255 - TemplateUpdateWeight;
-    const unsigned int newweight = 255 - origweight;
+    const unsigned int newweight = 256 - origweight;
     unsigned char *input = img + imstride * top + left * 3;
     unsigned int i, j;
 
@@ -1275,14 +1347,14 @@ void svlTrackerMSBruteForce::MatchTemplateFastNCC(unsigned char* img, unsigned c
 
                 tmpcolcount = 0;
 
-                tmpxfrom = l;
+                tmpxfrom = k;
                 if (tmpxfrom <= imgwidth_m1) {
                     xoffs = 0;
                     if (tmpxfrom < 0) {
                         xoffs = -tmpxfrom;
                         tmpxfrom = 0;
                     }
-                    tmpxto = l + tmpheight_m1;
+                    tmpxto = k + tmpheight_m1; // width = height
                     if (tmpxto >= 0) {
                         if (tmpxto > imgwidth_m1) {
                             tmpxto = imgwidth_m1;
@@ -1292,6 +1364,9 @@ void svlTrackerMSBruteForce::MatchTemplateFastNCC(unsigned char* img, unsigned c
                 }
 
                 if (tmpcolcount > 0) {
+
+                    l_m1 = tmpyfrom - 1;
+                    k_m1 = tmpxfrom - 1;
 
                     tmpcolcount3 = tmpcolcount * 3;
                     tmpstride = imgstride - tmpcolcount3;
@@ -1606,12 +1681,15 @@ void svlTrackerMSBruteForce::ShrinkImage(unsigned char* src, unsigned char* dst)
     const int smwidth  = Width >> 1;
     const int smheight = Height >> 1;
 
+    svlRect rect;
+    ROIRect.GetBoundingRect(rect);
+
     // make sure ROI values are even and in range
     int wr = SearchRadius;
-    int smleft   = (ROI.left - wr) / 2;
-    int smtop    = (ROI.top - wr)  / 2;
-    int smright  = ((ROI.right + wr)  + 1) / 2;
-    int smbottom = ((ROI.bottom + wr) + 1) / 2;
+    int smleft   = (rect.left - wr) / 2;
+    int smtop    = (rect.top - wr)  / 2;
+    int smright  = ((rect.right + wr)  + 1) / 2;
+    int smbottom = ((rect.bottom + wr) + 1) / 2;
     if (smleft < 0) smleft = 0;
     if (smtop  < 0) smtop = 0;
     if (smright >= smwidth) smright = smwidth - 1;
@@ -1688,10 +1766,13 @@ void svlTrackerMSBruteForce::CalculateSumTables(unsigned char* img)
     const int border = TemplateRadius + SearchRadius;
     int l, r, t, b;
 
-    l = (ROI.left   >= 0) ? ROI.left   : 0;
-    r = (ROI.right  >= 0) ? ROI.right  : Width;
-    t = (ROI.top    >= 0) ? ROI.top    : 0;
-    b = (ROI.bottom >= 0) ? ROI.bottom : Height;
+    svlRect rect;
+    ROIRect.GetBoundingRect(rect);
+
+    l = (rect.left   >= 0) ? rect.left   : 0;
+    r = (rect.right  >= 0) ? rect.right  : Width;
+    t = (rect.top    >= 0) ? rect.top    : 0;
+    b = (rect.bottom >= 0) ? rect.bottom : Height;
     l -= border;
     r += border + 1;
     t -= border;

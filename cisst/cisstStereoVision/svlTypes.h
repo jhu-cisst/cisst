@@ -213,10 +213,25 @@ typedef vctDynamicMatrix<unsigned char> svlImageRGBA;
 // Miscellaneous structure type definitions //
 //////////////////////////////////////////////
 
-struct CISST_EXPORT svlRect
+struct svlRect;
+
+struct CISST_EXPORT svlShape
+{
+    virtual ~svlShape() {}
+    virtual svlShape* Clone() = 0;
+    virtual bool IsWithin(int x, int y) const = 0;
+    virtual void GetBoundingRect(svlRect & rect) const = 0;
+};
+
+struct CISST_EXPORT svlRect : public svlShape
 {
     svlRect();
     svlRect(int left, int top, int right, int bottom);
+
+    virtual svlShape* Clone();
+    virtual bool IsWithin(int x, int y) const;
+    virtual void GetBoundingRect(svlRect & rect) const;
+
     void Assign(const svlRect & rect);
     void Assign(int left, int top, int right, int bottom);
     void Normalize();
@@ -228,10 +243,15 @@ struct CISST_EXPORT svlRect
     int bottom;
 };
 
-struct CISST_EXPORT svlTriangle
+struct CISST_EXPORT svlTriangle : public svlShape
 {
     svlTriangle();
     svlTriangle(int x1, int y1, int x2, int y2, int x3, int y3);
+
+    virtual svlShape* Clone();
+    virtual bool IsWithin(int x, int y) const;
+    virtual void GetBoundingRect(svlRect & rect) const;
+
     void Assign(const svlTriangle & triangle);
     void Assign(int x1, int y1, int x2, int y2, int x3, int y3);
 
@@ -243,12 +263,19 @@ struct CISST_EXPORT svlTriangle
     int y3;
 };
 
-struct CISST_EXPORT svlQuad
+struct CISST_EXPORT svlQuad : public svlShape
 {
     svlQuad();
     svlQuad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+    svlQuad(const svlRect & rect);
+
+    virtual svlShape* Clone();
+    virtual bool IsWithin(int x, int y) const;
+    virtual void GetBoundingRect(svlRect & rect) const;
+
     void Assign(const svlQuad & quad);
     void Assign(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+    void Assign(const svlRect & rect);
 
     int x1;
     int y1;
@@ -260,10 +287,15 @@ struct CISST_EXPORT svlQuad
     int y4;
 };
 
-struct CISST_EXPORT svlEllipse
+struct CISST_EXPORT svlEllipse : public svlShape
 {
     svlEllipse();
     svlEllipse(int cx, int cy, int rx, int ry, double angle);
+
+    virtual svlShape* Clone();
+    virtual bool IsWithin(int x, int y) const;
+    virtual void GetBoundingRect(svlRect & rect) const;
+
     void Assign(const svlEllipse & ellipse);
     void Assign(int cx, int cy, int rx, int ry, double angle);
 

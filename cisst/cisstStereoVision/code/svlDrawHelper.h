@@ -104,9 +104,11 @@ namespace svlDrawHelper
 
         int  GetLinePixelsMono8(int* idxs, int x1, int y1, int x2, int y2, const int w, const int h);
         int  GetLinePixelsRGB  (int* idxs, int x1, int y1, int x2, int y2, const int w, const int h);
+        int  GetLinePixelsRGBA (int* idxs, int x1, int y1, int x2, int y2, const int w, const int h);
 
         void ResampleLineMono8(int ix1, int iy1, int ix2, int iy2, int ox1, int oy1, int ox2, int oy2);
         void ResampleLineRGB  (int ix1, int iy1, int ix2, int iy2, int ox1, int oy1, int ox2, int oy2);
+        void ResampleLineRGBA (int ix1, int iy1, int ix2, int iy2, int ox1, int oy1, int ox2, int oy2);
 
         void ResampleLineAlphaMono8(int ix1, int iy1, int ix2, int iy2, int ox1, int oy1, int ox2, int oy2, unsigned int alpha);
         void ResampleLineAlphaRGB  (int ix1, int iy1, int ix2, int iy2, int ox1, int oy1, int ox2, int oy2, unsigned int alpha);
