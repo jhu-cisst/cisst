@@ -34,8 +34,8 @@ mtsIntervalStatistics::mtsIntervalStatistics():
     StdDev(0.0),
     Max(0.0),
     Min(0.0),
-    MaxComputeTime(cmnTypeTraits<double>::MinPositiveValue()),
     MinComputeTime(cmnTypeTraits<double>::MaxPositiveValue()),
+    MaxComputeTime(cmnTypeTraits<double>::MinPositiveValue()),
     StatisticsUpdatePeriod(1.0)
 {
     // Get a pointer to the time server

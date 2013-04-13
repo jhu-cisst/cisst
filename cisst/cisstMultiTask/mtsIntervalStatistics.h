@@ -32,9 +32,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
-#include <cisstMultiTask/mtsExport.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
+#include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
