@@ -29,6 +29,7 @@ class QTableWidgetItem;
 #include <QObject>
 
 #include <cisstVector/vctDynamicVector.h>
+#include <cisstVector/vctQtForwardDeclarations.h>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -66,12 +67,6 @@ public:
     void SetBase(const int base);
 };
 
-typedef vctQtWidgetDynamicVectorReadFloating<double> vctQtWidgetDynamicVectorDoubleRead;
-typedef vctQtWidgetDynamicVectorReadFloating<float> vctQtWidgetDynamicVectorFloatRead;
-typedef vctQtWidgetDynamicVectorReadInteger<int> vctQtWidgetDynamicVectorIntRead;
-typedef vctQtWidgetDynamicVectorReadInteger<unsigned int> vctQtWidgetDynamicVectorUIntRead;
-typedef vctQtWidgetDynamicVectorReadInteger<bool> vctQtWidgetDynamicVectorBoolRead;
-
 #if ((CISST_OS == CISST_WINDOWS) && (CISST_COMPILER != CISST_GCC))
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<double>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<float>;
@@ -84,7 +79,6 @@ template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<bool>;
 class CISST_EXPORT vctQtWidgetDynamicVectorWriteBase: public QObject
 {
     Q_OBJECT;
-    enum {SLIDER_RESOLUTION = 1000};
 public:
     typedef enum {TEXT_WIDGET, SPINBOX_WIDGET, SLIDER_WIDGET} DisplayModeType;
     vctQtWidgetDynamicVectorWriteBase(const DisplayModeType displayMode);
@@ -93,6 +87,7 @@ public:
 signals:
     void valueChanged(void);
 protected:
+    enum {SLIDER_RESOLUTION = 1000};
     QTableWidget * Table;
     DisplayModeType DisplayMode;
 protected slots:
@@ -133,11 +128,6 @@ public:
     void SetRange(const value_type minimum, const value_type maximum);
     void SetStep(const value_type step);
 };
-
-typedef vctQtWidgetDynamicVectorWriteFloating<double> vctQtWidgetDynamicVectorDoubleWrite;
-typedef vctQtWidgetDynamicVectorWriteFloating<float> vctQtWidgetDynamicVectorFloatWrite;
-typedef vctQtWidgetDynamicVectorWriteInteger<int> vctQtWidgetDynamicVectorIntWrite;
-typedef vctQtWidgetDynamicVectorWriteInteger<unsigned int> vctQtWidgetDynamicVectorUIntWrite;
 
 #if ((CISST_OS == CISST_WINDOWS) && (CISST_COMPILER != CISST_GCC))
 template class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating<double>;

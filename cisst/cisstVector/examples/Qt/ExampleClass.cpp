@@ -74,7 +74,13 @@ ExampleClass::ExampleClass(void):
     dynamicVectorIntWriteSpinBox->SetValue(vectorInt);
     dynamicVectorIntWriteSlider->SetValue(vectorInt);
 
-    frame ->setLayout(layout);
+    rotationDoubleRead = new vctQtWidgetRotationDoubleRead();
+    layout->addWidget(rotationDoubleRead);
+    vctMatRot3 rotation;
+    vctRandom(rotation);
+    rotationDoubleRead->SetValue(rotation);
+
+    frame->setLayout(layout);
     frame->show();
 }
 
