@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-12-08
 
-  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,61 +23,122 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctQtWidgetDynamicVector_h
 #define _vctQtWidgetDynamicVector_h
 
-#include <QTableWidget>
+class QWidget;
+class QTableWidget;
+class QTableWidgetItem;
+#include <QObject>
 
 #include <cisstVector/vctDynamicVector.h>
+#include <cisstVector/vctQtForwardDeclarations.h>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
+class CISST_EXPORT vctQtWidgetDynamicVectorReadBase
+{
+protected:
+    QTableWidget * Table;
+public:
+    vctQtWidgetDynamicVectorReadBase(void);
+    QWidget * GetWidget(void);
+};
 
 template <class _elementType>
-class CISST_EXPORT vctQtWidgetDynamicVectorRead
+class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating: public vctQtWidgetDynamicVectorReadBase
 {
     typedef _elementType value_type;
-    QTableWidget * Table;
-
- public:
-    vctQtWidgetDynamicVectorRead(void);
-    QWidget * GetWidget(void);
+    int Precision;
+    char Format;
+public:
+    vctQtWidgetDynamicVectorReadFloating(void);
     virtual bool SetValue(const vctDynamicVector<value_type> & value);
+    void SetPrecision(const int precision);
+    void SetFormat(const char format);
 };
 
-typedef vctQtWidgetDynamicVectorRead<double> vctQtWidgetDynamicVectorDoubleRead;
-typedef vctQtWidgetDynamicVectorRead<float> vctQtWidgetDynamicVectorFloatRead;
-typedef vctQtWidgetDynamicVectorRead<int> vctQtWidgetDynamicVectorIntRead;
-typedef vctQtWidgetDynamicVectorRead<unsigned int> vctQtWidgetDynamicVectorUIntRead;
-typedef vctQtWidgetDynamicVectorRead<bool> vctQtWidgetDynamicVectorBoolRead;
+template <class _elementType>
+class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger: public vctQtWidgetDynamicVectorReadBase
+{
+    typedef _elementType value_type;
+    int Base;
+public:
+    vctQtWidgetDynamicVectorReadInteger(void);
+    virtual bool SetValue(const vctDynamicVector<value_type> & value);
+    void SetBase(const int base);
+};
 
 #if ((CISST_OS == CISST_WINDOWS) && (CISST_COMPILER != CISST_GCC))
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<double>;
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<float>;
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<int>;
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<unsigned int>;
-template class CISST_EXPORT vctQtWidgetDynamicVectorRead<bool>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<double>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<float>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<int>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<unsigned int>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<bool>;
 #endif // CISST_WINDOWS
 
-// -- for doubles
-class CISST_EXPORT vctQtWidgetDynamicVectorDoubleWrite: public QTableWidget
+
+class CISST_EXPORT vctQtWidgetDynamicVectorWriteBase: public QObject
 {
- public:
-    vctQtWidgetDynamicVectorDoubleWrite(void);
-    virtual bool SetValue(const vctDynamicVector<double> & value);
-    virtual bool GetValue(vctDynamicVector<double> & placeHolder) const;
+    Q_OBJECT;
+public:
+    typedef enum {TEXT_WIDGET, SPINBOX_WIDGET, SLIDER_WIDGET} DisplayModeType;
+    vctQtWidgetDynamicVectorWriteBase(const DisplayModeType displayMode);
+    void SetDisplayMode(const DisplayModeType displayMode);
+    QWidget * GetWidget(void);
+signals:
+    void valueChanged(void);
+protected:
+    enum {SLIDER_RESOLUTION = 1000};
+    QTableWidget * Table;
+    DisplayModeType DisplayMode;
+protected slots:
+    void SliderValueChangedSlot(int value);
+    void DoubleSpinBoxValueChangedSlot(double value);
+    void SpinBoxValueChangedSlot(int value);
+    void ItemChangedSlot(QTableWidgetItem * item);
 };
 
-
-// -- for ints
-class CISST_EXPORT vctQtWidgetDynamicVectorIntWrite: public QTableWidget
+template <class _elementType>
+class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating: public vctQtWidgetDynamicVectorWriteBase
 {
- public:
-    vctQtWidgetDynamicVectorIntWrite(void);
-    virtual bool SetValue(const vctDynamicVector<int> & value);
-    virtual bool GetValue(vctDynamicVector<int> & placeHolder) const;
+    typedef _elementType value_type;
+    int Precision;
+    char Format;
+    value_type Minimum, Maximum, Step;
+public:
+    vctQtWidgetDynamicVectorWriteFloating(const DisplayModeType displayMode = TEXT_WIDGET);
+    virtual bool SetValue(const vctDynamicVector<value_type> & value, bool blockSignals = true);
+    virtual bool GetValue(vctDynamicVector<value_type> & placeHolder) const;
+    void SetPrecision(const int precision);
+    void SetFormat(const char format);
+    void SetRange(const value_type minimum, const value_type maximum);
+    void SetStep(const value_type step);
 };
+
+template <class _elementType>
+class CISST_EXPORT vctQtWidgetDynamicVectorWriteInteger: public vctQtWidgetDynamicVectorWriteBase
+{
+    typedef _elementType value_type;
+    int Base;
+    value_type Minimum, Maximum, Step;
+public:
+    vctQtWidgetDynamicVectorWriteInteger(const DisplayModeType displayMode = TEXT_WIDGET);
+    virtual bool SetValue(const vctDynamicVector<value_type> & value, bool blockSignals = true);
+    virtual bool GetValue(vctDynamicVector<value_type> & placeHolder) const;
+    void SetBase(const int base);
+    void SetRange(const value_type minimum, const value_type maximum);
+    void SetStep(const value_type step);
+};
+
+#if ((CISST_OS == CISST_WINDOWS) && (CISST_COMPILER != CISST_GCC))
+template class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating<double>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating<float>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorWriteInteger<int>;
+template class CISST_EXPORT vctQtWidgetDynamicVectorWriteInteger<unsigned int>;
+#endif // CISST_WINDOWS
 
 
 // -- for bools
+#include <QTableWidget>
 class CISST_EXPORT vctQtWidgetDynamicVectorBoolWrite: public QTableWidget
 {
  public:

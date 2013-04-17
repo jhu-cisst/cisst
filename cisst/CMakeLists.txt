@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -15,10 +15,6 @@
 
 # Backward compatibility
 cmake_minimum_required (VERSION 2.6.2)
-
-# todo: modify cisst-config.cmake to set CISST_BINARY_DIR based on current dir
-# todo: what to do with DOXYGEN_DIR and LIBRARY_DIR in cisst-config.cmake, needed?
-# todo: get rid of CISST_ROOT_DIR in cisstConfig.h, Simon uses it a lot, should provide short function to help
 
 # cisst libraries (Computer Integrated Surgical Systems and Technology)
 project (cisst)
@@ -253,7 +249,7 @@ if (CISST_BUILD_TESTS)
     if (CISST_USE_EXTERNAL)
       include (ExternalProject)
       set (cisstCppUnit_PREFIX cisstCppUnitExternal)
-      ExternalProject_Add (cisstCppUnitExternal
+      ExternalProject_Add (cisstCppUnit
                            PREFIX ${cisstCppUnit_PREFIX}
                            URL http://downloads.sourceforge.net/cppunit/cppunit-1.12.1.tar.gz
                            URL_MD5 bd30e9cf5523cdfc019b94f5e1d7fd19
@@ -264,25 +260,25 @@ if (CISST_BUILD_TESTS)
                                          "."
                            INSTALL_COMMAND ""
                            )
-      set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnitExternal/include")
+      set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit/include")
       set (CPPUNIT_LIBRARIES "cppunit")
       set (CPPUNIT_DEBUG_LIBRARIES "cppunit")
       set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
-      link_directories ("${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnitExternal-build")
+      link_directories ("${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
       set (CPPUNIT_FOUND ON)
-      mark_as_advanced (CPPUNIT_INCLUDE_DIR CPPUNIT_LIBRARIES CPPUNIT_DEBUG_LIBRARIES CPPUNIT_RELEASE_LIBRARIES CPPUNIT_FOUND)
     endif (CISST_USE_EXTERNAL)
   endif (NOT CPPUNIT_FOUND)
 
   if (CPPUNIT_FOUND)
-    add_subdirectory (cisstTestsDriver)
-    # add dependency to external project if needed
-    if (cisstCppUnit_PREFIX)
-      add_dependencies (cisstTestsDriver cisstCppUnitExternal)
-    endif (cisstCppUnit_PREFIX)
+    # set variable to confirm that cisstTestsDriver is being build
+    set (CISST_cisstTestsDriver ON)
+    # save settings for cisstTestsDriver
+    cisst_set_package_settings (cisstTestsDriver CppUnit INCLUDE_DIRECTORIES CPPUNIT_INCLUDE_DIR)
   else (CPPUNIT_FOUND)
     message (SEND_ERROR "CppUnit is needed for CISST_BUILD_TESTS, you can either install it or turn ON the option CISST_USE_EXTERNAL")
   endif (CPPUNIT_FOUND)
+else (CISST_BUILD_TESTS)
+  cisst_unset_all_package_settings (cisstTestsDriver CppUnit)
 endif (CISST_BUILD_TESTS)
 
 # Find native threads
@@ -314,6 +310,11 @@ set (CISST_LIBRARIES_OPTIONAL
 set (CISST_LIBS
      ${CISST_LIBRARIES_DEFAULT}
      ${CISST_LIBRARIES_OPTIONAL})
+
+# Add test driver if needed
+if (CISST_BUILD_TESTS)
+  set (CISST_LIBS ${CISST_LIBS} cisstTestsDriver)
+endif (CISST_BUILD_TESTS)
 
 # Which librairies have Qt Widgets
 set (CISST_LIBS_WITH_QT
@@ -417,11 +418,6 @@ foreach (lib ${CISST_LIBS})
     add_subdirectory (${lib})
   endif (CISST_${lib})
 endforeach (lib)
-
-# Create an artificial dependency on cisstFltkExternal if it exists
-if (TARGET cisstFltkExternal)
-  add_dependencies (cisstCommon cisstFltkExternal)
-endif (TARGET cisstFltkExternal)
 
 # Create misc. config files
 set (CISST_INCLUDE_DIR_FOR_CONFIG ${CISST_INCLUDE_DIR})

@@ -218,6 +218,7 @@ void mtsTaskContinuous::Start(void)
     if (this->State == mtsComponentState::INITIALIZING) {
         WaitToStart(this->InitializationDelay);
     }
+
     if (this->State == mtsComponentState::READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
         ChangeState(mtsComponentState::ACTIVE);
@@ -235,8 +236,10 @@ void mtsTaskContinuous::Start(void)
         }
         StartInternal();
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: started task " << this->GetName() << std::endl;
-    }
-    else {
+    } else if (this->State == mtsComponentState::ACTIVE) {
+        // NOP if task is already running
+        return;
+    } else {
         CMN_LOG_CLASS_INIT_ERROR << "Start: could not start task " << this->GetName()
                                  << ", state = " << this->State
                                  << "(" << CMN_LOG_DETAILS << ")" << std::endl;

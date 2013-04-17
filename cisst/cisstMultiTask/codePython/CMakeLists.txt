@@ -23,3 +23,8 @@ cisst_add_swig_module (MODULE cisstMultiTask
                        HEADER_FILES ../mtsPython.h
                        MODULE_LINK_LIBRARIES cisstMultiTask cisstOSAbstraction cisstVector cisstCommon
                        INSTALL_FILES 1)
+
+if (WIN32 AND CMAKE_CL_64)
+    message("cisstMultiTaskPython: added /bigobj flag")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+endif (WIN32 AND CMAKE_CL_64)

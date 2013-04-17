@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstMultiTask tests
 #
-# (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -15,7 +15,7 @@
 # --- end cisst license ---
 
 # paths for headers/libraries
-cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstTestsDriver)
 
 # test library
 add_library (cisstMultiTaskTestsLib
@@ -77,14 +77,11 @@ endif (CISST_MTS_HAS_ICE)
 # to find executables generated, provide internal configuration
 add_definitions(-DCMAKE_CFG_INTDIR_WITH_QUOTES="${CMAKE_CFG_INTDIR}")
 
-# CppUnit include directories
-include_directories (${CPPUNIT_INCLUDE_DIR})
-
 # add executable for C++ tests
 add_executable (cisstMultiTaskTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstMultiTaskTests PROPERTY FOLDER "cisstMultiTask/tests")
 target_link_libraries (cisstMultiTaskTests cisstTestsDriver cisstMultiTaskTestsLib)
-cisst_target_link_libraries (cisstMultiTaskTests cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+cisst_target_link_libraries (cisstMultiTaskTests cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstTestsDriver)
 
 
 # ICE related code
@@ -102,7 +99,7 @@ if (CISST_MTS_HAS_ICE)
   # create a program to configure multiple processes to be tested, also triggers creation and connection of components
   add_executable (cisstMultiTaskTestsConfigurationManager
                   mtsTestConfigurationManager.cpp)
-  set_property (TARGET cisstMultiTaskTestsConfigurationManager PROPERTY FOLDER "cisstMultiTask/tests")               
+  set_property (TARGET cisstMultiTaskTestsConfigurationManager PROPERTY FOLDER "cisstMultiTask/tests")
   cisst_target_link_libraries (cisstMultiTaskTestsConfigurationManager cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
   # make sure these programs are compiled before the test program
@@ -115,11 +112,6 @@ endif (CISST_MTS_HAS_ICE)
 
 # to generate a CTest list of tests
 cisst_add_test (cisstMultiTaskTests ITERATIONS 1 INSTANCES 1)
-
-# CppUnit libraries
-target_link_libraries (cisstMultiTaskTests
-                       optimized ${CPPUNIT_LIBRARIES}
-                       debug ${CPPUNIT_DEBUG_LIBRARIES})
 
 # To find generated executables
 set_target_properties (cisstMultiTaskTests

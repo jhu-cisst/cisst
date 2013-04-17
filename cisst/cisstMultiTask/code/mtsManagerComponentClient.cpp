@@ -844,7 +844,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart(const 
         mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         // Check if the component specified exists
         if (!LCM->GetComponent(arg.ComponentName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStart: failed to execute \"Component Start\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStart: did not find component \""
+                                    << arg.ComponentName << "\"" << std::endl;
             return;
         }
 
@@ -852,7 +853,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart(const 
         return;
     } else {
         if (!InterfaceLCMFunction.ComponentStart.IsValid()) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStart: failed to execute \"Component Start\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStart: could not start component \""
+                                    << arg.ComponentName << "\"" << std::endl;
             return;
         }
         //InterfaceLCMFunction.ComponentStart.ExecuteBlocking(arg);
@@ -867,7 +869,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStop(const m
         mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         // Check if the component specified exists
         if (!LCM->GetComponent(arg.ComponentName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStop: failed to execute \"Component Stop\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStop: did not find component \""
+                                    << arg.ComponentName << "\"" << std::endl;
             return;
         }
 
@@ -875,7 +878,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentStop(const m
         return;
     } else {
         if (!InterfaceLCMFunction.ComponentStop.IsValid()) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStop: failed to execute \"Component Stop\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentStop: could not stop component \""
+                                    << arg.ComponentName << "\"" << std::endl;
             return;
         }
         //InterfaceLCMFunction.ComponentStop.ExecuteBlocking(arg);
@@ -890,7 +894,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume(const
         mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         // Check if the component specified exists
         if (!LCM->GetComponent(arg.ComponentName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentResume: failed to execute \"Component Resume\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentResume: did not find component \""
+                                    << arg.ComponentName << "\"" << std::endl;
             return;
         }
 
@@ -898,7 +903,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentResume(const
         return;
     } else {
         if (!InterfaceLCMFunction.ComponentResume.IsValid()) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentResume: failed to execute \"Component Resume\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentResume: could not resume component \""
+                                    << arg.ComponentName << "\"" << std::endl;
             return;
         }
         //InterfaceLCMFunction.ComponentResume.ExecuteBlocking(arg);
@@ -914,7 +920,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentGetState(con
         mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         // Check if the component specified exists
         if (!LCM->GetComponent(component.ComponentName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: failed to execute \"Component Resume\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: did not find component \""
+                                    << component.ComponentName << "\"" << std::endl;
             return;
         }
 
@@ -922,7 +929,8 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentGetState(con
         return;
     } else {
         if (!InterfaceLCMFunction.ComponentGetState.IsValid()) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: failed to execute \"Component GetState\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: could not get state of component \"" 
+                                    << component.ComponentName << "\"" << std::endl;
             return;
         }
         InterfaceLCMFunction.ComponentGetState(component, state);

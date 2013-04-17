@@ -81,6 +81,7 @@ protected:
 
 protected:
     virtual void CreateInterfaces();
+public:
     virtual void SetTransform(const ThisType::ImageTransform & transform);
     virtual void SetTransforms(const vctDynamicVector<ThisType::ImageTransform> & transforms);
 

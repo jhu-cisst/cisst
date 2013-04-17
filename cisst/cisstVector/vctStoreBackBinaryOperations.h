@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2003-08-18
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-08-18
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -195,6 +195,26 @@ class vctStoreBackBinaryOperations {
                                                       const InputOutputType & input2) {
             input1 = (input1 > input2) ? input1 : input2;
             return input1;
+        }
+    };
+
+
+
+    class ClipIn {
+    public:
+        /*!
+          Execute the operation.
+          \param input1 First operand (input and output).
+          \param input2 Second operand.
+        */
+        static inline const InputOutputType & Operate(InputOutputType & input,
+                                                      const InputOutputType & bound) {
+            if (input > bound) {
+                input = bound;
+            } else if (input < -bound) {
+                input = -bound;
+            }
+            return input;
         }
     };
 

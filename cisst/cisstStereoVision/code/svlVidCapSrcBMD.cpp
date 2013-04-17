@@ -38,14 +38,62 @@ svlVidCapSrcBMD::svlVidCapSrcBMD() :
     ImageBuffer(0),
     deckLink(0),
     deckLinkInput(0),
-    Delegate(0)
+    Delegate(0),
+    BMDNumberOfDevices(0),
+    inputFlags(0),
+    displayMode(bmdModeNTSC),
+    width(0),
+    height(0),
+    frameRate(0),
+    pixelFormat(bmdFormat8BitYUV),
+    debug(false)
 {
-    BMDNumberOfDevices = 0;
-    inputFlags = 0;
-    displayMode = bmdModeHD1080i5994; //bmdModeHD1080p30
-    SetWidthHeightByBMDDisplayMode();
-    pixelFormat = bmdFormat8BitYUV; //bmdFormat8BitARGB
-    debug = false;
+    /// \todo(dmirota1)  This should not be changing at runtime
+    /*supported_displayModes.push_back(bmdModeNTSC);
+    supported_displayModes.push_back(bmdModeNTSC2398);
+    supported_displayModes.push_back(bmdModeNTSCp);
+    supported_displayModes.push_back(bmdModePAL);
+    supported_displayModes.push_back(bmdModePALp);
+    supported_displayModes.push_back(bmdModeHD1080p2398);
+    supported_displayModes.push_back(bmdModeHD1080p24);
+    supported_displayModes.push_back(bmdModeHD1080p25);
+    supported_displayModes.push_back(bmdModeHD1080p2997);
+    supported_displayModes.push_back(bmdModeHD1080p30);
+    supported_displayModes.push_back(bmdModeHD1080p50);
+    supported_displayModes.push_back(bmdModeHD1080p5994);
+    supported_displayModes.push_back(bmdModeHD1080p6000);
+    supported_displayModes.push_back(bmdModeHD1080i50);
+    supported_displayModes.push_back(bmdModeHD1080i5994);
+    supported_displayModes.push_back(bmdModeHD1080i6000);
+    supported_displayModes.push_back(bmdModeHD720p50);
+    supported_displayModes.push_back(bmdModeHD720p5994);
+    supported_displayModes.push_back(bmdModeHD720p60);
+    supported_displayModes.push_back(bmdMode2k2398);
+    supported_displayModes.push_back(bmdMode2k24);
+    supported_displayModes.push_back(bmdMode2k25);*/
+
+
+    /// \todo(dmirota1) Should be a better way to do this.
+    /*bmdDisplayMode_lookup[width_height_framerate(720,486,30)] = bmdModeNTSC;
+    bmdDisplayMode_lookup[width_height_framerate(720,486,23.98)] = bmdModeNTSC2398;
+    bmdDisplayMode_lookup[width_height_framerate(720,486,60)] = bmdModeNTSCp;
+    bmdDisplayMode_lookup[width_height_framerate(720,576,30)] = bmdModePAL;
+    bmdDisplayMode_lookup[width_height_framerate(720,576,60)] = bmdModePALp;
+    bmdDisplayMode_lookup[width_height_framerate(1920,1080,23.98)] = bmdModeHD1080p2398;
+    bmdDisplayMode_lookup[width_height_framerate(1920,1080,24)] = bmdModeHD1080p24;
+    bmdDisplayMode_lookup[width_height_framerate(1920,1080,25)] = bmdModeHD1080p25;
+    bmdDisplayMode_lookup[width_height_framerate(1920,1080,29.97)] = bmdModeHD1080p2997;
+    bmdDisplayMode_lookup[width_height_framerate(1920,1080,30)] = bmdModeHD1080p30;
+    bmdDisplayMode_lookup[width_height_framerate(1920,1080,50)] = bmdModeHD1080p50;
+    bmdDisplayMode_lookup[width_height_framerate(1920,1080,59.94)] = bmdModeHD1080p5994;
+    bmdDisplayMode_lookup[width_height_framerate(1920,1080,60)] = bmdModeHD1080p6000;
+    bmdDisplayMode_lookup[width_height_framerate(1280,720,50)] = bmdModeHD720p50;
+    bmdDisplayMode_lookup[width_height_framerate(1280,720,59.94)] = bmdModeHD720p5994;
+    bmdDisplayMode_lookup[width_height_framerate(1280,720,60)] = bmdModeHD720p60;
+    bmdDisplayMode_lookup[width_height_framerate(2048,1556,23.98)] = bmdMode2k2398;
+    bmdDisplayMode_lookup[width_height_framerate(2048,1556,24)] = bmdMode2k24;
+    bmdDisplayMode_lookup[width_height_framerate(2048,1556,25)] = bmdMode2k25;*/
+
 }
 
 svlVidCapSrcBMD::~svlVidCapSrcBMD()
@@ -58,101 +106,107 @@ svlVidCapSrcBMD::~svlVidCapSrcBMD()
     if (Delegate) delete [] Delegate;
 }
 
-void svlVidCapSrcBMD::SetWidthHeightByBMDDisplayMode()
+void svlVidCapSrcBMD::GetWidthHeightfromBMDDisplayMode(const BMDPixelFormat displayMode_in,int  &width_out, int &height_out, double &frameRate_out)
 {
     // default settings
-    width = 1920;
-    height = 1080; 
-    frameRate = 30;
+    width_out = 1920;
+    height_out = 1080;
+    frameRate_out = 30;
 
     // width & height
-    if (displayMode == bmdModeNTSC ||
-        displayMode == bmdModeNTSC2398 ||
-        displayMode == bmdModePAL ||
-        displayMode == bmdModeNTSCp ||
-        displayMode == bmdModePALp) {
-        width = 720;
-        height = 480;
+    if (displayMode_in == bmdModeNTSC ||
+        displayMode_in == bmdModeNTSC2398 ||
+        displayMode_in == bmdModeNTSCp){
+        width_out = 720;
+        height_out = 486;
     }
-    else if (displayMode == bmdModeHD1080p2398 ||
-             displayMode == bmdModeHD1080p24 ||
-             displayMode == bmdModeHD1080p25 ||
-             displayMode == bmdModeHD1080p2997 ||
-             displayMode == bmdModeHD1080p30 ||
-             displayMode == bmdModeHD1080i50 ||
-             displayMode == bmdModeHD1080i5994 ||
-             displayMode == bmdModeHD1080i6000 ||
-             displayMode == bmdModeHD1080p50 ||
-             displayMode == bmdModeHD1080p5994 ||
-             displayMode == bmdModeHD1080p6000) {
-        width = 1920;
-        height = 1080;
+    else if (displayMode_in == bmdModePAL ||
+             displayMode_in == bmdModePALp ) {
+             width_out = 720;
+             height_out = 576;
     }
-    else if (displayMode == bmdModeHD720p50 ||
-             displayMode == bmdModeHD720p5994 ||
-             displayMode == bmdModeHD720p60) {
-        width = 1920;
-        height = 720;
+    else if (displayMode_in == bmdModeHD1080p2398 ||
+             displayMode_in == bmdModeHD1080p24 ||
+             displayMode_in == bmdModeHD1080p25 ||
+             displayMode_in == bmdModeHD1080p2997 ||
+             displayMode_in == bmdModeHD1080p30 ||
+             displayMode_in == bmdModeHD1080i50 ||
+             displayMode_in == bmdModeHD1080i5994 ||
+             displayMode_in == bmdModeHD1080i6000 ||
+             displayMode_in == bmdModeHD1080p50 ||
+             displayMode_in == bmdModeHD1080p5994 ||
+             displayMode_in == bmdModeHD1080p6000) {
+        width_out = 1920;
+        height_out = 1080;
     }
-    else if (displayMode == bmdMode2k2398 ||
-             displayMode == bmdMode2k24 ||
-             displayMode == bmdMode2k25) {
-        width = 2048; 
-        height = 1080;    
+    else if (displayMode_in == bmdModeHD720p50 ||
+             displayMode_in == bmdModeHD720p5994 ||
+             displayMode_in == bmdModeHD720p60) {
+        width_out = 1280;
+        height_out = 720;
+    }
+    else if (displayMode_in == bmdMode2k2398 ||
+             displayMode_in == bmdMode2k24 ||
+             displayMode_in == bmdMode2k25) {
+        width_out = 2048;
+        height_out = 1556;
     }
 
     // frame rate
-    switch(displayMode)
+    switch(displayMode_in)
     {
         case bmdModeNTSC2398:
         case bmdModeHD1080p2398:
         case bmdMode2k2398:	
-            frameRate = 23.98;
+            frameRate_out = 23.98;
         break;
 
         case bmdModeHD1080p24:	
         case bmdMode2k24:	
-            frameRate = 24.0;
+            frameRate_out = 24.0;
         break;
 
         case bmdModeHD1080p25:	
         case bmdMode2k25:	
-            frameRate = 25.0;
+            frameRate_out = 25.0;
         break;
 
-        case bmdModeHD1080p2997:	
+        case bmdModeHD1080p2997:
+            frameRate_out = 29.97;
+        break;
+
         case bmdModeNTSC:
         case bmdModePAL:
-        case bmdModeNTSCp:
-        case bmdModePALp:	
         case bmdModeHD1080p30:
-            frameRate = 30.0;
+            frameRate_out = 30.0;
         break;
 
         case bmdModeHD1080i50:
         case bmdModeHD1080p50:	
         case bmdModeHD720p50:	
-            frameRate = 50.0;
+        case bmdModePALp:
+            frameRate_out = 50.0;
         break;
 
         case bmdModeHD1080i5994:
         case bmdModeHD1080p5994:	
         case bmdModeHD720p5994:
-            frameRate = 59.94;
+            frameRate_out = 59.94;
         break;
 
         case bmdModeHD1080i6000:
         case bmdModeHD1080p6000:	
         case bmdModeHD720p60:
-            frameRate = 60;
+        case bmdModeNTSCp:
+            frameRate_out = 60;
         break;
 
         default:
-            printf("Unrecognized display mode: %d\n", displayMode);	
+            printf("Unrecognized display mode: %d\n", displayMode_in);
         break;
     }
 
-    printf("Width:%d, Height:%d at %4.2fHz\n", width, height, frameRate);
+    //printf("Width:%d, Height:%d at %4.2fHz\n", width_out, height_out, frameRate_out);
 }
 
 IDeckLinkIterator* CreateDeckLinkIteratorInstance(void);
@@ -216,6 +270,7 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
     // Enumerate all cards in this system
     while (deckLinkIterator->Next(&deckLink) == S_OK)
     {
+        available_decklinks.push_back(deckLink);
         BMDNumberOfDevices++;
         deckLink->Release();
     }
@@ -340,7 +395,23 @@ int svlVidCapSrcBMD::Open()
         // Opening device
         result = deckLinkInput[i]->EnableVideoInput(displayMode, pixelFormat, inputFlags);
         if(result != S_OK) {
-            std::cerr << "svlVidCapSrcBMD::Open - deckLinkInput[" << i << "]->EnableVideoInput() returned error: " << result << std::endl;
+            std::cerr << "svlVidCapSrcBMD::Open - deckLinkInput[" << i << "]->EnableVideoInput() returned error: "; //<< result << std::endl;
+            switch(result){
+                case E_FAIL:
+                    std::cerr << "Failed" << std::endl;
+                    break;
+                case E_INVALIDARG:
+                    std::cerr << "Invalid Argument" << std::endl;
+                    break;
+                case E_ACCESSDENIED:
+                    std::cerr << "Access Denied" << std::endl;
+                    break;
+                case E_OUTOFMEMORY:
+                    std::cerr << "Out of Memory" << std::endl;
+                    break;
+                default:
+                    break;
+            }
             goto labError;
         }
 
@@ -435,6 +506,13 @@ int svlVidCapSrcBMD::SetDevice(int devid, int CMN_UNUSED(inid), unsigned int vid
     if (videoch >= NumOfStreams) return SVL_FAIL;
     DeviceID[videoch] = devid;
     // Input ID is ignored
+
+    if(supported_displayModes.empty()){
+        svlFilterSourceVideoCapture::ImageFormat *formatlist;
+        GetFormatList(devid, &formatlist);
+        delete formatlist;
+    }
+
     return SVL_OK;
 }
 
@@ -450,20 +528,78 @@ int svlVidCapSrcBMD::GetHeight(unsigned int videoch)
     return ImageBuffer[videoch]->GetHeight();
 }
 
-int svlVidCapSrcBMD::GetFormatList(unsigned int CMN_UNUSED(deviceid), svlFilterSourceVideoCapture::ImageFormat **formatlist)
+/// \todo(dmirota1) GetFormatList should not be changing the state of the class
+int svlVidCapSrcBMD::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist)
 {
     if (formatlist == 0) return SVL_FAIL;
 
-    formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[1];
-    formatlist[0][0].width = width;
-    formatlist[0][0].height = height;
-    formatlist[0][0].colorspace = svlFilterSourceVideoCapture::PixelRGB8;
-    formatlist[0][0].rgb_order = true;
-    formatlist[0][0].yuyv_order = false;
-    formatlist[0][0].framerate = frameRate;
-    formatlist[0][0].custom_mode = -1;
 
-    return 1;
+    IDeckLinkIterator*			deckLinkIterator = GetIDeckLinkIterator();
+
+    IDeckLink * current_decklink;
+
+    unsigned int i = 0;
+    do{
+        deckLinkIterator->Next(&current_decklink);
+        i++;
+    }while(i < deviceid);
+
+
+    IDeckLinkInput * current_input;
+
+    current_decklink->QueryInterface(IID_IDeckLinkInput,(void **)&current_input);
+
+
+    IDeckLinkDisplayModeIterator * iterator = NULL;
+
+    current_input->GetDisplayModeIterator(&iterator);
+
+    IDeckLinkDisplayMode * temp_displaymode = NULL;
+
+    supported_displayModes.clear();
+    //bmdDisplayMode_lookup.clear();
+    width_height_framerate_lookup.clear();
+
+    do{
+
+        iterator->Next(&temp_displaymode);
+
+        if(temp_displaymode != NULL){
+            supported_displayModes.push_back(temp_displaymode->GetDisplayMode());
+
+            long int numerator = 0;
+            long int denominator = 0;
+
+            temp_displaymode->GetFrameRate(&denominator,&numerator);
+
+            //bmdDisplayMode_lookup[width_height_framerate(temp_displaymode->GetWidth(),temp_displaymode->GetHeight(),(double)numerator/(double)denominator)] = temp_displaymode->GetDisplayMode();
+            width_height_framerate_lookup[temp_displaymode->GetDisplayMode()] = width_height_framerate(temp_displaymode->GetWidth(),temp_displaymode->GetHeight(),(double)numerator/(double)denominator);
+        }
+
+    }while(temp_displaymode != NULL);
+
+
+
+    formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[supported_displayModes.size()];
+
+    //int current_width = 0;
+    //int current_height = 0;
+    //double current_frameRate = 0;
+
+    for(int i = 0; i <  supported_displayModes.size();i++){
+        //GetWidthHeightfromBMDDisplayMode(supported_displayModes.at(i),current_width,current_height,current_frameRate);
+        width_height_framerate temp_width_height_framerate = width_height_framerate_lookup[supported_displayModes.at(i)];
+        formatlist[0][i].width = temp_width_height_framerate.width;
+        formatlist[0][i].height = temp_width_height_framerate.height;
+        formatlist[0][i].colorspace = svlFilterSourceVideoCapture::PixelRGB8;
+        formatlist[0][i].rgb_order = true;
+        formatlist[0][i].yuyv_order = false;
+        formatlist[0][i].framerate = temp_width_height_framerate.framerate;
+        formatlist[0][i].custom_mode = -1;
+        formatlist[0][i].custom_framerate = supported_displayModes.at(i); /// \todo(dmirota1)  Ask Balazs about where to storage extra information
+    }
+
+    return supported_displayModes.size();
 }
 
 int svlVidCapSrcBMD::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch)
@@ -477,6 +613,21 @@ int svlVidCapSrcBMD::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
     format.yuyv_order = false;
     format.framerate = frameRate;
     format.custom_mode = -1;
+    format.custom_framerate = displayMode;
+
+    return SVL_OK;
+}
+
+
+int svlVidCapSrcBMD::SetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch)
+{
+    if (videoch >= NumOfStreams || Initialized) return SVL_FAIL;
+
+    width = format.width;
+    height = format.height;
+    frameRate = format.framerate;
+
+    displayMode = format.custom_framerate;//bmdDisplayMode_lookup[width_height_framerate(width,height,frameRate)];
 
     return SVL_OK;
 }

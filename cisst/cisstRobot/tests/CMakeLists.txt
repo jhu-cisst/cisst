@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -13,7 +13,7 @@
 # --- end cisst license ---
 
 # paths for headers/libraries
-cisst_set_directories (cisstCommon cisstOSAbstraction cisstVector cisstNumerical cisstParameterTypes cisstRobot)
+cisst_set_directories (cisstCommon cisstOSAbstraction cisstVector cisstNumerical cisstParameterTypes cisstRobot cisstTestsDriver)
 
 if( CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB )
 
@@ -33,21 +33,13 @@ if( CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB )
        robRobotsKinematics.h
        )
 
-  # CppUnit include directories
-  include_directories (${CPPUNIT_INCLUDE_DIR})
-
   # Add executable for C++ tests
   add_executable (cisstRobotTests ${SOURCE_FILES} ${HEADER_FILES})
   set_property (TARGET cisstRobotTests PROPERTY FOLDER "cisstRobot/tests")
   target_link_libraries (cisstRobotTests cisstTestsDriver)
-  cisst_target_link_libraries (cisstRobotTests cisstCommon cisstVector cisstOSAbstraction cisstRobot)
+  cisst_target_link_libraries (cisstRobotTests cisstCommon cisstVector cisstOSAbstraction cisstRobot cisstTestsDriver)
 
   # To generate a CTest list of tests
   cisst_add_test (cisstRobotTests ITERATIONS 10 INSTANCES 2)
-
-  # CppUnit libraries
-  target_link_libraries (cisstRobotTests
-                         optimized ${CPPUNIT_LIBRARIES}
-                         debug ${CPPUNIT_DEBUG_LIBRARIES})
 
 endif( CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB )

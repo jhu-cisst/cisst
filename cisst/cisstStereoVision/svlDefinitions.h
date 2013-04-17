@@ -246,6 +246,7 @@ enum svlStereoLayout
     ,svlLayoutInterlacedRL
     ,svlLayoutSideBySide
     ,svlLayoutSideBySideRL
+    ,svlLayoutVertical
     ,svlLayoutInterlacedKeepSize
     ,svlLayoutInterlacedKeepSizeRL
 };

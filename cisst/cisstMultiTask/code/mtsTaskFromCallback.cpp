@@ -85,11 +85,15 @@ void mtsTaskFromCallback::Start(void)
             RunInternal(0);
         WaitToStart(this->InitializationDelay);
     }
+    
     if (this->State == mtsComponentState::READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
         ChangeState(mtsComponentState::ACTIVE);
         if (CheckForOwnThread())
             RunInternal(0);
+    } else if (this->State == mtsComponentState::ACTIVE) {
+        // NOP if task is already running
+        return;
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "Start: could not start task " << this->GetName() << ", state = " << this->State << std::endl;
     }

@@ -64,6 +64,7 @@ public:
 
     int GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist);
     int GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
+    int SetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
 
 private:
     unsigned int        NumOfStreams;
@@ -83,8 +84,29 @@ private:
     IDeckLinkInput** deckLinkInput;
     DeckLinkCaptureDelegate** Delegate;
 
-    void SetWidthHeightByBMDDisplayMode();
+    std::vector<IDeckLink*> available_decklinks;
+
+    void GetWidthHeightfromBMDDisplayMode(const BMDPixelFormat pixelFormat_in,int  &width_int, int &height_out, double &frameRate_out);
     IDeckLinkIterator* GetIDeckLinkIterator();
+
+    std::vector<BMDDisplayMode> supported_displayModes; /// \todo(dmirota1)  This needs to be expanded to be per device per available inputs.
+
+    class width_height_framerate{
+        public:
+        width_height_framerate(int width_in, int height_in, double framerate_in){width = width_in;height = height_in;framerate = framerate_in;}
+        width_height_framerate(){width = 0;height = 0;framerate = 0;}
+        width_height_framerate(const width_height_framerate & rhs_in){width = rhs_in.width;height = rhs_in.height;framerate = rhs_in.framerate;}
+        int width;
+        int height;
+        double framerate;
+
+        bool operator <(const width_height_framerate rhs_in) const {return width < rhs_in.width && height < rhs_in.height && framerate < rhs_in.framerate;}
+
+
+    };
+
+    //std::map<width_height_framerate, BMDDisplayMode> bmdDisplayMode_lookup; /// \note Used to lookup BMDDisplayMode given a height, width and frameRate
+    std::map<BMDDisplayMode, width_height_framerate> width_height_framerate_lookup;
 
 };
 

@@ -94,18 +94,19 @@ bool cdgClass::Validate(void)
 void cdgClass::GenerateHeader(std::ostream & outputStream) const
 {
     GenerateLineComment(outputStream);
+    const std::string className = this->GetFieldValue("name");
 
     size_t index;
     // for (index = 0; index < Scopes.size(); index++) {
     //     outputStream << "#include " << Includes[index] << std::endl;
     // }
 
-    outputStream << "class " << this->GetFieldValue("name") << ";" << std::endl;
+    outputStream << "class " << className << ";" << std::endl;
 
     GenerateStandardFunctionsHeader(outputStream);
     GenerateDataFunctionsHeader(outputStream);
 
-    outputStream << "class " << this->GetFieldValue("attribute") << " " << this->GetFieldValue("name");
+    outputStream << "class " << this->GetFieldValue("attribute") << " " << className;
 
     if (BaseClasses.size() != 0) {
         outputStream << ": ";
@@ -119,12 +120,16 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     outputStream << std::endl
                  << "{" << std::endl;
 
+    // add friendship for cmnDataCopy
+    outputStream << " friend void cmnDataCopy(" << className << " & destination, const "
+                 << className << " & source);" << std::endl;
+
     // constructors and destructor
     outputStream << " /* default constructors and destructors. */" << std::endl
                  << " public:" << std::endl
-                 << "    " << this->GetFieldValue("name") << "(void);" << std::endl
-                 << "    " << this->GetFieldValue("name") << "(const " << this->GetFieldValue("name") << " & other);" << std::endl
-                 << "    ~" << this->GetFieldValue("name") << "();" << std::endl << std::endl;
+                 << "    " << className << "(void);" << std::endl
+                 << "    " << className << "(const " << this->GetFieldValue("name") << " & other);" << std::endl
+                 << "    ~" << className << "();" << std::endl << std::endl;
 
     for (index = 0; index < Scopes.size(); index++) {
         Scopes[index]->GenerateHeader(outputStream);
@@ -375,8 +380,21 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
     outputStream << "/* data functions */" << std::endl;
 
-    outputStream << "void cmnDataCopy(" << className << " & destination, const " << className << " & source) {" << std::endl
-                 << "}" << std::endl;
+    outputStream << "void cmnDataCopy(" << className << " & destination, const " << className << " & source) {" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+            type = BaseClasses[index]->GetFieldValue("type");
+            outputStream << "    cmnDataCopy(*(dynamic_cast<" << type << "*>(&destination)), *(dynamic_cast<const " << type << "*>(&source)));" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->GetFieldValue("is-data") == "true") {
+            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
+            name = Members[index]->GetFieldValue("name");
+            outputStream << "    cmnDataCopy" << suffix << "(destination." << name << "Member, source." << name << "Member);" << std::endl;
+        }
+    }
+    outputStream << "}" << std::endl;
 
 
 

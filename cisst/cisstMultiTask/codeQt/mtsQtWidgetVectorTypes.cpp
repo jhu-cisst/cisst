@@ -55,7 +55,7 @@ mtsQtWidgetDoubleVecWrite::mtsQtWidgetDoubleVecWrite(void):
     mtsQtWidgetGenericObjectWrite()
 {
     VectorWidget = new vctQtWidgetDynamicVectorDoubleWrite();
-    Layout->addWidget(VectorWidget);
+    Layout->addWidget(VectorWidget->GetWidget());
     Layout->addStretch();
 }
 
