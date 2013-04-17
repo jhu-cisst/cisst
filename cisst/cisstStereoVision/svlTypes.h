@@ -78,8 +78,8 @@ http://www.cisst.org/cisst/license.txt.
     #else // CISST_SVL_HAS_OPENCV
         // to compile the same API
         typedef void IplImage;
-        namespace cv{
-            typedef int Mat;
+        namespace cv {
+            typedef std::string Mat;
         }
     #endif // CISST_SVL_HAS_OPENCV
 #endif // CISST_SVL_HAS_OPENCV2
