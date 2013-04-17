@@ -18,6 +18,7 @@ project (cisstVectorQt)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 qt4_wrap_cpp (QT_WRAPPED_CPP
               ../vctPlot2DOpenGLQtWidget.h
+              ../vctQtWidgetDynamicVector.h
               ../vctQtWidgetDynamicMatrix.h
               ../vctQtWidgetFrame4x4.h
               )
