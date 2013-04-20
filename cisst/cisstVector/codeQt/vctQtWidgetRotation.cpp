@@ -61,7 +61,7 @@ void vctQtWidgetRotationOpenGL::initializeGL(void)
     glShadeModel(GL_SMOOTH);
 }
 
-void vctQtWidgetRotationOpenGL::paintGL()
+void vctQtWidgetRotationOpenGL::paintGL(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -135,120 +135,143 @@ void vctQtWidgetRotationOpenGL::draw3DAxis(const double scale)
 
 
 
-
-
-
-
-
 // =============================================
 // vctQtWidgetRotationDoubleRead
 // =============================================
-
-vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(void)
+vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeType displayMode):
+    DisplayMode(UNDEFINED_WIDGET),
+    CurrentWidget(0)
 {
-    QLabel * label = new QLabel("&Display");
-    combo = new QComboBox();
-    combo->addItem("Matrix");
-    combo->addItem("Axis-Angle");
-    combo->addItem("Quaternion");
-    combo->addItem("3D");
-    label->setBuddy(combo);
-    connect(combo, SIGNAL(activated(QString)),
-            this, SLOT(slot_change_display_format(QString)));
-
-    QHBoxLayout *typeLayout = new QHBoxLayout;
-    typeLayout->addWidget(label);
-    typeLayout->addWidget(combo);
-
     // Matrix Groupbox
-    QVBoxLayout * matrixLayout = new QVBoxLayout;
     MatrixWidget = new vctQtWidgetDynamicMatrixDoubleRead();
     MatrixWidget->setMinimumSize(100, 100);
     MatrixWidget->resize(MatrixWidget->sizeHint());
-    matrixLayout->addWidget(MatrixWidget);
-
-    MatrixGroupBox = new QGroupBox("Matrix");
-    MatrixGroupBox->setLayout(matrixLayout);
 
     // Axis Angle Groupbox
     AxisWidget = new vctQtWidgetDynamicVectorDoubleRead();
     AngleWidget = new vctQtWidgetDynamicVectorDoubleRead();
 
     QGridLayout * axisAngleLayout = new QGridLayout;
+    axisAngleLayout->setSpacing(0);
     axisAngleLayout->addWidget(new QLabel("Axis"), 0, 0, 1, 1);
     axisAngleLayout->addWidget(AxisWidget->GetWidget(), 0, 1, 1, 1);
     axisAngleLayout->addWidget(new QLabel("Angle"), 1, 0, 1, 1);
     axisAngleLayout->addWidget(AngleWidget->GetWidget(), 1, 1, 1, 1);
 
-    AxisAngleGroupBox = new QGroupBox("Axis-Angle");
-    AxisAngleGroupBox->setLayout(axisAngleLayout);
+    AxisAngleWidget = new QWidget();
+    AxisAngleWidget->setLayout(axisAngleLayout);
 
     // Quaternion Groupbox
-    QVBoxLayout * quaternionLayout = new QVBoxLayout;
     QuaternionWidget = new vctQtWidgetDynamicVectorDoubleRead();
-    quaternionLayout->addWidget(QuaternionWidget->GetWidget());
-
-    QuaternionGroupBox = new QGroupBox("Quaternion");
-    QuaternionGroupBox->setLayout(quaternionLayout);
 
     // Visualization Groupbox
-    QVBoxLayout * openGLLayout = new QVBoxLayout;
     OpenGLWidget = new vctQtWidgetRotationOpenGL();
-    openGLLayout->addWidget(OpenGLWidget);
 
-    OpenGLGroupBox = new QGroupBox("3D");
-    OpenGLGroupBox->setLayout(openGLLayout);
-
-    // add to layout
     Layout = new QVBoxLayout;
-    Layout->addLayout(typeLayout);
-    Layout->addWidget(MatrixGroupBox);
-    CurrentGroupBox = MatrixGroupBox;
-
     this->setLayout(Layout);
     this->setWindowTitle("vctQtWidgetRotationDoubleRead");
+
+    // Set display mode
+    SetDisplayMode(displayMode);
+
+    // myWidget is any QWidget-derived class
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+            this, SLOT(ShowContextMenu(const QPoint&)));
+}
+
+void vctQtWidgetRotationDoubleRead::ShowContextMenu(const QPoint & pos)
+{
+    QPoint globalPos = this->mapToGlobal(pos);
+    QMenu menu;
+    QAction * matrix = new QAction("Matrix", this);
+    QAction * axisAngle = new QAction("Axis Angle", this);
+    QAction * quaternion = new QAction("Quaternion", this);
+    QAction * openGL = new QAction("3D", this);
+    menu.addAction(matrix);
+    menu.addAction(axisAngle);
+    menu.addAction(quaternion);
+    menu.addAction(openGL);
+
+    QAction * selectedItem = menu.exec(globalPos);
+    if (selectedItem) {
+        if (selectedItem == matrix) {
+            SetDisplayMode(MATRIX_WIDGET);
+        } else if (selectedItem == axisAngle) {
+            SetDisplayMode(AXIS_ANGLE_WIDGET);
+        } else if (selectedItem == quaternion) {
+            SetDisplayMode(QUATERNION_WIDGET);
+        } else if (selectedItem == openGL) {
+            SetDisplayMode(OPENGL_WIDGET);
+        }
+    }
 }
 
 void vctQtWidgetRotationDoubleRead::UpdateCurrentWidget(void)
 {
-    // matrix
-    MatrixWidget->SetValue(vctDoubleMat(this->Rotation));
-
-    // axis angle
     vctAxAnRot3 rotAxAn;
-    rotAxAn.FromRaw(Rotation);
-    AxisWidget->SetValue(vctDoubleVec(rotAxAn.Axis()));
-    AngleWidget->SetValue(vctDoubleVec(1, rotAxAn.Angle()));
-
-    // quaternion
     vctQuatRot3 rotQuat;
-    rotQuat.FromRaw(Rotation);
-    QuaternionWidget->SetValue(vctDoubleVec(rotQuat));
-
-    // visualization
-    OpenGLWidget->SetValue(Rotation);
-}
-
-void vctQtWidgetRotationDoubleRead::slot_change_display_format(QString item)
-{
-    if (item == "Matrix") {
-        SwitchDisplayFormat(MatrixGroupBox);
-    } else if(item == "Axis-Angle") {
-        SwitchDisplayFormat(AxisAngleGroupBox);
-    } else if (item == "Quaternion") {
-        SwitchDisplayFormat(QuaternionGroupBox);
-    } else if(item == "3D") {
-        SwitchDisplayFormat(OpenGLGroupBox);
+    // compute the value based on the internal Rotation
+    switch (DisplayMode) {
+    case MATRIX_WIDGET:
+        MatrixWidget->SetValue(vctDoubleMat(this->Rotation));
+        break;
+    case AXIS_ANGLE_WIDGET:
+        rotAxAn.FromRaw(Rotation);
+        AxisWidget->SetValue(vctDoubleVec(rotAxAn.Axis()));
+        AngleWidget->SetValue(vctDoubleVec(1, rotAxAn.Angle() * cmn180_PI));
+        break;
+    case QUATERNION_WIDGET:
+        rotQuat.FromRaw(Rotation);
+        QuaternionWidget->SetValue(vctDoubleVec(rotQuat));
+        break;
+    case OPENGL_WIDGET:
+        OpenGLWidget->SetValue(Rotation);
+        break;
+    default:
+        break;
     }
 }
 
-void vctQtWidgetRotationDoubleRead::SwitchDisplayFormat(QGroupBox * setBox)
+void vctQtWidgetRotationDoubleRead::SetDisplayMode(const DisplayModeType displayMode)
 {
-    Layout->removeWidget(CurrentGroupBox);
-    CurrentGroupBox->hide();
+    // should never allow anyone to use undefined
+    if (displayMode == UNDEFINED_WIDGET) {
+        return;
+    }
 
-    CurrentGroupBox = setBox;
-    Layout->addWidget(CurrentGroupBox);
-    CurrentGroupBox->show();
+    // if the mode is unchanged, nothing to do
+    if (displayMode == this->DisplayMode) {
+        return;
+    }
+
+    // set the new display mode
+    this->DisplayMode = displayMode;
+
+    // mostly for initialization, there was no widget defined prior this call
+    if (CurrentWidget) {
+        Layout->removeWidget(CurrentWidget);
+        CurrentWidget->hide();
+    }
+
+    // set the new current widget, these have been created in the ctor
+    switch (displayMode) {
+    case MATRIX_WIDGET:
+        CurrentWidget = MatrixWidget;
+        break;
+    case AXIS_ANGLE_WIDGET:
+        CurrentWidget = AxisAngleWidget;
+        break;
+    case QUATERNION_WIDGET:
+        CurrentWidget = QuaternionWidget->GetWidget();
+        break;
+    case OPENGL_WIDGET:
+        CurrentWidget = OpenGLWidget;
+        break;
+    default:
+        break;
+    }
+    Layout->addWidget(CurrentWidget);
+    CurrentWidget->show();
     resize(sizeHint());
 }
