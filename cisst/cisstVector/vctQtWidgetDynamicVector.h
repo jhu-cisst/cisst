@@ -67,7 +67,8 @@ public:
     void SetBase(const int base);
 };
 
-#if ((CISST_OS == CISST_WINDOWS) && (CISST_COMPILER != CISST_GCC))
+#if (CISST_OS == CISST_WINDOWS) && defined(CISST_COMPILER_IS_MSVC)
+#pragma warning ( disable : 4661 )
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<double>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<float>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<int>;
@@ -129,7 +130,8 @@ public:
     void SetStep(const value_type step);
 };
 
-#if ((CISST_OS == CISST_WINDOWS) && (CISST_COMPILER != CISST_GCC))
+#if (CISST_OS == CISST_WINDOWS) && defined(CISST_COMPILER_IS_MSVC)
+#pragma warning ( disable : 4661 )
 template class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating<double>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating<float>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorWriteInteger<int>;

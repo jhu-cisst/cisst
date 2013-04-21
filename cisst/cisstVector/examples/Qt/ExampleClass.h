@@ -39,17 +39,18 @@ public:
 
 protected:
     enum {NUMBER_OF_ELEMENTS = 4};
-    QFrame * frame;
-    QVBoxLayout * layout;
-    vctQtWidgetDynamicVectorDoubleRead * dynamicVectorDoubleRead;
-    vctQtWidgetDynamicVectorDoubleWrite * dynamicVectorDoubleWriteText;
-    vctQtWidgetDynamicVectorDoubleWrite * dynamicVectorDoubleWriteSpinBox;
-    vctQtWidgetDynamicVectorDoubleWrite * dynamicVectorDoubleWriteSlider;
-    vctQtWidgetDynamicVectorIntRead * dynamicVectorIntRead;
-    vctQtWidgetDynamicVectorIntWrite * dynamicVectorIntWriteText;
-    vctQtWidgetDynamicVectorIntWrite * dynamicVectorIntWriteSpinBox;
-    vctQtWidgetDynamicVectorIntWrite * dynamicVectorIntWriteSlider;
-    vctQtWidgetRotationDoubleRead * rotationDoubleRead;
+    QFrame * Frame;
+    QVBoxLayout * Layout;
+    vctQtWidgetDynamicVectorDoubleRead * DynamicVectorDoubleRead;
+    vctQtWidgetDynamicVectorDoubleWrite * DynamicVectorDoubleWriteText;
+    vctQtWidgetDynamicVectorDoubleWrite * DynamicVectorDoubleWriteSpinBox;
+    vctQtWidgetDynamicVectorDoubleWrite * DynamicVectorDoubleWriteSlider;
+    vctQtWidgetDynamicVectorIntRead * DynamicVectorIntRead;
+    vctQtWidgetDynamicVectorIntWrite * DynamicVectorIntWriteText;
+    vctQtWidgetDynamicVectorIntWrite * DynamicVectorIntWriteSpinBox;
+    vctQtWidgetDynamicVectorIntWrite * DynamicVectorIntWriteSlider;
+    vctQtWidgetRotationDoubleRead * RotationDoubleRead;
+    vctMatRot3 Rotation;
 protected slots:
     void DoubleTextValueChangedSlot(void);
     void DoubleSpinBoxValueChangedSlot(void);

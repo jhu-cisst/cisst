@@ -68,14 +68,14 @@ void vctQtWidgetRotationOpenGL::paintGL(void)
 
     // draw reference coordinate frame here
     glPushMatrix();
-    glTranslatef(0.4, 0.4, -5.0);
+    glTranslatef(0.4f, 0.4f, -5.0f);
     glRotatef(-30.0, 0.0, 1.0, 0.0);
     draw3DAxis(0.05);
     glPopMatrix();
 
     // gl transformation here
     // x+:left  y+:up   z+: point out screen
-    glTranslatef(0.0, 0.0, -10.0);
+    glTranslatef(0.0f, 0.0f, -10.0f);
 
     // orientation
     glRotatef(orientation.Z(), 0.0, 0.0, 1.0);
@@ -272,6 +272,7 @@ void vctQtWidgetRotationDoubleRead::SetDisplayMode(const DisplayModeType display
         break;
     }
     Layout->addWidget(CurrentWidget);
+    UpdateCurrentWidget();
     CurrentWidget->show();
     resize(sizeHint());
 }

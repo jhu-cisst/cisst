@@ -25,115 +25,122 @@ http://www.cisst.org/cisst/license.txt.
 ExampleClass::ExampleClass(void):
     QObject()
 {
-    frame = new QFrame();
-    layout = new QVBoxLayout();
+    Frame = new QFrame();
+    Layout = new QVBoxLayout();
 
-    dynamicVectorDoubleRead = new vctQtWidgetDynamicVectorDoubleRead();
-    dynamicVectorDoubleRead->SetPrecision(5);
-    layout->addWidget(dynamicVectorDoubleRead->GetWidget());
+    DynamicVectorDoubleRead = new vctQtWidgetDynamicVectorDoubleRead();
+    DynamicVectorDoubleRead->SetPrecision(5);
+    Layout->addWidget(DynamicVectorDoubleRead->GetWidget());
 
-    dynamicVectorDoubleWriteText = new vctQtWidgetDynamicVectorDoubleWrite(vctQtWidgetDynamicVectorDoubleWrite::TEXT_WIDGET);
-    layout->addWidget(dynamicVectorDoubleWriteText->GetWidget());
-    connect(dynamicVectorDoubleWriteText, SIGNAL(valueChanged()), this, SLOT(DoubleTextValueChangedSlot()));
+    DynamicVectorDoubleWriteText = new vctQtWidgetDynamicVectorDoubleWrite(vctQtWidgetDynamicVectorDoubleWrite::TEXT_WIDGET);
+    Layout->addWidget(DynamicVectorDoubleWriteText->GetWidget());
+    connect(DynamicVectorDoubleWriteText, SIGNAL(valueChanged()), this, SLOT(DoubleTextValueChangedSlot()));
 
-    dynamicVectorDoubleWriteSpinBox = new vctQtWidgetDynamicVectorDoubleWrite(vctQtWidgetDynamicVectorDoubleWrite::SPINBOX_WIDGET);
-    layout->addWidget(dynamicVectorDoubleWriteSpinBox->GetWidget());
-    connect(dynamicVectorDoubleWriteSpinBox, SIGNAL(valueChanged()), this, SLOT(DoubleSpinBoxValueChangedSlot()));
+    DynamicVectorDoubleWriteSpinBox = new vctQtWidgetDynamicVectorDoubleWrite(vctQtWidgetDynamicVectorDoubleWrite::SPINBOX_WIDGET);
+    Layout->addWidget(DynamicVectorDoubleWriteSpinBox->GetWidget());
+    connect(DynamicVectorDoubleWriteSpinBox, SIGNAL(valueChanged()), this, SLOT(DoubleSpinBoxValueChangedSlot()));
 
-    dynamicVectorDoubleWriteSlider = new vctQtWidgetDynamicVectorDoubleWrite(vctQtWidgetDynamicVectorDoubleWrite::SLIDER_WIDGET);
-    layout->addWidget(dynamicVectorDoubleWriteSlider->GetWidget());
-    connect(dynamicVectorDoubleWriteSlider, SIGNAL(valueChanged()), this, SLOT(DoubleSliderValueChangedSlot()));
+    DynamicVectorDoubleWriteSlider = new vctQtWidgetDynamicVectorDoubleWrite(vctQtWidgetDynamicVectorDoubleWrite::SLIDER_WIDGET);
+    Layout->addWidget(DynamicVectorDoubleWriteSlider->GetWidget());
+    connect(DynamicVectorDoubleWriteSlider, SIGNAL(valueChanged()), this, SLOT(DoubleSliderValueChangedSlot()));
 
     vctDynamicVector<double> vectorDouble(NUMBER_OF_ELEMENTS);
     vctRandom(vectorDouble, -100, 100);
-    dynamicVectorDoubleRead->SetValue(vectorDouble);
-    dynamicVectorDoubleWriteText->SetValue(vectorDouble);
-    dynamicVectorDoubleWriteSpinBox->SetValue(vectorDouble);
-    dynamicVectorDoubleWriteSlider->SetValue(vectorDouble);
+    DynamicVectorDoubleRead->SetValue(vectorDouble);
+    DynamicVectorDoubleWriteText->SetValue(vectorDouble);
+    DynamicVectorDoubleWriteSpinBox->SetValue(vectorDouble);
+    DynamicVectorDoubleWriteSlider->SetValue(vectorDouble);
 
-    dynamicVectorIntRead = new vctQtWidgetDynamicVectorIntRead();
-    dynamicVectorIntRead->SetBase(16);
-    layout->addWidget(dynamicVectorIntRead->GetWidget());
+    DynamicVectorIntRead = new vctQtWidgetDynamicVectorIntRead();
+    DynamicVectorIntRead->SetBase(16);
+    Layout->addWidget(DynamicVectorIntRead->GetWidget());
 
-    dynamicVectorIntWriteText = new vctQtWidgetDynamicVectorIntWrite(vctQtWidgetDynamicVectorIntWrite::TEXT_WIDGET);
-    layout->addWidget(dynamicVectorIntWriteText->GetWidget());
-    connect(dynamicVectorIntWriteText, SIGNAL(valueChanged()), this, SLOT(IntTextValueChangedSlot()));
+    DynamicVectorIntWriteText = new vctQtWidgetDynamicVectorIntWrite(vctQtWidgetDynamicVectorIntWrite::TEXT_WIDGET);
+    Layout->addWidget(DynamicVectorIntWriteText->GetWidget());
+    connect(DynamicVectorIntWriteText, SIGNAL(valueChanged()), this, SLOT(IntTextValueChangedSlot()));
 
-    dynamicVectorIntWriteSpinBox = new vctQtWidgetDynamicVectorIntWrite(vctQtWidgetDynamicVectorIntWrite::SPINBOX_WIDGET);
-    layout->addWidget(dynamicVectorIntWriteSpinBox->GetWidget());
-    connect(dynamicVectorIntWriteSpinBox, SIGNAL(valueChanged()), this, SLOT(IntSpinBoxValueChangedSlot()));
+    DynamicVectorIntWriteSpinBox = new vctQtWidgetDynamicVectorIntWrite(vctQtWidgetDynamicVectorIntWrite::SPINBOX_WIDGET);
+    Layout->addWidget(DynamicVectorIntWriteSpinBox->GetWidget());
+    connect(DynamicVectorIntWriteSpinBox, SIGNAL(valueChanged()), this, SLOT(IntSpinBoxValueChangedSlot()));
 
-    dynamicVectorIntWriteSlider = new vctQtWidgetDynamicVectorIntWrite(vctQtWidgetDynamicVectorIntWrite::SLIDER_WIDGET);
-    layout->addWidget(dynamicVectorIntWriteSlider->GetWidget());
-    connect(dynamicVectorIntWriteSlider, SIGNAL(valueChanged()), this, SLOT(IntSliderValueChangedSlot()));
+    DynamicVectorIntWriteSlider = new vctQtWidgetDynamicVectorIntWrite(vctQtWidgetDynamicVectorIntWrite::SLIDER_WIDGET);
+    Layout->addWidget(DynamicVectorIntWriteSlider->GetWidget());
+    connect(DynamicVectorIntWriteSlider, SIGNAL(valueChanged()), this, SLOT(IntSliderValueChangedSlot()));
 
     vctDynamicVector<int> vectorInt(NUMBER_OF_ELEMENTS);
     vctRandom(vectorInt, -100, 100);
-    dynamicVectorIntRead->SetValue(vectorInt);
-    dynamicVectorIntWriteText->SetValue(vectorInt);
-    dynamicVectorIntWriteSpinBox->SetValue(vectorInt);
-    dynamicVectorIntWriteSlider->SetValue(vectorInt);
+    DynamicVectorIntRead->SetValue(vectorInt);
+    DynamicVectorIntWriteText->SetValue(vectorInt);
+    DynamicVectorIntWriteSpinBox->SetValue(vectorInt);
+    DynamicVectorIntWriteSlider->SetValue(vectorInt);
 
-    rotationDoubleRead = new vctQtWidgetRotationDoubleRead();
-    layout->addWidget(rotationDoubleRead);
-    vctMatRot3 rotation;
-    vctRandom(rotation);
-    rotationDoubleRead->SetValue(rotation);
+    RotationDoubleRead = new vctQtWidgetRotationDoubleRead();
+    Layout->addWidget(RotationDoubleRead);
+    vctRandom(Rotation);
+    RotationDoubleRead->SetValue(Rotation);
 
-    frame->setLayout(layout);
-    frame->show();
+    Frame->setLayout(Layout);
+    Frame->show();
 }
 
 void ExampleClass::DoubleTextValueChangedSlot(void)
 {
     vctDynamicVector<double> result(NUMBER_OF_ELEMENTS);
-    dynamicVectorDoubleWriteText->GetValue(result);
-    dynamicVectorDoubleRead->SetValue(result);
-    dynamicVectorDoubleWriteSpinBox->SetValue(result);
-    dynamicVectorDoubleWriteSlider->SetValue(result);
+    DynamicVectorDoubleWriteText->GetValue(result);
+    DynamicVectorDoubleRead->SetValue(result);
+    DynamicVectorDoubleWriteSpinBox->SetValue(result);
+    DynamicVectorDoubleWriteSlider->SetValue(result);
 }
 
 void ExampleClass::DoubleSpinBoxValueChangedSlot(void)
 {
     vctDynamicVector<double> result(NUMBER_OF_ELEMENTS);
-    dynamicVectorDoubleWriteSpinBox->GetValue(result);
-    dynamicVectorDoubleRead->SetValue(result);
-    dynamicVectorDoubleWriteText->SetValue(result);
-    dynamicVectorDoubleWriteSlider->SetValue(result);
+    DynamicVectorDoubleWriteSpinBox->GetValue(result);
+    DynamicVectorDoubleRead->SetValue(result);
+    DynamicVectorDoubleWriteText->SetValue(result);
+    DynamicVectorDoubleWriteSlider->SetValue(result);
 }
 
 void ExampleClass::DoubleSliderValueChangedSlot(void)
 {
     vctDynamicVector<double> result(NUMBER_OF_ELEMENTS);
-    dynamicVectorDoubleWriteSlider->GetValue(result);
-    dynamicVectorDoubleRead->SetValue(result);
-    dynamicVectorDoubleWriteText->SetValue(result);
-    dynamicVectorDoubleWriteSpinBox->SetValue(result);
+    DynamicVectorDoubleWriteSlider->GetValue(result);
+    DynamicVectorDoubleRead->SetValue(result);
+    DynamicVectorDoubleWriteText->SetValue(result);
+    DynamicVectorDoubleWriteSpinBox->SetValue(result);
+    vctAxAnRot3 axisAngleRotation;
+    axisAngleRotation.FromNormalized(Rotation);
+    if (axisAngleRotation.Axis().at(0) < 0.0) {
+        axisAngleRotation.Axis().NegationSelf();
+    }
+    axisAngleRotation.Angle() = result.at(0) * cmnPI_180;
+    Rotation.FromNormalized(axisAngleRotation);
+    RotationDoubleRead->SetValue(Rotation);
 }
 
 void ExampleClass::IntTextValueChangedSlot(void)
 {
     vctDynamicVector<int> result(NUMBER_OF_ELEMENTS);
-    dynamicVectorIntWriteText->GetValue(result);
-    dynamicVectorIntRead->SetValue(result);
-    dynamicVectorIntWriteSpinBox->SetValue(result);
-    dynamicVectorIntWriteSlider->SetValue(result);
+    DynamicVectorIntWriteText->GetValue(result);
+    DynamicVectorIntRead->SetValue(result);
+    DynamicVectorIntWriteSpinBox->SetValue(result);
+    DynamicVectorIntWriteSlider->SetValue(result);
 }
 
 void ExampleClass::IntSpinBoxValueChangedSlot(void)
 {
     vctDynamicVector<int> result(NUMBER_OF_ELEMENTS);
-    dynamicVectorIntWriteSpinBox->GetValue(result);
-    dynamicVectorIntRead->SetValue(result);
-    dynamicVectorIntWriteText->SetValue(result);
-    dynamicVectorIntWriteSlider->SetValue(result);
+    DynamicVectorIntWriteSpinBox->GetValue(result);
+    DynamicVectorIntRead->SetValue(result);
+    DynamicVectorIntWriteText->SetValue(result);
+    DynamicVectorIntWriteSlider->SetValue(result);
 }
 
 void ExampleClass::IntSliderValueChangedSlot(void)
 {
     vctDynamicVector<int> result(NUMBER_OF_ELEMENTS);
-    dynamicVectorIntWriteSlider->GetValue(result);
-    dynamicVectorIntRead->SetValue(result);
-    dynamicVectorIntWriteText->SetValue(result);
-    dynamicVectorIntWriteSpinBox->SetValue(result);
+    DynamicVectorIntWriteSlider->GetValue(result);
+    DynamicVectorIntRead->SetValue(result);
+    DynamicVectorIntWriteText->SetValue(result);
+    DynamicVectorIntWriteSpinBox->SetValue(result);
 }

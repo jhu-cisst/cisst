@@ -179,9 +179,9 @@ vctQtWidgetDynamicVectorWriteFloating<_elementType>::vctQtWidgetDynamicVectorWri
     vctQtWidgetDynamicVectorWriteBase(displayMode),
     Precision(2),
     Format('f'),
-    Minimum(-100.0),
-    Maximum(100.0),
-    Step(0.01)
+    Minimum(static_cast<_elementType>(-100.0)),
+    Maximum(static_cast<_elementType>(100.0)),
+    Step(static_cast<_elementType>(0.01))
 {
 }
 
