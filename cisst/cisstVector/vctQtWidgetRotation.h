@@ -32,11 +32,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <QtOpenGL>
 
 class QWidget;
-class QComboBox;
 class QVBoxLayout;
 
-// Maybe we should make this class public after all
-class vctQtWidgetRotationOpenGL;
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -63,7 +60,7 @@ protected:
    void paintGL(void);
    void resizeGL(int width, int height);
    void draw3DAxis(const double scale);
-   vct3 orientation;
+   vct3 orientation; // should be replaced by rotation matrix using column-first storage order, isn't OpenGL Fortran like?
 };
 
 

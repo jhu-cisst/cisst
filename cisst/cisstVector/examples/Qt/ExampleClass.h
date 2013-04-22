@@ -50,7 +50,9 @@ protected:
     vctQtWidgetDynamicVectorIntWrite * DynamicVectorIntWriteSpinBox;
     vctQtWidgetDynamicVectorIntWrite * DynamicVectorIntWriteSlider;
     vctQtWidgetRotationDoubleRead * RotationDoubleRead;
-    vctMatRot3 Rotation;
+    vctQtWidgetFrameDoubleRead * FrameDoubleRead;
+    vctMatRot3 Rotation3D;
+    vctFrm3 Frame3D;
 protected slots:
     void DoubleTextValueChangedSlot(void);
     void DoubleSpinBoxValueChangedSlot(void);

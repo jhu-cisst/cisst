@@ -76,8 +76,14 @@ ExampleClass::ExampleClass(void):
 
     RotationDoubleRead = new vctQtWidgetRotationDoubleRead();
     Layout->addWidget(RotationDoubleRead);
-    vctRandom(Rotation);
-    RotationDoubleRead->SetValue(Rotation);
+    vctRandom(Rotation3D);
+    RotationDoubleRead->SetValue(Rotation3D);
+
+    FrameDoubleRead = new vctQtWidgetFrameDoubleRead();
+    Layout->addWidget(FrameDoubleRead);
+    vctRandom(Frame3D.Rotation());
+    vctRandom(Frame3D.Translation(), -10.0, 10.0);
+    FrameDoubleRead->SetValue(Frame3D);
 
     Frame->setLayout(Layout);
     Frame->show();
@@ -109,13 +115,13 @@ void ExampleClass::DoubleSliderValueChangedSlot(void)
     DynamicVectorDoubleWriteText->SetValue(result);
     DynamicVectorDoubleWriteSpinBox->SetValue(result);
     vctAxAnRot3 axisAngleRotation;
-    axisAngleRotation.FromNormalized(Rotation);
+    axisAngleRotation.FromNormalized(Rotation3D);
     if (axisAngleRotation.Axis().at(0) < 0.0) {
         axisAngleRotation.Axis().NegationSelf();
     }
     axisAngleRotation.Angle() = result.at(0) * cmnPI_180;
-    Rotation.FromNormalized(axisAngleRotation);
-    RotationDoubleRead->SetValue(Rotation);
+    Rotation3D.FromNormalized(axisAngleRotation);
+    RotationDoubleRead->SetValue(Rotation3D);
 }
 
 void ExampleClass::IntTextValueChangedSlot(void)

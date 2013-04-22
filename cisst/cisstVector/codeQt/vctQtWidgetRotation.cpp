@@ -38,8 +38,9 @@ http://www.cisst.org/cisst/license.txt.
 vctQtWidgetRotationOpenGL::vctQtWidgetRotationOpenGL(void)
 {
     orientation.SetAll(0.0);
-    setMinimumHeight(200);
-    setMinimumWidth(200);
+    setMinimumHeight(100);
+    setMinimumWidth(100);
+    setContentsMargins(0, 0, 0, 0);
 }
 
 void vctQtWidgetRotationOpenGL::SetValue(const vctMatRot3 & rot)
@@ -144,7 +145,7 @@ vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeTy
 {
     // Matrix Groupbox
     MatrixWidget = new vctQtWidgetDynamicMatrixDoubleRead();
-    MatrixWidget->setMinimumSize(100, 100);
+    MatrixWidget->setMinimumSize(80, 80);
     MatrixWidget->resize(MatrixWidget->sizeHint());
 
     // Axis Angle Groupbox
@@ -168,7 +169,9 @@ vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeTy
     OpenGLWidget = new vctQtWidgetRotationOpenGL();
 
     Layout = new QVBoxLayout;
+    Layout->setSpacing(0);
     this->setLayout(Layout);
+    this->setContentsMargins(0, 0, 0, 0);
     this->setWindowTitle("vctQtWidgetRotationDoubleRead");
 
     // Set display mode
