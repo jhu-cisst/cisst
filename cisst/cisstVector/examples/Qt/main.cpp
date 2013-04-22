@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon.h>
 #include <cisstVector.h>
 
-#include <QApplication.h>
+#include <QApplication>
 #include <QVBoxLayout>
 
 #include "ExampleClass.h"

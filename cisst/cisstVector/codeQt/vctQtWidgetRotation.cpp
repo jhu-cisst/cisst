@@ -155,9 +155,9 @@ vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeTy
     QGridLayout * axisAngleLayout = new QGridLayout;
     axisAngleLayout->setSpacing(0);
     axisAngleLayout->addWidget(new QLabel("Axis"), 0, 0, 1, 1);
-    axisAngleLayout->addWidget(AxisWidget->GetWidget(), 0, 1, 1, 1);
+    axisAngleLayout->addWidget(AxisWidget, 0, 1, 1, 1);
     axisAngleLayout->addWidget(new QLabel("Angle"), 1, 0, 1, 1);
-    axisAngleLayout->addWidget(AngleWidget->GetWidget(), 1, 1, 1, 1);
+    axisAngleLayout->addWidget(AngleWidget, 1, 1, 1, 1);
 
     AxisAngleWidget = new QWidget();
     AxisAngleWidget->setLayout(axisAngleLayout);
@@ -266,7 +266,7 @@ void vctQtWidgetRotationDoubleRead::SetDisplayMode(const DisplayModeType display
         CurrentWidget = AxisAngleWidget;
         break;
     case QUATERNION_WIDGET:
-        CurrentWidget = QuaternionWidget->GetWidget();
+        CurrentWidget = QuaternionWidget;
         break;
     case OPENGL_WIDGET:
         CurrentWidget = OpenGLWidget;

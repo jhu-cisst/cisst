@@ -26,28 +26,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <QHeaderView>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QCheckBox>
 
 
 vctQtWidgetDynamicVectorReadBase::vctQtWidgetDynamicVectorReadBase(void):
-    Table(0)
+    QTableWidget()
 {
-    this->Table = new QTableWidget();
-    this->Table->setRowCount(1);
-    this->Table->verticalHeader()->hide();
-    this->Table->horizontalHeader()->hide();
-    this->Table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->Table->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->setRowCount(1);
+    this->verticalHeader()->hide();
+    this->horizontalHeader()->hide();
+    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
     int verticalHeight =
-        this->Table->horizontalHeader()->sizeHint().height()
-        + this->Table->verticalHeader()->sizeHint().height();
-    this->Table->setFixedHeight(verticalHeight);
+        this->horizontalHeader()->sizeHint().height()
+        + this->verticalHeader()->sizeHint().height();
+    this->setFixedHeight(verticalHeight);
 }
-
-QWidget * vctQtWidgetDynamicVectorReadBase::GetWidget(void)
-{
-    return this->Table;
-}
-
 
 template <class _elementType>
 vctQtWidgetDynamicVectorReadFloating<_elementType>::vctQtWidgetDynamicVectorReadFloating(void):
@@ -73,19 +67,19 @@ template <class _elementType>
 bool vctQtWidgetDynamicVectorReadFloating<_elementType>::SetValue(const vctDynamicVector<_elementType> & vector)
 {
     const size_t size = vector.size();
-    if (static_cast<size_t>(this->Table->columnCount()) != size) {
-        this->Table->setColumnCount(size);
+    if (static_cast<size_t>(this->columnCount()) != size) {
+        this->setColumnCount(size);
     }
     QTableWidgetItem * tableItem;
     for (size_t index = 0; index < size; ++index) {
-        tableItem = this->Table->item(0, index);
+        tableItem = this->item(0, index);
         if (tableItem == 0) {
             tableItem = new QTableWidgetItem();
             tableItem->setTextAlignment(Qt::AlignRight);
             tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
-            this->Table->setItem(0, index, tableItem);
+            this->setItem(0, index, tableItem);
         }
-        tableItem->setText(QString::number(vector.Element(index), Format, Precision));
+        tableItem->setText(QString::number(vector.at(index), Format, Precision));
     }
     return true;
 }
@@ -108,19 +102,19 @@ template <class _elementType>
 bool vctQtWidgetDynamicVectorReadInteger<_elementType>::SetValue(const vctDynamicVector<_elementType> & vector)
 {
     const size_t size = vector.size();
-    if (static_cast<size_t>(this->Table->columnCount()) != size) {
-        this->Table->setColumnCount(size);
+    if (static_cast<size_t>(this->columnCount()) != size) {
+        this->setColumnCount(size);
     }
     QTableWidgetItem * tableItem;
     for (size_t index = 0; index < size; ++index) {
-        tableItem = this->Table->item(0, index);
+        tableItem = this->item(0, index);
         if (tableItem == 0) {
             tableItem = new QTableWidgetItem();
             tableItem->setTextAlignment(Qt::AlignRight);
             tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
-            this->Table->setItem(0, index, tableItem);
+            this->setItem(0, index, tableItem);
         }
-        tableItem->setText(QString::number(vector.Element(index), Base));
+        tableItem->setText(QString::number(vector.at(index), Base));
     }
     return true;
 }
@@ -134,24 +128,19 @@ template class vctQtWidgetDynamicVectorReadInteger<bool>;
 
 
 vctQtWidgetDynamicVectorWriteBase::vctQtWidgetDynamicVectorWriteBase(const DisplayModeType displayMode):
+    QTableWidget(),
     DisplayMode(displayMode)
 {
-    this->Table = new QTableWidget();
-    this->Table->setRowCount(1);
-    this->Table->verticalHeader()->hide();
-    this->Table->horizontalHeader()->hide();
-    this->Table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->Table->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->setRowCount(1);
+    this->verticalHeader()->hide();
+    this->horizontalHeader()->hide();
+    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
     int verticalHeight =
-        this->Table->horizontalHeader()->sizeHint().height()
-        + this->Table->verticalHeader()->sizeHint().height();
-    this->Table->setFixedHeight(verticalHeight);
-    connect(this->Table, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(ItemChangedSlot(QTableWidgetItem *)));
-}
-
-QWidget * vctQtWidgetDynamicVectorWriteBase::GetWidget(void)
-{
-    return this->Table;
+        this->horizontalHeader()->sizeHint().height()
+        + this->verticalHeader()->sizeHint().height();
+    this->setFixedHeight(verticalHeight);
+    connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(ItemChangedSlot(QTableWidgetItem *)));
 }
 
 void vctQtWidgetDynamicVectorWriteBase::SliderValueChangedSlot(int CMN_UNUSED(value))
@@ -219,52 +208,52 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const vctDyna
     const size_t size = vector.size();
     switch (DisplayMode) {
     case TEXT_WIDGET:
-        if (static_cast<size_t>(this->Table->columnCount()) != size) {
-            this->Table->setColumnCount(size);
+        if (static_cast<size_t>(this->columnCount()) != size) {
+            this->setColumnCount(size);
         }
         QTableWidgetItem * tableItem;
         for (size_t index = 0; index < size; ++index) {
-            tableItem = this->Table->item(0, index);
+            tableItem = this->item(0, index);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
                 tableItem->setTextAlignment(Qt::AlignRight);
-                this->Table->setItem(0, index, tableItem);
+                this->setItem(0, index, tableItem);
             }
-            tableItem->setText(QString::number(vector.Element(index), Format, Precision));
+            tableItem->setText(QString::number(vector.at(index), Format, Precision));
         }
         break;
     case SPINBOX_WIDGET:
-        if (static_cast<size_t>(this->Table->columnCount()) != size) {
-            this->Table->setColumnCount(size);
+        if (static_cast<size_t>(this->columnCount()) != size) {
+            this->setColumnCount(size);
         }
         QDoubleSpinBox * spinBox;
         for (size_t index = 0; index < size; ++index) {
-            spinBox = dynamic_cast<QDoubleSpinBox*>(this->Table->cellWidget(0, index));
+            spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(0, index));
             if (spinBox == 0) {
                 spinBox = new QDoubleSpinBox();
                 spinBox->setRange(Minimum, Maximum);
                 spinBox->setSingleStep(Step);
                 connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(DoubleSpinBoxValueChangedSlot(double)));
-                this->Table->setCellWidget(0, index, spinBox);
+                this->setCellWidget(0, index, spinBox);
             }
-            spinBox->setValue(vector.Element(index));
+            spinBox->setValue(vector.at(index));
         }
         break;
     case SLIDER_WIDGET:
-        if (static_cast<size_t>(this->Table->columnCount()) != size) {
-            this->Table->setColumnCount(size);
+        if (static_cast<size_t>(this->columnCount()) != size) {
+            this->setColumnCount(size);
         }
         QSlider * slider;
         for (size_t index = 0; index < size; ++index) {
-            slider = dynamic_cast<QSlider*>(this->Table->cellWidget(0, index));
+            slider = dynamic_cast<QSlider*>(this->cellWidget(0, index));
             if (slider == 0) {
                 slider = new QSlider(Qt::Horizontal);
                 slider->setRange(0, SLIDER_RESOLUTION);
                 slider->setSingleStep(1);
                 connect(slider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChangedSlot(int)));
-                this->Table->setCellWidget(0, index, slider);
+                this->setCellWidget(0, index, slider);
             }
-            slider->setValue((vector.Element(index) - Minimum) / (Maximum - Minimum) * SLIDER_RESOLUTION);
+            slider->setValue((vector.at(index) - Minimum) / (Maximum - Minimum) * SLIDER_RESOLUTION);
         }
         break;
     default:
@@ -278,7 +267,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const vctDyna
 template <class _elementType>
 bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValue(vctDynamicVector<value_type> & placeHolder) const
 {
-    const int columns = this->Table->columnCount();
+    const int columns = this->columnCount();
     if (columns != static_cast<int>(placeHolder.size())) {
         return false;
     }
@@ -286,23 +275,23 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValue(vctDynamicVec
     case TEXT_WIDGET:
         QTableWidgetItem * item;
         for (int column = 0; column < columns; ++column) {
-            item = dynamic_cast<QTableWidgetItem*>(this->Table->item(0, column));
-            placeHolder.Element(column) = item->text().toDouble();
+            item = dynamic_cast<QTableWidgetItem*>(this->item(0, column));
+            placeHolder.at(column) = item->text().toDouble();
         }
         break;
         break;
     case SPINBOX_WIDGET:
         QDoubleSpinBox * spinBox;
         for (int column = 0; column < columns; ++column) {
-            spinBox = dynamic_cast<QDoubleSpinBox*>(this->Table->cellWidget(0, column));
-            placeHolder.Element(column) = spinBox->value();
+            spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(0, column));
+            placeHolder.at(column) = spinBox->value();
         }
         break;
     case SLIDER_WIDGET:
         QSlider * slider;
         for (int column = 0; column < columns; ++column) {
-            slider = dynamic_cast<QSlider*>(this->Table->cellWidget(0, column));
-            placeHolder.Element(column) = static_cast<double>(slider->value()) / SLIDER_RESOLUTION * (Maximum - Minimum) + Minimum;
+            slider = dynamic_cast<QSlider*>(this->cellWidget(0, column));
+            placeHolder.at(column) = static_cast<double>(slider->value()) / SLIDER_RESOLUTION * (Maximum - Minimum) + Minimum;
         }
         break;
     default:
@@ -354,52 +343,52 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const vctDynam
     const size_t size = vector.size();
     switch (DisplayMode) {
     case TEXT_WIDGET:
-        if (static_cast<size_t>(this->Table->columnCount()) != size) {
-            this->Table->setColumnCount(size);
+        if (static_cast<size_t>(this->columnCount()) != size) {
+            this->setColumnCount(size);
         }
         QTableWidgetItem * tableItem;
         for (size_t index = 0; index < size; ++index) {
-            tableItem = this->Table->item(0, index);
+            tableItem = this->item(0, index);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
                 tableItem->setTextAlignment(Qt::AlignRight);
-                this->Table->setItem(0, index, tableItem);
+                this->setItem(0, index, tableItem);
             }
-            tableItem->setText(QString::number(vector.Element(index), Base));
+            tableItem->setText(QString::number(vector.at(index), Base));
         }
         break;
     case SPINBOX_WIDGET:
-        if (static_cast<size_t>(this->Table->columnCount()) != size) {
-            this->Table->setColumnCount(size);
+        if (static_cast<size_t>(this->columnCount()) != size) {
+            this->setColumnCount(size);
         }
         QSpinBox * spinBox;
         for (size_t index = 0; index < size; ++index) {
-            spinBox = dynamic_cast<QSpinBox*>(this->Table->cellWidget(0, index));
+            spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(0, index));
             if (spinBox == 0) {
                 spinBox = new QSpinBox();
                 spinBox->setRange(Minimum, Maximum);
                 spinBox->setSingleStep(Step);
                 connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(SpinBoxValueChangedSlot(int)));
-                this->Table->setCellWidget(0, index, spinBox);
+                this->setCellWidget(0, index, spinBox);
             }
-            spinBox->setValue(vector.Element(index));
+            spinBox->setValue(vector.at(index));
         }
         break;
     case SLIDER_WIDGET:
-        if (static_cast<size_t>(this->Table->columnCount()) != size) {
-            this->Table->setColumnCount(size);
+        if (static_cast<size_t>(this->columnCount()) != size) {
+            this->setColumnCount(size);
         }
         QSlider * slider;
         for (size_t index = 0; index < size; ++index) {
-            slider = dynamic_cast<QSlider*>(this->Table->cellWidget(0, index));
+            slider = dynamic_cast<QSlider*>(this->cellWidget(0, index));
             if (slider == 0) {
                 slider = new QSlider(Qt::Horizontal);
                 slider->setRange(Minimum, Maximum);
                 slider->setSingleStep(Step);
                 connect(slider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChangedSlot(int)));
-                this->Table->setCellWidget(0, index, slider);
+                this->setCellWidget(0, index, slider);
             }
-            slider->setValue(vector.Element(index));
+            slider->setValue(vector.at(index));
         }
         break;
     default:
@@ -413,7 +402,7 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const vctDynam
 template <class _elementType>
 bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::GetValue(vctDynamicVector<value_type> & placeHolder) const
 {
-    const int columns = this->Table->columnCount();
+    const int columns = this->columnCount();
     if (columns != static_cast<int>(placeHolder.size())) {
         return false;
     }
@@ -421,23 +410,23 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::GetValue(vctDynamicVect
     case TEXT_WIDGET:
         QTableWidgetItem * item;
         for (int column = 0; column < columns; ++column) {
-            item = dynamic_cast<QTableWidgetItem*>(this->Table->item(0, column));
-            placeHolder.Element(column) = item->text().toDouble();
+            item = dynamic_cast<QTableWidgetItem*>(this->item(0, column));
+            placeHolder.at(column) = item->text().toDouble();
         }
         break;
         break;
     case SPINBOX_WIDGET:
         QSpinBox * spinBox;
         for (int column = 0; column < columns; ++column) {
-            spinBox = dynamic_cast<QSpinBox*>(this->Table->cellWidget(0, column));
-            placeHolder.Element(column) = spinBox->value();
+            spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(0, column));
+            placeHolder.at(column) = spinBox->value();
         }
         break;
     case SLIDER_WIDGET:
         QSlider * slider;
         for (int column = 0; column < columns; ++column) {
-            slider = dynamic_cast<QSlider*>(this->Table->cellWidget(0, column));
-            placeHolder.Element(column) = slider->value();
+            slider = dynamic_cast<QSlider*>(this->cellWidget(0, column));
+            placeHolder.at(column) = slider->value();
         }
         break;
     default:
@@ -462,35 +451,41 @@ vctQtWidgetDynamicVectorBoolWrite::vctQtWidgetDynamicVectorBoolWrite(void):
     this->setFixedHeight(verticalHeight);
 }
 
-bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const vctDynamicVector<bool> & vector)
+void vctQtWidgetDynamicVectorBoolWrite::ValueChangedSlot(bool CMN_UNUSED(value))
 {
+    emit this->valueChanged();
+}
+
+bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const vctDynamicVector<bool> & vector, bool blockSignals)
+{
+    const bool previousBlockSignals = this->blockSignals(blockSignals);
+
     const size_t size = vector.size();
     if (static_cast<size_t>(this->columnCount()) != size) {
         this->setColumnCount(size);
     }
-    QSpinBox * spinBox;
+    QCheckBox * checkBox;
     for (size_t index = 0; index < size; ++index) {
-        spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(0, index));
-        if (spinBox == 0) {
-            spinBox = new QSpinBox();
-            this->setCellWidget(0, index, spinBox);
-            spinBox->setMinimum(0);
-            spinBox->setMaximum(1);
+        checkBox = dynamic_cast<QCheckBox*>(this->cellWidget(0, index));
+        if (checkBox == 0) {
+            checkBox = new QCheckBox();
+            this->setCellWidget(0, index, checkBox);
+            connect(checkBox, SIGNAL(toggled(bool)), this, SLOT(ValueChangedSlot(bool)));
         }
-        spinBox->setValue(vector.Element(index));
+        checkBox->setChecked(vector.at(index));
     }
+
+    this->blockSignals(previousBlockSignals);
     return true;
 }
 
 bool vctQtWidgetDynamicVectorBoolWrite::GetValue(vctDynamicVector<bool> & placeHolder) const
 {
     int columns = this->columnCount();
-    vctDynamicVector<double> newVector(columns);
-    QSpinBox * spinBox;
-    for(int column = 0; column < columns; ++column) {
-        spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(1, column));
-        newVector.Element(column) = (bool)spinBox->value();
+    QCheckBox * checkBox;
+    for (int column = 0; column < columns; ++column) {
+        checkBox = dynamic_cast<QCheckBox*>(this->cellWidget(0, column));
+        placeHolder.at(column) = checkBox->isChecked();
     }
-    placeHolder.Assign(newVector);
     return true;
 }

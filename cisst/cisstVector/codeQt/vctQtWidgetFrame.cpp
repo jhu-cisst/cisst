@@ -30,5 +30,5 @@ vctQtWidgetFrameDoubleRead::vctQtWidgetFrameDoubleRead(const DisplayModeType dis
     this->setWindowTitle("vctQtWidgetFrameDoubleRead");
     Layout->setSpacing(0);
     Layout->addWidget(RotationWidget);
-    Layout->addWidget(TranslationWidget->GetWidget());
+    Layout->addWidget(TranslationWidget);
 }

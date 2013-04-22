@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector.h>
 #include <cisstVectorQt.h>
 
-#include <QApplication.h>
 #include <QVBoxLayout>
 
 class ExampleClass: public QObject

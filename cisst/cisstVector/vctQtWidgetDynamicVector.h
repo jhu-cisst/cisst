@@ -23,10 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctQtWidgetDynamicVector_h
 #define _vctQtWidgetDynamicVector_h
 
-class QWidget;
-class QTableWidget;
-class QTableWidgetItem;
-#include <QObject>
+#include <QTableWidget>
 
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctQtForwardDeclarations.h>
@@ -34,13 +31,11 @@ class QTableWidgetItem;
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
-class CISST_EXPORT vctQtWidgetDynamicVectorReadBase
+class CISST_EXPORT vctQtWidgetDynamicVectorReadBase: public QTableWidget
 {
-protected:
-    QTableWidget * Table;
+    Q_OBJECT;
 public:
     vctQtWidgetDynamicVectorReadBase(void);
-    QWidget * GetWidget(void);
 };
 
 template <class _elementType>
@@ -77,19 +72,17 @@ template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<bool>;
 #endif // CISST_WINDOWS
 
 
-class CISST_EXPORT vctQtWidgetDynamicVectorWriteBase: public QObject
+class CISST_EXPORT vctQtWidgetDynamicVectorWriteBase: public QTableWidget
 {
     Q_OBJECT;
 public:
     typedef enum {TEXT_WIDGET, SPINBOX_WIDGET, SLIDER_WIDGET} DisplayModeType;
     vctQtWidgetDynamicVectorWriteBase(const DisplayModeType displayMode);
     void SetDisplayMode(const DisplayModeType displayMode);
-    QWidget * GetWidget(void);
 signals:
     void valueChanged(void);
 protected:
     enum {SLIDER_RESOLUTION = 1000};
-    QTableWidget * Table;
     DisplayModeType DisplayMode;
 protected slots:
     void SliderValueChangedSlot(int value);
@@ -140,13 +133,17 @@ template class CISST_EXPORT vctQtWidgetDynamicVectorWriteInteger<unsigned int>;
 
 
 // -- for bools
-#include <QTableWidget>
 class CISST_EXPORT vctQtWidgetDynamicVectorBoolWrite: public QTableWidget
 {
+    Q_OBJECT;
  public:
     vctQtWidgetDynamicVectorBoolWrite(void);
-    virtual bool SetValue(const vctDynamicVector<bool> & value);
+    virtual bool SetValue(const vctDynamicVector<bool> & value, bool blockSignals = true);
     virtual bool GetValue(vctDynamicVector<bool> & placeHolder) const;
+signals:
+    bool valueChanged(void);
+protected slots:
+    void ValueChangedSlot(bool value);
 };
 
 #endif // _vctQtWidgetDynamicVector_h
