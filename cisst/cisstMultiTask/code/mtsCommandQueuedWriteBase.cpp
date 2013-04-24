@@ -94,26 +94,36 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
                           << this->Name << "\"" << std::endl;
         return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
     }
+    // check if all queues have some space
+    if (ArgumentsQueue.IsFull() || BlockingFlagQueue.IsFull() || MailBox->IsFull()) {
+        CMN_LOG_RUN_WARNING << "Class mtsCommandQueuedWriteGeneric: Execute: Queue full for \""
+                            << this->Name << "\" ["
+                            << ArgumentsQueue.IsFull() << "|"
+                            << BlockingFlagQueue.IsFull() << "|"
+                            << MailBox->IsFull() << "]"
+                            << std::endl;
+        return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+    }
     // copy the argument to the local storage.
     if (!ArgumentsQueue.Put(argument)) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: ArgumentsQueue full for \""
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: ArgumentsQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: ArgumentsQueue.Put failed");
+        return mtsExecutionResult::UNDEFINED;
     }
     // copy the blocking flag to the local storage.
     if (!BlockingFlagQueue.Put(blocking)) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue full for \""
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get(); // pop argument
-        return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Put failed");
+        return mtsExecutionResult::UNDEFINED;
     }
     // finally try to queue to mailbox
     if (!MailBox->Write(this)) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: mailbox full for \""
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();  // pop argument and blocking flag from local storage
-        BlockingFlagQueue.Get();
-        return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
+        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed");
+        return mtsExecutionResult::UNDEFINED;
     }
     return mtsExecutionResult::COMMAND_QUEUED;
 }
