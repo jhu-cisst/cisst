@@ -60,9 +60,13 @@ public:
 
     int SetROI(const svlRect & rect, unsigned int videoch = SVL_LEFT);
     int SetROI(int left, int top, int right, int bottom, unsigned int videoch = SVL_LEFT);
+    int SetROI(const svlEllipse & ellipse, unsigned int videoch = SVL_LEFT);
     int GetROI(svlRect & rect, unsigned int videoch = SVL_LEFT) const;
+    int GetROI(svlEllipse & ellipse, unsigned int videoch = SVL_LEFT) const;
+
     // Inherited from svlFilterImageCenterFinderInterface
-    int SetCenter(int x, int y, int rx, int ry, unsigned int videoch = SVL_LEFT);
+    virtual int OnChangeCenterRect(const svlRect & rect, unsigned int videoch = SVL_LEFT);
+    virtual int OnChangeCenterEllipse(const svlEllipse & ellipse, unsigned int videoch = SVL_LEFT);
 
     int SetMosaicSize(unsigned int width, unsigned int height);
     const svlSampleImage* GetMosaicImage() const;
@@ -76,10 +80,10 @@ protected:
 
     virtual void LinkChannelsVertically();
     virtual int ReconstructRigidBody();
-    virtual void BackprojectRigidBody();
+    virtual void BackprojectRigidBody(int width, int height);
     virtual int ComputeHomography();
     virtual void BackprojectHomography();
-    virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int threadid = -1);
+    virtual void WarpImage(svlSampleImage* image, unsigned int videoch, int roi_margin, int threadid = -1);
     virtual int UpdateMosaicImage(unsigned int videoch, unsigned int width, unsigned int height);
     virtual void PushSamplesToAsyncOutputs(double timestamp);
 
@@ -88,10 +92,16 @@ private:
 
     unsigned int VideoChannels;
     vctDynamicVector<svlImageTracker*> Trackers;
-    vctDynamicVector<svlRect> ROI;
+    vctDynamicVector<svlRect> ROIRect;
+    vctDynamicVector<svlRect> ROIRectInternal;
+    vctDynamicVector<svlEllipse> ROIEllipse;
+    vctDynamicVector<svlEllipse> ROIEllipseInternal;
     vctDynamicVector<vctInt2> ROICenter;
+    vctDynamicVector<svlQuad> WarpedROIRect;
+    vctDynamicVector<svlEllipse> WarpedROIEllipse;
 
     bool RigidBody;
+    bool RigidBodyInitialized;
     vctDynamicVector<double> RigidBodyAngle;
     vctDynamicVector<double> RigidBodyScale;
     vctDynamicVector<vct3x3> RigidBodyTransform;
@@ -149,6 +159,12 @@ public:
     virtual int SetImageSize(unsigned int width, unsigned int height);
     virtual void SetROI(const svlRect & rect);
     virtual void SetROI(int left, int top, int right, int bottom);
+    virtual void SetROI(const svlQuad & quad);
+    virtual void SetROI(const svlEllipse & ellipse);
+
+    // Needs to be overridden if there is a need for margin within the ROI
+    virtual int GetROIMargin();
+
     virtual int SetTargetCount(unsigned int targetcount);
     virtual int SetTarget(unsigned int targetid, const svlTarget2D & target);
     virtual int GetTarget(unsigned int targetid, svlTarget2D & target);
@@ -164,7 +180,8 @@ protected:
     bool Initialized;
     unsigned int Width;
     unsigned int Height;
-    svlRect ROI;
+    svlQuad ROIRect;
+    svlEllipse ROIEllipse;
     vctDynamicVector<svlTarget2D> Targets;
 };
 

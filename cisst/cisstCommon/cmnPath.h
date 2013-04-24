@@ -180,6 +180,11 @@ public:
     /*! Get cisst shared directory based on CISST_ROOT from the
       environment variable */
     static bool GetCisstShare(std::string & result);
+
+    /*! Check if a file exists assuming the path provided is either
+      relative or absolute, this function doesn't use any search
+      path. */
+    static bool Exists(const std::string & fullPath, short more = READ);
 };
 
 

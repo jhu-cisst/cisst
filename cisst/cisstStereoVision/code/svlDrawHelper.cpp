@@ -933,9 +933,12 @@ void svlDrawHelper::WarpInternals::Draw(unsigned int thread_count, unsigned int 
                                         unsigned int alpha)
 {
     if (_ixs.size() < 3) return;
-    if (!Input || !Output || InPixelType != OutPixelType || alpha == 0) return;
+    if (!Input || !Output || alpha == 0) return;
     if (InPixelType != svlPixelMono8 &&
-        InPixelType != svlPixelRGB) return;
+        InPixelType != svlPixelRGB &&
+        InPixelType != svlPixelRGBA) return;
+    if ((InPixelType == svlPixelMono8 || InPixelType == svlPixelRGB) && InPixelType != OutPixelType) return;
+    if (InPixelType == svlPixelRGBA && OutPixelType != svlPixelRGB) return;
 
     ix1 <<= 1; iy1 <<= 1; ix2 <<= 1; iy2 <<= 1; ix3 <<= 1; iy3 <<= 1;
     ox1 <<= 1; oy1 <<= 1; ox2 <<= 1; oy2 <<= 1; ox3 <<= 1; oy3 <<= 1;
@@ -1030,35 +1033,44 @@ void svlDrawHelper::WarpInternals::Draw(unsigned int thread_count, unsigned int 
 
         if (_lm_x[i] != __LARGE_NUMBER &&
             _rm_x[i] != __SMALL_NUMBER) {
-            if (alpha == 256) {
-                if (InPixelType == svlPixelMono8) {
-                    ResampleLineMono8((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
-                                      (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
-                                      (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                      (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
+
+            if (InPixelType != svlPixelRGBA) {
+                if (alpha == 256) {
+                    if (InPixelType == svlPixelMono8) {
+                        ResampleLineMono8((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                          (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                          (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                          (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
+                    }
+                    else {
+                        ResampleLineRGB((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                        (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                        (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                        (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
+                    }
                 }
                 else {
-                    ResampleLineRGB((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
-                                    (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
-                                    (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                    (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
+                    if (InPixelType == svlPixelMono8) {
+                        ResampleLineAlphaMono8((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                               (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                               (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                               (_rm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                               alpha);
+                    }
+                    else if (InPixelType == svlPixelRGB) {
+                        ResampleLineAlphaRGB((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                             (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                             (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                             (_rm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                             alpha);
+                    }
                 }
             }
             else {
-                if (InPixelType == svlPixelMono8) {
-                    ResampleLineAlphaMono8((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
-                                           (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
-                                           (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                           (_rm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                           alpha);
-                }
-                else {
-                    ResampleLineAlphaRGB((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
-                                         (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
-                                         (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                         (_rm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                         alpha);
-                }
+                ResampleLineRGBA((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                 (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                 (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                 (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
             }
         }
     }
@@ -1070,9 +1082,12 @@ void svlDrawHelper::WarpInternals::Draw(unsigned int thread_count, unsigned int 
                                         unsigned int alpha)
 {
     if (_ixs.size() < 4) return;
-    if (!Input || !Output || InPixelType != OutPixelType || alpha == 0) return;
+    if (!Input || !Output || alpha == 0) return;
     if (InPixelType != svlPixelMono8 &&
-        InPixelType != svlPixelRGB) return;
+        InPixelType != svlPixelRGB &&
+        InPixelType != svlPixelRGBA) return;
+    if ((InPixelType == svlPixelMono8 || InPixelType == svlPixelRGB) && InPixelType != OutPixelType) return;
+    if (InPixelType == svlPixelRGBA && OutPixelType != svlPixelRGB) return;
 
     ix1 <<= 1; iy1 <<= 1; ix2 <<= 1; iy2 <<= 1; ix3 <<= 1; iy3 <<= 1; ix4 <<= 1; iy4 <<= 1;
     ox1 <<= 1; oy1 <<= 1; ox2 <<= 1; oy2 <<= 1; ox3 <<= 1; oy3 <<= 1; ox4 <<= 1; oy4 <<= 1;
@@ -1181,35 +1196,44 @@ void svlDrawHelper::WarpInternals::Draw(unsigned int thread_count, unsigned int 
 
         if (_lm_x[i] != __LARGE_NUMBER &&
             _rm_x[i] != __SMALL_NUMBER) {
-            if (alpha == 256) {
-                if (InPixelType == svlPixelMono8) {
-                    ResampleLineMono8((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
-                                      (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
-                                      (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                      (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
+
+            if (InPixelType != svlPixelRGBA) {
+                if (alpha == 256) {
+                    if (InPixelType == svlPixelMono8) {
+                        ResampleLineMono8((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                          (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                          (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                          (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
+                    }
+                    else {
+                        ResampleLineRGB((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                        (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                        (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                        (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
+                    }
                 }
                 else {
-                    ResampleLineRGB((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
-                                    (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
-                                    (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                    (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
+                    if (InPixelType == svlPixelMono8) {
+                        ResampleLineAlphaMono8((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                               (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                               (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                               (_rm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                               alpha);
+                    }
+                    else {
+                        ResampleLineAlphaRGB((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                             (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                             (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                             (_rm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                             alpha);
+                    }
                 }
             }
             else {
-                if (InPixelType == svlPixelMono8) {
-                    ResampleLineAlphaMono8((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
-                                           (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
-                                           (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                           (_rm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                           alpha);
-                }
-                else {
-                    ResampleLineAlphaRGB((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
-                                         (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
-                                         (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                         (_rm_x[i] + 1) >> 1, (i + 1) >> 1,
-                                         alpha);
-                }
+                ResampleLineRGBA((_ixs[id1][pos1] + 1) >> 1, (_iys[id1][pos1] + 1) >> 1,
+                                 (_ixs[id2][pos2] + 1) >> 1, (_iys[id2][pos2] + 1) >> 1,
+                                 (_lm_x[i] + 1) >> 1, (i + 1) >> 1,
+                                 (_rm_x[i] + 1) >> 1, (i + 1) >> 1);
             }
         }
     }
@@ -1733,6 +1757,191 @@ int svlDrawHelper::WarpInternals::GetLinePixelsRGB(int* idxs, int x1, int y1, in
     return len;
 }
 
+int svlDrawHelper::WarpInternals::GetLinePixelsRGBA(int* idxs, int x1, int y1, int x2, int y2, const int w, const int h)
+{
+    const int stride = w * 4;
+
+    if (x1 == x2 && y1 == y2) {
+
+        if (x1 >= 0 && x1 < w && y1 >= 0 && y1 < h) *idxs = y1 * stride + x1 * 4;
+        else *idxs = -1;
+
+        return 1;
+    }
+
+    int x = x1, y = y1, dx, dy = y2 - y1, eps = 0, len = 0;
+
+    if (y1 == y2) {
+    // Horizontal line
+        if (x2 > x1) {
+            for (x = x1; x <= x2; x ++) {
+                if (x >= 0 && x < w && y1 >= 0 && y1 < h) *idxs = y1 * stride + x * 4;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        else {
+            for (x = x1; x >= x2; x --) {
+                if (x >= 0 && x < w && y1 >= 0 && y1 < h) *idxs = y1 * stride + x * 4;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        return len;
+    }
+    else if (x1 == x2) {
+    // Vertical line
+        if (y2 > y1) {
+            for (y = y1; y <= y2; y ++) {
+                if (x1 >= 0 && x1 < w && y >= 0 && y < h) *idxs = y * stride + x1 * 4;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        else {
+            for (y = y1; y >= y2; y --) {
+                if (x1 >= 0 && x1 < w && y >= 0 && y < h) *idxs = y * stride + x1 * 4;
+                else *idxs = -1;
+                idxs ++; len ++;
+            }
+        }
+        return len;
+    }
+
+    if (x1 < x2) {
+
+        dx = x2 - x1;
+
+        if (dy > 0) {
+            if (dx >= dy) {
+                for (x = x1; x <= x2; x ++) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 4;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) >= dx) {
+                        y ++;
+                        eps -= dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y <= y2; y ++) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 4;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= dy) {
+                        x ++;
+                        eps -= dy;
+                    }
+                }
+            }
+        }
+        else {
+            if (dx >= abs(dy)) {
+                for (x = x1; x <= x2; x ++) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 4;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) <= -dx) {
+                        y --;
+                        eps += dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y >= y2; y --) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 4;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= -dy) {
+                        x ++;
+                        eps -= -dy;
+                    }
+                }
+            }
+        }
+    }
+    else {
+
+        dx = x1 - x2;
+
+        if (dy > 0) {
+            if (dx >= dy) {
+                for (x = x1; x >= x2; x --) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 4;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) >= dx) {
+                        y ++;
+                        eps -= dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y <= y2; y ++) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 4;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= dy) {
+                        x --;
+                        eps -= dy;
+                    }
+                }
+            }
+        }
+        else {
+            if (dx >= abs(dy)) {
+                for (x = x1; x >= x2; x --) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 4;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dy;
+                    if ((eps << 1) <= -dx) {
+                        y --;
+                        eps += dx;
+                    }
+                }
+            }
+            else {
+                for (y = y1; y >= y2; y --) {
+
+                    if (x >= 0 && x < w && y >= 0 && y < h) *idxs = y * stride + x * 4;
+                    else *idxs = -1;
+                    idxs ++; len ++;
+
+                    eps += dx;
+                    if ((eps << 1) >= -dy) {
+                        x --;
+                        eps -= -dy;
+                    }
+                }
+            }
+        }
+    }
+
+    return len;
+}
+
 void svlDrawHelper::WarpInternals::ResampleLineMono8(int ix1, int iy1, int ix2, int iy2,
                                                      int ox1, int oy1, int ox2, int oy2)
 {
@@ -1913,6 +2122,93 @@ void svlDrawHelper::WarpInternals::ResampleLineRGB(int ix1, int iy1, int ix2, in
     }
 }
 
+void svlDrawHelper::WarpInternals::ResampleLineRGBA(int ix1, int iy1, int ix2, int iy2,
+                                                    int ox1, int oy1, int ox2, int oy2)
+{
+    int ilen = GetLinePixelsRGBA(_in_idxs,  ix1, iy1, ix2, iy2, InWidth, InHeight);
+    int olen = GetLinePixelsRGB(_out_idxs, ox1, oy1, ox2, oy2, OutWidth, OutHeight);
+
+    int* in_idxs = _in_idxs;
+    int* out_idxs = _out_idxs;
+    unsigned char *in_buf, *out_buf;
+    int ipix, opix, aval, iaval;
+
+    if (olen == 1) {
+
+        opix = *out_idxs;
+        if (opix >= 0) {
+            out_buf = Output + opix;
+
+            ipix = *in_idxs;
+            if (ipix >= 0) {
+                in_buf  = Input + ipix;
+                aval = in_buf[3]; // alpha
+                iaval = 256 - aval; // inverse alpha
+                *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
+            }
+        }
+
+        return;
+    }
+
+    int i, eps = 0;
+
+    if (ilen >= olen) {
+        for (i = 0; i < ilen; i ++) {
+            eps += olen;
+            if ((eps << 1) >= ilen) {
+
+                opix = *out_idxs;
+                if (opix >= 0) {
+                    out_buf = Output + opix;
+
+                    ipix = *in_idxs;
+                    if (ipix >= 0) {
+                        in_buf  = Input + ipix;
+                        aval = in_buf[3]; // alpha
+                        iaval = 256 - aval; // inverse alpha
+                        *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                        *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                        *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
+                    }
+                }
+                out_idxs ++;
+
+                eps -= ilen;
+            }
+            in_idxs ++;
+        }
+    }
+    else {
+        for (i = 0; i < olen; i ++) {
+
+            opix = *out_idxs;
+            if (opix >= 0) {
+                out_buf = Output + opix;
+
+                ipix = *in_idxs;
+                if (ipix >= 0) {
+                    in_buf  = Input + ipix;
+                    aval = in_buf[3]; // alpha
+                    iaval = 256 - aval; // inverse alpha
+                    *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                    *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
+                    *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
+                }
+            }
+            out_idxs ++;
+
+            if ((eps << 1) >= olen) {
+                eps -= olen;
+                in_idxs ++;
+            }
+            eps += ilen;
+        }
+    }
+}
+
 void svlDrawHelper::WarpInternals::ResampleLineAlphaMono8(int ix1, int iy1, int ix2, int iy2,
                                                           int ox1, int oy1, int ox2, int oy2,
                                                           unsigned int alpha)
@@ -1936,9 +2232,9 @@ void svlDrawHelper::WarpInternals::ResampleLineAlphaMono8(int ix1, int iy1, int 
                 in_buf  = Input + ipix;
                 *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
             }
-            else {
-                *out_buf = (iaval * (int)(*out_buf)) >> 8;
-            }
+//            else {
+//                *out_buf = (iaval * (int)(*out_buf)) >> 8;
+//            }
         }
 
         return;
@@ -1960,9 +2256,9 @@ void svlDrawHelper::WarpInternals::ResampleLineAlphaMono8(int ix1, int iy1, int 
                         in_buf  = Input + ipix;
                         *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
                     }
-                    else {
-                        *out_buf = (iaval * (int)(*out_buf)) >> 8;
-                    }
+//                    else {
+//                        *out_buf = (iaval * (int)(*out_buf)) >> 8;
+//                    }
                 }
                 out_idxs ++;
 
@@ -1983,9 +2279,9 @@ void svlDrawHelper::WarpInternals::ResampleLineAlphaMono8(int ix1, int iy1, int 
                     in_buf  = Input + ipix;
                     *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
                 }
-                else {
-                    *out_buf = (iaval * (int)(*out_buf)) >> 8;
-                }
+//                else {
+//                    *out_buf = (iaval * (int)(*out_buf)) >> 8;
+//                }
             }
             out_idxs ++;
 
@@ -2023,11 +2319,11 @@ void svlDrawHelper::WarpInternals::ResampleLineAlphaRGB(int ix1, int iy1, int ix
                 *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
                 *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
             }
-            else {
-                *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
-                *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
-                *out_buf = (iaval * (int)(*out_buf)) >> 8;
-            }
+//            else {
+//                *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+//                *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+//                *out_buf = (iaval * (int)(*out_buf)) >> 8;
+//            }
         }
 
         return;
@@ -2051,11 +2347,11 @@ void svlDrawHelper::WarpInternals::ResampleLineAlphaRGB(int ix1, int iy1, int ix
                         *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
                         *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
                     }
-                    else {
-                        *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
-                        *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
-                        *out_buf = (iaval * (int)(*out_buf)) >> 8;
-                    }
+//                    else {
+//                        *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+//                        *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+//                        *out_buf = (iaval * (int)(*out_buf)) >> 8;
+//                    }
                 }
                 out_idxs ++;
 
@@ -2078,11 +2374,11 @@ void svlDrawHelper::WarpInternals::ResampleLineAlphaRGB(int ix1, int iy1, int ix
                     *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8; out_buf ++; in_buf ++;
                     *out_buf = (aval * (int)(*in_buf) + iaval * (int)(*out_buf)) >> 8;
                 }
-                else {
-                    *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
-                    *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
-                    *out_buf = (iaval * (int)(*out_buf)) >> 8;
-                }
+//                else {
+//                    *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+//                    *out_buf = (iaval * (int)(*out_buf)) >> 8; out_buf ++;
+//                    *out_buf = (iaval * (int)(*out_buf)) >> 8;
+//                }
             }
             out_idxs ++;
 

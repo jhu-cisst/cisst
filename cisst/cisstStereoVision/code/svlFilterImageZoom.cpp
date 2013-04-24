@@ -72,9 +72,8 @@ int svlFilterImageZoom::SetCenter(int x, int y, unsigned int videoch)
     return SVL_OK;
 }
 
-int svlFilterImageZoom::SetCenter(int x, int y, int CMN_UNUSED(rx), int CMN_UNUSED(ry), unsigned int videoch)
+int svlFilterImageZoom::OnChangeCenter(int x, int y, unsigned int videoch)
 {
-    // Ignore radii
     return SetCenter(x, y, videoch);
 }
 

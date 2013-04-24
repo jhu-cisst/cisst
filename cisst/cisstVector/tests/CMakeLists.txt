@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstVector tests
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -15,7 +15,7 @@
 # --- end cisst license ---
 
 # paths for headers/libraries
-cisst_set_directories (cisstCommon cisstVector)
+cisst_set_directories (cisstCommon cisstVector cisstTestsDriver)
 
 # all source files
 set (SOURCE_FILES
@@ -124,19 +124,11 @@ set (HEADER_FILES
      )
 
 
-# CppUnit include directories
-include_directories (${CPPUNIT_INCLUDE_DIR})
-
 # Add executable for C++ tests
 add_executable (cisstVectorTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstVectorTests PROPERTY FOLDER "cisstVector/tests")
 target_link_libraries (cisstVectorTests cisstTestsDriver)
-cisst_target_link_libraries (cisstVectorTests cisstCommon cisstVector)
+cisst_target_link_libraries (cisstVectorTests cisstCommon cisstVector cisstTestsDriver)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstVectorTests ITERATIONS 10 INSTANCES 2)
-
-# CppUnit libraries
-target_link_libraries (cisstVectorTests
-                       optimized ${CPPUNIT_LIBRARIES}
-                       debug ${CPPUNIT_DEBUG_LIBRARIES})

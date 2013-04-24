@@ -76,9 +76,11 @@ inline bool cmnCommandLineOptionsConvert<std::string>(const char * value, std::s
      bool verbose;
      std::string filename;
      int iterations;
+     std::list<double> someNumbers;
      options.AddOptionNoValue("v", "verbose", "more messages");
-     options.AddOptionOneValue("f", "file", "file name", cmnCommandLineOptions::REQUIRED, &filename));
-     options.AddOptionOneValue("i", "iterations", "number of iterations", cmnCommandLineOptions::REQUIRED, &iterations));
+     options.AddOptionOneValue("f", "file", "file name", cmnCommandLineOptions::REQUIRED, &filename);
+     options.AddOptionOneValue("i", "iterations", "number of iterations", cmnCommandLineOptions::REQUIRED, &iterations);
+     options.AddOptionMultipleValues("n", "number", "one or many numbers", cmnCommandLineOptions::REQUIRED, &someNumbers);
 
      std::string errorMessage;
      if (!options.Parse(argc, argv, errorMessage)) {
@@ -123,12 +125,14 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
  protected:
     class OptionBase {
         friend class cmnCommandLineOptions;
+    protected:
 #if (CISST_COMPILER == CISST_DOTNET2003)
         // Workaround for Visual Studio.NET 2003
     public:
 #endif
         OptionBase(const std::string & shortOption, const std::string & longOption,
                    const std::string & description, RequiredType required);
+        virtual ~OptionBase() {};
         virtual bool SetValue(const char * value) = 0;
         std::string Short;
         std::string Long;
@@ -139,24 +143,28 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
 
     class CISST_EXPORT OptionNoValue: public OptionBase {
         friend class cmnCommandLineOptions;
+    protected:
         OptionNoValue(const std::string & shortOption, const std::string & longOption,
                       const std::string & description, RequiredType required = OPTIONAL);
+        virtual ~OptionNoValue() {};
         bool SetValue(const char * value);
     };
 
     class CISST_EXPORT OptionOneValueBase: public OptionBase {
         friend class cmnCommandLineOptions;
+    protected:
 #if (CISST_COMPILER == CISST_DOTNET2003)
         // Workaround for Visual Studio.NET 2003
     public:
 #endif
         OptionOneValueBase(const std::string & shortOption, const std::string & longOption,
                            const std::string & description, RequiredType required);
+        virtual ~OptionOneValueBase() {};
     };
-
     template <typename _elementType>
     class OptionOneValue: public OptionOneValueBase {
         friend class cmnCommandLineOptions;
+    protected:
         OptionOneValue(const std::string & shortOption, const std::string & longOption,
                        const std::string & description, RequiredType required,
                        _elementType * value):
@@ -172,6 +180,40 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
             return result;
         }
         _elementType * Value;
+    };
+
+    class CISST_EXPORT OptionMultipleValuesBase: public OptionBase {
+        friend class cmnCommandLineOptions;
+    protected:
+#if (CISST_COMPILER == CISST_DOTNET2003)
+        // Workaround for Visual Studio.NET 2003
+    public:
+#endif
+        OptionMultipleValuesBase(const std::string & shortOption, const std::string & longOption,
+                                 const std::string & description, RequiredType required);
+        virtual ~OptionMultipleValuesBase() {};
+    };
+    template <typename _elementType>
+    class OptionMultipleValues: public OptionMultipleValuesBase {
+        friend class cmnCommandLineOptions;
+    protected:
+        OptionMultipleValues(const std::string & shortOption, const std::string & longOption,
+                       const std::string & description, RequiredType required,
+                       std::list<_elementType> * value):
+            OptionMultipleValuesBase(shortOption, longOption, description, required),
+            Value(value)
+        {
+        }
+        bool SetValue(const char * value) {
+            _elementType temp;
+            bool result = cmnCommandLineOptionsConvert(value, temp);
+            if (result) {
+                Value->push_back(temp);
+                this->Set = true;
+            }
+            return result;
+        }
+        std::list<_elementType> * Value;
     };
 
  public:
@@ -190,6 +232,20 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
         typedef OptionOneValue<_elementType> OptionType;
         OptionType * option = new OptionOneValue<_elementType>(cleanedShort, cleanedLong, description,
                                                                required, value);
+        this->Options.push_back(option);
+        return true;
+    }
+
+    template <typename _elementType>
+    bool AddOptionMultipleValues(const std::string & shortOption, const std::string & longOption,
+                                 const std::string & description, RequiredType required, std::list<_elementType> * value) {
+        std::string cleanedShort, cleanedLong;
+        if (!this->ValidOptions(shortOption, longOption, cleanedShort, cleanedLong)) {
+            return false;
+        }
+        typedef OptionMultipleValues<_elementType> OptionType;
+        OptionType * option = new OptionMultipleValues<_elementType>(cleanedShort, cleanedLong, description,
+                                                                     required, value);
         this->Options.push_back(option);
         return true;
     }

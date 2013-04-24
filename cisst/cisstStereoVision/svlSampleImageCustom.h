@@ -558,6 +558,31 @@ public:
         return SVL_FAIL;
     }
 
+    int SetMatrix(cv::Mat& matrix, unsigned int videochannel = 0)
+    {
+        if (!OwnData && videochannel < _VideoChannels) {
+#if CISST_SVL_HAS_OPENCV
+            if (GetOCVImagePixelType(matrix) != GetPixelType()) {
+                return SVL_FAIL;
+            }
+            Image[videochannel].SetRef(matrix.rows, matrix.cols, matrix.cols * _DataChannels, _DataChannels, matrix.data);
+            if (OCVImageHeader[videochannel]) {
+                cvInitImageHeader(OCVImageHeader[videochannel],
+                                  cvSize(GetWidth(videochannel), GetHeight(videochannel)),
+                                  GetOCVDepth(),
+                                  _DataChannels);
+                cvSetData(OCVImageHeader[videochannel],
+                          GetPointer(videochannel),
+                          GetWidth(videochannel) * _DataChannels);
+            }
+            return SVL_OK;
+#else // CISST_SVL_HAS_OPENCV
+            return SVL_FAIL;
+#endif // CISST_SVL_HAS_OPENCV
+        }
+        return SVL_FAIL;
+    }
+
     vctDynamicMatrixRef<_ValueType> GetMatrixRef(const unsigned int videochannel = 0)
     {
         if (videochannel < _VideoChannels) return Image[videochannel];

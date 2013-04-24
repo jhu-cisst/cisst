@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -366,6 +366,8 @@ CMN_DATA_INSTANTIATE_ALL_BYTE_SWAP(double, d);
 // the type is not always a built-in type.  For example the MS
 // compiler uses typedef.  So we create a set of "parallel" functions
 // with the suffix _size_t
+void CISST_EXPORT cmnDataCopy_size_t(size_t & destination, const size_t & source);
+
 std::string CISST_EXPORT cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data),
                                                          const size_t CMN_UNUSED(index),
                                                          const std::string & userDescription = "s_t") throw (std::out_of_range);

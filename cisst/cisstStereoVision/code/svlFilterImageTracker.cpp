@@ -43,6 +43,7 @@ svlFilterImageTracker::svlFilterImageTracker() :
     svlFilterBase(),
     VideoChannels(0),
     RigidBody(false),
+    RigidBodyInitialized(false),
     ResetFlag(false),
     FramesToSkip(0),
     TargetTrajectorySmoothingWeight(0.0),
@@ -53,7 +54,7 @@ svlFilterImageTracker::svlFilterImageTracker() :
     RigidBodyScaleHigh(100.0),
     Iterations(1),
     WarpedImage(0),
-    RigidBodyIterations(2),
+    RigidBodyIterations(1),
     Mosaic(0),
     MosaicWidth(1000),
     MosaicHeight(1000)
@@ -78,9 +79,18 @@ svlFilterImageTracker::svlFilterImageTracker() :
     RigidBodyError.SetSize(RigidBodyIterations);
     RigidBodyError.SetAll(-1);
 
-    ROI.SetSize(SVL_MAX_CHANNELS);
-    ROI.SetAll(svlRect(0, 0, 4096, 4096));
+    ROIRect.SetSize(SVL_MAX_CHANNELS);
+    ROIRect.SetAll(svlRect(0, 0, 4096, 4096));
+    ROIRectInternal = ROIRect;
+    ROIEllipse.SetSize(SVL_MAX_CHANNELS);
+    ROIEllipse.SetAll(svlEllipse(-1, -1, 0, 0, 0.0));
+    ROIEllipseInternal = ROIEllipse;
     ROICenter.SetSize(SVL_MAX_CHANNELS);
+
+    WarpedROIRect.SetSize(SVL_MAX_CHANNELS);
+    WarpedROIRect.SetAll(svlRect(0, 0, 4096, 4096));
+    WarpedROIEllipse.SetSize(SVL_MAX_CHANNELS);
+    WarpedROIEllipse.SetAll(svlEllipse(-1, -1, 0, 0, 0.0));
 }
 
 svlFilterImageTracker::~svlFilterImageTracker()
@@ -230,7 +240,7 @@ int svlFilterImageTracker::SetROI(const svlRect & rect, unsigned int videoch)
 {
     if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
 
-    ROI[videoch] = rect;
+    ROIRect[videoch] = rect;
 
     return SVL_OK;
 }
@@ -239,10 +249,19 @@ int svlFilterImageTracker::SetROI(int left, int top, int right, int bottom, unsi
 {
     if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
 
-    ROI[videoch].left   = left;
-    ROI[videoch].top    = top;
-    ROI[videoch].right  = right;
-    ROI[videoch].bottom = bottom;
+    ROIRect[videoch].left   = left;
+    ROIRect[videoch].top    = top;
+    ROIRect[videoch].right  = right;
+    ROIRect[videoch].bottom = bottom;
+
+    return SVL_OK;
+}
+
+int svlFilterImageTracker::SetROI(const svlEllipse & ellipse, unsigned int videoch)
+{
+    if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
+
+    ROIEllipse[videoch] = ellipse;
 
     return SVL_OK;
 }
@@ -251,21 +270,29 @@ int svlFilterImageTracker::GetROI(svlRect & rect, unsigned int videoch) const
 {
     if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
 
-    rect = ROI[videoch];
+    rect = ROIRect[videoch];
 
     return SVL_OK;
 }
 
-int svlFilterImageTracker::SetCenter(int x, int y, int rx, int ry, unsigned int videoch)
+int svlFilterImageTracker::GetROI(svlEllipse & ellipse, unsigned int videoch) const
 {
     if (videoch >= SVL_MAX_CHANNELS) return SVL_FAIL;
 
-    ROI[videoch].left   = x - rx;
-    ROI[videoch].top    = y - ry;
-    ROI[videoch].right  = x + rx;
-    ROI[videoch].bottom = y + ry;
+    ellipse = ROIEllipse[videoch];
 
     return SVL_OK;
+}
+
+int svlFilterImageTracker::OnChangeCenterRect(const svlRect & rect, unsigned int videoch)
+{
+    return SetROI(rect, videoch);
+}
+
+int svlFilterImageTracker::OnChangeCenterEllipse(const svlEllipse & ellipse, unsigned int videoch)
+{
+    const int border = 0;
+    return SetROI(svlEllipse(ellipse.cx, ellipse.cy, std::max(ellipse.rx - border, 1), std::max(ellipse.ry - border, 1), ellipse.angle), videoch);
 }
 
 int svlFilterImageTracker::SetMosaicSize(unsigned int width, unsigned int height)
@@ -374,6 +401,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     vctDynamicVectorRef<int> flag;
     vctDynamicVectorRef<int> confidence;
     vctDynamicMatrixRef<int> position;
+    svlEllipse ell;
 
     const int weight = static_cast<int>(1000.0 * TargetTrajectorySmoothingWeight);
     const int weightsum = weight + 1000;
@@ -436,6 +464,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
             WarpedRigidBodyAngle.SetAll(0.0);
             WarpedRigidBodyScale.SetAll(1.0);
 
+            RigidBodyInitialized = false;
             ResetFlag = false;
         }
     }
@@ -444,8 +473,34 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
     _ParallelLoop(procInfo, vch, VideoChannels)
     {
-        // Region of interest might change at run-time
-        if (Trackers[vch]) Trackers[vch]->SetROI(ROI[vch]);
+        // Region of interest may change at run-time
+        if (Trackers[vch]) {
+            // Get all ROIs at once from public accessor
+            ROIRectInternal[vch] = ROIRect[vch];
+            ROIEllipseInternal[vch] = ROIEllipse[vch];
+
+            const bool cropped_image = true;
+            if (cropped_image) {
+                const int cx = img->GetWidth() / 2;
+                const int cy = img->GetHeight() / 2;
+                const int roi_rx = (ROIRectInternal[vch].right - ROIRectInternal[vch].left) / 2;
+                const int roi_ry = (ROIRectInternal[vch].bottom - ROIRectInternal[vch].top) / 2;
+                ROIRectInternal[vch].Assign(cx - roi_rx, cy - roi_ry, cx + roi_rx, cy + roi_ry);
+                ROIEllipseInternal[vch].cx = cx;
+                ROIEllipseInternal[vch].cy = cy;
+            }
+
+            if (ROIEllipseInternal[vch].rx > 0 && ROIEllipseInternal[vch].ry > 0) {
+                // If ellipse is valid use its bounding rectangle
+                ROIEllipseInternal[vch].GetBoundingRect(ROIRectInternal[vch]);
+            }
+            else {
+                // If ellipse is invalid use user-provided rectangle
+                ROIEllipseInternal[vch].Assign(-1, -1, 0, 0, 0.0);
+            }
+
+            ROIRectInternal[vch].Trim(0, img->GetWidth(vch), 0, img->GetHeight(vch));
+        }
     }
 
     if (WarpingParallel) {
@@ -454,7 +509,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
         vch = procInfo->ID >> 1;
         if (vch < VideoChannels && Trackers[vch]) {
-            WarpImage(img, vch, procInfo->ID);
+            WarpImage(img, vch, Trackers[vch]->GetROIMargin(), procInfo->ID);
         }
     }
 
@@ -468,12 +523,29 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         if (!Trackers[vch]) continue;
 
         if (RigidBody) {
-            if (!WarpingParallel) WarpImage(img, vch);
+            if (!WarpingParallel) WarpImage(img, vch, Trackers[vch]->GetROIMargin());
+
+            Trackers[vch]->SetROI(WarpedROIRect[vch]);
+            Trackers[vch]->SetROI(WarpedROIEllipse[vch]);
 
             // Pre-processing data
             Trackers[vch]->PreProcessImage(*WarpedImage, vch);
         }
         else {
+            const int roi_margin = Trackers[vch]->GetROIMargin();
+
+            svlRect _rect(ROIRectInternal[vch]);
+            _rect.left   += roi_margin;
+            _rect.top    += roi_margin;
+            _rect.right  -= roi_margin;
+            _rect.bottom -= roi_margin;
+            Trackers[vch]->SetROI(_rect);
+
+            svlEllipse _ell(ROIEllipseInternal[vch]);
+            _ell.rx -= roi_margin;
+            _ell.ry -= roi_margin;
+            Trackers[vch]->SetROI(_ell);
+
             // Pre-processing data
             Trackers[vch]->PreProcessImage(*img, vch);
         }
@@ -520,8 +592,10 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 //            LinkChannelsVertically();
 
             for (i = 0; i < RigidBodyIterations; i ++) RigidBodyError[i] = ReconstructRigidBody();
+            // TO DO: fix channel '0'
+            BackprojectRigidBody(img->GetWidth(0), img->GetHeight(0));
+
             //ComputeHomography();
-            BackprojectRigidBody();
             //BackprojectHomography();
 
             for (vch = 0; vch < VideoChannels; vch ++) {
@@ -626,7 +700,7 @@ void svlFilterImageTracker::LinkChannelsVertically()
 int svlFilterImageTracker::ReconstructRigidBody()
 {
     const unsigned int targetcount = static_cast<unsigned int>(Targets.cols());
-    double dconf, sum_conf = 0.0, ax, ay, rx, ry, vx, vy, angle, cos_an, sin_an, scale;
+    double dconf, sum_conf = 0.0, ax, ay, vx, vy, angle, cos_an, sin_an, scale;
     double proto_ax, proto_ay, proto_vx, proto_vy, proto_dist;
     double avrg_scale, avrg_angle, avrg_conf;
     vctDynamicMatrixRef<int> proto_pos;
@@ -750,8 +824,6 @@ int svlFilterImageTracker::ReconstructRigidBody()
         proto_pos.SetRef(2, targetcount, InitialTargets.GetPositionPointer(vch));
         ax = T_ax[vch];
         ay = T_ay[vch];
-        rx = ROICenter[vch].X();
-        ry = ROICenter[vch].Y();
         proto_ax = T_proto_ax[vch];
         proto_ay = T_proto_ay[vch];
         target = Targets.Pointer(vch, 0);
@@ -780,13 +852,14 @@ int svlFilterImageTracker::ReconstructRigidBody()
     return (bp_error_sum / visible_sum);
 }
 
-void svlFilterImageTracker::BackprojectRigidBody()
+void svlFilterImageTracker::BackprojectRigidBody(int width, int height)
 {
     const unsigned int targetcount = static_cast<unsigned int>(Targets.cols());
     double ax, ay, rx, ry, vx, vy, proto_ax, proto_ay, sin_an, cos_an, scale;
     vctDynamicMatrixRef<int> proto_pos;
     svlTarget2D *target;
     unsigned int i, vch;
+    vct3x3 xform, xform2 = vct3x3::Eye();
 
 
     for (vch = 0; vch < VideoChannels; vch ++) {
@@ -807,13 +880,16 @@ void svlFilterImageTracker::BackprojectRigidBody()
         // Calculate rigid body transformation
         vx = T_ax[vch] - T_proto_ax[vch];
         vy = T_ay[vch] - T_proto_ay[vch];
-        RigidBodyTransform[vch] = vct3x3::Eye();
-        RigidBodyTransform[vch].Element(0, 0) = cos_an * scale;
-        RigidBodyTransform[vch].Element(0, 1) = -sin_an * scale;
-        RigidBodyTransform[vch].Element(1, 0) = sin_an * scale;
-        RigidBodyTransform[vch].Element(1, 1) = cos_an * scale;
-        RigidBodyTransform[vch].Element(0, 2) = ROICenter[vch].X() + scale * (vx * cos_an - vy * sin_an);
-        RigidBodyTransform[vch].Element(1, 2) = ROICenter[vch].Y() + scale * (vx * sin_an + vy * cos_an);
+        xform = vct3x3::Eye();
+        xform.Element(0, 0) = cos_an * scale;
+        xform.Element(0, 1) = -sin_an * scale;
+        xform.Element(1, 0) = sin_an * scale;
+        xform.Element(1, 1) = cos_an * scale;
+        xform.Element(0, 2) = ROICenter[vch].X() + scale * (vx * cos_an - vy * sin_an);
+        xform.Element(1, 2) = ROICenter[vch].Y() + scale * (vx * sin_an + vy * cos_an);
+        xform2.Element(0, 2) = static_cast<int>(width  / 2) - ROICenter[vch].X();
+        xform2.Element(1, 2) = static_cast<int>(height / 2) - ROICenter[vch].Y();
+        RigidBodyTransform[vch].ProductOf(xform, xform2);
 
         // Backproject transformed model onto output targets
         for (i = 0; i < targetcount; i ++) {
@@ -895,7 +971,7 @@ int svlFilterImageTracker::ComputeHomography()
         }
 
         std::cerr << "Video channel: " << vch << std::endl;
-        std::cout << "Homography: (" << j << ") " << Homography[vch] << std::endlls -l
+        std::cout << "Homography: (" << j << ") " << Homography[vch] << std::endl
                   << "Singular values: " << svdData.S() << std::endl
                   << "Eigen vectors:" << std::endl << svdData.Vt().TransposeRef() << std::endl << std::endl;
     }
@@ -940,22 +1016,22 @@ void svlFilterImageTracker::BackprojectHomography()
 */
 }
 
-void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoch, int threadid)
+void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoch, int roi_margin, int threadid)
 {
-    double c = cos(WarpedRigidBodyAngle[videoch]);
-    double s = sin(WarpedRigidBodyAngle[videoch]);
-    double sc = WarpedRigidBodyScale[videoch];
+    const double c = cos(WarpedRigidBodyAngle[videoch]);
+    const double s = sin(WarpedRigidBodyAngle[videoch]);
+    const double sc = WarpedRigidBodyScale[videoch];
 
     const int border = 50;
 
-    const int x1 = std::max(0, ROI[videoch].left - border);
-    const int y1 = std::max(0, ROI[videoch].top - border);
-    const int x2 = std::min(static_cast<int>(image->GetWidth(videoch) - 1), ROI[videoch].right + border);
-    const int y2 = y1;
-    const int x3 = x2;
-    const int y3 = std::min(static_cast<int>(image->GetHeight(videoch) - 1), ROI[videoch].bottom + border);
-    const int x4 = x1;
-    const int y4 = y3;
+    int x1 = std::max(0, ROIRectInternal[videoch].left - border);
+    int y1 = std::max(0, ROIRectInternal[videoch].top - border);
+    int x2 = std::min(static_cast<int>(image->GetWidth(videoch) - 1), ROIRectInternal[videoch].right + border);
+    int y2 = y1;
+    int x3 = x2;
+    int y3 = std::min(static_cast<int>(image->GetHeight(videoch) - 1), ROIRectInternal[videoch].bottom + border);
+    int x4 = x1;
+    int y4 = y3;
 
     const int cx = (x1 + x2 + x3 + x4) / 4;
     const int cy = (y1 + y2 + y3 + y4) / 4;
@@ -988,6 +1064,39 @@ void svlFilterImageTracker::WarpImage(svlSampleImage* image, unsigned int videoc
         svlQuad quad_in (x1,  y1,  x2,  y2,  x3,  y3,  x4,  y4);
         svlQuad quad_out(wx1, wy1, wx2, wy2, wx3, wy3, wx4, wy4);
         svlDraw::WarpQuad(image, videoch, quad_in, WarpedImage, videoch, quad_out, WarpInternals[videoch]);
+    }
+
+    // Warp ROIs
+    if (threadid < 0 || (threadid & 1) == 0) {
+
+        // Rect
+        x1 = std::max(0, ROIRectInternal[videoch].left + roi_margin);
+        y1 = std::max(0, ROIRectInternal[videoch].top) + roi_margin;
+        x2 = std::min(static_cast<int>(image->GetWidth(videoch) - 1), ROIRectInternal[videoch].right + 1 - roi_margin);
+        y2 = y1;
+        x3 = x2;
+        y3 = std::min(static_cast<int>(image->GetHeight(videoch) - 1), ROIRectInternal[videoch].bottom + 1 - roi_margin);
+        x4 = x1;
+        y4 = y3;
+
+        WarpedROIRect[videoch].x1 = static_cast<int>(sc * (c * (x1 - cx) - s * (y1 - cy))) + cx;
+        WarpedROIRect[videoch].y1 = static_cast<int>(sc * (s * (x1 - cx) + c * (y1 - cy))) + cy;
+        WarpedROIRect[videoch].x2 = static_cast<int>(sc * (c * (x2 - cx) - s * (y2 - cy))) + cx;
+        WarpedROIRect[videoch].y2 = static_cast<int>(sc * (s * (x2 - cx) + c * (y2 - cy))) + cy;
+        WarpedROIRect[videoch].x3 = static_cast<int>(sc * (c * (x3 - cx) - s * (y3 - cy))) + cx;
+        WarpedROIRect[videoch].y3 = static_cast<int>(sc * (s * (x3 - cx) + c * (y3 - cy))) + cy;
+        WarpedROIRect[videoch].x4 = static_cast<int>(sc * (c * (x4 - cx) - s * (y4 - cy))) + cx;
+        WarpedROIRect[videoch].y4 = static_cast<int>(sc * (s * (x4 - cx) + c * (y4 - cy))) + cy;
+
+        // Ellipse
+        x1 = ROIEllipseInternal[videoch].cx;
+        y1 = ROIEllipseInternal[videoch].cy;
+
+        WarpedROIEllipse[videoch].cx = static_cast<int>(sc * (c * (x1 - cx) - s * (y1 - cy))) + cx;
+        WarpedROIEllipse[videoch].cy = static_cast<int>(sc * (s * (x1 - cx) + c * (y1 - cy))) + cy;
+        WarpedROIEllipse[videoch].rx = static_cast<int>(sc * (ROIEllipseInternal[videoch].rx - roi_margin));
+        WarpedROIEllipse[videoch].ry = static_cast<int>(sc * (ROIEllipseInternal[videoch].ry - roi_margin));
+        WarpedROIEllipse[videoch].angle = ROIEllipseInternal[videoch].angle + WarpedRigidBodyAngle[videoch];
     }
 }
 
@@ -1154,7 +1263,9 @@ void svlFilterImageTracker::PushSamplesToAsyncOutputs(double timestamp)
 svlImageTracker::svlImageTracker() :
     Initialized(false),
     Width(0),
-    Height(0)
+    Height(0),
+    ROIRect(-1, -1, -1, -1, -1, -1, -1, -1),
+    ROIEllipse(-1, -1, 0, 0, 0.0)
 {
 }
 
@@ -1175,19 +1286,30 @@ int svlImageTracker::SetImageSize(unsigned int width, unsigned int height)
 
 void svlImageTracker::SetROI(const svlRect & rect)
 {
-    ROI = rect;
-    ROI.Normalize();
-    ROI.Trim(0, Width, 0, Height);
+    svlRect _rect(rect);
+    _rect.Normalize();
+    _rect.Trim(0, Width, 0, Height);
+    ROIRect.Assign(_rect);
 }
 
 void svlImageTracker::SetROI(int left, int top, int right, int bottom)
 {
-    ROI.left   = left;
-    ROI.top    = top;
-    ROI.right  = right;
-    ROI.bottom = bottom;
-    ROI.Normalize();
-    ROI.Trim(0, Width, 0, Height);
+    SetROI(svlRect(left, top, right, bottom));
+}
+
+void svlImageTracker::SetROI(const svlQuad & quad)
+{
+    ROIRect.Assign(quad);
+}
+
+void svlImageTracker::SetROI(const svlEllipse & ellipse)
+{
+    ROIEllipse = ellipse;
+}
+
+int svlImageTracker::GetROIMargin()
+{
+    return 0;
 }
 
 int svlImageTracker::SetTargetCount(unsigned int targetcount)

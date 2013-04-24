@@ -336,6 +336,9 @@ public:
     ApplyTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
             vctDynamicVectorBase<_vectorOwnerType2, value_type> & output) const
     {
+        if (output.size() < DIMENSION) {
+            cmnThrow("vctFrameBase::ApplyTo: size of output is too small");
+        } 
         // Implementation note: we think that computing output first to a local variable,
         // then copying the result to the dynamic vector output, is more efficient than
         // computing directly to the output vector, because there is less pointer
@@ -361,6 +364,9 @@ public:
     ApplyTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
             vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>  & output) const
     {
+        if (input.size() < DIMENSION) {
+            cmnThrow("vctFrameBase::ApplyTo: size of input is too small");
+        } 
         TranslationType result;
         // See implementation notes for rotation class
         RotationMember.ApplyTo(input, result);

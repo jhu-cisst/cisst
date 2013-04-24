@@ -32,14 +32,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
-#include <cisstMultiTask/mtsExport.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
+#include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
-   
-   Calculate the statistics (avg,std,min,max) on the vector of data that is added one sample at time. 
+
+   Calculate the statistics (avg,std,min,max) on the vector of data that is added one sample at time.
    AddSample checks if the statistics need to be recalculated after a given period elapses (eg 1sec).
    
  */
@@ -47,7 +47,7 @@ class CISST_EXPORT mtsIntervalStatistics : public mtsGenericObject {
 
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
- public:
+public:
     /*! TimeTicks are typedef'ed as unsigned long long (64 bits)*/
     typedef unsigned long long int TimeTicksType;
 
@@ -55,37 +55,41 @@ class CISST_EXPORT mtsIntervalStatistics : public mtsGenericObject {
     typedef mtsGenericObject BaseType;
 
     /*! The measured sample average. */
-    double GetAvg(void) {
-            return Avg;
+    inline double GetAvg(void) const {
+        return Avg;
     }
     /*! The measured minimum period of the task */
-    double GetStdDev(void) {
-            return StdDev;
+    inline double GetStdDev(void) const {
+        return StdDev;
     }
     
     /*! The measured maximum period of the task */
-    double GetMax(void) {
-            return Max;
+    inline double GetMax(void) const {
+        return Max;
     }
     
     /*! The measured task period (difference between current Tic and
         previous Tic). */
-    double GetMin(void) {
-            return Min;
+    inline double GetMin(void) const {
+        return Min;
     }
 
     /*! Time period between period statistics calculations */
-    inline void SetStatisticsUpdatePeriod(const double &time){
+    inline void SetStatisticsUpdatePeriod(const double & time) {
         StatisticsUpdatePeriod = time;
     }
+
     /*! Get time period between period statistics calculations */
-    inline double GetStatisticsUpdatePeriod(void){
+    inline double GetStatisticsUpdatePeriod(void) const {
         return StatisticsUpdatePeriod;
     }
 
-    void AddSample(const double &sample);
+    /*! Add one sample to compute statistics */
+    void AddSample(const double sample);
 
- private:
+    void AddComputeTime(const double computeTime);
+
+private:
     
     /*! Internal variables for statistics calculations*/
     double          Sum;   //name clash with original SumOfPeriods
@@ -103,19 +107,21 @@ class CISST_EXPORT mtsIntervalStatistics : public mtsGenericObject {
     double         StdDev;
     double         Max;
     double         Min;
-    double         StatisticsUpdatePeriod; 
-
+    double MinComputeTime;
+    double MaxComputeTime;
+    double         StatisticsUpdatePeriod;
 
 public:
 
     mtsIntervalStatistics();
-    ~mtsIntervalStatistics() { };
+    inline ~mtsIntervalStatistics() {};
+
     /*! Human readable text output */
-    virtual void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const;
 
     /*! Machine reabable text output */
-    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const;
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const;
 
     /*! Serialize the content of the object without any extra
       information, i.e. no class type nor format version.  The
@@ -126,6 +132,7 @@ public:
       information, i.e. no class type nor format version. */
     virtual void DeSerializeRaw(std::istream & inputStream);
 };
+
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatistics)
 
 #endif // _mtsIntervalStatistics_h
