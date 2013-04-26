@@ -55,6 +55,88 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 
+  mtsComponentConstructorNameAndArg<T> can be used to provide a name and additional argument
+  (of type T) to a component constructor that takes a single argument. Type T must be streamable,
+  and must be supported by cmnSerializeRaw and cmnDeSerializeRaw.
+*/
+
+template <class T>
+class mtsComponentConstructorNameAndArg : public mtsGenericObject
+{
+    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+public:
+    std::string Name;
+    T Arg;
+
+    mtsComponentConstructorNameAndArg() : mtsGenericObject() {}
+    mtsComponentConstructorNameAndArg(const std::string &name, const T &arg) : mtsGenericObject(),
+        Name(name), Arg(arg) {}
+    ~mtsComponentConstructorNameAndArg() {}
+
+    void SerializeRaw(std::ostream & outputStream) const {
+        mtsGenericObject::SerializeRaw(outputStream);
+        cmnSerializeRaw(outputStream, Name);
+        cmnSerializeRaw(outputStream, Arg);
+    }
+
+    void DeSerializeRaw(std::istream & inputStream) {
+        mtsGenericObject::DeSerializeRaw(inputStream);
+        cmnDeSerializeRaw(inputStream, Name);
+        cmnDeSerializeRaw(inputStream, Arg);
+    }
+
+    void ToStream(std::ostream & outputStream) const {
+        outputStream << "Name: " << Name
+                     << ", Arg: " << Arg << std::endl;
+    }
+
+    /*! Raw text output to stream */
+    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                             bool headerOnly = false, const std::string & headerPrefix = "") const {
+        mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+        if (headerOnly) {
+            outputStream << headerPrefix << "-name" << delimiter
+                         << headerPrefix << "-arg";
+        } else {
+            outputStream << this->Name << delimiter
+                         << this->Arg;
+        }
+    }
+
+    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
+      Returns true if successful. */
+    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') {
+        mtsGenericObject::FromStreamRaw(inputStream, delimiter);
+        if (inputStream.fail())
+            return false;
+        inputStream >> Name >> Arg;
+        if (inputStream.fail())
+            return false;
+        return (typeid(*this) == typeid(mtsComponentConstructorNameAndArg<T>));
+    }
+};
+
+typedef mtsComponentConstructorNameAndArg<int> mtsComponentConstructorNameAndInt;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorNameAndInt)
+
+typedef mtsComponentConstructorNameAndArg<unsigned int> mtsComponentConstructorNameAndUInt;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorNameAndUInt)
+
+typedef mtsComponentConstructorNameAndArg<long> mtsComponentConstructorNameAndLong;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorNameAndLong)
+
+typedef mtsComponentConstructorNameAndArg<unsigned long> mtsComponentConstructorNameAndULong;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorNameAndULong)
+
+typedef mtsComponentConstructorNameAndArg<double> mtsComponentConstructorNameAndDouble;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorNameAndDouble)
+
+typedef mtsComponentConstructorNameAndArg<std::string> mtsComponentConstructorNameAndString;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorNameAndString)
+
+/*!
+  \ingroup cisstMultiTask
+
   mtsComponent should be used to write wrappers around existing
   devices or resources.  This class allows to interact with existing
   devices as one would interact with a task (as in mtsTask and
@@ -92,7 +174,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsComponent(void);
 
     /*! Default copy constructor.  Protected to prevent copy as it is
-      not support yet.  It is not clear why one would use a copy
+      not supported yet.  It is not clear why one would use a copy
       constructor on a component anyway. */
     mtsComponent(const mtsComponent & other);
 
