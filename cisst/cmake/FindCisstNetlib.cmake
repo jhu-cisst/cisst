@@ -72,11 +72,13 @@ if (NOT CISSTNETLIB_DIR)
     # download files once prefix is set
     if (NOT CISSTNETLIB_DOWNLOAD_PREFIX STREQUAL "")
       # download tgz file
-      message ("Downloading: http://www.cisst.org/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz")
+      message ("Downloading: http://unittest.lcsr.jhu.edu/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz")
       file (DOWNLOAD
-            http://www.cisst.org/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz
+            http://unittest.lcsr.jhu.edu/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz
             "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz"
+            LOG log
             SHOWPROGRESS)
+      message ("Downloading cisstNetlib result:" ${log})
       # uncompress using cmake -E tar
       execute_process (COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz"
                        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
@@ -87,7 +89,7 @@ if (NOT CISSTNETLIB_DIR)
       # tell where to find the newly downloaded cisstNetlib
       set (CISSTNETLIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}" CACHE PATH "Path were cisstNetlib has been downloaded" FORCE)
       message ("You need to configure once more to use the newly downloaded cisstNetlib")
-   endif (NOT CISSTNETLIB_DOWNLOAD_PREFIX STREQUAL "")
+    endif (NOT CISSTNETLIB_DOWNLOAD_PREFIX STREQUAL "")
 
   endif (CISSTNETLIB_DOWNLOAD_NOW)
 endif (NOT CISSTNETLIB_DIR)
