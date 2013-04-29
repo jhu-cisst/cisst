@@ -76,6 +76,7 @@ public:
     /*! Constructor, initialize Timestamp to 0 and Valid flag to
       false. */
     inline mtsGenericObject(void):
+        cmnGenericObject(),
         TimestampMember(0.0),
         AutomaticTimestampMember(true),
         ValidMember(false)
@@ -90,7 +91,7 @@ public:
 
     /*! Copy constructor */
     inline mtsGenericObject(const mtsGenericObject & other):
-        cmnGenericObject(),
+        cmnGenericObject(other),
         TimestampMember(other.TimestampMember),
         AutomaticTimestampMember(other.AutomaticTimestampMember),
         ValidMember(other.ValidMember)

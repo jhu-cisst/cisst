@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -194,7 +194,7 @@ endif (LIBXML2_FOUND)
 
 
 # Support for JSON
-option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst .  If not, some examples and utilities won't be compiled" ON)
+option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst (requires git to download JSON).  If not, some examples and utilities won't be compiled" OFF)
 mark_as_advanced (CISST_HAS_JSON)
 
 if (CISST_HAS_JSON)
