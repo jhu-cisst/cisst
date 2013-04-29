@@ -30,6 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_HAS_JSON
 
-#endif CISST_HAS_JSON
+#endif // CISST_HAS_JSON
 
 #endif // _vctDataFunctionsDynamicMatrixJSON_h
