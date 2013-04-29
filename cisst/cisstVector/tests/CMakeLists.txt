@@ -123,6 +123,16 @@ set (HEADER_FILES
      vctPlot2DBaseTest.h
      )
 
+if (CISST_HAS_JSON)
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       vctDataFunctionsFixedSizeVectorJSONTest.h
+       vctDataFunctionsDynamicVectorJSONTest.h)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       vctDataFunctionsFixedSizeVectorJSONTest.cpp
+       vctDataFunctionsDynamicVectorJSONTest.cpp)
+endif (CISST_HAS_JSON)
 
 # Add executable for C++ tests
 add_executable (cisstVectorTests ${SOURCE_FILES} ${HEADER_FILES})

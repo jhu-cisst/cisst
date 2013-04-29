@@ -182,8 +182,6 @@ void cmnDataDeSerializeBinary(std::istream & inputStream,
     // retrieve size of string
     cmnDataDeSerializeBinary_size_t(inputStream, size, remoteFormat, localFormat);
     data.resize(size);
-    // this const_cast is a bit alarming, lets be verbose until we are sure this is safe
-    std::cerr << CMN_LOG_DETAILS << " - not really sure about the following const cast" << std::endl;
     inputStream.read(const_cast<char *>(data.data()), size);
     if (inputStream.fail()) {
         cmnThrow("cmnDataDeSerializeBinary(std::string): error occured with std::istream::read");

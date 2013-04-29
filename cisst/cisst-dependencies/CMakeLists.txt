@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -191,3 +191,42 @@ else (LIBXML2_FOUND)
   set (CISST_FOUND_LIBXML2_XML OFF CACHE BOOL "Is LibXml2 XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
   mark_as_advanced (CISST_FOUND_LIBXML2_XML)
 endif (LIBXML2_FOUND)
+
+
+# Support for JSON
+option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst (requires git to download JSON).  If not, some examples and utilities won't be compiled" OFF)
+mark_as_advanced (CISST_HAS_JSON)
+
+if (CISST_HAS_JSON)
+  include (ExternalProject)
+  set (cisstJSON_PREFIX cisstJSONExternal)
+  set (CISST_JSON_GIT "git://github.com/TubeTK/jsoncpp-cmake.git")
+  ExternalProject_Add (cisstJSONExternal
+                       PREFIX ${cisstJSON_PREFIX}
+                       GIT_REPOSITORY ${CISST_JSON_GIT}
+                       CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                        -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                        -DOPTION_BUILD_EXAMPLES:BOOL=OFF
+                                        -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstJSON
+                       INSTALL_DIR ${cisst_BINARY_DIR}/cisstJSON
+                       )
+
+  # Set all JSON variables based on install directory
+  set (JSON_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstJSON/include")
+  set (JSON_INCLUDE_DIR ${JSON_INCLUDE_DIR} PARENT_SCOPE)
+
+  set (JSON_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstJSON/lib")
+  set (JSON_LIBRARY_DIRS ${JSON_LIBRARY_DIRS} PARENT_SCOPE)
+  set (JSON_LIBRARIES json)
+  set (JSON_LIBRARIES ${JSON_LIBRARIES} PARENT_SCOPE)
+
+  set (JSON_FOUND ON)
+  set (JSON_FOUND ON PARENT_SCOPE)
+
+  cisst_set_package_settings (cisstCommon JSON INCLUDE_DIRECTORIES JSON_INCLUDE_DIR)
+  cisst_set_package_settings (cisstCommon JSON LIBRARIES           JSON_LIBRARIES)
+  cisst_set_package_settings (cisstCommon JSON LINK_DIRECTORIES    JSON_LIBRARY_DIRS)
+
+else (CISST_HAS_JSON)
+  cisst_unset_all_package_settings (cisstCommon JSON)
+endif (CISST_HAS_JSON)
