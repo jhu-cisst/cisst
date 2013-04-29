@@ -406,6 +406,14 @@ http://www.cisst.org/cisst/license.txt.
 
 // Wrap tasks and components
 %include "cisstMultiTask/mtsComponent.h"
+
+%template(mtsComponentConstructorNameAndInt) mtsComponentConstructorNameAndArg<int>;
+%template(mtsComponentConstructorNameAndUInt) mtsComponentConstructorNameAndArg<unsigned int>;
+%template(mtsComponentConstructorNameAndLong) mtsComponentConstructorNameAndArg<long>;
+%template(mtsComponentConstructorNameAndULong) mtsComponentConstructorNameAndArg<unsigned long>;
+%template(mtsComponentConstructorNameAndDouble) mtsComponentConstructorNameAndArg<double>;
+%template(mtsComponentConstructorNameAndString) mtsComponentConstructorNameAndArg<std::string>;
+
 %extend mtsComponent {
     %pythoncode {
         def UpdateFromC(self):

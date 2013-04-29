@@ -304,7 +304,14 @@ int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch
 
 #if CISST_SVL_HAS_OPENCV
 
-    if (interpolation) cvResize(src_img->IplImageRef(src_videoch), dst_img->IplImageRef(dst_videoch), CV_INTER_LINEAR);
+    if (interpolation) {
+        if (src_width > dst_width && src_height > dst_height) {
+            cvResize(src_img->IplImageRef(src_videoch), dst_img->IplImageRef(dst_videoch), CV_INTER_AREA);
+        }
+        else {
+            cvResize(src_img->IplImageRef(src_videoch), dst_img->IplImageRef(dst_videoch), CV_INTER_LINEAR);
+        }
+    }
     else cvResize(src_img->IplImageRef(src_videoch), dst_img->IplImageRef(dst_videoch), CV_INTER_NN);
 
 #else // CISST_SVL_HAS_OPENCV

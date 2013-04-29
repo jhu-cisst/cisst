@@ -125,12 +125,14 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
  protected:
     class OptionBase {
         friend class cmnCommandLineOptions;
+    protected:
 #if (CISST_COMPILER == CISST_DOTNET2003)
         // Workaround for Visual Studio.NET 2003
     public:
 #endif
         OptionBase(const std::string & shortOption, const std::string & longOption,
                    const std::string & description, RequiredType required);
+        virtual ~OptionBase() {};
         virtual bool SetValue(const char * value) = 0;
         std::string Short;
         std::string Long;
@@ -141,23 +143,28 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
 
     class CISST_EXPORT OptionNoValue: public OptionBase {
         friend class cmnCommandLineOptions;
+    protected:
         OptionNoValue(const std::string & shortOption, const std::string & longOption,
                       const std::string & description, RequiredType required = OPTIONAL);
+        virtual ~OptionNoValue() {};
         bool SetValue(const char * value);
     };
 
     class CISST_EXPORT OptionOneValueBase: public OptionBase {
         friend class cmnCommandLineOptions;
+    protected:
 #if (CISST_COMPILER == CISST_DOTNET2003)
         // Workaround for Visual Studio.NET 2003
     public:
 #endif
         OptionOneValueBase(const std::string & shortOption, const std::string & longOption,
                            const std::string & description, RequiredType required);
+        virtual ~OptionOneValueBase() {};
     };
     template <typename _elementType>
     class OptionOneValue: public OptionOneValueBase {
         friend class cmnCommandLineOptions;
+    protected:
         OptionOneValue(const std::string & shortOption, const std::string & longOption,
                        const std::string & description, RequiredType required,
                        _elementType * value):
@@ -177,16 +184,19 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
 
     class CISST_EXPORT OptionMultipleValuesBase: public OptionBase {
         friend class cmnCommandLineOptions;
+    protected:
 #if (CISST_COMPILER == CISST_DOTNET2003)
         // Workaround for Visual Studio.NET 2003
     public:
 #endif
         OptionMultipleValuesBase(const std::string & shortOption, const std::string & longOption,
                                  const std::string & description, RequiredType required);
+        virtual ~OptionMultipleValuesBase() {};
     };
     template <typename _elementType>
     class OptionMultipleValues: public OptionMultipleValuesBase {
         friend class cmnCommandLineOptions;
+    protected:
         OptionMultipleValues(const std::string & shortOption, const std::string & longOption,
                        const std::string & description, RequiredType required,
                        std::list<_elementType> * value):

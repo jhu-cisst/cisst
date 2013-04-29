@@ -235,11 +235,11 @@ int svlFilterOutput::Connect(svlFilterInput *input)
         LCM->AddComponent(input->Filter);
     }
 
-    osaSleep(0.25);
+//    osaSleep(0.25);
 
     if (LCM->Connect(input->Filter->GetName(), input->GetName(),
                      this->Filter->GetName(), this->GetName())) {
-        osaSleep(1.0);  // PK TEMP (remove when Connect is a blocking command)
+       osaSleep(0.5);  // PK TEMP (remove when Connect is a blocking command)
         return SVL_OK;
     }
 

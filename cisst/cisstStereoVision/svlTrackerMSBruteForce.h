@@ -56,6 +56,7 @@ public:
 
     int GetFeatureRef(unsigned int targetid, vctDynamicVectorRef<unsigned char> & feature);
 
+    virtual int GetROIMargin();
     virtual int SetTarget(unsigned int targetid, const svlTarget2D & target);
     virtual int Initialize();
     virtual void ResetTargets();

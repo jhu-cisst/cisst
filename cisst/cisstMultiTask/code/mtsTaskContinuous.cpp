@@ -217,7 +217,9 @@ void mtsTaskContinuous::Start(void)
 {
     if (this->State == mtsComponentState::INITIALIZING) {
         WaitToStart(this->InitializationDelay);
-    } else if (this->State == mtsComponentState::READY) {
+    }
+
+    if (this->State == mtsComponentState::READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
         ChangeState(mtsComponentState::ACTIVE);
         if (CaptureThread) {

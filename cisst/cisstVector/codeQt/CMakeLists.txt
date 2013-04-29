@@ -18,7 +18,10 @@ project (cisstVectorQt)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 qt4_wrap_cpp (QT_WRAPPED_CPP
               ../vctPlot2DOpenGLQtWidget.h
+              ../vctQtWidgetDynamicVector.h
               ../vctQtWidgetDynamicMatrix.h
+              ../vctQtWidgetRotation.h
+              ../vctQtWidgetFrame.h
               ../vctQtWidgetFrame4x4.h
               )
 
@@ -37,10 +40,15 @@ cisst_add_library (
   SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp
                vctQtWidgetDynamicVector.cpp
                vctQtWidgetDynamicMatrix.cpp
+               vctQtWidgetRotation.cpp
+               vctQtWidgetFrame.cpp
                vctQtWidgetFrame4x4.cpp
-  HEADER_FILES vctPlot2DOpenGLQtWidget.h
+  HEADER_FILES vctQtForwardDeclarations.h
+               vctPlot2DOpenGLQtWidget.h
                vctQtWidgetDynamicVector.h
                vctQtWidgetDynamicMatrix.h
+               vctQtWidgetRotation.h
+               vctQtWidgetFrame.h
                vctQtWidgetFrame4x4.h
                vctExportQt.h
   ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})

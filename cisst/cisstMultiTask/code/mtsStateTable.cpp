@@ -188,9 +188,6 @@ void mtsStateTable::Advance(void) {
         AveragePeriod = SumOfPeriods / Ticks[IndexWriter];
     }
 
-    //Update Period Statistics
-    PeriodStats.AddSample(Period.Data);
-
     /* If for all cases, IndexReader is behind IndexWriter, we don't
     need critical sections. This is based on the assumption that
     there is only one Writer that has access to Advance method and
@@ -212,21 +209,6 @@ void mtsStateTable::Advance(void) {
             StateVectorElements[i]->SetTimestampIfAutomatic(Tic.Data);
             Write(i, *(StateVectorElements[i]));
         }
-    }
-    // Get the Toc value and write it to the state table.
-    if (TimeServer) {
-        Toc = TimeServer->GetRelativeTime(); // in seconds
-    }
-    Write(TocId, Toc);
-    // now increment the IndexWriter and set its Tick value
-    IndexWriter = newIndexWriter;
-    Ticks[IndexWriter] = Ticks[tmpIndex] + 1;
-    // move index reader to recently written data
-    IndexReader = tmpIndex;
-
-    // compute index delayed, ideally a valid index
-    if (IndexReader > Delay) {
-        IndexDelayed = IndexReader - Delay;
     }
 
     // data collection, test if we are currently collecting
@@ -289,6 +271,28 @@ void mtsStateTable::Advance(void) {
             }
         }
     }
+
+    // Get the Toc value and write it to the state table.
+    if (TimeServer) {
+        Toc = TimeServer->GetRelativeTime(); // in seconds
+    }
+
+    // Update Period Statistics
+    PeriodStats.AddSample(Period.Data);
+    PeriodStats.AddComputeTime(this->Toc - this->Tic);
+
+    Write(TocId, Toc);
+    // now increment the IndexWriter and set its Tick value
+    IndexWriter = newIndexWriter;
+    Ticks[IndexWriter] = Ticks[tmpIndex] + 1;
+    // move index reader to recently written data
+    IndexReader = tmpIndex;
+
+    // compute index delayed, ideally a valid index
+    if (IndexReader > Delay) {
+        IndexDelayed = IndexReader - Delay;
+    }
+
 
 }
 

@@ -24,26 +24,37 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
 
 mtsIntervalStatistics::mtsIntervalStatistics():
-mtsGenericObject(),
-Sum(0.0),
-SumOfSquares(0.0),
-NumberOfSamples(0),
-TempMax(0.0),
-TempMin(0.0),
-Avg(0.0),
-StdDev(0.0),
-Max(0.0),
-Min(0.0),
-StatisticsUpdatePeriod(1.0)
+    mtsGenericObject(),
+    Sum(0.0),
+    SumOfSquares(0.0),
+    NumberOfSamples(0),
+    TempMax(0.0),
+    TempMin(0.0),
+    Avg(0.0),
+    StdDev(0.0),
+    Max(0.0),
+    Min(0.0),
+    MinComputeTime(cmnTypeTraits<double>::MaxPositiveValue()),
+    MaxComputeTime(cmnTypeTraits<double>::MinPositiveValue()),
+    StatisticsUpdatePeriod(1.0)
 {
     // Get a pointer to the time server
     TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
 }
 
+
 void mtsIntervalStatistics::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "TimeStamp: " << TimestampMember <<" Avg: "<< Avg<<" StdDev: "<<StdDev<<" Max: " <<Max<<" Min: "<<Min<<" Period: "<<StatisticsUpdatePeriod;
+    outputStream << "TimeStamp: " << TimestampMember
+                 << " Avg: " << Avg
+                 << " StdDev: " << StdDev
+                 << " Max: " << Max
+                 << " Min: " << Min
+                 << " MinComputeTime: " << MinComputeTime
+                 << " MaxComputeTime: " << MaxComputeTime
+                 << " Period: " << StatisticsUpdatePeriod;
 }
+
 
 void mtsIntervalStatistics::ToStreamRaw(std::ostream & outputStream, const char delimiter,
                                         bool headerOnly, const std::string & headerPrefix) const
@@ -52,18 +63,22 @@ void mtsIntervalStatistics::ToStreamRaw(std::ostream & outputStream, const char 
     outputStream << delimiter;
     if (headerOnly) {
         outputStream << headerPrefix << "-TimeStamp" << delimiter
-            << headerPrefix << "-Avg" << delimiter
-            << headerPrefix << "-StdDev" << delimiter
-            << headerPrefix << "-Max" << delimiter
-            << headerPrefix << "-Min" << delimiter
-            << headerPrefix << "-Period";
+                     << headerPrefix << "-Avg" << delimiter
+                     << headerPrefix << "-StdDev" << delimiter
+                     << headerPrefix << "-Max" << delimiter
+                     << headerPrefix << "-Min" << delimiter
+                     << headerPrefix << "-MinComputeTime" << delimiter
+                     << headerPrefix << "-MaxComputeTime" << delimiter
+                     << headerPrefix << "-Period";
     } else {
         outputStream << this->TimestampMember << delimiter
-            << this->Avg << delimiter
-            << this->StdDev << delimiter
-            << this->Max << delimiter
-            << this->Min << delimiter
-            << this->StatisticsUpdatePeriod;
+                     << this->Avg << delimiter
+                     << this->StdDev << delimiter
+                     << this->Max << delimiter
+                     << this->Min << delimiter
+                     << this->MinComputeTime << delimiter
+                     << this->MaxComputeTime << delimiter
+                     << this->StatisticsUpdatePeriod;
     }
 }
 
@@ -81,9 +96,9 @@ void mtsIntervalStatistics::SerializeRaw(std::ostream & outputStream) const
     cmnSerializeRaw(outputStream, NumberOfSamples);
     cmnSerializeRaw(outputStream, TempMax);
     cmnSerializeRaw(outputStream, TempMin);
-
+    cmnSerializeRaw(outputStream, MinComputeTime);
+    cmnSerializeRaw(outputStream, MaxComputeTime);
 }
-
 
 void mtsIntervalStatistics::DeSerializeRaw(std::istream & inputStream)
 {
@@ -98,11 +113,13 @@ void mtsIntervalStatistics::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, NumberOfSamples);
     cmnDeSerializeRaw(inputStream, TempMax);
     cmnDeSerializeRaw(inputStream, TempMin);
+    cmnDeSerializeRaw(inputStream, MinComputeTime);
+    cmnDeSerializeRaw(inputStream, MaxComputeTime);
     //since we might be on a different computer the timing should be different
     LastUpdateTime = TimeServer->GetRelativeTime();
 }
 
-void mtsIntervalStatistics::AddSample(const double &sample) {
+void mtsIntervalStatistics::AddSample(const double sample) {
 
     //check for max
     if (TempMax < sample){
@@ -114,11 +131,11 @@ void mtsIntervalStatistics::AddSample(const double &sample) {
     }
 
     Sum += sample; 
-    SumOfSquares += sample*sample;
+    SumOfSquares += sample * sample;
     NumberOfSamples++;
     //Check to see if the statistics need to be to be updated
     //reset the counters and save the data
-    if (TimeServer->GetRelativeTime() > (LastUpdateTime + StatisticsUpdatePeriod) ) {
+    if (TimeServer->GetRelativeTime() > (LastUpdateTime + StatisticsUpdatePeriod)) {
         //save the max/min
         Min = TempMin;
         Max = TempMax;
@@ -137,6 +154,20 @@ void mtsIntervalStatistics::AddSample(const double &sample) {
         TempMax = sample;
         TempMin = sample;
         LastUpdateTime = TimeServer->GetRelativeTime();
-    }
 
+        MaxComputeTime = cmnTypeTraits<double>::MinPositiveValue();
+        MinComputeTime = cmnTypeTraits<double>::MaxPositiveValue();
+    }
+}
+
+void mtsIntervalStatistics::AddComputeTime(const double computeTime)
+{
+    //check for max
+    if (MaxComputeTime < computeTime){
+        MaxComputeTime = computeTime;
+    }
+    //check for min.
+    if (MinComputeTime > computeTime){
+        MinComputeTime = computeTime;
+    }
 }

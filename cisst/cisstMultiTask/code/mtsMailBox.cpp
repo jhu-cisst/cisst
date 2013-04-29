@@ -191,6 +191,12 @@ bool mtsMailBox::IsEmpty(void) const
 }
 
 
+bool mtsMailBox::IsFull(void) const
+{
+    return CommandQueue.IsFull();
+}
+
+
 void mtsMailBox::SetPostCommandDequeuedCommand(mtsCommandVoid * command)
 {
     this->PostCommandDequeuedCommand = command;
