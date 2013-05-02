@@ -1,5 +1,22 @@
 #include <cisstNumerical/nmrLSMinNorm.h>
 
+// from cisstRobot/applications/cisstKinematicsIdentification
+extern "C" {
+  void dgelss_( CISSTNETLIB_INTEGER* M,
+		CISSTNETLIB_INTEGER* N,
+		CISSTNETLIB_INTEGER* NRHS,
+		CISSTNETLIB_DOUBLE* A,
+		CISSTNETLIB_INTEGER* LDA,
+		CISSTNETLIB_DOUBLE* B,
+		CISSTNETLIB_INTEGER* LDB,
+		CISSTNETLIB_DOUBLE* S,
+		CISSTNETLIB_DOUBLE* RCOND,
+		CISSTNETLIB_INTEGER* RANK,
+		CISSTNETLIB_DOUBLE* WORK,
+		CISSTNETLIB_INTEGER* LWORK,
+		CISSTNETLIB_INTEGER* INFO );
+}
+
 nmrLSMinNorm::Data::Data() : 
   M(0), 
   N(0), 
@@ -24,7 +41,7 @@ nmrLSMinNorm::Data::Data( const vctDynamicMatrix<double>& A,
   LDA( M ),
   LDB( (M<N) ? N : M ),
   
-  S( new doublereal[ (M<N) ? M : N ] ),
+  S( new CISSTNETLIB_DOUBLE[ (M<N) ? M : N ] ),
   RCOND( rcond ),
   
   WORK( NULL ),
@@ -35,14 +52,14 @@ nmrLSMinNorm::Data::Data( const vctDynamicMatrix<double>& A,
   CheckSystem( A, b );
   
   // this call determines the optimal work space size
-  doublereal work[1];  // size will be here
+  CISSTNETLIB_DOUBLE work[1];  // size will be here
   dgelss_( &M, &N, &NRHS,
 	   NULL, &LDA,
 	   NULL, &LDB,
 	   &S[0], &RCOND, &RANK,
 	   &work[0], &LWORK, &INFO );
   LWORK = work[0];              // copy the work space size
-  WORK = new doublereal[LWORK]; // allocate the work space
+  WORK = new CISSTNETLIB_DOUBLE[LWORK]; // allocate the work space
   
   // if system is underdetermined (M<N) we need a larger b matrix
   if( underdetermined ){ 
@@ -101,11 +118,11 @@ void nmrLSMinNorm::Data::CheckSystem( const vctDynamicMatrix<double>& A,
 
 vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& vctA,
 				       vctDynamicMatrix<double>& vctb,
-				       doublereal rcond ){
+				       CISSTNETLIB_DOUBLE rcond ){
 
   // data pointers
-  doublereal* A = vctA.Pointer();
-  doublereal* B = vctb.Pointer();
+  CISSTNETLIB_DOUBLE* A = vctA.Pointer();
+  CISSTNETLIB_DOUBLE* B = vctb.Pointer();
   
   // allocate data. Allocate a LDBxNRHS B matrix for underdetermined systems.
   nmrLSMinNorm::Data data( vctA, vctb, rcond );
@@ -149,11 +166,11 @@ vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& vctA,
 vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& vctA,
 				       vctDynamicMatrix<double>& vctb,
 				       nmrLSMinNorm::Data& data,
-				       doublereal rcond ){
+				       CISSTNETLIB_DOUBLE rcond ){
   
   // data pointers
-  doublereal* A = vctA.Pointer();
-  doublereal* B = vctb.Pointer();
+  CISSTNETLIB_DOUBLE* A = vctA.Pointer();
+  CISSTNETLIB_DOUBLE* B = vctb.Pointer();
   
   // check if we need to reallocate data
   if( data.M    != int(vctA.rows()) || 

@@ -10,22 +10,22 @@ public:
 
   public:
 
-    integer M;          // number of rows of matrix A
-    integer N;          // number of columns of matrix A
-    integer NRHS;       // number of right hand side vectors (columns of b)
+    CISSTNETLIB_INTEGER M;          // number of rows of matrix A
+    CISSTNETLIB_INTEGER N;          // number of columns of matrix A
+    CISSTNETLIB_INTEGER NRHS;       // number of right hand side vectors (columns of b)
 
-    integer LDA;        // lead dimension of matrix A (column stride)
-    integer LDB;        // lead dimension of matrix B (column stride)
+    CISSTNETLIB_INTEGER LDA;        // lead dimension of matrix A (column stride)
+    CISSTNETLIB_INTEGER LDB;        // lead dimension of matrix B (column stride)
                         // LDB = max( M, N ) 
 
-    doublereal* S;      // vector of singular values
-    doublereal RCOND;   // used to determine the effective rank of A
-    integer RANK;       // effective rank of A
+    CISSTNETLIB_DOUBLE* S;      // vector of singular values
+    CISSTNETLIB_DOUBLE RCOND;   // used to determine the effective rank of A
+    CISSTNETLIB_INTEGER RANK;       // effective rank of A
     
-    doublereal* WORK;   // work space
-    integer LWORK;      // size of work space (determined by dgless)
+    CISSTNETLIB_DOUBLE* WORK;   // work space
+    CISSTNETLIB_INTEGER LWORK;      // size of work space (determined by dgless)
 
-    integer INFO;       // error number
+    CISSTNETLIB_INTEGER INFO;       // error number
 
     // if A is underdetermined, we need to reallocate b to a LDBxNRHS matrix
     // and copy b into the upper MxNRHS block
@@ -66,7 +66,7 @@ public:
 */
 vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& A,
 				       vctDynamicMatrix<double>& b,
-				       doublereal r = -1.0 );
+				       CISSTNETLIB_DOUBLE r = -1.0 );
 
 //! Computes the minimum norm solution to a real linear least squares problem
 /**
@@ -87,5 +87,5 @@ vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& A,
 vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& A,
 				       vctDynamicMatrix<double>& b,
 				       nmrLSMinNorm::Data& data,
-				       doublereal r = -1.0 );
+				       CISSTNETLIB_DOUBLE r = -1.0 );
 
