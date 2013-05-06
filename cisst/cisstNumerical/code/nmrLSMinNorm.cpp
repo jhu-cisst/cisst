@@ -104,12 +104,12 @@ void nmrLSMinNorm::Data::CheckSystem( const vctDynamicMatrix<double>& A,
   }
 
   // check for fortran format
-  if( not( A.IsFortran() ) ){
+  if( !( A.IsFortran() ) ){
     std::string message( "nmrLSMinNorm: Invalid matrix A format." );
     cmnThrow( std::runtime_error( message ) );
   }
 
-  if( not( b.IsFortran() ) ){
+  if( !( b.IsFortran() ) ){
     std::string message( "nmrLSMinNorm: Invalid matrix b format." );
     cmnThrow( std::runtime_error( message ) );
   }
