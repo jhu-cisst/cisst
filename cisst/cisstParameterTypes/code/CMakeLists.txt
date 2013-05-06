@@ -19,7 +19,8 @@ cisst_data_generator (cisstParameterTypes
                       "${cisst_BINARY_DIR}/include" # where to save the file
                       "cisstParameterTypes/"        # sub directory for include
                       ../prmPositionCartesianGet.ccc
-                      ../prmPositionJointGet.ccc)
+                      ../prmPositionJointGet.ccc
+                      ../prmFixtureGainCartesianSet.ccc)
 
 # to compile cisst generated code, need to find header file
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
