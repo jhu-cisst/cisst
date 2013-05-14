@@ -60,6 +60,7 @@ set (HEADER_FILES
      prmExport.h
      prmForwardDeclarations.h
      prmMotionBase.h
+     prmJointType.h
 
      prmPositionJointSet.h
      prmVelocityJointGet.h
