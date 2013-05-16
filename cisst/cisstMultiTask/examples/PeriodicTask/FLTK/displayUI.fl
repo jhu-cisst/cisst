@@ -1,0 +1,141 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0
+header_name {.h} 
+code_name {.cxx}
+class displayUI {open : {public mtsTaskContinuous}
+} {
+  decl {bool WaitingForTrigger;} {}
+  decl {mtsFunctionRead GetData;} {}
+  decl {mtsFunctionWrite SetAmplitude;} {}
+  decl {mtsFunctionWrite SetTriggerThreshold;} {}
+  decl {mtsFunctionVoid ResetTrigger;} {}
+  decl {mtsFunctionRead GetTime;} {}
+  decl {vctPlot2DBase::Signal * DataSignal;} {}
+  decl {vctPlot2DBase::Signal * TriggerSignal;} {}
+  Function {displayUI(const std::string & name): mtsTaskContinuous(name)} {open
+  } {
+    Fl_Window DisplayWindow {
+      label DisplayWindow user_data_type {void*} selected
+      private xywh {757 504 579 329} type Double
+      code0 {\#include <cisstMultiTask/mtsTaskContinuous.h>}
+      code1 {\#include <cisstMultiTask/mtsInterfaceRequired.h>}
+      code2 {\#include <cisstVector/vctPlot2DOpenGLFLTK.h>} visible
+    } {
+      Fl_Value_Output Data {
+        label {Data:}
+        private xywh {400 25 170 25} box PLASTIC_THIN_DOWN_BOX align 5
+      }
+      Fl_Return_Button Close {
+        label Close
+        callback {DisplayWindow->hide();}
+        private xywh {495 295 75 25} box PLASTIC_THIN_UP_BOX
+      }
+      Fl_Dial Amplitude {
+        label {Amplitude:}
+        callback {this->SetAmplitude(Amplitude->value()); AmplitudeValue->value(Amplitude->value());}
+        private tooltip {Modify amplitude used by the data generator} xywh {400 79 80 81} box PLASTIC_ROUND_DOWN_BOX color 1 align 1
+      }
+      Fl_Dial Trigger {
+        label {Trigger:}
+        callback {this->SetTriggerThreshold(Trigger->value() * this->Amplitude->value());
+TriggerValue->value(Trigger->value());}
+        private tooltip {Modify amplitude used to trigger wakeup} xywh {490 79 80 81} box PLASTIC_ROUND_DOWN_BOX color 109 align 1 minimum -1
+      }
+      Fl_Check_Button WaitForTrigger {
+        label Wait
+        callback {this->WaitForTrigger->deactivate();
+this->WaitingForTrigger = true;
+this->ResetTrigger();}
+        private tooltip {Wait until the sine wave has reached the trigger value} xywh {490 197 80 18} down_box PLASTIC_DOWN_BOX
+      }
+      Fl_Value_Output Time {
+        label {Time:}
+        private xywh {400 258 170 25} box PLASTIC_DOWN_BOX align 5
+      }
+      Fl_Value_Output AmplitudeValue {
+        private tooltip {Current amplitude} xywh {400 165 80 25} box PLASTIC_DOWN_BOX labeltype NO_LABEL align 5
+      }
+      Fl_Value_Output TriggerValue {
+        private tooltip {Current trigger value} xywh {490 165 80 25} box PLASTIC_DOWN_BOX labeltype NO_LABEL align 5
+      }
+      Fl_Box Plot {
+        label {Graph Region}
+        private xywh {10 10 385 310} box PLASTIC_DOWN_BOX labelfont 1 labelsize 12
+        class vctPlot2DOpenGLFLTK
+      }
+    }
+    code {// create the cisstMultiTask interface with commands and events
+mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("DataGenerator");
+if (interfaceRequired) {
+    interfaceRequired->AddFunction("GetData", GetData);
+    interfaceRequired->AddFunction("SetAmplitude", SetAmplitude);
+    interfaceRequired->AddFunction("SetTriggerThreshold", SetTriggerThreshold);
+    interfaceRequired->AddFunction("ResetTrigger", ResetTrigger);
+    interfaceRequired->AddEventHandlerVoid(&displayUI::TriggerHandler, this, "TriggerEvent");
+}
+
+interfaceRequired = AddInterfaceRequired("TimeGenerator");
+if (interfaceRequired) {
+    interfaceRequired->AddFunction("GetTime", GetTime);
+}
+
+// configure FLTK widgets
+double maxValue = 5.0; double minValue = 0.5;
+double startValue =  1.0;
+this->WaitingForTrigger = false;
+this->Amplitude->bounds(minValue, maxValue);
+this->Amplitude->value(startValue);
+this->AmplitudeValue->value(startValue);
+this->Trigger->bounds(-0.9, 0.9);
+this->Trigger->value(0.0);
+this->TriggerValue->value(0.0);
+// plotting
+this->DataSignal = this->Plot->AddSignal("Data");
+this->DataSignal->SetColor(vct3(1.0, 0.9, 0.9));
+this->TriggerSignal = this->Plot->AddSignal("Trigger");
+this->TriggerSignal->SetColor(vct3(0.0, 1.0, 0.0));
+this->Plot->SetContinuousFitY(false);
+this->Plot->FitY(-5.0, 5.0); // set Y range} {}
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {this->DisplayWindow->show();
+this->Plot->show();} {}
+  }
+  Function {Startup(void)} {open return_type void
+  } {
+    code {show(0, 0);} {}
+  }
+  Function {Cleanup(void)} {return_type void
+  } {
+    code {} {}
+  }
+  Function {Run(void)} {open return_type void
+  } {
+    code {// process queued events
+ProcessQueuedEvents();
+
+// always get and display time
+mtsDouble time;
+this->GetTime(time);
+this->Time->value(time); // display in seconds
+
+// if not waiting for trigger
+if (!this->WaitingForTrigger) {
+    mtsDouble data;
+    this->GetData(data);
+    this->Data->value(data);
+    this->DataSignal->AppendPoint(vctDouble2(data.Timestamp(),
+                                             data.Data));
+    this->TriggerSignal->AppendPoint(vctDouble2(data.Timestamp(),
+                                                this->Trigger->value() * this->Amplitude->value()));
+    this->Plot->redraw();
+}} {}
+  }
+  Function {TriggerHandler(void)} {open private return_type void
+  } {
+    code {this->WaitForTrigger->value(0);
+this->WaitForTrigger->activate();
+this->WaitingForTrigger = false;} {}
+  }
+} 

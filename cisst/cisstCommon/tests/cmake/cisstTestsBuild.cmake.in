@@ -1,0 +1,23 @@
+#
+# $Id$
+#
+# Cmake configuration file for the CISST library test packages
+#
+# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+# Reserved.
+#
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
+
+# Link the main test module
+set (cisstTests_MAIN_LIB cisstTestsDriver)
+
+set (CPPUNIT_INCLUDE_DIR @CPPUNIT_INCLUDE_DIR@)
+
+link_directories (@LIBRARY_OUTPUT_PATH@)
+link_libraries (@CPPUNIT_LIBRARY@ ${cisstTests_MAIN_LIB})

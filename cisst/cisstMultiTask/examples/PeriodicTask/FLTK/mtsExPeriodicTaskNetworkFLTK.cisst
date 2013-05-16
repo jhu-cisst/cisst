@@ -1,0 +1,35 @@
+# Create and run the mtsExPeriodicTaskFLTK example in network configuration
+# using cisstComponentManager.
+# From command line:  cisstComponentManager global GCM -e mtsExPeriodicTaskNetworkFLTK.cisst
+# From component manager:  execute mtsExPeriodicTaskNetworkFLTK.cisst
+
+# For Linux (gnome desktop)
+#system "gnome-terminal -x ./cisstComponentManager localhost ProcessServer"
+#system "gnome-terminal -x ./cisstComponentManager localhost ProcessClient"
+system "cisstComponentManager localhost ProcessServer"
+system "cisstComponentManager localhost ProcessClient"
+
+echo "Waiting for ProcessClient and ProcessServer"
+waitfor ProcessServer Main active
+waitfor ProcessClient Main active
+
+sleep 2
+
+load ProcessServer mtsExPeriodicTaskComponents
+load ProcessClient mtsExPeriodicTaskGuiFLTK
+
+sleep 2
+
+create ProcessServer sineTask       "Sine 0.005"
+create ProcessServer clockComponent Clock
+create ProcessClient displayTask    Display
+
+connect ProcessClient Display DataGenerator ProcessServer Sine MainInterface
+connect ProcessClient Display TimeGenerator ProcessServer Clock MainInterface
+connect ProcessClient Main    Dispatch      ProcessClient Display Dispatcher
+
+sleep 2
+
+start ProcessServer Sine
+start ProcessServer Clock
+start ProcessClient Display

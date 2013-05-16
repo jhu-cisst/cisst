@@ -1,0 +1,109 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0
+header_name {.h} 
+code_name {.cxx}
+class C1UI {open
+} {
+  Function {C1UI()} {open
+  } {
+    Fl_Window ClientWindow {
+      label Client open selected
+      xywh {265 157 356 510} type Double visible
+    } {
+      Fl_Return_Button Close {
+        label Close
+        callback {ClientWindow->hide();  Opened = false;}
+        xywh {235 465 105 30} box THIN_UP_BOX
+      }
+      Fl_Button VoidButton1 {
+        label Void1
+        callback {this->VoidRequested1 = true;}
+        xywh {215 20 120 30}
+      }
+      Fl_Value_Slider WriteValue1 {
+        xywh {15 60 190 30} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
+      }
+      Fl_Button WriteButton1 {
+        label Write1
+        callback {this->WriteRequested1 = true;}
+        xywh {215 60 120 30}
+      }
+      Fl_Button ReadButton1 {
+        label Read1
+        callback {this->ReadRequested1 = true;}
+        xywh {215 100 120 30}
+      }
+      Fl_Value_Output ReadValue1 {
+        xywh {15 101 191 28}
+      }
+      Fl_Button QualifiedReadButton1 {
+        label {Qualified Read1}
+        callback {this->QualifiedReadRequested1 = true;}
+        xywh {215 138 120 30}
+      }
+      Fl_Value_Output QualifiedReadValue1 {
+        xywh {15 138 191 28}
+      }
+      Fl_Value_Output EventValue1 {
+        label {Events1   }
+        xywh {215 176 120 28}
+      }
+
+      Fl_Button VoidButton2 {
+        label Void2
+        callback {this->VoidRequested2 = true;}
+        xywh {218 261 120 30}
+      }
+      Fl_Value_Slider WriteValue2 {
+        xywh {18 301 190 30} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
+      }
+      Fl_Button WriteButton2 {
+        label Write2
+        callback {this->WriteRequested2 = true;}
+        xywh {218 301 120 30}
+      }
+      Fl_Button ReadButton2 {
+        label Read2
+        callback {this->ReadRequested2 = true;}
+        xywh {218 341 120 30}
+      }
+      Fl_Value_Output ReadValue2 {
+        xywh {18 342 191 28}
+      }
+      Fl_Button QualifiedReadButton2 {
+        label {Qualified Read2}
+        callback {this->QualifiedReadRequested2 = true;}
+        xywh {218 379 120 30}
+      }
+      Fl_Value_Output QualifiedReadValue2 {
+        xywh {18 379 191 28}
+      }
+      Fl_Value_Output EventValue2 {
+        label {Events2   }
+        xywh {218 417 120 28}
+      }
+    }
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {ClientWindow->show();} {}
+  }
+  decl {bool VoidRequested1;} {public
+  }
+  decl {bool WriteRequested1;} {public
+  }
+  decl {bool ReadRequested1;} {public
+  }
+  decl {bool QualifiedReadRequested1;} {public
+  }
+  decl {bool VoidRequested2;} {public
+  }
+  decl {bool WriteRequested2;} {public
+  }
+  decl {bool ReadRequested2;} {public
+  }
+  decl {bool QualifiedReadRequested2;} {public
+  }
+  decl {bool Opened;} {public
+  }
+} 

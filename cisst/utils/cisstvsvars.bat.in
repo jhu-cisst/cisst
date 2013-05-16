@@ -1,0 +1,25 @@
+@rem $Id$
+
+@rem Author(s): Anton Deguet
+@rem Created on: 2006-05-02
+
+@rem (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights Reserved.
+
+@rem Always edit the source file: cisstvsvars.bat.in
+@rem Do not edit the generated file: cisstvsvars.bat
+
+@rem --- begin cisst license - do not edit ---
+@rem 
+@rem This software is provided "as is" under an open source license, with
+@rem no warranty.  The complete license can be found in license.txt and
+@rem http://www.cisst.org/cisst/license.txt.
+@rem 
+@rem --- end cisst license ---
+
+@if exist "${VCVARSALL_BAT}" (
+  @echo Calling vcvarsall.bat ${VCVARSALL_CONFIG}
+  @call "${VCVARSALL_BAT}" ${VCVARSALL_CONFIG}
+) else (
+  @echo vsvarsall.bat not found - trying vsvars32.bat
+  @if exist "${VSVARS32_BAT}" call "${VSVARS32_BAT}"
+)

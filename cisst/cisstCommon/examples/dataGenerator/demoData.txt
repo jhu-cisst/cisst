@@ -1,0 +1,128 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+// You can use C++ stype single line comments
+// You can't use C style comments using /* */, sorry.
+
+// Inline code that will be placed in the generated header file
+inline-header {
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
+#include <vector>
+
+// You can place external typedef at the global scope but
+// this is not best practice ...
+typedef std::vector<int> MyVectorType;
+}
+
+// 'class' is used to declare a new type.  You can have multiple classes
+// declared in a single data file.  This is not C++, you don't want a ; at the end
+// of the class scope, so just use "}' to close any scope.
+class {
+    name demoData; // required
+
+    // 'base-class' is optional, you can use as many base classes as you want
+    // for multiple inheritance.  The inheritance order is based on the order of
+    // 'base-class' in this file.
+    base-class {
+        type cmnGenericObject; // C/C++ type
+        visibility public; // Default, can also use 'protected', 'private'
+        is-data false; // This is used to indicate if the base class is a cisst data type.
+        // If the base class is a cisst data type, the code generator will assume that all
+        // cisst data functions (serialize, de-serialize, ...) are available for this type.
+    }
+
+    // Just another base type to illustrate multiple inheritance.
+    base-class {
+        type MyVectorType;
+        visibility private; //default, can also use protected, private
+        is-data false;
+    }
+
+    // 'typedef' uses the last token on the line as type name, anything in the middle defined the type
+    // The equivalent typedef will be defined in the class scope
+    typedef {
+        name VectorType;
+        type vctFixedSizeVector<double, 2>;
+    }
+
+    // 'member' allows to define a data type
+    member {
+        name StartPoint;
+        // 'type' is required, you can even use a previously defined typedef
+        type demoData::VectorType;
+        // 'description' is pptional but strongly recommended.  This can easly break the cisst
+        // data generator is you use a ; in your description.  It must fit on a single line too.
+        description Segment start point;
+        // 'accessors'
+        accessors references; // Options are none, 'references', 'set-get', 'all' - default is "all"
+        // 'references' will create two methods (replace "<type>" and "<name>" by user provided values):
+        //   - const <type> & <name>(void) const
+        //   - <type> & <name>(void)
+        // 'set-get' will create two methods:
+        //   - void Set<name>(const <type> & newValue)
+        //   - void Get<name>(<type> & placeHolder) const
+
+        // By default all members are protected, can also use 'public' or 'private'
+        visibility public;
+    }
+
+    // Illustrating more data members
+    member {
+        name StopPoint;
+        type demoData::VectorType;
+        description Segment stop point;
+        accessors all;
+        // 'default' allows to set a default value in the generated constructor!
+        default VectorType(0, 0);
+    }
+
+    member {
+        name Length;
+        type double;
+        default 10.0;
+    }
+
+    member {
+        name Sine;
+        type double;
+        default 0;
+    }
+
+    member {
+        name Size;
+        type size_t;
+        // 'is-size_t' is quite important to handle size_t accross OSs since some OS
+        // sees this as a 32 bits int while others considers it to be 64 bits.
+        // The data generator doesn't make any assumption even if the 'type' is size_t.
+        is-size_t true;
+    }
+
+    // code that will be place in scope of the generated class declaration
+    inline-header {
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+
+// Code that will be placed in the generated header file but outside the class' scope
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(demoData);
+}
+
+// Code that will be placed in the generated source file (i.e. .cpp)
+inline-code {
+    CMN_IMPLEMENT_SERVICES(demoData);
+}
+
+// You can have multiple data types declared in a single data description file.
+class {
+    name demoData2; // required
+
+    member {
+        name Length;
+        type double;
+        description Some text should go here;
+        default 0;
+    }
+}

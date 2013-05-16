@@ -1,0 +1,64 @@
+@rem $Id$
+
+@rem Author(s): Anton Deguet
+@rem Created on: 2006-05-02
+
+@rem (C) Copyright 2006-2012 Johns Hopkins University (JHU), All
+@rem Rights Reserved.
+
+@rem Always edit the source file: cisstvars.bat.in
+@rem Do not edit the generated file: cisstvars.bat
+
+@rem --- begin cisst license - do not edit ---
+@rem
+@rem This software is provided "as is" under an open source license, with
+@rem no warranty.  The complete license can be found in license.txt and
+@rem http://www.cisst.org/cisst/license.txt.
+@rem
+@rem --- end cisst license ---
+
+
+@set CISST_SAW_DIR=${cisst_saw_BINARY_DIR_NATIVE}
+@set CMAKE_GENERATOR=${CMAKE_GENERATOR}
+@set CISST_BUILD_SAW=${CISST_BUILD_SAW}
+
+@if "%CMAKE_GENERATOR%" == "NMake Makefiles" goto nmake
+@if "%CMAKE_GENERATOR%" == "MinGW Makefiles" goto nmake
+@goto visual
+
+
+:visual
+@if (%1) == () goto usage
+@set CISST_INTDIR=%1
+@goto setpath
+
+
+:nmake
+@set CISST_INTDIR=
+@goto setpath
+
+
+:setpath
+@echo Setting environment variables for the cisst package
+
+@set CISST_PATH=%CISST_SAW_DIR%\cisst\bin\%CISST_INTDIR%;%CISST_SAW_DIR%\cisst\lib\%CISST_INTDIR%
+@set CISST_PYTHONPATH=%CISST_SAW_DIR%\cisst\lib;%CISST_SAW_DIR%\cisst\lib\%CISST_INTDIR%
+
+@if "%CISST_BUILD_SAW%" == "ON" set CISST_PATH=%CISST_SAW_DIR%\saw\bin\%CISST_INTDIR%;%CISST_SAW_DIR%\saw\lib\%CISST_INTDIR%;%CISST_PATH%
+@if "%CISST_BUILD_SAW%" == "ON" set CISST_PYTHONPATH=%CISST_SAW_DIR%\saw\lib\%CISST_INTDIR%;%CISST_SAW_DIR%\saw\lib;%CISST_PYTHONPATH%
+@if "%CISST_BUILD_SAW%" == "ON" set CISST_CLASSPATH=%CISST_SAW_DIR%\saw\lib\%CISST_INTDIR%;%CISST_SAW_DIR%\saw\lib;%CISST_CLASSPATH%
+
+@set PATH=%CISST_PATH%;%PATH%
+@set CISST_ROOT=%CISST_SAW_DIR%\cisst
+@set PYTHONPATH=%CISST_PYTHONPATH%;%PYTHONPATH%
+@set CLASSPATH=%CISST_CLASSPATH%;%CLASSPATH%
+
+@goto end
+
+
+:usage
+@echo "Usage: %0 ${CMAKE_CONFIGURATION_TYPES}"
+@goto end
+
+:end
+

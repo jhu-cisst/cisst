@@ -1,0 +1,58 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0
+header_name {.h} 
+code_name {.cxx}
+class serverUI {open
+} {
+  Function {serverUI()} {open
+  } {
+    Fl_Window ServerWindow {
+      label Server open selected
+      xywh {564 225 356 258} type Double visible
+    } {
+      Fl_Return_Button Close {
+        label Close
+        callback {ServerWindow->hide();  Opened = false;}
+        xywh {230 215 105 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+      }
+      Fl_Check_Button VoidValue {
+        label Void
+        tooltip {This value can be changed using the "Void" button on the client side.} xywh {130 9 35 26} down_box PLASTIC_THIN_DOWN_BOX align 4
+      }
+      Fl_Value_Output WriteValue {
+        label Write
+        tooltip {This value can be changed using the "Write" button on the client side.} xywh {130 41 195 31} box PLASTIC_DOWN_BOX
+      }
+      Fl_Button VoidEventButton {
+        label {Void Event}
+        callback {this->VoidEventRequested = true;}
+        tooltip {Send a "Void" event to the client.  This will reset the "Event" counter on the  client side.} xywh {15 125 115 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+      }
+      Fl_Button WriteEventButton {
+        label {Write Event}
+        callback {this->WriteEventRequested = true;}
+        tooltip {This sends an event to the client with the value in "Read".  The client will add this value to the event counter.} xywh {15 165 115 30} box PLASTIC_UP_BOX down_box PLASTIC_DOWN_BOX
+      }
+      Fl_Value_Slider ReadValue {
+        label Read
+        tooltip {This value will be read by the client.  It can be changed to verify that a new value is read on the client side} xywh {130 80 195 30} type {Horz Knob} box PLASTIC_DOWN_BOX align 4 maximum 100 step 1 value 50 textsize 14
+      }
+      Fl_Slider HeartBeat {
+        tooltip {Heart beat, shows that the task is still running} xywh {15 215 210 30} type Horizontal box PLASTIC_DOWN_BOX maximum 100 step 1 deactivate
+      }
+    }
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {ServerWindow->show();} {}
+    code {Opened = true;} {}
+    code {VoidEventRequested = false;} {}
+    code {WriteEventRequested = false;} {}
+  }
+  decl {bool VoidEventRequested;} {public
+  }
+  decl {bool WriteEventRequested;} {public
+  }
+  decl {bool Opened;} {public
+  }
+} 

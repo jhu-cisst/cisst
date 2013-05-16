@@ -1,0 +1,27 @@
+# Create and run the cisstMultiTaskPeriodicTaskQt example
+# using cisstComponentManager (without the data collection feature).
+# From command line:  cisstComponentManager -e mtsExPeriodicTaskQt.cisst
+# From component manager:  execute mtsExPeriodicTaskQt.cisst
+
+load cisstMultiTaskQt
+load mtsExPeriodicTaskComponents
+load mtsExPeriodicTaskGuiQt
+
+create mtsQtApplication "myQtApp myQtApp"
+create mainQtComponent mainQt
+
+create sineTask           "SIN0 0.005"
+connect mainQt DISP0 SIN0 MainInterface
+
+create sineTask           "SIN1 0.005"
+# Create sine task with delay; should add latency to constructor
+create sineTaskWithDelay  "SIN-DELAY1 0.005"
+connect SIN-DELAY1 MainInterface SIN1 MainInterface
+connect mainQt DISP1 SIN-DELAY1 MainInterface
+
+start SIN0
+start SIN1
+start SIN-DELAY1
+
+start mainQt
+start myQtApp
