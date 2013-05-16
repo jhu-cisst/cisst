@@ -845,7 +845,10 @@ macro (cisst_find_saw_component ...)
   endif ()
 
    # Search using user arguments with our hints
-  find_package(${ARGV} HINTS ${_cfc_INSTALLED_PATH} "${CISST_BINARY_DIR}/../saw/components/")
+  find_package (${ARGV}
+                HINTS ${_cfc_INSTALLED_PATH}
+                "${CISST_BINARY_DIR}/../saw/components/"
+                "${CISST_BINARY_DIR}/../saw/applications/")
 
   if (${ARGV0}_FOUND)
     if (${${ARGV0}_DIR} STREQUAL ${_cfc_INSTALLED_PATH})
