@@ -22,10 +22,28 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctQuaternionRotation3.h>
 #include <cisstVector/vctFixedSizeMatrix.h>
 
+//#include <cisstNumerical/nmrNetlib.h>
+
 #include <vector>
 #include <iostream>
 
 using namespace std;
+
+typedef long int integer;
+typedef unsigned long int uinteger;
+typedef char *address;
+typedef short int shortint;
+typedef float real;
+typedef double doublereal;
+typedef struct { real r, i; } complex;
+typedef struct { doublereal r, i; } doublecomplex;
+typedef long int logical;
+typedef short int shortlogical;
+typedef char logical1;
+typedef char integer1;
+typedef long int flag;
+typedef long int ftnlen;
+typedef long int ftnint;
 
 #ifdef SINGLE_PRECISION
 
@@ -55,36 +73,38 @@ using namespace std;
 
 extern "C" {
 
-  void potrf(char *uplo, int *n, double *a, int *lda, int *info);
-  void potri(char *uplo, int *n, double *a, int *lda, int *info);
-  void symm(char *side, char *uplo, int *m, int *n,
-            double *alpha, double *a, int *lda,
-            double* b, int *ldb, double *beta,
-            double *c, int *ldc);
+  void potrf(char *uplo, integer *n, doublereal *a, integer *lda, integer *info);
+  void potri(char *uplo, integer *n, doublereal *a, integer *lda, integer *info);
+
+  void symm(char *side, char *uplo, integer *m, integer *n,
+            doublereal *alpha, doublereal *a, integer *lda,
+            doublereal* b, integer *ldb, doublereal *beta,
+            doublereal *c, integer *ldc);
   void gemm(char *transa, char *transb, 
-	    int *m, int *n, int *k,
-            double *alpha, double *a, int *lda,
-                         double *b, int *ldb, 
-	    double *beta,  double *c, int *ldc);
-  void symv(char *uplo, int *n,
-            double *alpha, double *a, int *lda,
-            double *x, int *incx, double *beta,
-            double *y, int *incy);
-  void gemv(char *trans, int *m, int *n,
-            double *alpha, double *a, int *lda,
-            double *x, int *incx, double *beta,
-            double *y, int *incy);
-  void  gesv(int *N, int *NRHS,
-             double *A, int *LDA, int *IPIV,
-             double *B, int *LDB, int *INFO);
-  void gelss(int* M, int* N, int* NRHS,
-	     double* A, int* LDA, 
-	     double* B, int* LDB, 
-	     double* S, double* RCOND, int* RANK, 
-	     double* WORK, int* LWORK, int* INFO );
+	    integer *m, integer *n, integer *k,
+            doublereal *alpha, doublereal *a, integer *lda,
+	    doublereal *b, integer *ldb, 
+	    doublereal *beta,  doublereal *c, integer *ldc);
+  void symv(char *uplo, integer *n,
+            doublereal *alpha, doublereal *a, integer *lda,
+            doublereal *x, integer *incx, doublereal *beta,
+            doublereal *y, integer *incy);
+  void gemv(char *trans, integer *m, integer *n,
+            doublereal *alpha, doublereal *a, integer *lda,
+            doublereal *x, integer *incx, doublereal *beta,
+            doublereal *y, integer *incy);
 
-  double nrm2(int *N, double* X, int *INC);
+  void  gesv(integer *N, integer *NRHS,
+             doublereal *A, integer *LDA, integer *IPIV,
+             doublereal *B, integer *LDB, integer *INFO);
+  void gelss(integer* M, integer* N, integer* NRHS,
+	     doublereal* A, integer* LDA, 
+	     doublereal* B, integer* LDB, 
+	     doublereal* S, doublereal* RCOND, integer* RANK, 
+	     doublereal* WORK, integer* LWORK, integer* INFO );
 
+  doublereal nrm2(integer *N, doublereal* X, integer *INC);
+  
 }
 
 #define NR_END 1
@@ -273,26 +293,26 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   }
 
   // A is a pointer to the 6xN spatial Jacobian
-  int M = 6;                  // The number or rows of matrix A
-  int N = links.size();       // The number of columns of matrix A
-  int NRHS = 1;               // The number of right hand side vectors
+  integer M = 6;                  // The number or rows of matrix A
+  integer N = links.size();       // The number of columns of matrix A
+  integer NRHS = 1;               // The number of right hand side vectors
 
-  int LDA = M;                // The leading dimension of the array A.
+  integer LDA = M;                // The leading dimension of the array A.
 
   // B is a pointer the the N vector containing the solution
-  double* B = new double[N];  // The N-by-NRHS matrix of right hand side matrix
-  int LDB = N;                // The leading dimension of the array B.
+  doublereal* B = new doublereal[N];  // The N-by-NRHS matrix of right hand side matrix
+  integer LDB = N;                // The leading dimension of the array B.
 
   // These values are used for the SVD computation
-  int INFO;                   // The info code
-  int INC = 1;                // The index increment 
+  integer INFO;                   // The info code
+  integer INC = 1;                // The index increment 
 
-  double ndq=1;               // norm of the iteration error
+  doublereal ndq=1;               // norm of the iteration error
   size_t i;                   // the iteration counter
   char TRANSN = 'N';          // "N"ormal
   char TRANST = 'T';          // "T"transpose
-  double ALPHA = 1.0;
-  double* dq = new double[links.size()];
+  doublereal ALPHA = 1.0;
+  doublereal* dq = new doublereal[links.size()];
 
   // loop until Niter are executed or the error is bellow the tolerance
   for( i=0; i<Niterations && tolerance<ndq; i++ ){
@@ -320,16 +340,16 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     vctFixedSizeVector<double,3> dr = 0.5*( (n1%n2) + (o1%o2) + (a1%a2) );
 
     // combine both errors in one R^6 vector
-    double e[6] = { dt[0], dt[1], dt[2], dr[0], dr[1], dr[2] };
+    doublereal e[6] = { dt[0], dt[1], dt[2], dr[0], dr[1], dr[2] };
 
     // 
-    for( int j=0; j<N; j++ )
+    for( integer j=0; j<N; j++ )
       { B[j] = 0.0; }
-    for( int j=0; j<6; j++ )
+    for( integer j=0; j<6; j++ )
       { B[j] = e[j]; }
 
     // weights
-    double I[6][6] = { { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
+    doublereal I[6][6] = { { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
 		       { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0 },
 		       { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 },
 		       { 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 },
@@ -347,7 +367,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 	  &(I[0][0]), &M );
 
     // solve B = I\B
-    int IPIV[6];
+    integer IPIV[6];
     LDB=6;
     gesv( &M, &NRHS, 
 	  &(I[0][0]), &LDA,
@@ -357,7 +377,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     // should check the pivots
 
     // dq = J'B
-    double GAMMA = 0.0;
+    doublereal GAMMA = 0.0;
     gemv( &TRANST, &M, &N, &ALPHA,
 	  &(Js[0][0]), &LDA,
 	  &(B[0]), &INC,
@@ -598,17 +618,17 @@ void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const{
 
   char TRANSA[] = "T";  // op(Ad): transpose of Ad coz it's row major
   char TRANSB[] = "N";  // op(Jn) 
-  int M = 6;            // specifies  the number  of rows  of op( Ad )
-  int N = links.size();// specifies the number  of columns of the matrix Jn
-  int K = 6;            // specifies  the number of columns of op( Ad )
-  double ALPHA = 1.0;     // C := alpha*op( A )*op( B ) + beta*C
-  double* A = &Ad[0][0];  // 
-  int LDA = 6;          // specifies the first dimension of A 
-  double* B = &Jn[0][0];  // 
-  int LDB = 6;          // specifies  the first dimension of B 
-  double BETA = 0.0;      // C := alpha*op( A )*op( B ) + beta*C
-  double* C = &Js[0][0];  // 
-  int LDC = 6;          // specifies the first dimension of C
+  integer M = 6;            // specifies  the number  of rows  of op( Ad )
+  integer N = links.size();// specifies the number  of columns of the matrix Jn
+  integer K = 6;            // specifies  the number of columns of op( Ad )
+  doublereal ALPHA = 1.0;     // C := alpha*op( A )*op( B ) + beta*C
+  doublereal* A = &Ad[0][0];  // 
+  integer LDA = 6;          // specifies the first dimension of A 
+  doublereal* B = &Jn[0][0];  // 
+  integer LDB = 6;          // specifies  the first dimension of B 
+  doublereal BETA = 0.0;      // C := alpha*op( A )*op( B ) + beta*C
+  doublereal* C = &Js[0][0];  // 
+  integer LDC = 6;          // specifies the first dimension of C
 
   // Js = Ad * Jn
   gemm(TRANSA, TRANSB,
@@ -813,17 +833,17 @@ void robManipulator::OSinertia( double Ac[6][6],
   char UPLO = 'L';                // lower triangular (upper triangular for CM)
   char TRANST = 'T';
   char TRANSN = 'N';
-  double ALPHA = 1.0;
-  double BETA = 0.0;                //
-  int NEQS = 6;                   // num rows of the jacobian
-  int NJOINTS = links.size();    // The order of matrix A
-  int INFO;
+  doublereal ALPHA = 1.0;
+  doublereal BETA = 0.0;                //
+  integer NEQS = 6;                   // num rows of the jacobian
+  integer NJOINTS = links.size();    // The order of matrix A
+  integer INFO;
                                   // The inertia matrix
-  double** A   = rmatrix(0, links.size()-1, 0, links.size()-1);
-  int LDA = links.size();        // The leading dimension of A
-  double** JAi = rmatrix(0, links.size()-1, 0, 5);
-  int LDJAi = 6;
-  int LDJ = 6;
+  doublereal** A   = rmatrix(0, links.size()-1, 0, links.size()-1);
+  integer LDA = links.size();        // The leading dimension of A
+  doublereal** JAi = rmatrix(0, links.size()-1, 0, 5);
+  integer LDJAi = 6;
+  integer LDJ = 6;
   
   for(size_t r=0; r<links.size(); r++)
     for(size_t c=0; c<links.size(); c++)
@@ -871,7 +891,7 @@ void robManipulator::OSinertia( double Ac[6][6],
   
   // J*A^-1*J'
   // C := alpha*op( A )*op( B ) + beta*C
-  int LDAc = 6;
+  integer LDAc = 6;
   gemm(&TRANSN, &TRANST, &NEQS, &NEQS, &NJOINTS,
        &ALPHA, &JAi[0][0], &LDJAi, 
        &Jn[0][0],  &LDJ,
@@ -892,19 +912,19 @@ void robManipulator::OSinertia( double Ac[6][6],
     std::cout<<"OSinertia::dpotri2: The matrix is singular.\n";
   */
 
-  double I[6][6];
-  int LDI = 6;
+  doublereal I[6][6];
+  integer LDI = 6;
   for( int r=0; r<6; r++ )
     for( int c=0; c<6; c++ )
       I[r][c] = 0.0;
   for( int r=0; r<6; r++ )
     I[r][r] = 1.0;
 
-  double S[6];                // The singular values of A in decreasing order
-  double RCOND = -1;          // Use machine precision to determine rank(A)
-  int RANK;                   // The effective rank of A
-  int LWORK = 128;            // The (safe) size of the workspace
-  double WORK[128];           // The workspace
+  doublereal S[6];                // The singular values of A in decreasing order
+  doublereal RCOND = -1;          // Use machine precision to determine rank(A)
+  integer RANK;                   // The effective rank of A
+  integer LWORK = 128;            // The (safe) size of the workspace
+  doublereal WORK[128];           // The workspace
   
   // compute the minimum norm solution
   gelss( &NEQS, &NEQS, &NEQS,
@@ -927,8 +947,8 @@ robManipulator::InverseDynamics(const vctDynamicVector<double>& q,
 				const vctFixedSizeVector<double,6>& vdwd )const{
 
   
-  double* JTAcF = new double[links.size()];
-  double* JTAch = new double[links.size()];
+  doublereal* JTAcF = new doublereal[links.size()];
+  doublereal* JTAch = new doublereal[links.size()];
   for(size_t i=0; i<links.size(); i++) JTAcF[i] = 0.0;
   for(size_t i=0; i<links.size(); i++) JTAch[i] = 0.0;
     
@@ -936,29 +956,29 @@ robManipulator::InverseDynamics(const vctDynamicVector<double>& q,
   if(0.0 < vdwd.Norm()){
 
     char UPLO = 'L';
-    int NEQS = 6;
-    int INC = 1;
+    integer NEQS = 6;
+    integer INC = 1;
     char TRANST = 'T';
-    int NJOINTS = links.size();
+    integer NJOINTS = links.size();
     
-    double ALPHA =  1.0;      //
-    double BETA  =  0.0;      // 
+    doublereal ALPHA =  1.0;      //
+    doublereal BETA  =  0.0;      // 
     
-    double Ac[6][6];          // OS inertia matrix
-    int LDAc = 6;             // 1st dimension of Ac
+    doublereal Ac[6][6];          // OS inertia matrix
+    integer LDAc = 6;             // 1st dimension of Ac
     OSinertia( Ac, q );       // compute OS inertia matrix
     
-    int LDJ = 6;              // 1st dimention of Jn
+    integer LDJ = 6;              // 1st dimention of Jn
     
     vctFixedSizeVector<double,6> h;
     h = BiasAcceleration( q, qd ); // h = Jdqd
 
-    double hv[6];            // make an array of h
+    doublereal hv[6];            // make an array of h
     for( int i=0; i<6; i++ ) { hv[i] = h[i]; }
     
     // Ac*h
     // y := alpha*A*x + beta*y,
-    double Ach[6];                                  // symmetric matrix*vector
+    doublereal Ach[6];                                  // symmetric matrix*vector
     symv( &UPLO, &NEQS,
 	  &ALPHA, 
 	  &Ac[0][0], &LDAc, 
@@ -976,10 +996,10 @@ robManipulator::InverseDynamics(const vctDynamicVector<double>& q,
 	  &JTAch[0], &INC );
     
     // Ac*F
-    double Fv[6];            // make an array of vdwd
+    doublereal Fv[6];            // make an array of vdwd
     for( int i=0; i<6; i++ ) { Fv[i] = vdwd[i]; }
 
-    double AcF[6];
+    doublereal AcF[6];
     symv( &UPLO, &NEQS,
 	  &ALPHA, 
 	  &Ac[0][0], &LDAc, 
@@ -1016,7 +1036,7 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
 
   vctDynamicVector<double> ccg = CCG(q, qd);
 
-  double* Inertterm  = new double[ links.size() ];
+  doublereal* Inertterm  = new doublereal[ links.size() ];
   for( size_t i=0; i<links.size(); i++ ) 
     Inertterm [i] = 0;
 
@@ -1024,17 +1044,17 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
   if( 0.0 < qdd.Norm() ){
 
     char LOW = 'L';
-    int N = links.size();;
-    int LDA = links.size();
-    int INC = 1;
-    double ALPHA = 1.0;
-    double BETA = 0.0;
+    integer N = links.size();;
+    integer LDA = links.size();
+    integer INC = 1;
+    doublereal ALPHA = 1.0;
+    doublereal BETA = 0.0;
 
-    double** A = rmatrix(0, links.size()-1, 0, links.size()-1);
+    doublereal** A = rmatrix(0, links.size()-1, 0, links.size()-1);
     JSinertia(A,q);
 
     // must copy to an array for symv
-    double* qddv = new double[ links.size() ];
+    doublereal* qddv = new doublereal[ links.size() ];
     for( size_t i=0; i<links.size(); i++ ) qddv[i] = qdd[i];
 
     symv(&LOW, &N,

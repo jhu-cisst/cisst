@@ -58,18 +58,28 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking)
                           << this->Name << "\"" << std::endl;
         return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
     }
+    // check if all queues have some space
+    if (BlockingFlagQueue.IsFull() || MailBox->IsFull()) {
+        CMN_LOG_RUN_WARNING << "Class mtsCommandQueuedVoid: Execute: Queue full for \""
+                            << this->Name << "\" ["
+                            << BlockingFlagQueue.IsFull() << "|"
+                            << MailBox->IsFull() << "]"
+                            << std::endl;
+        return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+    }
     // copy the blocking flag to the local storage.
     if (!BlockingFlagQueue.Put(blocking)) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: BlockingFlagQueue full for \""
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: BlockingFlagQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+        cmnThrow("mtsCommandQueuedVoid: Execute: BlockingFlagQueue.Put failed");
+        return mtsExecutionResult::UNDEFINED;
     }
     // finally try to queue to mailbox
     if (!MailBox->Write(this)) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: Mailbox full for \""
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: Mailbox.Write failed for \""
                           << this->Name << "\"" <<  std::endl;
-        BlockingFlagQueue.Get(); // pop blocking flag from local storage
-        return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
+        cmnThrow("mtsCommandQueuedVoid: Execute: MailBox.Write failed");
+        return mtsExecutionResult::UNDEFINED;
     }
     return mtsExecutionResult::COMMAND_QUEUED;
 }

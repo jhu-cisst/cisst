@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsMatrix.h>
 #include <cisstVector/vctFixedSizeMatrixBase.h>
-
+#include <cisstVector/vctDataFunctionsFixedSizeMatrixJSON.h>
 
 template <vct::size_type _rows, vct::size_type _cols, class _elementType,
           vct::stride_type _rowStrideDestination, vct::stride_type _colStrideDestination, class _dataPtrTypeDestination,
@@ -113,7 +113,7 @@ std::string cmnDataSerializeTextDescription(const vctFixedSizeConstMatrixBase<_r
     const vct::size_type myCols = data.cols();
     vct::size_type indexRow, indexCol;
     const char separator = (delimiter == ',') ? ':' : ',';
-        
+
     for (indexRow = 0; indexRow < myRows; ++indexRow) {
         for (indexCol = 0; indexCol < myCols; ++indexCol) {
             if (indexRow != 0 || indexCol != 0) {
@@ -258,5 +258,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
 {
     matrix.SerializeRaw(outputStream);
 }
+
+// ----------------------- end of older functions
 
 #endif // _vctDataFunctionsFixedSizeMatrix_h

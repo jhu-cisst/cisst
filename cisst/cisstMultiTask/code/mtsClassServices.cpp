@@ -37,6 +37,12 @@ CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorEvent, mtsCollectorBase)   // derives
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorState, mtsCollectorBase)   // derives from mtsTaskFromSignal
 
 #include <cisstMultiTask/mtsComponent.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndInt)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndUInt)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndLong)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndULong)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndDouble)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndString)
 CMN_IMPLEMENT_SERVICES(mtsComponent)
 
 #include <cisstMultiTask/mtsComponentAddLatency.h>

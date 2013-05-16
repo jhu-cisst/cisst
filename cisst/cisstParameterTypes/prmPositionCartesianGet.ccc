@@ -38,12 +38,13 @@ class {
     // 'member' is used to declare data members
     // - 'name' is required
     // - 'type' is required, can be any C/C++ type
-    // - 'is-data' is similar to 'is-type' for a base class, it tells the generator to use or not
+    // - 'is-data' is similar to 'is-data' for a base class, it tells the generator to use or not
     //   use the cisst data functions for that member.  The default is 'true'
     // - 'description' is anything you want but shouldn't have a ;
     member {
         name MovingFrame;
         type prmTransformationBasePtr;
+        default 0;
         is-data false;
         description Pointer to moving frame, unused;
     }
@@ -52,6 +53,7 @@ class {
     member {
         name ReferenceFrame;
         type prmTransformationBasePtr;
+        default 0;
         is-data false;
         description Pointer to reference frame, unused;
     }

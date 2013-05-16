@@ -187,11 +187,70 @@ void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetFormat(const char f
 }
 
 template <class _elementType>
+typename vctQtWidgetDynamicVectorWriteFloating<_elementType>::value_type
+vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMinimum(const size_t index) const {
+    if (Minimums.ValidIndex(index)) {
+        return Minimums.Element(index);
+    }
+    return Minimum;
+}
+
+template <class _elementType>
+typename vctQtWidgetDynamicVectorWriteFloating<_elementType>::value_type
+vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMaximum(const size_t index) const {
+    if (Maximums.ValidIndex(index)) {
+        return Maximums.Element(index);
+    }
+    return Maximum;
+}
+
+template <class _elementType>
 void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetRange(const value_type minimum,
                                                                    const value_type maximum)
 {
+    // set internal data members
     Minimum = minimum;
     Maximum = maximum;
+    Minimums.SetAll(minimum);
+    Maximums.SetAll(maximum);
+    // update widgets
+    UpdateWidgetRange();
+}
+
+template <class _elementType>
+void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetRange(const vctDynamicVector<value_type> & minimums,
+                                                                   const vctDynamicVector<value_type> & maximums)
+{
+    // set internal data members
+    Minimums.ForceAssign(minimums);
+    Maximums.ForceAssign(maximums);
+    // update widgets
+    UpdateWidgetRange();
+}
+
+template <class _elementType>
+void vctQtWidgetDynamicVectorWriteFloating<_elementType>::UpdateWidgetRange()
+{
+    // update widgets, if any
+    const size_t size = this->columnCount();
+    if (size == 0) {
+        return;
+    }
+    switch (DisplayMode) {
+    case TEXT_WIDGET:
+        break;
+    case SPINBOX_WIDGET:
+        QDoubleSpinBox * spinBox;
+        for (size_t index = 0; index < size; ++index) {
+            spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(0, index));
+            spinBox->setRange(GetMinimum(index), GetMaximum(index));
+        }
+        break;
+    case SLIDER_WIDGET:
+        break;
+    default:
+        break;
+    }
 }
 
 template <class _elementType>
@@ -253,7 +312,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const vctDyna
                 connect(slider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChangedSlot(int)));
                 this->setCellWidget(0, index, slider);
             }
-            slider->setValue((vector.at(index) - Minimum) / (Maximum - Minimum) * SLIDER_RESOLUTION);
+            slider->setValue((vector.at(index) - GetMinimum(index)) / (GetMaximum(index) - GetMinimum(index)) * SLIDER_RESOLUTION);
         }
         break;
     default:
@@ -267,6 +326,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const vctDyna
 template <class _elementType>
 bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValue(vctDynamicVector<value_type> & placeHolder) const
 {
+    size_t index;
     const int columns = this->columnCount();
     if (columns != static_cast<int>(placeHolder.size())) {
         return false;
@@ -290,8 +350,9 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValue(vctDynamicVec
     case SLIDER_WIDGET:
         QSlider * slider;
         for (int column = 0; column < columns; ++column) {
+            index = static_cast<size_t>(column);
             slider = dynamic_cast<QSlider*>(this->cellWidget(0, column));
-            placeHolder.at(column) = static_cast<double>(slider->value()) / SLIDER_RESOLUTION * (Maximum - Minimum) + Minimum;
+            placeHolder.at(column) = static_cast<double>(slider->value()) / SLIDER_RESOLUTION * (GetMaximum(index) - GetMinimum(index)) + GetMinimum(index);
         }
         break;
     default:

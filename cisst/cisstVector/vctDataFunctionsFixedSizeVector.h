@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsVector.h>
 #include <cisstVector/vctFixedSizeVectorBase.h>
-
+#include <cisstVector/vctDataFunctionsFixedSizeVectorJSON.h>
 
 template <vct::size_type _size, class _elementType,
           vct::stride_type _strideDestination, class _dataPtrTypeDestination,
@@ -224,5 +224,6 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
 {
     vector.SerializeRaw(outputStream);
 }
+// ----------------------- end of older functions
 
 #endif // _vctDataFunctionsFixedSizeVector_h

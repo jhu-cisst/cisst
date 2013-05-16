@@ -60,9 +60,23 @@ set (HEADER_FILES
 
 # tests that depends on external packages
 if (CISST_HAS_XML)
-  set (SOURCE_FILES ${SOURCE_FILES} cmnXMLPathTest.cpp)
-  set (HEADER_FILES ${HEADER_FILES} cmnXMLPathTest.h)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       cmnXMLPathTest.cpp)
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       cmnXMLPathTest.h)
 endif (CISST_HAS_XML)
+
+# JSON tests
+if (CISST_HAS_JSON)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       cmnDataFunctionsJSONTest.cpp)
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       cmnDataFunctionsJSONTest.h)
+endif (CISST_HAS_JSON)
 
 # Add executable for C++ tests
 add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES})

@@ -98,6 +98,7 @@ class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating: public vctQtWidgetDyna
     int Precision;
     char Format;
     value_type Minimum, Maximum, Step;
+    vctDynamicVector<value_type> Minimums, Maximums;
 public:
     vctQtWidgetDynamicVectorWriteFloating(const DisplayModeType displayMode = TEXT_WIDGET);
     virtual bool SetValue(const vctDynamicVector<value_type> & value, bool blockSignals = true);
@@ -105,7 +106,12 @@ public:
     void SetPrecision(const int precision);
     void SetFormat(const char format);
     void SetRange(const value_type minimum, const value_type maximum);
+    void SetRange(const vctDynamicVector<value_type> & minimums, const vctDynamicVector<value_type> & maximums);
     void SetStep(const value_type step);
+protected:
+    void UpdateWidgetRange(void);
+    value_type GetMinimum(const size_t index) const;
+    value_type GetMaximum(const size_t index) const;
 };
 
 template <class _elementType>
