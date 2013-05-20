@@ -89,19 +89,36 @@ public:
         bool            Running;
     } InternalThreadType;
 
-    /*! Named map of components being monitored
-    typedef cmnNamedMap<mtsComponent> MonitoringTargetsType;
-    MonitoringTargetsType * MonitoringTargets; */
-
+    /*! A mtsMonitorComponent can monitor multiple components simultaneously.
+        In this case, multiple instances of TargetComponentAccessor are created and
+        managed by the mtsMonitorComponent instance.
+        An instance of TargetComponentAccessor is instantiated per one target component
+        and maintains all the necessary internal accessors such as mtsFunctionRead that 
+        allows mtsMonitorComponent to fetch data from target components.  */
     class TargetComponentAccessor {
     public:
+        /*! Typedef for cisstMonitor container */
         typedef std::map<SF::Monitor::UIDType, SF::cisstMonitor *> MonitorTargetSetType;
+
+        /*! Typedef for function object container.  In case of custom targets
+            (Monitor::TARGET_CUSTOM), multiple function objects can be used and this
+            requires the management of multiple function objects. 
+            key: location ID in string */
+        typedef std::map<std::string, mtsFunctionRead *> MonitorFunctionSetType;
 
     protected:
         /*! Set of SF::cisstMonitor instances (each defines one monitoring target element)
             in the same component */
         // MJ: SF::cisstMonitor instances should be allocated and deallocated externally.
         MonitorTargetSetType MonitorTargetSet;
+
+        /*! Functions to read state variables from target component */
+        struct {
+            mtsFunctionRead        GetPeriod;        // for Monitor::TARGET_THREAD_PERIOD
+            mtsFunctionRead        GetExecTimeUser;  // for Monitor::TARGET_THREAD_DUTYCYCLE_USER
+            mtsFunctionRead        GetExecTimeTotal; // for Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL
+            MonitorFunctionSetType GetCustomData;    // for Monitor::TARGET_CUSTOM
+        } AccessFunctions;
 
     public:
         TargetComponentAccessor();
@@ -113,11 +130,6 @@ public:
 
         /*! Required interface to connect to the target component */
         mtsInterfaceRequired * InterfaceRequired;
-
-        /*! Functions to read state variables from target component */
-        mtsFunctionRead GetPeriod;   // for Monitor::TARGET_THREAD_PERIOD
-        mtsFunctionRead GetExecTimeUser;  // for Monitor::TARGET_THREAD_DUTYCYCLE_USER
-        mtsFunctionRead GetExecTimeTotal; // for Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL
 
         /*! Event receiver to receive events */
         mtsEventReceiverWrite FaultEventReceiver;
@@ -132,6 +144,12 @@ public:
 
         /*! Get new samples for all monitor targets if necessary */
         bool RefreshSamples(double currentTick, SF::Publisher * publisher);
+
+        /*! Add function object to this accessor */
+        bool AddFunction(SF::Monitor::TargetType type, const std::string & targetLocationID = "");
+
+        /*! Generate contents of this class in human readable format */
+        void ToStream(std::ostream & outputStream) const;
     };
 
 protected:
@@ -231,6 +249,12 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorComponent)
 
+inline std::ostream & operator << (std::ostream & outputStream, 
+                                   const mtsMonitorComponent::TargetComponentAccessor & accessor)
+{
+    accessor.ToStream(outputStream);
+    return outputStream;
+}
 
 #endif // _mtsMonitorComponent_h
 
