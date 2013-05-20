@@ -107,11 +107,11 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
         switch (targetType) {
         case SF::Monitor::TARGET_THREAD_PERIOD:
             // Get new period sample
-            if (!GetPeriod.IsValid()) {
+            if (!AccessFunctions.GetPeriod.IsValid()) {
                 CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetPeriod function" << std::endl;
             } else {
                 double period;
-                this->GetPeriod(period);
+                this->AccessFunctions.GetPeriod(period);
                 publisher->Publish(monitor->GetJsonForPublish(period, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
 #if MANUAL_ADVANCE
@@ -122,11 +122,11 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
 
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
             // Get new duty cycle (user) sample
-            if (!this->GetExecTimeUser.IsValid()) {
+            if (!this->AccessFunctions.GetExecTimeUser.IsValid()) {
                 CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeUser function" << std::endl;
             } else {
                 double execTimeUser;
-                this->GetExecTimeUser(execTimeUser);
+                this->AccessFunctions.GetExecTimeUser(execTimeUser);
                 publisher->Publish(monitor->GetJsonForPublish(execTimeUser, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
 #if MANUAL_ADVANCE
@@ -137,17 +137,22 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
 
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
             // Get new duty cycle (total) sample
-            if (!this->GetExecTimeTotal.IsValid()) {
+            if (!this->AccessFunctions.GetExecTimeTotal.IsValid()) {
                 CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeTotal function" << std::endl;
             } else {
                 double execTimeTotal;
-                this->GetExecTimeTotal(execTimeTotal);
+                this->AccessFunctions.GetExecTimeTotal(execTimeTotal);
                 publisher->Publish(monitor->GetJsonForPublish(execTimeTotal, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
 #if MANUAL_ADVANCE
                 advance = true;
 #endif
             }
+            break;
+
+        case SF::Monitor::TARGET_CUSTOM:
+            // MJTEMP: TODO
+            std::cout << "C";
             break;
 
             // [SFUPDATE]
@@ -160,6 +165,93 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
     return advance;
 #endif
     return true;
+}
+
+bool mtsMonitorComponent::TargetComponentAccessor::AddFunction(SF::Monitor::TargetType type,
+                                                               const std::string & targetLocationID)
+{
+    bool ret = false;
+
+    switch (type) {
+        case SF::Monitor::TARGET_THREAD_PERIOD:
+            ret = InterfaceRequired->AddFunction("GetPeriod", this->AccessFunctions.GetPeriod);
+            break;
+        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
+            ret = InterfaceRequired->AddFunction("GetExecTimeUser", this->AccessFunctions.GetExecTimeUser);
+            break;
+        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
+            ret = InterfaceRequired->AddFunction("GetExecTimeTotal", this->AccessFunctions.GetExecTimeTotal);
+            break;
+        case SF::Monitor::TARGET_FILTER_EVENT: // MJTEMP: what is this???
+            // NOP
+            break;
+        case SF::Monitor::TARGET_CUSTOM:
+            // Check if the monitoring target is already registered
+            if (AccessFunctions.GetCustomData.find(targetLocationID) != 
+                AccessFunctions.GetCustomData.end())
+            {
+                CMN_LOG_RUN_WARNING << "TargetComponentAccessor::AddFunction: Failed to add function: "
+                    << "already registered custom monitoring target: \"" << targetLocationID << "\"" << std::endl;
+                ret = false;
+            } else {
+                mtsFunctionRead * newFuncForCustomTarget = new mtsFunctionRead;
+                ret = InterfaceRequired->AddFunction(targetLocationID, *newFuncForCustomTarget);
+                if (ret) {
+                    AccessFunctions.GetCustomData[targetLocationID] = newFuncForCustomTarget;
+                    // MJTEMP
+                    std::cout << "-----------------------------------------\n";
+                    std::cout << *this << std::endl;
+                } else {
+                    delete newFuncForCustomTarget;
+                    CMN_LOG_RUN_WARNING << "TargetComponentAccessor::AddFunction: Failed to add function: "
+                        << "Failed to add custom monitoring target: \"" << targetLocationID << "\"" << std::endl;
+                }
+            }
+            break;
+        case SF::Monitor::TARGET_INVALID:
+            ret = false;
+            break;
+        default:
+            SFASSERT(false);
+    }
+
+    return ret;
+}
+
+void mtsMonitorComponent::TargetComponentAccessor::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "Target process  : \"" << this->ProcessName << "\"" << std::endl
+                 << "Target component: \"" << this->ComponentName << "\"" << std::endl 
+                 << "Monitor targets:" << std::endl;
+    // Monitor targets
+    MonitorTargetSetType::const_iterator it1 = MonitorTargetSet.begin();
+    int i = 0;
+    for (; it1 != MonitorTargetSet.end(); ++it1)
+        outputStream << "\t[" << ++i << "] " << *(it1->second) << std::endl;
+
+    // Access functions
+    outputStream << "Access functions:" << std::endl
+        /*
+                 << "\tGetPeriod: " << (GetPeriod.IsValid() ? "valid" : "invalid") << std::endl
+                 << "\tGetExecTimeUser: " << (GetExecTimeUser.IsValid() ? "valid" : "invalid") << std::endl
+                 << "\tGetExecTimeTotal: " << (GetExecTimeTotal.IsValid() ? "valid" : "invalid") << std::endl;
+                 */
+                 << "\tGetPeriod: " << AccessFunctions.GetPeriod << std::endl
+                 << "\tGetExecTimeUser: " << AccessFunctions.GetExecTimeUser << std::endl
+                 << "\tGetExecTimeTotal: " << AccessFunctions.GetExecTimeTotal << std::endl
+                 << "\tGetCustomData: " << std::endl;
+
+    MonitorFunctionSetType::const_iterator it2 = AccessFunctions.GetCustomData.begin();
+    i = 0;
+    for (; it2 != AccessFunctions.GetCustomData.end(); ++it2)
+        outputStream << "\t\t[" << ++i << "] " << it2->first << ": " << *(it2->second) << std::endl;
+
+    // Required interface
+    outputStream << "Required interface: " << std::endl;
+    if (!InterfaceRequired)
+        outputStream << "NULL" << std::endl;
+    else
+        outputStream << *InterfaceRequired << std::endl;
 }
 
 //-------------------------------------------------- 
@@ -386,7 +478,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
                     return false;
                 }
 
-                targetComponentAccessor->InterfaceRequired->AddFunction("GetPeriod", targetComponentAccessor->GetPeriod);
+                targetComponentAccessor->AddFunction(SF::Monitor::TARGET_THREAD_PERIOD);
 
                 // MJ TODO: this (i.e., definining filters and setting up FDD pipeline) should 
                 // be done via JSON.  For now, install filters and FDD pipelines by default with
@@ -405,7 +497,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
                     return false;
                 }
 
-                targetComponentAccessor->InterfaceRequired->AddFunction("GetExecTimeUser", targetComponentAccessor->GetExecTimeUser);
+                targetComponentAccessor->AddFunction(SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER);
 
                 InstallMonitorTarget(taskPeriodic, monitorTarget);
             }
@@ -420,7 +512,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
                     return false;
                 }
 
-                targetComponentAccessor->InterfaceRequired->AddFunction("GetExecTimeTotal", targetComponentAccessor->GetExecTimeTotal);
+                targetComponentAccessor->AddFunction(SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL);
 
                 InstallMonitorTarget(taskPeriodic, monitorTarget);
             }
@@ -437,6 +529,10 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
             // [SFUPDATE]
 
         case SF::Monitor::TARGET_CUSTOM:
+            {
+                targetComponentAccessor->AddFunction(SF::Monitor::TARGET_CUSTOM,
+                                                     monitorTarget->GetLocationID()->GetIDString());
+            }
             break;
 
         case SF::Monitor::TARGET_INVALID:
@@ -572,6 +668,11 @@ void mtsMonitorComponent::InstallMonitorTarget(mtsTask * task, SF::Monitor * mon
         case SF::Monitor::TARGET_FILTER_EVENT:
             // This should not be called: Output of filter doesn't need to be tracked.
             CMN_ASSERT(false);
+            break;
+
+
+        case SF::Monitor::TARGET_CUSTOM:
+            std::cout << "$$$$$$$$$$$$$ InstallMonitorTarget: TARGET_CUSTOM" << std::endl;
             break;
 
         // [SFUPDATE]
