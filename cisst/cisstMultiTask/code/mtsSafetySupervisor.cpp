@@ -23,7 +23,7 @@
 #include "dict.h"
 #include "publisher.h"
 #include "subscriber.h"
-#include "MongoDB.h"
+#include "db/MongoDB.h"
 #include "jsonSerializer.h"
 
 using namespace SF;
