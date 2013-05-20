@@ -436,6 +436,9 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 
             // [SFUPDATE]
 
+        case SF::Monitor::TARGET_CUSTOM:
+            break;
+
         case SF::Monitor::TARGET_INVALID:
         default:
             CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: invalid or unsupported monitor type: " << std::endl;

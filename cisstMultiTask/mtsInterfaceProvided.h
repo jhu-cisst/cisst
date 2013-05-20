@@ -762,7 +762,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateDelayed(const mtsState
 
     AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
     if (!stateAccessor) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadStateDelayed: invalid accessor for command " << commandName << std::endl;
         return 0;
     }
     // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
