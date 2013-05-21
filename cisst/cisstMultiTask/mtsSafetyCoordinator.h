@@ -36,49 +36,57 @@ class CISST_EXPORT mtsSafetyCoordinator: public mtsGenericObject, public SF::Coo
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    /*! Monitor components for fault detection and diagnosis.  For now, only 
-        one monitor is deployed per process but the number of the instance can be 
-        increased later depending on the run-time performance or overhead. */
+    //! Typedef for monitor components for fault detection and diagnosis.
+    /*! For now, only one monitor is deployed per process but the number of the instance 
+        can be increased later depending on the run-time performance or overhead.
+    */
     typedef std::vector<mtsMonitorComponent*> MonitorsType;
 
-    /*! Filters deployed in the same component */
+    //! Typedef for filters deployed in the same component
     typedef std::list<SF::FilterBase*> FiltersType;
-    /*! Filters deployed in the same process (grouped by component name)
-        Key: component name, Value: list of filters */
+
+    //! Typedef for filters deployed in the same process (grouped by component name)
+    /*! Key: component name, Value: list of filters 
+     */
     typedef std::map<std::string, FiltersType*> FilterSetType;
 
 protected:
-    /*! Monitor instances */
+    //! Monitor instances
     MonitorsType Monitors;
     
-    /*! Filter instances.  Grouped by the name of component to which the filter is deployed. */
+    //! Filter instances.  Grouped by the name of component to which the filter is deployed
     FilterSetType FilterSet;
 
-    /*! Parse JSON specification and return new monitoring target spec */
+    //! Parse JSON specification and return new monitoring target spec
     //bool ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget);
 
 public:
-    mtsSafetyCoordinator();
+    //! Constructor
+    mtsSafetyCoordinator(void);
+    //! Destructor
     ~mtsSafetyCoordinator();
 
     //-------------------------------------------------- 
     //  Monitoring
     //-------------------------------------------------- 
-    /*! Create monitor instance */
+    //! Create monitor instance
     bool CreateMonitor(void);
 
-    /*! Install monitoring target object (JSON spec could be used as argument) */
+    //! Install a single monitoring target object using monitor instance
     bool AddMonitor(SF::Monitor * monitor);
+    //! Install possibly multiiple monitoring target objects using JSON file
+    bool AddMonitor(const std::string & jsonFileName);
 
     //-------------------------------------------------- 
     //  Filtering
     //-------------------------------------------------- 
-    /*! Install filter either on the target component or on the monitor component */
+    //! Install filter either on the target component or on the monitor component
     bool AddFilter(SF::FilterBase * filter);
 
-    /*! Deploy all monitors and FDDs that are installed so far.
-        MJ: Right now, this method should be called user's main.cpp but could be moved
-        into either cisst or SF such that users don't need to directly call this method. */
+    //! Deploy all monitors and FDDs that are installed so far.
+    /*! MJ: Right now, this method should be called user's main.cpp but could be moved
+        into either cisst or SF such that users don't need to directly call this method.
+    */
     bool DeployMonitorsAndFDDs(void);
 
     //-------------------------------------------------- 
