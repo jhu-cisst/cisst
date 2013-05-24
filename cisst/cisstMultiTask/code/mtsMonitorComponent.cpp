@@ -29,10 +29,6 @@
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
 #include <cisstMultiTask/mtsFaultTypes.h>
 
-// For monitoring mechanism (and period example), this flag should be ON.
-// For passive filtering mechanism (and event example), this flag should be OFF.
-#define MANUAL_ADVANCE 0
-
 using namespace SF::Dict;
 
 CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
@@ -42,10 +38,13 @@ const std::string NameOfMonitorComponent = "SafetyMonitor";
 //-------------------------------------------------- 
 //  mtsMonitorComponent::TargetComponentAccessor
 //-------------------------------------------------- 
-mtsMonitorComponent::TargetComponentAccessor::TargetComponentAccessor()
-    : InterfaceRequired(0)
-{
-}
+mtsMonitorComponent::TargetComponentAccessor::TargetComponentAccessor(void)
+    : ManualAdvance(false), InterfaceRequired(0)
+{}
+        
+mtsMonitorComponent::TargetComponentAccessor::TargetComponentAccessor(bool manualAdvance)
+    : ManualAdvance(manualAdvance), InterfaceRequired(0)
+{}
 
 mtsMonitorComponent::TargetComponentAccessor::~TargetComponentAccessor()
 {
@@ -91,17 +90,19 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
     MonitorTargetSetType::iterator it = MonitorTargetSet.begin();
     const MonitorTargetSetType::iterator itEnd = MonitorTargetSet.end();
 
-#if MANUAL_ADVANCE
+    // used only for manual advance
     bool advance = false;
-#endif
+
     SF::cisstMonitor * monitor;
     for (; it != itEnd; ++it) {
         monitor = it->second;
 
         // Skip inactive monitor
-        if (!monitor->IsActive()) continue;
+        if (!monitor->IsActive())
+            continue;
         // Refresh sample only when needed
-        if (!monitor->IsSamplingNecessary(currentTick)) continue;
+        if (!monitor->IsSamplingNecessary(currentTick))
+            continue;
 
         SF::Monitor::TargetType targetType = monitor->GetTargetType();
         switch (targetType) {
@@ -114,9 +115,8 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 this->AccessFunctions.GetPeriod(period);
                 publisher->Publish(monitor->GetJsonForPublish(period, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
-#if MANUAL_ADVANCE
-                advance = true;
-#endif
+                if (ManualAdvance)
+                    advance = true;
             }
             break;
 
@@ -129,9 +129,8 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 this->AccessFunctions.GetExecTimeUser(execTimeUser);
                 publisher->Publish(monitor->GetJsonForPublish(execTimeUser, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
-#if MANUAL_ADVANCE
-                advance = true;
-#endif
+                if (ManualAdvance)
+                    advance = true;
             }
             break;
 
@@ -144,15 +143,14 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 this->AccessFunctions.GetExecTimeTotal(execTimeTotal);
                 publisher->Publish(monitor->GetJsonForPublish(execTimeTotal, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
-#if MANUAL_ADVANCE
-                advance = true;
-#endif
+                if (ManualAdvance)
+                    advance = true;
             }
             break;
 
         case SF::Monitor::TARGET_CUSTOM:
             // MJTEMP: TODO
-            std::cout << "C";
+            std::cout << "TARGET_CUSTOM";
             break;
 
             // [SFUPDATE]
@@ -161,10 +159,8 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: not supported monitoring type" << std::endl;
         }
     }
-#if MANUAL_ADVANCE
-    return advance;
-#endif
-    return true;
+
+    return (ManualAdvance ? advance : true);
 }
 
 bool mtsMonitorComponent::TargetComponentAccessor::AddFunction(SF::Monitor::TargetType type,
@@ -257,35 +253,51 @@ void mtsMonitorComponent::TargetComponentAccessor::ToStream(std::ostream & outpu
 //-------------------------------------------------- 
 //  mtsMonitorComponent
 //-------------------------------------------------- 
-mtsMonitorComponent::mtsMonitorComponent()
-    // MJ: Maximum monitoring time resolution is 5 msec (somewhat arbitrary but practically
-    // enough to cover most monitoring scenarios)
-    : mtsTaskPeriodic(NameOfMonitorComponent, 5.0 * cmn_ms, false, 5000),
-      Publisher(0), Subscriber(0), SubscriberCallback(0)
+// MJ: Default monitoring time period is set as 5 msec, which is somewhat arbitrary 
+// but practically short enough to cover most monitoring scenarios.
+const double DefaultMonitoringPeriod = 5.0 * cmn_ms;
+
+mtsMonitorComponent::mtsMonitorComponent(void)
+    : mtsTaskPeriodic(NameOfMonitorComponent, DefaultMonitoringPeriod, false, 5000),
+      ManualAdvance(false)
 {
-    Init();
+    Initialize();
 }
 
 mtsMonitorComponent::mtsMonitorComponent(double period)
-    // MJ: Maximum monitoring time resolution is 5 msec (somewhat arbitrary but practically
-    // enough to cover most monitoring scenarios)
     : mtsTaskPeriodic(NameOfMonitorComponent, period, false, 5000),
-      Publisher(0), Subscriber(0), SubscriberCallback(0)
+      ManualAdvance(false)
 {
-    Init();
+    Initialize();
 }
 
-void mtsMonitorComponent::Init(void)
+mtsMonitorComponent::mtsMonitorComponent(bool automaticAdvance)
+    : mtsTaskPeriodic(NameOfMonitorComponent, DefaultMonitoringPeriod, false, 5000),
+      ManualAdvance(!automaticAdvance)
 {
-    TargetComponentAccessors = new TargetComponentAccessorType(true);
+    Initialize();
+}
 
-#if MANUAL_ADVANCE
+mtsMonitorComponent::mtsMonitorComponent(double period, bool automaticAdvance)
+    : mtsTaskPeriodic(NameOfMonitorComponent, period, false, 5000),
+      ManualAdvance(!automaticAdvance)
+{
+    Initialize();
+}
+
+void mtsMonitorComponent::Initialize(void)
+{
+    Publisher = 0;
+    Subscriber = 0;
+    SubscriberCallback = 0;
+
+    TargetComponentAccessors = new TargetComponentAccessorType(ManualAdvance);
+
     // The monitoring state table doesn't advance automatically.  It advances only when needed 
     // to reduce run-time overhead because the advancement of the state table results in 
     // running all FDD pipelines.  The manual advancement is controlled by 
     // mtsMonitorComponent::RunMonitors(void).
-    this->StateTableMonitor.SetAutomaticAdvance(false);
-#endif
+    this->StateTableMonitor.SetAutomaticAdvance(!ManualAdvance);
 
     Publisher = new SF::Publisher(TopicNames::Monitor);
     Publisher->Startup();
@@ -421,16 +433,18 @@ mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::CreateTarget
 bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    SF::cisstEventLocation * locationID = 
-        dynamic_cast<SF::cisstEventLocation*>(monitorTarget->GetLocationID());
-    CMN_ASSERT(locationID);
+    SF::cisstEventLocation * locationID = monitorTarget->GetLocationID();
+    if (!locationID) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Null monitoring target location" << std::endl;
+        return false;
+    }
 
     // Validity check: process name
     const std::string thisProcessName = LCM->GetProcessName();
     const std::string processName = locationID->GetProcessName();
     if (thisProcessName.compare(processName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: different process name "
-            << "(expected: \"" << thisProcessName << "\", actual: \"" << processName << ")" << std::endl;
+            << "(expected: \"" << thisProcessName << "\", actual: \"" << processName << "\")" << std::endl;
         return false;
     }
 
@@ -470,39 +484,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
     const std::string targetTypeString = SF::Monitor::GetTargetTypeString(targetType);
     switch (targetType) {
         case SF::Monitor::TARGET_THREAD_PERIOD:
-            {
-                mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
-                if (!taskPeriodic) {
-                    CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: " << targetTypeString << " is only applicable to periodic task" << std::endl;
-                    if (newTargetComponent) delete targetComponentAccessor;
-                    return false;
-                }
-
-                targetComponentAccessor->AddFunction(SF::Monitor::TARGET_THREAD_PERIOD);
-
-                // MJ TODO: this (i.e., definining filters and setting up FDD pipeline) should 
-                // be done via JSON.  For now, install filters and FDD pipelines by default with
-                // hard-coded fixed parameters.
-                //if (!InstallFilters(targetComponentAccessor, taskPeriodic)) {
-                InstallMonitorTarget(taskPeriodic, monitorTarget);
-            }
-            break;
-
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
-            {
-                mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
-                if (!taskPeriodic) {
-                    CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: " << targetTypeString << " is only applicable to periodic task" << std::endl;
-                    if (newTargetComponent) delete targetComponentAccessor;
-                    return false;
-                }
-
-                targetComponentAccessor->AddFunction(SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER);
-
-                InstallMonitorTarget(taskPeriodic, monitorTarget);
-            }
-            break;
-
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
             {
                 mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
@@ -511,9 +493,12 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
                     if (newTargetComponent) delete targetComponentAccessor;
                     return false;
                 }
+                targetComponentAccessor->AddFunction(targetType);
 
-                targetComponentAccessor->AddFunction(SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL);
-
+                // MJ TODO: this (i.e., definining filters and setting up FDD pipeline) should 
+                // be done via JSON.  For now, install filters and FDD pipelines by default with
+                // hard-coded fixed parameters.
+                //if (!InstallFilters(targetComponentAccessor, taskPeriodic)) {
                 InstallMonitorTarget(taskPeriodic, monitorTarget);
             }
             break;
@@ -593,31 +578,23 @@ bool mtsMonitorComponent::InitializeAccessors(void)
 
 void mtsMonitorComponent::RunMonitors(void)
 {
-#if MANUAL_ADVANCE
-    const double currentTick = osaGetTime();
-#else
-    const double currentTick = this->GetTick();
-#endif
+    const double currentTick = (ManualAdvance ? osaGetTime() : this->GetTick());
 
     TargetComponentAccessorType::const_iterator it = TargetComponentAccessors->begin();
     const TargetComponentAccessorType::const_iterator itEnd = TargetComponentAccessors->end();
-#if MANUAL_ADVANCE
-    bool advance = false;
-#endif
-    for (; it != itEnd; ++it) {
-#if MANUAL_ADVANCE
-        advance |= it->second->RefreshSamples(currentTick, Publisher);
-#else
-        it->second->RefreshSamples(currentTick, Publisher);
-#endif
-    }
 
-#if MANUAL_ADVANCE
-    // Do filtering and run all FDD pipelines (MJ: this can be further optimized such that
-    // only updated samples are processed).
-    if (advance)
-        StateTableMonitor.Advance();
-#endif
+    if (ManualAdvance) {
+        bool advance = false;
+        for (; it != itEnd; ++it)
+            advance |= it->second->RefreshSamples(currentTick, Publisher);
+        // Do filtering and run all FDD pipelines (MJ: this can be further optimized such that
+        // only updated samples are processed).
+        if (advance)
+            StateTableMonitor.Advance();
+    } else {
+        for (; it != itEnd; ++it)
+            it->second->RefreshSamples(currentTick, Publisher);
+    }
 }
 
 void mtsMonitorComponent::PrintTargetComponents(void)

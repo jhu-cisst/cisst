@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2011-12-29
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -107,6 +107,9 @@ public:
         typedef std::map<std::string, mtsFunctionRead *> MonitorFunctionSetType;
 
     protected:
+        /*! Copy of mtsMonitorComponent::ManualAdvance */
+        bool ManualAdvance;
+
         /*! Set of SF::cisstMonitor instances (each defines one monitoring target element)
             in the same component */
         // MJ: SF::cisstMonitor instances should be allocated and deallocated externally.
@@ -121,7 +124,11 @@ public:
         } AccessFunctions;
 
     public:
-        TargetComponentAccessor();
+        /*! Default constructor (ManualAdvance is set as false) */
+        TargetComponentAccessor(void);
+        /*! Constructor with manual advance flag */
+        TargetComponentAccessor(bool manualAdvance);
+        /*! Destructor */
         ~TargetComponentAccessor();
 
         /*! Name of process and component which this instance manages */
@@ -153,12 +160,15 @@ public:
     };
 
 protected:
+    /*! Flag to determine state table's automatic advance */
+    bool ManualAdvance;
+     
     /*! List of TargetComponentAccessor structure */
     typedef cmnNamedMap<TargetComponentAccessor> TargetComponentAccessorType;
     TargetComponentAccessorType * TargetComponentAccessors;
 
     /*! Initialize monitor instance */
-    void Init(void);
+    void Initialize(void);
 
     /*! Fetch new values from each target component */
     void RunMonitors(void);
@@ -208,8 +218,19 @@ protected:
     void * RunSubscriber(unsigned int arg);
 
 public:
-    mtsMonitorComponent();
+    /*! Default constructor (default: 5 msec period with automatic state table advance) */
+    mtsMonitorComponent(void);
+    /*! Constructor with custom period and automatic state table advance */
     mtsMonitorComponent(double period);
+    /*! Constructor with custom state table advance option and 5 msec period
+ 
+        For monitoring mechanism (and period example), automaticAdvance should be OFF.
+        For passive filtering mechanism (and event example), automaticAdvance should be ON.
+    */
+    mtsMonitorComponent(bool automaticAdvance);
+    /*! Constructor with custom period and custom state table advance option */
+    mtsMonitorComponent(double period, bool automaticAdvance);
+    /*! Destructor */
     ~mtsMonitorComponent();
 
     /*! Pass monitoring target information (i.e., cisstMonitor instance) to the 

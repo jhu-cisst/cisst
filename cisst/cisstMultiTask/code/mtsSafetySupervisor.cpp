@@ -125,8 +125,8 @@ void mtsSafetySupervisor::Cleanup(void)
 
 void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 {
-    SF::JSONSerializer json;
-    if (!json.ParseJSON(message)) {
+    SF::JSONSerializer jsonSerializer;
+    if (!jsonSerializer.ParseJSON(message)) {
         CMN_LOG_RUN_ERROR << "Parse: invalid json message: " << std::endl << message << std::endl;
         return;
     }
@@ -136,14 +136,14 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
     std::cout << MongoDB::GetDBEntryFromMonitorTopic(json) << std::endl;
 #endif
 
-    switch (json.GetTopicType()) {
+    switch (jsonSerializer.GetTopicType()) {
         case SF::JSONSerializer::MONITOR:
             {
                 //SendMessageToCubeCollector(MongoDB::GetDBEntryFromMonitorTopic(json));
-#if 0 // MJ TEMP for debugging
+#if 1 // MJ TEMP for debugging
                 static int count = 0;
-                std::cout << "--------------------------------------- Monitor " << ++count << std::endl;
-                std::cout << MongoDB::GetDBEntryFromMonitorTopic(json) << std::endl;
+                std::cout << "--------- Monitor " << ++count << std::endl;
+                std::cout << SF::MongoDB::ConvertTopicMesssageToDBEntry(SF::JSONSerializer::MONITOR, jsonSerializer) << std::endl;
 #endif
             }
             break;
@@ -153,10 +153,10 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 #if 1 // MJ TEMP for debugging
                 static int count = 0;
                 std::cout << "--------------------------------------- Fault" << ++count << std::endl;
-                std::cout << "Fault type   : " << Fault::GetFaultTypeString(json.GetFaultType()) << std::endl;
-                std::cout << "Detector name: " << json.GetFaultDetectorName() << std::endl;
-                std::cout << "Timestamp    : " << std::cout.precision(10) << std::scientific << json.GetTimestamp() << std::endl;
-                std::cout << "Values       : " << json.GetFaultFields() << std::endl;
+                std::cout << "Fault type   : " << Fault::GetFaultTypeString(jsonSerializer.GetFaultType()) << std::endl;
+                std::cout << "Detector name: " << jsonSerializer.GetFaultDetectorName() << std::endl;
+                std::cout << "Timestamp    : " << std::cout.precision(10) << std::scientific << jsonSerializer.GetTimestamp() << std::endl;
+                std::cout << "Values       : " << jsonSerializer.GetFaultFields() << std::endl;
                 std::cout << message << std::endl;
 #endif
             }

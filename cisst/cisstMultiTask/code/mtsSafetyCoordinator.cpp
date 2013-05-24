@@ -31,7 +31,7 @@ using namespace SF::Dict::Json;
 
 CMN_IMPLEMENT_SERVICES(mtsSafetyCoordinator);
 
-mtsSafetyCoordinator::mtsSafetyCoordinator()
+mtsSafetyCoordinator::mtsSafetyCoordinator() : SF::Coordinator()
 {
 }
 
@@ -59,49 +59,31 @@ mtsSafetyCoordinator::~mtsSafetyCoordinator()
     }
 }
 
-bool mtsSafetyCoordinator::AddMonitor(SF::Monitor * baseMonitor)
+bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON, 
+                                               SF::cisstMonitor * targetInstance)
 {
-    if (!baseMonitor) {
-        CMN_LOG_CLASS_RUN_ERROR << "NULL cisstMonitor instance error" << std::endl;
+    if (!targetInstance) {
+        CMN_LOG_CLASS_RUN_ERROR << "Null cisstMonitorTargetInstance" << std::endl;
         return false;
     }
 
-    SF::cisstMonitor * monitor = dynamic_cast<SF::cisstMonitor*>(baseMonitor);
-    CMN_ASSERT(monitor);
-    SF::cisstEventLocation * locationID = dynamic_cast<SF::cisstEventLocation*>(monitor->GetLocationID());
-    CMN_ASSERT(locationID);
-
-    const std::string targetUID = monitor->GetUIDAsString();
-    const std::string monitorInJson = monitor->GetMonitorJSON();
-
-    // Check if same monitoring target is already registered
-    if (this->IsDuplicateUID(targetUID)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Target is already being monitored: " << targetUID << std::endl;
+    if (!targetInstance->GetLocationID()) {
+        CMN_LOG_CLASS_RUN_ERROR << "Null monitoring target location instance" << std::endl;
         return false;
     }
 
     // Check if json syntax is valid
     SF::JSON json;
-    if (!json.Read(monitorInJson.c_str())) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json for monitor target: " << targetUID
-            << "\nJSON: " << monitorInJson << std::endl;
+    if (!json.Read(targetJSON.c_str())) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json for monitor target: [ " << targetJSON << " ]" << std::endl;
         return false;
     }
-
-    // Parse json and extract information of interest
-    /*
-    SF::cisstMonitor newMonitorTarget;
-    if (!ParseJSON(json, newMonitorTarget)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to extract information from json: " << targetUID
-            << "\nJSON: " << monitorInJson << std::endl;
-        return false;
-    }
-    */
     
     // Monitor cannot monitor itself
-    const std::string targetComponentName = locationID->GetComponentName();
+    const std::string targetComponentName = targetInstance->GetLocationID()->GetComponentName();
     if (targetComponentName.compare(mtsMonitorComponent::GetNameOfMonitorComponent()) == 0) {
-        CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << locationID->GetComponentName() << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " 
+            << targetInstance->GetLocationID()->GetComponentName() << std::endl;
         return false;
     }
 
@@ -109,21 +91,50 @@ bool mtsSafetyCoordinator::AddMonitor(SF::Monitor * baseMonitor)
     // [SFUPDATE] Use single monitor instance per process.  Should more than one
     // monitoring component be deployed within the same process, review the comments of
     // bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
+    const std::string targetUID = targetInstance->GetUIDAsString();
     mtsMonitorComponent * monitorComponent = Monitors[0];
-    if (!monitorComponent->AddMonitorTarget(monitor)) {
+    if (!monitorComponent->AddMonitorTarget(targetInstance)) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to add monitor target to monitor component: " << targetUID << std::endl;
         return false;
     }
 
-    CMN_LOG_CLASS_RUN_DEBUG << "AddMonitor: successfully added monitor target: " << targetUID 
-        << "\nJSON: " << json.GetJSON() << std::endl;
+    if (!this->AddMonitoringTarget(targetUID, targetJSON)) {
+        CMN_LOG_CLASS_RUN_DEBUG << "Failed to add monitor target to coordinator: " << targetUID << std::endl;
+        return false;
+    }
 
-    this->MonitorTargetMap[targetUID] = monitorInJson;
+    CMN_LOG_CLASS_RUN_DEBUG << "Successfully deployed monitoring target [ " << targetJSON << " ]" << std::endl;
 
     return true;
 }
 
-bool mtsSafetyCoordinator::AddMonitor(const std::string & jsonFileName)
+bool mtsSafetyCoordinator::AddMonitorTarget(SF::cisstMonitor * cisstMonitorTarget)
+{
+    if (!cisstMonitorTarget) {
+        CMN_LOG_CLASS_RUN_ERROR << "Null cisst monitoring target" << std::endl;
+        return false;
+    }
+
+    SF::cisstEventLocation * locationID = cisstMonitorTarget->GetLocationID();
+    if (!locationID) {
+        CMN_LOG_CLASS_RUN_ERROR << "Null cisst monitoring target location" << std::endl;
+        return false;
+    }
+
+    // Deploy monitoring target to monitor component
+    const std::string targetJSON = cisstMonitorTarget->GetMonitorJSON();
+    if (!DeployMonitorTarget(targetJSON, cisstMonitorTarget)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to deploy monitoring target [ " << targetJSON << " ]" << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "Successfully added monitoring target using monitoring target instance" << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+
+    return true;
+}
+
+bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & jsonFileName)
 {
     // Construct JSON structure from file
     SF::JSON json;
@@ -132,55 +143,36 @@ bool mtsSafetyCoordinator::AddMonitor(const std::string & jsonFileName)
         return false;
     }
 
-    const SF::JSON::JSONVALUE monitors = json.GetRoot()[SF::Dict::Json::monitor];
-    if (monitors.isNull() || monitors.size() == 0) {
+    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::monitor];
+    if (targets.isNull() || targets.size() == 0) {
         CMN_LOG_CLASS_RUN_ERROR << "No monitor specification found in json file: " << jsonFileName << std::endl;
         return false;
     }
 
     // Create and install monitor instances, iterating each monitor specification
-    for (size_t i = 0; i < monitors.size(); ++i) {
-        // Create monitor instance
-        SF::cisstMonitor * monitor = new SF::cisstMonitor(monitors[i]);
+    for (size_t i = 0; i < targets.size(); ++i) {
+        // Create monitoring target instance
+        SF::cisstMonitor * cisstMonitorTarget = new SF::cisstMonitor(targets[i]);
 
         // Check if same monitoring target is already registered
-        const std::string targetUID = monitor->GetUIDAsString();
-        if (this->IsDuplicateUID(targetUID)) {
+        const std::string targetUID = cisstMonitorTarget->GetUIDAsString();
+        if (this->FindMonitoringTarget(targetUID)) {
             CMN_LOG_CLASS_RUN_ERROR << "Target is already being monitored: " << targetUID << std::endl;
             return false;
         }
 
-        // Check if json syntax is valid
-        const std::string monitorInJson = monitor->GetMonitorJSON();
-        SF::JSON json;
-        if (!json.Read(monitorInJson.c_str())) {
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json of monitor specification: " << targetUID
-                << "\nJSON: " << monitorInJson << std::endl;
+        // Deploy monitoring target to monitor component
+        const std::string targetJSON = cisstMonitorTarget->GetMonitorJSON();
+        if (!DeployMonitorTarget(targetJSON, cisstMonitorTarget)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to deploy monitoring target [ " << targetJSON << " ]" << std::endl;
             return false;
         }
-
-        // Monitor cannot monitor itself
-        const std::string targetComponentName = locationID->GetComponentName();
-        if (targetComponentName.compare(mtsMonitorComponent::GetNameOfMonitorComponent()) == 0) {
-            CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << locationID->GetComponentName() << std::endl;
-            return false;
-        }
-
-        // Add new monitor target to monitor 
-        // [SFUPDATE] Use single monitor instance per process.  Should more than one
-        // monitoring component be deployed within the same process, review the comments of
-        // bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
-        mtsMonitorComponent * monitorComponent = Monitors[0];
-        if (!monitorComponent->AddMonitorTarget(monitor)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to add monitor target to monitor component: " << targetUID << std::endl;
-            return false;
-        }
-
-        CMN_LOG_CLASS_RUN_DEBUG << "AddMonitor: successfully added monitor target: " << targetUID 
-            << "\nJSON: " << json.GetJSON() << std::endl;
-
-        this->MonitorTargetMap[targetUID] = monitorInJson;
     }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "Successfully added monitoring target(s) from json file: " << jsonFileName << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+
+    return true;
 }
 
 bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
@@ -398,7 +390,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
             // Install fault event handler to target component accessor of the monitor component
             monitor->SetAttachedToActiveFilter(true);
 
-            if (!AddMonitor(monitor)) {
+            if (!AddMonitorTarget(monitor)) {
                 CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to install new monitor. Filter: [" << *filter << "], Monitor: [" << *monitor << "]" << std::endl;
                 // MJ TODO: undo signal installation above
                 delete monitor;
@@ -466,7 +458,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
                                                               locationID,
                                                               SF::Monitor::STATE_ON,
                                                               SF::Monitor::OUTPUT_EVENT);
-            if (!AddMonitor(monitor)) {
+            if (!AddMonitorTarget(monitor)) {
                 CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to install new monitor. Filter: [" << *filter << "], Monitor: [" << *monitor << "]" << std::endl;
                 // MJ TODO: undo signal installation above
                 delete monitor;
@@ -522,7 +514,15 @@ bool mtsSafetyCoordinator::CreateMonitor(void)
         return true;
     }
 
-    mtsMonitorComponent * monitor = new mtsMonitorComponent;
+    // MJTODO:
+    // Because mtsMonitorComponent has two different configurations depending on
+    // mtsMonitorComponent::ManualAdvance, there has to be at least two monitoring
+    // components with manual and automatic advance, for monitoring and filtering,
+    // respectively.  Refer to mtsMonitorComponent's constructors for further comments.
+ 
+    // Create monitoring component with manual state table advance.  This monitor component
+    // is used only for monitoring, not filtering (filtering requires automatic advance).
+    mtsMonitorComponent * monitor = new mtsMonitorComponent(false);
     mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance(); 
     if (!componentManager->AddComponent(monitor)) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to create monitor" << std::endl;
@@ -540,8 +540,7 @@ bool mtsSafetyCoordinator::CreateMonitor(void)
 void mtsSafetyCoordinator::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
-    // MJ: Nothing to print out for now
-    //outputStream << " Process: \""        << this->Process << "\","
+    this->PrintMonitoringTargets(outputStream);
 }
 
 void mtsSafetyCoordinator::SerializeRaw(std::ostream & outputStream) const
