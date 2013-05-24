@@ -26,6 +26,8 @@ set (SOURCE_FILES
      osaThreadTest.cpp
      osaThreadSignalTest.cpp
      osaTripleBufferTest.cpp
+     osaTimeDataTest.cpp
+     osaPerformanceCounterTest.cpp
      )
 
 # all header files
@@ -37,6 +39,8 @@ set (HEADER_FILES
      osaThreadTest.h
      osaThreadSignalTest.h
      osaTripleBufferTest.h
+     osaTimeDataTest.h
+     osaPerformanceCounterTest.h
      )
 
 # add executable for C++ tests

@@ -36,11 +36,11 @@ void osaTimeDataTest::TestAlgebra(void)
 	osaTimeData temp;
 	osaTimeData temp2;
 	osaTimeData result; 
-	result.sumOf(temp,temp2);
+	result.SumOf(temp,temp2);
 	CPPUNIT_ASSERT((temp+temp2)==result);
 
-	result.sumOf(temp,temp2);
-	result.subtract(temp);
+	result.SumOf(temp,temp2);
+	result.Subtract(temp);
 	CPPUNIT_ASSERT(temp2==result);
 
 	osaTimeData t(200,6913578,true);
@@ -61,18 +61,20 @@ void osaTimeDataTest::TestEqual(void)
 void osaTimeDataTest::TestInequalities(void)
 {
 	osaTimeData before;
+    before.Now();
 	osaTimeData after;
+    after.Now();
 	CPPUNIT_ASSERT(before <= after);	
 
 
-	before.add( after);
+	before.Add( after);
 	CPPUNIT_ASSERT(before > after);	
 }
 
 void osaTimeDataTest::TestFromTo(void)
 {
 	osaTimeData now(10,234,true);
-	double nowInSeconds = now.toSeconds();
+	double nowInSeconds = now.ToSeconds();
 	osaTimeData shouldBeSame(nowInSeconds);
 	CPPUNIT_ASSERT(now == shouldBeSame);
 }

@@ -6,7 +6,7 @@ void osaPerformanceCounterTest::TestTimer(void)
 
 	osaPerformanceCounter pf;
 	pf.Start();
-	pf.delay(2.00000000); //sleep for 2 seconds
+	pf.Delay(2.00000000); //sleep for 2 seconds
 	pf.Stop();
 	osaTimeData diff = pf.GetElapsedTime();
 

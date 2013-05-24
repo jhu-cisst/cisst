@@ -30,104 +30,79 @@ class osaTimeData
 public:
 		
 	/*! Default constructor, construct the osaTimeData of current time*/
-	osaTimeData()
-	{
-		now();
-		positive_flag = true;
-		normalize();
-	}
+	osaTimeData();
 
 	/*! Initialize all the elements to the given values 
-	  \param _seconds number of seconds used to set seconds of this object
-	  \param _nseconds number of nano seconds used to set nseconds of this object
-	  \param _positive_flag the boolean flag to determine whether this osaTimeData is positive or negative. Set to true by default. True = positive*/
-	osaTimeData(unsigned int _seconds, unsigned int _nseconds, bool _positive_flag=true): seconds(_seconds),nseconds(_nseconds),positive_flag(_positive_flag)
-	{
-		normalize();	
-		struct timespec res;
-		clock_getres( CLOCK_REALTIME, &res); 
-		resolution = static_cast<long long>(res.tv_nsec);
-		
-	}
+	  \param seconds number of seconds used to set seconds of this object
+	  \param nseconds number of nano seconds used to set nseconds of this object
+	  \param positive_flag the boolean flag to determine whether this osaTimeData is positive or negative. Set to true by default. True = positive*/
+	osaTimeData(unsigned int seconds, unsigned int nseconds, bool positive_flag=true);
 	/*! Initializes all the elements of the osaTimeData object from seconds
 	\param seconds the number of seconds in double
 	*/
-	osaTimeData(double dseconds)
-	{
-		bool flag = true;
-		if(dseconds < 0 )
-		{
-			flag = false;
-			dseconds = dseconds * -1;
-		}
-		long long fractpart ;      
-		seconds = splitDoubles(dseconds,&fractpart);
-		nseconds = fractpart;
-		positive_flag = flag;
-		normalize();
-		struct timespec res;
-		clock_getres(CLOCK_REALTIME, &res);
-		resolution = static_cast<long long>(res.tv_nsec); 
-	}
+	osaTimeData(double dseconds);
 
 	/*! Destructor*/
 	~osaTimeData(){}
 
+	/*! sets the properties of the osaTimeData object to current time
+	*/
+	void Now();
 	//Utility
-	osaTimeData copy() const;
+//	osaTimeData Copy() const;
 	/*!Set the objects time to equal the given time
 	\param newTime the osaTimeData object to set to*/
-	void setTime(const osaTimeData &newTime);
+	void SetTime(const osaTimeData &newTime);
 	/*!Normalize the osaTimeData object*/
-	void normalize();
+	void Normalize();
 
 	/*!Determines whether the two objects are equal
 	\param compareTo
 	\return true if the objects are equal */
-	bool equals(const osaTimeData &compareTo) const;
+	bool Equals(const osaTimeData &compareTo) const;
 	
 	/*!Returns the number of seconds that this osaTimeData object represents
 	\return the number of seconds in double */
-	double toSeconds(); 
+	double ToSeconds(); 
 
 	/*!Create osaTimeData object from seconds
 	\param seconds the number of seconds in double
 	\return this object that is converted from given number of seconds*/
-	osaTimeData from(double seconds);
+	osaTimeData From(double seconds);
 
 	/*!Addition of two osaTimeData objects
 	\param rhs the osaTimeData object to add*/
-	void add(const osaTimeData &rhs);
+	void Add(const osaTimeData &rhs);
 	/*!Subtraction of two osaTimeData objects
 	\param rhs the osaTimeData object to subtract
 	*/
-	void subtract(const osaTimeData &rhs);
+	void Subtract(const osaTimeData &rhs);
 	/*!Sum of two osaTimeData objects*/
-	void sumOf(osaTimeData &first, osaTimeData &second);
+	void SumOf(osaTimeData &first, osaTimeData &second);
 	
-	std::string toString(); // string representation YYYY/MM/DD, HH:MM:SS.DDDD
+	std::string ToString(); // string representation YYYY/MM/DD, HH:MM:SS.DDDD
 	
 	//gets,sets
 	/*!Returns the seconds of this osaTimeData object.
 	\return the number seconds this object represents
 	*/
-	long long getSeconds();
+	long long GetSeconds();
 	/*!Sets the seconds of this osaTimeData object to a specified number of seconds
 	\param sec number of seconds to set to
 	*/
-	void setSeconds(long long sec);
+	void SetSeconds(long long sec);
 	/*!Returns the nano seconds of this osaTimeData object.
 	\return the number of nano-seconds this object holds
 	*/
-	long long getNSeconds();
+	long long GetNanoSeconds();
 	/*!Sets the nano-seconds of this osaTimeData object to a specified number of nanoseconds
 	\return nsec number of nano seconds to set to
 	*/
-	void setNSeconds(long long nsec);
+	void SetNanoSeconds(long long nsec);
 	/*!Returns the resolution of the osaTimeData object in nano seconds
 	\return the resolution of the osaTimeData object in nanoseconds
 	*/
-	long long getResolution();
+	long long GetResolution();
 
 	//ALGEBRA
 	const osaTimeData operator=(const osaTimeData &rhs);
@@ -143,23 +118,20 @@ public:
 
 protected:
 	/*!Number of seconds*/
-	long long seconds;
+	long long Seconds;
 	/*!Number of nano seconds*/
-	long long nseconds;	
+	long long Nano_seconds;	
 	/*!Resolution of this time object in nanoseconds  */
-	long long resolution;
+	long long Resolution;
 	/*!Boolean to indicate whether this osaTimeData is negatve or positive. Positive = true, negative = false*/
-	bool positive_flag;
+	bool Positive;
 private:
 	/*! Given a double variable, split it into two integers (whole part and fraction part)
 	\param doubleToSplit the double value to split
 	\param fractionpart the address of where the int value of the fraction part will be stored
 	\return the whole part of the doubleToSplit
 	*/
-	long long splitDoubles(double doubleToSplit, long long *fractionPart);
-	/*! sets the properties of the osaTimeData object to current time
-	*/
-	void now();
+	long long SplitDoubles(double doubleToSplit, long long *fractionPart);
 }
 ;
 #endif

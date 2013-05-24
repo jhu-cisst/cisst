@@ -35,6 +35,9 @@ set (SOURCE_FILES
      osaThreadBuddy.cpp
      osaThreadSignal.cpp
      osaTimeServer.cpp
+     osaTimeData.cpp
+     osaDate.cpp
+     osaPerformanceCounter.cpp
      )
 
 # all header files
@@ -60,6 +63,9 @@ set (HEADER_FILES
      osaThreadSignal.h
      osaTimeServer.h
      osaTripleBuffer.h
+     osaTimeData.h
+     osaDate.h
+     osaPerformanceCounter.h
      )
 
 # Create the config file

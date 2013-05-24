@@ -45,10 +45,10 @@ public:
 	/*! Return the current read of the counter*/
 	osaTimeData GetElapsedTime() ;
 	/*! Delays/Sleeps the system by the time represented by osaTimeData*/
-	void delay(osaTimeData delayAmount);
+	void Delay(osaTimeData delayAmount);
 protected:
-	osaTimeData origin;
-	osaTimeData end;
+	osaTimeData Origin;
+	osaTimeData End;
 	bool HasHighPerformanceCounter;
 	bool isRunning;
 	
