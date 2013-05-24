@@ -57,8 +57,9 @@ protected:
     //! Filter instances.  Grouped by the name of component to which the filter is deployed
     FilterSetType FilterSet;
 
-    //! Parse JSON specification and return new monitoring target spec
-    //bool ParseJSON(SF::JSON & json, SF::cisstMonitor & newMonitorTarget);
+    //! Deploy monitor target to monitor component
+    bool DeployMonitorTarget(const std::string & targetJSON, 
+                             SF::cisstMonitor * cisstMonitorTargetInstance);
 
 public:
     //! Constructor
@@ -73,9 +74,9 @@ public:
     bool CreateMonitor(void);
 
     //! Install a single monitoring target object using monitor instance
-    bool AddMonitor(SF::Monitor * monitor);
+    bool AddMonitorTarget(SF::cisstMonitor * monitor);
     //! Install possibly multiiple monitoring target objects using JSON file
-    bool AddMonitor(const std::string & jsonFileName);
+    bool AddMonitorTarget(const std::string & jsonFileName);
 
     //-------------------------------------------------- 
     //  Filtering
