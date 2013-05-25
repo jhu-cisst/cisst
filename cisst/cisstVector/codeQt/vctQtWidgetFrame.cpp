@@ -25,6 +25,7 @@ vctQtWidgetFrameDoubleRead::vctQtWidgetFrameDoubleRead(const DisplayModeType dis
 {
     RotationWidget = new vctQtWidgetRotationDoubleRead(displayMode);
     TranslationWidget = new vctQtWidgetDynamicVectorDoubleRead();
+    TranslationWidget->SetPrecision(3);
     Layout = new QVBoxLayout;
     this->setLayout(Layout);
     this->setWindowTitle("vctQtWidgetFrameDoubleRead");
