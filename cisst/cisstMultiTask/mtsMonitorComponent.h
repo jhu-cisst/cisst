@@ -97,14 +97,20 @@ public:
         allows mtsMonitorComponent to fetch data from target components.  */
     class TargetComponentAccessor {
     public:
-        /*! Typedef for cisstMonitor container */
-        typedef std::map<SF::Monitor::UIDType, SF::cisstMonitor *> MonitorTargetSetType;
+        /*! Typedef for cisstMonitor container 
+         *
+         *  key: string representation of target UID
+         *  value: instance of SF::cisstMonitor 
+         */
+        typedef std::map<std::string, SF::cisstMonitor *> MonitorTargetSetType;
 
-        /*! Typedef for function object container.  In case of custom targets
-            (Monitor::TARGET_CUSTOM), multiple function objects can be used and this
-            requires the management of multiple function objects. 
-            key: location ID in string */
-        typedef std::map<std::string, mtsFunctionRead *> MonitorFunctionSetType;
+        /*! Predefined monitoring targets are accessed via this->InterfaceRequiredPredefined
+         *  and custom monitoring targets are accessed via separate required interface.
+         *
+         *  key: provided interface name
+         *  value: instance of FunctionObjects
+         */
+        typedef std::map<std::string, mtsInterfaceRequired *> InterfaceRequiredCustomType;
 
     protected:
         /*! Copy of mtsMonitorComponent::ManualAdvance */
@@ -117,10 +123,9 @@ public:
 
         /*! Functions to read state variables from target component */
         struct {
-            mtsFunctionRead        GetPeriod;        // for Monitor::TARGET_THREAD_PERIOD
-            mtsFunctionRead        GetExecTimeUser;  // for Monitor::TARGET_THREAD_DUTYCYCLE_USER
-            mtsFunctionRead        GetExecTimeTotal; // for Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL
-            MonitorFunctionSetType GetCustomData;    // for Monitor::TARGET_CUSTOM
+            mtsFunctionRead GetPeriod;        // for Monitor::TARGET_THREAD_PERIOD
+            mtsFunctionRead GetExecTimeUser;  // for Monitor::TARGET_THREAD_DUTYCYCLE_USER
+            mtsFunctionRead GetExecTimeTotal; // for Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL
         } AccessFunctions;
 
     public:
@@ -135,8 +140,10 @@ public:
         std::string ProcessName;
         std::string ComponentName;
 
-        /*! Required interface to connect to the target component */
-        mtsInterfaceRequired * InterfaceRequired;
+        /*! Required interface to access predefined monitoring targets */
+        mtsInterfaceRequired * InterfaceRequiredPredefined;
+        /*! Map of required interfaces to access custom monitoring targets */
+        InterfaceRequiredCustomType InterfaceRequiredCustom;
 
         /*! Event receiver to receive events */
         mtsEventReceiverWrite FaultEventReceiver;
@@ -144,16 +151,21 @@ public:
         /*! Add new cisstMonitor instance.  Returns false if duplicate. */
         bool AddMonitorTargetToAccessor(SF::cisstMonitor * monitor);
         /*! Check if given monitor target is already being monitored. */
-        bool FindMonitorTarget(SF::Monitor::UIDType uid) const;
-        bool FindMonitorTarget(const std::string & uidString) const;
+        bool FindMonitorTargetFromAccessor(const std::string & targetUID) const;
         /*! Remove cisstMonitor instance.  Returns false if not found. */
-        void RemoveMonitorTargetFromAccessor(SF::Monitor::UIDType uid);
+        void RemoveMonitorTargetFromAccessor(const std::string & targetUID);
 
         /*! Get new samples for all monitor targets if necessary */
         bool RefreshSamples(double currentTick, SF::Publisher * publisher);
 
-        /*! Add function object to this accessor */
-        bool AddFunction(SF::Monitor::TargetType type, const std::string & targetLocationID = "");
+        /*! Add mts function object to this accessor
+         *  \param type Monitoring target type (see SF::Monitor::TargetType)
+         *  \param targetLocationID UID string of monitoring target.  Should be specified
+         *         if type is SF::Monitor::CUSTOM.
+         */
+        bool AddMonitoringFunction(SF::Monitor::TargetType type, 
+                                   const std::string & providedInterfaceName = "",
+                                   const std::string & targetCommandName = "");
 
         /*! Generate contents of this class in human readable format */
         void ToStream(std::ostream & outputStream) const;
@@ -183,11 +195,11 @@ protected:
     //bool InstallFilters(mtsTaskContinuous * taskContinuous);
     //bool InstallFilters(mtsTaskFromCallback * taskFromCallback);
     //bool InstallFilters(mtsTaskFromSignal * taskFromSignal);
-    // MJ TEMP: this is not being used (replaced by InstallMonitorTarget())
+    // MJ TEMP: this is not being used (replaced by AddStateVectorForMonitoring())
     bool InstallFilters(TargetComponentAccessor * entry, mtsTaskPeriodic * taskPeriodic);
 
-    /*! Install monitor: add new column to the monitor state table */
-    void InstallMonitorTarget(mtsTask * task, SF::Monitor * monitor);
+    /*! Add new column vector to the monitoring state table */
+    void AddStateVectorForMonitoring(mtsTask * task, SF::cisstMonitor * monitor);
 
     /*! Receive event notifications from target components and publishes them to
         the Safety Supervisor of Safety Framework. */
@@ -239,9 +251,12 @@ public:
     bool AddMonitorTarget(SF::cisstMonitor * monitorTarget);
 
     /*! Create target component accessor (useful when creating monitor for filter) */
-    TargetComponentAccessor * CreateTargetComponentAccessor(
-        const std::string & targetProcessName, const std::string & targetComponentName,
-        bool attachFaultEventHandler, bool addAccessor);
+    TargetComponentAccessor * CreateTargetComponentAccessor(SF::cisstMonitor * monitorTarget);
+    TargetComponentAccessor * CreateTargetComponentAccessor(const std::string & targetProcessName, 
+                                                            const std::string & targetComponentName,
+                                                            SF::Monitor::TargetType targetType,
+                                                            bool attachFaultEventHandler, 
+                                                            bool addAccessor);
 
     // TODO: replace this with RemoveMonitorTargetFromComponent()
     /*! Unregister component from the registry */
