@@ -291,6 +291,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const vctDyna
             if (spinBox == 0) {
                 spinBox = new QDoubleSpinBox();
                 spinBox->setRange(Minimum, Maximum);
+                spinBox->setDecimals(3);
                 spinBox->setSingleStep(Step);
                 connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(DoubleSpinBoxValueChangedSlot(double)));
                 this->setCellWidget(0, index, spinBox);
