@@ -90,7 +90,9 @@ bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON,
     // Add new monitor target to monitor 
     // [SFUPDATE] Use single monitor instance per process.  Should more than one
     // monitoring component be deployed within the same process, review the comments of
-    // bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
+    //      bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
+    // Also, update the following important method as well:
+    //      bool mtsMonitorComponent::InitializeAccessors(void)
     const std::string targetUID = targetInstance->GetUIDAsString();
     mtsMonitorComponent * monitorComponent = Monitors[0];
     if (!monitorComponent->AddMonitorTarget(targetInstance)) {
@@ -272,12 +274,17 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
         mtsMonitorComponent::TargetComponentAccessor * accessor
             = Monitors[0]->GetTargetComponentAccessor(targetComponentName);
         if (!accessor) {
+            //
+            // FIXME: THIS SHOULD BE UPDATED ACCORDINGLY TO BE ABLE TO SUPPORT CUSTOM_TARGET
+            //
             // If target component accessor is null, create new accessor and add it
             // to the monitoring component.
-            accessor = Monitors[0]->CreateTargetComponentAccessor(
-                targetProcessName, targetComponentName, 
-                false, // this is not active filter
-                true); // add accessor to internal data structure
+            accessor = Monitors[0]->CreateTargetComponentAccessor(targetProcessName, 
+                                                                  targetComponentName, 
+                                                                  // FIXME!!!!!!!!!!!!!!!!!!!!!!
+                                                                  SF::Monitor::TARGET_INVALID, 
+                                                                  false, // this is not active filter
+                                                                  true); // add accessor to internal data structure
         }
 
         // Instantiate history buffer for each input signal

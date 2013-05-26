@@ -28,6 +28,7 @@
 #include <cisstMultiTask/mtsFaultDetectorThresholding.h>
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
 #include <cisstMultiTask/mtsFaultTypes.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 using namespace SF::Dict;
 
@@ -39,46 +40,42 @@ const std::string NameOfMonitorComponent = "SafetyMonitor";
 //  mtsMonitorComponent::TargetComponentAccessor
 //-------------------------------------------------- 
 mtsMonitorComponent::TargetComponentAccessor::TargetComponentAccessor(void)
-    : ManualAdvance(false), InterfaceRequired(0)
+    : ManualAdvance(false), InterfaceRequiredPredefined(0)
 {}
         
 mtsMonitorComponent::TargetComponentAccessor::TargetComponentAccessor(bool manualAdvance)
-    : ManualAdvance(manualAdvance), InterfaceRequired(0)
+    : ManualAdvance(manualAdvance), InterfaceRequiredPredefined(0)
 {}
 
 mtsMonitorComponent::TargetComponentAccessor::~TargetComponentAccessor()
 {
-    if (InterfaceRequired) delete InterfaceRequired;
+    if (InterfaceRequiredPredefined) delete InterfaceRequiredPredefined;
+
+    // TODO: add nother cleanups
 }
 
-bool mtsMonitorComponent::TargetComponentAccessor::AddMonitorTargetToAccessor(SF::cisstMonitor * monitor)
+bool mtsMonitorComponent::TargetComponentAccessor::AddMonitorTargetToAccessor(SF::cisstMonitor * monitorTarget)
 {
-    SF::Monitor::UIDType uid = monitor->GetUIDAsNumber();
-    if (FindMonitorTarget(uid))
+    std::string targetUID = monitorTarget->GetUIDAsString();
+    if (FindMonitorTargetFromAccessor(targetUID))
         return false;
 
-    MonitorTargetSet.insert(std::make_pair(uid, monitor));
+    MonitorTargetSet.insert(std::make_pair(targetUID, monitorTarget));
 
     return true;
 }
 
-void mtsMonitorComponent::TargetComponentAccessor::RemoveMonitorTargetFromAccessor(SF::Monitor::UIDType uid)
+void mtsMonitorComponent::TargetComponentAccessor::RemoveMonitorTargetFromAccessor(const std::string & targetUID)
 {
-    MonitorTargetSet.erase(uid);
+    MonitorTargetSet.erase(targetUID);
 }
 
-bool mtsMonitorComponent::TargetComponentAccessor::FindMonitorTarget(SF::Monitor::UIDType uid) const
-{
-    MonitorTargetSetType::const_iterator it = MonitorTargetSet.find(uid);
-    return (it != MonitorTargetSet.end());
-}
-
-bool mtsMonitorComponent::TargetComponentAccessor::FindMonitorTarget(const std::string & uidString) const
+bool mtsMonitorComponent::TargetComponentAccessor::FindMonitorTargetFromAccessor(const std::string & targetUID) const
 {
     MonitorTargetSetType::const_iterator it = MonitorTargetSet.begin();
     const MonitorTargetSetType::const_iterator itEnd = MonitorTargetSet.end();
     for (; it != itEnd; ++it) {
-        if (it->second->GetUIDAsString().compare(uidString) == 0)
+        if (it->second->GetUIDAsString().compare(targetUID) == 0)
             return true;
     }
 
@@ -87,13 +84,16 @@ bool mtsMonitorComponent::TargetComponentAccessor::FindMonitorTarget(const std::
 
 bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double currentTick, SF::Publisher * publisher)
 {
-    MonitorTargetSetType::iterator it = MonitorTargetSet.begin();
-    const MonitorTargetSetType::iterator itEnd = MonitorTargetSet.end();
-
     // used only for manual advance
     bool advance = false;
+    SF::cisstMonitor * monitor = 0;
+    // for custom monitoring type
+    mtsInterfaceRequired * required = 0;
+    mtsFunctionRead * functionRead = 0;
+    InterfaceRequiredCustomType::const_iterator it2;
 
-    SF::cisstMonitor * monitor;
+    MonitorTargetSetType::iterator it = MonitorTargetSet.begin();
+    const MonitorTargetSetType::iterator itEnd = MonitorTargetSet.end();
     for (; it != itEnd; ++it) {
         monitor = it->second;
 
@@ -149,8 +149,24 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             break;
 
         case SF::Monitor::TARGET_CUSTOM:
-            // MJTEMP: TODO
-            std::cout << "TARGET_CUSTOM";
+            it2 = InterfaceRequiredCustom.find(monitor->GetLocationID()->GetInterfaceProvidedName());
+            CMN_ASSERT(it2 != InterfaceRequiredCustom.end());
+            required = it2->second;
+            functionRead = required->GetFunctionRead(monitor->GetLocationID()->GetCommandName());
+            CMN_ASSERT(functionRead);
+            if (!functionRead->IsValid()) {
+                CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid custom function (\"" 
+                    << monitor->GetLocationID()->GetCommandName() << "\"" << std::endl;
+            } else {
+                // TODO: how to expand a set of supported data types?? double, doublevec??
+                // does SF need sort of prm lib?
+                double sample;
+                (*functionRead)(sample);
+                publisher->Publish(monitor->GetJsonForPublish(sample, currentTick));
+                monitor->UpdateLastSamplingTick(currentTick);
+                if (ManualAdvance)
+                    advance = true;
+            }
             break;
 
             // [SFUPDATE]
@@ -163,45 +179,34 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
     return (ManualAdvance ? advance : true);
 }
 
-bool mtsMonitorComponent::TargetComponentAccessor::AddFunction(SF::Monitor::TargetType type,
-                                                               const std::string & targetLocationID)
+bool mtsMonitorComponent::TargetComponentAccessor::AddMonitoringFunction(SF::Monitor::TargetType type,
+                                                                         const std::string & providedInterfaceName,
+                                                                         const std::string & targetCommandName)
 {
     bool ret = false;
 
     switch (type) {
         case SF::Monitor::TARGET_THREAD_PERIOD:
-            ret = InterfaceRequired->AddFunction("GetPeriod", this->AccessFunctions.GetPeriod);
+            ret = InterfaceRequiredPredefined->AddFunction("GetPeriod", this->AccessFunctions.GetPeriod);
             break;
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
-            ret = InterfaceRequired->AddFunction("GetExecTimeUser", this->AccessFunctions.GetExecTimeUser);
+            ret = InterfaceRequiredPredefined->AddFunction("GetExecTimeUser", this->AccessFunctions.GetExecTimeUser);
             break;
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
-            ret = InterfaceRequired->AddFunction("GetExecTimeTotal", this->AccessFunctions.GetExecTimeTotal);
+            ret = InterfaceRequiredPredefined->AddFunction("GetExecTimeTotal", this->AccessFunctions.GetExecTimeTotal);
             break;
         case SF::Monitor::TARGET_FILTER_EVENT: // MJTEMP: what is this???
             // NOP
             break;
         case SF::Monitor::TARGET_CUSTOM:
-            // Check if the monitoring target is already registered
-            if (AccessFunctions.GetCustomData.find(targetLocationID) != 
-                AccessFunctions.GetCustomData.end())
             {
-                CMN_LOG_RUN_WARNING << "TargetComponentAccessor::AddFunction: Failed to add function: "
-                    << "already registered custom monitoring target: \"" << targetLocationID << "\"" << std::endl;
-                ret = false;
-            } else {
-                mtsFunctionRead * newFuncForCustomTarget = new mtsFunctionRead;
-                ret = InterfaceRequired->AddFunction(targetLocationID, *newFuncForCustomTarget);
-                if (ret) {
-                    AccessFunctions.GetCustomData[targetLocationID] = newFuncForCustomTarget;
-                    // MJTEMP
-                    std::cout << "-----------------------------------------\n";
-                    std::cout << *this << std::endl;
-                } else {
-                    delete newFuncForCustomTarget;
-                    CMN_LOG_RUN_WARNING << "TargetComponentAccessor::AddFunction: Failed to add function: "
-                        << "Failed to add custom monitoring target: \"" << targetLocationID << "\"" << std::endl;
-                }
+                // Check if required interface for custom monitoring target already exists
+                CMN_ASSERT(InterfaceRequiredCustom.find(providedInterfaceName) != InterfaceRequiredCustom.end());
+                mtsInterfaceRequired * required = (InterfaceRequiredCustom.find(providedInterfaceName))->second;
+                CMN_ASSERT(required);
+                mtsFunctionRead * function = new mtsFunctionRead;
+                CMN_ASSERT(required->AddFunction(targetCommandName, *function));
+                ret = true;
             }
             break;
         case SF::Monitor::TARGET_INVALID:
@@ -226,28 +231,22 @@ void mtsMonitorComponent::TargetComponentAccessor::ToStream(std::ostream & outpu
         outputStream << "\t[" << ++i << "] " << *(it1->second) << std::endl;
 
     // Access functions
-    outputStream << "Access functions:" << std::endl
-        /*
-                 << "\tGetPeriod: " << (GetPeriod.IsValid() ? "valid" : "invalid") << std::endl
-                 << "\tGetExecTimeUser: " << (GetExecTimeUser.IsValid() ? "valid" : "invalid") << std::endl
-                 << "\tGetExecTimeTotal: " << (GetExecTimeTotal.IsValid() ? "valid" : "invalid") << std::endl;
-                 */
+    outputStream << "Predefined targets -------------------------------------" << std::endl
                  << "\tGetPeriod: " << AccessFunctions.GetPeriod << std::endl
                  << "\tGetExecTimeUser: " << AccessFunctions.GetExecTimeUser << std::endl
-                 << "\tGetExecTimeTotal: " << AccessFunctions.GetExecTimeTotal << std::endl
-                 << "\tGetCustomData: " << std::endl;
-
-    MonitorFunctionSetType::const_iterator it2 = AccessFunctions.GetCustomData.begin();
-    i = 0;
-    for (; it2 != AccessFunctions.GetCustomData.end(); ++it2)
-        outputStream << "\t\t[" << ++i << "] " << it2->first << ": " << *(it2->second) << std::endl;
-
-    // Required interface
-    outputStream << "Required interface: " << std::endl;
-    if (!InterfaceRequired)
+                 << "\tGetExecTimeTotal: " << AccessFunctions.GetExecTimeTotal << std::endl;
+    outputStream << "\tInterfaceRequiredPredefined: ";
+    if (InterfaceRequiredPredefined == 0)
         outputStream << "NULL" << std::endl;
     else
-        outputStream << *InterfaceRequired << std::endl;
+        outputStream << *InterfaceRequiredPredefined << std::endl;
+
+    InterfaceRequiredCustomType::const_iterator it2 = InterfaceRequiredCustom.begin();
+    outputStream << "Custom targets:" << std::endl;
+    for (; it2 != InterfaceRequiredCustom.end(); ++it2) {
+        outputStream << "\tprv.int \"" << it2->first << "\" -------------------------------------" << std::endl;
+        outputStream << *(it2->second) << std::endl;
+    }
 }
 
 //-------------------------------------------------- 
@@ -397,34 +396,63 @@ void mtsMonitorComponent::Cleanup(void)
 }
 
 mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::CreateTargetComponentAccessor(
-    const std::string & targetProcessName, const std::string & targetComponentName,
-    bool attachFaultEventHandler, bool addAccessor)
-{   
+    SF::cisstMonitor * monitorTarget)
+{
+    const std::string targetProcessName(monitorTarget->GetLocationID()->GetProcessName());
+    const std::string targetComponentName(monitorTarget->GetLocationID()->GetComponentName());
+    bool  attachedToActiveFilter = monitorTarget->IsAttachedToActiveFilter();
+    const SF::Monitor::TargetType targetType = monitorTarget->GetTargetType();
+    
+    return CreateTargetComponentAccessor(targetProcessName, 
+                                         targetComponentName, 
+                                         targetType,
+                                         attachedToActiveFilter,
+                                         false); // MJFIXME: true in case of active filtering (?)
+}
+
+mtsMonitorComponent::TargetComponentAccessor * 
+    mtsMonitorComponent::CreateTargetComponentAccessor(const std::string & targetProcessName, 
+                                                       const std::string & targetComponentName,
+                                                       const SF::Monitor::TargetType targetType,
+                                                       bool attachFaultEventHandler, 
+                                                       bool addAccessor)
+{
     TargetComponentAccessor * targetComponentAccessor = new TargetComponentAccessor;
     targetComponentAccessor->ProcessName = targetProcessName;
     targetComponentAccessor->ComponentName = targetComponentName;
-    targetComponentAccessor->InterfaceRequired = 
-        AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName), MTS_OPTIONAL);
-    // MJ FIXME: can't HandleMonitorEvent be moved to if () down below?
-    // Add monitor event handler if new tareget component is to be added.
-    targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
-        &mtsMonitorComponent::HandleMonitorEvent, this, MonitorNames::MonitorEvent);
-    // Add fault event handler if new tareget component is to be added.
-    if (attachFaultEventHandler) {
-        //targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
-        //    &mtsMonitorComponent::HandleFaultEvent, this, FaultNames::FaultEvent);
-        targetComponentAccessor->InterfaceRequired->AddEventReceiver(
-            FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
-        targetComponentAccessor->FaultEventReceiver.SetHandler(
-            &mtsMonitorComponent::HandleFaultEvent, this);
-    }
 
-    if (addAccessor) {
-        if (!TargetComponentAccessors->AddItem(targetComponentName, targetComponentAccessor)) {
-            CMN_LOG_CLASS_RUN_ERROR << "CreateTargetComponentAccessor: Failed to add state table access interface for component \"" << targetComponentName << "\"" << std::endl;
-            delete targetComponentAccessor;
-            return 0;
+    // For predefined monitoring targets, add required interface that accesses target
+    // component's monitoring state table
+    mtsInterfaceRequired * required = 0;
+    // If predefined targets
+    if (targetType != SF::Monitor::TARGET_CUSTOM) {
+        targetComponentAccessor->InterfaceRequiredPredefined = 
+            this->AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName), MTS_OPTIONAL);
+        required = targetComponentAccessor->InterfaceRequiredPredefined;
+
+        CMN_LOG_CLASS_RUN_DEBUG << "CreateTargetComponentAccessor: Created internal required interface "
+            << "\"" << GetNameOfStateTableAccessInterface(targetComponentName) << "\" for predefined "
+            << "monitoring target" << std::endl;
+
+        // MJ FIXME: can't HandleMonitorEvent be moved to if () down below?
+        // Add monitor event handler if new tareget component is to be added.
+        required->AddEventHandlerWrite(&mtsMonitorComponent::HandleMonitorEvent, this, MonitorNames::MonitorEvent);
+        // Add fault event handler if new tareget component is to be added.
+        if (attachFaultEventHandler) {
+            required->AddEventReceiver(FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
+            targetComponentAccessor->FaultEventReceiver.SetHandler(&mtsMonitorComponent::HandleFaultEvent, this);
         }
+
+        if (addAccessor) {
+            if (!TargetComponentAccessors->AddItem(targetComponentName, targetComponentAccessor)) {
+                CMN_LOG_CLASS_RUN_ERROR << "CreateTargetComponentAccessor: Failed to add state table access interface for component \"" << targetComponentName << "\"" << std::endl;
+                delete targetComponentAccessor;
+                return 0;
+            }
+        }
+    } else {
+        // FIXME: WHAT IF CUSTOM TARGET?? Doesn't it need event handlers??????
+        // -> will handle it later when working on filtering.
     }
 
     return targetComponentAccessor;
@@ -432,6 +460,11 @@ mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::CreateTarget
 
 bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 {
+    if (!monitorTarget) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: null monitoring target instance" << std::endl;
+        return false;
+    }
+
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     SF::cisstEventLocation * locationID = monitorTarget->GetLocationID();
     if (!locationID) {
@@ -439,48 +472,103 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
         return false;
     }
 
-    // Validity check: process name
     const std::string thisProcessName = LCM->GetProcessName();
-    const std::string processName = locationID->GetProcessName();
-    if (thisProcessName.compare(processName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: different process name "
-            << "(expected: \"" << thisProcessName << "\", actual: \"" << processName << "\")" << std::endl;
+    const std::string targetProcessName = locationID->GetProcessName();
+
+    // Validity check: process name
+    // MJ: Components that contain monitoring targets should be in the same process with
+    // the monitoring component to make sure the target is monitored.  If not, monitoring
+    // mechanisms have to rely on network middlewares is NOT guaranteed due to many network-related issues
+    if (thisProcessName.compare(targetProcessName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: target and current process names should match "
+            << "(target: \"" << targetProcessName << "\", current: \"" << thisProcessName << "\")" << std::endl;
         return false;
     }
 
-    // Make sure if the target component exists.
+    // Check if the target component exists (within the same process).
     const std::string targetComponentName = locationID->GetComponentName();
-    mtsComponent * targetComponent = LCM->GetComponent(targetComponentName);
-    if (!targetComponent) {
+    if (!LCM->FindComponent(targetComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: no component \"" << targetComponentName << "\" found" << std::endl;
         return false;
     }
 
-    // Embed all necessary sampling mechanism into component depending on the type of 
-    // component (e.g., mtsComponent, mtsTaskPeriodic, ...) and the specification of 
-    // monitor target.
-
-    // Fetch target component information if registered already.  If not, create new instance.
-    bool newTargetComponent = false;
-    TargetComponentAccessor * targetComponentAccessor = TargetComponentAccessors->GetItem(targetComponentName);
-    if (!targetComponentAccessor) {
-        newTargetComponent = true;
-        // Create new connection between monitor component and new target component
-        targetComponentAccessor = CreateTargetComponentAccessor(
-            thisProcessName, targetComponentName, monitorTarget->IsAttachedToActiveFilter(), false);
-    } else {
-        // Check duplicate monitor target
-        if (targetComponentAccessor->FindMonitorTarget(monitorTarget->GetUIDAsString())) {
-            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Failed to install monitor [ " 
-                << monitorTarget->GetUIDAsString() << " ] to "
-                << targetComponentName << ": already monitored" << std::endl;
+    // If monitoring target is of type CUSTOM, check if the target provided interface and command exist.
+    // NOTE: currently, required interface, function, and event generators cannot be used
+    // as part of monitoring targets.
+    const SF::Monitor::TargetType targetType = monitorTarget->GetTargetType();
+    const std::string targetPrvIntfName = locationID->GetInterfaceProvidedName();
+    const std::string targetCommandName = locationID->GetCommandName();
+    if (targetType == SF::Monitor::TARGET_CUSTOM) {
+        // check name of provided interface
+        if (targetPrvIntfName.empty()) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: null provided interface name" << std::endl;
+            return false;
+        }
+        // check name of command 
+        if (targetCommandName.empty()) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: null command name: \"" << targetCommandName << "\"" << std::endl;
+            return false;
+        }
+        // check if the provided interface exists
+        mtsComponent * component = LCM->GetComponent(targetComponentName);
+        CMN_ASSERT(component); // component should exist
+        mtsInterfaceProvided * interfaceProvided = component->GetInterfaceProvided(targetPrvIntfName);
+        if (!interfaceProvided) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: no provided interface found: \"" << targetPrvIntfName << "\"" << std::endl;
+            return false;
+        }
+        // check if the command exists
+        mtsCommandRead * command = interfaceProvided->GetCommandRead(targetCommandName);
+        if (!command) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: no command \"" << targetCommandName 
+                << "\" in provided interface \"" << targetPrvIntfName << "\"" << std::endl;
             return false;
         }
     }
+
+    // Fetch target component information if registered already.  If not, create new instance.
+    bool newTargetComponent = false;
+    const std::string targetUID(monitorTarget->GetUIDAsString());
+    TargetComponentAccessor * targetComponentAccessor = TargetComponentAccessors->GetItem(targetComponentName);
+    if (!targetComponentAccessor) {
+        newTargetComponent = true;
+        // Create required interface to access monitoring target component, but
+        // mtsFunctionRead object is NOT created here.
+        targetComponentAccessor = CreateTargetComponentAccessor(monitorTarget);
+    } 
+
+    // Check duplicate monitor target
+    if (targetComponentAccessor->FindMonitorTargetFromAccessor(targetUID)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Failed to install monitor [ " 
+            << monitorTarget->GetUIDAsString() << " ] to component "
+            << targetComponentName << ": target is already being monitored" << std::endl;
+        return false;
+    }
+
+    // In case of CUSTOM target, create required interface if provided interface is
+    // not yet known to the target component accessor.
+    if (targetType == SF::Monitor::TARGET_CUSTOM) {
+        if (targetComponentAccessor->InterfaceRequiredCustom.find(targetPrvIntfName) 
+            == targetComponentAccessor->InterfaceRequiredCustom.end())
+        {
+            // MJ: this code has overlap with CreateTargetComponentAccessor() method.
+            std::string reqIntName("ReqIntfFor[");
+            reqIntName += targetPrvIntfName;
+            reqIntName += "]";
+
+            mtsInterfaceRequired * required = this->AddInterfaceRequired(reqIntName, MTS_OPTIONAL);
+            targetComponentAccessor->InterfaceRequiredCustom[targetPrvIntfName] = required;
+
+            CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTarget: Created internal required interface "
+                << "\"" << reqIntName << "\" for custom monitoring target: " 
+                << monitorTarget->GetLocationID()->GetIDString() << std::endl;
+        }
+    }
+
     // Add monitor target to component accessor
     CMN_ASSERT(targetComponentAccessor->AddMonitorTargetToAccessor(monitorTarget));
 
-    const SF::Monitor::TargetType targetType = monitorTarget->GetTargetType();
+    // Create mtsFunctionRead object
     const std::string targetTypeString = SF::Monitor::GetTargetTypeString(targetType);
     switch (targetType) {
         case SF::Monitor::TARGET_THREAD_PERIOD:
@@ -493,13 +581,9 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
                     if (newTargetComponent) delete targetComponentAccessor;
                     return false;
                 }
-                targetComponentAccessor->AddFunction(targetType);
+                targetComponentAccessor->AddMonitoringFunction(targetType);
 
-                // MJ TODO: this (i.e., definining filters and setting up FDD pipeline) should 
-                // be done via JSON.  For now, install filters and FDD pipelines by default with
-                // hard-coded fixed parameters.
-                //if (!InstallFilters(targetComponentAccessor, taskPeriodic)) {
-                InstallMonitorTarget(taskPeriodic, monitorTarget);
+                AddStateVectorForMonitoring(taskPeriodic, monitorTarget);
             }
             break;
 
@@ -515,8 +599,18 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 
         case SF::Monitor::TARGET_CUSTOM:
             {
-                targetComponentAccessor->AddFunction(SF::Monitor::TARGET_CUSTOM,
-                                                     monitorTarget->GetLocationID()->GetIDString());
+                mtsTask * task = LCM->GetComponentAsTask(targetComponentName);
+                if (!task) {
+                    CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: invalid target component type (component name:"
+                                            << "\"" << targetComponentName << "\"" << std::endl;
+                    if (newTargetComponent) delete targetComponentAccessor;
+                    return false;
+                }
+                targetComponentAccessor->AddMonitoringFunction(targetType, targetPrvIntfName, targetCommandName);
+
+                // In case of custom targets, the target component accessor directly accesses the 
+                // target command and thus no additional state vector is required.
+                //AddStateVectorForMonitoring(task, monitorTarget);
             }
             break;
 
@@ -532,14 +626,13 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 
     if (newTargetComponent) {
         if (!TargetComponentAccessors->AddItem(targetComponentName, targetComponentAccessor)) {
-            CMN_LOG_CLASS_RUN_ERROR << "RegisterComponent: Failed to add state table access interface for component \"" << targetComponentName << "\"" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Failed to add state table access interface for component \"" << targetComponentName << "\"" << std::endl;
             return false;
         }
     }
 
-    //PrintTargetComponents();
-
-    CMN_LOG_CLASS_RUN_DEBUG << "RegisterComponent: Successfully registered component: \"" << targetComponentName << "\"" << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTarget: Successfully added monitoring target: \n" << *monitorTarget << std::endl;
+    //CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTarget: target component accessor: \n" << *targetComponentAccessor << std::endl;
 
     return true;
 }
@@ -549,31 +642,61 @@ bool mtsMonitorComponent::InitializeAccessors(void)
     // Connect new monitoring target component to monitor component 
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
 
+    bool ret = true;
+    mtsTask * task = 0; 
+    TargetComponentAccessor * accessor = 0;
+    std::string clientComponentName, reqIntName;
+    std::string serverComponentName, prvIntName;
+
     TargetComponentAccessorType::const_iterator it = TargetComponentAccessors->begin();
     const TargetComponentAccessorType::const_iterator itEnd = TargetComponentAccessors->end();
-    TargetComponentAccessor * accessor;
     for (; it != itEnd; ++it) {
         accessor = it->second;
+        // Establish connections for predefined monitoring targets
+        if (accessor->InterfaceRequiredPredefined) {
+            task = LCM->GetComponentAsTask(accessor->ComponentName); 
+            if (!task) { // [SFUPDATE]
+                CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << accessor->ComponentName << "\"" << std::endl;
+            } else {
+                clientComponentName = mtsMonitorComponent::GetNameOfMonitorComponent();
+                reqIntName = GetNameOfStateTableAccessInterface(accessor->ComponentName);
+                serverComponentName = accessor->ComponentName;
+                prvIntName = mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName());
+                // try to connect internal required interfaces to target provided interface
+                if (!LCM->Connect(clientComponentName, reqIntName, serverComponentName, prvIntName)) {
+                    if (!UnregisterComponent(serverComponentName)) // MJTEMP: do i need this?
+                        CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << serverComponentName << "\" from monitor component" << std::endl;
 
-        mtsTask * task = LCM->GetComponentAsTask(accessor->ComponentName); 
-        if (!task) { // [SFUPDATE]
-            CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << accessor->ComponentName << "\"" << std::endl;
-            return false; // MJ TODO
-        }
-
-        if (!LCM->Connect(mtsMonitorComponent::GetNameOfMonitorComponent(), GetNameOfStateTableAccessInterface(accessor->ComponentName),
-                          accessor->ComponentName, mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName())))
-        {
-            if (!UnregisterComponent(accessor->ComponentName)) {
-                CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << accessor->ComponentName << "\" from monitor component" << std::endl;
+                    CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << serverComponentName << "\" to monitor component" << std::endl;
+                    ret = false;
+                }
             }
+        }
+        // Establish connections for custom monitoring targets
+        if (!accessor->InterfaceRequiredCustom.empty()) {
+            // Monitoring component is right now singleton.
+            // If multiple monitoring components are deployed, this should be updated as well.
+            clientComponentName = mtsMonitorComponent::GetNameOfMonitorComponent();
+            serverComponentName = accessor->ComponentName;
 
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << accessor->ComponentName << "\" to monitor component" << std::endl;
-            return false;
+            TargetComponentAccessor::InterfaceRequiredCustomType::const_iterator it2 = accessor->InterfaceRequiredCustom.begin();
+            const TargetComponentAccessor::InterfaceRequiredCustomType::const_iterator it2End = accessor->InterfaceRequiredCustom.end();
+            for (; it2 != it2End; ++it2) {
+                prvIntName = it2->first;
+                reqIntName = it2->second->GetName();
+                // try to connect internal required interfaces to target provided interface
+                if (!LCM->Connect(clientComponentName, reqIntName, serverComponentName, prvIntName)) {
+                    if (!UnregisterComponent(serverComponentName)) // MJTEMP: do i need this?
+                        CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << serverComponentName << "\" from monitor component" << std::endl;
+
+                    CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << serverComponentName << "\" to monitor component" << std::endl;
+                    ret = false;
+                }
+            }
         }
     }
 
-    return true;
+    return ret;
 }
 
 void mtsMonitorComponent::RunMonitors(void)
@@ -618,12 +741,12 @@ void mtsMonitorComponent::PrintTargetComponents(void)
     */
 }
 
-void mtsMonitorComponent::InstallMonitorTarget(mtsTask * task, SF::Monitor * monitor)
+void mtsMonitorComponent::AddStateVectorForMonitoring(mtsTask * task, SF::cisstMonitor * monitor)
 {
     const std::string taskName = task->GetName();
     std::string newElementName(taskName);
 
-    // MJ TEMP: Adding a new element to state table on the fly may be not thread safe.
+    // MJ TEMP: Adding a new element (column vector) to state table on the fly may be not thread safe.
     switch (monitor->GetTargetType()) {
         case SF::Monitor::TARGET_THREAD_PERIOD:
             // Add "Period" to the monitoring state table of this component with the name of
@@ -647,9 +770,10 @@ void mtsMonitorComponent::InstallMonitorTarget(mtsTask * task, SF::Monitor * mon
             CMN_ASSERT(false);
             break;
 
-
         case SF::Monitor::TARGET_CUSTOM:
-            std::cout << "$$$$$$$$$$$$$ InstallMonitorTarget: TARGET_CUSTOM" << std::endl;
+            //newElementName = monitor->GetUIDAsString();
+            //this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.ExecTimeTotal);
+            // Custom monitoring target doesn't need
             break;
 
         // [SFUPDATE]
@@ -748,7 +872,7 @@ bool mtsMonitorComponent::InstallFilters(TargetComponentAccessor * CMN_UNUSED(en
         new mtsFaultDetectorThresholding(//filterAverage->GetOutputSignalName(0),
                                          periodName,
                                          periodExpected, 
-                                         10, 1); // MJTEMP
+                                         10, 1);
                                          //(size_t)(1.0 / periodExpected) * 5.0);
     ADD_FILTER(detectorThresholding);
 
