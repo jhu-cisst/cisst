@@ -663,6 +663,8 @@ bool mtsMonitorComponent::InitializeAccessors(void)
                 serverComponentName = accessor->ComponentName;
                 prvIntName = mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName());
                 // try to connect internal required interfaces to target provided interface
+                // MJ: We don't use 6-parameter version of Connect() because monitor
+                // components are assumed to be in the same process as the target components.
                 if (!LCM->Connect(clientComponentName, reqIntName, serverComponentName, prvIntName)) {
                     if (!UnregisterComponent(serverComponentName)) // MJTEMP: do i need this?
                         CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << serverComponentName << "\" from monitor component" << std::endl;

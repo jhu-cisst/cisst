@@ -139,7 +139,8 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
     switch (jsonSerializer.GetTopicType()) {
         case SF::JSONSerializer::MONITOR:
             {
-                //SendMessageToCubeCollector(MongoDB::GetDBEntryFromMonitorTopic(json));
+                SendMessageToCubeCollector(MongoDB::ConvertTopicMesssageToDBEntry(
+                    jsonSerializer.GetTopicType(), jsonSerializer));
 #if 1 // MJ TEMP for debugging
                 static int count = 0;
                 std::cout << "--------- Monitor " << ++count << std::endl;
@@ -149,7 +150,8 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
             break;
         case SF::JSONSerializer::FAULT:
             {
-                //SendMessageToCubeCollector(MongoDB::GetDBEntryFromFaultTopic(json));
+                //SendMessageToCubeCollector(MongoDB::ConvertTopicMesssageToDBEntry(
+                //    jsonSerializer.GetTopicType(), jsonSerializer));
 #if 1 // MJ TEMP for debugging
                 static int count = 0;
                 std::cout << "--------------------------------------- Fault" << ++count << std::endl;
