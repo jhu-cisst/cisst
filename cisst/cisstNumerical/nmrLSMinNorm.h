@@ -10,22 +10,22 @@ public:
 
   public:
 
-    CISSTNETLIB_INTEGER M;          // number of rows of matrix A
-    CISSTNETLIB_INTEGER N;          // number of columns of matrix A
-    CISSTNETLIB_INTEGER NRHS;       // number of right hand side vectors (columns of b)
+    CISSTNETLIB_INTEGER M;   // number of rows of matrix A
+    CISSTNETLIB_INTEGER N;   // number of columns of matrix A
+    CISSTNETLIB_INTEGER NRHS;// number of right hand side vectors (columns of b)
 
-    CISSTNETLIB_INTEGER LDA;        // lead dimension of matrix A (column stride)
-    CISSTNETLIB_INTEGER LDB;        // lead dimension of matrix B (column stride)
-                        // LDB = max( M, N ) 
+    CISSTNETLIB_INTEGER LDA; // lead dimension of matrix A (column stride)
+    CISSTNETLIB_INTEGER LDB; // lead dimension of matrix B (column stride)
+                             // LDB = max( M, N ) 
 
-    CISSTNETLIB_DOUBLE* S;      // vector of singular values
-    CISSTNETLIB_DOUBLE RCOND;   // used to determine the effective rank of A
-    CISSTNETLIB_INTEGER RANK;       // effective rank of A
+    CISSTNETLIB_DOUBLE* S;   // vector of singular values
+    CISSTNETLIB_DOUBLE RCOND;// used to determine the effective rank of A
+    CISSTNETLIB_INTEGER RANK;// effective rank of A
     
-    CISSTNETLIB_DOUBLE* WORK;   // work space
-    CISSTNETLIB_INTEGER LWORK;      // size of work space (determined by dgless)
+    CISSTNETLIB_DOUBLE* WORK;// work space
+    CISSTNETLIB_INTEGER LWORK; // size of work space (determined by dgless)
 
-    CISSTNETLIB_INTEGER INFO;       // error number
+    CISSTNETLIB_INTEGER INFO;// error number
 
     // if A is underdetermined, we need to reallocate b to a LDBxNRHS matrix
     // and copy b into the upper MxNRHS block
