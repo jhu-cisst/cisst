@@ -575,15 +575,15 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
             {
-                mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
-                if (!taskPeriodic) {
+                mtsTaskPeriodic * targetTaskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
+                if (!targetTaskPeriodic) {
                     CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: " << targetTypeString << " is only applicable to periodic task" << std::endl;
                     if (newTargetComponent) delete targetComponentAccessor;
                     return false;
                 }
                 targetComponentAccessor->AddMonitoringFunction(targetType);
 
-                AddStateVectorForMonitoring(taskPeriodic, monitorTarget);
+                AddStateVectorForMonitoring(targetTaskPeriodic, monitorTarget);
             }
             break;
 
@@ -743,9 +743,9 @@ void mtsMonitorComponent::PrintTargetComponents(void)
     */
 }
 
-void mtsMonitorComponent::AddStateVectorForMonitoring(mtsTask * task, SF::cisstMonitor * monitor)
+void mtsMonitorComponent::AddStateVectorForMonitoring(mtsTaskPeriodic * targetTaskPeriodic, SF::cisstMonitor * monitor)
 {
-    const std::string taskName = task->GetName();
+    const std::string taskName = targetTaskPeriodic->GetName();
     std::string newElementName(taskName);
 
     // MJ TEMP: Adding a new element (column vector) to state table on the fly may be not thread safe.
@@ -753,8 +753,10 @@ void mtsMonitorComponent::AddStateVectorForMonitoring(mtsTask * task, SF::cisstM
         case SF::Monitor::TARGET_THREAD_PERIOD:
             // Add "Period" to the monitoring state table of this component with the name of
             // (component name)+"Period"
-            newElementName += "Period";
-            this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.Period);
+            newElementName += "PeriodActual";
+            this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.PeriodActual);
+            // Set nominal period value
+            monitor->Samples.PeriodNominal = targetTaskPeriodic->GetPeriodicity(true);
             break;
 
         case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
