@@ -47,8 +47,6 @@ int main( int argc, char** argv ){
 
       vctDynamicVector<double> q( manipulator.links.size(), 0.0 );
       if( q.FromStreamRaw( std::cin ) ){
-	q = q * cmnPI / 180.0;
-	q[2] = q[2] * 180.0 / (cmnPI*1000.0);
 	vctFrame4x4<double> Rt = manipulator.ForwardKinematics( q );
 	std::cout << std::endl;
 	std::cout.precision(10);
@@ -71,10 +69,7 @@ int main( int argc, char** argv ){
       for( size_t i=0; i<q.size() && cnt<argc; i++, cnt++ )
 	{ sscanf( argv[cnt], "%lf", &q[i] ); }
       
-      q = q * cmnPI / 180.0;
-      q[2] = q[2] * 180.0 / (cmnPI*1000.0);
       vctFrame4x4<double> Rt = manipulator.ForwardKinematics( q );
-      std::cerr << Rt.Translation() << std::endl;
       std::cout << std::endl;
       std::cout.precision(10);
       Rt.ToStreamRaw( std::cout );
