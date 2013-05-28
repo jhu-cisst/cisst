@@ -199,7 +199,8 @@ protected:
     bool InstallFilters(TargetComponentAccessor * entry, mtsTaskPeriodic * taskPeriodic);
 
     /*! Add new column vector to the monitoring state table */
-    void AddStateVectorForMonitoring(mtsTask * task, SF::cisstMonitor * monitor);
+    void AddStateVectorForMonitoring(mtsTaskPeriodic * targetTaskPeriodic,
+                                     SF::cisstMonitor * monitor);
 
     /*! Receive event notifications from target components and publishes them to
         the Safety Supervisor of Safety Framework. */
