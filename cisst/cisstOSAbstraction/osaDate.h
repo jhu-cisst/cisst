@@ -29,10 +29,10 @@ public:
 	*/
 	osaDate(osaTimeData t);
 	/*!Default destructor*/
-	~osaDate(); 
+	~osaDate(){} 
 	/*! Creates a std::string representation of this osaDate object.
 	*/
-	std::string toString();
+	std::string ToString();
 private:
 protected:
 	int year;

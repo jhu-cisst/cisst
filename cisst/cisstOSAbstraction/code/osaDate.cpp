@@ -32,12 +32,26 @@ osaDate::osaDate(osaTimeData t)
 	second = timeinfo->tm_sec;
 }
 
-std::string osaDate::toString()
+std::string osaDate::ToString()
 {
 	std::stringstream ss;
     
-	ss<<year<<"/"<<month<<"/"<<day<<" "<<hour<<":"<<minute<<":"<<second;
-
+	ss<<year<<"/";
+    if(month<10)
+        ss<<"0";
+    ss<<month<<"/";
+    if(day<10)
+        ss<<"0";
+    ss<<day<<" ";
+    if(hour<10)
+        ss<<"0";
+    ss<<hour<<":"; 
+    if(minute<10)
+        ss<<"0";
+    ss<<minute<<":";
+    if(second<10)
+        ss<<"0";
+    ss<<second;
 	
 	return ss.str();
 }
