@@ -144,7 +144,7 @@ bool mtsSafetyCoordinator::AddMonitorTarget(SF::cisstMonitor * cisstMonitorTarge
 bool mtsSafetyCoordinator::AddMonitorTarget(const SF::JSON::JSONVALUE & targets)
 {
     if (targets.isNull() || targets.size() == 0) {
-        CMN_LOG_CLASS_RUN_ERROR << "No monitor specification found in json: " << targets << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: No monitor specification found in json: " << targets << std::endl;
         return false;
     }
 
@@ -156,14 +156,14 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const SF::JSON::JSONVALUE & targets)
         // Check if same monitoring target is already registered
         const std::string targetUID = cisstMonitorTarget->GetUIDAsString();
         if (this->FindMonitoringTarget(targetUID)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Target is already being monitored: " << targetUID << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Target is already being monitored: " << targetUID << std::endl;
             return false;
         }
 
         // Deploy monitoring target to monitor component
         const std::string targetJSON = cisstMonitorTarget->GetMonitorJSON();
         if (!DeployMonitorTarget(targetJSON, cisstMonitorTarget)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to deploy monitoring target [ " << targetJSON << " ]" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Failed to deploy monitoring target [ " << targetJSON << " ]" << std::endl;
             return false;
         }
     }
@@ -176,7 +176,7 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSON(const std::string & jsonStri
     // Construct JSON structure from JSON string
     SF::JSON json;
     if (!json.Read(jsonString.c_str())) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to read json string: " << jsonString << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetFromJSON: Failed to read json string: " << jsonString << std::endl;
         return false;
     }
 
@@ -184,10 +184,10 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSON(const std::string & jsonStri
     bool ret = AddMonitorTarget(targets);
 
     if (ret) {
-        CMN_LOG_CLASS_RUN_DEBUG << "Successfully added monitoring target(s) using json string: " << jsonString << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetFromJSON: Successfully added monitoring target(s) using json string: " << jsonString << std::endl;
         CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
     } else {
-        CMN_LOG_CLASS_RUN_DEBUG << "Failed to add monitoring target(s) using json string: " << jsonString << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetFromJSON: Failed to add monitoring target(s) using json string: " << jsonString << std::endl;
     }
 
     return ret;
@@ -198,7 +198,7 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSONFile(const std::string & json
     // Construct JSON structure from JSON file
     SF::JSON json;
     if (!json.ReadFromFile(jsonFileName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to read json file: " << jsonFileName << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetFromJSONFile: Failed to read json file: " << jsonFileName << std::endl;
         return false;
     }
 
@@ -206,10 +206,10 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSONFile(const std::string & json
     bool ret = AddMonitorTarget(targets);
 
     if (ret) {
-        CMN_LOG_CLASS_RUN_DEBUG << "Successfully added monitoring target(s) from JSON file: " << jsonFileName << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetFromJSONFile: Successfully added monitoring target(s) from JSON file: " << jsonFileName << std::endl;
         CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
     } else {
-        CMN_LOG_CLASS_RUN_DEBUG << "Failed to add monitoring target(s) from JSON file: " << jsonFileName << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetFromJSONFile: Failed to add monitoring target(s) from JSON file: " << jsonFileName << std::endl;
     }
 
     return ret;
@@ -320,10 +320,13 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
         // to the monitoring component.
         accessor = Monitors[0]->CreateTargetComponentAccessor(targetProcessName, 
                                                               targetComponentName, 
-                                                              // FIXME!!!!!!!!!!!!!!!!!!!!!!
-                                                              SF::Monitor::TARGET_INVALID, 
+                                                              SF::Monitor::TARGET_FILTER_EVENT, 
                                                               false, // this is not active filter
                                                               true); // add accessor to internal data structure
+        if (!accessor) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilterPassive: Failed to add passive filter: " << *filter << std::endl;
+            return false;
+        }
     }
 
     // Instantiate history buffer for each input signal
@@ -342,9 +345,9 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
         // has been registered to the default state table of the target component.
         // If not, the input signal cannot fetch new values from the state table and
         // thus always have zero value(s).
-        // If yes, create new historyBuffer instance that contains read functions, and
-        // add the read functions to the required interface of the target component 
-        // accessor.
+        // If the input signal exists, create new historyBuffer instance that contains 
+        // the read functions, and add the read functions to the required interface of 
+        // the target component accessor.
 
         // Get the name of provided interface of the monitoring state table
         const std::string providedInterfaceName
@@ -419,12 +422,80 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
 
 bool mtsSafetyCoordinator::AddFilterFromJSONFile(const std::string & jsonFileName)
 {
-    return false;
+    // Construct JSON structure from JSON file
+    SF::JSON json;
+    if (!json.ReadFromFile(jsonFileName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to read json file: " << jsonFileName << std::endl;
+        return false;
+    }
+
+    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::filter];
+    bool ret = AddFilter(targets);
+
+    if (ret) {
+        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+    } else {
+        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
+    }
+
+    return ret;
 }
 
 bool mtsSafetyCoordinator::AddFilterFromJSON(const std::string & jsonString)
 {
-    return false;
+    // Construct JSON structure from JSON string
+    SF::JSON json;
+    if (!json.Read(jsonString.c_str())) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSON: Failed to read json string: " << jsonString << std::endl;
+        return false;
+    }
+
+    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::filter];
+    bool ret = AddFilter(targets);
+
+    if (ret) {
+        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Successfully added filter(s) using json string: " << jsonString << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+    } else {
+        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Failed to add filter(s) using json string: " << jsonString << std::endl;
+    }
+
+    return ret;
+}
+
+bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
+{
+    if (filters.isNull() || filters.size() == 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: No filter specification found in json: " << filters << std::endl;
+        return false;
+    }
+
+    // Create filter target instance
+
+    // Figure out how many filters are defined
+#if 0
+    // Create and install filter instances, iterating each filter specification
+    for (size_t i = 0; i < targets.size(); ++i) {
+        SF::cisstMonitor * cisstMonitorTarget = new SF::cisstMonitor(targets[i]);
+
+        // Check if same monitoring target is already registered
+        const std::string targetUID = cisstMonitorTarget->GetUIDAsString();
+        if (this->FindMonitoringTarget(targetUID)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Target is already being monitored: " << targetUID << std::endl;
+            return false;
+        }
+
+        // Deploy monitoring target to monitor component
+        const std::string targetJSON = cisstMonitorTarget->GetMonitorJSON();
+        if (!DeployMonitorTarget(targetJSON, cisstMonitorTarget)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to deploy monitoring target [ " << targetJSON << " ]" << std::endl;
+            return false;
+        }
+    }
+#endif
+
+    return true;
 }
 
 bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
@@ -456,7 +527,6 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
         }
     }
     else
-        // smmy
         AddFilterPassive(filter, targetTask, targetProcessName, targetComponentName);
     
     // If this filter is the last one of filtering pipeline, install a new monitor
@@ -485,7 +555,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
 
             if (!AddMonitorTarget(monitor)) {
                 CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to install new monitor. Filter: [" << *filter << "], Monitor: [" << *monitor << "]" << std::endl;
-                // MJ TODO: undo signal installation above
+                // MJ TODO: undo signal installation process above
                 delete monitor;
                 return false;
             }
@@ -686,7 +756,6 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
     } else {
         fields[SF::Dict::Json::values].resize(numberOfScalar);
         for (size_t i = 0; i < numberOfScalar; ++i)
-            //std::setprecision(PRECISION) << values[i];
             fields[SF::Dict::Json::values][i] = values[i];
     }
 
