@@ -62,10 +62,12 @@ protected:
                              SF::cisstMonitor * cisstMonitorTargetInstance);
 
     //! Install monitoring targets from JSON
-    /*! Called internally by AddMonitorTargetFromJSONFile() and AddMonitorTargetFromJSON() 
-     */
+    /*! Called internally by AddMonitorTargetFromJSONFile() and AddMonitorTargetFromJSON() */
     bool AddMonitorTarget(const SF::JSON::JSONVALUE & targets);
 
+    //! Install filter from JSON
+    /*! Called internally by AddFilterFromJSONFile() and AddFilterFromJSON() */
+    bool AddFilter(const SF::JSON::JSONVALUE & filters);
     //! Install active filter
     bool AddFilterActive(SF::FilterBase * filter, mtsTask * targetTask);
     //! Install passive filter
