@@ -18,6 +18,7 @@
   --- end cisst license ---
 */
 
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsSafetyCoordinator.h>
 #include <cisstMultiTask/mtsMonitorComponent.h>
 #include <cisstMultiTask/mtsHistoryBuffer.h>
@@ -27,6 +28,9 @@
 #include "dict.h"
 #include "signal.h"
 #include "jsonSerializer.h"
+
+//! Const to set the decimal precision to format floating-point values
+static const int PRECISION = 9;
 
 using namespace SF::Dict::Json;
 
@@ -211,202 +215,250 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSONFile(const std::string & json
     return ret;
 }
 
-bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
+bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * targetTask)
 {
-    if (!filter) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: NULL filter error" << std::endl;
-        return false;
-    }
+    std::string         signalName;
+    SF::SignalElement * signal = 0;
+    mtsHistoryBuffer  * historyBuffer = 0;
+    mtsStateTable     * stateTable = 0;
 
-    // Collect arguments
-    const std::string targetProcessName = mtsManagerLocal::GetInstance()->GetName();
-    const std::string targetComponentName(filter->GetNameOfTargetComponent());
-    const SF::FilterBase::FilteringType filteringType = filter->GetFilteringType();
+    // Instantiate history buffer for each input signal
+    const size_t numberOfInputs = filter->GetNumberOfInputs();
+    for (size_t i = 0; i < numberOfInputs; ++i) {
+        signal = filter->GetInputSignalElement(i);
+        CMN_ASSERT(signal);
+        signalName = signal->GetName();
 
-    // Check if target component of type task exists
-    mtsTask * targetTask = mtsManagerLocal::GetInstance()->GetComponentAsTask(targetComponentName);
-    if (!targetTask) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no task-type component \"" << targetComponentName << "\" found" << std::endl;
-        return false;
-    }
+        // Each component has two state tables -- the default state table 
+        // and the monitoring state table (if the SF plug-in option enabled).
+        // Because input signals can be either raw signals from other component,
+        // which is managed by the default one, or output of other filters
+        // that the monitoring state table maintains, we first need to figure out 
+        // which state table has the input signal being added.
 
-    // Install filter
-    SF::SignalElement * signal;
-    mtsHistoryBuffer * historyBuffer = 0;
-    std::string signalName;
+        // First search for signal name in default state table
+        stateTable = targetTask->GetDefaultStateTable();
+        int stateVectorId = stateTable->GetStateVectorID(signalName);
 
-    // Active filtering: filter is run by the target component
-    if (filteringType == SF::FilterBase::ACTIVE) {
-        // Instantiate history buffer for each input signal
-        mtsStateTable * stateTable = targetTask->GetDefaultStateTable();
-        CMN_ASSERT(stateTable);
-        const size_t totalInputCount = filter->GetNumberOfInputs();
-        for (size_t i = 0; i < totalInputCount; ++i) {
-            signal = filter->GetInputSignalElement(i);
-            CMN_ASSERT(signal);
-            signalName = signal->GetName();
+        if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
+            historyBuffer = new mtsHistoryBuffer(SF::FilterBase::ACTIVE, stateTable);
+            signal->SetHistoryBufferInstance(historyBuffer);
+            // associate output signal with state vector
+            signal->SetHistoryBufferIndex(stateVectorId);
+        } else {
+            // If not found, try monitoring state table
+            stateTable = targetTask->GetMonitoringStateTable();
+            stateVectorId = stateTable->GetStateVectorID(signalName);
 
-            // Each component has two state tables -- the default state table 
-            // and the monitoring state table (if the SF plug-in option enabled).
-            // Because input signals can be either raw signals from other component
-            // (which is managed by the default one) or output of other filters
-            // (which the monitoring state table maintains), we first
-            // figure out which state table has the input signal being added.
-            int stateVectorId = stateTable->GetStateVectorID(signalName);
             if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
                 historyBuffer = new mtsHistoryBuffer(SF::FilterBase::ACTIVE, stateTable);
                 signal->SetHistoryBufferInstance(historyBuffer);
                 // associate output signal with state vector
                 signal->SetHistoryBufferIndex(stateVectorId);
             } else {
-                stateTable = targetTask->GetMonitoringStateTable();
-                stateVectorId = stateTable->GetStateVectorID(signalName);
-                if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
-                    historyBuffer = new mtsHistoryBuffer(SF::FilterBase::ACTIVE, stateTable);
-                    signal->SetHistoryBufferInstance(historyBuffer);
-                    // associate output signal with state vector
-                    signal->SetHistoryBufferIndex(stateVectorId);
-                } else {
-                    CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no input signal \"" << signalName << "\" found" << std::endl;
-                    return false;
-                }
+                CMN_LOG_CLASS_RUN_ERROR << "AddFilterActive: no input signal \"" << signalName << "\" found" << std::endl;
+                return false;
             }
         }
-        // Instantiate history buffer for each output signal
-        stateTable = targetTask->GetMonitoringStateTable();
-        CMN_ASSERT(stateTable);
-        const size_t totalOutputCount = filter->GetNumberOfOutputs();
-        for (size_t i = 0; i < totalOutputCount; ++i) {
-            signal = filter->GetOutputSignalElement(i);
-            CMN_ASSERT(signal);
-            signalName = signal->GetName();
-
-            // All output signals are added to the monitoring state table.
-            SF::SignalElement::SignalType outputSignalType = signal->GetSignalType();
-            // Create new state vector and add it to the monitoring state table.
-            // MJ: adding a new element on the fly may not be thread-safe (?)
-            mtsStateDataId id;
-            if (outputSignalType == SF::SignalElement::SCALAR) {
-                id = stateTable->NewElement(signalName, signal->GetPlaceholderScalarPointer());
-            } else {
-                id = stateTable->NewElement(signalName, signal->GetPlaceholderVectorPointer());
-            }
-            // associate output signal with state vector
-            id = stateTable->GetStateVectorID(signalName);
-            CMN_ASSERT(id != mtsStateTable::INVALID_STATEVECTOR_ID);
-            signal->SetHistoryBufferInstance(historyBuffer);
-            signal->SetHistoryBufferIndex(id);
-        }
-
-        // Associate filter with the monitoring state table of the target component.
-        // Active filters are run by target component.
-        stateTable->RegisterFilter(filter);
-    }
-    // Passive filtering: filter is run by the monitoring component
-    else {
-        // Get target component accessor
-        mtsMonitorComponent::TargetComponentAccessor * accessor
-            = Monitors[0]->GetTargetComponentAccessor(targetComponentName);
-        if (!accessor) {
-            //
-            // FIXME: THIS SHOULD BE UPDATED ACCORDINGLY TO BE ABLE TO SUPPORT CUSTOM_TARGET
-            //
-            // If target component accessor is null, create new accessor and add it
-            // to the monitoring component.
-            accessor = Monitors[0]->CreateTargetComponentAccessor(targetProcessName, 
-                                                                  targetComponentName, 
-                                                                  // FIXME!!!!!!!!!!!!!!!!!!!!!!
-                                                                  SF::Monitor::TARGET_INVALID, 
-                                                                  false, // this is not active filter
-                                                                  true); // add accessor to internal data structure
-        }
-
-        // Instantiate history buffer for each input signal
-        mtsStateTable * stateTable = Monitors[0]->GetMonitoringStateTable();
-        CMN_ASSERT(stateTable);
-        const size_t totalInputCount = filter->GetNumberOfInputs();
-        for (size_t i = 0; i < totalInputCount; ++i) {
-            signal = filter->GetInputSignalElement(i);
-            CMN_ASSERT(signal);
-            signalName = signal->GetName();
-
-            // TODO: Establish mts connection between monitor::required interface and
-            // target component's state table::provided interface
-
-            // Check if a read-from-statetable command that the input signal uses
-            // has been registered to the default state table of the target component.
-            // If not, the input signal cannot fetch new values from the state table and
-            // thus always have zero value(s).
-            // If yes, create new historyBuffer instance that contains read functions, and
-            // add the read functions to the required interface of the target component 
-            // accessor.
-
-            // Get the name of provided interface of the monitoring state table
-            const std::string providedInterfaceName
-                = mtsStateTable::GetNameOfStateTableInterface(targetTask->GetMonitoringStateTableName());
-            // Get the instance of the provided interface
-            mtsInterfaceProvided * provided = targetTask->GetInterfaceProvided(providedInterfaceName);
-            CMN_ASSERT(provided);
-
-            // Set the name of the read-from-statetable command
-            std::string commandName("Get");
-            commandName += signalName;
-            // Add read-from-statetable command for each input signal
-            if (signal->GetSignalType() == SF::SignalElement::SCALAR) {
-                provided->AddCommandReadStateInternalScalar(targetTask->StateTable, signalName, commandName);
-            } else {
-                provided->AddCommandReadStateInternalVector(targetTask->StateTable, signalName, commandName);
-            }
-
-            // Get the name of required interface of the target component accessor
-            const std::string requiredInterfaceName
-                = mtsMonitorComponent::GetNameOfStateTableAccessInterface(targetComponentName);
-            // Get the instance of the required interface 
-            mtsInterfaceRequired * required = Monitors[0]->GetInterfaceRequired(requiredInterfaceName);
-            CMN_ASSERT(required);
-
-            historyBuffer = new mtsHistoryBuffer(SF::FilterBase::PASSIVE, stateTable);
-            signal->SetHistoryBufferInstance(historyBuffer);
-
-            // Add functions to fetch data from the monitoring state table of the target component
-            // using read-from-statetable commands added above.
-            if (signal->GetSignalType() == SF::SignalElement::SCALAR) {
-                required->AddFunction(commandName, historyBuffer->FetchScalarValue);
-            } else {
-                required->AddFunction(commandName, historyBuffer->FetchVectorValue);
-            }
-        }
-
-        // Instantiate history buffer for each output signal
-        const size_t totalOutputCount = filter->GetNumberOfOutputs();
-        for (size_t i = 0; i < totalOutputCount; ++i) {
-            signal = filter->GetOutputSignalElement(i);
-            CMN_ASSERT(signal);
-            signalName = signal->GetName();
-
-            // The monitoring state table of the monitor component maintains all output signals
-            SF::SignalElement::SignalType outputSignalType = signal->GetSignalType();
-            // Create new state vector and add it to the monitoring state table.
-            // MJ: adding a new element on the fly may not be thread-safe (?)
-            mtsStateDataId id;
-            if (outputSignalType == SF::SignalElement::SCALAR) {
-                id = stateTable->NewElement(signalName, signal->GetPlaceholderScalarPointer());
-            } else {
-                id = stateTable->NewElement(signalName, signal->GetPlaceholderVectorPointer());
-            }
-            // associate output signal with state vector
-            id = stateTable->GetStateVectorID(signalName);
-            CMN_ASSERT(id != mtsStateTable::INVALID_STATEVECTOR_ID);
-            historyBuffer = new mtsHistoryBuffer(SF::FilterBase::PASSIVE, stateTable);
-            signal->SetHistoryBufferInstance(historyBuffer);
-            signal->SetHistoryBufferIndex(id);
-        }
-
-        // Associate filter with the monitoring state table of the monitoring component 
-        // Passive filters are run by the Monitor component.
-        stateTable->RegisterFilter(filter);
     }
 
+    // Instantiate history buffer for each output signal.
+    // Output signals are maintained by monitoring state table.
+    stateTable = targetTask->GetMonitoringStateTable();
+    const size_t numberOfOutputs = filter->GetNumberOfOutputs();
+    for (size_t i = 0; i < numberOfOutputs; ++i) {
+        signal = filter->GetOutputSignalElement(i);
+        CMN_ASSERT(signal);
+        signalName = signal->GetName();
+
+        SF::SignalElement::SignalType outputSignalType = signal->GetSignalType();
+        // Create new state vector for output and add it to the monitoring state table.
+        // MJ: adding a new element on the fly may not be thread-safe but adding a new
+        // filter is usually done before starting components.
+        // Should filters be added at run-time, this thread-safety issue may need to
+        // be reviewed.
+        mtsStateDataId id;
+        if (outputSignalType == SF::SignalElement::SCALAR) {
+            id = stateTable->NewElement(signalName, signal->GetPlaceholderScalarPointer());
+        } else {
+            id = stateTable->NewElement(signalName, signal->GetPlaceholderVectorPointer());
+        }
+        // associate output signal with state vector
+        id = stateTable->GetStateVectorID(signalName);
+        CMN_ASSERT(id != mtsStateTable::INVALID_STATEVECTOR_ID);
+        signal->SetHistoryBufferInstance(historyBuffer);
+        signal->SetHistoryBufferIndex(id);
+    }
+
+    // Associate filter with the monitoring state table of the target component.
+    // Active filters are run by target component.
+    stateTable->RegisterFilter(filter);
+
+    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterActive: Successfully added ACTIVE filter to component \"" 
+        << targetTask->GetName() << "\", filter: " << *filter << std::endl;
+
+    return true;
+}
+
+bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
+                                            mtsTask           * targetTask,
+                                            const std::string & targetProcessName,
+                                            const std::string & targetComponentName)
+{
+    std::string         signalName;
+    SF::SignalElement * signal;
+    mtsHistoryBuffer  * historyBuffer = 0;
+
+    // Get target component accessor
+    mtsMonitorComponent::TargetComponentAccessor * accessor
+        = Monitors[0]->GetTargetComponentAccessor(targetComponentName);
+    if (!accessor) {
+        //
+        // FIXME: THIS SHOULD BE UPDATED ACCORDINGLY TO BE ABLE TO SUPPORT CUSTOM_TARGET
+        //
+        // If target component accessor is null, create new accessor and add it
+        // to the monitoring component.
+        accessor = Monitors[0]->CreateTargetComponentAccessor(targetProcessName, 
+                                                              targetComponentName, 
+                                                              // FIXME!!!!!!!!!!!!!!!!!!!!!!
+                                                              SF::Monitor::TARGET_INVALID, 
+                                                              false, // this is not active filter
+                                                              true); // add accessor to internal data structure
+    }
+
+    // Instantiate history buffer for each input signal
+    mtsStateTable * stateTable = Monitors[0]->GetMonitoringStateTable();
+    CMN_ASSERT(stateTable);
+    const size_t numberOfInputs = filter->GetNumberOfInputs();
+    for (size_t i = 0; i < numberOfInputs; ++i) {
+        signal = filter->GetInputSignalElement(i);
+        CMN_ASSERT(signal);
+        signalName = signal->GetName();
+
+        // TODO: Establish mts connection between monitor::required interface and
+        // target component's state table::provided interface
+
+        // Check if a read-from-statetable command that the input signal uses
+        // has been registered to the default state table of the target component.
+        // If not, the input signal cannot fetch new values from the state table and
+        // thus always have zero value(s).
+        // If yes, create new historyBuffer instance that contains read functions, and
+        // add the read functions to the required interface of the target component 
+        // accessor.
+
+        // Get the name of provided interface of the monitoring state table
+        const std::string providedInterfaceName
+            = mtsStateTable::GetNameOfStateTableInterface(targetTask->GetMonitoringStateTableName());
+        // Get the instance of the provided interface
+        mtsInterfaceProvided * provided = targetTask->GetInterfaceProvided(providedInterfaceName);
+        CMN_ASSERT(provided);
+
+        // Set the name of the read-from-statetable command
+        std::string commandName("Get");
+        commandName += signalName;
+        // Add read-from-statetable command for each input signal
+        if (signal->GetSignalType() == SF::SignalElement::SCALAR) {
+            provided->AddCommandReadStateInternalScalar(targetTask->StateTable, signalName, commandName);
+        } else {
+            provided->AddCommandReadStateInternalVector(targetTask->StateTable, signalName, commandName);
+        }
+
+        // Get the name of required interface of the target component accessor
+        const std::string requiredInterfaceName
+            = mtsMonitorComponent::GetNameOfStateTableAccessInterface(targetComponentName);
+        // Get the instance of the required interface 
+        mtsInterfaceRequired * required = Monitors[0]->GetInterfaceRequired(requiredInterfaceName);
+        CMN_ASSERT(required);
+
+        historyBuffer = new mtsHistoryBuffer(SF::FilterBase::PASSIVE, stateTable);
+        signal->SetHistoryBufferInstance(historyBuffer);
+
+        // Add functions to fetch data from the monitoring state table of the target component
+        // using read-from-statetable commands added above.
+        if (signal->GetSignalType() == SF::SignalElement::SCALAR) {
+            required->AddFunction(commandName, historyBuffer->FetchScalarValue);
+        } else {
+            required->AddFunction(commandName, historyBuffer->FetchVectorValue);
+        }
+    }
+
+    // Instantiate history buffer for each output signal
+    const size_t numberOfOutputs = filter->GetNumberOfOutputs();
+    for (size_t i = 0; i < numberOfOutputs; ++i) {
+        signal = filter->GetOutputSignalElement(i);
+        CMN_ASSERT(signal);
+        signalName = signal->GetName();
+
+        // The monitoring state table of the monitor component maintains all output signals
+        SF::SignalElement::SignalType outputSignalType = signal->GetSignalType();
+        // Create new state vector and add it to the monitoring state table.
+        // MJ: adding a new element on the fly may not be thread-safe (?)
+        mtsStateDataId id;
+        if (outputSignalType == SF::SignalElement::SCALAR) {
+            id = stateTable->NewElement(signalName, signal->GetPlaceholderScalarPointer());
+        } else {
+            id = stateTable->NewElement(signalName, signal->GetPlaceholderVectorPointer());
+        }
+        // associate output signal with state vector
+        id = stateTable->GetStateVectorID(signalName);
+        CMN_ASSERT(id != mtsStateTable::INVALID_STATEVECTOR_ID);
+        historyBuffer = new mtsHistoryBuffer(SF::FilterBase::PASSIVE, stateTable);
+        signal->SetHistoryBufferInstance(historyBuffer);
+        signal->SetHistoryBufferIndex(id);
+    }
+
+    // Associate filter with the monitoring state table of the monitoring component 
+    // Passive filters are run by the Monitor component.
+    stateTable->RegisterFilter(filter);
+
+    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterPassive: Successfully added PASSIVE filter to component \"" 
+        << targetTask->GetName() << "\", filter: " << *filter << std::endl;
+
+    return true;
+}
+
+bool mtsSafetyCoordinator::AddFilterFromJSONFile(const std::string & jsonFileName)
+{
+    return false;
+}
+
+bool mtsSafetyCoordinator::AddFilterFromJSON(const std::string & jsonString)
+{
+    return false;
+}
+
+bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
+{
+    if (!filter) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: NULL filter instance" << std::endl;
+        return false;
+    }
+
+    // Collect arguments
+    // filter can be only deployed to the process where target component runs.
+    const std::string targetProcessName   = mtsManagerLocal::GetInstance()->GetName();
+    const std::string targetComponentName = filter->GetNameOfTargetComponent();
+    const SF::FilterBase::FilteringType filteringType = filter->GetFilteringType();
+
+    // Check if task-type target component exists
+    mtsTask * targetTask = mtsManagerLocal::GetInstance()->GetComponentAsTask(targetComponentName);
+    if (!targetTask) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no task-type component found: \"" << targetComponentName << "\"" << std::endl;
+        return false;
+    }
+
+    // Active filters are run by the target component and passive filters are run by
+    // the monitoring component.
+    if (filteringType == SF::FilterBase::ACTIVE) {
+        if (!AddFilterActive(filter, targetTask)) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: failed to add active filter for: " << *filter << std::endl;
+            return false;
+        }
+    }
+    else
+        // smmy
+        AddFilterPassive(filter, targetTask, targetProcessName, targetComponentName);
+    
     // If this filter is the last one of filtering pipeline, install a new monitor
     // instance to publish events or faults detected by this filter.
     if (filter->IsLastFilterOfPipeline()) {
@@ -608,7 +660,7 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
     SF::JSONSerializer serializer;
 
     // Predefined monitoring targets are handled by SF::cisstMonitor
-    const SF::Monitor::TargetType targetType = serializer.GetMonitorTargetType();
+    const SF::Monitor::TargetType targetType = monitorTarget.GetTargetType();
     if (targetType != SF::Monitor::TARGET_CUSTOM)
         return std::string("");
 
@@ -622,6 +674,24 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
 
     // Populate monitor-specific fields
     SF::JSON::JSONVALUE & fields = serializer.GetMonitorFields();
+
+    // Extract double values from payload
+    std::stringstream ss;
+    payload->ToStreamRaw(ss);
+    std::vector<double> values;
+    size_t numberOfScalar = mtsSafetyCoordinator::ExtractScalarValues(ss, values);
+    if (numberOfScalar == 1) {
+        // If single element scalr, key is "value" (otherwise, "values")
+        fields[SF::Dict::Json::value] = values[0];
+    } else {
+        fields[SF::Dict::Json::values].resize(numberOfScalar);
+        for (size_t i = 0; i < numberOfScalar; ++i)
+            //std::setprecision(PRECISION) << values[i];
+            fields[SF::Dict::Json::values][i] = values[i];
+    }
+
+#if 0
+    // Handle instances of mtsGenericObject and mtsGenericObjectProxy differently
     size_t numberOfElement = payload->ScalarNumber();
     // If single element scalr, key is "value" (otherwise, "values")
     if (numberOfElement == 1)
@@ -631,11 +701,35 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
         ss << "[ ";
         for (size_t i = 0; i < numberOfElement; ++i) {
             if (i > 0) ss << ", ";
-            ss << payload->Scalar(i);
+            ss << std::setprecision(PRECISION) << payload->Scalar(i);
         }
         ss << " ]";
         fields[SF::Dict::Json::values] = ss.str();
     }
+#endif
 
     return serializer.GetJSON();
 }
+
+size_t mtsSafetyCoordinator::ExtractScalarValues(const std::stringstream & ss, 
+                                                 std::vector<double> & values)
+{
+#define DELIMITER " "
+    char * str = new char[ss.str().size()];
+    memcpy(str, ss.str().c_str(), ss.str().size());
+    char * ptr = strtok(str, DELIMITER);
+    int cnt = 1;
+    while (ptr) {
+        // skip three base numeric fields from cmnGenericObject
+        if (cnt++ <= 3) {
+            ptr = strtok(0, DELIMITER);
+            continue;
+        }
+        values.push_back(atof(ptr));
+        ptr = strtok(0, DELIMITER);
+    }
+#undef DELIMITER
+
+    return values.size();
+}
+
