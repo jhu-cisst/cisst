@@ -61,6 +61,11 @@ protected:
     bool DeployMonitorTarget(const std::string & targetJSON, 
                              SF::cisstMonitor * cisstMonitorTargetInstance);
 
+    //! Install monitoring targets from JSON
+    /*! Called internally by AddMonitorTargetFromJSONFile() and AddMonitorTargetFromJSON() 
+     */
+    bool AddMonitorTarget(const SF::JSON::JSONVALUE & targets);
+
 public:
     //! Constructor
     mtsSafetyCoordinator(void);
@@ -75,8 +80,10 @@ public:
 
     //! Install a single monitoring target object using monitor instance
     bool AddMonitorTarget(SF::cisstMonitor * monitor);
-    //! Install possibly multiiple monitoring target objects using JSON file
-    bool AddMonitorTarget(const std::string & jsonFileName);
+    //! Install monitoring targets by reading JSON file
+    bool AddMonitorTargetFromJSONFile(const std::string & jsonFileName);
+    //! Install monitoring targets from JSON string
+    bool AddMonitorTargetFromJSON(const std::string & jsonString);
 
     //-------------------------------------------------- 
     //  Filtering
@@ -95,12 +102,18 @@ public:
     //-------------------------------------------------- 
     // TODO
 
+
     //-------------------------------------------------- 
     //  Misc.
     //-------------------------------------------------- 
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);
+
+    //! JSON serializer
+    static const std::string GetJsonForPublish(const SF::cisstMonitor & monitorTarget,
+                                               mtsGenericObject * payload,
+                                               double timestamp);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSafetyCoordinator);
