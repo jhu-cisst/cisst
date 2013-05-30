@@ -19,6 +19,7 @@
 */
 
 #include "dict.h"
+#include "jsonSerializer.h"
 
 #include <cisstMultiTask/mtsMonitorComponent.h>
 
@@ -29,8 +30,6 @@
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
 #include <cisstMultiTask/mtsFaultTypes.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-
-using namespace SF::Dict;
 
 CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
 
@@ -158,11 +157,39 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid custom function (\"" 
                     << monitor->GetLocationID()->GetCommandName() << "\"" << std::endl;
             } else {
-                // TODO: how to expand a set of supported data types?? double, doublevec??
-                // does SF need sort of prm lib?
+#if 0
                 double sample;
                 (*functionRead)(sample);
                 publisher->Publish(monitor->GetJsonForPublish(sample, currentTick));
+#endif
+                // Create a temporary argument which includes dynamic allocation internally.
+                // Therefore, this object should be deallocated manually.
+                mtsFunctionRead::CommandType * command = functionRead->GetCommand();
+                CMN_ASSERT(command);
+                mtsGenericObject * tempArgument;
+                {
+                    tempArgument = dynamic_cast<mtsGenericObject *>(
+                        command->GetArgumentPrototype()->Services()->Create());
+                    if (!tempArgument) {
+                        CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to created argument prototype for command \"" 
+                            << command->GetName() << "\"" << std::endl;
+                        continue;
+                    }
+
+                    // Fetch new value
+                    (*functionRead)(*tempArgument);
+
+                    // TEST {
+                    SF::JSONSerializer js;
+                    js.SetTopicType(SF::JSONSerializer::MONITOR);
+                    SF::JSON::JSONVALUE & field = js.GetMonitorFields();
+                    field[SF::Dict::Json::custom] = 3.0;
+                    // }
+
+                    //publisher->Publish(monitor->GetJsonForPublish(sample, currentTick));
+                }
+                delete tempArgument;
+
                 monitor->UpdateLastSamplingTick(currentTick);
                 if (ManualAdvance)
                     advance = true;
@@ -298,7 +325,7 @@ void mtsMonitorComponent::Initialize(void)
     // mtsMonitorComponent::RunMonitors(void).
     this->StateTableMonitor.SetAutomaticAdvance(!ManualAdvance);
 
-    Publisher = new SF::Publisher(TopicNames::Monitor);
+    Publisher = new SF::Publisher(SF::Dict::TopicNames::Monitor);
     Publisher->Startup();
 #if 0
     ThreadPublisher.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunPublisher, 0);
@@ -306,7 +333,7 @@ void mtsMonitorComponent::Initialize(void)
 #endif
 
     SubscriberCallback = new mtsSubscriberCallback;
-    Subscriber = new SF::Subscriber(TopicNames::Supervisor, SubscriberCallback);
+    Subscriber = new SF::Subscriber(SF::Dict::TopicNames::Supervisor, SubscriberCallback);
     ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
 }
@@ -436,10 +463,10 @@ mtsMonitorComponent::TargetComponentAccessor *
 
         // MJ FIXME: can't HandleMonitorEvent be moved to if () down below?
         // Add monitor event handler if new tareget component is to be added.
-        required->AddEventHandlerWrite(&mtsMonitorComponent::HandleMonitorEvent, this, MonitorNames::MonitorEvent);
+        required->AddEventHandlerWrite(&mtsMonitorComponent::HandleMonitorEvent, this, SF::Dict::MonitorNames::MonitorEvent);
         // Add fault event handler if new tareget component is to be added.
         if (attachFaultEventHandler) {
-            required->AddEventReceiver(FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
+            required->AddEventReceiver(SF::Dict::FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
             targetComponentAccessor->FaultEventReceiver.SetHandler(&mtsMonitorComponent::HandleFaultEvent, this);
         }
 

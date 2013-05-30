@@ -26,6 +26,7 @@
 
 #include "dict.h"
 #include "signal.h"
+#include "jsonSerializer.h"
 
 using namespace SF::Dict::Json;
 
@@ -136,18 +137,10 @@ bool mtsSafetyCoordinator::AddMonitorTarget(SF::cisstMonitor * cisstMonitorTarge
     return true;
 }
 
-bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & jsonFileName)
+bool mtsSafetyCoordinator::AddMonitorTarget(const SF::JSON::JSONVALUE & targets)
 {
-    // Construct JSON structure from file
-    SF::JSON json;
-    if (!json.ReadFromFile(jsonFileName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to read json file: " << jsonFileName << std::endl;
-        return false;
-    }
-
-    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::monitor];
     if (targets.isNull() || targets.size() == 0) {
-        CMN_LOG_CLASS_RUN_ERROR << "No monitor specification found in json file: " << jsonFileName << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "No monitor specification found in json: " << targets << std::endl;
         return false;
     }
 
@@ -171,10 +164,51 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & jsonFileName)
         }
     }
 
-    CMN_LOG_CLASS_RUN_DEBUG << "Successfully added monitoring target(s) from json file: " << jsonFileName << std::endl;
-    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
-
     return true;
+}
+
+bool mtsSafetyCoordinator::AddMonitorTargetFromJSON(const std::string & jsonString)
+{
+    // Construct JSON structure from JSON string
+    SF::JSON json;
+    if (!json.Read(jsonString.c_str())) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to read json string: " << jsonString << std::endl;
+        return false;
+    }
+
+    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::monitor];
+    bool ret = AddMonitorTarget(targets);
+
+    if (ret) {
+        CMN_LOG_CLASS_RUN_DEBUG << "Successfully added monitoring target(s) using json string: " << jsonString << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+    } else {
+        CMN_LOG_CLASS_RUN_DEBUG << "Failed to add monitoring target(s) using json string: " << jsonString << std::endl;
+    }
+
+    return ret;
+}
+
+bool mtsSafetyCoordinator::AddMonitorTargetFromJSONFile(const std::string & jsonFileName)
+{
+    // Construct JSON structure from JSON file
+    SF::JSON json;
+    if (!json.ReadFromFile(jsonFileName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to read json file: " << jsonFileName << std::endl;
+        return false;
+    }
+
+    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::monitor];
+    bool ret = AddMonitorTarget(targets);
+
+    if (ret) {
+        CMN_LOG_CLASS_RUN_DEBUG << "Successfully added monitoring target(s) from JSON file: " << jsonFileName << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+    } else {
+        CMN_LOG_CLASS_RUN_DEBUG << "Failed to add monitoring target(s) from JSON file: " << jsonFileName << std::endl;
+    }
+
+    return ret;
 }
 
 bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
@@ -564,3 +598,44 @@ void mtsSafetyCoordinator::DeSerializeRaw(std::istream & inputStream)
     //cmnDeSerializeRaw(inputStream, Process);
 }
 
+const std::string mtsSafetyCoordinator::GetJsonForPublish(
+    const SF::cisstMonitor & monitorTarget, mtsGenericObject * payload, double timestamp)
+{
+    if (!payload)
+        return std::string("");
+
+    // JSONSerializer instance
+    SF::JSONSerializer serializer;
+
+    // Predefined monitoring targets are handled by SF::cisstMonitor
+    const SF::Monitor::TargetType targetType = serializer.GetMonitorTargetType();
+    if (targetType != SF::Monitor::TARGET_CUSTOM)
+        return std::string("");
+
+    // Populate common fields
+    SF::cisstEventLocation * locationID =
+        dynamic_cast<SF::cisstEventLocation*>(monitorTarget.GetLocationID());
+    serializer.SetTopicType(SF::JSONSerializer::MONITOR);
+    serializer.SetEventLocation(locationID);
+    serializer.SetTimestamp(timestamp);
+    serializer.SetMonitorTargetType(SF::Monitor::TARGET_CUSTOM);
+
+    // Populate monitor-specific fields
+    SF::JSON::JSONVALUE & fields = serializer.GetMonitorFields();
+    size_t numberOfElement = payload->ScalarNumber();
+    // If single element scalr, key is "value" (otherwise, "values")
+    if (numberOfElement == 1)
+        fields[SF::Dict::Json::value] = payload->Scalar(0);
+    else {
+        std::stringstream ss;
+        ss << "[ ";
+        for (size_t i = 0; i < numberOfElement; ++i) {
+            if (i > 0) ss << ", ";
+            ss << payload->Scalar(i);
+        }
+        ss << " ]";
+        fields[SF::Dict::Json::values] = ss.str();
+    }
+
+    return serializer.GetJSON();
+}
