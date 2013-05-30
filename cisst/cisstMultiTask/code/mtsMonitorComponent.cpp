@@ -157,11 +157,6 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                 CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid custom function (\"" 
                     << monitor->GetLocationID()->GetCommandName() << "\"" << std::endl;
             } else {
-#if 0
-                double sample;
-                (*functionRead)(sample);
-                publisher->Publish(monitor->GetJsonForPublish(sample, currentTick));
-#endif
                 // Create a temporary argument which includes dynamic allocation internally.
                 // Therefore, this object should be deallocated manually.
                 mtsFunctionRead::CommandType * command = functionRead->GetCommand();
@@ -176,17 +171,13 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
                         continue;
                     }
 
-                    // Fetch new value
+                    // fetch new value
                     (*functionRead)(*tempArgument);
 
-                    // TEST {
-                    SF::JSONSerializer js;
-                    js.SetTopicType(SF::JSONSerializer::MONITOR);
-                    SF::JSON::JSONVALUE & field = js.GetMonitorFields();
-                    field[SF::Dict::Json::custom] = 3.0;
-                    // }
-
+                    // publish new reading to the system via Safety Coordinator's publisher
                     //publisher->Publish(monitor->GetJsonForPublish(sample, currentTick));
+                    publisher->Publish(mtsSafetyCoordinator::GetJsonForPublish(
+                        *monitor, tempArgument, osaGetTime()));
                 }
                 delete tempArgument;
 

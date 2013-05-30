@@ -66,6 +66,14 @@ protected:
      */
     bool AddMonitorTarget(const SF::JSON::JSONVALUE & targets);
 
+    //! Install active filter
+    bool AddFilterActive(SF::FilterBase * filter, mtsTask * targetTask);
+    //! Install passive filter
+    bool AddFilterPassive(SF::FilterBase    * filter,
+                          mtsTask           * targetTask,
+                          const std::string & targetProcessName,
+                          const std::string & targetComponentName);
+
 public:
     //! Constructor
     mtsSafetyCoordinator(void);
@@ -88,8 +96,12 @@ public:
     //-------------------------------------------------- 
     //  Filtering
     //-------------------------------------------------- 
-    //! Install filter either on the target component or on the monitor component
+    //! Install a single filter using filter instance
     bool AddFilter(SF::FilterBase * filter);
+    //! Install filters by reading JSON file
+    bool AddFilterFromJSONFile(const std::string & jsonFileName);
+    //! Install filters from JSON string
+    bool AddFilterFromJSON(const std::string & jsonString);
 
     //! Deploy all monitors and FDDs that are installed so far.
     /*! MJ: Right now, this method should be called user's main.cpp but could be moved
@@ -114,6 +126,15 @@ public:
     static const std::string GetJsonForPublish(const SF::cisstMonitor & monitorTarget,
                                                mtsGenericObject * payload,
                                                double timestamp);
+    //! Extract double values out of ToStream()
+    // MJ: mts-variables that are derived from cmnGenericObject do not properly override 
+    // cmnGenericObject::ScalarNumber() and cmnGenericObject::Scalar(), and thus cannot
+    // be used to extract double values.  Instead, cmnGenericObject::ToStreamRaw() appears 
+    // to work fine and this method is used to extract double values out of string.
+    // This introduces additional run-time overhead for string parsing and type conversion.
+    // When the two methods above are properly supported by the derived classes, this 
+    // method should be deprecated.
+    static size_t ExtractScalarValues(const std::stringstream & ss, std::vector<double> & values);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSafetyCoordinator);
