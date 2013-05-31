@@ -26,8 +26,10 @@
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 #include "dict.h"
+#include "utils.h"
 #include "signal.h"
 #include "jsonSerializer.h"
+#include "filters/threshold.h"
 
 //! Const to set the decimal precision to format floating-point values
 static const int PRECISION = 9;
@@ -473,27 +475,28 @@ bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
 
     // Create filter target instance
 
-    // Figure out how many filters are defined
-#if 0
-    // Create and install filter instances, iterating each filter specification
-    for (size_t i = 0; i < targets.size(); ++i) {
-        SF::cisstMonitor * cisstMonitorTarget = new SF::cisstMonitor(targets[i]);
+    // Figure out how many filters are defined, and 
+    // create and install filter instances while iterating each filter specification
+    std::string filterClassName;
+    SF::FilterBase * filter = 0; 
+    for (size_t i = 0; i < filters.size(); ++i) {
+        filterClassName = SF::JSON::GetSafeValueString(filters[i], SF::Dict::Json::class_name);
+        SF::to_lowercase(filterClassName);
+        // Create filter instance based on filter class name
+        if (filterClassName.compare("filterthreshold") == 0)
+            filter = new SF::FilterThreshold(filters[i]);
+        // [SFUPDATE]
 
-        // Check if same monitoring target is already registered
-        const std::string targetUID = cisstMonitorTarget->GetUIDAsString();
-        if (this->FindMonitoringTarget(targetUID)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Target is already being monitored: " << targetUID << std::endl;
+        // Install filter to the target component
+        if (!AddFilter(filter)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to add filter \"" << filter->GetFilterName() << "\"\n";
+            delete filter;
             return false;
         }
-
-        // Deploy monitoring target to monitor component
-        const std::string targetJSON = cisstMonitorTarget->GetMonitorJSON();
-        if (!DeployMonitorTarget(targetJSON, cisstMonitorTarget)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to deploy monitoring target [ " << targetJSON << " ]" << std::endl;
-            return false;
-        }
-    }
-#endif
+        CMN_LOG_CLASS_RUN_DEBUG << "[" << (i + 1) << "/" << filters.size() << "] "
+            << "Successfully installed filter: \"" << filter->GetFilterName() << "\"" << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << *filter << std::endl;
+   }
 
     return true;
 }
@@ -540,16 +543,17 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
         // propagated to one of target component accessors of the monitoring component.
         // Then, the fault event is handled by mtsMonitorComponent::HandleFaultEvent() which
         // propagates the event to the Safety Supervisor.
-        if (filteringType == SF::FilterBase::ACTIVE) {
-            // Define target
-            SF::cisstEventLocation * locationID = new SF::cisstEventLocation;
-            locationID->SetProcessName(targetProcessName);
-            locationID->SetComponentName(targetComponentName);
 
-            SF::cisstMonitor * monitor = new SF::cisstMonitor(SF::Monitor::TARGET_FILTER_EVENT,
-                                                              locationID,
-                                                              SF::Monitor::STATE_ON,
-                                                              SF::Monitor::OUTPUT_EVENT);
+        // Define monitoring target
+        SF::cisstEventLocation * locationID = new SF::cisstEventLocation;
+        locationID->SetProcessName(targetProcessName);
+        locationID->SetComponentName(targetComponentName);
+
+        SF::cisstMonitor * monitor = new SF::cisstMonitor(SF::Monitor::TARGET_FILTER_EVENT,
+                                                            locationID,
+                                                            SF::Monitor::STATE_ON,
+                                                            SF::Monitor::OUTPUT_EVENT);
+        if (filteringType == SF::FilterBase::ACTIVE) {
             // Install fault event handler to target component accessor of the monitor component
             monitor->SetAttachedToActiveFilter(true);
 
@@ -612,15 +616,6 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
             // MJ TODO: better way than setting instance of monitor component??
             eventPublisher->SetMonitorComponentInstance(Monitors[0]);
 
-            // Define target
-            SF::cisstEventLocation * locationID = new SF::cisstEventLocation;
-            locationID->SetProcessName(targetProcessName);
-            locationID->SetComponentName(targetComponentName);
-
-            SF::cisstMonitor * monitor = new SF::cisstMonitor(SF::Monitor::TARGET_FILTER_EVENT,
-                                                              locationID,
-                                                              SF::Monitor::STATE_ON,
-                                                              SF::Monitor::OUTPUT_EVENT);
             if (!AddMonitorTarget(monitor)) {
                 CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to install new monitor. Filter: [" << *filter << "], Monitor: [" << *monitor << "]" << std::endl;
                 // MJ TODO: undo signal installation above
