@@ -1,5 +1,25 @@
-#include "../osaPerformanceCounter.h"
-#include "../osaTimeData.h"
+
+/*
+  $Id: osaPerformanceCounter.cpp 3034 2013-05-31 09:53:36Z tkim60 $
+
+  Author(s):  Tae Soo Kim
+  Created on: 2013-05-31
+
+  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#include <cisstOSAbstraction/osaTimeData.h>
+#include <cisstOSAbstraction/osaPerformanceCounter.h>
 
 void osaPerformanceCounter::Reset()
 {

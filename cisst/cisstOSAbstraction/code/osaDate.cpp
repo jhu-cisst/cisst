@@ -1,8 +1,27 @@
-#include "../osaDate.h"
+/*
+  $Id: osaDate.cpp 3034 2013-05-31 09:53:36Z tkim60 $
+
+  Author(s):  Tae Soo Kim
+  Created on: 2013-05-31
+
+  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#include <cisstOSAbstraction/osaDate.h>
 
 osaDate::osaDate()
 {
-	timespec t;
+/*	timespec t;
 	clock_gettime(CLOCK_REALTIME,&t);
 	time_t tt = t.tv_sec;
 	struct tm *timeinfo;
@@ -12,24 +31,21 @@ osaDate::osaDate()
 	DayMember = timeinfo->tm_mday ;  // day of the month 1~31
 	HourMember = timeinfo->tm_hour ; // hour since midnight
 	MinuteMember = timeinfo->tm_min ;
-	SecondMember = timeinfo->tm_sec;
+	SecondMember = timeinfo->tm_sec;*/
 
+	YearMember =0;
+	MonthMember = 0;
+	DayMember = 0 ;  // day of the month 1~31
+	HourMember = 0 ; // hour since midnight
+	MinuteMember = 0 ;
+	SecondMember = 0;
+
+    NanoSeconds = 0;
 }
 
-osaDate::osaDate(const osaTimeData &t)
+osaDate::osaDate(osaTimeData &t)
 {
-	struct timespec ts;
-	ts.tv_sec = t.GetSeconds();
-	ts.tv_nsec = t.GetNanoSeconds();
-	struct tm *timeinfo;
-	timeinfo = localtime(&ts.tv_sec);
-	
-	YearMember = timeinfo->tm_year + 1900 ;
-	MonthMember = timeinfo->tm_mon +1;
-	DayMember = timeinfo->tm_mday;
-	HourMember = timeinfo->tm_hour;
-	MinuteMember = timeinfo->tm_min;
-	SecondMember = timeinfo->tm_sec;
+    From(t);
 }
 
 std::string osaDate::ToString() const
@@ -56,62 +72,98 @@ std::string osaDate::ToString() const
 	return ss.str();
 }
 
-int& osaDate::GetYear(void)
+void osaDate::From(osaTimeData &timeData)
+{
+    osaTimeData zero(0.0);
+    timeData.Normalize();
+    
+    try
+    {
+        if (timeData<zero)
+            throw std::runtime_error("Can not create an osaDate from a negative osaTimeData");
+    }
+    catch(std::exception const& e)
+    {
+        std::cout << "Exception: " << e.what() << "\n";
+    }
+
+
+	struct timespec ts;
+	ts.tv_sec = timeData.GetSeconds();
+	ts.tv_nsec = timeData.GetNanoSeconds();
+	struct tm *timeinfo;
+	timeinfo = localtime(&ts.tv_sec);
+	
+	YearMember = timeinfo->tm_year + 1900 ;
+	MonthMember = timeinfo->tm_mon +1;
+	DayMember = timeinfo->tm_mday;
+	HourMember = timeinfo->tm_hour;
+	MinuteMember = timeinfo->tm_min;
+	SecondMember = timeinfo->tm_sec;
+    NanoSeconds = timeData.GetNanoSeconds();
+}
+
+void osaDate::To(osaTimeData &timeData) const
+{
+    timeData.SetNanoSeconds(NanoSeconds);
+}
+
+unsigned int& osaDate::GetYear(void)
 {
     return YearMember;
 }
 
-const int& osaDate::GetYear(void) const
+const unsigned int& osaDate::GetYear(void) const
 {
     return YearMember;
 }
 
-int& osaDate::GetMonth(void)
+unsigned int& osaDate::GetMonth(void)
 {
     return MonthMember;
 }
 
-const int& osaDate::GetMonth(void) const
+const unsigned int& osaDate::GetMonth(void) const
 {
     return MonthMember;
 }
 
-int& osaDate::GetDay(void)
+unsigned int& osaDate::GetDay(void)
 {
     return DayMember;
 }
  
-const int& osaDate::GetDay(void) const
+const unsigned int& osaDate::GetDay(void) const
 {
     return DayMember;
 }
  
-int& osaDate::GetHour(void)
+unsigned int& osaDate::GetHour(void)
 {
     return HourMember;
 }
 
-const int& osaDate::GetHour(void) const
+const unsigned int& osaDate::GetHour(void) const
 {
     return HourMember;
 }
    
-int& osaDate::GetMinute(void)
+unsigned int& osaDate::GetMinute(void)
 {
     return MinuteMember;
 }
  
-const int& osaDate::GetMinute(void) const
+const unsigned int& osaDate::GetMinute(void) const
 {
     return MinuteMember;
 }
 
-int& osaDate::GetSecond(void)
+unsigned int& osaDate::GetSecond(void)
 {
     return SecondMember;
 }
 
-const int& osaDate::GetSecond(void) const
+const unsigned int& osaDate::GetSecond(void) const
 {
     return SecondMember;
 }
