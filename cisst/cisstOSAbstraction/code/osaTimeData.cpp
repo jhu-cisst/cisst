@@ -6,22 +6,22 @@
 #include "../osaTimeData.h"
 
 
-osaTimeData::osaTimeData()
+osaTimeData::osaTimeData(void):
+    Seconds(0),
+    NanoSeconds(0),
+	Positive(true)
 {
-    Seconds = 0;
-    Nano_seconds=0;
-	Positive = true;
 }
 
-osaTimeData::osaTimeData(unsigned int seconds, unsigned int nseconds, bool positive_flag)
+osaTimeData::osaTimeData(int_type seconds,int_type nseconds, bool positive_flag)
 {
     Seconds = seconds;
-    Nano_seconds = nseconds;
+    NanoSeconds = nseconds;
     Positive = positive_flag ; 
 	Normalize();
     struct timespec res;
     clock_getres( CLOCK_REALTIME, &res);
-    Resolution = static_cast<long long>(res.tv_nsec);
+//    Resolution = static_cast<long long>(res.tv_nsec);
 }
 
 osaTimeData::osaTimeData(double dseconds)
@@ -32,44 +32,44 @@ osaTimeData::osaTimeData(double dseconds)
 		flag = false;
 		dseconds = dseconds * -1;
 	}
-	long long fractpart ;      
-	Seconds = SplitDoubles(dseconds,&fractpart);
-	Nano_seconds = fractpart;
+	int_type fractpart ;      
+	SplitDoubles(dseconds, Seconds, fractpart);
+	NanoSeconds = fractpart;
 	Positive = flag;
 	Normalize();
 	struct timespec res;
 	clock_getres(CLOCK_REALTIME, &res);
-	Resolution = static_cast<long long>(res.tv_nsec); 
+//	Resolution = static_cast<long long>(res.tv_nsec); 
 }
 /*returns the osaTimeData object of current time*/
 void osaTimeData::Now()
 {
-	timespec res;
+//	timespec res;
 	timespec now;
 	clock_gettime(CLOCK_REALTIME, &now);
 	Seconds = static_cast<long long> (now.tv_sec);
-	Nano_seconds = static_cast<long long> (now.tv_nsec); 
-	Resolution = static_cast<long long>(res.tv_nsec);
+	NanoSeconds = static_cast<long long> (now.tv_nsec); 
+//	Resolution = static_cast<long long>(res.tv_nsec);
 }
 
 
 void osaTimeData::SetTime(const osaTimeData &newTime)
 {
 	Seconds = newTime.Seconds;
-	Nano_seconds = newTime.Nano_seconds;
+	NanoSeconds = newTime.NanoSeconds;
 	Positive = newTime.Positive;	
 }
 
 void osaTimeData::Normalize()
 {
-	while(Nano_seconds < 0)
+	while(NanoSeconds < 0)
 	{
-		Nano_seconds = Nano_seconds + 1000000000;
+		NanoSeconds = NanoSeconds + 1000000000;
 		Seconds--;
 	}
-	while(this->Nano_seconds >= 1000000000)
+	while(this->NanoSeconds >= 1000000000)
 	{
-		this->Nano_seconds = this->Nano_seconds - 1000000000;
+		this->NanoSeconds = this->NanoSeconds - 1000000000;
 		this->Seconds++;
 	}	
 	if(Seconds < 0 )
@@ -85,7 +85,7 @@ void osaTimeData::Normalize()
 bool osaTimeData::Equals(const osaTimeData &compareTo) const
 {
 	
-	if(Seconds==compareTo.Seconds && Nano_seconds==compareTo.Nano_seconds && Positive == compareTo.Positive )
+	if(Seconds==compareTo.Seconds && NanoSeconds==compareTo.NanoSeconds && Positive == compareTo.Positive )
 		return true;
 	else
 		return false;
@@ -95,9 +95,9 @@ bool osaTimeData::Equals(const osaTimeData &compareTo) const
 double osaTimeData::ToSeconds()
 {
 	if(Positive)
-		return Seconds+(Nano_seconds/1000000000.0);
+		return Seconds+(NanoSeconds/1000000000.0);
 	else
-		return -1*(Seconds+Nano_seconds/1000000000.0);
+		return -1*(Seconds+NanoSeconds/1000000000.0);
 }
 
 osaTimeData osaTimeData::From(double doubleSeconds)
@@ -108,15 +108,15 @@ osaTimeData osaTimeData::From(double doubleSeconds)
 		flag = false;
 		doubleSeconds = doubleSeconds * -1;
 	}
-	long long fractpart , intpart ;      
-	intpart = SplitDoubles(doubleSeconds,&fractpart);
+	int_type fractpart , intpart ;      
+	SplitDoubles(doubleSeconds,intpart,fractpart);
 	return osaTimeData(intpart,fractpart,flag);
 }
 
 void osaTimeData::Add(const osaTimeData &rhs)
 {
 	Seconds = Seconds + rhs.Seconds;
-	Nano_seconds = Nano_seconds + rhs.Nano_seconds;	
+	NanoSeconds = NanoSeconds + rhs.NanoSeconds;	
 	
 	Normalize();
 }
@@ -126,25 +126,25 @@ void osaTimeData::Subtract(const osaTimeData &rhs)
 	if( (!Positive && rhs.Positive ) ||  (Positive && !rhs.Positive)) // lhs is negative, rhs is positive
 	{
 		Seconds = Seconds + rhs.Seconds;
-		Nano_seconds = Nano_seconds + rhs.Nano_seconds;
+		NanoSeconds = NanoSeconds + rhs.NanoSeconds;
 	}
 	else if(Positive && rhs.Positive)
 	{
 		Seconds = Seconds - rhs.Seconds;
-		Nano_seconds = Nano_seconds - rhs.Nano_seconds;
+		NanoSeconds = NanoSeconds - rhs.NanoSeconds;
 	}
 	else // both negatives
 	{
 		if(Seconds < rhs.Seconds)
 		{
 			Seconds =rhs.Seconds - Seconds ;
-			Nano_seconds = rhs.Nano_seconds - Nano_seconds ;
+			NanoSeconds = rhs.NanoSeconds - NanoSeconds ;
 			Positive = true; // it is now positive
 		}
 		else
 		{
 			Seconds = Seconds - rhs.Seconds;
-			Nano_seconds = Nano_seconds - rhs.Nano_seconds;
+			NanoSeconds = NanoSeconds - rhs.NanoSeconds;
 		}
 	}
 	Normalize();
@@ -157,10 +157,10 @@ void osaTimeData::SumOf(osaTimeData &first, osaTimeData &second)
 	osaTimeData temp(first);
 	temp.Add(second);
 	Seconds = temp.Seconds;
-	Nano_seconds = temp.Nano_seconds;
+	NanoSeconds = temp.NanoSeconds;
 }
 
-std::string osaTimeData::ToString()
+std::string osaTimeData::ToString() const
 {	
 	std::stringstream ss;
    	long long tempArray[9];
@@ -169,7 +169,7 @@ std::string osaTimeData::ToString()
 		ss<<"-"; 
 	ss<<Seconds<<".";
 
-	long long temp =  Nano_seconds ;
+	long long temp =  NanoSeconds ;
 	for(int i = 0 ; i < 9 ; i++)
 	{
 		tempArray[8-i] = (temp % 10 );
@@ -183,42 +183,42 @@ std::string osaTimeData::ToString()
 	return ss.str();
 }
 
-long long osaTimeData::GetSeconds()
+long long osaTimeData::GetSeconds() const
 {
 	return Seconds;
 }
 
-long long osaTimeData::GetNanoSeconds()
+long long osaTimeData::GetNanoSeconds() const
 {
-	return Nano_seconds;
+	return NanoSeconds;
 }
 
-void osaTimeData::SetSeconds(long long s)
+void osaTimeData::SetSeconds(long long s) 
 {
 	Seconds = s;	
 }
 
 void osaTimeData::SetNanoSeconds(long long s)
 {
-	Nano_seconds = s;
+	NanoSeconds = s;
 }
-long long osaTimeData::GetResolution()
+/*long long osaTimeData::GetResolution()
 {
 	return Resolution;
-}
+}*/
 
-long long osaTimeData::SplitDoubles(double doubleToSplit, long long *fractionPart)
+void osaTimeData::SplitDoubles(const double &seconds, int_type &fullSeconds, int_type &nanoSeconds)
 {
 
-	long long temp = static_cast<long long> ( doubleToSplit * 1000000000);
+	long long temp = static_cast<long long> ( seconds * 1000000000);
 	long long computation=0;
 	for(int i = 0 ; i < 9 ; i++)
 	{
 		computation = computation+  (temp % 10 ) * pow(10,i);
 		temp = temp/10;
 	}
-	*fractionPart = computation;
-	return temp;
+	nanoSeconds = computation;
+	fullSeconds= temp;
 }
 
 const osaTimeData osaTimeData::operator=(const osaTimeData &rhs)
@@ -252,7 +252,7 @@ bool osaTimeData::operator>(const osaTimeData &rhs) const
 {
 	if(this->Seconds > rhs.Seconds)
 		return true;
-	else if(this->Seconds == rhs.Seconds && this->Nano_seconds > rhs.Nano_seconds)
+	else if(this->Seconds == rhs.Seconds && this->NanoSeconds > rhs.NanoSeconds)
 		return true;
 	else
 		return false;
@@ -261,7 +261,7 @@ bool osaTimeData::operator<(const osaTimeData &rhs) const
 {
 	if(this->Seconds < rhs.Seconds)
 		return true;
-	else if(this->Seconds == rhs.Seconds && this->Nano_seconds < rhs.Nano_seconds)
+	else if(this->Seconds == rhs.Seconds && this->NanoSeconds < rhs.NanoSeconds)
 		return true;
 	else
 		return false;
@@ -270,7 +270,7 @@ bool osaTimeData::operator>=(const osaTimeData &rhs) const
 {
 	if(this->Seconds > rhs.Seconds)
 		return true;
-	else if(this->Seconds == rhs.Seconds && this->Nano_seconds >= rhs.Nano_seconds)
+	else if(this->Seconds == rhs.Seconds && this->NanoSeconds >= rhs.NanoSeconds)
 		return true;
 	else
 		return false;
@@ -279,7 +279,7 @@ bool osaTimeData::operator<=(const osaTimeData &rhs) const
 {
 	if(this->Seconds <  rhs.Seconds)
 		return true;
-	else if(this->Seconds == rhs.Seconds && this->Nano_seconds <= rhs.Nano_seconds)
+	else if(this->Seconds == rhs.Seconds && this->NanoSeconds <= rhs.NanoSeconds)
 		return true;
 	else
 		return false;

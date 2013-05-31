@@ -27,20 +27,38 @@ public:
 	/*! Create an osaDate object from a given osaTimeData object 
 		\param _otd osaTimeData object that will be converted to a osaDate object
 	*/
-	osaDate(osaTimeData t);
+	osaDate(const osaTimeData &t);
 	/*!Default destructor*/
 	~osaDate(){} 
 	/*! Creates a std::string representation of this osaDate object.
 	*/
-	std::string ToString();
+	std::string ToString() const;
+
+    int& GetYear(void);
+    const int& GetYear(void) const;
+
+    int& GetMonth(void);
+    const int& GetMonth(void) const;
+    
+    int& GetDay(void);
+    const int& GetDay(void) const;
+
+    int& GetHour(void);
+    const int& GetHour(void) const;
+   
+    int& GetMinute(void);
+    const int& GetMinute(void) const;
+
+    int& GetSecond(void);
+    const int& GetSecond(void) const;
 private:
 protected:
-	int year;
-	int month;
-	int day;
-	int hour;
-	int minute;
-	int second;
+	int YearMember;
+	int MonthMember;
+	int DayMember;
+	int HourMember;
+	int MinuteMember;
+	int SecondMember;
 };
 
 #endif

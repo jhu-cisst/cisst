@@ -28,7 +28,8 @@
 class osaTimeData 
 {
 public:
-		
+	typedef long long int int_type;
+
 	/*! Default constructor, construct the osaTimeData of current time*/
 	osaTimeData();
 
@@ -36,7 +37,7 @@ public:
 	  \param seconds number of seconds used to set seconds of this object
 	  \param nseconds number of nano seconds used to set nseconds of this object
 	  \param positive_flag the boolean flag to determine whether this osaTimeData is positive or negative. Set to true by default. True = positive*/
-	osaTimeData(unsigned int seconds, unsigned int nseconds, bool positive_flag=true);
+	osaTimeData(const int_type seconds,const int_type nseconds, bool positive_flag=true);
 	/*! Initializes all the elements of the osaTimeData object from seconds
 	\param seconds the number of seconds in double
 	*/
@@ -80,13 +81,13 @@ public:
 	/*!Sum of two osaTimeData objects*/
 	void SumOf(osaTimeData &first, osaTimeData &second);
 	
-	std::string ToString(); // string representation YYYY/MM/DD, HH:MM:SS.DDDD
+	std::string ToString() const; // string representation YYYY/MM/DD, HH:MM:SS.DDDD
 	
 	//gets,sets
 	/*!Returns the seconds of this osaTimeData object.
 	\return the number seconds this object represents
 	*/
-	long long GetSeconds();
+	long long GetSeconds() const;
 	/*!Sets the seconds of this osaTimeData object to a specified number of seconds
 	\param sec number of seconds to set to
 	*/
@@ -94,7 +95,7 @@ public:
 	/*!Returns the nano seconds of this osaTimeData object.
 	\return the number of nano-seconds this object holds
 	*/
-	long long GetNanoSeconds();
+	long long GetNanoSeconds() const;
 	/*!Sets the nano-seconds of this osaTimeData object to a specified number of nanoseconds
 	\return nsec number of nano seconds to set to
 	*/
@@ -102,7 +103,7 @@ public:
 	/*!Returns the resolution of the osaTimeData object in nano seconds
 	\return the resolution of the osaTimeData object in nanoseconds
 	*/
-	long long GetResolution();
+//	long long GetResolution();
 
 	//ALGEBRA
 	const osaTimeData operator=(const osaTimeData &rhs);
@@ -118,11 +119,9 @@ public:
 
 protected:
 	/*!Number of seconds*/
-	long long Seconds;
+	int_type Seconds;
 	/*!Number of nano seconds*/
-	long long Nano_seconds;	
-	/*!Resolution of this time object in nanoseconds  */
-	long long Resolution;
+	int_type NanoSeconds;	
 	/*!Boolean to indicate whether this osaTimeData is negatve or positive. Positive = true, negative = false*/
 	bool Positive;
 private:
@@ -131,7 +130,7 @@ private:
 	\param fractionpart the address of where the int value of the fraction part will be stored
 	\return the whole part of the doubleToSplit
 	*/
-	long long SplitDoubles(double doubleToSplit, long long *fractionPart);
+	void SplitDoubles(const double &seconds, int_type &fullSeconds, int_type &nanoSeconds);
 }
 ;
 #endif
