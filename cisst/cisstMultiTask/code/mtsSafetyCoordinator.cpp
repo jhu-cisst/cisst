@@ -431,8 +431,8 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFile(const std::string & jsonFileNam
         return false;
     }
 
-    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::filter];
-    bool ret = AddFilter(targets);
+    const SF::JSON::JSONVALUE filters = json.GetRoot()[SF::Dict::Json::filter];
+    bool ret = AddFilter(filters);
 
     if (ret) {
         CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
@@ -453,8 +453,8 @@ bool mtsSafetyCoordinator::AddFilterFromJSON(const std::string & jsonString)
         return false;
     }
 
-    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::filter];
-    bool ret = AddFilter(targets);
+    const SF::JSON::JSONVALUE filters = json.GetRoot()[SF::Dict::Json::filter];
+    bool ret = AddFilter(filters);
 
     if (ret) {
         CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Successfully added filter(s) using json string: " << jsonString << std::endl;
