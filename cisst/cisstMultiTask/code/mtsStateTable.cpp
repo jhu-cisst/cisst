@@ -302,7 +302,7 @@ void mtsStateTable::Advance(void) {
         FiltersType::const_iterator it = Filters._name.begin();\
         const FiltersType::const_iterator itEnd = Filters._name.end();\
         for (; it != itEnd; ++it)\
-            (*it)->DoFiltering();\
+            (*it)->RunFilter();\
     }
     // Process filters sequentially
     PROCESS_FILTERS(Features)
@@ -357,6 +357,7 @@ void mtsStateTable::Cleanup(void) {
         FiltersType::const_iterator it = Filters._name.begin();\
         const FiltersType::const_iterator itEnd = Filters._name.end();\
         for (; it != itEnd; ++it)\
+            (*it)->CleanupFilter();\
             delete *it;\
     }\
     Filters._name.clear();
@@ -582,6 +583,15 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
 #if CISST_HAS_SAFETY_PLUGINS
 bool mtsStateTable::RegisterFilter(SF::FilterBase * filter)
 {
+    CMN_ASSERT(filter);
+
+    // initialize filter instance before deployment.  filter is deployed only when
+    // initialization is successful.
+    if (!filter->InitFilter()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RegisterFilter: failed to initialize filter: " << *filter << std::endl;
+        return false;
+    }
+
     switch (filter->GetFilterCategory()) {
         case SF::FilterBase::FEATURE:
             Filters.Features.push_back(filter);
