@@ -76,6 +76,7 @@ public:
     /*! Constructor, initialize Timestamp to 0 and Valid flag to
       false. */
     inline mtsGenericObject(void):
+        cmnGenericObject(),
         TimestampMember(0.0),
         AutomaticTimestampMember(true),
         ValidMember(false)
@@ -90,7 +91,7 @@ public:
 
     /*! Copy constructor */
     inline mtsGenericObject(const mtsGenericObject & other):
-        cmnGenericObject(),
+        cmnGenericObject(other),
         TimestampMember(other.TimestampMember),
         AutomaticTimestampMember(other.AutomaticTimestampMember),
         ValidMember(other.ValidMember)
@@ -158,6 +159,11 @@ size_t CISST_EXPORT cmnDataScalarNumber(const mtsGenericObject & data);
 double CISST_EXPORT cmnDataScalar(const mtsGenericObject & data, const size_t index) throw (std::out_of_range);
 
 std::string CISST_EXPORT cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const std::string & userDescription = "") throw (std::out_of_range);
+
+#if CISST_HAS_JSON
+void CISST_EXPORT cmnDataToJSON(const mtsGenericObject & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataFromJSON(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error);
+#endif // CISST_HAS_JSON
 
 #endif // _mtsGenericObject_h
 

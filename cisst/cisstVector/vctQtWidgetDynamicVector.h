@@ -23,10 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctQtWidgetDynamicVector_h
 #define _vctQtWidgetDynamicVector_h
 
-class QWidget;
-class QTableWidget;
-class QTableWidgetItem;
-#include <QObject>
+#include <QTableWidget>
 
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctQtForwardDeclarations.h>
@@ -34,13 +31,11 @@ class QTableWidgetItem;
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
-class CISST_EXPORT vctQtWidgetDynamicVectorReadBase
+class CISST_EXPORT vctQtWidgetDynamicVectorReadBase: public QTableWidget
 {
-protected:
-    QTableWidget * Table;
+    Q_OBJECT;
 public:
     vctQtWidgetDynamicVectorReadBase(void);
-    QWidget * GetWidget(void);
 };
 
 template <class _elementType>
@@ -67,7 +62,8 @@ public:
     void SetBase(const int base);
 };
 
-#if ((CISST_OS == CISST_WINDOWS) && (CISST_COMPILER != CISST_GCC))
+#if (CISST_OS == CISST_WINDOWS) && defined(CISST_COMPILER_IS_MSVC)
+#pragma warning ( disable : 4661 )
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<double>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating<float>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<int>;
@@ -76,19 +72,17 @@ template class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger<bool>;
 #endif // CISST_WINDOWS
 
 
-class CISST_EXPORT vctQtWidgetDynamicVectorWriteBase: public QObject
+class CISST_EXPORT vctQtWidgetDynamicVectorWriteBase: public QTableWidget
 {
     Q_OBJECT;
 public:
     typedef enum {TEXT_WIDGET, SPINBOX_WIDGET, SLIDER_WIDGET} DisplayModeType;
     vctQtWidgetDynamicVectorWriteBase(const DisplayModeType displayMode);
     void SetDisplayMode(const DisplayModeType displayMode);
-    QWidget * GetWidget(void);
 signals:
     void valueChanged(void);
 protected:
     enum {SLIDER_RESOLUTION = 1000};
-    QTableWidget * Table;
     DisplayModeType DisplayMode;
 protected slots:
     void SliderValueChangedSlot(int value);
@@ -104,6 +98,7 @@ class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating: public vctQtWidgetDyna
     int Precision;
     char Format;
     value_type Minimum, Maximum, Step;
+    vctDynamicVector<value_type> Minimums, Maximums;
 public:
     vctQtWidgetDynamicVectorWriteFloating(const DisplayModeType displayMode = TEXT_WIDGET);
     virtual bool SetValue(const vctDynamicVector<value_type> & value, bool blockSignals = true);
@@ -111,7 +106,12 @@ public:
     void SetPrecision(const int precision);
     void SetFormat(const char format);
     void SetRange(const value_type minimum, const value_type maximum);
+    void SetRange(const vctDynamicVector<value_type> & minimums, const vctDynamicVector<value_type> & maximums);
     void SetStep(const value_type step);
+protected:
+    void UpdateWidgetRange(void);
+    value_type GetMinimum(const size_t index) const;
+    value_type GetMaximum(const size_t index) const;
 };
 
 template <class _elementType>
@@ -129,7 +129,8 @@ public:
     void SetStep(const value_type step);
 };
 
-#if ((CISST_OS == CISST_WINDOWS) && (CISST_COMPILER != CISST_GCC))
+#if (CISST_OS == CISST_WINDOWS) && defined(CISST_COMPILER_IS_MSVC)
+#pragma warning ( disable : 4661 )
 template class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating<double>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating<float>;
 template class CISST_EXPORT vctQtWidgetDynamicVectorWriteInteger<int>;
@@ -138,13 +139,17 @@ template class CISST_EXPORT vctQtWidgetDynamicVectorWriteInteger<unsigned int>;
 
 
 // -- for bools
-#include <QTableWidget>
 class CISST_EXPORT vctQtWidgetDynamicVectorBoolWrite: public QTableWidget
 {
+    Q_OBJECT;
  public:
     vctQtWidgetDynamicVectorBoolWrite(void);
-    virtual bool SetValue(const vctDynamicVector<bool> & value);
+    virtual bool SetValue(const vctDynamicVector<bool> & value, bool blockSignals = true);
     virtual bool GetValue(vctDynamicVector<bool> & placeHolder) const;
+signals:
+    bool valueChanged(void);
+protected slots:
+    void ValueChangedSlot(bool value);
 };
 
 #endif // _vctQtWidgetDynamicVector_h

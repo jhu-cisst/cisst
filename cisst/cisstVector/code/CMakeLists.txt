@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -162,8 +162,18 @@ if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
        vctPlot2DOpenGL.h
        )
   cisst_library_use_settings (cisstVector cisstOpenGL)
-
 endif (CISST_HAS_OPENGL OR CISST_HAS_VTK)
+
+# JSON specific header files
+if (CISST_HAS_JSON)
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       vctDataFunctionsFixedSizeVectorJSON.h
+       vctDataFunctionsFixedSizeMatrixJSON.h
+       vctDataFunctionsDynamicVectorJSON.h
+       vctDataFunctionsDynamicMatrixJSON.h
+       vctDataFunctionsTransformations.h)
+endif (CISST_HAS_JSON)
 
 cisst_add_library (
   LIBRARY cisstVector

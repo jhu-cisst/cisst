@@ -169,6 +169,10 @@ void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
                  << "    size_t ScalarNumber(void) const;" << std::endl
                  << "    double Scalar(const size_t index) const throw (std::out_of_range);" << std::endl
                  << "    std::string ScalarDescription(const size_t index, const std::string & userDescription = \"\") const throw (std::out_of_range);" << std::endl
+                 << "#if CISST_HAS_JSON" << std::endl
+                 << "    void ToJSON(Json::Value & jsonValue) const;" << std::endl
+                 << "    void FromJSON(const Json::Value & jsonValue) throw (std::runtime_error);" << std::endl
+                 << "#endif // CISST_HAS_JSON" << std::endl
                  << std::endl;
 }
 
@@ -353,7 +357,12 @@ void cdgClass::GenerateDataFunctionsHeader(std::ostream & outputStream) const
                  << "size_t " << attribute << " cmnDataScalarNumber(const " << name << " & data);" << std::endl
                  << "std::string " << attribute << " cmnDataScalarDescription(const " << name
                  << " & data, const size_t index, const std::string & userDescription = \"\") throw (std::out_of_range);" << std::endl
-                 << "double " << attribute << " cmnDataScalar(const " << name << " & data, const size_t index) throw (std::out_of_range);" << std::endl;
+                 << "double " << attribute << " cmnDataScalar(const " << name << " & data, const size_t index) throw (std::out_of_range);" << std::endl
+                 << "#if CISST_HAS_JSON" << std::endl
+                 << "#include <json/json.h>" << std::endl
+                 << "void " << attribute << " cmnDataToJSON(const " << name << " & data, Json::Value & jsonValue);" << std::endl
+                 << "void " << attribute << " cmnDataFromJSON(" << name << " & data, const Json::Value & jsonValue) throw (std::runtime_error);" << std::endl
+                 << "#endif // CISST_HAS_JSON" << std::endl;
 }
 
 
@@ -643,4 +652,45 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
     outputStream << "    cmnThrow(std::out_of_range(\"cmnDataScalarDescription: " << className << " index out of range\"));" << std::endl
                  << "    return 1.2345;" << std::endl
                  << "}" << std::endl;
+
+
+
+    outputStream << "#if CISST_HAS_JSON" << std::endl
+                 << "void cmnDataToJSON(const " << className << " & data, Json::Value & jsonValue) {" << std::endl
+                 << "    data.ToJSON(jsonValue);" << std::endl
+                 << "}" << std::endl
+                 << "void " << className << "::ToJSON(Json::Value & jsonValue) const {" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+            type = BaseClasses[index]->GetFieldValue("type");
+            outputStream << "    cmnDataToJSON(*(dynamic_cast<const " << type << "*>(this)), jsonValue);" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->GetFieldValue("is-data") == "true") {
+            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
+            name = Members[index]->GetFieldValue("name");
+            outputStream << "    cmnDataToJSON" << suffix << "(this->" << name << "Member, jsonValue[\"" << name << "\"]);" << std::endl;
+        }
+    }
+    outputStream << "}" << std::endl
+                 << "void cmnDataFromJSON(" << className << " & data, const Json::Value & jsonValue) throw (std::runtime_error) {" << std::endl
+                 << "    data.FromJSON(jsonValue);" << std::endl
+                 << "}" << std::endl
+                 << "void " << className << "::FromJSON(const Json::Value & jsonValue) throw (std::runtime_error) {" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+            type = BaseClasses[index]->GetFieldValue("type");
+            outputStream << "    cmnDataFromJSON(*(dynamic_cast<" << type << "*>(this)), jsonValue);" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->GetFieldValue("is-data") == "true") {
+            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
+            name = Members[index]->GetFieldValue("name");
+            outputStream << "    cmnDataFromJSON" << suffix << "(this->" << name << "Member, jsonValue[\"" << name << "\"]);" << std::endl;
+        }
+    }
+    outputStream << "}" << std::endl
+                 << "#endif // CISST_HAS_JSON" << std::endl;
 }

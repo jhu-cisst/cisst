@@ -47,4 +47,7 @@ typedef vctQtWidgetDynamicVectorWriteInteger<unsigned int> vctQtWidgetDynamicVec
 
 class vctQtWidgetDynamicMatrixDoubleRead;
 
+class vctQtWidgetRotation;
+class vctQtWidgetFrame;
+
 #endif  // _vctQtForwardDeclarations_h

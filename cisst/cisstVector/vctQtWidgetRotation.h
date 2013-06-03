@@ -31,17 +31,20 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 #include <QtOpenGL>
 
-class QGroupBox;
-class QComboBox;
+class QWidget;
 class QVBoxLayout;
 
-// Maybe we should make this class public after all
-class vctQtWidgetRotationOpenGL;
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
 
+/*!
+  Widget to visualize rotation using 3 axes in OpenGL
+  \todo use rotation matrix to rotate axis instead of euler angles
+  \todo use a GL list to create the axes once and re-use later
+  \todo remove reference frame?
+*/
 class CISST_EXPORT vctQtWidgetRotationOpenGL: public QGLWidget
 {
     Q_OBJECT;
@@ -56,59 +59,78 @@ protected:
    void initializeGL(void);
    void paintGL(void);
    void resizeGL(int width, int height);
-
    void draw3DAxis(const double scale);
-
-   // protected thing here
-   vct3 orientation;
+   vct3 orientation; // should be replaced by rotation matrix using column-first storage order, isn't OpenGL Fortran like?
 };
 
 
+/*! Qt Widget to display a rotation using cisstVector. */
 class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
 {
     Q_OBJECT;
 
  public:
-    vctQtWidgetRotationDoubleRead(void);
+    /*! Possible display modes.  See SetDisplayMode method.  Please
+      note that UNDEFINED_WIDGET should never be used. */
+    typedef enum {UNDEFINED_WIDGET, MATRIX_WIDGET, AXIS_ANGLE_WIDGET, QUATERNION_WIDGET, OPENGL_WIDGET} DisplayModeType;
+
+    /*! Constructor.  Default display mode is rotation matrix.  See
+      also SetDisplayMode. */
+    vctQtWidgetRotationDoubleRead(const DisplayModeType displayMode = MATRIX_WIDGET);
+
     inline ~vctQtWidgetRotationDoubleRead(void) {};
 
-    //! set value
+    /*! Set the rotation value to be displayed.  This method assumes
+      the rotation matrix is valid, i.e. normalized and will nor
+      perform any check nor normalization. */
     template <class _containerType>
     void SetValue(const vctMatrixRotation3ConstBase<_containerType> & rotation) {
         this->Rotation.FromRaw(rotation);
         this->UpdateCurrentWidget();
     }
 
+    /*! Set the display mode, i.e. the widget used to represent the
+      rotation.  Option are rotation matrix, axis and angle,
+      quaternion (displayed in order x, y, z, w) and 3D OpenGL based
+      using red, green abnd blue axes.  Please note that the display
+      mode UNDEFINED_WIDGET will be silently ignored. */ 
+    void SetDisplayMode(const DisplayModeType displayMode);
+
  protected slots:
-    void slot_change_display_format(QString item);
+    /*! Contextual menu showed when the user right click on the widget */
+    void ShowContextMenu(const QPoint & position);
 
  protected:
+    /*! Current display mode, somewhat redundant with the
+      CurrentWidget pointer.  The current widget should always be
+      set by changinf the DisplayMode. */
+    DisplayModeType DisplayMode;
 
+    /*! Update the content of the currennt widget.  This method is
+      called when the user provides a new rotation with SetValue or
+      when the widget used to display the rotation is changed using
+      SetDisplayMode. */
     void UpdateCurrentWidget(void);
-    void SwitchDisplayFormat(QGroupBox * setBox);
-
+    
+    /*! Internal representation for the rotation to display. */
     vctMatRot3 Rotation;
-    QComboBox * combo;
 
     // Matrix
     vctQtWidgetDynamicMatrixDoubleRead * MatrixWidget;
-    QGroupBox * MatrixGroupBox;
 
     // Axis Angle
     vctQtWidgetDynamicVectorDoubleRead * AxisWidget;
     vctQtWidgetDynamicVectorDoubleRead * AngleWidget;
-    QGroupBox * AxisAngleGroupBox;
+    QWidget * AxisAngleWidget;
 
     // Quaternion
     vctQtWidgetDynamicVectorDoubleRead * QuaternionWidget;
-    QGroupBox * QuaternionGroupBox;
 
     // Visualization
     vctQtWidgetRotationOpenGL * OpenGLWidget;
-    QGroupBox * OpenGLGroupBox;
 
-    // current box
-    QGroupBox * CurrentGroupBox;
+    // current widget
+    QWidget * CurrentWidget;
     QVBoxLayout * Layout;
 };
 

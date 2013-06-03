@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctDataFunctions_h
 #define _vctDataFunctions_h
 
+#include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 #include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
 #include <cisstVector/vctDataFunctionsDynamicVector.h>

@@ -28,7 +28,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlRenderTargets.h>
 #include <cisst3DUserInterface/ui3CursorSphere.h>
 
-#include <sawIntuitiveDaVinci/mtsIntuitiveDaVinci.h>
+#ifdef sawIntuitiveDaVinci
+  #include <sawIntuitiveDaVinci/mtsIntuitiveDaVinci.h>
+#else
+  #ifdef cisstDaVinci_isi_bbapi
+    #include <cisstDaVinci/cdvReadWrite.h>
+  #endif
+#endif
 
 #include "BehaviorLUS.h"
 
@@ -54,10 +60,12 @@ int main()
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
 
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
-#if 1
+#ifdef sawIntuitiveDaVinci
     mtsIntuitiveDaVinci * daVinci = new mtsIntuitiveDaVinci("daVinci", 50);
 #else
+  #ifdef cisstDaVinci_isi_bbapi
     cdvReadWrite * daVinci = new cdvReadWrite("daVinci", 60 /* Hz */);
+  #endif
 #endif
     componentManager->AddComponent(daVinci);
 
@@ -200,11 +208,11 @@ int main()
     transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
 
     // setup first arm
-    ui3MasterArm * rightMaster = new ui3MasterArm("MTMR");
+    ui3MasterArm * rightMaster = new ui3MasterArm("MTMR1");
     guiManager.AddMasterArm(rightMaster);
-    rightMaster->SetInput(daVinci, "MTMR",
-                          daVinci, "MTMRSelect",
-                          daVinci, "MTMRClutch",
+    rightMaster->SetInput(daVinci, "MTMR1",
+                          daVinci, "MTMR1Select",
+                          daVinci, "MTMR1Clutch",
                           ui3MasterArm::PRIMARY);
     rightMaster->SetTransformation(transform, 0.8 /* scale factor */);
     ui3CursorBase * rightCursor = new ui3CursorSphere();
@@ -212,11 +220,11 @@ int main()
     rightMaster->SetCursor(rightCursor);
 
     // setup second arm
-    ui3MasterArm * leftMaster = new ui3MasterArm("MTML");
+    ui3MasterArm * leftMaster = new ui3MasterArm("MTML1");
     guiManager.AddMasterArm(leftMaster);
-    leftMaster->SetInput(daVinci, "MTML",
-                         daVinci, "MTMLSelect",
-                         daVinci, "MTMLClutch",
+    leftMaster->SetInput(daVinci, "MTML1",
+                         daVinci, "MTML1Select",
+                         daVinci, "MTML1Clutch",
                          ui3MasterArm::SECONDARY);
     leftMaster->SetTransformation(transform, 0.8 /* scale factor */);
     ui3CursorBase * leftCursor = new ui3CursorSphere();

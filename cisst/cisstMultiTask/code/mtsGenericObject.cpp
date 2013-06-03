@@ -237,3 +237,19 @@ std::string cmnDataScalarDescription(const mtsGenericObject & data, const size_t
     // last case
     return std::string(userDescription) + "Valid";
 }
+
+#if CISST_HAS_JSON
+void CISST_EXPORT cmnDataToJSON(const mtsGenericObject & data, Json::Value & jsonValue) {
+    cmnDataToJSON(data.Timestamp(), jsonValue["Timestamp"]);
+    cmnDataToJSON(data.AutomaticTimestamp(), jsonValue["AutomaticTimestamp"]);
+    cmnDataToJSON(data.Valid(), jsonValue["Valid"]);
+}
+
+void CISST_EXPORT cmnDataFromJSON(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    cmnDataFromJSON(data.Timestamp(), jsonValue["Timestamp"]);
+    cmnDataFromJSON(data.AutomaticTimestamp(), jsonValue["AutomaticTimestamp"]);
+    cmnDataFromJSON(data.Valid(), jsonValue["Valid"]);
+}
+
+// void CISST_EXPORT cmnDataFromJSON(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error);
+#endif // CISST_HAS_JSON

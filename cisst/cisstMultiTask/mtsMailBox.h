@@ -87,6 +87,9 @@ public:
     /*! Returns true if mailbox is empty. */
     bool IsEmpty(void) const;
 
+    /*! Returns true if mailbox is full. */
+    bool IsFull(void) const;
+
     /*! Set the command to be called after a blocking command is
       de-queued and executed.  This can be used to call a trigger for
       event.  The event handler on the client site can then raise a

@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-
 #pragma once
 #ifndef _cmnDataFunctions_h
 #define _cmnDataFunctions_h
@@ -29,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 #include <limits>
 #include <cisstCommon/cmnThrow.h>
+#include <cisstCommon/cmnDataFunctionsJSON.h>
 
 // always include last
 #include <cisstCommon/cmnExport.h>
@@ -429,6 +429,5 @@ inline std::string cmnDataScalarDescription(const std::string & CMN_UNUSED(data)
 /*! Utility used to extract delimiter for functions cmnDataDeSerializeText */
 void CISST_EXPORT cmnDataDeSerializeTextDelimiter(std::istream & inputStream, const char delimiter, const char * className)
     throw (std::runtime_error);
-
 
 #endif // _cmnDataFunctions_h

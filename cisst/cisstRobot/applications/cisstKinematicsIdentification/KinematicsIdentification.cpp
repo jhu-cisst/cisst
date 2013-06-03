@@ -151,6 +151,8 @@ int main( int argc, char** argv ){
     vctDynamicVector<double> q( manipulator.links.size(), 0.0 );
     if( q.FromStreamRaw( qfile ) )
       { Q.push_back( q ); }
+    else
+      break;
   }
 
 
@@ -165,6 +167,8 @@ int main( int argc, char** argv ){
     vctFrame4x4<double> Rt;
     if( Rt.FromStreamRaw( se3file ) )
       { RT.push_back( Rt ); }
+    else
+      break;
   }
 
   if( Q.size() != RT.size() ){
@@ -176,11 +180,17 @@ int main( int argc, char** argv ){
   }
 
   double tolerance = 1e-5;
+  double best_error = 1000000.0;
 
   // some phony increment
   vctDynamicVector<double> dx( 1, 1.0 );
 
   while( tolerance < dx.Norm() ){
+
+    if (best_error > dx.Norm()) {
+      CMN_LOG_RUN_DEBUG << "best error updated: " << dx.Norm() << std::endl;
+      best_error = dx.Norm();
+    }
 
     // these must be column major
     vctDynamicMatrix<double> J(0,0,VCT_COL_MAJOR);

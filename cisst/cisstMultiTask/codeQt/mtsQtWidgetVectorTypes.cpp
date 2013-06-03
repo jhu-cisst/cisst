@@ -38,7 +38,7 @@ mtsQtWidgetDoubleVecRead::mtsQtWidgetDoubleVecRead(void):
     mtsQtWidgetGenericObjectRead()
 {
     VectorWidget = new vctQtWidgetDynamicVectorDoubleRead();
-    Layout->addWidget(VectorWidget->GetWidget());
+    Layout->addWidget(VectorWidget);
     Layout->addStretch();
 }
 
@@ -55,7 +55,7 @@ mtsQtWidgetDoubleVecWrite::mtsQtWidgetDoubleVecWrite(void):
     mtsQtWidgetGenericObjectWrite()
 {
     VectorWidget = new vctQtWidgetDynamicVectorDoubleWrite();
-    Layout->addWidget(VectorWidget->GetWidget());
+    Layout->addWidget(VectorWidget);
     Layout->addStretch();
 }
 
@@ -83,7 +83,7 @@ mtsQtWidgetBoolVecRead::mtsQtWidgetBoolVecRead(void):
     mtsQtWidgetGenericObjectRead()
 {
     VectorWidget = new vctQtWidgetDynamicVectorBoolRead();
-    Layout->addWidget(VectorWidget->GetWidget());
+    Layout->addWidget(VectorWidget);
     Layout->addStretch();
 }
 

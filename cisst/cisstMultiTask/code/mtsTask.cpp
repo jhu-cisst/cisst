@@ -77,7 +77,7 @@ mtsExecutionResult mtsTask::RunEvent(bool check)
 // Thus, we do the following:
 //   1) If the other task is initializing (i.e., Create called), we also call Create; this shouldn't
 //      be necessary, since most likely the application code will create this task (either by
-//      calling Create directory, or by calling mtsManagerLocal::CreateAll.
+//      calling Create directly, or by calling mtsManagerLocal::CreateAll).
 //   2) If this task is ACTIVE, and the other task is suspended (i.e., state is READY), we
 //      also suspend this task. Note that we could also automatically start this task when
 //      the other task becomes ACTIVE, but for now we are not doing that; instead, the user
