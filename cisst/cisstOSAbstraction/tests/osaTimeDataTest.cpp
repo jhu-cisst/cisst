@@ -60,15 +60,17 @@ void osaTimeDataTest::TestEqual(void)
 
 void osaTimeDataTest::TestInequalities(void)
 {
-	osaTimeData before;
-    before.Now();
-	osaTimeData after;
-    after.Now();
+	osaTimeData before = osaTimeNow();
+	osaTimeData after = osaTimeNow();
 	CPPUNIT_ASSERT(before <= after);	
 
 
 	before.Add( after);
 	CPPUNIT_ASSERT(before > after);	
+
+    osaTimeData negative(-100);
+    osaTimeData positive(100);
+    CPPUNIT_ASSERT(negative<positive);
 }
 
 void osaTimeDataTest::TestFromTo(void)

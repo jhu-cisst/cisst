@@ -29,6 +29,11 @@ public:
 		\param t osaTimeData object that will be converted to a osaDate object
 	*/
 	osaDate(osaTimeData &t);
+    /*! Create an osaDate object from the specified year, month, day, hour, minute, second, and nano seconds.
+    */
+    osaDate(unsigned int year, unsigned int month, unsigned int day, unsigned int hour, 
+            unsigned int minute, unsigned int second, int_type nanoSecond);
+    
 	/*!Default destructor*/
 	~osaDate(){} 
 	/*! Creates a std::string representation of this osaDate object.
@@ -74,5 +79,7 @@ protected:
 	unsigned int SecondMember;
     int_type NanoSeconds;
 };
+
+osaDate osaDateNow(void);
 
 #endif

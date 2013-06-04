@@ -63,16 +63,6 @@ osaTimeData::osaTimeData(double dseconds)
 	clock_getres(CLOCK_REALTIME, &res);
 //	Resolution = static_cast<long long>(res.tv_nsec); 
 }
-/*returns the osaTimeData object of current time*/
-void osaTimeData::Now()
-{
-//	timespec res;
-	timespec now;
-	clock_gettime(CLOCK_REALTIME, &now);
-	Seconds = static_cast<long long> (now.tv_sec);
-	NanoSeconds = static_cast<long long> (now.tv_nsec); 
-//	Resolution = static_cast<long long>(res.tv_nsec);
-}
 
 
 void osaTimeData::SetTime(const osaTimeData &newTime)
@@ -205,6 +195,16 @@ std::string osaTimeData::ToString() const
 	return ss.str();
 }
 
+bool osaTimeData::IsPositive(void) const
+{
+    return Positive;
+}
+
+void osaTimeData::SetPositive(bool flag)
+{
+    Positive = flag ;
+}
+
 long long osaTimeData::GetSeconds() const
 {
 	return Seconds;
@@ -272,39 +272,105 @@ bool osaTimeData::operator==(const osaTimeData &rhs) const
 
 bool osaTimeData::operator>(const osaTimeData &rhs) const
 {
-	if(this->Seconds > rhs.Seconds)
-		return true;
-	else if(this->Seconds == rhs.Seconds && this->NanoSeconds > rhs.NanoSeconds)
-		return true;
-	else
-		return false;
+    if(this->IsPositive() && !rhs.IsPositive())
+        return true;
+    else if(!this->IsPositive() && rhs.IsPositive())
+        return false;
+    else if(!this->IsPositive() && !rhs.IsPositive())
+    {
+	    if(this->Seconds < rhs.Seconds)
+	    	return true;
+	    else if(this->Seconds == rhs.Seconds && this->NanoSeconds < rhs.NanoSeconds)
+	    	return true;
+    	else
+	    	return false;
+    }
+    else
+    {
+	    if(this->Seconds > rhs.Seconds)
+	    	return true;
+	    else if(this->Seconds == rhs.Seconds && this->NanoSeconds > rhs.NanoSeconds)
+	    	return true;
+    	else
+	    	return false;
+    }
 }
 bool osaTimeData::operator<(const osaTimeData &rhs) const
 {
-	if(this->Seconds < rhs.Seconds)
-		return true;
-	else if(this->Seconds == rhs.Seconds && this->NanoSeconds < rhs.NanoSeconds)
-		return true;
-	else
-		return false;
+    if(this->IsPositive() && !rhs.IsPositive())
+        return false;
+    else if(!this->IsPositive() && rhs.IsPositive())
+        return true;
+    else if(!this->IsPositive() && !rhs.IsPositive())
+    {
+	    if(this->Seconds > rhs.Seconds)
+	    	return true;
+	    else if(this->Seconds == rhs.Seconds && this->NanoSeconds > rhs.NanoSeconds)
+	    	return true;
+    	else
+	    	return false;
+    }
+    else
+    {
+	    if(this->Seconds < rhs.Seconds)
+    		return true;
+    	else if(this->Seconds == rhs.Seconds && this->NanoSeconds < rhs.NanoSeconds)
+    		return true;
+    	else
+    		return false;
+    }
 }
 bool osaTimeData::operator>=(const osaTimeData &rhs) const
 {
-	if(this->Seconds > rhs.Seconds)
-		return true;
-	else if(this->Seconds == rhs.Seconds && this->NanoSeconds >= rhs.NanoSeconds)
-		return true;
-	else
-		return false;
+    if(this->IsPositive() && !rhs.IsPositive())
+        return true;
+    else if(!this->IsPositive() && rhs.IsPositive())
+        return false;
+    else if(!this->IsPositive() && !rhs.IsPositive())
+    {
+	    if(this->Seconds < rhs.Seconds)
+	    	return true;
+	    else if(this->Seconds == rhs.Seconds && this->NanoSeconds <= rhs.NanoSeconds)
+	    	return true;
+    	else
+	    	return false;
+    }
+    else
+    {
+	    if(this->Seconds > rhs.Seconds)
+	    	return true;
+	    else if(this->Seconds == rhs.Seconds && this->NanoSeconds >= rhs.NanoSeconds)
+	    	return true;
+    	else
+	    	return false;
+    }
+
 }
 bool osaTimeData::operator<=(const osaTimeData &rhs) const
 {
-	if(this->Seconds <  rhs.Seconds)
-		return true;
-	else if(this->Seconds == rhs.Seconds && this->NanoSeconds <= rhs.NanoSeconds)
-		return true;
-	else
-		return false;
+    if(this->IsPositive() && !rhs.IsPositive())
+        return false;
+    else if(!this->IsPositive() && rhs.IsPositive())
+        return true;
+    else if(!this->IsPositive() && !rhs.IsPositive())
+    {
+	    if(this->Seconds > rhs.Seconds)
+	    	return true;
+	    else if(this->Seconds == rhs.Seconds && this->NanoSeconds >= rhs.NanoSeconds)
+	    	return true;
+    	else
+	    	return false;
+    }
+    else
+    {
+	    if(this->Seconds < rhs.Seconds)
+    		return true;
+    	else if(this->Seconds == rhs.Seconds && this->NanoSeconds <= rhs.NanoSeconds)
+    		return true;
+    	else
+    		return false;
+    }
+
 }
 osaTimeData osaTimeData::operator*(const double &rhs) 
 {
@@ -315,6 +381,19 @@ osaTimeData osaTimeData::operator/(const double &rhs)
 {
 	double me = ToSeconds();
 	return From(me/rhs);	
+}
+
+
+/*returns the osaTimeData object of current time*/
+osaTimeData osaTimeNow()
+{
+//	timespec res;
+	timespec now;
+	clock_gettime(CLOCK_REALTIME, &now);
+	long long seconds = static_cast<long long> (now.tv_sec);
+	long long nanoSeconds = static_cast<long long> (now.tv_nsec); 
+//	Resolution = static_cast<long long>(res.tv_nsec);
+    return osaTimeData(seconds,nanoSeconds);
 }
 
 

@@ -46,9 +46,6 @@ public:
 	/*! Destructor*/
 	~osaTimeData(){}
 
-	/*! sets the properties of the osaTimeData object to current time
-	*/
-	void Now();
 	//Utility
 //	osaTimeData Copy() const;
 	/*!Set the objects time to equal the given time
@@ -83,6 +80,14 @@ public:
 	
 	std::string ToString() const; // string representation YYYY/MM/DD, HH:MM:SS.DDDD
 	
+    /*!Returns true if the osaTimeData is positive
+    \return true if the object is positive
+    */
+    bool IsPositive(void) const;
+    /*!sets the positive flag of osaTimeData
+    \param flag if true, the osaTimeData is set to positive, else, negative
+    */
+    void SetPositive(bool flag);
 	//gets,sets
 	/*!Returns the seconds of this osaTimeData object.
 	\return the number seconds this object represents
@@ -133,4 +138,9 @@ private:
 	void SplitDoubles(const double &seconds, int_type &fullSeconds, int_type &nanoSeconds);
 }
 ;
+
+
+/*! sets the properties of the osaTimeData object to current time
+*/
+osaTimeData osaTimeNow(void);
 #endif

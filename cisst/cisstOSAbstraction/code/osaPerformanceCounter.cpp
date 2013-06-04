@@ -37,8 +37,7 @@ void osaPerformanceCounter::Start()
 		return ;
 	else
 	{
-		osaTimeData now;
-        now.Now();
+		osaTimeData now = osaTimeNow();
 		SetOrigin(now);
 	}
 }
@@ -56,8 +55,7 @@ osaTimeData osaPerformanceCounter::GetElapsedTime()
 {
 	if(isRunning)
 	{
-        osaTimeData End;
-        End.Now();
+        osaTimeData End = osaTimeNow();
     }
 	osaTimeData diff = (End-Origin);
 	osaTimeData offset(0,247818,true);//this is the experimentally determined overhead of getting elapsed time

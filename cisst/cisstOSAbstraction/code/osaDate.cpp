@@ -19,28 +19,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaDate.h>
 
-osaDate::osaDate()
+osaDate::osaDate():
+	YearMember(0),
+	MonthMember(0),
+	DayMember(0),   // day of the month 1~31
+	HourMember(0), // hour since midnight
+	MinuteMember(0),
+	SecondMember(0),
+    NanoSeconds(0)
 {
-/*	timespec t;
-	clock_gettime(CLOCK_REALTIME,&t);
-	time_t tt = t.tv_sec;
-	struct tm *timeinfo;
-	timeinfo = localtime(&tt);
-	YearMember =timeinfo->tm_year + 1900;
-	MonthMember = timeinfo->tm_mon + 1;
-	DayMember = timeinfo->tm_mday ;  // day of the month 1~31
-	HourMember = timeinfo->tm_hour ; // hour since midnight
-	MinuteMember = timeinfo->tm_min ;
-	SecondMember = timeinfo->tm_sec;*/
-
-	YearMember =0;
-	MonthMember = 0;
-	DayMember = 0 ;  // day of the month 1~31
-	HourMember = 0 ; // hour since midnight
-	MinuteMember = 0 ;
-	SecondMember = 0;
-
-    NanoSeconds = 0;
 }
 
 osaDate::osaDate(osaTimeData &t)
@@ -48,6 +35,16 @@ osaDate::osaDate(osaTimeData &t)
     From(t);
 }
 
+osaDate::osaDate(unsigned int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second, int_type nanoSecond):
+	YearMember(year),
+	MonthMember(month),
+	DayMember(day),   
+	HourMember(hour), // hour since midnight
+	MinuteMember(minute),
+	SecondMember(second),
+    NanoSeconds(nanoSecond)
+{
+}
 std::string osaDate::ToString() const
 {
 	std::stringstream ss;
@@ -68,18 +65,25 @@ std::string osaDate::ToString() const
     if(SecondMember<10)
         ss<<"0";
     ss<<SecondMember;
+    ss<<".";
+  
+    unsigned int firstDigit = NanoSeconds/100000000;
+    unsigned int secondDigit = (NanoSeconds - firstDigit*100000000)/10000000;
+    unsigned int thirdDigit = (NanoSeconds - firstDigit*100000000-secondDigit*10000000)/1000000;
+    ss<<firstDigit;
+    ss<<secondDigit;
+    ss<<thirdDigit;
 	
 	return ss.str();
 }
 
 void osaDate::From(osaTimeData &timeData)
 {
-    osaTimeData zero(0.0);
     timeData.Normalize();
     
     try
     {
-        if (timeData<zero)
+        if (!timeData.IsPositive())
             throw std::runtime_error("Can not create an osaDate from a negative osaTimeData");
     }
     catch(std::exception const& e)
@@ -105,6 +109,18 @@ void osaDate::From(osaTimeData &timeData)
 
 void osaDate::To(osaTimeData &timeData) const
 {
+    time_t seconds;
+    struct tm time_info ;
+
+    time_info.tm_year = YearMember - 1900;
+    time_info.tm_mon = MonthMember - 1;
+    time_info.tm_mday = DayMember;
+    time_info.tm_hour = HourMember;
+    time_info.tm_min = MinuteMember;
+    time_info.tm_sec = SecondMember;
+
+    seconds = mktime(&time_info);
+    timeData.SetSeconds(seconds);
     timeData.SetNanoSeconds(NanoSeconds);
 }
 
@@ -166,4 +182,24 @@ unsigned int& osaDate::GetSecond(void)
 const unsigned int& osaDate::GetSecond(void) const
 {
     return SecondMember;
+}
+
+osaDate osaDateNow(void)
+{
+/*	timespec t;
+	clock_gettime(CLOCK_REALTIME,&t);
+	time_t tt = t.tv_sec;
+	struct tm *timeinfo;
+	timeinfo = localtime(&tt);
+    osaDate result(
+	timeinfo->tm_year + 1900,
+    timeinfo->tm_mon + 1,
+	timeinfo->tm_mday,   // day of the month 1~31
+	timeinfo->tm_hour, // hour since midnight
+	timeinfo->tm_min,
+	timeinfo->tm_sec,
+    0);*/
+    osaTimeData now = osaTimeNow();
+    osaDate dateFrom(now);
+    return dateFrom;
 }
