@@ -133,7 +133,6 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 #if 0
     std::cout << "--------------------------------------------------" << std::endl;
     std::cout << message << std::endl;
-    std::cout << MongoDB::GetDBEntryFromMonitorTopic(json) << std::endl;
 #endif
 
     switch (jsonSerializer.GetTopicType()) {
@@ -148,18 +147,18 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 #endif
             }
             break;
-        case SF::JSONSerializer::FAULT:
+        case SF::JSONSerializer::EVENT:
             {
                 //SendMessageToCubeCollector(MongoDB::ConvertTopicMesssageToDBEntry(
                 //    jsonSerializer.GetTopicType(), jsonSerializer));
 #if 1 // MJ TEMP for debugging
                 static int count = 0;
-                std::cout << "--------------------------------------- Fault" << ++count << std::endl;
-                std::cout << "Fault type   : " << Fault::GetFaultTypeString(jsonSerializer.GetFaultType()) << std::endl;
-                std::cout << "Detector name: " << jsonSerializer.GetFaultDetectorName() << std::endl;
+                std::cout << "--------------------------------------- Event" << ++count << std::endl;
+                std::cout << "Event type   : " << Event::GetEventTypeString(jsonSerializer.GetEventType()) << std::endl;
+                //std::cout << "Detector name: " << jsonSerializer.GetFaultDetectorName() << std::endl;
                 std::cout << "Timestamp    : " << std::cout.precision(10) << std::scientific << jsonSerializer.GetTimestamp() << std::endl;
-                std::cout << "Values       : " << jsonSerializer.GetFaultFields() << std::endl;
-                std::cout << message << std::endl;
+                std::cout << "Values       : " << jsonSerializer.GetEventSpecificJson() << std::endl;
+                std::cout << "Original json: \n" << message << std::endl;
 #endif
             }
             break;
@@ -170,7 +169,7 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
             break;
         case SF::JSONSerializer::INVALID:
             {
-                std::cout << "FAULT INVALID" << std::endl;
+                std::cout << "INVALID_EVENT" << std::endl;
             }
             break;
     }
