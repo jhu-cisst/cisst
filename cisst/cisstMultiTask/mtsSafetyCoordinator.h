@@ -42,20 +42,26 @@ public:
     */
     typedef std::vector<mtsMonitorComponent*> MonitorsType;
 
-    //! Typedef for filters deployed in the same component
-    typedef std::list<SF::FilterBase*> FiltersType;
+    //typedef std::list<SF::FilterBase*> FiltersType;
 
     //! Typedef for filters deployed in the same process (grouped by component name)
     /*! Key: component name, Value: list of filters 
      */
-    typedef std::map<std::string, FiltersType*> FilterSetType;
+    //typedef std::map<std::string, FiltersType*> FilterSetType;
+
+    //! Typedef for filters deployed in the process
+    typedef std::map<SF::FilterBase::FilterIDType, SF::FilterBase*> FiltersType;
+
+    //! Typedef for events reported so far
+    // TODO
 
 protected:
     //! Monitor instances
     MonitorsType Monitors;
     
     //! Filter instances.  Grouped by the name of component to which the filter is deployed
-    FilterSetType FilterSet;
+    //FilterSetType FilterSet;
+    FiltersType Filters;
 
     //! Deploy monitor target to monitor component
     bool DeployMonitorTarget(const std::string & targetJSON, 
@@ -110,6 +116,16 @@ public:
         into either cisst or SF such that users don't need to directly call this method.
     */
     bool DeployMonitorsAndFDDs(void);
+
+    //! Handle event (fault, error, failure)
+    /*! Depending on the type of event (esp. in case of fault events), Safety Coordinator 
+     * in each process can deal with events or faults locally, i.e., within the process 
+     * boundary, or pass it to Safety Supervisor for system-wide event propagation and 
+     * global coordination.
+     * If dealt only by Safety Coordinator, it would be the best-performance event 
+     * handling case.
+     */
+    void OnFaultEvent(const std::string & json);
 
     //-------------------------------------------------- 
     //  State Machine Management

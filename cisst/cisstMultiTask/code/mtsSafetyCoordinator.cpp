@@ -49,21 +49,9 @@ mtsSafetyCoordinator::~mtsSafetyCoordinator()
             delete Monitors[i];
     }
 
-    if (!FilterSet.empty()) {
-        for (FilterSetType::iterator it = FilterSet.begin();
-             it != FilterSet.end(); ++it) 
-        {
-            FiltersType * filters = it->second;
-            if (!filters->empty()) {
-                for (FiltersType::iterator _it = filters->begin();
-                     _it != filters->end(); ++_it)
-                {
-                    delete (*_it);
-                }
-            }
-            delete filters;
-        }
-    }
+    if (!Filters.empty())
+        for (FiltersType::iterator it = Filters.begin(); it != Filters.end(); ++it)
+            delete it->second;
 }
 
 bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON, 
@@ -626,16 +614,9 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
     }
 
     // Add filter to the list of filters deployed
-    FilterSetType::iterator it = FilterSet.find(targetComponentName);
-    // First time to deploy a filter to the target component
-    if (it == FilterSet.end()) {
-        FiltersType * filterList = new FiltersType;
-        filterList->push_back(filter);
-        CMN_LOG_CLASS_RUN_DEBUG << "AddFilter: Installed new filter to component \"" << targetComponentName << "\" for the first time.  Filter info: " << (*filter) << std::endl;
-    } else {
-        it->second->push_back(filter);
-        CMN_LOG_CLASS_RUN_DEBUG << "AddFilter: Installed new filter to component \"" << targetComponentName << "\".  Filter info: " << (*filter) << std::endl;
-    }
+    const SF::FilterBase::FilterIDType uid = filter->GetFilterUID();
+    if (Filters.find(uid) == Filters.end())
+        Filters[uid] = filter;
 
     // Set other properties of filter
     // MJ: Should more fields be required for event localization, middleware-specific class
@@ -660,6 +641,54 @@ bool mtsSafetyCoordinator::DeployMonitorsAndFDDs(void)
     }
 
     return true;
+}
+
+void mtsSafetyCoordinator::OnFaultEvent(const std::string & json)
+{
+    SF::JSONSerializer jsonSerializer;
+    if (!jsonSerializer.ParseJSON(json)) {
+        CMN_LOG_CLASS_RUN_ERROR << "OnFaultEvent: failed to parse json:\n" << json << std::endl;
+        return;
+    }
+
+    const SF::FilterBase::FilterIDType uid = jsonSerializer.GetFilterUID();
+    FiltersType::const_iterator it = Filters.find(uid);
+    if (it == Filters.end()) {
+        CMN_LOG_CLASS_RUN_WARNING << "OnFaultEvent: no filter with uid " << uid << " found" << std::endl;
+        return;
+    }
+
+    // Get filter instance based on filter UID
+    SF::FilterBase * filter = it->second;
+    CMN_ASSERT(filter);
+
+    // If filter has reported an event which has not been resolved yet, ignore it.
+    // MJ: THIS "POLICY" SHOULD BE REVIWED.
+    if (filter->GetEventState() == SF::FilterBase::NONE) {
+        std::cout << "======================== DETECTED" << std::endl; // TEMP
+        std::cout << *filter << std::endl; // TEMP
+
+        filter->SetEventState(SF::FilterBase::DETECTED);
+    }
+
+    const std::string targetComponentName = filter->GetNameOfTargetComponent();
+    mtsComponent * component = mtsManagerLocal::GetInstance()->GetComponentAsTask(targetComponentName);
+    if (!component) {
+        CMN_LOG_CLASS_RUN_WARNING << "OnFaultEvent: no component found: \""
+            << targetComponentName << "\"" << std::endl;
+        return;
+    }
+
+    // change state to ERROR
+    // TEMP: THIS SHOULD BE OTHER STATE depending on json (e.g., severity information)
+    static int cnt = 0;
+    if (cnt++ == 0) {
+        component->FaultState->ProcessEvent(SF::State::ERROR_DETECTION);
+    }
+    if (cnt == 500) {
+        component->FaultState->ProcessEvent(SF::State::ERROR_REMOVAL);
+        cnt = 0;
+    }
 }
 
 bool mtsSafetyCoordinator::CreateMonitor(void)
