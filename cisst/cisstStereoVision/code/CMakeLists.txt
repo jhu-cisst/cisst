@@ -434,7 +434,7 @@ ELSE(CISST_SVL_USE_USER_OPENCV)
 
     ##OpenCV
     #IF(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
-    #    FIND_PACKAGE(OpenCV)
+    #    FIND_PACKAGE(OpenCV1)
     #    IF(OpenCV_FOUND)
     #        MESSAGE("Version: " ${OpenCV_VERSION})
     #        MESSAGE("Major: " ${OpenCV_VERSION_MAJOR})
@@ -553,7 +553,7 @@ ELSE(CISST_SVL_USE_USER_OPENCV)
                 SET(OpenCV_HIGHGUI_LIBRARY          ${OpenCV20_HIGHGUI_LIBRARY})
                 SET(OpenCV_ML_LIBRARY               ${OpenCV20_ML_LIBRARY})
             ELSE(OpenCV20_FOUND)
-                FIND_PACKAGE(OpenCV COMPONENTS CV CXCORE CVAUX HIGHGUI)
+                FIND_PACKAGE(OpenCV1 COMPONENTS CV CXCORE CVAUX HIGHGUI)
             ENDIF(OpenCV20_FOUND)
         ENDIF(OpenCV21_FOUND)
 
