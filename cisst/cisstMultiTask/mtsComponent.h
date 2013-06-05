@@ -162,6 +162,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     friend class mtsManagerLocal;
     friend class mtsComponentProxy;
+    friend class mtsSafetyCoordinator;
 
  protected:
 

@@ -315,8 +315,8 @@ mtsTask::mtsTask(const std::string & name,
     provided->AddEventWrite(this->GenerateMonitorEvent, SF::Dict::MonitorNames::MonitorEvent, std::string());
     // [SFUPDATE]
 
-    // Create SF state machine with new instance of state transition event handler and
-    // associate the instance with the SF state machine.
+    // Create SF state machine with default state transition event handler and
+    // associate it with the SF state machine.
     // The event handler will be removed when the state machine is destroyed and thus
     // it should not be removed outside the state machine of Safety Framework.
     SF::StateEventHandler * eventHandler = new SF::StateEventHandler;
