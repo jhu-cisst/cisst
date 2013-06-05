@@ -931,11 +931,8 @@ void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
     // will take care of the event.
     Publisher->Publish(json);
 
-    // MJ TODO: Depending on the type of event (esp. in case of fault events),
-    // the Safety Coordinator in each process can deal with events or faults locally,
-    // i.e., within the process boundary.
-    // This would be the best-performance-fault-handling case but it loses the
-    // system-wide fault (event) propagation and global coordination by the "brain."
+    // Report event to Safety Coordinator
+    mtsManagerLocal::GetInstance()->GetCoordinator()->OnFaultEvent(json);
 }
 
 bool mtsMonitorComponent::UnregisterComponent(const std::string & componentName)
