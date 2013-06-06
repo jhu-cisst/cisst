@@ -1,3 +1,20 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id$
+  
+  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #include <cisstNumerical/nmrNetlib.h>
 #include <cisstVector/vctDynamicMatrix.h>
 #include <cisstNumerical/nmrExport.h>
@@ -49,15 +66,15 @@ public:
 
     // Create and fill data 
     Data( vctDynamicMatrix<double>& A,
-	  vctDynamicVector<double>& D,
-	  vctDynamicMatrix<double>& V );
+          vctDynamicVector<double>& D,
+          vctDynamicMatrix<double>& V );
 
     ~Data();
 
     // Check the system of equation for inconsistencies
     void CheckSystem( const vctDynamicMatrix<double>& A,
-		      const vctDynamicVector<double>& D,
-		      const vctDynamicMatrix<double>& V );
+                      const vctDynamicVector<double>& D,
+                      const vctDynamicMatrix<double>& V );
 
     // Print errors if any
     void CheckInfo() const;
@@ -81,15 +98,15 @@ public:
    
    \param[in] A The \f$ N \times N \f$ column major matrix. The matrix A is
               modified during the evaluation. The matrix must be in column 
-	      major.
+              major.
    \param[out] D The vector of \f$ N \f$ eigen vectors. The vector must be
                allocated prior to calling.
    \param[out] V The \f$ N \times N \f$ matrix of eigen vectors. Eigen vectors
                  are stored in the columns of D. The matrix must be column
-		 major and allocated prior to calling.
+                 major and allocated prior to calling.
    \return ESUCCESS if the computation was successful. EFAILURE otherwise.
 */
-nmrSymmetricEigenProblem::Errno
+nmrSymmetricEigenProblem::Errno CISST_EXPORT
 nmrSymmetricEigenProblem
 ( vctDynamicMatrix<double>& A,
   vctDynamicVector<double>& D,
@@ -104,17 +121,17 @@ nmrSymmetricEigenProblem
    
    \param[in] A The \f$ N \times N \f$ column major matrix. The matrix A is
               modified during the evaluation. The matrix must be column 
-	      major.
+              major.
    \param[out] D The vector of \f$ N \f$ eigen vectors. The vector must be
                allocated before calling.
    \param[out] V The \f$ N \times N \f$ matrix of eigen vectors. Eigen vectors
                  are stored in the columns of V. The matrix must be column
-		 major and allocated before calling.
+                 major and allocated before calling.
    \param[in] data Computation data. This data can is filled during the initial
                    call and can be reused in subsequent calls.
    \return ESUCCESS if the computation was successful. EFAILURE otherwise.
 */
-nmrSymmetricEigenProblem::Errno
+nmrSymmetricEigenProblem::Errno CISST_EXPORT
 nmrSymmetricEigenProblem
 ( vctDynamicMatrix<double>& A,
   vctDynamicVector<double>& D,
