@@ -79,15 +79,35 @@ http://www.cisst.org/cisst/license.txt.
 
 %template(svlSampleImageRGB) svlSampleImageCustom<unsigned char,  3, 1>;
 
-
-
 %ignore FitEllipse;
 %ignore SetFilterCompactness;
 %ignore SetFilterArea;
 
+///\note SWIG is very picky about string matching the signature needs to be exactly the same
+%rename(RectifyPython) Rectify(svlSampleImage* src_img,
+                               unsigned int src_videoch,
+                               svlSampleImage* dst_img,
+                               unsigned int dst_videoch,
+                               bool interpolation,
+                               Internals& internals);
+
 %include "cisstStereoVision/svlImageProcessing.h"
+
+%rename(SetFromCameraCalibrationPython) SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, unsigned int videoch);
+
 %include "code/svlImageProcessingHelper.h"
+
+%apply double& INOUT { double & framerate };
+
+%apply unsigned int & INOUT { unsigned int & };
+
 %include "code/svlVideoCodecCVI.h"
+
+%extend svlVideoCodecCVI {
+   int ReadPython(svlSampleImage &image, const unsigned int videoch, const bool noresize) {
+       return $self->Read(NULL, image, videoch, noresize);
+   }
+}
 
 %include "cisstStereoVision/svlFilterImageWindow.h"
 %import "cisstStereoVision/svlConfig.h"
