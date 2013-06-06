@@ -70,6 +70,25 @@ http://www.cisst.org/cisst/license.txt.
 
  // %include "cisstStereoVision/svlFilterRGBSwapper.h"
 
+%include "cisstStereoVision/svlSampleImage.h"
+
+//%ignore svlSampleImageCustom::GetMatrixRef;
+
+%include "cisstStereoVision/svlSampleImageCustom.h"
+
+
+%template(svlSampleImageRGB) svlSampleImageCustom<unsigned char,  3, 1>;
+
+
+
+%ignore FitEllipse;
+%ignore SetFilterCompactness;
+%ignore SetFilterArea;
+
+%include "cisstStereoVision/svlImageProcessing.h"
+%include "code/svlImageProcessingHelper.h"
+%include "code/svlVideoCodecCVI.h"
+
 %include "cisstStereoVision/svlFilterImageWindow.h"
 %import "cisstStereoVision/svlConfig.h"
 #if CISST_SVL_HAS_OPENCV2
