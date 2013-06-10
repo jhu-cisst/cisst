@@ -927,8 +927,8 @@ void mtsMonitorComponent::HandleMonitorEvent(const std::string & json)
 void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
 {
     // If the monitor component receives an event regardless of its type (monitor or
-    // fault), publish the event to the safety framework as is.  The Safety Supervisor
-    // will take care of the event.
+    // fault), publish the event to the safety framework.  The Safety Supervisor
+    // will handle the event "accordingly" (TODO).
     Publisher->Publish(json);
 
     // Report event to Safety Coordinator
