@@ -2273,7 +2273,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
     for (size_t i = 0; i < interfaceNames.size(); ++i) {
         interfaceProvided = component->GetInterfaceProvided(interfaceNames[i]);
         if (!interfaceProvided) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL provided/output interface detected: " << interfaceNames[i] << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL provided interface detected: " << interfaceNames[i] << std::endl;
             return false;
         } else {
             if (ManagerGlobal->FindInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i])) {
@@ -2281,7 +2281,26 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
             }
         }
         if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i])) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add provided/output interface: "
+            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add provided interface: "
+                                     << componentName << ":" << interfaceNames[i] << std::endl;
+            return false;
+        }
+        osaSleep(0.1);  // PK TEMP until blocking commands supported
+    }
+    mtsInterfaceOutput * interfaceOutput;
+    interfaceNames = component->GetNamesOfInterfacesOutput();
+    for (size_t i = 0; i < interfaceNames.size(); ++i) {
+        interfaceOutput = component->GetInterfaceOutput(interfaceNames[i]);
+        if (!interfaceOutput) {
+            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL output interface detected: " << interfaceNames[i] << std::endl;
+            return false;
+        } else {
+            if (ManagerGlobal->FindInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i])) {
+                continue;
+            }
+        }
+        if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i])) {
+            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add output interface: "
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
@@ -2293,7 +2312,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
     for (size_t i = 0; i < interfaceNames.size(); ++i) {
         interfaceRequired = component->GetInterfaceRequired(interfaceNames[i]);
         if (!interfaceRequired) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL required/input interface detected: " << interfaceNames[i] << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL required interface detected: " << interfaceNames[i] << std::endl;
             return false;
         } else {
             if (ManagerGlobal->FindInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i])) {
@@ -2301,12 +2320,33 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
             }
         }
         if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i])) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add required/input interface: "
+            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add required interface: "
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
         osaSleep(0.1);  // PK TEMP until blocking commands supported
     }
+
+    mtsInterfaceInput * interfaceInput;
+    interfaceNames = component->GetNamesOfInterfacesInput();
+    for (size_t i = 0; i < interfaceNames.size(); ++i) {
+        interfaceInput = component->GetInterfaceInput(interfaceNames[i]);
+        if (!interfaceInput) {
+            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL input interface detected: " << interfaceNames[i] << std::endl;
+            return false;
+        } else {
+            if (ManagerGlobal->FindInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i])) {
+                continue;
+            }
+        }
+        if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i])) {
+            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add input interface: "
+                                     << componentName << ":" << interfaceNames[i] << std::endl;
+            return false;
+        }
+        osaSleep(0.1);  // PK TEMP until blocking commands supported
+    }
+
     return true;
 }
 

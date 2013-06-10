@@ -463,10 +463,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     InterfacesProvidedMapType InterfacesProvided;
     typedef cmnNamedMap<mtsInterfaceOutput> InterfacesOutputMapType;
     InterfacesOutputMapType InterfacesOutput;
-    // typedef std::list<mtsInterfaceProvided *> InterfacesProvidedListType;
-    // InterfacesProvidedListType InterfacesProvided;
-    // typedef std::list<mtsInterfaceOutput *> InterfacesOutputListType;
-    // InterfacesOutputListType InterfacesOutput;
     //@}
 
     /*! Map of required interfaces.  Used to store pointers on all
@@ -477,10 +473,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     InterfacesRequiredMapType InterfacesRequired;
     typedef cmnNamedMap<mtsInterfaceInput> InterfacesInputMapType;
     InterfacesInputMapType InterfacesInput;
-    // typedef std::list<mtsInterfaceRequired *> InterfacesRequiredListType;  adeguet1 OrOutput  to be removed
-    // InterfacesRequiredListType InterfacesRequired;
-    // typedef std::list<mtsInterfaceInput *> InterfacesInputListType;
-    // InterfacesInputListType InterfacesInput;
     //@}
 
     /*! Map of state tables, includes the default StateTable under the

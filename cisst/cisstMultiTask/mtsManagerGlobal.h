@@ -91,8 +91,8 @@ protected:
     typedef struct {
         //ConnectedInterfaceMapType InterfaceProvidedOrOutputMap;
         //ConnectedInterfaceMapType InterfaceRequiredOrInputMap;
-        InterfaceMapElementType InterfaceProvidedMap;
-        InterfaceMapElementType InterfaceRequiredMap;
+        InterfaceMapElementType InterfaceProvidedOrOutputMap;
+        InterfaceMapElementType InterfaceRequiredOrInputMap;
     } InterfaceMapType;
 
     /*! Component map: a map of registered components in a process
@@ -178,38 +178,38 @@ protected:
     void Cleanup(void);
 
     /*! Get connection information about provided interface specified */
-    ConnectionIDListType * GetConnectionsOfInterfaceProvided(
+    ConnectionIDListType * GetConnectionsOfInterfaceProvidedOrOutput(
         const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & interfaceName) const;
 
-    ConnectionIDListType * GetConnectionsOfInterfaceProvided(
+    ConnectionIDListType * GetConnectionsOfInterfaceProvidedOrOutput(
         const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & interfaceName, InterfaceMapType ** interfaceMap) const;
 
     /*! Get connection information about required interface specified */
-    ConnectionIDListType * GetConnectionsOfInterfaceRequired(
+    ConnectionIDListType * GetConnectionsOfInterfaceRequiredOrInput(
         const std::string & clientProcessName, const std::string & clientComponentName,
         const std::string & interfaceName) const;
 
-    ConnectionIDListType * GetConnectionsOfInterfaceRequired(
+    ConnectionIDListType * GetConnectionsOfInterfaceRequiredOrInput(
         const std::string & clientProcessName, const std::string & clientComponentName,
         const std::string & interfaceName, InterfaceMapType ** interfaceMap) const;
 
     /*! Add new connection id to specified interface */
-    bool AddConnectionToInterfaceProvided(
+    bool AddConnectionToInterfaceProvidedOrOutput(
         const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & interfaceName, const ConnectionIDType connectionID);
 
-    bool AddConnectionToInterfaceRequired(
+    bool AddConnectionToInterfaceRequiredOrInput(
         const std::string & clientProcessName, const std::string & clientComponentName,
         const std::string & interfaceName, const ConnectionIDType connectionID);
 
     /*! Remove connection id from specified interface */
-    bool RemoveConnectionOfInterfaceProvided(
+    bool RemoveConnectionOfInterfaceProvidedOrOutput(
         const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & interfaceName, const ConnectionIDType connectionID);
 
-    bool RemoveConnectionOfInterfaceRequired(
+    bool RemoveConnectionOfInterfaceRequiredOrInput(
         const std::string & clientProcessName, const std::string & clientComponentName,
         const std::string & interfaceName, const ConnectionIDType connectionID);
 
