@@ -651,26 +651,29 @@ void mtsSafetyCoordinator::OnFaultEvent(const std::string & json)
         return;
     }
 
+    // Get filter instance based on filter UID
     const SF::FilterBase::FilterIDType uid = jsonSerializer.GetFilterUID();
     FiltersType::const_iterator it = Filters.find(uid);
     if (it == Filters.end()) {
         CMN_LOG_CLASS_RUN_WARNING << "OnFaultEvent: no filter with uid " << uid << " found" << std::endl;
         return;
     }
-
-    // Get filter instance based on filter UID
     SF::FilterBase * filter = it->second;
     CMN_ASSERT(filter);
 
     // If filter has reported an event which has not been resolved yet, ignore it.
-    // MJ: THIS "POLICY" SHOULD BE REVIWED.
-    if (filter->GetEventState() == SF::FilterBase::NONE) {
-        std::cout << "======================== DETECTED" << std::endl; // TEMP
-        std::cout << *filter << std::endl; // TEMP
-
-        filter->SetEventState(SF::FilterBase::DETECTED);
+    // MJTODO: If SF::FilterBase is updated to handle multiple events simultaneously, 
+    // HasPendingEvent can accept argument to specify the type of event of interest.
+    if (!filter->HasPendingEvent()) {
+        CMN_LOG_CLASS_RUN_WARNING << "OnFaultEvent: Filter [ " << filter->GetFilterName() << " ] "
+            << "detected fault: \n" << json << std::endl;
+        if (!filter->SetEventDetected(json)) {
+            CMN_LOG_CLASS_RUN_WARNING << "OnFaultEvent: Failed to set event detected: \n" << json << std::endl;
+            return;
+        }
     }
 
+#if 0 // MJTEMP: disabled test codes
     const std::string targetComponentName = filter->GetNameOfTargetComponent();
     mtsComponent * component = mtsManagerLocal::GetInstance()->GetComponentAsTask(targetComponentName);
     if (!component) {
@@ -689,6 +692,7 @@ void mtsSafetyCoordinator::OnFaultEvent(const std::string & json)
         component->FaultState->ProcessEvent(SF::State::ERROR_REMOVAL);
         cnt = 0;
     }
+#endif
 }
 
 bool mtsSafetyCoordinator::CreateMonitor(void)
