@@ -222,10 +222,10 @@ public:
         if( !h.empty() ){ hRef.Assign(h); }
 
         CMN_LOG_INIT_ERROR << W << std::endl;
-        cisstNetlib_lsei_( W.Pointer(), &MDW, &ME, &MA, &MG, &N, 
-                           Options.Pointer(), X.Pointer(), &RNormE,
-                           &RNormL, &Mode, 
-                           Work.Pointer(), Index.Pointer() );
+        lsei_( W.Pointer(), &MDW, &ME, &MA, &MG, &N, 
+               Options.Pointer(), X.Pointer(), &RNormE,
+               &RNormL, &Mode, 
+               Work.Pointer(), Index.Pointer() );
 
     }
 
@@ -238,10 +238,10 @@ public:
             cmnThrow( std::runtime_error( msg ) );
         }
         
-        cisstNetlib_lsei_( W.Pointer(), &MDW, &ME, &MA, &MG, &N, 
-                           Options.Pointer(), X.Pointer(), &RNormE,
-                           &RNormL, &Mode, 
-                           Work.Pointer(), Index.Pointer());
+        lsei_( W.Pointer(), &MDW, &ME, &MA, &MG, &N, 
+               Options.Pointer(), X.Pointer(), &RNormE,
+               &RNormL, &Mode, 
+               Work.Pointer(), Index.Pointer());
     }
     
     /*! Get X.  This method must be used after Solve(). */
