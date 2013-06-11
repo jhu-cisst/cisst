@@ -2009,7 +2009,11 @@ bool mtsManagerLocal::Connect(const std::string & clientProcessName,
     }
     // This should not be the case: two external component cannot be connected.
     else {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: cannot connect two external components." << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: cannot connect two external components: "
+                                 << serverProcessName << ":" << serverComponentName << ":" << serverInterfaceName
+                                 << " to "
+                                 << clientProcessName << ":" << clientComponentName << ":" << clientInterfaceName
+                                 << " on process " << this->ProcessName << std::endl;
         return false;
     }
 
