@@ -354,10 +354,11 @@ IF(CISST_SVL_USE_USER_OPENCV)
 
     FIND_PACKAGE(OpenCV REQUIRED)
     IF(OpenCV_FOUND)
-        OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
+        OPTION(CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" ON)
     ELSE(OpenCV_FOUND)
-        OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
+        OPTION(CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" OFF)
     ENDIF(OpenCV_FOUND)
+    OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
 
 ELSE(CISST_SVL_USE_USER_OPENCV)
 
