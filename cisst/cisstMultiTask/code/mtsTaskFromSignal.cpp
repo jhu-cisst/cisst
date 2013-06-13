@@ -137,8 +137,7 @@ mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvidedWithoutSystemEvent
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
     }
     if (interfaceProvided) {
-        if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided)) {
-            InterfacesProvided.push_back(interfaceProvided);
+        if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {
             return interfaceProvided;
         }
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: task \"" << this->GetName() << "\" unable to add interface \""

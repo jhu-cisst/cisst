@@ -512,7 +512,7 @@ public:
     ~mtsComponentWithManagement();
 };
 
-%include "cisstMultiTask/mtsInterfaceProvidedOrOutput.h"
+%include "cisstMultiTask/mtsInterface.h"
 %include "cisstMultiTask/mtsInterfaceProvided.h"
 %extend mtsInterfaceProvided {
     %pythoncode {
@@ -542,7 +542,6 @@ public:
     }
 }
 
-%include "cisstMultiTask/mtsInterfaceRequiredOrInput.h"
 %include "cisstMultiTask/mtsInterfaceRequired.h"
 %extend mtsInterfaceRequired {
     %pythoncode {
