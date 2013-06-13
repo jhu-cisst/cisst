@@ -1,4 +1,3 @@
-
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
@@ -12,13 +11,13 @@
 
 #ifndef osaTimeData_h
 #define osaTimeData_h
+#include <cisstCommon/cmnGenericObject.h>
 
-#include <cmath>
-#include <sys/time.h>
-#include <cstddef>
+
 #include <iostream>
 #include <string>
 #include <sstream>
+
 
 /*! \brief Implementation of a simple object to represent relative time.
 	\ingroup cisstOSAbstraction
@@ -143,4 +142,11 @@ private:
 /*! sets the properties of the osaTimeData object to current time
 */
 osaTimeData osaTimeNow(void);
+
+/*! windows version of clock_gettime
+*/
+void windows_gettime(struct timeval *tv);
 #endif
+
+
+

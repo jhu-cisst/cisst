@@ -1,4 +1,5 @@
 
+
 /*
   $Id: osaPerformanceCounter.cpp 3034 2013-05-31 09:53:36Z tkim60 $
 
@@ -18,9 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstOSAbstraction/osaTimeData.h>
 #include <cisstOSAbstraction/osaPerformanceCounter.h>
+#if (CISST_OS == CISST_WINDOWS || CISST_OS == CISST_CYGWIN )
 
+#include <windows.h>
+
+#endif
 void osaPerformanceCounter::Reset()
 {
 	osaTimeData newTimeData;
@@ -63,11 +67,15 @@ osaTimeData osaPerformanceCounter::GetElapsedTime()
 }
 void osaPerformanceCounter::Delay(osaTimeData timeToDelay)
 {
-
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
 	struct timespec ts;
 	ts.tv_sec = timeToDelay.GetSeconds();
 	ts.tv_nsec = timeToDelay.GetNanoSeconds();
 	clock_nanosleep(CLOCK_MONOTONIC,0,&ts,NULL);	
+#else
+	int delay = timeToDelay.GetSeconds()*1000 + timeToDelay.GetNanoSeconds()/1000000;  // there is alot of precision lost here. Must FIX
+	Sleep(delay);
+#endif
 }
 
 

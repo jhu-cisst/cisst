@@ -1,3 +1,4 @@
+
 /*
   $Id: osaDate.cpp 3034 2013-05-31 09:53:36Z tkim60 $
 
@@ -19,6 +20,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaDate.h>
 
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
+#include <sys/time.h>
+
+#elif (CISST_OS == CISST_WINDOWS || CISST_OS == CISST_CYGWIN )
+#include <cmath>
+#include <windows.h>
+
+#endif
 osaDate::osaDate():
 	YearMember(0),
 	MonthMember(0),
@@ -92,11 +101,19 @@ void osaDate::From(osaTimeData &timeData)
     }
 
 
+#if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
+	timeval ts;
+	ts.tv_sec = timeData.GetSeconds();
+	ts.tv_usec = timeData.GetNanoSeconds()/1000;	
+#else
 	struct timespec ts;
 	ts.tv_sec = timeData.GetSeconds();
-	ts.tv_nsec = timeData.GetNanoSeconds();
+	ts.tv_nsec = timeData.GetNanoSeconds();	
+#endif
+
+	
 	struct tm *timeinfo;
-	timeinfo = localtime(&ts.tv_sec);
+	timeinfo = localtime((const time_t*)&ts.tv_sec);
 	
 	YearMember = timeinfo->tm_year + 1900 ;
 	MonthMember = timeinfo->tm_mon +1;

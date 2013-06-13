@@ -1,5 +1,6 @@
 
 
+
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
@@ -23,9 +24,20 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <math.h>
 #include <iomanip>
 #include <cisstOSAbstraction/osaTimeData.h>
+#include <cmath>
+#include <iostream>
+
+
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
+#include <sys/time.h>
+
+#elif (CISST_OS == CISST_WINDOWS || CISST_OS == CISST_CYGWIN )
+#include <cmath>
+#include <windows.h>
+
+#endif
 
 
 osaTimeData::osaTimeData(void):
@@ -41,8 +53,8 @@ osaTimeData::osaTimeData(int_type seconds,int_type nseconds, bool positive_flag)
     NanoSeconds = nseconds;
     Positive = positive_flag ; 
 	Normalize();
-    struct timespec res;
-    clock_getres( CLOCK_REALTIME, &res);
+//    struct timespec res;
+//    clock_getres( CLOCK_REALTIME, &res);
 //    Resolution = static_cast<long long>(res.tv_nsec);
 }
 
@@ -59,8 +71,8 @@ osaTimeData::osaTimeData(double dseconds)
 	NanoSeconds = fractpart;
 	Positive = flag;
 	Normalize();
-	struct timespec res;
-	clock_getres(CLOCK_REALTIME, &res);
+//	struct timespec res;
+//	clock_getres(CLOCK_REALTIME, &res);
 //	Resolution = static_cast<long long>(res.tv_nsec); 
 }
 
@@ -236,7 +248,7 @@ void osaTimeData::SplitDoubles(const double &seconds, int_type &fullSeconds, int
 	long long computation=0;
 	for(int i = 0 ; i < 9 ; i++)
 	{
-		computation = computation+  (temp % 10 ) * pow(10,i);
+		computation = computation+  (temp % 10 ) * pow(10.0,i);
 		temp = temp/10;
 	}
 	nanoSeconds = computation;
@@ -387,13 +399,92 @@ osaTimeData osaTimeData::operator/(const double &rhs)
 /*returns the osaTimeData object of current time*/
 osaTimeData osaTimeNow()
 {
+#if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
+	timeval now;
+	windows_gettime(&now);
+	long long seconds = static_cast<long long> (now.tv_sec);
+	long long nanoSeconds = static_cast<long long> (now.tv_usec); 
+	return  osaTimeData(seconds,nanoSeconds);
+#else
 //	timespec res;
 	timespec now;
 	clock_gettime(CLOCK_REALTIME, &now);
 	long long seconds = static_cast<long long> (now.tv_sec);
 	long long nanoSeconds = static_cast<long long> (now.tv_nsec); 
 //	Resolution = static_cast<long long>(res.tv_nsec);
-    return osaTimeData(seconds,nanoSeconds);
+	return osaTimeData(seconds,nanoSeconds);
+#endif
+    
 }
+
+#if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
+LARGE_INTEGER getFILETIMEoffset()
+{
+    SYSTEMTIME s;
+    FILETIME f;
+    LARGE_INTEGER t;
+
+    s.wYear = 1970;
+    s.wMonth = 1;
+    s.wDay = 1;
+    s.wHour = 0;
+    s.wMinute = 0;
+    s.wSecond = 0;
+    s.wMilliseconds = 0;
+    SystemTimeToFileTime(&s, &f);
+    t.QuadPart = f.dwHighDateTime;
+    t.QuadPart <<= 32;
+    t.QuadPart |= f.dwLowDateTime;
+    return (t);
+}
+
+void windows_gettime(struct timeval *tv)
+{
+    LARGE_INTEGER t;
+    FILETIME f;
+    double microseconds;
+    static LARGE_INTEGER offset;
+    static double frequencyToMicroseconds;
+    static int initialized = 0;
+    static BOOL usePerformanceCounter = 0;
+
+    if (!initialized) 
+    {
+        LARGE_INTEGER performanceFrequency;
+        initialized = 1;
+        usePerformanceCounter = QueryPerformanceFrequency(&performanceFrequency);
+        
+        if (usePerformanceCounter) 
+        {
+            QueryPerformanceCounter(&offset);
+            frequencyToMicroseconds = (double)performanceFrequency.QuadPart / 1000000.;
+        } 
+        else 
+        {
+            offset = getFILETIMEoffset();
+            frequencyToMicroseconds = 10.;
+                                                                                        
+		}
+                                         
+	}                      
+        if (usePerformanceCounter) 
+            QueryPerformanceCounter(&t);
+            
+        else 
+        {
+            GetSystemTimeAsFileTime(&f);
+            t.QuadPart |= f.dwLowDateTime;
+            
+        }
+        t.QuadPart -= offset.QuadPart;
+        microseconds = (double)t.QuadPart / frequencyToMicroseconds;
+        t.QuadPart = microseconds;
+        tv->tv_sec = t.QuadPart / 1000000;
+        tv->tv_usec = t.QuadPart % 1000000;
+        
+        return ;
+}
+
+#endif
 
 

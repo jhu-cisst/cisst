@@ -1,4 +1,5 @@
 
+
 /*
   Author(s): Tae Soo Kim
   Created on: 2012-04-03
@@ -12,7 +13,7 @@
 
 #include <time.h>
 #include <string>
-#include "osaTimeData.h"
+#include <cisstOSAbstraction/osaTimeData.h>
 #include <stdexcept>
 /*! \brief Implementation of a simple object to represent date
 	\ingroup cisstOSAbstraction

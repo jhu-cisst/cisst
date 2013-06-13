@@ -1,5 +1,6 @@
 
 
+
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
@@ -13,7 +14,7 @@
 #ifndef osaPerformanceCounter_h
 #define osaPerformanceCounter_h
 
-#include "osaTimeData.h"
+#include <cisstOSAbstraction/osaTimeData.h>
 
 /*!
 \brief Implementation of a reliable performance counter.
