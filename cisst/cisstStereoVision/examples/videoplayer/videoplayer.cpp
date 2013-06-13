@@ -41,8 +41,6 @@ http://www.cisst.org/cisst/license.txt.
 
 using namespace std;
 
-#include <cisstMultiTask.h>
-
 ////////////////////////////////////////
 //     Window event handler class     //
 ////////////////////////////////////////
@@ -230,18 +228,6 @@ int ParseNumber(char* string, unsigned int maxlen)
 
 int my_main(int argc, char** argv)
 {
-
-    // set global component manager IP
-    std::string globalComponentManagerIP = "127.0.0.1";
-    // log configuration
-    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
-    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
-
-    mtsComponentManager * componentManager = mtsComponentManager::GetInstance(globalComponentManagerIP, "videoplayer");
-    componentManager->StartAll();
-
     cerr << "svlExVideoPlayer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl << endl;
     cerr << "Command line format:" << endl;
