@@ -109,12 +109,26 @@ void mtsComponent::Create(void)
 }
 
 
+bool mtsComponent::CreateAndWait(double timeoutInSeconds)
+{
+    this->Create();
+    return this->WaitForState(mtsComponentState::READY, timeoutInSeconds);
+}
+
+
 void mtsComponent::Start(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Start: default start method for component \""
                                << this->GetName() << "\"" << std::endl;
     this->Startup();
     this->State = mtsComponentState::ACTIVE;
+}
+
+
+bool mtsComponent::StartAndWait(double timeoutInSeconds)
+{
+    this->Start();
+    return this->WaitForState(mtsComponentState::ACTIVE, timeoutInSeconds);
 }
 
 
@@ -132,6 +146,13 @@ void mtsComponent::Kill(void)
                                << this->GetName() << "\"" << std::endl;
     this->Cleanup();
     this->State = mtsComponentState::FINISHED;
+}
+
+
+bool mtsComponent::KillAndWait(double timeoutInSeconds)
+{
+    this->Kill();
+    return this->WaitForState(mtsComponentState::FINISHED, timeoutInSeconds);
 }
 
 
