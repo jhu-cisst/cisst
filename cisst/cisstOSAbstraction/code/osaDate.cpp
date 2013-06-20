@@ -216,7 +216,7 @@ osaDate osaDateNow(void)
 	timeinfo->tm_min,
 	timeinfo->tm_sec,
     0);*/
-    osaTimeData now = osaTimeNow();
+    osaTimeData now = osaTimeNow(0); 
     osaDate dateFrom(now);
     return dateFrom;
 }

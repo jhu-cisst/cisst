@@ -141,7 +141,7 @@ private:
 
 /*! sets the properties of the osaTimeData object to current time
 */
-osaTimeData osaTimeNow(void);
+osaTimeData osaTimeNow(int);
 
 /*! windows version of clock_gettime
 */

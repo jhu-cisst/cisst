@@ -396,8 +396,9 @@ osaTimeData osaTimeData::operator/(const double &rhs)
 }
 
 
-/*returns the osaTimeData object of current time*/
-osaTimeData osaTimeNow()
+/*returns the osaTimeData object of current time
+\param indicator 0-real time, 1-monotonic*/
+osaTimeData osaTimeNow(int indicator)
 {
 #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
 	timeval now;
@@ -408,7 +409,10 @@ osaTimeData osaTimeNow()
 #else
 //	timespec res;
 	timespec now;
-	clock_gettime(CLOCK_REALTIME, &now);
+    if(indicator==0)
+    	clock_gettime(CLOCK_REALTIME, &now);
+    else
+    	clock_gettime(CLOCK_MONOTONIC, &now);
 	long long seconds = static_cast<long long> (now.tv_sec);
 	long long nanoSeconds = static_cast<long long> (now.tv_nsec); 
 //	Resolution = static_cast<long long>(res.tv_nsec);

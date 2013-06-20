@@ -26,10 +26,7 @@ class osaPerformanceCounter
 {
 public:
 	/*! Default constructor*/
-	osaPerformanceCounter()
-	{
-		isRunning = false;
-	}
+	osaPerformanceCounter();
 	/*!Default destructor*/
 	~osaPerformanceCounter(){}
 	/*! Reset all the counters to zero and stop the watch*/

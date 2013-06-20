@@ -25,9 +25,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <windows.h>
 
 #endif
+osaPerformanceCounter::osaPerformanceCounter():
+    HasHighPerformanceCounter(false),
+    isRunning(false)
+{
+
+}
+
 void osaPerformanceCounter::Reset()
 {
-	osaTimeData newTimeData;
+	osaTimeData newTimeData = osaTimeNow(1);
 	Origin = newTimeData;
 	isRunning = false;
 }
@@ -41,14 +48,15 @@ void osaPerformanceCounter::Start()
 		return ;
 	else
 	{
-		osaTimeData now = osaTimeNow();
+		osaTimeData now = osaTimeNow(1);
 		SetOrigin(now);
+        isRunning = true;
 	}
 }
 void osaPerformanceCounter::Stop()
 {
 	isRunning = false;
-	osaTimeData newEnd;
+	osaTimeData newEnd = osaTimeNow(1);
 	End = newEnd;	
 }
 bool osaPerformanceCounter::IsRunning()
@@ -59,11 +67,10 @@ osaTimeData osaPerformanceCounter::GetElapsedTime()
 {
 	if(isRunning)
 	{
-        osaTimeData End = osaTimeNow();
+        End = osaTimeNow(1);
     }
 	osaTimeData diff = (End-Origin);
-	osaTimeData offset(0,247818,true);//this is the experimentally determined overhead of getting elapsed time
-	return diff-offset;
+	return diff;
 }
 void osaPerformanceCounter::Delay(osaTimeData timeToDelay)
 {

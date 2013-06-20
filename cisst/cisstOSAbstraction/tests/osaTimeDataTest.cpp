@@ -60,8 +60,8 @@ void osaTimeDataTest::TestEqual(void)
 
 void osaTimeDataTest::TestInequalities(void)
 {
-	osaTimeData before = osaTimeNow();
-	osaTimeData after = osaTimeNow();
+	osaTimeData before = osaTimeNow(0);
+	osaTimeData after = osaTimeNow(0);
 	CPPUNIT_ASSERT(before <= after);	
 
 
