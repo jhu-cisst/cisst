@@ -34,14 +34,17 @@ mtsQtApplicationConstructorArg::mtsQtApplicationConstructorArg() : mtsGenericObj
 }
 
 mtsQtApplicationConstructorArg::mtsQtApplicationConstructorArg(const std::string &name, int argc, char **argv) :
-    mtsGenericObject(), Name(name)
+    mtsGenericObject(),
+    Name(name)
 {
     for (int i = 0; i < argc; i++)
         Args.push_back(argv[i]);
 }
 
 mtsQtApplicationConstructorArg::mtsQtApplicationConstructorArg(const mtsQtApplicationConstructorArg &other) :
-    mtsGenericObject(), Name(other.Name), Args(other.Args)
+    mtsGenericObject(),
+    Name(other.Name),
+    Args(other.Args)
 {
 }
 
@@ -118,60 +121,75 @@ bool mtsQtApplicationConstructorArg::FromStreamRaw(std::istream & inputStream, c
 class BasicTimerHandler : public QObject {
 // Qt strongly recommends putting Q_OBJECT here
 protected:
-    mtsQtApplication *qtapp;
-    void timerEvent(QTimerEvent *event) { if (qtapp) qtapp->Process(); }
+    mtsQtApplication * QtApp;
+    void timerEvent(QTimerEvent * CMN_UNUSED(event)) {
+        if (QtApp) {
+            QtApp->Process();
+        }
+    }
 public:
-    BasicTimerHandler(mtsQtApplication *qa) : QObject(0), qtapp(qa)
-      { setObjectName("BasicTimerHandler"); }
+    BasicTimerHandler(mtsQtApplication * qa):
+        QObject(0),
+        QtApp(qa)
+    {
+        setObjectName("BasicTimerHandler");
+    }
     ~BasicTimerHandler() {}
 };
 
-mtsQtApplication::mtsQtApplication(const std::string &name, int &argc, char **argv)
-                                  : mtsTaskContinuous(name, 16, false), ArgcCopy(0), ArgvCopy(0)
+mtsQtApplication::mtsQtApplication(const std::string &name, int &argc, char **argv):
+    mtsTaskContinuous(name, 16, false),
+    ArgcCopy(0),
+    ArgvCopy(0)
 {
-    qtapp = new QApplication(argc, argv);
+    QtApp = new QApplication(argc, argv);
     Timer = new QBasicTimer;
-    timerHandler = new BasicTimerHandler(this);
+    TimerHandler = new BasicTimerHandler(this);
 }
 
-mtsQtApplication::mtsQtApplication(const mtsQtApplicationConstructorArg &arg) 
-                                  : mtsTaskContinuous(arg.GetName(), 16, false)
+mtsQtApplication::mtsQtApplication(const mtsQtApplicationConstructorArg &arg):
+    mtsTaskContinuous(arg.GetName(), 16, false)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "mtsQtApplication: " << arg << std::endl;
     ArgcCopy = arg.GetArgc();
     arg.GetArgv(&ArgvCopy);
-    qtapp = new QApplication(ArgcCopy, ArgvCopy);
+    QtApp = new QApplication(ArgcCopy, ArgvCopy);
     Timer = new QBasicTimer;
-    timerHandler = new BasicTimerHandler(this);
+    TimerHandler = new BasicTimerHandler(this);
 }
 
 mtsQtApplication::~mtsQtApplication()
 {
-    delete qtapp;
+    delete QtApp;
     delete Timer;
-    delete timerHandler;
+    delete TimerHandler;
     if (ArgvCopy) {
-        for (int i = 0; i < ArgcCopy; i++)
+        for (int i = 0; i < ArgcCopy; i++) {
             delete [] ArgvCopy[i];
+        }
         delete [] ArgvCopy;
     }
 }
 
 void mtsQtApplication::Startup(void)
 {
-    Timer->start(500, timerHandler);  // Start 0.5 second timer
+    Timer->start(50, TimerHandler);  // Start 50 milliseconds second timer
 }
+
+#include <cisstOSAbstraction/osaSleep.h>
 
 void mtsQtApplication::Run(void)
 {
-    qtapp->exec();
+    QtApp->exec();
+    osaSleep(1.0 * cmn_s);
     Timer->stop();
     Kill();
 }
 
 void mtsQtApplication::Process(void)
 {
-    if (InterfaceProvidedToManager)
+    if (InterfaceProvidedToManager) {
         InterfaceProvidedToManager->ProcessMailBoxes();
+    }
     ProcessQueuedCommands();
 }
