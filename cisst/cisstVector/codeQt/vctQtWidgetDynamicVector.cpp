@@ -46,9 +46,9 @@ vctQtWidgetDynamicVectorReadBase::vctQtWidgetDynamicVectorReadBase(void):
 template <class _elementType>
 vctQtWidgetDynamicVectorReadFloating<_elementType>::vctQtWidgetDynamicVectorReadFloating(void):
     vctQtWidgetDynamicVectorReadBase(),
-    Precision(2),
     Format('f')
 {
+    SetPrecision(2);
 }
 
 template <class _elementType>
@@ -166,18 +166,45 @@ void vctQtWidgetDynamicVectorWriteBase::ItemChangedSlot(QTableWidgetItem * CMN_U
 template <class _elementType>
 vctQtWidgetDynamicVectorWriteFloating<_elementType>::vctQtWidgetDynamicVectorWriteFloating(const DisplayModeType displayMode):
     vctQtWidgetDynamicVectorWriteBase(displayMode),
-    Precision(2),
-    Format('f'),
-    Minimum(static_cast<_elementType>(-100.0)),
-    Maximum(static_cast<_elementType>(100.0)),
-    Step(static_cast<_elementType>(0.01))
+    Format('f')
 {
+    SetPrecision(2);
+    SetRange(static_cast<_elementType>(-100.0),
+             static_cast<_elementType>(100.0));
+    SetStep(static_cast<_elementType>(0.01));
 }
 
 template <class _elementType>
 void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetPrecision(const int precision)
 {
+    std::cerr << "SetPrecision " << precision << std::endl;
     Precision = precision;
+    UpdateWidgetPrecision();
+}
+
+template <class _elementType>
+void vctQtWidgetDynamicVectorWriteFloating<_elementType>::UpdateWidgetPrecision(void)
+{
+    // update widgets, if any
+    const size_t size = this->columnCount();
+    if (size == 0) {
+        return;
+    }
+    switch (DisplayMode) {
+    case TEXT_WIDGET:
+        break;
+    case SPINBOX_WIDGET:
+        QDoubleSpinBox * spinBox;
+        for (size_t index = 0; index < size; ++index) {
+            spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(0, index));
+            spinBox->setDecimals(this->Precision);
+        }
+        break;
+    case SLIDER_WIDGET:
+        break;
+    default:
+        break;
+    }
 }
 
 template <class _elementType>
@@ -229,7 +256,7 @@ void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetRange(const vctDyna
 }
 
 template <class _elementType>
-void vctQtWidgetDynamicVectorWriteFloating<_elementType>::UpdateWidgetRange()
+void vctQtWidgetDynamicVectorWriteFloating<_elementType>::UpdateWidgetRange(void)
 {
     // update widgets, if any
     const size_t size = this->columnCount();
@@ -291,7 +318,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const vctDyna
             if (spinBox == 0) {
                 spinBox = new QDoubleSpinBox();
                 spinBox->setRange(Minimum, Maximum);
-                spinBox->setDecimals(3);
+                spinBox->setDecimals(this->Precision);
                 spinBox->setSingleStep(Step);
                 connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(DoubleSpinBoxValueChangedSlot(double)));
                 this->setCellWidget(0, index, spinBox);
