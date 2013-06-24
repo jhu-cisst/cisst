@@ -297,10 +297,6 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsBoolMat)
 
 #ifdef MTS_CLASS_SERVICES_PART1
 
-#include <cisstMultiTask/mtsHistory.h>
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDoubleHistory)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDoubleVecHistory)
-
 #include <cisstMultiTask/mtsManagerGlobal.h>
 CMN_IMPLEMENT_SERVICES(mtsManagerGlobal)
 CMN_IMPLEMENT_SERVICES(mtsManagerGlobalInterface)

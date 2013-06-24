@@ -148,8 +148,6 @@ set (HEADER_FILES
      mtsGenericObject.h
      mtsGenericObjectProxy.h
 
-     mtsHistory.h
-
      mtsIntervalStatistics.h
      mtsInterfaceCommon.h
      mtsInterface.h
