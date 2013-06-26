@@ -140,8 +140,9 @@ private:
 
 
 /*! sets the properties of the osaTimeData object to current time
+\param 0=real time (default), 1=monotonic
 */
-osaTimeData osaTimeNow(int);
+osaTimeData osaTimeNow(int=0);
 
 /*! windows version of clock_gettime
 */

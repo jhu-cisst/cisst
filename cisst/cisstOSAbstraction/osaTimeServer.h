@@ -1,3 +1,4 @@
+
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
@@ -29,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegister.h>
-
+#include <cisstOSAbstraction/osaTimeData.h>
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
@@ -109,18 +110,20 @@ public:
         measurements.
         \param origin Returns the current origin */
     bool GetTimeOrigin(osaAbsoluteTime & origin) const;
+    bool GetTimeOrigin(osaTimeData& origin) const;
 
     /*! Get the number of seconds that have elapsed since the time origin.
-        \returns The number of seconds */
-    double GetRelativeTime(void) const;
+        \returns The osaTimeData of the relative time since origin */
+   // double GetRelativeTime(void) const;
+    osaTimeData GetRelativeTime(void) const;
 
    /*! Get the number of seconds that have elapsed since 1970.
      \returns The number of seconds */
     double GetAbsoluteTimeInSeconds(void) const;
 
       /*! Get the absolute time since 1970.
-     \returns The number of seconds */
-    osaAbsoluteTime GetAbsoluteTime(void) const;
+     \returns The osaTimeData of absolute time */
+    osaTimeData GetAbsoluteTime(void) const;
 
     /*! Estimate drift between synchronized clocks (Windows only) */
     double EstimateDrift(void) const;
@@ -131,6 +134,7 @@ public:
         \param absolute The absolute time value (output)
     */
     void RelativeToAbsolute(double relative, osaAbsoluteTime & absolute) const;
+    void RelativeToAbsolute(osaTimeData relative, osaTimeData & absolute) const;
 
     /*! Convert the specified absolute time to a relative time
         by subtracting from the time origin and converting to seconds.
@@ -138,6 +142,11 @@ public:
         \returns The relative time value in seconds
     */
     double AbsoluteToRelative(const osaAbsoluteTime & absolute) const;
+    osaTimeData AbsoluteToRelative(const osaTimeData & absolute);
+
+protected:
+    osaTimeData TimeOrigin;
+
 };
 
 
@@ -145,4 +154,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(osaTimeServer)
 
 
 #endif // _osaTimeServer_h
-

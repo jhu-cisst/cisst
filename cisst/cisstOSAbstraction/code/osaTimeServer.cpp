@@ -1,3 +1,4 @@
+
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
@@ -311,7 +312,7 @@ unsigned int osaTimeServer::SizeOfInternals(void) {
 
 void osaTimeServer::SetTimeOrigin(void)
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+/*#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
     if (clock_gettime(CLOCK_REALTIME, &INTERNALS(TimeOrigin)) == 0) {
         // On RTAI, synchronize rt_get_time_ns with clock_gettime
         this->Synchronize();
@@ -324,7 +325,8 @@ void osaTimeServer::SetTimeOrigin(void)
     }
 #elif (CISST_OS == CISST_DARWIN)
     gettimeofday(&INTERNALS(TimeOrigin), NULL);
-#elif (CISST_OS == CISST_WINDOWS)
+*/
+#if (CISST_OS == CISST_WINDOWS)
     FILETIME currentTime;
     GetSystemTimeAsFileTime(&currentTime);
     ULARGE_INTEGER time;
@@ -336,24 +338,37 @@ void osaTimeServer::SetTimeOrigin(void)
         // GetSystemTimeAsFileTime
         this->Synchronize();
     }
+#else 
+    osaTimeData now = osaTimeNow();
+    TimeOrigin = now;
 #endif
 }
 
 void osaTimeServer::SetTimeOriginFrom(const osaTimeServer *other)
 {
     CMN_LOG_RUN_VERBOSE << "osaTimeServer: setting time origin from existing time server" << std::endl;
-    osaTimeServerInternals *thisInternals = reinterpret_cast<osaTimeServerInternals*>(this->Internals);
+/*    osaTimeServerInternals *thisInternals = reinterpret_cast<osaTimeServerInternals*>(this->Internals);
     const osaTimeServerInternals *otherInternals = reinterpret_cast<const osaTimeServerInternals*>(other->Internals);
     thisInternals->TimeOrigin = otherInternals->TimeOrigin;
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
     thisInternals->CounterOrigin = otherInternals->CounterOrigin;
-#elif (CISST_OS == CISST_WINDOWS)
+*/
+#if (CISST_OS == CISST_WINDOWS)
     // The counter frequency and resolution should be set in the constructor
     if ((thisInternals->CounterFrequency != otherInternals->CounterFrequency) ||
         (thisInternals->CounterResolution != thisInternals->CounterResolution))
         CMN_LOG_RUN_WARNING << "osaTimeServer: mismatch in counter frequency or resolution" << std::endl;
     thisInternals->CounterOrigin = otherInternals->CounterOrigin;
+#else 
+    other->GetTimeOrigin(TimeOrigin);
+    
 #endif
+}
+
+bool osaTimeServer::GetTimeOrigin(osaTimeData& origin) const
+{
+    origin = TimeOrigin;
+    return true;
 }
 
 bool osaTimeServer::GetTimeOrigin(osaAbsoluteTime & origin) const
@@ -384,7 +399,14 @@ bool osaTimeServer::GetTimeOrigin(osaAbsoluteTime & origin) const
     return true;
 }
 
-double osaTimeServer::GetRelativeTime(void) const
+osaTimeData osaTimeServer::GetRelativeTime(void) const
+{
+    osaTimeData ans = osaTimeNow();
+    osaTimeData diff = ans - TimeOrigin;
+    return diff;
+}
+
+/*double osaTimeServer::GetRelativeTime(void) const
 {
     double answer;
 #if (CISST_OS == CISST_LINUX_RTAI)
@@ -414,7 +436,7 @@ double osaTimeServer::GetRelativeTime(void) const
     }
 #endif
     return answer;
-}
+}*/
 
 
 double osaTimeServer::GetAbsoluteTimeInSeconds(void) const {
@@ -423,10 +445,10 @@ double osaTimeServer::GetAbsoluteTimeInSeconds(void) const {
 
 }
 
-osaAbsoluteTime osaTimeServer::GetAbsoluteTime(void) const {
+osaTimeData osaTimeServer::GetAbsoluteTime(void) const {
 
-    osaAbsoluteTime absTime;
-    RelativeToAbsolute(GetRelativeTime(), absTime);
+    osaTimeData absTime = osaTimeNow();
+//    RelativeToAbsolute(GetRelativeTime(), absTime);
     return absTime;
 
 }
@@ -470,6 +492,10 @@ void osaTimeServer::RelativeToAbsolute(double relative, osaAbsoluteTime & absolu
         absolute.nsec -= 1000000000L;
     }
 }
+void osaTimeServer::RelativeToAbsolute(osaTimeData relative, osaTimeData& absolute) const
+{
+    absolute = relative+TimeOrigin;
+}
 
 double osaTimeServer::AbsoluteToRelative(const osaAbsoluteTime & absolute) const
 {
@@ -499,6 +525,12 @@ double osaTimeServer::AbsoluteToRelative(const osaAbsoluteTime & absolute) const
 #endif
 
     return answer;
+}
+
+osaTimeData osaTimeServer::AbsoluteToRelative(const osaTimeData& absolute) 
+{
+    osaTimeData diff = TimeOrigin - absolute;
+    return diff;
 }
 
 double osaAbsoluteTime::ToSeconds(void) const
