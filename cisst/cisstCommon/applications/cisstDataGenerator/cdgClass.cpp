@@ -121,7 +121,7 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
                  << "{" << std::endl;
 
     // add friendship for cmnDataCopy
-    outputStream << " friend void cmnDataCopy(" << className << " & destination, const "
+    outputStream << " friend void " << this->GetFieldValue("attribute") << " cmnDataCopy(" << className << " & destination, const "
                  << className << " & source);" << std::endl;
 
     // constructors and destructor
