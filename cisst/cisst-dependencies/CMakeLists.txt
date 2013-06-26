@@ -97,7 +97,7 @@ if (CISST_HAS_FLTK)
       if (CISST_USE_EXTERNAL)
         include (ExternalProject)
         set (cisstFltk_PREFIX cisstFltkExternal)
-        set (CISST_FLTK_URL http://ftp.easysw.com/pub/fltk/1.3.2/fltk-1.3.2-source.tar.gz)
+        set (CISST_FLTK_URL http://fltk.org/pub/fltk/1.3.2/fltk-1.3.2-source.tar.gz)
         set (CISST_FLTK_URL_MD5 9f7e707d4fb7a5a76f0f9b73ff70623d)
         ExternalProject_Add (cisstFltkExternal
                              PREFIX ${cisstFltk_PREFIX}
