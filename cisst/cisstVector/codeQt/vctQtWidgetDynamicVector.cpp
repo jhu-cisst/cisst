@@ -177,7 +177,6 @@ vctQtWidgetDynamicVectorWriteFloating<_elementType>::vctQtWidgetDynamicVectorWri
 template <class _elementType>
 void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetPrecision(const int precision)
 {
-    std::cerr << "SetPrecision " << precision << std::endl;
     Precision = precision;
     UpdateWidgetPrecision();
 }
