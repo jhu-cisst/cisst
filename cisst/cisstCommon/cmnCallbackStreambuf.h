@@ -112,10 +112,11 @@ protected:
 	    The buffer is printed every time a newline is encountered or the buffer becomes full. */
     virtual std::streamsize xsputn(const ElementType* s, std::streamsize n)
     {
-        std::streamsize todo = n;
+		std::streamsize todo = n;
         while (todo > 0) {
-            unsigned int limit = (todo < sizeof(Buffer)-Idx-1) ? todo : sizeof(Buffer)-Idx-1;
-            for (unsigned int i=0; i < limit; i++) {
+			std::streamsize tmp = static_cast<std::streamsize>(sizeof(Buffer)-Idx-1);
+			std::streamsize limit = (todo < tmp) ? todo : tmp;
+			for (std::streamsize i=0; i < limit; i++) {
                 Buffer[Idx++] = *s;
                 if (*s == '\n')
                     PrintLine();
