@@ -7,8 +7,7 @@
   Author(s):	Anton Deguet
   Created on:   2009-01-26
 
-  (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "swigrun.i"
 
 %import "cisstConfig.h"
+%import "cisstStereoVision/svlConfig.h"
 
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
@@ -101,6 +101,7 @@ http://www.cisst.org/cisst/license.txt.
 
 %apply unsigned int & INOUT { unsigned int & };
 
+#if CISST_SVL_HAS_ZLIB
 %include "code/svlVideoCodecCVI.h"
 
 %extend svlVideoCodecCVI {
@@ -108,9 +109,9 @@ http://www.cisst.org/cisst/license.txt.
        return $self->Read(NULL, image, videoch, noresize);
    }
 }
+#endif  // CISST_SVL_HAS_ZLIB
 
 %include "cisstStereoVision/svlFilterImageWindow.h"
-%import "cisstStereoVision/svlConfig.h"
 #if CISST_SVL_HAS_OPENCV2
 %include "cisstStereoVision/svlFilterImageCameraCalibrationOpenCV.h"
 #endif //CISST_SVL_HAS_OPENCV2
