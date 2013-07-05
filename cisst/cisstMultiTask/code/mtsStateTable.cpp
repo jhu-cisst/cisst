@@ -151,7 +151,7 @@ bool mtsStateTable::Write(mtsStateDataId id, const mtsGenericObject & object) {
 
 void mtsStateTable::Start(void) {
     if (TimeServer) {
-        Tic = TimeServer->GetRelativeTime(); // in seconds
+        Tic = TimeServer->GetRelativeTime().ToSeconds(); // in seconds
         // Since IndexReader and IndexWriter are initialized to 0,
         // the first period will be 0
         mtsDouble oldTic;
@@ -274,7 +274,7 @@ void mtsStateTable::Advance(void) {
 
     // Get the Toc value and write it to the state table.
     if (TimeServer) {
-        Toc = TimeServer->GetRelativeTime(); // in seconds
+        Toc = TimeServer->GetRelativeTime().ToSeconds(); // in seconds
     }
 
     // Update Period Statistics
@@ -449,7 +449,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: received request to start data collection in "
                             << delay.Data << " seconds" << std::endl;
     // set start time based on current time and delay
-    const double startTime = this->TimeServer->GetRelativeTime() + delay.Data;
+    const double startTime = this->TimeServer->GetRelativeTime().ToSeconds() + delay.Data;
     // if we are not yet collection
     if (!this->DataCollection.Collecting) {
         // if there is no collection scheduled
@@ -498,7 +498,7 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
                             << delay.Data << " seconds for state table \""
                             << this->GetName() << "\"" << std::endl;
     // set stop time based on current time and delay
-    const double stopTime = this->TimeServer->GetRelativeTime() + delay.Data;
+    const double stopTime = this->TimeServer->GetRelativeTime().ToSeconds() + delay.Data;
     // check is there is already a stop time scheduled
     if (this->DataCollection.StopTime == 0) {
         CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "

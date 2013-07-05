@@ -1717,12 +1717,12 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         // will iterate on all components
         ComponentMapType::const_iterator iterator = ComponentMap.begin();
         const ComponentMapType::const_iterator end = ComponentMap.end();
-        double timeStartedAll = TimeServer.GetRelativeTime();
+        double timeStartedAll = TimeServer.GetRelativeTime().ToSeconds();
         double timeEnd = timeStartedAll + timeout;
         bool timedOut = false;
         for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
             // compute how much time do we have left based on when we started
-            double timeLeft = timeEnd - TimeServer.GetRelativeTime();
+            double timeLeft = timeEnd - TimeServer.GetRelativeTime().ToSeconds();
             isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
             if (!isManager) {
                 allAtState = iterator->second->WaitForState(desiredState, timeLeft);
@@ -1742,7 +1742,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         // report results
         if (allAtState && !timedOut) {
             CMN_LOG_CLASS_INIT_VERBOSE << "WaitForStateAll: all components reached state \""
-                                       << desiredState << "\" in " << (TimeServer.GetRelativeTime() - timeStartedAll) << " seconds" << std::endl;
+                                       << desiredState << "\" in " << (TimeServer.GetRelativeTime().ToSeconds() - timeStartedAll) << " seconds" << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: failed to reached state \""
                                      << desiredState << "\" for all components" << std::endl;

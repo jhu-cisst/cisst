@@ -114,7 +114,7 @@ public:
     }
 
     inline void Method(void) {
-        const double time = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime();
+        const double time = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime().ToSeconds();
         History.push_back(time);
     }
 
@@ -169,7 +169,7 @@ public:
     }
 
     inline void Method(const mtsGenericObject & data) {
-        const double time = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime();
+        const double time = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime().ToSeconds();
         // push copy of parameter to history
         mtsGenericObject * parameter = dynamic_cast<mtsGenericObject *>(data.Services()->Create(data));
         if (parameter) {
@@ -275,7 +275,7 @@ void mtsComponentAddLatency::Run(void)
     this->LatencyStateTable.Advance();
 
     // see if we have some old void/write commands
-    const double time = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime() - this->Latency;
+    const double time = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime().ToSeconds() - this->Latency;
     DelayedVoidList::iterator voidIterator = DelayedVoids.begin();
     const DelayedVoidList::iterator voidEnd = DelayedVoids.end();
     this->LatencyStateTable.Start();

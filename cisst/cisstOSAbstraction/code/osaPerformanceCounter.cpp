@@ -1,9 +1,10 @@
-
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
   $Id: osaPerformanceCounter.cpp 3034 2013-05-31 09:53:36Z tkim60 $
 
-  Author(s):  Tae Soo Kim
+  Author(s): Tae Soo Kim
   Created on: 2013-05-31
 
   (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
@@ -19,70 +20,74 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+
 #include <cisstOSAbstraction/osaPerformanceCounter.h>
+
 #if (CISST_OS == CISST_WINDOWS || CISST_OS == CISST_CYGWIN )
-
 #include <windows.h>
-
 #endif
+
 osaPerformanceCounter::osaPerformanceCounter():
     HasHighPerformanceCounter(false),
     isRunning(false)
 {
-
 }
 
-void osaPerformanceCounter::Reset()
+void osaPerformanceCounter::Reset(void)
 {
 	osaTimeData newTimeData = osaTimeNow(1);
 	Origin = newTimeData;
 	isRunning = false;
 }
-void osaPerformanceCounter::SetOrigin(osaTimeData &origin)
+
+void osaPerformanceCounter::SetOrigin(osaTimeData & origin)
 {
 	Origin = origin;
 }
-void osaPerformanceCounter::Start()
+
+void osaPerformanceCounter::Start(void)
 {
-	if(isRunning)
-		return ;
-	else
-	{
-		osaTimeData now = osaTimeNow(1);
-		SetOrigin(now);
+	if (isRunning) {
+		return;
+    } 
+	else {
+        Origin = osaTimeNow(1);
         isRunning = true;
-	}
+    }
 }
-void osaPerformanceCounter::Stop()
+
+void osaPerformanceCounter::Stop(void)
 {
 	isRunning = false;
-	osaTimeData newEnd = osaTimeNow(1);
-	End = newEnd;	
+	End = osaTimeNow(1);
 }
-bool osaPerformanceCounter::IsRunning()
+
+bool osaPerformanceCounter::IsRunning(void)
 {
 	return isRunning;
 }
-osaTimeData osaPerformanceCounter::GetElapsedTime()
+
+osaTimeData osaPerformanceCounter::GetElapsedTime(void)
 {
-	if(isRunning)
-	{
+	if (isRunning) {
         End = osaTimeNow(1);
     }
-	osaTimeData diff = (End-Origin);
-	return diff;
+	return (End - Origin);
 }
+
 void osaPerformanceCounter::Delay(osaTimeData timeToDelay)
 {
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
 	struct timespec ts;
-	ts.tv_sec = timeToDelay.GetSeconds();
-	ts.tv_nsec = timeToDelay.GetNanoSeconds();
-	clock_nanosleep(CLOCK_MONOTONIC,0,&ts,NULL);	
+	ts.tv_sec = timeToDelay.Seconds();
+	ts.tv_nsec = timeToDelay.NanoSeconds();
+#if (CISST_OS == CISST_DARWIN) 
+    nanosleep(&ts, NULL);
 #else
-	int delay = timeToDelay.GetSeconds()*1000 + timeToDelay.GetNanoSeconds()/1000000;  // there is alot of precision lost here. Must FIX
+	clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL);	
+#endif // (CISST_DARWIN)
+#else
+	int delay = timeToDelay.GetSeconds() * 1000 + timeToDelay.GetNanoSeconds() / 1000000;  // there is alot of precision lost here. Must FIX
 	Sleep(delay);
 #endif
 }
-
-

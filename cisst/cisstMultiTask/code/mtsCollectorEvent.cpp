@@ -119,7 +119,7 @@ mtsCollectorEvent::~mtsCollectorEvent()
 bool mtsCollectorEvent::CheckCollectingStatus(void)
 {
     // get the current time and check agains scheduled start/stop time
-    const double currentTime = this->TimeServer->GetRelativeTime();
+    const double currentTime = this->TimeServer->GetRelativeTime().ToSeconds();
     if (this->Collecting) {
         // check if we have been collecting long enough to send a progress info (number of samples)
         if ((currentTime - this->TimeOfLastProgressEvent) >= this->TimeIntervalForProgressEvent) {
@@ -483,7 +483,7 @@ void mtsCollectorEvent::SaveEventVoid(const CollectorEventVoid * event)
             this->OpenFileIfNeeded();
             this->PrintHeader(this->FileFormat);
         }
-        *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime()
+        *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime().ToSeconds()
                               << this->Delimiter << event->EventId << std::endl;
         this->SampleCounter++;
         this->SampleCounterForEvent++;
@@ -500,7 +500,7 @@ void mtsCollectorEvent::SaveEventWrite(const CollectorEventWrite * event, const 
             this->OpenFileIfNeeded();
             this->PrintHeader(this->FileFormat);
         }
-        *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime()
+        *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime().ToSeconds()
                               << this->Delimiter << event->EventId << this->Delimiter;
         payload.ToStreamRaw(*(this->OutputStream), this->Delimiter);
         *(this->OutputStream) << std::endl;
@@ -555,7 +555,7 @@ void mtsCollectorEvent::PrintHeader(const CollectorFileFormat & fileFormat)
 
 void mtsCollectorEvent::StartCollection(const mtsDouble & delay)
 {
-    const double currentTime = this->TimeServer->GetRelativeTime();
+    const double currentTime = this->TimeServer->GetRelativeTime().ToSeconds();
     if (delay.Data == 0.0) {
         this->SetCollecting(true, currentTime);
         CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: starting collection now (" << currentTime << ")" << std::endl;
@@ -568,7 +568,7 @@ void mtsCollectorEvent::StartCollection(const mtsDouble & delay)
 
 void mtsCollectorEvent::StopCollection(const mtsDouble & delay)
 {
-    const double currentTime = this->TimeServer->GetRelativeTime();
+    const double currentTime = this->TimeServer->GetRelativeTime().ToSeconds();
     if (delay.Data == 0.0) {
         this->SetCollecting(false, currentTime);
         CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: stopping collection now (" << currentTime << ")" << std::endl;

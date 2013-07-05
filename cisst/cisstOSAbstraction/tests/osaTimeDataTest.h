@@ -1,4 +1,3 @@
-
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
@@ -8,7 +7,7 @@
   Author(s):  Tae Soo Kim
   Created on: 2013-04-28
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -30,7 +29,7 @@ class osaTimeDataTest: public CppUnit::TestFixture
         CPPUNIT_TEST(TestAlgebra);
         CPPUNIT_TEST(TestEqual);
         CPPUNIT_TEST(TestInequalities);
-       CPPUNIT_TEST(TestFromTo);
+	CPPUNIT_TEST(TestFromTo);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -42,14 +41,15 @@ public:
     }
 
 
-	/*! Test that the addition to time works as intended */
-	void TestAlgebra(void);
+    /*! Test that the addition to time works as intended */
+    void TestAlgebra(void);
 
-	/*! Test that the equality check works as intended*/
-	void TestEqual(void);
-	/*! Test that the inequality checks work as intended*/
-	void TestInequalities(void);
-	/*! Test that the from/to function work as intended*/
-	void TestFromTo(void);
+    /*! Test that the equality check works as intended*/
+    void TestEqual(void);
 
+    /*! Test that the inequality checks work as intended*/
+    void TestInequalities(void);
+
+    /*! Test that the from/to function work as intended*/
+    void TestFromTo(void);
 };

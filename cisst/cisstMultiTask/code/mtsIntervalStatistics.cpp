@@ -116,7 +116,7 @@ void mtsIntervalStatistics::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, MinComputeTime);
     cmnDeSerializeRaw(inputStream, MaxComputeTime);
     //since we might be on a different computer the timing should be different
-    LastUpdateTime = TimeServer->GetRelativeTime();
+    LastUpdateTime = TimeServer->GetRelativeTime().ToSeconds();
 }
 
 void mtsIntervalStatistics::AddSample(const double sample) {
@@ -153,7 +153,7 @@ void mtsIntervalStatistics::AddSample(const double sample) {
         //Should this should be the next period?
         TempMax = sample;
         TempMin = sample;
-        LastUpdateTime = TimeServer->GetRelativeTime();
+        LastUpdateTime = TimeServer->GetRelativeTime().ToSeconds();
 
         MaxComputeTime = cmnTypeTraits<double>::MinPositiveValue();
         MinComputeTime = cmnTypeTraits<double>::MaxPositiveValue();
