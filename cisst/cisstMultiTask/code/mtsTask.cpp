@@ -46,7 +46,7 @@ void mtsTask::DoRunInternal(void)
             InterfaceProvidedToManager->ProcessMailBoxes();
         this->Run();
     }
-    catch (const std::runtime_error &excp) {
+    catch (const std::exception &excp) {
         OnRunException(excp);
     }
     catch (...) {
@@ -144,7 +144,7 @@ void mtsTask::StartupInternal(void) {
             // Call user-supplied startup function
             this->Startup();
         }
-        catch (const std::runtime_error &excp) {
+        catch (const std::exception &excp) {
             OnStartupException(excp);
         }
         catch (...) {
@@ -443,12 +443,12 @@ bool mtsTask::CheckForOwnThread(void) const
 }
 
 
-void mtsTask::OnStartupException(const std::runtime_error &excp)
+void mtsTask::OnStartupException(const std::exception &excp)
 {
     CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception " << excp.what() << std::endl;
 }
 
-void mtsTask::OnRunException(const std::runtime_error &excp)
+void mtsTask::OnRunException(const std::exception &excp)
 {
     CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception " << excp.what() << std::endl;
 }

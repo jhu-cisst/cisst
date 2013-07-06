@@ -204,7 +204,7 @@ public:
 
     /*! Virtual method that gets called if an exception is thrown in the
         Startup method. This could be moved to mtsComponent. */
-    virtual void OnStartupException(const std::runtime_error &excp);
+    virtual void OnStartupException(const std::exception &excp);
 
     /*! Pure virtual method that gets overloaded to run the actual task.
       */
@@ -212,7 +212,7 @@ public:
 
     /*! Virtual method that gets called if an exception is thrown in the
         Run method. */
-    virtual void OnRunException(const std::runtime_error &excp);
+    virtual void OnRunException(const std::exception &excp);
 
     /*! Virtual method that gets called when the task/interface needs
       to be configured. Should it take XML info?? */
