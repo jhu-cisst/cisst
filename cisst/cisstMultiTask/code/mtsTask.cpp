@@ -445,12 +445,12 @@ bool mtsTask::CheckForOwnThread(void) const
 
 void mtsTask::OnStartupException(const std::exception &excp)
 {
-    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception " << excp.what() << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
 }
 
 void mtsTask::OnRunException(const std::exception &excp)
 {
-    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception " << excp.what() << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
 }
 
 void mtsTask::SetInitializationDelay(double delay)

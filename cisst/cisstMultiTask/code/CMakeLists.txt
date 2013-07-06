@@ -124,7 +124,6 @@ set (HEADER_FILES
 
      mtsComponent.h
      mtsComponentAddLatency.h
-     mtsComponentDispatcher.h
      mtsComponentGeneratorMacros.h
      mtsComponentState.h
      mtsComponentViewer.h

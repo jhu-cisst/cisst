@@ -336,14 +336,6 @@ CMN_IMPLEMENT_SERVICES(mtsLogMessage);
 #include <cisstMultiTask/mtsComponentViewer.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
 
-#include <cisstMultiTask/mtsComponentDispatcher.h>
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(mtsComponentDispatcherPeriodic, 
-                                                mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(mtsComponentDispatcherContinuous, 
-                                                mtsTaskContinuous, mtsTaskContinuousConstructorArg)
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(mtsComponentDispatcherMain, 
-                                                mtsTaskMain, std::string)
-
 /* ICE dependent classes */
 #include <cisstMultiTask/mtsConfig.h>
 #if CISST_MTS_HAS_ICE
