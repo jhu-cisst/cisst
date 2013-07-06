@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -33,16 +32,26 @@
 #include <iostream>
 
 
+std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
+
 /********************* Methods that call user methods *****************/
 
 void mtsTask::DoRunInternal(void)
 {
     RunEventCalled = false;
     StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
-    // Make sure following is called
-    if (InterfaceProvidedToManager)
-        InterfaceProvidedToManager->ProcessMailBoxes();
-    this->Run();
+    try {
+        // Make sure following is called
+        if (InterfaceProvidedToManager)
+            InterfaceProvidedToManager->ProcessMailBoxes();
+        this->Run();
+    }
+    catch (const std::runtime_error &excp) {
+        OnRunException(excp);
+    }
+    catch (...) {
+        OnRunException(mtsTask::UnknownException);
+    }
     // advance all state tables (if automatic)
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
     RunEvent();  // only generates event if RunEventCalled is false
@@ -131,8 +140,16 @@ void mtsTask::StartupInternal(void) {
     }
     RunEventCalled = false;
     if (success) {
-        // Call user-supplied startup function
-        this->Startup();
+        try {
+            // Call user-supplied startup function
+            this->Startup();
+        }
+        catch (const std::runtime_error &excp) {
+            OnStartupException(excp);
+        }
+        catch (...) {
+            OnStartupException(mtsTask::UnknownException);
+        }
         ChangeState(mtsComponentState::READY);
     }
     else {
@@ -425,6 +442,16 @@ bool mtsTask::CheckForOwnThread(void) const
     return (osaGetCurrentThreadId() == Thread.GetId());
 }
 
+
+void mtsTask::OnStartupException(const std::runtime_error &excp)
+{
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception " << excp.what() << std::endl;
+}
+
+void mtsTask::OnRunException(const std::runtime_error &excp)
+{
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception " << excp.what() << std::endl;
+}
 
 void mtsTask::SetInitializationDelay(double delay)
 {
