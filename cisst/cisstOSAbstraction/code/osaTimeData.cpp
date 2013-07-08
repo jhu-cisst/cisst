@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaTimeData.cpp 3034 2013-05-31 09:53:36Z tkim60 $
+  $Id$
 
   Author(s):  Tae Soo Kim
   Created on: 2013-05-31
@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 
 */
-
 
 #include <iomanip>
 #include <cisstOSAbstraction/osaTimeData.h>
@@ -54,10 +53,10 @@ osaTimeData::osaTimeData(int_type seconds, int_type nseconds, bool positive_flag
 osaTimeData::osaTimeData(double dseconds)
 {
     if (dseconds < 0) {
-	Positive = false;
-	dseconds = -dseconds;
+        Positive = false;
+        dseconds = -dseconds;
     } else {
-	Positive = true;
+        Positive = true;
     }
     SplitDoubles(dseconds, Seconds_, NanoSeconds_);
     Normalize();
@@ -73,23 +72,23 @@ void osaTimeData::SetTime(const osaTimeData & newTime)
 void osaTimeData::Normalize(void)
 {
     while (NanoSeconds_ < 0) {
-	NanoSeconds_ += 1000000000;
-	--Seconds_;
+        NanoSeconds_ += 1000000000;
+        --Seconds_;
     }
     while (this->NanoSeconds_ >= 1000000000) {
-	NanoSeconds_ -= 1000000000;
-	++Seconds_;
+        NanoSeconds_ -= 1000000000;
+        ++Seconds_;
     }
     if (Seconds_ < 0) {
-	// if it was a positive time, make it negative
-	if (Positive) {
-	    Positive = false;
-	}
-	// if it was a negative time, make it positive
-	else {
-	    Positive = true;
-	    Seconds_ = -Seconds_;
-	}
+        // if it was a positive time, make it negative
+        if (Positive) {
+            Positive = false;
+        }
+        // if it was a negative time, make it positive
+        else {
+            Positive = true;
+            Seconds_ = -Seconds_;
+        }
     }
 }
 
@@ -97,26 +96,26 @@ bool osaTimeData::Equals(const osaTimeData & compareTo) const
 {
 
     return (Seconds_ == compareTo.Seconds_)
-	&& (NanoSeconds_ == compareTo.NanoSeconds_)
-	&& (Positive == compareTo.Positive);
+        && (NanoSeconds_ == compareTo.NanoSeconds_)
+        && (Positive == compareTo.Positive);
 }
 
 double osaTimeData::ToSeconds(void) const
 {
     if (Positive) {
-	return Seconds_ + (NanoSeconds_ / 1000000000.0);
+        return Seconds_ + (NanoSeconds_ / 1000000000.0);
     } else {
-	return -1.0 * (Seconds_ + NanoSeconds_ / 1000000000.0);
+        return -1.0 * (Seconds_ + NanoSeconds_ / 1000000000.0);
     }
 }
 
 osaTimeData & osaTimeData::From(double doubleSeconds)
 {
     if (doubleSeconds < 0) {
-	Positive = false;
-	doubleSeconds = -doubleSeconds;
+        Positive = false;
+        doubleSeconds = -doubleSeconds;
     } else {
-	Positive = true;
+        Positive = true;
     }
     SplitDoubles(doubleSeconds, Seconds_, NanoSeconds_);
     Normalize();
@@ -134,25 +133,25 @@ void osaTimeData::Subtract(const osaTimeData & rhs)
 {
     // lhs is negative, rhs is positive
     if ((!Positive && rhs.Positive)
-	|| (Positive && !rhs.Positive))	{
-	Seconds_ += rhs.Seconds_;
-	NanoSeconds_ += rhs.NanoSeconds_;
+        || (Positive && !rhs.Positive))   {
+        Seconds_ += rhs.Seconds_;
+        NanoSeconds_ += rhs.NanoSeconds_;
     }
     else if(Positive && rhs.Positive) {
-	Seconds_ -= rhs.Seconds_;
-	NanoSeconds_ -= rhs.NanoSeconds_;
+        Seconds_ -= rhs.Seconds_;
+        NanoSeconds_ -= rhs.NanoSeconds_;
     }
     // both negatives
     else {
-	if (Seconds_ < rhs.Seconds_) {
-	    Seconds_ = rhs.Seconds_ - Seconds_ ;
-	    NanoSeconds_ = rhs.NanoSeconds_ - NanoSeconds_ ;
-	    Positive = true; // it is now positive
-	}
-	else {
-	    Seconds_ -= rhs.Seconds_;
-	    NanoSeconds_ -= rhs.NanoSeconds_;
-	}
+        if (Seconds_ < rhs.Seconds_) {
+            Seconds_ = rhs.Seconds_ - Seconds_ ;
+            NanoSeconds_ = rhs.NanoSeconds_ - NanoSeconds_ ;
+            Positive = true; // it is now positive
+        }
+        else {
+            Seconds_ -= rhs.Seconds_;
+            NanoSeconds_ -= rhs.NanoSeconds_;
+        }
     }
     Normalize();
 }
@@ -169,17 +168,17 @@ std::string osaTimeData::ToString(void) const
     int_type tempArray[9];
 
     if (!Positive) {
-	ss << "-";
+        ss << "-";
     }
     ss << Seconds_ << ".";
 
     int_type temp =  NanoSeconds_ ;
     for (unsigned int i = 0 ; i < 9 ; i++) {
-	tempArray[8-i] = (temp % 10 );
-	temp = temp / 10;
+        tempArray[8-i] = (temp % 10 );
+        temp = temp / 10;
     }
     for (unsigned int i = 0 ; i < 9 ; i++) {
-	ss << tempArray[i];
+        ss << tempArray[i];
     }
     return ss.str();
 }
@@ -220,8 +219,8 @@ void osaTimeData::SplitDoubles(const double & seconds, int_type & fullSeconds, i
     int_type temp = static_cast<int_type>(seconds * 1000000000);
     int_type computation = 0;
     for (unsigned int i = 0 ; i < 9 ; i++) {
-	computation = computation + (temp % 10 ) * pow(10.0, i);
-	temp = temp / 10;
+        computation = computation + (temp % 10 ) * pow(10.0, i);
+        temp = temp / 10;
     }
     nanoSeconds = computation;
     fullSeconds = temp;
@@ -255,32 +254,32 @@ bool osaTimeData::operator==(const osaTimeData & rhs) const
 bool osaTimeData::operator>(const osaTimeData & rhs) const
 {
     if (this->IsPositive() && !rhs.IsPositive()) {
-	return true;
+        return true;
     }
     else if (!this->IsPositive() && rhs.IsPositive()) {
         return false;
     }
     else if (!this->IsPositive() && !rhs.IsPositive()) {
-	if (this->Seconds_ < rhs.Seconds_) {
-	    return true;
-	}
-	else if (this->Seconds_ == rhs.Seconds_ && this->NanoSeconds_ < rhs.NanoSeconds_) {
-	    return true;
-	}
-	else {
-	    return false;
-	}
+        if (this->Seconds_ < rhs.Seconds_) {
+            return true;
+        }
+        else if (this->Seconds_ == rhs.Seconds_ && this->NanoSeconds_ < rhs.NanoSeconds_) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     else {
-	if (this->Seconds_ > rhs.Seconds_) {
-	    return true;
-	}
-	else if (this->Seconds_ == rhs.Seconds_ && this->NanoSeconds_ > rhs.NanoSeconds_) {
-	    return true;
-	}
-	else {
-	    return false;
-	}
+        if (this->Seconds_ > rhs.Seconds_) {
+            return true;
+        }
+        else if (this->Seconds_ == rhs.Seconds_ && this->NanoSeconds_ > rhs.NanoSeconds_) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }
 
@@ -292,13 +291,13 @@ bool osaTimeData::operator<(const osaTimeData & rhs) const
 bool osaTimeData::operator>=(const osaTimeData & rhs) const
 {
     return ((*this == rhs)
-	    || (*this > rhs));
+            || (*this > rhs));
 }
 
 bool osaTimeData::operator<=(const osaTimeData & rhs) const
 {
     return ((*this == rhs)
-	    || (*this < rhs));
+            || (*this < rhs));
 }
 
 osaTimeData osaTimeData::operator*(const double & rhs)
@@ -331,17 +330,17 @@ osaTimeData osaTimeNow(int indicator)
     const int_type nanoSeconds = now.tv_usec * 1000;
     return osaTimeData(seconds, nanoSeconds);
 #else
-    //	timespec res;
+    //   timespec res;
     timespec now;
     if (indicator == 0) {
-    	clock_gettime(CLOCK_REALTIME, &now);
+        clock_gettime(CLOCK_REALTIME, &now);
     }
     else {
-    	clock_gettime(CLOCK_MONOTONIC, &now);
+        clock_gettime(CLOCK_MONOTONIC, &now);
     }
     const int_type seconds = static_cast<int_type>(now.tv_sec);
     const int_type nanoSeconds = static_cast<int_type>(now.tv_nsec);
-    //	Resolution = static_cast<long long>(res.tv_nsec);
+    //   Resolution = static_cast<long long>(res.tv_nsec);
     return osaTimeData(seconds, nanoSeconds);
 #endif
 }
@@ -378,25 +377,25 @@ void windows_gettime(struct timeval *vtv)
     static BOOL usePerformanceCounter = 0;
 
     if (!initialized) {
-	LARGE_INTEGER performanceFrequency;
-	initialized = 1;
-	usePerformanceCounter = QueryPerformanceFrequency(&performanceFrequency);
+        LARGE_INTEGER performanceFrequency;
+        initialized = 1;
+        usePerformanceCounter = QueryPerformanceFrequency(&performanceFrequency);
 
-	if (usePerformanceCounter) {
-	    QueryPerformanceCounter(&offset);
-	    frequencyToMicroseconds = (double)performanceFrequency.QuadPart / 1000000.;
-	}
-	else {
-	    offset = getFILETIMEoffset();
-	    frequencyToMicroseconds = 10.;
-	}
+        if (usePerformanceCounter) {
+            QueryPerformanceCounter(&offset);
+            frequencyToMicroseconds = (double)performanceFrequency.QuadPart / 1000000.;
+        }
+        else {
+            offset = getFILETIMEoffset();
+            frequencyToMicroseconds = 10.;
+        }
     }
     if (usePerformanceCounter) {
-	QueryPerformanceCounter(&t);
+        QueryPerformanceCounter(&t);
     }
     else {
-	GetSystemTimeAsFileTime(&f);
-	t.QuadPart |= f.dwLowDateTime;
+        GetSystemTimeAsFileTime(&f);
+        t.QuadPart |= f.dwLowDateTime;
     }
     t.QuadPart -= offset.QuadPart;
     microseconds = (double)t.QuadPart / frequencyToMicroseconds;

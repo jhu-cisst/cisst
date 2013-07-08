@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaTimeServerTest.cpp 3615 2012-04-25 00:46:07Z adeguet1 $
+  $Id$
 
   Author(s): Tae Soo Kim
   Created on: 2013-06-01
@@ -29,10 +29,10 @@ void osaDateTest::TestPrint(void)
     osaDate dateFromTimeData(timeData);
 
     std::cout << std::endl
-	      << "osaDate now: "
-	      << date.ToString() << " (from osaDateNow)" << std::endl
-	      << "osaDate now: "
-	      << dateFromTimeData.ToString() << " (from osaTimeNow)" << std::endl;
+          << "osaDate now: "
+          << date.ToString() << " (from osaDateNow)" << std::endl
+          << "osaDate now: "
+          << dateFromTimeData.ToString() << " (from osaTimeNow)" << std::endl;
 
     osaTimeData timeDataFromDate;
     dateFromTimeData.To(timeDataFromDate);

@@ -2,11 +2,21 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+  $Id$
+
   Author(s): Tae Soo Kim
-  Created on: 2012-02-27
+  Created on: 2013-06-01
 
-  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
+  Reserved.
 
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
 */
 
 #ifndef osaTimeData_h

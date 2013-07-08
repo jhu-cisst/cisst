@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaTimeServerTest.h 3612 2012-04-24 21:19:46Z adeguet1 $
+  $Id$
 
   Author(s):  Tae Soo Kim
   Created on: 2013-04-28
