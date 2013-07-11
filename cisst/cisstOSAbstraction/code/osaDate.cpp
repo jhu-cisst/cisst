@@ -21,6 +21,7 @@
 */
 
 #include <cisstOSAbstraction/osaDate.h>
+#include <iomanip>
 
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
 #include <sys/time.h>
@@ -61,32 +62,12 @@ osaDate::osaDate(unsigned int years, unsigned int months, unsigned int days,
 std::string osaDate::ToString(void) const
 {
     std::stringstream ss;
+    ss<<std::setfill('0') << std::setw(2);
+    
+    ss << Years_ <<"/"<<Months_<<"/"<<Days_<<" "<<Hours_<<":"<<Minutes_<<":"<<Seconds_<<".";
 
-    ss << Years_ << "/";
-    if (Months_ < 10)
-        ss << "0";
-    ss << Months_ << "/";
-    if(Days_<10)
-        ss << "0";
-    ss << Days_ << " ";
-    if (Hours_<10)
-        ss << "0";
-    ss << Hours_ << ":";
-    if (Minutes_<10)
-        ss << "0";
-    ss << Minutes_ << ":";
-    if (Seconds_<10)
-        ss << "0";
-    ss << Seconds_;
-    ss << ".";
-
-    unsigned int firstDigit = NanoSeconds_ / 100000000;
-    unsigned int secondDigit = (NanoSeconds_ - firstDigit * 100000000) / 10000000;
-    unsigned int thirdDigit = (NanoSeconds_ - firstDigit * 100000000 - secondDigit * 10000000) / 1000000;
-    ss << firstDigit;
-    ss << secondDigit;
-    ss << thirdDigit;
-
+    ss<<NanoSeconds_/1000000;
+   
     return ss.str();
 }
 

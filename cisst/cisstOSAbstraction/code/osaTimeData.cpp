@@ -170,16 +170,7 @@ std::string osaTimeData::ToString(void) const
     if (!Positive) {
         ss << "-";
     }
-    ss << Seconds_ << ".";
-
-    int_type temp =  NanoSeconds_ ;
-    for (unsigned int i = 0 ; i < 9 ; i++) {
-        tempArray[8-i] = (temp % 10 );
-        temp = temp / 10;
-    }
-    for (unsigned int i = 0 ; i < 9 ; i++) {
-        ss << tempArray[i];
-    }
+    ss << Seconds_ << "."<<NanoSeconds_;
     return ss.str();
 }
 
