@@ -95,6 +95,12 @@ const std::string & mtsComponent::GetName(void) const
 }
 
 
+void mtsComponent::GetName(std::string & placeHolder) const
+{
+    placeHolder = this->Name;
+}
+
+
 void mtsComponent::SetName(const std::string & componentName)
 {
     this->Name = componentName;

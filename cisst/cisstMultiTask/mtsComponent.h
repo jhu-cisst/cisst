@@ -225,6 +225,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Returns the name of the component. */
     const std::string & GetName(void) const;
+    void GetName(std::string & placeHolder) const;
 
     /*! Set name.  This method is useful to perform dynamic creation
       using the default constructor and then set the name. */
