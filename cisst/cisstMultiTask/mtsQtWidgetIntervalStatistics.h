@@ -27,7 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <QLabel>
 #include <QWidget>
 
-class mtsQtWidgetIntervalStatistics: public QWidget
+// Always include last
+#include <cisstMultiTask/mtsExportQt.h>
+
+class CISST_EXPORT mtsQtWidgetIntervalStatistics: public QWidget
 {
     Q_OBJECT;
 
