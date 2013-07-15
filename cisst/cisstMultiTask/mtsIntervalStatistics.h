@@ -74,6 +74,16 @@ public:
         return Min;
     }
 
+    /*! Get minimum compute time. */
+    inline double MinComputeTime(void) const {
+        return MinComputeTime_;
+    }
+
+    /*! Get maximum compute time. */
+    inline double MaxComputeTime(void) const {
+        return MaxComputeTime_;
+    }
+
     /*! Time period between period statistics calculations */
     inline void SetStatisticsUpdatePeriod(const double & time) {
         StatisticsUpdatePeriod = time;
@@ -107,8 +117,8 @@ private:
     double         StdDev;
     double         Max;
     double         Min;
-    double MinComputeTime;
-    double MaxComputeTime;
+    double MinComputeTime_;
+    double MaxComputeTime_;
     double         StatisticsUpdatePeriod;
 
 public:

@@ -36,12 +36,18 @@ mtsQtWidgetIntervalStatistics::mtsQtWidgetIntervalStatistics(void)
     MainLayout->addWidget(QLMin, 2, 0);
     QLMax = new QLabel("Max: n/a");
     MainLayout->addWidget(QLMax, 3, 0);
+    QLLoad = new QLabel("Load: n/a");
+    MainLayout->addWidget(QLLoad, 4, 0);
 }
 
 void mtsQtWidgetIntervalStatistics::SetValue(const mtsIntervalStatistics & newValue)
 {
-    QLAverage->setText(QString("Avg: ") + QString::number(newValue.GetAvg() * 1000.0));
-    QLStdDev->setText(QString("Dev: ") + QString::number(newValue.GetStdDev() * 1000.0));
-    QLMin->setText(QString("Min: ") + QString::number(newValue.GetMin() * 1000.0));
-    QLMax->setText(QString("Max: ") + QString::number(newValue.GetMax() * 1000.0));
+    const double avg = newValue.GetAvg();
+    QLAverage->setText(QString("Avg: %1").arg(avg * 1000.0, 6, 'g', 4));
+    QLStdDev->setText(QString("Dev: %1").arg(newValue.GetStdDev() * 1000.0, -10, 'g', 2));
+    QLMin->setText(QString("Min: %1").arg(newValue.GetMin() * 1000.0, 6, 'g', 4));
+    QLMax->setText(QString("Max: %1").arg(newValue.GetMax() * 1000.0, 6, 'g', 4));
+    const int minLoad = newValue.MinComputeTime() / avg * 100;
+    const int maxLoad = newValue.MaxComputeTime() / avg * 100;
+    QLLoad->setText(QString("Load: %1:%2\%").arg(minLoad).arg(maxLoad));
 }

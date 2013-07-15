@@ -46,6 +46,7 @@ protected:
     QLabel * QLStdDev;
     QLabel * QLMin;
     QLabel * QLMax;
+    QLabel * QLLoad;
 };
 
 #endif  // _mtsQtWidgetIntervalStatistics_h
