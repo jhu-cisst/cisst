@@ -25,6 +25,7 @@ set (SOURCE_FILES
      nmrMultiVariablePowerBasis.cpp
      nmrPolynomialBase.cpp
      nmrPolynomialTermPowerIndex.cpp
+     nmrSavitzkyGolay.cpp
      nmrSingleVariablePowerBasis.cpp
      nmrStandardPolynomial.cpp
      )
@@ -43,6 +44,7 @@ set (HEADER_FILES
      nmrPolynomialBase.h
      nmrPolynomialContainer.h
      nmrPolynomialTermPowerIndex.h
+     nmrSavitzkyGolay.h
      nmrSingleVariablePowerBasis.h
      nmrStandardPolynomial.h
      )
