@@ -25,7 +25,6 @@ set (SOURCE_FILES
      nmrMultiVariablePowerBasis.cpp
      nmrPolynomialBase.cpp
      nmrPolynomialTermPowerIndex.cpp
-     nmrSavitzkyGolay.cpp
      nmrSingleVariablePowerBasis.cpp
      nmrStandardPolynomial.cpp
      )
@@ -44,7 +43,6 @@ set (HEADER_FILES
      nmrPolynomialBase.h
      nmrPolynomialContainer.h
      nmrPolynomialTermPowerIndex.h
-     nmrSavitzkyGolay.h
      nmrSingleVariablePowerBasis.h
      nmrStandardPolynomial.h
      )
@@ -62,6 +60,7 @@ if (CISST_HAS_CISSTNETLIB)
        # deprecated nmrLSISolver.cpp
        nmrLSqLin.cpp
        nmrSymmetricEigenProblem.cpp
+       nmrSavitzkyGolay.cpp
       )
   set (HEADER_FILES
        ${HEADER_FILES}
@@ -85,6 +84,7 @@ if (CISST_HAS_CISSTNETLIB)
        nmrCallBack.h
        nmrSVDRSSolver.h
        nmrSymmetricEigenProblem.h
+       nmrSavitzkyGolay.h
        )
 endif (CISST_HAS_CISSTNETLIB)
 
