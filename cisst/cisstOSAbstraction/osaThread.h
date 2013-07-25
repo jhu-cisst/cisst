@@ -189,6 +189,9 @@ class CISST_EXPORT osaThread {
     /*! Whether the thread exists. */
     bool Valid;
 
+    /*! Whether the thread is running */
+    bool Running;
+
 protected:
 
     /*! Creates a new thread. */
@@ -312,6 +315,9 @@ public:
         \param timeInSeconds The amount of time the task is suspended (in seconds)
      */
     void Sleep(double timeInSeconds);
+
+    /*! Returns if this thread is running. */
+    inline bool IsRunning(void) const { return Running; }
 
     /*! Returns whether the thread exists (is valid). */
     inline bool IsValid(void) const { return Valid; }
