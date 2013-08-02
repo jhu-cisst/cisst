@@ -30,7 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnNamedMap.h>
-#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
