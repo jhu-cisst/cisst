@@ -28,8 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstCommon/cmnNamedMap.h>
 
-#include <cisstOSAbstraction/osaThread.h>
-#include <cisstOSAbstraction/osaMutex.h>
+//#include <cisstOSAbstraction/osaThread.h>
+//#include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
