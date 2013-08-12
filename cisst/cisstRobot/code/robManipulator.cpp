@@ -350,11 +350,11 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
     // weights
     doublereal I[6][6] = { { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
-		       { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0 },
-		       { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 },
-		       { 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 },
-		       { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 },
-		       { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 } };
+                           { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0 },
+                           { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 },
+                           { 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 },
+                           { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 },
+                           { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 } };
 
     // We need to solve dq = J' ( JJ' + lambda I )^-1 e
 
@@ -394,8 +394,11 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   // copy the joint values and 
   for(size_t j=0; j<links.size(); j++){
     q[j] = fmod((double)q[j], (double)2.0*cmnPI);
-    if(cmnPI < q[j])
-      q[j] = q[j] - 2.0*cmnPI;
+    if (cmnPI < q[j]) {
+        q[j] = q[j] - 2.0*cmnPI;
+    } else if (q[j] < -cmnPI) {
+        q[j] = q[j] + 2.0 * cmnPI;
+    }
   }
 
   delete[] B;
@@ -663,7 +666,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   std::vector<vctFixedSizeVector<double,3> > F(links.size(),
 					       vctFixedSizeVector<double,3>(0));
   // torques
-  vctDynamicVector<double>                  tau(links.size(), 0.0);
+  vctDynamicVector<double> tau(links.size(), 0.0);
 
   // The axis pointing "up"
   vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
