@@ -3,8 +3,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,13 +44,13 @@ class CISST_EXPORT robManipulator{
   
   //! Body Jacobian
   /**
-     The (geometric) body Jacobian in column major
+     The (geometric) body Jacobian in column major order
   */
   double** Jn;
   
   //! Spatial Jacobian
   /**
-     The (geometric) spatial Jacobian in column major
+     The (geometric) spatial Jacobian in column major order
   */
   double** Js;
 
@@ -75,18 +74,18 @@ class CISST_EXPORT robManipulator{
   /**
      Evaluate the geometric spatial Jacobian.
      \warning To evaluate the spatial Jacobian you must first evaluate the
-     body Jacobia
+     body Jacobian
   */
   void JacobianSpatial( const vctDynamicVector<double>& q ) const;
   
   //! Recursive Newton-Euler altorithm
   /**
-     Evaluate the inverse dynamics through RNE. The joints positions, 
+     Evaluate the inverse dynamics through RNE. The joint positions, 
      velocities and accelerations must be set before calling this method. It
      returns a vector of forces/torques that realize the desired state.
-     \param q The joints positions
-     \param qd The joints velocities
-     \param qdd The joints accelerations
+     \param q The joint positions
+     \param qd The joint velocities
+     \param qdd The joint accelerations
      \param fext An external force/moment acting on the tool control point
      \param g The gravity acceleration
   */
@@ -100,10 +99,10 @@ class CISST_EXPORT robManipulator{
   //! Coriolis/centrifugal and gravity
   /**
      Evaluate the coriolis/centrifugal and gravitational forces acting on the
-     manipulator. The joints positions, velocities and accelerations must be
+     manipulator. The joint positions, velocities and accelerations must be
      set before calling this method. It returns a vector of forces/torques 
      that realize the given positions and accelerations. This method is akin
-     to calling RNE without the joints accelerations
+     to calling RNE without the joint accelerations
   */
   vctDynamicVector<double> 
   CCG( const vctDynamicVector<double>& q,
@@ -112,18 +111,18 @@ class CISST_EXPORT robManipulator{
   //! End-effector accelerations
   /**
      Compute the linear and angular accelerations of the last link. This is 
-     akin to compute the forward recursion of the RNE.
+     akin to computing the forward recursion of the RNE.
   */
   /*
   vctFixedSizeVector<double,6> 
   Acceleration( const vctDynamicVector<double>& q,
 		const vctDynamicVector<double>& qd,
-		const vctDynamicVector<double>& qdd ) const ;
+		const vctDynamicVector<double>& qdd ) const;
   */
   //! Compute the bias acceleration
   /**
      The bias acceleration is the 6D vector Jdqd that is used to evaluate the
-     inverse dynamics in operations space. This vector is derived from
+     inverse dynamics in operation space. This vector is derived from
      d (J qd) / dt = Jdqd + J qdd
   */
   vctFixedSizeVector<double,6> 
@@ -143,7 +142,7 @@ class CISST_EXPORT robManipulator{
   
   //! Compute the 6x6 manipulator inertia matrix in operation space
   /**
-     \param[input] A A pointer to an 6x6 matrix
+     \param[input] A A pointer to a 6x6 matrix
      \param[output] The 6x6 manipulator inertia matrix in operation space
   */
   void OSinertia(double Ac[6][6], const vctDynamicVector<double>& q) const;
@@ -174,9 +173,10 @@ public:
   
   //! Evaluate the forward kinematics
   /**
-     Compute the position and orientations of each link wrt to the world frame
-     This method is non-const since it needs to update the position and 
-     orientation of each link in order to render them in OpenGL
+     Compute the position and orientation of each link wrt to the world frame
+     \param[input] q The vector of joint positions
+     \param[input] N The link number (0 => base, negative => end-effector)
+     \return The position and orientation, as a 4x4 frame
   */
   virtual
     vctFrame4x4<double>
@@ -184,13 +184,13 @@ public:
   
   //! Evaluate the inverse kinematics
   /**
-     Compute the inverse kinematics. The solution is computed with from 
+     Compute the inverse kinematics. The solution is computed numerically using
      Newton's algorithm.
      \param[input] q An initial guess of the solution
      \param[output] q The inverse kinematics solution
      \param Rts The desired position and orientation of the tool control point
      \param tolerance The error tolerance of the solution
-     \param Niteration The maximum number of iteration allowed to find asolution
+     \param Niteration The maximum number of iterations allowed to find a solution
      \return SUCCESS if a solution was found within the given tolerance and 
                      number of iterations. ERROR otherwise.
   */
@@ -213,12 +213,12 @@ public:
   //! Inverse dynamics in joint space
   /**
      Compute and return the inverse dynamics of the manipulator in joint space.
-     InverseDynamics returns the joint torques that corresponds to a manipulator
-     with the given the joints positions, velocities and accelerations.
-     \param q A vector of joints positions
-     \param qd A vector of joints velocities
-     \param qdd A vector of joints accelerations
-     \return A vector of joints torques
+     InverseDynamics returns the joint torques that correspond to a manipulator
+     with the given joint positions, velocities and accelerations.
+     \param q A vector of joint positions
+     \param qd A vector of joint velocities
+     \param qdd A vector of joint accelerations
+     \return A vector of joint torques
   */
   virtual
     vctDynamicVector<double> 
@@ -229,16 +229,16 @@ public:
   //! Inverse dynamics in operation space
   /**
      Compute and return the inverse dynamics of the manipulator in operation
-     space. InverseDynamics returns the joint torques that corresponds to a 
-     manipulator with the given the joints positions, velocities and 
-     the tool control point (TCP) accelerations. The reason why joints positions
+     space. InverseDynamics returns the joint torques that correspond to a 
+     manipulator with the given joint positions, velocities and 
+     the tool control point (TCP) accelerations. The reason why joint positions
      and velocities are given instead of the position and velocity of the TCP is
      that the coriolis, centrifugal and gravitational forces are uniquely 
-     determined by the joints positions and velocties.
-     \param q A vector of joints positions
-     \param qd A vector of joints velocities
+     determined by the joint positions and velocities.
+     \param q A vector of joint positions
+     \param qd A vector of joint velocities
      \param vdwd A 6D vector of the TCP linear and angular accelerations
-     \return A vector of joints torques
+     \return A vector of joint torques
   */
   virtual
     vctDynamicVector<double> 
@@ -247,12 +247,21 @@ public:
 		     const vctFixedSizeVector<double,6>& vdwd ) const;
   
 
+  //! Compute Jacobian for kinematics identification
+  /**
+     Computes the Jacobian for kinematics identification by numerically
+     differentiating with respect to the kinematics parameters (DH parameters).
+     \param q The vector of joint positions
+     \param epsilon The DH parameter difference to use for numerical differentiation
+     \return The Jacobian matrix to use for kinematics identification
+  */
   virtual 
     vctDynamicMatrix<double> 
     JacobianKinematicsIdentification( const vctDynamicVector<double>& q,
-				      double epsilon = 1e-6 ) const ;
+				      double epsilon = 1e-6 ) const;
 
-  void PrintKinematics( std::ostream& os ) const ;
+  //! Print the kinematics parameters to the specified output stream
+  void PrintKinematics( std::ostream& os ) const;
 
   //! Attach a tool
   virtual void Attach( robManipulator* tool );
