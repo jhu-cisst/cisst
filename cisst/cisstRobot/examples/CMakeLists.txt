@@ -19,15 +19,18 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
   cisstVector
   cisstOSAbstraction
   cisstMultiTask
-  cisstParameterTypes)
+  cisstParameterTypes
+  cisstRobot)
 
 find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
+
   add_executable (example example.cpp)
   set_property (TARGET example PROPERTY FOLDER "cisstRobot/examples")
   cisst_target_link_libraries (example ${REQUIRED_CISST_LIBRARIES})
+
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires " ${REQUIRED_CISST_LIBRARIES})
 endif (cisst_FOUND_AS_REQUIRED)

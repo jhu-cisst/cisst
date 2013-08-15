@@ -49,6 +49,9 @@ class CISST_EXPORT robHayati : public robKinematics {
      \param is The input stream
   */
   void ReadParameters( std::istream& is );
+#if CISST_HAS_JSON
+  void ReadParameters(const Json::Value &config);
+#endif
   
   //! Write the parameters to an output stream
   /**

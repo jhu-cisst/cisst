@@ -40,6 +40,14 @@ robKinematics::Errno robKinematics::Read( std::istream& is ){
   return robJoint::Read( is );
 }
 
+#if CISST_HAS_JSON
+robKinematics::Errno robKinematics::Read(const Json::Value &config)
+{
+    ReadParameters(config);
+    return robJoint::Read(config);
+}
+#endif
+
 robKinematics::Errno robKinematics::Write( std::ostream& os ) const {
   WriteParameters( os );
   return robJoint::Write( os );

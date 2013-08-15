@@ -20,8 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 
 #include <cisstVector/vctTransformationTypes.h>
-
 #include <cisstRobot/robLink.h>
+
+#if CISST_HAS_JSON
+#include <json/json.h>
+#endif
+
 #include <cisstRobot/robExport.h>
 
 class CISST_EXPORT robManipulator{
@@ -61,6 +65,10 @@ class CISST_EXPORT robManipulator{
   //! Load the kinematics and the dynamics of the robot
   robManipulator::Errno LoadRobot( const std::string& linkfile );
 
+#if CISST_HAS_JSON
+  //! Load the kinematics and the dynamtics of the robot from a JSON file
+  robManipulator::Errno LoadRobot(const Json::Value & config);
+#endif
 
   
   //! Evaluate the body Jacobian

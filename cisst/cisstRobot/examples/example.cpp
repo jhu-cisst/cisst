@@ -19,8 +19,61 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <iostream>
+#include <fstream>
+#include <cisstCommon/cmnPath.h>
+#include <cisstVector.h>
+#include <cisstRobot/robManipulator.h>
+
+#if CISST_HAS_JSON
+#include <json/json.h>
+#endif
+
 
 int main(int argc, char** argv)
 {
-    std::cout << "hello cisstRobot" << std::endl;
+    // log configuration
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cerr, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+
+    cmnPath path;
+    std::cout << path.GetWorkingDirectory() << std::endl;
+
+#if CISST_HAS_JSON
+
+    // open *.rob.json config file
+    std::string fileName("irb6600.rob.json");
+    std::ifstream robotConfigFile(fileName.c_str());
+
+    // load config file with JSON parser
+    Json::Reader jreader;
+    Json::Value  robotConfig;
+    bool rc = jreader.parse(robotConfigFile, robotConfig);
+    if (!rc) {
+        std::cerr << jreader.getFormattedErrorMessages() << std::endl;
+        return -1;
+    }
+
+    // robManipulator with .rob file
+    robManipulator robotRob;
+    robotRob.LoadRobot(robotConfig);
+
+    // robManipulator with .rob.json file
+    robManipulator robotJson;
+    robotJson.LoadRobot(robotConfig);
+
+    // joint position all zero
+    vctDoubleVec q(robotRob.links.size(), 0.0);
+
+    std::cout << "JSON: " << robotJson.ForwardKinematics(q) << std::endl
+              << "Rob:  " << robotRob.ForwardKinematics(q) << std::endl;
+
+#endif
 }
+
+
+
+
+
+
