@@ -15,28 +15,12 @@
 project (cisstParameterTypes)
 
 # create data type using the data generator
-if (CMAKE_CROSSCOMPILING)
-  # MJ: When cross compiling, the data generator binary built for the target platform
-  # cannot run on the host.  To get around this issue, we use pre-generated source and
-  # header files to manually set CMake variables that cisst_data_generator populates.
-  set (PREGEN_FILES prmPositionCartesianGet
-                    prmPositionJointGet
-                    prmFixtureGainCartesianSet)
-   # manually set CMake variables and copy header files in pregenerated folder to build tree
-  foreach (aFile ${PREGEN_FILES})
-    set (cisstParameterTypes_CISST_DG_SRCS ${cisstParameterTypes_CISST_DG_SRCS} "pregenerated/${aFile}.cpp")
-    set (cisstParameterTypes_CISST_DG_HDRS ${cisstParameterTypes_CISST_DG_HDRS} "${aFile}.h")
-    configure_file("pregenerated/${aFile}.h"
-                   "${cisst_BINARY_DIR}/include/cisstParameterTypes/${aFile}.h")
-  endforeach (aFile)
-else (CMAKE_CROSSCOMPILING)
-  cisst_data_generator (cisstParameterTypes
-                        "${cisst_BINARY_DIR}/include" # where to save the file
-                        "cisstParameterTypes/"        # sub directory for include
-                        ../prmPositionCartesianGet.ccc
-                        ../prmPositionJointGet.ccc
-                        ../prmFixtureGainCartesianSet.ccc)
-endif (CMAKE_CROSSCOMPILING)
+cisst_data_generator (cisstParameterTypes
+                      "${cisst_BINARY_DIR}/include" # where to save the file
+                      "cisstParameterTypes/"        # sub directory for include
+                      ../prmPositionCartesianGet.ccc
+                      ../prmPositionJointGet.ccc
+                      ../prmFixtureGainCartesianSet.ccc)
 
 # to compile cisst generated code, need to find header file
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
