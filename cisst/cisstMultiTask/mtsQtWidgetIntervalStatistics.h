@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 
-#include <QGridLayout>
+#include <QVBoxLayout>
 #include <QLabel>
 #include <QWidget>
 
@@ -41,7 +41,7 @@ public:
     void SetValue(const mtsIntervalStatistics & newValue);
 
 protected:
-    QGridLayout * MainLayout;
+    QVBoxLayout * MainLayout;
     QLabel * QLAverage;
     QLabel * QLStdDev;
     QLabel * QLMin;

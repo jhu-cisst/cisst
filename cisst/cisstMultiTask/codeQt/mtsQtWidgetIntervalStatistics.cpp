@@ -24,20 +24,19 @@ http://www.cisst.org/cisst/license.txt.
 mtsQtWidgetIntervalStatistics::mtsQtWidgetIntervalStatistics(void)
 {
     // create a layout for the widgets
-    MainLayout = new QGridLayout(this);
-    MainLayout->setRowStretch(0, 1);
-    MainLayout->setColumnStretch(1, 1);
+    MainLayout = new QVBoxLayout(this);
 
     QLAverage = new QLabel("Avg: n/a");
-    MainLayout->addWidget(QLAverage, 0, 0);
+    MainLayout->addWidget(QLAverage);
     QLStdDev = new QLabel("Dev: n/a");
-    MainLayout->addWidget(QLStdDev, 1, 0);
+    MainLayout->addWidget(QLStdDev);
     QLMin = new QLabel("Min: n/a");
-    MainLayout->addWidget(QLMin, 2, 0);
+    MainLayout->addWidget(QLMin);
     QLMax = new QLabel("Max: n/a");
-    MainLayout->addWidget(QLMax, 3, 0);
+    MainLayout->addWidget(QLMax);
     QLLoad = new QLabel("Load: n/a");
-    MainLayout->addWidget(QLLoad, 4, 0);
+    MainLayout->addWidget(QLLoad);
+    MainLayout->addStretch();
 }
 
 void mtsQtWidgetIntervalStatistics::SetValue(const mtsIntervalStatistics & newValue)
