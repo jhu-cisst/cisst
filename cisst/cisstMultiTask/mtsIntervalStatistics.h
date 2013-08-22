@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsIntervalStatistics_h
 
 #include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
@@ -144,5 +145,10 @@ public:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatistics)
+
+typedef std::vector<mtsIntervalStatistics> mtsIntervalStatisticsVec;
+MTS_IMPLEMENT_STDVEC_STREAM_OUT(mtsIntervalStatisticsVec);
+typedef mtsGenericObjectProxy<mtsIntervalStatisticsVec> mtsIntervalStatisticsVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatisticsVecProxy);
 
 #endif // _mtsIntervalStatistics_h
