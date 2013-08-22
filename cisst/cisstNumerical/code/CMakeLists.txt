@@ -50,6 +50,7 @@ set (HEADER_FILES
 if (CISST_HAS_CISSTNETLIB)
   set (SOURCE_FILES
        ${SOURCE_FILES}
+       nmrInverseSPD.cpp
        nmrLSMinNorm.cpp
        nmrPInverse.cpp
        nmrPInverseEconomy.cpp
@@ -66,6 +67,7 @@ if (CISST_HAS_CISSTNETLIB)
        ${HEADER_FILES}
        nmrNetlib.h
        nmrInverse.h
+       nmrInverseSPD.h
        nmrLU.h
        nmrLSMinNorm.h
        # deprecated: nmrLUSolver.h

@@ -53,6 +53,8 @@ http://www.cisst.org/cisst/license.txt.
 #include "ExampleGaussJordanInverse.h"
 #include <cisstNumerical/nmrSavitzkyGolay.h>
 #include "ExampleSavitzkyGolay.h"
+#include <cisstNumerical/nmrInverseSPD.h>
+#include "ExampleInverseSPD.h"
 
 int main(void)
 {
@@ -112,6 +114,9 @@ int main(void)
 
     std::cout << "--- ExampleSavitzkyGolay ---" << std::endl;
     ExampleSavitzkyGolay();
+
+    std::cout << "--- ExampleInverseSPD ---" << std::endl;
+    ExampleInverseSPD();
 
     return 0;
 }
