@@ -1,3 +1,4 @@
+
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
@@ -79,18 +80,27 @@ void osaDate::From(osaTimeData & timeData)
         cmnThrow("Can not create an osaDate from a negative osaTimeData");
     }
 
+	struct tm * timeinfo;
+
 #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
-    timeval ts;
-    ts.tv_sec = timeData.Seconds();
-    ts.tv_usec = timeData.NanoSeconds() / 1000;
+    //timespec ts;
+    //ts.tv_sec = timeData.Seconds();
+	time_t seconds = timeData.Seconds();
+//	ts.tv_usec = timeData.NanoSeconds() / 1000;
+   // ts.tv_usec = timeData.NanoSeconds() / 1000;
+	timeinfo = localtime(&seconds);
+
 #else
     struct timespec ts;
     ts.tv_sec = timeData.Seconds();
     ts.tv_nsec = timeData.NanoSeconds();
+	timeinfo = localtime((const time_t*)&ts.tv_sec);
+
 #endif
 
-    struct tm * timeinfo;
-    timeinfo = localtime((const time_t*)&ts.tv_sec);
+
+    //struct tm * timeinfo;
+	//timeinfo = localtime((const time_t*)&ts.tv_sec);
 
     Years_ = timeinfo->tm_year + 1900 ;
     Months_ = timeinfo->tm_mon +1;
@@ -197,3 +207,6 @@ osaDate osaDateNow(void)
     osaDate dateFrom(now);
     return dateFrom;
 }
+
+
+

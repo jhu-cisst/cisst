@@ -1,3 +1,4 @@
+
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
@@ -210,7 +211,7 @@ void osaTimeData::SplitDoubles(const double & seconds, int_type & fullSeconds, i
     int_type temp = static_cast<int_type>(seconds * 1000000000);
     int_type computation = 0;
     for (unsigned int i = 0 ; i < 9 ; i++) {
-        computation = computation + (temp % 10 ) * pow(10.0, i);
+        computation = computation + (temp % 10 ) * pow(10.0, (int)i);
         temp = temp / 10;
     }
     nanoSeconds = computation;
@@ -312,7 +313,7 @@ osaTimeData osaTimeNow(int indicator)
     timeval now;
     windows_gettime(&now);
     const int_type seconds = static_cast<int_type>(now.tv_sec);
-    const int_type nanoSeconds = static_cast<int_type>(now.tv_usec);
+    const int_type nanoSeconds = static_cast<int_type>(now.tv_usec) * 1000;
     return osaTimeData(seconds, nanoSeconds);
 #elif (CISST_OS == CISST_DARWIN)
     struct timeval now;
@@ -337,62 +338,39 @@ osaTimeData osaTimeNow(int indicator)
 }
 
 #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
-LARGE_INTEGER getFILETIMEoffset(void)
+// The following code was referenced from the works of developers of 'Alones World' (Korean iPhone application developers).
+
+void windows_gettime(struct timeval *tv)
 {
-    SYSTEMTIME s;
-    FILETIME f;
-    LARGE_INTEGER t;
 
-    s.wYear = 1970;
-    s.wMonth = 1;
-    s.wDay = 1;
-    s.wHour = 0;
-    s.wMinute = 0;
-    s.wSecond = 0;
-    s.wMilliseconds = 0;
-    SystemTimeToFileTime(&s, &f);
-    t.QuadPart = f.dwHighDateTime;
-    t.QuadPart <<= 32;
-    t.QuadPart |= f.dwLowDateTime;
-    return (t);
-}
+	// epoch time constants
+#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
+#define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+#else
+#define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
+#endif
 
-void windows_gettime(struct timeval *vtv)
-{
-    LARGE_INTEGER t;
-    FILETIME f;
-    double microseconds;
-    static LARGE_INTEGER offset;
-    static double frequencyToMicroseconds;
-    static int initialized = 0;
-    static BOOL usePerformanceCounter = 0;
+	FILETIME ft;
+	unsigned __int64 tmpres = 0;
+	// get system time
+	GetSystemTimeAsFileTime(&ft);
+	
+	// convert to unsigned 64 bit
+	tmpres |= ft.dwHighDateTime;
+	tmpres <<= 32;
+	tmpres |= ft.dwLowDateTime;
 
-    if (!initialized) {
-        LARGE_INTEGER performanceFrequency;
-        initialized = 1;
-        usePerformanceCounter = QueryPerformanceFrequency(&performanceFrequency);
 
-        if (usePerformanceCounter) {
-            QueryPerformanceCounter(&offset);
-            frequencyToMicroseconds = (double)performanceFrequency.QuadPart / 1000000.;
-        }
-        else {
-            offset = getFILETIMEoffset();
-            frequencyToMicroseconds = 10.;
-        }
-    }
-    if (usePerformanceCounter) {
-        QueryPerformanceCounter(&t);
-    }
-    else {
-        GetSystemTimeAsFileTime(&f);
-        t.QuadPart |= f.dwLowDateTime;
-    }
-    t.QuadPart -= offset.QuadPart;
-    microseconds = (double)t.QuadPart / frequencyToMicroseconds;
-    t.QuadPart = microseconds;
-    tv->tv_sec = t.QuadPart / 1000000;
-    tv->tv_usec = t.QuadPart % 1000000;
+    // convert 100nano seconds to  1micro second
+	tmpres /= 10;
+
+    // convert to epoch time
+	tmpres -= DELTA_EPOCH_IN_MICROSECS;    
+
+    // set seconds and useconds
+	tv->tv_sec = (tmpres / 1000000UL);
+	tv->tv_usec = (tmpres % 1000000UL);
+
 
     return ;
 }
