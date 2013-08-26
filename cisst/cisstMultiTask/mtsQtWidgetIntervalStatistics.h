@@ -25,12 +25,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QVBoxLayout>
 #include <QLabel>
-#include <QWidget>
+#include <QTableWidget>
 
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
 
-class CISST_EXPORT mtsQtWidgetIntervalStatistics: public QWidget
+class CISST_EXPORT mtsQtWidgetIntervalStatistics: public QTableWidget
 {
     Q_OBJECT;
 
@@ -41,12 +41,13 @@ public:
     void SetValue(const mtsIntervalStatistics & newValue);
 
 protected:
-    QVBoxLayout * MainLayout;
-    QLabel * QLAverage;
-    QLabel * QLStdDev;
-    QLabel * QLMin;
-    QLabel * QLMax;
-    QLabel * QLLoad;
+    QTableWidgetItem * QTWIAverage;
+    QTableWidgetItem * QTWIAverageHz;
+    QTableWidgetItem * QTWIStdDev;
+    QTableWidgetItem * QTWIMin;
+    QTableWidgetItem * QTWIMax;
+    QTableWidgetItem * QTWILoadMin;
+    QTableWidgetItem * QTWILoadMax;
 };
 
 #endif  // _mtsQtWidgetIntervalStatistics_h
