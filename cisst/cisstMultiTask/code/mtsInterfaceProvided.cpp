@@ -1293,6 +1293,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         elementCommandWrite.Name = writeCommand->GetName();
         // serialize argument
         streamBuffer.str("");
+        serializer.Reset();
         serializer.Serialize(*(writeCommand->GetArgumentPrototype()));
         elementCommandWrite.ArgumentPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsWrite.push_back(elementCommandWrite);
@@ -1313,6 +1314,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         elementCommandRead.Name = readCommand->GetName();
         // serialize argument
         streamBuffer.str("");
+        serializer.Reset();
         serializer.Serialize(*(readCommand->GetArgumentPrototype()));
         elementCommandRead.ArgumentPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsRead.push_back(elementCommandRead);
@@ -1333,10 +1335,12 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         elementCommandQualifiedRead.Name = qualifiedReadCommand->GetName();
         // serialize argument1
         streamBuffer.str("");
+        serializer.Reset();
         serializer.Serialize(*(qualifiedReadCommand->GetArgument1Prototype()));
         elementCommandQualifiedRead.Argument1PrototypeSerialized = streamBuffer.str();
         // serialize argument2
         streamBuffer.str("");
+        serializer.Reset();
         serializer.Serialize(*(qualifiedReadCommand->GetArgument2Prototype()));
         elementCommandQualifiedRead.Argument2PrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsQualifiedRead.push_back(elementCommandQualifiedRead);
@@ -1357,6 +1361,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         elementCommandVoidReturn.Name = voidReturnCommand->GetName();
         // serialize result
         streamBuffer.str("");
+        serializer.Reset();
         serializer.Serialize(*(voidReturnCommand->GetResultPrototype()));
         elementCommandVoidReturn.ResultPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsVoidReturn.push_back(elementCommandVoidReturn);
@@ -1377,10 +1382,12 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         elementCommandWriteReturn.Name = writeReturnCommand->GetName();
         // serialize argument
         streamBuffer.str("");
+        serializer.Reset();
         serializer.Serialize(*(writeReturnCommand->GetArgumentPrototype()));
         elementCommandWriteReturn.ArgumentPrototypeSerialized = streamBuffer.str();
         // serialize result
         streamBuffer.str("");
+        serializer.Reset();
         serializer.Serialize(*(writeReturnCommand->GetResultPrototype()));
         elementCommandWriteReturn.ResultPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsWriteReturn.push_back(elementCommandWriteReturn);
@@ -1415,6 +1422,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
         elementEventWrite.Name = writeEvent->GetName();
         // serialize argument
         streamBuffer.str("");
+        serializer.Reset();
         serializer.Serialize(*(writeEvent->GetArgumentPrototype()));
         elementEventWrite.ArgumentPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.EventsWrite.push_back(elementEventWrite);
