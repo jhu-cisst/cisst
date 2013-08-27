@@ -505,7 +505,7 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
         err = errno;
 #endif
         //! \Todo : some of the errors here might be soft errors, EAGAIN/EWOULDBLOCK and we might be able to recover from those.
-        CMN_LOG_CLASS_RUN_ERROR << "Receive: failed to receive because socket is not ready " << SocketFD << " Error: " <<err<<std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Receive: failed to receive because socket is not ready " << SocketFD << " Error: " << err << std::endl;
 
         if (SocketType == TCP)
             Close();
@@ -522,7 +522,15 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
             socklen_t length = sizeof(fromAddr);
             retval = recvfrom(SocketFD, bufrecv, maxlen, 0, reinterpret_cast<struct sockaddr *>(&fromAddr), &length);
 
-            if (retval > 0) {
+            if (retval == SOCKET_ERROR) {
+#if (CISST_OS == CISST_WINDOWS)
+                err = WSAGetLastError();
+#else
+                err = errno;
+#endif
+                CMN_LOG_CLASS_RUN_ERROR << "Receive error = " << err << std::endl;
+            }
+            else if (retval > 0) {
                 if (static_cast<unsigned int>(retval) < maxlen - 1) {
                     bufrecv[retval] = 0;  // NULL terminate the string for convenience if there is room
                     CMN_LOG_CLASS_RUN_DEBUG << "Receive: received " << retval << " bytes: " << std::endl;
