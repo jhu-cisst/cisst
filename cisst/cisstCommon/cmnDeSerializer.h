@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -192,6 +192,9 @@ public:
      */
     cmnDeSerializer(std::istream & inputStream);
 
+    /*! Destructor */
+    ~cmnDeSerializer();
+
 
     /*! De-serialize an object from the input stream.  This method
       will create an object dynamically therefore the class of the
@@ -240,13 +243,14 @@ public:
             const const_iterator end = ServicesContainer.end();
             const const_iterator iterator = ServicesContainer.find(typeId);
             if (iterator == end) {
-                CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Can't find corresponding class information" << std::endl;
+                cmnThrow("DeSerialize: Can't find corresponding class information");
             } else {
                 cmnClassServicesBase * servicesPointerLocal = iterator->second;
                 if (servicesPointerLocal != object.Services()) {
                     CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Object types don't match, local class = "
                         << servicesPointerLocal->GetName() << ", object class = " << object.Services()->GetName()
                         << std::endl;
+                    cmnThrow("DeSerialize: Object types don't match");
                 } else {
                     if (serializeObject) {
                         object.DeSerializeRaw(this->InputStream);
