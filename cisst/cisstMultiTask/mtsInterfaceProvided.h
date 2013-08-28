@@ -107,6 +107,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
 
     // to allow adding command write generic ...
     friend class mtsComponentAddLatency;
+    friend class mtsSocketProxyClient;
+    friend class mtsSocketProxyServer;
 
  public:
     /*! This type */

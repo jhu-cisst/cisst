@@ -76,6 +76,9 @@ set (SOURCE_FILES
 
      mtsParameterTypes.cpp
 
+     mtsSocketProxyClient.cpp
+     mtsSocketProxyServer.cpp
+
      mtsStateIndex.cpp
      mtsStateTable.cpp
 
@@ -88,6 +91,7 @@ set (SOURCE_FILES
 
 # all header files
 set (HEADER_FILES
+
      mtsCallableQualifiedReadBase.h
      mtsCallableQualifiedReadMethod.h
      mtsCallableQualifiedReadReturnVoidMethod.h
@@ -176,6 +180,9 @@ set (HEADER_FILES
 
      mtsQueue.h
 
+     mtsSocketProxyClient.h
+     mtsSocketProxyServer.h
+
      mtsStateArray.h
      mtsStateArrayBase.h
      mtsStateData.h
@@ -192,6 +199,16 @@ set (HEADER_FILES
      mtsTransformationTypes.h
 
      mtsVector.h
+     )
+
+# Header files in code directory
+set (ADDITIONAL_HEADER_FILES
+
+     mtsFunctionQualifiedReadProxy.h
+     mtsFunctionReadProxy.h
+     mtsFunctionWriteProxy.h
+
+     mtsProxySerializer.h
      )
 
 if (MINGW)
@@ -228,7 +245,6 @@ if (CISST_MTS_HAS_ICE)
        mtsProxyBaseCommon.h
        mtsProxyBaseClient.h
        mtsProxyBaseServer.h
-       mtsProxySerializer.h
 
        mtsInterfaceRequiredProxy.h
        mtsComponentInterfaceProxyServer.h
@@ -245,8 +261,6 @@ if (CISST_MTS_HAS_ICE)
        mtsCommandReadProxy.h
        mtsCommandQualifiedReadProxy.h
 
-       mtsFunctionReadProxy.h
-       mtsFunctionWriteProxy.h
        mtsFunctionReturnProxyBase.h
        mtsFunctionVoidReturnProxy.h
        mtsFunctionWriteReturnProxy.h

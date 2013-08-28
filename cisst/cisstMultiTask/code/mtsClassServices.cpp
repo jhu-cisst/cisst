@@ -336,6 +336,12 @@ CMN_IMPLEMENT_SERVICES(mtsLogMessage);
 #include <cisstMultiTask/mtsComponentViewer.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
 
+#include <cisstMultiTask/mtsSocketProxyClient.h>
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsSocketProxyClient, mtsTaskContinuous)
+
+#include <cisstMultiTask/mtsSocketProxyServer.h>
+CMN_IMPLEMENT_SERVICES_DERIVED(mtsSocketProxyServer, mtsTaskContinuous)
+
 /* ICE dependent classes */
 #include <cisstMultiTask/mtsConfig.h>
 #if CISST_MTS_HAS_ICE

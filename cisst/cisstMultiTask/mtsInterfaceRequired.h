@@ -93,6 +93,8 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     friend class mtsManagerLocalTest;
     friend class mtsEventReceiverBase;
     friend class mtsManagerComponentClient;
+    // for GetDescription
+    friend class mtsSocketProxyClient;
 
  protected:
 
