@@ -249,7 +249,8 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
 
     /*! \brief Send a string via the socket, possibly in multiple packets based on the specified
                maximum packet_size. This method can be used with both UDP and TCP, though it
-               is intended for UDP.
+               is intended for UDP (only for reliable UDP connections, since there is no check for
+               missing or out of sequence packets).
         \param bufsend String to be sent
         \param packetSize Maximum packet size
         \param timeoutSec is the longest time we should wait to send something
@@ -267,7 +268,8 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
     int Receive(char * bufrecv, unsigned int maxlen, double timeoutSec = 0.0);
 
     /*! \brief Receive a string via the socket, possibly in multiple packets. This method can be used
-               with both UDP and TCP, though it is intended for UDP.
+               with both UDP and TCP, though it is intended for UDP (only for reliable UDP connections,
+               since there is no check for missing or out of sequence packets).
         \param bufrecv String to store received data
         \param packetSize Maximum packet size
         \param timeoutStartSec Timeout for receiving first packet, in seconds

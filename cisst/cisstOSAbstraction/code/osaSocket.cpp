@@ -462,7 +462,7 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen, const double time
 
 int osaSocket::Send(const std::string & bufsend, double timeoutSec)
 {
-    return Send(bufsend.c_str(), static_cast<int>(bufsend.length()), timeoutSec);
+    return Send(bufsend.data(), static_cast<int>(bufsend.length()), timeoutSec);
 }
 
 int osaSocket::SendAsPackets(const char * bufsend, unsigned int msglen, unsigned int packetSize, double timeoutSec)
@@ -483,7 +483,7 @@ int osaSocket::SendAsPackets(const char * bufsend, unsigned int msglen, unsigned
 
 int osaSocket::SendAsPackets(const std::string & bufsend, unsigned int packetSize, double timeoutSec)
 {
-    return SendAsPackets(bufsend.c_str(), static_cast<int>(bufsend.length()), packetSize, timeoutSec);
+    return SendAsPackets(bufsend.data(), static_cast<int>(bufsend.length()), packetSize, timeoutSec);
 }
 
 int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec )
