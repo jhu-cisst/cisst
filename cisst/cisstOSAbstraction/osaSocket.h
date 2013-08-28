@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Ali Uneri
   Created on: 2009
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -175,6 +175,10 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
  public:
     enum SocketTypes { UDP, TCP };
 
+    // To be safe, we set the default packet size to 512 bytes. Depending on the system,
+    // the actual maximum packet size (for UDP) may be much larger than this.
+    enum { DEFAULT_MAX_PACKET_SIZE = 512 };
+
     /*! \brief Default constructor */
     osaSocket(SocketTypes type = TCP);
 
@@ -218,25 +222,67 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
     /*! \brief Send a byte array via the socket
         \param bufsend Buffer holding bytes to be sent
         \param msglen Number of bytes to send
-        \param timeoutSec is the longest time we should wait to send something (NA for UDP)
+        \param timeoutSec is the longest time we should wait to send something
         \return Number of bytes sent (-1 if error)
         \note  Since this is a nonblocking call the socket might not be ready to send right away
                so a short timeout will help in cases when large amount of data is sent
                around. If the socket is not ready within the timeout then the connection will be closed
     */
-    int Send(const char * bufsend, unsigned int msglen, const double timeoutSec = 0.0 );
+    int Send(const char * bufsend, unsigned int msglen, double timeoutSec = 0.0 );
 
     /*! \brief Send a string via the socket
         \param bufsend String to be sent
+        \param timeoutSec is the longest time we should wait to send something
         \return Number of bytes sent (-1 if error) */
-    int Send(const std::string & bufsend);
+    int Send(const std::string & bufsend, double timeoutSec = 0.0 );
+
+    /*! \brief Send a byte array via the socket, possibly in multiple packets based on the specified
+               maximum packet_size. This method can be used with both UDP and TCP, though it
+               is intended for UDP.
+        \param bufsend Buffer holding bytes to be sent
+        \param packetSize Maximum packet size
+        \param timeoutSec is the longest time we should wait to send something
+        \return Number of bytes sent (-1 if error)
+        \note  This function aborts if any error occurs and returns the number of bytes actually sent (if any).
+    */
+    int SendAsPackets(const char * bufsend, unsigned int msglen, unsigned int packetSize = DEFAULT_MAX_PACKET_SIZE, double timeoutSec = 0.0);
+
+    /*! \brief Send a string via the socket, possibly in multiple packets based on the specified
+               maximum packet_size. This method can be used with both UDP and TCP, though it
+               is intended for UDP.
+        \param bufsend String to be sent
+        \param packetSize Maximum packet size
+        \param timeoutSec is the longest time we should wait to send something
+        \return Number of bytes sent (-1 if error)
+        \note  This function aborts if any error occurs and returns the number of bytes actually sent (if any).
+    */
+    int SendAsPackets(const std::string & bufsend, unsigned int packetSize = DEFAULT_MAX_PACKET_SIZE, double timeoutSec = 0.0);
 
     /*! \brief Receive a byte array via the socket
         \param bufrecv Buffer to store received data
         \param maxlen Maximum number of bytes to receive
-        \param timeoutSec Timeout in seconds. (NA for UDP)
-        \return Number of bytes received. 0 if timeout is reached and/or no data is received. */
-    int Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec = 0.0);
+        \param timeoutSec Timeout in seconds
+        \return Number of bytes received. 0 if timeout is reached and/or no data is received.
+    */
+    int Receive(char * bufrecv, unsigned int maxlen, double timeoutSec = 0.0);
+
+    /*! \brief Receive a string via the socket, possibly in multiple packets. This method can be used
+               with both UDP and TCP, though it is intended for UDP.
+        \param bufrecv String to store received data
+        \param packetSize Maximum packet size
+        \param timeoutStartSec Timeout for receiving first packet, in seconds
+        \param timeoutNextSec Timeout for receiving subsequent packets (after first), in seconds
+        \return Number of bytes received. 0 if timeout is reached and/or no data is received.
+        \note  It can be difficult to determine when a complete set of packets has been received.
+               This function is intended primarily to receive the packet stream produced by SendAsPackets,
+               so it terminates reception in the following cases: (1) when a received packet is smaller
+               than the specified packetSize, (2) on any socket error, and (3) when a timeout occurs.
+               The first condition is best, since it avoids the possibility of appending data from
+               an unrelated packet. Thus, the caller can ensure that the total number of bytes transmitted
+               is not a multiple of the packetSize (e.g., by appending an extra byte).
+    */
+    int ReceiveAsPackets(std::string & bufrecv, unsigned int packetSize = DEFAULT_MAX_PACKET_SIZE,
+                         double timeoutStartSec = 0.0, double timeoutNextSec = 0.0);
 
     /*! \brief Close the socket
         \return False if close fails*/

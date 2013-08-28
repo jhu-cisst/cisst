@@ -7,7 +7,7 @@ $Id$
 Author(s):  Peter Kazanzides
 Created on: 2009
 
-(C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+(C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -460,9 +460,30 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen, const double time
     return retval;
 }
 
-int osaSocket::Send(const std::string & bufsend)
+int osaSocket::Send(const std::string & bufsend, double timeoutSec)
 {
-    return Send(bufsend.c_str(), static_cast<int>(bufsend.length()));
+    return Send(bufsend.c_str(), static_cast<int>(bufsend.length()), timeoutSec);
+}
+
+int osaSocket::SendAsPackets(const char * bufsend, unsigned int msglen, unsigned int packetSize, double timeoutSec)
+{
+    unsigned int nPackets = 1 + (msglen-1)/packetSize;
+    unsigned int numSent = 0;
+    for (unsigned int i = 0; i < nPackets-1; i++) {
+        int n = Send(bufsend + i*packetSize, packetSize, timeoutSec);
+        if (n > 0) numSent += n;
+        if (n != packetSize)
+            return numSent;
+        msglen -= packetSize;
+    }
+    int n = Send(bufsend + (nPackets-1)*packetSize, msglen, timeoutSec);
+    if (n > 0) numSent += n;
+    return numSent;
+}
+
+int osaSocket::SendAsPackets(const std::string & bufsend, unsigned int packetSize, double timeoutSec)
+{
+    return SendAsPackets(bufsend.c_str(), static_cast<int>(bufsend.length()), packetSize, timeoutSec);
 }
 
 int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec )
@@ -574,6 +595,33 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
         CMN_LOG_CLASS_RUN_ERROR << "Receive: failed to receive" << std::endl;
     }
     return retval;
+}
+
+int osaSocket::ReceiveAsPackets(std::string & bufrecv, unsigned int packetSize,
+                                double timeoutStartSec, double timeoutNextSec)
+{
+    bufrecv.clear();
+    // The following code avoids dynamic memory allocation for cases where the DEFAULT_MAX_PACKET_SIZE
+    // is used (or any packet size smaller than that).
+    char defaultBuffer[DEFAULT_MAX_PACKET_SIZE];
+    char *buffer = defaultBuffer;
+    if (packetSize > DEFAULT_MAX_PACKET_SIZE)
+        buffer = new char[packetSize];
+    int n = Receive(buffer, packetSize, timeoutStartSec);
+    if (n > 0) {
+        bufrecv.assign(buffer, n);
+        while (n == packetSize) {
+            n = Receive(buffer, packetSize, timeoutNextSec);
+            if (n > 0)
+                bufrecv.append(buffer, n);
+        }
+    }
+    if (packetSize > DEFAULT_MAX_PACKET_SIZE)
+        delete buffer;
+
+    // If no characters have been received and (n < 0), return n;
+    // otherwise, return the number of characters received.
+    return ((n < 0) && bufrecv.empty()) ? n : bufrecv.size();
 }
 
 //! This could be static or external to the osaSocket class
