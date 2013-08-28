@@ -47,7 +47,6 @@ public:
     {
         bool success = false;
         char recvBuffer[8];
-        bool dataSent = false;
         if (Socket.Send(Handle.empty() ? Name : Handle) > 0) {
             // Wait for result, with 2 second timeout
             int nBytes = Socket.Receive(recvBuffer, sizeof(recvBuffer), 2.0);
