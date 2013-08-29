@@ -26,95 +26,67 @@ http://www.cisst.org/cisst/license.txt.
 mtsQtWidgetIntervalStatistics::mtsQtWidgetIntervalStatistics(void):
     QTableWidget()
 {
-    this->setRowCount(7);
-    this->setColumnCount(2);
+    this->setRowCount(4);
+    this->setColumnCount(3);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    /*
-    this->verticalScrollBar()->setDisabled(true);
-    this->horizontalScrollBar()->setDisabled(true);
-    */
     this->verticalScrollBar()->hide();
     this->horizontalScrollBar()->hide();
-   /* int verticalHeight = 400;
-
-        this->horizontalHeader()->sizeHint().height()
-        + this->verticalHeader()->sizeHint().height();
-
+    int verticalHeight = this->verticalHeader()->sizeHint().height() * this->rowCount();
     this->setFixedHeight(verticalHeight);
-    this->setMinimumHeight(verticalHeight);
-    */
-    // this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     QLabel * label;
-    int row = 0;
 
-    label = new QLabel("Avg:");
-    this->setCellWidget(row, 0, label);
+    label = new QLabel("Average");
+    this->setCellWidget(0, 0, label);
     QTWIAverage = new QTableWidgetItem();
     QTWIAverage->setTextAlignment(Qt::AlignRight);
     QTWIAverage->setFlags(QTWIAverage->flags() ^ Qt::ItemIsEditable);
-    this->setItem(row, 1, QTWIAverage);
-    row++;
-
-    label = new QLabel("Avg:");
-    this->setCellWidget(row, 0, label);
+    this->setItem(0, 1, QTWIAverage);
     QTWIAverageHz = new QTableWidgetItem();
     QTWIAverageHz->setTextAlignment(Qt::AlignRight);
     QTWIAverageHz->setFlags(QTWIAverageHz->flags() ^ Qt::ItemIsEditable);
-    this->setItem(row, 1, QTWIAverageHz);
-    row++;
+    this->setItem(0, 2, QTWIAverageHz);
 
-    label = new QLabel("StdDev:");
-    this->setCellWidget(row, 0, label);
+    label = new QLabel("Std dev");
+    this->setCellWidget(1, 0, label);
     QTWIStdDev = new QTableWidgetItem();
     QTWIStdDev->setTextAlignment(Qt::AlignRight);
     QTWIStdDev->setFlags(QTWIStdDev->flags() ^ Qt::ItemIsEditable);
-    this->setItem(row, 1, QTWIStdDev);
-    row++;
+    this->setItem(1, 1, QTWIStdDev);
 
-    label = new QLabel("Min:");
-    this->setCellWidget(row, 0, label);
+    label = new QLabel("Range");
+    this->setCellWidget(2, 0, label);
     QTWIMin = new QTableWidgetItem();
     QTWIMin->setTextAlignment(Qt::AlignRight);
     QTWIMin->setFlags(QTWIMin->flags() ^ Qt::ItemIsEditable);
-    this->setItem(row, 1, QTWIMin);
-    row++;
-
-    label = new QLabel("Max:");
-    this->setCellWidget(row, 0, label);
+    this->setItem(2, 1, QTWIMin);
     QTWIMax = new QTableWidgetItem();
     QTWIMax->setTextAlignment(Qt::AlignRight);
     QTWIMax->setFlags(QTWIMax->flags() ^ Qt::ItemIsEditable);
-    this->setItem(row, 1, QTWIMax);
-    row++;
+    this->setItem(2, 2, QTWIMax);
 
-    label = new QLabel("LoadMin:");
-    this->setCellWidget(row, 0, label);
+    label = new QLabel("Load");
+    this->setCellWidget(3, 0, label);
     QTWILoadMin = new QTableWidgetItem();
     QTWILoadMin->setTextAlignment(Qt::AlignRight);
     QTWILoadMin->setFlags(QTWILoadMin->flags() ^ Qt::ItemIsEditable);
-    this->setItem(row, 1, QTWILoadMin);
-    row++;
-
-    label = new QLabel("LoadMax:");
-    this->setCellWidget(row, 0, label);
+    this->setItem(3, 1, QTWILoadMin);
     QTWILoadMax = new QTableWidgetItem();
     QTWILoadMax->setTextAlignment(Qt::AlignRight);
     QTWILoadMax->setFlags(QTWILoadMax->flags() ^ Qt::ItemIsEditable);
-    this->setItem(row, 1, QTWILoadMax);
-    row++;
+    this->setItem(3, 2, QTWILoadMax);
 }
 
 void mtsQtWidgetIntervalStatistics::SetValue(const mtsIntervalStatistics & newValue)
 {
     const double avg = newValue.GetAvg();
-    QTWIAverage->setText(QString("%1 ms").arg(avg * 1000.0, -6, 'f', 2));
-    QTWIAverageHz->setText(QString("%1 KHz").arg(0.001 / avg, -6, 'f', 2));
-    QTWIStdDev->setText(QString("%1 ms").arg(newValue.GetStdDev() * 1000.0, -6, 'f', 2));
-    QTWIMin->setText(QString("%1 ms").arg(newValue.GetMin() * 1000.0, -6, 'f', 2));
-    QTWIMax->setText(QString("%1 ms").arg(newValue.GetMax() * 1000.0, -6, 'f', 2));
+    QTWIAverage->setText(QString("%1 ms").arg(avg * 1000.0, -6, 'f', 3));
+    QTWIAverageHz->setText(QString("%1 KHz").arg(0.001 / avg, -6, 'f', 3));
+    QTWIStdDev->setText(QString("%1 ms").arg(newValue.GetStdDev() * 1000.0, -6, 'f', 3));
+    QTWIMin->setText(QString("%1 ms").arg(newValue.GetMin() * 1000.0, -6, 'f', 3));
+    QTWIMax->setText(QString("%1 ms").arg(newValue.GetMax() * 1000.0, -6, 'f', 3));
     const double minLoad = newValue.MinComputeTime() / avg * 100.0;
     const double maxLoad = newValue.MaxComputeTime() / avg * 100.0;
     QTWILoadMin->setText(QString("%1\%").arg(minLoad, -4, 'f', 0));
