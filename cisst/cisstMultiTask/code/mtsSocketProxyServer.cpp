@@ -28,6 +28,62 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsFunctionWriteProxy.h"
 #include "mtsFunctionQualifiedReadProxy.h"
 
+CMN_IMPLEMENT_SERVICES(mtsSocketProxyServerConstructorArg);
+
+void mtsSocketProxyServerConstructorArg::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, Name);
+    cmnSerializeRaw(outputStream, ComponentName);
+    cmnSerializeRaw(outputStream, ProvidedInterfaceName);
+    cmnSerializeRaw(outputStream, Port);
+}
+
+void mtsSocketProxyServerConstructorArg::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, Name);
+    cmnDeSerializeRaw(inputStream, ComponentName);
+    cmnDeSerializeRaw(inputStream, ProvidedInterfaceName);
+    cmnDeSerializeRaw(inputStream, Port);
+}
+
+void mtsSocketProxyServerConstructorArg::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "Name: " << Name
+                 << ", ComponentName: " << ComponentName
+                 << ", ProvidedInterfaceName: " << ProvidedInterfaceName
+                 << ", Port: " << Port << std::endl;
+}
+
+void mtsSocketProxyServerConstructorArg::ToStreamRaw(std::ostream & outputStream, const char delimiter,
+                                                bool headerOnly, const std::string & headerPrefix) const
+{
+    mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    if (headerOnly) {
+        outputStream << headerPrefix << "-name" << delimiter
+                     << headerPrefix << "-componentName" << delimiter
+                     << headerPrefix << "-providedInterfaceName" << delimiter
+                     << headerPrefix << "-port";
+    } else {
+        outputStream << this->Name << delimiter
+                     << this->ComponentName << delimiter
+                     << this->ProvidedInterfaceName << delimiter
+                     << this->Port;
+    }
+}
+
+bool mtsSocketProxyServerConstructorArg::FromStreamRaw(std::istream & inputStream, const char delimiter)
+{
+    mtsGenericObject::FromStreamRaw(inputStream, delimiter);
+    if (inputStream.fail())
+        return false;
+    inputStream >> Name >> ComponentName >> ProvidedInterfaceName >> Port;
+    if (inputStream.fail())
+        return false;
+    return (typeid(*this) == typeid(mtsSocketProxyServerConstructorArg));
+}
+
 struct CommandHandle {
     char leadingSpace;
     char cmdType;        // V, R, W, or Q
@@ -55,34 +111,26 @@ mtsSocketProxyServer::mtsSocketProxyServer(const std::string & proxyName, const 
     EventGeneratorVoidProxyMap("EventGeneratorVoidProxyMap"),
     EventGeneratorWriteProxyMap("EventGeneratorWriteProxyMap")
 {
-    FunctionVoidProxyMap.SetOwner(*this);
-    FunctionWriteProxyMap.SetOwner(*this);
-    FunctionReadProxyMap.SetOwner(*this);
-    FunctionQualifiedReadProxyMap.SetOwner(*this);
-    FunctionVoidReturnProxyMap.SetOwner(*this);
-    FunctionWriteReturnProxyMap.SetOwner(*this);
-    EventGeneratorVoidProxyMap.SetOwner(*this);
-    EventGeneratorWriteProxyMap.SetOwner(*this);
-
-    GetHandleSerializer = new mtsProxySerializer;
-
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    mtsComponent *component = LCM->GetComponent(componentName);
-    if (component) {
-        mtsInterfaceProvided *provided = component->GetInterfaceProvided(providedInterfaceName);
-        if (provided) {
-            provided->GetDescription(InterfaceDescription);
-            CreateServerProxy("Required");
-            CMN_LOG_CLASS_INIT_VERBOSE << "Created required interface in " << proxyName << std::endl;
-        }
-        else
-            CMN_LOG_CLASS_INIT_ERROR << "Failed to find provided interface " << providedInterfaceName
-                                     << " in component " << componentName << std::endl;
-    }
-    else
-        CMN_LOG_CLASS_INIT_ERROR << "Failed to find component " << componentName << std::endl;
-
+    if (Init(componentName, providedInterfaceName))
+        CMN_LOG_CLASS_INIT_VERBOSE << "Created required interface in " << proxyName << std::endl;
     Socket.AssignPort(port);
+}
+
+mtsSocketProxyServer::mtsSocketProxyServer(const mtsSocketProxyServerConstructorArg &arg) :
+    mtsTaskContinuous(arg.Name),
+    Socket(osaSocket::UDP),
+    FunctionVoidProxyMap("FunctionVoidProxyMap"),
+    FunctionWriteProxyMap("FunctionWriteProxyMap"),
+    FunctionReadProxyMap("FunctionReadProxyMap"),
+    FunctionQualifiedReadProxyMap("FunctionQualifiedReadProxyMap"),
+    FunctionVoidReturnProxyMap("FunctionVoidReturnProxyMap"),
+    FunctionWriteReturnProxyMap("FunctionWriteReturnProxyMap"),
+    EventGeneratorVoidProxyMap("EventGeneratorVoidProxyMap"),
+    EventGeneratorWriteProxyMap("EventGeneratorWriteProxyMap")
+{
+    if (Init(arg.ComponentName, arg.ProvidedInterfaceName))
+        CMN_LOG_CLASS_INIT_VERBOSE << "Created required interface in " << arg.Name << std::endl;
+    Socket.AssignPort(arg.Port);
 }
 
 mtsSocketProxyServer::~mtsSocketProxyServer()
@@ -285,6 +333,39 @@ void mtsSocketProxyServer::Run(void)
 void mtsSocketProxyServer::Cleanup(void)
 {
     Socket.Close();
+}
+
+bool mtsSocketProxyServer::Init(const std::string &componentName, const std::string &providedInterfaceName)
+{
+    FunctionVoidProxyMap.SetOwner(*this);
+    FunctionWriteProxyMap.SetOwner(*this);
+    FunctionReadProxyMap.SetOwner(*this);
+    FunctionQualifiedReadProxyMap.SetOwner(*this);
+    FunctionVoidReturnProxyMap.SetOwner(*this);
+    FunctionWriteReturnProxyMap.SetOwner(*this);
+    EventGeneratorVoidProxyMap.SetOwner(*this);
+    EventGeneratorWriteProxyMap.SetOwner(*this);
+
+    GetHandleSerializer = new mtsProxySerializer;
+
+    bool success = false;
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    mtsComponent *component = LCM->GetComponent(componentName);
+    if (component) {
+        mtsInterfaceProvided *provided = component->GetInterfaceProvided(providedInterfaceName);
+        if (provided) {
+            provided->GetDescription(InterfaceDescription);
+            CreateServerProxy("Required");
+            success = true;
+        }
+        else
+            CMN_LOG_CLASS_INIT_ERROR << "Failed to find provided interface " << providedInterfaceName
+                                     << " in component " << componentName << std::endl;
+    }
+    else
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to find component " << componentName << std::endl;
+
+    return success;
 }
 
 //-----------------------------------------------------------------------------

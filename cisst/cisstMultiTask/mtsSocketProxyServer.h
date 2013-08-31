@@ -42,9 +42,42 @@ class mtsProxySerializer;
 
 #include <cisstMultiTask/mtsExport.h>
 
+class CISST_EXPORT mtsSocketProxyServerConstructorArg : public mtsGenericObject
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+public:
+    std::string Name;
+    std::string ComponentName;
+    std::string ProvidedInterfaceName;
+    short Port;
+
+    mtsSocketProxyServerConstructorArg() : mtsGenericObject() {}
+    mtsSocketProxyServerConstructorArg(const std::string &name, const std::string &componentName,
+                                       const std::string &providedInterfaceName, short port) :
+        mtsGenericObject(), Name(name), ComponentName(componentName), ProvidedInterfaceName(providedInterfaceName), Port(port) {}
+    mtsSocketProxyServerConstructorArg(const mtsSocketProxyServerConstructorArg &other) : mtsGenericObject(),
+        Name(other.Name), ComponentName(other.ComponentName), ProvidedInterfaceName(other.ProvidedInterfaceName), Port(other.Port) {}
+    ~mtsSocketProxyServerConstructorArg() {}
+
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
+
+    void ToStream(std::ostream & outputStream) const;
+
+    /*! Raw text output to stream */
+    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                             bool headerOnly = false, const std::string & headerPrefix = "") const;
+
+    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
+      Returns true if successful. */
+    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsSocketProxyServerConstructorArg);
+
 class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
  protected:
 
@@ -73,6 +106,7 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     EventGeneratorVoidProxyMapType    EventGeneratorVoidProxyMap;
     EventGeneratorWriteProxyMapType   EventGeneratorWriteProxyMap;
 
+    bool Init(const std::string &componentName, const std::string &providedInterfaceName);
     void GetInterfaceDescription(InterfaceProvidedDescription &desc) const;
 
     /*! \brief Create server proxy
@@ -92,6 +126,8 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     */
     mtsSocketProxyServer(const std::string & name, const std::string & componentName,
                          const std::string & providedInterfaceName, short port);
+
+    mtsSocketProxyServer(const mtsSocketProxyServerConstructorArg & arg);
 
     /*! Destructor */
     virtual ~mtsSocketProxyServer();

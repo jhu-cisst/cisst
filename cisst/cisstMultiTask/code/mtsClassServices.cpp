@@ -337,10 +337,10 @@ CMN_IMPLEMENT_SERVICES(mtsLogMessage);
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
 
 #include <cisstMultiTask/mtsSocketProxyClient.h>
-CMN_IMPLEMENT_SERVICES_DERIVED(mtsSocketProxyClient, mtsTaskContinuous)
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyClient, mtsTaskContinuous, mtsSocketProxyClientConstructorArg)
 
 #include <cisstMultiTask/mtsSocketProxyServer.h>
-CMN_IMPLEMENT_SERVICES_DERIVED(mtsSocketProxyServer, mtsTaskContinuous)
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyServer, mtsTaskContinuous, mtsSocketProxyServerConstructorArg)
 
 /* ICE dependent classes */
 #include <cisstMultiTask/mtsConfig.h>

@@ -27,6 +27,57 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsProxySerializer.h"
 
+CMN_IMPLEMENT_SERVICES(mtsSocketProxyClientConstructorArg);
+
+void mtsSocketProxyClientConstructorArg::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, Name);
+    cmnSerializeRaw(outputStream, IP);
+    cmnSerializeRaw(outputStream, Port);
+}
+
+void mtsSocketProxyClientConstructorArg::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, Name);
+    cmnDeSerializeRaw(inputStream, IP);
+    cmnDeSerializeRaw(inputStream, Port);
+}
+
+void mtsSocketProxyClientConstructorArg::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "Name: " << Name
+                 << ", IP: " << IP
+                 << ", Port: " << Port << std::endl;
+}
+
+void mtsSocketProxyClientConstructorArg::ToStreamRaw(std::ostream & outputStream, const char delimiter,
+                                                bool headerOnly, const std::string & headerPrefix) const
+{
+    mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    if (headerOnly) {
+        outputStream << headerPrefix << "-name" << delimiter
+                     << headerPrefix << "-ip" << delimiter
+                     << headerPrefix << "-port";
+    } else {
+        outputStream << this->Name << delimiter
+                     << this->IP << delimiter
+                     << this->Port;
+    }
+}
+
+bool mtsSocketProxyClientConstructorArg::FromStreamRaw(std::istream & inputStream, const char delimiter)
+{
+    mtsGenericObject::FromStreamRaw(inputStream, delimiter);
+    if (inputStream.fail())
+        return false;
+    inputStream >> Name >> IP >> Port;
+    if (inputStream.fail())
+        return false;
+    return (typeid(*this) == typeid(mtsSocketProxyClientConstructorArg));
+}
+
 class CommandWrapperBase {
 protected:
     std::string Name;
@@ -156,15 +207,15 @@ mtsSocketProxyClient::mtsSocketProxyClient(const std::string & proxyName, const 
     Socket(osaSocket::UDP)
 {
     Socket.SetDestination(ip, port);
+    CreateClientProxy("Provided");
+}
 
-    // Call GetInterfaceDescription on server proxy to get the provided interface description
-    mtsGenericObjectProxy<InterfaceProvidedDescription> descProxy;
-    CommandWrapperRead GetInterfaceDescription("GetInterfaceDescription", Socket);
-    GetInterfaceDescription.Method(descProxy);
-
-    // Create the client proxy based on the provided interface description obtained
-    // from the server proxy.
-    CreateClientProxy("Provided", descProxy.GetData());
+mtsSocketProxyClient::mtsSocketProxyClient(const mtsSocketProxyClientConstructorArg &arg) :
+    mtsTaskContinuous(arg.Name),
+    Socket(osaSocket::UDP)
+{
+    Socket.SetDestination(arg.IP, arg.Port);
+    CreateClientProxy("Provided");
 }
 
 mtsSocketProxyClient::~mtsSocketProxyClient()
@@ -192,9 +243,14 @@ void mtsSocketProxyClient::Cleanup(void)
 //  Create a required interface that can be connected to the specified provided
 //  interface and expose its functionality via a socket.
 //-----------------------------------------------------------------------------
-bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfaceName, 
-                                             const InterfaceProvidedDescription & providedInterfaceDescription)
+bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfaceName)
 {
+    // Create the client proxy based on the provided interface description obtained from the server proxy.
+    mtsGenericObjectProxy<InterfaceProvidedDescription> descProxy;
+    CommandWrapperRead GetInterfaceDescription("GetInterfaceDescription", Socket);
+    GetInterfaceDescription.Method(descProxy);
+    InterfaceProvidedDescription &providedInterfaceDescription(descProxy.GetData());
+
     // Create a local required interface
     mtsInterfaceProvided * providedInterface = AddInterfaceProvided(providedInterfaceName);
     if (!providedInterface) {
