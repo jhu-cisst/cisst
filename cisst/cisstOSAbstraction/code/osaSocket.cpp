@@ -321,6 +321,30 @@ void osaSocket::SetDestination(const std::string & host, unsigned short port)
 }
 
 
+bool osaSocket::GetDestination(std::string & host, unsigned short & port) const
+{
+    bool ret = false;
+    const struct osaSocketInternals *constInternals = reinterpret_cast<const struct osaSocketInternals *>(Internals);
+    struct in_addr sAddr = constInternals->ServerAddr.sin_addr;
+    const char *str;
+#if (CISST_OS == CISST_WINDOWS)
+    // Windows does not provide inet_ntop prior to Vista, so we use inet_ntoa.
+    // Alternatively, should be able to use getnameinfo.
+    str = inet_ntoa(sAddr);
+#else
+    char buffer[INET_ADDRSTRLEN];
+    str = inet_ntop(AF_INET, &sAddr, buffer, sizeof(buffer));
+#endif
+    if (str) {
+        host.assign(str);
+        port = ntohs(constInternals->ServerAddr.sin_port);
+        ret = true;
+    }
+    else
+        CMN_LOG_CLASS_RUN_ERROR << "GetDestination failed" << std::endl;
+    return ret;
+}
+
 bool osaSocket::Connect(void)
 {
     if (SocketType == UDP) {
@@ -501,8 +525,8 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
     FD_ZERO(&readfds);
     FD_SET(SocketFD, &readfds);
 
-    long second = floor (timeoutSec);
-    long usec = floor ( (timeoutSec - second) *1e6);
+    long second = static_cast<long>(floor(timeoutSec));
+    long usec = static_cast<long>(floor( (timeoutSec - second) *1e6));
     timeval timeout = { second , usec };
 
     /* Notes for QNX from the QNX library reference (Min)
@@ -621,7 +645,7 @@ int osaSocket::ReceiveAsPackets(std::string & bufrecv, unsigned int packetSize,
 
     // If no characters have been received and (n < 0), return n;
     // otherwise, return the number of characters received.
-    return ((n < 0) && bufrecv.empty()) ? n : bufrecv.size();
+    return ((n < 0) && bufrecv.empty()) ? n : static_cast<int>(bufrecv.size());
 }
 
 //! This could be static or external to the osaSocket class
@@ -689,8 +713,8 @@ bool osaSocket::IsConnected(void) {
     FD_SET(SocketFD, &writefds);
 
     double timeoutSec = 0.000;
-    long second = floor (timeoutSec);
-    long usec = floor ( (timeoutSec - second) *1e6);
+    long second = static_cast<long>(floor(timeoutSec));
+    long usec = static_cast<long>(floor( (timeoutSec - second) *1e6));
     timeval timeout = { second , usec };
 
     retval = select(SocketFD + 1, &readfds, &writefds, NULL, &timeout);

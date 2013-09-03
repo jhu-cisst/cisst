@@ -207,6 +207,15 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
         \param port Server's port number */
     void SetDestination(const std::string & host, unsigned short port);
 
+    /*! \brief Get the destination address for UDP or TCP socket. This is particularly useful
+               for programs using UDP because the the Receive method automatically updates
+               the destination based on the address from which the packet was received. Thus,
+               subsequent Send commands will send to this address.
+        \param host Reference for returning server's IP address (e.g. "127.0.0.1")
+        \param port Reference for returning server's port number
+        \return true if destination address was returned */
+    bool GetDestination(std::string & host, unsigned short &port) const;
+
     /*! \brief Connect to the server; required for TCP sockets and should be
                used after SetDestination()
         \return true if the connection was successful */
