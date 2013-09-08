@@ -257,7 +257,7 @@ mark_as_advanced (CISST_HAS_JSON)
 if (CISST_HAS_JSON)
   include (ExternalProject)
   set (cisstJSON_PREFIX cisstJSONExternal)
-  set (CISST_JSON_GIT "git://github.com/TubeTK/jsoncpp-cmake.git")
+  set (CISST_JSON_GIT "https://github.com/jhu-cisst/jsoncpp-cmake.git")
   ExternalProject_Add (cisstJSONExternal
                        PREFIX ${cisstJSON_PREFIX}
                        GIT_REPOSITORY ${CISST_JSON_GIT}
