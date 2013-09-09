@@ -38,6 +38,8 @@ class mtsFunctionWriteProxy;
 class mtsFunctionQualifiedReadProxy;
 class mtsFunctionVoidReturnProxy;
 class mtsFunctionWriteReturnProxy;
+class mtsEventSenderVoid;
+class mtsEventSenderWrite;
 class mtsProxySerializer;
 
 #include <cisstMultiTask/mtsExport.h>
@@ -83,7 +85,7 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
 
     osaSocket Socket;
     InterfaceProvidedDescription InterfaceDescription;
-    mtsProxySerializer *GetHandleSerializer;
+    mtsProxySerializer *InternalSerializer;
 
     /*! Typedef for function proxies */
     typedef cmnNamedMap<mtsFunctionVoid>               FunctionVoidProxyMapType;
@@ -94,8 +96,8 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     typedef cmnNamedMap<mtsFunctionWriteReturnProxy>   FunctionWriteReturnProxyMapType;
 
     /*! Typedef for event generator proxies */
-    typedef cmnNamedMap<mtsFunctionVoid>          EventGeneratorVoidProxyMapType;
-    typedef cmnNamedMap<mtsFunctionWrite>         EventGeneratorWriteProxyMapType;
+    typedef cmnNamedMap<mtsEventSenderVoid>          EventGeneratorVoidProxyMapType;
+    typedef cmnNamedMap<mtsEventSenderWrite>         EventGeneratorWriteProxyMapType;
 
     FunctionVoidProxyMapType          FunctionVoidProxyMap;
     FunctionWriteProxyMapType         FunctionWriteProxyMap;
@@ -116,6 +118,7 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     mtsExecutionResult GetInterfaceDescription(std::string &outputArgString) const;
     mtsExecutionResult GetHandle(const std::string &commandName, const std::string &inputArgSerialized, 
                                  std::string &handleString) const;
+    mtsExecutionResult EventOperation(const std::string &commandName, const std::string &inputArgSerialized);
 
  public:
     /*! Constructor

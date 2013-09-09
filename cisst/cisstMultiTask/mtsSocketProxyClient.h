@@ -34,6 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 class CommandWrapperBase;
+class mtsCommandBase;
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -75,15 +76,23 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
  protected:
 
     osaSocket Socket;
+    mtsProxySerializer *InternalSerializer;
 
     // For memory cleanup
     std::vector<CommandWrapperBase *> CommandWrappers;
+    std::vector<mtsCommandBase *> EventGenerators;
 
     /*! \brief Create client proxy
       \param providedInterfaceDescription Complete information about provided
       interface to be created with arguments serialized
       \return True if success, false otherwise */
     bool CreateClientProxy(const std::string & providedInterfaceName);
+
+    // For use by MulticastCommandVoidProxy and MulticastCommandWriteProxy
+    bool EventOperation(const std::string &command, const std::string &eventName, const char *handle);
+
+    friend class MulticastCommandVoidProxy;
+    friend class MulticastCommandWriteProxy;
 
  public:
     /*! Constructor

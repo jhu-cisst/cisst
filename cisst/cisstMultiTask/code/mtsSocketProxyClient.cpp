@@ -23,8 +23,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCallableReadMethod.h>
 #include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
 
+#include <cisstMultiTask/mtsMulticastCommandVoid.h>
+#include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
+
 #include <cisstOSAbstraction/osaSleep.h>
 
+#include "mtsSocketProxyCommon.h"
 #include "mtsProxySerializer.h"
 
 CMN_IMPLEMENT_SERVICES(mtsSocketProxyClientConstructorArg);
@@ -125,7 +129,7 @@ public:
             }
             else
                 sendBuffer.insert(0, Handle);
-            if (Socket.SendAsPackets(sendBuffer, osaSocket::DEFAULT_MAX_PACKET_SIZE, 0.05) > 0) {
+            if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
                 // Wait for result, with 2 second timeout
                 int nBytes = Socket.Receive(recvBuffer, sizeof(recvBuffer), 2.0);
                 if ((nBytes >= 2) && (strcmp(recvBuffer, "OK") == 0))
@@ -147,7 +151,7 @@ public:
         if (Socket.Send(Handle.empty() ? Name : Handle) > 0) {
             std::string recvBuffer;
             // Wait for result, with 2 second timeout
-            int nBytes = Socket.ReceiveAsPackets(recvBuffer, osaSocket::DEFAULT_MAX_PACKET_SIZE, 2.0, 0.5);
+            int nBytes = Socket.ReceiveAsPackets(recvBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 2.0, 0.5);
             if ((nBytes >= 3) && (recvBuffer.compare(0, 3, "OK ") == 0)) {
                 mtsProxySerializer &serializer = const_cast<mtsProxySerializer &>(this->Serializer);
                 if (serializer.DeSerialize(recvBuffer.substr(3), arg))
@@ -176,10 +180,10 @@ public:
             }
             else
                 sendBuffer.insert(0, Handle);
-            if (Socket.SendAsPackets(sendBuffer, osaSocket::DEFAULT_MAX_PACKET_SIZE, 0.05) > 0) {
+            if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
                 std::string recvBuffer;
                 // Wait for result, with 2 second timeout
-                int nBytes = Socket.ReceiveAsPackets(recvBuffer, osaSocket::DEFAULT_MAX_PACKET_SIZE, 2.0, 0.5);
+                int nBytes = Socket.ReceiveAsPackets(recvBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 2.0, 0.5);
                 if ((nBytes >= 3) && (recvBuffer.compare(0, 3, "OK ") == 0)) {
                     if (Name.compare(0, 9, "GetHandle") == 0) {
                         // Special case handling for GetHandle functions
@@ -202,6 +206,141 @@ public:
     }
 };
 
+// NOTE: This is an alternative to mtsMulticastCommandVoidProxy.h, which is used for ICE
+class MulticastCommandVoidProxy : public mtsMulticastCommandVoid {
+    mtsSocketProxyClient *Proxy;
+public:
+    MulticastCommandVoidProxy(const std::string &name, mtsSocketProxyClient *proxy) 
+        : mtsMulticastCommandVoid(name), Proxy(proxy) {}
+    ~MulticastCommandVoidProxy() {}
+
+    bool AddCommand(BaseType * command);
+
+    bool RemoveCommand(BaseType * command);
+};
+
+bool MulticastCommandVoidProxy::AddCommand(mtsMulticastCommandVoid::BaseType * command)
+{
+    if (mtsMulticastCommandVoid::AddCommand(command)) {
+        if (Commands.size() == 1) {
+            CMN_LOG_RUN_VERBOSE << "MulticastCommandVoidProxy: enabling event " << GetName() << std::endl;
+            CommandHandle handle('V', this);
+            Proxy->EventOperation("EventEnable", GetName(), reinterpret_cast<const char *>(&handle));
+        }
+        return true;
+    }
+    return false;
+}
+
+bool MulticastCommandVoidProxy::RemoveCommand(mtsMulticastCommandVoid::BaseType * command)
+{
+    if (mtsMulticastCommandVoid::RemoveCommand(command)) {
+        if (Commands.size() == 0) {
+            CMN_LOG_RUN_VERBOSE << "MulticastCommandVoidProxy: disabling event " << GetName() << std::endl;
+            CommandHandle handle('V', this);
+            Proxy->EventOperation("EventDisable", GetName(), reinterpret_cast<const char *>(&handle));
+        }
+        return true;
+    }
+    return false;
+}
+
+// NOTE: This is an alternative to mtsMulticastCommandWriteProxy.h, which is used for ICE
+class MulticastCommandWriteProxy : public mtsMulticastCommandWriteBase {
+    mtsProxySerializer Serializer;
+    std::string argSerialized;
+    mtsGenericObject *arg;
+    mtsSocketProxyClient *Proxy;
+public:
+    MulticastCommandWriteProxy(const std::string &name, const std::string &argPrototypeSerialized, mtsSocketProxyClient *proxy);
+    ~MulticastCommandWriteProxy();
+
+    bool AddCommand(BaseType * command);
+
+    bool RemoveCommand(BaseType * command);
+
+    mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking);
+
+    mtsExecutionResult ExecuteSerialized(const std::string &inputArgSerialized, mtsBlockingType blocking);
+};
+
+MulticastCommandWriteProxy::MulticastCommandWriteProxy(const std::string &name, const std::string &argPrototypeSerialized,
+                                                       mtsSocketProxyClient *proxy)
+    : mtsMulticastCommandWriteBase(name), argSerialized(argPrototypeSerialized), Proxy(proxy)
+{
+    arg = Serializer.DeSerialize(argPrototypeSerialized);
+    if (arg)
+        SetArgumentPrototype(arg);
+    else
+        CMN_LOG_INIT_ERROR << "MulticastCommandWriteProxy: could not deserialize argument prototype" << std::endl;
+}
+
+MulticastCommandWriteProxy::~MulticastCommandWriteProxy()
+{
+    delete arg;
+}
+
+bool MulticastCommandWriteProxy::AddCommand(mtsMulticastCommandWriteBase::BaseType * command)
+{
+    // If arg has not yet been dynamically constructed, try again because the
+    // class may have been dynamically loaded since the last attempt to construct it.
+    if (!arg) {
+        arg = Serializer.DeSerialize(argSerialized);
+        SetArgumentPrototype(arg);
+    }
+    if (mtsMulticastCommandWriteBase::AddCommand(command)) {
+        if (Commands.size() == 1) {
+            CMN_LOG_RUN_VERBOSE << "MulticastCommandWriteProxy: enabling event " << GetName() << std::endl;
+            CommandHandle handle('W', this);
+            Proxy->EventOperation("EventEnable", GetName(), reinterpret_cast<const char *>(&handle));
+        }
+        return true;
+    }
+    return false;
+}
+
+bool MulticastCommandWriteProxy::RemoveCommand(mtsMulticastCommandWriteBase::BaseType * command)
+{
+    if (mtsMulticastCommandWriteBase::RemoveCommand(command)) {
+        if (Commands.size() == 0) {
+            CMN_LOG_RUN_VERBOSE << "MulticastCommandWriteProxy: disabling event " << GetName() << std::endl;
+            CommandHandle handle('W', this);
+            Proxy->EventOperation("EventDisable", GetName(), reinterpret_cast<const char *>(&handle));
+        }
+        return true;
+    }
+    return false;
+}
+
+mtsExecutionResult MulticastCommandWriteProxy::Execute(const mtsGenericObject & argument, mtsBlockingType blocking)
+{
+    for (size_t index = 0; index < Commands.size(); index++)
+        Commands[index]->Execute(argument, blocking);
+    return mtsExecutionResult::COMMAND_SUCCEEDED;
+}
+
+mtsExecutionResult MulticastCommandWriteProxy::ExecuteSerialized(const std::string &inputArgSerialized,
+                                                                 mtsBlockingType blocking)
+{
+    mtsExecutionResult ret = mtsExecutionResult:: ARGUMENT_DYNAMIC_CREATION_FAILED;
+    // If arg has not yet been dynamically constructed, try again because the
+    // class may have been dynamically loaded since the last attempt to construct it.
+    // Note that we could have the deserializer dynamically create the object from
+    // inputArgSerialized, but this would lead to unexpected results if the client
+    // sends the incorrect type.
+    if (!arg) {
+        arg = Serializer.DeSerialize(argSerialized);
+        SetArgumentPrototype(arg);
+    }
+    if (arg) {
+        if (Serializer.DeSerialize(inputArgSerialized, *arg))
+            ret = Execute(*arg, blocking);
+        else
+            ret = mtsExecutionResult::DESERIALIZATION_ERROR;
+    }
+    return ret;
+}
+
 mtsSocketProxyClient::mtsSocketProxyClient(const std::string & proxyName, const std::string & ip, short port) :
     mtsTaskContinuous(proxyName),
     Socket(osaSocket::UDP)
@@ -220,8 +359,14 @@ mtsSocketProxyClient::mtsSocketProxyClient(const mtsSocketProxyClientConstructor
 
 mtsSocketProxyClient::~mtsSocketProxyClient()
 {
-    for (size_t i = 0; i < CommandWrappers.size(); i++)
+    size_t i;
+    for (i = 0; i < CommandWrappers.size(); i++)
         delete CommandWrappers[i];
+
+    for (i = 0; i < EventGenerators.size(); i++)
+        delete EventGenerators[i];
+
+    delete InternalSerializer;
 }
 
 void mtsSocketProxyClient::Startup(void)
@@ -230,8 +375,52 @@ void mtsSocketProxyClient::Startup(void)
 
 void mtsSocketProxyClient::Run(void)
 {
-    if (ProcessQueuedCommands() == 0)
-        osaSleep(0.05);
+    ProcessQueuedCommands();
+
+    // Check for events
+    std::string inputArgString;
+    int bytesRead = Socket.ReceiveAsPackets(inputArgString, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.001, 0.1);
+    if (bytesRead > 0) {
+        size_t pos = inputArgString.find(' ');
+        if ((pos == 0) && (inputArgString.size() >= sizeof(CommandHandle))) {
+            CommandHandle handle(inputArgString);
+            inputArgString.erase(0, sizeof(CommandHandle));
+            // Since we know the command type (handle.cmdType) we could reinterpret_cast directly to
+            // the correct mtsCommandXXXX type, but to be safe we first reinterpret_cast to the base
+            // type, mtsCommandBase, and then do a dynamic_cast to the expected type. If the address
+            // (handle.addr) is corrupted, this would lead to either a dynamic_cast failure (i.e.,
+            // a null pointer) or possibly a runtime exception.
+            mtsCommandBase *commandBase = reinterpret_cast<mtsCommandBase *>(handle.addr);
+            try {
+                MulticastCommandVoidProxy *commandVoid;
+                MulticastCommandWriteProxy *commandWrite;
+                switch (handle.cmdType) {
+                  case 'V':
+                      commandVoid = dynamic_cast<MulticastCommandVoidProxy *>(commandBase);
+                      if (commandVoid)
+                          commandVoid->Execute(MTS_NOT_BLOCKING);
+                      else
+                          CMN_LOG_CLASS_RUN_ERROR << "MulticastCommandVoidProxy dynamic cast failed" << std::endl;
+                      break;
+                  case 'W':
+                      commandWrite = dynamic_cast<MulticastCommandWriteProxy *>(commandBase);
+                      if (commandWrite)
+                          commandWrite->ExecuteSerialized(inputArgString, MTS_NOT_BLOCKING);
+                      else
+                          CMN_LOG_CLASS_RUN_ERROR << "MulticastCommandWriteProxy dynamic cast failed" << std::endl;
+                      break;
+                  default:
+                      CMN_LOG_CLASS_RUN_ERROR << "Received invalid event handle, type = " << handle.cmdType << std::endl;
+                }
+            }
+            catch (const std::runtime_error &e) {
+                CMN_LOG_CLASS_RUN_ERROR << "Exception while using command handle for type " << handle.cmdType
+                                        << ", addr = " << std::hex << handle.addr << ": " << e.what() << std::endl;
+            }
+        }
+        else
+            CMN_LOG_CLASS_RUN_ERROR << "Received invalid data: " << inputArgString << std::endl;
+    }
 }
 
 void mtsSocketProxyClient::Cleanup(void)
@@ -245,6 +434,8 @@ void mtsSocketProxyClient::Cleanup(void)
 //-----------------------------------------------------------------------------
 bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfaceName)
 {
+    InternalSerializer = new mtsProxySerializer;
+
     // Create the client proxy based on the provided interface description obtained from the server proxy.
     mtsGenericObjectProxy<InterfaceProvidedDescription> descProxy;
     CommandWrapperRead GetInterfaceDescription("GetInterfaceDescription", Socket);
@@ -386,8 +577,61 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         }
         providedInterface->AddCommandWriteReturn(callable, cmd.Name, arg1, arg2);
     }
-    // TODO: events
 #endif
 
+    // Create Event Void generators
+    for (i = 0; i < providedInterfaceDescription.EventsVoid.size(); ++i) {
+        std::string eventName = providedInterfaceDescription.EventsVoid[i].Name;
+        MulticastCommandVoidProxy *eventProxy = new MulticastCommandVoidProxy(eventName, this);
+        EventGenerators.push_back(eventProxy);
+        providedInterface->AddEvent(eventName, eventProxy);
+    }
+
+    // Create Event Write generators
+    for (i = 0; i < providedInterfaceDescription.EventsWrite.size(); ++i) {
+        std::string eventName = providedInterfaceDescription.EventsWrite[i].Name;
+        MulticastCommandWriteProxy *eventProxy = new MulticastCommandWriteProxy(eventName,
+                                   providedInterfaceDescription.EventsWrite[i].ArgumentPrototypeSerialized, this);
+        EventGenerators.push_back(eventProxy);
+        providedInterface->AddEvent(eventName, eventProxy);
+    }
+
     return true;
+}
+
+// Sends EventEnable or EventDisable command to Server.
+// Format of packet:  "CommandName Handle|EventNameSerialized"
+// where:
+//     CommandName is "EventEnable" or "EventDisable" (delimited by space character)
+//     Handle is 10 bytes (space|cmdType|address)
+//     EventNameSerialized is the name of the event being enabled or disabled
+// TODO: merge with AddObserver and RemoveObserver in mtsInterfaceProvided (i.e., AddObserver and RemoveObserver
+//     should also be command objects in provided interface)
+bool mtsSocketProxyClient::EventOperation(const std::string &command, const std::string &eventName, const char *handle)
+{
+    bool ret = false;
+    std::string nameSerialized;
+    if (InternalSerializer->Serialize(mtsStdString(eventName), nameSerialized)) {
+        std::string buffer(command);
+        buffer.reserve(command.size()+1+sizeof(CommandHandle)+nameSerialized.size());
+        buffer.append(" ");
+        buffer.append(handle, sizeof(CommandHandle));
+        buffer.append(nameSerialized);
+        if (Socket.Send(buffer) > 0) {
+            char recvBuffer[8];
+            // Wait for result, with 2 second timeout
+            int nBytes = Socket.Receive(recvBuffer, sizeof(recvBuffer), 2.0);
+            if ((nBytes >= 2) && (recvBuffer[0] == 'O') && (recvBuffer[1] == 'K')) {
+                CMN_LOG_CLASS_RUN_VERBOSE << command << " " << eventName << " succeeded" << std::endl;
+                ret = true;
+            }
+            else
+                CMN_LOG_CLASS_RUN_ERROR << command << " " << eventName << " failed, return message = " << recvBuffer << std::endl;
+        }
+        else
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to send " << command << " for event " << eventName << std::endl;
+    }
+    else
+        CMN_LOG_CLASS_RUN_ERROR << command << " failed to serialize event name: " << eventName << std::endl;
+    return ret;
 }

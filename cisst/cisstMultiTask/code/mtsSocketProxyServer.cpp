@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
+#include "mtsSocketProxyCommon.h"
 #include "mtsFunctionReadProxy.h"
 #include "mtsFunctionWriteProxy.h"
 #include "mtsFunctionQualifiedReadProxy.h"
@@ -84,19 +85,87 @@ bool mtsSocketProxyServerConstructorArg::FromStreamRaw(std::istream & inputStrea
     return (typeid(*this) == typeid(mtsSocketProxyServerConstructorArg));
 }
 
-struct CommandHandle {
-    char leadingSpace;
-    char cmdType;        // V, R, W, or Q
-    long long int addr;
+class mtsEventSenderBase {
+protected:
+    osaSocket   &Socket;
 
-    CommandHandle(char cmd, mtsFunctionBase *ptr);
-    ~CommandHandle() {}
+    struct ClientInfo {
+        std::string IP;
+        unsigned short Port;
+        CommandHandle Handle;
+
+        ClientInfo(const std::string &ip, unsigned short port, const CommandHandle &handle) :
+            IP(ip), Port(port), Handle(handle) {}
+        ~ClientInfo() {}
+    };
+
+    std::vector<ClientInfo> ClientList;
+
+public:
+
+    mtsEventSenderBase(osaSocket &socket) : Socket(socket) {}
+    ~mtsEventSenderBase() {}
+
+    bool AddClient(const std::string &ip, unsigned short port, const CommandHandle &handle);
+    bool RemoveClient(const std::string &ip, unsigned short port, const CommandHandle &handle);
 };
 
-CommandHandle::CommandHandle(char cmd, mtsFunctionBase *ptr) : leadingSpace(' '), cmdType(cmd)
+bool mtsEventSenderBase::AddClient(const std::string &ip, unsigned short port, const CommandHandle &handle)
 {
-    addr = (long long int)ptr;
+    std::vector<ClientInfo>::iterator it;
+    for (it = ClientList.begin(); it != ClientList.end(); it++) {
+        if ((it->Port == port) && (it->IP == ip))
+            return false;
+    }
+    ClientList.push_back(ClientInfo(ip, port, handle));
+    return true;
 }
+
+bool mtsEventSenderBase::RemoveClient(const std::string &ip, unsigned short port, const CommandHandle &handle)
+{
+    std::vector<ClientInfo>::iterator it;
+    for (it = ClientList.begin(); it != ClientList.end(); it++) {
+        if ((it->Port == port) && (it->IP == ip) && (it->Handle == handle)) {
+            ClientList.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+class mtsEventSenderVoid : public mtsEventSenderBase {
+public:
+    mtsEventSenderVoid(osaSocket &socket) : mtsEventSenderBase(socket) {}
+    ~mtsEventSenderVoid() {}
+    void Method(void)
+    {
+        std::vector<ClientInfo>::const_iterator it;
+        for (it = ClientList.begin(); it != ClientList.end(); it++) {
+            Socket.SetDestination(it->IP, it->Port);
+            Socket.Send(reinterpret_cast<const char *>(&it->Handle), sizeof(CommandHandle));
+        }
+    }
+};
+
+class mtsEventSenderWrite : public mtsEventSenderBase {
+    mtsProxySerializer Serializer;
+public:
+    mtsEventSenderWrite(osaSocket &socket) : mtsEventSenderBase(socket) {}
+    ~mtsEventSenderWrite() {}
+    void Method(const mtsGenericObject &arg)
+    {
+        std::string sendBuffer;
+        if (Serializer.Serialize(arg, sendBuffer)) {
+            sendBuffer.insert(0, sizeof(CommandHandle), ' ');
+            std::vector<ClientInfo>::const_iterator it;
+            for (it = ClientList.begin(); it != ClientList.end(); it++) {
+                Socket.SetDestination(it->IP, it->Port);
+                sendBuffer.replace(0, sizeof(CommandHandle), reinterpret_cast<const char *>(&it->Handle), sizeof(CommandHandle));
+                Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05);
+            }
+        }
+    }
+};
 
 mtsSocketProxyServer::mtsSocketProxyServer(const std::string & proxyName, const std::string & componentName,
                                            const std::string & providedInterfaceName, short port) :
@@ -142,11 +211,11 @@ mtsSocketProxyServer::~mtsSocketProxyServer()
 #if 0
     FunctionVoidReturnProxyMap.DeleteAll();
     FunctionWriteReturnProxyMap.DeleteAll();
+#endif
     EventGeneratorVoidProxyMap.DeleteAll();
     EventGeneratorWriteProxyMap.DeleteAll();
-#endif
 
-    delete GetHandleSerializer;
+    delete InternalSerializer;
 }
 
 void mtsSocketProxyServer::Startup(void)
@@ -156,9 +225,10 @@ void mtsSocketProxyServer::Startup(void)
 void mtsSocketProxyServer::Run(void)
 {
     ProcessQueuedCommands();
+    ProcessQueuedEvents();
 
     std::string inputArgString;
-    int bytesRead = Socket.ReceiveAsPackets(inputArgString, osaSocket::DEFAULT_MAX_PACKET_SIZE, 0.05, 0.5);
+    int bytesRead = Socket.ReceiveAsPackets(inputArgString, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.001, 0.1);
     if (bytesRead > 0) {
 
         // Process the input string. The code currently supports two protocols, which
@@ -192,7 +262,7 @@ void mtsSocketProxyServer::Run(void)
 
         size_t pos = inputArgString.find(' ');
         if ((pos == 0) && (inputArgString.size() >= sizeof(CommandHandle))) {
-            CommandHandle handle = *(reinterpret_cast<const CommandHandle *>(inputArgString.c_str()));
+            CommandHandle handle(inputArgString);
             inputArgString.erase(0, sizeof(CommandHandle));
             // Since we know the command type (handle.cmdType) we could reinterpret_cast directly to
             // the correct mtsFunctionXXXX type, but to be safe we first reinterpret_cast to the base
@@ -263,10 +333,13 @@ void mtsSocketProxyServer::Run(void)
                 inputArgString.clear();
             }
 
-            // First, handle the special case commands (GetInterfaceDescription and GetHandleXXX)
+            // First, handle the special case commands (GetInterfaceDescription, GetHandleXXX, 
+            // EventEnable, and EventDisable)
             if (commandName.compare(0, 9, "GetHandle") == 0)
                 ret = GetHandle(commandName, inputArgString, outputArgString);
-            else  if (commandName == "GetInterfaceDescription")
+            else if (commandName.compare(0, 5, "Event") == 0)
+                ret = EventOperation(commandName, inputArgString);
+            else if (commandName == "GetInterfaceDescription")
                 ret = GetInterfaceDescription(outputArgString);
             // Next, handle commands using string names
             else if (inputArgString.empty()) {
@@ -321,12 +394,12 @@ void mtsSocketProxyServer::Run(void)
             outputArgString.insert(0, "FAIL ", 5);
 
         size_t nBytes = outputArgString.size();
-        // If the packet size is an exact multiple of DEFAULT_MAX_PACKET_SIZE (nBytes == 0), then we
+        // If the packet size is an exact multiple of SOCKET_PROXY_PACKET_SIZE (nBytes == 0), then we
         // send an extra byte so that the receiver does not have to rely on a timeout to figure out
         // when a packet stream is finished.
-        if ((nBytes%osaSocket::DEFAULT_MAX_PACKET_SIZE) == 0)
+        if ((nBytes%mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE) == 0)
             outputArgString.append(" ");
-        Socket.SendAsPackets(outputArgString, osaSocket::DEFAULT_MAX_PACKET_SIZE, 0.1);
+        Socket.SendAsPackets(outputArgString, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.1);
     }
 }
 
@@ -346,7 +419,7 @@ bool mtsSocketProxyServer::Init(const std::string &componentName, const std::str
     EventGeneratorVoidProxyMap.SetOwner(*this);
     EventGeneratorWriteProxyMap.SetOwner(*this);
 
-    GetHandleSerializer = new mtsProxySerializer;
+    InternalSerializer = new mtsProxySerializer;
 
     bool success = false;
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
@@ -404,7 +477,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
         success = requiredInterfaceProxy->AddFunction(cmd.Name, *functionWriteProxy);
         success &= FunctionWriteProxyMap.AddItem(cmd.Name, functionWriteProxy);
         if (!success) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: failed to add write function proxy: \"" << cmd.Name << "\"" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to add write function proxy: \"" << cmd.Name << "\"" << std::endl;
             return false;
         }
     }
@@ -416,7 +489,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
         success = requiredInterfaceProxy->AddFunction(cmd.Name, *functionReadProxy);
         success &= FunctionReadProxyMap.AddItem(cmd.Name, functionReadProxy);
         if (!success) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: failed to add read function proxy: \"" << cmd.Name << "\"" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to add read function proxy: \"" << cmd.Name << "\"" << std::endl;
             return false;
         }
     }
@@ -430,7 +503,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
         success = requiredInterfaceProxy->AddFunction(cmd.Name, *functionQualifiedReadProxy);
         success &= FunctionQualifiedReadProxyMap.AddItem(cmd.Name, functionQualifiedReadProxy);
         if (!success) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: failed to add qualified read function proxy: \"" 
+            CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to add qualified read function proxy: \"" 
                                      << cmd.Name << "\"" << std::endl;
             return false;
         }
@@ -446,7 +519,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
         success = requiredInterfaceProxy->AddFunction(cmd.Name, *functionVoidReturnProxy);
         success &= FunctionVoidReturnProxyMap.AddItem(cmd.Name, functionVoidReturnProxy);
         if (!success) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: failed to add void return function proxy: \""
+            CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to add void return function proxy: \""
                                      << cmd.Name << "\"" << std::endl;
             return false;
         }
@@ -462,14 +535,56 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
         success = requiredInterfaceProxy->AddFunction(cmd.Name, *functionWriteReturnProxy);
         success &= FunctionWriteReturnProxyMap.AddItem(cmd.Name, functionWriteReturnProxy);
         if (!success) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: failed to add write return function proxy: \""
+            CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to add write return function proxy: \""
                                      << cmd.Name << "\"" << std::endl;
             return false;
         }
     }
 #endif
 
-    // TODO: Create event handler proxies
+    // Create EventVoid proxies
+    for (i = 0; i < InterfaceDescription.EventsVoid.size(); ++i) {
+        const EventVoidElement &evt = InterfaceDescription.EventsVoid[i];
+        mtsEventSenderVoid *eventSender = new mtsEventSenderVoid(Socket);
+        success = false;
+        if (requiredInterfaceProxy->AddEventHandlerVoid(&mtsEventSenderVoid::Method, eventSender, evt.Name))
+           success = EventGeneratorVoidProxyMap.AddItem(evt.Name, eventSender);
+        if (!success) {
+            CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to add event void handler: \""
+                                     << evt.Name << "\"" << std::endl;
+            return false;
+        }
+    }
+
+    // Create EventWrite proxies
+    for (i = 0; i < InterfaceDescription.EventsWrite.size(); ++i) {
+        const EventWriteElement &evt = InterfaceDescription.EventsWrite[i];
+        mtsEventSenderWrite *eventSender = new mtsEventSenderWrite(Socket);
+        success = false;
+        std::stringstream argStream(evt.ArgumentPrototypeSerialized);
+        cmnDeSerializer deserializer(argStream);
+        try {
+            mtsGenericObject *argPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+            if (!argPrototype) {
+                CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to deserialize argument prototype for write event "
+                                         << evt.Name << std::endl;
+                return false;
+            }
+            if (requiredInterfaceProxy->AddEventHandlerWriteGeneric(&mtsEventSenderWrite::Method, eventSender, evt.Name,
+                                                                    MTS_INTERFACE_EVENT_POLICY, argPrototype))
+                success = EventGeneratorWriteProxyMap.AddItem(evt.Name, eventSender);
+            if (!success) {
+                CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to add event write handler: \""
+                                         << evt.Name << "\"" << std::endl;
+                return false;
+            }
+        }
+        catch (const std::runtime_error &e) {
+            CMN_LOG_CLASS_INIT_WARNING << "CreateServeProxy: failed to deserialize arg prototype for event write " << evt.Name
+                                       << ": " << e.what() << std::endl;
+            return false;
+        }
+    }
 
     return true;
 }
@@ -499,7 +614,7 @@ mtsExecutionResult mtsSocketProxyServer::GetHandle(const std::string &commandNam
     mtsExecutionResult ret = mtsExecutionResult::INVALID_COMMAND_ID;
     mtsStdString command;
     char cmdType;
-    if (GetHandleSerializer->DeSerialize(inputArgSerialized, command)) {
+    if (InternalSerializer->DeSerialize(inputArgSerialized, command)) {
         if (commandName.compare(9, 4, "Void") == 0) {
             handle = FunctionVoidProxyMap.GetItem(command);
             cmdType = 'V';
@@ -529,6 +644,52 @@ mtsExecutionResult mtsSocketProxyServer::GetHandle(const std::string &commandNam
     if (ret.IsOK()) {
         CommandHandle header(cmdType, handle);
         handleString.assign(reinterpret_cast<char *>(&header), sizeof(CommandHandle));
+    }
+    return ret;
+}
+
+mtsExecutionResult mtsSocketProxyServer::EventOperation(const std::string &commandName,
+                                                        const std::string &inputArgSerialized)
+{
+    bool isEnable;
+    if (commandName.compare(5, 6, "Enable") == 0)
+        isEnable = true;
+    else if (commandName.compare(5, 7, "Disable") == 0)
+        isEnable = false;
+    else {
+        CMN_LOG_CLASS_RUN_ERROR << "Invalid command: " << commandName << std::endl;
+        return mtsExecutionResult::INVALID_COMMAND_ID;
+    }
+
+    mtsExecutionResult ret = mtsExecutionResult::DESERIALIZATION_ERROR;
+    // First 10 characters are handle
+    CommandHandle handle(inputArgSerialized);
+    if (handle.IsValid()) {
+        mtsStdString eventName;
+        if (InternalSerializer->DeSerialize(inputArgSerialized.substr(sizeof(CommandHandle)), eventName)) {
+            ret = mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;
+            mtsEventSenderBase *eventSender = 0;
+            if (handle.cmdType == 'V')
+                eventSender = EventGeneratorVoidProxyMap.GetItem(eventName);
+            else if (handle.cmdType == 'W')
+                eventSender = EventGeneratorWriteProxyMap.GetItem(eventName);
+            if (eventSender) {
+                std::string ip;
+                unsigned short port;
+                Socket.GetDestination(ip, port);
+                if ((isEnable ? eventSender->AddClient(ip, port, handle) :
+                     eventSender->RemoveClient(ip, port, handle)))
+                    ret = mtsExecutionResult::COMMAND_SUCCEEDED;
+                else
+                    CMN_LOG_CLASS_RUN_ERROR << commandName << " " << eventName << " failed for "
+                                            << ip << ":" << port << std::endl;
+            }
+            else
+                CMN_LOG_CLASS_RUN_ERROR << commandName << ": could not find event " << eventName << std::endl;
+        }
+        else
+            CMN_LOG_CLASS_RUN_ERROR << commandName << ": failed to deserialize '"
+                                    << inputArgSerialized.substr(sizeof(CommandHandle)) << "'" << std::endl;
     }
     return ret;
 }

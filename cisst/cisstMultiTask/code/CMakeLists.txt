@@ -3,8 +3,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -76,6 +75,7 @@ set (SOURCE_FILES
 
      mtsParameterTypes.cpp
 
+     mtsSocketProxyCommon.cpp
      mtsSocketProxyClient.cpp
      mtsSocketProxyServer.cpp
 
@@ -209,6 +209,7 @@ set (ADDITIONAL_HEADER_FILES
      mtsFunctionWriteProxy.h
 
      mtsProxySerializer.h
+     mtsSocketProxyCommon.h
      )
 
 if (MINGW)
