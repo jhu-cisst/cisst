@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -850,7 +849,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventNam
 
 
 bool mtsInterfaceProvided::AddEventVoid(mtsFunctionVoid & eventTrigger,
-                                        const std::string eventName)
+                                        const std::string & eventName)
 {
     mtsCommandVoid * command;
     command = this->AddEventVoid(eventName);
@@ -1158,9 +1157,7 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommand
 {
     mtsMulticastCommandVoid * multicastCommand = GetEventVoid(eventName); // EventVoidGenerators.GetItem(eventName);
     if (multicastCommand) {
-        // should probably check for duplicates (have AddCommand return bool?)
-        multicastCommand->AddCommand(handler);
-        return true;
+        return multicastCommand->AddCommand(handler);
     } else {
         // maybe the event is not defined at the end-user level but in
         // the original interface?
@@ -1180,9 +1177,7 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommand
     }
     mtsMulticastCommandWriteBase * multicastCommand = EventWriteGenerators.GetItem(eventName);
     if (multicastCommand) {
-        // should probably check for duplicates (have AddCommand return bool?)
-        multicastCommand->AddCommand(handler);
-        return true;
+        return multicastCommand->AddCommand(handler);
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
         return false;

@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -467,7 +467,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
       interface. */
     //@{
     mtsCommandVoid * AddEventVoid(const std::string & eventName);
-    bool AddEventVoid(mtsFunctionVoid & eventTrigger, const std::string eventName);
+    bool AddEventVoid(mtsFunctionVoid & eventTrigger, const std::string & eventName);
 
     template <class __argumentType>
     mtsCommandWriteBase * AddEventWrite(const std::string & eventName,
