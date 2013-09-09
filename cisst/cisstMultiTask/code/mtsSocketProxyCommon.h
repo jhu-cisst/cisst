@@ -39,6 +39,7 @@ namespace mtsSocketProxy {
 struct CommandHandle {
     char leadingSpace;
     char cmdType;        // V, R, W, or Q
+    char filler[6];      // TEMP to avoid packed/unpacked issues
     long long int addr;
 
     CommandHandle(char cmd, void *ptr);

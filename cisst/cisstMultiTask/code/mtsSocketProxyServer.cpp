@@ -237,7 +237,7 @@ void mtsSocketProxyServer::Run(void)
         // CommandString (#2 below). The CommandHandle protocol is more run-time
         // efficient because there is no string lookup.
         //
-        // 1) CommandHandle protocol: The first 10 bytes are the CommandHandle, where
+        // 1) CommandHandle protocol: The first 16 bytes are the CommandHandle, where
         //    the first byte is a space, the second byte is a character that designates
         //    the type of command ('V', 'R', 'W', 'Q'), and the last 8 bytes are a 64-bit
         //    address of the mtsFunctionXXXX object to be invoked. The serialized command
@@ -662,7 +662,7 @@ mtsExecutionResult mtsSocketProxyServer::EventOperation(const std::string &comma
     }
 
     mtsExecutionResult ret = mtsExecutionResult::DESERIALIZATION_ERROR;
-    // First 10 characters are handle
+    // First 16 characters are handle
     CommandHandle handle(inputArgSerialized);
     if (handle.IsValid()) {
         mtsStdString eventName;

@@ -617,7 +617,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
 // Format of packet:  "CommandName Handle|EventNameSerialized"
 // where:
 //     CommandName is "EventEnable" or "EventDisable" (delimited by space character)
-//     Handle is 10 bytes (space|cmdType|address)
+//     Handle is 16 bytes (space:1|cmdType:1|filler:6|address:8)
 //     EventNameSerialized is the name of the event being enabled or disabled
 // TODO: merge with AddObserver and RemoveObserver in mtsInterfaceProvided (i.e., AddObserver and RemoveObserver
 //     should also be command objects in provided interface)
