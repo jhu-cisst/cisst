@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -52,7 +52,7 @@ if (CISST_MTS_HAS_ICE)
                              debug     Iced debug     IceUtild)
       cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES_ALL)
     else (WIN32)
-      set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} IceUtil)
+      set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} ${ICEUTIL_LIBRARY_NAME})
       cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES)
     endif (WIN32)
   endif (CISST_HAS_IOS)
