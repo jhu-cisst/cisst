@@ -251,20 +251,25 @@ endif (LIBXML2_FOUND)
 
 
 # Support for JSON
-option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst (requires git to download JSON).  If not, some examples and utilities won't be compiled" OFF)
+option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some examples and utilities won't be compiled" OFF)
 mark_as_advanced (CISST_HAS_JSON)
 
 if (CISST_HAS_JSON)
   include (ExternalProject)
   set (cisstJSON_PREFIX cisstJSONExternal)
-  set (CISST_JSON_GIT "https://github.com/jhu-cisst/jsoncpp-cmake.git")
+
+  set (CISST_JSON_SVN_REPOSITORY svn://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp)
+  set (CISST_JSON_SVN_REVISION 274)
   ExternalProject_Add (cisstJSONExternal
                        PREFIX ${cisstJSON_PREFIX}
-                       GIT_REPOSITORY ${CISST_JSON_GIT}
+                       SVN_REPOSITORY ${CISST_JSON_SVN_REPOSITORY}
+                       SVN_REVISION   -r ${CISST_JSON_SVN_REVISION}
                        CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                                         -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
                                         -DOPTION_BUILD_EXAMPLES:BOOL=OFF
+                                        -DJSONCPP_WITH_TESTS:BOOL=OFF
+                                        -DJSONCPP_WITH_POST_BUILD_UNITTEST:BOOL=OFF
                                         -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstJSON
                        INSTALL_DIR ${cisst_BINARY_DIR}/cisstJSON
                        )
