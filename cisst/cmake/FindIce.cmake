@@ -103,6 +103,7 @@ if (ICE_ICE_H_INCLUDE_DIR)
         ${ICE_HOME}/share/ice/slice
         ${ICE_HOME}/share/Ice/slice
         # For Ice installation via Ubuntu Synaptic package manager
+        ${ICE_HOME}/share/Ice-3.5.0/slice
         ${ICE_HOME}/share/Ice-3.4.1/slice
         ${ICE_HOME}/share/Ice-3.4.0/slice
         ${ICE_HOME}/share/Ice-3.3.1/slice
