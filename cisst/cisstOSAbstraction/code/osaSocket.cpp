@@ -621,28 +621,19 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
     return retval;
 }
 
-int osaSocket::ReceiveAsPackets(std::string & bufrecv, unsigned int packetSize,
+int osaSocket::ReceiveAsPackets(std::string & bufrecv, char *packetBuffer, unsigned int packetSize,
                                 double timeoutStartSec, double timeoutNextSec)
 {
     bufrecv.clear();
-    // The following code avoids dynamic memory allocation for cases where the DEFAULT_MAX_PACKET_SIZE
-    // is used (or any packet size smaller than that).
-    char defaultBuffer[DEFAULT_MAX_PACKET_SIZE];
-    char *buffer = defaultBuffer;
-    if (packetSize > DEFAULT_MAX_PACKET_SIZE)
-        buffer = new char[packetSize];
-    int n = Receive(buffer, packetSize, timeoutStartSec);
+    int n = Receive(packetBuffer, packetSize, timeoutStartSec);
     if (n > 0) {
-        bufrecv.assign(buffer, n);
+        bufrecv.assign(packetBuffer, n);
         while (n == packetSize) {
-            n = Receive(buffer, packetSize, timeoutNextSec);
+            n = Receive(packetBuffer, packetSize, timeoutNextSec);
             if (n > 0)
-                bufrecv.append(buffer, n);
+                bufrecv.append(packetBuffer, n);
         }
     }
-    if (packetSize > DEFAULT_MAX_PACKET_SIZE)
-        delete buffer;
-
     // If no characters have been received and (n < 0), return n;
     // otherwise, return the number of characters received.
     return ((n < 0) && bufrecv.empty()) ? n : static_cast<int>(bufrecv.size());

@@ -228,7 +228,8 @@ void mtsSocketProxyServer::Run(void)
     ProcessQueuedEvents();
 
     std::string inputArgString;
-    int bytesRead = Socket.ReceiveAsPackets(inputArgString, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.001, 0.1);
+    char packetBuffer[mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE];
+    int bytesRead = Socket.ReceiveAsPackets(inputArgString, packetBuffer, sizeof(packetBuffer), 0.001, 0.1);
     if (bytesRead > 0) {
 
         // Process the input string. The code currently supports two protocols, which

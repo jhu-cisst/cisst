@@ -175,10 +175,6 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
  public:
     enum SocketTypes { UDP, TCP };
 
-    // To be safe, we set the default packet size to 512 bytes. Depending on the system,
-    // the actual maximum packet size (for UDP) may be much larger than this.
-    enum { DEFAULT_MAX_PACKET_SIZE = 512 };
-
     /*! \brief Default constructor */
     osaSocket(SocketTypes type = TCP);
 
@@ -254,7 +250,7 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
         \return Number of bytes sent (-1 if error)
         \note  This function aborts if any error occurs and returns the number of bytes actually sent (if any).
     */
-    int SendAsPackets(const char * bufsend, unsigned int msglen, unsigned int packetSize = DEFAULT_MAX_PACKET_SIZE, double timeoutSec = 0.0);
+    int SendAsPackets(const char * bufsend, unsigned int msglen, unsigned int packetSize, double timeoutSec = 0.0);
 
     /*! \brief Send a string via the socket, possibly in multiple packets based on the specified
                maximum packet_size. This method can be used with both UDP and TCP, though it
@@ -266,7 +262,7 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
         \return Number of bytes sent (-1 if error)
         \note  This function aborts if any error occurs and returns the number of bytes actually sent (if any).
     */
-    int SendAsPackets(const std::string & bufsend, unsigned int packetSize = DEFAULT_MAX_PACKET_SIZE, double timeoutSec = 0.0);
+    int SendAsPackets(const std::string & bufsend, unsigned int packetSize, double timeoutSec = 0.0);
 
     /*! \brief Receive a byte array via the socket
         \param bufrecv Buffer to store received data
@@ -280,7 +276,8 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
                with both UDP and TCP, though it is intended for UDP (only for reliable UDP connections,
                since there is no check for missing or out of sequence packets).
         \param bufrecv String to store received data
-        \param packetSize Maximum packet size
+        \param packetBuffer Buffer to store one packet
+        \param packetSize Maximum packet size, should equal sizeof(packetBuffer)
         \param timeoutStartSec Timeout for receiving first packet, in seconds
         \param timeoutNextSec Timeout for receiving subsequent packets (after first), in seconds
         \return Number of bytes received. 0 if timeout is reached and/or no data is received.
@@ -292,7 +289,7 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
                an unrelated packet. Thus, the caller can ensure that the total number of bytes transmitted
                is not a multiple of the packetSize (e.g., by appending an extra byte).
     */
-    int ReceiveAsPackets(std::string & bufrecv, unsigned int packetSize = DEFAULT_MAX_PACKET_SIZE,
+    int ReceiveAsPackets(std::string & bufrecv, char *packetBuffer, unsigned int packetSize,
                          double timeoutStartSec = 0.0, double timeoutNextSec = 0.0);
 
     /*! \brief Close the socket

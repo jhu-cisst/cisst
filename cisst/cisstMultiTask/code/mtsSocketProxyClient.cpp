@@ -159,7 +159,8 @@ public:
         SocketMutex.Lock();
         if (Socket.Send(Handle.empty() ? Name : Handle) > 0) {
             // Wait for result, with 2 second timeout
-            nBytes = Socket.ReceiveAsPackets(recvBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 2.0, 0.5);
+            char packetBuffer[mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE];
+            nBytes = Socket.ReceiveAsPackets(recvBuffer, packetBuffer, sizeof(packetBuffer), 2.0, 0.5);
         }
         SocketMutex.Unlock();
         if ((nBytes >= 3) && (recvBuffer.compare(0, 3, "OK ") == 0)) {
@@ -194,7 +195,8 @@ public:
             SocketMutex.Lock();
             if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
                 // Wait for result, with 2 second timeout
-                nBytes = Socket.ReceiveAsPackets(recvBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 2.0, 0.5);
+                char packetBuffer[mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE];
+                nBytes = Socket.ReceiveAsPackets(recvBuffer, packetBuffer, sizeof(packetBuffer), 2.0, 0.5);
             }
             SocketMutex.Unlock();
             if ((nBytes >= 3) && (recvBuffer.compare(0, 3, "OK ") == 0)) {
@@ -391,8 +393,9 @@ void mtsSocketProxyClient::Run(void)
 
     // Check for events
     std::string inputArgString;
+    char packetBuffer[mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE];
     SocketMutex.Lock();
-    int bytesRead = Socket.ReceiveAsPackets(inputArgString, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.001, 0.1);
+    int bytesRead = Socket.ReceiveAsPackets(inputArgString, packetBuffer, sizeof(packetBuffer), 0.001, 0.1);
     SocketMutex.Unlock();
     if (bytesRead > 0) {
         size_t pos = inputArgString.find(' ');
