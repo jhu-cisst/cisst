@@ -241,9 +241,11 @@ void mtsSocketProxyServer::Run(void)
         // 1) CommandHandle protocol: The first 16 bytes are the CommandHandle, where
         //    the first byte is a space, the second byte is a character that designates
         //    the type of command ('V', 'R', 'W', 'Q'), and the last 8 bytes are a 64-bit
-        //    address of the mtsFunctionXXXX object to be invoked. The serialized command
+        //    address of the mtsFunctionXXXX object to be invoked. The next 16 bytes
+        //    are the EventReceiverHandle; this is also a CommandHandle, but is actually
+        //    the address of the client's EventReceiverWriteProxy object. The serialized command
         //    argument (e.g., for Write, QualifiedRead, and WriteReturn commands) immediately
-        //    follows the CommandHandle.
+        //    follows the EventReceiverHandle.
         //
         // 2) CommandString protocol: All characters up to the first delimiter (space, or end
         //    of string) designate the command name. If there is a space, then it is assumed
@@ -253,18 +255,21 @@ void mtsSocketProxyServer::Run(void)
         //    that do not use an argument (Void, Read, VoidReturn) and those that do (Write,
         //    QualifiedRead, WriteReturn).
         //
-        // There is currently only one protocol for the response packet. It consists of a string
-        // indicating "OK" or "FAIL". If there is a return value (e.g., for Read, QualifiedRead,
+        // There is currently only one protocol for the response packet. It begins with the
+        // EventReceiverHandle (which is an empty string for the CommandString protocol), followed by
+        // a string indicating "OK" or "FAIL". If there is a return value (e.g., for Read, QualifiedRead,
         // VoidReturn, or WriteReturn), this is followed by a space and then by the serialized
         // return value.
 
         mtsExecutionResult ret;
+        std::string        RecvHandle;
         std::string        outputArgString;
 
         size_t pos = inputArgString.find(' ');
-        if ((pos == 0) && (inputArgString.size() >= sizeof(CommandHandle))) {
+        if ((pos == 0) && (inputArgString.size() >= 2*sizeof(CommandHandle))) {
             CommandHandle handle(inputArgString);
-            inputArgString.erase(0, sizeof(CommandHandle));
+            RecvHandle = inputArgString.substr(sizeof(CommandHandle), sizeof(CommandHandle));
+            inputArgString.erase(0, 2*sizeof(CommandHandle));
             // Since we know the command type (handle.cmdType) we could reinterpret_cast directly to
             // the correct mtsFunctionXXXX type, but to be safe we first reinterpret_cast to the base
             // type, mtsFunctionBase, and then do a dynamic_cast to the expected type. If the address
@@ -393,6 +398,11 @@ void mtsSocketProxyServer::Run(void)
             outputArgString.insert(0, "OK ", 3);
         else
             outputArgString.insert(0, "FAIL ", 5);
+
+        if (!RecvHandle.empty()) {
+            // Send it back as an event
+            outputArgString.insert(0, RecvHandle);
+        }
 
         size_t nBytes = outputArgString.size();
         // If the packet size is an exact multiple of SOCKET_PROXY_PACKET_SIZE (nBytes == 0), then we
