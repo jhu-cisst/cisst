@@ -180,6 +180,7 @@ set (HEADER_FILES
 
      mtsQueue.h
 
+     mtsSocketProxyCommon.h
      mtsSocketProxyClient.h
      mtsSocketProxyServer.h
 
@@ -209,7 +210,6 @@ set (ADDITIONAL_HEADER_FILES
      mtsFunctionWriteProxy.h
 
      mtsProxySerializer.h
-     mtsSocketProxyCommon.h
      )
 
 if (MINGW)
