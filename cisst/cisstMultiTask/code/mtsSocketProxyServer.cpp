@@ -23,8 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstMultiTask/mtsSocketProxyCommon.h>
 
-#include "mtsSocketProxyCommon.h"
 #include "mtsFunctionReadProxy.h"
 #include "mtsFunctionWriteProxy.h"
 #include "mtsFunctionQualifiedReadProxy.h"
@@ -92,10 +92,12 @@ protected:
     struct ClientInfo {
         std::string IP;
         unsigned short Port;
-        CommandHandle Handle;
+        char Handle[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
 
-        ClientInfo(const std::string &ip, unsigned short port, const CommandHandle &handle) :
-            IP(ip), Port(port), Handle(handle) {}
+        ClientInfo(const std::string &ip, unsigned short port, const char *handle) : IP(ip), Port(port)
+        {
+            memcpy(Handle, handle, sizeof(Handle));
+        }
         ~ClientInfo() {}
     };
 
@@ -106,11 +108,11 @@ public:
     mtsEventSenderBase(osaSocket &socket) : Socket(socket) {}
     ~mtsEventSenderBase() {}
 
-    bool AddClient(const std::string &ip, unsigned short port, const CommandHandle &handle);
-    bool RemoveClient(const std::string &ip, unsigned short port, const CommandHandle &handle);
+    bool AddClient(const std::string &ip, unsigned short port, const char *handle);
+    bool RemoveClient(const std::string &ip, unsigned short port, const char *handle);
 };
 
-bool mtsEventSenderBase::AddClient(const std::string &ip, unsigned short port, const CommandHandle &handle)
+bool mtsEventSenderBase::AddClient(const std::string &ip, unsigned short port, const char *handle)
 {
     std::vector<ClientInfo>::iterator it;
     for (it = ClientList.begin(); it != ClientList.end(); it++) {
@@ -121,11 +123,12 @@ bool mtsEventSenderBase::AddClient(const std::string &ip, unsigned short port, c
     return true;
 }
 
-bool mtsEventSenderBase::RemoveClient(const std::string &ip, unsigned short port, const CommandHandle &handle)
+bool mtsEventSenderBase::RemoveClient(const std::string &ip, unsigned short port, const char *handle)
 {
     std::vector<ClientInfo>::iterator it;
     for (it = ClientList.begin(); it != ClientList.end(); it++) {
-        if ((it->Port == port) && (it->IP == ip) && (it->Handle == handle)) {
+        if ((it->Port == port) && (it->IP == ip)
+            && (memcmp(it->Handle, handle, CommandHandle::COMMAND_HANDLE_STRING_SIZE) == 0)) {
             ClientList.erase(it);
             return true;
         }
@@ -142,7 +145,7 @@ public:
         std::vector<ClientInfo>::const_iterator it;
         for (it = ClientList.begin(); it != ClientList.end(); it++) {
             Socket.SetDestination(it->IP, it->Port);
-            Socket.Send(reinterpret_cast<const char *>(&it->Handle), sizeof(CommandHandle));
+            Socket.Send(it->Handle, sizeof(it->Handle));
         }
     }
 };
@@ -156,11 +159,12 @@ public:
     {
         std::string sendBuffer;
         if (Serializer.Serialize(arg, sendBuffer)) {
-            sendBuffer.insert(0, sizeof(CommandHandle), ' ');
+            sendBuffer.insert(0, CommandHandle::COMMAND_HANDLE_STRING_SIZE, ' ');
             std::vector<ClientInfo>::const_iterator it;
             for (it = ClientList.begin(); it != ClientList.end(); it++) {
                 Socket.SetDestination(it->IP, it->Port);
-                sendBuffer.replace(0, sizeof(CommandHandle), reinterpret_cast<const char *>(&it->Handle), sizeof(CommandHandle));
+                sendBuffer.replace(0, CommandHandle::COMMAND_HANDLE_STRING_SIZE,
+                                   it->Handle,CommandHandle::COMMAND_HANDLE_STRING_SIZE);
                 Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05);
             }
         }
@@ -238,10 +242,10 @@ void mtsSocketProxyServer::Run(void)
         // CommandString (#2 below). The CommandHandle protocol is more run-time
         // efficient because there is no string lookup.
         //
-        // 1) CommandHandle protocol: The first 16 bytes are the CommandHandle, where
+        // 1) CommandHandle protocol: The first 10 bytes are the CommandHandle, where
         //    the first byte is a space, the second byte is a character that designates
         //    the type of command ('V', 'R', 'W', 'Q'), and the last 8 bytes are a 64-bit
-        //    address of the mtsFunctionXXXX object to be invoked. The next 16 bytes
+        //    address of the mtsFunctionXXXX object to be invoked. The next 10 bytes
         //    are the EventReceiverHandle; this is also a CommandHandle, but is actually
         //    the address of the client's EventReceiverWriteProxy object. The serialized command
         //    argument (e.g., for Write, QualifiedRead, and WriteReturn commands) immediately
@@ -266,10 +270,11 @@ void mtsSocketProxyServer::Run(void)
         std::string        outputArgString;
 
         size_t pos = inputArgString.find(' ');
-        if ((pos == 0) && (inputArgString.size() >= 2*sizeof(CommandHandle))) {
+        if ((pos == 0) && (inputArgString.size() >= 2*CommandHandle::COMMAND_HANDLE_STRING_SIZE)) {
             CommandHandle handle(inputArgString);
-            RecvHandle = inputArgString.substr(sizeof(CommandHandle), sizeof(CommandHandle));
-            inputArgString.erase(0, 2*sizeof(CommandHandle));
+            RecvHandle = inputArgString.substr(CommandHandle::COMMAND_HANDLE_STRING_SIZE,
+                                               CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+            inputArgString.erase(0, 2*CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             // Since we know the command type (handle.cmdType) we could reinterpret_cast directly to
             // the correct mtsFunctionXXXX type, but to be safe we first reinterpret_cast to the base
             // type, mtsFunctionBase, and then do a dynamic_cast to the expected type. If the address
@@ -654,7 +659,7 @@ mtsExecutionResult mtsSocketProxyServer::GetHandle(const std::string &commandNam
     }
     if (ret.IsOK()) {
         CommandHandle header(cmdType, handle);
-        handleString.assign(reinterpret_cast<char *>(&header), sizeof(CommandHandle));
+        header.ToString(handleString);
     }
     return ret;
 }
@@ -673,16 +678,18 @@ mtsExecutionResult mtsSocketProxyServer::EventOperation(const std::string &comma
     }
 
     mtsExecutionResult ret = mtsExecutionResult::DESERIALIZATION_ERROR;
-    // First 16 characters are handle
-    CommandHandle handle(inputArgSerialized);
-    if (handle.IsValid()) {
+    // First 10 characters are handle. We don't need to deserialize this.
+    char handle[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+    memcpy(handle, inputArgSerialized.data(), sizeof(handle));
+    std::string argSerialized = inputArgSerialized.substr(CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+    if ((handle[1] == 'V') || (handle[1] == 'W')) {
         mtsStdString eventName;
-        if (InternalSerializer->DeSerialize(inputArgSerialized.substr(sizeof(CommandHandle)), eventName)) {
+        if (InternalSerializer->DeSerialize(argSerialized, eventName)) {
             ret = mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;
             mtsEventSenderBase *eventSender = 0;
-            if (handle.cmdType == 'V')
+            if (handle[1] == 'V')
                 eventSender = EventGeneratorVoidProxyMap.GetItem(eventName);
-            else if (handle.cmdType == 'W')
+            else if (handle[1] == 'W')
                 eventSender = EventGeneratorWriteProxyMap.GetItem(eventName);
             if (eventSender) {
                 std::string ip;
@@ -699,8 +706,7 @@ mtsExecutionResult mtsSocketProxyServer::EventOperation(const std::string &comma
                 CMN_LOG_CLASS_RUN_ERROR << commandName << ": could not find event " << eventName << std::endl;
         }
         else
-            CMN_LOG_CLASS_RUN_ERROR << commandName << ": failed to deserialize '"
-                                    << inputArgSerialized.substr(sizeof(CommandHandle)) << "'" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << commandName << ": failed to deserialize '" << argSerialized << "'" << std::endl;
     }
     return ret;
 }

@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnAssert.h>
 #include <cisstMultiTask/mtsSocketProxyClient.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsCallableReadMethod.h>
@@ -25,10 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
+#include <cisstMultiTask/mtsSocketProxyCommon.h>
 
 #include <cisstOSAbstraction/osaSleep.h>
 
-#include "mtsSocketProxyCommon.h"
 #include "mtsProxySerializer.h"
 
 CMN_IMPLEMENT_SERVICES(mtsSocketProxyClientConstructorArg);
@@ -117,13 +118,14 @@ protected:
     std::string Name;
     osaSocket   &Socket;
     osaMutex    &SocketMutex;
-    std::string Handle;
+    char        Handle[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
     EventReceiverWriteProxy *Receiver;
     mtsCommandWriteBase     *receiveHandler;
 public:
     CommandWrapperBase(const std::string &name, osaSocket &socket, osaMutex &mutex) : Name(name), Socket(socket),
                                                                                       SocketMutex(mutex)
     {
+        Handle[0] = 0;
         Receiver = new EventReceiverWriteProxy;
         receiveHandler = new mtsCommandWrite<EventReceiverWriteProxy, std::string>(&EventReceiverWriteProxy::ExecuteSerialized,
                                                                                    Receiver, name+"Receiver", std::string());
@@ -135,7 +137,11 @@ public:
         delete Receiver;
     }
 
-    void SetHandle(const std::string &handle) { Handle = handle; }
+    void SetHandle(const std::string &handle)
+    {
+        CMN_ASSERT(handle.size() >= sizeof(Handle));
+        memcpy(Handle, handle.data(), sizeof(Handle));
+    }
 };
 
 class CommandWrapperVoid : public CommandWrapperBase {
@@ -146,7 +152,7 @@ public:
     {
         bool success = false;
         Receiver->SetArg(0);
-        if (Handle.empty()) {
+        if (Handle[0] != ' ') {
             char recvBuffer[8];
             SocketMutex.Lock();
             if (Socket.Send(Name) > 0) {
@@ -158,10 +164,10 @@ public:
             SocketMutex.Unlock();
         }
         else {
-            char sendBuffer[2*sizeof(CommandHandle)];
-            memcpy(sendBuffer, Handle.data(), sizeof(CommandHandle));
+            char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+            memcpy(sendBuffer, Handle, sizeof(Handle));
             CommandHandle recv_handle('W', receiveHandler);
-            memcpy(sendBuffer+sizeof(CommandHandle), reinterpret_cast<const char *>(&recv_handle), sizeof(CommandHandle));
+            recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
                 // Wait for result, with 2 second timeout
                 Receiver->Wait(2.0);
@@ -183,7 +189,7 @@ public:
         std::string sendBuffer;
         Receiver->SetArg(0);
         if (Serializer.Serialize(arg, sendBuffer)) {
-            if (Handle.empty()) {
+            if (Handle[0] != ' ') {
                 sendBuffer.insert(0, " ");
                 sendBuffer.insert(0, Name);
                 SocketMutex.Lock();
@@ -197,9 +203,11 @@ public:
                 SocketMutex.Unlock();
             }
             else {
+                char cmdBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+                memcpy(cmdBuffer, Handle, sizeof(Handle));
                 CommandHandle recv_handle('W', receiveHandler);
-                sendBuffer.insert(0, reinterpret_cast<const char *>(&recv_handle), sizeof(CommandHandle));
-                sendBuffer.insert(0, Handle);
+                recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+                sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
                 if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
                     // Wait for result, with 2 second timeout
                     Receiver->Wait(2.0);
@@ -220,7 +228,7 @@ public:
     bool Method(mtsGenericObject &arg) const
     { 
         Receiver->SetArg(&arg);
-        if (Handle.empty()) {
+        if (Handle[0] != ' ') {
             std::string recvBuffer;
             SocketMutex.Lock();
             if (Socket.Send(Name) > 0) {
@@ -232,10 +240,10 @@ public:
                 Receiver->ExecuteSerialized(recvBuffer);
         }
         else {
-            char sendBuffer[2*sizeof(CommandHandle)];
-            memcpy(sendBuffer, Handle.data(), sizeof(CommandHandle));
+            char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+            memcpy(sendBuffer, Handle, sizeof(Handle));
             CommandHandle recv_handle('W', receiveHandler);
-            memcpy(sendBuffer+sizeof(CommandHandle), reinterpret_cast<const char *>(&recv_handle), sizeof(CommandHandle));
+            recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
                 // Wait for result, with 2 second timeout
                 Receiver->Wait(2.0);
@@ -258,7 +266,7 @@ public:
         std::string sendBuffer;
         mtsProxySerializer &serializer = const_cast<mtsProxySerializer &>(this->Serializer);
         if (serializer.Serialize(arg1, sendBuffer)) {
-            if (Handle.empty()) {
+            if (Handle[0] != ' ') {
                 sendBuffer.insert(0, " ");
                 sendBuffer.insert(0, Name);    
                 std::string recvBuffer;
@@ -286,9 +294,11 @@ public:
                 }
             }
             else {
+                char cmdBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+                memcpy(cmdBuffer, Handle, sizeof(Handle));
                 CommandHandle recv_handle('W', receiveHandler);
-                sendBuffer.insert(0, reinterpret_cast<const char *>(&recv_handle), sizeof(CommandHandle));
-                sendBuffer.insert(0, Handle);
+                recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+                sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
                 if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
                     // Wait for result, with 2 second timeout
                     Receiver->Wait(2.0);
@@ -319,7 +329,9 @@ bool MulticastCommandVoidProxy::AddCommand(mtsMulticastCommandVoid::BaseType * c
         if (Commands.size() == 1) {
             CMN_LOG_RUN_VERBOSE << "MulticastCommandVoidProxy: enabling event " << GetName() << std::endl;
             CommandHandle handle('V', this);
-            Proxy->EventOperation("EventEnable", GetName(), reinterpret_cast<const char *>(&handle));
+            char handleBuf[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+            handle.ToString(handleBuf);
+            Proxy->EventOperation("EventEnable", GetName(), handleBuf);
         }
         return true;
     }
@@ -332,7 +344,9 @@ bool MulticastCommandVoidProxy::RemoveCommand(mtsMulticastCommandVoid::BaseType 
         if (Commands.size() == 0) {
             CMN_LOG_RUN_VERBOSE << "MulticastCommandVoidProxy: disabling event " << GetName() << std::endl;
             CommandHandle handle('V', this);
-            Proxy->EventOperation("EventDisable", GetName(), reinterpret_cast<const char *>(&handle));
+            char handleBuf[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+            handle.ToString(handleBuf);
+            Proxy->EventOperation("EventDisable", GetName(), handleBuf);
         }
         return true;
     }
@@ -386,7 +400,9 @@ bool MulticastCommandWriteProxy::AddCommand(mtsMulticastCommandWriteBase::BaseTy
         if (Commands.size() == 1) {
             CMN_LOG_RUN_VERBOSE << "MulticastCommandWriteProxy: enabling event " << GetName() << std::endl;
             CommandHandle handle('W', this);
-            Proxy->EventOperation("EventEnable", GetName(), reinterpret_cast<const char *>(&handle));
+            char handleBuf[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+            handle.ToString(handleBuf);
+            Proxy->EventOperation("EventEnable", GetName(), handleBuf);
         }
         return true;
     }
@@ -399,7 +415,9 @@ bool MulticastCommandWriteProxy::RemoveCommand(mtsMulticastCommandWriteBase::Bas
         if (Commands.size() == 0) {
             CMN_LOG_RUN_VERBOSE << "MulticastCommandWriteProxy: disabling event " << GetName() << std::endl;
             CommandHandle handle('W', this);
-            Proxy->EventOperation("EventDisable", GetName(), reinterpret_cast<const char *>(&handle));
+            char handleBuf[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+            handle.ToString(handleBuf);
+            Proxy->EventOperation("EventDisable", GetName(), handleBuf);
         }
         return true;
     }
@@ -479,9 +497,9 @@ void mtsSocketProxyClient::Run(void)
     SocketMutex.Unlock();
     if (bytesRead > 0) {
         size_t pos = inputArgString.find(' ');
-        if ((pos == 0) && (inputArgString.size() >= sizeof(CommandHandle))) {
+        if ((pos == 0) && (inputArgString.size() >= CommandHandle::COMMAND_HANDLE_STRING_SIZE)) {
             CommandHandle handle(inputArgString);
-            inputArgString.erase(0, sizeof(CommandHandle));
+            inputArgString.erase(0, CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             // Since we know the command type (handle.cmdType) we could reinterpret_cast directly to
             // the correct mtsCommandXXXX type, but to be safe we first reinterpret_cast to the base
             // type, mtsCommandBase, and then do a dynamic_cast to the expected type. If the address
@@ -707,7 +725,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
 // Format of packet:  "CommandName Handle|EventNameSerialized"
 // where:
 //     CommandName is "EventEnable" or "EventDisable" (delimited by space character)
-//     Handle is 16 bytes (space:1|cmdType:1|filler:6|address:8)
+//     Handle is 10 bytes (space:1|cmdType:1|address:8)
 //     EventNameSerialized is the name of the event being enabled or disabled
 // TODO: merge with AddObserver and RemoveObserver in mtsInterfaceProvided (i.e., AddObserver and RemoveObserver
 //     should also be command objects in provided interface)
@@ -717,9 +735,9 @@ bool mtsSocketProxyClient::EventOperation(const std::string &command, const std:
     std::string nameSerialized;
     if (InternalSerializer->Serialize(mtsStdString(eventName), nameSerialized)) {
         std::string buffer(command);
-        buffer.reserve(command.size()+1+sizeof(CommandHandle)+nameSerialized.size());
+        buffer.reserve(command.size()+1+CommandHandle::COMMAND_HANDLE_STRING_SIZE+nameSerialized.size());
         buffer.append(" ");
-        buffer.append(handle, sizeof(CommandHandle));
+        buffer.append(handle, CommandHandle::COMMAND_HANDLE_STRING_SIZE);
         buffer.append(nameSerialized);
         if (Socket.Send(buffer) > 0) {
             char recvBuffer[8];
