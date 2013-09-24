@@ -256,7 +256,7 @@ public:
             recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
                 // Wait for result, with 2 second timeout
-                if (!Proxy->CheckForEventsImmediate(10.0))
+                if (!Proxy->CheckForEventsImmediate(2.0))
                     Receiver->Wait(2.0);
             }
         }
@@ -510,7 +510,7 @@ void mtsSocketProxyClient::CheckForEvents(double timeoutInSec)
     std::string inputArgString;
     char packetBuffer[mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE];
     SocketMutex.Lock();
-    int bytesRead = Socket.ReceiveAsPackets(inputArgString, packetBuffer, sizeof(packetBuffer), timeoutInSec, 0.1);
+    int bytesRead = Socket.ReceiveAsPackets(inputArgString, packetBuffer, sizeof(packetBuffer), timeoutInSec, 0.5);
     SocketMutex.Unlock();
     if (bytesRead > 0) {
         size_t pos = inputArgString.find(' ');
@@ -600,8 +600,9 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     // Create the client proxy based on the provided interface description obtained from the server proxy.
     mtsGenericObjectProxy<InterfaceProvidedDescription> descProxy;
     CommandWrapperRead GetInterfaceDescription("GetInterfaceDescription", Socket, SocketMutex, this);
-    //GetInterfaceDescription.SetHandle(ServerData.GetInterfaceDescription());
-    GetInterfaceDescription.Method(descProxy);
+    GetInterfaceDescription.SetHandle(ServerData.GetInterfaceDescription());
+    if (!GetInterfaceDescription.Method(descProxy))
+        CMN_LOG_CLASS_RUN_ERROR << "GetInterfaceDescription failed" << std::endl;
     InterfaceProvidedDescription &providedInterfaceDescription(descProxy.GetData());
 
     // Create a local required interface
