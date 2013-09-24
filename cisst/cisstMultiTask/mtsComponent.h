@@ -311,14 +311,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     std::vector<std::string> GetNamesOfInterfacesOutput(void) const;
     //@}
 
-    /*! Check if there is any interface with the given name */
-    bool InterfaceExists(const std::string & interfaceName, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_VERBOSE) const;
-
-    /*! Check if there is any interface provided or output with the given name */
-    bool InterfaceProvidedOrOutputExists(const std::string & interfaceName, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_VERBOSE) const;
-
-    /*! Check if there is any interface required or input with the given name */
-    bool InterfaceRequiredOrInputExists(const std::string & interfaceName, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_VERBOSE) const;
+    /*! Get a provided or output interface identified by its name */
+    mtsInterfaceProvidedOrOutput * GetInterfaceProvidedOrOutput(const std::string & interfaceProvidedOrOutputName);
 
     /*! Get a provided interface identified by its name */
     mtsInterfaceProvided * GetInterfaceProvided(const std::string & interfaceProvidedName) const;
@@ -368,7 +362,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       connected to a given required interface (defined by its name).
       This method will return a null pointer if the required interface
       has not been connected.  See mtsTaskManager::Connect. */
-    const mtsInterfaceProvided * GetInterfaceProvidedFor(const std::string & interfaceRequiredName);
+    const mtsInterfaceProvidedOrOutput * GetInterfaceProvidedOrOutputFor(const std::string & interfaceRequiredOrInputName);
+
+    /*! Get a required or input interface identified by its name */
+    mtsInterfaceRequiredOrInput * GetInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName);
 
     /*! Get a required interface identified by its name */
     mtsInterfaceRequired * GetInterfaceRequired(const std::string & interfaceRequiredName);
@@ -477,20 +474,24 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       on all provided interfaces.  Separate lists of provided and
       output interfaces are maintained for efficiency. */
     //@{
-    typedef cmnNamedMap<mtsInterfaceProvided> InterfacesProvidedMapType;
-    InterfacesProvidedMapType InterfacesProvided;
-    typedef cmnNamedMap<mtsInterfaceOutput> InterfacesOutputMapType;
-    InterfacesOutputMapType InterfacesOutput;
+    typedef cmnNamedMap<mtsInterfaceProvidedOrOutput> InterfacesProvidedOrOutputMapType;
+    InterfacesProvidedOrOutputMapType InterfacesProvidedOrOutput;
+    typedef std::list<mtsInterfaceProvided *> InterfacesProvidedListType;
+    InterfacesProvidedListType InterfacesProvided;
+    typedef std::list<mtsInterfaceOutput *> InterfacesOutputListType;
+    InterfacesOutputListType InterfacesOutput;
     //@}
 
     /*! Map of required interfaces.  Used to store pointers on all
       required interfaces.   Separate lists of required and
       input interfaces are maintained for efficiency. */
     //@{
-    typedef cmnNamedMap<mtsInterfaceRequired> InterfacesRequiredMapType;
-    InterfacesRequiredMapType InterfacesRequired;
-    typedef cmnNamedMap<mtsInterfaceInput> InterfacesInputMapType;
-    InterfacesInputMapType InterfacesInput;
+    typedef cmnNamedMap<mtsInterfaceRequiredOrInput> InterfacesRequiredOrInputMapType;
+    InterfacesRequiredOrInputMapType InterfacesRequiredOrInput;
+    typedef std::list<mtsInterfaceRequired *> InterfacesRequiredListType;
+    InterfacesRequiredListType InterfacesRequired;
+    typedef std::list<mtsInterfaceInput *> InterfacesInputListType;
+    InterfacesInputListType InterfacesInput;
     //@}
 
     /*! Map of state tables, includes the default StateTable under the
@@ -499,7 +500,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     StateTableMapType StateTables;
 
     /*! Process all messages in mailboxes. Returns number of commands processed. */
-    size_t ProcessMailBoxes(InterfacesProvidedMapType & interfaces);
+    size_t ProcessMailBoxes(InterfacesProvidedListType & interfaces);
 
     /*! Process all queued commands. Returns number of events processed.
       These are the commands provided by all interfaces of the task. */

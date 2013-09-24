@@ -30,7 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 
 #include <cisstMultiTask/mtsMailBox.h>
-#include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsCallableVoidMethod.h>
 #include <cisstMultiTask/mtsCallableVoidFunction.h>
 #include <cisstMultiTask/mtsCallableVoidReturnMethod.h>
@@ -39,10 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCallableReadReturnVoidMethod.h>
 #include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
 #include <cisstMultiTask/mtsCallableQualifiedReadReturnVoidMethod.h>
-#include <cisstMultiTask/mtsCommandQualifiedRead.h>
-#include <cisstMultiTask/mtsCommandWrite.h>
-#include <cisstMultiTask/mtsMulticastCommandWrite.h>
-#include <cisstMultiTask/mtsInterface.h>
+#include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last
@@ -94,7 +90,7 @@ http://www.cisst.org/cisst/license.txt.
   and should only be called by mtsComponent.
 
 */
-class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
+class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     // To dynamically create and add command proxies and event proxies
@@ -113,7 +109,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     typedef mtsInterfaceProvided ThisType;
 
     /*! Base class */
-    typedef mtsInterface BaseType;
+    typedef mtsInterfaceProvidedOrOutput BaseType;
 
     /*! Default size for mail boxes and argument queues */
     enum {DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE = 64};

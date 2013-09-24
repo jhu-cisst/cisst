@@ -7,7 +7,7 @@
   Author(s):  Daniel Li, Anton Deguet
   Created on: 2009-05-20
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -87,6 +87,9 @@ http://www.cisst.org/cisst/license.txt.
     // Copy the data from the temporary container to the vctDynamicMatrix
     $1.ForceAssign(tempContainer);
 }
+
+
+// TODO: Search for other uses of %typemap(out, optimal="1")
 
 
 %typemap(out) vctDynamicMatrix
@@ -403,10 +406,9 @@ http://www.cisst.org/cisst/license.txt.
     *****************************************************************************/
 
     typedef $1_ltype MatrixType;
-    MatrixType ref($1);
     npy_intp *sizes = PyDimMem_NEW(2);
-    sizes[0] = ref.rows();
-    sizes[1] = ref.cols();
+    sizes[0] = $1.rows();
+    sizes[1] = $1.cols();
     int type = vctPythonType<MatrixType::value_type>();
     $result = PyArray_SimpleNew(2, sizes, type);
 
@@ -415,8 +417,8 @@ http://www.cisst.org/cisst/license.txt.
     *****************************************************************************/
 
     // Create a temporary vctDynamicMatrixRef container
-    const npy_intp size0 = ref.rows();
-    const npy_intp size1 = ref.cols();
+    const npy_intp size0 = $1.rows();
+    const npy_intp size1 = $1.cols();
     const npy_intp stride0 = size1;
     const npy_intp stride1 = 1;
     const MatrixType::pointer data = reinterpret_cast<MatrixType::pointer>(PyArray_DATA($result));
@@ -424,7 +426,7 @@ http://www.cisst.org/cisst/license.txt.
     vctDynamicMatrixRef<MatrixType::value_type> tempContainer(size0, size1, stride0, stride1, data);
 
     // Copy the data from the vctDynamicMatrixRef to the temporary container
-    tempContainer.Assign(ref);
+    tempContainer.Assign($1);
 }
 
 

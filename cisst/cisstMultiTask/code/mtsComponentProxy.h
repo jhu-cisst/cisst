@@ -55,6 +55,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsComponentProxy_h
 
 #include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
@@ -141,12 +142,12 @@ class CISST_EXPORT mtsComponentProxy : public mtsComponent
     inline void Configure(const std::string & CMN_UNUSED(componentProxyName)) {};
 
     mtsInterfaceRequired *
-        AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceName,
+        AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
                                                        mtsRequiredType isRequired = MTS_REQUIRED);
 
     /*! Register connection information which is used to clean up a logical
       connection when a network proxy client is detected as disconnected. */
-    bool AddConnectionInformation(const std::string & serverInterfaceName, const ConnectionIDType connectionID);
+    bool AddConnectionInformation(const std::string & serverInterfaceProvidedName, const ConnectionIDType connectionID);
 
     //-------------------------------------------------------------------------
     //  Methods to Manage Interface Proxy
@@ -233,23 +234,23 @@ class CISST_EXPORT mtsComponentProxy : public mtsComponent
       required interface proxy at server side.
       \param connectionID Id of this connection (issued by the global
       component manager)
-      \param serverInterfaceName Name of provided interface proxy at
+      \param serverInterfaceProvidedName Name of provided interface proxy at
       client side
-      \param clientInterfaceName Name of required interface
+      \param clientInterfaceRequiredName Name of required interface
       \note This method is called only by a client process
       \return True if success, false otherwise */
     bool UpdateCommandProxyID(const ConnectionIDType connectionID,
-                              const std::string & serverInterfaceName, const std::string & clientInterfaceName);
+                              const std::string & serverInterfaceProvidedName, const std::string & clientInterfaceRequiredName);
 
     /*! \brief Assign ids of event handler proxies' in a required interface
       proxy at server side those of event generators' fetched from a
       provided interface proxy at client side.
       \param clientComponentName Name of client component
-      \param clientInterfaceName Name of required interface at server
+      \param clientInterfaceRequiredName Name of required interface at server
       side
       \note This method is called only by a server process
       \return True if success, false otherwise */
-    bool UpdateEventHandlerProxyID(const std::string & clientComponentName, const std::string & clientInterfaceName);
+    bool UpdateEventHandlerProxyID(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName);
 
     //-------------------------------------------------------------------------
     //  Getters

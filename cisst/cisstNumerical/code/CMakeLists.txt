@@ -59,7 +59,6 @@ if (CISST_HAS_CISSTNETLIB)
        nmrLDPSolver.cpp
        # deprecated nmrLSISolver.cpp
        nmrLSqLin.cpp
-       nmrSymmetricEigenProblem.cpp
       )
   set (HEADER_FILES
        ${HEADER_FILES}
@@ -82,7 +81,6 @@ if (CISST_HAS_CISSTNETLIB)
        nmrNNLSSolver.h
        nmrCallBack.h
        nmrSVDRSSolver.h
-       nmrSymmetricEigenProblem.h
        )
 endif (CISST_HAS_CISSTNETLIB)
 

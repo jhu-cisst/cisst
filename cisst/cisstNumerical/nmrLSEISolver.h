@@ -135,10 +135,10 @@ public:
       convenient way to extract the required sizes from the input
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
-    inline void Allocate( vctDynamicMatrix<CISSTNETLIB_DOUBLE> &E, 
-                          vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
-                          vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G )
-    { Allocate(E.rows(), A.rows(), G.rows(), A.cols()); }
+    inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &E, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
+                         vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G) {
+	    Allocate(E.rows(), A.rows(), G.rows(), E.cols());
+    }
 
 
     /*! Given a \f$ M \times N\f$ matrix A, and a \f$ M \times 1 \f$ vector B,
@@ -161,87 +161,59 @@ public:
       The third alternative is to set get refrence to individual
       chunks of this objects W.
     */
-    inline void Solve( vctDynamicMatrix<CISSTNETLIB_DOUBLE> &E, 
-                       vctDynamicMatrix<CISSTNETLIB_DOUBLE> &f,
-                       vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
-                       vctDynamicMatrix<CISSTNETLIB_DOUBLE> &b,
-                       vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, 
-                       vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h) 
+    inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &E, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &f,
+                      vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &b,
+                      vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h) 
         throw (std::runtime_error)
     {
-
-        if( MA != static_cast<CISSTNETLIB_INTEGER>(A.rows()) || 
-            N  != static_cast<CISSTNETLIB_INTEGER>(A.cols()) ||
-            MA != static_cast<CISSTNETLIB_INTEGER>(b.rows()) || 
-            1  != static_cast<CISSTNETLIB_INTEGER>(b.cols()) ){
-            std::string msg( "nmrLSEISolver::Solve: Objectives dimensions." );
-            cmnThrow( std::runtime_error( msg ) );
+        /* check that the size matches with Allocate() */
+        if (
+            (MA != static_cast<CISSTNETLIB_INTEGER>(A.rows())) || (ME != static_cast<CISSTNETLIB_INTEGER>(E.rows())) || (MG != static_cast<CISSTNETLIB_INTEGER>(G.rows()))
+            || (N != static_cast<CISSTNETLIB_INTEGER>(A.cols())) || (N != static_cast<CISSTNETLIB_INTEGER>(E.cols())) || (N != static_cast<CISSTNETLIB_INTEGER>(G.cols()))
+            || (1 != static_cast<CISSTNETLIB_INTEGER>(b.cols())) || (1 != static_cast<CISSTNETLIB_INTEGER>(f.cols())) || (1 != static_cast<CISSTNETLIB_INTEGER>(h.cols()))
+            ) {
+            cmnThrow(std::runtime_error("nmrLSEISolver Solve: Sizes used for Allocate were different"));
         }
         
-        if( !E.empty() &&
-            ( ME != static_cast<CISSTNETLIB_INTEGER>(E.rows()) || 
-              N  != static_cast<CISSTNETLIB_INTEGER>(E.cols()) ||
-              ME != static_cast<CISSTNETLIB_INTEGER>(f.rows()) || 
-              1  != static_cast<CISSTNETLIB_INTEGER>(f.cols()) ) ){
-            std::string msg( "nmrLSEISolver::Solve: Equalities dimensions." );
-            cmnThrow( std::runtime_error( msg ) );
-        }
-
-        if( !G.empty() && 
-            ( MG != static_cast<CISSTNETLIB_INTEGER>(G.rows()) || 
-              N  != static_cast<CISSTNETLIB_INTEGER>(G.cols()) ||
-              MG != static_cast<CISSTNETLIB_INTEGER>(h.rows()) || 
-              1  != static_cast<CISSTNETLIB_INTEGER>(h.cols()) ) ){
-            std::string msg( "nmrLSEISolver::Solve: Inequalities dimensions." );
-            cmnThrow( std::runtime_error( msg ) );
+        /* check other dimensions */
+        if ( (A.rows() != b.rows()) || (E.rows() != f.rows()) || (G.rows() != h.rows())) {
+            cmnThrow(std::runtime_error("nmrLSEISolver Solve: Sizes of parameters are incompatible"));
         }
         
         /* check that the matrices are Fortran like */
-        if ( (               !A.IsFortran() ) ||
-             (               !b.IsFortran() ) ||
-             ( !E.empty() && !E.IsFortran() ) || 
-             ( !f.empty() && !f.IsFortran() ) ||
-             ( !G.empty() && !G.IsFortran() ) || 
-             ( !h.empty() && !h.IsFortran() ) ){
-            std::string msg( "nmrLSEISolver::Solve: Incompatible matrices." );
-            cmnThrow( std::runtime_error( msg ) );
+        if (! (A.IsFortran() && E.IsFortran() && G.IsFortran()
+               && b.IsFortran() && f.IsFortran() && h.IsFortran())) {
+            cmnThrow(std::runtime_error("nmrLSEISolver Solve: All parameters must be Fortran compatible"));
         }
        
-        if( ( MDW != static_cast<CISSTNETLIB_INTEGER>( W.rows() ) ) || 
-            ( N+1 != static_cast<CISSTNETLIB_INTEGER>( W.cols() ))) {
-            std::string msg( "nmrLSEISolver::Solve: workspace not allocated." );
-            cmnThrow( std::runtime_error( msg ) );
-        }
+        if ((MDW != static_cast<CISSTNETLIB_INTEGER>(W.rows()) ) || (N+1 != static_cast<CISSTNETLIB_INTEGER>(W.cols()))) {
+            cmnThrow(std::runtime_error("nmrLSEISolver Solve: Memory for W was not allocated"));
+	}
 
-        /* copy */
-        ARef.Assign(A);
-        bRef.Assign(b);
-        if( !E.empty() ){ ERef.Assign(E); }
-        if( !f.empty() ){ fRef.Assign(f); }
-        if( !G.empty() ){ GRef.Assign(G); }
-        if( !h.empty() ){ hRef.Assign(h); }
+	/* copy */
+	ERef.Assign(E);
+	ARef.Assign(A);
+	GRef.Assign(G);
+	fRef.Assign(f);
+	bRef.Assign(b);
+	hRef.Assign(h);
 
-        CMN_LOG_INIT_ERROR << W << std::endl;
-        lsei_( W.Pointer(), &MDW, &ME, &MA, &MG, &N, 
-               Options.Pointer(), X.Pointer(), &RNormE,
-               &RNormL, &Mode, 
-               Work.Pointer(), Index.Pointer() );
-
+	CMN_LOG_INIT_ERROR << W << std::endl;
+    
+    lsei_(W.Pointer(), &MDW, &ME, &MA, &MG, &N, Options.Pointer(), X.Pointer(), &RNormE,
+          &RNormL, &Mode, Work.Pointer(), Index.Pointer());
+    //error handling??
     }
 
     inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &W)
 	    throw (std::runtime_error)
     {
-        if( (MDW != static_cast<CISSTNETLIB_INTEGER>(W.rows()) ) || 
-            (N+1 != static_cast<CISSTNETLIB_INTEGER>(W.cols())) ) {
-            std::string msg( "nmrLSEISolver::Solve: workspace not allocated." );
-            cmnThrow( std::runtime_error( msg ) );
+        if ((MDW != static_cast<CISSTNETLIB_INTEGER>(W.rows()) ) || (N+1 != static_cast<CISSTNETLIB_INTEGER>(W.cols()))) {
+            cmnThrow(std::runtime_error("nmrLSEISolver Solve: Sizes used for Allocate were different"));
         }
         
-        lsei_( W.Pointer(), &MDW, &ME, &MA, &MG, &N, 
-               Options.Pointer(), X.Pointer(), &RNormE,
-               &RNormL, &Mode, 
-               Work.Pointer(), Index.Pointer());
+        lsei_(W.Pointer(), &MDW, &ME, &MA, &MG, &N, Options.Pointer(), X.Pointer(), &RNormE,
+              &RNormL, &Mode, Work.Pointer(), Index.Pointer());
     }
     
     /*! Get X.  This method must be used after Solve(). */

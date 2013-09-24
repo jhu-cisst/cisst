@@ -36,8 +36,7 @@ mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName,
                                            mtsComponent * component,
                                            mtsMailBox * mailBox,
                                            mtsRequiredType required):
-    mtsInterface(interfaceName, component),
-    Required(required),
+    mtsInterfaceRequiredOrInput(interfaceName, component, required),
     MailBox(mailBox),
     InterfaceProvided(0),
     MailBoxSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
@@ -83,7 +82,7 @@ osaThreadSignal * mtsInterfaceRequired::GetThreadSignal(void)
 }
 
 
-const mtsInterfaceProvided * mtsInterfaceRequired::GetConnectedInterface(void) const
+const mtsInterfaceProvidedOrOutput * mtsInterfaceRequired::GetConnectedInterface(void) const
 {
     return InterfaceProvided;
 }
@@ -303,8 +302,17 @@ mtsCommandWriteBase * mtsInterfaceRequired::GetEventHandlerWrite(const std::stri
 }
 
 
-bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvided * interfaceProvided)
+bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
 {
+    // make sure we are connecting to a provided interface
+    mtsInterfaceProvided * interfaceProvided = dynamic_cast<mtsInterfaceProvided *>(interfaceProvidedOrOutput);
+    if (!interfaceProvided) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: can not connect input interface \""
+                                 << interfaceProvidedOrOutput->GetFullName() << "\" to required interface \""
+                                 << this->GetFullName() << "\", can only connect required with provided or input with output"
+                                 << std::endl;
+        return false;
+    }
     // get the end user interface
     mtsInterfaceProvided * endUserInterface = interfaceProvided->GetEndUserInterface(this->GetName());
     if (!endUserInterface) {
@@ -365,12 +373,6 @@ bool mtsInterfaceRequired::DetachCommands(void)
         iter->second->Detach();
     }
     return true;
-}
-
-
-mtsRequiredType mtsInterfaceRequired::IsRequired(void) const
-{
-    return this->Required;
 }
 
 

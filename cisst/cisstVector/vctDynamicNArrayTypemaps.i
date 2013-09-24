@@ -7,7 +7,7 @@
   Author(s):  Daniel Li, Anton Deguet
   Created on: 2009-05-20
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -97,6 +97,8 @@ http://www.cisst.org/cisst/license.txt.
     $1.Assign(tempContainer);
 }
 
+
+// TODO: Search for other uses of %typemap(out, optimal="1")
 
 
 %typemap(out) vctDynamicNArray
@@ -474,9 +476,8 @@ http://www.cisst.org/cisst/license.txt.
     *****************************************************************************/
 
     typedef $1_ltype NArrayType;
-    NArrayType ref($1);
     vct::size_type sz = NArrayType::DIMENSION;
-    const vctFixedSizeVector<vct::size_type, NArrayType::DIMENSION> sizes(ref.sizes());
+    const vctFixedSizeVector<vct::size_type, NArrayType::DIMENSION> sizes($1.sizes());
     npy_intp *shape = PyDimMem_NEW(sz);
     for (vct::size_type i = 0; i < sz; i++) {
         shape[i] = sizes.at(i);
@@ -491,13 +492,13 @@ http://www.cisst.org/cisst/license.txt.
 
     // Create a temporary vctDynamicNArrayRef container
     // `sizes' defined above, don't need to redefine it
-    vctFixedSizeVector<vct::stride_type, NArrayType::DIMENSION> strides(ref.strides());
+    vctFixedSizeVector<vct::stride_type, NArrayType::DIMENSION> strides($1.strides());
     const NArrayType::pointer data = reinterpret_cast<NArrayType::pointer>(PyArray_DATA($result));
 
     vctDynamicNArrayRef<NArrayType::value_type, NArrayType::DIMENSION> tempContainer(data, sizes, strides);
 
     // Copy the data from the vctDynamicNArrayRef to the temporary container
-    tempContainer.Assign(ref);
+    tempContainer.Assign($1);
 }
 
 

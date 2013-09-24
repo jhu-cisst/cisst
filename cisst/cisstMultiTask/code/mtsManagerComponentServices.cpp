@@ -204,30 +204,30 @@ bool mtsManagerComponentServices::ComponentConfigure(
 
 
 bool mtsManagerComponentServices::Connect(const std::string & clientComponentName,
-                                          const std::string & clientInterfaceName,
+                                          const std::string & clientInterfaceRequiredName,
                                           const std::string & serverComponentName,
-                                          const std::string & serverInterfaceName) const
+                                          const std::string & serverInterfaceProvidedName) const
 {
     const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return Connect(thisProcessName, clientComponentName, clientInterfaceName,
-                   thisProcessName, serverComponentName, serverInterfaceName);
+    return Connect(thisProcessName, clientComponentName, clientInterfaceRequiredName,
+                   thisProcessName, serverComponentName, serverInterfaceProvidedName);
 }
 
 
 bool mtsManagerComponentServices::Connect(const std::string & clientProcessName,
                                           const std::string & clientComponentName,
-                                          const std::string & clientInterfaceName,
+                                          const std::string & clientInterfaceRequiredName,
                                           const std::string & serverProcessName,
                                           const std::string & serverComponentName,
-                                          const std::string & serverInterfaceName) const
+                                          const std::string & serverInterfaceProvidedName) const
 {
     mtsDescriptionConnection connectionDescription;
     connectionDescription.Client.ProcessName   = clientProcessName;
     connectionDescription.Client.ComponentName = clientComponentName;
-    connectionDescription.Client.InterfaceName = clientInterfaceName;
+    connectionDescription.Client.InterfaceName = clientInterfaceRequiredName;
     connectionDescription.Server.ProcessName   = serverProcessName;
     connectionDescription.Server.ComponentName = serverComponentName;
-    connectionDescription.Server.InterfaceName = serverInterfaceName;
+    connectionDescription.Server.InterfaceName = serverInterfaceProvidedName;
 
     return Connect(connectionDescription);
 }
@@ -261,19 +261,19 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
 
 
 bool mtsManagerComponentServices::Disconnect(
-    const std::string & clientComponentName, const std::string & clientInterfaceName,
-    const std::string & serverComponentName, const std::string & serverInterfaceName) const
+    const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+    const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
 {
     const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return Disconnect(thisProcessName, clientComponentName, clientInterfaceName,
-                      thisProcessName, serverComponentName, serverInterfaceName);
+    return Disconnect(thisProcessName, clientComponentName, clientInterfaceRequiredName,
+                      thisProcessName, serverComponentName, serverInterfaceProvidedName);
 }
 
 bool mtsManagerComponentServices::Disconnect(
     const std::string & clientProcessName,
-    const std::string & clientComponentName, const std::string & clientInterfaceName,
+    const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
     const std::string & serverProcessName,
-    const std::string & serverComponentName, const std::string & serverInterfaceName) const
+    const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
 {
     if (!ServiceComponentManagement.Disconnect.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: invalid function - has not been bound to command" << std::endl;
@@ -283,10 +283,10 @@ bool mtsManagerComponentServices::Disconnect(
     mtsDescriptionConnection arg;
     arg.Client.ProcessName   = clientProcessName;
     arg.Client.ComponentName = clientComponentName;
-    arg.Client.InterfaceName = clientInterfaceName;
+    arg.Client.InterfaceName = clientInterfaceRequiredName;
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
-    arg.Server.InterfaceName = serverInterfaceName;
+    arg.Server.InterfaceName = serverInterfaceProvidedName;
     arg.ConnectionID = InvalidConnectionID;  // not needed
 
     return Disconnect(arg);
@@ -490,7 +490,7 @@ InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDe
 {
     // output arg
     InterfaceProvidedDescription argOut;
-    argOut.InterfaceName = "ERROR";
+    argOut.InterfaceProvidedName = "ERROR";
 
     if (!ServiceGetters.GetInterfaceProvidedDescription.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "GetInterfaceProvidedDescription: invalid function - has not been bound to command" << std::endl;
@@ -515,7 +515,7 @@ InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDe
 {
     // output arg
     InterfaceRequiredDescription argOut;
-    argOut.InterfaceName = "ERROR";
+    argOut.InterfaceRequiredName = "ERROR";
 
     if (!ServiceGetters.GetInterfaceRequiredDescription.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "GetInterfaceRequiredDescription: invalid function - has not been bound to command" << std::endl;
