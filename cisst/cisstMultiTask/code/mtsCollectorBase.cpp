@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 mtsComponentManager * mtsCollectorBase::ComponentManager;

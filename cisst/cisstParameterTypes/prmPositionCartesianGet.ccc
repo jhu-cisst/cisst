@@ -7,9 +7,10 @@
 // In general, the cisst data generator preserves the order of declaration, i.e. the generated
 // code follows the order of declaration in the data file.
 inline-header {
+#include <cisstVector/vctTransformationTypes.h>
 #include <cisstVector/vctDataFunctions.h>
-#include <cisstParameterTypes/prmTransformationBase.h>
-#include <cisstParameterTypes/prmTransformationManager.h>
+
+#include <cisstMultiTask/mtsGenericObject.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -33,29 +34,6 @@ class {
     base-class {
         type mtsGenericObject;
         is-data true;
-    }
-
-    // 'member' is used to declare data members
-    // - 'name' is required
-    // - 'type' is required, can be any C/C++ type
-    // - 'is-data' is similar to 'is-data' for a base class, it tells the generator to use or not
-    //   use the cisst data functions for that member.  The default is 'true'
-    // - 'description' is anything you want but shouldn't have a ;
-    member {
-        name MovingFrame;
-        type prmTransformationBasePtr;
-        default 0;
-        is-data false;
-        description Pointer to moving frame, unused;
-    }
-
-    // see previous 'member'.  These two have been added for backward compatibility only
-    member {
-        name ReferenceFrame;
-        type prmTransformationBasePtr;
-        default 0;
-        is-data false;
-        description Pointer to reference frame, unused;
     }
 
     // an actual member, here 'is-data' is implicitely set to 'true'

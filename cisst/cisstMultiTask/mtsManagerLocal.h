@@ -416,13 +416,22 @@ public:
       mtsTask::Create() is called internally. */
     void CreateAll(void);
 
+    /*! Call CreateAll method followed by WaitForStateAll. */
+    bool CreateAllAndWait(double timeoutInSeconds);
+
     /*! \brief Start all components. If a component is of type mtsTask,
       mtsTask::Start() is called internally. */
     void StartAll(void);
 
+    /*! Call StartAll method followed by WaitForStateAll. */
+    bool StartAllAndWait(double timeoutInSeconds);
+
     /*! \brief Stop all components. If a component is of type mtsTask,
       mtsTask::Kill() is called internally. */
     void KillAll(void);
+
+    /*! Call KillAll method followed by WaitForStateAll. */
+    bool KillAllAndWait(double timeoutInSeconds);
 
     /*! \brief Cleanup.  Since a local component manager is a singleton, the
                destructor will be called when the program exits but a library

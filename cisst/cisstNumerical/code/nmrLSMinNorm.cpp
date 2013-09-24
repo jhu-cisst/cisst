@@ -1,20 +1,41 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id: nmrLSMinNorm.cpp 4267 2013-06-11 14:01:21Z sleonar7 $
+  
+  Author(s):	Simon Leonard
+  Created on:	2013-06-11
+
+  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #include <cisstNumerical/nmrLSMinNorm.h>
 
 // from cisstRobot/applications/cisstKinematicsIdentification
 extern "C" {
   void dgelss_( CISSTNETLIB_INTEGER* M,
-		CISSTNETLIB_INTEGER* N,
-		CISSTNETLIB_INTEGER* NRHS,
-		CISSTNETLIB_DOUBLE* A,
-		CISSTNETLIB_INTEGER* LDA,
-		CISSTNETLIB_DOUBLE* B,
-		CISSTNETLIB_INTEGER* LDB,
-		CISSTNETLIB_DOUBLE* S,
-		CISSTNETLIB_DOUBLE* RCOND,
-		CISSTNETLIB_INTEGER* RANK,
-		CISSTNETLIB_DOUBLE* WORK,
-		CISSTNETLIB_INTEGER* LWORK,
-		CISSTNETLIB_INTEGER* INFO );
+                CISSTNETLIB_INTEGER* N,
+                CISSTNETLIB_INTEGER* NRHS,
+                CISSTNETLIB_DOUBLE* A,
+                CISSTNETLIB_INTEGER* LDA,
+                CISSTNETLIB_DOUBLE* B,
+                CISSTNETLIB_INTEGER* LDB,
+                CISSTNETLIB_DOUBLE* S,
+                CISSTNETLIB_DOUBLE* RCOND,
+                CISSTNETLIB_INTEGER* RANK,
+                CISSTNETLIB_DOUBLE* WORK,
+                CISSTNETLIB_INTEGER* LWORK,
+                CISSTNETLIB_INTEGER* INFO );
 }
 
 nmrLSMinNorm::Data::Data() : 
@@ -32,8 +53,8 @@ nmrLSMinNorm::Data::Data() :
 {}
 
 nmrLSMinNorm::Data::Data( const vctDynamicMatrix<double>& A, 
-			  const vctDynamicMatrix<double>& b,
-			  double rcond ) : 
+                          const vctDynamicMatrix<double>& b,
+                          double rcond ) : 
   M( A.rows() ),
   N( A.cols() ),
   NRHS( b.cols() ),
@@ -93,7 +114,7 @@ void nmrLSMinNorm::Data::CheckInfo() const{
 }
 
 void nmrLSMinNorm::Data::CheckSystem( const vctDynamicMatrix<double>& A,
-				      const vctDynamicMatrix<double>& b ) const{
+                                      const vctDynamicMatrix<double>& b ) const{
   
   // test that number of rows match
   if( A.rows() != b.rows() ){
@@ -117,9 +138,9 @@ void nmrLSMinNorm::Data::CheckSystem( const vctDynamicMatrix<double>& A,
 }
 
 vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& vctA,
-				       vctDynamicMatrix<double>& vctb,
-				       CISSTNETLIB_DOUBLE rcond ){
-
+                                       vctDynamicMatrix<double>& vctb,
+                                       CISSTNETLIB_DOUBLE rcond ){
+    
   // data pointers
   CISSTNETLIB_DOUBLE* A = vctA.Pointer();
   CISSTNETLIB_DOUBLE* B = vctb.Pointer();
@@ -164,10 +185,10 @@ vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& vctA,
 }
 
 vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& vctA,
-				       vctDynamicMatrix<double>& vctb,
-				       nmrLSMinNorm::Data& data,
-				       CISSTNETLIB_DOUBLE rcond ){
-  
+                                       vctDynamicMatrix<double>& vctb,
+                                       nmrLSMinNorm::Data& data,
+                                       CISSTNETLIB_DOUBLE rcond ){
+    
   // data pointers
   CISSTNETLIB_DOUBLE* A = vctA.Pointer();
   CISSTNETLIB_DOUBLE* B = vctb.Pointer();

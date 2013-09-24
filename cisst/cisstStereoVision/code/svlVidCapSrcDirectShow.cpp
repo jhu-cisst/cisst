@@ -565,6 +565,9 @@ int svlVidCapSrcDirectShow::AssembleGraph()
             CapHeight[i] = videoinfo->bmiHeader.biHeight;
             CapTopDown[i] = true;
         }
+        /*CapWidth[i] = 640;
+        CapHeight[i] = 480;
+        CapTopDown[i] = true;*/
         CoTaskMemFree(mediatype.pbFormat);
 
         // Setup output buffer and frame callback

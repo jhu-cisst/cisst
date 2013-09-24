@@ -35,43 +35,81 @@ namespace mtsInterfaceCommon {
     // Command object definition
 	struct CommandVoidElement {
         std::string Name;
+
+        CommandVoidElement() {}
+        CommandVoidElement(const std::string &name) : Name(name) {}
+        ~CommandVoidElement() {}
 	};
 
 	struct CommandWriteElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
+
+        CommandWriteElement() {}
+        CommandWriteElement(const std::string &name, const std::string &arg)
+            : Name(name), ArgumentPrototypeSerialized(arg) {}
+        ~CommandWriteElement() {}
 	};
 
     struct CommandReadElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
+
+        CommandReadElement() {}
+        CommandReadElement(const std::string &name, const std::string &arg)
+            : Name(name), ArgumentPrototypeSerialized(arg) {}
+        ~CommandReadElement() {}
 	};
 
 	struct CommandQualifiedReadElement {
 		std::string Name;
         std::string Argument1PrototypeSerialized;
         std::string Argument2PrototypeSerialized;
+
+        CommandQualifiedReadElement() {}
+        CommandQualifiedReadElement(const std::string &name, const std::string &arg1, const std::string &arg2)
+            : Name(name), Argument1PrototypeSerialized(arg1), Argument2PrototypeSerialized(arg2) {}
+        ~CommandQualifiedReadElement() {}
 	};
 
 	struct CommandVoidReturnElement {
 		std::string Name;
         std::string ResultPrototypeSerialized;
+
+        CommandVoidReturnElement() {}
+        CommandVoidReturnElement(const std::string &name, const std::string &arg)
+            : Name(name), ResultPrototypeSerialized(arg) {}
+        ~CommandVoidReturnElement() {}
 	};
 
 	struct CommandWriteReturnElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
         std::string ResultPrototypeSerialized;
+
+        CommandWriteReturnElement() {}
+        CommandWriteReturnElement(const std::string &name, const std::string &arg1, const std::string &arg2)
+            : Name(name), ArgumentPrototypeSerialized(arg1), ResultPrototypeSerialized(arg2) {}
+        ~CommandWriteReturnElement() {}
 	};
 
     // Event object definition
 	struct EventVoidElement {
 		std::string Name;
+
+        EventVoidElement() {}
+        EventVoidElement(const std::string &name) : Name(name) {}
+        ~EventVoidElement() {}
 	};
 
 	struct EventWriteElement {
         std::string Name;
         std::string ArgumentPrototypeSerialized;
+
+        EventWriteElement() {}
+        EventWriteElement(const std::string &name, const std::string &arg)
+            : Name(name), ArgumentPrototypeSerialized(arg) {}
+        ~EventWriteElement() {}
 	};
 
     typedef std::vector<CommandVoidElement>          CommandVoidVector;

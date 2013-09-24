@@ -1801,6 +1801,13 @@ void mtsManagerLocal::CreateAll(void)
 }
 
 
+bool mtsManagerLocal::CreateAllAndWait(double timeoutInSeconds)
+{
+    this->CreateAll();
+    return this->WaitForStateAll(mtsComponentState::READY, timeoutInSeconds);
+}
+
+
 void mtsManagerLocal::StartAll(void)
 {
     // Get the current thread id in order to check if any task will use the current thread.
@@ -1865,6 +1872,13 @@ void mtsManagerLocal::StartAll(void)
 }
 
 
+bool mtsManagerLocal::StartAllAndWait(double timeoutInSeconds)
+{
+    this->StartAll();
+    return this->WaitForStateAll(mtsComponentState::ACTIVE, timeoutInSeconds);
+}
+
+
 void mtsManagerLocal::KillAll(void)
 {
     mtsManagerComponentBase * isManager;
@@ -1890,6 +1904,14 @@ void mtsManagerLocal::KillAll(void)
     LogDisabled = true;
     SetLogForwarding(false);
 }
+
+
+bool mtsManagerLocal::KillAllAndWait(double timeoutInSeconds)
+{
+    this->KillAll();
+    return this->WaitForStateAll(mtsComponentState::FINISHED, timeoutInSeconds);
+}
+
 
 bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceName,
                               const std::string & serverComponentName, const std::string & serverInterfaceName)

@@ -2,9 +2,13 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: nmrLSMinNorm.h 4267 2013-06-11 14:01:21Z sleonar7 $
   
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  Author(s):	Simon Leonard
+  Created on:	2013-06-11
+
+  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -14,6 +18,9 @@ http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
 */
+
+#ifndef _nmrLSMinNorm_h
+#define _nmrLSMinNorm_h
 
 #include <cisstNumerical/nmrNetlib.h>
 #include <cisstVector/vctDynamicMatrix.h>
@@ -82,9 +89,9 @@ public:
             approximation). If \f$ r<0 \f$, machine precision is used instead.
    \return The \f$ N \times O \f$ minimum norm solutions \f$ \mathbf{x} \f$.
 */
-vctDynamicMatrix<double> CISST_EXPORT nmrLSMinNorm( vctDynamicMatrix<double>& A,
-                                       vctDynamicMatrix<double>& b,
-                                       CISSTNETLIB_DOUBLE r = -1.0 );
+vctDynamicMatrix<double> CISST_EXPORT nmrLSMinNorm(vctDynamicMatrix<double>& A,
+                                                   vctDynamicMatrix<double>& b,
+                                                   CISSTNETLIB_DOUBLE r = -1.0);
 
 //! Computes the minimum norm solution to a real linear least squares problem
 /**
@@ -102,8 +109,9 @@ vctDynamicMatrix<double> CISST_EXPORT nmrLSMinNorm( vctDynamicMatrix<double>& A,
             approximation). If \f$ r<0 \f$, machine precision is used instead.
    \return The \f$ N \times O \f$ minimum norm solutions \f$ \mathbf{x} \f$.
 */
-vctDynamicMatrix<double> CISST_EXPORT nmrLSMinNorm( vctDynamicMatrix<double>& A,
-                                                    vctDynamicMatrix<double>& b,
-                                                    nmrLSMinNorm::Data& data,
-                                                    CISSTNETLIB_DOUBLE r = -1.0 );
+vctDynamicMatrix<double> CISST_EXPORT nmrLSMinNorm(vctDynamicMatrix<double>& A,
+                                                   vctDynamicMatrix<double>& b,
+                                                   nmrLSMinNorm::Data& data,
+                                                   CISSTNETLIB_DOUBLE r = -1.0);
 
+#endif

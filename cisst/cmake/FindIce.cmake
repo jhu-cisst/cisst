@@ -4,7 +4,7 @@
 # Author(s):  Min Yang Jung, Anton Deguet
 # Created on: 2009
 #
-# (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -87,7 +87,7 @@ if (ICE_ICE_H_INCLUDE_DIR)
   message (STATUS "Setting ICE_HOME to ${ICE_HOME}")
 
   # include and lib dirs are easy
-  if (WIN32)  
+  if (WIN32)
     set (ICE_INCLUDE_DIR
         ${ICE_ICE_H_INCLUDE_DIR}
         ${ICE_HOME}/slice
@@ -103,6 +103,7 @@ if (ICE_ICE_H_INCLUDE_DIR)
         ${ICE_HOME}/share/ice/slice
         ${ICE_HOME}/share/Ice/slice
         # For Ice installation via Ubuntu Synaptic package manager
+        ${ICE_HOME}/share/Ice-3.5.0/slice
         ${ICE_HOME}/share/Ice-3.4.1/slice
         ${ICE_HOME}/share/Ice-3.4.0/slice
         ${ICE_HOME}/share/Ice-3.3.1/slice
@@ -144,16 +145,27 @@ if (ICE_ICE_H_INCLUDE_DIR)
 
   # try to figure if the ice library is libIce or libZeroCIce on Mac OS with MacPort
   if (APPLE)
+    # libIce
     unset (ICE_LIBRARY_NAME_ZEROC_ICE CACHE)
     if (ICE_LIBRARY_NAME_ZEROC_ICE)
       set (ICE_LIBRARY_NAME ZeroCIce)
     else (ICE_LIBRARY_NAME_ZEROC_ICE)
       set (ICE_LIBRARY_NAME Ice)
     endif (ICE_LIBRARY_NAME_ZEROC_ICE)
+    unset (ICEUTIL_LIBRARY_NAME_ZEROC_ICE CACHE)
+    # libIceUtil
+    find_library (ICEUTIL_LIBRARY_NAME_ZEROC_ICE NAMES ZeroCIceUtil PATHS ${ICE_LIBRARY_DIR} NO_DEFAULT_PATH)
+    if (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
+      set (ICEUTIL_LIBRARY_NAME ZeroCIceUtil)
+    else (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
+      set (ICEUTIL_LIBRARY_NAME IceUtil)
+    endif (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
   else (APPLE)
     set (ICE_LIBRARY_NAME Ice)
+    set (ICEUTIL_LIBRARY_NAME IceUtil)
   endif (APPLE)
-  message( STATUS "Ice library name is ${ICE_LIBRARY_NAME}")
+  message (STATUS "Ice library name is ${ICE_LIBRARY_NAME}")
+  message (STATUS "IceUtil library name is ${ICEUTIL_LIBRARY_NAME}")
 
   # find slice2cpp
   find_program (ICE_SLICE2CPP
@@ -170,7 +182,9 @@ if (ICE_ICE_H_INCLUDE_DIR)
   if (ICE_FOUND)
     mark_as_advanced (ICE_FOUND ICE_HOME
                       ICE_INCLUDE_DIR ICE_ICE_H_INCLUDE_DIR ICE_SLICE_DIR
-                      ICE_LIBRARY_NAME ICE_LIBRARY_NAME_ZEROC_ICE ICE_SLICE2CPP)
+                      ICE_LIBRARY_NAME ICE_LIBRARY_NAME_ZEROC_ICE
+                      ICEUTIL_LIBRARY_NAME ICEUTIL_LIBRARY_NAME_ZEROC_ICE
+                      ICE_SLICE2CPP)
   endif (ICE_FOUND)
 
 endif (ICE_ICE_H_INCLUDE_DIR)

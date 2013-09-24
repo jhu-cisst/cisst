@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -93,6 +93,8 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     friend class mtsManagerLocalTest;
     friend class mtsEventReceiverBase;
     friend class mtsManagerComponentClient;
+    // for GetDescription
+    friend class mtsSocketProxyClient;
 
  protected:
 
@@ -389,12 +391,12 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
                                                           const std::string & eventName,
                                                           mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
 
-    // PK: Can we get rid of this?
     template <class __classType>
         inline mtsCommandWriteBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
                                                                  __classType * classInstantiation,
                                                                  const std::string & eventName,
-                                                                 mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
+                                                                 mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY,
+                                                                 mtsGenericObject *argumentPrototype = 0);
 
     bool RemoveEventHandlerVoid(const std::string & eventName);
     bool RemoveEventHandlerWrite(const std::string & eventName);
@@ -429,15 +431,19 @@ template <class __classType>
 inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
                                                                                __classType * classInstantiation,
                                                                                const std::string & eventName,
-                                                                               mtsEventQueueingPolicy queueingPolicy)
+                                                                               mtsEventQueueingPolicy queueingPolicy,
+                                                                               mtsGenericObject *argumentPrototype)
 {
     bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerWriteGeneric", eventName);
     mtsCommandWriteBase * actualCommand =
-        new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, 0);
+        new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, argumentPrototype);
     if (queued) {
         // PK: check for MailBox overlaps with code in UseQueueBasedOnInterfacePolicy
         if (MailBox) {
-            EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize));
+            mtsCommandQueuedWriteGeneric *tmp = new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize);
+            if (argumentPrototype)
+                tmp->SetArgumentPrototype(argumentPrototype);
+            EventHandlersWrite.AddItem(eventName,  tmp);
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write generic \"" << eventName << "\"" << std::endl;
         }
