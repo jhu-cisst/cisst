@@ -114,7 +114,9 @@ void vctPlot2DOpenGL::Render(const vctPlot2DBase::VerticalLine * line)
 
 void vctPlot2DOpenGL::Render(const vctPlot2DBase::Signal * signal)
 {
+    size_t numberOfPoints;
     if (signal->Visible) {
+        numberOfPoints = signal->Data.size();
         glColor3d(signal->Color.Element(0),
                   signal->Color.Element(1),
                   signal->Color.Element(2));

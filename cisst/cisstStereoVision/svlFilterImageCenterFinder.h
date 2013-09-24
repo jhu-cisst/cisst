@@ -43,7 +43,6 @@ public:
 
     int GetCenter(int &x, int &y, unsigned int videoch = SVL_LEFT) const;
     int GetRadius(int &x, int &y, unsigned int videoch = SVL_LEFT) const;
-    int GetEllipse(svlEllipse &ellipse, unsigned int videoch = SVL_LEFT) const;
 
     void SetTrajectorySmoothing(double smoothing);
     void SetThreshold(unsigned char thresholdlevel);

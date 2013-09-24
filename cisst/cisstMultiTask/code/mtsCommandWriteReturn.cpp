@@ -45,10 +45,10 @@ mtsCommandWriteReturn::mtsCommandWriteReturn(mtsCallableWriteReturnBase * callab
 
 mtsCommandWriteReturn::~mtsCommandWriteReturn()
 {
-    if (this->ArgumentPrototype == this->ResultPrototype)
+    if (this->ArgumentPrototype) {
         delete this->ArgumentPrototype;
-    else {
-        delete this->ArgumentPrototype;
+    }
+    if (this->ResultPrototype) {
         delete this->ResultPrototype;
     }
 }

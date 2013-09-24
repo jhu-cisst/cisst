@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-09-03
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,50 +36,18 @@ class CISST_EXPORT mtsFunctionWriteProxy : public mtsFunctionWrite {
 protected:
     typedef mtsFunctionWrite BaseType;
     mtsProxySerializer Serializer;
-    std::string argSerialized;
-    mtsGenericObject *arg;
 
 public:
     mtsFunctionWriteProxy():
-        mtsFunctionWrite(true /* this is a proxy class */), arg(0)
+        mtsFunctionWrite(true /* this is a proxy class */)
     {}
 
-    mtsFunctionWriteProxy(const std::string &argumentPrototypeSerialized):
-        mtsFunctionWrite(true /* this is a proxy class */), argSerialized(argumentPrototypeSerialized)
-    {
-        arg = Serializer.DeSerialize(argumentPrototypeSerialized);
-        if (!arg)
-            CMN_LOG_INIT_ERROR << "mtsFunctionWriteProxy: could not deserialize argument prototype" << std::endl;
-    }
-
     ~mtsFunctionWriteProxy()
-    {
-        delete arg;
-    }
+    {}
 
     /*! Getter */
-    inline mtsProxySerializer * GetSerializer(void)
-    {
+    inline mtsProxySerializer * GetSerializer(void) {
         return &Serializer;
-    }
-
-    inline mtsExecutionResult ExecuteSerialized(const std::string &inputArgSerialized)
-    {
-        mtsExecutionResult ret = mtsExecutionResult:: ARGUMENT_DYNAMIC_CREATION_FAILED;
-        // If arg has not yet been dynamically constructed, try again because the
-        // class may have been dynamically loaded since the last attempt to construct it.
-        // Note that we could have the deserializer dynamically create the object from
-        // inputArgSerialized, but this would lead to unexpected results if the client
-        // sends the incorrect type.
-        if (!arg)
-            arg = Serializer.DeSerialize(argSerialized);
-        if (arg) {
-            if (Serializer.DeSerialize(inputArgSerialized, *arg))
-                ret = Execute(*arg);
-            else
-                ret = mtsExecutionResult::DESERIALIZATION_ERROR;
-        }
-        return ret;
     }
 };
 

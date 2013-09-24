@@ -159,7 +159,7 @@ struct osaThreadInternals {
 #define INTERNALS(A) (reinterpret_cast<osaThreadInternals*>(Internals)->A)
 
 // Constructor. Does nothing.
-osaThread::osaThread() : Signal(), Valid(false), Running(false)
+osaThread::osaThread() : Signal(), Valid(false)
 {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
 }
@@ -258,7 +258,6 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata)
 
     SetThreadName(name);
     Valid = true;
-    Running = true;
 }
 
 void osaThread::SetThreadName(const char* name)
@@ -302,7 +301,6 @@ void osaThread::Delete(void)
 #endif // CISST_WINDOWS
 
         Valid = false;
-        Running = false;
 
         // wait for thread to terminate
         Wait();
@@ -396,11 +394,8 @@ void osaThread::Sleep(double timeInSeconds)
         CMN_LOG_RUN_VERBOSE << "osaThread::Sleep: Calling osaSleep for external thread" << std::endl;
         osaSleep(timeInSeconds);
     }
-    else {
-        Running = false;
+    else
         Signal.Wait(timeInSeconds);
-        Running = true;
-    }
 }
 
 

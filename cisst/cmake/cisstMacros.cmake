@@ -668,8 +668,12 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
       # if the target exists, use its destination
       get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
     else (TARGET cisstDataGenerator)
-      find_program (CISST_DG_EXECUTABLE cisstDataGenerator)
+      message (SEND_ERROR "To use the cisst_data_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstDataGenerator")
     endif (TARGET cisstDataGenerator)
+  else (TARGET cisstCommon)
+    # assumes this is an external project, find using the path provided in cisst-config.cmake
+    find_program (CISST_DG_EXECUTABLE cisstDataGenerator
+                  PATHS "${CISST_BINARY_DIR}/bin")
   endif (TARGET cisstCommon)
 
   # loop over input files

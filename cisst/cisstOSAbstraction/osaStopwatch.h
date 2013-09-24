@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnLogger.h>
 
-#if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
+#if CISST_OS_IS_WINDOWS || (CISST_OS == CISST_CYGWIN)
     #include <Windows.h>
 #elif (CISST_OS == CISST_QNX)
     #include <time.h>

@@ -47,7 +47,7 @@ int main(void)
         std::cout << "> Enter port: ";
         std::cin >> port;
     }
-    socket.SetDestination(host, port);
+    socket.SetDestination(host.c_str(), port);
     isClientConnected = true;
 
     std::cout << std::endl

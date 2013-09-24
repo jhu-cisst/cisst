@@ -43,7 +43,9 @@ mtsCommandVoidReturn::mtsCommandVoidReturn(mtsCallableVoidReturnBase * callable,
 
 mtsCommandVoidReturn::~mtsCommandVoidReturn()
 {
-    delete this->ResultPrototype;
+    if (this->ResultPrototype) {
+        delete this->ResultPrototype;
+    }
 }
 
 

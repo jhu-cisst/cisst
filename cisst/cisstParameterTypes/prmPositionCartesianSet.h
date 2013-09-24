@@ -29,6 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctTransformationTypes.h>
+#include <cisstParameterTypes/prmTransformationBase.h>
+#include <cisstParameterTypes/prmTransformationManager.h>
 #include <cisstParameterTypes/prmMotionBase.h>
 
 // Always include last
@@ -44,7 +46,15 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
  protected:
     typedef prmMotionBase BaseType;
 
-    /*! Motion command goal */
+    /*! The controllable frame node in the transformation tree this
+      command will act on */
+    prmTransformationBasePtr MovingFrame;
+
+    /*! The controllable/reference frame node with respect to which
+      the goal is specified */
+    prmTransformationBasePtr ReferenceFrame;
+
+    /*! Motion command goal, relative to ReferenceFrame */
     vctDoubleFrm3 GoalMember;
 
     /*! linear velocity to goal (time derivative of magnitude of the
@@ -66,16 +76,22 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
 
  public:
     /*! default constructor */
-    prmPositionCartesianSet()
+    prmPositionCartesianSet():
+        MovingFrame(NULL),
+        ReferenceFrame(NULL)
     {}
 
     /*!constructor with all parameters */
-    prmPositionCartesianSet(const vctDoubleFrm3 & goal,
+    prmPositionCartesianSet(const prmTransformationBasePtr & movingFrame,
+                            const prmTransformationBasePtr & referenceFrame,
+                            const vctDoubleFrm3 & goal,
                             const vctDouble3 & velocity,
                             const vctDouble3 & velocityAngular,
                             const vctDouble3 & acceleration,
                             const vctDouble3 & accelerationAngular,
                             const vctBool2 & mask):
+        MovingFrame(movingFrame),
+        ReferenceFrame(referenceFrame),
         GoalMember(goal),
         Velocity(velocity),
         VelocityAngular(velocityAngular),
@@ -141,12 +157,55 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
        this->GoalMember.Rotation().Assign(orientation);
     }
 
+    /*! Set target to a node in the transformation tree
+      \param target node in the tree
+      \return void
+    */
+    void SetGoal(const prmTransformationBasePtr & target)
+    {
+        this->GoalMember = prmWRTReference(target, this->ReferenceFrame);
+    }
+
     /*! Get current goal parameter
       \return prmCartesianPosition current goal parameter
     */
     vctDoubleFrm3 GetGoal(void) const
     {
         return this->GoalMember;
+    }
+
+    /*! Set the reference frame for current move
+      \param referenceFrame frame node in the tree
+      \return void
+    */
+    void SetReferenceFrame(const prmTransformationBasePtr & referenceFrame)
+    {
+        this->ReferenceFrame = referenceFrame;
+    }
+
+    /*! Get the reference frame for current move
+      \return prmTransformationBasePtr reference frame node in the tree
+    */
+    prmTransformationBasePtr GetReferenceFrame(void) const
+    {
+        return this->ReferenceFrame;
+    }
+
+    /*! Set the moving frame for current move
+      \param movingFrame node in the tree
+      \return void
+    */
+    void SetMovingFrame(const prmTransformationBasePtr  & movingFrame)
+    {
+        this->MovingFrame =  movingFrame;
+    }
+
+    /*! Get the moving frame for current move
+      \return prmTransformationBasePtr reference frame node in the tree
+    */
+    prmTransformationBasePtr GetMovingFrame(void) const
+    {
+        return this->MovingFrame;
     }
 
     /*! Set the velocity parameter

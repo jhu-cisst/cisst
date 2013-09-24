@@ -353,41 +353,6 @@ IF(CISST_SVL_USE_USER_OPENCV)
 
     FIND_PACKAGE(OpenCV REQUIRED)
     IF(OpenCV_FOUND)
-
-        SET(SOURCE_FILES
-            ${SOURCE_FILES}
-            svlFilterImageZoom.cpp
-            svlFilterToolTracker.cpp
-            #svlVideoCodecOpenCV.h       # private header
-            #svlVideoCodecOpenCV.cpp
-            svlTrackerOCVMeanShift.cpp
-            svlCCCalibrationGrid.cpp
-            svlCCCornerDetector.cpp
-            svlCCFileIO.cpp
-            svlCCHandEyeCalibration.cpp
-            svlCCOriginDetector.cpp
-            svlFilterImageCameraCalibrationOpenCV.cpp
-            )
-        IF(NOT WIN32)
-            SET(SOURCE_FILES
-                ${SOURCE_FILES}
-                svlVidCapSrcOpenCV.h    # private header
-                svlVidCapSrcOpenCV.cpp
-                )
-        ENDIF(NOT WIN32)
-        SET(HEADER_FILES
-            ${HEADER_FILES}
-            svlFilterImageZoom.h
-            svlFilterToolTracker.h
-            svlTrackerOCVMeanShift.h
-            svlCCCalibrationGrid.h
-            svlCCCornerDetector.h
-            svlCCFileIO.h
-            svlCCHandEyeCalibration.h
-            svlCCOriginDetector.h
-            svlFilterImageCameraCalibrationOpenCV.h
-            )
-
         cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
         cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBRARIES)
         OPTION(CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" ON)

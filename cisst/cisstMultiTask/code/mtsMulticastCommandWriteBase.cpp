@@ -7,7 +7,8 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,35 +24,32 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
 #include <cisstMultiTask/mtsCommandWrite.h>
 
-bool mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
+void mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
     if (command) {
         VectorType::iterator it = std::find(Commands.begin(), Commands.end(), command);
         if (it != Commands.end()) {
             CMN_LOG_INIT_DEBUG << "Class mtsMulticastCommandWriteBase: AddCommand: command already added" << std::endl;
-            return false;
+            return;
         }
         // check if the command already has an argument prototype
         if (command->GetArgumentPrototype()) {
             CMN_ASSERT(this->GetArgumentPrototype());
             if (command->GetArgumentPrototype()->Services() != this->GetArgumentPrototype()->Services()) {
                 CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument types don't match" << std::endl;
-                return false;
+                return;  // need better error handling?
             } else {
                 // copy the multicast command prototype to each added command using in place new
                 this->GetArgumentPrototype()->Services()->Create(const_cast<mtsGenericObject *>(command->GetArgumentPrototype()), *(this->GetArgumentPrototype()));
                 // Add the command to the list
                 this->Commands.push_back(command);
-                return true;
             }
         } else {
             // create a new object
             command->SetArgumentPrototype(reinterpret_cast<const mtsGenericObject *>(this->GetArgumentPrototype()->Services()->Create(*(this->GetArgumentPrototype()))));
             // Add the command to the list
             this->Commands.push_back(command);
-            return true;
         }
     }
-    return false;
 }
 
 

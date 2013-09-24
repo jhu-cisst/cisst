@@ -50,11 +50,8 @@ mtsCommandQualifiedRead::mtsCommandQualifiedRead(mtsCallableQualifiedReadBase * 
 
 mtsCommandQualifiedRead::~mtsCommandQualifiedRead()
 {
-    if (this->Argument1Prototype == this->Argument2Prototype)
+    if (this->Argument1Prototype) {
         delete this->Argument1Prototype;
-    else {
-        delete this->Argument1Prototype;
-        delete this->Argument2Prototype;
     }
 }
 

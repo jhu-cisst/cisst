@@ -50,7 +50,6 @@ set (HEADER_FILES
 if (CISST_HAS_CISSTNETLIB)
   set (SOURCE_FILES
        ${SOURCE_FILES}
-       nmrInverseSPD.cpp
        nmrLSMinNorm.cpp
        nmrPInverse.cpp
        nmrPInverseEconomy.cpp
@@ -61,13 +60,11 @@ if (CISST_HAS_CISSTNETLIB)
        # deprecated nmrLSISolver.cpp
        nmrLSqLin.cpp
        nmrSymmetricEigenProblem.cpp
-       nmrSavitzkyGolay.cpp
       )
   set (HEADER_FILES
        ${HEADER_FILES}
        nmrNetlib.h
        nmrInverse.h
-       nmrInverseSPD.h
        nmrLU.h
        nmrLSMinNorm.h
        # deprecated: nmrLUSolver.h
@@ -86,7 +83,6 @@ if (CISST_HAS_CISSTNETLIB)
        nmrCallBack.h
        nmrSVDRSSolver.h
        nmrSymmetricEigenProblem.h
-       nmrSavitzkyGolay.h
        )
 endif (CISST_HAS_CISSTNETLIB)
 

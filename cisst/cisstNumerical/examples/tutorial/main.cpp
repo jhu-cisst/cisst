@@ -51,10 +51,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "ExampleIsOrthonormal.h"
 #include <cisstNumerical/nmrGaussJordanInverse.h>
 #include "ExampleGaussJordanInverse.h"
-#include <cisstNumerical/nmrSavitzkyGolay.h>
-#include "ExampleSavitzkyGolay.h"
-#include <cisstNumerical/nmrInverseSPD.h>
-#include "ExampleInverseSPD.h"
 
 int main(void)
 {
@@ -111,12 +107,6 @@ int main(void)
 
     std::cout << "--- ExampleGaussJordanInverse ---" << std::endl;
     ExampleGaussJordanInverse();
-
-    std::cout << "--- ExampleSavitzkyGolay ---" << std::endl;
-    ExampleSavitzkyGolay();
-
-    std::cout << "--- ExampleInverseSPD ---" << std::endl;
-    ExampleInverseSPD();
 
     return 0;
 }

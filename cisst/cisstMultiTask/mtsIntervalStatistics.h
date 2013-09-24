@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsIntervalStatistics_h
 
 #include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
@@ -75,16 +74,6 @@ public:
         return Min;
     }
 
-    /*! Get minimum compute time. */
-    inline double MinComputeTime(void) const {
-        return MinComputeTime_;
-    }
-
-    /*! Get maximum compute time. */
-    inline double MaxComputeTime(void) const {
-        return MaxComputeTime_;
-    }
-
     /*! Time period between period statistics calculations */
     inline void SetStatisticsUpdatePeriod(const double & time) {
         StatisticsUpdatePeriod = time;
@@ -118,8 +107,8 @@ private:
     double         StdDev;
     double         Max;
     double         Min;
-    double MinComputeTime_;
-    double MaxComputeTime_;
+    double MinComputeTime;
+    double MaxComputeTime;
     double         StatisticsUpdatePeriod;
 
 public:
@@ -145,10 +134,5 @@ public:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatistics)
-
-typedef std::vector<mtsIntervalStatistics> mtsIntervalStatisticsVec;
-MTS_IMPLEMENT_STDVEC_STREAM_OUT(mtsIntervalStatisticsVec);
-typedef mtsGenericObjectProxy<mtsIntervalStatisticsVec> mtsIntervalStatisticsVecProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatisticsVecProxy);
 
 #endif // _mtsIntervalStatistics_h
