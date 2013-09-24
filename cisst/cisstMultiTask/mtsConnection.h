@@ -62,10 +62,10 @@ public:
 
     std::string GetClientProcessName(void) const;
     std::string GetClientComponentName(void) const;
-    std::string GetClientInterfaceRequiredName(void) const;
+    std::string GetClientInterfaceName(void) const;
     std::string GetServerProcessName(void) const;
     std::string GetServerComponentName(void) const;
-    std::string GetServerInterfaceProvidedName(void) const;
+    std::string GetServerInterfaceName(void) const;
 
     mtsDescriptionConnection GetDescriptionConnection(void) const;
     void GetDescriptionConnection(mtsDescriptionConnection & description) const;

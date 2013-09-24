@@ -324,9 +324,6 @@ public:
     inline virtual void ResetOverranPeriod(void) {
         OverranPeriod = false;
     }
-
-    // commented in base class
-    void ToStream(std::ostream & outputStream) const;
 };
 
 

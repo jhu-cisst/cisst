@@ -180,38 +180,38 @@ protected:
     /*! Get connection information about provided interface specified */
     ConnectionIDListType * GetConnectionsOfInterfaceProvidedOrOutput(
         const std::string & serverProcessName, const std::string & serverComponentName,
-        const std::string & interfaceProvidedName) const;
+        const std::string & interfaceName) const;
 
     ConnectionIDListType * GetConnectionsOfInterfaceProvidedOrOutput(
         const std::string & serverProcessName, const std::string & serverComponentName,
-        const std::string & interfaceProvidedName, InterfaceMapType ** interfaceMap) const;
+        const std::string & interfaceName, InterfaceMapType ** interfaceMap) const;
 
     /*! Get connection information about required interface specified */
     ConnectionIDListType * GetConnectionsOfInterfaceRequiredOrInput(
         const std::string & clientProcessName, const std::string & clientComponentName,
-        const std::string & interfaceRequiredName) const;
+        const std::string & interfaceName) const;
 
     ConnectionIDListType * GetConnectionsOfInterfaceRequiredOrInput(
         const std::string & clientProcessName, const std::string & clientComponentName,
-        const std::string & interfaceRequiredName, InterfaceMapType ** interfaceMap) const;
+        const std::string & interfaceName, InterfaceMapType ** interfaceMap) const;
 
     /*! Add new connection id to specified interface */
     bool AddConnectionToInterfaceProvidedOrOutput(
         const std::string & serverProcessName, const std::string & serverComponentName,
-        const std::string & interfaceProvidedName, const ConnectionIDType connectionID);
+        const std::string & interfaceName, const ConnectionIDType connectionID);
 
     bool AddConnectionToInterfaceRequiredOrInput(
         const std::string & clientProcessName, const std::string & clientComponentName,
-        const std::string & interfaceRequiredName, const ConnectionIDType connectionID);
+        const std::string & interfaceName, const ConnectionIDType connectionID);
 
     /*! Remove connection id from specified interface */
     bool RemoveConnectionOfInterfaceProvidedOrOutput(
         const std::string & serverProcessName, const std::string & serverComponentName,
-        const std::string & interfaceProvidedName, const ConnectionIDType connectionID);
+        const std::string & interfaceName, const ConnectionIDType connectionID);
 
     bool RemoveConnectionOfInterfaceRequiredOrInput(
         const std::string & clientProcessName, const std::string & clientComponentName,
-        const std::string & interfaceRequiredName, const ConnectionIDType connectionID);
+        const std::string & interfaceName, const ConnectionIDType connectionID);
 
     /*! Remove component proxies and internal interfaces (InterfaceComponentRequiredForXXX)
         that were created because of the disconnected process */
@@ -225,7 +225,7 @@ protected:
 
     /*! Get connection id that the required interface specified involves in */
     ConnectionIDType GetConnectionID(const std::string & clientProcessName,
-        const std::string & clientComponentName, const std::string & interfaceRequiredName) const;
+        const std::string & clientComponentName, const std::string & interfaceName) const;
 
     /*! Get connection information using connection id */
     mtsConnection * GetConnectionInformation(const ConnectionIDType connectionID);
@@ -285,8 +285,8 @@ public:
     //  Connection Management
     //-------------------------------------------------------------------------
     ConnectionIDType Connect(const std::string & requestProcessName,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceName,
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceName);
 
     bool ConnectConfirm(const ConnectionIDType connectionID);
 
@@ -295,8 +295,8 @@ public:
     bool Disconnect(const mtsDescriptionConnection & connection);
 
     bool Disconnect(
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceName,
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceName);
 
     bool InitiateConnect(const ConnectionIDType connectionID);
 
@@ -416,7 +416,7 @@ public:
 
     bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName,
-        const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
+        const std::string & serverInterfaceName, std::string & endpointInfo);
 
     /*! Check if there is any pending connection.  All new connections should be
         confirmed by the LCM within timeout after the GCM issues a new connection

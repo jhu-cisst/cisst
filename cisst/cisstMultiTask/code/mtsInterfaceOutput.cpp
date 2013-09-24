@@ -23,13 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 mtsInterfaceOutput::mtsInterfaceOutput(const std::string & name, mtsComponent * component):
-    BaseType(name, component)
+    mtsInterface(name, component)
 {
-}
-
-
-mtsInterfaceOutput::~mtsInterfaceOutput() {
-	CMN_LOG_CLASS_INIT_VERBOSE << "Class mtsInterfaceOutput: Class destructor" << std::endl;
-    // ADV: Need to add all cleanup, i.e. make sure all mailboxes are
-    // properly deleted.
 }

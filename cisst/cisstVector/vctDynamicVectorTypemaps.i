@@ -7,7 +7,7 @@
   Author(s):  Daniel Li, Anton Deguet, Mitch Williams
   Created on: 2009-05-20
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -385,8 +385,9 @@ http://www.cisst.org/cisst/license.txt.
     *****************************************************************************/
 
     typedef $1_ltype VectorType;
+    VectorType ref($1);
     npy_intp *sizes = PyDimMem_NEW(1);
-    sizes[0] = $1.size();
+    sizes[0] = ref.size();
     int type = vctPythonType<VectorType::value_type>();
     $result = PyArray_SimpleNew(1, sizes, type);
 
@@ -395,14 +396,14 @@ http://www.cisst.org/cisst/license.txt.
     *****************************************************************************/
 
     // Create a temporary vctDynamicVectorRef container
-    const npy_intp size = $1.size();
+    const npy_intp size = ref.size();
     const npy_intp stride = 1;
     const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($result));
 
     vctDynamicVectorRef<VectorType::value_type> tempContainer(size, data, stride);
 
     // Copy the data from the vctDynamicVectorRef to the temporary container
-    tempContainer.Assign($1);
+    tempContainer.Assign(ref);
 }
 
 

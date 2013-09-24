@@ -54,12 +54,11 @@ set (SOURCE_FILES
 
      mtsGenericObject.cpp
 
+     mtsInterface.cpp
      mtsInterfaceInput.cpp
      mtsInterfaceOutput.cpp
      mtsInterfaceProvided.cpp
-     mtsInterfaceProvidedOrOutput.cpp
      mtsInterfaceRequired.cpp
-     mtsInterfaceRequiredOrInput.cpp
      mtsIntervalStatistics.cpp
 
      mtsLODMultiplexerStreambuf.cpp
@@ -153,12 +152,11 @@ set (HEADER_FILES
 
      mtsIntervalStatistics.h
      mtsInterfaceCommon.h
+     mtsInterface.h
      mtsInterfaceInput.h
      mtsInterfaceOutput.h
      mtsInterfaceProvided.h
-     mtsInterfaceProvidedOrOutput.h
      mtsInterfaceRequired.h
-     mtsInterfaceRequiredOrInput.h
 
      mtsLODMultiplexerStreambuf.h
 
