@@ -350,7 +350,9 @@ void mtsSocketProxyServer::Run(void)
                 inputArgString.clear();
             }
 
-            if (inputArgString.empty()) {
+            if (commandName == "GetInitData")
+                ret = GetInitData(outputArgString);
+            else if (inputArgString.empty()) {
                 // Void, Read, or VoidReturn
                 mtsFunctionVoid *functionVoid = FunctionVoidProxyMap.GetItem(commandName);
                 if (functionVoid)
@@ -608,12 +610,14 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
 {
     std::stringstream outputStream;
     cmnSerializer serializer(outputStream);
-    mtsStdString stringProxy;
-    serializer.Serialize(stringProxy);
+    mtsStdString *stringProxy = new mtsStdString;
+    // mtsCommandQualifiedRead destructor will delete the following
+    serializer.Serialize(*stringProxy);
     std::string stringSerialized = outputStream.str();
     outputStream.str("");
-    mtsGenericObjectProxy<InterfaceProvidedDescription> descProxy;
-    serializer.Serialize(descProxy);
+    // mtsCommandRead destructor will delete the following
+    mtsGenericObjectProxy<InterfaceProvidedDescription> *descProxy = new mtsGenericObjectProxy<InterfaceProvidedDescription>;
+    serializer.Serialize(*descProxy);
     std::string interfaceDescriptionSerialized = outputStream.str();
 
     // GetInterfaceDescription
@@ -621,9 +625,9 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
     mtsCallableReadBase *callableRead;
     mtsCommandRead *commandRead;
 
-    InterfaceDescription.CommandsRead.push_back(CommandReadElement("GetInterfaceDescription", interfaceDescriptionSerialized));
+    //InterfaceDescription.CommandsRead.push_back(CommandReadElement("GetInterfaceDescription", interfaceDescriptionSerialized));
     callableRead = new mtsCallableReadMethod<mtsSocketProxyServer, InterfaceProvidedDescription>(&mtsSocketProxyServer::GetInterfaceDescription, this);
-    commandRead = new mtsCommandRead(callableRead, "GetInterfaceDescription", &descProxy);
+    commandRead = new mtsCommandRead(callableRead, "GetInterfaceDescription", descProxy);
     SpecialCommands.push_back(commandRead);
     functionReadProxy = new mtsFunctionReadProxy(interfaceDescriptionSerialized);
     functionReadProxy->Bind(commandRead);
@@ -643,9 +647,9 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
                            { "GetHandleVoidReturn", &mtsSocketProxyServer::GetHandleVoidReturn},
                            { "GetHandleWriteReturn", &mtsSocketProxyServer::GetHandleWriteReturn} };
     for (int i = 0; i < 6; i++) {
-        InterfaceDescription.CommandsQualifiedRead.push_back(CommandQualifiedReadElement(GetHandleInfo[i].name, stringSerialized, stringSerialized));
+        //InterfaceDescription.CommandsQualifiedRead.push_back(CommandQualifiedReadElement(GetHandleInfo[i].name, stringSerialized, stringSerialized));
         callableQualifiedRead = new mtsCallableQualifiedReadMethod<mtsSocketProxyServer, std::string, std::string>(GetHandleInfo[i].action, this);
-        commandQualifiedRead = new mtsCommandQualifiedRead(callableQualifiedRead, GetHandleInfo[i].name, &stringProxy, &stringProxy);
+        commandQualifiedRead = new mtsCommandQualifiedRead(callableQualifiedRead, GetHandleInfo[i].name, stringProxy, stringProxy);
         SpecialCommands.push_back(commandQualifiedRead);
         functionQualifiedReadProxy = new mtsFunctionQualifiedReadProxy(stringSerialized, stringSerialized);
         functionQualifiedReadProxy->Bind(commandQualifiedRead);
@@ -655,7 +659,7 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
     // EventEnable and EventDisable
     mtsFunctionWriteProxy *functionWriteProxy;
     mtsCommandWriteBase *commandWrite;
-    InterfaceDescription.CommandsWrite.push_back(CommandWriteElement("EventEnable", stringSerialized));
+    //InterfaceDescription.CommandsWrite.push_back(CommandWriteElement("EventEnable", stringSerialized));
     commandWrite = new mtsCommandWrite<mtsSocketProxyServer, std::string>(&mtsSocketProxyServer::EventEnable, this,
                                                                           "EventEnable", mtsStdString());
     SpecialCommands.push_back(commandWrite);
@@ -663,7 +667,7 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
     functionWriteProxy->Bind(commandWrite);
     FunctionWriteProxyMap.AddItem("EventEnable", functionWriteProxy);
 
-    InterfaceDescription.CommandsWrite.push_back(CommandWriteElement("EventDisable", stringSerialized));
+    //InterfaceDescription.CommandsWrite.push_back(CommandWriteElement("EventDisable", stringSerialized));
     commandWrite = new mtsCommandWrite<mtsSocketProxyServer, std::string>(&mtsSocketProxyServer::EventDisable, this,
                                                                           "EventDisable", mtsStdString());
     SpecialCommands.push_back(commandWrite);
@@ -701,7 +705,6 @@ mtsExecutionResult mtsSocketProxyServer::GetInitData(std::string &outputArgSeria
 
 bool mtsSocketProxyServer::GetInterfaceDescription(InterfaceProvidedDescription &desc) const
 {
-    CMN_LOG_CLASS_RUN_WARNING << "GetInterfaceDescription called" << std::endl;
     desc = InterfaceDescription;
     return true;
 }

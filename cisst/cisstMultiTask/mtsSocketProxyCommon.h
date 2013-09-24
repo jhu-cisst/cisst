@@ -40,6 +40,7 @@ class mtsFunctionQualifiedRead;
 
 namespace mtsSocketProxy {
 
+    const unsigned int SOCKET_PROXY_VERSION = 0;
     const unsigned int SOCKET_PROXY_PACKET_SIZE = 512;
 
 };
@@ -78,6 +79,7 @@ class CISST_EXPORT mtsSocketProxyInitData : public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
+    unsigned int version;
     unsigned int packetSize;    
     char getInterfaceDescription[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
     char getHandleVoid[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
@@ -97,6 +99,7 @@ public:
                            mtsFunctionWrite *ee, mtsFunctionWrite *ed);
     ~mtsSocketProxyInitData() {}
 
+    unsigned int InterfaceVersion(void) const { return version; }
     unsigned int PacketSize(void) const { return packetSize; }
     const char *GetInterfaceDescription(void) const { return getInterfaceDescription; }
     const char *GetHandleVoid(void) const { return getHandleVoid; }

@@ -38,7 +38,7 @@ CommandHandle::CommandHandle(const std::string &str)
 bool CommandHandle::IsValidType(char cmd_type)
 {
     return ((cmd_type == 'V') || (cmd_type == 'R') || (cmd_type == 'W') || (cmd_type == 'Q')
-           || (cmd_type == 'r') || (cmd_type == 'q'));
+            || (cmd_type == 'r') || (cmd_type == 'q') || (cmd_type == 'I'));
 }
 
 bool CommandHandle::IsValid(void) const
@@ -94,7 +94,8 @@ bool CommandHandle::operator != (const CommandHandle &other) const
 
 CMN_IMPLEMENT_SERVICES(mtsSocketProxyInitData)
 
-mtsSocketProxyInitData::mtsSocketProxyInitData() : mtsGenericObject(), packetSize(mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE)
+mtsSocketProxyInitData::mtsSocketProxyInitData() : mtsGenericObject(), 
+    version(mtsSocketProxy::SOCKET_PROXY_VERSION), packetSize(mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE)
 {
     getInterfaceDescription[0] = 0;
     getHandleVoid[0] = 0;
@@ -110,7 +111,8 @@ mtsSocketProxyInitData::mtsSocketProxyInitData() : mtsGenericObject(), packetSiz
 mtsSocketProxyInitData::mtsSocketProxyInitData(unsigned int psize, mtsFunctionRead *gid, mtsFunctionQualifiedRead *ghv,
                         mtsFunctionQualifiedRead *ghr, mtsFunctionQualifiedRead *ghw, mtsFunctionQualifiedRead *ghqr,
                         mtsFunctionQualifiedRead *ghvr, mtsFunctionQualifiedRead *ghwr,
-                        mtsFunctionWrite *ee, mtsFunctionWrite *ed) : mtsGenericObject(), packetSize(psize)
+                        mtsFunctionWrite *ee, mtsFunctionWrite *ed)
+                        : mtsGenericObject(), version(mtsSocketProxy::SOCKET_PROXY_VERSION), packetSize(psize)
 {
     CommandHandle handle('R', gid);
     handle.ToString(getInterfaceDescription);
@@ -135,6 +137,7 @@ mtsSocketProxyInitData::mtsSocketProxyInitData(unsigned int psize, mtsFunctionRe
 void mtsSocketProxyInitData::SerializeRaw(std::ostream & outputStream) const
 {
     mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, version);
     cmnSerializeRaw(outputStream, packetSize);
     outputStream.write(getInterfaceDescription, sizeof(getInterfaceDescription));
     outputStream.write(getHandleVoid, sizeof(getHandleVoid));
@@ -150,6 +153,7 @@ void mtsSocketProxyInitData::SerializeRaw(std::ostream & outputStream) const
 void mtsSocketProxyInitData::DeSerializeRaw(std::istream & inputStream)
 {
     mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, version);
     cmnDeSerializeRaw(inputStream, packetSize);
     inputStream.read(getInterfaceDescription, sizeof(getInterfaceDescription));
     inputStream.read(getHandleVoid, sizeof(getHandleVoid));
@@ -164,27 +168,29 @@ void mtsSocketProxyInitData::DeSerializeRaw(std::istream & inputStream)
 
 void mtsSocketProxyInitData::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "PacketSize: " << packetSize << std::endl;
+    outputStream << "Version: " << version << ", PacketSize: " << packetSize << std::endl;
 }
 
-// Following implementation is incomplete (only handles PacketSize)
+// Following implementation is incomplete (only handles Version and PacketSize)
 void mtsSocketProxyInitData::ToStreamRaw(std::ostream & outputStream, const char delimiter,
                                          bool headerOnly, const std::string & headerPrefix) const
 {
     mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
     if (headerOnly)
-        outputStream << headerPrefix << "-PacketSize";
+        outputStream << headerPrefix << "-Version" << delimiter
+                     << headerPrefix << "-PacketSize";
     else
-        outputStream << this->packetSize;
+        outputStream << this->version << delimiter
+                     << this->packetSize;
 }
 
-// Following implementation is incomplete (only handles PacketSize)
+// Following implementation is incomplete (only handles Version and PacketSize)
 bool mtsSocketProxyInitData::FromStreamRaw(std::istream & inputStream, const char delimiter)
 {
     mtsGenericObject::FromStreamRaw(inputStream, delimiter);
     if (inputStream.fail())
         return false;
-    inputStream >> packetSize;
+    inputStream >> version >> packetSize;
     if (inputStream.fail())
         return false;
     return (typeid(*this) == typeid(mtsSocketProxyInitData));

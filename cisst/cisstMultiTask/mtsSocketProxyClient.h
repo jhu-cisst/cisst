@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 
+#include <cisstMultiTask/mtsSocketProxyCommon.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 class CommandWrapperBase;
@@ -82,6 +83,8 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
     osaMutex SocketMutex;
     mtsProxySerializer *InternalSerializer;
 
+    mtsSocketProxyInitData ServerData;
+
     // For memory cleanup
     std::vector<CommandWrapperBase *> CommandWrappers;
     std::vector<mtsCommandBase *> EventGenerators;
@@ -94,6 +97,8 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
 
     // For use by MulticastCommandVoidProxy and MulticastCommandWriteProxy
     bool EventOperation(const std::string &command, const std::string &eventName, const char *handle);
+    
+    void CheckForEvents(double timeoutInSec);
 
     friend class MulticastCommandVoidProxy;
     friend class MulticastCommandWriteProxy;
@@ -120,6 +125,8 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
 
     void Cleanup(void);
 
+    // Following used by command wrappers
+    bool CheckForEventsImmediate(double timeoutInSec);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSocketProxyClient)
