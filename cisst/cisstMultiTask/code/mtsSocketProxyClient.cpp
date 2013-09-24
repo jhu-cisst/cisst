@@ -732,13 +732,13 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
 bool mtsSocketProxyClient::EventOperation(const std::string &command, const std::string &eventName, const char *handle)
 {
     bool ret = false;
-    std::string nameSerialized;
-    if (InternalSerializer->Serialize(mtsStdString(eventName), nameSerialized)) {
+    std::string handleAndName(handle, CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+    handleAndName.append(eventName);
+    std::string handleAndNameSerialized;
+    if (InternalSerializer->Serialize(mtsStdString(handleAndName), handleAndNameSerialized)) {
         std::string buffer(command);
-        buffer.reserve(command.size()+1+CommandHandle::COMMAND_HANDLE_STRING_SIZE+nameSerialized.size());
         buffer.append(" ");
-        buffer.append(handle, CommandHandle::COMMAND_HANDLE_STRING_SIZE);
-        buffer.append(nameSerialized);
+        buffer.append(handleAndNameSerialized);
         if (Socket.Send(buffer) > 0) {
             char recvBuffer[8];
             // Wait for result, with 2 second timeout

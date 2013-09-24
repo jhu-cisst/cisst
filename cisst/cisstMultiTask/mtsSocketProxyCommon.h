@@ -30,7 +30,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 
+#include <cisstMultiTask/mtsGenericObject.h>
+
 #include <cisstMultiTask/mtsExport.h>
+
+class mtsFunctionRead;
+class mtsFunctionWrite;
+class mtsFunctionQualifiedRead;
 
 namespace mtsSocketProxy {
 
@@ -67,5 +73,55 @@ struct CISST_EXPORT CommandHandle {
     bool operator == (const CommandHandle & other) const;
     bool operator != (const CommandHandle & other) const;
 };
+
+class CISST_EXPORT mtsSocketProxyInitData : public mtsGenericObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+    unsigned int packetSize;    
+    char getInterfaceDescription[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+    char getHandleVoid[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+    char getHandleRead[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+    char getHandleWrite[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+    char getHandleQualifiedRead[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+    char getHandleVoidReturn[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+    char getHandleWriteReturn[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+    char eventEnable[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+    char eventDisable[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+
+public:
+    mtsSocketProxyInitData();
+    mtsSocketProxyInitData(unsigned int psize, mtsFunctionRead *gid, mtsFunctionQualifiedRead *ghv,
+                           mtsFunctionQualifiedRead *ghr, mtsFunctionQualifiedRead *ghw, mtsFunctionQualifiedRead *ghqr,
+                           mtsFunctionQualifiedRead *ghvr, mtsFunctionQualifiedRead *ghwr,
+                           mtsFunctionWrite *ee, mtsFunctionWrite *ed);
+    ~mtsSocketProxyInitData() {}
+
+    unsigned int PacketSize(void) const { return packetSize; }
+    const char *GetInterfaceDescription(void) const { return getInterfaceDescription; }
+    const char *GetHandleVoid(void) const { return getHandleVoid; }
+    const char *GetHandleRead(void) const { return getHandleRead; }
+    const char *GetHandleWrite(void) const { return getHandleWrite; }
+    const char *GetHandleQualifiedRead(void) const { return getHandleQualifiedRead; }
+    const char *GetHandleVoidReturn(void) const { return getHandleVoidReturn; }
+    const char *GetHandleWriteReturn(void) const { return getHandleWriteReturn; }
+    const char *EventEnable(void) const { return eventEnable; }
+    const char *EventDisable(void) const { return eventDisable; }
+
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
+
+    void ToStream(std::ostream & outputStream) const;
+
+    /*! Raw text output to stream */
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+
+    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
+      Returns true if successful. */
+    bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsSocketProxyInitData);
 
 #endif // _mtsSocketProxyCommon_h

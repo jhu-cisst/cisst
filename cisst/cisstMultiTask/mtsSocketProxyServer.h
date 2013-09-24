@@ -108,17 +108,27 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     EventGeneratorVoidProxyMapType    EventGeneratorVoidProxyMap;
     EventGeneratorWriteProxyMapType   EventGeneratorWriteProxyMap;
 
+    // For memory cleanup
+    std::vector<mtsCommandBase *> SpecialCommands;
+
     bool Init(const std::string &componentName, const std::string &providedInterfaceName);
-    void GetInterfaceDescription(InterfaceProvidedDescription &desc) const;
 
     /*! \brief Create server proxy
       \return True if success, false otherwise */
     bool CreateServerProxy(const std::string & requiredInterfaceName);
 
-    mtsExecutionResult GetInterfaceDescription(std::string &outputArgString) const;
-    mtsExecutionResult GetHandle(const std::string &commandName, const std::string &inputArgSerialized, 
-                                 std::string &handleString) const;
-    mtsExecutionResult EventOperation(const std::string &commandName, const std::string &inputArgSerialized);
+    bool GetInterfaceDescription(InterfaceProvidedDescription &desc) const;
+    bool GetHandleVoid(const std::string &commandName, std::string &handleString) const;
+    bool GetHandleRead(const std::string &commandName, std::string &handleString) const;
+    bool GetHandleWrite(const std::string &commandName, std::string &handleString) const;
+    bool GetHandleQualifiedRead(const std::string &commandName, std::string &handleString) const;
+    bool GetHandleVoidReturn(const std::string &commandName, std::string &handleString) const;
+    bool GetHandleWriteReturn(const std::string &commandName, std::string &handleString) const;
+    void EventEnable(const std::string &eventHandleAndName);
+    void EventDisable(const std::string &eventHandleAndName);
+
+    void AddSpecialCommands(void);
+    mtsExecutionResult GetInitData(std::string &outputArgSerialized) const;
 
  public:
     /*! Constructor
