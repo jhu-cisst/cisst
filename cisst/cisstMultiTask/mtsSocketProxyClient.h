@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsSocketProxyClient_h
 
 #include <cisstOSAbstraction/osaSocket.h>
-#include <cisstOSAbstraction/osaMutex.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 
 #include <cisstMultiTask/mtsSocketProxyCommon.h>
@@ -78,9 +77,6 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
  protected:
 
     osaSocket Socket;
-    // SocketMutex is a quick fix to deal with the fact that Read and QualifiedRead commands
-    // are not queued, and therefore occur asynchronously with respect to the Run method.
-    osaMutex SocketMutex;
     mtsProxySerializer *InternalSerializer;
 
     mtsSocketProxyInitData ServerData;

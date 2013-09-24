@@ -117,14 +117,13 @@ class CommandWrapperBase {
 protected:
     std::string Name;
     osaSocket   &Socket;
-    osaMutex    &SocketMutex;
     char        Handle[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
     EventReceiverWriteProxy *Receiver;
     mtsCommandWriteBase     *receiveHandler;
     mtsSocketProxyClient    *Proxy;
 public:
-    CommandWrapperBase(const std::string &name, osaSocket &socket, osaMutex &mutex, mtsSocketProxyClient *proxy)
-        : Name(name), Socket(socket), SocketMutex(mutex), Proxy(proxy)
+    CommandWrapperBase(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
+        : Name(name), Socket(socket), Proxy(proxy)
     {
         Handle[0] = 0;
         Receiver = new EventReceiverWriteProxy;
@@ -152,30 +151,45 @@ public:
 
 class CommandWrapperVoid : public CommandWrapperBase {
 public:
-    CommandWrapperVoid(const std::string &name, osaSocket &socket, osaMutex &mutex, mtsSocketProxyClient *proxy)
-        : CommandWrapperBase(name, socket, mutex, proxy) {}
+    CommandWrapperVoid(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
+        : CommandWrapperBase(name, socket, proxy) {}
     ~CommandWrapperVoid() {}
     void Method(void)
     {
         bool success = false;
         Receiver->SetArg(0);
-        if (Handle[0] != ' ') {
-            char recvBuffer[8];
-            SocketMutex.Lock();
-            if (Socket.Send(Name) > 0) {
-                // Wait for result, with 2 second timeout
-                int nBytes = Socket.Receive(recvBuffer, sizeof(recvBuffer), 2.0);
-                if ((nBytes >= 2) && (strcmp(recvBuffer, "OK") == 0))
-                    success = true;
-            }
-            SocketMutex.Unlock();
+        char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+        memcpy(sendBuffer, Handle, sizeof(Handle));
+        CommandHandle recv_handle('W', receiveHandler);
+        recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+        if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
+            // Wait for result, with 2 second timeout
+            if (!Proxy->CheckForEventsImmediate(2.0))
+                Receiver->Wait(2.0);
+            success = Receiver->ArgValid();
         }
-        else {
-            char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
-            memcpy(sendBuffer, Handle, sizeof(Handle));
+    }
+};
+
+class CommandWrapperWrite : public CommandWrapperBase {
+    mtsProxySerializer Serializer;
+public:
+    CommandWrapperWrite(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
+        : CommandWrapperBase(name, socket, proxy) {}
+    ~CommandWrapperWrite() {}
+
+    void Method(const mtsGenericObject &arg)
+    { 
+        bool success = false;
+        std::string sendBuffer;
+        Receiver->SetArg(0);
+        if (Serializer.Serialize(arg, sendBuffer)) {
+            char cmdBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+            memcpy(cmdBuffer, Handle, sizeof(Handle));
             CommandHandle recv_handle('W', receiveHandler);
-            recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
-            if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
+            recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+            sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
+            if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
                 // Wait for result, with 2 second timeout
                 if (!Proxy->CheckForEventsImmediate(2.0))
                     Receiver->Wait(2.0);
@@ -185,80 +199,24 @@ public:
     }
 };
 
-class CommandWrapperWrite : public CommandWrapperBase {
-    mtsProxySerializer Serializer;
-public:
-    CommandWrapperWrite(const std::string &name, osaSocket &socket, osaMutex &mutex, mtsSocketProxyClient *proxy)
-        : CommandWrapperBase(name, socket, mutex, proxy) {}
-    ~CommandWrapperWrite() {}
-
-    void Method(const mtsGenericObject &arg)
-    { 
-        bool success = false;
-        std::string sendBuffer;
-        Receiver->SetArg(0);
-        if (Serializer.Serialize(arg, sendBuffer)) {
-            if (Handle[0] != ' ') {
-                sendBuffer.insert(0, " ");
-                sendBuffer.insert(0, Name);
-                SocketMutex.Lock();
-                if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                    // Wait for result, with 2 second timeout
-                    char recvBuffer[8];
-                    int nBytes = Socket.Receive(recvBuffer, sizeof(recvBuffer), 2.0);
-                    if ((nBytes >= 2) && (strcmp(recvBuffer, "OK") == 0))
-                        success = true;
-                }
-                SocketMutex.Unlock();
-            }
-            else {
-                char cmdBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
-                memcpy(cmdBuffer, Handle, sizeof(Handle));
-                CommandHandle recv_handle('W', receiveHandler);
-                recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
-                sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
-                if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                    // Wait for result, with 2 second timeout
-                    if (!Proxy->CheckForEventsImmediate(2.0))
-                        Receiver->Wait(2.0);
-                    success = Receiver->ArgValid();
-                }
-            }
-        }
-    }
-};
-
 class CommandWrapperRead : public CommandWrapperBase {
 public:
-    CommandWrapperRead(const std::string &name, osaSocket &socket, osaMutex &mutex, mtsSocketProxyClient *proxy)
-        : CommandWrapperBase(name, socket, mutex, proxy) { }
+    CommandWrapperRead(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
+        : CommandWrapperBase(name, socket, proxy) { }
 
     ~CommandWrapperRead() { }
 
     bool Method(mtsGenericObject &arg) const
     { 
         Receiver->SetArg(&arg);
-        if (Handle[0] != ' ') {
-            std::string recvBuffer;
-            SocketMutex.Lock();
-            if (Socket.Send(Name) > 0) {
-                char packetBuffer[mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE];
-                Socket.ReceiveAsPackets(recvBuffer, packetBuffer, sizeof(packetBuffer), 2.0, 0.5);
-            }
-            SocketMutex.Unlock();
-            if (!recvBuffer.empty())
-                Receiver->ExecuteSerialized(recvBuffer);
-        }
-        else {
-            char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
-            memcpy(sendBuffer, Handle, sizeof(Handle));
-            CommandHandle recv_handle('W', receiveHandler);
-            recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
-            if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
-                // Wait for result, with 2 second timeout
-                if (!Proxy->CheckForEventsImmediate(2.0))
-                    Receiver->Wait(2.0);
-            }
+        char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+        memcpy(sendBuffer, Handle, sizeof(Handle));
+        CommandHandle recv_handle('W', receiveHandler);
+        recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+        if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
+            // Wait for result, with 2 second timeout
+            if (!Proxy->CheckForEventsImmediate(2.0))
+                Receiver->Wait(2.0);
         }
         return Receiver->ArgValid();
     }
@@ -267,8 +225,8 @@ public:
 class CommandWrapperQualifiedRead : public CommandWrapperBase {
     mtsProxySerializer Serializer;
 public:
-    CommandWrapperQualifiedRead(const std::string &name, osaSocket &socket, osaMutex &mutex, mtsSocketProxyClient *proxy)
-        : CommandWrapperBase(name, socket, mutex, proxy) {}
+    CommandWrapperQualifiedRead(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
+        : CommandWrapperBase(name, socket, proxy) {}
     ~CommandWrapperQualifiedRead() {}
 
     bool Method(const mtsGenericObject &arg1, mtsGenericObject &arg2) const
@@ -278,45 +236,16 @@ public:
         std::string sendBuffer;
         mtsProxySerializer &serializer = const_cast<mtsProxySerializer &>(this->Serializer);
         if (serializer.Serialize(arg1, sendBuffer)) {
-            if (Handle[0] != ' ') {
-                sendBuffer.insert(0, " ");
-                sendBuffer.insert(0, Name);    
-                std::string recvBuffer;
-                int nBytes = 0;
-                SocketMutex.Lock();
-                if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                    // Wait for result, with 2 second timeout
-                    char packetBuffer[mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE];
-                    nBytes = Socket.ReceiveAsPackets(recvBuffer, packetBuffer, sizeof(packetBuffer), 2.0, 0.5);
-                }
-                SocketMutex.Unlock();
-                if ((nBytes >= 3) && (recvBuffer.compare(0, 3, "OK ") == 0)) {
-                    if (Name.compare(0, 9, "GetHandle") == 0) {
-                        // Special case handling for GetHandle functions
-                        mtsStdString *arg2Str = dynamic_cast<mtsStdString *>(&arg2);
-                        if (arg2Str) {
-                            *arg2Str = recvBuffer.substr(3);
-                            success = true;
-                        }
-                    }
-                }
-                if (!success && !recvBuffer.empty()) {
-                    Receiver->ExecuteSerialized(recvBuffer);
-                    success = Receiver->ArgValid();
-                }
-            }
-            else {
-                char cmdBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
-                memcpy(cmdBuffer, Handle, sizeof(Handle));
-                CommandHandle recv_handle('W', receiveHandler);
-                recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
-                sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
-                if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                    // Wait for result, with 2 second timeout
-                    if (!Proxy->CheckForEventsImmediate(2.0))
-                        Receiver->Wait(2.0);
-                    success = Receiver->ArgValid();
-                }
+            char cmdBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+            memcpy(cmdBuffer, Handle, sizeof(Handle));
+            CommandHandle recv_handle('W', receiveHandler);
+            recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+            sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
+            if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
+                // Wait for result, with 2 second timeout
+                if (!Proxy->CheckForEventsImmediate(2.0))
+                    Receiver->Wait(2.0);
+                success = Receiver->ArgValid();
             }
         }
         return success;
@@ -509,9 +438,7 @@ void mtsSocketProxyClient::CheckForEvents(double timeoutInSec)
 {
     std::string inputArgString;
     char packetBuffer[mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE];
-    SocketMutex.Lock();
     int bytesRead = Socket.ReceiveAsPackets(inputArgString, packetBuffer, sizeof(packetBuffer), timeoutInSec, 0.5);
-    SocketMutex.Unlock();
     if (bytesRead > 0) {
         size_t pos = inputArgString.find(' ');
         if ((pos == 0) && (inputArgString.size() >= CommandHandle::COMMAND_HANDLE_STRING_SIZE)) {
@@ -584,7 +511,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
 {
     InternalSerializer = new mtsProxySerializer;
 
-    CommandWrapperRead GetInitData("GetInitData", Socket, SocketMutex, this);
+    CommandWrapperRead GetInitData("GetInitData", Socket, this);
     GetInitData.SetHandle(" I        ");
     if (GetInitData.Method(ServerData)) {
         if (ServerData.InterfaceVersion() != mtsSocketProxy::SOCKET_PROXY_VERSION)
@@ -599,7 +526,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
 
     // Create the client proxy based on the provided interface description obtained from the server proxy.
     mtsGenericObjectProxy<InterfaceProvidedDescription> descProxy;
-    CommandWrapperRead GetInterfaceDescription("GetInterfaceDescription", Socket, SocketMutex, this);
+    CommandWrapperRead GetInterfaceDescription("GetInterfaceDescription", Socket, this);
     GetInterfaceDescription.SetHandle(ServerData.GetInterfaceDescription());
     if (!GetInterfaceDescription.Method(descProxy))
         CMN_LOG_CLASS_RUN_ERROR << "GetInterfaceDescription failed" << std::endl;
@@ -617,11 +544,11 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     mtsStdString handleSerialized;
 
     // Create Void command proxies
-    CommandWrapperQualifiedRead GetHandleVoid("GetHandleVoid", Socket, SocketMutex, this);
+    CommandWrapperQualifiedRead GetHandleVoid("GetHandleVoid", Socket, this);
     GetHandleVoid.SetHandle(ServerData.GetHandleVoid());
     for (i = 0; i < providedInterfaceDescription.CommandsVoid.size(); ++i) {
         std::string commandName = providedInterfaceDescription.CommandsVoid[i].Name;
-        CommandWrapperVoid *wrapper = new CommandWrapperVoid(commandName, Socket, SocketMutex, this);
+        CommandWrapperVoid *wrapper = new CommandWrapperVoid(commandName, Socket, this);
         if (GetHandleVoid.Method(mtsStdString(commandName), handleSerialized))
             wrapper->SetHandle(handleSerialized);
         CommandWrappers.push_back(wrapper);
@@ -629,11 +556,11 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     }
 
     // Create Write command proxies
-    CommandWrapperQualifiedRead GetHandleWrite("GetHandleWrite", Socket, SocketMutex, this);
+    CommandWrapperQualifiedRead GetHandleWrite("GetHandleWrite", Socket, this);
     GetHandleWrite.SetHandle(ServerData.GetHandleWrite());
     for (i = 0; i < providedInterfaceDescription.CommandsWrite.size(); ++i) {
         const CommandWriteElement &cmd = providedInterfaceDescription.CommandsWrite[i];
-        CommandWrapperWrite *wrapper = new CommandWrapperWrite(cmd.Name, Socket, SocketMutex, this);
+        CommandWrapperWrite *wrapper = new CommandWrapperWrite(cmd.Name, Socket, this);
         if (GetHandleWrite.Method(mtsStdString(cmd.Name), handleSerialized))
             wrapper->SetHandle(handleSerialized);
         CommandWrappers.push_back(wrapper);
@@ -653,11 +580,11 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     }
 
     // Create Read command proxies
-    CommandWrapperQualifiedRead GetHandleRead("GetHandleRead", Socket, SocketMutex, this);
+    CommandWrapperQualifiedRead GetHandleRead("GetHandleRead", Socket, this);
     GetHandleRead.SetHandle(ServerData.GetHandleRead());
     for (i = 0; i < providedInterfaceDescription.CommandsRead.size(); ++i) {
         const CommandReadElement &cmd = providedInterfaceDescription.CommandsRead[i];
-        CommandWrapperRead *wrapper = new CommandWrapperRead(cmd.Name, Socket, SocketMutex, this);
+        CommandWrapperRead *wrapper = new CommandWrapperRead(cmd.Name, Socket, this);
         if (GetHandleRead.Method(mtsStdString(cmd.Name), handleSerialized))
             wrapper->SetHandle(handleSerialized);
         CommandWrappers.push_back(wrapper);
@@ -677,11 +604,11 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     }
 
     // Create QualifiedRead command proxies
-    CommandWrapperQualifiedRead GetHandleQualifiedRead("GetHandleQualifiedRead", Socket, SocketMutex, this);
+    CommandWrapperQualifiedRead GetHandleQualifiedRead("GetHandleQualifiedRead", Socket, this);
     GetHandleQualifiedRead.SetHandle(ServerData.GetHandleQualifiedRead());
     for (i = 0; i < providedInterfaceDescription.CommandsQualifiedRead.size(); ++i) {
         const CommandQualifiedReadElement &cmd = providedInterfaceDescription.CommandsQualifiedRead[i];
-        CommandWrapperQualifiedRead *wrapper = new CommandWrapperQualifiedRead(cmd.Name, Socket, SocketMutex, this);
+        CommandWrapperQualifiedRead *wrapper = new CommandWrapperQualifiedRead(cmd.Name, Socket, this);
         if (GetHandleQualifiedRead.Method(mtsStdString(cmd.Name), handleSerialized))
             wrapper->SetHandle(handleSerialized);
         CommandWrappers.push_back(wrapper);
@@ -706,7 +633,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     // Create VoidReturn command proxies
     for (i = 0; i < providedInterfaceDescription.CommandsVoidReturn.size(); ++i) {
         const CommandVoidReturnElement &cmd = providedInterfaceDescription.CommandsVoidReturn[i];
-        CommandWrapperVoidReturn *wrapper = new CommandWrapperVoidReturn(cmd.Name, Socket, SocketMutex, this);
+        CommandWrapperVoidReturn *wrapper = new CommandWrapperVoidReturn(cmd.Name, Socket, this);
         CommandWrappers.push_back(wrapper);
         mtsCallableVoidReturnBase *callable = new mtsCallableVoidReturnMethodGeneric<CommandWrapperVoidReturn>
             (&CommandWrapperVoidReturn::Method, wrapper);
@@ -726,7 +653,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     // Create WriteReturn command proxies
     for (i = 0; i < providedInterfaceDescription.CommandsWriteReturn.size(); ++i) {
         const CommandWriteReturnElement &cmd = providedInterfaceDescription.CommandsWriteReturn[i];
-        CommandWrapperWriteReturn *wrapper = new CommandWrapperWriteReturn(cmd.Name, Socket, SocketMutex, this);
+        CommandWrapperWriteReturn *wrapper = new CommandWrapperWriteReturn(cmd.Name, Socket, this);
         CommandWrappers.push_back(wrapper);
         mtsCallableWriteReturnBase *callable = new mtsCallableWriteReturnMethodGeneric<CommandWrapperWriteReturn>
             (&CommandWrapperWriteReturn::Method, wrapper);
