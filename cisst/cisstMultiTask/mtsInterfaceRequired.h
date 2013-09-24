@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsInterfaceRequired_h
 #define _mtsInterfaceRequired_h
 
-#include <cisstMultiTask/mtsInterfaceRequiredOrInput.h>
+#include <cisstMultiTask/mtsInterface.h>
 
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstOSAbstraction/osaThread.h>
@@ -83,7 +83,7 @@ class mtsEventHandlerList;
   with a real robot), at this time it is not worth the trouble.
 */
 
-class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
+class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -93,8 +93,13 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
     friend class mtsManagerLocalTest;
     friend class mtsEventReceiverBase;
     friend class mtsManagerComponentClient;
+    // for GetDescription
+    friend class mtsSocketProxyClient;
 
  protected:
+
+    /*! Indicates if the interface must be connected. */
+    mtsRequiredType Required;
 
     /*! Mailbox (if supported). */
     mtsMailBox * MailBox;
@@ -109,7 +114,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
     size_t ArgumentQueuesSize;
 
     /*! Default constructor. Does nothing, should not be used. */
-    mtsInterfaceRequired(void) {}
+    mtsInterfaceRequired(void);
 
     /*! Thread signal used for blocking calls.  It is shared between
       all functions */
@@ -143,7 +148,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
     /*! Default destructor. */
     virtual ~mtsInterfaceRequired();
 
-    const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const;
+    const mtsInterfaceProvided * GetConnectedInterface(void) const;
 
     /*! Set the desired size for the event handlers mail box.  If
       queueing has been enabled for this interface, a single mailbox
@@ -211,11 +216,16 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
     virtual mtsCommandWriteBase * GetEventHandlerWrite(const std::string & eventName) const;
     //@}
 
-    inline bool CouldConnectTo(mtsInterfaceProvidedOrOutput * CMN_UNUSED(interfaceProvidedOrOutput)) {
+    /* adeguet - seems deprecated or at least not used anywhere?
+    inline bool CouldConnectTo(mtsInterfaceProvided * CMN_UNUSED(interfaceProvidedOrOutput)) {
         return true;
-    }
-    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);  // Should be deprecated
-    bool Disconnect(void) { return DetachCommands(); }  // Should be deprecated
+        } */
+
+    bool ConnectTo(mtsInterfaceProvided * interfaceProvided);  // used by mtsManagerComponentClient.cpp
+    //    bool Disconnect(void) { return DetachCommands(); }  // Should be deprecated -- adeguet1 OrOutput
+
+    /*! Check if this interface is required or not for the component to function. */
+    mtsRequiredType IsRequired(void) const;
 
     /*!
       \todo update documentation
@@ -231,7 +241,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
     void BlockingCommandReturnExecutedHandler(void);
 
     bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
-    bool DetachCommands(void);
+    bool DetachCommands(void); // used by mtsManagerComponentClient
 
     void GetEventList(mtsEventHandlerList & eventList);
     bool CheckEventList(mtsEventHandlerList & eventList) const;
@@ -381,12 +391,12 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
                                                           const std::string & eventName,
                                                           mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
 
-    // PK: Can we get rid of this?
     template <class __classType>
         inline mtsCommandWriteBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
                                                                  __classType * classInstantiation,
                                                                  const std::string & eventName,
-                                                                 mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
+                                                                 mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY,
+                                                                 mtsGenericObject *argumentPrototype = 0);
 
     bool RemoveEventHandlerVoid(const std::string & eventName);
     bool RemoveEventHandlerWrite(const std::string & eventName);
@@ -421,15 +431,19 @@ template <class __classType>
 inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
                                                                                __classType * classInstantiation,
                                                                                const std::string & eventName,
-                                                                               mtsEventQueueingPolicy queueingPolicy)
+                                                                               mtsEventQueueingPolicy queueingPolicy,
+                                                                               mtsGenericObject *argumentPrototype)
 {
     bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerWriteGeneric", eventName);
     mtsCommandWriteBase * actualCommand =
-        new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, 0);
+        new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, argumentPrototype);
     if (queued) {
         // PK: check for MailBox overlaps with code in UseQueueBasedOnInterfacePolicy
         if (MailBox) {
-            EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize));
+            mtsCommandQueuedWriteGeneric *tmp = new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize);
+            if (argumentPrototype)
+                tmp->SetArgumentPrototype(argumentPrototype);
+            EventHandlersWrite.AddItem(eventName,  tmp);
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write generic \"" << eventName << "\"" << std::endl;
         }

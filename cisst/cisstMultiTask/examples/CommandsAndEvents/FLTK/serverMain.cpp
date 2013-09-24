@@ -24,6 +24,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 
+#if !CISST_MTS_HAS_ICE
+#include <cisstMultiTask/mtsSocketProxyServer.h>
+#endif
+
 // Enable or disable system-wide thread-safe logging
 //#define MTS_LOGGING
 
@@ -51,8 +55,10 @@ int main(int argc, char * argv[])
     mtsManagerLocal::SetLogForwarding(true);
 #endif
 
-    std::string globalComponentManagerIP;
     bool useGeneric;
+
+#if CISST_MTS_HAS_ICE
+    std::string globalComponentManagerIP;
 
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " [GlobalManagerIP] [flag]" << std::endl;
@@ -86,6 +92,14 @@ int main(int argc, char * argv[])
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
     }
+#else
+    useGeneric = true;
+    if ((argc > 1) && (argv[1][0] == '1'))
+        useGeneric = false;
+    mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
+    std::cout << "Starting server" << std::endl;
+    std::cout << "Using " << (useGeneric ? "mtsDouble" : "double") << std::endl;
+#endif
 
     // create our server task
     serverTaskBase * server;
@@ -97,6 +111,16 @@ int main(int argc, char * argv[])
 
     server->Configure();
     componentManager->AddComponent(server);
+
+#if !CISST_MTS_HAS_ICE
+    mtsSocketProxyServer * serverProxy = new mtsSocketProxyServer("MyServerProxy", "Server", "Provided", 1234);
+    componentManager->AddComponent(serverProxy);
+
+    if (!componentManager->Connect("MyServerProxy", "Required", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed for server" << std::endl;
+        return 1;
+    }
+#endif
 
     // create the tasks, i.e. find the commands
     componentManager->CreateAll();

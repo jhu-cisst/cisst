@@ -3,8 +3,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -54,12 +53,11 @@ set (SOURCE_FILES
 
      mtsGenericObject.cpp
 
+     mtsInterface.cpp
      mtsInterfaceInput.cpp
      mtsInterfaceOutput.cpp
      mtsInterfaceProvided.cpp
-     mtsInterfaceProvidedOrOutput.cpp
      mtsInterfaceRequired.cpp
-     mtsInterfaceRequiredOrInput.cpp
      mtsIntervalStatistics.cpp
 
      mtsLODMultiplexerStreambuf.cpp
@@ -77,6 +75,10 @@ set (SOURCE_FILES
 
      mtsParameterTypes.cpp
 
+     mtsSocketProxyCommon.cpp
+     mtsSocketProxyClient.cpp
+     mtsSocketProxyServer.cpp
+
      mtsStateIndex.cpp
      mtsStateTable.cpp
 
@@ -89,6 +91,7 @@ set (SOURCE_FILES
 
 # all header files
 set (HEADER_FILES
+
      mtsCallableQualifiedReadBase.h
      mtsCallableQualifiedReadMethod.h
      mtsCallableQualifiedReadReturnVoidMethod.h
@@ -125,7 +128,6 @@ set (HEADER_FILES
 
      mtsComponent.h
      mtsComponentAddLatency.h
-     mtsComponentDispatcher.h
      mtsComponentGeneratorMacros.h
      mtsComponentState.h
      mtsComponentViewer.h
@@ -149,16 +151,13 @@ set (HEADER_FILES
      mtsGenericObject.h
      mtsGenericObjectProxy.h
 
-     mtsHistory.h
-
      mtsIntervalStatistics.h
      mtsInterfaceCommon.h
+     mtsInterface.h
      mtsInterfaceInput.h
      mtsInterfaceOutput.h
      mtsInterfaceProvided.h
-     mtsInterfaceProvidedOrOutput.h
      mtsInterfaceRequired.h
-     mtsInterfaceRequiredOrInput.h
 
      mtsLODMultiplexerStreambuf.h
 
@@ -181,6 +180,10 @@ set (HEADER_FILES
 
      mtsQueue.h
 
+     mtsSocketProxyCommon.h
+     mtsSocketProxyClient.h
+     mtsSocketProxyServer.h
+
      mtsStateArray.h
      mtsStateArrayBase.h
      mtsStateData.h
@@ -197,6 +200,16 @@ set (HEADER_FILES
      mtsTransformationTypes.h
 
      mtsVector.h
+     )
+
+# Header files in code directory
+set (ADDITIONAL_HEADER_FILES
+
+     mtsFunctionQualifiedReadProxy.h
+     mtsFunctionReadProxy.h
+     mtsFunctionWriteProxy.h
+
+     mtsProxySerializer.h
      )
 
 if (MINGW)
@@ -233,7 +246,6 @@ if (CISST_MTS_HAS_ICE)
        mtsProxyBaseCommon.h
        mtsProxyBaseClient.h
        mtsProxyBaseServer.h
-       mtsProxySerializer.h
 
        mtsInterfaceRequiredProxy.h
        mtsComponentInterfaceProxyServer.h
@@ -250,8 +262,6 @@ if (CISST_MTS_HAS_ICE)
        mtsCommandReadProxy.h
        mtsCommandQualifiedReadProxy.h
 
-       mtsFunctionReadProxy.h
-       mtsFunctionWriteProxy.h
        mtsFunctionReturnProxyBase.h
        mtsFunctionVoidReturnProxy.h
        mtsFunctionWriteReturnProxy.h

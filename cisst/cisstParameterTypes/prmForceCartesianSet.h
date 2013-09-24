@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Cartesian position move parameters.
 */
 
@@ -27,8 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmForceCartesianSet_h
 #define _prmForceCartesianSet_h
 
-#include <cisstParameterTypes/prmTransformationBase.h>
-#include <cisstParameterTypes/prmTransformationManager.h>
+#include <cisstVector/vctFixedSizeVector.h>
 #include <cisstParameterTypes/prmMotionBase.h>
 
 // Always include last
@@ -48,30 +47,21 @@ public:
 
  protected:
     /*! Set and Get methods for the reference frame for current
-        force, mask, movinf and reference frames.  This is 
+        force, mask, movinf and reference frames.  This is
         defined by a node in the transformation tree. */
-
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(ForceType, Force);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(MaskType, Mask);
-    
+
  public:
     /*! default constructor */
     prmForceCartesianSet():
-        MovingFrameMember(NULL),
-        ReferenceFrameMember(NULL),
         ForceMember(0.0),
         MaskMember(true)
     {}
-    
+
     /*!constructor with all parameters */
-    prmForceCartesianSet(const prmTransformationBasePtr & movingFrame, 
-                         const prmTransformationBasePtr & referenceFrame, 
-                         const ForceType & force,
+    prmForceCartesianSet(const ForceType & force,
                          const MaskType & mask):
-        MovingFrameMember(movingFrame),
-        ReferenceFrameMember(referenceFrame),
         ForceMember(force),
         MaskMember(mask)
     {}
@@ -81,7 +71,7 @@ public:
         ForceMember.SetAll(forceSet);
         MaskMember.SetAll(mask);
     }
-    
+
     /*!destructor
      */
     virtual ~prmForceCartesianSet();
@@ -98,7 +88,7 @@ public:
 
     /*! Binary deserialization */
     void DeSerializeRaw(std::istream & inputStream);
-    
+
 }; // _prmForceCartesianSet_h
 
 

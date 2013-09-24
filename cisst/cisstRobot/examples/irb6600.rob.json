@@ -1,0 +1,66 @@
+{
+  "name":"irb6600",
+  "numOfLinks":6,
+  "links":[
+    {
+      "index":1,
+      "name":"joint_one",
+      "convention":"standard",
+      "alpha":-1.5708, "A":0.32, "theta":0.00, "D":0.780,
+      "type":"revolute",
+      "mode":"active",
+      "offset":0.00,
+      "jmin":-3.14159, "jmax":3.14159
+    },
+    {
+      "index":2,
+      "name":"joint_two",
+      "convention":"standard",
+      "alpha":0.0000, "A":-1.075, "theta":1.5708, "D":0.00,
+      "type":"revolute",
+      "mode":"active",
+      "offset":1.5708,
+      "jmin":-3.14159, "jmax":3.14159
+    },
+    {
+      "index":3,
+      "name":"joint_three",
+      "convention":"standard",
+      "alpha":1.5708, "A":-0.200, "theta":0.00, "D":0.00,
+      "type":"revolute",
+      "mode":"active",
+      "offset":0.00,
+      "jmin":-3.14159, "jmax":3.14159
+    },
+    {
+      "index":4,
+      "name":"joint_four",
+      "convention":"standard",
+      "alpha":-1.5708, "A":0.00, "theta":0.00, "D":1.142,
+      "type":"revolute",
+      "mode":"active",
+      "offset":0.00,
+      "jmin":-6.28318, "jmax":6.28318
+    },
+    {
+      "index":5,
+      "name":"joint_five",
+      "convention":"standard",
+      "alpha":1.5708, "A":0.00, "theta":0.00, "D":0.00,
+      "type":"revolute",
+      "mode":"active",
+      "offset":0.00,
+      "jmin":-3.14159, "jmax":3.14159
+    },
+    {
+      "index":6,
+      "name":"joint_six",
+      "convention":"standard",
+      "alpha":0.00, "A":0.00, "theta":0.00, "D":0.200,
+      "type":"revolute",
+      "mode":"active",
+      "offset":0.00,
+      "jmin":-6.28318, "jmax":6.28318
+    }
+  ]
+}

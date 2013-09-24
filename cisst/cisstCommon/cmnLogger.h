@@ -43,7 +43,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnExport.h>
 
-
+// MJ: some thirdparty drivers on QNX make CMN_LOG macro throw exceptions
+// (e.g., std::bad_cast) and the following preprocessor can be used to bypass
+// this issue by replacing CMN_LOG with std::cout.
+#define BYPASS_CMN_LOG 0
 
 
 /*! This macro is used to log human readable information within a
@@ -80,6 +83,12 @@ http://www.cisst.org/cisst/license.txt.
     (void*)0:\
     ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
 
+#if (CISST_OS == CISST_QNX)
+  #if BYPASS_CMN_LOG
+  #undef CMN_LOG_CLASS_INSTANCE
+  #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) std::cout
+  #endif
+#endif
 
 #define CMN_LOG_CLASS(lod) CMN_LOG_CLASS_INSTANCE(this, lod)
 
@@ -138,6 +147,12 @@ http://www.cisst.org/cisst/license.txt.
     (void*)0: \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
 
+#if (CISST_OS == CISST_QNX)
+  #if BYPASS_CMN_LOG
+  #undef CMN_LOG
+  #define CMN_LOG(lod) std::cout
+  #endif
+#endif
 
 /*! Macros defined to use #CMN_LOG for a given level of detail. */
 //@{

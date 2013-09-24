@@ -16,4 +16,6 @@
 project (cisstCommonApplications)
 
 # data generator should always be compiled so we don't use cisst_offer_application
-add_subdirectory (cisstDataGenerator)
+if (NOT CMAKE_CROSSCOMPILING)
+  add_subdirectory (cisstDataGenerator)
+endif (NOT CMAKE_CROSSCOMPILING)

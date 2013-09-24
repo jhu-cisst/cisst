@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 
 #include <cisstMultiTask/mtsMailBox.h>
+#include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsCallableVoidMethod.h>
 #include <cisstMultiTask/mtsCallableVoidFunction.h>
 #include <cisstMultiTask/mtsCallableVoidReturnMethod.h>
@@ -38,7 +39,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCallableReadReturnVoidMethod.h>
 #include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
 #include <cisstMultiTask/mtsCallableQualifiedReadReturnVoidMethod.h>
-#include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
+#include <cisstMultiTask/mtsCommandWrite.h>
+#include <cisstMultiTask/mtsMulticastCommandWrite.h>
+#include <cisstMultiTask/mtsInterface.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last
@@ -90,7 +94,7 @@ http://www.cisst.org/cisst/license.txt.
   and should only be called by mtsComponent.
 
 */
-class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
+class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     // To dynamically create and add command proxies and event proxies
@@ -103,13 +107,15 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
 
     // to allow adding command write generic ...
     friend class mtsComponentAddLatency;
+    friend class mtsSocketProxyClient;
+    friend class mtsSocketProxyServer;
 
  public:
     /*! This type */
     typedef mtsInterfaceProvided ThisType;
 
     /*! Base class */
-    typedef mtsInterfaceProvidedOrOutput BaseType;
+    typedef mtsInterface BaseType;
 
     /*! Default size for mail boxes and argument queues */
     enum {DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE = 64};
@@ -401,12 +407,6 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     mtsCommandRead * AddCommandReadStateDelayed(const mtsStateTable & stateTable,
                                                 const _elementType & stateData, const std::string & commandName);
 
-    /*! Adds command object to read history (i.e., vector of data)
-      from the state table. */
-    template <class _elementType>
-    mtsCommandQualifiedRead * AddCommandReadHistory(const mtsStateTable & stateTable, const _elementType & stateData,
-                                                    const std::string & commandName);
-
     /*! Adds command object to write to state table. */
     template <class _elementType>
     mtsCommandWriteBase * AddCommandWriteState(const mtsStateTable & stateTable,
@@ -474,7 +474,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
       interface. */
     //@{
     mtsCommandVoid * AddEventVoid(const std::string & eventName);
-    bool AddEventVoid(mtsFunctionVoid & eventTrigger, const std::string eventName);
+    bool AddEventVoid(mtsFunctionVoid & eventTrigger, const std::string & eventName);
 
     template <class __argumentType>
     mtsCommandWriteBase * AddEventWrite(const std::string & eventName,
@@ -755,25 +755,6 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateDelayed(const mtsState
     // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
     return this->AddCommandRead(new mtsCallableReadMethod<AccessorType, FinalType>(&AccessorType::GetDelayed, stateAccessor),
                                 commandName, new FinalType(stateData));
-}
-
-
-template <class _elementType>
-mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandReadHistory(const mtsStateTable & stateTable,
-                                                                      const _elementType & stateData, const std::string & commandName)
-{
-    typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
-    typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
-
-    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
-    if (!stateAccessor) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadHistory: invalid accessor for command " << commandName << std::endl;
-        return 0;
-    }
-    return this->AddCommandQualifiedRead(new mtsCallableQualifiedReadMethod<AccessorType, mtsStateIndex, mtsHistory<FinalType> >(&AccessorType::GetHistory, stateAccessor),
-                                         commandName,
-                                         mtsStateIndex(),
-                                         mtsHistory<FinalType>());
 }
 
 template <class _elementType>

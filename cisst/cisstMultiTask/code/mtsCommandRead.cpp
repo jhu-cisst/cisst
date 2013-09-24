@@ -48,9 +48,7 @@ mtsCommandRead::mtsCommandRead(mtsCallableReadBase * callable,
 
 mtsCommandRead::~mtsCommandRead()
 {
-    if (this->ArgumentPrototype) {
-        delete this->ArgumentPrototype;
-    }
+    delete this->ArgumentPrototype;
 }
 
 

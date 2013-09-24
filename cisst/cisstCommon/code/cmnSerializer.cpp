@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -31,6 +30,14 @@ cmnSerializer::cmnSerializer(std::ostream & outputStream):
     }
 }
 
+cmnSerializer::~cmnSerializer()
+{
+}
+
+void cmnSerializer::Reset(void)
+{
+    ServicesContainer.clear();
+}
 
 void cmnSerializer::Serialize(const cmnGenericObject & object, const bool serializeObject) {
     // get object services and send information if needed

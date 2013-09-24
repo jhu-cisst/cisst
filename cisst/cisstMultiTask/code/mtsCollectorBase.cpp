@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 mtsComponentManager * mtsCollectorBase::ComponentManager;
@@ -44,6 +45,7 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     OutputHeaderFile(0),
     FloatingNotation(COLLECTOR_FILE_FLOATING_NOTATION_NONE),
     Precision(10),
+    Width(4),
     FillCharacter(' '),
     FileOpened(false),
     Serializer(0)
@@ -199,6 +201,8 @@ void mtsCollectorBase::OpenFileIfNeeded(void)
     case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
         CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in text/truncated mode" << std::endl;
         this->OutputFile->open(this->OutputFileName.c_str(), std::ios::trunc);
+        // set parameters for the output stream!
+        this->SetOutputStreamParams();
         this->OutputHeaderFile->open(this->OutputHeaderFileName.c_str(), std::ios::trunc);
         this->FileOpened = true;
         break;
@@ -323,6 +327,31 @@ void mtsCollectorBase::GetWorkingDirectory(mtsStdString & placeHolder) const
     placeHolder = this->WorkingDirectoryMember;
 }
 
+void mtsCollectorBase::SetOutputStreamParams(void)
+{
+    // set floating point notation
+    switch (this->FloatingNotation) {
+    case COLLECTOR_FILE_FLOATING_NOTATION_NONE:
+        this->OutputStream->unsetf(std::ios::floatfield);
+        break;
+    case COLLECTOR_FILE_FLOATING_NOTATION_FIXED:
+        this->OutputStream->setf(std::ios::fixed, std::ios::floatfield);
+        break;
+    case COLLECTOR_FILE_FLOATING_NOTATION_SCIENTIFIC:
+        this->OutputStream->setf(std::ios::scientific, std::ios::floatfield);
+        break;
+    }
+
+    // set width
+    this->OutputStream->width(this->Width);
+
+    // set precision
+    this->OutputStream->precision(this->Precision);
+
+    // set fill character
+    this->OutputStream->fill(this->FillCharacter);
+}
+
 void mtsCollectorBase::SetOutputStreamFloatingNotation(const CollectorFileFloatingNotation floatingNotation)
 {
     this->FloatingNotation = floatingNotation;
@@ -330,17 +359,7 @@ void mtsCollectorBase::SetOutputStreamFloatingNotation(const CollectorFileFloati
         CMN_LOG_CLASS_RUN_WARNING << "SetOutputStreamFloatingNotation: floating notation modified while collecting, the setting will only be applied to future files" << std::endl;
     }
     else {
-        switch (floatingNotation) {
-        case COLLECTOR_FILE_FLOATING_NOTATION_NONE:
-            this->OutputStream->unsetf(std::ios::floatfield);
-            break;
-        case COLLECTOR_FILE_FLOATING_NOTATION_FIXED:
-            this->OutputStream->setf(std::ios::fixed, std::ios::floatfield);
-            break;
-        case COLLECTOR_FILE_FLOATING_NOTATION_SCIENTIFIC:
-            this->OutputStream->setf(std::ios::scientific, std::ios::floatfield);
-            break;
-        }
+        CMN_LOG_CLASS_RUN_VERBOSE << "SetOutputStreamFloatingNotation: floating notation set to " << this->FloatingNotation << std::endl;
     }
 }
 
@@ -351,7 +370,18 @@ void mtsCollectorBase::SetOutputStreamPrecision(const int precision)
         CMN_LOG_CLASS_RUN_WARNING << "SetOutputStreamPrecision: precision modified while collecting, the setting will only be applied to future files" << std::endl;
     }
     else {
-        this->OutputStream->precision(precision);
+        CMN_LOG_CLASS_RUN_VERBOSE << "SetOutputStreamPrecision: precision set to " << this->Precision << std::endl;
+    }
+}
+
+void mtsCollectorBase::SetOutputStreamWidth(const int width)
+{
+    this->Width = width;
+    if (this->Status == COLLECTOR_COLLECTING) {
+        CMN_LOG_CLASS_RUN_WARNING << "SetOutputStreamWidth: width modified while collecting, the setting will only be applied to future files" << std::endl;
+    }
+    else {
+        CMN_LOG_CLASS_RUN_VERBOSE << "SetOutputStreamWidth: width set to " << this->Width << std::endl;
     }
 }
 
@@ -362,7 +392,7 @@ void mtsCollectorBase::SetOutputStreamFill(const char fillCharacter)
         CMN_LOG_CLASS_RUN_WARNING << "SetOutputStreamFill: fill character modified while collecting, the setting will only be applied to future files" << std::endl;
     }
     else {
-        this->OutputStream->fill(fillCharacter);
+        CMN_LOG_CLASS_RUN_VERBOSE << "SetOutputStreamFill: fill character set to " << fillCharacter << std::endl;
     }
 }
 

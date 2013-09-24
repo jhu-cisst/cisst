@@ -6,8 +6,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -39,22 +38,32 @@
 #include "statemachine.h"
 #endif
 
+std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
+
 /********************* Methods that call user methods *****************/
 
 void mtsTask::DoRunInternal(void)
 {
     RunEventCalled = false;
     StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
-    // Make sure following is called
-    if (InterfaceProvidedToManager)
-        InterfaceProvidedToManager->ProcessMailBoxes();
+    try {
+        // Make sure following is called
+        if (InterfaceProvidedToManager)
+            InterfaceProvidedToManager->ProcessMailBoxes();
 #if CISST_HAS_SAFETY_PLUGINS
     double tic = osaGetTime();
 #endif
-    this->Run();
+        this->Run();
 #if CISST_HAS_SAFETY_PLUGINS
     StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
 #endif
+    }
+    catch (const std::exception &excp) {
+        OnRunException(excp);
+    }
+    catch (...) {
+        OnRunException(mtsTask::UnknownException);
+    }
     // advance all state tables (if automatic)
     // MJ: Filters installed are processed by mtsStateTable::Advance
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
@@ -123,10 +132,10 @@ void mtsTask::StartupInternal(void) {
 
     // Loop through the required interfaces and make sure they are all connected. This extra check is probably not needed.
     bool success = true;
-    InterfacesRequiredOrInputMapType::const_iterator requiredIterator = InterfacesRequiredOrInput.begin();
-    const mtsInterfaceProvidedOrOutput * connectedInterface;
+    InterfacesRequiredMapType::const_iterator requiredIterator = InterfacesRequired.begin();
+    const mtsInterfaceProvided * connectedInterface;
     for (;
-         requiredIterator != InterfacesRequiredOrInput.end();
+         requiredIterator != InterfacesRequired.end();
          requiredIterator++) {
         connectedInterface = requiredIterator->second->GetConnectedInterface();
         if (!connectedInterface) {
@@ -144,8 +153,16 @@ void mtsTask::StartupInternal(void) {
     }
     RunEventCalled = false;
     if (success) {
-        // Call user-supplied startup function
-        this->Startup();
+        try {
+            // Call user-supplied startup function
+            this->Startup();
+        }
+        catch (const std::exception &excp) {
+            OnStartupException(excp);
+        }
+        catch (...) {
+            OnStartupException(mtsTask::UnknownException);
+        }
         ChangeState(mtsComponentState::READY);
     }
     else {
@@ -164,7 +181,7 @@ void mtsTask::CleanupInternal() {
     StateTables.ForEachVoid(&mtsStateTable::Cleanup);
 
     // Perform Cleanup on all interfaces provided
-    InterfacesProvidedOrOutput.ForEachVoid(&mtsInterfaceProvidedOrOutput::Cleanup);
+    InterfacesProvided.ForEachVoid(&mtsInterfaceProvided::Cleanup);
 
     if (InterfaceProvidedToManagerCallable) {
         delete InterfaceProvidedToManagerCallable;
@@ -331,7 +348,7 @@ mtsTask::mtsTask(const std::string & name,
         ExecIn->AddEventHandlerVoid(&mtsTask::RunEventHandler, this, "RunEvent", MTS_EVENT_NOT_QUEUED);
         ExecIn->AddEventHandlerWrite(&mtsTask::ChangeStateEventHandler, this, "ChangeStateEvent", MTS_EVENT_NOT_QUEUED);
     }
-    else 
+    else
         CMN_LOG_CLASS_INIT_ERROR << "Failed to add ExecIn interface to " << this->GetName() << std::endl;
     // ExecOut interface
     ExecOut = this->AddInterfaceProvided(mtsManagerComponentBase::InterfaceNames::InterfaceExecOut);
@@ -340,7 +357,7 @@ mtsTask::mtsTask(const std::string & name,
         ExecOut->AddEventVoid(RunEventInternal, "RunEvent");
         ExecOut->AddEventWrite(ChangeStateEvent, "ChangeStateEvent", this->State);
     }
-    else 
+    else
         CMN_LOG_CLASS_INIT_ERROR << "Failed to add ExecOut interface to " << this->GetName() << std::endl;
 }
 
@@ -411,8 +428,7 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const st
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
     }
     if (interfaceProvided) {
-        if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided)) {
-            InterfacesProvided.push_back(interfaceProvided);
+        if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {
             return interfaceProvided;
         }
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: task " << this->GetName() << " unable to add interface \""
@@ -480,14 +496,16 @@ bool mtsTask::CheckForOwnThread(void) const
     return (osaGetCurrentThreadId() == Thread.GetId());
 }
 
-void mtsTask::ToStream(std::ostream & outputStream) const
+
+void mtsTask::OnStartupException(const std::exception &excp)
 {
-    outputStream << "Task name: " << Name << std::endl;
-    StateTable.ToStream(outputStream);
-    InterfacesProvidedOrOutput.ToStream(outputStream);
-    InterfacesRequiredOrInput.ToStream(outputStream);
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
 }
 
+void mtsTask::OnRunException(const std::exception &excp)
+{
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
+}
 
 void mtsTask::SetInitializationDelay(double delay)
 {

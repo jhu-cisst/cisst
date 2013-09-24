@@ -27,9 +27,7 @@ prmVelocityCartesianGet::~prmVelocityCartesianGet()
 void prmVelocityCartesianGet::ToStream(std::ostream & outputStream) const
 {
     BaseType::ToStream(outputStream);
-    outputStream << "\nReference frame: " << this->ReferenceFrameMember
-                 << "\nMoving frame: " << this->MovingFrameMember
-                 << "\nLinear velocity: " << this->VelocityLinearMember
+    outputStream << "Linear velocity: " << this->VelocityLinearMember
                  << "\nAngular velocity: " << this->VelocityAngularMember;
 }
 

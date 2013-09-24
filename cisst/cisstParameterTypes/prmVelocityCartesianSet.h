@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmVelocityCartesianSet_h
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstParameterTypes/prmTransformationManager.h>
 #include <cisstParameterTypes/prmMotionBase.h>
 
 // Always include last
@@ -48,14 +47,6 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
 
     typedef prmMotionBase BaseType;
 
-    /*! The controllable frame node in the transformation tree this
-      command will act on */
-    prmTransformationBasePtr MovingFrame;
-
-    /*! The controllable/reference frame node with respect to which
-      the goal is specified */
-    prmTransformationBasePtr ReferenceFrame;
-    
     /*! Linear goal (time derivative of magnitude of the vector to
       goal. */
     vctDouble3 Velocity;
@@ -74,21 +65,15 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
 
  public:
 	/*! default constructor */
-    inline prmVelocityCartesianSet():
-        MovingFrame(NULL),
-        ReferenceFrame(NULL)
-            {}
+    inline prmVelocityCartesianSet()
+    {}
     
     /*! constructor with all parameters */
-    prmVelocityCartesianSet(const prmTransformationBasePtr & movingFrame, 
-                            const prmTransformationBasePtr & referenceFrame,
-                            const vctDouble3 & velocity,
+    prmVelocityCartesianSet(const vctDouble3 & velocity,
                             const vctDouble3 & velocityAngular,
                             const vctDouble3 & acceleration,
                             const vctDouble3 & accelerationAngular,
                             const vctBool6 & mask):
-        MovingFrame(movingFrame),
-        ReferenceFrame(referenceFrame),  
         Velocity(velocity),
         VelocityAngular(velocityAngular),
         Acceleration(acceleration),
@@ -137,40 +122,6 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     inline vctDouble3 GetGoal(void) const
     {
         return this->Velocity;
-    }
-    
-    /*! Set the reference frame for current move
-      \param referenceFrame frame node in the tree
-      \return void
-    */
-    inline void SetReferenceFrame(const prmTransformationBasePtr & referenceFrame)
-    {
-        this->ReferenceFrame = referenceFrame;
-    } 
-    
-    /*! Get the reference frame for current move
-      \return prmTransformationBasePtr reference frame node in the tree
-    */
-    inline prmTransformationBasePtr GetReferenceFrame(void) const
-    {
-        return this->ReferenceFrame;
-    }
-
-    /*! Set the moving frame for current move
-      \param movingFrame frame node in the tree
-      \return void
-    */
-    inline void SetMovingFrame(const prmTransformationBasePtr & movingFrame)
-    {
-        this->MovingFrame =  movingFrame;
-    }
-    
-    /*! Get the moving frame for current move
-      \return prmTransformationBasePtr moving frame node in the tree
-    */
-    inline prmTransformationBasePtr GetMovingFrame(void) const
-    {
-        return this->MovingFrame;
     }
     
     /*! Set the velocity parameter

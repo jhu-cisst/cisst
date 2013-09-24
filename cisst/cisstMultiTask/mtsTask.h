@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,6 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsTask_h
 #define _mtsTask_h
 
+#include <stdexcept>
+
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaMutex.h>
@@ -40,7 +42,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
 #include <cisstMultiTask/mtsComponent.h>
-#include <cisstMultiTask/mtsHistory.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 
@@ -69,6 +70,8 @@ class CISST_EXPORT mtsTask: public mtsComponent
 
 public:
     typedef mtsComponent BaseType;
+
+    static std::runtime_error UnknownException;
 
 protected:
     /************************ Protected task data  *********************/
@@ -212,9 +215,17 @@ public:
     /* The Run, Startup, and Cleanup methods could be made protected.    */
     /* Note that Startup and Cleanup are now defind in mtsComponent.     */
 
-    /*! Virtual method that gets overloaded to run the actual task.
+    /*! Virtual method that gets called if an exception is thrown in the
+        Startup method. This could be moved to mtsComponent. */
+    virtual void OnStartupException(const std::exception &excp);
+
+    /*! Pure virtual method that gets overloaded to run the actual task.
       */
     virtual void Run(void) = 0;
+
+    /*! Virtual method that gets called if an exception is thrown in the
+        Run method. */
+    virtual void OnRunException(const std::exception &excp);
 
     /*! Virtual method that gets called when the task/interface needs
       to be configured. Should it take XML info?? */
@@ -324,9 +335,6 @@ public:
     inline virtual void ResetOverranPeriod(void) {
         OverranPeriod = false;
     }
-
-    // commented in base class
-    void ToStream(std::ostream & outputStream) const;
 };
 
 

@@ -1,9 +1,11 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
 /*
+  Author(s):  Simon Leonard
+  Created on: 2009-11-11
 
-  Author(s): Simon Leonard
-  Created on: Nov 11 2009
-
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -21,20 +23,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstRobot/robExport.h>
 
 class CISST_EXPORT robFunction{
-  
+
  protected:
 
-  double t1;
-  double t2;
+    double t1;
+    double t2;
 
  public:
 
-  robFunction( double t1, double t2 );
-  
-  virtual double& StartTime();
-  virtual double& StopTime();
-  virtual double Duration() const;
+    robFunction( void );
+    robFunction( double startTime, double stopTime );
+
+    void Set( double startTime, double stopTime );
+    virtual double& StartTime( void );
+    virtual double& StopTime( void );
+    virtual double Duration( void ) const;
 
 };
 
-#endif
+#endif // _robFunction_h

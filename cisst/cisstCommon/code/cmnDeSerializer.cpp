@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -31,6 +30,9 @@ cmnDeSerializer::cmnDeSerializer(std::istream & inputStream):
     }
 }
 
+cmnDeSerializer::~cmnDeSerializer()
+{
+}
 
 cmnGenericObject * cmnDeSerializer::DeSerialize(const bool serializeObject) {
     cmnGenericObject * object = 0;
@@ -44,10 +46,12 @@ cmnGenericObject * cmnDeSerializer::DeSerialize(const bool serializeObject) {
             object = this->DeSerialize();
         }
     } else {
-        const const_iterator end = ServicesContainer.end();
-        const const_iterator iterator = ServicesContainer.find(typeId);
+        const_iterator end = ServicesContainer.end();
+        const_iterator iterator = ServicesContainer.find(typeId);
         if (iterator == end) {
-            CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Can't find corresponding class information" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "DeSerialize(dynamic): Can't find class information for typeId = " << typeId 
+                              << std::endl;
+            cmnThrow("DeSerialize: Can't find corresponding class information");
         } else {
             cmnClassServicesBase * servicesPointerLocal = iterator->second;
             object = servicesPointerLocal->Create();

@@ -209,8 +209,61 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
   Js = rmatrix(0, links.size()-1, 0, 5);
   Jn = rmatrix(0, links.size()-1, 0, 5);
 
-  return robManipulator::ESUCCESS;;
+  return robManipulator::ESUCCESS;
 }
+
+#if CISST_HAS_JSON
+robManipulator::Errno robManipulator::LoadRobot(const Json::Value &config)
+{
+    if (config.isNull()) {
+        CMN_LOG_RUN_ERROR << "JSON value is NULL" << std::endl;
+        return robManipulator::EFAILURE;
+    }
+
+    // get robot name
+    CMN_LOG_RUN_DEBUG << config.get("name", "robot").asString() << std::endl;
+
+    // get number of links
+    int numLinks = config.get("numOfLinks", -1).asInt();
+    if (numLinks == -1) {
+        CMN_LOG_RUN_ERROR << "Can't find number of links" << std::endl;
+        return robManipulator::EFAILURE;
+    }
+
+    // load each link
+    for (int i = 0; i < numLinks; i++) {
+        const Json::Value jlink = config["links"][i];
+        if (jlink.isNull()) {
+            CMN_LOG_RUN_ERROR << "Can't link " << i+1 << std::endl;
+            return robManipulator::EFAILURE;
+        }
+
+        // Find the type of kinematics convention
+        std::string convention;
+        convention = jlink.get("convention", "standard").asString();
+
+        robKinematics* kinematics = NULL;
+        try{ kinematics = robKinematics::Instantiate( convention ); }
+        catch( std::bad_alloc& ){
+          CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                << "Failed to allocate a kinematics of type: "
+                << convention
+                << std::endl;
+        }
+
+        CMN_ASSERT( kinematics != NULL );
+        robLink li( kinematics, robMass() );
+
+        li.Read(jlink);
+        links.push_back(li);
+    }
+
+    Js = rmatrix(0, links.size()-1, 0, 5);
+    Jn = rmatrix(0, links.size()-1, 0, 5);
+
+    return robManipulator::ESUCCESS;
+}
+#endif
 
 
 //////////////////////////////////////
@@ -350,11 +403,11 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
     // weights
     doublereal I[6][6] = { { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
-		       { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0 },
-		       { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 },
-		       { 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 },
-		       { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 },
-		       { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 } };
+                           { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0 },
+                           { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 },
+                           { 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 },
+                           { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 },
+                           { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 } };
 
     // We need to solve dq = J' ( JJ' + lambda I )^-1 e
 
@@ -394,8 +447,11 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   // copy the joint values and 
   for(size_t j=0; j<links.size(); j++){
     q[j] = fmod((double)q[j], (double)2.0*cmnPI);
-    if(cmnPI < q[j])
-      q[j] = q[j] - 2.0*cmnPI;
+    if (cmnPI < q[j]) {
+        q[j] = q[j] - 2.0*cmnPI;
+    } else if (q[j] < -cmnPI) {
+        q[j] = q[j] + 2.0 * cmnPI;
+    }
   }
 
   delete[] B;
@@ -663,7 +719,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   std::vector<vctFixedSizeVector<double,3> > F(links.size(),
 					       vctFixedSizeVector<double,3>(0));
   // torques
-  vctDynamicVector<double>                  tau(links.size(), 0.0);
+  vctDynamicVector<double> tau(links.size(), 0.0);
 
   // The axis pointing "up"
   vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);

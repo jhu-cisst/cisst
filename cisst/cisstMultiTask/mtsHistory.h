@@ -25,6 +25,8 @@ http://www.cisst.org/cisst/license.txt.
   \brief A data collection tool
 */
 
+#error "This file has been deprecated, there is no replacement for the class mtsHistory.  adeguet1, 2013/06/24"
+
 #ifndef _mtsHistory_h
 #define _mtsHistory_h
 

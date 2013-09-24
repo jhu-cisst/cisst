@@ -19,6 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 #define _robJoint_h
 
 #include <iostream>
+#include <cisstConfig.h>
+
+#if CISST_HAS_JSON
+#include <json/json.h>
+#endif
+
 #include <cisstRobot/robExport.h>
 
 //! Joint types
@@ -180,6 +186,9 @@ public:
      \param is[in] The input stream
   */
   virtual robJoint::Errno Read( std::istream& is );
+#if CISST_HAS_JSON
+  virtual robJoint::Errno Read( const Json::Value &config );
+#endif
 
   //! Read from an input stream
   /**

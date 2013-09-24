@@ -18,5 +18,7 @@ project (cisstRobotLibs)
 add_subdirectory (code)
 add_subdirectory (applications)
 
+# build examples and tests, add an option to skip them
+cisst_offer_examples (cisstRobot)
 # build tests, add an option to skip them
 cisst_offer_tests (cisstRobot)

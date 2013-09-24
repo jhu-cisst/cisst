@@ -22,6 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctMatrixRotation3.h>
 #include <cisstVector/vctFrame4x4.h>
+#if CISST_HAS_JSON
+#include <json/json.h>
+#endif
 #include <cisstRobot/robExport.h>
 
 class CISST_EXPORT robMass{
@@ -120,6 +123,9 @@ public:
 
   //! Read the mass from a input stream
   robMass::Errno ReadMass( std::istream& is );
+#if CISST_HAS_JSON
+  robMass::Errno ReadMass( const Json::Value &config );
+#endif
   
   //! Write the mass from a output stream
   robMass::Errno WriteMass( std::ostream& os ) const;
