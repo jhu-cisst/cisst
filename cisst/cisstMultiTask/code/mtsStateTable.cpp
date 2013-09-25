@@ -638,9 +638,7 @@ void mtsStateTable::PrintFilters(std::ostream & outputStream) const
     PRINT_FILTERS(FaultDetectors);
 }
 
-#endif
 
-// MJ TEMP
 double mtsStateTable::GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const
 {
     mtsDouble value;
@@ -675,6 +673,7 @@ void mtsStateTable::GetNewValueVector(const mtsStateDataId id, std::vector<doubl
         vec.push_back(_vec(i));
     }
 }
+#endif
 
 // MJ TODO: Following APIs could be added to access old values for convenience:
 //
