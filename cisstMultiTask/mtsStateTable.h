@@ -40,6 +40,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 #include <iostream>
 
+#if CISST_HAS_SAFETY_PLUGINS
+#include <cisstMultiTask/mtsVector.h>
+#endif
+
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
@@ -500,12 +504,12 @@ public:
     static const mtsStateDataId INVALID_STATEVECTOR_ID;
 
     /*! Fetch new value from state table */
+#if CISST_HAS_SAFETY_PLUGINS
     double GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const;
     mtsDoubleVec GetNewValueVector(const mtsStateDataId id, double & timeStamp) const;
     void GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & vec, double & timeStamp) const;
     void GetNewValueVector(const mtsStateDataId id, std::vector<double> & vec, double & timeStamp) const;
 
-#if CISST_HAS_SAFETY_PLUGINS
     typedef std::list<SF::FilterBase*> FiltersType;
     struct FiltersStruct {
         /*! List of filters attached to this state table to define features */
