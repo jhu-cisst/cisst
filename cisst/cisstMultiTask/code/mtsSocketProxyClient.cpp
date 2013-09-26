@@ -88,24 +88,51 @@ class EventReceiverWriteProxy
     osaThreadSignal    Signal;
     mtsProxySerializer Serializer;
     mtsGenericObject   *arg;
-    bool argValid;
+
+    enum ExecutionState { CMD_NONE, CMD_QUEUED, CMD_FINISHED, CMD_ABORTED };
+    ExecutionState    state;
 public:
-    EventReceiverWriteProxy() : arg(0), argValid(false) {}
+    EventReceiverWriteProxy() : arg(0), state(CMD_NONE) {}
     ~EventReceiverWriteProxy() {}
 
-    void SetArg(mtsGenericObject *a) { argValid = false; arg = a; }
-    bool ArgValid() const { return argValid; }
+    void SetArg(mtsGenericObject *a) { state = CMD_NONE; arg = a; }
+    bool WasQueued() const { return (state == CMD_QUEUED); }
+    bool WasFinished() const { return (state == CMD_FINISHED); }
+    bool WasAborted() const { return (state == CMD_ABORTED); }
 
     void ExecuteSerialized(const std::string &argString)
     {
-        if (arg) {
+        if (argString == "QUEUED")     // For any command that can be queued
+            state = CMD_QUEUED;
+        else if (arg) {                // For commands with a return value
             if ((argString.size() >= 3) && (argString.compare(0, 3, "OK ") == 0)) {
                 if (Serializer.DeSerialize(argString.substr(3), *arg))
-                    argValid = true;
+                    state = CMD_FINISHED;
+                else {
+                    CMN_LOG_RUN_ERROR << "EventReceiverWriteProxy: failed to deserialize return value of type "
+                                      << arg->Services()->GetName() << std::endl;
+                    state = CMD_ABORTED;
+                }
+            }
+            else if ((argString.size() >= 5) && (argString.compare(0, 5, "FAIL ") == 0))
+                state = CMD_ABORTED;
+            else {
+                CMN_LOG_RUN_WARNING << "EventReceiverWriteProxy(arg): unexpected response: " << argString << std::endl;
+                state = CMD_ABORTED;
             }
         }
-        else if (argString == "OK")
-            argValid = true;
+        else {                         // For commands with a return value
+            if (argString == "OK")
+                state = CMD_FINISHED;
+            else if (argString == "FAIL")
+                state = CMD_ABORTED;
+            else {
+                CMN_LOG_RUN_WARNING << "EventReceiverWriteProxy: unexpected response: " << argString << std::endl;
+                state = CMD_ABORTED;
+            }
+        }
+
+
         Signal.Raise();
     }
 
@@ -160,7 +187,6 @@ public:
             CMN_LOG_RUN_ERROR << "CommandWrapperVoid: invalid handle = " << Handle[1] << std::endl;
             return;
         }
-        bool success = false;
         Receiver->SetArg(0);
         char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
         memcpy(sendBuffer, Handle, sizeof(Handle));
@@ -170,7 +196,9 @@ public:
             // Wait for result, with 2 second timeout
             if (!Proxy->CheckForEventsImmediate(2.0))
                 Receiver->Wait(2.0);
-            success = Receiver->ArgValid();
+            if (!Receiver->WasQueued())
+                CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue void command "
+                                    << Name << std::endl;
         }
     }
 };
@@ -188,7 +216,6 @@ public:
             CMN_LOG_RUN_ERROR << "CommandWrapperWrite: invalid handle = " << Handle[1] << std::endl;
             return;
         }
-        bool success = false;
         std::string sendBuffer;
         Receiver->SetArg(0);
         if (Serializer.Serialize(arg, sendBuffer)) {
@@ -201,7 +228,9 @@ public:
                 // Wait for result, with 2 second timeout
                 if (!Proxy->CheckForEventsImmediate(2.0))
                     Receiver->Wait(2.0);
-                success = Receiver->ArgValid();
+                if (!Receiver->WasQueued())
+                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue write command "
+                                        << Name << std::endl;
             }
         }
     }
@@ -229,8 +258,11 @@ public:
             // Wait for result, with 2 second timeout
             if (!Proxy->CheckForEventsImmediate(2.0))
                 Receiver->Wait(2.0);
+            if (!Receiver->WasFinished())
+                CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to receive result for read command "
+                                    << Name << std::endl;
         }
-        return Receiver->ArgValid();
+        return Receiver->WasFinished();
     }
 };
 
@@ -243,7 +275,6 @@ public:
 
     bool Method(const mtsGenericObject &arg1, mtsGenericObject &arg2) const
     { 
-        bool success = false;
         if ((Handle[0] != ' ') || (Handle[1] != 'Q')) {
             CMN_LOG_RUN_ERROR << "CommandWrapperQualifiedRead: invalid handle = " << Handle[1] << std::endl;
             return false;
@@ -261,10 +292,12 @@ public:
                 // Wait for result, with 2 second timeout
                 if (!Proxy->CheckForEventsImmediate(2.0))
                     Receiver->Wait(2.0);
-                success = Receiver->ArgValid();
+                if (!Receiver->WasFinished())
+                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to receive result for qualified read command "
+                                        << Name << std::endl;
             }
         }
-        return success;
+        return Receiver->WasFinished();
     }
 };
 
@@ -290,9 +323,17 @@ public:
             // Wait for initial result (OK), with 2 second timeout
             if (!Proxy->CheckForEventsImmediate(2.0))
                 Receiver->Wait(2.0);
-            // Wait for final result, with 20 second timeout (for now)
-            if (!Proxy->CheckForEventsImmediate(20.0))
-                Receiver->Wait(20.0);
+            if (Receiver->WasQueued()) {
+                // Wait for final result, with 20 second timeout (for now)
+                if (!Proxy->CheckForEventsImmediate(20.0))
+                     Receiver->Wait(20.0);
+                if (!Receiver->WasFinished())
+                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: VoidReturn command " << Name
+                                        << " did not receive response (timeout)" << std::endl;
+            }
+            else
+                CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: VoidReturn command " << Name
+                                    << " failed, not waiting for result" << std::endl;
         }
     }
 };
@@ -324,9 +365,17 @@ public:
                 // Wait for initial result (OK), with 2 second timeout
                 if (!Proxy->CheckForEventsImmediate(2.0))
                     Receiver->Wait(2.0);
-                // Wait for final result, with 20 second timeout (for now)
-                if (!Proxy->CheckForEventsImmediate(20.0))
-                    Receiver->Wait(20.0);
+                if (Receiver->WasQueued()) {
+                    // Wait for final result, with 20 second timeout (for now)
+                    if (!Proxy->CheckForEventsImmediate(20.0))
+                         Receiver->Wait(20.0);
+                    if (!Receiver->WasFinished())
+                        CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: WriteReturn command " << Name
+                                            << " did not receive response (timeout)" << std::endl;
+                }
+                else
+                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: WriteReturn command " << Name
+                                        << " failed, not waiting for result" << std::endl;
             }
         }
     }

@@ -254,9 +254,9 @@ public:
                 Socket.GetDestination(IP, Port);
                 cmd->EnableFinishedEvent(eventSenderCommand);
                 ret = Execute(*retVal);
-                // ret is probably COMMAND_QUEUED
-                //if (ret != mtsExecutionResult::COMMAND_QUEUED)
-                //    CMN_LOG_RUN_WARNING << "FunctionVoidReturnProxy: result is not queued: " << ret << std::endl;
+                // ret should be COMMAND_QUEUED
+                if (ret.GetResult() != mtsExecutionResult::COMMAND_QUEUED)
+                    CMN_LOG_RUN_WARNING << "FunctionVoidReturnProxy: result is not queued: " << ret << std::endl;
             }
             else
                 ret = mtsExecutionResult::FUNCTION_NOT_BOUND;
@@ -358,9 +358,9 @@ public:
                     Socket.GetDestination(IP, Port);
                     cmd->EnableFinishedEvent(eventSenderCommand);
                     ret = Execute(*arg, *retVal);
-                    // ret is probably COMMAND_QUEUED
-                    //if (ret != mtsExecutionResult::COMMAND_QUEUED)
-                    //    CMN_LOG_RUN_WARNING << "FunctionWriteReturnProxy: result is not queued: " << ret << std::endl;
+                    // ret should be COMMAND_QUEUED
+                    if (ret.GetResult() != mtsExecutionResult::COMMAND_QUEUED)
+                        CMN_LOG_RUN_WARNING << "FunctionWriteReturnProxy: result is not queued: " << ret << std::endl;
                 }
                 else
                     ret = mtsExecutionResult::SERIALIZATION_ERROR;
@@ -464,9 +464,9 @@ void mtsSocketProxyServer::Run(void)
         //
         // There is currently only one protocol for the response packet. It begins with the
         // EventReceiverHandle (which is an empty string for the CommandString protocol), followed by
-        // a string indicating "OK" or "FAIL". If there is a return value (e.g., for Read, QualifiedRead,
-        // VoidReturn, or WriteReturn), this is followed by a space and then by the serialized
-        // return value.
+        // a string indicating "OK", "QUEUED", or "FAIL". If there is a return value (e.g., for Read,
+        // QualifiedRead, VoidReturn, or WriteReturn), this is followed by a space and then by the
+        // serialized return value.
 
         mtsExecutionResult ret;
         std::string        RecvHandle;
@@ -613,10 +613,18 @@ void mtsSocketProxyServer::Run(void)
         if (!ret.IsOK())
             CMN_LOG_CLASS_RUN_WARNING << "RETURN = " << ret << std::endl;
 
-        if (outputArgString.empty())
-            outputArgString.assign(ret.IsOK() ? "OK" : "FAIL");
-        else if (ret.IsOK())
+        if (outputArgString.empty()) {
+            if (ret.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED)
+                outputArgString.assign("OK");
+            else if (ret.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+                outputArgString.assign("QUEUED");
+            else
+                outputArgString.assign("FAIL");
+        }
+        else if (ret.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED)
             outputArgString.insert(0, "OK ", 3);
+        else if (ret.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+            outputArgString.insert(0, "QUEUED ", 7);  // should not happen (i.e., outputArgString should be empty)
         else
             outputArgString.insert(0, "FAIL ", 5);
 
@@ -924,6 +932,8 @@ mtsExecutionResult mtsSocketProxyServer::GetInitData(std::string &outputArgSeria
 
 bool mtsSocketProxyServer::GetInterfaceDescription(InterfaceProvidedDescription &desc) const
 {
+    mtsFunctionReadProxy *proxy = FunctionReadProxyMap.GetItem("GetInterfaceDescription");
+    proxy->GetSerializer()->Reset();
     desc = InterfaceDescription;
     return true;
 }
