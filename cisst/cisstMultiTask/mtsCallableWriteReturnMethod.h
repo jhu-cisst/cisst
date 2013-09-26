@@ -7,8 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -218,6 +217,69 @@ public:
         return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::IS_DERIVED,
                                cmnIsDerivedFromTemplated<ResultType, mtsGenericObjectProxy>::IS_DERIVED>
             ::CallMethod(ClassInstantiation, Action, argument, result);
+    }
+
+    /* documented in base class */
+    void ToStream(std::ostream & outputStream) const {
+        if (this->ClassInstantiation) {
+            outputStream << "method based callable write return object using class/object \""
+                         << mtsObjectName(this->ClassInstantiation) << "\"";
+        } else {
+            outputStream << "invalid method based callable object";
+        }
+    }
+};
+
+template <class _classType>
+class mtsCallableWriteReturnMethodGeneric: public mtsCallableWriteReturnBase {
+
+public:
+    typedef mtsCallableWriteReturnBase BaseType;
+
+    /*! Typedef for the specific interface. */
+    typedef _classType ClassType;
+
+    /*! This type. */
+    typedef mtsCallableWriteReturnMethodGeneric<ClassType> ThisType;
+
+    /*! Typedef for pointer to member function (method) of a specific
+      class (_classType). */
+    typedef void(_classType::*ActionType)(const mtsGenericObject & argument, mtsGenericObject & result);
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCallableWriteReturnMethodGeneric(const ThisType & CMN_UNUSED(other)) {}
+
+protected:
+    /*! The pointer to member function of the receiver class that
+      is to be invoked for a particular instance of the command. */
+    ActionType Action;
+
+    /*! Stores the receiver object of the command. */
+    ClassType * ClassInstantiation;
+
+public:
+    /*! The constructor. Does nothing. */
+    mtsCallableWriteReturnMethodGeneric(void): BaseType(), ClassInstantiation(0) {}
+
+    /*! The constructor.
+      \param action Pointer to the member function that is to be called
+      by the invoker of the command
+      \param classInstantiation Pointer to the receiver of the command
+    */
+    mtsCallableWriteReturnMethodGeneric(ActionType action, ClassType * classInstantiation):
+        BaseType(),
+        Action(action),
+        ClassInstantiation(classInstantiation)
+    {}
+
+    /*! The destructor. Does nothing */
+    virtual ~mtsCallableWriteReturnMethodGeneric() {}
+
+    /* documented in base class */
+    mtsExecutionResult Execute(const mtsGenericObject & argument, mtsGenericObject & result) {
+        (ClassInstantiation->*Action)(argument, result);
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
     /* documented in base class */
