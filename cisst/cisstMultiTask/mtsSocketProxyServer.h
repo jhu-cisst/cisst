@@ -36,8 +36,8 @@ http://www.cisst.org/cisst/license.txt.
 class mtsFunctionReadProxy;
 class mtsFunctionWriteProxy;
 class mtsFunctionQualifiedReadProxy;
-class mtsFunctionVoidReturnProxy;
-class mtsFunctionWriteReturnProxy;
+class FunctionVoidReturnProxy;
+class FunctionWriteReturnProxy;
 class mtsEventSenderVoid;
 class mtsEventSenderWrite;
 class mtsProxySerializer;
@@ -92,8 +92,8 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     typedef cmnNamedMap<mtsFunctionWriteProxy>         FunctionWriteProxyMapType;
     typedef cmnNamedMap<mtsFunctionReadProxy>          FunctionReadProxyMapType;
     typedef cmnNamedMap<mtsFunctionQualifiedReadProxy> FunctionQualifiedReadProxyMapType;
-    typedef cmnNamedMap<mtsFunctionVoidReturnProxy>    FunctionVoidReturnProxyMapType;
-    typedef cmnNamedMap<mtsFunctionWriteReturnProxy>   FunctionWriteReturnProxyMapType;
+    typedef cmnNamedMap<FunctionVoidReturnProxy>       FunctionVoidReturnProxyMapType;
+    typedef cmnNamedMap<FunctionWriteReturnProxy>      FunctionWriteReturnProxyMapType;
 
     /*! Typedef for event generator proxies */
     typedef cmnNamedMap<mtsEventSenderVoid>          EventGeneratorVoidProxyMapType;

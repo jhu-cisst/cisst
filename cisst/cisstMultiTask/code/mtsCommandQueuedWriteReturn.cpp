@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandQueuedWriteReturn.h>
 #include <cisstMultiTask/mtsCallableWriteReturnBase.h>
+#include <cisstMultiTask/mtsCommandWriteBase.h>
 #include <cisstMultiTask/mtsMailBox.h>
 
 
@@ -30,7 +30,8 @@ mtsCommandQueuedWriteReturn::mtsCommandQueuedWriteReturn(mtsCallableWriteReturnB
                                                          const mtsGenericObject * resultPrototype,
                                                          mtsMailBox * mailBox):
     BaseType(callable, name, argumentPrototype, resultPrototype),
-    MailBox(mailBox)
+    MailBox(mailBox),
+    FinishedEvent(0)
 {}
 
 
@@ -89,6 +90,23 @@ std::string mtsCommandQueuedWriteReturn::GetMailBoxName(void) const
     return this->MailBox ? this->MailBox->GetName() : "null pointer!";
 }
 
+
+void mtsCommandQueuedWriteReturn::EnableFinishedEvent(mtsCommandWriteBase *cmd)
+{
+    FinishedEvent = cmd;
+}
+
+bool mtsCommandQueuedWriteReturn::GenerateFinishedEvent(const mtsGenericObject &arg) const
+{
+    bool ret = false;
+    if (FinishedEvent) {
+        mtsExecutionResult result = FinishedEvent->Execute(arg, MTS_NOT_BLOCKING);
+        if (!result.IsOK())
+            CMN_LOG_RUN_ERROR << "mtsCommandQueuedWriteReturn: FinishedEvent returned " << result << std::endl;
+        ret = result.IsOK();
+    }
+    return ret;
+}
 
 void mtsCommandQueuedWriteReturn::ToStream(std::ostream & outputStream) const {
     outputStream << "mtsCommandQueuedWriteReturn: MailBox \""

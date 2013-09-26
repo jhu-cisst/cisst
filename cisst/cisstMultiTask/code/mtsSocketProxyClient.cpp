@@ -156,6 +156,10 @@ public:
     ~CommandWrapperVoid() {}
     void Method(void)
     {
+        if ((Handle[0] != ' ') || (Handle[1] != 'V')) {
+            CMN_LOG_RUN_ERROR << "CommandWrapperVoid: invalid handle = " << Handle[1] << std::endl;
+            return;
+        }
         bool success = false;
         Receiver->SetArg(0);
         char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
@@ -180,6 +184,10 @@ public:
 
     void Method(const mtsGenericObject &arg)
     { 
+        if ((Handle[0] != ' ') || (Handle[1] != 'W')) {
+            CMN_LOG_RUN_ERROR << "CommandWrapperWrite: invalid handle = " << Handle[1] << std::endl;
+            return;
+        }
         bool success = false;
         std::string sendBuffer;
         Receiver->SetArg(0);
@@ -208,6 +216,10 @@ public:
 
     bool Method(mtsGenericObject &arg) const
     { 
+        if ((Handle[0] != ' ') || ((Handle[1] != 'R') && (Handle[1] != 'I'))) {
+            CMN_LOG_RUN_ERROR << "CommandWrapperRead: invalid handle = " << Handle[1] << std::endl;
+            return false;
+        }
         Receiver->SetArg(&arg);
         char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
         memcpy(sendBuffer, Handle, sizeof(Handle));
@@ -232,6 +244,10 @@ public:
     bool Method(const mtsGenericObject &arg1, mtsGenericObject &arg2) const
     { 
         bool success = false;
+        if ((Handle[0] != ' ') || (Handle[1] != 'Q')) {
+            CMN_LOG_RUN_ERROR << "CommandWrapperQualifiedRead: invalid handle = " << Handle[1] << std::endl;
+            return false;
+        }
         Receiver->SetArg(&arg2);
         std::string sendBuffer;
         mtsProxySerializer &serializer = const_cast<mtsProxySerializer &>(this->Serializer);
@@ -249,6 +265,70 @@ public:
             }
         }
         return success;
+    }
+};
+
+class CommandWrapperVoidReturn : public CommandWrapperBase {
+public:
+    CommandWrapperVoidReturn(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
+        : CommandWrapperBase(name, socket, proxy) { }
+
+    ~CommandWrapperVoidReturn() { }
+
+    void Method(mtsGenericObject &arg)
+    { 
+        if ((Handle[0] != ' ') || (Handle[1] != 'r')) {
+            CMN_LOG_RUN_ERROR << "CommandWrapperVoidReturn: invalid handle = " << Handle[1] << std::endl;
+            return;
+        }
+        Receiver->SetArg(&arg);
+        char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+        memcpy(sendBuffer, Handle, sizeof(Handle));
+        CommandHandle recv_handle('W', receiveHandler);
+        recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+        if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
+            // Wait for initial result (OK), with 2 second timeout
+            if (!Proxy->CheckForEventsImmediate(2.0))
+                Receiver->Wait(2.0);
+            // Wait for final result, with 20 second timeout (for now)
+            if (!Proxy->CheckForEventsImmediate(20.0))
+                Receiver->Wait(20.0);
+        }
+    }
+};
+
+class CommandWrapperWriteReturn : public CommandWrapperBase {
+    mtsProxySerializer Serializer;
+public:
+    CommandWrapperWriteReturn(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
+        : CommandWrapperBase(name, socket, proxy) { }
+
+    ~CommandWrapperWriteReturn() { }
+
+    void Method(const mtsGenericObject &arg1, mtsGenericObject &arg2)
+    { 
+        if ((Handle[0] != ' ') || (Handle[1] != 'q')) {
+            CMN_LOG_RUN_ERROR << "CommandWrapperWriteReturn: invalid handle = " << Handle[1] << std::endl;
+            return;
+        }
+        Receiver->SetArg(&arg2);
+        std::string sendBuffer;
+        mtsProxySerializer &serializer = const_cast<mtsProxySerializer &>(this->Serializer);
+        if (serializer.Serialize(arg1, sendBuffer)) {
+            char cmdBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+            memcpy(cmdBuffer, Handle, sizeof(Handle));
+            CommandHandle recv_handle('W', receiveHandler);
+            recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+            sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
+            if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
+                // Wait for initial result (OK), with 2 second timeout
+                if (!Proxy->CheckForEventsImmediate(2.0))
+                    Receiver->Wait(2.0);
+                // Wait for final result, with 20 second timeout (for now)
+                if (!Proxy->CheckForEventsImmediate(20.0))
+                    Receiver->Wait(20.0);
+            }
+        }
     }
 };
 
@@ -551,6 +631,8 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         CommandWrapperVoid *wrapper = new CommandWrapperVoid(commandName, Socket, this);
         if (GetHandleVoid.Method(mtsStdString(commandName), handleSerialized))
             wrapper->SetHandle(handleSerialized);
+        else
+            CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for void command " << commandName << std::endl;
         CommandWrappers.push_back(wrapper);
         providedInterface->AddCommandVoid(&CommandWrapperVoid::Method, wrapper, commandName);
     }
@@ -563,6 +645,8 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         CommandWrapperWrite *wrapper = new CommandWrapperWrite(cmd.Name, Socket, this);
         if (GetHandleWrite.Method(mtsStdString(cmd.Name), handleSerialized))
             wrapper->SetHandle(handleSerialized);
+        else
+            CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for write command " << cmd.Name << std::endl;
         CommandWrappers.push_back(wrapper);
         std::stringstream argStream(cmd.ArgumentPrototypeSerialized);
         cmnDeSerializer deserializer(argStream);
@@ -587,6 +671,8 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         CommandWrapperRead *wrapper = new CommandWrapperRead(cmd.Name, Socket, this);
         if (GetHandleRead.Method(mtsStdString(cmd.Name), handleSerialized))
             wrapper->SetHandle(handleSerialized);
+        else
+            CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for read command " << cmd.Name << std::endl;
         CommandWrappers.push_back(wrapper);
         mtsCallableReadBase *callable = new mtsCallableReadMethodGeneric<CommandWrapperRead>
             (&CommandWrapperRead::Method, wrapper);
@@ -611,6 +697,8 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         CommandWrapperQualifiedRead *wrapper = new CommandWrapperQualifiedRead(cmd.Name, Socket, this);
         if (GetHandleQualifiedRead.Method(mtsStdString(cmd.Name), handleSerialized))
             wrapper->SetHandle(handleSerialized);
+        else
+            CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for qualified read command " << cmd.Name << std::endl;
         CommandWrappers.push_back(wrapper);
         mtsCallableQualifiedReadBase *callable = new mtsCallableQualifiedReadMethodGeneric<CommandWrapperQualifiedRead>
             (&CommandWrapperQualifiedRead::Method, wrapper);
@@ -629,11 +717,16 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         providedInterface->AddCommandQualifiedRead(callable, cmd.Name, arg1, arg2);
     }
 
-#if 0
     // Create VoidReturn command proxies
+    CommandWrapperQualifiedRead GetHandleVoidReturn("GetHandleVoidReturn", Socket, this);
+    GetHandleVoidReturn.SetHandle(ServerData.GetHandleVoidReturn());
     for (i = 0; i < providedInterfaceDescription.CommandsVoidReturn.size(); ++i) {
         const CommandVoidReturnElement &cmd = providedInterfaceDescription.CommandsVoidReturn[i];
         CommandWrapperVoidReturn *wrapper = new CommandWrapperVoidReturn(cmd.Name, Socket, this);
+        if (GetHandleVoidReturn.Method(mtsStdString(cmd.Name), handleSerialized))
+            wrapper->SetHandle(handleSerialized);
+        else
+            CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for void return command " << cmd.Name << std::endl;
         CommandWrappers.push_back(wrapper);
         mtsCallableVoidReturnBase *callable = new mtsCallableVoidReturnMethodGeneric<CommandWrapperVoidReturn>
             (&CommandWrapperVoidReturn::Method, wrapper);
@@ -651,9 +744,15 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     }
 
     // Create WriteReturn command proxies
+    CommandWrapperQualifiedRead GetHandleWriteReturn("GetHandleWriteReturn", Socket, this);
+    GetHandleWriteReturn.SetHandle(ServerData.GetHandleWriteReturn());
     for (i = 0; i < providedInterfaceDescription.CommandsWriteReturn.size(); ++i) {
         const CommandWriteReturnElement &cmd = providedInterfaceDescription.CommandsWriteReturn[i];
         CommandWrapperWriteReturn *wrapper = new CommandWrapperWriteReturn(cmd.Name, Socket, this);
+        if (GetHandleWriteReturn.Method(mtsStdString(cmd.Name), handleSerialized))
+            wrapper->SetHandle(handleSerialized);
+        else
+            CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for write return command " << cmd.Name << std::endl;
         CommandWrappers.push_back(wrapper);
         mtsCallableWriteReturnBase *callable = new mtsCallableWriteReturnMethodGeneric<CommandWrapperWriteReturn>
             (&CommandWrapperWriteReturn::Method, wrapper);
@@ -671,7 +770,6 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         }
         providedInterface->AddCommandWriteReturn(callable, cmd.Name, arg1, arg2);
     }
-#endif
 
     // Create Event Void generators
     for (i = 0; i < providedInterfaceDescription.EventsVoid.size(); ++i) {
