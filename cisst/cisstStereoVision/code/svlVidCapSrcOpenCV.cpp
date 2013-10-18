@@ -22,15 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "svlVidCapSrcOpenCV.h"
 #include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstStereoVision/svlBufferImage.h>
-
-// For compatibility with earlier OpenCV versions
-#ifndef CV_CAP_UNICAP
-    #define CV_CAP_UNICAP   600
-#endif
-#ifndef CV_CAP_DSHOW
-    #define CV_CAP_DSHOW    700
-#endif
 
 
 /*************************************/
@@ -81,7 +74,7 @@ int svlVidCapSrcOpenCV::SetStreamCount(unsigned int numofstreams)
     CaptureThread = new osaThread*[NumOfStreams];
     DeviceID = new int[NumOfStreams];
     ImageBuffer = new svlBufferImage*[NumOfStreams];
-    OCVCapture = new CvCapture*[NumOfStreams];
+    OCVCapture = new cv::VideoCapture*[NumOfStreams];
 
     for (unsigned int i = 0; i < NumOfStreams; i ++) {
         CaptureProc[i] = 0;
@@ -98,66 +91,28 @@ int svlVidCapSrcOpenCV::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **
 {
     if (deviceinfo == 0 || Initialized) return SVL_FAIL;
 
-    int i, j, maxdevices;
+    int i;
     int devid[800], width[800], height[800];
-    CvCapture *capture;
-    IplImage *frame;
-    char* imgdata;
 
     OCVNumberOfDevices = 0;
-    for (j = 1; j <= 7; j ++) {
-    // The first 7 APIs are supported right now
+    while (1) {
+        cv::VideoCapture capture2(OCVNumberOfDevices);
+        if (!capture2.isOpened()) break;
 
-        // Bug in OpenCV's Mac OS X QuickTime implementation.
-        // At the moment only the first device can be used.
-        // To be reviewed once OpenCV is fixed.
-        if (j*100 == CV_CAP_QT) maxdevices = 1;
-        else maxdevices = 100;
-
-#if CISST_SVL_HAS_VIDEO4LINUX2
-        // OpenCV's Video4Linux implementation interferes
-        // with SVL's native Video4Linux2 implementation.
-        // The two cannot be used in the same time.
-        // Skipping OpenCV Video4Linux devices.
-        if (j*100 == CV_CAP_VFW) continue;
-#endif // CISST_HAS_VIDEO4LINUX2
-
-#if CISST_SVL_HAS_DC1394
-        // OpenCV's DC1394 implementation may interfere
-        // with SVL's native DC1394 implementation.
-        // The two should be used in the same time.
-        // Skipping OpenCV DC1394 devices.
-        if (j*100 == CV_CAP_IEEE1394) continue;
-#endif // CISST_SVL_HAS_DC1394
-
-        imgdata = 0;
-        for (i = 0; i < maxdevices; i ++) {
-        // Find cameras
-            capture = cvCaptureFromCAM(j * 100 + i);
-            if (!capture) break;
-
-            // Trying to capture a frame
-            // to determine image dimensions
-            frame = cvQueryFrame(capture);
-            if(!frame) {
-                cvReleaseCapture(&capture);
-                continue;
-            }
-
-            // Check if the capture device have already been initialized
-            if (frame->imageData == imgdata) {
-                cvReleaseCapture(&capture);
-                break;
-            }
-            imgdata = frame->imageData;
-
-            width[OCVNumberOfDevices] = frame->width;
-            height[OCVNumberOfDevices] = frame->height;
-
-            cvReleaseCapture(&capture);
-            devid[OCVNumberOfDevices] = j * 100 + i;
-            OCVNumberOfDevices ++;
+        // Capture frame to determine image size
+        cv::Mat mat;
+        for (i = 0; i < 50; i ++) {
+            capture2 >> mat;
+            if (mat.cols >= 1 && mat.rows >= 1) break;
+            osaSleep(0.1);
         }
+        if (i >= 50) break;
+
+        width[OCVNumberOfDevices] = mat.cols;
+        height[OCVNumberOfDevices] = mat.rows;
+        devid[OCVNumberOfDevices] = OCVNumberOfDevices;
+
+        OCVNumberOfDevices ++;
     }
 
     if (OCVDeviceID) {
@@ -195,46 +150,7 @@ int svlVidCapSrcOpenCV::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **
 
             // name
             std::stringstream strstr;
-            switch ((OCVDeviceID[i] / 100) * 100) {
-                case CV_CAP_IEEE1394:
-#if (CISST_OS == CISST_WINDOWS)
-                    strstr << "CMU IEEE1394 Device (OpenCV: " << OCVDeviceID[i] << ")";
-#else
-                    strstr << "DC1394 Device (OpenCV: " << OCVDeviceID[i] << ")";
-#endif
-                break;
-
-                case CV_CAP_STEREO:
-                    strstr << "TYZX Stereo Device (OpenCV: " << OCVDeviceID[i] << ")";
-                break;
-
-                case CV_CAP_VFW:
-#if (CISST_OS == CISST_WINDOWS)
-                    strstr << "Video for Windows Device (OpenCV: " << OCVDeviceID[i] << ")";
-#else
-                    strstr << "Video4Linux Device (OpenCV: " << OCVDeviceID[i] << ")";
-#endif
-                break;
-
-                case CV_CAP_MIL:
-                    strstr << "Matrox Imaging Device (OpenCV: " << OCVDeviceID[i] << ")";
-                break;
-
-                case CV_CAP_QT:
-                    strstr << "QuickTime Device (OpenCV: " << OCVDeviceID[i] << ")";
-                break;
-
-                case CV_CAP_UNICAP:
-                    strstr << "Unicap Device (OpenCV: " << OCVDeviceID[i] << ")";
-                break;
-
-                case CV_CAP_DSHOW:
-                    strstr << "DirectShow Device (OpenCV: " << OCVDeviceID[i] << ")";
-                break;
-
-                default:
-                    strstr << "Unknown Device (OpenCV: " << OCVDeviceID[i] << ")";
-            }
+            strstr << "OpenCV video capture device #" << OCVDeviceID[i];
 
             memset(deviceinfo[0][i].name, 0, SVL_VCS_STRING_LENGTH);
             memcpy(deviceinfo[0][i].name, strstr.str().c_str(), std::min(static_cast<int>(strstr.str().length()), SVL_VCS_STRING_LENGTH - 1));
@@ -261,22 +177,26 @@ int svlVidCapSrcOpenCV::Open()
 
     Close();
 
-    IplImage *frame;
-
     for (unsigned int i = 0; i < NumOfStreams; i ++) {
 
         // Opening device
-        OCVCapture[i] = cvCaptureFromCAM(DeviceID[i]);
+        OCVCapture[i] = new cv::VideoCapture(DeviceID[i]);
         if (!OCVCapture[i]) goto labError;
 
+        // Check if device is open
+        if (!OCVCapture[i]->isOpened()) goto labError;
         // Trying to capture a frame
-        if (!cvGrabFrame(OCVCapture[i])) goto labError;
-
-        frame = cvRetrieveFrame(OCVCapture[i]);
-        if(!frame) goto labError;
+        cv::Mat mat;
+        int j;
+        for (j = 0; j < 50; j ++) {
+            OCVCapture[i][0] >> mat;
+            if (mat.cols >= 1 && mat.rows >= 1) break;
+            osaSleep(0.1);
+        }
+        if (j >= 50) goto labError;;
 
         // Allocate capture buffers
-        ImageBuffer[i] = new svlBufferImage(frame->width, frame->height);
+        ImageBuffer[i] = new svlBufferImage(mat.cols, mat.rows);
     }
 
     Initialized = true;
@@ -297,7 +217,7 @@ void svlVidCapSrcOpenCV::Close()
 
     for (unsigned int i = 0; i < NumOfStreams; i ++) {
         if (OCVCapture[i]) {
-            cvReleaseCapture(&(OCVCapture[i]));
+            delete OCVCapture[i];
             OCVCapture[i] = 0;
         }
 
@@ -442,10 +362,32 @@ void* svlVidCapSrcOpenCVThread::Proc(svlVidCapSrcOpenCV* baseref)
     InitSuccess = true;
     InitEvent.Raise();
 
-    while (baseref->Running) {
-        Frame = cvQueryFrame(baseref->OCVCapture[StreamID]);
+    cv::Mat captured_mat, rgb_mat;
+    IplImage ipl_img;
+    int i;
 
-        if (baseref->ImageBuffer[StreamID]->PushIplImage(Frame) == false) {
+    while (baseref->Running) {
+        for (i = 0; i < 50; i ++) {
+            baseref->OCVCapture[StreamID][0] >> captured_mat;
+            if (captured_mat.cols >= 1 && captured_mat.rows >= 1) break;
+            osaSleep(0.01);
+        }
+        if (i >= 50) {
+            Error = true;
+            break;
+        }
+        if (captured_mat.elemSize() == 1) {
+            cv::cvtColor(captured_mat, rgb_mat, CV_GRAY2RGB);
+            ipl_img = rgb_mat;
+        }
+        else if (captured_mat.elemSize() == 3) {
+            ipl_img = captured_mat;
+        }
+        else {
+            Error = true;
+            break;
+        }
+        if (baseref->ImageBuffer[StreamID]->PushIplImage(&ipl_img) == false) {
             Error = true;
             break;
         }
