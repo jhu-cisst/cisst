@@ -41,6 +41,10 @@ http://www.cisst.org/cisst/license.txt.
 #define SCHED_FIFO 0   /*! No Scheduling Policy available in Windows */
 #endif
 
+#if (CISST_OS == CISST_DARWIN) // SCHED_FIFO is not defined otherwise
+#include <pthread.h>
+#endif
+
 /*!
   \brief PriorityType and SchedulingPolicyType.
 
