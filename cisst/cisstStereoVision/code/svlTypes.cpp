@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cmath>
 #include <cisstStereoVision/svlTypes.h>
+#include <cmath>
 
 
 /*************************/
