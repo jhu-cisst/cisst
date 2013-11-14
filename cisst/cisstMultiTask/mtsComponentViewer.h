@@ -67,11 +67,11 @@ protected:
     static void ParseArgs(const std::string &input, std::string &arg1, std::string &arg2);
     static bool ParseProcessAndComponent(const std::string &input, std::string &processName,
                                          std::string &componentName);
-    void ProcessResponse(void);
+    virtual void ProcessResponse(void);
 
     bool ConnectToUDrawGraph(void);
 
-    void SendAllInfo(void);
+    virtual void SendAllInfo(void);
     void ActivateMenuItems(void);
 
     std::string GetComponentInUDrawGraphFormat(const std::string & processName, const std::string & componentName,
@@ -83,10 +83,10 @@ protected:
     void ChangeComponentBorder(const std::string &processName, const std::string &componentName, BorderType border);
 
     // Event Handlers
-    void AddComponentHandler(const mtsDescriptionComponent &componentInfo);
-    void ChangeStateHandler(const mtsComponentStateChange &componentStateChange);
-    void AddConnectionHandler(const mtsDescriptionConnection &connectionInfo);
-    void RemoveConnectionHandler(const mtsDescriptionConnection &connectionInfo);
+    virtual void AddComponentHandler(const mtsDescriptionComponent &componentInfo);
+    virtual void ChangeStateHandler(const mtsComponentStateChange &componentStateChange);
+    virtual void AddConnectionHandler(const mtsDescriptionConnection &connectionInfo);
+    virtual void RemoveConnectionHandler(const mtsDescriptionConnection &connectionInfo);
 
 public:
 
@@ -94,13 +94,13 @@ public:
 
     virtual ~mtsComponentViewer();
 
-    void Configure(const std::string & CMN_UNUSED(filename)) {}
+    virtual void Configure(const std::string & CMN_UNUSED(filename)) {}
 
-    void Startup(void);
+    virtual void Startup(void);
 
-    void Run(void);
+    virtual void Run(void);
 
-    void Cleanup(void);
+    virtual void Cleanup(void);
 
 };
 
