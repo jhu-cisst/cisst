@@ -38,6 +38,14 @@ extern "C" {
     #include <libswscale/swscale.h>
 }
 
+#define CALC_FFMPEG_VERSION(a,b,c) ( a<<16 | b<<8 | c )
+#if LIBAVCODEC_BUILD >= CALC_FFMPEG_VERSION(54,25,0)
+#  define CV_CODEC_ID AVCodecID
+#  define CV_CODEC(name) AV_##name
+#else
+#  define CV_CODEC_ID CodecID
+#  define CV_CODEC(name) name
+#endif
 
 class svlVideoCodecFFMPEG : public svlVideoCodecBase
 {
@@ -135,7 +143,8 @@ private:
     void BuildIndex();
     void ConfigureEncoder();
     void BuildEncoderList();
-    int GetFFMPEGEncoderID(CodecID codec_id) const;
+    /// \note AVCodecID
+    int GetFFMPEGEncoderID(CV_CODEC_ID codec_id) const;
     std::string GetExtensionFromEncoderID(unsigned int encoder_id);
 };
 

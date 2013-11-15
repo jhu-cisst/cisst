@@ -95,6 +95,8 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     friend class mtsManagerComponentClient;
     // for GetDescription
     friend class mtsSocketProxyClient;
+    // for MailBox
+    friend class mtsSocketProxyServer;
 
  protected:
 

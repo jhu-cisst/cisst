@@ -59,6 +59,10 @@ public:
         delete DeSerializer;
     }
 
+    void Reset(void) {
+        Serializer->Reset();
+    }
+
     bool Serialize(const mtsGenericObject & originalObject, std::string & serializedObject) {
         try {
             SerializationBuffer.str("");

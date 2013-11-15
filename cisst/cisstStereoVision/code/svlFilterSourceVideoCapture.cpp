@@ -1564,10 +1564,14 @@ labError:
 
 int svlFilterSourceVideoCapture::LoadSettings(const char* filepath)
 {
-    if (OutputImage == 0)
+    if (OutputImage == 0) {
+        CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: video channel count has not been set" << std::endl;
         return SVL_FAIL;
-    if (IsInitialized() == true)
+    }
+    if (IsInitialized() == true) {
+        CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: filter already initialized" << std::endl;
         return SVL_ALREADY_INITIALIZED;
+    }
 
     int intvalue;
     unsigned int i, readlen;
@@ -1582,6 +1586,7 @@ int svlFilterSourceVideoCapture::LoadSettings(const char* filepath)
     readlen = static_cast<unsigned int>(fread(&uintvalue, sizeof(unsigned int), 1, fp));
 	if (readlen < 1 || uintvalue != NumberOfChannels) {
         fclose(fp);
+        CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Number-Of-Channels\"" << std::endl;
         return SVL_FAIL;
     }
 
@@ -1590,30 +1595,75 @@ int svlFilterSourceVideoCapture::LoadSettings(const char* filepath)
 
     // For each channel
     for (i = 0; i < NumberOfChannels; i ++) {
+        bool device_id_out_of_range = false;
 
 		// Read "device id"
         readlen = static_cast<unsigned int>(fread(&intvalue, sizeof(int), 1, fp));
-		if (readlen < 1) goto labError;
-        if (intvalue < -1 || intvalue >= NumberOfEnumeratedDevices) goto labError;
-        DeviceID[i] = intvalue;
+        if (readlen < 1) {
+            CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Device-ID[" << i << "]\"" << std::endl;
+            goto labError;
+        }
+        if (intvalue < -1 || intvalue >= NumberOfEnumeratedDevices) {
+            device_id_out_of_range = true;
+            CMN_LOG_CLASS_INIT_WARNING << "LoadSettings: Device-ID[" << i << "]=" << intvalue << " out of range [0, " << NumberOfEnumeratedDevices - 1 << "]" << std::endl;
+            DeviceID[i] = -1;
+        }
+        else {
+            DeviceID[i] = intvalue;
+        }
 
         // Read "device name"
         readlen = static_cast<unsigned int>(fread(buffer, SVL_VCS_STRING_LENGTH, 1, fp));
-		if (readlen < 1) goto labError;
+        if (readlen < 1) {
+            CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Device-Name[" << i << "]\"" << std::endl;
+            goto labError;
+        }
+        buffer[SVL_VCS_STRING_LENGTH - 1] = 0;
         if (DeviceID[i] >= 0) {
-            buffer[SVL_VCS_STRING_LENGTH - 1] = 0;
-            if (strcmp(EnumeratedDevices[DeviceID[i]].name, buffer) != 0) goto labError;
+            if (strcmp(EnumeratedDevices[DeviceID[i]].name, buffer) != 0) {
+                CMN_LOG_CLASS_INIT_WARNING << "LoadSettings: Device-Name[" << i << "]\" doesn't match string in configuration file (\"" << EnumeratedDevices[DeviceID[i]].name << "\" vs. \"" << buffer << "\")" << std::endl;
+                DeviceID[i] = -1;
+            }
+        }
+        if (DeviceID[i] < 0) {
+            // List available capture devices
+            std::stringstream strstr;
+            strstr << "LoadSettings: searching for available capture device matching the name specified in configuration file (\"" << buffer << "\")" << std::endl
+                   << ". Available capture devices (" << NumberOfEnumeratedDevices << "):" << std::endl;
+            for (int j = 0; j < NumberOfEnumeratedDevices; j ++) {
+                strstr << ".     " << j << ") " << EnumeratedDevices[j].name << std::endl;
+            }
+            CMN_LOG_CLASS_INIT_WARNING << strstr.str();
+            // Search for device name
+            int j;
+            for (j = 0; j < NumberOfEnumeratedDevices; j ++) {
+                if (strcmp(EnumeratedDevices[j].name, buffer) == 0) {
+                    CMN_LOG_CLASS_INIT_WARNING << "LoadSettings: found matching capture device (" << j << ")" << std::endl;
+                    DeviceID[i] = j;
+                    break;
+                }
+            }
+            if (j >= NumberOfEnumeratedDevices) {
+                CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to find matching available capture device" << std::endl;
+                goto labError;
+            }
         }
 
         // Read "input id"
         readlen = static_cast<unsigned int>(fread(&intvalue, sizeof(int), 1, fp));
-		if (readlen < 1) goto labError;
+        if (readlen < 1) {
+            CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Input-ID[" << i << "]\"" << std::endl;
+            goto labError;
+        }
         if (DeviceID[i] >= 0) InputID[i] = intvalue;
         else InputID[i] = -1;
 
         // Read "format size"
         readlen = static_cast<unsigned int>(fread(&intvalue, sizeof(int), 1, fp));
-		if (readlen < 1) goto labError;
+        if (readlen < 1) {
+            CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Format-Size[" << i << "]\"" << std::endl;
+            goto labError;
+        }
 
         // Read "format"
         if (intvalue == sizeof(ImageFormat)) {
@@ -1622,13 +1672,17 @@ int svlFilterSourceVideoCapture::LoadSettings(const char* filepath)
             if (readlen < sizeof(ImageFormat)) {
                 delete Format[i];
                 Format[i] = 0;
+                CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Format[" << i << "]\"" << std::endl;
                 goto labError;
             }
         }
 
         // Read "properties size"
         readlen = static_cast<unsigned int>(fread(&intvalue, sizeof(int), 1, fp));
-		if (readlen < 1) goto labError;
+        if (readlen < 1) {
+            CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Properties-Size[" << i << "]\"" << std::endl;
+            goto labError;
+        }
 
         // Read "properties"
         if (intvalue == sizeof(ImageProperties)) {
@@ -1637,26 +1691,34 @@ int svlFilterSourceVideoCapture::LoadSettings(const char* filepath)
             if (readlen < sizeof(ImageProperties)) {
                 delete Properties[i];
                 Properties[i] = 0;
+                CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Properties[" << i << "]\"" << std::endl;
                 goto labError;
             }
         }
 
         // Read "trigger size"
         readlen = static_cast<unsigned int>(fread(&intvalue, sizeof(int), 1, fp));
-		if (readlen < 1) goto labError;
+        if (readlen < 1) {
+            CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Trigger-Size[" << i << "]\"" << std::endl;
+            goto labError;
+        }
 
         // Read "trigger"
         if (intvalue == sizeof(ExternalTrigger)) {
             readlen = static_cast<unsigned int>(fread(&(Trigger[i]), 1, sizeof(ExternalTrigger), fp));
             if (readlen < sizeof(ExternalTrigger)) {
                 memset(&(Trigger[i]), 0, sizeof(ExternalTrigger));
+                CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Trigger[" << i << "]\"" << std::endl;
                 goto labError;
             }
         }
 
         // Read "device specific configuration buffer size"
         readlen = static_cast<unsigned int>(fread(&uintvalue, sizeof(unsigned int), 1, fp));
-		if (readlen < 1) goto labError;
+        if (readlen < 1) {
+            CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Dev-Spec-Config-Buffer-Size[" << i << "]\"" << std::endl;
+            goto labError;
+        }
         if (DeviceID[i] >= 0) {
             if (uintvalue >= MAX_PROPERTIES_BUFFER_SIZE) goto labError;
             DevSpecConfigBufferSize[i] = uintvalue;
@@ -1669,7 +1731,10 @@ int svlFilterSourceVideoCapture::LoadSettings(const char* filepath)
         if (uintvalue > 0) {
             DevSpecConfigBuffer[i] = new unsigned char[uintvalue];
             readlen = static_cast<unsigned int>(fread(DevSpecConfigBuffer[i], 1, uintvalue, fp));
-    		if (readlen < uintvalue) goto labError;
+            if (readlen < uintvalue) {
+                CMN_LOG_CLASS_INIT_ERROR << "LoadSettings: failed to load \"Dev-Spec-Config-Buffer[" << i << "]\"" << std::endl;
+                goto labError;
+            }
         }
     }
 

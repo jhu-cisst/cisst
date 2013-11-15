@@ -305,10 +305,17 @@ public:
       A similar test can be performed for a cmnPrintfParser object,
       and tests the status of the output channel.
     */
+#if CISST_OSTREAM_CAN_CAST_TO_VOID_PTR       
     inline operator void *(void)
     {
         return (void *)(OutputStream);
     }
+#else
+    inline operator bool (void)
+    {
+        return OutputStream;
+    }
+#endif
 
     /*! The size of buffer allocated for formatting each output
       element.  Exceeding this size will truncate the output for that

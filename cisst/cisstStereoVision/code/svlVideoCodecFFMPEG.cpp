@@ -43,9 +43,9 @@ http://www.cisst.org/cisst/license.txt.
     }
 #endif
 
-#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (2 << 8))
-    #define av_open_input_file  avformat_open_input
-#endif
+//#if LIBAVCODEC_VERSION_INT < ((53 << 16) + (2 << 8))
+//    #define av_open_input_file  avformat_open_input
+//#endif
 
 #ifndef AVSEEK_FLAG_FRAME
     #define AVSEEK_FLAG_FRAME   8
@@ -58,7 +58,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*********************************/
 /*** svlVideoCodecFFMPEG class ***/
-/*********************************/
+/***************av_open_input_file******************/
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlVideoCodecFFMPEG, svlVideoCodecBase)
 
@@ -336,7 +336,7 @@ int svlVideoCodecFFMPEG::Create(const std::string &filename, const unsigned int 
         pEncoderCtx = pStream->codec;
 
         // Set generic encoder parameters
-        pEncoderCtx->codec_id      = static_cast<CodecID>(EncoderIDs[Config.EncoderID]);
+        pEncoderCtx->codec_id      = static_cast<CV_CODEC_ID>(EncoderIDs[Config.EncoderID]);
         pEncoderCtx->codec_type    = AVMEDIA_TYPE_VIDEO;
         pEncoderCtx->bit_rate      = Config.Bitrate * 1024; // bits per second
         pEncoderCtx->width         = width;                 // must be multiple of 2
@@ -1648,7 +1648,7 @@ void svlVideoCodecFFMPEG::BuildIndex()
 
 void svlVideoCodecFFMPEG::ConfigureEncoder()
 {
-    CodecID codec_id = static_cast<CodecID>(EncoderIDs[Config.EncoderID]);
+    CV_CODEC_ID codec_id = static_cast<CV_CODEC_ID>(EncoderIDs[Config.EncoderID]);
 
     pEncoderCtx->max_b_frames = 0;
     pEncoderCtx->gop_size     = Config.GoP;
@@ -1681,7 +1681,7 @@ void svlVideoCodecFFMPEG::BuildEncoderList()
 
     // Enumerate video encoders
     for (i = 0; i < first_num_of_codecs; i ++) {
-        av_codec = avcodec_find_encoder(static_cast<CodecID>(i));
+        av_codec = avcodec_find_encoder(static_cast<CV_CODEC_ID>(i));
         if (av_codec && av_codec->type == AVMEDIA_TYPE_VIDEO) {
             EncoderNames[encoder_count] = av_codec->long_name;
             EncoderIDs[encoder_count] = i;
@@ -1694,7 +1694,7 @@ void svlVideoCodecFFMPEG::BuildEncoderList()
     EncoderIDs.resize(encoder_count);
 }
 
-int svlVideoCodecFFMPEG::GetFFMPEGEncoderID(CodecID codec_id) const
+int svlVideoCodecFFMPEG::GetFFMPEGEncoderID(CV_CODEC_ID codec_id) const
 {
     for (unsigned int i = 0; i < EncoderIDs.size(); i ++) {
         if (EncoderIDs[i] == static_cast<unsigned int>(codec_id)) return i;

@@ -43,6 +43,7 @@ int main(int argc, char * argv[])
 
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
     // get all message to log file
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
     // get only errors and warnings to std::cout
@@ -113,11 +114,21 @@ int main(int argc, char * argv[])
     componentManager->AddComponent(server);
 
 #if !CISST_MTS_HAS_ICE
-    mtsSocketProxyServer * serverProxy = new mtsSocketProxyServer("MyServerProxy", "Server", "Provided", 1234);
-    componentManager->AddComponent(serverProxy);
+    // For now, we create two server proxies. It would be better to have just one server proxy,
+    // but first the code needs to be modified to use separate serializers for each client.
+    // Sharing one serializer does not work because it serializes the class services for only
+    // the first client to which it sends the data object.
+    mtsSocketProxyServer * serverProxy1 = new mtsSocketProxyServer("MyServerProxy1", "Server", "Provided", 1234);
+    mtsSocketProxyServer * serverProxy2 = new mtsSocketProxyServer("MyServerProxy2", "Server", "Provided", 1235);
+    componentManager->AddComponent(serverProxy1);
+    componentManager->AddComponent(serverProxy2);
 
-    if (!componentManager->Connect("MyServerProxy", "Required", "Server", "Provided")) {
-        CMN_LOG_INIT_ERROR << "Connect failed for server" << std::endl;
+    if (!componentManager->Connect("MyServerProxy1", "Required", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed for server 1" << std::endl;
+        return 1;
+    }
+    if (!componentManager->Connect("MyServerProxy2", "Required", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed for server 2" << std::endl;
         return 1;
     }
 #endif

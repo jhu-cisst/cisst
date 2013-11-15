@@ -78,10 +78,21 @@ http://www.cisst.org/cisst/license.txt.
 
   \param lod The log level of detail of the message.
 */
+#if CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
     (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod))? \
     (void*)0:\
     ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
+
+#else // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+
+#define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
+    (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod))? \
+    0:\
+    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
+
+#endif // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
 
 #if (CISST_OS == CISST_QNX)
   #if BYPASS_CMN_LOG
@@ -142,10 +153,22 @@ http://www.cisst.org/cisst/license.txt.
 
   \param lod The log level of detail of the message.
 */
+#if CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+
 #define CMN_LOG(lod) \
     (!(cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod))?  \
     (void*)0: \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
+
+#else // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+
+#define CMN_LOG(lod) \
+    (!(cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod))?  \
+    0: \
+    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
+
+#endif // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+
 
 #if (CISST_OS == CISST_QNX)
   #if BYPASS_CMN_LOG

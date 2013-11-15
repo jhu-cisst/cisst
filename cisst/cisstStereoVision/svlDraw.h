@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlDraw_h
 
 #include <cisstStereoVision/svlTypes.h>
+#include <cisstCommon/cmnConstants.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -82,10 +83,10 @@ namespace svlDraw
     void CISST_EXPORT Poly(svlSampleImage* image, unsigned int videoch, const vctDynamicVectorRef<svlPoint2D> points, svlRGB color, unsigned int thickness, unsigned int start);
 
     // RGB
-    void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, int cx, int cy, int rx, int ry, unsigned char r, unsigned char g, unsigned char b, double angle = 0.0, double from_angle = 0.0, double to_angle = 360.0, int thickness = 1);
-    void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, int cx, int cy, int rx, int ry, svlRGB color, double angle = 0.0, double from_angle = 0.0, double to_angle = 360.0, int thickness = 1);
-    void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, const svlEllipse & ellipse, svlRGB color, double from_angle = 0.0, double to_angle = 360.0, int thickness = 1);
-    void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, const svlEllipse & ellipse, unsigned char r, unsigned char g, unsigned char b, double from_angle = 0.0, double to_angle = 360.0, int thickness = 1);
+    void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, int cx, int cy, int rx, int ry, unsigned char r, unsigned char g, unsigned char b, double angle = 0.0, double from_angle = 0.0, double to_angle = 2.0*cmnPI, int thickness = 1);
+    void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, int cx, int cy, int rx, int ry, svlRGB color, double angle = 0.0, double from_angle = 0.0, double to_angle = 2.0*cmnPI, int thickness = 1);
+    void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, const svlEllipse & ellipse, svlRGB color, double from_angle = 0.0, double to_angle = 2.0*cmnPI, int thickness = 1);
+    void CISST_EXPORT Ellipse(svlSampleImage* image, unsigned int videoch, const svlEllipse & ellipse, unsigned char r, unsigned char g, unsigned char b, double from_angle = 0.0, double to_angle = 2.0*cmnPI, int thickness = 1);
 
     // RGB
     void CISST_EXPORT Crosshair(svlSampleImage* image, unsigned int videoch, svlPoint2D pos, svlRGB color, unsigned int radius = 5, unsigned int thickness = 2);
