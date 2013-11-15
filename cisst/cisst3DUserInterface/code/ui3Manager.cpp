@@ -107,7 +107,7 @@ bool ui3Manager::AddRenderer(unsigned int width, unsigned int height,
 {
     if (width < 1 || height < 1 || renderername.empty()) return false;
 
-    int rendererindex = Renderers.size();
+    size_t rendererindex = Renderers.size();
     _RendererStruct* renderer = new _RendererStruct;
     CMN_ASSERT(renderer);
 
@@ -656,9 +656,9 @@ bool ui3Manager::SetupRenderers()
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Setting up VTK renderers: begin" << std::endl;
 
-    unsigned int i;
+    size_t i;
     double bgheight, bgwidth, viewangle;
-    const unsigned int renderercount = this->Renderers.size();
+    const size_t renderercount = this->Renderers.size();
 
     for (i = 0; i < renderercount; i ++) {
 
@@ -738,9 +738,9 @@ bool ui3Manager::SetupRenderers()
 void ui3Manager::ReleaseRenderers()
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "ReleaseRenderers: start" << std::endl;
-    const unsigned int renderercount = this->Renderers.size();
+    const size_t renderercount = this->Renderers.size();
 
-    for (unsigned int i = 0; i < renderercount; i ++) {
+    for (size_t i = 0; i < renderercount; i ++) {
         if (this->Renderers[i]) {
             if (this->Renderers[i]->renderer) {
                 delete this->Renderers[i]->renderer;
@@ -891,9 +891,9 @@ void* ui3ManagerCVTKRendererProc::Proc(ui3Manager* baseref)
     ThreadKilled = false;
     ThreadReadySignal.Raise();
 
-    unsigned int i, framecount = 10;
+    size_t i, framecount = 10;
     double prevtime, time;
-    const unsigned int renderercount = baseref->Renderers.size();
+    const size_t renderercount = baseref->Renderers.size();
 
     osaStopwatch stopwatch;
     stopwatch.Start();

@@ -53,7 +53,7 @@ ui3SceneManager::~ui3SceneManager(void)
 
 bool ui3SceneManager::AddRenderer(ui3VTKRenderer * renderer)
 {
-    unsigned int rendererIndex = this->Renderers.size();
+    size_t rendererIndex = this->Renderers.size();
     this->Renderers.resize(rendererIndex + 1);
     this->Renderers[rendererIndex] = renderer;
     renderer->Add(this->VisibleObjects);

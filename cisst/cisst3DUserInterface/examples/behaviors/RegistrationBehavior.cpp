@@ -313,7 +313,7 @@ void RegistrationBehavior::PrimaryMasterButtonCallback(const prmEventButton & ev
 
         prmPositionCartesianGet position;
         this->GetPrimaryMasterPosition(position);
-        unsigned int fiducialID;
+        size_t fiducialID;
 
         if (VirtualFiducials.size() < NUM_FIDUCIALS) {
             fiducialID = VirtualFiducials.size();

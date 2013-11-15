@@ -204,20 +204,20 @@ class CISST_EXPORT ui3BehaviorBase: public mtsTaskContinuous
       streams attached to the behavior. It may be called from several
       independent stream threads simultaneously.
     */
-    virtual void OnStreamSample(svlSample* sample, int streamindex);
+    virtual void OnStreamSample(svlSample* sample, size_t streamindex);
 
     /*!
       Adds a new SVL source interface to the behavior and
       returns the stream index for the new interface.
     */
-    int AddStream(svlStreamType type, const std::string & streamname);
+    size_t AddStream(svlStreamType type, const std::string & streamname);
 
     /*!
       Returns image width if the specified stream is of image type.
       Otherwise or if the SVL pipeline is not yet initialized,
       the return value is 0.
     */
-    unsigned int GetStreamWidth(const int streamindex, unsigned int channel = 0);
+    unsigned int GetStreamWidth(const size_t streamindex, unsigned int channel = 0);
     unsigned int GetStreamWidth(const std::string & streamname, unsigned int channel = 0);
 
     /*!

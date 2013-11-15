@@ -139,14 +139,14 @@ private:
     VisibleObjectType VisibleToggle;
     VisibleObjectType FiducialToggle;
     double MeanTRE, MaxTRE, MeanTREProjection, MaxTREProjection, MeanTRETriangulation, MaxTRETriangulation;
-    int TREFiducialCount;
+    size_t TREFiducialCount;
     FILE *TRE, * TREProjection, *TRETriangulation;
 
     vctDouble3 InitialMasterLeft, InitialMasterRight;
     vctFrm3 WristCalibration, WristToTip;
     ui3VisibleObject * Cursor;
     ui3VisibleList * VisibleList, * VisibleListECM, * VisibleListECMRCM, * VisibleListVirtual, * VisibleListReal;
-    typedef std::map<int, ManualRegistrationSurfaceVisibleStippleObject *> ManualRegistrationType;
+    typedef std::map<size_t, ManualRegistrationSurfaceVisibleStippleObject *> ManualRegistrationType;
     ManualRegistrationType VisibleObjects, VisibleObjectsVirtualFiducials, VisibleObjectsRealFiducials, VisibleObjectsVirtualTargets, VisibleObjectsRealTargets,
         VisibleObjectsVirtualCalibration,VisibleObjectsRealCalibration;
 };

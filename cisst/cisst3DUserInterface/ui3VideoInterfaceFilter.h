@@ -38,7 +38,7 @@ public:
     /*!
      Constructor
     */
-    ui3VideoInterfaceFilter(svlStreamType streamtype, int streamid, ui3BehaviorBase* behavior);
+    ui3VideoInterfaceFilter(svlStreamType streamtype, size_t streamid, ui3BehaviorBase* behavior);
 
     /*!
      Destructor
@@ -51,7 +51,7 @@ public:
 private:
     svlSampleImage* OutputImage;
 
-    int StreamID;
+    size_t StreamID;
     ui3BehaviorBase* ParentBehavior;
 
     int Initialize(svlSample* syncInput, svlSample* &syncOutput);

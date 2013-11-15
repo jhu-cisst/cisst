@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
 
 
-ui3VideoInterfaceFilter::ui3VideoInterfaceFilter(svlStreamType streamtype, int streamid, ui3BehaviorBase* behavior) :
+ui3VideoInterfaceFilter::ui3VideoInterfaceFilter(svlStreamType streamtype, size_t streamid, ui3BehaviorBase* behavior) :
     svlFilterBase(),
     OutputImage(0),
     StreamID(streamid),
