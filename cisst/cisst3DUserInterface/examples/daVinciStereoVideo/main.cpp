@@ -97,7 +97,7 @@ int main()
 #endif
 
     // this is were the icons have been copied by CMake post build rule
-    cmnPath path;;
+    cmnPath path;
     path.AddRelativeToCisstShare("/cisst3DUserInterface/icons");
     std::string fileName = path.Find("move.png", cmnPath::READ);
     PNGViewer3D * pngViewer;
@@ -155,7 +155,13 @@ int main()
 
     svlCameraGeometry camera_geometry;
     // Load Camera calibration results
-    camera_geometry.LoadCalibration("E:/Users/davinci_mock_or/calib_results.txt");
+    path.AddRelativeToCisstShare("models/cameras");
+    std::string calibrationFile = path.Find("mock_or_calib_results.txt");
+    if (calibrationFile == "") {
+        std::cerr << "Unable to find camera calibration file in path: " << path << std::endl;
+        exit(-1);
+    }
+    camera_geometry.LoadCalibration(calibrationFile);
     // Center world in between the two cameras (da Vinci specific)
     camera_geometry.SetWorldToCenter();
     // Rotate world by 180 degrees (VTK specific)
