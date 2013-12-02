@@ -51,7 +51,7 @@ cdgScope * cdgTypedef::Create(size_t lineNumber) const
 }
 
 
-bool cdgTypedef::Validate(void)
+bool cdgTypedef::Validate(std::string & CMN_UNUSED(errorMessage))
 {
     return true;
 }

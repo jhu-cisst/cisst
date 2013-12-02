@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -195,15 +195,15 @@ private:
     osaThreadSignal LogTheadFinished;
     bool            LogThreadFinishWaiting;
     void*           LogDispatchThread(void * arg);
- 
+
     /*! Set up system logger that allows collecting system-wide logs across network */
     void SetupSystemLogger(void);
 
-    /*! If Manager Component Client (MCC) is ready to forward logs to 
+    /*! If Manager Component Client (MCC) is ready to forward logs to
         Manager Component Server (MCS) */
     bool MCCReadyForLogForwarding(void) const;
 
-public:    
+public:
     /*! Callback function for system-wide thread-safe logging */
     static void LogDispatcher(const char * str, int len);
 
@@ -220,7 +220,7 @@ public:
     /*! Check if further logs are allowed */
     static bool IsLogAllowed(void);
 
-protected:    
+protected:
     /*! Protected constructor (singleton) */
     mtsManagerLocal(void);
 
@@ -317,13 +317,13 @@ protected:
         \param providedInterfaceDescription Description of provided interface */
     bool CreateInterfaceProvidedProxy(
         const std::string & serverComponentProxyName,
-        const InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        const mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
     /*! \brief Create required interface proxy
         \param clientComponentProxyName Name of component proxy that has */
     bool CreateInterfaceRequiredProxy(
         const std::string & clientComponentProxyName,
-        const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        const mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
     /*! Remove provided interface proxy */
     bool RemoveInterfaceProvidedProxy(
@@ -343,14 +343,14 @@ protected:
     bool GetInterfaceProvidedDescription(
         const std::string & serverComponentName,
         const std::string & providedInterfaceName,
-        InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
     /*! Extract all the information on a required interface such as function
         objects and event handlers with arguments serialized */
     bool GetInterfaceRequiredDescription(
         const std::string & componentName,
         const std::string & requiredInterfaceName,
-        InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
     /*! Change GCM connection state */
     inline void SetGCMConnected(const bool connected) {
@@ -374,7 +374,7 @@ public:
     /*! \brief Remove component from this local component manager. */
     bool RemoveComponent(mtsComponent * component);
     bool RemoveComponent(const std::string & componentName);
-    
+
     /*! \brief Retrieve a component by name. */
     mtsComponent * GetComponent(const std::string & componentName) const;
     mtsTask * GetComponentAsTask(const std::string & componentName) const;
@@ -510,7 +510,7 @@ public:
         \param globalComponentManager reference to global component manager (GCM)
     */
     static mtsManagerLocal * GetInstance(mtsManagerGlobal & globalComponentManager);
-   
+
     /*! Enumerate all the names of components added */
     std::vector<std::string> GetNamesOfComponents(void) const;
     void GetNamesOfComponents(std::vector<std::string>& namesOfComponents) const;
@@ -522,7 +522,7 @@ public:
     }
 #endif
     const osaTimeServer & GetTimeServer(void) const;
-    
+
     /*! Returns name of this local component manager */
     inline const std::string GetProcessName(const std::string & CMN_UNUSED(listenerID) = "") const {
         return ProcessName;
@@ -626,7 +626,7 @@ public:
 
     /*! Set endpoint access information */
     bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
-    
+
     //returns the list or processes in the system and their absolute time differences relative to GCM
     bool GetGCMProcTimeSyncInfo(std::vector<std::string> &processNames, std::vector<double> &timeOffsets);
 

@@ -244,12 +244,15 @@ bool svlFilterImageCameraCalibrationOpenCV::ImportOriginsFile(const std::string 
         Tokenize(tempLine, token, ",");
         if (inf.eof() || token.size() <= 0)
             break;
-        std::cerr << token << std::endl;
+        std::copy(token.begin(), token.end(), std::ostream_iterator<std::string>(std::cerr, " "));
+        // std::cerr << token << std::endl;
         if (token.at(0).compare(0,1,"#")) {
             //assume format is name,point1X,point1Y,point2X,point2Y,point3X,point3Y
             if (token.size() < 7)
             {
-                std::cout << "ERROR: ImportOriginsfiles: " << token << std::endl;
+                std::cout << "ERROR: ImportOriginsfiles: ";
+                std::copy(token.begin(), token.end(), std::ostream_iterator<std::string>(std::cout, " "));
+                std::cout << std::endl;
                 return false;
             }
             //assume 3 points

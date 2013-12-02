@@ -151,6 +151,8 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                 case cdgScope::CDG_CLASS:
                 case cdgScope::CDG_BASECLASS:
                 case cdgScope::CDG_MEMBER:
+                case cdgScope::CDG_ENUM:
+                case cdgScope::CDG_ENUMVALUE:
                 case cdgScope::CDG_TYPEDEF:
                     // first define the current step, either find new keyword or new scope
                     if (keyword.empty()) {
@@ -289,7 +291,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     if (errorFound) {
         std::cerr << parsedOutput.str() << std::endl;
     } else {
-        // fill in dafault values
+        // fill in default values
         scopes.back()->FillInDefaults();
     }
 
@@ -297,9 +299,9 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
 }
 
 
-bool cdgFile::Validate(void)
+bool cdgFile::Validate(std::string & errorMessage)
 {
-    return this->Global->ValidateRecursion();
+    return this->Global->ValidateRecursion(errorMessage);
 }
 
 
@@ -323,8 +325,14 @@ void cdgFile::GenerateHeader(std::ostream & outputStream) const
 {
     GenerateMessage(outputStream);
 
-    outputStream << "#ifndef _" << HeaderGuard << std::endl
+    outputStream << "#pragma once" << std::endl
+                 << "#ifndef _" << HeaderGuard << std::endl
                  << "#define _" << HeaderGuard << std::endl << std::endl;
+
+    outputStream << "#include <cisstCommon/cmnDataFunctions.h>" << std::endl
+                 << "#include <cisstCommon/cmnDataFunctionsEnumMacros.h>" << std::endl
+                 << "#include <cisstCommon/cmnDataFunctionsJSON.h>" << std::endl
+                 << std::endl;
 
     this->Global->GenerateHeader(outputStream);
 
@@ -336,9 +344,13 @@ void cdgFile::GenerateCode(std::ostream & outputStream) const
 {
     GenerateMessage(outputStream);
 
-    outputStream << "#include <" << Header << ">" << std::endl << std::endl
-                 << "#include <cisstCommon/cmnDataFunctions.h>" << std::endl << std::endl;
-
+    outputStream << "#include <" << Header << ">" << std::endl
+                 << "#include <cisstCommon/cmnDataFunctionsMacros.h>" << std::endl
+                 << "#include <cisstCommon/cmnDataFunctionsEnumMacros.h>" << std::endl
+                 << "#include <cisstCommon/cmnDataFunctionsString.h>" << std::endl
+                 << "#include <cisstCommon/cmnDataFunctionsVector.h>" << std::endl
+                 << "#include <cisstCommon/cmnDataFunctionsJSON.h>" << std::endl
+                 << std::endl;
     this->Global->GenerateCode(outputStream);
 }
 

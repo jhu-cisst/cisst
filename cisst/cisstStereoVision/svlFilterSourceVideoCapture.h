@@ -3,9 +3,9 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
-  Created on: 2006 
+  Created on: 2006
 
   (C) Copyright 2006-2008 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterSourceVideoCapture_h
 
 #include <cisstStereoVision/svlFilterSourceBase.h>
+#include <cisstStereoVision/svlFilterSourceVideoCaptureTypes.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
 
 // Always include last!
@@ -42,77 +43,12 @@ class CISST_EXPORT svlFilterSourceVideoCapture : public svlFilterSourceBase
 friend class svlVidCapSrcDialogThread;
 
 public:
-    enum PlatformType {
-        WinDirectShow   = 0,
-        WinSVS          = 1,
-        LinVideo4Linux2 = 2,
-        LinLibDC1394    = 3,
-        OpenCV          = 4,
-        MatroxImaging   = 5,
-        BlackMagicDeckLink = 6,
-        NumberOfPlatformTypes
-    };
-
-    typedef struct _DeviceInfo {
-	    int ID;
-	    char name[SVL_VCS_STRING_LENGTH];
-        PlatformType platform;
-	    int inputcount;
-	    int activeinput;
-	    char inputnames[SVL_VCS_ARRAY_LENGTH][SVL_VCS_STRING_LENGTH];
-	    bool testok;
-    } DeviceInfo;
-
-    typedef enum _PixelType {
-        PixelRAW8    = 0,   //  8 bits per pixel
-        PixelRAW16   = 1,   // 16 bits per pixel
-        PixelRGB8    = 2,   // 24 bits per pixel
-        PixelYUV444  = 3,   // 24 bits per pixel
-        PixelYUV422  = 4,   // 16 bits per pixel
-        PixelYUV411  = 5,   // 12 bits per pixel
-        PixelMONO8   = 6,   //  8 bits per pixel
-        PixelMONO16  = 7,   // 16 bits per pixel
-        PixelUnknown = 8,
-        PixelTypeCount
-    } PixelType;
-
-    typedef enum _PatternType {
-        PatternRGGB    = 0,
-        PatternGBRG    = 1,
-        PatternGRBG    = 2,
-        PatternBGGR    = 3,
-        PatternUnknown = 4,
-        PatternTypeCount
-    } PatternType;
-
-    typedef struct _ImageFormat {
-        bool            defaults;               // write/optional
-        unsigned int    width;                  // read/write
-        unsigned int    height;                 // read/write
-        PixelType       colorspace;             // read/write
-        double          framerate;              // read/write
-        bool            rgb_order;              // read/write
-        bool            yuyv_order;             // read/write
-        int             custom_mode;            // read/write
-        unsigned int    custom_roileft;         // read/write
-        unsigned int    custom_roitop;          // read/write
-        unsigned int    custom_framerate;       // write
-        unsigned int    custom_maxwidth;        // read only
-        unsigned int    custom_maxheight;       // read only
-        unsigned int    custom_unitwidth;       // read only
-        unsigned int    custom_unitheight;      // read only
-        unsigned int    custom_unitleft;        // read only
-        unsigned int    custom_unittop;         // read only
-        PixelType       custom_colorspaces[PixelTypeCount]; // read only
-        PatternType     custom_pattern;         // read only
-    } ImageFormat;
-
-    typedef struct _ExternalTrigger {
-        bool            enable;
-        unsigned int    mode;
-        unsigned int    source;
-        unsigned int    polarity;
-    } ExternalTrigger;
+    typedef svlFilterSourceVideoCaptureTypes::PlatformType PlatformType;
+    typedef svlFilterSourceVideoCaptureTypes::DeviceInfo DeviceInfo;
+    typedef svlFilterSourceVideoCaptureTypes::PixelType PixelType;
+    typedef svlFilterSourceVideoCaptureTypes::PatternType PatternType;
+    typedef svlFilterSourceVideoCaptureTypes::ImageFormat ImageFormat;
+    typedef svlFilterSourceVideoCaptureTypes::ExternalTrigger ExternalTrigger;
 
     typedef enum _ImagePropertiesMask {
         propShutter      = 1,
@@ -123,33 +59,8 @@ public:
         propSaturation   = 1 << 5,
     } ImagePropertiesMask;
 
-    typedef struct _ImageProperties {
-        unsigned int mask;
-        unsigned int manual;
-        unsigned int shutter;
-        unsigned int gain;
-        unsigned int wb_u_b;
-        unsigned int wb_v_r;
-        unsigned int brightness;
-        unsigned int gamma;
-        unsigned int saturation;
-    } ImageProperties;
-
-    class CISST_EXPORT Config
-    {
-    public:
-        Config();
-        Config(const Config& objref);
-
-        int                               Channels;
-        vctDynamicVector<int>             Device;
-        vctDynamicVector<int>             Input;
-        vctDynamicVector<ImageFormat>     Format;
-        vctDynamicVector<ImageProperties> Properties;
-        vctDynamicVector<ExternalTrigger> Trigger;
-
-        void SetChannels(const int channels);
-    };
+    typedef svlFilterSourceVideoCaptureTypes::ImageProperties ImageProperties;
+    typedef svlFilterSourceVideoCaptureTypes::Config Config;
 
     typedef svlFilterSourceVideoCapture ThisType;
     typedef vctDynamicVector<DeviceInfo> DeviceInfoListType;
@@ -319,30 +230,15 @@ private:
     bool Stopped;
 };
 
-typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::Config> svlFilterSourceVideoCapture_Config;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Config);
 typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::DeviceInfoListType> svlFilterSourceVideoCapture_DeviceList;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_DeviceList);
+
 typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::FormatListType> svlFilterSourceVideoCapture_FormatList;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_FormatList);
-typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ImageFormat> svlFilterSourceVideoCapture_Format;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Format);
-// Note: do not use svlFilterSourceVideoCapture_ImageProperties because it will confict with SWIG
-//       wrapping of svlFilterSourceVideoCapture::ImageProperties (SWIG will change :: to _).
-typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ImageProperties> svlFilterSourceVideoCaptureImageProperties;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCaptureImageProperties);
-typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ExternalTrigger> svlFilterSourceVideoCapture_Trigger;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Trigger);
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlVidCapSrcBase)
 
-
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::Config & objref);
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfo & objref);
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageFormat & objref);
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageProperties & objref);
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ExternalTrigger & objref);
 CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfoListType & objref);
 CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::FormatListType & objref);
 

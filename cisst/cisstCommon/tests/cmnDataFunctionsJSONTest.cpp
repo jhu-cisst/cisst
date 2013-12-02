@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "cmnDataFunctionsJSONTest.h"
 
-#include <cisstCommon/cmnDataFunctions.h>
+#include <cisstCommon/cmnDataFunctionsJSON.h>
 #include <json/json.h>
 
 void cmnDataFunctionsJSONTest::TestNativeTypes(void)
@@ -41,36 +41,36 @@ void cmnDataFunctionsJSONTest::TestNativeTypes(void)
     doublePositive = 654.321;
     std::string stringHello, stringRead;
     stringHello = "hello";
-    cmnDataToJSON(boolTrue, jsonValue["boolTrue"]);
-    cmnDataToJSON(boolFalse, jsonValue["boolFalse"]);
-    cmnDataToJSON(intZero, jsonValue["intZero"]);
-    cmnDataToJSON(intNegative, jsonValue["intNegative"]);
-    cmnDataToJSON(intPositive, jsonValue["intPositive"]);
-    cmnDataToJSON(doubleZero, jsonValue["doubleZero"]);
-    cmnDataToJSON(doubleNegative, jsonValue["doubleNegative"]);
-    cmnDataToJSON(doublePositive, jsonValue["doublePositive"]);
-    cmnDataToJSON(stringHello, jsonValue["stringHello"]);
+    cmnDataJSON<bool>::SerializeText(boolTrue, jsonValue["boolTrue"]);
+    cmnDataJSON<bool>::SerializeText(boolFalse, jsonValue["boolFalse"]);
+    cmnDataJSON<int>::SerializeText(intZero, jsonValue["intZero"]);
+    cmnDataJSON<int>::SerializeText(intNegative, jsonValue["intNegative"]);
+    cmnDataJSON<int>::SerializeText(intPositive, jsonValue["intPositive"]);
+    cmnDataJSON<double>::SerializeText(doubleZero, jsonValue["doubleZero"]);
+    cmnDataJSON<double>::SerializeText(doubleNegative, jsonValue["doubleNegative"]);
+    cmnDataJSON<double>::SerializeText(doublePositive, jsonValue["doublePositive"]);
+    cmnDataJSON<std::string>::SerializeText(stringHello, jsonValue["stringHello"]);
     boolRead = false;
-    cmnDataFromJSON(boolRead, jsonValue["boolTrue"]);
+    cmnDataJSON<bool>::DeSerializeText(boolRead, jsonValue["boolTrue"]);
     CPPUNIT_ASSERT_EQUAL(boolTrue, boolRead);
-    cmnDataFromJSON(boolRead, jsonValue["boolFalse"]);
+    cmnDataJSON<bool>::DeSerializeText(boolRead, jsonValue["boolFalse"]);
     CPPUNIT_ASSERT_EQUAL(boolFalse, boolRead);
     intRead = 1347893291;
-    cmnDataFromJSON(intRead, jsonValue["intZero"]);
+    cmnDataJSON<int>::DeSerializeText(intRead, jsonValue["intZero"]);
     CPPUNIT_ASSERT_EQUAL(intZero, intRead);
-    cmnDataFromJSON(intRead, jsonValue["intNegative"]);
+    cmnDataJSON<int>::DeSerializeText(intRead, jsonValue["intNegative"]);
     CPPUNIT_ASSERT_EQUAL(intNegative, intRead);
-    cmnDataFromJSON(intRead, jsonValue["intPositive"]);
+    cmnDataJSON<int>::DeSerializeText(intRead, jsonValue["intPositive"]);
     CPPUNIT_ASSERT_EQUAL(intPositive, intRead);
     doubleRead = 1347893291.123;
-    cmnDataFromJSON(doubleRead, jsonValue["doubleZero"]);
+    cmnDataJSON<double>::DeSerializeText(doubleRead, jsonValue["doubleZero"]);
     CPPUNIT_ASSERT_EQUAL(doubleZero, doubleRead);
-    cmnDataFromJSON(doubleRead, jsonValue["doubleNegative"]);
+    cmnDataJSON<double>::DeSerializeText(doubleRead, jsonValue["doubleNegative"]);
     CPPUNIT_ASSERT_EQUAL(doubleNegative, doubleRead);
-    cmnDataFromJSON(doubleRead, jsonValue["doublePositive"]);
+    cmnDataJSON<double>::DeSerializeText(doubleRead, jsonValue["doublePositive"]);
     CPPUNIT_ASSERT_EQUAL(doublePositive, doubleRead);
     stringRead = "bye";
-    cmnDataFromJSON(stringRead, jsonValue["stringHello"]);
+    cmnDataJSON<std::string>::DeSerializeText(stringRead, jsonValue["stringHello"]);
     CPPUNIT_ASSERT_EQUAL(stringHello, stringRead);
 }
 
@@ -83,8 +83,8 @@ void cmnDataFunctionsJSONTest::TestStdVector(void)
     vectorString.push_back("bonjour");
     vectorString.push_back("monde");
     Json::Value jsonValue;
-    cmnDataToJSON(vectorString, jsonValue["strings"]);
-    cmnDataFromJSON(vectorRead, jsonValue["strings"]);
+    cmnDataJSON<std::vector<std::string> >::SerializeText(vectorString, jsonValue["strings"]);
+    cmnDataJSON<std::vector<std::string> >::DeSerializeText(vectorRead, jsonValue["strings"]);
     CPPUNIT_ASSERT_EQUAL(vectorRead.size(), vectorString.size());
     for (size_t index = 0;
          index < vectorRead.size();

@@ -22,17 +22,20 @@ http://www.cisst.org/cisst/license.txt.
 #include "vctGenericContainerTest.h"
 #include "vctDataFunctionsDynamicMatrixTest.h"
 
+#include <cisstCommon/cmnDataFunctionsString.h>
+
 #include <cisstVector/vctDynamicMatrix.h>
 #include <cisstVector/vctDataFunctionsDynamicMatrix.h>
 #include <cisstVector/vctRandomDynamicMatrix.h>
 
 void vctDataFunctionsDynamicMatrixTest::TestDataCopy(void)
 {
-    vctDynamicMatrix<double> source, destination;
+    typedef vctDynamicMatrix<double> DataType;
+    DataType source, data;
     source.SetSize(7, 3);
     vctRandom(source, -1.0, 1.0);
-    cmnDataCopy(destination, source);
-    CPPUNIT_ASSERT(source.Equal(destination));
+    cmnData<DataType>::Copy(data, source);
+    CPPUNIT_ASSERT(source.Equal(data));
 }
 
 
@@ -40,15 +43,16 @@ void vctDataFunctionsDynamicMatrixTest::TestBinarySerializationStream(void)
 {
     cmnDataFormat local, remote;
     std::stringstream stream;
-    vctDynamicMatrix<double> m1, m2, mReference;
+    typedef vctDynamicMatrix<double> DataType;
+    DataType m1, m2, mReference;
     m1.SetSize(12, 23);
     m2.SetSize(12, 23);
     mReference.SetSize(12, 23);
     vctRandom(mReference, -10.0, 10.0);
     m1 = mReference;
-    cmnDataSerializeBinary(stream, m1);
+    cmnData<DataType>::SerializeBinary(m1, stream);
     m1.SetAll(0);
-    cmnDataDeSerializeBinary(stream, m2, remote, local);
+    cmnData<DataType>::DeSerializeBinary(m2, stream, local, remote);
     CPPUNIT_ASSERT_EQUAL(mReference, m2);
 }
 
@@ -56,25 +60,26 @@ void vctDataFunctionsDynamicMatrixTest::TestBinarySerializationStream(void)
 void vctDataFunctionsDynamicMatrixTest::TestTextSerializationStream(void)
 {
     std::stringstream stream;
-    vctDynamicMatrix<double> m1, m2, mReference;
+    typedef vctDynamicMatrix<double> DataType;
+    DataType m1, m2, mReference;
     m1.SetSize(4, 5);
     mReference.SetSize(4,5);
     m2.SetSize(2, 3); // intentionally different
     vctRandom(mReference, -10.0, 10.0);
     m1 = mReference;
-    cmnDataSerializeText(stream, m1, ',');
+    cmnData<DataType>::SerializeText(m1, stream, ',');
     m1.SetAll(0);
-    cmnDataDeSerializeText(stream, m2, ',');
+    cmnData<DataType>::DeSerializeText(m2, stream, ',');
     CPPUNIT_ASSERT(mReference.AlmostEqual(m2, 0.01)); // low precision due to stream out loss
     CPPUNIT_ASSERT(!stream.fail());
     // try without delimiter, using space
     stream.clear();
     vctRandom(mReference, -20.0, 20.0);
     m1 = mReference;
-    cmnDataSerializeText(stream, m1, ' ');
+    cmnData<DataType>::SerializeText(m1, stream, ' ');
     m2.SetSize(2, 3); // intentionally different
     m2.SetAll(0.0);
-    cmnDataDeSerializeText(stream, m2, ' ');
+    cmnData<DataType>::DeSerializeText(m2, stream, ' ');
     CPPUNIT_ASSERT(mReference.AlmostEqual(m2, 0.01)); // low precision due to stream out loss
     CPPUNIT_ASSERT(!stream.fail());
     // try with the wrong delimiter
@@ -82,11 +87,11 @@ void vctDataFunctionsDynamicMatrixTest::TestTextSerializationStream(void)
     stream.clear();
     vctRandom(mReference, -20.0, 20.0);
     m1 = mReference;
-    cmnDataSerializeText(stream, m1, '|');
+    cmnData<DataType>::SerializeText(m1, stream, '|');
     m2.SetSize(2, 3); // intentionally different
     m2.SetAll(0.0);
     try {
-        cmnDataDeSerializeText(stream, m2, ',');
+        cmnData<DataType>::DeSerializeText(m2, stream, ',');
     } catch (std::runtime_error) {
         exceptionReceived = true;
     }
@@ -96,35 +101,38 @@ void vctDataFunctionsDynamicMatrixTest::TestTextSerializationStream(void)
 
 void vctDataFunctionsDynamicMatrixTest::TestScalar(void)
 {
-    vctDynamicMatrix<int> mInt;
+    typedef vctDynamicMatrix<int> DataType;
+    DataType mInt;
     mInt.SetSize(6, 3);
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(6 * 3), cmnDataScalarNumber(mInt));
-    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(mInt));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(mInt.size() + 2), cmnData<DataType>::ScalarNumber(mInt));
+    CPPUNIT_ASSERT_EQUAL(false, cmnData<DataType>::ScalarNumberIsFixed(mInt));
 
-    vctDynamicMatrix<vctDynamicMatrix<double> > mmDouble;
+    typedef vctDynamicMatrix<vctDynamicMatrix<double> > DataType2;
+    DataType2 mmDouble;
     mmDouble.SetSize(4, 5);
-    size_t numberOfScalarsExpected = 0;
+    size_t numberOfScalarsExpected = 2; // size of the containing matrix
     for (size_t i = 0; i < mmDouble.rows(); ++i) {
         for (size_t j = 0; j < mmDouble.cols(); ++j) {
             mmDouble.Element(i, j).SetSize(i + 1, j + 1); // + 1 to make sure we don't have a 0 size matrix
             numberOfScalarsExpected += ((i + 1) * (j + 1));
+            numberOfScalarsExpected += 2; // size of each contained matrix
         }
     }
-    CPPUNIT_ASSERT_EQUAL(numberOfScalarsExpected, cmnDataScalarNumber(mmDouble));
-    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(mmDouble));
+    CPPUNIT_ASSERT_EQUAL(numberOfScalarsExpected, cmnData<DataType2>::ScalarNumber(mmDouble));
+    CPPUNIT_ASSERT_EQUAL(false, cmnData<DataType2>::ScalarNumberIsFixed(mmDouble));
 
-    vctDynamicMatrix<std::string> mString;
+    typedef vctDynamicMatrix<std::string> DataType3;
+    DataType3 mString;
     mString.SetSize(3, 2);
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnDataScalarNumber(mString));
-    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(mString));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), cmnData<DataType3>::ScalarNumber(mString));
+    CPPUNIT_ASSERT_EQUAL(false, cmnData<DataType3>::ScalarNumberIsFixed(mString));
 
     size_t row, col, subRow, subCol, position;
     bool exceptionReceived = false;
     std::string description;
-
     // exception expected if index too high
     try {
-        description = cmnDataScalarDescription(mInt, cmnDataScalarNumber(mInt) + 1);
+        description = cmnData<DataType>::ScalarDescription(mInt, cmnData<DataType>::ScalarNumber(mInt) + 1);
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
@@ -132,16 +140,16 @@ void vctDataFunctionsDynamicMatrixTest::TestScalar(void)
 
     exceptionReceived = false;
     try {
-        description = cmnDataScalarDescription(mmDouble, cmnDataScalarNumber(mmDouble) + 1);
+        description = cmnData<DataType2>::ScalarDescription(mmDouble, cmnData<DataType2>::ScalarNumber(mmDouble) + 1);
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);
 
-    // exception expected for any index
+    // exception expected for any index above 2
     exceptionReceived = false;
     try {
-        description = cmnDataScalarDescription(mString, cmnDataScalarNumber(mString));
+        description = cmnData<DataType3>::ScalarDescription(mString, cmnData<DataType3>::ScalarNumber(mString) + 1);
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
@@ -149,22 +157,37 @@ void vctDataFunctionsDynamicMatrixTest::TestScalar(void)
 
     // get scalar
     position = 0;
+    CPPUNIT_ASSERT_EQUAL(static_cast<double>(mInt.rows()), cmnData<DataType>::Scalar(mInt, position));
+    position++;
+    CPPUNIT_ASSERT_EQUAL(static_cast<double>(mInt.cols()), cmnData<DataType>::Scalar(mInt, position));
+    position++;
+
     for (row = 0; row < mInt.rows(); ++row) {
         for (col = 0; col < mInt.cols(); ++col) {
             mInt.Element(row, col) = static_cast<int>(row * 10 + col);
-            CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * 10 + col), cmnDataScalar(mInt, position));
+            CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * 10 + col), cmnData<DataType>::Scalar(mInt, position));
             position++;
         }
     }
 
+    // check size
     position = 0;
+    CPPUNIT_ASSERT_EQUAL(static_cast<double>(mmDouble.rows()), cmnData<DataType2>::Scalar(mmDouble, position));
+    position++;
+    CPPUNIT_ASSERT_EQUAL(static_cast<double>(mmDouble.cols()), cmnData<DataType2>::Scalar(mmDouble, position));
+    position++;
+
     for (row = 0; row < mmDouble.rows(); ++row) {
         for (col = 0; col < mmDouble.cols(); ++col) {
+            CPPUNIT_ASSERT_EQUAL(static_cast<double>(mmDouble.Element(row, col).rows()), cmnData<DataType2>::Scalar(mmDouble, position));
+            position++;
+            CPPUNIT_ASSERT_EQUAL(static_cast<double>(mmDouble.Element(row, col).cols()), cmnData<DataType2>::Scalar(mmDouble, position));
+            position++;
             for (subRow = 0; subRow < mmDouble.Element(row, col).rows(); ++subRow) {
                 for (subCol = 0; subCol < mmDouble.Element(row, col).cols(); ++subCol) {
                     mmDouble.Element(row, col).Element(subRow, subCol) = static_cast<double>(row * col * 100 + subRow * subCol);
                     CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * col * 100 + subRow * subCol),
-                                         cmnDataScalar(mmDouble, position));
+                                         cmnData<DataType2>::Scalar(mmDouble, position));
                     position++;
                 }
             }

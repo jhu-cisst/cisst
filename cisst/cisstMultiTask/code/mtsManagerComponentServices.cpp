@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstMultiTask/mtsInterfaceCommon.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
@@ -412,7 +413,7 @@ std::string mtsManagerComponentServices::ComponentGetState(const std::string & p
                                                            const std::string componentName) const
 {
     mtsComponentState state = ComponentGetState(mtsDescriptionComponent(processName, componentName));
-    return mtsComponentState::ToString(state.GetState());
+    return state.HumanReadable();
 }
 
 std::vector<std::string> mtsManagerComponentServices::GetNamesOfProcesses(void) const
@@ -485,11 +486,12 @@ std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOf
     return listOfComponentClasses;
 }
 
-InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName,
-                             const std::string & componentName, const std::string &interfaceName) const
+mtsInterfaceProvidedDescription
+mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName,
+                                                             const std::string & componentName, const std::string & interfaceName) const
 {
     // output arg
-    InterfaceProvidedDescription argOut;
+    mtsInterfaceProvidedDescription argOut;
     argOut.InterfaceName = "ERROR";
 
     if (!ServiceGetters.GetInterfaceProvidedDescription.IsValid()) {
@@ -510,11 +512,12 @@ InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDe
     return argOut;
 }
 
-InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName,
-                             const std::string & componentName, const std::string &interfaceName) const
+mtsInterfaceRequiredDescription
+mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName,
+                                                             const std::string & componentName, const std::string & interfaceName) const
 {
     // output arg
-    InterfaceRequiredDescription argOut;
+    mtsInterfaceRequiredDescription argOut;
     argOut.InterfaceName = "ERROR";
 
     if (!ServiceGetters.GetInterfaceRequiredDescription.IsValid()) {
@@ -562,7 +565,7 @@ void mtsManagerComponentServices::DisableLogForwarding(void)
 {
     DisableLogForwarding(GetNamesOfProcesses());
 }
- 
+
 void mtsManagerComponentServices::DisableLogForwarding(const std::vector<std::string> &processNames)
 {
     ServiceLogManagement.DisableLogForwarding(processNames);

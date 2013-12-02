@@ -62,7 +62,7 @@ protected:
 
     /*! Returns the name of the interface. */
     const std::string & GetName(void) const;
-    
+
     /*! Returns the name of the this interface as well as the
       component that owns the interface. */
     const std::string GetFullName(void) const;

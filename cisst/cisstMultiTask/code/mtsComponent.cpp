@@ -69,6 +69,8 @@ void mtsComponent::Initialize(void)
     this->StateTables.SetOwner(*this);
 
     InterfaceProvidedToManager = 0;
+
+    ReplayMode = false;
 }
 
 
@@ -946,7 +948,9 @@ void mtsComponent::InterfaceInternalCommands_GetEndUserInterface(const mtsEndUse
     CMN_ASSERT(argin.OriginalInterface);
     argout = argin;  // not really needed
     argout.EndUserInterface = 0;
-    argout.EndUserInterface = argin.OriginalInterface->GetEndUserInterface(argin.UserName);
+    argout.EndUserInterface =
+        reinterpret_cast<size_t>(reinterpret_cast<mtsInterfaceProvided*>(argin.OriginalInterface)
+                                 ->GetEndUserInterface(argin.UserName));
 }
 
 void mtsComponent::InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin,
@@ -961,7 +965,9 @@ void mtsComponent::InterfaceInternalCommands_RemoveEndUserInterface(const mtsEnd
 {
     CMN_ASSERT(argin.OriginalInterface);
     argout = argin;  // not really needed
-    argout.EndUserInterface = argin.OriginalInterface->RemoveEndUserInterface(argin.EndUserInterface, argin.UserName);
+    argout.EndUserInterface =
+        reinterpret_cast<size_t>(reinterpret_cast<mtsInterfaceProvided*>(argin.OriginalInterface)
+                                 ->RemoveEndUserInterface(reinterpret_cast<mtsInterfaceProvided*>(argin.EndUserInterface), argin.UserName));
 }
 
 void mtsComponent::InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin,
@@ -1019,4 +1025,92 @@ void mtsComponent::InterfaceInternalCommands_ComponentStartOther(const mtsCompon
     else
         CMN_LOG_CLASS_RUN_ERROR << GetName() << ": could not find component " << arg.ComponentName
                                 << " to start" << std::endl;
+}
+
+bool mtsComponent::SetReplayMode(void) {
+    if (!(this->State == mtsComponentState::CONSTRUCTED)) {
+        CMN_LOG_CLASS_RUN_ERROR << "SetReplayMode: component \"" << GetName() << "\" failed to set replay mode." << std::endl;
+        return false;
+    }
+    this->ReplayMode = true;
+    return true;
+}
+
+bool mtsComponent::SetReplayData(const std::string & stateTableName, const std::string & fileName) {
+    if (!this->ReplayMode) {
+        CMN_LOG_CLASS_RUN_ERROR << "SetReplayData: component \"" << GetName() << "\" not in replay mode." << std::endl;
+        return false;
+    }
+
+    // find state table and disable AutoAdvance
+    mtsStateTable * stateTable = this->StateTables.GetItem(stateTableName);
+    if (!stateTable) {
+        CMN_LOG_CLASS_RUN_ERROR << "SetReplayData: component \"" << GetName() << "\",  state table \"" << stateTableName << "\" was not found." << std::endl;
+        return false;
+    }
+    stateTable->SetAutomaticAdvance(false);
+
+    // get number of columns, i.e. all elements in state table
+    const size_t numberOfElements = stateTable->GetNumberOfElements();
+    mtsGenericObject * data = 0;
+    // make sure we don't overwrite timestamp when we will advance the state table
+    for (size_t index = 0; index < numberOfElements;index++) {
+        data = stateTable->GetStateVectorElement(index);
+        data->SetAutomaticTimestamp(false);
+    }
+
+    std::ifstream input(fileName.c_str());
+    if (!input.is_open()) {
+        CMN_LOG_CLASS_RUN_ERROR << "SetReplayData: component \"" << GetName() << "\" unable to open file \"" << fileName << "\"." << std::endl;
+        return false;
+    }
+
+    // code below is adapted from http://stackoverflow.com/questions/3482064/counting-the-number-of-lines-in-a-text-file/3482093#3482093
+    // new lines will be skipped unless we stop it from happening:
+    input.unsetf(std::ios_base::skipws);
+
+    // count the newlines with an algorithm specialized for counting:
+    size_t numberOfLines = std::count(std::istream_iterator<char>(input),
+                                      std::istream_iterator<char>(),
+                                      '\n');
+
+    // return to the beginning of the file and restore whitespace skipping
+    input.seekg(0);
+    input.setf(std::ios_base::skipws);
+
+    // resize state table and start loading data
+    stateTable->SetSize(numberOfLines);
+    for (size_t line = 0; line < numberOfLines; line++) {
+        stateTable->Start();
+        for (size_t index = 0; index < numberOfElements; index++) {
+            data = stateTable->GetStateVectorElement(index);
+            std::cerr << "data before de-serialization: " << *data << std::endl;
+            if (!data) {
+                CMN_LOG_CLASS_RUN_ERROR << "SetReplayData: component \"" << GetName() << "\", state table \""
+                                        << stateTableName << "\", failed to retrieve data element " << index << std::endl;
+                return false;
+            }
+            data->FromStreamRaw(input, ',');
+            std::cerr << "reader data " << index << " = " << *data << std::endl;
+            if (index != numberOfElements-1) {
+                char c;
+                input >> c;
+                if( c != ',') {
+                    CMN_LOG_CLASS_RUN_ERROR << "SetReplayData: component \"" << GetName() << "\", error parsing state table \""
+                                            << stateTableName << "\" at line " << line << ", element " << index << std::endl;
+                }
+            }
+        }
+        stateTable->Advance();
+        stateTable->ReplayAdvance();
+    }
+    return true;
+}
+
+bool mtsComponent::SetReplayTime(const double time) {
+    if (!this->ReplayMode) {
+        CMN_LOG_CLASS_RUN_ERROR << "SetReplayTime: component \"" << GetName() << "\" not in replay mode." << std::endl;
+        return false;
+    }
+    return true;
 }

@@ -348,7 +348,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     EventHandlerWriteMapType EventHandlersWrite;
 
     /*! Get description of this interface (with serialized argument information) */
-    void GetDescription(InterfaceRequiredDescription & requiredInterfaceDescription);
+    void GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription);
 
  public:
 

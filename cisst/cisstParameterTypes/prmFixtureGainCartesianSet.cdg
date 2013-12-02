@@ -30,83 +30,83 @@ class {
         type vct3;
         description Force position vector;
     }
-    
+
     member {
         name TorqueOrientation;
         type vctMatRot3;
-        description Torque orientation matrix.;
+        description Torque orientation matrix;
     }
-    
+
     member {
         name PositionStiffnessPos;
         type vct3;
-        description Positive position stiffness vector.;
+        description Positive position stiffness vector;
     }
-    
+
     member {
         name PositionStiffnessNeg;
         type vct3;
-        description Negative position stiffness vector.;
+        description Negative position stiffness vector;
     }
-    
+
     member {
         name PositionDampingPos;
         type vct3;
-        description Positive position damping vector.;
+        description Positive position damping vector;
     }
-    
+
     member {
         name PositionDampingNeg;
         type vct3;
-        description Negative position damping vector.;
+        description Negative position damping vector;
     }
-    
+
     member {
         name ForceBiasPos;
         type vct3;
-        description Positive force bias vector.;
+        description Positive force bias vector;
     }
-    
+
     member {
         name ForceBiasNeg;
         type vct3;
-        description Negative force bias vector.;
+        description Negative force bias vector;
     }
-    
+
     member {
         name OrientationStiffnessPos;
         type vct3;
-        description Positive orientation stiffness vector.;
+        description Positive orientation stiffness vector;
     }
-    
+
     member {
         name OrientationStiffnessNeg;
         type vct3;
-        description Negative orientation stiffness vector.;
+        description Negative orientation stiffness vector;
     }
-    
+
     member {
         name OrientationDampingPos;
         type vct3;
-        description Positive orientation damping vector.;
+        description Positive orientation damping vector;
     }
-    
+
     member {
         name OrientationDampingNeg;
         type vct3;
-        description Positive orientation damping vector.;
+        description Positive orientation damping vector;
     }
-    
+
     member {
         name TorqueBiasPos;
         type vct3;
-        description Positive torque bias vector.;
+        description Positive torque bias vector;
     }
-    
+
     member {
         name TorqueBiasNeg;
         type vct3;
-        description Negative torque bias vector.;
+        description Negative torque bias vector;
     }
 
     inline-header {
@@ -114,7 +114,6 @@ class {
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     }
 }
-
 
 inline-header {
 CMN_DECLARE_SERVICES_INSTANTIATION(prmFixtureGainCartesianSet);

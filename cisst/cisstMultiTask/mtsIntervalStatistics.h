@@ -5,9 +5,9 @@
   $Id$
 
   Author(s):  Marcin Balicki
-  Created on: 2010-3-31
+  Created on: 2010-03-31
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -42,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 
    Calculate the statistics (avg,std,min,max) on the vector of data that is added one sample at time.
    AddSample checks if the statistics need to be recalculated after a given period elapses (eg 1sec).
-   
+
  */
 class CISST_EXPORT mtsIntervalStatistics : public mtsGenericObject {
 
@@ -63,12 +63,12 @@ public:
     inline double GetStdDev(void) const {
         return StdDev;
     }
-    
+
     /*! The measured maximum period of the task */
     inline double GetMax(void) const {
         return Max;
     }
-    
+
     /*! The measured task period (difference between current Tic and
         previous Tic). */
     inline double GetMin(void) const {
@@ -77,12 +77,12 @@ public:
 
     /*! Get minimum compute time. */
     inline double MinComputeTime(void) const {
-        return MinComputeTime_;
+        return mMinComputeTime;
     }
 
     /*! Get maximum compute time. */
     inline double MaxComputeTime(void) const {
-        return MaxComputeTime_;
+        return mMaxComputeTime;
     }
 
     /*! Time period between period statistics calculations */
@@ -101,7 +101,7 @@ public:
     void AddComputeTime(const double computeTime);
 
 private:
-    
+
     /*! Internal variables for statistics calculations*/
     double          Sum;   //name clash with original SumOfPeriods
     double          SumOfSquares;
@@ -118,8 +118,8 @@ private:
     double         StdDev;
     double         Max;
     double         Min;
-    double MinComputeTime_;
-    double MaxComputeTime_;
+    double mMinComputeTime;
+    double mMaxComputeTime;
     double         StatisticsUpdatePeriod;
 
 public:
@@ -145,10 +145,5 @@ public:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatistics)
-
-typedef std::vector<mtsIntervalStatistics> mtsIntervalStatisticsVec;
-MTS_IMPLEMENT_STDVEC_STREAM_OUT(mtsIntervalStatisticsVec);
-typedef mtsGenericObjectProxy<mtsIntervalStatisticsVec> mtsIntervalStatisticsVecProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatisticsVecProxy);
 
 #endif // _mtsIntervalStatistics_h

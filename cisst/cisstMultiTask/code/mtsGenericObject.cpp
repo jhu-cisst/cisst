@@ -107,109 +107,148 @@ void mtsGenericObject::DeSerializeRaw(std::istream & inputStream) {
 
 size_t mtsGenericObject::ScalarNumber(void) const
 {
-    return cmnDataScalarNumber(*this);
+    return cmnData<mtsGenericObject>::ScalarNumber(*this);
 }
 
 
 bool mtsGenericObject::ScalarNumberIsFixed(void) const
 {
-    return cmnDataScalarNumberIsFixed(*this);
+    return cmnData<mtsGenericObject>::ScalarNumberIsFixed(*this);
 }
 
 
 double mtsGenericObject::Scalar(const size_t index) const
     throw (std::out_of_range)
 {
-    return cmnDataScalar(*this, index);
+    return cmnData<mtsGenericObject>::Scalar(*this, index);
 }
 
 
 std::string mtsGenericObject::ScalarDescription(const size_t index, const std::string & userDescription) const
     throw (std::out_of_range)
 {
-    return cmnDataScalarDescription(*this, index, userDescription);
+    return cmnData<mtsGenericObject>::ScalarDescription(*this, index, userDescription);
 }
 
 
-void cmnDataCopy(mtsGenericObject & destination, const mtsGenericObject & source)
+template <>
+void cmnData<mtsGenericObject>::Copy(mtsGenericObject & data, const mtsGenericObject & source)
 {
-    destination.Timestamp() = source.Timestamp();
-    destination.AutomaticTimestamp() = source.AutomaticTimestamp();
-    destination.Valid() = source.Valid();
+    data.Timestamp() = source.Timestamp();
+    data.AutomaticTimestamp() = source.AutomaticTimestamp();
+    data.Valid() = source.Valid();
 }
 
 
-void cmnDataSerializeBinary(std::ostream & outputStream, const mtsGenericObject & data)
+template <>
+void cmnData<mtsGenericObject>::SerializeBinary(const mtsGenericObject & data, std::ostream & outputStream)
     throw (std::runtime_error)
 {
-    cmnDataSerializeBinary(outputStream, data.Timestamp());
-    cmnDataSerializeBinary(outputStream, data.AutomaticTimestamp());
-    cmnDataSerializeBinary(outputStream, data.Valid());
+    cmnData<double>::SerializeBinary(data.Timestamp(), outputStream);
+    cmnData<bool>::SerializeBinary(data.AutomaticTimestamp(), outputStream);
+    cmnData<bool>::SerializeBinary(data.Valid(), outputStream);
 }
 
 
-void cmnDataDeSerializeBinary(std::istream & inputStream, mtsGenericObject & data,
-                              const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat)
+template <>
+void cmnData<mtsGenericObject>::DeSerializeBinary(mtsGenericObject & data,
+                                                  std::istream & inputStream,
+                                                  const cmnDataFormat & localFormat,
+                                                  const cmnDataFormat & remoteFormat)
     throw (std::runtime_error)
 {
-    cmnDataDeSerializeBinary(inputStream, data.Timestamp(), remoteFormat, localFormat);
-    cmnDataDeSerializeBinary(inputStream, data.AutomaticTimestamp(), remoteFormat, localFormat);
-    cmnDataDeSerializeBinary(inputStream, data.Valid(), remoteFormat, localFormat);
+    cmnData<double>::DeSerializeBinary(data.Timestamp(), inputStream, localFormat, remoteFormat);
+    cmnData<bool>::DeSerializeBinary(data.AutomaticTimestamp(), inputStream, localFormat, remoteFormat);
+    cmnData<bool>::DeSerializeBinary(data.Valid(), inputStream, localFormat, remoteFormat);
 }
 
 
-void cmnDataSerializeText(std::ostream & outputStream, const mtsGenericObject & data, const char delimiter)
+template <>
+void cmnData<mtsGenericObject>::SerializeText(const mtsGenericObject & data, std::ostream & outputStream, const char delimiter)
     throw (std::runtime_error)
 {
-    cmnDataSerializeText(outputStream, data.Timestamp(), delimiter);
+    cmnData<double>::SerializeText(data.Timestamp(), outputStream, delimiter);
     outputStream << delimiter;
-    cmnDataSerializeText(outputStream, data.AutomaticTimestamp(), delimiter);
+    cmnData<bool>::SerializeText(data.AutomaticTimestamp(), outputStream, delimiter);
     outputStream << delimiter;
-    cmnDataSerializeText(outputStream, data.Valid(), delimiter);
+    cmnData<bool>::SerializeText(data.Valid(), outputStream, delimiter);
 }
 
 
-std::string cmnDataSerializeTextDescription(const mtsGenericObject & data, const char delimiter, const std::string & userDescription)
+template <>
+std::string cmnData<mtsGenericObject>::SerializeDescription(const mtsGenericObject & data, const char delimiter, const std::string & userDescription)
 {
     const std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
     std::stringstream description;
-    description << cmnDataSerializeTextDescription(data.Timestamp(), delimiter, prefix + "Timestamp")
+    description << cmnData<double>::SerializeDescription(data.Timestamp(), delimiter, prefix + "Timestamp")
                 << delimiter
-                << cmnDataSerializeTextDescription(data.AutomaticTimestamp(), delimiter, prefix + "AutomaticTimestamp")
+                << cmnData<bool>::SerializeDescription(data.AutomaticTimestamp(), delimiter, prefix + "AutomaticTimestamp")
                 << delimiter
-                << cmnDataSerializeTextDescription(data.Valid(), delimiter, prefix + "Valid");
+                << cmnData<bool>::SerializeDescription(data.Valid(), delimiter, prefix + "Valid");
     return description.str();
 }
 
 
-void cmnDataDeSerializeText(std::istream & inputStream, mtsGenericObject & data, const char delimiter)
+template <>
+void cmnData<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, std::istream & inputStream, const char delimiter)
     throw (std::runtime_error)
 {
-    cmnDataDeSerializeText(inputStream, data.Timestamp(), delimiter);
+    cmnData<double>::DeSerializeText(data.Timestamp(), inputStream, delimiter);
     cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "mtsGenericObject");
-    cmnDataDeSerializeText(inputStream, data.AutomaticTimestamp(), delimiter);
+    cmnData<bool>::DeSerializeText(data.AutomaticTimestamp(), inputStream, delimiter);
     cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "mtsGenericObject");
-    cmnDataDeSerializeText(inputStream, data.Valid(), delimiter);
+    cmnData<bool>::DeSerializeText(data.Valid(), inputStream, delimiter);
 }
 
 
-bool cmnDataScalarNumberIsFixed(const mtsGenericObject & CMN_UNUSED(data))
+template <>
+std::string cmnData<mtsGenericObject>::HumanReadable(const mtsGenericObject & data)
+{
+    std::stringstream output;
+    output << "Timestamp (";
+    if (data.AutomaticTimestamp()) {
+        output << "auto";
+    } else {
+        output << "manual";
+    }
+    output << "): ";
+
+    std::ios_base::fmtflags flags = output.flags();       // Save old flags
+    output.setf(std::ios::fixed | std::ios::showpoint);
+    output.precision(5);
+    output  << data.Timestamp();
+    output.flags(flags);                             // Restore old flags
+
+    if (data.Valid()) {
+        output << " (valid)";
+    } else {
+        output << " (invalid)";
+    }
+    return output.str();
+}
+
+
+template <>
+bool cmnData<mtsGenericObject>::ScalarNumberIsFixed(const mtsGenericObject & CMN_UNUSED(data))
 {
     return true;
 }
 
 
-size_t cmnDataScalarNumber(const mtsGenericObject & CMN_UNUSED(data))
+template <>
+size_t cmnData<mtsGenericObject>::ScalarNumber(const mtsGenericObject & CMN_UNUSED(data))
 {
     return 3;
 }
 
 
-double cmnDataScalar(const mtsGenericObject & data, const size_t index)
+template <>
+double cmnData<mtsGenericObject>::Scalar(const mtsGenericObject & data, const size_t index)
     throw (std::out_of_range)
 {
     if (index >= data.ScalarNumber()) {
-        return 0.0;
+        cmnThrow(std::out_of_range("cmnDataScalar: mtsGenericObject index out of range"));
+        return 1.2345;
     }
     if (index == 0) {
         return data.Timestamp();
@@ -222,7 +261,8 @@ double cmnDataScalar(const mtsGenericObject & data, const size_t index)
 }
 
 
-std::string cmnDataScalarDescription(const mtsGenericObject & data, const size_t index, const std::string & userDescription)
+template <>
+std::string cmnData<mtsGenericObject>::ScalarDescription(const mtsGenericObject & data, const size_t index, const std::string & userDescription)
     throw (std::out_of_range)
 {
     if (index >= data.ScalarNumber()) {
@@ -239,17 +279,18 @@ std::string cmnDataScalarDescription(const mtsGenericObject & data, const size_t
 }
 
 #if CISST_HAS_JSON
-void CISST_EXPORT cmnDataToJSON(const mtsGenericObject & data, Json::Value & jsonValue) {
-    cmnDataToJSON(data.Timestamp(), jsonValue["Timestamp"]);
-    cmnDataToJSON(data.AutomaticTimestamp(), jsonValue["AutomaticTimestamp"]);
-    cmnDataToJSON(data.Valid(), jsonValue["Valid"]);
+template <>
+void cmnDataJSON<mtsGenericObject>::SerializeText(const mtsGenericObject & data, Json::Value & jsonValue) {
+    cmnDataJSON<double>::SerializeText(data.Timestamp(), jsonValue["Timestamp"]);
+    cmnDataJSON<bool>::SerializeText(data.AutomaticTimestamp(), jsonValue["AutomaticTimestamp"]);
+    cmnDataJSON<bool>::SerializeText(data.Valid(), jsonValue["Valid"]);
 }
 
-void CISST_EXPORT cmnDataFromJSON(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error) {
-    cmnDataFromJSON(data.Timestamp(), jsonValue["Timestamp"]);
-    cmnDataFromJSON(data.AutomaticTimestamp(), jsonValue["AutomaticTimestamp"]);
-    cmnDataFromJSON(data.Valid(), jsonValue["Valid"]);
+template <>
+void cmnDataJSON<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    cmnDataJSON<double>::DeSerializeText(data.Timestamp(), jsonValue["Timestamp"]);
+    cmnDataJSON<bool>::DeSerializeText(data.AutomaticTimestamp(), jsonValue["AutomaticTimestamp"]);
+    cmnDataJSON<bool>::DeSerializeText(data.Valid(), jsonValue["Valid"]);
 }
 
-// void CISST_EXPORT cmnDataFromJSON(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error);
 #endif // CISST_HAS_JSON

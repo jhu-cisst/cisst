@@ -208,7 +208,7 @@ void mtsTask::SetThreadReturnValue(void * returnValue) {
 
 void mtsTask::ChangeState(mtsComponentState::Enum newState)
 {
-    if (this->State.GetState() == newState)
+    if (this->State.State() == newState)
         return;
 
     // If this component is providing the thread, inform

@@ -30,23 +30,46 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_HAS_JSON
 template <class _rotationType>
-void
-cmnDataToJSON(const vctFrameBase<_rotationType> & data,
-              Json::Value & jsonValue)
+class cmnDataJSON<vctFrameBase<_rotationType> >
 {
-    cmnDataToJSON(data.Translation(), jsonValue["Translation"]);
-    cmnDataToJSON(data.Rotation(), jsonValue["Rotation"]);
-}
+public:
+    typedef vctFrameBase<_rotationType> DataType;
+    typedef typename DataType::TranslationType TranslationType;
+    typedef typename DataType::RotationType RotationType;
 
-template <class _rotationType>
-void
-cmnDataFromJSON(vctFrameBase<_rotationType> & data,
-                const Json::Value & jsonValue)
-    throw (std::runtime_error)
+    static void SerializeText(const DataType & data, Json::Value & jsonValue)
+    {
+        cmnDataJSON<TranslationType>::SerializeText(data.Translation(), jsonValue["Translation"]);
+        cmnDataJSON<RotationType>::SerializeText(data.Rotation(), jsonValue["Rotation"]);
+    }
+
+    static void DeSerializeText(DataType & data, const Json::Value & jsonValue)
+        throw (std::runtime_error)
+    {
+        cmnDataJSON<TranslationType>::DeSerializeText(data.Translation(), jsonValue["Translation"]);
+        cmnDataJSON<RotationType>::DeSerializeText(data.Rotation(), jsonValue["Rotation"]);
+    }
+};
+
+// pass through class for rotation matrix
+template <class _elementType, bool _rowMajor>
+class cmnDataJSON<vctMatrixRotation3<_elementType, _rowMajor> >
 {
-    cmnDataFromJSON(data.Translation(), jsonValue["Translation"]);
-    cmnDataFromJSON(data.Rotation(), jsonValue["Rotation"]);
-}
+ public:
+    typedef vctMatrixRotation3<_elementType, _rowMajor> DataType;
+    typedef typename DataType::ContainerType ContainerType;
+
+    static void SerializeText(const DataType & data, Json::Value & jsonValue)
+    {
+        cmnDataJSON<ContainerType>::SerializeText(data, jsonValue);
+    }
+
+    static void DeSerializeText(DataType & data, const Json::Value & jsonValue)
+    {
+        cmnDataJSON<ContainerType>::DeSerializeText(data, jsonValue);
+    }
+};
+
 #endif // CISST_HAS_JSON
 
 #endif // _vctDataFunctionsTransformationsJSON_h

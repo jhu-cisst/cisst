@@ -43,7 +43,6 @@ http://www.cisst.org/cisst/license.txt.
 /***************************************/
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceImageFile, svlFilterSourceBase)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceImageFile_FileInfo)
 
 svlFilterSourceImageFile::svlFilterSourceImageFile() :
     svlFilterSourceBase(),
@@ -69,7 +68,7 @@ svlFilterSourceImageFile::svlFilterSourceImageFile(unsigned int channelcount) :
     FrameSet(false)
 {
     CreateInterfaces();
-    
+
     AddOutput("output", true);
     SetAutomaticOutputType(false);
     SetChannelCount(channelcount);
@@ -391,21 +390,3 @@ void svlFilterSourceImageFile::GetDimensionsRCommand(vctInt2 & dimensions) const
                                  << std::endl;
     }
 }
-
-
-/****************************/
-/*** Stream out operators ***/
-/****************************/
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceImageFile::FileInfo & objref)
-{
-    stream << "File name prefix: " << objref.path_prefix << std::endl
-           << "File extension: " << objref.path_extension << std::endl
-           << "Number of sequence digits: " << objref.sequence_digits << std::endl
-           << "Sequence starts at frame: " << objref.sequence_from << std::endl
-           << "Sequence ends at frame: " << objref.sequence_to << std::endl
-           << "Video channel: " << objref.channel << std::endl;
-    
-    return stream;
-}
-

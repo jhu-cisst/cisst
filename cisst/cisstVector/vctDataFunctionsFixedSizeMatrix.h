@@ -26,194 +26,90 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsFixedSizeMatrix_h
 
 #include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsMatrix.h>
 #include <cisstVector/vctFixedSizeMatrixBase.h>
+#include <cisstCommon/cmnDataFunctionsMatrixHelpers.h>
 #include <cisstVector/vctDataFunctionsFixedSizeMatrixJSON.h>
 
-template <vct::size_type _rows, vct::size_type _cols, class _elementType,
-          vct::stride_type _rowStrideDestination, vct::stride_type _colStrideDestination, class _dataPtrTypeDestination,
-          vct::stride_type _rowStrideSource, vct::stride_type _colStrideSource, class _dataPtrTypeSource>
-void cmnDataCopy(vctFixedSizeMatrixBase<_rows, _cols, _rowStrideDestination, _colStrideDestination, _elementType, _dataPtrTypeDestination> & destination,
-                 const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStrideSource, _colStrideSource, _elementType, _dataPtrTypeSource> & source)
+template <class _elementType, vct::size_type _rows, vct::size_type _cols, bool _rowMajor>
+class cmnData<vctFixedSizeMatrix<_elementType, _rows, _cols, _rowMajor> >
 {
-    destination.Assign(source);
-}
+public:
+    enum {IS_SPECIALIZED = 1};
 
+    typedef vctFixedSizeMatrix<_elementType, _rows, _cols, _rowMajor> DataType;
 
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-void cmnDataSerializeBinary(std::ostream & outputStream,
-                            const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data)
-    throw (std::runtime_error)
-{
-    const vct::size_type myRows = data.rows();
-    const vct::size_type myCols = data.cols();
-    vct::size_type indexRow, indexCol;
-    for (indexRow = 0; indexRow < myRows; ++indexRow) {
-        for (indexCol = 0; indexCol < myCols; ++indexCol) {
-            cmnDataSerializeBinary(outputStream, data.Element(indexRow, indexCol));
-        }
+    static void Copy(DataType & data, const DataType & source)
+    {
+        data.Assign(source);
     }
-}
 
-
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-void cmnDataDeSerializeBinary(std::istream & inputStream,
-                              vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data,
-                              const cmnDataFormat & remoteFormat,
-                              const cmnDataFormat & localFormat)
-    throw (std::runtime_error)
-{
-    const vct::size_type myRows = data.rows();
-    const vct::size_type myCols = data.cols();
-    vct:: size_type indexRow, indexCol;
-
-    for (indexRow = 0; indexRow < myRows; ++indexRow) {
-        for (indexCol = 0; indexCol < myCols; ++indexCol) {
-            cmnDataDeSerializeBinary(inputStream, data.Element(indexRow, indexCol), remoteFormat, localFormat);
-        }
+    static std::string HumanReadable(const DataType & data)
+    {
+        return cmnDataMatrixHumanReadable(data);
     }
-}
 
-
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-void cmnDataSerializeText(std::ostream & outputStream,
-                          const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data,
-                          const char delimiter)
-    throw (std::runtime_error)
-{
-    const vct::size_type myRows = data.rows();
-    const vct::size_type myCols = data.cols();
-    vct::size_type indexRow, indexCol;
-    for (indexRow = 0; indexRow < myRows; ++indexRow) {
-        for (indexCol = 0; indexCol < myCols; ++indexCol) {
-            if (indexRow != 0 || indexCol != 0) {
-                outputStream << delimiter;
-            }
-            cmnDataSerializeText(outputStream, data.Element(indexRow, indexCol), delimiter);
-        }
+    static void SerializeBinary(const DataType & data, std::ostream & outputStream)
+        throw (std::runtime_error)
+    {
+        cmnDataMatrixSerializeBinary(data, outputStream);
     }
-}
 
+    static void DeSerializeBinary(DataType & data,
+                                  std::istream & inputStream,
+                                  const cmnDataFormat & localFormat,
+                                  const cmnDataFormat & remoteFormat)
+        throw (std::runtime_error)
+    {
+        cmnDataMatrixDeSerializeBinary(data, inputStream, localFormat, remoteFormat);
+    }
 
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-std::string cmnDataSerializeTextDescription(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data,
+    static void SerializeText(const DataType & data,
+                              std::ostream & outputStream,
+                              const char delimiter)
+        throw (std::runtime_error)
+    {
+        cmnDataMatrixSerializeText(data, outputStream, delimiter);
+    }
+
+    static std::string SerializeDescription(const DataType & data,
                                             const char delimiter,
                                             const std::string & userDescription = "m")
-{
-    std::stringstream description;
-    const vct::size_type myRows = data.rows();
-    const vct::size_type myCols = data.cols();
-    vct::size_type indexRow, indexCol;
-    const char separator = (delimiter == ',') ? ':' : ',';
-
-    for (indexRow = 0; indexRow < myRows; ++indexRow) {
-        for (indexCol = 0; indexCol < myCols; ++indexCol) {
-            if (indexRow != 0 || indexCol != 0) {
-                description << delimiter;
-            }
-            description << userDescription << "[" << indexRow << separator << indexCol << "]{" << cmnDataSerializeTextDescription(data.Element(indexRow, indexCol), delimiter) << "}";
-        }
+    {
+        return cmnDataMatrixSerializeDescription(data, delimiter, userDescription, false /* no need to serialize size */);
     }
-    return description.str();
-}
 
-
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-void cmnDataDeSerializeText(std::istream & inputStream,
-                            vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data,
-                            const char delimiter)
-    throw (std::runtime_error)
-{
-    const vct::size_type myRows = data.rows();
-    const vct::size_type myCols = data.cols();
-    vct:: size_type indexRow, indexCol;
-
-    for (indexRow = 0; indexRow < myRows; ++indexRow) {
-        for (indexCol = 0; indexCol < myCols; ++indexCol) {
-            if (indexRow != 0 || indexCol != 0) {
-                cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFixedSizeMatrixBase");
-            }
-            cmnDataDeSerializeText(inputStream, data.Element(indexRow, indexCol), delimiter);
-        }
+    static void DeSerializeText(DataType & data,
+                                std::istream & inputStream,
+                                const char delimiter)
+        throw (std::runtime_error)
+    {
+        cmnDataMatrixDeSerializeText(data, inputStream, delimiter);
     }
-}
 
-
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-bool cmnDataScalarNumberIsFixed(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data)
-{
-    return cmnDataScalarNumberIsFixed(data.Element(0, 0));
-}
-
-
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-size_t cmnDataScalarNumber(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data)
-{
-    if (cmnDataScalarNumberIsFixed(data.Element(0, 0))) {
-        return data.size() * cmnDataScalarNumber(data.Element(0, 0));
+    static bool ScalarNumberIsFixed(const DataType & data)
+    {
+        return ((data.size() == 0) || cmnData<_elementType>::ScalarNumberIsFixed(data.Element(0, 0)));
     }
-    size_t result = 0;
-    typedef typename vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::const_iterator const_iterator;
-    const const_iterator end = data.end();
-    const_iterator iter = data.begin();
-    for (; iter != end; ++iter) {
-        result += cmnDataScalarNumber(*iter);
+
+    static size_t ScalarNumber(const DataType & data)
+    {
+        return cmnDataMatrixScalarNumber(data, false /* do not treat size as a scalar*/);
     }
-    return result;
-}
 
-
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-std::string
-cmnDataScalarDescription(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data,
-                         const size_t & index,
-                         const std::string & userDescription = "m")
-    throw (std::out_of_range)
-{
-    size_t elementRow, elementCol, inElementIndex;
-    std::stringstream result;
-    if (vctDataFindInMatrixScalarIndex(data, index, elementRow, elementCol, inElementIndex)) {
-        result << userDescription << "[" << elementRow << ',' << elementCol << "]{" << cmnDataScalarDescription(data.Element(elementRow, elementCol), inElementIndex) << "}";
-    } else {
-        cmnThrow(std::out_of_range("cmnDataScalarDescription: vctFixedSizeMatrix index out of range"));
+    static std::string ScalarDescription(const DataType & data,
+                                         const size_t & index,
+                                         const std::string & userDescription = "m")
+        throw (std::out_of_range)
+    {
+        return cmnDataMatrixScalarDescription(data, index, userDescription, false /* do not treat size as a scalar */);
     }
-    return result.str();
-}
 
-
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-double
-cmnDataScalar(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & data,
-              const size_t & index)
-    throw (std::out_of_range)
-{
-    size_t elementRow, elementCol, inElementIndex;
-    if (vctDataFindInMatrixScalarIndex(data, index, elementRow, elementCol, inElementIndex)) {
-        return cmnDataScalar(data.Element(elementRow, elementCol), inElementIndex);
-    } else {
-        cmnThrow(std::out_of_range("cmnDataScalar: vctFixedSizeMatrix index out of range"));
+    static double Scalar(const DataType & data, const size_t & index)
+        throw (std::out_of_range)
+    {
+        return cmnDataMatrixScalar(data, index, false /* do not treat size as a scalar */);
     }
-    return 0.123456789; // unreachable, just to avoid compiler warnings
-}
-
+};
 
 // ---------------------- older functions, to be deprecated
 template <typename _elementType, vct::size_type _rows, vct::size_type _cols>

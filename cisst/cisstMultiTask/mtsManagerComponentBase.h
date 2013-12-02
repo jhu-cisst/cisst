@@ -75,7 +75,7 @@ http://www.cisst.org/cisst/license.txt.
                      User Component
                 with internal interfaces
 
-  The cisstMultiTask has four different set of internal connections between 
+  The cisstMultiTask has four different set of internal connections between
   components.
 
   1) InterfaceInternal.Required - InterfaceComponent.Provided

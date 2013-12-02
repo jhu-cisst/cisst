@@ -60,8 +60,8 @@ void mtsStateTableTest::TestGetStateVectorID(void)
     StateTable.StateVectorDataNames.push_back(names[5]);
     CPPUNIT_ASSERT_EQUAL(total_column_count, StateTable.StateVectorDataNames.size());
 
-    for (int i = 0; i < total_column_count; ++i) {
-        CPPUNIT_ASSERT_EQUAL(i, StateTable.GetStateVectorID(names[i]));
+    for (size_t i = 0; i < total_column_count; ++i) {
+        CPPUNIT_ASSERT_EQUAL(i, static_cast<size_t>(StateTable.GetStateVectorID(names[i])));
     }
 }
 

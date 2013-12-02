@@ -31,26 +31,13 @@ http://www.cisst.org/cisst/license.txt.
 
 void vctDataFunctionsFixedSizeVectorJSONTest::TestVector(void)
 {
-    vctFixedSizeVector<double, 7> source, destination;
+    typedef vctFixedSizeVector<double, 7> DataType;
+    DataType source, destination;
     vctRandom(source, -1.0, 1.0);
     Json::Value jsonValue;
-    cmnDataToJSON(source, jsonValue["object"]);
-    cmnDataFromJSON(destination, jsonValue["object"]);
+    cmnDataJSON<DataType>::SerializeText(source, jsonValue["object"]);
+    cmnDataJSON<DataType>::DeSerializeText(destination, jsonValue["object"]);
     CPPUNIT_ASSERT(source.Equal(destination));
-}
-
-void vctDataFunctionsFixedSizeVectorJSONTest::TestVectorRef(void)
-{
-    vctFixedSizeMatrix<int, 7, 7> source, destination;
-    source.SetAll(0);
-    destination.SetAll(0);
-    vctRandom(source, -10, 10);
-    Json::Value jsonValue;
-    cmnDataToJSON(source.Row(1), jsonValue["object"]);
-    cmnDataFromJSON(destination.Column(1), jsonValue["object"]);
-    CPPUNIT_ASSERT(source.Row(1).Equal(destination.Column(1)));
-    destination.Column(1).SetAll(0);
-    CPPUNIT_ASSERT(destination.Equal(0));
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctDataFunctionsFixedSizeVectorJSONTest);

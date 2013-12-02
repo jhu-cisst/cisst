@@ -6,13 +6,16 @@
 
 // Inline code that will be placed in the generated header file
 inline-header {
+#include <cisstCommon/cmnDataFunctionsArray.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
+#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVector/vctDataFunctionsDynamicVector.h>
 #include <vector>
 
 // You can place external typedef at the global scope but
 // this is not best practice ...
-typedef std::vector<int> MyVectorType;
+typedef std::vector<int> StdVectorType;
 }
 
 // 'class' is used to declare a new type.  You can have multiple classes
@@ -34,7 +37,7 @@ class {
 
     // Just another base type to illustrate multiple inheritance.
     base-class {
-        type MyVectorType;
+        type StdVectorType;
         visibility private; //default, can also use protected, private
         is-data false;
     }
@@ -42,20 +45,24 @@ class {
     // 'typedef' uses the last token on the line as type name, anything in the middle defined the type
     // The equivalent typedef will be defined in the class scope
     typedef {
-        name VectorType;
+        name FixedVectorType;
         type vctFixedSizeVector<double, 2>;
+    }
+    typedef {
+        name DynamicVectorType;
+        type vctDynamicVector<double>;
     }
 
     // 'member' allows to define a data type
     member {
-        name StartPoint;
+        name FixedVector;
         // 'type' is required, you can even use a previously defined typedef
-        type demoData::VectorType;
+        type demoData::FixedVectorType;
         // 'description' is pptional but strongly recommended.  This can easly break the cisst
         // data generator is you use a ; in your description.  It must fit on a single line too.
-        description Segment start point;
+        description fixed size vector;
         // 'accessors'
-        accessors references; // Options are none, 'references', 'set-get', 'all' - default is "all"
+        accessors none; // Options are none, 'references', 'set-get', 'all' - default is "none" when visibility is "public"
         // 'references' will create two methods (replace "<type>" and "<name>" by user provided values):
         //   - const <type> & <name>(void) const
         //   - <type> & <name>(void)
@@ -69,12 +76,19 @@ class {
 
     // Illustrating more data members
     member {
-        name StopPoint;
-        type demoData::VectorType;
-        description Segment stop point;
+        name DynamicVector;
+        type demoData::DynamicVectorType;
+        description dynamic vector;
         accessors all;
         // 'default' allows to set a default value in the generated constructor!
-        default VectorType(0, 0);
+        default DynamicVectorType(2, 5); // size 2, all elements initialized to 5
+    }
+
+    member {
+        name StdVector;
+        type StdVectorType;
+        description std vector;
+        accessors all;
     }
 
     member {
@@ -94,8 +108,7 @@ class {
         type size_t;
         // 'is-size_t' is quite important to handle size_t accross OSs since some OS
         // sees this as a 32 bits int while others considers it to be 64 bits.
-        // The data generator doesn't make any assumption even if the 'type' is size_t.
-        is-size_t true;
+        is-size_t true; // automatically set by data generator because type is "size_t"
     }
 
     // code that will be place in scope of the generated class declaration
@@ -118,6 +131,7 @@ inline-code {
 // You can have multiple data types declared in a single data description file.
 class {
     name demoData2; // required
+    namespace TestNamespace;
 
     member {
         name Length;

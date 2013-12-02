@@ -89,7 +89,10 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    file.Validate();
+    if (!file.Validate(errorMessage)) {
+        std::cout << "Error, validation failed:" << errorMessage << std::endl;
+        return -1;
+    }
 
     std::ofstream header(headerFull.c_str());
     if (header.is_open()) {

@@ -31,7 +31,7 @@ class {
         }
 
         inline void SetSize(size_t size) {
-            this->PositionMember.SetSize(size);
+            this->mPosition.SetSize(size);
         }
 
     private:

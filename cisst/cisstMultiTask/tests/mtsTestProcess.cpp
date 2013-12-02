@@ -91,7 +91,14 @@ int main(int argc, char * argv[])
 
     // normal operations
     bool stop = false;
-    std::string componentName;
+    std::string
+        componentName,
+        interfaceType,
+        interfaceName,
+        commandName;
+    int parameter;
+    mtsExecutionResult executionResult;
+
     while (!stop) {
         std::cin >> command;
         if (command == std::string("stop")) {
@@ -108,6 +115,72 @@ int main(int argc, char * argv[])
             } else {
                 std::cout << componentName << " not found" << std::endl;
             }
+        } else if (command == std::string("command")) {
+            std::cin >> componentName;
+            std::cin >> interfaceType;
+            std::cin >> interfaceName;
+            std::cin >> commandName;
+            mtsComponent * component = componentManager->GetComponent(componentName);
+            mtsTestComponent * testComponent = dynamic_cast<mtsTestComponent *>(component);
+            if (!testComponent) {
+                std::cout << "failed to cast component to test component" << std::endl;
+            } else {
+                if (interfaceType == "required") {
+                    mtsTestInterfaceRequiredBase * interfaceRequired = testComponent->TestInterfacesRequired[interfaceName];
+                    if (!interfaceRequired) {
+                        std::cout << "failed to find test interface required \"" << interfaceName << "\" on component \"" << componentName << "\"" << std::endl;
+                    } else {
+                        if (commandName == "get_value") {
+                            std::cout << interfaceRequired->GetValue() << std::endl;
+                        } else if (commandName == "function_void") {
+                            executionResult = interfaceRequired->FunctionVoid();
+                            if (!executionResult) {
+                                std::cout << executionResult << std::endl;
+                            } else {
+                                std::cout << "ok" << std::endl;
+                            }
+                        } else if (commandName == "function_write") {
+                            std::cin >> parameter;
+                            executionResult = interfaceRequired->FunctionWrite(parameter);
+                            if (!executionResult) {
+                                std::cout << executionResult << std::endl;
+                            } else {
+                                std::cout << "ok" << std::endl;
+                            }
+                        } else {
+                            std::cout << "unknown command name \"" << commandName << "\"";
+                        }
+                    }
+                } else if (interfaceType == "provided") {
+                    mtsTestInterfaceProvidedBase * interfaceProvided = testComponent->TestInterfacesProvided[interfaceName];
+                    if (!interfaceProvided) {
+                        std::cout << "failed to find test interface required \"" << interfaceName << "\" on component \"" << componentName << "\"" << std::endl;
+                    } else {
+                        if (commandName == "get_value") {
+                            std::cout << interfaceProvided->GetValue() << std::endl;
+                        } else if (commandName == "event_void") {
+                            executionResult = interfaceProvided->EventVoid();
+                            if (!executionResult) {
+                                std::cout << "trigger event void result: " << executionResult << std::endl;
+                            } else {
+                                std::cout << "ok" << std::endl;
+                            }
+                        } else if (commandName == "event_write") {
+                            std::cin >> parameter;
+                            executionResult = interfaceProvided->EventWrite(parameter);
+                            if (!executionResult) {
+                                std::cout << "trigger event write result: " << executionResult << ": " << parameter << std::endl;
+                            } else {
+                                std::cout << "ok" << std::endl;
+                            }
+                        } else {
+                            std::cout << "unknown command name \"" << commandName << "\"";
+                        }
+                    }
+                } else {
+                    std::cout << "incorrect type of interface \"" << interfaceType << "\", options are \"required\" or \"provided\"" << std::endl;
+                }
+            }
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
@@ -121,7 +194,6 @@ int main(int argc, char * argv[])
         return 1;
     }
 
-    componentManager->Cleanup();
     std::cout << "stop succeeded" << std::endl;
 
     // wait to be killed by pipe
@@ -135,4 +207,3 @@ int main(int argc, char * argv[])
 
     return 0;
 }
-

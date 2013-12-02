@@ -59,7 +59,7 @@ svlVidCapSrcOpenCV::~svlVidCapSrcOpenCV()
 
 svlFilterSourceVideoCapture::PlatformType svlVidCapSrcOpenCV::GetPlatformType()
 {
-    return svlFilterSourceVideoCapture::OpenCV;
+    return svlFilterSourceVideoCaptureTypes::OpenCV;
 }
 
 int svlVidCapSrcOpenCV::SetStreamCount(unsigned int numofstreams)
@@ -143,7 +143,7 @@ int svlVidCapSrcOpenCV::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **
 
         for (i = 0; i < OCVNumberOfDevices; i ++) {
             // platform
-            deviceinfo[0][i].platform = svlFilterSourceVideoCapture::OpenCV;
+            deviceinfo[0][i].platform = svlFilterSourceVideoCaptureTypes::OpenCV;
 
             // id
             deviceinfo[0][i].ID = OCVDeviceID[i];
@@ -151,7 +151,6 @@ int svlVidCapSrcOpenCV::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **
             // name
             std::stringstream strstr;
             strstr << "OpenCV video capture device #" << OCVDeviceID[i];
-
             memset(deviceinfo[0][i].name, 0, SVL_VCS_STRING_LENGTH);
             memcpy(deviceinfo[0][i].name, strstr.str().c_str(), std::min(static_cast<int>(strstr.str().length()), SVL_VCS_STRING_LENGTH - 1));
 
@@ -306,7 +305,7 @@ int svlVidCapSrcOpenCV::GetFormatList(unsigned int deviceid, svlFilterSourceVide
     formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[1];
     formatlist[0][0].width = OCVWidth[deviceid];
     formatlist[0][0].height = OCVHeight[deviceid];
-    formatlist[0][0].colorspace = svlFilterSourceVideoCapture::PixelRGB8;
+    formatlist[0][0].colorspace = svlFilterSourceVideoCaptureTypes::PixelRGB8;
     formatlist[0][0].rgb_order = true;
     formatlist[0][0].yuyv_order = false;
     formatlist[0][0].framerate = -1.0;
@@ -321,7 +320,7 @@ int svlVidCapSrcOpenCV::GetFormat(svlFilterSourceVideoCapture::ImageFormat& form
 
     format.width = OCVWidth[DeviceID[videoch]];
     format.height = OCVHeight[DeviceID[videoch]];
-    format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
+    format.colorspace = svlFilterSourceVideoCaptureTypes::PixelRGB8;
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = -1.0;

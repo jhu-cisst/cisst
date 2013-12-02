@@ -85,7 +85,7 @@ void mtsTaskFromCallback::Start(void)
             RunInternal(0);
         WaitToStart(this->InitializationDelay);
     }
-    
+
     if (this->State == mtsComponentState::READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
         ChangeState(mtsComponentState::ACTIVE);

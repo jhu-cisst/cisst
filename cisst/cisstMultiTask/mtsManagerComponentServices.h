@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -193,10 +193,12 @@ public:
     std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(void) const;
     std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(const std::string &processName) const;
 
-    InterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName,
-                                 const std::string & componentName, const std::string &interfaceName) const;
-    InterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & processName,
-                                 const std::string & componentName, const std::string &interfaceName) const;
+    mtsInterfaceProvidedDescription
+        GetInterfaceProvidedDescription(const std::string & processName,
+                                        const std::string & componentName, const std::string &interfaceName) const;
+    mtsInterfaceRequiredDescription
+        GetInterfaceRequiredDescription(const std::string & processName,
+                                        const std::string & componentName, const std::string &interfaceName) const;
 
     // Dynamically load the file (fileName) into the current process
     bool Load(const std::string & fileName) const;

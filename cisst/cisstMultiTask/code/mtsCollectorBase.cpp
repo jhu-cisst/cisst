@@ -130,23 +130,24 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
     this->SampleCounter = 0;
     this->SampleCounterForEvent = 0;
 
-
     // currently doesn't store fullpath if not using the default naming.
     std::string headerFileName;
     size_t pos = fileName.find_last_of(".");
     if (pos != std::string::npos) {
         headerFileName = fileName.substr(0,pos) + ".desc";
-    }
-    else {
+    } else {
         headerFileName = fileName + ".desc";
         std::string ext;
         switch (fileFormat) {
         case COLLECTOR_FILE_FORMAT_CSV:
             ext = ".csv";
+            break;
         case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
             ext = ".txt";
+            break;
         default:
             ext = ".cdat";
+            break;
         }
         this->OutputFileName = fileName + ext;
     }
@@ -233,8 +234,7 @@ void mtsCollectorBase::SetOutputToDefault(const CollectorFileFormat fileFormat)
         suffix = "txt";
     } else if (fileFormat == COLLECTOR_FILE_FORMAT_CSV) {
         suffix = "csv";
-    }
-    else {
+    } else {
         suffix = "cdat"; // for cisst dat
     }
 
@@ -242,7 +242,7 @@ void mtsCollectorBase::SetOutputToDefault(const CollectorFileFormat fileFormat)
         this->WorkingDirectoryMember.Data
         + cmnPath::DirectorySeparator()
         + this->GetDefaultOutputName() + "." + suffix;
-    // add header file name, Joshua 2011.03.03
+    // add header file name
     this->OutputHeaderFileName =  this->WorkingDirectoryMember.Data
         + cmnPath::DirectorySeparator()
         + this->GetDefaultOutputName() + ".desc" ;

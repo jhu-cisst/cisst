@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "vctDataFunctionsFixedSizeMatrixTest.h"
 
+#include <cisstCommon/cmnDataFunctionsString.h>
+
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
 #include <cisstVector/vctRandomFixedSizeMatrix.h>
@@ -31,10 +33,11 @@ http://www.cisst.org/cisst/license.txt.
 
 void vctDataFunctionsFixedSizeMatrixTest::TestDataCopy(void)
 {
-    vctFixedSizeMatrix<double, 7, 3> source, destination;
+    typedef vctFixedSizeMatrix<double, 7, 3> DataType;
+    DataType source, data;
     vctRandom(source, -1.0, 1.0);
-    cmnDataCopy(destination, source);
-    CPPUNIT_ASSERT(source.Equal(destination));
+    cmnData<DataType>::Copy(data, source);
+    CPPUNIT_ASSERT(source.Equal(data));
 }
 
 
@@ -42,12 +45,13 @@ void vctDataFunctionsFixedSizeMatrixTest::TestBinarySerializationStream(void)
 {
     cmnDataFormat local, remote;
     std::stringstream stream;
-    vctFixedSizeMatrix<double, 6, 3> m1, m2, mReference;
+    typedef vctFixedSizeMatrix<double, 6, 3> DataType;
+    DataType m1, m2, mReference;
     vctRandom(mReference, -10.0, 10.0);
     m1 = mReference;
-    cmnDataSerializeBinary(stream, m1);
+    cmnData<DataType>::SerializeBinary(m1, stream);
     m1.SetAll(0);
-    cmnDataDeSerializeBinary(stream, m2, remote, local);
+    cmnData<DataType>::DeSerializeBinary(m2, stream, local, remote);
     CPPUNIT_ASSERT_EQUAL(mReference, m2);
 }
 
@@ -55,21 +59,22 @@ void vctDataFunctionsFixedSizeMatrixTest::TestBinarySerializationStream(void)
 void vctDataFunctionsFixedSizeMatrixTest::TestTextSerializationStream(void)
 {
     std::stringstream stream;
-    vctFixedSizeMatrix<double, 4, 5> m1, m2, mReference;
+    typedef vctFixedSizeMatrix<double, 4, 5> DataType;
+    DataType m1, m2, mReference;
     vctRandom(mReference, -10.0, 10.0);
     m1 = mReference;
-    cmnDataSerializeText(stream, m1, ',');
+    cmnData<DataType>::SerializeText(m1, stream, ',');
     m1.SetAll(0);
-    cmnDataDeSerializeText(stream, m2, ',');
+    cmnData<DataType>::DeSerializeText(m2, stream, ',');
     CPPUNIT_ASSERT(mReference.AlmostEqual(m2, 0.01)); // low precision due to stream out loss
     CPPUNIT_ASSERT(!stream.fail());
     // try without delimiter, using space
     stream.clear();
     vctRandom(mReference, -20.0, 20.0);
     m1 = mReference;
-    cmnDataSerializeText(stream, m1, ' ');
+    cmnData<DataType>::SerializeText(m1, stream, ' ');
     m2.SetAll(0.0);
-    cmnDataDeSerializeText(stream, m2, ' ');
+    cmnData<DataType>::DeSerializeText(m2, stream, ' ');
     CPPUNIT_ASSERT(mReference.AlmostEqual(m2, 0.01)); // low precision due to stream out loss
     CPPUNIT_ASSERT(!stream.fail());
     // try with the wrong delimiter
@@ -77,10 +82,10 @@ void vctDataFunctionsFixedSizeMatrixTest::TestTextSerializationStream(void)
     stream.clear();
     vctRandom(mReference, -20.0, 20.0);
     m1 = mReference;
-    cmnDataSerializeText(stream, m1, '|');
+    cmnData<DataType>::SerializeText(m1, stream, '|');
     m2.SetAll(0.0);
     try {
-        cmnDataDeSerializeText(stream, m2, ',');
+        cmnData<DataType>::DeSerializeText(m2, stream, ',');
     } catch (std::runtime_error) {
         exceptionReceived = true;
     }
@@ -90,28 +95,33 @@ void vctDataFunctionsFixedSizeMatrixTest::TestTextSerializationStream(void)
 
 void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
 {
-    vctFixedSizeMatrix<int, 3, 6> mInt;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3 * 6), cmnDataScalarNumber(mInt));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(mInt));
+    typedef vctFixedSizeMatrix<int, 3, 6> DataType;
+    DataType mInt;
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3 * 6), cmnData<DataType>::ScalarNumber(mInt));
+    CPPUNIT_ASSERT_EQUAL(true, cmnData<DataType>::ScalarNumberIsFixed(mInt));
 
-    vctFixedSizeMatrix<vctFixedSizeMatrix<double, 3, 4>, 2, 3> mmDouble;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3 * 4 * 2 * 3), cmnDataScalarNumber(mmDouble));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(mmDouble));
+    typedef vctFixedSizeMatrix<vctFixedSizeMatrix<double, 3, 4>, 2, 3> DataType2;
+    DataType2 mmDouble;
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3 * 4 * 2 * 3), cmnData<DataType2>::ScalarNumber(mmDouble));
+    CPPUNIT_ASSERT_EQUAL(true, cmnData<DataType2>::ScalarNumberIsFixed(mmDouble));
 
-    vctFixedSizeMatrix<std::string, 3, 2> mString;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnDataScalarNumber(mString));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(mString));
+    typedef vctFixedSizeMatrix<std::string, 3, 2> DataType3;
+    DataType3 mString;
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnData<DataType3>::ScalarNumber(mString));
+    CPPUNIT_ASSERT_EQUAL(true, cmnData<DataType3>::ScalarNumberIsFixed(mString));
 
-    vctFixedSizeMatrix<vctDynamicMatrix<double>, 4, 2> mmMixed;
+    typedef vctFixedSizeMatrix<vctDynamicMatrix<double>, 4, 2> DataType4;
+    DataType4 mmMixed;
     size_t numberOfScalarsExpected = 0;
     for (size_t i = 0; i < mmMixed.rows(); i++) {
         for (size_t j = 0; j < mmMixed.cols(); j++) {
+            numberOfScalarsExpected += 2; // size of dynamic matrix
             mmMixed.Element(i, j).SetSize(i + 1, j + 1); // + 1 to make sure we don't have a 0 size matrix
             numberOfScalarsExpected += ((i + 1) * (j + 1));
         }
     }
-    CPPUNIT_ASSERT_EQUAL(numberOfScalarsExpected, cmnDataScalarNumber(mmMixed));
-    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(mmMixed));
+    CPPUNIT_ASSERT_EQUAL(numberOfScalarsExpected, cmnData<DataType4>::ScalarNumber(mmMixed));
+    CPPUNIT_ASSERT_EQUAL(false, cmnData<DataType4>::ScalarNumberIsFixed(mmMixed));
 
     size_t row, col, subRow, subCol, position;
     bool exceptionReceived = false;
@@ -119,7 +129,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
 
     // exception expected if index too high
     try {
-        description = cmnDataScalarDescription(mInt, cmnDataScalarNumber(mInt) + 1);
+        description = cmnData<DataType>::ScalarDescription(mInt, cmnData<DataType>::ScalarNumber(mInt) + 1);
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
@@ -127,7 +137,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
 
     exceptionReceived = false;
     try {
-        description = cmnDataScalarDescription(mmDouble, cmnDataScalarNumber(mmDouble) + 1);
+        description = cmnData<DataType2>::ScalarDescription(mmDouble, cmnData<DataType2>::ScalarNumber(mmDouble) + 1);
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
@@ -136,7 +146,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
     // exception expected for any index
     exceptionReceived = false;
     try {
-        description = cmnDataScalarDescription(mString, cmnDataScalarNumber(mString));
+        description = cmnData<DataType3>::ScalarDescription(mString, cmnData<DataType3>::ScalarNumber(mString));
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
@@ -147,7 +157,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
     for (row = 0; row < mInt.rows(); ++row) {
         for (col = 0; col < mInt.cols(); ++col) {
             mInt.Element(row, col) = static_cast<int>(row * 10 + col);
-            CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * 10 + col), cmnDataScalar(mInt, position));
+            CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * 10 + col), cmnData<DataType>::Scalar(mInt, position));
             position++;
         }
     }
@@ -159,7 +169,7 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
                 for (subCol = 0; subCol < mmDouble.Element(row, col).cols(); ++subCol) {
                     mmDouble.Element(row, col).Element(subRow, subCol) = static_cast<double>(row * col * 100 + subRow * subCol);
                     CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * col * 100 + subRow * subCol),
-                                         cmnDataScalar(mmDouble, position));
+                                         cmnData<DataType2>::Scalar(mmDouble, position));
                     position++;
                 }
             }
@@ -170,11 +180,15 @@ void vctDataFunctionsFixedSizeMatrixTest::TestScalar(void)
     position = 0;
     for (row = 0; row < mmMixed.rows(); ++row) {
         for (col = 0; col < mmMixed.cols(); ++col) {
+            CPPUNIT_ASSERT_EQUAL(static_cast<double>(mmMixed.Element(row, col).rows()), cmnData<DataType4>::Scalar(mmMixed, position));
+            position++;
+            CPPUNIT_ASSERT_EQUAL(static_cast<double>(mmMixed.Element(row, col).cols()), cmnData<DataType4>::Scalar(mmMixed, position));
+            position++;
             for (subRow = 0; subRow < mmMixed.Element(row, col).rows(); ++subRow) {
                 for (subCol = 0; subCol < mmMixed.Element(row, col).cols(); ++subCol) {
                     mmMixed.Element(row, col).Element(subRow, subCol) = static_cast<double>(row * col * 100 + subRow * subCol);
                     CPPUNIT_ASSERT_EQUAL(static_cast<double>(row * col * 100 + subRow * subCol),
-                                         cmnDataScalar(mmMixed, position));
+                                         cmnData<DataType4>::Scalar(mmMixed, position));
                     position++;
                 }
             }

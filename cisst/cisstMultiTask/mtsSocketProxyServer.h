@@ -84,7 +84,7 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
  protected:
 
     osaSocket Socket;
-    InterfaceProvidedDescription InterfaceDescription;
+    mtsInterfaceProvidedDescription InterfaceDescription;
     mtsProxySerializer *InternalSerializer;
 
     /*! Typedef for function proxies */
@@ -117,7 +117,7 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
       \return True if success, false otherwise */
     bool CreateServerProxy(const std::string & requiredInterfaceName);
 
-    bool GetInterfaceDescription(InterfaceProvidedDescription &desc) const;
+    bool GetInterfaceDescription(mtsInterfaceProvidedDescription &desc) const;
     bool GetHandleVoid(const std::string &commandName, std::string &handleString) const;
     bool GetHandleRead(const std::string &commandName, std::string &handleString) const;
     bool GetHandleWrite(const std::string &commandName, std::string &handleString) const;

@@ -164,7 +164,7 @@ class CISST_EXPORT mtsComponentProxy : public mtsComponent
       a provided interface proxy and create a provided interface proxy
       instance which is used for only one user (client component). This
       is conceptually identical to what AllocatedResources() does. */
-    bool CreateInterfaceProvidedProxy(const InterfaceProvidedDescription & providedInterfaceDescription);
+    bool CreateInterfaceProvidedProxy(const mtsInterfaceProvidedDescription & providedInterfaceDescription);
 
     /*! \brief Remove provided interface proxy
       \param providedInterfaceProxyName Name of provided interface proxy to
@@ -173,7 +173,7 @@ class CISST_EXPORT mtsComponentProxy : public mtsComponent
     bool RemoveInterfaceProvidedProxy(const std::string & providedInterfaceProxyName);
 
     /*! \brief Create or remove a required interface proxy */
-    bool CreateInterfaceRequiredProxy(const InterfaceRequiredDescription & requiredInterfaceDescription);
+    bool CreateInterfaceRequiredProxy(const mtsInterfaceRequiredDescription & requiredInterfaceDescription);
     bool RemoveInterfaceRequiredProxy(const std::string & requiredInterfaceProxyName);
 
     /*! \brief Get name of provided interface instance for new connection,

@@ -1,0 +1,267 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+}
+
+class {
+    name mtsCommandVoidDescription;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+}
+
+class {
+    name mtsCommandWriteDescription;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ArgumentPrototypeSerialized;
+        type std::string;
+        visibility public;
+    }
+}
+
+class {
+    name mtsCommandReadDescription;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ArgumentPrototypeSerialized;
+        type std::string;
+        visibility public;
+    }
+}
+
+class {
+    name mtsCommandQualifiedReadDescription;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name Argument1PrototypeSerialized;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name Argument2PrototypeSerialized;
+        type std::string;
+        visibility public;
+    }
+}
+
+class {
+    name mtsCommandVoidReturnDescription;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ResultPrototypeSerialized;
+        type std::string;
+        visibility public;
+    }
+}
+
+class {
+    name mtsCommandWriteReturnDescription;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ArgumentPrototypeSerialized;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ResultPrototypeSerialized;
+        type std::string;
+        visibility public;
+    }
+}
+
+class {
+    name mtsEventVoidDescription;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+}
+
+class {
+    name mtsEventWriteDescription;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ArgumentPrototypeSerialized;
+        type std::string;
+        visibility public;
+    }
+}
+
+
+inline-header {
+    typedef std::vector<mtsCommandVoidDescription>          mtsCommandsVoidDescription;
+	typedef std::vector<mtsCommandWriteDescription>         mtsCommandsWriteDescription;
+	typedef std::vector<mtsCommandReadDescription>          mtsCommandsReadDescription;
+	typedef std::vector<mtsCommandQualifiedReadDescription> mtsCommandsQualifiedReadDescription;
+	typedef std::vector<mtsCommandVoidReturnDescription>    mtsCommandsVoidReturnDescription;
+	typedef std::vector<mtsCommandWriteReturnDescription>   mtsCommandsWriteReturnDescription;
+    typedef std::vector<mtsEventVoidDescription>            mtsEventsVoidDescription;
+    typedef std::vector<mtsEventWriteDescription>           mtsEventsWriteDescription;
+
+    typedef std::vector<std::string>                         mtsCommandPointerNames;
+    typedef mtsCommandsVoidDescription                       mtsEventHandlersVoidDescription;
+    typedef mtsCommandsWriteDescription                      mtsEventHandlersWriteDescription;
+}
+
+
+class {
+	name mtsInterfaceProvidedDescription;
+    attribute CISST_EXPORT;
+    member {
+        name InterfaceName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name CommandsVoid;
+        type mtsCommandsVoidDescription;
+        visibility public;
+    }
+    member {
+        name CommandsWrite;
+        type mtsCommandsWriteDescription;
+        visibility public;
+    }
+    member {
+        name CommandsRead;
+        type mtsCommandsReadDescription;
+        visibility public;
+    }
+    member {
+        name CommandsQualifiedRead;
+        type mtsCommandsQualifiedReadDescription;
+        visibility public;
+    }
+    member {
+        name CommandsVoidReturn;
+        type mtsCommandsVoidReturnDescription;
+        visibility public;
+    }
+    member {
+        name CommandsWriteReturn;
+        type mtsCommandsWriteReturnDescription;
+        visibility public;
+    }
+    member {
+        name EventsVoid;
+        type mtsEventsVoidDescription;
+        visibility public;
+    }
+    member {
+        name EventsWrite;
+        type mtsEventsWriteDescription;
+        visibility public;
+    }
+}
+
+
+class {
+    name mtsInterfaceRequiredDescription;
+    attribute CISST_EXPORT;
+    member {
+        name InterfaceName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name FunctionVoidNames;
+        type mtsCommandPointerNames;
+        visibility public;
+    }
+    member {
+        name FunctionWriteNames;
+        type mtsCommandPointerNames;
+        visibility public;
+    }
+    member {
+        name FunctionReadNames;
+        type mtsCommandPointerNames;
+        visibility public;
+    }
+    member {
+        name FunctionQualifiedReadNames;
+        type mtsCommandPointerNames;
+        visibility public;
+    }
+    member {
+        name FunctionVoidReturnNames;
+        type mtsCommandPointerNames;
+        visibility public;
+    }
+    member {
+        name FunctionWriteReturnNames;
+        type mtsCommandPointerNames;
+        visibility public;
+    }
+    member {
+        name EventHandlersVoid;
+        type mtsEventHandlersVoidDescription;
+        visibility public;
+    }
+    member {
+        name EventHandlersWrite;
+        type mtsEventHandlersWriteDescription;
+        visibility public;
+    }
+    // "IsRequired" attribute
+    member {
+        name IsRequired; // MTS_OPTIONAL or MTS_REQUIRED (of type mtsRequiredType)
+        type bool;
+        visibility public;
+    }
+}
+
+inline-header {
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+typedef mtsGenericObjectProxy<mtsInterfaceProvidedDescription> InterfaceProvidedDescriptionProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(InterfaceProvidedDescriptionProxy);
+typedef mtsGenericObjectProxy<mtsInterfaceRequiredDescription> InterfaceRequiredDescriptionProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(InterfaceRequiredDescriptionProxy);
+}

@@ -52,7 +52,7 @@ cdgScope * cdgInline::Create(size_t lineNumber) const
 }
 
 
-bool cdgInline::Validate(void)
+bool cdgInline::Validate(std::string & CMN_UNUSED(errorMessage))
 {
     return true;
 }

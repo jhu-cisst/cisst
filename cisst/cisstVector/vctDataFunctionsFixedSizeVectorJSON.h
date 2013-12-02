@@ -29,62 +29,43 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctFixedSizeVectorBase.h>
 
 #if CISST_HAS_JSON
-template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-void cmnDataToJSON(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector,
-                   Json::Value & jsonValue) {
-    typedef vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> VectorType;
-    typedef typename VectorType::const_iterator const_iterator;
-    const const_iterator end = vector.end();
-    const_iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataToJSON(*iter, jsonValue[index]);
-    }
-}
-
-template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline void cmnDataFromJSON(vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType> & vector,
-                            const Json::Value & jsonValue)
-    throw (std::runtime_error)
+template <class _elementType, vct::size_type _size>
+class cmnDataJSON<vctFixedSizeVector<_elementType, _size> >
 {
-    // make sure both vectors have the same size
-    if (vector.size() != jsonValue.size()) {
-        cmnThrow("cmnDataFromJSON: vector sizes don't match");
-    }
-    typedef vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType> VectorType;
-    typedef typename VectorType::iterator iterator;
-    const iterator end = vector.end();
-    iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataFromJSON(*iter, jsonValue[index]);
-    }
-}
+public:
+    typedef vctFixedSizeVector<_elementType, _size> DataType;
 
-template <class _elementType, vct::size_type _size, vct::stride_type _stride>
-inline void cmnDataFromJSON(vctFixedSizeVectorRef<_elementType, _size, _stride> vector,
-                            const Json::Value & jsonValue)
-    throw (std::runtime_error)
-{
-    // make sure both vectors have the same size
-    if (vector.size() != jsonValue.size()) {
-        cmnThrow("cmnDataFromJSON: vector sizes don't match");
+    static void SerializeText(const DataType & vector, Json::Value & jsonValue)
+    {
+        typedef typename DataType::const_iterator const_iterator;
+        const const_iterator end = vector.end();
+        const_iterator iter;
+        int index = 0;
+        for (iter = vector.begin();
+             iter != end;
+             ++index, ++iter) {
+            cmnDataJSON<_elementType>::SerializeText(*iter, jsonValue[index]);
+        }
     }
-    typedef vctFixedSizeVectorRef<_elementType, _size, _stride> VectorType;
-    typedef typename VectorType::iterator iterator;
-    const iterator end = vector.end();
-    iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataFromJSON(*iter, jsonValue[index]);
+
+    static void DeSerializeText(DataType & vector, const Json::Value & jsonValue)
+        throw (std::runtime_error)
+    {
+        // make sure both vectors have the same size
+        if (vector.size() != jsonValue.size()) {
+            cmnThrow("cmnDataJSON<vctFixedSizeVector>::DeSerializeText: vector sizes don't match");
+        }
+        typedef typename DataType::iterator iterator;
+        const iterator end = vector.end();
+        iterator iter;
+        int index = 0;
+        for (iter = vector.begin();
+             iter != end;
+             ++index, ++iter) {
+            cmnDataJSON<_elementType>::DeSerializeText(*iter, jsonValue[index]);
+        }
     }
-}
+};
 
 #endif // CISST_HAS_JSON
 

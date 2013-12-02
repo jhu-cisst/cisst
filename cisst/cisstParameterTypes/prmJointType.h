@@ -23,18 +23,35 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmJointType_h
 #define _prmJointType_h
 
-
+#include <cisstCommon/cmnDataFunctionsEnumMacros.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
-
 
 typedef enum JointType {
     PRM_PRISMATIC,
     PRM_REVOLUTE
 } prmJointType;
+
 typedef vctDynamicVector<prmJointType> prmJointTypeVec;
 typedef mtsGenericObjectProxy<prmJointTypeVec> prmJointTypeProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(prmJointTypeProxy);
 
+inline std::string cmnDataHumanReadable(const prmJointType & data)
+{
+    switch (data) {
+    case PRM_PRISMATIC:
+        return "prismatic";
+        break;
+    case PRM_REVOLUTE:
+        return "revolute";
+        break;
+    default:
+        return "unknown";
+        break;
+    }
+    return "unknown";
+}
+
+CMN_DATA_SPECIALIZATION_FOR_ENUM(prmJointType, int, cmnDataHumanReadable);
 
 #endif // _prmJointType_h
 

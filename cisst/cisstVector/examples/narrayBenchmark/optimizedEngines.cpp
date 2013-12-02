@@ -65,7 +65,7 @@ int main()
     destinationNArray.SetSize(size4);
 
     /* create parent container overlay for fast random and tests */
-    const unsigned int totalSize = sourceNArray.size(); /* aka size^4 */
+    const size_t totalSize = sourceNArray.size(); /* aka size^4 */
     VectorRefType sourceVector(totalSize, sourceNArray.Pointer());
     VectorRefType destinationVector(totalSize, destinationNArray.Pointer());
 

@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterSourceBase.h>
 #include <cisstStereoVision/svlBufferSample.h>
+#include <cisstStereoVision/svlFilterSourceTextFileTypes.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -33,17 +34,7 @@ class CISST_EXPORT svlFilterSourceTextFile : public svlFilterSourceBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    struct CISST_EXPORT FileInfo
-    {
-        FileInfo();
-        FileInfo(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit, const double & _timestamp_overflow_value = -1.0);
-        void Assign(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit, const double & _timestamp_overflow_value = -1.0);
-
-        std::string filepath;
-        int timestamp_column;
-        double timestamp_unit;
-        double timestamp_overflow_value;
-    };
+    typedef svlFilterSourceTextFileTypes::FileInfo FileInfo;
 
 public:
     svlFilterSourceTextFile();
@@ -88,13 +79,7 @@ protected:
     virtual void CreateInterfaces();
 };
 
-typedef mtsGenericObjectProxy<svlFilterSourceTextFile::FileInfo> svlFilterSourceTextFile_FileInfo;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceTextFile_FileInfo);
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceTextFile)
-
-
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceTextFile::FileInfo & objref);
-
 
 #endif  // _svlFilterSourceTextFile_h
 

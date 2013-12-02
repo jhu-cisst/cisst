@@ -1196,7 +1196,7 @@ bool ManualRegistration::ImportFiducialFile(const std::string & inputFile, Visib
         Tokenize(tempLine, token, ",");
         if (inf.eof() || token.size() <= 0)
             break;
-        std::cerr << token << std::endl;
+		std::cerr << cmnData<std::vector<std::string> >::HumanReadable(token) << std::endl;
         if (token.at(0).compare(0,1,"#")) {
             if (token.size() < 4)
                 return false;

@@ -78,7 +78,7 @@ mtsInterfaceRequired * mtsComponentProxy::AddInterfaceRequiredWithoutSystemEvent
 //-----------------------------------------------------------------------------
 //  Methods for Server Components
 //-----------------------------------------------------------------------------
-bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDescription & requiredInterfaceDescription)
+bool mtsComponentProxy::CreateInterfaceRequiredProxy(const mtsInterfaceRequiredDescription & requiredInterfaceDescription)
 {
     const std::string requiredInterfaceName = requiredInterfaceDescription.InterfaceName;
     const mtsRequiredType isRequired = (requiredInterfaceDescription.IsRequired ? MTS_REQUIRED : MTS_OPTIONAL);
@@ -286,7 +286,7 @@ const std::string mtsComponentProxy::GetNameOfProvidedInterfaceInstance(
 //-----------------------------------------------------------------------------
 //  Methods for Client Components
 //-----------------------------------------------------------------------------
-bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDescription & providedInterfaceDescription)
+bool mtsComponentProxy::CreateInterfaceProvidedProxy(const mtsInterfaceProvidedDescription & providedInterfaceDescription)
 {
     const std::string providedInterfaceName = providedInterfaceDescription.InterfaceName;
 
@@ -315,8 +315,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 
     // Create void command proxies
     mtsCommandVoidProxy * newCommandVoid = 0;
-    CommandVoidVector::const_iterator itVoid = providedInterfaceDescription.CommandsVoid.begin();
-    const CommandVoidVector::const_iterator itVoidEnd = providedInterfaceDescription.CommandsVoid.end();
+    mtsCommandsVoidDescription::const_iterator itVoid = providedInterfaceDescription.CommandsVoid.begin();
+    const mtsCommandsVoidDescription::const_iterator itVoidEnd = providedInterfaceDescription.CommandsVoid.end();
     for (; itVoid != itVoidEnd; ++itVoid) {
         commandName = itVoid->Name;
         newCommandVoid = new mtsCommandVoidProxy(commandName);
@@ -330,8 +330,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 
     // Create write command proxies
     mtsCommandWriteProxy * newCommandWrite = 0;
-    CommandWriteVector::const_iterator itWrite = providedInterfaceDescription.CommandsWrite.begin();
-    const CommandWriteVector::const_iterator itWriteEnd = providedInterfaceDescription.CommandsWrite.end();
+    mtsCommandsWriteDescription::const_iterator itWrite = providedInterfaceDescription.CommandsWrite.begin();
+    const mtsCommandsWriteDescription::const_iterator itWriteEnd = providedInterfaceDescription.CommandsWrite.end();
     for (; itWrite != itWriteEnd; ++itWrite) {
         commandName = itWrite->Name;
         newCommandWrite = new mtsCommandWriteProxy(commandName);
@@ -363,8 +363,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 
     // Create read command proxies
     mtsCommandReadProxy * newCommandRead = 0;
-    CommandReadVector::const_iterator itRead = providedInterfaceDescription.CommandsRead.begin();
-    const CommandReadVector::const_iterator itReadEnd = providedInterfaceDescription.CommandsRead.end();
+    mtsCommandsReadDescription::const_iterator itRead = providedInterfaceDescription.CommandsRead.begin();
+    const mtsCommandsReadDescription::const_iterator itReadEnd = providedInterfaceDescription.CommandsRead.end();
     for (; itRead != itReadEnd; ++itRead) {
         commandName = itRead->Name;
         newCommandRead = new mtsCommandReadProxy(commandName);
@@ -396,8 +396,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 
     // Create qualified read command proxies
     mtsCommandQualifiedReadProxy * newCommandQualifiedRead = 0;
-    CommandQualifiedReadVector::const_iterator itQualifiedRead = providedInterfaceDescription.CommandsQualifiedRead.begin();
-    const CommandQualifiedReadVector::const_iterator itQualifiedReadEnd = providedInterfaceDescription.CommandsQualifiedRead.end();
+    mtsCommandsQualifiedReadDescription::const_iterator itQualifiedRead = providedInterfaceDescription.CommandsQualifiedRead.begin();
+    const mtsCommandsQualifiedReadDescription::const_iterator itQualifiedReadEnd = providedInterfaceDescription.CommandsQualifiedRead.end();
     for (; itQualifiedRead != itQualifiedReadEnd; ++itQualifiedRead) {
         commandName = itQualifiedRead->Name;
         newCommandQualifiedRead = new mtsCommandQualifiedReadProxy(commandName);
@@ -439,8 +439,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 
     // Create void return command proxies
     mtsCommandVoidReturnProxy * newCommandVoidReturn = 0;
-    CommandVoidReturnVector::const_iterator itVoidReturn = providedInterfaceDescription.CommandsVoidReturn.begin();
-    const CommandVoidReturnVector::const_iterator itVoidReturnEnd = providedInterfaceDescription.CommandsVoidReturn.end();
+    mtsCommandsVoidReturnDescription::const_iterator itVoidReturn = providedInterfaceDescription.CommandsVoidReturn.begin();
+    const mtsCommandsVoidReturnDescription::const_iterator itVoidReturnEnd = providedInterfaceDescription.CommandsVoidReturn.end();
     for (; itVoidReturn != itVoidReturnEnd; ++itVoidReturn) {
         commandName = itVoidReturn->Name;
         newCommandVoidReturn = new mtsCommandVoidReturnProxy(commandName);
@@ -473,8 +473,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
 
     // Create write return command proxies
     mtsCommandWriteReturnProxy * newCommandWriteReturn = 0;
-    CommandWriteReturnVector::const_iterator itWriteReturn = providedInterfaceDescription.CommandsWriteReturn.begin();
-    const CommandWriteReturnVector::const_iterator itWriteReturnEnd = providedInterfaceDescription.CommandsWriteReturn.end();
+    mtsCommandsWriteReturnDescription::const_iterator itWriteReturn = providedInterfaceDescription.CommandsWriteReturn.begin();
+    const mtsCommandsWriteReturnDescription::const_iterator itWriteReturnEnd = providedInterfaceDescription.CommandsWriteReturn.end();
     for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
         commandName = itWriteReturn->Name;
         newCommandWriteReturn = new mtsCommandWriteReturnProxy(commandName);
@@ -530,8 +530,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
     // Create void event generator proxies
     mtsFunctionVoid * eventVoidGeneratorProxy = 0;
     mtsMulticastCommandVoidProxy * eventMulticastCommandVoidProxy;
-    EventVoidVector::const_iterator itEventVoid = providedInterfaceDescription.EventsVoid.begin();
-    const EventVoidVector::const_iterator itEventVoidEnd = providedInterfaceDescription.EventsVoid.end();
+    mtsEventsVoidDescription::const_iterator itEventVoid = providedInterfaceDescription.EventsVoid.begin();
+    const mtsEventsVoidDescription::const_iterator itEventVoidEnd = providedInterfaceDescription.EventsVoid.end();
     for (; itEventVoid != itEventVoidEnd; ++itEventVoid) {
         eventName = itEventVoid->Name;
         eventVoidGeneratorProxy = new mtsFunctionVoid();
@@ -562,8 +562,8 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const InterfaceProvidedDesc
     // Create write event generator proxies
     mtsFunctionWrite * eventWriteGeneratorProxy;
     mtsMulticastCommandWriteProxy * eventMulticastCommandWriteProxy;
-    EventWriteVector::const_iterator itEventWrite = providedInterfaceDescription.EventsWrite.begin();
-    const EventWriteVector::const_iterator itEventWriteEnd = providedInterfaceDescription.EventsWrite.end();
+    mtsEventsWriteDescription::const_iterator itEventWrite = providedInterfaceDescription.EventsWrite.begin();
+    const mtsEventsWriteDescription::const_iterator itEventWriteEnd = providedInterfaceDescription.EventsWrite.end();
     for (; itEventWrite != itEventWriteEnd; ++itEventWrite) {
         eventName = itEventWrite->Name;
         eventWriteGeneratorProxy = new mtsFunctionWrite();

@@ -28,9 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstCommon/cmnNamedMap.h>
 
-//#include <cisstOSAbstraction/osaThread.h>
-//#include <cisstOSAbstraction/osaMutex.h>
-
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
@@ -535,9 +532,20 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     void InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg);
 
  public:
-
     /*! Send a human readable description of the component. */
     void ToStream(std::ostream & outputStream) const;
+
+    /*! Method to set replay mode*/
+    bool SetReplayMode(void);
+
+    bool SetReplayData(const std::string & stateTableName, const std::string & fileName);
+
+    bool SetReplayTime(const double time);
+
+ protected:
+
+    bool ReplayMode;
+
 };
 
 

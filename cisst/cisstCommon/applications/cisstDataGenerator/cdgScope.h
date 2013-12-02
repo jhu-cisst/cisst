@@ -40,6 +40,8 @@ public:
                CDG_BASECLASS,
                CDG_TYPEDEF,
                CDG_MEMBER,
+               CDG_ENUM,
+               CDG_ENUMVALUE,
                CDG_CODE};
 
     typedef std::vector<cdgScope *> ScopesContainer;
@@ -61,7 +63,8 @@ public:
     bool HasField(const std::string & fieldName) const;
     bool SetFieldValue(const std::string & fieldName,
                        const std::string & value,
-                       std::string & errorMessage);
+                       std::string & errorMessage,
+                       const bool & allowOverwrite = false);
     std::string GetFieldValue(const std::string & fieldName) const;
     bool IsValid(std::string & errorMessage) const;
     void FillInDefaults(void);
@@ -72,8 +75,8 @@ public:
                      Stack & scopes,
                      size_t lineNumber);
 
-    virtual bool ValidateRecursion(void);
-    virtual bool Validate(void) = 0;
+    virtual bool ValidateRecursion(std::string & errorMessage);
+    virtual bool Validate(std::string & errorMessage) = 0;
 
     virtual void GenerateHeader(std::ostream & outputStream) const = 0;
     virtual void GenerateCode(std::ostream & outputStream) const = 0;

@@ -51,7 +51,7 @@ public:
     cdgScope * Create(size_t lineNumber) const;
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
-    bool Validate(void);
+    bool Validate(std::string & errorMessage);
     void GenerateHeader(std::ostream & output) const;
     void GenerateCode(std::ostream & output) const;
 

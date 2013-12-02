@@ -28,7 +28,6 @@ class vctDataFunctionsDynamicVectorJSONTest: public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE(vctDataFunctionsDynamicVectorJSONTest);
     {
         CPPUNIT_TEST(TestVector);
-        CPPUNIT_TEST(TestVectorRef);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -40,5 +39,4 @@ class vctDataFunctionsDynamicVectorJSONTest: public CppUnit::TestFixture
     }
 
     void TestVector(void);
-    void TestVectorRef(void);
 };

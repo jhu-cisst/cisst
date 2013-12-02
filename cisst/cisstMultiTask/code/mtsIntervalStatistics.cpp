@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 
 CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsIntervalStatisticsVecProxy);
 
 mtsIntervalStatistics::mtsIntervalStatistics():
     mtsGenericObject(),
@@ -35,8 +34,8 @@ mtsIntervalStatistics::mtsIntervalStatistics():
     StdDev(0.0),
     Max(0.0),
     Min(0.0),
-    MinComputeTime_(cmnTypeTraits<double>::MaxPositiveValue()),
-    MaxComputeTime_(cmnTypeTraits<double>::MinPositiveValue()),
+    mMinComputeTime(cmnTypeTraits<double>::MaxPositiveValue()),
+    mMaxComputeTime(cmnTypeTraits<double>::MinPositiveValue()),
     StatisticsUpdatePeriod(1.0)
 {
     // Get a pointer to the time server
@@ -51,8 +50,8 @@ void mtsIntervalStatistics::ToStream(std::ostream & outputStream) const
                  << " StdDev: " << StdDev
                  << " Max: " << Max
                  << " Min: " << Min
-                 << " MinComputeTime: " << MinComputeTime_
-                 << " MaxComputeTime: " << MaxComputeTime_
+                 << " MinComputeTime: " << mMinComputeTime
+                 << " MaxComputeTime: " << mMaxComputeTime
                  << " Period: " << StatisticsUpdatePeriod;
 }
 
@@ -77,8 +76,8 @@ void mtsIntervalStatistics::ToStreamRaw(std::ostream & outputStream, const char 
                      << this->StdDev << delimiter
                      << this->Max << delimiter
                      << this->Min << delimiter
-                     << this->MinComputeTime_ << delimiter
-                     << this->MaxComputeTime_ << delimiter
+                     << this->mMinComputeTime << delimiter
+                     << this->mMaxComputeTime << delimiter
                      << this->StatisticsUpdatePeriod;
     }
 }
@@ -97,8 +96,8 @@ void mtsIntervalStatistics::SerializeRaw(std::ostream & outputStream) const
     cmnSerializeRaw(outputStream, NumberOfSamples);
     cmnSerializeRaw(outputStream, TempMax);
     cmnSerializeRaw(outputStream, TempMin);
-    cmnSerializeRaw(outputStream, MinComputeTime_);
-    cmnSerializeRaw(outputStream, MaxComputeTime_);
+    cmnSerializeRaw(outputStream, mMinComputeTime);
+    cmnSerializeRaw(outputStream, mMaxComputeTime);
 }
 
 void mtsIntervalStatistics::DeSerializeRaw(std::istream & inputStream)
@@ -114,8 +113,8 @@ void mtsIntervalStatistics::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, NumberOfSamples);
     cmnDeSerializeRaw(inputStream, TempMax);
     cmnDeSerializeRaw(inputStream, TempMin);
-    cmnDeSerializeRaw(inputStream, MinComputeTime_);
-    cmnDeSerializeRaw(inputStream, MaxComputeTime_);
+    cmnDeSerializeRaw(inputStream, mMinComputeTime);
+    cmnDeSerializeRaw(inputStream, mMaxComputeTime);
     //since we might be on a different computer the timing should be different
     LastUpdateTime = TimeServer->GetRelativeTime();
 }
@@ -156,19 +155,19 @@ void mtsIntervalStatistics::AddSample(const double sample) {
         TempMin = sample;
         LastUpdateTime = TimeServer->GetRelativeTime();
 
-        MaxComputeTime_ = cmnTypeTraits<double>::MinPositiveValue();
-        MinComputeTime_ = cmnTypeTraits<double>::MaxPositiveValue();
+        mMaxComputeTime = cmnTypeTraits<double>::MinPositiveValue();
+        mMinComputeTime = cmnTypeTraits<double>::MaxPositiveValue();
     }
 }
 
 void mtsIntervalStatistics::AddComputeTime(const double computeTime)
 {
     //check for max
-    if (MaxComputeTime_ < computeTime){
-        MaxComputeTime_ = computeTime;
+    if (mMaxComputeTime < computeTime){
+        mMaxComputeTime = computeTime;
     }
     //check for min.
-    if (MinComputeTime_ > computeTime){
-        MinComputeTime_ = computeTime;
+    if (mMinComputeTime > computeTime){
+        mMinComputeTime = computeTime;
     }
 }

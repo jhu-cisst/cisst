@@ -31,8 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 /***************************************/
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageOverlay, svlFilterBase)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterImageOverlay_ImageTransform)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterImageOverlay_ImageTransformVector)
 
 svlFilterImageOverlay::svlFilterImageOverlay() :
     svlFilterBase(),
@@ -698,23 +696,3 @@ void svlFilterImageOverlay::RemoveAndDeleteOverlayInternal(svlOverlay* overlay)
 
     CS.Leave();
 }
-
-
-/****************************/
-/*** Stream out operators ***/
-/****************************/
-
-std::ostream & operator << (std::ostream & stream, const svlFilterImageOverlay::ImageTransform & objref)
-{
-    stream << "ID=" << objref.ID << " (timestamp=" << std::fixed << objref.timestamp << ")" << std::endl << objref.frame << std::endl;
-    return stream;
-}
-
-std::ostream & operator << (std::ostream & stream, const vctDynamicVector<svlFilterImageOverlay::ImageTransform> & objref)
-{
-    for (unsigned int i = 0; i < objref.size(); i ++) {
-        stream << "ID=" << objref[i].ID << " (timestamp=" << std::fixed << objref[i].timestamp << ")" << std::endl << objref[i].frame << std::endl;
-    }
-    return stream;
-}
-

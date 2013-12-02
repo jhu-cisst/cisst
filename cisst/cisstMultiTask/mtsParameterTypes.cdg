@@ -1,0 +1,300 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+#include <cisstMultiTask/mtsParameterTypesOld.h>
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+}
+
+class {
+    name mtsDescriptionComponent;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name ProcessName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ComponentName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ClassName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ConstructorArgSerialized;
+        type std::string;
+        visibility public;
+    }
+    inline-header {
+    public:
+       mtsDescriptionComponent(const std::string & processName, const std::string & componentName);
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsDescriptionComponent> mtsDescriptionComponentProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentProxy);
+}
+
+inline-code {
+    mtsDescriptionComponent::mtsDescriptionComponent(const std::string & processName, const std::string & componentName):
+        ProcessName(processName),
+        ComponentName(componentName) {
+    }
+}
+
+
+class {
+    name mtsDescriptionComponentClass;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name ClassName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ArgType;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ArgTypeId;
+        type std::string;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsDescriptionComponentClass> mtsDescriptionComponentClassProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentClassProxy);
+
+typedef std::vector<mtsDescriptionComponentClass> mtsDescriptionComponentClassVec;
+typedef mtsGenericObjectProxy<mtsDescriptionComponentClassVec> mtsDescriptionComponentClassVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentClassVecProxy);
+}
+
+
+class {
+    name mtsDescriptionInterface;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name ProcessName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ComponentName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name InterfaceRequiredNames;
+        type std::vector<std::string>;
+        visibility public;
+    }
+    member {
+        name InterfaceProvidedNames;
+        type std::vector<std::string>;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsDescriptionInterface> mtsDescriptionInterfaceProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionInterfaceProxy);
+}
+
+
+class {
+    name mtsDescriptionIntefaceFullName;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name ProcessName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ComponentName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name InterfaceName;
+        type std::string;
+        visibility public;
+    }
+}
+
+
+class {
+    name mtsDescriptionConnection;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Client;
+        type mtsDescriptionIntefaceFullName;
+        visibility public;
+    }
+    member {
+        name Server;
+        type mtsDescriptionIntefaceFullName;
+        visibility public;
+    }
+    member {
+        name ConnectionID;
+        type ConnectionIDType;
+        visibility public;
+        default InvalidConnectionID;
+    }
+    inline-header {
+    mtsDescriptionConnection(
+        const std::string & clientProcessName,
+        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+        const std::string & serverProcessName,
+        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+        const ConnectionIDType connectionId = InvalidConnectionID);
+    void Init(void);
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsDescriptionConnection> mtsDescriptionConnectionProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionProxy);
+typedef std::vector<mtsDescriptionConnection> mtsDescriptionConnectionVec;
+typedef mtsGenericObjectProxy<mtsDescriptionConnectionVec> mtsDescriptionConnectionVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionVecProxy);
+}
+
+
+class {
+    name mtsComponentStatusControl;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    enum {
+        name ComponentStatusCommand;
+        enum-value {
+            name COMPONENT_START;
+            description START;
+            value 0;
+        }
+        enum-value {
+            name COMPONENT_STOP;
+            description STOP;
+        }
+        enum-value {
+            name COMPONENT_RESUME;
+            description RESUME;
+        }
+    }
+    member {
+        name ProcessName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ComponentName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name DelayInSecond;
+        type double;
+        visibility public;
+        default 0.0;
+    }
+    member {
+        name Command;
+        type ComponentStatusCommand;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsComponentStatusControl> mtsComponentStatusControlProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStatusControlProxy);
+}
+
+
+class {
+    name mtsComponentStateChange;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name ProcessName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name ComponentName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name NewState;
+        type mtsComponentState;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsComponentStateChange> mtsComponentStateChangeProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStateChangeProxy);
+}
+
+
+class {
+    name mtsDescriptionLoadLibrary;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name ProcessName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name LibraryName;
+        type std::string;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsDescriptionLoadLibrary> mtsDescriptionLoadLibraryProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionLoadLibraryProxy);
+}
+
+
+class {
+    name mtsEndUserInterfaceArg;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name OriginalInterface;
+        type size_t;
+        visibility public;
+    }
+    member {
+        name UserName;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name EndUserInterface;
+        type size_t;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsEndUserInterfaceArg> mtsEndUserInterfaceArgProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsEndUserInterfaceArgProxy);
+}

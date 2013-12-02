@@ -18,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
 #include <cisstMultiTask/mtsSocketProxyServer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -714,7 +713,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
 
     // Create write function proxies
     for (i = 0; i < InterfaceDescription.CommandsWrite.size(); ++i) {
-        const CommandWriteElement &cmd = InterfaceDescription.CommandsWrite[i];
+        const mtsCommandWriteDescription &cmd = InterfaceDescription.CommandsWrite[i];
         mtsFunctionWriteProxy *functionWriteProxy = new mtsFunctionWriteProxy(cmd.ArgumentPrototypeSerialized);
         success = requiredInterfaceProxy->AddFunction(cmd.Name, *functionWriteProxy);
         success &= FunctionWriteProxyMap.AddItem(cmd.Name, functionWriteProxy);
@@ -726,7 +725,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
 
     // Create read function proxies
     for (i = 0; i < InterfaceDescription.CommandsRead.size(); ++i) {
-        const CommandReadElement &cmd = InterfaceDescription.CommandsRead[i];
+        const mtsCommandReadDescription &cmd = InterfaceDescription.CommandsRead[i];
         mtsFunctionReadProxy *functionReadProxy = new mtsFunctionReadProxy(cmd.ArgumentPrototypeSerialized);
         success = requiredInterfaceProxy->AddFunction(cmd.Name, *functionReadProxy);
         success &= FunctionReadProxyMap.AddItem(cmd.Name, functionReadProxy);
@@ -738,14 +737,14 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
 
     // Create QualifiedRead function proxies
     for (i = 0; i < InterfaceDescription.CommandsQualifiedRead.size(); ++i) {
-        const CommandQualifiedReadElement &cmd = InterfaceDescription.CommandsQualifiedRead[i];
+        const mtsCommandQualifiedReadDescription &cmd = InterfaceDescription.CommandsQualifiedRead[i];
         mtsFunctionQualifiedReadProxy *functionQualifiedReadProxy = new mtsFunctionQualifiedReadProxy(
                                                                         cmd.Argument1PrototypeSerialized,
                                                                         cmd.Argument2PrototypeSerialized);
         success = requiredInterfaceProxy->AddFunction(cmd.Name, *functionQualifiedReadProxy);
         success &= FunctionQualifiedReadProxyMap.AddItem(cmd.Name, functionQualifiedReadProxy);
         if (!success) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to add qualified read function proxy: \"" 
+            CMN_LOG_CLASS_INIT_ERROR << "CreateServerProxy: failed to add qualified read function proxy: \""
                                      << cmd.Name << "\"" << std::endl;
             return false;
         }
@@ -753,7 +752,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
 
     // Create VoidReturn function proxies
     for (i = 0; i < InterfaceDescription.CommandsVoidReturn.size(); ++i) {
-        const CommandVoidReturnElement &cmd = InterfaceDescription.CommandsVoidReturn[i];
+        const mtsCommandVoidReturnDescription &cmd = InterfaceDescription.CommandsVoidReturn[i];
         FunctionVoidReturnProxy *functionVoidReturnProxy = new FunctionVoidReturnProxy(
                                                                  cmd.ResultPrototypeSerialized,
                                                                  Socket,
@@ -770,7 +769,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
 
     // Create WriteReturn function proxies
     for (i = 0; i < InterfaceDescription.CommandsWriteReturn.size(); ++i) {
-        const CommandWriteReturnElement &cmd = InterfaceDescription.CommandsWriteReturn[i];
+        const mtsCommandWriteReturnDescription &cmd = InterfaceDescription.CommandsWriteReturn[i];
         FunctionWriteReturnProxy *functionWriteReturnProxy = new FunctionWriteReturnProxy(
                                                                  cmd.ArgumentPrototypeSerialized,
                                                                  cmd.ResultPrototypeSerialized,
@@ -788,7 +787,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
 
     // Create EventVoid proxies
     for (i = 0; i < InterfaceDescription.EventsVoid.size(); ++i) {
-        const EventVoidElement &evt = InterfaceDescription.EventsVoid[i];
+        const mtsEventVoidDescription &evt = InterfaceDescription.EventsVoid[i];
         mtsEventSenderVoid *eventSender = new mtsEventSenderVoid(Socket);
         success = false;
         if (requiredInterfaceProxy->AddEventHandlerVoid(&mtsEventSenderVoid::Method, eventSender, evt.Name))
@@ -802,7 +801,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
 
     // Create EventWrite proxies
     for (i = 0; i < InterfaceDescription.EventsWrite.size(); ++i) {
-        const EventWriteElement &evt = InterfaceDescription.EventsWrite[i];
+        const mtsEventWriteDescription &evt = InterfaceDescription.EventsWrite[i];
         mtsEventSenderWrite *eventSender = new mtsEventSenderWrite(Socket);
         success = false;
         std::stringstream argStream(evt.ArgumentPrototypeSerialized);
@@ -843,7 +842,7 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
     std::string stringSerialized = outputStream.str();
     outputStream.str("");
     // mtsCommandRead destructor will delete the following
-    mtsGenericObjectProxy<InterfaceProvidedDescription> *descProxy = new mtsGenericObjectProxy<InterfaceProvidedDescription>;
+    mtsGenericObjectProxy<mtsInterfaceProvidedDescription> *descProxy = new mtsGenericObjectProxy<mtsInterfaceProvidedDescription>;
     serializer.Serialize(*descProxy);
     std::string interfaceDescriptionSerialized = outputStream.str();
 
@@ -853,7 +852,7 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
     mtsCommandRead *commandRead;
 
     //InterfaceDescription.CommandsRead.push_back(CommandReadElement("GetInterfaceDescription", interfaceDescriptionSerialized));
-    callableRead = new mtsCallableReadMethod<mtsSocketProxyServer, InterfaceProvidedDescription>(&mtsSocketProxyServer::GetInterfaceDescription, this);
+    callableRead = new mtsCallableReadMethod<mtsSocketProxyServer, mtsInterfaceProvidedDescription>(&mtsSocketProxyServer::GetInterfaceDescription, this);
     commandRead = new mtsCommandRead(callableRead, "GetInterfaceDescription", descProxy);
     SpecialCommands.push_back(commandRead);
     functionReadProxy = new mtsFunctionReadProxy(interfaceDescriptionSerialized);
@@ -930,7 +929,7 @@ mtsExecutionResult mtsSocketProxyServer::GetInitData(std::string &outputArgSeria
     return ret;
 }
 
-bool mtsSocketProxyServer::GetInterfaceDescription(InterfaceProvidedDescription &desc) const
+bool mtsSocketProxyServer::GetInterfaceDescription(mtsInterfaceProvidedDescription &desc) const
 {
     mtsFunctionReadProxy *proxy = FunctionReadProxyMap.GetItem("GetInterfaceDescription");
     proxy->GetSerializer()->Reset();
