@@ -666,11 +666,14 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     # make sure the target existsOUTPUT_NAME
     if (TARGET cisstDataGenerator)
       # if the target exists, use its destination
+      cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
       get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
-    else (TARGET cisstDataGenerator)
-      find_program (CISST_DG_EXECUTABLE cisstDataGenerator)
     endif (TARGET cisstDataGenerator)
+  else (TARGET cisstCommon)
+    cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
+    find_program (CISST_DG_EXECUTABLE cisstDataGenerator HINTS "${CISST_BINARY_DIR}/bin")
   endif (TARGET cisstCommon)
+  cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator executable found: ${CISST_DG_EXECUTABLE}")
 
   # loop over input files
   foreach (input ${ARGV})
@@ -679,7 +682,9 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     get_filename_component (INPUT_WE "${input}" NAME_WE)
     set (input_absolute "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
     # create output name and concatenate to list available in parent scope
-    file (MAKE_DIRECTORY "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${GENERATED_FILES_VAR_PREFIX}")
+    set (FULL_GENERATED_INCLUDE_DIRECTORY "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}")
+    file (MAKE_DIRECTORY ${FULL_GENERATED_INCLUDE_DIRECTORY})
+    cisst_cmake_debug ("cisst_data_generator: creating directory for generated header file ${FULL_GENERATED_INCLUDE_DIRECTORY}")
     set (header_absolute "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h")
     set (code_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}_cdg.cpp")
     cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute}")
