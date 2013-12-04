@@ -353,7 +353,11 @@ void cdgClass::GenerateMethodSerializeRawCode(std::ostream & outputStream) const
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            outputStream << "    cmnSerializeRaw(outputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            if (Members[index]->GetFieldValue("is-size_t") == "true") {
+                outputStream << "    cmnSerializeSizeRaw(outputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            } else {
+                outputStream << "    cmnSerializeRaw(outputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl
@@ -375,7 +379,11 @@ void cdgClass::GenerateMethodDeSerializeRawCode(std::ostream & outputStream) con
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            outputStream << "    cmnDeSerializeRaw(inputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            if (Members[index]->GetFieldValue("is-size_t") == "true") {
+                outputStream << "    cmnDeSerializeSizeRaw(inputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            } else {
+                outputStream << "    cmnDeSerializeRaw(inputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl
