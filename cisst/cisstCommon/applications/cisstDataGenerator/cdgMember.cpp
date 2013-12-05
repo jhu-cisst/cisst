@@ -42,7 +42,7 @@ cdgMember::cdgMember(size_t lineNumber):
     field = this->AddField("default", "", false, "default value that should be assigned to the data member in the class constructor");
     CMN_ASSERT(field);
 
-    field = this->AddField("accessors", "all", false, "indicates which types of accessors should be generated for the data member");
+    field = this->AddField("accessors", "all/none", false, "indicates which types of accessors should be generated for the data member (default depends on \"visibility\")");
     CMN_ASSERT(field);
     field->AddPossibleValue("none");
     field->AddPossibleValue("references");
@@ -81,8 +81,66 @@ cdgScope * cdgMember::Create(size_t lineNumber) const
 }
 
 
-bool cdgMember::Validate(void)
+bool cdgMember::Validate(std::string & errorMessage)
 {
+    std::string dummy;
+    // set a default description, use the member name
+    if (this->GetFieldValue("description") == "") {
+        this->SetFieldValue("description",
+                            this->GetFieldValue("name"),
+                            dummy);
+    }
+    // check if default has not be overwritten and set real default
+    // based on visibility
+    if (this->GetFieldValue("accessors") == "all/none") {
+        if (this->GetFieldValue("visibility") == "public") {
+            this->SetFieldValue("accessors", "none", dummy, true);
+        } else {
+            this->SetFieldValue("accessors", "all", dummy, true);
+        }
+    }
+    // check that accessors are compatible with visibility
+    if (this->GetFieldValue("visibility") == "public") {
+        if ((this->GetFieldValue("accessors") == "all")
+            || (this->GetFieldValue("accessors") == "references")) {
+            errorMessage = errorMessage + "\n" + ClassName + "::" + this->GetFieldValue("name")
+                + " can not be declared public if the accessors are set to \"all\" or \"references\"";
+            return false;
+        }
+        MemberName = this->GetFieldValue("name");
+    } else {
+        MemberName = "m" + this->GetFieldValue("name");
+    }
+    // check if the type is exactly size_t
+    std::string type = this->GetFieldValue("type");
+    if (type == "size_t") {
+        this->SetFieldValue("is-size_t", "true", dummy, true);
+    }
+    // check if the type is a C array, looking for square brackets
+    size_t openSquareBracket = std::count(type.begin(), type.end(), '[');
+    size_t closeSquareBracket = std::count(type.begin(), type.end(), ']');
+    if (openSquareBracket != closeSquareBracket) {
+        errorMessage = errorMessage + "\n" + ClassName + "::" + this->GetFieldValue("name")
+            + " number of \"[\" and \"]\" don't match";
+        return false;
+    }
+    // C-array
+    if (openSquareBracket != 0) {
+        IsCArray = true;
+        CArrayDimension = openSquareBracket;
+        size_t firstOpenBracket = type.find('[');
+        CArrayType = type.substr(0, firstOpenBracket);
+        CArraySize = type.substr(firstOpenBracket);
+        if (!(this->GetFieldValue("accessors") == "none")) {
+            errorMessage = errorMessage + "\n" + ClassName + "::" + this->GetFieldValue("name")
+                + " accessors \"all\", \"references\" or \"set-get\" not supported for C arrays, possible value is \"none\" (you can also make this member public).  Current value is \""
+                + this->GetFieldValue("accessors") + "\"";
+            return false;
+        }
+    } else {
+        IsCArray = false;
+    }
+
     return true;
 }
 
@@ -93,8 +151,12 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
     const std::string type = this->GetFieldValue("type");
     const std::string name = this->GetFieldValue("name");
     const std::string accessors = this->GetFieldValue("accessors");
-    outputStream << " protected:" << std::endl
-                 << "    " << type << " " << name << "Member; // " << this->GetFieldValue("description") << std::endl;
+    outputStream << " " << this->GetFieldValue("visibility") << ":" << std::endl;
+    if (IsCArray) {
+        outputStream << "    " << CArrayType << " " << MemberName << CArraySize << "; // " << this->GetFieldValue("description") << std::endl;
+    } else {
+        outputStream << "    " << type << " " << MemberName << "; // " << this->GetFieldValue("description") << std::endl;
+    }
     if (accessors != "none") {
         outputStream << " public:" << std::endl;
     }
@@ -106,9 +168,10 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
     }
     if ((accessors == "all")
         || (accessors == "references")) {
+        std::string returnType = type + " & ";
         outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
-                     << "    const " << type << " & " << name << "(void) const;" << std::endl
-                     << "    " << type << " & " << name << "(void);" << std::endl;
+                     << "    const " << returnType << name << "(void) const;" << std::endl
+                     << "    " << returnType << name << "(void);" << std::endl;
     }
 }
 
@@ -132,28 +195,29 @@ void cdgMember::GenerateCode(std::ostream & outputStream) const
                      << "/* accessors is set to: " << accessors << " */" << std::endl
                      << "void " << this->ClassName << "::Get" << name << "(" << type << " & placeHolder) const" << std::endl
                      << "{" << std::endl
-                     << "    placeHolder = this->" << name << "Member;" << std::endl
+                     << "    placeHolder = this->" << MemberName << ";" << std::endl
                      << "}" << std::endl
                      << std::endl
                      << "void " << this->ClassName << "::Set" << name << "(const " << type << " & newValue)" << std::endl
                      << "{" << std::endl
-                     << "    this->" << name << "Member = newValue;" << std::endl
+                     << "    this->" << MemberName << " = newValue;" << std::endl
                      << "}" << std::endl
                      << std::endl;
     }
 
     if ((accessors == "all")
         || (accessors == "references")) {
+        std::string returnType = type + " & ";
         outputStream << std::endl
                      << "/* accessors is set to: " << accessors << " */" << std::endl
-                     << "const " << type << " & " << this->ClassName << "::" << name << "(void) const" << std::endl
+                     << "const " << returnType << this->ClassName << "::" << name << "(void) const" << std::endl
                      << "{" << std::endl
-                     << "    return this->" << name << "Member;" << std::endl
+                     << "    return this->" << MemberName << ";" << std::endl
                      << "}" << std::endl
                      << std::endl
-                     << type << " & " << this->ClassName << "::" << name << "(void)" << std::endl
+                     << returnType << this->ClassName << "::" << name << "(void)" << std::endl
                      << "{" << std::endl
-                     << "    return this->" << name << "Member;" << std::endl
+                     << "    return this->" << MemberName << ";" << std::endl
                      << "}" << std::endl
                      << std::endl;
     }

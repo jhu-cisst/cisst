@@ -131,7 +131,7 @@ ccgMacro ccgParser::GetMacro(int startValue)
     for (ccgMacro macro = DECLARE_COMPONENT;
          macro < MAX_MACRO;
          macro = (ccgMacro) (macro + 1)) {
-        int temp;
+        size_t temp;
         if ((temp = Line.find(MacroNames[macro], startValue)) != -1) {
             Line = Line.substr(temp);
             return macro;
@@ -301,9 +301,9 @@ int ccgParser::ParseComponent(void)
 int ccgParser::ParseStateTableData(void)
 {
     std::string dtype, dname;
-    int startin = Line.find('(') + 1;
-    int endin = Line.find(',');
-    int namestart = Line.find(' ', endin) + 1;
+    size_t startin = Line.find('(') + 1;
+    size_t endin = Line.find(',');
+    size_t namestart = Line.find(' ', endin) + 1;
 
     dtype = Line.substr(startin, endin - startin);
     dname = Line.substr(namestart, Line.find(')') - namestart);

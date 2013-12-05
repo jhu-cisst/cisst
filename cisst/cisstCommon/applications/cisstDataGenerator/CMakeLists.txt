@@ -54,6 +54,10 @@ add_executable (cisstDataGenerator
                 cdgBaseClass.cpp
                 cdgMember.h
                 cdgMember.cpp
+                cdgEnum.h
+                cdgEnum.cpp
+                cdgEnumValue.h
+                cdgEnumValue.cpp
                 cdgTypedef.h
                 cdgTypedef.cpp
                 cdgInline.h

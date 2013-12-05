@@ -322,7 +322,7 @@ svlFilterSourceVideoCapture::PlatformType svlVidCapSrcMIL::GetPlatformType()
     std::cerr << "svlVidCapSrcMIL::GetPlatformType()" << std::endl;
 #endif
 
-    return svlFilterSourceVideoCapture::MatroxImaging;
+    return svlFilterSourceVideoCaptureTypes::MatroxImaging;
 }
 
 int svlVidCapSrcMIL::SetStreamCount(unsigned int numofstreams)
@@ -384,7 +384,7 @@ int svlVidCapSrcMIL::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
 
         for (sys = 0; sys < MILNumberOfSystems; sys ++) {
             // platform
-            deviceinfo[0][sys].platform = svlFilterSourceVideoCapture::MatroxImaging;
+            deviceinfo[0][sys].platform = svlFilterSourceVideoCaptureTypes::MatroxImaging;
 
             // id
             deviceinfo[0][sys].ID = sys;
@@ -620,7 +620,7 @@ int svlVidCapSrcMIL::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCa
     formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[1];
     formatlist[0][0].width = MilWidth[deviceid][0];
     formatlist[0][0].height = MilHeight[deviceid][0];
-    formatlist[0][0].colorspace = svlFilterSourceVideoCapture::PixelRGB8;
+    formatlist[0][0].colorspace = svlFilterSourceVideoCaptureTypes::PixelRGB8;
     formatlist[0][0].rgb_order = true;
     formatlist[0][0].yuyv_order = false;
     formatlist[0][0].framerate = -1.0;
@@ -639,7 +639,7 @@ int svlVidCapSrcMIL::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
 
     format.width = MilWidth[SystemID[videoch]][DigitizerID[videoch]];
     format.height = MilHeight[SystemID[videoch]][DigitizerID[videoch]];
-    format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
+    format.colorspace = svlFilterSourceVideoCaptureTypes::PixelRGB8;
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = -1.0;

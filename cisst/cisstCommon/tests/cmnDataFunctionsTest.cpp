@@ -22,51 +22,52 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "cmnDataFunctionsTest.h"
 
-#include <cisstCommon/cmnDataFunctions.h>
+#include <limits>
+#include <cisstCommon/cmnDataFunctionsString.h>
 
 void cmnDataFunctionsTest::TestCopyNativeTypes(void)
 {
     bool b1, b2;
     b1 = true;
-    cmnDataCopy(b2, b1);
+    cmnData<bool>::Copy(b2, b1);
     CPPUNIT_ASSERT_EQUAL(b1, b2);
     b1 = false;
-    cmnDataCopy(b2, b1);
+    cmnData<bool>::Copy(b2, b1);
     CPPUNIT_ASSERT_EQUAL(b1, b2);
 
     char c1, c2;
     c1 = 'x';
-    cmnDataCopy(c2, c1);
+    cmnData<char>::Copy(c2, c1);
     CPPUNIT_ASSERT_EQUAL(c1, c2);
 
     unsigned char uc1, uc2;
     uc1 = 'z';
-    cmnDataCopy(uc2, uc1);
+    cmnData<unsigned char>::Copy(uc2, uc1);
     CPPUNIT_ASSERT_EQUAL(uc1, uc2);
 
     int i1, i2;
     i1 = -2345;
-    cmnDataCopy(i2, i1);
+    cmnData<int>::Copy(i2, i1);
     CPPUNIT_ASSERT_EQUAL(i1, i2);
 
     unsigned int ui1, ui2;
     ui1 = 1234;
-    cmnDataCopy(ui2, ui1);
+    cmnData<unsigned int>::Copy(ui2, ui1);
     CPPUNIT_ASSERT_EQUAL(ui1, ui2);
 
     float f1, f2;
     f1 = -1.23456f;
-    cmnDataCopy(f2, f1);
+    cmnData<float>::Copy(f2, f1);
     CPPUNIT_ASSERT_EQUAL(f1, f2);
 
     double d1, d2;
     d1 = -1.7654321;
-    cmnDataCopy(d2, d1);
+    cmnData<double>::Copy(d2, d1);
     CPPUNIT_ASSERT_EQUAL(d1, d2);
 
     std::string s1, s2;
     s1 = "Hello world!";
-    cmnDataCopy(s2, s1);
+    cmnData<std::string>::Copy(s2, s1);
     CPPUNIT_ASSERT_EQUAL(s1, s2);
 }
 
@@ -78,33 +79,41 @@ void cmnDataFunctionsTest::TestBinarySerializationStreamNativeTypes(void)
     std::stringstream stream;
     bool b1, b2, bReference = true;
     b1 = bReference;
-    cmnDataSerializeBinary(stream, b1);
+    cmnData<bool>::SerializeBinary(b1, stream);
     b1 = false;
-    cmnDataDeSerializeBinary(stream, b2, remote, local);
+    cmnData<bool>::DeSerializeBinary(b2, stream, local, remote);
     CPPUNIT_ASSERT_EQUAL(bReference, b2);
 
     bReference = false;
     b1 = bReference;
-    cmnDataSerializeBinary(stream, b1);
+    cmnData<bool>::SerializeBinary(b1, stream);
     b1 = true;
 
     char c1, c2, cReference = 'X';
     c1 = cReference;
-    cmnDataSerializeBinary(stream, c1);
+    cmnData<char>::SerializeBinary(c1, stream);
     c1 = '?';
+
+    double d1, d2, dReference = 3.1415;
+    d1 = dReference;
+    cmnData<double>::SerializeBinary(d1, stream);
+    d1 = -1.3333;
 
     std::string s1, s2, sReference = "Good night moon!";
     s1 = sReference;
-    cmnDataSerializeBinary(stream, s1);
+    cmnData<std::string>::SerializeBinary(s1, stream);
     s1 = "The runaway bunny";
 
-    cmnDataDeSerializeBinary(stream, b2, remote, local);
+    cmnData<bool>::DeSerializeBinary(b2, stream, local, remote);
     CPPUNIT_ASSERT_EQUAL(bReference, b2);
 
-    cmnDataDeSerializeBinary(stream, c2, remote, local);
+    cmnData<char>::DeSerializeBinary(c2, stream, local, remote);
     CPPUNIT_ASSERT_EQUAL(cReference, c2);
 
-    cmnDataDeSerializeBinary(stream, s2, remote, local);
+    cmnData<double>::DeSerializeBinary(d2, stream, local, remote);
+    CPPUNIT_ASSERT_EQUAL(dReference, d2);
+
+    cmnData<std::string>::DeSerializeBinary(s2, stream, local, remote);
     CPPUNIT_ASSERT_EQUAL(sReference, s2);
 }
 
@@ -113,43 +122,84 @@ void cmnDataFunctionsTest::TestBinarySerializationCharNativeTypes(void)
 {
     cmnDataFormat local, remote;
     const size_t bufferSize = 1024;
-    char buffer[bufferSize];
+    size_t bytesLeft = bufferSize;
+    char * buffer = new char[bufferSize];
     char * bufferRead = buffer;
 
-    /*
+    CPPUNIT_ASSERT_EQUAL(sizeof(size_t), cmnData<size_t>::SerializeBinaryByteSize(bufferSize));
+
     bool b1, b2, bReference = true;
     b1 = bReference;
-    cmnDataSerializeBinary(stream, b1);
+    size_t b1ByteWritten = cmnData<bool>::SerializeBinary(b1, buffer, bytesLeft);
+    buffer += b1ByteWritten;
+    CPPUNIT_ASSERT_EQUAL(sizeof(bool), cmnData<bool>::SerializeBinaryByteSize(b1));
+    CPPUNIT_ASSERT_EQUAL(sizeof(bool), b1ByteWritten);
     b1 = false;
-    cmnDataDeSerializeBinary(stream, b2, remote, local);
-    CPPUNIT_ASSERT_EQUAL(bReference, b2);
 
-    bReference = false;
-    b1 = bReference;
-    cmnDataSerializeBinary(stream, b1);
-    b1 = true;
-
-    bool c1, c2, cReference = 'X';
+    char c1, c2, cReference = 'X';
     c1 = cReference;
-    cmnDataSerializeBinary(stream, c1);
+    size_t c1ByteWritten = cmnData<char>::SerializeBinary(c1, buffer, bytesLeft);
+    buffer += c1ByteWritten;
+    CPPUNIT_ASSERT_EQUAL(sizeof(char), cmnData<char>::SerializeBinaryByteSize(c1));
+    CPPUNIT_ASSERT_EQUAL(sizeof(char), c1ByteWritten);
     c1 = '?';
-    */
-    std::string s1, s2, sReference = "Good night moon!";
+
+    double d1, d2, dReference = 3.14159;
+    d1 = dReference;
+    size_t d1ByteWritten = cmnData<double>::SerializeBinary(d1, buffer, bytesLeft);
+    buffer += d1ByteWritten;
+    CPPUNIT_ASSERT_EQUAL(sizeof(double), cmnData<double>::SerializeBinaryByteSize(d1));
+    CPPUNIT_ASSERT_EQUAL(sizeof(double), d1ByteWritten);
+    d1 = false;
+
+    std::string s1, s2, sReference = "123456789";
     s1 = sReference;
-    size_t byteWritten = cmnDataSerializeBinary(buffer, bufferSize, s1);
-    s1 = "The runaway bunny";
-    *(buffer + 10) = '\0';
+    size_t s1ByteWritten = cmnData<std::string>::SerializeBinary(s1, buffer, bytesLeft);
+    buffer += s1ByteWritten;
+    CPPUNIT_ASSERT(s1ByteWritten != 0);
+    CPPUNIT_ASSERT_EQUAL(sizeof(size_t) + s1.length() * sizeof(std::string::value_type), s1ByteWritten);
+    s1 = "not what we expect, dummy result";
 
-    /*
-    cmnDataDeSerializeBinary(stream, b2, remote, local);
+    std::string empty1;
+    size_t empty1ByteWritten = cmnData<std::string>::SerializeBinary(empty1, buffer, bytesLeft);
+    CPPUNIT_ASSERT_EQUAL(sizeof(size_t), empty1ByteWritten);
+    buffer += s1ByteWritten;
+
+    // get ready to read everything back!
+    bytesLeft = bufferSize; 
+
+    b2 = false;
+    size_t b1ByteRead = cmnData<bool>::DeSerializeBinary(b2, bufferRead, bytesLeft, local, remote);
+    CPPUNIT_ASSERT(b1ByteRead != 0);
+    CPPUNIT_ASSERT_EQUAL(b1ByteRead, b1ByteWritten);
     CPPUNIT_ASSERT_EQUAL(bReference, b2);
+    bufferRead += b1ByteRead;
 
-    cmnDataDeSerializeBinary(stream, c2, remote, local);
+    c2 = '!';
+    size_t c1ByteRead = cmnData<char>::DeSerializeBinary(c2, bufferRead, bytesLeft, local, remote);
+    CPPUNIT_ASSERT(c1ByteRead != 0);
+    CPPUNIT_ASSERT_EQUAL(c1ByteRead, c1ByteWritten);
     CPPUNIT_ASSERT_EQUAL(cReference, c2);
+    bufferRead += c1ByteRead;
 
-    cmnDataDeSerializeBinary(bufferRead, bufferSize, s2, remote, local);
+    d2 = -3.33333;
+    size_t d1ByteRead = cmnData<double>::DeSerializeBinary(d2, bufferRead, bytesLeft, local, remote);
+    CPPUNIT_ASSERT(d1ByteRead != 0);
+    CPPUNIT_ASSERT_EQUAL(d1ByteRead, d1ByteWritten);
+    CPPUNIT_ASSERT_EQUAL(dReference, d2);
+    bufferRead += d1ByteRead;
+
+    size_t s1ByteRead = cmnData<std::string>::DeSerializeBinary(s2, bufferRead, bytesLeft, local, remote);
+    CPPUNIT_ASSERT(s1ByteRead != 0);
+    CPPUNIT_ASSERT_EQUAL(s1ByteRead, s1ByteWritten);
     CPPUNIT_ASSERT_EQUAL(sReference, s2);
-    */
+    bufferRead += s1ByteRead;
+
+    std::string empty2 = "test";
+    size_t empty1ByteRead = cmnData<std::string>::DeSerializeBinary(empty2, bufferRead, bytesLeft, local, remote);
+    bufferRead += empty1ByteRead;
+    CPPUNIT_ASSERT_EQUAL(sizeof(size_t), empty1ByteRead);
+    CPPUNIT_ASSERT(empty2.empty());
 }
 
 
@@ -197,8 +247,8 @@ void cmnDataFunctionsTest::TestByteSwapMacros(void)
 void cmnDataFunctionsTest::TestDescriptions(void)
 {
     double d1;
-    CPPUNIT_ASSERT_EQUAL(std::string("d"), cmnDataScalarDescription(d1, 0));
+    CPPUNIT_ASSERT_EQUAL(std::string("{d}"), cmnData<double>::ScalarDescription(d1, 0));
 
     unsigned long long int ulli1;
-    CPPUNIT_ASSERT_EQUAL(std::string("ulli"), cmnDataScalarDescription(ulli1, 0));
+    CPPUNIT_ASSERT_EQUAL(std::string("{ulli}"), cmnData<unsigned long long int>::ScalarDescription(ulli1, 0));
 }

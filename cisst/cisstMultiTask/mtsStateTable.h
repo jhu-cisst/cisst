@@ -325,6 +325,9 @@ public:
     /*! Default destructor. */
     ~mtsStateTable();
 
+	/*! Method to change the size of the table*/
+    bool SetSize(const size_t size);
+
     /*! Get a handle for data to be used by a reader.  All the const
       methods, that can be called from a reader and writer. */
     mtsStateIndex GetIndexReader(void) const;
@@ -379,6 +382,11 @@ public:
         return StateVectorElements[id]; // WEIRD???
     }
 
+
+    mtsGenericObject * GetStateVectorElement(size_t id) const {
+        return StateVectorElements[id];
+    }
+
     /*! Return pointer to accessor functions for the state data element.
         \param element Pointer to state data element (i.e., working copy)
         \returns Pointer to accessor class (0 if not found)
@@ -394,6 +402,8 @@ public:
     */
     mtsStateTable::AccessorBase * GetAccessor(const std::string & name) const;
     mtsStateTable::AccessorBase * GetAccessor(const char * name) const;
+    mtsStateTable::AccessorBase * GetAccessor(const size_t id) const;
+
 
     /*! Get a handle for data to be used by a writer */
     mtsStateIndex GetIndexWriter(void) const;
@@ -413,6 +423,11 @@ public:
 
     /*! Advance if automatic advance is set and does nothing otherwise. */
     void AdvanceIfAutomatic(void);
+
+    /*! Advance for replay mode, be very careful this should only be
+      used in replay mode as this method only increments the reader
+      index. */ 
+    bool ReplayAdvance(void);
 
     /*! Cleanup called when the task is being stopped. */
     void Cleanup(void);

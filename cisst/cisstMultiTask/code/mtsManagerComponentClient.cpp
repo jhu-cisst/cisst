@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -138,18 +138,23 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                 CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: AddObserverList invalid for " << serverComponentName << std::endl;
                 return false;
             }
-            mtsEndUserInterfaceArg endUserInterfaceArg(serverInterfaceProvided, clientInterfaceName);
-            
+            mtsEndUserInterfaceArg endUserInterfaceArg(reinterpret_cast<size_t>(serverInterfaceProvided), clientInterfaceName, 0);
+
 #if (CISST_OS == CISST_LINUX_XENOMAI && CISST_MTS_64BIT)
             {
                 // See void mtsComponent::InterfaceInternalCommands_GetEndUserInterface()
-                endUserInterfaceArg.EndUserInterface = endUserInterfaceArg.OriginalInterface->GetEndUserInterface(clientInterfaceRequiredName);
+                // 11/20/13: Patch for cisstDataGenerator
+                //endUserInterfaceArg.EndUserInterface = endUserInterfaceArg.OriginalInterface->GetEndUserInterface(clientInterfaceName);
+                mtsInterfaceProvided * originalInterface = reinterpret_cast<mtsInterfaceProvided*>(endUserInterfaceArg.OriginalInterface);
+                CMN_ASSERT(originalInterface);
+                endUserInterfaceArg.EndUserInterface = 
+                    reinterpret_cast<size_t>(originalInterface->GetEndUserInterface(clientInterfaceName));
             }
 #else
             serverFunctionSet->GetEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
 #endif
-            
-            mtsInterfaceProvided *endUserInterface = endUserInterfaceArg.EndUserInterface;
+
+            mtsInterfaceProvided * endUserInterface = reinterpret_cast<mtsInterfaceProvided*>(endUserInterfaceArg.EndUserInterface);
             if (!endUserInterface) {
                 CMN_LOG_CLASS_RUN_ERROR << "ConnectLocally: failed to get end-user interface for " << serverComponentName << std::endl;
                 return false;
@@ -157,7 +162,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
             success = clientInterfaceRequired->BindCommands(endUserInterface);
             mtsEventHandlerList eventList(endUserInterface);
             clientInterfaceRequired->GetEventList(eventList);
-            
+
 #if (CISST_OS == CISST_LINUX_XENOMAI && CISST_MTS_64BIT)
             {
                 // From void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout)
@@ -185,7 +190,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                                      << serverComponentName << ":" << serverInterfaceName << std::endl;
             return false;
         }
-        
+
         // Post-connect processing to handle the special case 1:
         // When the manager component server's provided interface (InterfaceGCM's
         // provided interface) gets connected with a manager component client's
@@ -204,7 +209,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                 }
             }
         }
-        
+
     }
     else {  // Input/Output connection
         if (!serverInterfaceOutput) {
@@ -351,7 +356,9 @@ bool mtsManagerComponentClient::DisconnectLocally(const std::string & clientComp
             // running if the required interface is MTS_OPTIONAL.
             clientComponent->Suspend(); // Could instead use serverFunctionSet->ComponentStop
             clientInterfaceRequired->DetachCommands();
-            mtsEndUserInterfaceArg endUserInterfaceArg(serverInterfaceProvided, clientInterfaceName, endUserInterface);
+            mtsEndUserInterfaceArg endUserInterfaceArg(reinterpret_cast<size_t>(serverInterfaceProvided),
+                                                       clientInterfaceName,
+                                                       reinterpret_cast<size_t>(endUserInterface));
             serverFunctionSet->RemoveEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
             if (endUserInterfaceArg.EndUserInterface != 0) {
                 CMN_LOG_CLASS_RUN_WARNING << "DisconnectLocally: failed to remove end-user interface for " << serverComponentName << std::endl;
@@ -717,12 +724,12 @@ bool mtsManagerComponentClient::CanForwardLog(void) const
 bool mtsManagerComponentClient::ForwardLog(const mtsLogMessage & log) const
 {
     mtsExecutionResult ret = InterfaceLCMFunction.PrintLog(log);
-    if ((ret.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED))// && 
+    if ((ret.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED))// &&
          //(ret.GetResult() != mtsExecutionResult::COMMAND_QUEUED) )
     {
         return false;
     }
-    
+
     return true;
 }
 
@@ -949,7 +956,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentGetState(con
         return;
     } else {
         if (!InterfaceLCMFunction.ComponentGetState.IsValid()) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: could not get state of component \"" 
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentGetState: could not get state of component \""
                                     << component.ComponentName << "\"" << std::endl;
             return;
         }
@@ -1011,7 +1018,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetListOfComponentCla
 }
 
 void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
-                                 InterfaceProvidedDescription & description) const
+                                                                                           mtsInterfaceProvidedDescription & description) const
 {
     if (IsLocalProcess(intfc.ProcessName))
     {
@@ -1026,7 +1033,7 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceProvidedD
 }
 
 void mtsManagerComponentClient::InterfaceComponentCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc,
-                                 InterfaceRequiredDescription & description) const
+                                                                                           mtsInterfaceRequiredDescription & description) const
 {
     if (IsLocalProcess(intfc.ProcessName))
     {
@@ -1338,7 +1345,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState(const mts
     }
     // Get a set of function objects that are bound to the InterfaceLCM's provided
     // interface.
-    InterfaceComponentFunctionType * functionSet = 
+    InterfaceComponentFunctionType * functionSet =
         InterfaceComponentFunctionMap.GetItem(component.ComponentName, CMN_LOG_LEVEL_NONE);
     if (!functionSet) {
         // MJ: It is possible that the component viewer tries to fetch component state via
@@ -1360,7 +1367,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentGetState(const mts
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface &intfc,
-                                                     InterfaceProvidedDescription & description) const
+                                                                                     mtsInterfaceProvidedDescription & description) const
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     if (intfc.InterfaceProvidedNames.size() < 1) {
@@ -1375,7 +1382,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_GetInterfaceProvidedDescrip
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface &intfc,
-                                                     InterfaceRequiredDescription & description) const
+                                                                                     mtsInterfaceRequiredDescription & description) const
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     if (intfc.InterfaceRequiredNames.size() < 1) {

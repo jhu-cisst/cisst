@@ -239,7 +239,7 @@ void *mtsComponentViewer::ReadFromUDrawGraph(int)
             else {
                 CMN_LOG_CLASS_INIT_WARNING << "ReadFromUDrawGraph: waiting for ComponentViewer to become active"
                                            << ", current state = " 
-                                           << mtsComponentState::ToString(GetState().GetState()) << std::endl;
+                                           << GetState().HumanReadable() << std::endl;
                 ReadyToRead.Wait();    // no timeout
             }
         }

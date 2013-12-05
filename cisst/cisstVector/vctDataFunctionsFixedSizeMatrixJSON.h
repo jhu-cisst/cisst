@@ -29,39 +29,42 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctFixedSizeMatrixBase.h>
 
 #if CISST_HAS_JSON
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-void cmnDataToJSON(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
-                   Json::Value & jsonValue) {
-    const size_t numberOfRows = matrix.rows();
-    int jsonRowIndex = 0;
-    for (size_t rowIndex = 0;
-         rowIndex < numberOfRows;
-         ++rowIndex, ++jsonRowIndex) {
-        cmnDataToJSON(matrix.Row(rowIndex), jsonValue[jsonRowIndex]);
-    }
-}
-
-template <vct::size_type _rows, vct::size_type _cols,
-          vct::stride_type _rowStride, vct::stride_type _colStride,
-          class _elementType, class _dataPtrType>
-inline void cmnDataFromJSON(vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
-                            const Json::Value & jsonValue)
-    throw (std::runtime_error)
+template <class _elementType, vct::size_type _rows, vct::size_type _cols>
+class cmnDataJSON<vctFixedSizeMatrix<_elementType, _rows, _cols> >
 {
-    // make sure both matrices have the same number of rows
-    if (matrix.rows() != jsonValue.size()) {
-        cmnThrow("cmnDataFromJSON: matrix number of rows don't match");
+public:
+    typedef vctFixedSizeMatrix<_elementType, _rows, _cols> DataType;
+
+    static void SerializeText(const DataType matrix, Json::Value & jsonValue)
+    {
+        const size_t numberOfRows = matrix.rows();
+        int jsonRowIndex = 0;
+        for (size_t rowIndex = 0;
+             rowIndex < numberOfRows;
+             ++rowIndex, ++jsonRowIndex) {
+            cmnDataJSON<typename DataType::RowValueType>::SerializeText(matrix.Row(rowIndex), jsonValue[jsonRowIndex]);
+        }
     }
-    const size_t numberOfRows = matrix.rows();
-    int jsonRowIndex = 0;
-    for (size_t rowIndex = 0;
-         rowIndex < numberOfRows;
-         ++rowIndex, ++jsonRowIndex) {
-        cmnDataFromJSON(matrix.Row(rowIndex), jsonValue[jsonRowIndex]);
+    
+    static void DeSerializeText(DataType & matrix, const Json::Value & jsonValue)
+        throw (std::runtime_error)
+    {
+        // make sure both matrices have the same number of rows
+        if (matrix.rows() != jsonValue.size()) {
+            cmnThrow("cmnDataJSON<vctFixedSizeMatrix>::DeSerializeText: matrix number of rows don't match");
+        }
+        const size_t numberOfRows = matrix.rows();
+        int jsonRowIndex = 0;
+        typename DataType::RowValueType temporaryRow;
+        for (size_t rowIndex = 0;
+             rowIndex < numberOfRows;
+             ++rowIndex, ++jsonRowIndex) {
+            cmnDataJSON<typename DataType::RowValueType>::DeSerializeText(temporaryRow, jsonValue[jsonRowIndex]);
+            matrix.Row(rowIndex).Assign(temporaryRow);
+        }
     }
-}
+};
+
 #endif // CISST_HAS_JSON
 
 #endif // _vctDataFunctionsFixedSizeMatrixJSON_h

@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "vctDataFunctionsFixedSizeVectorTest.h"
 
+#include <cisstCommon/cmnDataFunctionsString.h>
+
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 #include <cisstVector/vctRandomFixedSizeVector.h>
@@ -31,10 +33,11 @@ http://www.cisst.org/cisst/license.txt.
 
 void vctDataFunctionsFixedSizeVectorTest::TestDataCopy(void)
 {
-    vctFixedSizeVector<double, 7> source, destination;
+    typedef vctFixedSizeVector<double, 7> DataType;
+    DataType source, data;
     vctRandom(source, -1.0, 1.0);
-    cmnDataCopy(destination, source);
-    CPPUNIT_ASSERT(source.Equal(destination));
+    cmnData<DataType>::Copy(data, source);
+    CPPUNIT_ASSERT(source.Equal(data));
 }
 
 
@@ -42,12 +45,13 @@ void vctDataFunctionsFixedSizeVectorTest::TestBinarySerializationStream(void)
 {
     cmnDataFormat local, remote;
     std::stringstream stream;
-    vctFixedSizeVector<double, 12> v1, v2, vReference;
+    typedef vctFixedSizeVector<double, 12> DataType;
+    DataType v1, v2, vReference;
     vctRandom(vReference, -10.0, 10.0);
     v1 = vReference;
-    cmnDataSerializeBinary(stream, v1);
+    cmnData<DataType>::SerializeBinary(v1, stream);
     v1.SetAll(0);
-    cmnDataDeSerializeBinary(stream, v2, remote, local);
+    cmnData<DataType>::DeSerializeBinary(v2, stream, local, remote);
     CPPUNIT_ASSERT_EQUAL(vReference, v2);
     CPPUNIT_ASSERT(!stream.fail());
 }
@@ -57,21 +61,22 @@ void vctDataFunctionsFixedSizeVectorTest::TestBinarySerializationStream(void)
 void vctDataFunctionsFixedSizeVectorTest::TestTextSerializationStream(void)
 {
     std::stringstream stream;
-    vctFixedSizeVector<double, 12> v1, v2, vReference;
+    typedef vctFixedSizeVector<double, 12> DataType;
+    DataType v1, v2, vReference;
     vctRandom(vReference, -10.0, 10.0);
     v1 = vReference;
-    cmnDataSerializeText(stream, v1, ',');
+    cmnData<DataType>::SerializeText(v1, stream, ',');
     v1.SetAll(0);
-    cmnDataDeSerializeText(stream, v2, ',');
+    cmnData<DataType>::DeSerializeText(v2, stream, ',');
     CPPUNIT_ASSERT(vReference.AlmostEqual(v2, 0.01)); // low precision due to stream out loss
     CPPUNIT_ASSERT(!stream.fail());
     // try without delimiter, using space
     stream.clear();
     vctRandom(vReference, -20.0, 20.0);
     v1 = vReference;
-    cmnDataSerializeText(stream, v1, ' ');
+    cmnData<DataType>::SerializeText(v1, stream, ' ');
     v2.SetAll(0.0);
-    cmnDataDeSerializeText(stream, v2, ' ');
+    cmnData<DataType>::DeSerializeText(v2, stream, ' ');
     CPPUNIT_ASSERT(vReference.AlmostEqual(v2, 0.01)); // low precision due to stream out loss
     CPPUNIT_ASSERT(!stream.fail());
     // try with the wrong delimiter
@@ -79,10 +84,10 @@ void vctDataFunctionsFixedSizeVectorTest::TestTextSerializationStream(void)
     stream.clear();
     vctRandom(vReference, -20.0, 20.0);
     v1 = vReference;
-    cmnDataSerializeText(stream, v1, ',');
+    cmnData<DataType>::SerializeText(v1, stream, ',');
     v2.SetAll(0.0);
     try {
-        cmnDataDeSerializeText(stream, v2, '!');
+        cmnData<DataType>::DeSerializeText(v2, stream, '!');
     } catch (std::runtime_error) {
         exceptionReceived = true;
     }
@@ -92,24 +97,29 @@ void vctDataFunctionsFixedSizeVectorTest::TestTextSerializationStream(void)
 
 void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
 {
-    vctFixedSizeVector<int, 6> vInt;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(6), cmnDataScalarNumber(vInt));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(vInt));
+    typedef vctFixedSizeVector<int, 6> DataType;
+    DataType vInt;
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(6), cmnData<DataType>::ScalarNumber(vInt));
+    CPPUNIT_ASSERT_EQUAL(true, cmnData<DataType>::ScalarNumberIsFixed(vInt));
 
-    vctFixedSizeVector<vctFixedSizeVector<double, 12>, 4> vvDouble;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(48), cmnDataScalarNumber(vvDouble));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(vvDouble));
+    typedef vctFixedSizeVector<vctFixedSizeVector<double, 12>, 4> DataType2;
+    DataType2 vvDouble;
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(48), cmnData<DataType2>::ScalarNumber(vvDouble));
+    CPPUNIT_ASSERT_EQUAL(true, cmnData<DataType2>::ScalarNumberIsFixed(vvDouble));
 
-    vctFixedSizeVector<std::string, 3> vString;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnDataScalarNumber(vString));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(vString));
+    typedef vctFixedSizeVector<std::string, 3> DataType3;
+    DataType3 vString;
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), cmnData<DataType3>::ScalarNumber(vString));
+    CPPUNIT_ASSERT_EQUAL(true, cmnData<DataType3>::ScalarNumberIsFixed(vString));
 
-    vctFixedSizeVector<vctDynamicVector<double>, 4> vvMixed;
+    typedef vctFixedSizeVector<vctDynamicVector<double>, 4> DataType4;
+    DataType4 vvMixed;
     for (size_t i = 0; i < vvMixed.size(); i++) {
         vvMixed.Element(i).SetSize(10 + i);
     }
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(46), cmnDataScalarNumber(vvMixed));
-    CPPUNIT_ASSERT_EQUAL(false, cmnDataScalarNumberIsFixed(vvMixed));
+    // total scalar, 4 sizes of each contained dynamic vector + 10 + 11 + 12 + 13
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(50), cmnData<DataType4>::ScalarNumber(vvMixed));
+    CPPUNIT_ASSERT_EQUAL(false, cmnData<DataType4>::ScalarNumberIsFixed(vvMixed));
 
     size_t index, subIndex, position;
     bool exceptionReceived = false;
@@ -117,7 +127,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
 
     // exception expected if index too high
     try {
-        description = cmnDataScalarDescription(vInt, cmnDataScalarNumber(vInt) + 1);
+        description = cmnData<DataType>::ScalarDescription(vInt, cmnData<DataType>::ScalarNumber(vInt) + 1);
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
@@ -125,7 +135,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
 
     exceptionReceived = false;
     try {
-        description = cmnDataScalarDescription(vvDouble, cmnDataScalarNumber(vvDouble) + 1);
+        description = cmnData<DataType2>::ScalarDescription(vvDouble, cmnData<DataType2>::ScalarNumber(vvDouble) + 1);
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
@@ -134,7 +144,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
     // exception expected for any index
     exceptionReceived = false;
     try {
-        description = cmnDataScalarDescription(vString, cmnDataScalarNumber(vString));
+        description = cmnData<DataType3>::ScalarDescription(vString, cmnData<DataType3>::ScalarNumber(vString));
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
@@ -144,7 +154,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
     position = 0;
     for (index = 0; index < vInt.size(); ++index) {
         vInt.Element(index) = static_cast<int>(index);
-        CPPUNIT_ASSERT_EQUAL(static_cast<double>(index), cmnDataScalar(vInt, position));
+        CPPUNIT_ASSERT_EQUAL(static_cast<double>(index), cmnData<DataType>::Scalar(vInt, position));
         position++;
     }
 
@@ -153,7 +163,7 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
         for (subIndex = 0; subIndex < vvDouble.Element(index).size(); ++subIndex) {
             vvDouble.Element(index).Element(subIndex) = static_cast<double>(index * 100 + subIndex);
             CPPUNIT_ASSERT_EQUAL(static_cast<double>(index * 100 + subIndex),
-                                 cmnDataScalar(vvDouble, position));
+                                 cmnData<DataType2>::Scalar(vvDouble, position));
             position++;
         }
     }
@@ -161,10 +171,14 @@ void vctDataFunctionsFixedSizeVectorTest::TestScalar(void)
     // try with fixed size vector of dynamic vectors
     position = 0;
     for (index = 0; index < vvMixed.size(); ++index) {
+        // size of dynamic vectors are treated as scalars
+        CPPUNIT_ASSERT_EQUAL(static_cast<double>(vvMixed.Element(index).size()),
+                             cmnData<DataType4>::Scalar(vvMixed, position));
+        position++;
         for (subIndex = 0; subIndex < vvMixed.Element(index).size(); ++subIndex) {
             vvMixed.Element(index).Element(subIndex) = static_cast<double>(index * 100 + subIndex);
             CPPUNIT_ASSERT_EQUAL(static_cast<double>(index * 100 + subIndex),
-                                 cmnDataScalar(vvMixed, position));
+                                 cmnData<DataType4>::Scalar(vvMixed, position));
             position++;
         }
     }

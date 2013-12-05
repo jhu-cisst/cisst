@@ -112,6 +112,22 @@ mtsStateTable::~mtsStateTable()
 {
 }
 
+bool mtsStateTable::SetSize(const size_t size){
+    if(this->HistoryLength == size){
+        return true;
+    }
+
+    this->HistoryLength = size;
+
+    for (unsigned int j = 0; j < StateVector.size(); j++)  {
+        if (StateVector[j]) {
+            StateVector[j]->SetSize(this->HistoryLength);
+        }
+    }
+
+    return true;
+}
+
 
 /* All the const methods that can be called from reader or writer */
 mtsStateIndex mtsStateTable::GetIndexReader(void) const {
@@ -145,6 +161,10 @@ mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const std::string & nam
 mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const char * name) const
 {
     return GetAccessor(std::string(name));
+}
+
+mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const size_t id) const{
+    return StateVectorAccessors[id];
 }
 
 
@@ -340,6 +360,18 @@ void mtsStateTable::AdvanceIfAutomatic(void) {
     if (this->AutomaticAdvanceFlag) {
         this->Advance();
     }
+}
+
+
+bool mtsStateTable::ReplayAdvance(void)
+{
+    std::cerr << "index: " << IndexReader << " of " << HistoryLength << std::endl;
+    IndexReader++;
+    if (IndexReader > HistoryLength) {
+        IndexReader = 0;
+        return false;
+    }
+    return true;
 }
 
 

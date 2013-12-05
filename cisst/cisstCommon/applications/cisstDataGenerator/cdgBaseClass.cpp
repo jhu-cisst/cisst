@@ -59,7 +59,7 @@ cdgScope * cdgBaseClass::Create(size_t lineNumber) const
 }
 
 
-bool cdgBaseClass::Validate(void)
+bool cdgBaseClass::Validate(std::string & CMN_UNUSED(errorMessage))
 {
     return true;
 }

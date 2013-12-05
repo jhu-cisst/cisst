@@ -66,9 +66,17 @@ public:
         Data(size, objectExample)
     {}
 
-
 	/*! Default destructor. */
 	virtual ~mtsStateArray() {}
+
+
+    bool SetDataSize(const size_t size){
+        value_type objectExample = Data[0];
+        //\todo add try catch for alloc exception
+        Data.resize(size,objectExample);
+        return true;
+    }
+
 
     /*! Access element at index. This returns the data of the derived type
       (value_type) rather than the base type (mtsGenericObject), which is

@@ -387,7 +387,7 @@ bool mtsManagerProxyClient::ReceiveRemoveComponentProxy(const ::std::string & co
 bool mtsManagerProxyClient::ReceiveCreateInterfaceProvidedProxy(const std::string & serverComponentProxyName, const ::mtsManagerProxy::InterfaceProvidedDescription & providedInterfaceDescription)
 {
     // Convert providedInterfaceDescription into an object of type mtsInterfaceCommon::InterfaceProvidedDescription
-    InterfaceProvidedDescription convertedDescription;
+    mtsInterfaceProvidedDescription convertedDescription;
     mtsManagerProxyServer::ConvertInterfaceProvidedDescription(providedInterfaceDescription, convertedDescription);
 
     return ProxyOwner->CreateInterfaceProvidedProxy(serverComponentProxyName, convertedDescription);
@@ -396,7 +396,7 @@ bool mtsManagerProxyClient::ReceiveCreateInterfaceProvidedProxy(const std::strin
 bool mtsManagerProxyClient::ReceiveCreateInterfaceRequiredProxy(const std::string & clientComponentProxyName, const ::mtsManagerProxy::InterfaceRequiredDescription & requiredInterfaceDescription)
 {
     // Convert requiredInterfaceDescription into an object of type mtsInterfaceCommon::InterfaceRequiredDescription
-    InterfaceRequiredDescription convertedDescription;
+    mtsInterfaceRequiredDescription convertedDescription;
     mtsManagerProxyServer::ConvertInterfaceRequiredDescription(requiredInterfaceDescription, convertedDescription);
 
     return ProxyOwner->CreateInterfaceRequiredProxy(clientComponentProxyName, convertedDescription);
@@ -444,7 +444,7 @@ bool mtsManagerProxyClient::ReceiveConnectClientSideInterface(const ConnectionID
 
 bool mtsManagerProxyClient::ReceiveGetInterfaceProvidedDescription(const std::string & serverComponentName, const std::string & providedInterfaceName, ::mtsManagerProxy::InterfaceProvidedDescription & providedInterfaceDescription)
 {
-    InterfaceProvidedDescription src;
+    mtsInterfaceProvidedDescription src;
 
     if (!ProxyOwner->GetInterfaceProvidedDescription(serverComponentName, providedInterfaceName, src)) {
         LogError(mtsManagerProxyClient, "ReceiveGetInterfaceProvidedDescription() failed");
@@ -459,7 +459,7 @@ bool mtsManagerProxyClient::ReceiveGetInterfaceProvidedDescription(const std::st
 
 bool mtsManagerProxyClient::ReceiveGetInterfaceRequiredDescription(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::InterfaceRequiredDescription & requiredInterfaceDescription)
 {
-    InterfaceRequiredDescription src;
+    mtsInterfaceRequiredDescription src;
 
     if (!ProxyOwner->GetInterfaceRequiredDescription(componentName, requiredInterfaceName, src)) {
         LogError(mtsManagerProxyClient, "ReceiveGetInterfaceRequiredDescription() failed");

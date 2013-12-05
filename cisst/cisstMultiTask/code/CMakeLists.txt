@@ -13,6 +13,16 @@
 #
 # --- end cisst license ---
 
+# create data type using the data generator
+cisst_data_generator (cisstMultiTask
+                      "${cisst_BINARY_DIR}/include" # where to save the file
+                      "cisstMultiTask/"        # sub directory for include
+                      ../mtsInterfaceCommon.cdg
+                      ../mtsComponentState.cdg
+                      ../mtsParameterTypes.cdg)
+# to compile cisst generated code, need to find header file
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
+
 # all source files
 set (SOURCE_FILES
 
@@ -34,9 +44,9 @@ set (SOURCE_FILES
      mtsCommandVoidReturn.cpp
      mtsCommandWriteReturn.cpp
 
+     mtsComponentState.cpp # see mtsComponentState.cdg
      mtsComponent.cpp
      mtsComponentAddLatency.cpp
-     mtsComponentState.cpp
      mtsComponentViewer.cpp
      mtsConnection.cpp
 
@@ -73,7 +83,7 @@ set (SOURCE_FILES
      mtsMulticastCommandVoid.cpp
      mtsMulticastCommandWriteBase.cpp
 
-     mtsParameterTypes.cpp
+     mtsParameterTypesOld.cpp
 
      mtsSocketProxyCommon.cpp
      mtsSocketProxyClient.cpp
@@ -129,7 +139,6 @@ set (HEADER_FILES
      mtsComponent.h
      mtsComponentAddLatency.h
      mtsComponentGeneratorMacros.h
-     mtsComponentState.h
      mtsComponentViewer.h
      mtsConnection.h
 
@@ -152,7 +161,6 @@ set (HEADER_FILES
      mtsGenericObjectProxy.h
 
      mtsIntervalStatistics.h
-     mtsInterfaceCommon.h
      mtsInterface.h
      mtsInterfaceInput.h
      mtsInterfaceOutput.h
@@ -176,7 +184,7 @@ set (HEADER_FILES
      mtsMulticastCommandWrite.h
      mtsMulticastCommandWriteBase.h
 
-     mtsParameterTypes.h
+     mtsParameterTypesOld.h
 
      mtsQueue.h
 
@@ -396,7 +404,9 @@ cisst_add_library (LIBRARY cisstMultiTask
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
-                   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
+                                           ${cisstMultiTask_CISST_DG_SRCS}
+                   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES}
+                                           ${cisstMultiTask_CISST_DG_HDRS})
 #set_target_properties(cisstMultiTask PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
 
 # For Safety Framework

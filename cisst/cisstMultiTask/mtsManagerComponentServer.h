@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,18 +22,18 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of Manager Component Server
   \ingroup cisstMultiTask
 
-  This class defines the manager component server which is managed by the local 
+  This class defines the manager component server which is managed by the local
   component manager (LCM) that runs with the global component manager (GCM).
   Only one manager component server exists in the whole system and all the other
   manager components should be of type manager component client
-  (mtsManagerComponentClient) which internally gets connected to the manager 
+  (mtsManagerComponentClient) which internally gets connected to the manager
   component server when they start.
 
   This component provides services for other manager component clients to allow
-  dynamic component creation and connection request (disconnection and 
+  dynamic component creation and connection request (disconnection and
   reconnection will be handled later).
 
-  \note Related classes: mtsManagerComponentBase, mtsManagerComponentClient 
+  \note Related classes: mtsManagerComponentBase, mtsManagerComponentClient
 */
 
 #ifndef _mtsManagerComponentServer_h
@@ -51,7 +51,7 @@ class mtsManagerComponentServer : public mtsManagerComponentBase
     friend class mtsManagerLocal;
 
 protected:
-    /*! Global component manager instance to directly use the services it 
+    /*! Global component manager instance to directly use the services it
         provides */
     mtsManagerGlobal & GCM;
 
@@ -62,8 +62,8 @@ protected:
     void GetNamesOfProcesses(std::vector<std::string> & processList) const;
 
     /*! Functions.  Since one manager component server needs to be able to
-        handle multiple manager component clients, we keep a list of 
-        function objects using named map with (key = process name, 
+        handle multiple manager component clients, we keep a list of
+        function objects using named map with (key = process name,
         value = function object set instance) */
     typedef struct {
         mtsFunctionWriteReturn ComponentCreate;
@@ -85,7 +85,7 @@ protected:
 
     typedef cmnNamedMap<InterfaceGCMFunctionType> InterfaceGCMFunctionMapType;
     InterfaceGCMFunctionMapType InterfaceGCMFunctionMap;
-    
+
     /*! Event generator for system-wide thread-safe logging */
     mtsFunctionWrite EventPrintLog;
 
@@ -99,12 +99,12 @@ protected:
     void InterfaceGCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentGetState(const mtsDescriptionComponent &component, mtsComponentState &state) const;
     void InterfaceGCMCommands_GetNamesOfProcesses(std::vector<std::string> & names) const;
-    void InterfaceGCMCommands_GetNamesOfComponents(const std::string & processName, 
+    void InterfaceGCMCommands_GetNamesOfComponents(const std::string & processName,
                                                    std::vector<std::string> & names) const;
     void InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
-    void InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, InterfaceProvidedDescription & description) const;
-    void InterfaceGCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, InterfaceRequiredDescription & description) const;
+    void InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, mtsInterfaceProvidedDescription & description) const;
+    void InterfaceGCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, mtsInterfaceRequiredDescription & description) const;
     void InterfaceGCMCommands_LoadLibrary(const mtsDescriptionLoadLibrary & lib, bool & result) const;
     void InterfaceGCMCommands_PrintLog(const mtsLogMessage & log);
     void InterfaceGCMCommands_SetLogForwarding(const std::vector<std::string> & processNames, bool state);  // internal
@@ -113,7 +113,7 @@ protected:
     void InterfaceGCMCommands_GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const;
     void InterfaceGCMCommands_GetAbsoluteTimeDiffs(const std::vector<std::string> & processNames,
                                                    std::vector<double> & processTimes) const;
-    void InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName, 
+    void InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName,
                                                         std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
 #if CISST_HAS_SAFETY_PLUGINS
     void InterfaceGCMCommands_FaultPropage(const mtsFaultBase & fault);

@@ -7,7 +7,7 @@
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
 
-  (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -21,7 +21,27 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterInput.h>
-CMN_IMPLEMENT_SERVICES(svlFilterInput)
+CMN_IMPLEMENT_SERVICES(svlFilterInput);
 
 #include <cisstStereoVision/svlFilterOutput.h>
-CMN_IMPLEMENT_SERVICES(svlFilterOutput)
+CMN_IMPLEMENT_SERVICES(svlFilterOutput);
+
+#include <cisstStereoVision/svlFilterImageOverlayTypes.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterImageOverlayImageTransformProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterImageOverlayImageTransformVectorProxy);
+
+#include <cisstStereoVision/svlFilterSourceImageFileTypes.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceImageFileInfoProxy);
+
+#include <cisstStereoVision/svlFilterSplitterTypes.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSplitterOutputInfoProxy);
+
+#include <cisstStereoVision/svlFilterSourceTextFileTypes.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceTextFileInfoProxy);
+
+#include <cisstStereoVision/svlFilterSourceVideoCaptureTypes.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCaptureDeviceInfoProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCaptureExternalTriggerProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCaptureImageFormatProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCaptureImagePropertiesProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCaptureConfigProxy);

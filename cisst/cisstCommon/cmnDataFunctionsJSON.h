@@ -38,54 +38,111 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <json/json.h>
 
-void CISST_EXPORT cmnDataToJSON(const double value, Json::Value & jsonValue);
-void CISST_EXPORT cmnDataFromJSON(double & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
+template <typename _elementType>
+class cmnDataJSON
+{
+public:
+    typedef _elementType DataType;
+    static void SerializeText(const DataType & data, Json::Value & jsonValue);
+    static void DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error);
+};
 
-void CISST_EXPORT cmnDataToJSON(const float value, Json::Value & jsonValue);
-void CISST_EXPORT cmnDataFromJSON(float & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
+template <>
+void CISST_EXPORT cmnDataJSON<double>::SerializeText(const DataType & data, Json::Value & jsonValue);
+template <>
+void CISST_EXPORT cmnDataJSON<double>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error);
 
-void CISST_EXPORT cmnDataToJSON(const int value, Json::Value & jsonValue);
-void CISST_EXPORT cmnDataFromJSON(int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
+template <>
+void CISST_EXPORT cmnDataJSON<float>::SerializeText(const DataType & data, Json::Value & jsonValue);
+template <>
+void CISST_EXPORT cmnDataJSON<float>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error);
 
-void CISST_EXPORT cmnDataToJSON(const unsigned int value, Json::Value & jsonValue);
-void CISST_EXPORT cmnDataFromJSON(unsigned int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
+template <>
+void CISST_EXPORT cmnDataJSON<char>::SerializeText(const DataType & data, Json::Value & jsonValue);
+template <>
+void CISST_EXPORT cmnDataJSON<char>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error);
 
-void CISST_EXPORT cmnDataToJSON(const bool value, Json::Value & jsonValue);
-void CISST_EXPORT cmnDataFromJSON(bool & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
+template <>
+void CISST_EXPORT cmnDataJSON<int>::SerializeText(const DataType & data, Json::Value & jsonValue);
+template <>
+void CISST_EXPORT cmnDataJSON<int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error);
 
-void CISST_EXPORT cmnDataToJSON(const std::string value, Json::Value & jsonValue);
-void CISST_EXPORT cmnDataFromJSON(std::string & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
+template <>
+void CISST_EXPORT cmnDataJSON<unsigned int>::SerializeText(const DataType & data, Json::Value & jsonValue);
+template <>
+void CISST_EXPORT cmnDataJSON<unsigned int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error);
 
-void CISST_EXPORT cmnDataToJSON_size_t(const size_t value, Json::Value & jsonValue);
-void CISST_EXPORT cmnDataFromJSON_size_t(size_t & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error);
+template <>
+void CISST_EXPORT cmnDataJSON<bool>::SerializeText(const DataType & data, Json::Value & jsonValue);
+template <>
+void CISST_EXPORT cmnDataJSON<bool>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error);
+
+template <>
+void CISST_EXPORT cmnDataJSON<std::string>::SerializeText(const DataType & data, Json::Value & jsonValue);
+template <>
+void CISST_EXPORT cmnDataJSON<std::string>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error);
+
 
 template <class _elementType>
-void cmnDataToJSON(const std::vector<_elementType> & vector, Json::Value & jsonValue) {
-    typedef std::vector<_elementType> VectorType;
-    typedef typename VectorType::const_iterator const_iterator;
-    const const_iterator end = vector.end();
-    int jsonIndex = 0;
-    for (const_iterator iter = vector.begin();
-         iter != end;
-         ++iter, ++jsonIndex) {
-        cmnDataToJSON(*iter, jsonValue[jsonIndex]);
-    }
-}
+class cmnDataJSON<std::vector<_elementType> >
+{
+public:
+    typedef std::vector<_elementType> DataType;
 
-template <class _elementType>
-void cmnDataFromJSON(std::vector<_elementType> & vector, const Json::Value & jsonValue) throw (std::runtime_error) {
-    // get the vector size from JSON and resize
-    vector.resize(jsonValue.size());
-    typedef std::vector<_elementType> VectorType;
-    typedef typename VectorType::iterator iterator;
-    const iterator end = vector.end();
-    int jsonIndex = 0;
-    for (iterator iter = vector.begin();
-         iter != end;
-         ++iter, ++jsonIndex) {
-        cmnDataFromJSON(*iter, jsonValue[jsonIndex]);
+    static void SerializeText(const DataType & data, Json::Value & jsonValue)
+    {
+        typedef typename DataType::const_iterator const_iterator;
+        const const_iterator end = data.end();
+        int jsonIndex = 0;
+        for (const_iterator iter = data.begin();
+             iter != end;
+             ++iter, ++jsonIndex) {
+            cmnDataJSON<_elementType>::SerializeText(*iter, jsonValue[jsonIndex]);
+        }
     }
-}
+
+    static void DeSerializeText(std::vector<_elementType> & data, const Json::Value & jsonValue) throw (std::runtime_error)
+    {
+        // get the vector size from JSON and resize
+        data.resize(jsonValue.size());
+        typedef typename DataType::iterator iterator;
+        const iterator end = data.end();
+        int jsonIndex = 0;
+        for (iterator iter = data.begin();
+             iter != end;
+             ++iter, ++jsonIndex) {
+            cmnDataJSON<_elementType>::DeSerializeText(*iter, jsonValue[jsonIndex]);
+        }
+    }
+};
+
+
+template <class _elementType, int _size>
+class cmnDataJSON<_elementType[_size] >
+{
+public:
+    typedef _elementType * pointer;
+    typedef const _elementType * const_pointer;
+
+    static void SerializeText(const_pointer data, Json::Value & jsonValue)
+    {
+        const_pointer ptr = data;
+        for (int index = 0; index < _size; ++index, ++ptr) {
+            cmnDataJSON<_elementType>::SerializeText(*ptr, jsonValue[index]);
+        }
+    }
+
+    static void DeSerializeText(pointer data, const Json::Value & jsonValue) throw (std::runtime_error)
+    {
+        if (jsonValue.size() != _size) {
+            cmnThrow("cmnDataJSON<c-array>::DeSerializeText: vector sizes don't match");
+        }
+        pointer ptr = data;
+        for (int index = 0; index < _size; ++index, ++ptr) {
+            cmnDataJSON<_elementType>::DeSerializeText(*ptr, jsonValue[index]);
+        }
+    }
+};
 
 #endif // CISST_HAS_JSON
 

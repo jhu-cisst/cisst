@@ -26,233 +26,104 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctDataFunctionsDynamicVector_h
 
 #include <cisstCommon/cmnDataFunctions.h>
-#include <cisstVector/vctDataFunctionsVector.h>
 #include <cisstVector/vctDynamicVectorBase.h>
+#include <cisstCommon/cmnDataFunctionsVectorHelpers.h>
 #include <cisstVector/vctDataFunctionsDynamicVectorJSON.h>
 
-// there are two different specialization for vectors, dynamic vectors can be resized while references can't
-template <typename _elementType, class _vectorOwnerTypeSource>
-void cmnDataCopy(vctDynamicVector<_elementType> & destination,
-                 const vctDynamicConstVectorBase<_vectorOwnerTypeSource, _elementType> & source)
-{
-    // potentially resizes the destination
-    destination.ForceAssign(source);
-}
-
-template <typename _elementType, class _vectorOwnerTypeSource>
-void cmnDataCopy(vctDynamicVectorRef<_elementType> & destination,
-                 const vctDynamicConstVectorBase<_vectorOwnerTypeSource, _elementType> & source)
-{
-    // this might fail if the destination is not properly sized
-    destination.Assign(source);
-}
-
-
-// there is only one specialization since we only read and there is no size issue
-template <typename _elementType, class _vectorOwnerType>
-void cmnDataSerializeBinary(std::ostream & outputStream,
-                            const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data)
-    throw (std::runtime_error)
-{
-    const vct::size_type mySize = data.size();
-    cmnDataSerializeBinary_size_t(outputStream, mySize);
-
-    typedef typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::const_iterator const_iterator;
-    const_iterator iter = data.begin();
-    const const_iterator end = data.end();
-    for (; iter != end; ++iter) {
-        cmnDataSerializeBinary(outputStream, *iter);
-    }
-}
-
-
-// as for the cmnDataCopy, two different specializations
 template <typename _elementType>
-void cmnDataDeSerializeBinary(std::istream & inputStream,
-                              vctDynamicVector<_elementType> & data,
-                              const cmnDataFormat & remoteFormat,
-                              const cmnDataFormat & localFormat)
-    throw (std::runtime_error)
+class cmnData<vctDynamicVector<_elementType> >
 {
-    // for vectors that own memory, we resize the destination based on deserialized "size"
-    vct::size_type mySize = 0;
-    cmnDataDeSerializeBinary_size_t(inputStream, mySize, remoteFormat, localFormat);
-    data.SetSize(mySize);
+public:
+    enum {IS_SPECIALIZED = 1};
 
-    // get data
-    typedef typename vctDynamicVector<_elementType>::iterator iterator;
-    iterator iter = data.begin();
-    const iterator end = data.end();
-    for (; iter != end; ++iter) {
-        cmnDataDeSerializeBinary(inputStream, *iter, remoteFormat, localFormat);
-    }
-}
+    typedef vctDynamicVector<_elementType> DataType;
 
-template <typename _elementType>
-void cmnDataDeSerializeBinary(std::istream & inputStream,
-                              vctDynamicVectorRef<_elementType> & data,
-                              const cmnDataFormat & remoteFormat,
-                              const cmnDataFormat & localFormat)
-    throw (std::runtime_error)
-{
-    // get and set size
-    vct::size_type mySize;
-    cmnDataDeSerializeBinary_size_t(inputStream, mySize, remoteFormat, localFormat);
-
-    if (mySize != data.size()) {
-        cmnThrow(std::runtime_error("cmnDataDeSerializeBinary: vctDynamicVectorRef, size of vectors don't match"));
+    static void Copy(DataType & data, const DataType & source)
+    {
+        // potentially resizes the destination
+        data.ForceAssign(source);
     }
 
-    // get data
-    typedef typename vctDynamicVectorRef<_elementType>::iterator iterator;
-    iterator iter = data.begin();
-    const iterator end = data.end();
-    for (; iter != end; ++iter) {
-        cmnDataDeSerializeBinary(inputStream, *iter, remoteFormat, localFormat);
+    static std::string HumanReadable(const DataType & data)
+    {
+        return cmnDataVectorHumanReadable(data);
     }
-}
 
-
-// there is only one specialization since we only read and there is no size issue
-template <typename _elementType, class _vectorOwnerType>
-void cmnDataSerializeText(std::ostream & outputStream,
-                          const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data,
-                          const char delimiter)
-    throw (std::runtime_error)
-{
-    const vct::size_type mySize = data.size();
-    cmnDataSerializeText_size_t(outputStream, mySize, delimiter);
-    typedef typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::const_iterator const_iterator;
-    const_iterator iter = data.begin();
-    const const_iterator end = data.end();
-    for (; iter != end; ++iter) {
-        outputStream << delimiter;
-        cmnDataSerializeText(outputStream, *iter, delimiter);
+    static void SerializeBinary(const DataType & data,
+                                       std::ostream & outputStream)
+        throw (std::runtime_error)
+    {
+        const vct::size_type mySize = data.size();
+        cmnData<size_t>::SerializeBinary(mySize, outputStream);
+        cmnDataVectorSerializeBinary(data, outputStream);
     }
-}
 
+    static void DeSerializeBinary(DataType & data,
+                                  std::istream & inputStream,
+                                  const cmnDataFormat & localFormat,
+                                  const cmnDataFormat & remoteFormat)
+        throw (std::runtime_error)
+    {
+        cmnDataVectorDeSerializeBinaryResize(data, inputStream, localFormat, remoteFormat);
+    }
 
-template <typename _elementType, class _vectorOwnerType>
-std::string cmnDataSerializeTextDescription(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data,
+    static void SerializeText(const DataType & data,
+                              std::ostream & outputStream,
+                              const char delimiter)
+        throw (std::runtime_error)
+    {
+        const size_t size = data.size();
+        cmnData<size_t>::SerializeText(size, outputStream, delimiter);
+        if (size > 0) {
+            outputStream << delimiter;
+            cmnDataVectorSerializeText(data, outputStream, delimiter);
+        }
+    }
+
+    static std::string SerializeDescription(const DataType & data,
                                             const char delimiter,
                                             const std::string & userDescription = "v")
-{
-    std::stringstream description;
-    const vct::size_type mySize = data.size();
-    // size with user description
-    description << userDescription << ".size{" << cmnDataSerializeTextDescription_size_t(mySize, delimiter) << "}";
-    // elements
-    size_t index;
-    for (index = 0; index < mySize; ++index) {
-        description << delimiter << userDescription << "[" << index << "]{" << cmnDataSerializeTextDescription(data.Element(index), delimiter) << "}";
-    }
-    return description.str();
-}
-
-// as for the cmnDataCopy, two different specializations
-template <typename _elementType>
-void cmnDataDeSerializeText(std::istream & inputStream,
-                            vctDynamicVector<_elementType> & data,
-                            const char delimiter)
-    throw (std::runtime_error)
-{
-    // for vectors that own memory, we resize the destination based on deserialized "size"
-    vct::size_type mySize = 0;
-    cmnDataDeSerializeText_size_t(inputStream, mySize, delimiter);
-    data.SetSize(mySize);
-
-    // get data
-    typedef typename vctDynamicVector<_elementType>::iterator iterator;
-    iterator iter = data.begin();
-    const iterator end = data.end();
-    for (; iter != end; ++iter) {
-        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicVector");
-        cmnDataDeSerializeText(inputStream, *iter, delimiter);
-    }
-}
-
-template <typename _elementType>
-void cmnDataDeSerializeText(std::istream & inputStream,
-                            vctDynamicVectorRef<_elementType> & data,
-                            const char delimiter)
-    throw (std::runtime_error)
-{
-    // get and set size
-    vct::size_type mySize;
-    cmnDataDeSerializeText_size_t(inputStream, mySize, delimiter);
-
-    if (mySize != data.size()) {
-        cmnThrow(std::runtime_error("cmnDataDeSerializeText: vctDynamicVectorRef, size of vectors don't match"));
+    {
+        return cmnDataVectorSerializeDescription(data, delimiter, userDescription, true /* need to serialize size */);
     }
 
-    // get data
-    typedef typename vctDynamicVectorRef<_elementType>::iterator iterator;
-    iterator iter = data.begin();
-    const iterator end = data.end();
-    for (; iter != end; ++iter) {
-        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctDynamicVectorRef");
-        cmnDataDeSerializeText(inputStream, *iter, delimiter);
+    static void DeSerializeText(DataType & data,
+                                std::istream & inputStream,
+                                const char delimiter)
+        throw (std::runtime_error)
+    {
+        cmnDataVectorDeSerializeTextResize(data, inputStream, delimiter);
     }
-}
 
-
-template <class _vectorOwnerType, typename _elementType>
-bool cmnDataScalarNumberIsFixed(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & CMN_UNUSED(data))
-{
-    return false;
-}
-
-
-template <class _vectorOwnerType, typename _elementType>
-size_t cmnDataScalarNumber(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data)
-{
-    if (cmnDataScalarNumberIsFixed(data.Element(0))) {
-        return data.size() * cmnDataScalarNumber(data.Element(0));
+    static bool ScalarNumberIsFixed(const DataType & CMN_UNUSED(data))
+    {
+        return false;
     }
-    size_t result = 0;
-    typedef typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::const_iterator const_iterator;
-    const const_iterator end = data.end();
-    const_iterator iter = data.begin();
-    for (; iter != end; ++iter) {
-        result += cmnDataScalarNumber(*iter);
+
+    static size_t ScalarNumber(const DataType & data)
+    {
+        return cmnDataVectorScalarNumber(data) + 1; /* treat vector size as a scalar */
     }
-    return result;
-}
 
-
-template <class _vectorOwnerType, typename _elementType>
-std::string
-cmnDataScalarDescription(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data,
-                         const size_t & index,
-                         const std::string & userDescription = "v")
-    throw (std::out_of_range)
-{
-    size_t elementIndex, inElementIndex;
-    std::stringstream result;
-    if (vctDataFindInVectorScalarIndex(data, index, elementIndex, inElementIndex)) {
-        result << userDescription << "[" << elementIndex << "]{" << cmnDataScalarDescription(data.Element(elementIndex), inElementIndex) << "}";
-    } else {
-        cmnThrow(std::out_of_range("cmnDataScalarDescription: vctDynamicVector index out of range"));
+    static std::string ScalarDescription(const DataType & data, const size_t & index, const std::string & userDescription = "v")
+        throw (std::out_of_range)
+    {
+        /* treat vector size as a scalar */
+        if (index == 0) {
+            return cmnData<size_t>::ScalarDescription(data.size(), 0, userDescription + ".size");
+        }
+        return cmnDataVectorScalarDescription(data, index - 1, userDescription);
     }
-    return result.str();
-}
 
-
-template <class _vectorOwnerType, typename _elementType>
-double
-cmnDataScalar(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & data,
-              const size_t & index)
-    throw (std::out_of_range)
-{
-    size_t elementIndex, inElementIndex;
-    if (vctDataFindInVectorScalarIndex(data, index, elementIndex, inElementIndex)) {
-        return cmnDataScalar(data.Element(elementIndex), inElementIndex);
-    } else {
-        cmnThrow(std::out_of_range("cmnDataScalar: vctDynamicVector index out of range"));
+    static double Scalar(const DataType & data, const size_t & index) throw (std::out_of_range)
+    {
+        /* treat vector size as a scalar */
+        if (index == 0) {
+            return static_cast<double>(data.size());
+        }
+        return cmnDataVectorScalar(data, index - 1);
     }
-    return 0.123456789; // unreachable, just to avoid compiler warnings
-}
-
+};
 
 // ---------------------- older functions, to be deprecated
 template <typename _elementType>

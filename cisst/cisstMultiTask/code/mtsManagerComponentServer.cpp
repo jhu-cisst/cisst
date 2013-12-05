@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsInterfaceCommon.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
@@ -81,7 +82,7 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
 {
     // InterfaceGCM's required interface is not created here but is created
     // when a manager component client connects to the manager component
-    // server.  
+    // server.
     // See mtsManagerComponentServer::AddNewClientProcess()
     // for the creation of required interfaces.
 
@@ -207,13 +208,13 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfComponentClasses,
                           newFunctionSet->GetListOfComponentClasses);
 
-    required->AddEventHandlerWrite(&mtsManagerComponentServer::HandleChangeStateEvent, this, 
+    required->AddEventHandlerWrite(&mtsManagerComponentServer::HandleChangeStateEvent, this,
                                    mtsManagerComponentBase::EventNames::ChangeState);
 
-    // Remember a required interface (InterfaceGCM's required interface) to 
+    // Remember a required interface (InterfaceGCM's required interface) to
     // connect it to the provided interface (InterfaceLCM's provided interface).
     if (!InterfaceGCMFunctionMap.AddItem(clientProcessName, newFunctionSet)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to add \"GCM\" required interface: " 
+        CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to add \"GCM\" required interface: "
             << "\"" << clientProcessName << "\", " << interfaceName << std::endl;
         return false;
     }
@@ -226,7 +227,7 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
     if (!LCM->Connect(LCM->GetProcessName(), this->GetName(), interfaceName,
                       clientProcessName, serverComponentName, serverInterfaceName))
     {
-        CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to connect: " 
+        CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to connect: "
             << mtsManagerGlobal::GetInterfaceUID(LCM->GetProcessName(), this->GetName(), interfaceName)
             << " - "
             << mtsManagerGlobal::GetInterfaceUID(clientProcessName, serverComponentName, serverInterfaceName)
@@ -235,10 +236,10 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
     }
 #else
     if (!LCM->Connect(this->GetName(), interfaceName, serverComponentName, serverInterfaceName)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to connect: " 
+        CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to connect: "
             << this->GetName() << ":" << interfaceName
-            << " - " 
-            << serverComponentName << ":" << serverInterfaceName 
+            << " - "
+            << serverComponentName << ":" << serverInterfaceName
             << std::endl;
         return false;
     }
@@ -307,8 +308,8 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure(const mt
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/)
 {
-    // We don't check argument validity with the GCM at this stage and rely on 
-    // the current normal connection procedure (GCM allows connection at the 
+    // We don't check argument validity with the GCM at this stage and rely on
+    // the current normal connection procedure (GCM allows connection at the
     // request of LCM) because the GCM guarantees that arguments are valid.
     // The Connect request is then passed to the manager component client which
     // calls local component manager's Connect() method.
@@ -331,7 +332,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
 }
 
 
-// MJ: Another method that does the same thing but accepts a single parameter 
+// MJ: Another method that does the same thing but accepts a single parameter
 // as connection id should be added.
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
@@ -345,7 +346,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const m
     if (arg.Client.ProcessName != arg.Server.ProcessName) {
         // PK TEMP fix for network disconnect
         mtsDescriptionConnection arg2;
-        // Step 1: Disconnect Client from ServerProxy  
+        // Step 1: Disconnect Client from ServerProxy
         CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 1 (client side disconnect)" << std::endl;
         arg2 = arg;
         arg2.Server.ProcessName = arg.Client.ProcessName;
@@ -390,7 +391,7 @@ void mtsManagerComponentServer::ComponentDisconnect(const std::string & processN
     // Get a set of function objects that are bound to the InterfaceLCM's provided interface.
     InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processName);
     if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to get function set for process \"" 
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to get function set for process \""
             << processName << "\": " << arg << std::endl;
         return;
     }
@@ -545,7 +546,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections(std::v
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
-                                                                                     InterfaceProvidedDescription & description) const
+                                                                                     mtsInterfaceProvidedDescription & description) const
 {
     if (!GCM.FindComponent(intfc.ProcessName, intfc.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceProvidedDescription: failed to get interface description - no component found: "
@@ -569,7 +570,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceProvidedDescrip
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc,
-                                                                                     InterfaceRequiredDescription & description) const
+                                                                                     mtsInterfaceRequiredDescription & description) const
 {
     if (!GCM.FindComponent(intfc.ProcessName, intfc.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceRequiredDescription: failed to get interface description - no component found: "
@@ -710,7 +711,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetAbsoluteTimeDiffs(const 
             double tic = LCM->GetTimeServer().GetAbsoluteTimeInSeconds();
             result = functionSet->GetAbsoluteTimeInSeconds(time);
             double roundTripTime =  LCM->GetTimeServer().GetAbsoluteTimeInSeconds() - tic;
-            if (result.IsOK()) {  
+            if (result.IsOK()) {
                 trialTimes[i] = (tic + roundTripTime/2.0) - time;
             }
             else {

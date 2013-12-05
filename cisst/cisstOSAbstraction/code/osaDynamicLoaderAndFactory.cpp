@@ -57,7 +57,7 @@ bool osaDynamicLoaderAndFactoryBase::Init(const char *name, const char *file, co
     if (!Load(file, path))
         return false;
     std::string funcname(name);
-    int namelen = funcname.size();
+    size_t namelen = funcname.size();
     funcname.append("BaseType");
     const std::type_info **basetypep = (const std::type_info **)GetSymbolAddr(handle, funcname.c_str());
     if (basetypep) {

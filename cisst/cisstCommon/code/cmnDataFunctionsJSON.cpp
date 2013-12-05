@@ -25,53 +25,80 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_HAS_JSON
 
-void cmnDataToJSON(const double value, Json::Value & jsonValue) {
-    jsonValue = value;
+template <>
+void cmnDataJSON<double>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = data;
 }
-void cmnDataFromJSON(double & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asDouble();
-}
-
-void cmnDataToJSON(const float value, Json::Value & jsonValue) {
-    jsonValue = value;
-}
-void cmnDataFromJSON(float & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asFloat();
+template <>
+void cmnDataJSON<double>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    data = jsonValue.asDouble();
 }
 
-void cmnDataToJSON(const int value, Json::Value & jsonValue) {
-    jsonValue = value;
+template <>
+void cmnDataJSON<float>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = data;
 }
-void cmnDataFromJSON(int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asInt();
-}
-
-void cmnDataToJSON(const unsigned int value, Json::Value & jsonValue) {
-    jsonValue = value;
-}
-void cmnDataFromJSON(unsigned int & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asUInt();
+template <>
+void cmnDataJSON<float>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    data = jsonValue.asFloat();
 }
 
-void cmnDataToJSON(const bool value, Json::Value & jsonValue) {
-    jsonValue = value;
+template <>
+void cmnDataJSON<char>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = data;
 }
-void cmnDataFromJSON(bool & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asBool();
+template <>
+void cmnDataJSON<char>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    std::string temp = jsonValue.asString();
+    if (temp.size() != 1) {
+        cmnThrow("cmnDataJSON<char>::DeSerializeText: string with more than one character");
+    }
+    data = temp[0];
 }
 
-void cmnDataToJSON(const std::string value, Json::Value & jsonValue) {
-    jsonValue = value;
+template <>
+void cmnDataJSON<int>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = data;
 }
-void cmnDataFromJSON(std::string & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asString();
+template <>
+void cmnDataJSON<int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    data = jsonValue.asInt();
 }
 
-void cmnDataToJSON_size_t(const size_t value, Json::Value & jsonValue) {
-    jsonValue = static_cast<Json::UInt64>(value);
+template <>
+void cmnDataJSON<unsigned int>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = data;
 }
-void cmnDataFromJSON_size_t(size_t & placeHolder, const Json::Value & jsonValue) throw (std::runtime_error) {
-    placeHolder = jsonValue.asUInt64();
+template <>
+void cmnDataJSON<unsigned int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    data = jsonValue.asUInt();
+}
+
+template <>
+void cmnDataJSON<unsigned long int>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = Json::UInt64(data);
+}
+template <>
+void cmnDataJSON<unsigned long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    data = jsonValue.asUInt64();
+}
+
+template <>
+void cmnDataJSON<bool>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = data;
+}
+template <>
+void cmnDataJSON<bool>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    data = jsonValue.asBool();
+}
+
+template <>
+void cmnDataJSON<std::string>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = data;
+}
+template <>
+void cmnDataJSON<std::string>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    data = jsonValue.asString();
 }
 
 #endif // CISST_HAS_JSON

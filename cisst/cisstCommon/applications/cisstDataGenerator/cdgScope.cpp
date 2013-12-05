@@ -62,11 +62,12 @@ bool cdgScope::HasField(const std::string & fieldName) const
 
 bool cdgScope::SetFieldValue(const std::string & fieldName,
                              const std::string & value,
-                             std::string & errorMessage)
+                             std::string & errorMessage,
+                             const bool & allowOverwrite)
 {
     cdgField * field = this->Fields.GetItem(fieldName);
     if (field) {
-        return field->SetValue(value, errorMessage);
+        return field->SetValue(value, errorMessage, allowOverwrite);
     }
     errorMessage = "unhandled field name \"" + fieldName + "\"";
     return false;
@@ -169,7 +170,7 @@ bool cdgScope::HasSubScope(const std::string & keyword,
 }
 
 
-bool cdgScope::ValidateRecursion(void)
+bool cdgScope::ValidateRecursion(std::string & errorMessage)
 {
     bool valid = true;
     const ScopesContainer::iterator end = Scopes.end();
@@ -177,8 +178,8 @@ bool cdgScope::ValidateRecursion(void)
     for (iter = Scopes.begin();
          iter != end;
          ++iter) {
-        valid = valid && ((*iter)->Validate());
-        valid = valid && ((*iter)->ValidateRecursion());
+        valid = valid && ((*iter)->Validate(errorMessage));
+        valid = valid && ((*iter)->ValidateRecursion(errorMessage));
     }
     return valid;
 }

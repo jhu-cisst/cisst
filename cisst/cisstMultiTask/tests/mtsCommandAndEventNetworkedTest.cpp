@@ -120,10 +120,10 @@ void mtsCommandAndEventNetworkedTest::StartAllComponents(void)
 
 void mtsCommandAndEventNetworkedTest::StopAllComponents(void)
 {
-    SendAndVerify(PipeComponentManager, "stop", "stop succeeded");
-    SendAndVerify(PipeProcessServer, "stop", "stop succeeded");
     SendAndVerify(PipeProcessClient, "stop", "stop succeeded");
+    SendAndVerify(PipeProcessServer, "stop", "stop succeeded");
     SendAndVerify(PipeConfigurationManager, "stop", "stop succeeded");
+    SendAndVerify(PipeComponentManager, "stop", "stop succeeded");
 }
 
 
@@ -200,8 +200,6 @@ void mtsCommandAndEventNetworkedTest::TestExecution(_clientType * client, _serve
                                                     double clientExecutionDelay, double serverExecutionDelay,
                                                     double blockingDelay)
 {
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
-
     // we assume both client and servers use the same type
     typedef typename _serverType::value_type value_type;
 
@@ -379,9 +377,18 @@ void mtsCommandAndEventNetworkedTest::TestExecution(_clientType * client, _serve
 #endif
 
 
-template <class _elementType>
 void mtsCommandAndEventNetworkedTest::TestDeviceDevice(void)
 {
+    // to be set based on component type, now set for device
+    double serverExecutionDelay = 0.0 * cmn_s;
+    double clientExecutionDelay = 0.0 * cmn_s;
+    double blockingDelay = 0.0 * cmn_s;
+
+    // test commands and timing
+    const double queueingDelay = 100.0 * cmn_ms; // includes time to send request thru pipes
+    const osaTimeServer & timeServer = mtsComponentManager::GetInstance()->GetTimeServer();
+    double startTime, stopTime;
+
     StartAllComponents();
     PingAllComponents();
 
@@ -389,35 +396,69 @@ void mtsCommandAndEventNetworkedTest::TestDeviceDevice(void)
 
     // create server component
     SendAndVerify(PipeConfigurationManager, "dynamic_load server_process cisstMultiTaskTestsLib", "cisstMultiTaskTestsLib loaded on server_process");
-    SendAndVerify(PipeConfigurationManager, "create_component server_process mtsTestDevice1_mtsInt server", "component created");
+    SendAndVerify(PipeConfigurationManager, "create_component server_process mtsTestDevice1_int server", "component created", 2.0 * cmn_s);
     SendAndVerify(PipeProcessServer, "has_component server", "server found");
     PingAllComponents();
 
     // create client component
     SendAndVerify(PipeConfigurationManager, "dynamic_load client_process cisstMultiTaskTestsLib", "cisstMultiTaskTestsLib loaded on client_process");
-    SendAndVerify(PipeConfigurationManager, "create_component client_process mtsTestDevice1_mtsInt client", "component created");
+    SendAndVerify(PipeConfigurationManager, "create_component client_process mtsTestDevice1_int client", "component created", 2.0 * cmn_s);
     SendAndVerify(PipeProcessClient, "has_component client", "client found");
     PingAllComponents();
 
     SendAndVerify(PipeConfigurationManager,
                   "connect client_process client r1 server_process server p1",
                   "connection succeeded");
+    // constant sleep until we can figure out a good way to handle connection event
+    osaSleep(2.0 * cmn_s);
+
+    // check initial values in required interfaces
+    SendAndVerify(PipeProcessServer, "command server provided p1 get_value", "-1");
+    SendAndVerify(PipeProcessClient, "command client required r1 get_value", "-1");
+    SendAndVerify(PipeProcessServer, "command server required r1 get_value", "-1");
+
+    // loop over void and write commands to alternate blocking and non
+    // blocking commands
+    unsigned int index;
+    for (index = 0; index < 3; index++) {
+        // test void command non blocking
+        startTime = timeServer.GetRelativeTime();
+        SendAndVerify(PipeProcessClient, "command client required r1 function_void", "ok"); // trigger void function on client
+        stopTime = timeServer.GetRelativeTime();
+        CPPUNIT_ASSERT((stopTime - startTime) <= queueingDelay); // make sure execution is fast
+        osaSleep(serverExecutionDelay + blockingDelay); // time to dequeue and let command execute
+        SendAndVerify(PipeProcessServer, "command server provided p1 get_value", "0"); // reset
+        SendAndVerify(PipeProcessClient, "command client required r1 get_value", "-1"); // unchanged
+
+        // test write command
+        startTime = timeServer.GetRelativeTime();
+        SendAndVerify(PipeProcessClient, "command client required r1 function_write 4", "ok"); // trigger write function on client        
+        stopTime = timeServer.GetRelativeTime();
+        CPPUNIT_ASSERT((stopTime - startTime) <= queueingDelay); // make sure execution is fast
+        osaSleep(serverExecutionDelay + blockingDelay);  // time to dequeue and let command execute
+        SendAndVerify(PipeProcessServer, "command server provided p1 get_value", "4"); // set to new value
+        SendAndVerify(PipeProcessClient, "command client required r1 get_value", "-1"); // unchanged
+    }
+
+    for (index = 0; index < 3; index++) {
+        // test void event
+        SendAndVerify(PipeProcessServer, "command server provided p1 event_void", "ok"); // trigger void event on server
+        osaSleep(clientExecutionDelay);
+        SendAndVerify(PipeProcessServer, "command server provided p1 get_value", "4"); // unchanged
+        SendAndVerify(PipeProcessClient, "command client required r1 get_value", "0"); // reset by void event
+
+        // test write event
+        SendAndVerify(PipeProcessServer, "command server provided p1 event_write 10", "ok"); // trigger write event on server
+        osaSleep(clientExecutionDelay);
+        SendAndVerify(PipeProcessServer, "command server provided p1 get_value", "4"); // unchanged
+        SendAndVerify(PipeProcessClient, "command client required r1 get_value", "10"); // set by write event
+    }
 
     StopAllComponents();
 
     /*
-    mtsTestDevice2<_elementType> * client = new mtsTestDevice2<_elementType>;
-    mtsTestDevice3<_elementType> * server = new mtsTestDevice3<_elementType>;
     TestExecution(client, server, 0.0, 0.0);
-    delete client;
-    delete server;
     */
-}
-void mtsCommandAndEventNetworkedTest::TestDeviceDevice_mtsInt(void) {
-    mtsCommandAndEventNetworkedTest::TestDeviceDevice<mtsInt>();
-}
-void mtsCommandAndEventNetworkedTest::TestDeviceDevice_int(void) {
-    mtsCommandAndEventNetworkedTest::TestDeviceDevice<int>();
 }
 
 

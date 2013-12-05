@@ -1,0 +1,119 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnSerializer.h>
+#include <cisstCommon/cmnDeSerializer.h>
+#include <cisstCommon/cmnDataFunctionsArray.h>
+#include <cisstCommon/cmnDataFunctionsVector.h>
+#include <cisstCommon/cmnDataFunctionsString.h>
+#include <vector>
+typedef std::vector<int> StdVectorType;
+
+class cmnDataGeneratorTestA
+{
+public:
+    virtual void PureVirtualA(void) const = 0;
+};
+
+}
+
+class {
+    name cmnDataGeneratorTestB;
+    base-class {
+        type cmnDataGeneratorTestA;
+        visibility public;
+        is-data false;
+    }
+
+    member {
+        name StringA;
+        type std::string;
+        default "DefaultA";
+    }
+
+    inline-header {
+        virtual void PureVirtualB(void) const = 0;
+    }
+}
+
+class {
+    name cmnDataGeneratorTestC;
+
+    base-class {
+        type cmnGenericObject;
+        visibility public;
+        is-data false;
+    }
+
+    base-class {
+        type cmnDataGeneratorTestB;
+        visibility public;
+    }
+
+    inline-header {
+        // to test inheritance using dynamic cast
+        inline void PureVirtualA(void) const {}
+        inline void PureVirtualB(void) const {}
+    }
+
+    member {
+        name StdVector;
+        type StdVectorType;
+        description std vector;
+        visibility public;
+    }
+
+    enum {
+        name ArraySizeType;
+        enum-value {
+            name SIZE;
+            value 3;
+        }
+    }
+
+    member {
+        name CArray;
+        type double[SIZE];
+        visibility public;
+    }
+
+    enum {
+        name Array2DSizeType;
+        enum-value {
+            name ROW;
+            value 3;
+        }
+        enum-value {
+            name COL;
+            value 4;
+        }
+    }
+
+    member {
+        name CArray2D;
+        type size_t[ROW][COL];
+        visibility public;;
+    }
+
+    member {
+        name dummyString;
+        type std::string;
+        default "Make sure the string parser doesn't fail if there is no comma at the end.";
+    }
+
+    inline-header {
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(cmnDataGeneratorTestC);
+}
+
+inline-code {
+    CMN_IMPLEMENT_SERVICES(cmnDataGeneratorTestC);
+}

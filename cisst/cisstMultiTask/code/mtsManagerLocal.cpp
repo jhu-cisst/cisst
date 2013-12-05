@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -1271,7 +1271,7 @@ mtsTaskContinuous *mtsManagerLocal::PopCurrentMainTask(void)
         MainTaskNames.pop();
     }
     if (previousMainTask)
-        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, so main task reverts to " 
+        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, so main task reverts to "
                                   << previousMainTask->GetName() << std::endl;
     else
         CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, no main task remaining" << std::endl;
@@ -1284,7 +1284,7 @@ void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfComman
                                          const std::string & interfaceName,
                                          const std::string & CMN_UNUSED(listenerID))
 {
-    InterfaceProvidedDescription desc;
+    mtsInterfaceProvidedDescription desc;
     if (!GetInterfaceProvidedDescription(componentName, interfaceName, desc)) {
         CMN_LOG_CLASS_INIT_ERROR << "GetNamesOfCommands: failed to get provided interface information: "
                                  << this->ProcessName << ":" << componentName << ":" << interfaceName << std::endl;
@@ -1324,12 +1324,12 @@ void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfComman
     }
 }
 
-void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
+void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string> & namesOfEventGenerators,
                                                 const std::string & componentName,
                                                 const std::string & interfaceName,
                                                 const std::string & CMN_UNUSED(listenerID))
 {
-    InterfaceProvidedDescription desc;
+    mtsInterfaceProvidedDescription desc;
     if (!GetInterfaceProvidedDescription(componentName, interfaceName, desc)) {
         CMN_LOG_CLASS_INIT_ERROR << "GetNamesOfEventGenerators: failed to get provided interface information: "
                                  << this->ProcessName << ":" << componentName << ":" << interfaceName << std::endl;
@@ -1349,12 +1349,12 @@ void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesO
     }
 }
 
-void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
+void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string> & namesOfFunctions,
                                           const std::string & componentName,
                                           const std::string & requiredInterfaceName,
                                           const std::string & CMN_UNUSED(listenerID))
 {
-    InterfaceRequiredDescription desc;
+    mtsInterfaceRequiredDescription desc;
     if (!GetInterfaceRequiredDescription(componentName, requiredInterfaceName, desc)) {
         return;
     }
@@ -1392,12 +1392,12 @@ void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string>& namesOfFunct
     }
 }
 
-void mtsManagerLocal::GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
+void mtsManagerLocal::GetNamesOfEventHandlers(std::vector<std::string> & namesOfEventHandlers,
                                               const std::string & componentName,
                                               const std::string & requiredInterfaceName,
                                               const std::string & CMN_UNUSED(listenerID))
 {
-    InterfaceRequiredDescription desc;
+    mtsInterfaceRequiredDescription desc;
     if (!GetInterfaceRequiredDescription(componentName, requiredInterfaceName, desc)) {
         return;
     }
@@ -2450,7 +2450,8 @@ bool mtsManagerLocal::Disconnect(
 
 bool mtsManagerLocal::GetInterfaceProvidedDescription(
     const std::string & serverComponentName, const std::string & interfaceName,
-    InterfaceProvidedDescription & interfaceProvidedDescription, const std::string & CMN_UNUSED(listenerID))
+    mtsInterfaceProvidedDescription & interfaceProvidedDescription,
+    const std::string & CMN_UNUSED(listenerID))
 {
     // Get component specified
     mtsComponent * component = GetComponent(serverComponentName);
@@ -2482,7 +2483,8 @@ bool mtsManagerLocal::GetInterfaceProvidedDescription(
 
 bool mtsManagerLocal::GetInterfaceRequiredDescription(
     const std::string & componentName, const std::string & requiredInterfaceName,
-    InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & CMN_UNUSED(listenerID))
+    mtsInterfaceRequiredDescription & requiredInterfaceDescription,
+    const std::string & CMN_UNUSED(listenerID))
 {
     // Get the component instance specified
     mtsComponent * component = GetComponent(componentName);
@@ -2539,10 +2541,12 @@ bool mtsManagerLocal::RemoveComponentProxy(const std::string & componentProxyNam
 bool mtsManagerLocal::CreateInterfaceProvidedProxy(
 #if CISST_MTS_HAS_ICE
     const std::string & serverComponentProxyName,
-    const InterfaceProvidedDescription & interfaceProvidedDescription, const std::string & CMN_UNUSED(listenerID))
+    const mtsInterfaceProvidedDescription & interfaceProvidedDescription,
+    const std::string & CMN_UNUSED(listenerID))
 #else
     const std::string & CMN_UNUSED(serverComponentProxyName),
-    const InterfaceProvidedDescription & CMN_UNUSED(interfaceProvidedDescription), const std::string & CMN_UNUSED(listenerID))
+    const mtsInterfaceProvidedDescription & CMN_UNUSED(interfaceProvidedDescription),
+    const std::string & CMN_UNUSED(listenerID))
 #endif
 {
 #if CISST_MTS_HAS_ICE
@@ -2594,9 +2598,13 @@ bool mtsManagerLocal::CreateInterfaceProvidedProxy(
 
 bool mtsManagerLocal::CreateInterfaceRequiredProxy(
 #if CISST_MTS_HAS_ICE
-    const std::string & clientComponentProxyName, const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & CMN_UNUSED(listenerID))
+    const std::string & clientComponentProxyName,
+    const mtsInterfaceRequiredDescription & requiredInterfaceDescription,
+    const std::string & CMN_UNUSED(listenerID))
 #else
-    const std::string & CMN_UNUSED(clientComponentProxyName), const InterfaceRequiredDescription & CMN_UNUSED(requiredInterfaceDescription), const std::string & CMN_UNUSED(listenerID))
+    const std::string & CMN_UNUSED(clientComponentProxyName),
+    const mtsInterfaceRequiredDescription & CMN_UNUSED(requiredInterfaceDescription),
+    const std::string & CMN_UNUSED(listenerID))
 #endif
 {
 #if CISST_MTS_HAS_ICE

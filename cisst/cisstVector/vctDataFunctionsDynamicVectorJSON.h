@@ -29,56 +29,43 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDynamicVectorBase.h>
 
 #if CISST_HAS_JSON
-template <typename _elementType, typename _vectorOwnerType>
-void cmnDataToJSON(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector,
-                   Json::Value & jsonValue) {
-    typedef vctDynamicConstVectorBase<_vectorOwnerType, _elementType> VectorType;
-    typedef typename VectorType::const_iterator const_iterator;
-    const const_iterator end = vector.end();
-    const_iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataToJSON(*iter, jsonValue[index]);
-    }
-}
+template <class _elementType>
+class cmnDataJSON<vctDynamicVector<_elementType> >
+{
+public:
+    typedef vctDynamicVector<_elementType> DataType;
 
-template <typename _elementType>
-void cmnDataFromJSON(vctDynamicVector<_elementType> & vector,
-                     const Json::Value & jsonValue) throw (std::runtime_error) {
-    // get the vector size from JSON and resize
-    vector.SetSize(jsonValue.size());
-    typedef vctDynamicVector<_elementType> VectorType;
-    typedef typename VectorType::iterator iterator;
-    const iterator end = vector.end();
-    iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataFromJSON(*iter, jsonValue[index]);
+    static void SerializeText(const DataType & vector,
+                              Json::Value & jsonValue) {
+        typedef typename DataType::const_iterator const_iterator;
+        const const_iterator end = vector.end();
+        const_iterator iter;
+        int index = 0;
+        for (iter = vector.begin();
+             iter != end;
+             ++index, ++iter) {
+            cmnDataJSON<_elementType>::SerializeText(*iter, jsonValue[index]);
+        }
     }
-}
 
-template <typename _elementType>
-void cmnDataFromJSON(vctDynamicVectorRef<_elementType> vector,
-                     const Json::Value & jsonValue) throw (std::runtime_error) {
-    // make sure both vectors have the same size
-    if (vector.size() != jsonValue.size()) {
-        cmnThrow("cmnDataFromJSON: vector sizes don't match");
+    static void DeSerializeText(DataType & vector,
+                                const Json::Value & jsonValue)
+        throw (std::runtime_error)
+    {
+        // get the vector size from JSON and resize
+        vector.SetSize(jsonValue.size());
+        typedef typename DataType::iterator iterator;
+        const iterator end = vector.end();
+        iterator iter;
+        int index = 0;
+        for (iter = vector.begin();
+             iter != end;
+             ++index, ++iter) {
+            cmnDataJSON<_elementType>::DeSerializeText(*iter, jsonValue[index]);
+        }
     }
-    typedef vctDynamicVectorRef<_elementType> VectorType;
-    typedef typename VectorType::iterator iterator;
-    const iterator end = vector.end();
-    iterator iter;
-    int index = 0;
-    for (iter = vector.begin();
-         iter != end;
-         ++index, ++iter) {
-        cmnDataFromJSON(*iter, jsonValue[index]);
-    }
-}
+};
+
 #endif // CISST_HAS_JSON
 
 #endif // _vctDataFunctionsDynamicVectorJSON_h

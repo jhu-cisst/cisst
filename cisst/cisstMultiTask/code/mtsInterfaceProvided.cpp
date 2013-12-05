@@ -209,7 +209,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
              iterWriteReturn++) {
             commandQueuedWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(iterWriteReturn->second);
             if (commandQueuedWriteReturn) {
-                commandWriteReturn = commandQueuedWriteReturn->Clone(this->MailBox); // no argument queue size, since this is a blocking command there can only be one call 
+                commandWriteReturn = commandQueuedWriteReturn->Clone(this->MailBox); // no argument queue size, since this is a blocking command there can only be one call
                 CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: cloned queued write return command \"" << iterWriteReturn->first
                                            << "\" for \"" << this->GetFullName() << "\"" << std::endl;
             } else {
@@ -1296,7 +1296,7 @@ void mtsInterfaceProvided::RemoveObserverList(const mtsEventHandlerList & argin,
     }
 }
 
-bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & providedInterfaceDescription)
+bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription)
 {
     bool success = true;
 
@@ -1310,7 +1310,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
 
     // Extract void commands
     mtsCommandVoid * voidCommand;
-    CommandVoidElement elementCommandVoid;
+    mtsCommandVoidDescription elementCommandVoid;
     const std::vector<std::string> namesOfVoidCommand = GetNamesOfCommandsVoid();
     for (size_t i = 0; i < namesOfVoidCommand.size(); ++i) {
         voidCommand = CommandsVoid.GetItem(namesOfVoidCommand[i]);
@@ -1326,7 +1326,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
 
     // Extract write commands
     mtsCommandWriteBase * writeCommand;
-    CommandWriteElement elementCommandWrite;
+    mtsCommandWriteDescription elementCommandWrite;
     const std::vector<std::string> namesOfWriteCommand = GetNamesOfCommandsWrite();
     for (size_t i = 0; i < namesOfWriteCommand.size(); ++i) {
         writeCommand = CommandsWrite.GetItem(namesOfWriteCommand[i]);
@@ -1347,7 +1347,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
 
     // Extract read commands
     mtsCommandRead * readCommand;
-    CommandReadElement elementCommandRead;
+    mtsCommandReadDescription elementCommandRead;
     const std::vector<std::string> namesOfReadCommand = GetNamesOfCommandsRead();
     for (size_t i = 0; i < namesOfReadCommand.size(); ++i) {
         readCommand = CommandsRead.GetItem(namesOfReadCommand[i]);
@@ -1368,7 +1368,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
 
     // Extract qualified read commands
     mtsCommandQualifiedRead * qualifiedReadCommand;
-    CommandQualifiedReadElement elementCommandQualifiedRead;
+    mtsCommandQualifiedReadDescription elementCommandQualifiedRead;
     const std::vector<std::string> namesOfQualifiedReadCommand = GetNamesOfCommandsQualifiedRead();
     for (size_t i = 0; i < namesOfQualifiedReadCommand.size(); ++i) {
         qualifiedReadCommand = CommandsQualifiedRead.GetItem(namesOfQualifiedReadCommand[i]);
@@ -1394,7 +1394,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
 
     // Extract void return commands
     mtsCommandVoidReturn * voidReturnCommand;
-    CommandVoidReturnElement elementCommandVoidReturn;
+    mtsCommandVoidReturnDescription elementCommandVoidReturn;
     const std::vector<std::string> namesOfVoidReturnCommand = GetNamesOfCommandsVoidReturn();
     for (size_t i = 0; i < namesOfVoidReturnCommand.size(); ++i) {
         voidReturnCommand = CommandsVoidReturn.GetItem(namesOfVoidReturnCommand[i]);
@@ -1415,7 +1415,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
 
     // Extract write return commands
     mtsCommandWriteReturn * writeReturnCommand;
-    CommandWriteReturnElement elementCommandWriteReturn;
+    mtsCommandWriteReturnDescription elementCommandWriteReturn;
     const std::vector<std::string> namesOfWriteReturnCommand = GetNamesOfCommandsWriteReturn();
     for (size_t i = 0; i < namesOfWriteReturnCommand.size(); ++i) {
         writeReturnCommand = CommandsWriteReturn.GetItem(namesOfWriteReturnCommand[i]);
@@ -1441,7 +1441,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
 
     // Extract void events
     mtsMulticastCommandVoid * voidEvent;
-    EventVoidElement elementEventVoid;
+    mtsEventVoidDescription elementEventVoid;
     const std::vector<std::string> namesOfVoidEvent = GetNamesOfEventsVoid();
     for (size_t i = 0; i < namesOfVoidEvent.size(); ++i) {
         voidEvent = EventVoidGenerators.GetItem(namesOfVoidEvent[i]);
@@ -1456,7 +1456,7 @@ bool mtsInterfaceProvided::GetDescription(InterfaceProvidedDescription & provide
 
     // Extract write events
     mtsMulticastCommandWriteBase * writeEvent;
-    EventWriteElement elementEventWrite;
+    mtsEventWriteDescription elementEventWrite;
     const std::vector<std::string> namesOfWriteEvent = GetNamesOfEventsWrite();
     for (size_t i = 0; i < namesOfWriteEvent.size(); ++i) {
         writeEvent = EventWriteGenerators.GetItem(namesOfWriteEvent[i]);

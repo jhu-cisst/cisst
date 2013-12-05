@@ -108,7 +108,7 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
     mtsSocketProxyClient(const std::string &name, const std::string &ip, short port);
 
     mtsSocketProxyClient(const mtsSocketProxyClientConstructorArg &arg);
-    
+
 
     /*! Destructor */
     virtual ~mtsSocketProxyClient();

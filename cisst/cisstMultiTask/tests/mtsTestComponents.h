@@ -62,11 +62,48 @@ const double StateTransitionMaximumDelay = 5.0 * cmn_s;
    artificially slow and test blocking commands.
 */
 
+
+//-----------------------------------------------------------------------------
+//  Base class for all test components
+//-----------------------------------------------------------------------------
+class mtsTestInterfaceRequiredBase
+{
+public:
+    mtsFunctionVoid FunctionVoid;
+    mtsFunctionVoidReturn FunctionVoidReturn;
+    mtsFunctionWrite FunctionWrite;
+    mtsFunctionWriteReturn FunctionWriteReturn;
+    mtsFunctionWrite FunctionFilteredWrite;
+    mtsFunctionRead FunctionRead;
+    mtsFunctionQualifiedRead FunctionQualifiedRead;
+    mtsFunctionRead FunctionStateTableRead;
+    mtsFunctionVoid FunctionStateTableAdvance;
+
+    virtual int GetValue(void) const = 0; 
+};
+
+class mtsTestInterfaceProvidedBase
+{
+public:
+    mtsFunctionVoid EventVoid;
+    mtsFunctionWrite EventWrite;
+
+    virtual int GetValue(void) const = 0; 
+};
+
+class mtsTestComponent
+{
+public:
+    std::map<std::string, mtsTestInterfaceProvidedBase *> TestInterfacesProvided;
+    std::map<std::string, mtsTestInterfaceRequiredBase *> TestInterfacesRequired;
+};
+
+
 //-----------------------------------------------------------------------------
 //  Provided Interface and Required Interface Definition
 //-----------------------------------------------------------------------------
 template <class _elementType>
-class mtsTestInterfaceProvided
+class mtsTestInterfaceProvided: public mtsTestInterfaceProvidedBase
 {
 public:
     typedef _elementType value_type; // STL convention
@@ -78,8 +115,6 @@ private:
 
 public:
     mtsStateTable * StateTable;
-    mtsFunctionVoid EventVoid;
-    mtsFunctionWrite EventWrite;
 
     enum {Argument1PrototypeDefault = 100};
     enum {Argument2PrototypeDefault = 200};
@@ -173,7 +208,7 @@ public:
 
 
 template <class _elementType>
-class mtsTestInterfaceRequired
+class mtsTestInterfaceRequired: public mtsTestInterfaceRequiredBase
 {
 public:
     typedef _elementType value_type; // STL convention
@@ -182,16 +217,6 @@ private:
     value_type Value;
 
 public:
-    mtsFunctionVoid FunctionVoid;
-    mtsFunctionVoidReturn FunctionVoidReturn;
-    mtsFunctionWrite FunctionWrite;
-    mtsFunctionWriteReturn FunctionWriteReturn;
-    mtsFunctionWrite FunctionFilteredWrite;
-    mtsFunctionRead FunctionRead;
-    mtsFunctionQualifiedRead FunctionQualifiedRead;
-    mtsFunctionRead FunctionStateTableRead;
-    mtsFunctionVoid FunctionStateTableAdvance;
-
     mtsTestInterfaceRequired() {
         Value = -1;   // initial value = -1;
     }
@@ -229,7 +254,7 @@ public:
 //  - required interface: r1, r2
 //-----------------------------------------------------------------------------
 template <class _elementType>
-class mtsTestPeriodic1: public mtsTaskPeriodic
+class mtsTestPeriodic1: public mtsTaskPeriodic, public mtsTestComponent
 {
 public:
     typedef _elementType value_type;
@@ -270,7 +295,7 @@ public:
 };
 
 template <class _elementType>
-class CISST_EXPORT mtsTestDevice1: public mtsComponent
+class CISST_EXPORT mtsTestDevice1: public mtsComponent, public mtsTestComponent
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
@@ -289,6 +314,7 @@ public:
         provided = AddInterfaceProvided("p1");
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
+            TestInterfacesProvided["p1"] = &InterfaceProvided1;
             AddStateTable(InterfaceProvided1.StateTable, true);
         }
 
@@ -296,10 +322,12 @@ public:
         required = AddInterfaceRequired("r1", MTS_OPTIONAL);
         if (required) {
             InterfaceRequired1.PopulateExistingInterface(required);
+            TestInterfacesRequired["r1"] = &InterfaceRequired1;
         }
         required = AddInterfaceRequired("r2", MTS_OPTIONAL);
         if (required) {
             InterfaceRequired2.PopulateExistingInterface(required);
+            TestInterfacesRequired["r2"] = &InterfaceRequired2;
         }
     }
 
@@ -318,7 +346,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestDevice1_mtsInt);
 //  - required interface: r1
 //-----------------------------------------------------------------------------
 template <class _elementType>
-class mtsTestContinuous1: public mtsTaskContinuous
+class mtsTestContinuous1: public mtsTaskContinuous, public mtsTestComponent
 {
 public:
     typedef _elementType value_type;
@@ -363,7 +391,7 @@ public:
 
 
 template <class _elementType>
-class mtsTestDevice2: public mtsComponent
+class mtsTestDevice2: public mtsComponent, public mtsTestComponent
 {
 public:
     typedef _elementType value_type;
@@ -406,7 +434,7 @@ public:
 //  - required interface: r1
 //-----------------------------------------------------------------------------
 template <class _elementType>
-class mtsTestFromCallback1: public mtsTaskFromCallback
+class mtsTestFromCallback1: public mtsTaskFromCallback, public mtsTestComponent
 {
 public:
     typedef _elementType value_type;
@@ -482,7 +510,7 @@ public:
 
 
 template <class _elementType>
-class mtsTestDevice3: public mtsComponent
+class mtsTestDevice3: public mtsComponent, public mtsTestComponent
 {
 public:
     typedef _elementType value_type;
@@ -515,7 +543,7 @@ public:
 
 
 template <class _elementType>
-class mtsTestFromSignal1: public mtsTaskFromSignal
+class mtsTestFromSignal1: public mtsTaskFromSignal, public mtsTestComponent
 {
 public:
     typedef _elementType value_type;

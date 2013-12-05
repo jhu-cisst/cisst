@@ -432,7 +432,7 @@ int mtsManagerGlobal::GetNumberOfInterfaces(const std::string & processName, con
         return -1;
     }
 
-    int numberOfInterfaceProvided = 0, numberOfInterfaceRequired = 0;
+    size_t numberOfInterfaceProvided = 0, numberOfInterfaceRequired = 0;
     InterfaceMapType * interfaceMap = ProcessMap.GetItem(processName)->GetItem(componentName);
     if (!interfaceMap) {
         CMN_LOG_CLASS_RUN_WARNING << "GetNumberOfInterfaces: no interface map found for "
@@ -1372,7 +1372,7 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
         // Create required interface proxy
         if (!foundRequiredInterfaceProxy) {
             // Extract required interface information from the client process
-            InterfaceRequiredDescription requiredInterfaceDescription;
+            mtsInterfaceRequiredDescription requiredInterfaceDescription;
 
             if (LocalManager) {
                 if (LocalManager->GetProcessName() == clientProcessName) {
@@ -1436,7 +1436,7 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
             // MJ: could minimize network traffic if GCM caches provided interface
             // description information
             // Extract provided interface information from the server process
-            InterfaceProvidedDescription providedInterfaceDescription;
+            mtsInterfaceProvidedDescription providedInterfaceDescription;
             if (LocalManager) {
                 if (LocalManager->GetProcessName() == serverProcessName) {
                     if (!LocalManager->GetInterfaceProvidedDescription(

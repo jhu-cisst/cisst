@@ -31,11 +31,19 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cmnPortabilityTestCMake.h.in
 # Add the path for the includes
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
+# create data type using the data generator
+cisst_data_generator (cisstCommonTests
+                      ${CMAKE_CURRENT_BINARY_DIR}
+                      ""
+                      cmnDataGeneratorTestTypes.cdg)
+
 # all source files
 set (SOURCE_FILES
      cmnClassRegisterTest.cpp
      cmnCommandLineOptionsTest.cpp
      cmnDataFunctionsTest.cpp
+     cmnDataFunctionsVectorTest.cpp
+     cmnDataGeneratorTest.cpp
      cmnLogLoDTest.cpp
      cmnObjectRegisterTest.cpp
      cmnPathTest.cpp
@@ -49,6 +57,8 @@ set (HEADER_FILES
      cmnClassRegisterTest.h
      cmnCommandLineOptionsTest.h
      cmnDataFunctionsTest.h
+     cmnDataFunctionsVectorTest.h
+     cmnDataGeneratorTest.h
      cmnLogLoDTest.h
      cmnObjectRegisterTest.h
      cmnPathTest.h
@@ -79,7 +89,7 @@ if (CISST_HAS_JSON)
 endif (CISST_HAS_JSON)
 
 # Add executable for C++ tests
-add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES})
+add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES} ${cisstCommonTests_CISST_DG_SRCS})
 set_property (TARGET cisstCommonTests PROPERTY FOLDER "cisstCommon/tests")
 cisst_target_link_libraries (cisstCommonTests cisstCommon cisstTestsDriver)
 

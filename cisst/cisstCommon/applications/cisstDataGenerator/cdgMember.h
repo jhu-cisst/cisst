@@ -33,16 +33,23 @@ class cdgMember: public cdgScope
     friend class cdgClass;
 
     bool UsesClassTypedef;
-
     std::string ClassName;
+
+    // for C array types, e.g.  double data[10]
+    bool IsCArray;
+    std::string CArraySize; // [10]
+    std::string CArrayType; // double
+    size_t CArrayDimension;
 
 public:
     cdgMember(size_t lineNumber);
     cdgScope::Type GetScope(void) const;
     cdgScope * Create(size_t lineNumber) const;
-    bool Validate(void);
+    bool Validate(std::string & errorMessage);
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
+
+    std::string MemberName; // name used internally
 
 private:
     cdgMember(void); // make sure constructor with line number is always used.

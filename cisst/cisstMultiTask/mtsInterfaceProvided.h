@@ -592,7 +592,7 @@ protected: // PK TEMP
                                         const std::string & commandName);
 
     /*! types and containers to store interfaces cloned for thread safety */
-    typedef std::pair<unsigned int, ThisType *> InterfaceProvidedCreatedPairType;
+    typedef std::pair<size_t, ThisType *> InterfaceProvidedCreatedPairType;
     typedef std::list<InterfaceProvidedCreatedPairType> InterfaceProvidedCreatedListType;
     InterfaceProvidedCreatedListType InterfacesProvidedCreated;
 
@@ -708,7 +708,7 @@ protected:
     bool AddSystemEvents(void);
 
     /*! Get description of this interface (with serialized argument information) */
-    bool GetDescription(InterfaceProvidedDescription & providedInterfaceDescription);
+    bool GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription);
 };
 
 

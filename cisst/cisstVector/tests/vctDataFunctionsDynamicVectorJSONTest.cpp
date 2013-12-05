@@ -31,30 +31,15 @@ http://www.cisst.org/cisst/license.txt.
 
 void vctDataFunctionsDynamicVectorJSONTest::TestVector(void)
 {
-    vctDynamicVector<double> source, destination;
+    typedef vctDynamicVector<double> DataType;
+    DataType source, destination;
     source.SetSize(10);
     destination.SetSize(10);
     vctRandom(source, -1.0, 1.0);
     Json::Value jsonValue;
-    cmnDataToJSON(source, jsonValue["object"]);
-    cmnDataFromJSON(destination, jsonValue["object"]);
+    cmnDataJSON<DataType>::SerializeText(source, jsonValue["object"]);
+    cmnDataJSON<DataType>::DeSerializeText(destination, jsonValue["object"]);
     CPPUNIT_ASSERT(source.Equal(destination));
-}
-
-void vctDataFunctionsDynamicVectorJSONTest::TestVectorRef(void)
-{
-    vctDynamicMatrix<int> source, destination;
-    source.SetSize(10, 10);
-    destination.SetSize(10, 10);
-    source.SetAll(0);
-    destination.SetAll(0);
-    vctRandom(source, -10, 10);
-    Json::Value jsonValue;
-    cmnDataToJSON(source.Row(1), jsonValue["object"]);
-    cmnDataFromJSON(destination.Column(1), jsonValue["object"]);
-    CPPUNIT_ASSERT(source.Row(1).Equal(destination.Column(1)));
-    destination.Column(1).SetAll(0);
-    CPPUNIT_ASSERT(destination.Equal(0));
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctDataFunctionsDynamicVectorJSONTest);

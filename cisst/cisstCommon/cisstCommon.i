@@ -53,7 +53,7 @@ http://www.cisst.org/cisst/license.txt.
 // Generate parameter documentation for IRE
 %feature("autodoc", "1");
 
-%rename (__str__) *::ToString;
+%rename (__str__) *::HumanReadable;
 %ignore *::ToStream;
 %ignore *::ToStreamRaw;
 %ignore *::FromStreamRaw;

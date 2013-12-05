@@ -152,16 +152,16 @@ public:
 
     /*! Data structure converters */
     static void ConvertInterfaceProvidedDescription(
-        const ::mtsManagerProxy::InterfaceProvidedDescription & src, InterfaceProvidedDescription & dest);
+        const ::mtsManagerProxy::InterfaceProvidedDescription & src, mtsInterfaceProvidedDescription & dest);
 
     static void ConvertInterfaceRequiredDescription(
-        const ::mtsManagerProxy::InterfaceRequiredDescription & src, InterfaceRequiredDescription & dest);
+        const ::mtsManagerProxy::InterfaceRequiredDescription & src, mtsInterfaceRequiredDescription & dest);
 
     static void ConstructInterfaceProvidedDescriptionFrom(
-        const InterfaceProvidedDescription & src, ::mtsManagerProxy::InterfaceProvidedDescription & dest);
+        const mtsInterfaceProvidedDescription & src, ::mtsManagerProxy::InterfaceProvidedDescription & dest);
 
     static void ConstructInterfaceRequiredDescriptionFrom(
-        const InterfaceRequiredDescription & src, ::mtsManagerProxy::InterfaceRequiredDescription & dest);
+        const mtsInterfaceRequiredDescription & src, ::mtsManagerProxy::InterfaceRequiredDescription & dest);
 
     //-------------------------------------------------------------------------
     //  Implementation of mtsManagerLocalInterface
@@ -174,10 +174,10 @@ public:
     bool RemoveComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
 
     bool CreateInterfaceProvidedProxy(const std::string & serverComponentProxyName,
-        const InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        const mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
     bool CreateInterfaceRequiredProxy(const std::string & clientComponentProxyName,
-        const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        const mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
     bool RemoveInterfaceProvidedProxy(
         const std::string & componentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "");
@@ -193,10 +193,10 @@ public:
     //  Getters
     bool GetInterfaceProvidedDescription(
         const std::string & serverComponentName, const std::string & providedInterfaceName,
-        InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
     bool GetInterfaceRequiredDescription(const std::string & componentName, const std::string & requiredInterfaceName,
-        InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
     const std::string GetProcessName(const std::string & listenerID = "") const;
 

@@ -46,10 +46,8 @@ set (HEADER_FILES
      vctDeterminant.h
 
      vctDataFunctions.h
-     vctDataFunctionsVector.h
      vctDataFunctionsFixedSizeVector.h
      vctDataFunctionsDynamicVector.h
-     vctDataFunctionsMatrix.h
      vctDataFunctionsFixedSizeMatrix.h
      vctDataFunctionsDynamicMatrix.h
      vctDataFunctionsTransformations.h
@@ -172,7 +170,7 @@ if (CISST_HAS_JSON)
        vctDataFunctionsFixedSizeMatrixJSON.h
        vctDataFunctionsDynamicVectorJSON.h
        vctDataFunctionsDynamicMatrixJSON.h
-       vctDataFunctionsTransformations.h)
+       vctDataFunctionsTransformationsJSON.h)
 endif (CISST_HAS_JSON)
 
 cisst_add_library (

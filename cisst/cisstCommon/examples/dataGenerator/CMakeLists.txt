@@ -21,7 +21,7 @@ if (cisst_FOUND_AS_REQUIRED)
   cisst_data_generator (cmnExDataGenerator
                         ${CMAKE_CURRENT_BINARY_DIR}
                         ""
-                        demoData.txt)
+                        demoData.cdg)
 
   # to compile cisst generated code, need to find header file
   include_directories (${CMAKE_CURRENT_BINARY_DIR})

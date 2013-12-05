@@ -89,7 +89,7 @@ svlVidCapSrcV4L2::~svlVidCapSrcV4L2()
 
 svlFilterSourceVideoCapture::PlatformType svlVidCapSrcV4L2::GetPlatformType()
 {
-    return svlFilterSourceVideoCapture::LinVideo4Linux2;
+    return svlFilterSourceVideoCaptureTypes::LinVideo4Linux2;
 }
 
 int svlVidCapSrcV4L2::SetStreamCount(unsigned int numofstreams)
@@ -188,7 +188,7 @@ int svlVidCapSrcV4L2::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **de
                     (devprops.capabilities & V4L2_CAP_READWRITE) != 0) {
 
                     // platform
-                    tempinfo[counter].platform = svlFilterSourceVideoCapture::LinVideo4Linux2;
+                    tempinfo[counter].platform = svlFilterSourceVideoCaptureTypes::LinVideo4Linux2;
 
                     // id
                     tempinfo[counter].ID = i;
@@ -321,7 +321,7 @@ int svlVidCapSrcV4L2::Open()
         format.fmt.pix.height = Format[i]->height;
         format.fmt.pix.pixelformat = svlPixelType_to_V4L2_color(Format[i]->colorspace);
 
-        if (Format[i]->colorspace == svlFilterSourceVideoCapture::PixelYUV422 && Format[i]->yuyv_order) {
+        if (Format[i]->colorspace == svlFilterSourceVideoCaptureTypes::PixelYUV422 && Format[i]->yuyv_order) {
             format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
             format.fmt.pix.field = V4L2_FIELD_INTERLACED;
         }
@@ -744,7 +744,7 @@ int svlVidCapSrcV4L2::GetFormatList(unsigned int deviceid, svlFilterSourceVideoC
             /* Increment the index */
             format.index++;
 
-            if (V4L2_color_to_svlPixelType(format.pixelformat) != svlFilterSourceVideoCapture::PixelUnknown) {
+            if (V4L2_color_to_svlPixelType(format.pixelformat) != svlFilterSourceVideoCaptureTypes::PixelUnknown) {
                 formats.push_back(new svlFilterSourceVideoCapture::ImageFormat);
                 memset(formats.back(),0,sizeof(svlFilterSourceVideoCapture::ImageFormat));
                 formats.back()->width = current_format.fmt.pix.width;
@@ -811,7 +811,7 @@ int svlVidCapSrcV4L2::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format
 
     format.width = 720;
     format.height = 480;
-    format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
+    format.colorspace = svlFilterSourceVideoCaptureTypes::PixelRGB8;
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = 30.0;
@@ -1263,11 +1263,11 @@ int svlVidCapSrcV4L2::V4L2_color_to_internal_color(int color_in){
 
 int svlVidCapSrcV4L2::svlPixelType_to_V4L2_color(svlFilterSourceVideoCapture::PixelType color_in)
 {
-    if (color_in == svlFilterSourceVideoCapture::PixelRGB8) {
+    if (color_in == svlFilterSourceVideoCaptureTypes::PixelRGB8) {
         // Using BGR24
         return V4L2_PIX_FMT_BGR24;
     }
-    else if (color_in == svlFilterSourceVideoCapture::PixelYUV422) {
+    else if (color_in == svlFilterSourceVideoCaptureTypes::PixelYUV422) {
         // Using UYVY
         return V4L2_PIX_FMT_UYVY;
     }
@@ -1282,19 +1282,19 @@ svlFilterSourceVideoCapture::PixelType svlVidCapSrcV4L2::V4L2_color_to_svlPixelT
 {
     if (color_in == V4L2_PIX_FMT_BGR24) {
         // Using BGR24
-        return svlFilterSourceVideoCapture::PixelRGB8;
+        return svlFilterSourceVideoCaptureTypes::PixelRGB8;
     }
     else if (color_in == V4L2_PIX_FMT_UYVY) {
         // Using UYVY
-        return svlFilterSourceVideoCapture::PixelYUV422;
+        return svlFilterSourceVideoCaptureTypes::PixelYUV422;
     }
     else if (color_in == V4L2_PIX_FMT_YUYV) {
         // Using UYVY
-        return svlFilterSourceVideoCapture::PixelYUV422;
+        return svlFilterSourceVideoCaptureTypes::PixelYUV422;
     }
     else {
         // Unsupported format
-        return svlFilterSourceVideoCapture::PixelUnknown;
+        return svlFilterSourceVideoCaptureTypes::PixelUnknown;
     }
 
 }

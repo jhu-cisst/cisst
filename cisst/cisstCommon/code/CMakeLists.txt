@@ -21,6 +21,8 @@ set (SOURCE_FILES
      cmnClassServices.cpp
      cmnCommandLineOptions.cpp
      cmnDataFunctions.cpp
+     cmnDataFunctionsString.cpp
+     cmnDataFormat.cpp
      cmnDeSerializer.cpp
      cmnGenericObject.cpp
      cmnGetChar.cpp
@@ -50,6 +52,14 @@ set (HEADER_FILES
      cmnCommandLineOptions.h
      cmnConstants.h
      cmnDataFunctions.h
+     cmnDataFunctionsEnumMacros.h
+     cmnDataFunctionsMacros.h
+     cmnDataFunctionsString.h
+     cmnDataFunctionsVector.h
+     cmnDataFunctionsArray.h
+     cmnDataFunctionsVectorHelpers.h
+     cmnDataFunctionsMatrixHelpers.h
+     cmnDataFormat.h
      cmnDeSerializer.h
      cmnExport.h
      cmnExportMacros.h

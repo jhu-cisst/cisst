@@ -48,6 +48,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterSourceVideoCapture::Config class ***/
 /*************************************************/
 
+#if 0
 svlFilterSourceVideoCapture::Config::Config() :
     Channels(0)
 {
@@ -82,7 +83,7 @@ void svlFilterSourceVideoCapture::Config::SetChannels(const int channels)
         memset(&(Trigger[i]),    0, sizeof(svlFilterSourceVideoCapture::ExternalTrigger));
     }
 }
-
+#endif
 
 /*******************************************/
 /*** svlFilterSourceVideoCapture class *****/
@@ -91,12 +92,8 @@ void svlFilterSourceVideoCapture::Config::SetChannels(const int channels)
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSourceVideoCapture, svlFilterSourceBase)
 CMN_IMPLEMENT_SERVICES(svlVidCapSrcBase)
 
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Config)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_DeviceList)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_FormatList)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Format)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCaptureImageProperties)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Trigger)
 
 svlFilterSourceVideoCapture::svlFilterSourceVideoCapture() :
     svlFilterSourceBase(),
@@ -107,7 +104,7 @@ svlFilterSourceVideoCapture::svlFilterSourceVideoCapture() :
     FormatListSize(0)
 {
     CreateInterfaces();
-    
+
     AddOutput("output", true);
     SetAutomaticOutputType(false);
 
@@ -123,7 +120,7 @@ svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(unsigned int channelcou
     FormatListSize(0)
 {
     CreateInterfaces();
-    
+
     AddOutput("output", true);
     SetAutomaticOutputType(false);
 
@@ -219,7 +216,7 @@ int svlFilterSourceVideoCapture::EnumerateDevices()
         if (go == 0) {
 #if CISST_SVL_HAS_MIL
             // MIL device object is a singleton, cannot be created dynamically
-            if (APIPlatforms[j] == MatroxImaging) {
+			if (APIPlatforms[j] == svlFilterSourceVideoCaptureTypes::MatroxImaging) {
                 go = svlVidCapSrcMIL::GetInstance();
             }
 #endif // CISST_SVL_HAS_MIL
@@ -361,7 +358,7 @@ int svlFilterSourceVideoCapture::Initialize(svlSample* &syncOutput)
     for (i = 0; i < NumberOfChannels; i ++) {
         platform = DeviceObj[API[i]]->GetPlatformType();
 
-        if (platform == WinDirectShow) {
+        if (platform == svlFilterSourceVideoCaptureTypes::WinDirectShow) {
 #if CISST_SVL_HAS_DIRECTSHOW
             // DirectShow does not use the Format structure.
             // Instead, it has its own custom configuration format.
@@ -370,8 +367,8 @@ int svlFilterSourceVideoCapture::Initialize(svlSample* &syncOutput)
             }
 #endif // CISST_SVL_HAS_DIRECTSHOW
         }
-#if CISST_SVL_HAS_MIL 
-        else if (platform == MatroxImaging) {
+#if CISST_SVL_HAS_MIL
+        else if (platform == svlFilterSourceVideoCaptureTypes::MatroxImaging) {
             // Check if Matrox device supports capture
             if (dynamic_cast<svlVidCapSrcMIL*>(DeviceObj[API[i]])->IsCaptureSupported(APIDeviceID[i], InputID[i]) == false) {
                 ret = SVL_VCS_UNABLE_TO_OPEN;
@@ -401,7 +398,7 @@ int svlFilterSourceVideoCapture::Initialize(svlSample* &syncOutput)
     for (i = 0; i < NumberOfChannels; i ++) {
         platform = DeviceObj[API[i]]->GetPlatformType();
 
-        if (platform == WinDirectShow) {
+        if (platform == svlFilterSourceVideoCaptureTypes::WinDirectShow) {
 #if CISST_SVL_HAS_DIRECTSHOW
             // DirectShow does not use the Properties structure.
             // Instead, it encodes image preperties into the custom
@@ -468,7 +465,7 @@ int svlFilterSourceVideoCapture::Release()
 #if CISST_SVL_HAS_MIL
         // MIL device object is a singleton, should not be deleted
         if (DeviceObj[i] &&
-            DeviceObj[i]->GetPlatformType() == MatroxImaging) {
+            DeviceObj[i]->GetPlatformType() == svlFilterSourceVideoCaptureTypes::MatroxImaging) {
             dynamic_cast<svlVidCapSrcMIL*>(DeviceObj[i])->Release();
             continue;
         }
@@ -578,7 +575,7 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
             if (DeviceGenObj[j] == 0) {
 #if CISST_SVL_HAS_MIL
                 // MIL device object is a singleton, cannot be created dynamically
-                if (APIPlatforms[j] == MatroxImaging) {
+                if (APIPlatforms[j] == svlFilterSourceVideoCaptureTypes::MatroxImaging) {
                     DeviceGenObj[j] = svlVidCapSrcMIL::GetInstance();
                 }
 #endif // CISST_SVL_HAS_MIL
@@ -639,7 +636,7 @@ int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
     std::cout << std::endl << "  ===== Setup capture format =====" << std::endl;
     DialogFormat(videoch);
 
-    if (EnumeratedDevices[DeviceID[videoch]].platform == LinLibDC1394) {
+    if (EnumeratedDevices[DeviceID[videoch]].platform == svlFilterSourceVideoCaptureTypes::LinLibDC1394) {
 #if CISST_SVL_HAS_DC1394
         std::cout << std::endl << "  ===== Setup external trigger =====" << std::endl;
         DialogTrigger(videoch);
@@ -723,7 +720,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
     // Get capture API platform
     PlatformType platform = EnumeratedDevices[DeviceID[videoch]].platform;
 
-    if (platform == WinDirectShow) {
+    if (platform == svlFilterSourceVideoCaptureTypes::WinDirectShow) {
 #if CISST_SVL_HAS_DIRECTSHOW
         // Create temporary DirectShow capture module and initialize it
         svlVidCapSrcDirectShow device;
@@ -836,9 +833,10 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
 
                 defaultval = 0;
                 std::cout << "  == Select color space ==" << std::endl;
-                for (i = 0; i < PixelTypeCount && formats[formatid].custom_colorspaces[i] != PixelUnknown; i ++) {
+                for (i = 0; i < svlFilterSourceVideoCaptureTypes::PixelTypeCount
+                         && formats[formatid].custom_colorspaces[i] != svlFilterSourceVideoCaptureTypes::PixelUnknown; i ++) {
                     std::cout << "  " << i << ") " << GetPixelTypeName(formats[formatid].custom_colorspaces[i]) << std::endl;
-                    if (formats[formatid].custom_colorspaces[i] == PixelRAW8) defaultval = i;
+                    if (formats[formatid].custom_colorspaces[i] == svlFilterSourceVideoCaptureTypes::PixelRAW8) defaultval = i;
                 }
                 std::cout << "  # Enter color space ID";
                 if (defaultval >= 0) std::cout << " (default=" << GetPixelTypeName(formats[formatid].custom_colorspaces[defaultval]) << ")";
@@ -891,7 +889,7 @@ int svlFilterSourceVideoCapture::DialogTrigger(unsigned int videoch)
     if (DeviceID[videoch] >= NumberOfEnumeratedDevices)
         return SVL_VCS_UNABLE_TO_OPEN;
 
-    if (EnumeratedDevices[DeviceID[videoch]].platform == LinLibDC1394) {
+    if (EnumeratedDevices[DeviceID[videoch]].platform == svlFilterSourceVideoCaptureTypes::LinLibDC1394) {
         ExternalTrigger trigger;
         int ivalue;
         char input[256];
@@ -953,7 +951,7 @@ int svlFilterSourceVideoCapture::DialogImageProperties(unsigned int videoch)
     // Get capture API platform and API specific device ID
     PlatformType platform = DeviceObj[API[videoch]]->GetPlatformType();
 
-    if (platform == WinDirectShow) {
+    if (platform == svlFilterSourceVideoCaptureTypes::WinDirectShow) {
 #if CISST_SVL_HAS_DIRECTSHOW
         svlVidCapSrcDirectShow* device = dynamic_cast<svlVidCapSrcDirectShow*>(DeviceObj[API[videoch]]);
         if (device->ShowImageDialog(0, APIChannelID[videoch]) == SVL_OK) {
@@ -1269,7 +1267,8 @@ int svlFilterSourceVideoCapture::PrintFormatList(unsigned int videoch)
             std::cout << "              roipos=(" << formats[i].custom_roileft << ", " << formats[i].custom_roitop << "); ";
             std::cout << "unit=(" << formats[i].custom_unitleft << ", " << formats[i].custom_unittop << ")" << std::endl;
             std::cout << "              colorspaces=(";
-            for (j = 0; j < PixelTypeCount && formats[i].custom_colorspaces[j] != PixelUnknown; j ++) {
+            for (j = 0; j < svlFilterSourceVideoCaptureTypes::PixelTypeCount
+                     && formats[i].custom_colorspaces[j] != svlFilterSourceVideoCaptureTypes::PixelUnknown; j ++) {
                 if (j > 0) std::cout << ", ";
                 std::cout << GetPixelTypeName(formats[i].custom_colorspaces[j]);
             }
@@ -1431,28 +1430,28 @@ int svlFilterSourceVideoCapture::GetImageProperties(unsigned int videoch)
 std::string svlFilterSourceVideoCapture::GetPixelTypeName(PixelType pixeltype)
 {
     switch (pixeltype) {
-        case PixelRAW8:     return "RAW8";
-        case PixelRAW16:    return "RAW16";
-        case PixelRGB8:     return "RGB24";
-        case PixelYUV444:   return "YUV444";
-        case PixelYUV422:   return "YUV422";
-        case PixelYUV411:   return "YUV411";
-        case PixelMONO8:    return "Mono8";
-        case PixelMONO16:   return "Mono16";
-        case PixelUnknown:
-        default:            return "Unknown color space";
+    case svlFilterSourceVideoCaptureTypes::PixelRAW8:    return "RAW8";
+    case svlFilterSourceVideoCaptureTypes::PixelRAW16:   return "RAW16";
+    case svlFilterSourceVideoCaptureTypes::PixelRGB8:    return "RGB24";
+    case svlFilterSourceVideoCaptureTypes::PixelYUV444:  return "YUV444";
+    case svlFilterSourceVideoCaptureTypes::PixelYUV422:  return "YUV422";
+    case svlFilterSourceVideoCaptureTypes::PixelYUV411:  return "YUV411";
+    case svlFilterSourceVideoCaptureTypes::PixelMONO8:   return "Mono8";
+    case svlFilterSourceVideoCaptureTypes::PixelMONO16:  return "Mono16";
+    case svlFilterSourceVideoCaptureTypes::PixelUnknown:
+    default:                                             return "Unknown color space";
     }
 }
 
 std::string svlFilterSourceVideoCapture::GetPatternTypeName(PatternType patterntype)
 {
     switch (patterntype) {
-        case PatternRGGB:   return "RGGB";
-        case PatternGBRG:   return "GBRG";
-        case PatternGRBG:   return "GRBG";
-        case PatternBGGR:   return "BGGR";
-        case PatternUnknown:
-        default:            return "Unknown pattern";
+    case svlFilterSourceVideoCaptureTypes::PatternRGGB:   return "RGGB";
+    case svlFilterSourceVideoCaptureTypes::PatternGBRG:   return "GBRG";
+    case svlFilterSourceVideoCaptureTypes::PatternGRBG:   return "GRBG";
+    case svlFilterSourceVideoCaptureTypes::PatternBGGR:   return "BGGR";
+    case svlFilterSourceVideoCaptureTypes::PatternUnknown:
+    default:                                              return "Unknown pattern";
     }
 }
 
@@ -1620,10 +1619,8 @@ int svlFilterSourceVideoCapture::LoadSettings(const char* filepath)
         }
         buffer[SVL_VCS_STRING_LENGTH - 1] = 0;
         if (DeviceID[i] >= 0) {
-            if (strcmp(EnumeratedDevices[DeviceID[i]].name, buffer) != 0) {
-                CMN_LOG_CLASS_INIT_WARNING << "LoadSettings: Device-Name[" << i << "]\" doesn't match string in configuration file (\"" << EnumeratedDevices[DeviceID[i]].name << "\" vs. \"" << buffer << "\")" << std::endl;
-                DeviceID[i] = -1;
-            }
+            buffer[SVL_VCS_STRING_LENGTH - 1] = 0;
+            if (strcmp(EnumeratedDevices[DeviceID[i]].name, buffer) != 0) goto labError;
         }
         if (DeviceID[i] < 0) {
             // List available capture devices
@@ -2157,7 +2154,7 @@ void svlFilterSourceVideoCapture::GetFormatListRCommand(svlFilterSourceVideoCapt
         memcpy(formatlist.Pointer(i), &(formats[i]), sizeof(ImageFormat));
     }
     ReleaseFormatList(formats);
-    
+
     CMN_LOG_CLASS_INIT_VERBOSE << "GetFormatListCommand: number of available images formats for channel 1: " << formatcount << std::endl;
 }
 
@@ -2302,17 +2299,6 @@ void* svlVidCapSrcDialogThread::Proc(svlFilterSourceVideoCapture* baseref)
 /*** Stream out operators ***/
 /****************************/
 
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::Config& objref)
-{
-    for (int i = 0; i < objref.Channels; i ++) {
-        if (i > 0) stream << ", (";
-        else stream << "(";
-        stream << objref.Device[i] << ", "
-               << objref.Input[i]  << ")";
-    }
-    return stream;
-}
-
 std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfoListType & objref)
 {
     const unsigned int size = static_cast<unsigned int>(objref.size());
@@ -2367,202 +2353,3 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
 
     return stream;
 }
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfo & objref)
-{
-    stream << objref.name;
-
-    switch (objref.platform) {
-        case svlFilterSourceVideoCapture::WinDirectShow:
-            stream << " [DirectShow device]";
-        break;
-
-        case svlFilterSourceVideoCapture::WinSVS:
-            stream << " [Videre Design SVS device]";
-        break;
-
-        case svlFilterSourceVideoCapture::LinVideo4Linux2:
-            stream << " [Video4Linux2 device]";
-        break;
-
-        case svlFilterSourceVideoCapture::LinLibDC1394:
-            stream << " [DC1394 IIDC/DCAM device]";
-        break;
-
-        case svlFilterSourceVideoCapture::OpenCV:
-            stream << " [Detected by OpenCV]";
-        break;
-
-        case svlFilterSourceVideoCapture::MatroxImaging:
-            stream << " [Matrox Imaging device]";
-        break;
-
-        case svlFilterSourceVideoCapture::BlackMagicDeckLink:
-            stream << " [BlackMagic DeckLink device]";
-        break;
-
-        case svlFilterSourceVideoCapture::NumberOfPlatformTypes:
-            stream << " [Unknown device type]";
-        default:
-        break;
-    }
-
-    if (objref.testok) stream << " [Tested]";
-
-    stream << std::endl;
-
-    for (int i = 0; i < objref.inputcount; i ++) {
-
-        if (i == 0) stream << "   Inputs:"
-                           << std::endl;
-        stream << "    "
-               << i
-               << ") ";
-
-        if (i != objref.activeinput) stream << " ";
-        else stream << "*";
-
-        stream << objref.inputnames[i]
-               << std::endl;
-    }
-
-    return stream;
-}
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageFormat & objref)
-{
-    stream << " "
-           << objref.width
-           << "x"
-           << objref.height
-           << " ";
-
-    stream << svlFilterSourceVideoCapture::GetPixelTypeName(objref.colorspace);
-
-    if (objref.framerate > 0.0) {
-
-        stream << " (<="
-               << objref.framerate
-               << "fps)"
-               << std::endl;
-    }
-    else {
-
-        stream << " (unknown framerate)"
-               << std::endl;
-    }
-
-    if (objref.custom_mode >= 0) {
-
-        stream << "  [CUSTOM mode="
-               << objref.custom_mode
-               << std::endl;
-
-        stream << "          maxsize=("
-               << objref.custom_maxwidth
-               << ", "
-               << objref.custom_maxheight
-               << "); ";
-
-        stream << "unit=(" << objref.custom_unitwidth
-        << ", "
-        << objref.custom_unitheight
-        << ")"
-        << std::endl;
-
-        stream << "          roipos=("
-               << objref.custom_roileft
-               << ", "
-               << objref.custom_roitop
-               << "); ";
-
-        stream << "unit=("
-               << objref.custom_unitleft
-               << ", "
-               << objref.custom_unittop
-               << ")"
-               << std::endl;
-
-        stream << "          colorspaces=(";
-
-        for (unsigned int j = 0;
-             j < svlFilterSourceVideoCapture::PixelTypeCount &&
-             objref.custom_colorspaces[j] != svlFilterSourceVideoCapture::PixelUnknown;
-             j ++) {
-
-            if (j > 0) std::cout << ", ";
-
-            stream << svlFilterSourceVideoCapture::GetPixelTypeName(objref.custom_colorspaces[j]);
-        }
-
-        stream << ")"
-               << std::endl;
-
-        stream << "          pattern="
-               << svlFilterSourceVideoCapture::GetPatternTypeName(objref.custom_pattern)
-               << "]"
-               << std::endl;
-    }
-
-    return stream;
-}
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageProperties & objref)
-{
-    stream << " shutter:       "
-           << objref.shutter;
-    if (objref.manual & svlFilterSourceVideoCapture::propShutter) stream << " auto";
-    stream << std::endl;
-
-    stream << " gain:          "
-           << objref.gain;
-    if (objref.manual & svlFilterSourceVideoCapture::propGain) stream << " auto";
-    stream << std::endl;
-
-    stream << " white balance: "
-           << objref.wb_u_b
-           << ", "
-           << objref.wb_v_r;
-    if (objref.manual & svlFilterSourceVideoCapture::propWhiteBalance) stream << " auto";
-    stream << std::endl;
-
-    stream << " brightness:    "
-           << objref.brightness;
-    if (objref.manual & svlFilterSourceVideoCapture::propBrightness) stream << " auto";
-    stream << std::endl;
-
-    stream << " gamma:         "
-           << objref.gamma;
-    if (objref.manual & svlFilterSourceVideoCapture::propGamma) stream << " auto";
-    stream << std::endl;
-
-    stream << " saturation:    "
-           << objref.saturation;
-    if (objref.manual & svlFilterSourceVideoCapture::propSaturation) stream << " auto";
-    stream << std::endl;
-
-    return stream;
-}
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ExternalTrigger & objref)
-{
-    stream << " enabled:  ";
-    if (objref.enable) stream << "true";
-    else stream << "false";
-    stream << std::endl;
-
-    stream << " mode:     "
-           << objref.mode;
-    stream << std::endl;
-
-    stream << " source:   "
-           << objref.source;
-    stream << std::endl;
-
-    stream << " polarity: "
-           << objref.polarity;
-    stream << std::endl;
-
-    return stream;
-}
-

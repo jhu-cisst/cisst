@@ -16,6 +16,19 @@
 
 project (cisstStereoVision)
 
+# create data type using the data generator
+cisst_data_generator (cisstStereoVision
+                      "${cisst_BINARY_DIR}/include" # where to save the file
+                      "cisstStereoVision/"          # sub directory for include
+                      ../svlFilterSourceVideoCaptureTypes.cdg
+                      ../svlFilterImageOverlayTypes.cdg
+                      ../svlFilterSourceImageFileTypes.cdg
+                      ../svlFilterSplitterTypes.cdg
+                      ../svlFilterSourceTextFileTypes.cdg
+)
+# to compile cisst generated code, need to find header file
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
+
 # set dependencies
 SET(DEPENDENCIES
     cisstCommon
@@ -28,6 +41,7 @@ SET(DEPENDENCIES
 SET(SOURCE_FILES
   # Public System API
     svlTypes.cpp
+    svlFilterSourceVideoCaptureTypesExtra.cpp
     svlClassServices.cpp
     svlSampleBlobs.cpp
     svlSampleCameraGeometry.cpp
@@ -341,7 +355,7 @@ ENDIF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
 
 
 IF(WIN32)
-    SET(SVL_DEFAULT_USE_USER_OPENCV ON)
+    SET(SVL_DEFAULT_USE_USER_OPENCV OFF)
 ELSE(WIN32)
     SET(SVL_DEFAULT_USE_USER_OPENCV OFF)
 ENDIF(WIN32)
@@ -1043,7 +1057,7 @@ IF(WIN32)
                  "${DIRECTSHOW_INCLUDE_DIR}"
                  "${DIRECTX_INCLUDE_DIR}")
             cisst_set_package_settings (cisstStereoVision DirectShow INCLUDE_DIRECTORIES CISST_SVL_ALL_DIRECTSHOW_INCLUDE)
-	    set (CISST_SVL_ALL_DIRECTSHOW_LIBRARIES
+            set (CISST_SVL_ALL_DIRECTSHOW_LIBRARIES
                  "${DIRECTSHOW_strmiids_LIBRARY}"
                  "${DIRECTSHOW_WinMM_LIBRARY}")
             cisst_set_package_settings (cisstStereoVision DirectShow LIBRARIES CISST_SVL_ALL_DIRECTSHOW_LIBRARIES)
@@ -1125,8 +1139,8 @@ IF(WIN32)
         IF(SVS_FOUND)
             MARK_AS_ADVANCED(FORCE ${SVS_OPTIONS})
 
-	    cisst_set_package_settings (cisstStereoVision SVS INCLUDE_DIRECTORIES SVS_INCLUDE_DIR)
-	    set (CISST_SVL_ALL_SVS_LIBRARIES
+            cisst_set_package_settings (cisstStereoVision SVS INCLUDE_DIRECTORIES SVS_INCLUDE_DIR)
+            set (CISST_SVL_ALL_SVS_LIBRARIES
                  "${SVS_svs_LIBRARY}"
                  "${SVS_svsgrab_LIBRARY}")
             cisst_set_package_settings (cisstStereoVision SVS LIBRARIES CISST_SVL_ALL_SVS_LIBRARIES)
@@ -1461,7 +1475,7 @@ if (CISST_SVL_HAS_BM_DECKLINK)
         cisst_unset_all_package_settings (cisstStereoVision decklink)
     endif (DeckLink_FOUND)
 else (CISST_SVL_HAS_BM_DECKLINK)
-    cisst_unset_all_package_settings (cisstStereoVision decklink)	
+    cisst_unset_all_package_settings (cisstStereoVision decklink)
 endif (CISST_SVL_HAS_BM_DECKLINK)
 
 
@@ -1536,7 +1550,8 @@ cisst_add_library (
   DEPENDENCIES ${DEPENDENCIES}
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES}
-  ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
+  ADDITIONAL_SOURCE_FILES ${cisstStereoVision_CISST_DG_SRCS}
+  ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${cisstStereoVision_CISST_DG_HDRS})
 
 # Link `cisstStereoVision` against CUDA generated libraries
 IF(CISST_SVL_HAS_CUDA)
