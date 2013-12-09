@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -124,51 +124,51 @@ const std::string mtsManagerComponentBase::GetNameOfManagerComponentClientFor(co
     return componentName;
 }
 
-bool mtsManagerComponentBase::IsNameOfInterfaceGCMRequired(const std::string & nameOfInterface)
+bool mtsManagerComponentBase::IsNameOfInterfaceGCMRequired(const std::string & interfaceName)
 {
     const std::string prefix = GetNameOfInterfaceGCMRequiredFor("");
 
-    return (nameOfInterface.substr(0, prefix.size()) == prefix);
+    return (interfaceName.substr(0, prefix.size()) == prefix);
 }
 
-bool mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(const std::string & nameOfInterface)
+bool mtsManagerComponentBase::IsNameOfInterfaceGCMProvided(const std::string & interfaceName)
 {
-    return (nameOfInterface.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided.size())
+    return (interfaceName.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided.size())
             == GetNameOfInterfaceGCMProvided());
 }
 
-bool mtsManagerComponentBase::IsNameOfInterfaceLCMRequired(const std::string & nameOfInterface)
+bool mtsManagerComponentBase::IsNameOfInterfaceLCMRequired(const std::string & interfaceName)
 {
-    return (nameOfInterface == GetNameOfInterfaceLCMRequired());
+    return (interfaceName == GetNameOfInterfaceLCMRequired());
 }
 
-bool mtsManagerComponentBase::IsNameOfInterfaceLCMProvided(const std::string & nameOfInterface)
+bool mtsManagerComponentBase::IsNameOfInterfaceLCMProvided(const std::string & interfaceName)
 {
-    return (nameOfInterface.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided.size())
+    return (interfaceName.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceLCMProvided.size())
             == GetNameOfInterfaceLCMProvided());
 }
 
-bool mtsManagerComponentBase::IsNameOfInterfaceComponentRequired(const std::string & nameOfInterface)
+bool mtsManagerComponentBase::IsNameOfInterfaceComponentRequired(const std::string & interfaceName)
 {
     const std::string prefix = GetNameOfInterfaceComponentRequiredFor("");
 
-    return (nameOfInterface.substr(0, prefix.size()) == prefix);
+    return (interfaceName.substr(0, prefix.size()) == prefix);
 }
 
-bool mtsManagerComponentBase::IsNameOfInterfaceComponentProvided(const std::string & nameOfInterface)
+bool mtsManagerComponentBase::IsNameOfInterfaceComponentProvided(const std::string & interfaceName)
 {
-    return (nameOfInterface.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceComponentProvided.size())
+    return (interfaceName.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceComponentProvided.size())
             == GetNameOfInterfaceComponentProvided());
 }
 
-bool mtsManagerComponentBase::IsNameOfInterfaceInternalRequired(const std::string & nameOfInterface)
+bool mtsManagerComponentBase::IsNameOfInterfaceInternalRequired(const std::string & interfaceName)
 {
-    return (nameOfInterface == GetNameOfInterfaceInternalRequired());
+    return (interfaceName == GetNameOfInterfaceInternalRequired());
 }
 
-bool mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(const std::string & nameOfInterface)
+bool mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(const std::string & interfaceName)
 {
-    return (nameOfInterface.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided.size())
+    return (interfaceName.substr(0, mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided.size())
             == GetNameOfInterfaceInternalProvided());
 }
 
@@ -218,4 +218,26 @@ const std::string mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(vo
 const std::string mtsManagerComponentBase::GetNameOfInterfaceInternalProvided(void)
 {
     return InterfaceNames::InterfaceInternalProvided;
+}
+
+bool mtsManagerComponentBase::IsManagerComponent(const std::string & componentName)
+{
+    if (IsManagerComponentServer(componentName)) return true;
+    if (IsManagerComponentClient(componentName)) return true;
+
+    return false;
+}
+
+bool mtsManagerComponentBase::IsNameOfInternalInterface(const std::string & interfaceName)
+{
+    if (IsNameOfInterfaceGCMRequired(interfaceName)) return true;
+    if (IsNameOfInterfaceGCMProvided(interfaceName)) return true;
+    if (IsNameOfInterfaceLCMRequired(interfaceName)) return true;
+    if (IsNameOfInterfaceLCMProvided(interfaceName)) return true;
+    if (IsNameOfInterfaceComponentRequired(interfaceName)) return true;
+    if (IsNameOfInterfaceComponentProvided(interfaceName)) return true;
+    if (IsNameOfInterfaceInternalRequired(interfaceName)) return true;
+    if (IsNameOfInterfaceInternalProvided(interfaceName)) return true;
+
+    return false;
 }
