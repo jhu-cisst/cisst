@@ -26,7 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnDataFunctions.h>
 
-#define CMN_DATA_SPECIALIZATION_FOR_ENUM(_enum, _promotedType, _humanReadableFunction) \
+
+#define CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(_enum, _promotedType, _humanReadableFunction) \
 template <>                                                             \
 class cmnData<_enum> {                                                  \
 public:                                                                 \
@@ -91,6 +92,10 @@ public:                                                                 \
      return 1.2345;                                                     \
  }                                                                      \
 };
+
+
+#define CMN_DATA_SPECIALIZATION_FOR_ENUM(_enum, _promotedType) \
+    CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(_enum, _promotedType, cmnData<int>::HumanReadable)
 
 
 #define CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(_enum) \
