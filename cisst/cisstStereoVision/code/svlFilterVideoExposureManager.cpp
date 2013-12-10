@@ -37,6 +37,9 @@ svlFilterVideoExposureManager::svlFilterVideoExposureManager() :
     MaxGain(1000),
     MaxShutter(1305)
 {
+    Histogram.SetSize(256);
+    Histogram.SetAll(0);
+
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageRGBStereo);
