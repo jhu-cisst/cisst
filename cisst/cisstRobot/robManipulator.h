@@ -178,6 +178,9 @@ public:
   */
   robManipulator( const std::string& robotfilename,
 		  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
+
+  //! Manipulator destructor
+  virtual ~robManipulator();
   
   //! Evaluate the forward kinematics
   /**
