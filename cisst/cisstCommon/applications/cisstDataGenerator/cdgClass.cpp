@@ -189,7 +189,7 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     // global functions for enums have to be declared after the enum is defined
     const std::string classWithNamespace = this->ClassWithNamespace();
     for (index = 0; index < Enums.size(); ++index) {
-        Enums[index]->GenerateDataFunctionsHeader(outputStream, classWithNamespace);
+        Enums[index]->GenerateDataFunctionsHeader(outputStream, classWithNamespace, this->GetFieldValue("attribute"));
     }
 
 }

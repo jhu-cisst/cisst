@@ -87,11 +87,11 @@ void cdgEnum::GenerateCode(std::ostream & CMN_UNUSED(outputStream)) const
 }
 
 
-void cdgEnum::GenerateDataFunctionsHeader(std::ostream & outputStream, const std::string & cScope) const
+void cdgEnum::GenerateDataFunctionsHeader(std::ostream & outputStream, const std::string & cScope, const std::string & attribute) const
 {
     const std::string name = this->GetFieldValue("name");
 
-    outputStream << "std::string CISST_EXPORT cmnDataHumanReadable_" << cScope << "_" << name << "(const " << cScope << "::" << name << " & data);" << std::endl
+    outputStream << "std::string " << attribute << " cmnDataHumanReadable_" << cScope << "_" << name << "(const " << cScope << "::" << name << " & data);" << std::endl
                  << "CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(" << cScope << "::" << name << ", int, cmnDataHumanReadable_" << cScope << "_" << name << ");" << std::endl
                  << "#if CISST_HAS_JSON" << std::endl
                  << "  CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(" << cScope << "::" << name << ");" << std::endl

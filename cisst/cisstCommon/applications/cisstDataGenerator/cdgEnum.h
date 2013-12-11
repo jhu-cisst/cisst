@@ -42,7 +42,7 @@ public:
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
 
-    void GenerateDataFunctionsHeader(std::ostream & outputStream, const std::string & cScope) const;
+    void GenerateDataFunctionsHeader(std::ostream & outputStream, const std::string & cScope, const std::string & attribute) const;
     void GenerateDataFunctionsCode(std::ostream & outputStream, const std::string & cScope) const;
 
 private:
