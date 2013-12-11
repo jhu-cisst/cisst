@@ -27,7 +27,8 @@ class CISST_EXPORT robKinematics : public robJoint {
     UNDEFINED,
     STANDARD_DH,
     MODIFIED_DH,
-    HAYATI
+    HAYATI,
+    MODIFIED_HAYATI
   };
 
  private:
