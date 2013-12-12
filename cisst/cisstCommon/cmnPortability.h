@@ -404,17 +404,20 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 
   \param x The number to be tested.
 */
-#ifdef CISST_COMPILER_IS_MSVC
-#define CMN_ISFINITE(x) ((_finite(x) == 1) ? true : false)
-#elif (CISST_OS == CISST_QNX)
+#if CISST_HAS_ISFINITE
   #define CMN_ISFINITE(x) isfinite(x)
 #else
-  #if (CISST_OS == CISST_SOLARIS)
-    #include <ieeefp.h>
+  #ifdef CISST_COMPILER_IS_MSVC
+    #define CMN_ISFINITE(x) ((_finite(x) == 1) ? true : false)
+  #elif (CISST_OS == CISST_QNX)
+    #define CMN_ISFINITE(x) isfinite(x)
+  #else
+    #if (CISST_OS == CISST_SOLARIS)
+      #include <ieeefp.h>
+    #endif
+    #define CMN_ISFINITE(x) finite(x)
   #endif
-#define CMN_ISFINITE(x) finite(x)
 #endif
-
 
 
 /*!

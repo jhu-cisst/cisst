@@ -236,6 +236,11 @@ int main(int argc, char ** argv) {
 }" CISST_OSTREAM_CAN_CAST_TO_VOID_PTR)
 
 
+# Look for isfinite function
+include (CheckSymbolExists)
+check_symbol_exists (isfinite "math.h" CISST_HAS_ISFINITE)
+
+
 # Path of all CISST shared libraries.
 link_directories (${LIBRARY_OUTPUT_PATH})
 
