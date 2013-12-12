@@ -491,8 +491,8 @@ bool vctPlot2DBase::Signal::PrependArray(const double * pointArray, size_t array
     }
 
     if (!this->Frozen) {
-        size_t tempIndexLast = this->IndexLast;
-        size_t tempIndexFirst = this->IndexFirst;
+        ptrdiff_t tempIndexLast = this->IndexLast;
+        ptrdiff_t tempIndexFirst = this->IndexFirst;
         double * newBuffer = new double [Data.size()*this->PointSize];
         memset(newBuffer, 0, Data.size() * this->PointSize * sizeof(double));
         if (!this->Empty) {
