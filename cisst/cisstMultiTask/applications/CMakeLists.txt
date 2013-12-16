@@ -23,6 +23,7 @@ cisst_offer_application (cisstMultiTask Logger ON)
 # ICE dependent applications
 if (CISST_MTS_HAS_ICE)
   cisst_offer_application (cisstMultiTask GlobalComponentManager ON)
+  cisst_offer_application (cisstMultiTask ComponentViewer ON)
   # FLTK dependent applications
   if (CISST_HAS_FLTK)
     cisst_offer_application (cisstMultiTask GlobalComponentManagerFLTK ON)

@@ -46,8 +46,15 @@ const char * mtlCallFunctionVoid(uint64_T voidPointerOnFunction)
 }
 
 
+struct phonebook
+{
+  const char *name;
+  double phone;
+};
+
 mxArray * mtlCallFunctionRead(uint64_T voidPointerOnFunction)
 {
+    CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
     mtsFunctionRead * functionPointer = reinterpret_cast<mtsFunctionRead *>(voidPointerOnFunction);
     mtsExecutionResult result;
     mtsGenericObject * placeHolder = dynamic_cast<mtsGenericObject *>(functionPointer->GetArgumentPrototype()->Services()->Create());
@@ -58,7 +65,48 @@ mxArray * mtlCallFunctionRead(uint64_T voidPointerOnFunction)
         mexErrMsgTxt(errorMessage.c_str());
     }
     // return mtsExecutionResult::ToString(result.GetResult()).c_str();
-    return placeHolder->ToMatlab();
+    // return placeHolder->ToMatlab();
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+   const char *field_names[] = {"name", "phone"};
+   struct phonebook friends[] = {{"Jordan Robert", 3386},{"Mary Smith",3912},
+                                 {"Stacy Flora", 3238},{"Harry Alpert",3077}};
+
+    mwSize dims[2] = {1, 2};
+    int name_field, phone_field;
+    mwIndex i;
+
+    mxArray * resultArray;
+    /* Create a 1-by-n array of structs. */ 
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+    resultArray = mxCreateStructArray(2, dims, 2, field_names);
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+    /* This is redundant, but here for illustration.  Since we just
+       created the structure and the field number indices are zero
+       based, name_field will always be 0 and phone_field will always
+       be 1 */
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+    name_field = mxGetFieldNumber(resultArray,"name");
+    phone_field = mxGetFieldNumber(resultArray,"phone");
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+    /* Populate the name and phone fields of the phonebook structure. */ 
+    for (i=0; i<3; i++) {
+        mxArray *field_value;
+        /* Use mxSetFieldByNumber instead of mxSetField for efficiency
+         * mxSetField(plhs[0],i,"name",mxCreateString(friends[i].name); */
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+        mxSetFieldByNumber(resultArray, i, name_field, mxCreateString(friends[i].name));
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+        field_value = mxCreateDoubleMatrix(1, 1, mxREAL);
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+        *mxGetPr(field_value) = friends[i].phone;
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+        /* Use mxSetFieldByNumber instead of mxSetField for efficiency
+         * mxSetField(plhs[0],i,"name",mxCreateString(friends[i].name); */
+        mxSetFieldByNumber(resultArray, i, phone_field, field_value);
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+    }
+CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << std::endl;
+return resultArray;
 }
 
 

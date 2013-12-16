@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2003-09-30
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-09-30
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -189,6 +189,9 @@ public:
     bool operator< (const ThisType & other) const {
         return ((*this) - other) < 0;
     }
+    bool operator<= (const ThisType & other) const {
+        return (*this < other) || (*this == other);
+    }
 
 
     /*! Equality of iterators, required by STL */
@@ -199,7 +202,10 @@ public:
 
     /*! Complementary operation to operator < */
     bool operator> (const ThisType & other) const {
-        return other < *this;
+        return other < (*this);
+    }
+    bool operator>= (const ThisType & other) const {
+        return (*this > other) || (*this == other);
     }
 
 
@@ -374,4 +380,3 @@ operator-(const vctFixedStrideVectorIterator<_elementType, _stride> & iterator,
 
 
 #endif  // _vctFixedStrideVectorIterator_h
-

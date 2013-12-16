@@ -48,21 +48,21 @@ svlFilterBase::svlFilterBase() :
 svlFilterBase::~svlFilterBase()
 {
     svlFilterInput * input;
-    mtsComponent::InterfacesInputListType::iterator iterinputs;
+    mtsComponent::InterfacesInputMapType::iterator iterinputs;
     for (iterinputs = InterfacesInput.begin();
          iterinputs != InterfacesInput.end();
          iterinputs ++) {
-        input = dynamic_cast<svlFilterInput *>(*iterinputs);
+        input = dynamic_cast<svlFilterInput *>(iterinputs->second);
         if (input) {
             delete input;
         }
     }
     svlFilterOutput * output;
-    mtsComponent::InterfacesOutputListType::iterator iteroutputs;
+    mtsComponent::InterfacesOutputMapType::iterator iteroutputs;
     for (iteroutputs = InterfacesOutput.begin();
          iteroutputs != InterfacesOutput.end();
          iteroutputs ++) {
-        output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+        output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
         if (output) {
             delete output;
         }
@@ -87,11 +87,11 @@ unsigned int svlFilterBase::GetFrameCounter() const
 svlFilterInput* svlFilterBase::GetInput() const
 {
     svlFilterInput * input;
-    mtsComponent::InterfacesInputListType::const_iterator iterinputs;
+    mtsComponent::InterfacesInputMapType::const_iterator iterinputs;
     for (iterinputs = InterfacesInput.begin();
          iterinputs != InterfacesInput.end();
          iterinputs ++) {
-        input = dynamic_cast<svlFilterInput *>(*iterinputs);
+        input = dynamic_cast<svlFilterInput *>(iterinputs->second);
         if (input->Trunk) {
             return input;
         }
@@ -102,11 +102,11 @@ svlFilterInput* svlFilterBase::GetInput() const
 svlFilterOutput* svlFilterBase::GetOutput() const
 {
     svlFilterOutput * output;
-    mtsComponent::InterfacesOutputListType::const_iterator iteroutputs;
+    mtsComponent::InterfacesOutputMapType::const_iterator iteroutputs;
     for (iteroutputs = InterfacesOutput.begin();
          iteroutputs != InterfacesOutput.end();
          iteroutputs ++) {
-        output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+        output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
         if (output->Trunk) {
             return output;
         }
@@ -128,12 +128,12 @@ svlFilterInput* svlFilterBase::AddInput(const std::string &inputname, bool trunk
 {
     if (trunk) {
         svlFilterInput * input;
-        mtsComponent::InterfacesInputListType::const_iterator iterinputs;
+        mtsComponent::InterfacesInputMapType::const_iterator iterinputs;
         // Check if there is already a trunk input
         for (iterinputs = InterfacesInput.begin();
              iterinputs != InterfacesInput.end();
              iterinputs ++) {
-            input = dynamic_cast<svlFilterInput *>(*iterinputs);
+            input = dynamic_cast<svlFilterInput *>(iterinputs->second);
             if (input->Trunk) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddInput: there is already a Trunk input for this filter" << std::endl;
                 return 0;
@@ -150,12 +150,12 @@ svlFilterOutput* svlFilterBase::AddOutput(const std::string &outputname, bool tr
 {
     if (trunk) {
         svlFilterOutput * output;
-        mtsComponent::InterfacesOutputListType::const_iterator iteroutputs;
+        mtsComponent::InterfacesOutputMapType::const_iterator iteroutputs;
         // Check if there is already a trunk output
         for (iteroutputs = InterfacesOutput.begin();
              iteroutputs != InterfacesOutput.end();
              iteroutputs ++) {
-            output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+            output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
             if (output->Trunk) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddOutput: there is already a Trunk output for this filter" << std::endl;
                 return 0;

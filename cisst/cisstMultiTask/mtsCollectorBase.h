@@ -30,10 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnNamedMap.h>
-#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <cisstMultiTask/mtsHistory.h>
 
 #include <string>
 #include <stdexcept>
@@ -84,7 +82,6 @@ protected:
     class SignalMapElement {
     public:
         mtsTask * Task;
-        mtsHistoryBase * History;
 
         SignalMapElement(void) {}
         ~SignalMapElement(void) {}
@@ -140,8 +137,13 @@ protected:
       COLLECTOR_FILE_FLOATING_NOTATION_NONE */
     CollectorFileFloatingNotation FloatingNotation;
 
-    /*! Collector File precision [DEFAULT = 10] */
+    /*! Collector File precision [DEFAULT = 10]
+      This is the maximum number of characters used. */
     std::streamsize Precision;
+
+    /*! Collector File width [DEFAULT = 4]
+      This is the minimum number of characters used. */
+    std::streamsize Width;
 
     /*! Collector File fill value [DEFAULT = ' '] */
     char FillCharacter;
@@ -163,6 +165,9 @@ protected:
     /*! Update the delimiter used in output files based on file
       format.  Should be used everytime FileFormat is set. */
     void SetDelimiter(void);
+
+    /*! Setup the parameters for the collector output stream. */
+    void SetOutputStreamParams(void);
 
     /*! Default control interface and methods used for the provided commands. */
     mtsInterfaceProvided * ControlInterface;
@@ -276,6 +281,10 @@ public:
     /*! Set precision value for the output file.  This setting will
       apply to all future files. */
     void SetOutputStreamPrecision(const int precision);
+
+    /*! Set width value for the output file.  This setting will
+      apply to all future files. */
+    void SetOutputStreamWidth(const int width);
 
     /*! Set fill character for the output file. This setting will
       apply to all future files. */

@@ -20,7 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#include <cmath>
 #include <cisstStereoVision/svlTypes.h>
+#include <cmath>
 
 
 /*************************/
@@ -139,6 +141,7 @@ void svlBlob::Assign(const svlBlob & blob)
 /*********************/
 
 svlRect::svlRect() :
+    svlShape(),
     left(0),
     top(0),
     right(0),
@@ -147,11 +150,34 @@ svlRect::svlRect() :
 }
 
 svlRect::svlRect(int _left, int _top, int _right, int _bottom) :
+    svlShape(),
     left(_left),
     top(_top),
     right(_right),
     bottom(_bottom)
 {
+}
+
+svlShape* svlRect::Clone()
+{
+    return new svlRect(*this);
+}
+
+bool svlRect::IsWithin(int x, int y) const
+{
+    if (x < left || x >= right ||
+        y < top  || y >= bottom) {
+        return false;
+    }
+    return true;
+}
+
+void svlRect::GetBoundingRect(svlRect & rect) const
+{
+    rect.left = left;
+    rect.top = top;
+    rect.right = right;
+    rect.bottom = bottom;
 }
 
 void svlRect::Assign(const svlRect & rect)
@@ -203,6 +229,7 @@ void svlRect::Trim(int minx, int maxx, int miny, int maxy)
 /*************************/
 
 svlTriangle::svlTriangle() :
+    svlShape(),
     x1(0),
     y1(0),
     x2(0),
@@ -213,6 +240,7 @@ svlTriangle::svlTriangle() :
 }
 
 svlTriangle::svlTriangle(int _x1, int _y1, int _x2, int _y2, int _x3, int _y3) :
+    svlShape(),
     x1(_x1),
     y1(_y1),
     x2(_x2),
@@ -220,6 +248,48 @@ svlTriangle::svlTriangle(int _x1, int _y1, int _x2, int _y2, int _x3, int _y3) :
     x3(_x3),
     y3(_y3)
 {
+}
+
+svlShape* svlTriangle::Clone()
+{
+    return new svlTriangle(*this);
+}
+
+bool svlTriangle::IsWithin(int x, int y) const
+{
+    // Test bounding rectangle first; that's fast
+    svlRect bounding;
+    GetBoundingRect(bounding);
+    if (bounding.IsWithin(x, y) == false) return false;
+
+    // Perform proper test next
+    vctFloat2 v0(x3 - x1, y3 - y1);
+    vctFloat2 v1(x2 - x1, y2 - y1);
+    vctFloat2 v2(x - x1, y - y1);
+
+    const float dp00 = v0.DotProduct(v0);
+    const float dp01 = v0.DotProduct(v1);
+    const float dp02 = v0.DotProduct(v2);
+    const float dp11 = v1.DotProduct(v1);
+    const float dp12 = v1.DotProduct(v2);
+
+    float det = dp00 * dp11 - dp01 * dp01;
+    if (det == 0.0f) return false;
+    det = 1.0f / det;
+
+    const float u = (dp11 * dp02 - dp01 * dp12) * det;
+    const float v = (dp00 * dp12 - dp01 * dp02) * det;
+
+    if (u >= 0.0f && v >= 0.0f && (u + v) < 1.0f) return true;
+    return false;
+}
+
+void svlTriangle::GetBoundingRect(svlRect & rect) const
+{
+    rect.left = std::min(std::min(x1, x2), x3);
+    rect.top = std::min(std::min(y1, y2), y3);
+    rect.right = std::max(std::max(x1, x2), x3) + 1;
+    rect.bottom = std::max(std::max(y1, y2), y3) + 1;
 }
 
 void svlTriangle::Assign(const svlTriangle & triangle)
@@ -248,6 +318,7 @@ void svlTriangle::Assign(int x1, int y1, int x2, int y2, int x3, int y3)
 /*********************/
 
 svlQuad::svlQuad() :
+    svlShape(),
     x1(0),
     y1(0),
     x2(0),
@@ -260,6 +331,7 @@ svlQuad::svlQuad() :
 }
 
 svlQuad::svlQuad(int _x1, int _y1, int _x2, int _y2, int _x3, int _y3, int _x4, int _y4) :
+    svlShape(),
     x1(_x1),
     y1(_y1),
     x2(_x2),
@@ -269,6 +341,44 @@ svlQuad::svlQuad(int _x1, int _y1, int _x2, int _y2, int _x3, int _y3, int _x4, 
     x4(_x4),
     y4(_y4)
 {
+}
+
+svlQuad::svlQuad(const svlRect & rect) :
+    svlShape(),
+    x1(rect.left),
+    y1(rect.top),
+    x2(rect.right + 1),
+    y2(rect.top),
+    x3(rect.right + 1),
+    y3(rect.bottom + 1),
+    x4(rect.left),
+    y4(rect.bottom + 1)
+{
+}
+
+svlShape* svlQuad::Clone()
+{
+    return new svlQuad(*this);
+}
+
+bool svlQuad::IsWithin(int x, int y) const
+{
+    svlTriangle tri1(x1, y1, x2, y2, x3, y3);
+    svlTriangle tri2(x3, y3, x4, y4, x1, y1);
+
+    // Test convex case
+    if (tri1.IsWithin(x, y) || tri2.IsWithin(x, y)) return true;
+
+    // TO DO: concave implementation
+    return false;
+}
+
+void svlQuad::GetBoundingRect(svlRect & rect) const
+{
+    rect.left = std::min(std::min(x1, x2), std::min(x3, x4));
+    rect.top = std::min(std::min(y1, y2), std::min(y3, y4));
+    rect.right = std::max(std::max(x1, x2), std::max(x3, x4)) + 1;
+    rect.bottom = std::max(std::max(y1, y2), std::max(y3, y4)) + 1;
 }
 
 void svlQuad::Assign(const svlQuad & quad)
@@ -295,12 +405,25 @@ void svlQuad::Assign(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int
     this->y4 = y4;
 }
 
+void svlQuad::Assign(const svlRect & rect)
+{
+    x1 = rect.left;
+    y1 = rect.top;
+    x2 = rect.right + 1;
+    y2 = rect.top;
+    x3 = rect.right + 1;
+    y3 = rect.bottom + 1;
+    x4 = rect.left;
+    y4 = rect.bottom + 1;
+}
+
 
 /************************/
 /*** svlEllipse class ***/
 /************************/
 
 svlEllipse::svlEllipse() :
+    svlShape(),
     cx(0),
     cy(0),
     rx(0),
@@ -310,12 +433,66 @@ svlEllipse::svlEllipse() :
 }
 
 svlEllipse::svlEllipse(int _cx, int _cy, int _rx, int _ry, double _angle) :
+    svlShape(),
     cx(_cx),
     cy(_cy),
     rx(_rx),
     ry(_ry),
     angle(_angle)
 {
+}
+
+svlShape* svlEllipse::Clone()
+{
+    return new svlEllipse(*this);
+}
+
+bool svlEllipse::IsWithin(int x, int y) const
+{
+    // Test bounding rectangle first; that's fast
+    int maxr = std::max(rx, ry);
+    if (x < (cx - maxr) || x > (cx + maxr) ||
+        y < (cy - maxr) || y > (cy + maxr)) {
+        return false;
+    }
+
+    // Perform proper test next
+    if (angle == 0.0) {
+        double dx = x - cx;
+        double dy = y - cy;
+        double dist = dx * dx / (rx * rx) + dy * dy / (ry * ry);
+
+        if (dist <= 1) return true;
+        else return false;
+    }
+    else {
+        double sa = sin(-angle);
+        double ca = cos(-angle);
+        double dx = x - cx;
+        double dy = y - cy;
+        double dxr = dx * ca - dy * sa;
+        double dyr = dx * sa + dy * ca;
+        double dist = dxr * dxr / (rx * rx) + dyr * dyr / (ry * ry);
+
+        if (dist <= 1) return true;
+        else return false;
+    }
+}
+
+void svlEllipse::GetBoundingRect(svlRect & rect) const
+{
+    double ta = tan(angle);
+    double cta = 1.0 / ta;
+    double sa = sin(angle);
+    double ca = cos(angle);
+    double anx = -atan((double)ry * ta / rx);
+    double any = atan((double)ry * cta / rx);
+    int x = cx + (int)std::ceil(std::abs(rx * cos(anx) * ca - ry * sin(anx) * sa));
+    int y = cy + (int)std::ceil(std::abs(rx * cos(any) * sa + ry * sin(any) * ca));
+    rect.left = (cx << 1) - x;
+    rect.top = (cy << 1) - y;
+    rect.right = x + 1;
+    rect.bottom = y + 1;
 }
 
 void svlEllipse::Assign(const svlEllipse & ellipse)

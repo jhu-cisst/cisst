@@ -95,7 +95,7 @@ bool mtsTaskContinuousConstructorArg::FromStreamRaw(std::istream & inputStream, 
 void * mtsTaskContinuous::RunInternal(void *data)
 {
     if (ExecIn && ExecIn->GetConnectedInterface()) {
-        CMN_LOG_CLASS_RUN_ERROR << "RunInternal for " << this->GetName() 
+        CMN_LOG_CLASS_RUN_ERROR << "RunInternal for " << this->GetName()
                                 << " called, even though task receives thread from "
                                 << ExecIn->GetConnectedInterface()->GetComponent()->GetName() << std::endl;
         return 0;
@@ -187,7 +187,7 @@ void mtsTaskContinuous::Create(void *data)
         // This case occurs when the source task uses the main thread.
         const mtsTask *srcTask = dynamic_cast<const mtsTask *>(ExecIn->GetConnectedInterface()->GetComponent());
         if (srcTask && srcTask->CheckForOwnThread()) {
-            CMN_LOG_CLASS_INIT_VERBOSE << "Create: special case initialization from " 
+            CMN_LOG_CLASS_INIT_VERBOSE << "Create: special case initialization from "
                                        << srcTask->GetName() << std::endl;
             Thread.CreateFromCurrentThread();
             StartupInternal();
@@ -217,7 +217,9 @@ void mtsTaskContinuous::Start(void)
 {
     if (this->State == mtsComponentState::INITIALIZING) {
         WaitToStart(this->InitializationDelay);
-    } else if (this->State == mtsComponentState::READY) {
+    }
+
+    if (this->State == mtsComponentState::READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
         ChangeState(mtsComponentState::ACTIVE);
         if (CaptureThread) {

@@ -1,0 +1,114 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+//
+// $Id: mtsComponentState.h 4170 2013-05-07 14:24:01Z adeguet1 $
+//
+// Author(s):  Anton Deguet
+// Created on: 2010-09-14
+//
+// (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+//
+// --- begin cisst license - do not edit ---
+//
+// This software is provided "as is" under an open source license, with
+// no warranty.  The complete license can be found in license.txt and
+// http://www.cisst.org/cisst/license.txt.
+//
+// --- end cisst license ---
+
+inline-header {
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+}
+
+class {
+    inline-header {
+/*! The possible component states:
+  CONSTRUCTED  -- Initial state set by mtsTask constructor.
+  INITIALIZING -- Set by mtsComponent::Create.  The task stays in this state until the
+                  thread calls mtsTask::RunInternal, which calls mtsTask::StartupInternal
+                  and the user-supplied mtsTask::Startup. If a new thread is created,
+                  the call to mtsTask::RunInternal happens some time after the call
+                  to mtsTask::Create.
+  READY        -- Set by mtsTask::StartupInternal. This means that the task is ready
+                  to be used (i.e., all interfaces have been initialized). Also,
+                  a task can return to the READY state (from the ACTIVE state) in
+                  response to a call to mtsTask::Suspend.
+  ACTIVE       -- Set by mtsTask::Start.  This is the normal running state, where
+                  the task is calling the user-supplied mtsTask::Run method.
+  FINISHING    -- Set by mtsTask::Kill. If the mtsTask::Run method is currently
+                  executing, it will finish, but no further calls will be made.
+                  The task will then call mtsTask::CleanupInternal, which calls
+                  the user-supplied mtsTask::Cleanup. The state will then be set
+                  to FINISHED.
+  FINISHED     -- The task has finished.
+*/
+    }
+
+    name mtsComponentState;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+
+    enum {
+        name Enum;
+        enum-value {
+            name CONSTRUCTED;
+            description constructed;
+        }
+        enum-value {
+            name INITIALIZING;
+            description initializing;
+        }
+        enum-value {
+            name READY;
+            description ready;
+        }
+        enum-value {
+            name ACTIVE;
+            description active;
+        }
+        enum-value {
+            name FINISHING;
+            description finishing;
+        }
+        enum-value {
+            name FINISHED;
+            description finished;
+        }
+    }
+
+    member {
+        name State;
+        type mtsComponentState::Enum;
+    }
+
+    typedef {
+        name ThisType;
+        type mtsComponentState;
+    }
+
+    inline-header {
+        /*! Assignment operator. */
+        const ThisType & operator = (const Enum & value);
+
+        /*! Equality operators */
+        bool operator == (const ThisType & state) const;
+        bool operator != (const ThisType & state) const;
+
+        /*! Lesser or equal operators */
+        bool operator < (const ThisType & state) const;
+        bool operator <= (const ThisType & state) const;
+
+        /*! Greater or equal operators */
+        bool operator > (const ThisType & state) const;
+        bool operator >= (const ThisType & state) const;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsComponentState> mtsComponentStateProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStateProxy);
+}

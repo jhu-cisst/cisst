@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2004-07-02
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2004-07-02
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -187,6 +187,9 @@ public:
     bool operator< (const ThisType & other) const {
         return ((*this) - other) < 0;
     }
+    bool operator<= (const ThisType & other) const {
+        return ((*this) < other) || ((*this) == other);
+    }
 
 
     /*! Equality of iterators, required by STL */
@@ -197,7 +200,10 @@ public:
 
     /*! Complementary operation to operator < */
     bool operator> (const ThisType & other) const {
-        return other < *this;
+        return other < (*this);
+    }
+    bool operator>= (const ThisType & other) const {
+        return ((*this) > other) || ((*this) == other);
     }
 
 

@@ -1,0 +1,361 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+
+#include <cisstCommon/cmnDataFunctionsArray.h>
+#include <cisstVector/vctFixedSizeMatrixTypes.h>
+#include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+#include <cisstStereoVision/svlTypes.h>
+
+// Always include last
+#include <cisstStereoVision/svlExport.h>
+
+namespace svlFilterSourceVideoCaptureTypes {
+    enum PlatformType {
+        WinDirectShow   = 0,
+        WinSVS          = 1,
+        LinVideo4Linux2 = 2,
+        LinLibDC1394    = 3,
+        OpenCV          = 4,
+        MatroxImaging   = 5,
+        BlackMagicDeckLink = 6,
+        NumberOfPlatformTypes
+    };
+
+    enum PixelType {
+        PixelRAW8    = 0,   //  8 bits per pixel
+        PixelRAW16   = 1,   // 16 bits per pixel
+        PixelRGB8    = 2,   // 24 bits per pixel
+        PixelYUV444  = 3,   // 24 bits per pixel
+        PixelYUV422  = 4,   // 16 bits per pixel
+        PixelYUV411  = 5,   // 12 bits per pixel
+        PixelMONO8   = 6,   //  8 bits per pixel
+        PixelMONO16  = 7,   // 16 bits per pixel
+        PixelUnknown = 8,
+        PixelTypeCount
+    };
+
+    enum PatternType {
+        PatternRGGB    = 0,
+        PatternGBRG    = 1,
+        PatternGRBG    = 2,
+        PatternBGGR    = 3,
+        PatternUnknown = 4,
+        PatternTypeCount
+    };
+
+} // namespace
+
+ CMN_DATA_SPECIALIZATION_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PlatformType, int);
+ CMN_DATA_SPECIALIZATION_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PixelType, int);
+ CMN_DATA_SPECIALIZATION_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PatternType, int);
+#if CISST_HAS_JSON
+ CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PlatformType);
+ CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PixelType);
+ CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PatternType);
+#endif
+}
+
+inline-code {
+#if CISST_HAS_JSON
+    CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PlatformType, int);
+    CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PixelType, int);
+    CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PatternType, int);
+#endif
+}
+
+class {
+    name DeviceInfo;
+    namespace svlFilterSourceVideoCaptureTypes;
+    attribute CISST_EXPORT;
+    generate-human-readable false;
+    member {
+        name ID;
+        type int;
+        visibility public;
+    }
+   member {
+        name name;
+        type char[SVL_VCS_STRING_LENGTH];
+        visibility public;
+    }
+   member {
+        name platform;
+        type PlatformType;
+        visibility public;
+    }
+   member {
+        name inputcount;
+        type int;
+        visibility public;
+    }
+   member {
+        name activeinput;
+        type int;
+        visibility public;
+    }
+   member {
+        name inputnames;
+        type char[SVL_VCS_ARRAY_LENGTH][SVL_VCS_STRING_LENGTH];
+        visibility public;
+    }
+   member {
+        name testok;
+        type bool;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCaptureTypes::DeviceInfo> svlFilterSourceVideoCaptureDeviceInfoProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceVideoCaptureDeviceInfoProxy);
+}
+
+
+class {
+    name ExternalTrigger;
+    namespace svlFilterSourceVideoCaptureTypes;
+    attribute CISST_EXPORT;
+    member {
+        name enable;
+        type bool;
+        visibility public;
+    }
+    member {
+        name mode;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name source;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name polarity;
+        type unsigned int;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCaptureTypes::ExternalTrigger> svlFilterSourceVideoCaptureExternalTriggerProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceVideoCaptureExternalTriggerProxy);
+}
+
+
+class {
+    name ImageFormat;
+    namespace svlFilterSourceVideoCaptureTypes;
+    attribute CISST_EXPORT;
+    generate-human-readable false;
+    member {
+        name defaults;
+        type bool;
+        visibility public;
+    }
+    member {
+        name width;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name height;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name colorspace;
+        type svlFilterSourceVideoCaptureTypes::PixelType;
+        visibility public;
+    }
+    member {
+        name framerate;
+        type double;
+        visibility public;
+    }
+    member {
+        name rgb_order;
+        type bool;
+        visibility public;
+    }
+    member {
+        name yuyv_order;
+        type bool;
+        visibility public;
+    }
+    member {
+        name custom_mode;
+        type int;
+        visibility public;
+    }
+    member {
+        name custom_roileft;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name custom_roitop;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name custom_framerate;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name custom_maxwidth;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name custom_maxheight;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name custom_unitwidth;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name custom_unitheight;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name custom_unitleft;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name custom_unittop;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name custom_colorspaces;
+        type PixelType[PixelTypeCount];
+        visibility public;
+    }
+    member {
+        name custom_pattern;
+        type PatternType;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCaptureTypes::ImageFormat> svlFilterSourceVideoCaptureImageFormatProxy;;
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceVideoCaptureImageFormatProxy);
+}
+
+class {
+    name ImageProperties;
+    namespace svlFilterSourceVideoCaptureTypes;
+    attribute CISST_EXPORT;
+    generate-human-readable false;
+    member {
+        name mask;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name manual;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name shutter;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name wb_u_b;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name wb_v_r;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name brightness;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name gamma;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name saturation;
+        type unsigned int;
+        visibility public;
+    }
+    member {
+        name gain;
+        type unsigned int;
+        visibility public;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCaptureTypes::ImageProperties> svlFilterSourceVideoCaptureImagePropertiesProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceVideoCaptureImagePropertiesProxy);
+}
+
+
+class {
+    name Config;
+    namespace svlFilterSourceVideoCaptureTypes;
+    attribute CISST_EXPORT;
+    generate-human-readable false;
+    member {
+        name Channels;
+        type int;
+        visibility public;
+    }
+    member {
+        name Device;
+        type std::vector<int>;
+        visibility public;
+    }
+    member {
+        name Input;
+        type std::vector<int>;
+        visibility public;
+    }
+    member {
+        name Format;
+        type std::vector<svlFilterSourceVideoCaptureTypes::ImageFormat>;
+        visibility public;
+    }
+    member {
+        name Properties;
+        type std::vector<svlFilterSourceVideoCaptureTypes::ImageProperties>;
+        visibility public;
+    }
+    member {
+        name Trigger;
+        type std::vector<svlFilterSourceVideoCaptureTypes::ExternalTrigger>;
+        visibility public;
+    }
+    inline-header {
+        void SetChannels(const int channels);
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCaptureTypes::Config> svlFilterSourceVideoCaptureConfigProxy;;
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceVideoCaptureConfigProxy);
+}
+
+
+
+

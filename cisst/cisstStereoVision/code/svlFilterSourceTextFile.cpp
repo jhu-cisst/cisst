@@ -37,7 +37,7 @@ svlFilterSourceTextFile::svlFilterSourceTextFile() :
     ErrorValue(-1000000.0)
 {
     CreateInterfaces();
-    
+
     AddOutput("output", true);
     SetAutomaticOutputType(false);
     GetOutput()->SetType(svlTypeMatrixFloat);
@@ -326,7 +326,7 @@ int svlFilterSourceTextFile::Release()
 
     if (Timer.IsRunning()) Timer.Stop();
     StopTargetTimer();
-    
+
     return SVL_OK;
 }
 
@@ -354,7 +354,7 @@ void svlFilterSourceTextFile::CreateInterfaces()
     }
 }
 
-
+#if 0
 /***********************************************/
 /*** svlFilterSourceTextFile::FileInfo class ***/
 /***********************************************/
@@ -385,19 +385,5 @@ void svlFilterSourceTextFile::FileInfo::Assign(const std::string & _filepath, co
     if (_timestamp_overflow_value < 0.0) timestamp_overflow_value = pow(2.0, 100);
     else timestamp_overflow_value = _timestamp_overflow_value;
 }
-
-
-/****************************/
-/*** Stream out operators ***/
-/****************************/
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceTextFile::FileInfo & objref)
-{
-    stream << "File path: " << objref.filepath << std::endl
-           << "Timestamp column: " << objref.timestamp_column << std::endl
-           << "Timestamp unit: " << objref.timestamp_unit << std::endl
-           << "Timestamp overflow value: " << objref.timestamp_overflow_value << std::endl;
-
-    return stream;
-}
+#endif
 

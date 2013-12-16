@@ -116,13 +116,13 @@ protected:
     bool ReceiveFindComponent(const std::string & processName, const std::string & componentName) const;
     bool ReceiveRemoveComponent(const std::string & processName, const std::string & componentName);
 
-    bool ReceiveAddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool ReceiveFindInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
-    bool ReceiveRemoveInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool ReceiveAddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool ReceiveFindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool ReceiveRemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
-    bool ReceiveAddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
-    bool ReceiveFindInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
-    bool ReceiveRemoveInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool ReceiveAddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool ReceiveFindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool ReceiveRemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
 
     /*! Connection Management */
     ::Ice::Int ReceiveConnect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet);
@@ -135,7 +135,7 @@ protected:
     bool ReceiveGetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
     bool ReceiveGetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName,
-        const std::string & serverInterfaceProvidedName, std::string & endpointInfo);
+        const std::string & serverInterfaceName, std::string & endpointInfo);
     bool ReceiveInitiateConnect(const ConnectionIDType connectionID);
     bool ReceiveConnectServerSideInterfaceRequest(const ConnectionIDType connectionID);
 
@@ -152,16 +152,16 @@ public:
 
     /*! Data structure converters */
     static void ConvertInterfaceProvidedDescription(
-        const ::mtsManagerProxy::InterfaceProvidedDescription & src, InterfaceProvidedDescription & dest);
+        const ::mtsManagerProxy::InterfaceProvidedDescription & src, mtsInterfaceProvidedDescription & dest);
 
     static void ConvertInterfaceRequiredDescription(
-        const ::mtsManagerProxy::InterfaceRequiredDescription & src, InterfaceRequiredDescription & dest);
+        const ::mtsManagerProxy::InterfaceRequiredDescription & src, mtsInterfaceRequiredDescription & dest);
 
     static void ConstructInterfaceProvidedDescriptionFrom(
-        const InterfaceProvidedDescription & src, ::mtsManagerProxy::InterfaceProvidedDescription & dest);
+        const mtsInterfaceProvidedDescription & src, ::mtsManagerProxy::InterfaceProvidedDescription & dest);
 
     static void ConstructInterfaceRequiredDescriptionFrom(
-        const InterfaceRequiredDescription & src, ::mtsManagerProxy::InterfaceRequiredDescription & dest);
+        const mtsInterfaceRequiredDescription & src, ::mtsManagerProxy::InterfaceRequiredDescription & dest);
 
     //-------------------------------------------------------------------------
     //  Implementation of mtsManagerLocalInterface
@@ -174,10 +174,10 @@ public:
     bool RemoveComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
 
     bool CreateInterfaceProvidedProxy(const std::string & serverComponentProxyName,
-        const InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        const mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
     bool CreateInterfaceRequiredProxy(const std::string & clientComponentProxyName,
-        const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        const mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
     bool RemoveInterfaceProvidedProxy(
         const std::string & componentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "");
@@ -193,10 +193,10 @@ public:
     //  Getters
     bool GetInterfaceProvidedDescription(
         const std::string & serverComponentName, const std::string & providedInterfaceName,
-        InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
     bool GetInterfaceRequiredDescription(const std::string & componentName, const std::string & requiredInterfaceName,
-        InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
     const std::string GetProcessName(const std::string & listenerID = "") const;
 
@@ -413,13 +413,13 @@ protected:
         bool FindComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current & CMN_UNUSED(current)) const;
         bool RemoveComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current & CMN_UNUSED(current));
 
-        bool AddInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
-        bool FindInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
-        bool RemoveInterfaceProvided(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
+        bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
+        bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
+        bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
 
-        bool AddInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & current);
-        bool FindInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current &) const;
-        bool RemoveInterfaceRequired(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & current);
+        bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & current);
+        bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current &) const;
+        bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & current);
 
         /*! Connection Management */
         ::Ice::Int Connect(const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet, const ::Ice::Current & current);
@@ -431,7 +431,7 @@ protected:
         bool SetInterfaceProvidedProxyAccessInfo(::Ice::Int connectionID, const std::string & endpointInfo, const ::Ice::Current & current);
         bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
             const std::string & serverProcessName, const std::string & serverComponentName,
-            const std::string & serverInterfaceProvidedName, std::string & endpointInfo, const ::Ice::Current & current);
+            const std::string & serverInterfaceName, std::string & endpointInfo, const ::Ice::Current & current);
         bool GetInterfaceProvidedProxyAccessInfoWithID(::Ice::Int connectionID, std::string & endpointInfo, const ::Ice::Current & current);
         bool InitiateConnect(::Ice::Int connectionID, const ::Ice::Current & current);
         bool ConnectServerSideInterfaceRequest(::Ice::Int connectionID, const ::Ice::Current & current);

@@ -3,7 +3,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -46,6 +46,9 @@ class CISST_EXPORT robDH : public robKinematics {
      \param is The input stream
   */
   void ReadParameters( std::istream& is );
+#if CISST_HAS_JSON
+  void ReadParameters(const Json::Value &config);
+#endif
   
   //! Write the parameters to an output stream
   /**

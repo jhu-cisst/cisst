@@ -7,7 +7,7 @@ $Id$
 Author(s):  Wen P. Liu
 Created on: 2011
 
-(C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+(C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
 Reserved.
 
 --- begin cisst license - do not edit ---
@@ -157,17 +157,17 @@ void svlVidCapSrcBMD::GetWidthHeightfromBMDDisplayMode(const BMDPixelFormat disp
     {
         case bmdModeNTSC2398:
         case bmdModeHD1080p2398:
-        case bmdMode2k2398:	
+        case bmdMode2k2398:
             frameRate_out = 23.98;
         break;
 
-        case bmdModeHD1080p24:	
-        case bmdMode2k24:	
+        case bmdModeHD1080p24:
+        case bmdMode2k24:
             frameRate_out = 24.0;
         break;
 
-        case bmdModeHD1080p25:	
-        case bmdMode2k25:	
+        case bmdModeHD1080p25:
+        case bmdMode2k25:
             frameRate_out = 25.0;
         break;
 
@@ -182,20 +182,20 @@ void svlVidCapSrcBMD::GetWidthHeightfromBMDDisplayMode(const BMDPixelFormat disp
         break;
 
         case bmdModeHD1080i50:
-        case bmdModeHD1080p50:	
-        case bmdModeHD720p50:	
+        case bmdModeHD1080p50:
+        case bmdModeHD720p50:
         case bmdModePALp:
             frameRate_out = 50.0;
         break;
 
         case bmdModeHD1080i5994:
-        case bmdModeHD1080p5994:	
+        case bmdModeHD1080p5994:
         case bmdModeHD720p5994:
             frameRate_out = 59.94;
         break;
 
         case bmdModeHD1080i6000:
-        case bmdModeHD1080p6000:	
+        case bmdModeHD1080p6000:
         case bmdModeHD720p60:
         case bmdModeNTSCp:
             frameRate_out = 60;
@@ -223,7 +223,7 @@ IDeckLinkIterator* svlVidCapSrcBMD::GetIDeckLinkIterator()
         return 0;
     }
 #else
-    deckLinkIterator = CreateDeckLinkIteratorInstance();	
+    deckLinkIterator = CreateDeckLinkIteratorInstance();
 #endif // (CISST_OS == CISST_WINDOWS)
 
     return deckLinkIterator;
@@ -231,7 +231,7 @@ IDeckLinkIterator* svlVidCapSrcBMD::GetIDeckLinkIterator()
 
 svlFilterSourceVideoCapture::PlatformType svlVidCapSrcBMD::GetPlatformType()
 {
-    return svlFilterSourceVideoCapture::BlackMagicDeckLink;
+    return svlFilterSourceVideoCaptureTypes::BlackMagicDeckLink;
 }
 
 int svlVidCapSrcBMD::SetStreamCount(unsigned int numofstreams)
@@ -263,9 +263,9 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
         printf("svlVidCapSrcBMD::GetDeviceList() called\n");
     if (deviceinfo == 0 || Initialized) return SVL_FAIL;
 
-    IDeckLinkIterator*			deckLinkIterator = GetIDeckLinkIterator();
-    IDeckLink*					deckLink;
-    HRESULT						result;
+    IDeckLinkIterator * deckLinkIterator = GetIDeckLinkIterator();
+    IDeckLink * deckLink;
+    HRESULT result;
 
     // Enumerate all cards in this system
     while (deckLinkIterator->Next(&deckLink) == S_OK)
@@ -295,12 +295,14 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             // name
             if(result!= S_OK)
                 description = "BlackMagic DeckLink";
-            else
-                description = (char *) deviceNameBSTR;
+            else {
+                std::wstring name(deviceNameBSTR);
+                description = std::string(name.begin(), name.end());
+            }
 
 #else
 #if (CISST_OS == CISST_LINUX)
-            char *		deviceNameString = NULL;
+            char * deviceNameString = NULL;
             result = deckLink->GetModelName((const char **)(&deviceNameString));
             // name
             if (result != S_OK)
@@ -322,7 +324,7 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
 #endif // WIN32
 
             // platform
-            deviceinfo[0][i].platform = svlFilterSourceVideoCapture::BlackMagicDeckLink;
+            deviceinfo[0][i].platform = svlFilterSourceVideoCaptureTypes::BlackMagicDeckLink;
 
             // id
             deviceinfo[0][i].ID = i;
@@ -367,7 +369,7 @@ int svlVidCapSrcBMD::Open()
 
     HRESULT result;
 
-    IDeckLinkIterator* deckLinkIterator = GetIDeckLinkIterator();
+    IDeckLinkIterator * deckLinkIterator = GetIDeckLinkIterator();
     if (!deckLinkIterator) {
         std::cerr << "svlVidCapSrcBMD::Open - GetIDeckLinkIterator() returned error" << std::endl;
         goto labError;
@@ -507,10 +509,10 @@ int svlVidCapSrcBMD::SetDevice(int devid, int CMN_UNUSED(inid), unsigned int vid
     DeviceID[videoch] = devid;
     // Input ID is ignored
 
-    if(supported_displayModes.empty()){
-        svlFilterSourceVideoCapture::ImageFormat *formatlist;
+    if (supported_displayModes.empty()) {
+        svlFilterSourceVideoCapture::ImageFormat * formatlist;
         GetFormatList(devid, &formatlist);
-        delete formatlist;
+        delete [] formatlist;
     }
 
     return SVL_OK;
@@ -532,66 +534,48 @@ int svlVidCapSrcBMD::GetHeight(unsigned int videoch)
 int svlVidCapSrcBMD::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist)
 {
     if (formatlist == 0) return SVL_FAIL;
-
-
-    IDeckLinkIterator*			deckLinkIterator = GetIDeckLinkIterator();
-
+    IDeckLinkIterator * deckLinkIterator = GetIDeckLinkIterator();
     IDeckLink * current_decklink;
 
     unsigned int i = 0;
-    do{
+    do {
         deckLinkIterator->Next(&current_decklink);
         i++;
-    }while(i < deviceid);
-
+    } while (i < deviceid);
 
     IDeckLinkInput * current_input;
-
     current_decklink->QueryInterface(IID_IDeckLinkInput,(void **)&current_input);
-
-
     IDeckLinkDisplayModeIterator * iterator = NULL;
-
     current_input->GetDisplayModeIterator(&iterator);
-
     IDeckLinkDisplayMode * temp_displaymode = NULL;
 
     supported_displayModes.clear();
     //bmdDisplayMode_lookup.clear();
     width_height_framerate_lookup.clear();
 
-    do{
-
+    do {
         iterator->Next(&temp_displaymode);
-
-        if(temp_displaymode != NULL){
+        if (temp_displaymode != NULL) {
             supported_displayModes.push_back(temp_displaymode->GetDisplayMode());
-
-            long int numerator = 0;
-            long int denominator = 0;
-
-            temp_displaymode->GetFrameRate(&denominator,&numerator);
-
+            BMDTimeValue numerator = 0;
+            BMDTimeValue denominator = 0;
+            temp_displaymode->GetFrameRate(&denominator, &numerator);
             //bmdDisplayMode_lookup[width_height_framerate(temp_displaymode->GetWidth(),temp_displaymode->GetHeight(),(double)numerator/(double)denominator)] = temp_displaymode->GetDisplayMode();
             width_height_framerate_lookup[temp_displaymode->GetDisplayMode()] = width_height_framerate(temp_displaymode->GetWidth(),temp_displaymode->GetHeight(),(double)numerator/(double)denominator);
         }
-
-    }while(temp_displaymode != NULL);
-
-
+    } while (temp_displaymode != NULL);
 
     formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[supported_displayModes.size()];
-
     //int current_width = 0;
     //int current_height = 0;
     //double current_frameRate = 0;
 
-    for(int i = 0; i <  supported_displayModes.size();i++){
+    for (int i = 0; i < supported_displayModes.size(); i++) {
         //GetWidthHeightfromBMDDisplayMode(supported_displayModes.at(i),current_width,current_height,current_frameRate);
         width_height_framerate temp_width_height_framerate = width_height_framerate_lookup[supported_displayModes.at(i)];
         formatlist[0][i].width = temp_width_height_framerate.width;
         formatlist[0][i].height = temp_width_height_framerate.height;
-        formatlist[0][i].colorspace = svlFilterSourceVideoCapture::PixelRGB8;
+        formatlist[0][i].colorspace = svlFilterSourceVideoCaptureTypes::PixelRGB8;
         formatlist[0][i].rgb_order = true;
         formatlist[0][i].yuyv_order = false;
         formatlist[0][i].framerate = temp_width_height_framerate.framerate;
@@ -608,7 +592,7 @@ int svlVidCapSrcBMD::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
 
     format.width = width;
     format.height = height;
-    format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
+    format.colorspace = svlFilterSourceVideoCaptureTypes::PixelRGB8;
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = frameRate;
@@ -627,7 +611,7 @@ int svlVidCapSrcBMD::SetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
     height = format.height;
     frameRate = format.framerate;
 
-    displayMode = format.custom_framerate;//bmdDisplayMode_lookup[width_height_framerate(width,height,frameRate)];
+    displayMode = static_cast<BMDDisplayMode> (format.custom_framerate);//bmdDisplayMode_lookup[width_height_framerate(width,height,frameRate)];
 
     return SVL_OK;
 }
@@ -722,5 +706,4 @@ void DeckLinkCaptureDelegate::processVideoFrame(IDeckLinkVideoInputFrame* videoF
         m_buffer->Push();
     }
 }
-
 

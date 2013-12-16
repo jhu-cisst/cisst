@@ -132,6 +132,20 @@ void robHayati::ReadParameters( std::istream& is ) {
   if( this->alpha ==  1.5708 ) this->alpha =  cmnPI_2;
 }
 
+#if CISST_HAS_JSON
+void robHayati::ReadParameters(const Json::Value &config)
+{
+    this->alpha = config.get("alpha", "0.00").asDouble();
+    this->beta = config.get("beta", "0.00").asDouble();
+    this->theta = config.get("theta", "0.00").asDouble();
+    this->d = config.get("D", "0.00").asDouble();
+
+    // just make sure we're accureate
+    if( this->alpha == -1.5708 ) this->alpha = -cmnPI_2;
+    if( this->alpha ==  1.5708 ) this->alpha =  cmnPI_2;
+}
+#endif // CISST_HAS_JSON
+
 void robHayati::WriteParameters( std::ostream& os ) const {
   os << std::setw(10) << "HAYATI"
      << std::setw(10) << alpha 

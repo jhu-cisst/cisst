@@ -46,9 +46,9 @@ const std::string & cdgField::GetValue(void) const
 }
 
 
-bool cdgField::SetValue(const std::string & value, std::string & errorMessage)
+bool cdgField::SetValue(const std::string & value, std::string & errorMessage, const bool & allowOverwrite)
 {
-    if (!this->Value.empty()) {
+    if (!this->Value.empty() && !allowOverwrite) {
         errorMessage = Keyword + " already set";
         return false;
     }

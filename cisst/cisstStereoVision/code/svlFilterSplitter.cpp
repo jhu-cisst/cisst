@@ -31,13 +31,12 @@ http://www.cisst.org/cisst/license.txt.
 /**************************************/
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterSplitter, svlFilterBase)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSplitter_OutputInfo)
 
 svlFilterSplitter::svlFilterSplitter() :
     svlFilterBase()
 {
     CreateInterfaces();
-    
+
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageRGBA);
@@ -164,18 +163,3 @@ void svlFilterSplitter::AddOutputCommand(const svlFilterSplitter::OutputInfo & o
                                  << std::endl;
     }
 }
-
-
-/****************************/
-/*** Stream out operators ***/
-/****************************/
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSplitter::OutputInfo & objref)
-{
-    stream << "Output name: " << objref.name << std::endl
-           << "Thread count: " << objref.threadcount << std::endl
-           << "Buffer size: " << objref.buffersize << std::endl;
-
-    return stream;
-}
-

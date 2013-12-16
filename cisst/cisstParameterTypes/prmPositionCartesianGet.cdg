@@ -1,0 +1,82 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+// You can use C++ like comments in your data file.
+// 'inline-header' can be used to insert any code in the generated header file.
+// All snippets of code provided will be used in the same order in the generated header file.
+// In general, the cisst data generator preserves the order of declaration, i.e. the generated
+// code follows the order of declaration in the data file.
+inline-header {
+#include <cisstVector/vctDataFunctions.h>
+#include <cisstParameterTypes/prmTransformationBase.h>
+#include <cisstParameterTypes/prmTransformationManager.h>
+
+// Always include last
+#include <cisstParameterTypes/prmExport.h>
+}
+
+// 'class' is used to create a new class.  there can be multiple classes defined in the same file
+class {
+    // 'name' is always required, it will be used to name the class
+    name prmPositionCartesianGet; // required
+
+    // 'attribute' is optional
+    // - the generated code will be "class CISST_EXPORT prmPositionCartesianGet
+    // - this is useful mostly on Windows to create DLLs 
+    attribute CISST_EXPORT;
+
+    // 'base-class' is optional
+    // - you can have multiple base classes
+    // - there is an extra option called 'visibility' which can be 'public', 'private', 'protected'
+    // - the option 'is-data' indicates if the base class is itself a cisst data type and therefore
+    //   supports serialization, de-serialization, ...
+    base-class {
+        type mtsGenericObject;
+        is-data true;
+    }
+
+    // 'member' is used to declare data members
+    // - 'name' is required
+    // - 'type' is required, can be any C/C++ type
+    // - 'is-data' is similar to 'is-data' for a base class, it tells the generator to use or not
+    //   use the cisst data functions for that member.  The default is 'true'
+    // - 'description' is anything you want but shouldn't have a ;
+    member {
+        name MovingFrame;
+        type prmTransformationBasePtr;
+        default 0;
+        is-data false;
+        description Pointer to moving frame, unused;
+    }
+
+    // see previous 'member'.  These two have been added for backward compatibility only
+    member {
+        name ReferenceFrame;
+        type prmTransformationBasePtr;
+        default 0;
+        is-data false;
+        description Pointer to reference frame, unused;
+    }
+
+    // an actual member, here 'is-data' is implicitely set to 'true'
+    member {
+        name Position;
+        type vctFrm3;
+        description Desired position;
+    }
+
+    // For any type derived from cmnGenericObject we need to add some code in the header file
+    // Note that if you decided to use the 'proxy' approach for cisstMultiTask, you would have to
+    // replace this code by something like:
+    //     typedef mtsGenericObjectProxy<MyClass> mtsMyClassProxy;
+    //     CMN_DECLARE_SERVICES_INSTANTIATION(mtsMyClassProxy)
+    inline-header {
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+
+// inline code added outside the class's scope
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(prmPositionCartesianGet);
+}

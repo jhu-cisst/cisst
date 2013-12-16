@@ -96,17 +96,22 @@ int svlFilterImageCropper::SetCenter(int x, int y, unsigned int videoch)
                      videoch);
 }
 
-int svlFilterImageCropper::SetCenter(int x, int y, int rx, int ry, unsigned int videoch)
+int svlFilterImageCropper::OnChangeCenter(int x, int y, unsigned int videoch)
 {
-    if (IsInitialized() ) {
-        return SetCenter(x, y, videoch);
+    return SetCenter(x, y, videoch);
+}
+
+int svlFilterImageCropper::OnChangeCenterRect(const svlRect & rect, unsigned int videoch)
+{
+    if (IsInitialized()) {
+        return SetCenter((rect.left + rect.right + 1) / 2, (rect.top + rect.bottom + 1) / 2, videoch);
     }
     else {
-        return SetRectangle(x - rx, y - ry, x + rx, y + ry, videoch);
+        return SetRectangle(rect, videoch);
     }
 }
 
-svlRect  svlFilterImageCropper::GetRectangle(unsigned int videoch) {
+svlRect svlFilterImageCropper::GetRectangle(unsigned int videoch) {
 
     if (videoch >= Rectangles.size()) {
         CMN_LOG_CLASS_RUN_ERROR << "Requested channel does not exist"<<std::endl;

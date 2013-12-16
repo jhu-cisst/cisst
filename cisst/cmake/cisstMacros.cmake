@@ -666,15 +666,14 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     # make sure the target existsOUTPUT_NAME
     if (TARGET cisstDataGenerator)
       # if the target exists, use its destination
+      cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
       get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
-    else (TARGET cisstDataGenerator)
-      message (SEND_ERROR "To use the cisst_data_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstDataGenerator")
     endif (TARGET cisstDataGenerator)
   else (TARGET cisstCommon)
-    # assumes this is an external project, find using the path provided in cisst-config.cmake
-    find_program (CISST_DG_EXECUTABLE cisstDataGenerator
-                  PATHS "${CISST_BINARY_DIR}/bin")
+    cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
+    find_program (CISST_DG_EXECUTABLE cisstDataGenerator HINTS "${CISST_BINARY_DIR}/bin")
   endif (TARGET cisstCommon)
+  cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator executable found: ${CISST_DG_EXECUTABLE}")
 
   # loop over input files
   foreach (input ${ARGV})
@@ -683,21 +682,24 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     get_filename_component (INPUT_WE "${input}" NAME_WE)
     set (input_absolute "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
     # create output name and concatenate to list available in parent scope
-    file (MAKE_DIRECTORY "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${GENERATED_FILES_VAR_PREFIX}")
+    set (FULL_GENERATED_INCLUDE_DIRECTORY "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}")
+    file (MAKE_DIRECTORY ${FULL_GENERATED_INCLUDE_DIRECTORY})
+    cisst_cmake_debug ("cisst_data_generator: creating directory for generated header file ${FULL_GENERATED_INCLUDE_DIRECTORY}")
     set (header_absolute "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h")
-    set (code_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.cpp")
+    set (code_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}_cdg.cpp")
     cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute}")
     set (GENERATED_FILES ${GENERATED_FILES} ${code_absolute} ${header_absolute})
     set (GENERATED_FILES_HDRS ${GENERATED_FILES_HDRS} "${INPUT_WE}.h")
     # tell cmake the output is generated and how to generate it
     set_source_files_properties (${header_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
+    set_source_files_properties ("${INPUT_WE}.h" PROPERTIES GENERATED 1)
     add_custom_command (OUTPUT ${header_absolute} ${code_absolute}
                         COMMAND "${CISST_DG_EXECUTABLE}"
                         --verbose
                         --input ${input_absolute}
                         --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
-                        --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}.cpp
+                        --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}_cdg.cpp
                         MAIN_DEPENDENCY ${input}
                         DEPENDS ${CISST_DG_EXECUTABLE}
                         COMMENT "cisstDataGenerator for ${INPUT_WE}")
@@ -845,7 +847,10 @@ macro (cisst_find_saw_component ...)
   endif ()
 
    # Search using user arguments with our hints
-  find_package(${ARGV} HINTS ${_cfc_INSTALLED_PATH} "${CISST_BINARY_DIR}/../saw/components/")
+  find_package (${ARGV}
+                HINTS ${_cfc_INSTALLED_PATH}
+                "${CISST_BINARY_DIR}/../saw/components/"
+                "${CISST_BINARY_DIR}/../saw/applications/")
 
   if (${ARGV0}_FOUND)
     if (${${ARGV0}_DIR} STREQUAL ${_cfc_INSTALLED_PATH})

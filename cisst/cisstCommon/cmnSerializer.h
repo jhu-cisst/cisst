@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -181,6 +180,11 @@ public:
      */
     cmnSerializer(std::ostream & outputStream);
 
+    /*! Destructor */
+    ~cmnSerializer();
+
+    /*! Reset the list of types already sent. */
+    void Reset(void);
 
     /*! Serialize an object.  This method will first verify that the
       information (cmnClassServices) related to the class of the

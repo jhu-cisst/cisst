@@ -23,6 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstRobot/robKinematics.h>
 #include <cisstRobot/robMass.h>
 
+#if CISST_HAS_JSON
+#include <json/json.h>
+#endif
+
 #include <cisstRobot/robExport.h>
 
 //! A robot link
@@ -77,6 +81,10 @@ class CISST_EXPORT robLink {
      body principal axis (9 double): 
   */
   robLink::Errno Read( std::istream& is );
+
+#if CISST_HAS_JSON
+  robLink::Errno Read( const Json::Value & linkConfig );
+#endif
   
   //! Write the DH and body parameters
   robLink::Errno Write( std::ostream& os ) const;

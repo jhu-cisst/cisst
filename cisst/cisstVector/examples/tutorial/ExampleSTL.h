@@ -23,7 +23,7 @@ void ExampleSTL(void) {
     typedef vctFixedSizeVector<double, 6> VectorType;
 
     VectorType vector1;
-    int value = vector1.size();
+    size_t value = vector1.size();
     const VectorType::iterator end = vector1.end();
     VectorType::iterator iter;
     // fill with numbers using iterators

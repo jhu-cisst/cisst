@@ -67,7 +67,7 @@ svlVidCapSrcDirectShow::~svlVidCapSrcDirectShow()
 
 svlFilterSourceVideoCapture::PlatformType svlVidCapSrcDirectShow::GetPlatformType()
 {
-    return svlFilterSourceVideoCapture::WinDirectShow;
+    return svlFilterSourceVideoCaptureTypes::WinDirectShow;
 }
 
 int svlVidCapSrcDirectShow::SetStreamCount(unsigned int numofstreams)
@@ -241,7 +241,7 @@ int svlVidCapSrcDirectShow::GetDeviceList(svlFilterSourceVideoCapture::DeviceInf
             if (TestOpen(i) == SVL_OK) {
                 deviceinfo[0][i].ID = i;
                 deviceinfo[0][i].testok = true;
-                deviceinfo[0][i].platform = svlFilterSourceVideoCapture::WinDirectShow;
+                deviceinfo[0][i].platform = svlFilterSourceVideoCaptureTypes::WinDirectShow;
                 GetDeviceInputs(pTestCapFilt, deviceinfo[0] + i);
                 TestClose();
             }
@@ -565,6 +565,9 @@ int svlVidCapSrcDirectShow::AssembleGraph()
             CapHeight[i] = videoinfo->bmiHeader.biHeight;
             CapTopDown[i] = true;
         }
+        /*CapWidth[i] = 640;
+        CapHeight[i] = 480;
+        CapTopDown[i] = true;*/
         CoTaskMemFree(mediatype.pbFormat);
 
         // Setup output buffer and frame callback

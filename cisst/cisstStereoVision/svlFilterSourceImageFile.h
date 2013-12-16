@@ -3,9 +3,9 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
-  Created on: 2006 
+  Created on: 2006
 
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterSourceImageFile_h
 
 #include <cisstStereoVision/svlFilterSourceBase.h>
+#include <cisstStereoVision/svlFilterSourceImageFileTypes.h>
 #include <cisstStereoVision/svlImageIO.h>
 
 // Always include last!
@@ -35,14 +36,7 @@ class CISST_EXPORT svlFilterSourceImageFile : public svlFilterSourceBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    typedef struct _FileInfo {
-        std::string  path_prefix;
-        std::string  path_extension;
-        unsigned int sequence_digits;
-        unsigned int sequence_from;
-        unsigned int sequence_to;
-        unsigned int channel;
-    } FileInfo;
+    typedef svlFilterSourceImageFileTypes::FileInfo FileInfo;
 
 public:
     svlFilterSourceImageFile();
@@ -87,14 +81,6 @@ protected:
     virtual void GetDimensionsRCommand(vctInt2 & dimensions) const;
 };
 
-typedef mtsGenericObjectProxy<svlFilterSourceImageFile::FileInfo> svlFilterSourceImageFile_FileInfo;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceImageFile_FileInfo);
-
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceImageFile)
 
-
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceImageFile::FileInfo & objref);
-
-
 #endif // _svlFilterSourceImageFile_h
-

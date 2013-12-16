@@ -7,8 +7,11 @@
 
 #include <cisstVector/vctFrame4x4.h>
 #include <cisstVector/vctMatrixRotation3.h>
-
 #include <cisstRobot/robJoint.h>
+
+#if CISST_HAS_JSON
+#include <json/json.h>
+#endif
 
 #include <cisstRobot/robExport.h>
 
@@ -24,7 +27,8 @@ class CISST_EXPORT robKinematics : public robJoint {
     UNDEFINED,
     STANDARD_DH,
     MODIFIED_DH,
-    HAYATI
+    HAYATI,
+    MODIFIED_HAYATI
   };
 
  private:
@@ -36,6 +40,9 @@ class CISST_EXPORT robKinematics : public robJoint {
   
   //! Read the parameters of the kinematics convention
   virtual void ReadParameters( std::istream& is ) = 0;
+#if CISST_HAS_JSON
+  virtual void ReadParameters(const Json::Value &config) = 0;
+#endif
   
   //! Write the parameters of the kinematics convention
   virtual void WriteParameters( std::ostream& os ) const = 0;
@@ -56,6 +63,9 @@ class CISST_EXPORT robKinematics : public robJoint {
 
   //! Read the kinematics parameters and joints parameters
   robKinematics::Errno Read( std::istream& is );
+#if CISST_HAS_JSON
+  robKinematics::Errno Read(const Json::Value &config);
+#endif
 
   //! Write the kinematics parameters and joints parameters
   robKinematics::Errno Write( std::ostream& os ) const;

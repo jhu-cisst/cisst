@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
 
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterSplitter_h
 
 #include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlFilterSplitterTypes.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -34,11 +35,7 @@ class CISST_EXPORT svlFilterSplitter : public svlFilterBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    typedef struct _OutputInfo {
-        std::string  name;
-        unsigned int threadcount;
-        unsigned int buffersize;
-    } OutputInfo;
+    typedef svlFilterSplitterTypes::OutputInfo OutputInfo;
 
 public:
     svlFilterSplitter();
@@ -58,14 +55,7 @@ protected:
     virtual void AddOutputCommand(const OutputInfo & output);
 };
 
-typedef mtsGenericObjectProxy<svlFilterSplitter::OutputInfo> svlFilterSplitter_OutputInfo;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSplitter_OutputInfo);
-
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSplitter)
-
-
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSplitter::OutputInfo & objref);
-
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSplitter);
 
 #endif // _svlFilterSplitter_h
 

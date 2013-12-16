@@ -406,6 +406,14 @@ http://www.cisst.org/cisst/license.txt.
 
 // Wrap tasks and components
 %include "cisstMultiTask/mtsComponent.h"
+
+%template(mtsComponentConstructorNameAndInt) mtsComponentConstructorNameAndArg<int>;
+%template(mtsComponentConstructorNameAndUInt) mtsComponentConstructorNameAndArg<unsigned int>;
+%template(mtsComponentConstructorNameAndLong) mtsComponentConstructorNameAndArg<long>;
+%template(mtsComponentConstructorNameAndULong) mtsComponentConstructorNameAndArg<unsigned long>;
+%template(mtsComponentConstructorNameAndDouble) mtsComponentConstructorNameAndArg<double>;
+%template(mtsComponentConstructorNameAndString) mtsComponentConstructorNameAndArg<std::string>;
+
 %extend mtsComponent {
     %pythoncode {
         def UpdateFromC(self):
@@ -424,10 +432,10 @@ http://www.cisst.org/cisst/license.txt.
                     self.__dict__[interfaceNoSpace].UpdateFromC()
 
         def AddInterfaceRequiredFromProvided(self, interfaceProvided):
-            if not isinstance(interfaceProvided, InterfaceProvidedDescription):
-                print 'Parameter must be of type InterfaceProvidedDescription'
+            if not isinstance(interfaceProvided, mtsInterfaceProvidedDescription):
+                print 'Parameter must be of type mtsInterfaceProvidedDescription'
                 return
-            interfaceProvidedNoSpace = interfaceProvided.InterfaceProvidedName.replace(' ', '')
+            interfaceProvidedNoSpace = interfaceProvided.InterfaceName.replace(' ', '')
             interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvidedNoSpace, MTS_OPTIONAL)
             if not interfaceRequired:
                 return
@@ -477,7 +485,7 @@ http://www.cisst.org/cisst/license.txt.
                         print 'Could not get manager component services'
                         return
                     interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
-                    if not interfaceDescription.InterfaceProvidedName:
+                    if not interfaceDescription.InterfaceName:
                         print 'No provided interface (empty string)'
                         return
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
@@ -504,7 +512,7 @@ public:
     ~mtsComponentWithManagement();
 };
 
-%include "cisstMultiTask/mtsInterfaceProvidedOrOutput.h"
+%include "cisstMultiTask/mtsInterface.h"
 %include "cisstMultiTask/mtsInterfaceProvided.h"
 %extend mtsInterfaceProvided {
     %pythoncode {
@@ -534,7 +542,6 @@ public:
     }
 }
 
-%include "cisstMultiTask/mtsInterfaceRequiredOrInput.h"
 %include "cisstMultiTask/mtsInterfaceRequired.h"
 %extend mtsInterfaceRequired {
     %pythoncode {
@@ -779,21 +786,16 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionComponentClassVecProxy, mtsDe
 %include "cisstMultiTask/mtsComponentState.h"
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsComponentStateProxy, mtsComponentState);
 
-%extend mtsComponentState {
-    // ToString gets renamed to __str__
-    std::string ToString(void) const { return mtsComponentState::ToString($self->GetState()); }
-}
-
 %include "cisstMultiTask/mtsInterfaceCommon.h"
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(InterfaceProvidedDescriptionProxy, InterfaceProvidedDescription);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(InterfaceRequiredDescriptionProxy, InterfaceRequiredDescription);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsInterfaceProvidedDescriptionProxy, mtsInterfaceProvidedDescription);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsInterfaceRequiredDescriptionProxy, mtsInterfaceRequiredDescription);
 
-%template(CommandVoidVector)          std::vector<CommandVoidElement>;
-%template(CommandWriteVector)         std::vector<CommandWriteElement>;
-%template(CommandReadVector)          std::vector<CommandReadElement>;
-%template(CommandQualifiedReadVector) std::vector<CommandQualifiedReadElement>;
-%template(EventVoidVector)            std::vector<EventVoidElement>;
-%template(EventWriteVector)           std::vector<EventWriteElement>;
+%template(mtsCommandsVoidDescription)          std::vector<mtsCommandVoidDescription>;
+%template(mtsCommandsWriteDescription)         std::vector<mtsCommandWriteDescription>;
+%template(mtsCommandsReadDescription)          std::vector<mtsCommandReadDescription>;
+%template(mtsCommandsQualifiedReadDescription) std::vector<mtsCommandQualifiedReadDescription>;
+%template(mtsEventsVoidDescription)            std::vector<mtsEventVoidDescription>;
+%template(mtsEventsWriteDescription)           std::vector<mtsEventWriteDescription>;
 
 // Wrap mtsVector
 %import "cisstMultiTask/mtsVector.h"

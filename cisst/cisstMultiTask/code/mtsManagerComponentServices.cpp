@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstMultiTask/mtsInterfaceCommon.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
@@ -204,30 +205,30 @@ bool mtsManagerComponentServices::ComponentConfigure(
 
 
 bool mtsManagerComponentServices::Connect(const std::string & clientComponentName,
-                                          const std::string & clientInterfaceRequiredName,
+                                          const std::string & clientInterfaceName,
                                           const std::string & serverComponentName,
-                                          const std::string & serverInterfaceProvidedName) const
+                                          const std::string & serverInterfaceName) const
 {
     const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return Connect(thisProcessName, clientComponentName, clientInterfaceRequiredName,
-                   thisProcessName, serverComponentName, serverInterfaceProvidedName);
+    return Connect(thisProcessName, clientComponentName, clientInterfaceName,
+                   thisProcessName, serverComponentName, serverInterfaceName);
 }
 
 
 bool mtsManagerComponentServices::Connect(const std::string & clientProcessName,
                                           const std::string & clientComponentName,
-                                          const std::string & clientInterfaceRequiredName,
+                                          const std::string & clientInterfaceName,
                                           const std::string & serverProcessName,
                                           const std::string & serverComponentName,
-                                          const std::string & serverInterfaceProvidedName) const
+                                          const std::string & serverInterfaceName) const
 {
     mtsDescriptionConnection connectionDescription;
     connectionDescription.Client.ProcessName   = clientProcessName;
     connectionDescription.Client.ComponentName = clientComponentName;
-    connectionDescription.Client.InterfaceName = clientInterfaceRequiredName;
+    connectionDescription.Client.InterfaceName = clientInterfaceName;
     connectionDescription.Server.ProcessName   = serverProcessName;
     connectionDescription.Server.ComponentName = serverComponentName;
-    connectionDescription.Server.InterfaceName = serverInterfaceProvidedName;
+    connectionDescription.Server.InterfaceName = serverInterfaceName;
 
     return Connect(connectionDescription);
 }
@@ -261,19 +262,19 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
 
 
 bool mtsManagerComponentServices::Disconnect(
-    const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
+    const std::string & clientComponentName, const std::string & clientInterfaceName,
+    const std::string & serverComponentName, const std::string & serverInterfaceName) const
 {
     const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return Disconnect(thisProcessName, clientComponentName, clientInterfaceRequiredName,
-                      thisProcessName, serverComponentName, serverInterfaceProvidedName);
+    return Disconnect(thisProcessName, clientComponentName, clientInterfaceName,
+                      thisProcessName, serverComponentName, serverInterfaceName);
 }
 
 bool mtsManagerComponentServices::Disconnect(
     const std::string & clientProcessName,
-    const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+    const std::string & clientComponentName, const std::string & clientInterfaceName,
     const std::string & serverProcessName,
-    const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
+    const std::string & serverComponentName, const std::string & serverInterfaceName) const
 {
     if (!ServiceComponentManagement.Disconnect.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: invalid function - has not been bound to command" << std::endl;
@@ -283,10 +284,10 @@ bool mtsManagerComponentServices::Disconnect(
     mtsDescriptionConnection arg;
     arg.Client.ProcessName   = clientProcessName;
     arg.Client.ComponentName = clientComponentName;
-    arg.Client.InterfaceName = clientInterfaceRequiredName;
+    arg.Client.InterfaceName = clientInterfaceName;
     arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
-    arg.Server.InterfaceName = serverInterfaceProvidedName;
+    arg.Server.InterfaceName = serverInterfaceName;
     arg.ConnectionID = InvalidConnectionID;  // not needed
 
     return Disconnect(arg);
@@ -412,7 +413,7 @@ std::string mtsManagerComponentServices::ComponentGetState(const std::string & p
                                                            const std::string componentName) const
 {
     mtsComponentState state = ComponentGetState(mtsDescriptionComponent(processName, componentName));
-    return mtsComponentState::ToString(state.GetState());
+    return state.HumanReadable();
 }
 
 std::vector<std::string> mtsManagerComponentServices::GetNamesOfProcesses(void) const
@@ -485,12 +486,13 @@ std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOf
     return listOfComponentClasses;
 }
 
-InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName,
-                             const std::string & componentName, const std::string &interfaceName) const
+mtsInterfaceProvidedDescription
+mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName,
+                                                             const std::string & componentName, const std::string & interfaceName) const
 {
     // output arg
-    InterfaceProvidedDescription argOut;
-    argOut.InterfaceProvidedName = "ERROR";
+    mtsInterfaceProvidedDescription argOut;
+    argOut.InterfaceName = "ERROR";
 
     if (!ServiceGetters.GetInterfaceProvidedDescription.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "GetInterfaceProvidedDescription: invalid function - has not been bound to command" << std::endl;
@@ -510,12 +512,13 @@ InterfaceProvidedDescription mtsManagerComponentServices::GetInterfaceProvidedDe
     return argOut;
 }
 
-InterfaceRequiredDescription mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName,
-                             const std::string & componentName, const std::string &interfaceName) const
+mtsInterfaceRequiredDescription
+mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName,
+                                                             const std::string & componentName, const std::string & interfaceName) const
 {
     // output arg
-    InterfaceRequiredDescription argOut;
-    argOut.InterfaceRequiredName = "ERROR";
+    mtsInterfaceRequiredDescription argOut;
+    argOut.InterfaceName = "ERROR";
 
     if (!ServiceGetters.GetInterfaceRequiredDescription.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "GetInterfaceRequiredDescription: invalid function - has not been bound to command" << std::endl;
@@ -562,7 +565,7 @@ void mtsManagerComponentServices::DisableLogForwarding(void)
 {
     DisableLogForwarding(GetNamesOfProcesses());
 }
- 
+
 void mtsManagerComponentServices::DisableLogForwarding(const std::vector<std::string> &processNames)
 {
     ServiceLogManagement.DisableLogForwarding(processNames);

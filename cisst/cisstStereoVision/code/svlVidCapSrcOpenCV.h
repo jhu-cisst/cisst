@@ -69,7 +69,7 @@ private:
     int OCVNumberOfDevices;
     int* OCVWidth;
     int* OCVHeight;
-    CvCapture** OCVCapture;
+    cv::VideoCapture** OCVCapture;
     svlBufferImage** ImageBuffer;
 
     void Release();

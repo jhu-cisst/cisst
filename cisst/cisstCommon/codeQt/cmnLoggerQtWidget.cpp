@@ -167,8 +167,8 @@ cmnLoggerQtWidgetLoDDelegate::cmnLoggerQtWidgetLoDDelegate(QObject * parent):
 
 
 QWidget * cmnLoggerQtWidgetLoDDelegate::createEditor(QWidget * parent,
-                                                     const QStyleOptionViewItem & option,
-                                                     const QModelIndex & index) const
+                                                     const QStyleOptionViewItem & CMN_UNUSED(option),
+                                                     const QModelIndex & CMN_UNUSED(index)) const
 {
     QComboBox * comboBox = new QComboBox(parent);
     unsigned int lod;
@@ -201,7 +201,7 @@ void cmnLoggerQtWidgetLoDDelegate::setModelData(QWidget * editor, QAbstractItemM
 
 void cmnLoggerQtWidgetLoDDelegate::updateEditorGeometry(QWidget * editor,
                                                         const QStyleOptionViewItem & option,
-                                                        const QModelIndex & index) const
+                                                        const QModelIndex & CMN_UNUSED(index)) const
 {
     editor->setGeometry(option.rect);
 }

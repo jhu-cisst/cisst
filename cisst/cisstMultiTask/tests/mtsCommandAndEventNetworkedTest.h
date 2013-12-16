@@ -40,8 +40,7 @@ private:
 
     CPPUNIT_TEST_SUITE(mtsCommandAndEventNetworkedTest);
     {
-        CPPUNIT_TEST(TestDeviceDevice_mtsInt);
-        CPPUNIT_TEST(TestDeviceDevice_int);
+        CPPUNIT_TEST(TestDeviceDevice);
 #if 0
         CPPUNIT_TEST(TestPeriodicPeriodic_mtsInt);
         CPPUNIT_TEST(TestPeriodicPeriodic_int);
@@ -109,9 +108,7 @@ public:
                        double clientExecutionDelay, double serverExecutionDelay,
                        double blockingDelay = 0.0);
 #endif
-    template <class _elementType> void TestDeviceDevice(void);
-    void TestDeviceDevice_mtsInt(void);
-    void TestDeviceDevice_int(void);
+    void TestDeviceDevice(void);
 #if 0
     template <class _elementType> void TestPeriodicPeriodic(void);
     void TestPeriodicPeriodic_mtsInt(void);

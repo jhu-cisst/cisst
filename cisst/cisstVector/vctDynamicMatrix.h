@@ -234,6 +234,17 @@ public:
     }
 
 
+    /*! Constructor from a fixed size matrix. */
+    template <size_type __rows, size_type __cols,
+              stride_type __rowStride, stride_type __colStride,
+              class __elementType, class __dataPtrType>
+    explicit vctDynamicMatrix(const vctFixedSizeConstMatrixBase<__rows, __cols,
+                                                                __rowStride, __colStride,
+                                                                __elementType, __dataPtrType>  & other) {
+        this->ForceAssign(other);
+    }
+
+
     /*!  Assignment from a dynamic matrix to a matrix.  The
       operation discards the old memory allocated for this matrix, and
       allocates new memory the size of the input matrix.  Then the
@@ -254,11 +265,25 @@ public:
       allocates new memory the size of the input matrix.  Then the
       elements of the input matrix are copied into this matrix.
     */
-    ThisType & operator = (const ThisType& otherMatrix) {
+    ThisType & operator = (const ThisType & otherMatrix) {
         this->SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
         this->Assign(otherMatrix);
 		return *this;
     }
+
+    /*! Assignment from a fixed size matrix.  This operator will
+      resize the left side dynamic matrix to match the right side
+      fixed size matrix. */
+    template <size_type __rows, size_type __cols,
+              stride_type __rowStride, stride_type __colStride,
+              class __elementType, class __dataPtrType>
+    ThisType & operator = (const vctFixedSizeConstMatrixBase<__rows, __cols,
+                                                             __rowStride, __colStride,
+                                                             __elementType, __dataPtrType>  & other) {
+        this->ForceAssign(other);
+        return *this;
+    }
+
 
     /*!  Assignement from a transitional vctReturnDynamicMatrix to a
       vctDynamicMatrix variable.  This specialized operation does not

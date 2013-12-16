@@ -1,0 +1,52 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+
+#include <cisstVector/vctFixedSizeMatrixTypes.h>
+#include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+
+// Always include last
+#include <cisstStereoVision/svlExport.h>
+}
+
+
+class {
+    name FileInfo;
+    namespace svlFilterSourceTextFileTypes;
+    attribute CISST_EXPORT;
+
+    member {
+        name filepath;
+        type std::string;
+        visibility public;
+        description File path;
+    }
+    member {
+        name timestamp_column;
+        type int;
+        default -1;
+        visibility public;
+        description Timestamp column;
+    }
+    member {
+        name timestamp_unit;
+        type double;
+        default 1.0;
+        visibility public;
+        description Timestamp unit;
+    }
+    member {
+        name timestamp_overflow_value;
+        type double;
+        default pow(2.0, 100);
+        visibility public;
+        description Timestamp overflow value;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<svlFilterSourceTextFileTypes::FileInfo> svlFilterSourceTextFileInfoProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceTextFileInfoProxy);
+}

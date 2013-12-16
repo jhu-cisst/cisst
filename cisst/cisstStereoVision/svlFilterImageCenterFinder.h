@@ -43,6 +43,7 @@ public:
 
     int GetCenter(int &x, int &y, unsigned int videoch = SVL_LEFT) const;
     int GetRadius(int &x, int &y, unsigned int videoch = SVL_LEFT) const;
+    int GetEllipse(svlEllipse &ellipse, unsigned int videoch = SVL_LEFT) const;
 
     void SetTrajectorySmoothing(double smoothing);
     void SetThreshold(unsigned char thresholdlevel);
@@ -60,11 +61,13 @@ public:
     int  SetEnableEllipseFittingDrawEllipse(bool enable);
     int  SetEnableEllipseMask(bool enable);
     void SetEllipseMaskTransition(int start, int end);
+    void SetEllipseMargin(int margin);
 
     bool GetEnableEllipseFitting() const;
     bool GetEnableEllipseFittingDrawEllipse() const;
     bool GetEnableEllipseMask() const;
     void GetEllipseMaskTransition(int & start, int & end) const;
+    int  GetEllipseMargin();
 
     svlSampleImage* GetEllipseMask();
 
@@ -96,6 +99,7 @@ private:
     int          EllipseMaskSlices;
     int          EllipseMaskTransitionStart;
     int          EllipseMaskTransitionEnd;
+    int          EllipseMargin;
 
     vctDynamicVector<svlFilterImageCenterFinderInterface*> Receivers;
 
@@ -107,6 +111,7 @@ private:
     vctDynamicVector<int> CenterYInternal;
     vctDynamicVector<int> RadiusXInternal;
     vctDynamicVector<int> RadiusYInternal;
+    vctDynamicVector<svlEllipse> Ellipse;
 
     vctDynamicVector< vctDynamicVector<unsigned int> > ProjectionV;
     vctDynamicVector< vctDynamicVector<unsigned int> > ProjectionH;
@@ -134,7 +139,9 @@ private:
 class CISST_EXPORT svlFilterImageCenterFinderInterface
 {
 public:
-    virtual int SetCenter(int x, int y, int rx, int ry, unsigned int videoch = SVL_LEFT) = 0;
+    virtual int OnChangeCenter(int x, int y, unsigned int videoch = SVL_LEFT);
+    virtual int OnChangeCenterRect(const svlRect & rect, unsigned int videoch = SVL_LEFT);
+    virtual int OnChangeCenterEllipse(const svlEllipse & ellipse, unsigned int videoch = SVL_LEFT);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageCenterFinder)

@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -89,10 +89,67 @@ if (CISST_HAS_FLTK)
   # OpenGL
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)
-  # FLTK is now required, but FindFLTK can't be used twice?
+  # FLTK is now required
   if (NOT FLTK_FOUND)
-    find_package (FLTK REQUIRED)
+    # FLTK released versions have a broken CMake for Mac
+    if (NOT APPLE)
+      # Try to build as external project
+      if (CISST_USE_EXTERNAL)
+        include (ExternalProject)
+        set (cisstFltk_PREFIX cisstFltkExternal)
+        set (CISST_FLTK_URL http://fltk.org/pub/fltk/1.3.2/fltk-1.3.2-source.tar.gz)
+        set (CISST_FLTK_URL_MD5 9f7e707d4fb7a5a76f0f9b73ff70623d)
+        ExternalProject_Add (cisstFltkExternal
+                             PREFIX ${cisstFltk_PREFIX}
+                             URL ${CISST_FLTK_URL}
+                             URL_MD5 ${CISST_FLTK_URL_MD5}
+                             CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                              -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                              -DOPTION_BUILD_EXAMPLES:BOOL=OFF
+                                              -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstFltk
+                             INSTALL_DIR ${cisst_BINARY_DIR}/cisstFltk
+                             )
+
+        # Set all FLTK variables based on install directory
+        set (FLTK_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstFltk/include")
+        set (FLTK_INCLUDE_DIR ${FLTK_INCLUDE_DIR} PARENT_SCOPE)
+
+	set (FLTK_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstFLTK/lib")
+        set (FLTK_LIBRARY_DIRS ${FLTK_LIBRARY_DIRS} PARENT_SCOPE)
+
+        if (WIN32)
+          set (FLTK_LIBRARIES debug fltkd optimized fltk
+                              debug fltkformsd optimized fltkforms
+                              debug fltkgld optimized fltkgl
+                              debug fltkimagesd optimized fltkimages)
+        else (WIN32)
+          set (FLTK_LIBRARIES fltk fltk_forms fltk_gl fltk_images)
+          if (UNIX)
+            include (FindX11)
+            find_library (FLTK_MATH_LIBRARY m)
+            set (FLTK_LIBRARIES ${FLTK_LIBRARIES} ${X11_LIBRARIES} ${FLTK_MATH_LIBRARY})
+          endif()
+
+	endif (WIN32)
+        set (FLTK_LIBRARIES ${FLTK_LIBRARIES} PARENT_SCOPE)
+
+	set (FLTK_FLUID_EXECUTABLE "${cisst_BINARY_DIR}/cisstFltk/bin/fluid${CMAKE_EXECUTABLE_SUFFIX}")
+	set (FLTK_FLUID_EXECUTABLE ${FLTK_FLUID_EXECUTABLE} PARENT_SCOPE)
+
+        set (FLTK_FOUND ON)
+        set (FLTK_FOUND ON PARENT_SCOPE)
+
+      else (CISST_USE_EXTERNAL)
+        # don't want to use external project, now set package as required
+        find_package (FLTK REQUIRED)
+      endif (CISST_USE_EXTERNAL)
+    else (NOT APPLE)
+      # now set package as required
+      find_package (FLTK REQUIRED)
+    endif (NOT APPLE)
   endif (NOT FLTK_FOUND)
+
+  # save settings for external projects
   cisst_set_package_settings (cisstFLTK FLTK INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
   cisst_set_package_settings (cisstFLTK FLTK LIBRARIES           FLTK_LIBRARIES)
   if (FLTK_LIBRARY_DIRS)
@@ -219,3 +276,48 @@ else (LIBXML2_FOUND)
   set (CISST_FOUND_LIBXML2_XML OFF CACHE BOOL "Is LibXml2 XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
   mark_as_advanced (CISST_FOUND_LIBXML2_XML)
 endif (LIBXML2_FOUND)
+
+
+# Support for JSON
+option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some examples and utilities won't be compiled" OFF)
+mark_as_advanced (CISST_HAS_JSON)
+
+if (CISST_HAS_JSON)
+  include (ExternalProject)
+  set (cisstJSON_PREFIX cisstJSONExternal)
+
+  set (CISST_JSON_SVN_REPOSITORY svn://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp)
+  set (CISST_JSON_SVN_REVISION 274)
+  ExternalProject_Add (cisstJSONExternal
+                       PREFIX ${cisstJSON_PREFIX}
+                       SVN_REPOSITORY ${CISST_JSON_SVN_REPOSITORY}
+                       SVN_REVISION   -r ${CISST_JSON_SVN_REVISION}
+                       CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                        -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+                                        -DOPTION_BUILD_EXAMPLES:BOOL=OFF
+                                        -DJSONCPP_WITH_TESTS:BOOL=OFF
+                                        -DJSONCPP_WITH_POST_BUILD_UNITTEST:BOOL=OFF
+                                        -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstJSON
+                       INSTALL_DIR ${cisst_BINARY_DIR}/cisstJSON
+                       )
+
+  # Set all JSON variables based on install directory
+  set (JSON_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstJSON/include")
+  set (JSON_INCLUDE_DIR ${JSON_INCLUDE_DIR} PARENT_SCOPE)
+
+  set (JSON_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstJSON/lib")
+  set (JSON_LIBRARY_DIRS ${JSON_LIBRARY_DIRS} PARENT_SCOPE)
+  set (JSON_LIBRARIES jsoncpp)
+  set (JSON_LIBRARIES ${JSON_LIBRARIES} PARENT_SCOPE)
+
+  set (JSON_FOUND ON)
+  set (JSON_FOUND ON PARENT_SCOPE)
+
+  cisst_set_package_settings (cisstCommon JSON INCLUDE_DIRECTORIES JSON_INCLUDE_DIR)
+  cisst_set_package_settings (cisstCommon JSON LIBRARIES           JSON_LIBRARIES)
+  cisst_set_package_settings (cisstCommon JSON LINK_DIRECTORIES    JSON_LIBRARY_DIRS)
+
+else (CISST_HAS_JSON)
+  cisst_unset_all_package_settings (cisstCommon JSON)
+endif (CISST_HAS_JSON)

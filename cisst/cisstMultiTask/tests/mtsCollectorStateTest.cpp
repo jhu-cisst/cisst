@@ -46,6 +46,8 @@ template <class _serverType>
 void mtsCollectorStateTest::TestExecution(_serverType * server,
                                           double serverExecutionDelay)
 {
+    const std::string filename = "StateDataCollectionUnitTest";
+
     // execution result used by all functions
     mtsExecutionResult executionResult;
 
@@ -57,22 +59,24 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT(manager->AddComponent(server));
 
     mtsCollectorState * stateCollector = new mtsCollectorState("CollectorStateTest");
+    stateCollector->SetOutput(filename, mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
     CPPUNIT_ASSERT(stateCollector);
     CPPUNIT_ASSERT(stateCollector->SetStateTable(server->GetName(),
                                                  server->InterfaceProvided1.StateTable->GetName()));
-    CPPUNIT_ASSERT(stateCollector->AddSignal("StateValue"));
+    CPPUNIT_ASSERT(stateCollector->AddSignal(""));
     CPPUNIT_ASSERT(manager->AddComponent(stateCollector));
     CPPUNIT_ASSERT(stateCollector->Connect());
-    stateCollector->SetOutputToDefault();
 
     // add test device to control execution
     mtsCollectorStateTestDevice * stateCollectorTestDevice = new mtsCollectorStateTestDevice();
+    std::string stateTableName = server->InterfaceProvided1.StateTable->GetName();
+    std::string stateTableInterfaceName = "StateTable" + server->InterfaceProvided1.StateTable->GetName();
     CPPUNIT_ASSERT(stateCollectorTestDevice);
     CPPUNIT_ASSERT(manager->AddComponent(stateCollectorTestDevice));
     CPPUNIT_ASSERT(manager->Connect(stateCollectorTestDevice->GetName(), "TestComponent",
                                     server->GetName(), "p1"));
     CPPUNIT_ASSERT(manager->Connect(stateCollectorTestDevice->GetName(), "StateTable",
-                                    server->GetName(), "StateTable" + server->InterfaceProvided1.StateTable->GetName()));
+                                    server->GetName(), stateTableInterfaceName));
     CPPUNIT_ASSERT(manager->Connect(stateCollectorTestDevice->GetName(), "CollectorState",
                                     stateCollector->GetName(), "Control"));
     manager->CreateAll();
@@ -86,7 +90,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT(stateCollectorTestDevice->CollectorState.StopCollection.IsValid());
 
     // actual testing, preliminary conditions
-    mtsUInt counter;
+    size_t numberOfRows = 0;
     mtsStateTable::IndexRange range;
     CPPUNIT_ASSERT(!stateCollectorTestDevice->CollectionRunning);
     CPPUNIT_ASSERT_EQUAL(0u, stateCollectorTestDevice->BatchReadyEventCounter);
@@ -103,6 +107,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT(!stateCollectorTestDevice->CollectionRunning);
     // advance state table, this will trigger the start event
     executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
+    numberOfRows++;
     CPPUNIT_ASSERT(executionResult.IsOK());
     CPPUNIT_ASSERT(stateCollectorTestDevice->CollectionRunning);
     // to make sure, not collection should have been performed so far
@@ -111,9 +116,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     // now try to stop
     executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking();
     CPPUNIT_ASSERT(executionResult.IsOK());
-    // commands are sent to the collector which then sends to the
-    // server which owns the state table.  the later command being
-    // queued we need to wait a bit
+    // see previous comment re. osaSleep
     osaSleep(serverExecutionDelay);
     // collection will not send the stop event until the next state table advance
     executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
@@ -123,6 +126,67 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->BatchReadyEventCounter);
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->SamplesCollected);
 
+#if 0 
+
+    // now collect 300 elements so we can test replay
+    executionResult = stateCollectorTestDevice->CollectorState.StartCollection.ExecuteBlocking();
+    CPPUNIT_ASSERT(executionResult.IsOK());
+    // see previous comment re. osaSleep
+    osaSleep(serverExecutionDelay);
+    for (size_t index = 0;
+         index < 300;
+         index++) {
+        executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
+        numberOfRows++;
+        CPPUNIT_ASSERT(executionResult.IsOK());
+        CPPUNIT_ASSERT(stateCollectorTestDevice->CollectionRunning);
+    }
+    // stop collection
+    executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking();
+    CPPUNIT_ASSERT(executionResult.IsOK());
+    // see previous comment re. osaSleep
+    osaSleep(serverExecutionDelay);
+    // collection will not send the stop event until the next state table advance
+    executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
+    CPPUNIT_ASSERT(executionResult.IsOK());
+    // since we had to do one advance, the collector should send a range event
+    CPPUNIT_ASSERT_EQUAL(11u, stateCollectorTestDevice->BatchReadyEventCounter);
+    CPPUNIT_ASSERT_EQUAL(300u, stateCollectorTestDevice->SamplesCollected);
+
+    // create a new component of the same type for replay
+    _serverType * replayComponent = new _serverType("replay-component");
+    CPPUNIT_ASSERT(manager->AddComponent(replayComponent));
+    // should fail since we are not in replay mode
+    CPPUNIT_ASSERT(!replayComponent->SetReplayData(stateTableName, filename));
+    CPPUNIT_ASSERT(replayComponent->SetReplayMode());
+    // shouldn't find that "dummy" state table
+    CPPUNIT_ASSERT(!replayComponent->SetReplayData("dummy", filename));
+    std::string dataReplayFile = filename + ".csv";
+    CPPUNIT_ASSERT(replayComponent->SetReplayData(stateTableName, dataReplayFile));
+
+    // create and connect component to read from replay state table
+    typedef typename _serverType::value_type value_type;
+    mtsTestDevice1<value_type> * replayReader = new mtsTestDevice1<value_type>("replay-reader");
+    CPPUNIT_ASSERT(manager->AddComponent(replayReader));
+    CPPUNIT_ASSERT(manager->Connect(replayReader->GetName(), "r1",
+                                    replayComponent->GetName(), "p1"));
+
+    replayComponent->Start();
+    replayReader->Start();
+    replayComponent->Create();
+    replayReader->Create();
+
+    value_type data;
+    for (size_t index = 0;
+         index < 300;
+         index++) {
+        CPPUNIT_ASSERT(replayComponent->InterfaceProvided1.StateTable->ReplayAdvance());
+        replayReader->InterfaceRequired1.FunctionStateTableRead(data);
+        std::cerr << index << " -> " << data << std::endl;
+    }
+
+#endif
+    
     // stop all and cleanup
     manager->KillAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));
@@ -131,7 +195,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT(manager->Disconnect(stateCollectorTestDevice->GetName(), "TestComponent",
                                        server->GetName(), "p1"));
     CPPUNIT_ASSERT(manager->Disconnect(stateCollectorTestDevice->GetName(), "StateTable",
-                                       server->GetName(), "StateTable" + server->InterfaceProvided1.StateTable->GetName()));
+                                       server->GetName(), stateTableInterfaceName));
     CPPUNIT_ASSERT(manager->Disconnect(stateCollectorTestDevice->GetName(), "CollectorState",
                                        stateCollector->GetName(), "Control"));
     CPPUNIT_ASSERT(manager->RemoveComponent(server));
@@ -226,6 +290,5 @@ void mtsCollectorStateTest::TestFromSignal_mtsInt(void) {
 void mtsCollectorStateTest::TestFromSignal_int(void) {
     mtsCollectorStateTest::TestFromSignal<int>();
 }
-
 
 CPPUNIT_TEST_SUITE_REGISTRATION(mtsCollectorStateTest);

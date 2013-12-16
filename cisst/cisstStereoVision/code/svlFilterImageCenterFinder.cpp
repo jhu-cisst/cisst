@@ -26,6 +26,26 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlDraw.h>
 
 
+/*************************************************/
+/*** svlFilterImageCenterFinderInterface class ***/
+/*************************************************/
+
+int svlFilterImageCenterFinderInterface::OnChangeCenter(int CMN_UNUSED(x), int CMN_UNUSED(y), unsigned int CMN_UNUSED(videoch))
+{
+    return SVL_FAIL;
+}
+
+int svlFilterImageCenterFinderInterface::OnChangeCenterRect(const svlRect & CMN_UNUSED(rect), unsigned int CMN_UNUSED(videoch))
+{
+    return SVL_FAIL;
+}
+
+int svlFilterImageCenterFinderInterface::OnChangeCenterEllipse(const svlEllipse & CMN_UNUSED(ellipse), unsigned int CMN_UNUSED(videoch))
+{
+    return SVL_FAIL;
+}
+
+
 /*****************************************/
 /*** svlFilterImageCenterFinder class ****/
 /*****************************************/
@@ -43,12 +63,13 @@ svlFilterImageCenterFinder::svlFilterImageCenterFinder() :
     EllipseFittingDrawEllipse(false),
     EllipseFittingSlices(32),
     EllipseFittingMode(0),
-    EllipseFittingEdgeThreshold(30),
+    EllipseFittingEdgeThreshold(100),
     EllipseFittingErrorThreshold(18),
     EllipseMaskEnabled(false),
     EllipseMaskSlices(32),
     EllipseMaskTransitionStart(0),
     EllipseMaskTransitionEnd(0),
+    EllipseMargin(0),
     MaskImage(0),
     TransitionImage(0)
 {
@@ -78,6 +99,16 @@ int svlFilterImageCenterFinder::GetRadius(int &x, int &y, unsigned int videoch) 
 
     x = RadiusX[videoch];
     y = RadiusY[videoch];
+
+    return SVL_OK;
+}
+
+int svlFilterImageCenterFinder::GetEllipse(svlEllipse &ellipse, unsigned int videoch) const
+{
+    if (!IsRunning()) return SVL_FAIL;
+    if (videoch >= RadiusX.size()) return SVL_FAIL;
+
+    ellipse = Ellipse[videoch];
 
     return SVL_OK;
 }
@@ -160,6 +191,11 @@ void svlFilterImageCenterFinder::SetEllipseMaskTransition(int start, int end)
     EllipseMaskTransitionEnd   = end;
 }
 
+void svlFilterImageCenterFinder::SetEllipseMargin(int margin)
+{
+    EllipseMargin = margin;
+}
+
 bool svlFilterImageCenterFinder::GetEnableEllipseFitting() const
 {
     return EllipseFittingEnabled;
@@ -179,6 +215,11 @@ void svlFilterImageCenterFinder::GetEllipseMaskTransition(int & start, int & end
 {
     start = EllipseMaskTransitionStart;
     end   = EllipseMaskTransitionEnd;
+}
+
+int svlFilterImageCenterFinder::GetEllipseMargin()
+{
+    return EllipseMargin;
 }
 
 svlSampleImage* svlFilterImageCenterFinder::GetEllipseMask()
@@ -213,6 +254,7 @@ int svlFilterImageCenterFinder::Initialize(svlSample* syncInput, svlSample* &syn
     CenterY.SetSize(videochannels);
     RadiusX.SetSize(videochannels);
     RadiusY.SetSize(videochannels);
+    Ellipse.SetSize(videochannels);
 
     for (i = 0; i < videochannels; i ++) {
         size = image->GetWidth(i);
@@ -375,10 +417,21 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
         RadiusYInternal[vch] = ry;
 
         if (EllipseFittingEnabled) {
-            svlEllipse ellipse;
-            if (FindEllipse(image, vch, x, y, ellipse)) {
-                if (EllipseFittingDrawEllipse) svlDraw::Ellipse(image, vch, ellipse, svlRGB(255, 255, 255));
-                if (EllipseMaskEnabled) UpdateMaskImage(vch, ellipse);
+            if (FindEllipse(image, vch, x, y, Ellipse[vch])) {
+                // Adjust with margin
+                Ellipse[vch].rx = std::max(0, Ellipse[vch].rx - EllipseMargin);
+                Ellipse[vch].ry = std::max(0, Ellipse[vch].ry - EllipseMargin);
+
+                svlRect bounding;
+                Ellipse[vch].GetBoundingRect(bounding);
+
+                CenterXInternal[vch] = Ellipse[vch].cx;
+                CenterYInternal[vch] = Ellipse[vch].cy;
+                RadiusXInternal[vch] = (bounding.right - bounding.left) / 2;
+                RadiusYInternal[vch] = (bounding.bottom - bounding.top) / 2;
+
+                if (EllipseFittingDrawEllipse) svlDraw::Ellipse(image, vch, Ellipse[vch], svlRGB(255, 255, 255));
+                if (EllipseMaskEnabled) UpdateMaskImage(vch, Ellipse[vch]);
             }
         }
     }
@@ -424,7 +477,12 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
         for (i = 0; i < Receivers.size(); i ++) {
             if (Receivers[i]) {
                 for (vch = 0; vch < videochannels; vch ++) {
-                    Receivers[i]->SetCenter(CenterX[vch], CenterY[vch], RadiusX[vch], RadiusY[vch], vch);
+                    Receivers[i]->OnChangeCenter(CenterX[vch], CenterY[vch], vch);
+                    Receivers[i]->OnChangeCenterRect(svlRect(CenterX[vch] - RadiusX[vch], CenterY[vch] - RadiusY[vch],
+                                                             CenterX[vch] + RadiusX[vch], CenterY[vch] + RadiusY[vch]), vch);
+                    if (EllipseFittingEnabled) {
+                        Receivers[i]->OnChangeCenterEllipse(Ellipse[vch], vch);
+                    }
                 }
             }
         }

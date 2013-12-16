@@ -96,7 +96,7 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
                     osaSleep(0.1); // check 10 times a second
                 }
                 if (baseref->StopThread) {
-                    CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): stream stopped while paused" << std::endl;
+                    CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << source->GetName() << "\"): stream stopped while paused" << std::endl;
                     break;
                 }
             }
@@ -106,7 +106,7 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
 
                 // Synchronization point, wait for other threads
                 if (sync->Sync(ThreadID) != SVL_SYNC_OK) {
-                    CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): Sync() returned error (#1)" << std::endl;
+                    CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << source->GetName() << "\"): Sync() returned error (#1)" << std::endl;
                     break;
                 }
 
@@ -127,11 +127,11 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
 
         status = source->Process(&info, outputsample);
         if (status == SVL_STOP_REQUEST) {
-            CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): SVL_STOP_REQUEST received" << std::endl;
+            CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << source->GetName() << "\"): SVL_STOP_REQUEST received" << std::endl;
             break;
         }
         else if (status < 0) {
-            CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): svlFilterSourceBase::Process() returned error (" << status << ")" << std::endl;
+            CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << source->GetName() << "\"): svlFilterSourceBase::Process() returned error (" << status << ")" << std::endl;
             break;
         }
 
@@ -151,7 +151,7 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
 
             // Synchronization point, wait for other threads
             if (sync->Sync(ThreadID) != SVL_SYNC_OK) {
-                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): Sync() returned error (#2)" << std::endl;
+                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << source->GetName() << "\"): Sync() returned error (#2)" << std::endl;
                 break;
             }
 
@@ -163,11 +163,11 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
 
         // Check for errors and stop request
         if (baseref->StopThread) {
-            CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): StopThread flag is true (#1)" << std::endl;
+            CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << source->GetName() << "\"): StopThread flag is true (#1)" << std::endl;
             break;
         }
         else if (baseref->StreamStatus != SVL_OK) {
-            CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): StreamStatus signals error (" << baseref->StreamStatus << ") (#1)" << std::endl;
+            CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << source->GetName() << "\"): StreamStatus signals error (" << baseref->StreamStatus << ") (#1)" << std::endl;
             break;
         }
 
@@ -206,13 +206,13 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
             // Check if the previous output is valid input for the next filter
             status = filter->IsDataValid(filter->GetInput()->Type, inputsample);
             if (status != SVL_OK) {
-                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): svlFilterBase::IsDataValid() returned error (" << status << ")" << std::endl;
+                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << filter->GetName() << "\"): svlFilterBase::IsDataValid() returned error (" << status << ")" << std::endl;
                 break;
             }
 
             status = filter->Process(&info, inputsample, outputsample);
             if (status < 0) {
-                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): svlFilterBase::Process() returned error (" << status << ")" << std::endl;
+                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << filter->GetName() << "\"): svlFilterBase::Process() returned error (" << status << ")" << std::endl;
                 break;
             }
 
@@ -221,7 +221,7 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
 
                 // Synchronization point, wait for other threads
                 if (sync->Sync(ThreadID) != SVL_SYNC_OK) {
-                    CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): Sync() returned error (#3)" << std::endl;
+                    CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << filter->GetName() << "\"): Sync() returned error (#3)" << std::endl;
                     break;
                 }
 
@@ -236,11 +236,11 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
 
             // Check for errors and stop request
             if (baseref->StopThread) {
-                CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): StopThread flag is true (#2)" << std::endl;
+                CMN_LOG_INIT_DEBUG << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << filter->GetName() << "\"): StopThread flag is true (#2)" << std::endl;
                 break;
             }
             else if (baseref->StreamStatus != SVL_OK) {
-                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << "): StreamStatus signals error (" << baseref->StreamStatus << ") (#2)" << std::endl;
+                CMN_LOG_INIT_ERROR << "svlStreamProc::Proc (ThreadID=" << ThreadID << ", Filter=\"" << filter->GetName() << "\"): StreamStatus signals error (" << baseref->StreamStatus << ") (#2)" << std::endl;
                 break;
             }
 

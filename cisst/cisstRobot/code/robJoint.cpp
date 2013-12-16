@@ -131,6 +131,61 @@ robJoint::Errno robJoint::Read( std::istream& is ){
   return robJoint::ESUCCESS;
 }
 
+#if CISST_HAS_JSON
+robJoint::Errno robJoint::Read(const Json::Value &config)
+{
+    std::string type, mode;
+
+    // read values from JSON config file
+    type = config.get("type", "revolute").asString();
+    mode = config.get("mode", "active").asString();
+    this->qoffset = config.get("offset", 0.0).asDouble();
+    this->qmin = config.get("qmin", 0.0).asDouble();
+    this->qmax = config.get("qmax", 0.0).asDouble();
+    this->ftmax = config.get("tmax", 0.0).asDouble();
+
+    // convert the strings to upper cases
+    std::transform( type.begin(), type.end(), type.begin(), ::toupper );
+    std::transform( mode.begin(), mode.end(), mode.begin(), ::toupper );
+
+    // match to string to a joint type
+    if( (type.compare("REVOLUTE") == 0) || (type.compare("HINGE") == 0) )
+      this->type = robJoint::HINGE;
+
+    else if( (type.compare("PRISMATIC") == 0) || (type.compare("SLIDER") == 0) )
+      this->type = robJoint::SLIDER;
+
+    else if( type.compare("UNIVERSAL") == 0 )
+      this->type = robJoint::UNIVERSAL;
+
+    else if( type.compare("BALLSOCKET") == 0 )
+      this->type = robJoint::BALLSOCKET;
+
+    else{
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                << ": Expected a joint type. Got " << type << "."
+                << std::endl;
+      return robJoint::EFAILURE;
+    }
+
+    // match the mode string to a joint mode
+    if( mode.compare( "PASSIVE" ) == 0 )
+      this->mode = robJoint::PASSIVE;
+
+    else if( mode.compare( "ACTIVE" ) == 0 )
+      this->mode = robJoint::ACTIVE;
+
+    else{
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                << ": Expected a joint mode. Got " << mode << "."
+                << std::endl;
+      return robJoint::EFAILURE;
+    }
+
+    return robJoint::ESUCCESS;
+}
+#endif
+
 robJoint::Errno robJoint::Write( std::ostream& os ) const {
 
   switch( GetType() ){

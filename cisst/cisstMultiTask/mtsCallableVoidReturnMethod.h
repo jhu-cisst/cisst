@@ -7,8 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -132,6 +131,69 @@ public:
     mtsExecutionResult Execute(mtsGenericObject & result) {
         return ConditionalCast<cmnIsDerivedFromTemplated<ResultType, mtsGenericObjectProxy>::IS_DERIVED>
             ::CallMethod(ClassInstantiation, Action, result);
+    }
+
+    /* documented in base class */
+    void ToStream(std::ostream & outputStream) const {
+        if (this->ClassInstantiation) {
+            outputStream << "method based callable void return object using class/object \""
+                         << mtsObjectName(this->ClassInstantiation) << "\"";
+        } else {
+            outputStream << "invalid method based callable object";
+        }
+    }
+};
+
+template <class _classType>
+class mtsCallableVoidReturnMethodGeneric: public mtsCallableVoidReturnBase {
+
+public:
+    typedef mtsCallableVoidReturnBase BaseType;
+
+    /*! Typedef for the specific interface. */
+    typedef _classType ClassType;
+
+    /*! This type. */
+    typedef mtsCallableVoidReturnMethodGeneric<ClassType> ThisType;
+
+    /*! Typedef for pointer to member function (method) of a specific
+      class (_classType). */
+    typedef void(_classType::*ActionType)(mtsGenericObject & result);
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCallableVoidReturnMethodGeneric(const ThisType & CMN_UNUSED(other)) {}
+
+protected:
+    /*! The pointer to member function of the receiver class that
+      is to be invoked for a particular instance of the command. */
+    ActionType Action;
+
+    /*! Stores the receiver object of the command. */
+    ClassType * ClassInstantiation;
+
+public:
+    /*! The constructor. Does nothing. */
+    mtsCallableVoidReturnMethodGeneric(void): BaseType(), ClassInstantiation(0) {}
+
+    /*! The constructor.
+      \param action Pointer to the member function that is to be called
+      by the invoker of the command
+      \param classInstantiation Pointer to the receiver of the command
+    */
+    mtsCallableVoidReturnMethodGeneric(ActionType action, ClassType * classInstantiation):
+        BaseType(),
+        Action(action),
+        ClassInstantiation(classInstantiation)
+    {}
+
+    /*! The destructor. Does nothing */
+    virtual ~mtsCallableVoidReturnMethodGeneric() {}
+
+    /* documented in base class */
+    mtsExecutionResult Execute(mtsGenericObject & result) {
+        (ClassInstantiation->*Action)(result);
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
     /* documented in base class */

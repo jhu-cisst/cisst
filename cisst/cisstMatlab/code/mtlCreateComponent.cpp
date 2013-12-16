@@ -132,15 +132,12 @@ const char * mtlCreateComponent(const char * componentName)
     mexEvalString(code.str().c_str());
     code.str("");
 
-
     ///Set
     inter = reinterpret_cast <unsigned long long int>(&(componentProxy->Set));
     code << componentName << ".interface2.Set = @(x)calllib('libcisstMatlab', 'mtlCallFunctionWrite', "
          << inter << ", x);";
     mexEvalString(code.str().c_str());
     code.str("");
-
-    osaSleep(10.0 * cmn_s);
 
     return "no error";
 }

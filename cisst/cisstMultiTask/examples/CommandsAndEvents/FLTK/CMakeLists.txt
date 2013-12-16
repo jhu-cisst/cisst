@@ -47,42 +47,37 @@ if (cisst_FOUND_AS_REQUIRED)
   # link with the cisst libraries
   cisst_target_link_libraries (mtsExCommandsAndEventsFLTKLocal ${REQUIRED_CISST_LIBRARIES})
 
-  # compile network version if ICE is available
-  if (CISST_MTS_HAS_ICE)
+  # compile network version (will use ICE or mtsSocketProxyClient/mtsSocketProxyServer)
 
-    # CMake command, generate .cxx and .h from .fl files
-    fltk_wrap_ui (mtsExCommandsAndEventsFLTKServer serverUI.fl)
+  # CMake command, generate .cxx and .h from .fl files
+  fltk_wrap_ui (mtsExCommandsAndEventsFLTKServer serverUI.fl)
 
-    # name the main executable and specifies with source files to use
-    add_executable (mtsExCommandsAndEventsFLTKServer
-                    serverTask.cpp
-                    serverMain.cpp
-                    serverTask.h
-                    ${mtsExCommandsAndEventsFLTKServer_FLTK_UI_SRCS}
-                    )
-    set_property (TARGET mtsExCommandsAndEventsFLTKServer PROPERTY FOLDER "cisstMultiTask/examples")
+  # name the main executable and specifies with source files to use
+  add_executable (mtsExCommandsAndEventsFLTKServer
+                  serverTask.cpp
+                  serverMain.cpp
+                  serverTask.h
+                  ${mtsExCommandsAndEventsFLTKServer_FLTK_UI_SRCS}
+                  )
+  set_property (TARGET mtsExCommandsAndEventsFLTKServer PROPERTY FOLDER "cisstMultiTask/examples")
 
-    # link with the cisst libraries
-    cisst_target_link_libraries (mtsExCommandsAndEventsFLTKServer ${REQUIRED_CISST_LIBRARIES})
+  # link with the cisst libraries
+  cisst_target_link_libraries (mtsExCommandsAndEventsFLTKServer ${REQUIRED_CISST_LIBRARIES})
 
-    # CMake command, generate .cxx and .h from .fl files
-    fltk_wrap_ui (mtsExCommandsAndEventsFLTKClient clientUI.fl)
+  # CMake command, generate .cxx and .h from .fl files
+  fltk_wrap_ui (mtsExCommandsAndEventsFLTKClient clientUI.fl)
 
-    # name the main executable and specifies with source files to use
-    add_executable (mtsExCommandsAndEventsFLTKClient
-                    clientTask.cpp
-                    clientMain.cpp
-                    clientTask.h
-                    ${mtsExCommandsAndEventsFLTKClient_FLTK_UI_SRCS}
-                    )
-    set_property (TARGET mtsExCommandsAndEventsFLTKClient PROPERTY FOLDER "cisstMultiTask/examples")
+  # name the main executable and specifies with source files to use
+  add_executable (mtsExCommandsAndEventsFLTKClient
+                  clientTask.cpp
+                  clientMain.cpp
+                  clientTask.h
+                  ${mtsExCommandsAndEventsFLTKClient_FLTK_UI_SRCS}
+                  )
+  set_property (TARGET mtsExCommandsAndEventsFLTKClient PROPERTY FOLDER "cisstMultiTask/examples")
 
-    # link with the cisst libraries
-    cisst_target_link_libraries (mtsExCommandsAndEventsFLTKClient ${REQUIRED_CISST_LIBRARIES})
-
-  else (CISST_MTS_HAS_ICE)
-    message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR}: example will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")
-  endif (CISST_MTS_HAS_ICE)
+  # link with the cisst libraries
+  cisst_target_link_libraries (mtsExCommandsAndEventsFLTKClient ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

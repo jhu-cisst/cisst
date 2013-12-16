@@ -16,6 +16,19 @@
 
 project (cisstStereoVision)
 
+# create data type using the data generator
+cisst_data_generator (cisstStereoVision
+                      "${cisst_BINARY_DIR}/include" # where to save the file
+                      "cisstStereoVision/"          # sub directory for include
+                      ../svlFilterSourceVideoCaptureTypes.cdg
+                      ../svlFilterImageOverlayTypes.cdg
+                      ../svlFilterSourceImageFileTypes.cdg
+                      ../svlFilterSplitterTypes.cdg
+                      ../svlFilterSourceTextFileTypes.cdg
+)
+# to compile cisst generated code, need to find header file
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
+
 # set dependencies
 SET(DEPENDENCIES
     cisstCommon
@@ -28,6 +41,7 @@ SET(DEPENDENCIES
 SET(SOURCE_FILES
   # Public System API
     svlTypes.cpp
+    svlFilterSourceVideoCaptureTypesExtra.cpp
     svlClassServices.cpp
     svlSampleBlobs.cpp
     svlSampleCameraGeometry.cpp
@@ -340,20 +354,19 @@ ELSE(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
 ENDIF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
 
 
-# OpenCV 2.2+
-IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
-    SET(OpenCV2_OPTIONS
-        OpenCV2_INCLUDE_DIRS
-        OpenCV2_LIBRARIES
-        CACHE INTERNAL "List of OpenCV 2.2+ options"
-        )
+IF(WIN32)
+    SET(SVL_DEFAULT_USE_USER_OPENCV OFF)
+ELSE(WIN32)
+    SET(SVL_DEFAULT_USE_USER_OPENCV OFF)
+ENDIF(WIN32)
 
-    FIND_PACKAGE(OpenCV2)
-    IF(OpenCV2_FOUND)
-        MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
+OPTION(CISST_SVL_USE_USER_OPENCV "Locate user-provided OpenCV directory" ${SVL_DEFAULT_USE_USER_OPENCV})
+IF(CISST_SVL_USE_USER_OPENCV)
 
-        cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
-        cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV2_LIBRARIES)
+    MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
+
+    FIND_PACKAGE(OpenCV REQUIRED)
+    IF(OpenCV_FOUND)
 
         SET(SOURCE_FILES
             ${SOURCE_FILES}
@@ -388,256 +401,318 @@ IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
             svlCCOriginDetector.h
             svlFilterImageCameraCalibrationOpenCV.h
             )
-        MESSAGE(STATUS "OpenCV 2.2+ found - Switch to advanced view for details")
-        OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" ON)
 
-    ELSE(OpenCV2_FOUND)
+        cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
+        cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBRARIES)
+        OPTION(CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" ON)
+    ELSE(OpenCV_FOUND)
         cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
+        OPTION(CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" OFF)
+    ENDIF(OpenCV_FOUND)
+    OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
 
-        IF(CISST_SVL_HAS_OPENCV2)
-            MARK_AS_ADVANCED(CLEAR ${OpenCV2_OPTIONS})
-            MESSAGE(FATAL_ERROR "OpenCV 2.2+ required. Please specify its location.")
-        ELSE(CISST_SVL_HAS_OPENCV2)
+ELSE(CISST_SVL_USE_USER_OPENCV)
+
+    # OpenCV 2.2+
+    IF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
+        SET(OpenCV2_OPTIONS
+            OpenCV2_INCLUDE_DIRS
+            OpenCV2_LIBRARIES
+            CACHE INTERNAL "List of OpenCV 2.2+ options"
+            )
+
+        FIND_PACKAGE(OpenCV2)
+        IF(OpenCV2_FOUND)
             MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
-            OPTION(CISST_SVL_HAS_OPENCV2 "Compile OpenCV 2.2+ extensions" OFF)
-        ENDIF(CISST_SVL_HAS_OPENCV2)
-    ENDIF(OpenCV2_FOUND)
 
-ELSE(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
-    cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
+            cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
+            cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV2_LIBRARIES)
 
-    MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
-    OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" OFF)
-ENDIF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
-
-
-##OpenCV
-#IF(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
-#    FIND_PACKAGE(OpenCV)
-#    IF(OpenCV_FOUND)
-#        MESSAGE("Version: " ${OpenCV_VERSION})
-#        MESSAGE("Major: " ${OpenCV_VERSION_MAJOR})
-#        MESSAGE("Minor: " ${OpenCV_VERSION_MINOR})
-#
-#        cisst_set_package_settings(cisstStereoVision OpenCV INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIR)
-#        cisst_set_package_settings(cisstStereoVision OpenCV LIBRARIES           OpenCV_LIBS)
-#        SET(SOURCE_FILES
-#            ${SOURCE_FILES}
-#            svlFilterImageZoom.cpp
-#            svlFilterToolTracker.cpp
-#            #svlVideoCodecOpenCV.h       # private header
-#            #svlVideoCodecOpenCV.cpp
-#            svlTrackerOCVMeanShift.cpp
-#            )
-#        IF(NOT WIN32)
-#            SET(SOURCE_FILES
-#                ${SOURCE_FILES}
-#                svlVidCapSrcOpenCV.h        # private header
-#                svlVidCapSrcOpenCV.cpp
-#            )
-#        ENDIF(NOT WIN32)
-#        SET(HEADER_FILES
-#            ${HEADER_FILES}
-#            svlFilterImageZoom.h
-#            svlFilterToolTracker.h
-#            svlTrackerOCVMeanShift.h
-#            )
-#        IF(OpenCV21_FOUND)
-#            SET(SOURCE_FILES
-#                ${SOURCE_FILES}
-#                svlCCCalibrationGrid.cpp
-#                svlCCCornerDetector.cpp
-#                svlCCFileIO.cpp
-#                svlCCHandEyeCalibration.cpp
-#                svlCCOriginDetector.cpp
-#                svlFilterImageCameraCalibrationOpenCV.cpp
-#            )
-#            SET(HEADER_FILES
-#                ${HEADER_FILES}
-#                svlCCCalibrationGrid.h
-#                svlCCCornerDetector.h
-#                svlCCFileIO.h
-#                svlCCHandEyeCalibration.h
-#                svlCCOriginDetector.h
-#                svlFilterImageCameraCalibrationOpenCV.h
-#            )
-#        ENDIF(OpenCV21_FOUND)
-#        MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
-#        OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
-#    ELSE(OpenCV_FOUND)
-#    ENDIF(OpenCV_FOUND)
-#ELSE(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
-#    cisst_unset_all_package_settings (cisstStereoVision OpenCV)
-#
-#    MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
-#    OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
-#ENDIF(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
-
-
-# OpenCV
-IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
-    SET(OpenCV_OPTIONS
-        OpenCV_ROOT_DIR
-        OpenCV_INCLUDE_DIRS
-        OpenCV_CV_INCLUDE_DIR
-        OpenCV_CXCORE_INCLUDE_DIR
-        OpenCV_CVAUX_INCLUDE_DIR
-        OpenCV_HIGHGUI_INCLUDE_DIR
-        OpenCV_LIBRARIES
-        OpenCV_CV_LIBRARY
-        OpenCV_CXCORE_LIBRARY
-        OpenCV_CVAUX_LIBRARY
-        OpenCV_CVHAARTRAINING_LIBRARY
-        OpenCV_CXTS_LIBRARY
-        OpenCV_HIGHGUI_LIBRARY
-        OpenCV_ML_LIBRARY
-        CACHE INTERNAL "List of OpenCV options"
-        )
-
-    FIND_PACKAGE(OpenCV21 COMPONENTS CV CXCORE CVAUX HIGHGUI)
-    IF(OpenCV21_FOUND)
-        # Copy 'OpenCV21_' variable values to 'OpenCV_' variables
-        SET(OpenCV_FOUND YES)
-        SET(OpenCV_ROOT_DIR                 ${OpenCV21_ROOT_DIR})
-        SET(OpenCV_INCLUDE_DIRS             ${OpenCV21_INCLUDE_DIRS})
-        SET(OpenCV_CV_INCLUDE_DIR           ${OpenCV21_CV_INCLUDE_DIR})
-        SET(OpenCV_CXCORE_INCLUDE_DIR       ${OpenCV21_CXCORE_INCLUDE_DIR})
-        SET(OpenCV_CVAUX_INCLUDE_DIR        ${OpenCV21_CVAUX_INCLUDE_DIR})
-        SET(OpenCV_HIGHGUI_INCLUDE_DIR      ${OpenCV21_HIGHGUI_INCLUDE_DIR})
-        SET(OpenCV_LIBRARIES                ${OpenCV21_LIBRARIES})
-        SET(OpenCV_CV_LIBRARY               ${OpenCV21_CV_LIBRARY})
-        SET(OpenCV_CXCORE_LIBRARY           ${OpenCV21_CXCORE_LIBRARY})
-        SET(OpenCV_CVAUX_LIBRARY            ${OpenCV21_CVAUX_LIBRARY})
-        SET(OpenCV_CVHAARTRAINING_LIBRARY   ${OpenCV21_CVHAARTRAINING_LIBRARY})
-        SET(OpenCV_CXTS_LIBRARY             ${OpenCV21_CXTS_LIBRARY})
-        SET(OpenCV_HIGHGUI_LIBRARY          ${OpenCV21_HIGHGUI_LIBRARY})
-        SET(OpenCV_ML_LIBRARY               ${OpenCV21_ML_LIBRARY})
-    ELSE(OpenCV21_FOUND)
-        FIND_PACKAGE(OpenCV20 COMPONENTS CV CXCORE CVAUX HIGHGUI)
-        IF(OpenCV20_FOUND)
-            # Copy 'OpenCV20_' variable values to 'OpenCV_' variables
-            SET(OpenCV_FOUND YES)
-            SET(OpenCV_ROOT_DIR                 ${OpenCV20_ROOT_DIR})
-            SET(OpenCV_INCLUDE_DIRS             ${OpenCV20_INCLUDE_DIRS})
-            SET(OpenCV_CV_INCLUDE_DIR           ${OpenCV20_CV_INCLUDE_DIR})
-            SET(OpenCV_CXCORE_INCLUDE_DIR       ${OpenCV20_CXCORE_INCLUDE_DIR})
-            SET(OpenCV_CVAUX_INCLUDE_DIR        ${OpenCV20_CVAUX_INCLUDE_DIR})
-            SET(OpenCV_HIGHGUI_INCLUDE_DIR      ${OpenCV20_HIGHGUI_INCLUDE_DIR})
-            SET(OpenCV_LIBRARIES                ${OpenCV20_LIBRARIES})
-            SET(OpenCV_CV_LIBRARY               ${OpenCV20_CV_LIBRARY})
-            SET(OpenCV_CXCORE_LIBRARY           ${OpenCV20_CXCORE_LIBRARY})
-            SET(OpenCV_CVAUX_LIBRARY            ${OpenCV20_CVAUX_LIBRARY})
-            SET(OpenCV_CVHAARTRAINING_LIBRARY   ${OpenCV20_CVHAARTRAINING_LIBRARY})
-            SET(OpenCV_CXTS_LIBRARY             ${OpenCV20_CXTS_LIBRARY})
-            SET(OpenCV_HIGHGUI_LIBRARY          ${OpenCV20_HIGHGUI_LIBRARY})
-            SET(OpenCV_ML_LIBRARY               ${OpenCV20_ML_LIBRARY})
-        ELSE(OpenCV20_FOUND)
-            FIND_PACKAGE(OpenCV COMPONENTS CV CXCORE CVAUX HIGHGUI)
-        ENDIF(OpenCV20_FOUND)
-    ENDIF(OpenCV21_FOUND)
-
-    # Remove 'OpenCV2x_' variables, if any
-    UNSET(OpenCV21_ROOT_DIR CACHE)
-    UNSET(OpenCV21_INCLUDE_DIRS CACHE)
-    UNSET(OpenCV21_CV_INCLUDE_DIR CACHE)
-    UNSET(OpenCV21_CXCORE_INCLUDE_DIR CACHE)
-    UNSET(OpenCV21_CVAUX_INCLUDE_DIR CACHE)
-    UNSET(OpenCV21_CVCAM_INCLUDE_DIR CACHE)
-    UNSET(OpenCV21_HIGHGUI_INCLUDE_DIR CACHE)
-    UNSET(OpenCV21_LIBRARIES CACHE)
-    UNSET(OpenCV21_CV_LIBRARY CACHE)
-    UNSET(OpenCV21_CXCORE_LIBRARY CACHE)
-    UNSET(OpenCV21_CVAUX_LIBRARY CACHE)
-    UNSET(OpenCV21_CVCAM_LIBRARY CACHE)
-    UNSET(OpenCV21_CVHAARTRAINING_LIBRARY CACHE)
-    UNSET(OpenCV21_CXTS_LIBRARY CACHE)
-    UNSET(OpenCV21_HIGHGUI_LIBRARY CACHE)
-    UNSET(OpenCV21_ML_LIBRARY CACHE)
-    UNSET(OpenCV21_TRS_LIBRARY CACHE)
-    UNSET(OpenCV20_ROOT_DIR CACHE)
-    UNSET(OpenCV20_INCLUDE_DIRS CACHE)
-    UNSET(OpenCV20_CV_INCLUDE_DIR CACHE)
-    UNSET(OpenCV20_CXCORE_INCLUDE_DIR CACHE)
-    UNSET(OpenCV20_CVAUX_INCLUDE_DIR CACHE)
-    UNSET(OpenCV20_CVCAM_INCLUDE_DIR CACHE)
-    UNSET(OpenCV20_HIGHGUI_INCLUDE_DIR CACHE)
-    UNSET(OpenCV20_LIBRARIES CACHE)
-    UNSET(OpenCV20_CV_LIBRARY CACHE)
-    UNSET(OpenCV20_CXCORE_LIBRARY CACHE)
-    UNSET(OpenCV20_CVAUX_LIBRARY CACHE)
-    UNSET(OpenCV20_CVCAM_LIBRARY CACHE)
-    UNSET(OpenCV20_CVHAARTRAINING_LIBRARY CACHE)
-    UNSET(OpenCV20_CXTS_LIBRARY CACHE)
-    UNSET(OpenCV20_HIGHGUI_LIBRARY CACHE)
-    UNSET(OpenCV20_ML_LIBRARY CACHE)
-    UNSET(OpenCV20_TRS_LIBRARY CACHE)
-
-    IF(OpenCV_FOUND)
-        MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
-        cisst_set_package_settings (cisstStereoVision OpenCV INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
-        cisst_set_package_settings (cisstStereoVision OpenCV LIBRARIES           OpenCV_LIBRARIES)
-        SET(SOURCE_FILES
-            ${SOURCE_FILES}
-            svlFilterImageZoom.cpp
-            svlFilterToolTracker.cpp
-            #svlVideoCodecOpenCV.h       # private header
-            #svlVideoCodecOpenCV.cpp
-            svlTrackerOCVMeanShift.cpp
-            )
-        IF(NOT WIN32)
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
-                svlVidCapSrcOpenCV.h        # private header
-                svlVidCapSrcOpenCV.cpp
-            )
-        ENDIF(NOT WIN32)
-        SET(HEADER_FILES
-            ${HEADER_FILES}
-            svlFilterImageZoom.h
-            svlFilterToolTracker.h
-            svlTrackerOCVMeanShift.h
-            )
-        IF(OpenCV21_FOUND)
-            SET(SOURCE_FILES
-                ${SOURCE_FILES}
+                svlFilterImageZoom.cpp
+                svlFilterToolTracker.cpp
+                #svlVideoCodecOpenCV.h       # private header
+                #svlVideoCodecOpenCV.cpp
+                svlTrackerOCVMeanShift.cpp
                 svlCCCalibrationGrid.cpp
                 svlCCCornerDetector.cpp
                 svlCCFileIO.cpp
                 svlCCHandEyeCalibration.cpp
                 svlCCOriginDetector.cpp
                 svlFilterImageCameraCalibrationOpenCV.cpp
-            )
+                )
+            IF(NOT WIN32)
+                SET(SOURCE_FILES
+                    ${SOURCE_FILES}
+                    svlVidCapSrcOpenCV.h    # private header
+                    svlVidCapSrcOpenCV.cpp
+                    )
+            ENDIF(NOT WIN32)
             SET(HEADER_FILES
                 ${HEADER_FILES}
+                svlFilterImageZoom.h
+                svlFilterToolTracker.h
+                svlTrackerOCVMeanShift.h
                 svlCCCalibrationGrid.h
                 svlCCCornerDetector.h
                 svlCCFileIO.h
                 svlCCHandEyeCalibration.h
                 svlCCOriginDetector.h
                 svlFilterImageCameraCalibrationOpenCV.h
-            )
-        ENDIF(OpenCV21_FOUND)
-        MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
-        OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
+                )
+            MESSAGE(STATUS "OpenCV 2.2+ found - Switch to advanced view for details")
+            OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" ON)
 
-    ELSE(OpenCV_FOUND)
+        ELSE(OpenCV2_FOUND)
+            cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
+
+            IF(CISST_SVL_HAS_OPENCV2)
+                MARK_AS_ADVANCED(CLEAR ${OpenCV2_OPTIONS})
+                MESSAGE(FATAL_ERROR "OpenCV 2.2+ required. Please specify its location.")
+            ELSE(CISST_SVL_HAS_OPENCV2)
+                MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
+                OPTION(CISST_SVL_HAS_OPENCV2 "Compile OpenCV 2.2+ extensions" OFF)
+            ENDIF(CISST_SVL_HAS_OPENCV2)
+        ENDIF(OpenCV2_FOUND)
+
+    ELSE(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
+        cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
+
+        MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
+        OPTION(CISST_SVL_HAS_OPENCV2 "Use OpenCV 2.2+ extensions" OFF)
+    ENDIF(CISST_SVL_HAS_OPENCV2 OR NOT OpenCV2_OPTIONS)
+
+
+    ##OpenCV
+    #IF(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
+    #    FIND_PACKAGE(OpenCV1)
+    #    IF(OpenCV_FOUND)
+    #        MESSAGE("Version: " ${OpenCV_VERSION})
+    #        MESSAGE("Major: " ${OpenCV_VERSION_MAJOR})
+    #        MESSAGE("Minor: " ${OpenCV_VERSION_MINOR})
+    #
+    #        cisst_set_package_settings(cisstStereoVision OpenCV INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIR)
+    #        cisst_set_package_settings(cisstStereoVision OpenCV LIBRARIES           OpenCV_LIBS)
+    #        SET(SOURCE_FILES
+    #            ${SOURCE_FILES}
+    #            svlFilterImageZoom.cpp
+    #            svlFilterToolTracker.cpp
+    #            #svlVideoCodecOpenCV.h       # private header
+    #            #svlVideoCodecOpenCV.cpp
+    #            svlTrackerOCVMeanShift.cpp
+    #            )
+    #        IF(NOT WIN32)
+    #            SET(SOURCE_FILES
+    #                ${SOURCE_FILES}
+    #                svlVidCapSrcOpenCV.h        # private header
+    #                svlVidCapSrcOpenCV.cpp
+    #            )
+    #        ENDIF(NOT WIN32)
+    #        SET(HEADER_FILES
+    #            ${HEADER_FILES}
+    #            svlFilterImageZoom.h
+    #            svlFilterToolTracker.h
+    #            svlTrackerOCVMeanShift.h
+    #            )
+    #        IF(OpenCV21_FOUND)
+    #            SET(SOURCE_FILES
+    #                ${SOURCE_FILES}
+    #                svlCCCalibrationGrid.cpp
+    #                svlCCCornerDetector.cpp
+    #                svlCCFileIO.cpp
+    #                svlCCHandEyeCalibration.cpp
+    #                svlCCOriginDetector.cpp
+    #                svlFilterImageCameraCalibrationOpenCV.cpp
+    #            )
+    #            SET(HEADER_FILES
+    #                ${HEADER_FILES}
+    #                svlCCCalibrationGrid.h
+    #                svlCCCornerDetector.h
+    #                svlCCFileIO.h
+    #                svlCCHandEyeCalibration.h
+    #                svlCCOriginDetector.h
+    #                svlFilterImageCameraCalibrationOpenCV.h
+    #            )
+    #        ENDIF(OpenCV21_FOUND)
+    #        MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
+    #        OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
+    #    ELSE(OpenCV_FOUND)
+    #    ENDIF(OpenCV_FOUND)
+    #ELSE(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
+    #    cisst_unset_all_package_settings (cisstStereoVision OpenCV)
+    #
+    #    MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
+    #    OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
+    #ENDIF(NOT OpenCV_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
+
+
+    # OpenCV
+    IF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
+        SET(OpenCV_OPTIONS
+            OpenCV_ROOT_DIR
+            OpenCV_INCLUDE_DIRS
+            OpenCV_CV_INCLUDE_DIR
+            OpenCV_CXCORE_INCLUDE_DIR
+            OpenCV_CVAUX_INCLUDE_DIR
+            OpenCV_HIGHGUI_INCLUDE_DIR
+            OpenCV_LIBRARIES
+            OpenCV_CV_LIBRARY
+            OpenCV_CXCORE_LIBRARY
+            OpenCV_CVAUX_LIBRARY
+            OpenCV_CVHAARTRAINING_LIBRARY
+            OpenCV_CXTS_LIBRARY
+            OpenCV_HIGHGUI_LIBRARY
+            OpenCV_ML_LIBRARY
+            CACHE INTERNAL "List of OpenCV options"
+            )
+
+        FIND_PACKAGE(OpenCV21 COMPONENTS CV CXCORE CVAUX HIGHGUI)
+        IF(OpenCV21_FOUND)
+            # Copy 'OpenCV21_' variable values to 'OpenCV_' variables
+            SET(OpenCV_FOUND YES)
+            SET(OpenCV_ROOT_DIR                 ${OpenCV21_ROOT_DIR})
+            SET(OpenCV_INCLUDE_DIRS             ${OpenCV21_INCLUDE_DIRS})
+            SET(OpenCV_CV_INCLUDE_DIR           ${OpenCV21_CV_INCLUDE_DIR})
+            SET(OpenCV_CXCORE_INCLUDE_DIR       ${OpenCV21_CXCORE_INCLUDE_DIR})
+            SET(OpenCV_CVAUX_INCLUDE_DIR        ${OpenCV21_CVAUX_INCLUDE_DIR})
+            SET(OpenCV_HIGHGUI_INCLUDE_DIR      ${OpenCV21_HIGHGUI_INCLUDE_DIR})
+            SET(OpenCV_LIBRARIES                ${OpenCV21_LIBRARIES})
+            SET(OpenCV_CV_LIBRARY               ${OpenCV21_CV_LIBRARY})
+            SET(OpenCV_CXCORE_LIBRARY           ${OpenCV21_CXCORE_LIBRARY})
+            SET(OpenCV_CVAUX_LIBRARY            ${OpenCV21_CVAUX_LIBRARY})
+            SET(OpenCV_CVHAARTRAINING_LIBRARY   ${OpenCV21_CVHAARTRAINING_LIBRARY})
+            SET(OpenCV_CXTS_LIBRARY             ${OpenCV21_CXTS_LIBRARY})
+            SET(OpenCV_HIGHGUI_LIBRARY          ${OpenCV21_HIGHGUI_LIBRARY})
+            SET(OpenCV_ML_LIBRARY               ${OpenCV21_ML_LIBRARY})
+        ELSE(OpenCV21_FOUND)
+            FIND_PACKAGE(OpenCV20 COMPONENTS CV CXCORE CVAUX HIGHGUI)
+            IF(OpenCV20_FOUND)
+                # Copy 'OpenCV20_' variable values to 'OpenCV_' variables
+                SET(OpenCV_FOUND YES)
+                SET(OpenCV_ROOT_DIR                 ${OpenCV20_ROOT_DIR})
+                SET(OpenCV_INCLUDE_DIRS             ${OpenCV20_INCLUDE_DIRS})
+                SET(OpenCV_CV_INCLUDE_DIR           ${OpenCV20_CV_INCLUDE_DIR})
+                SET(OpenCV_CXCORE_INCLUDE_DIR       ${OpenCV20_CXCORE_INCLUDE_DIR})
+                SET(OpenCV_CVAUX_INCLUDE_DIR        ${OpenCV20_CVAUX_INCLUDE_DIR})
+                SET(OpenCV_HIGHGUI_INCLUDE_DIR      ${OpenCV20_HIGHGUI_INCLUDE_DIR})
+                SET(OpenCV_LIBRARIES                ${OpenCV20_LIBRARIES})
+                SET(OpenCV_CV_LIBRARY               ${OpenCV20_CV_LIBRARY})
+                SET(OpenCV_CXCORE_LIBRARY           ${OpenCV20_CXCORE_LIBRARY})
+                SET(OpenCV_CVAUX_LIBRARY            ${OpenCV20_CVAUX_LIBRARY})
+                SET(OpenCV_CVHAARTRAINING_LIBRARY   ${OpenCV20_CVHAARTRAINING_LIBRARY})
+                SET(OpenCV_CXTS_LIBRARY             ${OpenCV20_CXTS_LIBRARY})
+                SET(OpenCV_HIGHGUI_LIBRARY          ${OpenCV20_HIGHGUI_LIBRARY})
+                SET(OpenCV_ML_LIBRARY               ${OpenCV20_ML_LIBRARY})
+            ELSE(OpenCV20_FOUND)
+                FIND_PACKAGE(OpenCV1 COMPONENTS CV CXCORE CVAUX HIGHGUI)
+            ENDIF(OpenCV20_FOUND)
+        ENDIF(OpenCV21_FOUND)
+
+        # Remove 'OpenCV2x_' variables, if any
+        UNSET(OpenCV21_ROOT_DIR CACHE)
+        UNSET(OpenCV21_INCLUDE_DIRS CACHE)
+        UNSET(OpenCV21_CV_INCLUDE_DIR CACHE)
+        UNSET(OpenCV21_CXCORE_INCLUDE_DIR CACHE)
+        UNSET(OpenCV21_CVAUX_INCLUDE_DIR CACHE)
+        UNSET(OpenCV21_CVCAM_INCLUDE_DIR CACHE)
+        UNSET(OpenCV21_HIGHGUI_INCLUDE_DIR CACHE)
+        UNSET(OpenCV21_LIBRARIES CACHE)
+        UNSET(OpenCV21_CV_LIBRARY CACHE)
+        UNSET(OpenCV21_CXCORE_LIBRARY CACHE)
+        UNSET(OpenCV21_CVAUX_LIBRARY CACHE)
+        UNSET(OpenCV21_CVCAM_LIBRARY CACHE)
+        UNSET(OpenCV21_CVHAARTRAINING_LIBRARY CACHE)
+        UNSET(OpenCV21_CXTS_LIBRARY CACHE)
+        UNSET(OpenCV21_HIGHGUI_LIBRARY CACHE)
+        UNSET(OpenCV21_ML_LIBRARY CACHE)
+        UNSET(OpenCV21_TRS_LIBRARY CACHE)
+        UNSET(OpenCV20_ROOT_DIR CACHE)
+        UNSET(OpenCV20_INCLUDE_DIRS CACHE)
+        UNSET(OpenCV20_CV_INCLUDE_DIR CACHE)
+        UNSET(OpenCV20_CXCORE_INCLUDE_DIR CACHE)
+        UNSET(OpenCV20_CVAUX_INCLUDE_DIR CACHE)
+        UNSET(OpenCV20_CVCAM_INCLUDE_DIR CACHE)
+        UNSET(OpenCV20_HIGHGUI_INCLUDE_DIR CACHE)
+        UNSET(OpenCV20_LIBRARIES CACHE)
+        UNSET(OpenCV20_CV_LIBRARY CACHE)
+        UNSET(OpenCV20_CXCORE_LIBRARY CACHE)
+        UNSET(OpenCV20_CVAUX_LIBRARY CACHE)
+        UNSET(OpenCV20_CVCAM_LIBRARY CACHE)
+        UNSET(OpenCV20_CVHAARTRAINING_LIBRARY CACHE)
+        UNSET(OpenCV20_CXTS_LIBRARY CACHE)
+        UNSET(OpenCV20_HIGHGUI_LIBRARY CACHE)
+        UNSET(OpenCV20_ML_LIBRARY CACHE)
+        UNSET(OpenCV20_TRS_LIBRARY CACHE)
+
+        IF(OpenCV_FOUND)
+            MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
+            cisst_set_package_settings (cisstStereoVision OpenCV INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
+            cisst_set_package_settings (cisstStereoVision OpenCV LIBRARIES           OpenCV_LIBRARIES)
+            SET(SOURCE_FILES
+                ${SOURCE_FILES}
+                svlFilterImageZoom.cpp
+                svlFilterToolTracker.cpp
+                #svlVideoCodecOpenCV.h       # private header
+                #svlVideoCodecOpenCV.cpp
+                svlTrackerOCVMeanShift.cpp
+                )
+            IF(NOT WIN32)
+                SET(SOURCE_FILES
+                    ${SOURCE_FILES}
+                    svlVidCapSrcOpenCV.h        # private header
+                    svlVidCapSrcOpenCV.cpp
+                )
+            ENDIF(NOT WIN32)
+            SET(HEADER_FILES
+                ${HEADER_FILES}
+                svlFilterImageZoom.h
+                svlFilterToolTracker.h
+                svlTrackerOCVMeanShift.h
+                )
+            IF(OpenCV21_FOUND)
+                SET(SOURCE_FILES
+                    ${SOURCE_FILES}
+                    svlCCCalibrationGrid.cpp
+                    svlCCCornerDetector.cpp
+                    svlCCFileIO.cpp
+                    svlCCHandEyeCalibration.cpp
+                    svlCCOriginDetector.cpp
+                    svlFilterImageCameraCalibrationOpenCV.cpp
+                )
+                SET(HEADER_FILES
+                    ${HEADER_FILES}
+                    svlCCCalibrationGrid.h
+                    svlCCCornerDetector.h
+                    svlCCFileIO.h
+                    svlCCHandEyeCalibration.h
+                    svlCCOriginDetector.h
+                    svlFilterImageCameraCalibrationOpenCV.h
+                )
+            ENDIF(OpenCV21_FOUND)
+            MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
+            OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
+
+        ELSE(OpenCV_FOUND)
+            cisst_unset_all_package_settings (cisstStereoVision OpenCV)
+
+            IF(CISST_SVL_HAS_OPENCV)
+                MARK_AS_ADVANCED(CLEAR ${OpenCV_OPTIONS})
+                MESSAGE(FATAL_ERROR "OpenCV required. Please specify its location.")
+            ELSE(CISST_SVL_HAS_OPENCV)
+                MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
+                OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
+            ENDIF(CISST_SVL_HAS_OPENCV)
+        ENDIF(OpenCV_FOUND)
+
+    ELSE(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
         cisst_unset_all_package_settings (cisstStereoVision OpenCV)
 
-        IF(CISST_SVL_HAS_OPENCV)
-            MARK_AS_ADVANCED(CLEAR ${OpenCV_OPTIONS})
-            MESSAGE(FATAL_ERROR "OpenCV required. Please specify its location.")
-        ELSE(CISST_SVL_HAS_OPENCV)
-            MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
-            OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
-        ENDIF(CISST_SVL_HAS_OPENCV)
-    ENDIF(OpenCV_FOUND)
+        MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
+        OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
+    ENDIF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
 
-ELSE(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
-    cisst_unset_all_package_settings (cisstStereoVision OpenCV)
-
-    MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
-    OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
-ENDIF(NOT OpenCV2_FOUND AND (CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS))
+ENDIF(CISST_SVL_USE_USER_OPENCV)
 
 
 # ZLIB
@@ -982,7 +1057,7 @@ IF(WIN32)
                  "${DIRECTSHOW_INCLUDE_DIR}"
                  "${DIRECTX_INCLUDE_DIR}")
             cisst_set_package_settings (cisstStereoVision DirectShow INCLUDE_DIRECTORIES CISST_SVL_ALL_DIRECTSHOW_INCLUDE)
-	    set (CISST_SVL_ALL_DIRECTSHOW_LIBRARIES
+            set (CISST_SVL_ALL_DIRECTSHOW_LIBRARIES
                  "${DIRECTSHOW_strmiids_LIBRARY}"
                  "${DIRECTSHOW_WinMM_LIBRARY}")
             cisst_set_package_settings (cisstStereoVision DirectShow LIBRARIES CISST_SVL_ALL_DIRECTSHOW_LIBRARIES)
@@ -1064,8 +1139,8 @@ IF(WIN32)
         IF(SVS_FOUND)
             MARK_AS_ADVANCED(FORCE ${SVS_OPTIONS})
 
-	    cisst_set_package_settings (cisstStereoVision SVS INCLUDE_DIRECTORIES SVS_INCLUDE_DIR)
-	    set (CISST_SVL_ALL_SVS_LIBRARIES
+            cisst_set_package_settings (cisstStereoVision SVS INCLUDE_DIRECTORIES SVS_INCLUDE_DIR)
+            set (CISST_SVL_ALL_SVS_LIBRARIES
                  "${SVS_svs_LIBRARY}"
                  "${SVS_svsgrab_LIBRARY}")
             cisst_set_package_settings (cisstStereoVision SVS LIBRARIES CISST_SVL_ALL_SVS_LIBRARIES)
@@ -1400,7 +1475,7 @@ if (CISST_SVL_HAS_BM_DECKLINK)
         cisst_unset_all_package_settings (cisstStereoVision decklink)
     endif (DeckLink_FOUND)
 else (CISST_SVL_HAS_BM_DECKLINK)
-    cisst_unset_all_package_settings (cisstStereoVision decklink)	
+    cisst_unset_all_package_settings (cisstStereoVision decklink)
 endif (CISST_SVL_HAS_BM_DECKLINK)
 
 
@@ -1475,7 +1550,8 @@ cisst_add_library (
   DEPENDENCIES ${DEPENDENCIES}
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES}
-  ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
+  ADDITIONAL_SOURCE_FILES ${cisstStereoVision_CISST_DG_SRCS}
+  ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${cisstStereoVision_CISST_DG_HDRS})
 
 # Link `cisstStereoVision` against CUDA generated libraries
 IF(CISST_SVL_HAS_CUDA)

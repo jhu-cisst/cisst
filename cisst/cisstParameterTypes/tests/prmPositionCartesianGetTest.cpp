@@ -67,10 +67,11 @@ void prmPositionCartesianGetTest::TestBinarySerializationStream(void)
     vctRandom(pReference.Position().Rotation());
     pReference.Timestamp() = 3.14;
     p1 = pReference;
-    cmnDataSerializeBinary(stream, p1);
+    cmnData<prmPositionCartesianGet>::SerializeBinary(p1, stream);
     p1.Position() = p1.Position().Identity();
-    cmnDataDeSerializeBinary(stream, p2, remote, local);
+    cmnData<prmPositionCartesianGet>::DeSerializeBinary(p2, stream, local, remote);
     CPPUNIT_ASSERT(pReference.Position().Equal(p2.Position()));
+    CPPUNIT_ASSERT_EQUAL(pReference.Timestamp(), p2.Timestamp());
 }
 
 
@@ -83,10 +84,11 @@ void prmPositionCartesianGetTest::TestTextSerializationStream(void)
     vctRandom(pReference.Position().Rotation());
     pReference.Timestamp() = 3.14;
     p1 = pReference;
-    cmnDataSerializeText(stream, p1, ',');
+    cmnData<prmPositionCartesianGet>::SerializeText(p1, stream, ',');
     p1.Position() = p1.Position().Identity();
-    cmnDataDeSerializeText(stream, p2, ',');
+    cmnData<prmPositionCartesianGet>::DeSerializeText(p2, stream, ',');
     CPPUNIT_ASSERT(pReference.Position().AlmostEqual(p2.Position(), 0.01)); // precision lost in conversion to/from strings
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(pReference.Timestamp(), p2.Timestamp(), 0.01);
 }
 
 
@@ -94,7 +96,7 @@ void prmPositionCartesianGetTest::TestScalars(void)
 {
     prmPositionCartesianGet position;
     // should have 3 defaults from mtsGenericObject + 12 for the
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(15), cmnDataScalarNumber(position));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(15), cmnData<prmPositionCartesianGet>::ScalarNumber(position));
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(15), position.ScalarNumber());
 
     size_t index, row, col;
@@ -112,8 +114,8 @@ void prmPositionCartesianGetTest::TestScalars(void)
     for (index = 0; index < 3; index++) {
         CPPUNIT_ASSERT_EQUAL(0.0, position.Scalar(translationOffset + index));
         expectedName.str("");
-        expectedName << "Position.Translation[" << index << "]{d}";
-        CPPUNIT_ASSERT_EQUAL(expectedName.str(), cmnDataScalarDescription(position, translationOffset + index));
+        expectedName << "Position.Translation[" << index << "]:{d}";
+        CPPUNIT_ASSERT_EQUAL(expectedName.str(), cmnData<prmPositionCartesianGet>::ScalarDescription(position, translationOffset + index));
         CPPUNIT_ASSERT_EQUAL(expectedName.str(), position.ScalarDescription(translationOffset + index));
     }
     // test Position.Rotation member
@@ -126,7 +128,7 @@ void prmPositionCartesianGetTest::TestScalars(void)
                 CPPUNIT_ASSERT_EQUAL(0.0, position.Scalar(rotationOffset + row * 3 + col));
             }
             expectedName.str("");
-            expectedName << "Position.Rotation[" << row << "," << col << "]{d}";
+            expectedName << "Position.Rotation[" << row << "," << col << "]:{d}";
             CPPUNIT_ASSERT_EQUAL(expectedName.str(), position.ScalarDescription(rotationOffset + row * 3 + col));
         }
     }

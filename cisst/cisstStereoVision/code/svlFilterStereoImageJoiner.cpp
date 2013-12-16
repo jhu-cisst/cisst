@@ -82,6 +82,7 @@ int svlFilterStereoImageJoiner::Initialize(svlSample* syncInput, svlSample* &syn
     switch (Layout) {
         case svlLayoutInterlaced:
         case svlLayoutInterlacedRL:
+        case svlLayoutVertical:
             height += input->GetHeight(SVL_RIGHT);
         break;
 
@@ -138,6 +139,11 @@ int svlFilterStereoImageJoiner::Process(svlProcInfo* procInfo, svlSample* syncIn
                     input2 += stride;
                     output += stride;
                 }
+            break;
+
+            case svlLayoutVertical:
+                memcpy(output, input1, stride * height);
+                memcpy(output + stride * height, input2, stride * height);
             break;
 
             case svlLayoutInterlacedRL:

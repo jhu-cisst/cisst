@@ -282,8 +282,8 @@ public:
     bool Valid;
     bool Visible;
     vctFrm3 HomePositionUI3;
-    typedef std::map<int,vctFrm3> vctFrm3MapType;
-    int PreviousIndex;
+    typedef std::map<size_t, vctFrm3> vctFrm3MapType;
+    size_t PreviousIndex;
     vctFrm3MapType PreviousPositions;
 
 protected:
@@ -297,7 +297,7 @@ protected:
     vtkActor  * OutlineActor;
 
     GeometryType Geometry;
-    int Size;
+    size_t Size;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ManualRegistrationSurfaceVisibleStippleObject);
@@ -1196,7 +1196,7 @@ bool ManualRegistration::ImportFiducialFile(const std::string & inputFile, Visib
         Tokenize(tempLine, token, ",");
         if (inf.eof() || token.size() <= 0)
             break;
-        std::cerr << token << std::endl;
+		std::cerr << cmnData<std::vector<std::string> >::HumanReadable(token) << std::endl;
         if (token.at(0).compare(0,1,"#")) {
             if (token.size() < 4)
                 return false;
@@ -1559,7 +1559,7 @@ void ManualRegistration::GetFiducials(vctDynamicVector<vct3>& fiducialsVirtual, 
 
 void ManualRegistration::AddFiducial(vctFrm3 positionUI3, VisibleObjectType type)
 {
-    int fiducialIndex;
+    size_t fiducialIndex;
     ManualRegistrationType::iterator foundModel;
 
     // Find first virtual object, i.e. Model

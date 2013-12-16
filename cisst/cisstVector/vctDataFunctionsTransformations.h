@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,117 +28,175 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 #include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
+#include <cisstVector/vctDataFunctionsTransformationsJSON.h>
 
 template <class _rotationType>
-void cmnDataCopy(vctFrameBase<_rotationType> & destination,
-                 const vctFrameBase<_rotationType> & source)
+class cmnData<vctFrameBase<_rotationType> >
 {
-    destination.Assign(source);
-}
+public:
+    enum {IS_SPECIALIZED = 1};
 
+    typedef vctFrameBase<_rotationType> DataType;
+    typedef typename DataType::TranslationType TranslationType;
+    typedef typename DataType::RotationType RotationType;
 
-template <class _rotationType>
-void cmnDataSerializeBinary(std::ostream & outputStream,
-                            const vctFrameBase<_rotationType> & data)
-    throw (std::runtime_error)
-{
-    cmnDataSerializeBinary(outputStream, data.Translation());
-    cmnDataSerializeBinary(outputStream, data.Rotation());
-}
-
-
-template <class _rotationType>
-void cmnDataDeSerializeBinary(std::istream & inputStream,
-                              vctFrameBase<_rotationType> & data,
-                              const cmnDataFormat & remoteFormat,
-                              const cmnDataFormat & localFormat)
-    throw (std::runtime_error)
-{
-    cmnDataDeSerializeBinary(inputStream, data.Translation(), remoteFormat, localFormat);
-    cmnDataDeSerializeBinary(inputStream, data.Rotation(), remoteFormat, localFormat);
-}
-
-
-template <class _rotationType>
-void cmnDataSerializeText(std::ostream & outputStream,
-                          const vctFrameBase<_rotationType> & data,
-                          const char delimiter)
-    throw (std::runtime_error)
-{
-    cmnDataSerializeText(outputStream, data.Translation(), delimiter);
-    outputStream << delimiter;
-    cmnDataSerializeText(outputStream, data.Rotation(), delimiter);
-}
-
-
-template <class _rotationType>
-std::string cmnDataSerializeTextDescription(const vctFrameBase<_rotationType> & data,
-                                            const char delimiter,
-                                            const std::string & userDescription = "frm3")
-{
-    const std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
-    std::stringstream description;
-    description << cmnDataSerializeTextDescription(data.Translation(), delimiter, prefix + "Translation")
-                << delimiter
-                << cmnDataSerializeTextDescription(data.Rotation(), delimiter, prefix + "Rotation");
-    return description.str();
-}
-
-
-template <class _rotationType>
-void cmnDataDeSerializeText(std::istream & inputStream,
-                            vctFrameBase<_rotationType> & data,
-                            const char delimiter)
-    throw (std::runtime_error)
-{
-    cmnDataDeSerializeText(inputStream, data.Translation(), delimiter);
-    cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFrameBase");
-    cmnDataDeSerializeText(inputStream, data.Rotation(), delimiter);
-}
-
-
-template <class _rotationType>
-bool cmnDataScalarNumberIsFixed(const vctFrameBase<_rotationType> & data)
-{
-    return (cmnDataScalarNumberIsFixed(data.Translation()) && cmnDataScalarNumberIsFixed(data.Rotation()));
-}
-
-
-template <class _rotationType>
-size_t cmnDataScalarNumber(const vctFrameBase<_rotationType> & data)
-{
-    return cmnDataScalarNumber(data.Translation()) + cmnDataScalarNumber(data.Rotation());
-}
-
-
-template <class _rotationType>
-std::string
-cmnDataScalarDescription(const vctFrameBase<_rotationType> & data,
-                         const size_t & index,
-                         const std::string & userDescription = "f")
-    throw (std::out_of_range)
-{
-    std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
-    const size_t scalarNumberTranslation = cmnDataScalarNumber(data.Translation());
-    if (index < scalarNumberTranslation) {
-        return prefix + cmnDataScalarDescription(data.Translation(), index, "Translation");
+    static void Copy(DataType & data, const DataType & source)
+    {
+        data.Assign(source);
     }
-    return prefix + cmnDataScalarDescription(data.Rotation(), index - scalarNumberTranslation, "Rotation");
-}
 
-
-template <class _rotationType>
-double
-cmnDataScalar(const vctFrameBase<_rotationType> & data,
-              const size_t & index)
-    throw (std::out_of_range)
-{
-    const size_t scalarNumberTranslation = cmnDataScalarNumber(data.Translation());
-    if (index < scalarNumberTranslation) {
-        return cmnDataScalar(data.Translation(), index);
+    static void SerializeBinary(const DataType & data, std::ostream & outputStream)
+        throw (std::runtime_error)
+    {
+        cmnData<TranslationType>::SerializeBinary(data.Translation(), outputStream);
+        cmnData<RotationType>::SerializeBinary(data.Rotation(), outputStream);
     }
-    return cmnDataScalar(data.Rotation(), index - scalarNumberTranslation);
-}
 
+    static void DeSerializeBinary(DataType & data, std::istream & inputStream,
+                                  const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat)
+        throw (std::runtime_error)
+    {
+        cmnData<TranslationType>::DeSerializeBinary(data.Translation(), inputStream, localFormat, remoteFormat);
+        cmnData<RotationType>::DeSerializeBinary(data.Rotation(), inputStream, localFormat, remoteFormat);
+    }
+
+    static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter)
+        throw (std::runtime_error)
+    {
+        cmnData<TranslationType>::SerializeText(data.Translation(), outputStream, delimiter);
+        outputStream << delimiter;
+        cmnData<RotationType>::SerializeText(data.Rotation(), outputStream, delimiter);
+    }
+
+    static std::string HumanReadable(const DataType & data)
+    {
+        return data.ToString();
+    }
+
+    static std::string SerializeDescription(const DataType & data, const char delimiter, const std::string & userDescription = "frm3")
+    {
+        const std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
+        std::stringstream description;
+        description << cmnData<TranslationType>::SerializeDescription(data.Translation(), delimiter, prefix + "Translation")
+                    << delimiter
+                    << cmnData<RotationType>::SerializeDescription(data.Rotation(), delimiter, prefix + "Rotation");
+        return description.str();
+    }
+
+    static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter)
+        throw (std::runtime_error)
+    {
+        cmnData<TranslationType>::DeSerializeText(data.Translation(), inputStream, delimiter);
+        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFrameBase");
+        cmnData<RotationType>::DeSerializeText(data.Rotation(), inputStream, delimiter);
+    }
+
+    static bool ScalarNumberIsFixed(const DataType & data)
+    {
+        return (cmnData<TranslationType>::ScalarNumberIsFixed(data.Translation())
+                && cmnData<RotationType>::ScalarNumberIsFixed(data.Rotation()));
+    }
+
+    static size_t ScalarNumber(const DataType & data)
+    {
+        return (cmnData<TranslationType>::ScalarNumber(data.Translation())
+                + cmnData<RotationType>::ScalarNumber(data.Rotation()));
+    }
+
+    static std::string ScalarDescription(const DataType & data, const size_t & index,
+                                         const std::string & userDescription = "frm3")
+        throw (std::out_of_range)
+    {
+        std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
+        const size_t scalarNumberTranslation = cmnData<TranslationType>::ScalarNumber(data.Translation());
+        if (index < scalarNumberTranslation) {
+            return prefix + cmnData<TranslationType>::ScalarDescription(data.Translation(), index, "Translation");
+        }
+        return prefix + cmnData<RotationType>::ScalarDescription(data.Rotation(), index - scalarNumberTranslation, "Rotation");
+    }
+
+    static double Scalar(const DataType & data, const size_t & index)
+        throw (std::out_of_range)
+    {
+        const size_t scalarNumberTranslation = cmnData<TranslationType>::ScalarNumber(data.Translation());
+        if (index < scalarNumberTranslation) {
+            return cmnData<TranslationType>::Scalar(data.Translation(), index);
+        }
+        return cmnData<RotationType>::Scalar(data.Rotation(), index - scalarNumberTranslation);
+    }
+};
+
+// pass through class for rotation matrix
+template <class _elementType, bool _rowMajor>
+class cmnData<vctMatrixRotation3<_elementType, _rowMajor> >
+{
+public:
+    enum {IS_SPECIALIZED = 1};
+    typedef vctMatrixRotation3<_elementType, _rowMajor> DataType;
+    typedef typename DataType::ContainerType ContainerType;
+
+    static void Copy(DataType & data, const DataType & source)
+    {
+        cmnData<ContainerType>::Copy(data, source);
+    }
+
+    static void SerializeBinary(const DataType & data, std::ostream & outputStream)
+        throw (std::runtime_error)
+    {
+        cmnData<ContainerType>::SerializeBinary(data, outputStream);
+    }
+
+    static void DeSerializeBinary(DataType & data, std::istream & inputStream,
+                                  const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat)
+        throw (std::runtime_error)
+    {
+        cmnData<ContainerType>::DeSerializeBinary(data, inputStream, localFormat, remoteFormat);
+    }
+
+    static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter)
+        throw (std::runtime_error)
+    {
+        cmnData<ContainerType>::SerializeText(data, outputStream, delimiter);
+    }
+
+    static std::string HumanReadable(const DataType & data)
+    {
+        return cmnData<ContainerType>::HumanReadable(data);
+    }
+
+    static std::string SerializeDescription(const DataType & data, const char delimiter, const std::string & userDescription = "mr3")
+    {
+        return cmnData<ContainerType>::SerializeDescription(data, delimiter, userDescription);
+    }
+
+    static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter)
+        throw (std::runtime_error)
+    {
+        return cmnData<ContainerType>::DeSerializeText(data, inputStream, delimiter);
+    }
+
+    static bool ScalarNumberIsFixed(const DataType & data)
+    {
+        return cmnData<ContainerType>::ScalarNumberIsFixed(data);
+    }
+
+    static size_t ScalarNumber(const DataType & data)
+    {
+        return cmnData<ContainerType>::ScalarNumber(data);
+    }
+
+    static std::string ScalarDescription(const DataType & data, const size_t & index,
+                                         const std::string & userDescription = "mr3")
+        throw (std::out_of_range)
+    {
+       return  cmnData<ContainerType>::ScalarDescription(data, index, userDescription);
+    }
+
+    static double Scalar(const DataType & data, const size_t & index)
+        throw (std::out_of_range)
+    {
+        return cmnData<ContainerType>::Scalar(data, index);
+    }
+};
 
 #endif // _vctDataFunctionsTransformations_h

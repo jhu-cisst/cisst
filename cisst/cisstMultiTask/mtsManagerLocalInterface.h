@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-08
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -71,12 +71,12 @@ public:
     /*! Create a provided interface proxy using InterfaceProvidedDescription */
     virtual bool CreateInterfaceProvidedProxy(
         const std::string & serverComponentProxyName,
-        const InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "") = 0;
+        const mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "") = 0;
 
     /*! Create a required interface proxy using InterfaceRequiredDescription */
     virtual bool CreateInterfaceRequiredProxy(
         const std::string & clientComponentProxyName,
-        const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
+        const mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
 
     /*! Remove a provided interface proxy.  Because a provided interface can
         have multiple connections with more than one required interface, this
@@ -92,25 +92,25 @@ public:
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
-    /*! \brief Connect interfaces at server side 
+    /*! \brief Connect interfaces at server side
         \param description Description of connection
-        \param listenerID Id of local component manager (set as process name) 
+        \param listenerID Id of local component manager (set as process name)
                that this method should call. Valid only in networked configuration
         \return True if success, false otherwise
-        \note This method is called by the global component manager and is 
+        \note This method is called by the global component manager and is
               always executed inside ConnectClientSideInterface(). */
     virtual bool ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "") = 0;
 
-    /*! \brief Connect interfaces at client side 
+    /*! \brief Connect interfaces at client side
         \param description Description of connection
-        \param listenerID Id of local component manager (set as process name) 
+        \param listenerID Id of local component manager (set as process name)
                that this method should call. Valid only in networked configuration
         \return True if success, false otherwise
         \note If the local component manager with the client process establishes
-              a connection successfully, the manager should inform the global 
+              a connection successfully, the manager should inform the global
               component manager (GCM) of its successful connection establishment
-              so that it registers this connection. Otherwise, the GCM cleans up 
-              the connection after timeout.  This method is always executed 
+              so that it registers this connection. Otherwise, the GCM cleans up
+              the connection after timeout.  This method is always executed
               ahead of ConnectServerSideInterface(). */
     virtual bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "") = 0;
 
@@ -122,53 +122,53 @@ public:
 
     /*! Get names of all commands in a provided interface */
     virtual void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
-                                    const std::string & componentName, 
-                                    const std::string & providedInterfaceName, 
+                                    const std::string & componentName,
+                                    const std::string & providedInterfaceName,
                                     const std::string & listenerID = "") = 0;
 
     /*! Get names of all event generators in a provided interface */
     virtual void GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
-                                           const std::string & componentName, 
-                                           const std::string & providedInterfaceName, 
+                                           const std::string & componentName,
+                                           const std::string & providedInterfaceName,
                                            const std::string & listenerID = "") = 0;
 
     /*! Get names of all functions in a required interface */
     virtual void GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
-                                     const std::string & componentName, 
-                                     const std::string & requiredInterfaceName, 
+                                     const std::string & componentName,
+                                     const std::string & requiredInterfaceName,
                                      const std::string & listenerID = "") = 0;
 
     /*! Get names of all event handlers in a required interface */
     virtual void GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
-                                         const std::string & componentName, 
-                                         const std::string & requiredInterfaceName, 
+                                         const std::string & componentName,
+                                         const std::string & requiredInterfaceName,
                                          const std::string & listenerID = "") = 0;
 
     /*! Get description of a command in a provided interface */
     virtual void GetDescriptionOfCommand(std::string & description,
-                                         const std::string & componentName, 
-                                         const std::string & providedInterfaceName, 
+                                         const std::string & componentName,
+                                         const std::string & providedInterfaceName,
                                          const std::string & commandName,
                                          const std::string & listenerID = "") = 0;
 
     /*! Get description of a event generator in a provided interface */
     virtual void GetDescriptionOfEventGenerator(std::string & description,
                                                 const std::string & componentName,
-                                                const std::string & providedInterfaceName, 
+                                                const std::string & providedInterfaceName,
                                                 const std::string & eventGeneratorName,
                                                 const std::string & listenerID = "") = 0;
 
     /*! Get description of a function in a required interface */
     virtual void GetDescriptionOfFunction(std::string & description,
-                                          const std::string & componentName, 
-                                          const std::string & requiredInterfaceName, 
+                                          const std::string & componentName,
+                                          const std::string & requiredInterfaceName,
                                           const std::string & functionName,
                                           const std::string & listenerID = "") = 0;
 
     /*! Get description of a function in a required  interface */
     virtual void GetDescriptionOfEventHandler(std::string & description,
-                                              const std::string & componentName, 
-                                              const std::string & requiredInterfaceName, 
+                                              const std::string & componentName,
+                                              const std::string & requiredInterfaceName,
                                               const std::string & eventHandlerName,
                                               const std::string & listenerID = "") = 0;
 
@@ -178,34 +178,34 @@ public:
         \param providedInterfaceName Name of provided interface
         \param providedInterfaceDescription Placeholder to be populated with
                provided interface information
-        \param listenerID Client ID that owns the component (specified by 
+        \param listenerID Client ID that owns the component (specified by
                componentName argument). Valid only in the networked configuration.
                Set as zero (by default) and ignored in standalone mode.
         \return True if success, false otherwise
-        \note There are two cases for which this method is called. One is to 
+        \note There are two cases for which this method is called. One is to
               support the component inspector of the global component manager
               and the other one is to establish a connection between components.
-              In the latter case, this method is called whenever a client 
+              In the latter case, this method is called whenever a client
               requests a new connection. With the networked configuration,
-              this method allocates a new user id which will be passed around 
+              this method allocates a new user id which will be passed around
               across networks throughout connection process. */
     virtual bool GetInterfaceProvidedDescription(
         const std::string & serverComponentName, const std::string & providedInterfaceName,
-        InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "") = 0;
+        mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "") = 0;
 
     /*! \brief Extract all information about required interface such as function
                objects and event handlers.  Arguments are serialized, if any.
         \param componentName Name of component
         \param requiredInterfaceName Name of required interface
-        \param requiredInterfaceDescription Placeholder to be populated with 
+        \param requiredInterfaceDescription Placeholder to be populated with
                required interface information
-        \param listenerID Client ID that owns the component (specified by 
+        \param listenerID Client ID that owns the component (specified by
                componentName argument). Valid only in the networked configuration.
                Set as zero (by default) and ignored in standalone mode.
         \return True if success, false otherwise */
     virtual bool GetInterfaceRequiredDescription(
         const std::string & componentName, const std::string & requiredInterfaceName,
-        InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
+        mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerLocalInterface)

@@ -73,6 +73,12 @@ public:
 	/*! Set data in array. */
 	virtual bool Set(index_type index, const mtsGenericObject & data) = 0;
 
+    virtual bool SetDataSize(const size_t size) = 0;
+
+    bool SetSize(const size_t size){
+        return SetDataSize(size);
+    }
+
 };
 
 

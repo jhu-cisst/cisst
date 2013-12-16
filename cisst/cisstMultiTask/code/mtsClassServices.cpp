@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnPortability.h>
+
+#include <cisstMultiTask/mtsInterfaceCommon.h>
 
 // If not using MingW, compile as a single file.
 #if (CISST_OS != CISST_WINDOWS) || (CISST_COMPILER != CISST_GCC)
@@ -37,13 +39,16 @@ CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorEvent, mtsCollectorBase)   // derives
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorState, mtsCollectorBase)   // derives from mtsTaskFromSignal
 
 #include <cisstMultiTask/mtsComponent.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndInt)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndUInt)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndLong)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndULong)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndDouble)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndString)
 CMN_IMPLEMENT_SERVICES(mtsComponent)
 
 #include <cisstMultiTask/mtsComponentAddLatency.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentAddLatency, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
-
-#include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
-CMN_IMPLEMENT_SERVICES(mtsInterfaceProvidedOrOutput)
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 CMN_IMPLEMENT_SERVICES(mtsInterfaceProvided)
@@ -294,10 +299,6 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsBoolMat)
 
 #ifdef MTS_CLASS_SERVICES_PART1
 
-#include <cisstMultiTask/mtsHistory.h>
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDoubleHistory)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDoubleVecHistory)
-
 #include <cisstMultiTask/mtsManagerGlobal.h>
 CMN_IMPLEMENT_SERVICES(mtsManagerGlobal)
 CMN_IMPLEMENT_SERVICES(mtsManagerGlobalInterface)
@@ -310,40 +311,40 @@ CMN_IMPLEMENT_SERVICES(mtsManagerLocalInterface)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceProvidedDescriptionProxy);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceRequiredDescriptionProxy);
 
-#include <cisstMultiTask/mtsParameterTypes.h>
+#include <cisstMultiTask/mtsComponentState.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStateProxy);
-CMN_IMPLEMENT_SERVICES(mtsDescriptionComponent);
 
-CMN_IMPLEMENT_SERVICES(mtsDescriptionComponentClass);
+#include <cisstMultiTask/mtsParameterTypes.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentProxy);
+
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentClassProxy);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentClassVecProxy);
 
-CMN_IMPLEMENT_SERVICES(mtsDescriptionInterface);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionInterfaceProxy);
 
-CMN_IMPLEMENT_SERVICES(mtsDescriptionConnection);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionProxy);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionVecProxy);
 
-CMN_IMPLEMENT_SERVICES(mtsComponentStatusControl);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStatusControlProxy);
 
-CMN_IMPLEMENT_SERVICES(mtsComponentStateChange);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStateChangeProxy);
 
-CMN_IMPLEMENT_SERVICES(mtsEndUserInterfaceArg);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsEndUserInterfaceArgProxy);
 
 CMN_IMPLEMENT_SERVICES(mtsEventHandlerList);
 
-CMN_IMPLEMENT_SERVICES(mtsDescriptionLoadLibrary);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionLoadLibraryProxy);
 
 CMN_IMPLEMENT_SERVICES(mtsLogMessage);
 
 #include <cisstMultiTask/mtsComponentViewer.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
 
-#include <cisstMultiTask/mtsComponentDispatcher.h>
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(mtsComponentDispatcherPeriodic, 
-                                                mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(mtsComponentDispatcherContinuous, 
-                                                mtsTaskContinuous, mtsTaskContinuousConstructorArg)
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(mtsComponentDispatcherMain, 
-                                                mtsTaskMain, std::string)
+#include <cisstMultiTask/mtsSocketProxyClient.h>
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyClient, mtsTaskContinuous, mtsSocketProxyClientConstructorArg)
+
+#include <cisstMultiTask/mtsSocketProxyServer.h>
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyServer, mtsTaskContinuous, mtsSocketProxyServerConstructorArg)
 
 /* ICE dependent classes */
 #include <cisstMultiTask/mtsConfig.h>

@@ -59,4 +59,7 @@ class testComponentProxy: public mtsComponent {
 
 CMN_DECLARE_SERVICES_INSTANTIATION(testComponentProxy);
 
+
+
+
 #endif // _testComponent_h

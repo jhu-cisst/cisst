@@ -36,7 +36,7 @@ public:
     cdgBaseClass(size_t lineNumber);
     cdgScope::Type GetScope(void) const;
     cdgScope * Create(size_t lineNumber) const;
-    bool Validate(void);
+    bool Validate(std::string & errorMessage);
     void GenerateHeaderInheritance(std::ostream & outputStream) const;
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;

@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -75,7 +75,7 @@ http://www.cisst.org/cisst/license.txt.
                      User Component
                 with internal interfaces
 
-  The cisstMultiTask has four different set of internal connections between 
+  The cisstMultiTask has four different set of internal connections between
   components.
 
   1) InterfaceInternal.Required - InterfaceComponent.Provided
@@ -185,16 +185,20 @@ public:
     mtsManagerComponentBase(const std::string & componentName);
     virtual ~mtsManagerComponentBase();
 
+    static bool IsManagerComponent(const std::string & componentName);
+    static bool IsNameOfInternalInterface(const std::string & interfaceName);
+
     static bool IsManagerComponentServer(const std::string & componentName);
     static bool IsManagerComponentClient(const std::string & componentName);
-    static bool IsNameOfInterfaceGCMRequired(const std::string & nameOfInterface);
-    static bool IsNameOfInterfaceGCMProvided(const std::string & nameOfInterface);
-    static bool IsNameOfInterfaceLCMRequired(const std::string & nameOfInterface);
-    static bool IsNameOfInterfaceLCMProvided(const std::string & nameOfInterface);
-    static bool IsNameOfInterfaceComponentRequired(const std::string & nameOfInterface);
-    static bool IsNameOfInterfaceComponentProvided(const std::string & nameOfInterface);
-    static bool IsNameOfInterfaceInternalRequired(const std::string & nameOfInterface);
-    static bool IsNameOfInterfaceInternalProvided(const std::string & nameOfInterface);
+
+    static bool IsNameOfInterfaceGCMRequired(const std::string & interfaceName);
+    static bool IsNameOfInterfaceGCMProvided(const std::string & interfaceName);
+    static bool IsNameOfInterfaceLCMRequired(const std::string & interfaceName);
+    static bool IsNameOfInterfaceLCMProvided(const std::string & interfaceName);
+    static bool IsNameOfInterfaceComponentRequired(const std::string & interfaceName);
+    static bool IsNameOfInterfaceComponentProvided(const std::string & interfaceName);
+    static bool IsNameOfInterfaceInternalRequired(const std::string & interfaceName);
+    static bool IsNameOfInterfaceInternalProvided(const std::string & interfaceName);
 
     static const std::string GetNameOfManagerComponentServer(void);
     static const std::string GetNameOfManagerComponentClientFor(const std::string & processName);

@@ -4,7 +4,7 @@
 # Author(s):  Min Yang Jung, Anton Deguet
 # Created on: 2009
 #
-# (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -37,46 +37,54 @@
 # start with 'not found'
 set (ICE_FOUND "NO" CACHE BOOL "Do we have Ice?" FORCE)
 
-find_path (ICE_ICE_H_INCLUDE_DIR
-           NAMES Ice/Ice.h
-           PATHS
-             # installation selected by user
-             ${ICE_HOME}/include
-             $ENV{ICE_HOME}/include
-             # debian package installs Ice here
-             /usr/include
-             # MacPort
-             /opt/local/include
-             # Test standard installation points: generic symlinks first, then standard dirs, newer first
-             /opt/Ice/include
-             /opt/Ice-4/include
-             /opt/Ice-4.0/include
-             /opt/Ice-3/include
-             /opt/Ice-3.5/include
-             /opt/Ice-3.4/include
-             /opt/Ice-3.3/include
-             # some people may manually choose to install Ice here
-             /usr/local/include
-             # Windows
-             # 3.4.1
-               "C:/Program Files/ZeroC/Ice-3.4.1/include"
-               C:/Ice-3.4.1-VC90/include
-               C:/Ice-3.4.1-VC80/include
-               C:/Ice-3.4.1/include
-             # 3.4.0
-               "C:/Program Files/ZeroC/Ice-3.4.0/include"
-               C:/Ice-3.4.0-VC90/include
-               C:/Ice-3.4.0-VC80/include
-               C:/Ice-3.4.0/include
-             # 3.3.1
-               C:/Ice-3.3.1-VC90/include
-               C:/Ice-3.3.1-VC80/include
-               C:/Ice-3.3.1/include
-             # 3.3.0
-               C:/Ice-3.3.0-VC90/include
-               C:/Ice-3.3.0-VC80/include
-               C:/Ice-3.3.0/include
-            )
+# Generate default path strings to look for Ice package
+if (WIN32)
+    # List of Ice versions
+    set (ICE_VERSIONS "3.5.1" "3.5.0"
+                      "3.4.1" "3.4.0"
+                      "3.3.1" "3.3.0")
+
+    set (ICE_DEFAULT_INCLUDE_PATH "")
+
+    if (CMAKE_SIZEOF_VOID_P MATCHES 8)
+        set (PROGRAM_FILES_PATH "C:/Program Files (x86)")
+    else ()
+        set (PROGRAM_FILES_PATH "C:/Program Files")
+    endif ()
+
+    foreach (VERSION ${ICE_VERSIONS})
+        set (ICE_DEFAULT_INCLUDE_PATH ${ICE_DEFAULT_INCLUDE_PATH}
+                                      "${PROGRAM_FILES_PATH}/ZeroC/Ice-${VERSION}/include"
+                                      "C:/Ice-${VERSION}/include"
+                                      "C:/Ice-${VERSION}-VC90/include"
+                                      "C:/Ice-${VERSION}-VC80/include")
+    endforeach ()
+
+    find_path (ICE_ICE_H_INCLUDE_DIR
+               NAMES Ice/Ice.h
+               PATHS ${ICE_DEFAULT_INCLUDE_PATH})
+else (WIN32)
+    find_path (ICE_ICE_H_INCLUDE_DIR
+               NAMES Ice/Ice.h
+               PATHS
+               # installation selected by user
+               ${ICE_HOME}/include
+               $ENV{ICE_HOME}/include
+               # debian package installs Ice here
+               /usr/include
+               # MacPort
+               /opt/local/include
+               # Test standard installation points: generic symlinks first, then standard dirs, newer first
+               /opt/Ice/include
+               /opt/Ice-4/include
+               /opt/Ice-4.0/include
+               /opt/Ice-3/include
+               /opt/Ice-3.5/include
+               /opt/Ice-3.4/include
+               /opt/Ice-3.3/include
+               # some people may manually choose to install Ice here
+               /usr/local/include)
+endif (WIN32)
 
 # NOTE: if ICE_HOME_INCLUDE_ICE is set to *-NOTFOUND it will evaluate to FALSE
 if (ICE_ICE_H_INCLUDE_DIR)
@@ -87,7 +95,7 @@ if (ICE_ICE_H_INCLUDE_DIR)
   message (STATUS "Setting ICE_HOME to ${ICE_HOME}")
 
   # include and lib dirs are easy
-  if (WIN32)  
+  if (WIN32)
     set (ICE_INCLUDE_DIR
         ${ICE_ICE_H_INCLUDE_DIR}
         ${ICE_HOME}/slice
@@ -103,6 +111,7 @@ if (ICE_ICE_H_INCLUDE_DIR)
         ${ICE_HOME}/share/ice/slice
         ${ICE_HOME}/share/Ice/slice
         # For Ice installation via Ubuntu Synaptic package manager
+        ${ICE_HOME}/share/Ice-3.5.0/slice
         ${ICE_HOME}/share/Ice-3.4.1/slice
         ${ICE_HOME}/share/Ice-3.4.0/slice
         ${ICE_HOME}/share/Ice-3.3.1/slice
@@ -141,6 +150,7 @@ if (ICE_ICE_H_INCLUDE_DIR)
 
   # try to figure if the ice library is libIce or libZeroCIce on Mac OS with MacPort
   if (APPLE)
+    # libIce
     unset (ICE_LIBRARY_NAME_ZEROC_ICE CACHE)
     find_library (ICE_LIBRARY_NAME_ZEROC_ICE NAMES ZeroCIce PATHS ${ICE_LIBRARY_DIR} NO_DEFAULT_PATH)
     if (ICE_LIBRARY_NAME_ZEROC_ICE)
@@ -148,10 +158,20 @@ if (ICE_ICE_H_INCLUDE_DIR)
     else (ICE_LIBRARY_NAME_ZEROC_ICE)
       set (ICE_LIBRARY_NAME Ice)
     endif (ICE_LIBRARY_NAME_ZEROC_ICE)
+    unset (ICEUTIL_LIBRARY_NAME_ZEROC_ICE CACHE)
+    # libIceUtil
+    find_library (ICEUTIL_LIBRARY_NAME_ZEROC_ICE NAMES ZeroCIceUtil PATHS ${ICE_LIBRARY_DIR} NO_DEFAULT_PATH)
+    if (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
+      set (ICEUTIL_LIBRARY_NAME ZeroCIceUtil)
+    else (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
+      set (ICEUTIL_LIBRARY_NAME IceUtil)
+    endif (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
   else (APPLE)
     set (ICE_LIBRARY_NAME Ice)
+    set (ICEUTIL_LIBRARY_NAME IceUtil)
   endif (APPLE)
-  message( STATUS "Ice library name is ${ICE_LIBRARY_NAME}")
+  message (STATUS "Ice library name is ${ICE_LIBRARY_NAME}")
+  message (STATUS "IceUtil library name is ${ICEUTIL_LIBRARY_NAME}")
 
   # find slice2cpp
   find_program (ICE_SLICE2CPP
@@ -168,7 +188,9 @@ if (ICE_ICE_H_INCLUDE_DIR)
   if (ICE_FOUND)
     mark_as_advanced (ICE_FOUND ICE_HOME
                       ICE_INCLUDE_DIR ICE_ICE_H_INCLUDE_DIR ICE_SLICE_DIR
-                      ICE_LIBRARY_NAME ICE_LIBRARY_NAME_ZEROC_ICE ICE_SLICE2CPP)
+                      ICE_LIBRARY_NAME ICE_LIBRARY_NAME_ZEROC_ICE
+                      ICEUTIL_LIBRARY_NAME ICEUTIL_LIBRARY_NAME_ZEROC_ICE
+                      ICE_SLICE2CPP)
   endif (ICE_FOUND)
 
 endif (ICE_ICE_H_INCLUDE_DIR)

@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -127,6 +127,17 @@ bool mtsMailBox::ExecuteNext(void)
                CMN_ASSERT(commandVoidReturn);
                isBlockingReturn = true;
                result = commandVoidReturn->GetCallable()->Execute( *(commandVoidReturn->GetResultPointer()) );
+               if (result.IsOK()) {
+#if 0
+                   // Don't check for failure to generate event because right now this feature is only
+                   // implemented for the socket proxies.
+                   if (!commandVoidReturn->GenerateFinishedEvent( *(commandVoidReturn->GetResultPointer()) ))
+                       CMN_LOG_RUN_ERROR << "mtsMailBox: failed to generate finished event for void return command "
+                                         << commandVoidReturn->GetName() << std::endl;
+#else
+                   commandVoidReturn->GenerateFinishedEvent( *(commandVoidReturn->GetResultPointer()) );
+#endif
+               }
                break;
            case 1:
                commandWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(*command);
@@ -134,6 +145,17 @@ bool mtsMailBox::ExecuteNext(void)
                isBlockingReturn = true;
                result = commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->GetArgumentPointer()),
                                                                     *(commandWriteReturn->GetResultPointer()) );
+               if (result.IsOK()) {
+#if 0
+                   // Don't check for failure to generate event because right now this feature is only
+                   // implemented for the socket proxies.
+                   if (!commandWriteReturn->GenerateFinishedEvent( *(commandWriteReturn->GetResultPointer()) ))
+                       CMN_LOG_RUN_ERROR << "mtsMailBox: failed to generate finished event for write return command "
+                                         << commandWriteReturn->GetName() << std::endl;
+#else
+                   commandWriteReturn->GenerateFinishedEvent( *(commandWriteReturn->GetResultPointer()) );
+#endif
+               }
                break;
            default:
                CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
@@ -188,6 +210,12 @@ void mtsMailBox::SetSize(size_t size)
 bool mtsMailBox::IsEmpty(void) const
 {
     return CommandQueue.IsEmpty();
+}
+
+
+bool mtsMailBox::IsFull(void) const
+{
+    return CommandQueue.IsFull();
 }
 
 

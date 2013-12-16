@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#error File deprecated
 
 #ifndef _mtsInterfaceRequiredOrInput_h
 #define _mtsInterfaceRequiredOrInput_h
@@ -29,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
+
 
 /*!
   \file

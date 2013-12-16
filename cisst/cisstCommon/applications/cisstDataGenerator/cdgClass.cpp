@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -21,6 +20,7 @@
 */
 
 #include "cdgClass.h"
+#include "cdgInline.h"
 
 CMN_IMPLEMENT_SERVICES(cdgClass);
 
@@ -29,7 +29,20 @@ cdgClass::cdgClass(size_t lineNumber):
     cdgScope("class", lineNumber)
 {
     CMN_ASSERT(this->AddField("name", "", true, "name of the generated C++ class"));
-    CMN_ASSERT(this->AddField("attribute", "", false, "string place between 'class' and the class name (e.g. CISST_EXPORT)"));
+    CMN_ASSERT(this->AddField("attribute", "", false, "string placed between 'class' and the class name (e.g. CISST_EXPORT)"));
+
+    cdgField * field;
+    field = this->AddField("ctor-all-members", "false", false, "adds a constructor requiring an initial value for each member");
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("false");
+
+    field = this->AddField("generate-human-readable", "true", false, "generate the code for std::string _type.HumanReadable(void), set this to false to provide own implementation");
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("false");
+
+    CMN_ASSERT(this->AddField("namespace", "", false, "namespace for the class"));
 
     this->AddKnownScope(*this);
 
@@ -41,6 +54,9 @@ cdgClass::cdgClass(size_t lineNumber):
 
     cdgMember newMember(0);
     this->AddSubScope(newMember);
+
+    cdgEnum newEnum(0);
+    this->AddSubScope(newEnum);
 
     cdgInline newInline(0, cdgInline::CDG_INLINE_HEADER);
     this->AddSubScope(newInline);
@@ -62,11 +78,12 @@ cdgScope * cdgClass::Create(size_t lineNumber) const
 }
 
 
-bool cdgClass::Validate(void)
+bool cdgClass::Validate(std::string & CMN_UNUSED(errorMessage))
 {
     cdgMember * memberPtr;
     cdgBaseClass * baseClassPtr;
     cdgTypedef * typedefPtr;
+    cdgEnum * enumPtr;
     const ScopesContainer::iterator end = Scopes.end();
     ScopesContainer::iterator iter;
     for (iter = Scopes.begin();
@@ -83,10 +100,19 @@ bool cdgClass::Validate(void)
                 typedefPtr = dynamic_cast<cdgTypedef *>(*iter);
                 if (typedefPtr) {
                     Typedefs.push_back(typedefPtr);
+                } else {
+                    enumPtr = dynamic_cast<cdgEnum *>(*iter);
+                    if (enumPtr) {
+                        Enums.push_back(enumPtr);
+                    }
                 }
             }
         }
     }
+    for (size_t index = 0; index < Members.size(); index++) {
+        Members[index]->ClassName = this->ClassWithNamespace(); // this->GetFieldValue("name");
+    }
+
     return true;
 }
 
@@ -97,15 +123,14 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     const std::string className = this->GetFieldValue("name");
 
     size_t index;
-    // for (index = 0; index < Scopes.size(); index++) {
-    //     outputStream << "#include " << Includes[index] << std::endl;
-    // }
 
-    outputStream << "class " << className << ";" << std::endl;
+    // forward declaration for the class
+    const std::string classNamespace = this->GetFieldValue("namespace");
 
-    GenerateStandardFunctionsHeader(outputStream);
-    GenerateDataFunctionsHeader(outputStream);
-
+    // actual class
+    if (classNamespace != "") {
+        outputStream << "namespace " << classNamespace << " {" << std::endl;
+    }
     outputStream << "class " << this->GetFieldValue("attribute") << " " << className;
 
     if (BaseClasses.size() != 0) {
@@ -120,10 +145,6 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     outputStream << std::endl
                  << "{" << std::endl;
 
-    // add friendship for cmnDataCopy
-    outputStream << " friend void cmnDataCopy(" << className << " & destination, const "
-                 << className << " & source);" << std::endl;
-
     // constructors and destructor
     outputStream << " /* default constructors and destructors. */" << std::endl
                  << " public:" << std::endl
@@ -135,11 +156,42 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
         Scopes[index]->GenerateHeader(outputStream);
     }
 
-    GenerateStandardMethodsHeader(outputStream);
+    if (this->GetFieldValue("ctor-all-members") == "true" && Members.size() > 0) {
+        outputStream << std::endl
+                     << " public:" << std::endl
+                     << "    /* ctor-all-member is set to: true */" << std::endl
+                     << "    " << className << "(";
+        std::string memberName, memberType;
+        for (index = 0; index < Members.size(); index++) {
+            memberName = Members[index]->GetFieldValue("name");
+            memberType = Members[index]->GetFieldValue("type");
+            outputStream << "const " << memberType << " & new" << memberName;
+            if (index != (Members.size() - 1)) {
+                outputStream << ", ";
+            }
+        }
+        outputStream << ");" << std::endl;
+    }
 
+    GenerateStandardMethodsHeader(outputStream);
     GenerateDataMethodsHeader(outputStream);
 
     outputStream << "};" << std::endl;
+
+    if (classNamespace != "") {
+        outputStream << "}; // end of namespace " << classNamespace << std::endl;
+    }
+
+    // declaration of all global functions
+    GenerateStandardFunctionsHeader(outputStream);
+    GenerateDataFunctionsHeader(outputStream);
+
+    // global functions for enums have to be declared after the enum is defined
+    const std::string classWithNamespace = this->ClassWithNamespace();
+    for (index = 0; index < Enums.size(); ++index) {
+        Enums[index]->GenerateDataFunctionsHeader(outputStream, classWithNamespace, this->GetFieldValue("attribute"));
+    }
+
 }
 
 
@@ -160,15 +212,21 @@ void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
     std::string name = this->GetFieldValue("name");
     outputStream << "    /* default data methods */" << std::endl
                  << " public:" << std::endl
+                 << "    void Copy(const " << name << " & source);" << std::endl
                  << "    void SerializeBinary(std::ostream & outputStream) const throw (std::runtime_error);" << std::endl
-                 << "    void DeSerializeBinary(std::istream & inputStream, const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat) throw (std::runtime_error);" << std::endl
-                 << "    void SerializeText(std::ostream & outputStream, const char delimiter) const throw (std::runtime_error);" << std::endl
-                 << "    std::string SerializeTextDescription(const char delimiter, const std::string & userDescription = \"\") const;" << std::endl
-                 << "    void DeSerializeText(std::istream & inputStream, const char delimiter) throw (std::runtime_error);" << std::endl
+                 << "    void DeSerializeBinary(std::istream & inputStream, const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat) throw (std::runtime_error);" << std::endl
+                 << "    void SerializeText(std::ostream & outputStream, const char delimiter = ',') const throw (std::runtime_error);" << std::endl
+                 << "    std::string SerializeDescription(const char delimiter, const std::string & userDescription = \"\") const;" << std::endl
+                 << "    void DeSerializeText(std::istream & inputStream, const char delimiter = ',') throw (std::runtime_error);" << std::endl
+                 << "    std::string HumanReadable(void) const;" << std::endl
                  << "    bool ScalarNumberIsFixed(void) const;" << std::endl
                  << "    size_t ScalarNumber(void) const;" << std::endl
                  << "    double Scalar(const size_t index) const throw (std::out_of_range);" << std::endl
                  << "    std::string ScalarDescription(const size_t index, const std::string & userDescription = \"\") const throw (std::out_of_range);" << std::endl
+                 << "#if CISST_HAS_JSON" << std::endl
+                 << "    void SerializeTextJSON(Json::Value & jsonValue) const;" << std::endl
+                 << "    void DeSerializeTextJSON(const Json::Value & jsonValue) throw (std::runtime_error);" << std::endl
+                 << "#endif // CISST_HAS_JSON" << std::endl
                  << std::endl;
 }
 
@@ -185,7 +243,6 @@ void cdgClass::GenerateCode(std::ostream & outputStream) const
     GenerateMethodToStreamRawCode(outputStream);
 
     for (index = 0; index < Members.size(); index++) {
-        Members[index]->ClassName = this->GetFieldValue("name");
         Members[index]->GenerateCode(outputStream);
     }
 
@@ -200,58 +257,94 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
 
     std::stringstream defaultConstructor;
     std::stringstream copyConstructor;
+    std::stringstream membersConstructor;
 
     // default and copy constructors
-    std::string name = this->GetFieldValue("name");
-    defaultConstructor << name << "::" << name << "(void)";
-    copyConstructor    << name << "::" << name << "(const " << name << " & other)";
+    const std::string name = this->GetFieldValue("name");
+    const std::string classWithNamespace = this->ClassWithNamespace();
+    bool commaNeeded = false;
+
+    defaultConstructor << classWithNamespace << "::" << name << "(void)";
+    copyConstructor    << classWithNamespace << "::" << name << "(const " << name << " & other)";
+    membersConstructor << classWithNamespace << "::" << name << "(";
+    std::string memberName, memberType;
+    for (index = 0; index < Members.size(); index++) {
+        if (commaNeeded) {
+            membersConstructor << ", ";
+        }
+        memberName = Members[index]->GetFieldValue("name");
+        memberType = Members[index]->GetFieldValue("type");
+        membersConstructor << "const " << memberType << " & new" << memberName;
+        commaNeeded = true;
+    }
+    membersConstructor << ")";
+
     if ((BaseClasses.size() + Members.size())!= 0) {
         defaultConstructor << ":";
         copyConstructor    << ":";
+        membersConstructor << ":";
     }
     defaultConstructor << std::endl;
     copyConstructor    << std::endl;
+    membersConstructor << std::endl;
+    commaNeeded = false;
     for (index = 0; index < BaseClasses.size(); index++) {
-        defaultConstructor << "    " << BaseClasses[index]->GetFieldValue("type") << "()";
-        copyConstructor    << "    " << BaseClasses[index]->GetFieldValue("type") << "(other)";
-        if ((index != (BaseClasses.size() - 1)) || (!Members.empty())) {
-            defaultConstructor << ",";
-            copyConstructor    << ",";
+        if (commaNeeded) {
+            defaultConstructor << "    , ";
+            copyConstructor    << "    , ";
+            membersConstructor << "    , ";
+        } else {
+            defaultConstructor << "      ";
+            copyConstructor    << "      ";
+            membersConstructor << "      ";
         }
-        defaultConstructor << std::endl;
-        copyConstructor    << std::endl;
+        defaultConstructor << BaseClasses[index]->GetFieldValue("type") << "()" << std::endl;
+        copyConstructor    << BaseClasses[index]->GetFieldValue("type") << "(other)" << std::endl;
+        membersConstructor << BaseClasses[index]->GetFieldValue("type") << "()" << std::endl;
+        commaNeeded = true;
     }
-    std::string memberName;
     for (index = 0; index < Members.size(); index++) {
-        memberName = Members[index]->GetFieldValue("name");
-        defaultConstructor << "    " << memberName << "Member(" << Members[index]->GetFieldValue("default") << ")";
-        copyConstructor    << "    " << memberName << "Member(other." << memberName << "Member)";
-        if (index != (Members.size() - 1)) {
-            defaultConstructor << ",";
-            copyConstructor    << ",";
+        // can use member initialization except for arrays
+        if (!Members[index]->IsCArray) {
+            if (commaNeeded) {
+                defaultConstructor << "    , ";
+                copyConstructor    << "    , ";
+                membersConstructor << "    , ";
+            } else {
+                defaultConstructor << "      ";
+                copyConstructor    << "      ";
+                membersConstructor << "      ";
+            }
+            memberName = Members[index]->MemberName;
+            defaultConstructor << memberName << "(" << Members[index]->GetFieldValue("default") << ")" << std::endl;
+            copyConstructor    << memberName << "(other." << memberName << ")" << std::endl;
+            membersConstructor << memberName << "(new" << Members[index]->GetFieldValue("name") << ")" << std::endl;
+            commaNeeded = true;
         }
-        defaultConstructor << std::endl;
-        copyConstructor    << std::endl;
     }
 
     defaultConstructor << "{}" << std::endl << std::endl;
     copyConstructor    << "{}" << std::endl << std::endl;
+    membersConstructor << "{}" << std::endl << std::endl;
 
     outputStream << defaultConstructor.str();
     outputStream << copyConstructor.str();
+    if (this->GetFieldValue("ctor-all-members") == "true") {
+        outputStream << membersConstructor.str();
+    }
 
     // destructor
-    outputStream << this->GetFieldValue("name") << "::~" << this->GetFieldValue("name") << "(void)"
+    outputStream << classWithNamespace << "::~" << name << "(void)"
                  << "{}" << std::endl << std::endl;
-
 }
 
 
 void cdgClass::GenerateMethodSerializeRawCode(std::ostream & outputStream) const
 {
     size_t index;
+    const std::string name = this->ClassWithNamespace();
     outputStream << std::endl
-                 << "void " << this->GetFieldValue("name") << "::SerializeRaw(std::ostream & outputStream) const" << std::endl
+                 << "void " << name << "::SerializeRaw(std::ostream & outputStream) const" << std::endl
                  << "{" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
@@ -260,7 +353,11 @@ void cdgClass::GenerateMethodSerializeRawCode(std::ostream & outputStream) const
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            outputStream << "    cmnSerializeRaw(outputStream, this->" << Members[index]->GetFieldValue("name") << "Member);" << std::endl;
+            if (Members[index]->GetFieldValue("is-size_t") == "true") {
+                outputStream << "    cmnSerializeSizeRaw(outputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            } else {
+                outputStream << "    cmnSerializeRaw(outputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl
@@ -271,8 +368,9 @@ void cdgClass::GenerateMethodSerializeRawCode(std::ostream & outputStream) const
 void cdgClass::GenerateMethodDeSerializeRawCode(std::ostream & outputStream) const
 {
     size_t index;
+    const std::string name = this->ClassWithNamespace();
     outputStream << std::endl
-                 << "void " << this->GetFieldValue("name") << "::DeSerializeRaw(std::istream & inputStream)" << std::endl
+                 << "void " << name << "::DeSerializeRaw(std::istream & inputStream)" << std::endl
                  << "{" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
@@ -281,7 +379,11 @@ void cdgClass::GenerateMethodDeSerializeRawCode(std::ostream & outputStream) con
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            outputStream << "    cmnDeSerializeRaw(inputStream, this->" << Members[index]->GetFieldValue("name") << "Member);" << std::endl;
+            if (Members[index]->GetFieldValue("is-size_t") == "true") {
+                outputStream << "    cmnDeSerializeSizeRaw(inputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            } else {
+                outputStream << "    cmnDeSerializeRaw(inputStream, this->" << Members[index]->MemberName << ");" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl
@@ -291,37 +393,25 @@ void cdgClass::GenerateMethodDeSerializeRawCode(std::ostream & outputStream) con
 
 void cdgClass::GenerateMethodToStreamCode(std::ostream & outputStream) const
 {
-    size_t index;
+    const std::string name = this->ClassWithNamespace();
     outputStream << std::endl
-                 << "void " << this->GetFieldValue("name") << "::ToStream(std::ostream & outputStream) const" << std::endl
+                 << "void " << name << "::ToStream(std::ostream & outputStream) const" << std::endl
                  << "{" << std::endl
-                 << "    outputStream << \"" << this->GetFieldValue("name") << "\" << std::endl;" << std::endl;
-    for (index = 0; index < BaseClasses.size(); index++) {
-        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
-            outputStream << "    " << BaseClasses[index]->GetFieldValue("type") << "::ToStream(outputStream);" << std::endl;
-        }
-    }
-    outputStream << "    outputStream" << std::endl;
-    for (index = 0; index < Members.size(); index++) {
-        outputStream << "        << \"  " << Members[index]->GetFieldValue("description") << ":\" << this->" << Members[index]->GetFieldValue("name") << "Member";
-        if (index == (Members.size() - 1)) {
-            outputStream << ";";
-        }
-        outputStream << std::endl;
-    }
-    outputStream << "}" << std::endl;
+                 << "    outputStream << this->HumanReadable();" << std::endl
+                 << "}" << std::endl;
 }
 
 
 void cdgClass::GenerateMethodToStreamRawCode(std::ostream & outputStream) const
 {
+    const std::string name = this->ClassWithNamespace();
     outputStream << std::endl
-                 << "void " << this->GetFieldValue("name") << "::ToStreamRaw(std::ostream & outputStream, const char delimiter, bool headerOnly, const std::string & headerPrefix) const" << std::endl
+                 << "void " << name << "::ToStreamRaw(std::ostream & outputStream, const char delimiter, bool headerOnly, const std::string & headerPrefix) const" << std::endl
                  << "{" << std::endl
                  << "    if (headerOnly) {" << std::endl
-                 << "        outputStream << cmnDataSerializeTextDescription(*this, delimiter, headerPrefix);" << std::endl
+                 << "        outputStream << cmnData<" << name << " >::SerializeDescription(*this, delimiter, headerPrefix);" << std::endl
                  << "    } else {" << std::endl
-                 << "        cmnDataSerializeText(outputStream, *this, delimiter);" << std::endl
+                 << "        cmnData<" << name << " >::SerializeText(*this, outputStream, delimiter);" << std::endl
                  << "    }" << std::endl
                  << "}" << std::endl;
 }
@@ -329,7 +419,7 @@ void cdgClass::GenerateMethodToStreamRawCode(std::ostream & outputStream) const
 
 void cdgClass::GenerateStandardFunctionsHeader(std::ostream & outputStream) const
 {
-    const std::string name = this->GetFieldValue("name");
+    const std::string name = this->ClassWithNamespace();
     const std::string attribute = this->GetFieldValue("attribute");
     outputStream << "/* default functions */" << std::endl
                  << "void " << attribute << " cmnSerializeRaw(std::ostream & outputStream, const " << name << " & object);" << std::endl
@@ -339,32 +429,67 @@ void cdgClass::GenerateStandardFunctionsHeader(std::ostream & outputStream) cons
 
 void cdgClass::GenerateDataFunctionsHeader(std::ostream & outputStream) const
 {
-    const std::string name = this->GetFieldValue("name");
+    const std::string name = this->ClassWithNamespace();
     const std::string attribute = this->GetFieldValue("attribute");
     outputStream << "/* data functions */" << std::endl
-                 << "void " << attribute << " cmnDataCopy(" << name << " & destination, const " << name << " & source);" << std::endl
-                 << "void " << attribute << " cmnDataSerializeBinary(std::ostream & outputStream, const " << name << " & data) throw (std::runtime_error);" << std::endl
-                 << "void " << attribute << " cmnDataDeSerializeBinary(std::istream & inputStream, " << name
-                 << " & data, const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat) throw (std::runtime_error);"<< std::endl
-                 << "void " << attribute << " cmnDataSerializeText(std::ostream & outputStream, const " << name << " & data, const char delimiter) throw (std::runtime_error);" << std::endl
-                 << "std::string " << attribute << " cmnDataSerializeTextDescription(const " << name << " & data, const char delimiter, const std::string & userDescription = \"\");" << std::endl
-                 << "void " << attribute << " cmnDataDeSerializeText(std::istream & inputStream, " << name << " & data, const char delimiter) throw (std::runtime_error);" << std::endl
-                 << "bool " << attribute << " cmnDataScalarNumberIsFixed(const " << name << " & data);" << std::endl
-                 << "size_t " << attribute << " cmnDataScalarNumber(const " << name << " & data);" << std::endl
-                 << "std::string " << attribute << " cmnDataScalarDescription(const " << name
-                 << " & data, const size_t index, const std::string & userDescription = \"\") throw (std::out_of_range);" << std::endl
-                 << "double " << attribute << " cmnDataScalar(const " << name << " & data, const size_t index) throw (std::out_of_range);" << std::endl;
+                 << "template <> class cmnData<" << name << " > {" << std::endl
+                 << "public: " << std::endl
+                 << "    enum {IS_SPECIALIZED = 1};" << std::endl
+                 << "    typedef " << name << " DataType;" << std::endl
+                 << "    static void Copy(DataType & data, const DataType & source) {" << std::endl
+                 << "        data.Copy(source);" << std::endl
+                 << "    }" << std::endl
+                 << "    static std::string SerializeDescription(const DataType & data, const char delimiter, const std::string & userDescription) {" << std::endl
+                 << "        return data.SerializeDescription(delimiter, userDescription);" << std::endl
+                 << "    }" << std::endl
+                 << "    static void SerializeBinary(const DataType & data, std::ostream & outputStream) throw (std::runtime_error) {" << std::endl
+                 << "        data.SerializeBinary(outputStream);" << std::endl
+                 << "    }" << std::endl
+                 << "    static void DeSerializeBinary(DataType & data, std::istream & inputStream, const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat) throw (std::runtime_error) {" << std::endl
+                 << "        data.DeSerializeBinary(inputStream, localFormat, remoteFormat);" << std::endl
+                 << "    }" << std::endl
+                 << "    static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter = ',') throw (std::runtime_error) {" << std::endl
+                 << "        data.SerializeText(outputStream, delimiter);" << std::endl
+                 << "    }" << std::endl
+                 << "    static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter = ',') throw (std::runtime_error) {" << std::endl
+                 << "        data.DeSerializeText(inputStream, delimiter);" << std::endl
+                 << "    }" << std::endl
+                 << "    static std::string HumanReadable(const DataType & data) {" << std::endl
+                 << "        return data.HumanReadable();" << std::endl
+                 << "    }" << std::endl
+                 << "    static bool ScalarNumberIsFixed(const DataType & data) {" << std::endl
+                 << "        return data.ScalarNumberIsFixed();" << std::endl
+                 << "    }" << std::endl
+                 << "    static size_t ScalarNumber(const DataType & data) {" << std::endl
+                 << "        return data.ScalarNumber();" << std::endl
+                 << "    }" << std::endl
+                 << "    static std::string ScalarDescription(const DataType & data, const size_t index, const std::string & userDescription = \"\") throw (std::out_of_range) {" << std::endl
+                 << "        return data.ScalarDescription(index, userDescription);" << std::endl
+                 << "    }" << std::endl
+                 << "    static double Scalar(const DataType & data, const size_t index) throw (std::out_of_range) {" << std::endl
+                 << "        return data.Scalar(index);" << std::endl
+                 << "    }" << std::endl
+                 << "};" << std::endl
+                 << "inline std::ostream & operator << (std::ostream & outputStream, const " << name << " & data) {" << std::endl
+                 << "    outputStream << cmnData<" << name << " >::HumanReadable(data);" << std::endl
+                 << "    return outputStream;" << std::endl
+                 << "}" << std::endl
+                 << "#if CISST_HAS_JSON" << std::endl
+                 << "template <> void " << attribute << " cmnDataJSON<" << name << " >::SerializeText(const " << name << " & data, Json::Value & jsonValue);" << std::endl
+                 << "template <> void " << attribute << " cmnDataJSON<" << name << " >::DeSerializeText(" << name << " & data, const Json::Value & jsonValue) throw (std::runtime_error);" << std::endl
+                 << "#endif // CISST_HAS_JSON" << std::endl;
 }
 
 
 void cdgClass::GenerateStandardFunctionsCode(std::ostream & outputStream) const
 {
+    const std::string name = this->ClassWithNamespace();
     outputStream << "/* default functions */" << std::endl
-                 << "void cmnSerializeRaw(std::ostream & outputStream, const " << this->GetFieldValue("name") << " & object)" << std::endl
+                 << "void cmnSerializeRaw(std::ostream & outputStream, const " << name << " & object)" << std::endl
                  << "{" << std::endl
                  << "    object.SerializeRaw(outputStream);" << std::endl
                  << "}" << std::endl
-                 << "void cmnDeSerializeRaw(std::istream & inputStream, " << this->GetFieldValue("name") << " & placeHolder)" << std::endl
+                 << "void cmnDeSerializeRaw(std::istream & inputStream, " << name << " & placeHolder)" << std::endl
                  << "{" << std::endl
                  << "    placeHolder.DeSerializeRaw(inputStream);" << std::endl
                  << "}" << std::endl;
@@ -374,78 +499,71 @@ void cdgClass::GenerateStandardFunctionsCode(std::ostream & outputStream) const
 void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 {
     size_t index;
-    std::string name, type, suffix, className;
-
-    className = this->GetFieldValue("name");
+    std::string name, type;
+    const std::string className = this->ClassWithNamespace();
 
     outputStream << "/* data functions */" << std::endl;
 
-    outputStream << "void cmnDataCopy(" << className << " & destination, const " << className << " & source) {" << std::endl;
+    outputStream << "void " << className << "::Copy(const " << className << " & source) {" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
-            outputStream << "    cmnDataCopy(*(dynamic_cast<" << type << "*>(&destination)), *(dynamic_cast<const " << type << "*>(&source)));" << std::endl;
+            outputStream << "    cmnData<" << type << " >::Copy(*this, source);" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
-            name = Members[index]->GetFieldValue("name");
-            outputStream << "    cmnDataCopy" << suffix << "(destination." << name << "Member, source." << name << "Member);" << std::endl;
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
+            outputStream << "    cmnData<" << type << " >::Copy" << "(this->" << name << ", source." << name << ");" << std::endl;
         }
     }
     outputStream << "}" << std::endl;
 
 
 
-    outputStream << "void cmnDataSerializeBinary(std::ostream & outputStream, const " << className << " & data) throw (std::runtime_error) {" << std::endl
-                 << "     data.SerializeBinary(outputStream);" << std::endl
-                 << "}" << std::endl
-                 << "void " << className << "::SerializeBinary(std::ostream & outputStream) const throw (std::runtime_error) {" << std::endl;
+    outputStream << "void " << className << "::SerializeBinary(std::ostream & outputStream) const throw (std::runtime_error) {" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
-            outputStream << "    cmnDataSerializeBinary(outputStream, *(dynamic_cast<const " << type << "*>(this)));" << std::endl;
+            outputStream << "    cmnData<" << type << " >::SerializeBinary(*this, outputStream);" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            name = Members[index]->GetFieldValue("name");
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
-            outputStream << "    cmnDataSerializeBinary" << suffix << "(outputStream, this->" << name << "Member);" << std::endl;
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
+            outputStream << "    cmnData<" << type << " >::SerializeBinary" << "(this->" << name << ", outputStream);" << std::endl;
         }
     }
     outputStream << "}" << std::endl;
 
 
 
-    outputStream << "void cmnDataDeSerializeBinary(std::istream & inputStream, " << this->GetFieldValue("name") << " & data," << std::endl
-                 << "                              const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat) throw (std::runtime_error) {"<< std::endl
-                 << "    data.DeSerializeBinary(inputStream, remoteFormat, localFormat);" << std::endl
-                 << "}" << std::endl
-                 << "void " << className << "::DeSerializeBinary(std::istream & inputStream," << std::endl
-                 << "                                            const cmnDataFormat & remoteFormat, const cmnDataFormat & localFormat) throw (std::runtime_error) {"<< std::endl;
+    outputStream << "void " << className << "::DeSerializeBinary(std::istream & inputStream," << std::endl
+                 << "                                            const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat) throw (std::runtime_error) {"<< std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
-            outputStream << "    cmnDataDeSerializeBinary(inputStream, *(dynamic_cast<" << type << "*>(this)), remoteFormat, localFormat);" << std::endl;
+            outputStream << "    cmnData<" << type << " >::DeSerializeBinary(*this, inputStream, localFormat, remoteFormat);" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            name = Members[index]->GetFieldValue("name");
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
-            outputStream << "    cmnDataDeSerializeBinary" << suffix << "(inputStream, this->" << name << "Member, remoteFormat, localFormat);" << std::endl;
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
+            if (Members[index]->GetFieldValue("is-size_t") == "true") {
+                outputStream << "    cmnDataDeSerializeBinary_size_t" << "(this->" << name << ", inputStream, localFormat, remoteFormat);" << std::endl;
+            } else {
+                outputStream << "    cmnData<" << type << " >::DeSerializeBinary" << "(this->" << name << ", inputStream, localFormat, remoteFormat);" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl;
 
 
 
-    outputStream << "void cmnDataSerializeText(std::ostream & outputStream, const " << className << " & data, const char delimiter) throw (std::runtime_error) {" << std::endl
-                 << "     data.SerializeText(outputStream, delimiter);" << std::endl
-                 << "}" << std::endl
-                 << "void " << className << "::SerializeText(std::ostream & outputStream, const char delimiter) const throw (std::runtime_error) {" << std::endl
+    outputStream << "void " << className << "::SerializeText(std::ostream & outputStream, const char delimiter) const throw (std::runtime_error) {" << std::endl
                  << "    bool someData = false;" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
@@ -454,26 +572,23 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
                          << "        outputStream << delimiter;" << std::endl
                          << "    }" << std::endl
                          << "    someData = true;" << std::endl
-                         << "    cmnDataSerializeText(outputStream, *(dynamic_cast<const " << type << "*>(this)), delimiter);" << std::endl;
+                         << "    cmnData<" << type << " >::SerializeText(*this, outputStream, delimiter);" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            name = Members[index]->GetFieldValue("name");
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
             outputStream << "    if (someData) {" << std::endl
                          << "        outputStream << delimiter;" << std::endl
                          << "    }" << std::endl
                          << "    someData = true;" << std::endl
-                         << "    " << "cmnDataSerializeText" << suffix << "(outputStream, this->" << name << "Member, delimiter);" << std::endl;
+                         << "    " << "cmnData<" << type << " >::SerializeText(this->" << name << ", outputStream, delimiter);" << std::endl;
         }
     }
     outputStream << "}" << std::endl;
 
-    outputStream << "std::string cmnDataSerializeTextDescription(const " << className << " & data, const char delimiter, const std::string & userDescription) {" << std::endl
-                 << "     return data.SerializeTextDescription(delimiter, userDescription);" << std::endl
-                 << "}" << std::endl
-                 << "std::string " << className << "::SerializeTextDescription(const char delimiter, const std::string & userDescription) const {" << std::endl
+    outputStream << "std::string " << className << "::SerializeDescription(const char delimiter, const std::string & userDescription) const {" << std::endl
                  << "    bool someData = false;" << std::endl
                  << "    const std::string prefix = (userDescription == \"\") ? \"\" : (userDescription + \".\");" << std::endl
                  << "    std::stringstream description;" << std::endl;
@@ -484,28 +599,25 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
                          << "        description << delimiter;" << std::endl
                          << "    }" << std::endl
                          << "    someData = true;" << std::endl
-                         << "    description << cmnDataSerializeTextDescription(*(dynamic_cast<const " << type << "*>(this)), delimiter, userDescription);" << std::endl;
+                         << "    description << cmnData<" << type << " >::SerializeDescription(*this, delimiter, userDescription);" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            name = Members[index]->GetFieldValue("name");
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
             outputStream << "    if (someData) {" << std::endl
                          << "        description << delimiter;" << std::endl
                          << "    }" << std::endl
                          << "    someData = true;" << std::endl
-                         << "    description << cmnDataSerializeTextDescription" << suffix << "(this->" << name << "Member, delimiter, prefix + \"" << name << "\");" << std::endl;
+                         << "    description << cmnData<" << type << " >::SerializeDescription(this->" << name << ", delimiter, prefix + \""
+                         << Members[index]->GetFieldValue("name") << "\");" << std::endl;
         }
     }
     outputStream << "    return description.str();" << std::endl
                  << "}" << std::endl;
 
-    outputStream << "void cmnDataDeSerializeText(std::istream & inputStream, " << this->GetFieldValue("name") << " & data," << std::endl
-                 << "                            const char delimiter) throw (std::runtime_error) {"<< std::endl
-                 << "    data.DeSerializeText(inputStream, delimiter);" << std::endl
-                 << "}" << std::endl
-                 << "void " << className << "::DeSerializeText(std::istream & inputStream," << std::endl
+    outputStream << "void " << className << "::DeSerializeText(std::istream & inputStream," << std::endl
                  << "                                          const char delimiter) throw (std::runtime_error) {"<< std::endl
                  << "    bool someData = false;" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
@@ -515,62 +627,81 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
                          << "        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, \"" << className << "\");" << std::endl
                          << "    }" << std::endl
                          << "    someData = true;" << std::endl
-                         << "    cmnDataDeSerializeText(inputStream, *(dynamic_cast<" << type << "*>(this)), delimiter);" << std::endl;
+                         << "    cmnData<" << type << " >::DeSerializeText(*this, inputStream, delimiter);" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            name = Members[index]->GetFieldValue("name");
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
             outputStream << "    if (someData) {" << std::endl
                          << "        cmnDataDeSerializeTextDelimiter(inputStream, delimiter, \"" << className << "\");" << std::endl
                          << "    }" << std::endl
                          << "    someData = true;" << std::endl
-                         << "    cmnDataDeSerializeText" << suffix << "(inputStream, this->" << name << "Member, delimiter);" << std::endl;
+                         << "    cmnData<" << type << " >::DeSerializeText(this->" << name << ", inputStream, delimiter);" << std::endl;
         }
     }
     outputStream << "}" << std::endl;
 
 
+    if (this->GetFieldValue("generate-human-readable") == "true") {
+        outputStream << "std::string " << className << "::HumanReadable(void) const {" << std::endl
+                     << "    std::stringstream description;" << std::endl
+                     << "    description << \"" << className << "\" << std::endl;" << std::endl;
+        for (index = 0; index < BaseClasses.size(); index++) {
+            if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+                type = BaseClasses[index]->GetFieldValue("type");
+                outputStream << "    description << cmnData< " << type << " >::HumanReadable(*this) << std::endl;" << std::endl;
+            }
+        }
+        outputStream << "    description" << std::endl;
+        for (index = 0; index < Members.size(); index++) {
+            if (Members[index]->GetFieldValue("is-data") == "true") {
+                type = Members[index]->GetFieldValue("type");
+                outputStream << "        << \"  " << Members[index]->GetFieldValue("description") << ":\" << cmnData<" << type << " >::HumanReadable(this->" << Members[index]->MemberName << ")";
+                if (index == (Members.size() - 1)) {
+                    outputStream << ";";
+                }
+            }
+            outputStream << std::endl;
+        }
+        outputStream << "    return description.str();" << std::endl
+                     << "}" << std::endl;
+    }
 
-    outputStream << "bool cmnDataScalarNumberIsFixed(const " << className << " & data) {" << std::endl
-                 << "     return data.ScalarNumberIsFixed();" << std::endl
-                 << "}" << std::endl
-                 << "bool " << className << "::ScalarNumberIsFixed(void) const {" << std::endl
+
+    outputStream << "bool " << className << "::ScalarNumberIsFixed(void) const {" << std::endl
                  << "    return true" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
-            outputStream << "           && cmnDataScalarNumberIsFixed(*(dynamic_cast<const " << type << "*>(this)))" << std::endl;
+            outputStream << "           && cmnData<" << type << " >::ScalarNumberIsFixed(*this)" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            name = Members[index]->GetFieldValue("name");
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
-            outputStream << "           && cmnDataScalarNumberIsFixed" << suffix << "(this->" << name << "Member)" << std::endl;
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
+            outputStream << "           && cmnData<" << type << " >::ScalarNumberIsFixed(this->" << name << ")" << std::endl;
         }
     }
     outputStream << "    ;" << std::endl
                  << "}" << std::endl;
 
 
-    outputStream << "size_t cmnDataScalarNumber(const " << className << " & data) {" << std::endl
-                 << "     return data.ScalarNumber();" << std::endl
-                 << "}" << std::endl
-                 << "size_t " << className << "::ScalarNumber(void) const {" << std::endl
+    outputStream << "size_t " << className << "::ScalarNumber(void) const {" << std::endl
                  << "    return 0" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
-            outputStream << "           + cmnDataScalarNumber(*(dynamic_cast<const " << type << "*>(this)))" << std::endl;
+            outputStream << "           + cmnData< " << type << " >::ScalarNumber(*this)" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            name = Members[index]->GetFieldValue("name");
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
-            outputStream << "           + cmnDataScalarNumber" << suffix << "(this->" << name << "Member)" << std::endl;
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
+            outputStream << "           + cmnData<" << type << " >::ScalarNumber(this->" << name << ")" << std::endl;
         }
     }
     outputStream << "    ;" << std::endl
@@ -578,31 +709,28 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
 
 
-    outputStream << "std::string cmnDataScalarDescription(const " << className << " & data, const size_t index," << std::endl
-                 << "                                     const std::string & userDescription) throw (std::out_of_range) {" << std::endl
-                 << "    return data.ScalarDescription(index, userDescription);" << std::endl
-                 << "}" << std::endl
-                 << "std::string " << className << "::ScalarDescription(const size_t index, const std::string & userDescription) const throw (std::out_of_range) {" << std::endl
+    outputStream << "std::string " << className << "::ScalarDescription(const size_t index, const std::string & userDescription) const throw (std::out_of_range) {" << std::endl
                  << "    std::string prefix = (userDescription == \"\") ? \"\" : (userDescription + \".\");" << std::endl
                  << "    size_t baseIndex = 0;" << std::endl
                  << "    size_t currentMaxIndex = 0;" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
-            outputStream << "    currentMaxIndex += cmnDataScalarNumber(*(dynamic_cast<const " << type << "*>(this)));" << std::endl
+            outputStream << "    currentMaxIndex += cmnData<" << type << " >::ScalarNumber(*this);" << std::endl
                          << "    if (index < currentMaxIndex) {" << std::endl
-                         << "        return cmnDataScalarDescription(*(dynamic_cast<const " << type << "*>(this)), index - baseIndex, prefix);" << std::endl
+                         << "        return cmnData<" << type << " >::ScalarDescription(*this, index - baseIndex, prefix);" << std::endl
                          << "    }" << std::endl
                          << "    baseIndex = currentMaxIndex;" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            name = Members[index]->GetFieldValue("name");
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
-            outputStream << "    currentMaxIndex += cmnDataScalarNumber" << suffix << "(this->" << name << "Member);" << std::endl
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
+            outputStream << "    currentMaxIndex += cmnData<" << type << " >::ScalarNumber(this->" << name << ");" << std::endl
                          << "    if (index < currentMaxIndex) {" << std::endl
-                         << "        return cmnDataScalarDescription" << suffix << "(this->" << name << "Member, index - baseIndex, prefix + \"" << name << "\");" << std::endl
+                         << "        return cmnData<" << type << " >::ScalarDescription(this->" << name << ", index - baseIndex, prefix + \""
+                         << Members[index]->GetFieldValue("name") << "\");" << std::endl
                          << "    }" << std::endl
                          << "    baseIndex = currentMaxIndex;" << std::endl;
         }
@@ -613,34 +741,90 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
 
 
-    outputStream << "double cmnDataScalar(const " << className << " & data, const size_t index) throw (std::out_of_range) {" << std::endl
-                 << "    return data.Scalar(index);" << std::endl
-                 << "}" << std::endl
-                 << "double " << className << "::Scalar(const size_t index) const throw (std::out_of_range) {" << std::endl
+    outputStream << "double " << className << "::Scalar(const size_t index) const throw (std::out_of_range) {" << std::endl
                  << "    size_t baseIndex = 0;" << std::endl
                  << "    size_t currentMaxIndex = 0;" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
-            outputStream << "    currentMaxIndex += cmnDataScalarNumber(*(dynamic_cast<const " << type << "*>(this)));" << std::endl
+            outputStream << "    currentMaxIndex += cmnData<" << type << " >::ScalarNumber(*this);" << std::endl
                          << "    if (index < currentMaxIndex) {" << std::endl
-                         << "        return cmnDataScalar(*(dynamic_cast<const " << type << "*>(this)), index - baseIndex);" << std::endl
+                         << "        return cmnData<" << type << " >::Scalar(*this, index - baseIndex);" << std::endl
                          << "    }" << std::endl
                          << "    baseIndex = currentMaxIndex;" << std::endl;
         }
     }
     for (index = 0; index < Members.size(); index++) {
         if (Members[index]->GetFieldValue("is-data") == "true") {
-            name = Members[index]->GetFieldValue("name");
-            suffix = (Members[index]->GetFieldValue("is-size_t") == "true") ? "_size_t" : "";
-            outputStream << "    currentMaxIndex += cmnDataScalarNumber" << suffix << "(this->" << name << "Member);" << std::endl
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
+            outputStream << "    currentMaxIndex += cmnData<" << type << " >::ScalarNumber(this->" << name << ");" << std::endl
                          << "    if (index < currentMaxIndex) {" << std::endl
-                         << "        return cmnDataScalar" << suffix << "(this->" << name << "Member, index - baseIndex);" << std::endl
+                         << "        return cmnData<" << type << " >::Scalar(this->" << name << ", index - baseIndex);" << std::endl
                          << "    }" << std::endl
                          << "    baseIndex = currentMaxIndex;" << std::endl;
         }
     }
-    outputStream << "    cmnThrow(std::out_of_range(\"cmnDataScalarDescription: " << className << " index out of range\"));" << std::endl
+    outputStream << "    cmnThrow(std::out_of_range(\"cmnDataScalar: " << className << " index out of range\"));" << std::endl
                  << "    return 1.2345;" << std::endl
                  << "}" << std::endl;
+
+
+
+    outputStream << "#if CISST_HAS_JSON" << std::endl
+                 << "template <>" << std::endl
+                 << "void cmnDataJSON<" << className << " >::SerializeText(const " << className << " & data, Json::Value & jsonValue) {" << std::endl
+                 << "    data.SerializeTextJSON(jsonValue);" << std::endl
+                 << "}" << std::endl
+                 << "void " << className << "::SerializeTextJSON(Json::Value & jsonValue) const {" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+            type = BaseClasses[index]->GetFieldValue("type");
+            outputStream << "    cmnDataJSON<" << type << " >::SerializeText(*(dynamic_cast<const " << type << "*>(this)), jsonValue);" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->GetFieldValue("is-data") == "true") {
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
+            outputStream << "    cmnDataJSON<" << type << " >::SerializeText(this->" << name << ", jsonValue[\""
+                         << Members[index]->GetFieldValue("name") << "\"]);" << std::endl;
+        }
+    }
+    outputStream << "}" << std::endl
+                 << "template<>" << std::endl
+                 << "void cmnDataJSON<" << className << " >::DeSerializeText(" << className << " & data, const Json::Value & jsonValue) throw (std::runtime_error) {" << std::endl
+                 << "    data.DeSerializeTextJSON(jsonValue);" << std::endl
+                 << "}" << std::endl
+                 << "void " << className << "::DeSerializeTextJSON(const Json::Value & jsonValue) throw (std::runtime_error) {" << std::endl;
+    for (index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+            type = BaseClasses[index]->GetFieldValue("type");
+            outputStream << "    cmnDataJSON<" << type << " >::DeSerializeText(*(dynamic_cast<" << type << "*>(this)), jsonValue);" << std::endl;
+        }
+    }
+    for (index = 0; index < Members.size(); index++) {
+        if (Members[index]->GetFieldValue("is-data") == "true") {
+            type = Members[index]->GetFieldValue("type");
+            name = Members[index]->MemberName;
+            outputStream << "    cmnDataJSON<" << type << " >::DeSerializeText(this->" << name << ", jsonValue[\""
+                         << Members[index]->GetFieldValue("name") << "\"]);" << std::endl;
+        }
+    }
+    outputStream << "}" << std::endl
+                 << "#endif // CISST_HAS_JSON" << std::endl;
+
+    for (index = 0; index < Enums.size(); ++index) {
+        Enums[index]->GenerateDataFunctionsCode(outputStream, className);
+    }
+}
+
+
+std::string cdgClass::ClassWithNamespace(void) const
+{
+    if (this->GetFieldValue("namespace") != "") {
+        return this->GetFieldValue("namespace") + "::" + this->GetFieldValue("name");
+    } else {
+        return this->GetFieldValue("name");
+    }
 }

@@ -93,6 +93,20 @@ void robDH::ReadParameters( std::istream& is ) {
   if( this->alpha ==  1.5708 ) this->alpha =  cmnPI_2;
 }
 
+#if CISST_HAS_JSON
+void robDH::ReadParameters(const Json::Value &config)
+{
+    this->alpha = config.get("alpha", "0.00").asDouble();
+    this->a = config.get("A", "0.00").asDouble();
+    this->theta = config.get("theta", "0.00").asDouble();
+    this->d = config.get("D", "0.00").asDouble();
+
+    // just make sure we're accureate
+    if( this->alpha == -1.5708 ) this->alpha = -cmnPI_2;
+    if( this->alpha ==  1.5708 ) this->alpha =  cmnPI_2;
+}
+#endif
+
 void robDH::WriteParameters( std::ostream& os ) const {
   os << std::setw(10) << "STANDARD DH"
      << std::setw(13) << alpha 

@@ -28,11 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 
 void vctDataFunctionsTransformationsTest::TestFrm3DataCopy(void)
 {
-    vctFrm3 source, destination;
+    vctFrm3 source, data;
     vctRandom(source.Rotation());
     vctRandom(source.Translation(), -10.0, 10.0);
-    cmnDataCopy(destination, source);
-    CPPUNIT_ASSERT(source.Equal(destination));
+    cmnData<vctFrm3>::Copy(data, source);
+    CPPUNIT_ASSERT(source.Equal(data));
 }
 
 
@@ -44,9 +44,9 @@ void vctDataFunctionsTransformationsTest::TestFrm3BinarySerializationStream(void
     vctRandom(fReference.Rotation());
     vctRandom(fReference.Translation(), -10.0, 10.0);
     f1 = fReference;
-    cmnDataSerializeBinary(stream, f1);
+    cmnData<vctFrm3>::SerializeBinary(f1, stream);
     f1.From(f1.Identity());
-    cmnDataDeSerializeBinary(stream, f2, remote, local);
+    cmnData<vctFrm3>::DeSerializeBinary(f2, stream, local, remote);
     CPPUNIT_ASSERT_EQUAL(fReference, f2);
 }
 
@@ -54,8 +54,8 @@ void vctDataFunctionsTransformationsTest::TestFrm3BinarySerializationStream(void
 void vctDataFunctionsTransformationsTest::TestFrm3Scalar(void)
 {
     vctFrm3 f;
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(12), cmnDataScalarNumber(f));
-    CPPUNIT_ASSERT_EQUAL(true, cmnDataScalarNumberIsFixed(f));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(12), cmnData<vctFrm3>::ScalarNumber(f));
+    CPPUNIT_ASSERT_EQUAL(true, cmnData<vctFrm3>::ScalarNumberIsFixed(f));
 
     size_t index;
     bool exceptionReceived = false;
@@ -63,19 +63,19 @@ void vctDataFunctionsTransformationsTest::TestFrm3Scalar(void)
 
     // exception expected if index too high
     try {
-        description = cmnDataScalarDescription(f, cmnDataScalarNumber(f) + 1);
+        description = cmnData<vctFrm3>::ScalarDescription(f, cmnData<vctFrm3>::ScalarNumber(f) + 1);
     } catch (std::out_of_range) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);
 
     // get scalar
-    for (index = 0; index < cmnDataScalarNumber(f); ++index) {
+    for (index = 0; index < cmnData<vctFrm3>::ScalarNumber(f); ++index) {
         // all should be null, except for rotation diagonal, index = 3, 7 and 11
         if ((index == 3) || (index == 7) || (index == 11)) {
-            CPPUNIT_ASSERT_EQUAL(1.0, cmnDataScalar(f, index));
+            CPPUNIT_ASSERT_EQUAL(1.0, cmnData<vctFrm3>::Scalar(f, index));
         } else {
-            CPPUNIT_ASSERT_EQUAL(0.0, cmnDataScalar(f, index));
+            CPPUNIT_ASSERT_EQUAL(0.0, cmnData<vctFrm3>::Scalar(f, index));
         }
     }
 }

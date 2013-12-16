@@ -7,8 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -31,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
 
+class mtsCommandWriteBase;
 
 /*!
   \ingroup cisstMultiTask
@@ -75,6 +75,9 @@ public:
 
     std::string GetMailBoxName(void) const;
 
+    void EnableFinishedEvent(mtsCommandWriteBase *cmd);
+    bool GenerateFinishedEvent(const mtsGenericObject &arg) const;
+
     void ToStream(std::ostream & outputStream) const;
 
 protected:
@@ -82,6 +85,8 @@ protected:
     const mtsGenericObject * ArgumentPointer;
     mtsGenericObject * ResultPointer;
 
+    /*! Event generator to indicate when execution is finished */
+    mtsCommandWriteBase * FinishedEvent;
 };
 
 

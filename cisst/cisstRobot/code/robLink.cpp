@@ -46,6 +46,15 @@ robLink::Errno robLink::Read( std::istream& is ){
   return robLink::ESUCCESS;
 }
 
+#if CISST_HAS_JSON
+robLink::Errno robLink::Read(const Json::Value &linkConfig)
+{
+    if (kinematics != NULL) { kinematics->Read(linkConfig); }
+    mass.ReadMass(linkConfig);
+    return robLink::ESUCCESS;
+}
+#endif
+
 robLink::Errno robLink::Write( std::ostream& os ) const { 
   if( kinematics != NULL ) { kinematics->Write( os ); }
   mass.WriteMass( os );

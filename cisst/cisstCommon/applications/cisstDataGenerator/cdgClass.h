@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "cdgBaseClass.h"
 #include "cdgMember.h"
 #include "cdgTypedef.h"
-#include "cdgInline.h"
+#include "cdgEnum.h"
 
 /*
 
@@ -63,11 +63,14 @@ class cdgClass: public cdgScope
     typedef std::vector<cdgBaseClass *> BaseClassesType;
     BaseClassesType BaseClasses;
 
+    typedef std::vector<cdgEnum *> EnumsType;
+    EnumsType Enums;
+
 public:
     cdgClass(size_t lineNumber);
     cdgScope::Type GetScope(void) const;
     cdgScope * Create(size_t lineNumber) const;
-    bool Validate(void);
+    bool Validate(std::string & errorMessage);
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
 
@@ -86,6 +89,7 @@ protected:
     void GenerateDataFunctionsHeader(std::ostream & outputStream) const;
     void GenerateDataFunctionsCode(std::ostream & outputStream) const;
 
+    std::string ClassWithNamespace(void) const;
 private:
     cdgClass(void); // make sure constructor with line number is always used.
 };

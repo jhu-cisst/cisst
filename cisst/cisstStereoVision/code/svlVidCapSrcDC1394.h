@@ -211,7 +211,7 @@ private:
     unsigned int NumberOfCameras;
     dc1394operation_mode_t* BestOpMode;
     dc1394speed_t* BestISOSpeed;
-    unsigned int PixelTypeBitSize[svlFilterSourceVideoCapture::PixelTypeCount];
+    unsigned int PixelTypeBitSize[svlFilterSourceVideoCaptureTypes::PixelTypeCount];
 };
 
 

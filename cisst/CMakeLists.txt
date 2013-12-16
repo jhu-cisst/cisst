@@ -225,6 +225,22 @@ include (CheckSizeTNativeType)
 check_size_t_native_type (CISST_SIZE_T_NATIVE)
 
 
+# Determine if we can use cast to void * for CMN_LOG
+include (CheckCXXSourceCompiles)
+check_cxx_source_compiles(
+"#include <iostream>
+int main(int argc, char ** argv) {
+    true ? (void *) 0 : std::cerr << \"true\";
+    false ? (void *) 0 : std::cerr << \"false\";
+    return 0;
+}" CISST_OSTREAM_CAN_CAST_TO_VOID_PTR)
+
+
+# Look for isfinite function
+include (CheckSymbolExists)
+check_symbol_exists (isfinite "math.h" CISST_HAS_ISFINITE)
+
+
 # Path of all CISST shared libraries.
 link_directories (${LIBRARY_OUTPUT_PATH})
 
@@ -322,6 +338,7 @@ set (CISST_LIBS_WITH_QT
      cisstCommon
      cisstVector
      cisstMultiTask
+     cisstParameterTypes
      cisstStereoVision)
 
 # Which librairies have FLTK Widgets

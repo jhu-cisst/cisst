@@ -24,6 +24,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 
+#if !CISST_MTS_HAS_ICE
+#include <cisstMultiTask/mtsSocketProxyServer.h>
+#endif
+
 // Enable or disable system-wide thread-safe logging
 //#define MTS_LOGGING
 
@@ -39,6 +43,7 @@ int main(int argc, char * argv[])
 
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
     // get all message to log file
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
     // get only errors and warnings to std::cout
@@ -51,8 +56,10 @@ int main(int argc, char * argv[])
     mtsManagerLocal::SetLogForwarding(true);
 #endif
 
-    std::string globalComponentManagerIP;
     bool useGeneric;
+
+#if CISST_MTS_HAS_ICE
+    std::string globalComponentManagerIP;
 
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " [GlobalManagerIP] [flag]" << std::endl;
@@ -86,6 +93,14 @@ int main(int argc, char * argv[])
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
     }
+#else
+    useGeneric = true;
+    if ((argc > 1) && (argv[1][0] == '1'))
+        useGeneric = false;
+    mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
+    std::cout << "Starting server" << std::endl;
+    std::cout << "Using " << (useGeneric ? "mtsDouble" : "double") << std::endl;
+#endif
 
     // create our server task
     serverTaskBase * server;
@@ -97,6 +112,26 @@ int main(int argc, char * argv[])
 
     server->Configure();
     componentManager->AddComponent(server);
+
+#if !CISST_MTS_HAS_ICE
+    // For now, we create two server proxies. It would be better to have just one server proxy,
+    // but first the code needs to be modified to use separate serializers for each client.
+    // Sharing one serializer does not work because it serializes the class services for only
+    // the first client to which it sends the data object.
+    mtsSocketProxyServer * serverProxy1 = new mtsSocketProxyServer("MyServerProxy1", "Server", "Provided", 1234);
+    mtsSocketProxyServer * serverProxy2 = new mtsSocketProxyServer("MyServerProxy2", "Server", "Provided", 1235);
+    componentManager->AddComponent(serverProxy1);
+    componentManager->AddComponent(serverProxy2);
+
+    if (!componentManager->Connect("MyServerProxy1", "Required", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed for server 1" << std::endl;
+        return 1;
+    }
+    if (!componentManager->Connect("MyServerProxy2", "Required", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed for server 2" << std::endl;
+        return 1;
+    }
+#endif
 
     // create the tasks, i.e. find the commands
     componentManager->CreateAll();

@@ -14,3 +14,4 @@
 
 add_subdirectory (tutorial)
 add_subdirectory (narrayBenchmark)
+add_subdirectory (Qt)

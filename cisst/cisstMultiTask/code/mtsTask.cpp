@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -33,16 +32,26 @@
 #include <iostream>
 
 
+std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
+
 /********************* Methods that call user methods *****************/
 
 void mtsTask::DoRunInternal(void)
 {
     RunEventCalled = false;
     StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
-    // Make sure following is called
-    if (InterfaceProvidedToManager)
-        InterfaceProvidedToManager->ProcessMailBoxes();
-    this->Run();
+    try {
+        // Make sure following is called
+        if (InterfaceProvidedToManager)
+            InterfaceProvidedToManager->ProcessMailBoxes();
+        this->Run();
+    }
+    catch (const std::exception &excp) {
+        OnRunException(excp);
+    }
+    catch (...) {
+        OnRunException(mtsTask::UnknownException);
+    }
     // advance all state tables (if automatic)
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
     RunEvent();  // only generates event if RunEventCalled is false
@@ -77,7 +86,7 @@ mtsExecutionResult mtsTask::RunEvent(bool check)
 // Thus, we do the following:
 //   1) If the other task is initializing (i.e., Create called), we also call Create; this shouldn't
 //      be necessary, since most likely the application code will create this task (either by
-//      calling Create directory, or by calling mtsManagerLocal::CreateAll.
+//      calling Create directly, or by calling mtsManagerLocal::CreateAll).
 //   2) If this task is ACTIVE, and the other task is suspended (i.e., state is READY), we
 //      also suspend this task. Note that we could also automatically start this task when
 //      the other task becomes ACTIVE, but for now we are not doing that; instead, the user
@@ -110,10 +119,10 @@ void mtsTask::StartupInternal(void) {
 
     // Loop through the required interfaces and make sure they are all connected. This extra check is probably not needed.
     bool success = true;
-    InterfacesRequiredOrInputMapType::const_iterator requiredIterator = InterfacesRequiredOrInput.begin();
-    const mtsInterfaceProvidedOrOutput * connectedInterface;
+    InterfacesRequiredMapType::const_iterator requiredIterator = InterfacesRequired.begin();
+    const mtsInterfaceProvided * connectedInterface;
     for (;
-         requiredIterator != InterfacesRequiredOrInput.end();
+         requiredIterator != InterfacesRequired.end();
          requiredIterator++) {
         connectedInterface = requiredIterator->second->GetConnectedInterface();
         if (!connectedInterface) {
@@ -131,8 +140,16 @@ void mtsTask::StartupInternal(void) {
     }
     RunEventCalled = false;
     if (success) {
-        // Call user-supplied startup function
-        this->Startup();
+        try {
+            // Call user-supplied startup function
+            this->Startup();
+        }
+        catch (const std::exception &excp) {
+            OnStartupException(excp);
+        }
+        catch (...) {
+            OnStartupException(mtsTask::UnknownException);
+        }
         ChangeState(mtsComponentState::READY);
     }
     else {
@@ -151,7 +168,7 @@ void mtsTask::CleanupInternal() {
     StateTables.ForEachVoid(&mtsStateTable::Cleanup);
 
     // Perform Cleanup on all interfaces provided
-    InterfacesProvidedOrOutput.ForEachVoid(&mtsInterfaceProvidedOrOutput::Cleanup);
+    InterfacesProvided.ForEachVoid(&mtsInterfaceProvided::Cleanup);
 
     if (InterfaceProvidedToManagerCallable) {
         delete InterfaceProvidedToManagerCallable;
@@ -191,7 +208,7 @@ void mtsTask::SetThreadReturnValue(void * returnValue) {
 
 void mtsTask::ChangeState(mtsComponentState::Enum newState)
 {
-    if (this->State.GetState() == newState)
+    if (this->State.State() == newState)
         return;
 
     // If this component is providing the thread, inform
@@ -277,7 +294,7 @@ mtsTask::mtsTask(const std::string & name,
         ExecIn->AddEventHandlerVoid(&mtsTask::RunEventHandler, this, "RunEvent", MTS_EVENT_NOT_QUEUED);
         ExecIn->AddEventHandlerWrite(&mtsTask::ChangeStateEventHandler, this, "ChangeStateEvent", MTS_EVENT_NOT_QUEUED);
     }
-    else 
+    else
         CMN_LOG_CLASS_INIT_ERROR << "Failed to add ExecIn interface to " << this->GetName() << std::endl;
     // ExecOut interface
     ExecOut = this->AddInterfaceProvided(mtsManagerComponentBase::InterfaceNames::InterfaceExecOut);
@@ -286,7 +303,7 @@ mtsTask::mtsTask(const std::string & name,
         ExecOut->AddEventVoid(RunEventInternal, "RunEvent");
         ExecOut->AddEventWrite(ChangeStateEvent, "ChangeStateEvent", this->State);
     }
-    else 
+    else
         CMN_LOG_CLASS_INIT_ERROR << "Failed to add ExecOut interface to " << this->GetName() << std::endl;
 }
 
@@ -357,8 +374,7 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const st
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
     }
     if (interfaceProvided) {
-        if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided)) {
-            InterfacesProvided.push_back(interfaceProvided);
+        if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {
             return interfaceProvided;
         }
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: task " << this->GetName() << " unable to add interface \""
@@ -426,14 +442,16 @@ bool mtsTask::CheckForOwnThread(void) const
     return (osaGetCurrentThreadId() == Thread.GetId());
 }
 
-void mtsTask::ToStream(std::ostream & outputStream) const
+
+void mtsTask::OnStartupException(const std::exception &excp)
 {
-    outputStream << "Task name: " << Name << std::endl;
-    StateTable.ToStream(outputStream);
-    InterfacesProvidedOrOutput.ToStream(outputStream);
-    InterfacesRequiredOrInput.ToStream(outputStream);
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
 }
 
+void mtsTask::OnRunException(const std::exception &excp)
+{
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
+}
 
 void mtsTask::SetInitializationDelay(double delay)
 {

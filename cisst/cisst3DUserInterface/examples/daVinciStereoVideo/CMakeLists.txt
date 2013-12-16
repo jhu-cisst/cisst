@@ -15,9 +15,10 @@
 project (ui3ExDaVinciStereoVideo)
 
 # sawSensablePhantom configuration
-include_directories (${sawIntuitiveDaVinci_INCLUDE_DIR})
-link_directories (${sawIntuitiveDaVinci_LIBRARY_DIR})
+include_directories (${${CISST_UI3_ISI_WRAPPER_USED}_INCLUDE_DIR})
+link_directories (${${CISST_UI3_ISI_WRAPPER_USED}_LIBRARY_DIR})
 
+add_definitions (-D${CISST_UI3_ISI_WRAPPER_DEFINITION})
 
 add_executable (ui3ExDaVinciStereoVideo
                 main.cpp
@@ -28,7 +29,7 @@ set_property (TARGET ui3ExDaVinciStereoVideo PROPERTY FOLDER "cisst3DUserInterfa
 
 target_link_libraries (ui3ExDaVinciStereoVideo
                        ui3ExBehaviors
-                       ${sawIntuitiveDaVinci_LIBRARIES})
+                       ${${CISST_UI3_ISI_WRAPPER_USED}_LIBRARIES})
 
 cisst_target_link_libraries (ui3ExDaVinciStereoVideo
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask

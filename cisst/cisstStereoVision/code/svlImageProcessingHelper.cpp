@@ -2673,6 +2673,7 @@ svlImageProcessingHelper::ExposureInternals::ExposureInternals() :
     Gamma(0.0),
     Modified(true)
 {
+    Curve.SetSize(255);
     Curve.SetAll(0);
 }
 

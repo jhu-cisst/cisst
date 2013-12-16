@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on: 2006-05-05
 
-  (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,41 +27,68 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnTypeTraits.h>
 
+#include <cisstCommon/cmnDataFunctions.h>
+#include <cisstCommon/cmnDataFunctionsString.h>
+#include <cisstCommon/cmnDataFunctionsVector.h>
+
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 
 // Always include last!
 #include <cisstMultiTask/mtsExport.h>
 
-
-// Define stream out operator for types based on std::vector
-#define MTS_IMPLEMENT_STDVEC_STREAM_OUT(_typeName)\
-inline std::ostream & operator << (std::ostream & output,\
-                                   const _typeName & object) {\
-    output << "[";\
-    for (size_t i = 0; i < object.size(); i++) {\
-        output << object[i];\
-        if (i < object.size()-1)\
-            output << ", ";\
-    }\
-    output << "]";\
-    return output;\
-}
-
 typedef std::vector<std::string> stdStringVec;
-MTS_IMPLEMENT_STDVEC_STREAM_OUT(stdStringVec);
-
 typedef std::vector<double> stdDoubleVec;
-MTS_IMPLEMENT_STDVEC_STREAM_OUT(stdDoubleVec);
-
 typedef std::vector<char> stdCharVec;
-MTS_IMPLEMENT_STDVEC_STREAM_OUT(stdCharVec);
 
 // Forward declarations
 template <class _elementType> class mtsGenericObjectProxyBase;
 template <class _elementType> class mtsGenericObjectProxy;
 template <class _elementType> class mtsGenericObjectProxyRef;
-template<typename T> class mtsGenericTypes;
+template <typename _elementType> class mtsGenericTypes;
+
+template <typename _elementType, bool>
+class cmnDataProxy
+{
+    // _elementType does not have cmnData<_elementType> static methods, so use the "old" way
+public:
+    static void CISST_DEPRECATED ToStream(std::ostream & outputStream, const _elementType & data) {
+        outputStream << data;
+    }
+    static void CISST_DEPRECATED ToStreamRaw(std::ostream & outputStream, const char CMN_UNUSED(delimiter), const _elementType & data) {
+        outputStream << data;
+    }
+    static bool CISST_DEPRECATED FromStreamRaw(std::istream & CMN_UNUSED(inputStream), const char CMN_UNUSED(delimiter), _elementType & CMN_UNUSED(data)) {
+        // Could try the "stream in" operator
+        return false;
+    }
+};
+
+template <typename _elementType>
+class cmnDataProxy<_elementType, true>
+{
+    // _elementType has the cmnData<_elementType> static methods
+public:
+    static void ToStream(std::ostream & outputStream, const _elementType & data) {
+        outputStream << cmnData<_elementType>::HumanReadable(data);
+    }
+    static void ToStreamRaw(std::ostream & outputStream, const char delimiter, const _elementType & data) {
+        cmnData<_elementType>::SerializeText(data, outputStream, delimiter);
+    }
+    static bool FromStreamRaw(std::istream & inputStream, const char delimiter, _elementType & data) {
+        try {
+            cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "mtsGenericObjectProxy");
+            cmnData<_elementType>::DeSerializeText(data, inputStream, delimiter);
+        } catch (...) {
+            return false;
+        }
+        if (inputStream.fail()) {
+            inputStream.clear();
+            return false;
+        }
+        return true;
+    }
+};
 
 #ifndef SWIG
 // Class services specialization for proxy objects.  We assume that we always want dynamic creation.
@@ -419,7 +446,8 @@ public:
         the actual type. */
     inline virtual void ToStream(std::ostream & outputStream) const {
         BaseType::ToStream(outputStream);
-        outputStream << " Value: " << this->Data;
+        outputStream << " Value: ";
+        cmnDataProxy<value_type, cmnData<value_type>::IS_SPECIALIZED>::ToStream(outputStream, this->Data);
     }
 
     /*! To stream raw data. */
@@ -430,8 +458,15 @@ public:
             outputStream << delimiter << headerPrefix << "-data";
         } else {
             BaseType::ToStreamRaw(outputStream, delimiter);
-            outputStream << delimiter << this->Data;
+            outputStream << delimiter;
+            cmnDataProxy<value_type, cmnData<value_type>::IS_SPECIALIZED>::ToStreamRaw(outputStream, delimiter, this->Data);
         }
+    }
+
+    /*! From stream raw. */
+    inline virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') {
+        BaseType::FromStreamRaw(inputStream, delimiter);
+        return cmnDataProxy<value_type, cmnData<value_type>::IS_SPECIALIZED>::FromStreamRaw(inputStream, delimiter, this->Data);
     }
 };
 
@@ -522,7 +557,8 @@ public:
         the actual type. */
     inline virtual void ToStream(std::ostream & outputStream) const {
         BaseType::ToStream(outputStream);
-        outputStream << " Value(ref): " << this->rData;
+        outputStream << " Value(ref): ";
+        cmnDataProxy<value_type, cmnData<value_type>::IS_SPECIALIZED>::ToStream(outputStream, this->rData);
     }
 
     /*! To stream raw data. */
@@ -533,8 +569,15 @@ public:
             outputStream << delimiter << headerPrefix << "-data(ref)";
         } else {
             BaseType::ToStreamRaw(outputStream, delimiter);
-            outputStream << delimiter << this->rData;
+            outputStream << delimiter;
+            cmnDataProxy<value_type, cmnData<value_type>::IS_SPECIALIZED>::ToStreamRaw(outputStream, delimiter, this->rData);
         }
+    }
+
+    /*! From stream raw. */
+    inline virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') {
+        BaseType::FromStreamRaw(inputStream, delimiter);
+        return cmnDataProxy<value_type, cmnData<value_type>::IS_SPECIALIZED>::FromStreamRaw(inputStream, delimiter, this->rData);
     }
 };
 
@@ -734,9 +777,8 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdCharVecProxy);
 // Now, define proxies for cisstVector classes (see also
 // mtsFixedSizeVectorTypes.h, which uses multiple inheritance,
 // rather than proxies).
-
 #include <cisstVector/vctFixedSizeVectorTypes.h>
-
+#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 typedef mtsGenericObjectProxy<vct1> mtsVct1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct1)
 typedef mtsGenericObjectProxy<vct2> mtsVct2;
@@ -947,9 +989,8 @@ typedef mtsGenericObjectProxy<vctBool9> mtsVctBool9;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool9)
 
 // Define a few fixed size matrices
-
 #include <cisstVector/vctFixedSizeMatrixTypes.h>
-
+#include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
 typedef mtsGenericObjectProxy<vct2x2> mtsVct2x2;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct2x2)
 typedef mtsGenericObjectProxy<vct3x3> mtsVct3x3;
@@ -960,16 +1001,16 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct4x4)
 // Transformation types (see also mtsTransformationTypes.h,
 // which uses multiple inheritance).
 #include <cisstVector/vctTransformationTypes.h>
-
+#include <cisstVector/vctDataFunctionsTransformations.h>
 typedef mtsGenericObjectProxy<vctMatRot3> mtsVctMatRot3;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctMatRot3)
-
 typedef mtsGenericObjectProxy<vctFrm3> mtsVctFrm3;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFrm3)
 
 // Dynamic vectors (see also mtsVector.h, which uses
 // multiple inheritance)
 #include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVector/vctDataFunctionsDynamicVector.h>
 typedef mtsGenericObjectProxy<vctDoubleVec> mtsVctDoubleVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctDoubleVec)
 typedef mtsGenericObjectProxy<vctFloatVec> mtsVctFloatVec;
@@ -992,4 +1033,5 @@ typedef mtsGenericObjectProxy<vctLongVec> mtsVctLongVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLongVec)
 typedef mtsGenericObjectProxy<vctULongVec> mtsVctULongVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULongVec)
+
 #endif

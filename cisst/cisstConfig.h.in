@@ -44,6 +44,12 @@ http://www.cisst.org/cisst/license.txt.
 // To allow overloading of functions for size_t
 #cmakedefine01 CISST_SIZE_T_NATIVE
 
+// For CMN_LOG macro
+#cmakedefine01 CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+
+// Do we have isfinite global function
+#cmakedefine01 CISST_HAS_ISFINITE
+
 // RTAI Realtime extension for Linux
 #cmakedefine01 CISST_HAS_LINUX_RTAI
 
@@ -70,5 +76,8 @@ http://www.cisst.org/cisst/license.txt.
 
 // Using IOS or not
 #cmakedefine01 CISST_HAS_IOS
+
+// Using JSonCpp, compiled along cisst
+#cmakedefine01 CISST_HAS_JSON
 
 #endif // _cisstConfig_h

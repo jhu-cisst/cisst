@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,7 +36,8 @@ mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName,
                                            mtsComponent * component,
                                            mtsMailBox * mailBox,
                                            mtsRequiredType required):
-    mtsInterfaceRequiredOrInput(interfaceName, component, required),
+    mtsInterface(interfaceName, component),
+    Required(required),
     MailBox(mailBox),
     InterfaceProvided(0),
     MailBoxSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
@@ -82,7 +83,7 @@ osaThreadSignal * mtsInterfaceRequired::GetThreadSignal(void)
 }
 
 
-const mtsInterfaceProvidedOrOutput * mtsInterfaceRequired::GetConnectedInterface(void) const
+const mtsInterfaceProvided * mtsInterfaceRequired::GetConnectedInterface(void) const
 {
     return InterfaceProvided;
 }
@@ -302,17 +303,8 @@ mtsCommandWriteBase * mtsInterfaceRequired::GetEventHandlerWrite(const std::stri
 }
 
 
-bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
+bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvided * interfaceProvided)
 {
-    // make sure we are connecting to a provided interface
-    mtsInterfaceProvided * interfaceProvided = dynamic_cast<mtsInterfaceProvided *>(interfaceProvidedOrOutput);
-    if (!interfaceProvided) {
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: can not connect input interface \""
-                                 << interfaceProvidedOrOutput->GetFullName() << "\" to required interface \""
-                                 << this->GetFullName() << "\", can only connect required with provided or input with output"
-                                 << std::endl;
-        return false;
-    }
     // get the end user interface
     mtsInterfaceProvided * endUserInterface = interfaceProvided->GetEndUserInterface(this->GetName());
     if (!endUserInterface) {
@@ -373,6 +365,12 @@ bool mtsInterfaceRequired::DetachCommands(void)
         iter->second->Detach();
     }
     return true;
+}
+
+
+mtsRequiredType mtsInterfaceRequired::IsRequired(void) const
+{
+    return this->Required;
 }
 
 
@@ -899,7 +897,7 @@ bool mtsInterfaceRequired::RemoveEventHandlerWrite(const std::string & eventName
     return EventHandlersWrite.RemoveItem(eventName, CMN_LOG_LEVEL_INIT_WARNING);
 }
 
-void mtsInterfaceRequired::GetDescription(InterfaceRequiredDescription & requiredInterfaceDescription)
+void mtsInterfaceRequired::GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription)
 {
     // Serializer initialization
     std::stringstream streamBuffer;
@@ -922,7 +920,7 @@ void mtsInterfaceRequired::GetDescription(InterfaceRequiredDescription & require
     requiredInterfaceDescription.FunctionWriteReturnNames = GetNamesOfFunctionsWriteReturn();
 
     // Extract void event handlers
-    CommandVoidElement elementEventVoidHandler;
+    mtsCommandVoidDescription elementEventVoidHandler;
     mtsInterfaceRequired::EventHandlerVoidMapType::MapType::const_iterator itVoid = EventHandlersVoid.begin();
     const mtsInterfaceRequired::EventHandlerVoidMapType::MapType::const_iterator itVoidEnd = EventHandlersVoid.end();
     for (; itVoid != itVoidEnd; ++itVoid) {
@@ -931,7 +929,7 @@ void mtsInterfaceRequired::GetDescription(InterfaceRequiredDescription & require
     }
 
     // Extract write event handlers
-    CommandWriteElement elementEventWriteHandler;
+    mtsCommandWriteDescription elementEventWriteHandler;
     mtsInterfaceRequired::EventHandlerWriteMapType::MapType::const_iterator itWrite = EventHandlersWrite.begin();
     const mtsInterfaceRequired::EventHandlerWriteMapType::MapType::const_iterator itWriteEnd = EventHandlersWrite.end();
     for (; itWrite != itWriteEnd; ++itWrite) {

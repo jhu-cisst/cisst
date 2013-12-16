@@ -37,7 +37,7 @@ public:
 
     void AddPossibleValue(const std::string & possibleValue);
     const std::string & GetValue(void) const;
-    bool SetValue(const std::string & value, std::string & errorMessage);
+    bool SetValue(const std::string & value, std::string & errorMessage, const bool & allowOverwrite = false);
     bool IsValid(std::string & errorMessage) const;
     void FillInDefaults(void);
     void DisplaySyntax(std::ostream & outputStream, size_t offsetSize) const;

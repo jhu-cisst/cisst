@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,15 +22,15 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of Manager Component Client
   \ingroup cisstMultiTask
 
-  This class defines the manager component client which is managed by all local 
-  component managers (LCMs).  An instance of this class is automatically created 
+  This class defines the manager component client which is managed by all local
+  component managers (LCMs).  An instance of this class is automatically created
   and gets connected to the manager component server which runs on LCM that runs
   with the global component manager (GCM).
-  
-  This component has two sets of interfaces, one for communication with the 
+
+  This component has two sets of interfaces, one for communication with the
   manager component server and the other one for command exchange between other
   manager component clients.
-  
+
   \note Related classes: mtsManagerComponentBase, mtsManagerComponentServer
 */
 
@@ -52,9 +52,9 @@ protected:
     /*! If MCS is ready */
     bool MCSReady;
 
-    /*! Functions for InterfaceComponent's required interface.  Since one 
-        manager component client needs to be able to handle multiple user 
-        components, we keep a list of function objects using named map with 
+    /*! Functions for InterfaceComponent's required interface.  Since one
+        manager component client needs to be able to handle multiple user
+        components, we keep a list of function objects using named map with
         (key = component name, value = function object set instance) */
     typedef struct {
         mtsFunctionVoid ComponentStop;
@@ -114,25 +114,25 @@ protected:
     // any thread, but still allow that method to queue commands for execution by the MCC.
     // Because any thread can call these methods, thread-safety is obtained by using a mutex.
     struct GeneralInterfaceStruct {
-        osaMutex Mutex;        
+        osaMutex Mutex;
         mtsFunctionWrite ComponentConnect;
     } GeneralInterface;
 
     /*! \brief Connect two local interfaces.
         \param clientComponentName Name of client component
-        \param clientInterfaceRequiredName Name of required interface
+        \param clientInterfaceName Name of required/input interface
         \param serverComponentName Name of server component
-        \param serverInterfaceProvidedName Name of provided interface
+        \param serverInterfaceName Name of provided/output interface
         \param clientProcessName Name of client process (ignored in standalone
                configuration, used in networked configuration)
         \return true if successful, false otherwise
         \note  It is assumed that the two components are in the same process. */
-    bool ConnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+    bool ConnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceName,
+                        const std::string & serverComponentName, const std::string & serverInterfaceName,
                         const std::string & clientProcessName = "");
 
-    bool DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                           const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+    bool DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceName,
+                           const std::string & serverComponentName, const std::string & serverInterfaceName);
 
     // If connection between InterfaceComponent.required - InterfaceInternal.provided is
     // disconnected, required interface instance of InterfaceComponent that corresponds
@@ -142,8 +142,8 @@ protected:
     bool AddInterfaceLCM(void);
     bool AddInterfaceComponent(void);
 
-    /*! Create a new set of function objects, add a new instance of 
-        InterfaceComponent's required interface to this component, and connect 
+    /*! Create a new set of function objects, add a new instance of
+        InterfaceComponent's required interface to this component, and connect
         it to InterfaceInternal's provided interface */
     bool AddNewClientComponent(const std::string & clientComponentName);
 
@@ -171,9 +171,9 @@ protected:
     void InterfaceLCMCommands_ComponentGetState(const mtsDescriptionComponent &component,
                                                 mtsComponentState &state) const;
     void InterfaceLCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface &intfc,
-                                                InterfaceProvidedDescription & description) const;
+                                                              mtsInterfaceProvidedDescription & description) const;
     void InterfaceLCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface &intfc,
-                                                InterfaceRequiredDescription & description) const;
+                                                              mtsInterfaceRequiredDescription & description) const;
     void InterfaceLCMCommands_LoadLibrary(const std::string &fileName, bool &result) const;
     void InterfaceLCMCommands_GetListOfComponentClasses(
                               std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
@@ -202,10 +202,10 @@ protected:
     void InterfaceComponentCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
     void InterfaceComponentCommands_GetListOfComponentClasses(const std::string &processName,
                                                               std::vector <mtsDescriptionComponentClass> & listOfComponentClasses) const;
-    void InterfaceComponentCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, 
-                                                                    InterfaceProvidedDescription & description) const;
-    void InterfaceComponentCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc, 
-                                                                    InterfaceRequiredDescription & description) const;
+    void InterfaceComponentCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
+                                                                    mtsInterfaceProvidedDescription & description) const;
+    void InterfaceComponentCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc,
+                                                                    mtsInterfaceRequiredDescription & description) const;
     void InterfaceComponentCommands_LoadLibrary(const mtsDescriptionLoadLibrary &lib, bool &result) const;
     void InterfaceComponentCommands_EnableLogForwarding(const std::vector<std::string> &processNames);
     void InterfaceComponentCommands_DisableLogForwarding(const std::vector<std::string> &processNames);

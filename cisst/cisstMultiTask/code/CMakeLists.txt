@@ -3,8 +3,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -13,6 +12,16 @@
 # http://www.cisst.org/cisst/license.txt.
 #
 # --- end cisst license ---
+
+# create data type using the data generator
+cisst_data_generator (cisstMultiTask
+                      "${cisst_BINARY_DIR}/include" # where to save the file
+                      "cisstMultiTask/"        # sub directory for include
+                      ../mtsInterfaceCommon.cdg
+                      ../mtsComponentState.cdg
+                      ../mtsParameterTypes.cdg)
+# to compile cisst generated code, need to find header file
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 # all source files
 set (SOURCE_FILES
@@ -35,9 +44,9 @@ set (SOURCE_FILES
      mtsCommandVoidReturn.cpp
      mtsCommandWriteReturn.cpp
 
+     mtsComponentState.cpp # see mtsComponentState.cdg
      mtsComponent.cpp
      mtsComponentAddLatency.cpp
-     mtsComponentState.cpp
      mtsComponentViewer.cpp
      mtsConnection.cpp
 
@@ -54,12 +63,11 @@ set (SOURCE_FILES
 
      mtsGenericObject.cpp
 
+     mtsInterface.cpp
      mtsInterfaceInput.cpp
      mtsInterfaceOutput.cpp
      mtsInterfaceProvided.cpp
-     mtsInterfaceProvidedOrOutput.cpp
      mtsInterfaceRequired.cpp
-     mtsInterfaceRequiredOrInput.cpp
      mtsIntervalStatistics.cpp
 
      mtsLODMultiplexerStreambuf.cpp
@@ -75,7 +83,11 @@ set (SOURCE_FILES
      mtsMulticastCommandVoid.cpp
      mtsMulticastCommandWriteBase.cpp
 
-     mtsParameterTypes.cpp
+     mtsParameterTypesOld.cpp
+
+     mtsSocketProxyCommon.cpp
+     mtsSocketProxyClient.cpp
+     mtsSocketProxyServer.cpp
 
      mtsStateIndex.cpp
      mtsStateTable.cpp
@@ -89,6 +101,7 @@ set (SOURCE_FILES
 
 # all header files
 set (HEADER_FILES
+
      mtsCallableQualifiedReadBase.h
      mtsCallableQualifiedReadMethod.h
      mtsCallableQualifiedReadReturnVoidMethod.h
@@ -125,9 +138,7 @@ set (HEADER_FILES
 
      mtsComponent.h
      mtsComponentAddLatency.h
-     mtsComponentDispatcher.h
      mtsComponentGeneratorMacros.h
-     mtsComponentState.h
      mtsComponentViewer.h
      mtsConnection.h
 
@@ -149,16 +160,12 @@ set (HEADER_FILES
      mtsGenericObject.h
      mtsGenericObjectProxy.h
 
-     mtsHistory.h
-
      mtsIntervalStatistics.h
-     mtsInterfaceCommon.h
+     mtsInterface.h
      mtsInterfaceInput.h
      mtsInterfaceOutput.h
      mtsInterfaceProvided.h
-     mtsInterfaceProvidedOrOutput.h
      mtsInterfaceRequired.h
-     mtsInterfaceRequiredOrInput.h
 
      mtsLODMultiplexerStreambuf.h
 
@@ -177,9 +184,13 @@ set (HEADER_FILES
      mtsMulticastCommandWrite.h
      mtsMulticastCommandWriteBase.h
 
-     mtsParameterTypes.h
+     mtsParameterTypesOld.h
 
      mtsQueue.h
+
+     mtsSocketProxyCommon.h
+     mtsSocketProxyClient.h
+     mtsSocketProxyServer.h
 
      mtsStateArray.h
      mtsStateArrayBase.h
@@ -197,6 +208,16 @@ set (HEADER_FILES
      mtsTransformationTypes.h
 
      mtsVector.h
+     )
+
+# Header files in code directory
+set (ADDITIONAL_HEADER_FILES
+
+     mtsFunctionQualifiedReadProxy.h
+     mtsFunctionReadProxy.h
+     mtsFunctionWriteProxy.h
+
+     mtsProxySerializer.h
      )
 
 if (MINGW)
@@ -233,7 +254,6 @@ if (CISST_MTS_HAS_ICE)
        mtsProxyBaseCommon.h
        mtsProxyBaseClient.h
        mtsProxyBaseServer.h
-       mtsProxySerializer.h
 
        mtsInterfaceRequiredProxy.h
        mtsComponentInterfaceProxyServer.h
@@ -250,8 +270,6 @@ if (CISST_MTS_HAS_ICE)
        mtsCommandReadProxy.h
        mtsCommandQualifiedReadProxy.h
 
-       mtsFunctionReadProxy.h
-       mtsFunctionWriteProxy.h
        mtsFunctionReturnProxyBase.h
        mtsFunctionVoidReturnProxy.h
        mtsFunctionWriteReturnProxy.h
@@ -344,7 +362,9 @@ cisst_add_library (LIBRARY cisstMultiTask
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
-                   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
+                                           ${cisstMultiTask_CISST_DG_SRCS}
+                   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES}
+                                           ${cisstMultiTask_CISST_DG_HDRS})
 #set_target_properties(cisstMultiTask PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
 
 # Add linking to external libraries

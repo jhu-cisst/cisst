@@ -22,62 +22,80 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnAssert.h>
-
-cmnDataFormat::cmnDataFormat(void)
-{
-    // determine size of pointer
-    if (sizeof(void *) == 4) {
-        this->WordSizeMember = CMN_DATA_32_BITS;
-    } else if (sizeof(void *)) {
-        this->WordSizeMember = CMN_DATA_64_BITS;
-    } else {
-        CMN_ASSERT(false);
-    }
-    // determine endianness
-    int one = 1;
-    char * part = reinterpret_cast<char *>(&one);
-    if (part[0] == 1) {
-        this->EndiannessMember = CMN_DATA_LITTLE_ENDIAN;
-    } else {
-        this->EndiannessMember = CMN_DATA_BIG_ENDIAN;
-    }
-    // determine size of size_t
-    if (sizeof(size_t) == 4) {\
-        this->SizeTSizeMember = CMN_DATA_SIZE_T_SIZE_32;
-    } else if (sizeof(size_t) == 8) {
-        this->SizeTSizeMember = CMN_DATA_SIZE_T_SIZE_64;
-    } else {
-        CMN_ASSERT(false);
-    }
-}
-
-
+#include <limits>
 
 // size_t specializations
-void cmnDataCopy_size_t(size_t & destination, const size_t & source) {
-    destination = source;
+void cmnDataCopy_size_t(size_t & data, const size_t & source) {
+    data = source;
 }
 
-std::string cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const std::string & userDescription)
-    throw (std::out_of_range) {
-    return userDescription;
+std::string cmnDataSerializeDescription_size_t(const size_t & CMN_UNUSED(data),
+                                               const char CMN_UNUSED(delimiter),
+                                               const std::string & userDescription)
+{
+    return (userDescription == "" ? "{s_t}" : (userDescription + ":{s_t}"));
 }
 
-double cmnDataScalar_size_t(const size_t & data, const size_t CMN_UNUSED(index))
-    throw (std::out_of_range) {
-    return static_cast<double>(data);
+size_t cmnDataSerializeBinaryByteSize_size_t(const size_t & CMN_UNUSED(data)) {
+    return sizeof(size_t);
 }
 
-size_t cmnDataScalarNumber_size_t(const size_t & CMN_UNUSED(data)) {
-    return 1;
+size_t cmnDataSerializeBinary_size_t(const size_t & data,
+                                     char * buffer, size_t bufferSize) {
+    if (bufferSize < sizeof(size_t)) {
+        return 0;
+    }
+    *(reinterpret_cast<size_t *>(buffer)) = data;
+    return sizeof(size_t);
 }
 
-bool cmnDataScalarNumberIsFixed_size_t(const size_t & CMN_UNUSED(data)) {
-    return true;
+size_t cmnDataDeSerializeBinary_size_t(size_t & data, const char * buffer, size_t bufferSize,
+                                       const cmnDataFormat & localFormat,
+                                       const cmnDataFormat & remoteFormat)
+{
+    // first case, both use same size
+    if (remoteFormat.GetSizeTSize() == localFormat.GetSizeTSize()) {
+        const size_t sizeOfData = sizeof(size_t);
+        if (bufferSize < sizeOfData) {
+            return 0;
+        }
+        data = *(reinterpret_cast<const size_t *>(buffer));
+        bufferSize -= sizeOfData;
+        return sizeOfData;
+    }
+    // different sizes
+    // local is 64, hence remote is 32
+    if (localFormat.GetSizeTSize() == cmnDataFormat::CMN_DATA_SIZE_T_SIZE_64) {
+        unsigned int tmp;
+        const size_t sizeOfData = sizeof(unsigned int);
+        if (bufferSize < sizeOfData) {
+            return 0;
+        }
+        tmp = *(reinterpret_cast<const unsigned int *>(buffer));
+        bufferSize -= sizeOfData;
+        data = tmp;
+        return sizeOfData;
+    }
+    // local is 32, hence remote is 64
+    if (localFormat.GetSizeTSize() == cmnDataFormat::CMN_DATA_SIZE_T_SIZE_32) {
+        unsigned long long int tmp;
+        const size_t sizeOfData = sizeof(unsigned long long int);
+        if (bufferSize < sizeOfData) {
+            return 0;
+        }
+        tmp = *(reinterpret_cast<const unsigned long long int *>(buffer));
+        bufferSize -= sizeOfData;
+        if (tmp > std::numeric_limits<size_t>::max()) {
+            cmnThrow("cmnDataDeSerializeBinary(size_t): received a size_t larger than what can be handled on 32 bits");
+        }
+        data = static_cast<size_t>(tmp); // this should be safe now
+        return sizeOfData;
+    }
+    return 0;
 }
 
-void cmnDataSerializeBinary_size_t(std::ostream & outputStream,
-                                   const size_t & data)
+void cmnDataSerializeBinary_size_t(const size_t & data,
+                                   std::ostream & outputStream)
     throw (std::runtime_error)
 {
     outputStream.write(reinterpret_cast<const char *>(&data),
@@ -87,10 +105,10 @@ void cmnDataSerializeBinary_size_t(std::ostream & outputStream,
     }
 }
 
-void cmnDataDeSerializeBinary_size_t(std::istream & inputStream,
-                                     size_t & data,
-                                     const cmnDataFormat & remoteFormat,
-                                     const cmnDataFormat & localFormat)
+void cmnDataDeSerializeBinary_size_t(size_t & data,
+                                     std::istream & inputStream,
+                                     const cmnDataFormat & localFormat,
+                                     const cmnDataFormat & remoteFormat)
     throw (std::runtime_error)
 {
     // first case, both use same size
@@ -130,26 +148,19 @@ void cmnDataDeSerializeBinary_size_t(std::istream & inputStream,
     }
 }
 
-void cmnDataSerializeText_size_t(std::ostream & outputStream,
-                                 const size_t & data,
+void cmnDataSerializeText_size_t(const size_t & data,
+                                 std::ostream & outputStream,
                                  const char CMN_UNUSED(delimiter))
     throw (std::runtime_error)
 {
     outputStream << data;
     if (outputStream.fail()) {
-            cmnThrow("cmnDataSerializeText_size_t: error occured with std::ostream::write");
-        }
+        cmnThrow("cmnDataSerializeText_size_t: error occured with std::ostream::write");
+    }
 }
 
-std::string cmnDataSerializeTextDescription_size_t(const size_t & CMN_UNUSED(data),
-                                                   const char CMN_UNUSED(delimiter),
-                                                   const std::string & userDescription)
-{
-    return userDescription;
-}
-
-void cmnDataDeSerializeText_size_t(std::istream & inputStream,
-                                   size_t & data,
+void cmnDataDeSerializeText_size_t(size_t & data,
+                                   std::istream & inputStream,
                                    const char CMN_UNUSED(delimiter)) throw (std::runtime_error)
 {
     inputStream >> data;
@@ -158,38 +169,34 @@ void cmnDataDeSerializeText_size_t(std::istream & inputStream,
     }
 }
 
-
-
-// std::string specialization
-void cmnDataSerializeBinary(std::ostream & outputStream,
-                            const std::string & data)
-    throw (std::runtime_error)
+std::string cmnDataHumanReadable_size_t(const size_t & data)
 {
-    cmnDataSerializeBinary_size_t(outputStream, data.size());
-    outputStream.write(data.data(), data.size());
-    if (outputStream.fail()) {
-        cmnThrow("cmnDataSerializeBinary(std::string): error occured with std::ostream::write");
-    }
+    std::stringstream stringStream;
+    stringStream << data;
+    return stringStream.str();
 }
 
-void cmnDataDeSerializeBinary(std::istream & inputStream,
-                              std::string & data,
-                              const cmnDataFormat & remoteFormat,
-                              const cmnDataFormat & localFormat)
-    throw (std::runtime_error)
+std::string cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const std::string & userDescription)
+    throw (std::out_of_range)
 {
-    size_t size;
-    // retrieve size of string
-    cmnDataDeSerializeBinary_size_t(inputStream, size, remoteFormat, localFormat);
-    data.resize(size);
-    // this const_cast is a bit alarming, lets be verbose until we are sure this is safe
-    std::cerr << CMN_LOG_DETAILS << " - not really sure about the following const cast" << std::endl;
-    inputStream.read(const_cast<char *>(data.data()), size);
-    if (inputStream.fail()) {
-        cmnThrow("cmnDataDeSerializeBinary(std::string): error occured with std::istream::read");
-    }
+    return (userDescription == "" ? "{s_t}" : (userDescription + ":{s_t}"));
 }
 
+double cmnDataScalar_size_t(const size_t & data, const size_t CMN_UNUSED(index))
+    throw (std::out_of_range)
+{
+    return static_cast<double>(data);
+}
+
+size_t cmnDataScalarNumber_size_t(const size_t & CMN_UNUSED(data))
+{
+    return 1;
+}
+
+bool cmnDataScalarNumberIsFixed_size_t(const size_t & CMN_UNUSED(data))
+{
+    return true;
+}
 
 void cmnDataDeSerializeTextDelimiter(std::istream & inputStream, const char delimiter, const char * className)
     throw (std::runtime_error)

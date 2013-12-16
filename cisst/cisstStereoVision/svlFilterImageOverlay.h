@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
 
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterImageOverlay_h
 
 #include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlFilterImageOverlayTypes.h>
 #include <cisstStereoVision/svlOverlayObjects.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <map>
@@ -35,14 +36,9 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT svlFilterImageOverlay : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-
 public:
     typedef svlFilterImageOverlay ThisType;
-    typedef struct _ImageTransform {
-	    int    ID;
-        vct3x3 frame;
-        double timestamp;
-    } ImageTransform;
+    typedef svlFilterImageOverlayTypes::ImageTransform ImageTransform;
 
 protected:
     typedef struct _TransformInternal {
@@ -81,6 +77,7 @@ protected:
 
 protected:
     virtual void CreateInterfaces();
+public:
     virtual void SetTransform(const ThisType::ImageTransform & transform);
     virtual void SetTransforms(const vctDynamicVector<ThisType::ImageTransform> & transforms);
 
@@ -115,15 +112,7 @@ private:
     void RemoveAndDeleteOverlayInternal(svlOverlay* overlay);
 };
 
-typedef mtsGenericObjectProxy<svlFilterImageOverlay::ImageTransform> svlFilterImageOverlay_ImageTransform;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay_ImageTransform);
-typedef mtsGenericObjectProxy<vctDynamicVector<svlFilterImageOverlay::ImageTransform> > svlFilterImageOverlay_ImageTransformVector;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay_ImageTransformVector);
-
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay)
-
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterImageOverlay::ImageTransform & objref);
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const vctDynamicVector<svlFilterImageOverlay::ImageTransform> & objref);
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay);
 
 #endif // _svlFilterImageOverlay_h
 
