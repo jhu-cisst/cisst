@@ -64,7 +64,7 @@ class CISST_EXPORT vctPlot2DBase
         ~Signal();
 
         // see AppendPoint
-        CISST_DEPRECATED void AddPoint(const vctDouble2 & point);
+        void CISST_DEPRECATED AddPoint(const vctDouble2 & point);
 
         /*! Insert point at last position and move last position
           forward.  If the circular buffer is full, this methods
@@ -323,14 +323,14 @@ class CISST_EXPORT vctPlot2DBase
       a new signal.  This method checks if the name has already been
       used.  If so, the signal won't be added and the method returns a
       0 pointer. */
-    Signal * CISST_DEPRECATED AddSignal(const std::string & name);
+    Signal CISST_DEPRECATED * AddSignal(const std::string & name);
 
     /*! This method is now deprecated.  The user should first use
       AddScale and then AddVecticalLine on the newly created scale.
       Create a new vertical line.  This method checks if the name has
       already been used.  If so, the line won't be added and the
       method returns a 0 pointer. */
-    VerticalLine * CISST_DEPRECATED AddVerticalLine(const std::string & name);
+    VerticalLine CISST_DEPRECATED * AddVerticalLine(const std::string & name);
 
     /*! Data recentering, these methods re-align the data once only,
       based on all signals.  Padding is used to make sure the data is
