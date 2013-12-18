@@ -183,6 +183,9 @@ public:
     /*! Destructor */
     ~cmnSerializer();
 
+    /*! Returns true if the services have already been serialized. */
+    bool ServicesSerialized(const cmnClassServicesBase *servicesPointer) const;
+
     /*! Reset the list of types already sent. */
     void Reset(void);
 
