@@ -51,7 +51,8 @@ public slots:
     void FitYSlot(void);
     void SetContinuousFitXSlot(bool);
     void SetContinuousFitYSlot(bool);
-    
+    void SetContinuousExpandYSlot(bool);
+
 };
 
 #endif  // _vctPlot2DOpenGLQtWidget_h

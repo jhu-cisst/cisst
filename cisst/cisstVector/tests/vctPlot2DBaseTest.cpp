@@ -7,7 +7,7 @@
   Author(s):  Joshua Chuang
   Created on: 2011-06-01
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -21,10 +21,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "vctPlot2DBaseTest.h"
 
+CPPUNIT_TEST_SUITE_REGISTRATION(vctPlot2DBaseTest);
+
 void vctPlot2DBaseTest::TestBufferManipulating(void)
 {
     vctPlot2DBaseTestClass plot;
-    vctPlot2DBaseTestClass::Signal * signal = plot.AddSignal("TestSignal");
+    vctPlot2DBaseTestClass::Scale * scale = plot.AddScale("TestScale");
+    vctPlot2DBaseTestClass::Signal * signal = scale->AddSignal("TestSignal");
     const size_t dataElements = 1000;
     const size_t pointSize = 2;
     double * arrayToAppend = new double[dataElements * pointSize];
@@ -199,7 +202,8 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
 void vctPlot2DBaseTest::TestRangeComputation(void){
 
     vctPlot2DBaseTestClass plot;
-    vctPlot2DBaseTestClass::Signal * signal = plot.AddSignal("TestRange");
+    vctPlot2DBaseTestClass::Scale * scale = plot.AddScale("TestScale");
+    vctPlot2DBaseTestClass::Signal * signal = scale->AddSignal("TestRange");
     const int dataElements = 12345;
     const int pointSize = 2;
     double * arrayToAppend = new double[dataElements * pointSize];
@@ -276,5 +280,55 @@ void vctPlot2DBaseTest::TestRangeComputation(void){
     CPPUNIT_ASSERT(maxXY.Y() == dataElements + 1);
 }
 
+void vctPlot2DBaseTest::TestAddScaleSignalLine(void)
+{
+    vctPlot2DBaseTestClass plot;
+    vctPlot2DBase::Scale * scale = plot.AddScale("TestScale");
+    CPPUNIT_ASSERT(scale);
+    // try to add a new one with same name
+    vctPlot2DBase::Scale * scaleFail = plot.AddScale("TestScale");
+    CPPUNIT_ASSERT(scaleFail == 0);
+    // add a new signal
+    vctPlot2DBase::Signal * signal1 = scale->AddSignal("signal1");
+    CPPUNIT_ASSERT(signal1);
+    // try to add another one with same name
+    vctPlot2DBase::Signal * signalFail = scale->AddSignal("signal1");
+    CPPUNIT_ASSERT(signalFail == 0);
+    // add new ones with a different name
+    vctPlot2DBase::Signal * signal2 = scale->AddSignal("signal2");
+    CPPUNIT_ASSERT(signal2);
+    // remove by name or pointer
+    CPPUNIT_ASSERT(scale->RemoveSignal("signal1"));
+    CPPUNIT_ASSERT(scale->RemoveSignal(signal2));
+    // attempt to remove a non existing signal should return false
+    CPPUNIT_ASSERT(!scale->RemoveSignal("dummy"));
+    CPPUNIT_ASSERT(!scale->RemoveSignal("signal2"));
+    CPPUNIT_ASSERT(!scale->RemoveSignal(signal1));
+    // remove scale
+    CPPUNIT_ASSERT(plot.RemoveScale("TestScale"));
+    // add it again and remove by pointer
+    scale = plot.AddScale("Again");
+    CPPUNIT_ASSERT(plot.RemoveScale(scale));
+    scale = 0;
+    // try to remove a null pointer
+    CPPUNIT_ASSERT(!plot.RemoveScale(scale));
+    // dummy name
+    CPPUNIT_ASSERT(!plot.RemoveScale("dummy"));
+}
 
-CPPUNIT_TEST_SUITE_REGISTRATION(vctPlot2DBaseTest);
+void vctPlot2DBaseTest::TestAddScaleSignalLineDeprecated(void)
+{
+    vctPlot2DBaseTestClass plot;
+    vctPlot2DBase::Signal * signal = plot.AddSignal("scaleName-signalName");
+    CPPUNIT_ASSERT(signal);
+    // try to add a new one with same name
+    vctPlot2DBase::Signal * signalFail = plot.AddSignal("scaleName-signalName");
+    CPPUNIT_ASSERT(signalFail == 0);
+    // check that the - has been parsed properly and try to add scale with same name
+    CPPUNIT_ASSERT(!plot.AddScale("scaleName"));
+    // get the scale and try to add a signal to make sure the signal has been added
+    vctPlot2DBase::Scale * scale = plot.GetScales()["scaleName"];
+    CPPUNIT_ASSERT(scale);
+    CPPUNIT_ASSERT(!scale->AddSignal("scaleName-signalName"));
+}
+

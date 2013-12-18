@@ -7,7 +7,7 @@
   Author(s):  Joshua Chuang
   Created on: 2011-06-01
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -38,6 +38,8 @@ class vctPlot2DBaseTest: public CppUnit::TestFixture
     {
         CPPUNIT_TEST(TestBufferManipulating);
         CPPUNIT_TEST(TestRangeComputation);
+        CPPUNIT_TEST(TestAddScaleSignalLine);
+        CPPUNIT_TEST(TestAddScaleSignalLineDeprecated);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -54,6 +56,7 @@ public:
     /*! Test range computation, min, max, ... */
     void TestRangeComputation(void);
 
+    /*! Test API to add and remove scales, signals and lines. */
+    void TestAddScaleSignalLine(void);
+    void TestAddScaleSignalLineDeprecated(void);
 };
-
-

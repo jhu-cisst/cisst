@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -66,7 +66,7 @@ int vctPlot2DOpenGLFLTK::handle(int event) {
         return 0;
         break;
     case FL_DRAG:
-    case FL_RELEASE:    
+    case FL_RELEASE:
     case FL_FOCUS :
     case FL_UNFOCUS :
     case FL_KEYBOARD:

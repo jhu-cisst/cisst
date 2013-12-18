@@ -75,12 +75,17 @@ void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
 
         QAction * fitYnow = new QAction("Fit Y now", this);
         QAction * fitYalways = new QAction("Fit Y always", this);
+        QAction * expandYalways = new QAction("Expand Y always", this);
         fitYalways->setCheckable(true);
         fitYalways->setChecked(this->GetContinuousFitY());
+        expandYalways->setCheckable(true);
+        expandYalways->setChecked(this->GetContinuousExpandY());
         menu.addAction(fitYnow);
         menu.addAction(fitYalways);
+        menu.addAction(expandYalways);
         connect(fitYnow, SIGNAL(triggered()), this, SLOT(FitYSlot()));
         connect(fitYalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousFitYSlot(bool)));
+        connect(expandYalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousExpandYSlot(bool)));
 
         menu.exec(mapToGlobal(event->pos()));
     }
@@ -96,14 +101,14 @@ void vctPlot2DOpenGLQtWidget::FreezeSlot(bool checked)
 void vctPlot2DOpenGLQtWidget::FitXSlot(void)
 {
     this->SetContinuousFitX(false);
-    this->FitX();
+    this->AutoFitX();
 }
 
 
 void vctPlot2DOpenGLQtWidget::FitYSlot(void)
 {
     this->SetContinuousFitY(false);
-    this->FitY();
+    this->AutoFitY();
 }
 
 
@@ -118,3 +123,8 @@ void vctPlot2DOpenGLQtWidget::SetContinuousFitYSlot(bool checked)
     this->SetContinuousFitY(checked);
 }
 
+
+void vctPlot2DOpenGLQtWidget::SetContinuousExpandYSlot(bool checked)
+{
+    this->SetContinuousExpandY(checked);
+}

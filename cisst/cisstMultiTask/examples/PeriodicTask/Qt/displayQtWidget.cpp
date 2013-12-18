@@ -25,7 +25,8 @@ displayQtWidget::displayQtWidget(void)
 {
     // create the widgets
     Plot = new vctPlot2DOpenGLQtWidget(this);
-    DataSignal = Plot->AddSignal("Data");
+    vctPlot2DBase::Scale * scale = Plot->AddScale("Scale");
+    DataSignal = scale->AddSignal("Data");
     DialAmplitude = new QDial(this);
     LabelAmplitude = new QLabel("Amplitude", this);
     ValueAmplitude = new QLabel("1", this);
