@@ -154,6 +154,21 @@ osaSocketStreambuf<_element, _trait>::overflow(int_type c)
 
 #endif // OSA_SOCKET_WITH_STREAM
 
+struct CISST_EXPORT osaIPandPort {
+    std::string IP;
+    unsigned short Port;
+
+    osaIPandPort() : IP(""), Port(0) {}
+    osaIPandPort(const std::string &ip, short port) : IP(ip), Port(port) {}
+    ~osaIPandPort() {}
+
+    bool operator == (const osaIPandPort &other);
+    bool operator != (const osaIPandPort &other);
+
+    // For STL maps and sets
+    bool operator < (const osaIPandPort &other);
+};
+
 class CISST_EXPORT osaSocket : public cmnGenericObject
 #ifdef OSA_SOCKET_WITH_STREAM
 , public std::iostream
@@ -203,6 +218,10 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
         \param port Server's port number */
     void SetDestination(const std::string & host, unsigned short port);
 
+    /*! \brief Set the destination address for UDP or TCP socket
+      \param ip_port Server's hostname or IP address (e.g. localhost, 127.0.0.1) and port number */
+    void SetDestination(const osaIPandPort & ip_port);
+
     /*! \brief Get the destination address for UDP or TCP socket. This is particularly useful
                for programs using UDP because the the Receive method automatically updates
                the destination based on the address from which the packet was received. Thus,
@@ -211,6 +230,14 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
         \param port Reference for returning server's port number
         \return true if destination address was returned */
     bool GetDestination(std::string & host, unsigned short &port) const;
+
+    /*! \brief Get the destination address for UDP or TCP socket. This is particularly useful
+               for programs using UDP because the the Receive method automatically updates
+               the destination based on the address from which the packet was received. Thus,
+               subsequent Send commands will send to this address.
+        \param ip_port Reference for returning server's IP address (e.g. "127.0.0.1") and port number
+        \return true if destination address was returned */
+    bool GetDestination(osaIPandPort & ip_port) const;
 
     /*! \brief Connect to the server; required for TCP sockets and should be
                used after SetDestination()
@@ -223,6 +250,12 @@ class CISST_EXPORT osaSocket : public cmnGenericObject
         \param port Server's port number
         \return true if the connection was successful */
     bool Connect(const std::string & host, unsigned short port);
+
+    /*! \brief Connect to the server; required for TCP sockets; includes call
+               to SetDestination()
+        \param ip_port Server's hostname or IP address (e.g. localhost, 127.0.0.1) and port number
+        \return true if the connection was successful */
+    bool Connect(const osaIPandPort & ip_port);
 
     /*! \brief Send a byte array via the socket
         \param bufsend Buffer holding bytes to be sent

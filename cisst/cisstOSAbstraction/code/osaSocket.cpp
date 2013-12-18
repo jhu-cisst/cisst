@@ -50,6 +50,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <netdb.h>
 #endif
 
+bool osaIPandPort::operator == (const osaIPandPort &other)
+{
+    return (IP == other.IP) && (Port == other.Port);
+}
+
+bool osaIPandPort::operator != (const osaIPandPort &other)
+{
+    return !((*this) == other );
+}
+
+bool osaIPandPort::operator < (const osaIPandPort &other)
+{
+    return (IP < other.IP) || ((IP == other.IP) && (Port < other.Port));
+}
+
 struct osaSocketInternals {
     struct sockaddr_in ServerAddr;
 };
@@ -320,6 +335,10 @@ void osaSocket::SetDestination(const std::string & host, unsigned short port)
     //    << host << ":" << port << std::endl;
 }
 
+void osaSocket::SetDestination(const osaIPandPort &ip_port)
+{
+    SetDestination(ip_port.IP, ip_port.Port);
+}
 
 bool osaSocket::GetDestination(std::string & host, unsigned short & port) const
 {
@@ -343,6 +362,11 @@ bool osaSocket::GetDestination(std::string & host, unsigned short & port) const
     else
         CMN_LOG_CLASS_RUN_ERROR << "GetDestination failed" << std::endl;
     return ret;
+}
+
+bool osaSocket::GetDestination(osaIPandPort &ip_port) const
+{
+    return GetDestination(ip_port.IP, ip_port.Port);
 }
 
 bool osaSocket::Connect(void)
@@ -384,6 +408,11 @@ bool osaSocket::Connect(const std::string & host, unsigned short port)
     return Connect();
 }
 
+bool osaSocket::Connect(const osaIPandPort &ip_port)
+{
+    SetDestination(ip_port);
+    return Connect();
+}
 
 int osaSocket::Send(const char * bufsend, unsigned int msglen, const double timeoutSec )
 {
