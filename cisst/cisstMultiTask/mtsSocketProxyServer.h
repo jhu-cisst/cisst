@@ -36,8 +36,8 @@ http://www.cisst.org/cisst/license.txt.
 class mtsFunctionReadProxy;
 class mtsFunctionWriteProxy;
 class mtsFunctionQualifiedReadProxy;
-class FunctionVoidReturnProxy;
-class FunctionWriteReturnProxy;
+class FunctionVoidReturnProxyMaster;
+class FunctionWriteReturnProxyMaster;
 class mtsEventSenderVoid;
 class mtsEventSenderWrite;
 class mtsProxySerializer;
@@ -51,11 +51,11 @@ public:
     std::string Name;
     std::string ComponentName;
     std::string ProvidedInterfaceName;
-    short Port;
+    unsigned short Port;
 
     mtsSocketProxyServerConstructorArg() : mtsGenericObject() {}
     mtsSocketProxyServerConstructorArg(const std::string &name, const std::string &componentName,
-                                       const std::string &providedInterfaceName, short port) :
+                                       const std::string &providedInterfaceName, unsigned short port) :
         mtsGenericObject(), Name(name), ComponentName(componentName), ProvidedInterfaceName(providedInterfaceName), Port(port) {}
     mtsSocketProxyServerConstructorArg(const mtsSocketProxyServerConstructorArg &other) : mtsGenericObject(),
         Name(other.Name), ComponentName(other.ComponentName), ProvidedInterfaceName(other.ProvidedInterfaceName), Port(other.Port) {}
@@ -85,15 +85,14 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
 
     osaSocket Socket;
     mtsInterfaceProvidedDescription InterfaceDescription;
-    mtsProxySerializer *InternalSerializer;
 
     /*! Typedef for function proxies */
-    typedef cmnNamedMap<mtsFunctionVoid>               FunctionVoidProxyMapType;
-    typedef cmnNamedMap<mtsFunctionWriteProxy>         FunctionWriteProxyMapType;
-    typedef cmnNamedMap<mtsFunctionReadProxy>          FunctionReadProxyMapType;
-    typedef cmnNamedMap<mtsFunctionQualifiedReadProxy> FunctionQualifiedReadProxyMapType;
-    typedef cmnNamedMap<FunctionVoidReturnProxy>       FunctionVoidReturnProxyMapType;
-    typedef cmnNamedMap<FunctionWriteReturnProxy>      FunctionWriteReturnProxyMapType;
+    typedef cmnNamedMap<mtsFunctionVoid>                FunctionVoidProxyMapType;
+    typedef cmnNamedMap<mtsFunctionWriteProxy>          FunctionWriteProxyMapType;
+    typedef cmnNamedMap<mtsFunctionReadProxy>           FunctionReadProxyMapType;
+    typedef cmnNamedMap<mtsFunctionQualifiedReadProxy>  FunctionQualifiedReadProxyMapType;
+    typedef cmnNamedMap<FunctionVoidReturnProxyMaster>  FunctionVoidReturnProxyMapType;
+    typedef cmnNamedMap<FunctionWriteReturnProxyMaster> FunctionWriteReturnProxyMapType;
 
     /*! Typedef for event generator proxies */
     typedef cmnNamedMap<mtsEventSenderVoid>          EventGeneratorVoidProxyMapType;
@@ -138,7 +137,7 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
         \param port Port to use for socket (UDP)
     */
     mtsSocketProxyServer(const std::string & name, const std::string & componentName,
-                         const std::string & providedInterfaceName, short port);
+                         const std::string & providedInterfaceName, unsigned short port);
 
     mtsSocketProxyServer(const mtsSocketProxyServerConstructorArg & arg);
 
