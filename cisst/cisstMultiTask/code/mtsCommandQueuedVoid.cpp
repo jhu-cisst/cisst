@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -78,6 +77,7 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking)
     if (!MailBox->Write(this)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: Mailbox.Write failed for \""
                           << this->Name << "\"" <<  std::endl;
+        BlockingFlagQueue.Get();   // Remove the blocking flag that was already queued
         cmnThrow("mtsCommandQueuedVoid: Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }
