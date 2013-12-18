@@ -174,6 +174,28 @@ public:
     }
 };
 
+// Programmer Note
+// The VoidReturn and WriteReturn implementation uses a "master" proxy object, which keeps
+// a list of proxy objects for each connected client (identified by IP+Port). This is similar
+// to mtsInterfaceProvided, which has the concept of an "end-user interface". There are
+// two reasons for this.
+//
+// The first reason is that the current implementation of the VoidReturn and WriteReturn commands
+// assumes that they alway block the client. Thus, rather than using queues (mtsQueue) for the argument
+// (for WriteReturn) and return value placeholder, as done for example in mtsCommandQueuedWrite, 
+// they just set pointers. In the future, we could change the implementation to allow multiple
+// VoidReturn or WriteReturn commands to be issued by a client, where each command specifies a
+// "completion object" that can be called to get the final result. If we make that change, then
+// it would become necessary to rework mtsCommandQueuedVoidReturn and mtsCommandQueuedWriteReturn
+// to use queues for the argument and return value.
+//
+// The second reason is that we need to send the return value back to the correct client.
+// Currently, mtsCommandQueuedVoidReturn and mtsCommandQueuedWriteReturn can handle just one "event sender"
+// at a time (see EnableFinishedEvent and GenerateFinishedEvent). So, for now we clone these commands
+// (as normally done for a provided interface), even though there is no thread-safety issue because
+// mtsSocketProxyServer is a single thread. This gives us multiple copies of the FinishedEvent.
+// I believe this could be fixed by making an mtsQueue for the event sender commands (FinishedEvent).
+
 class FunctionVoidReturnProxy : public mtsFunctionVoidReturn {
     osaIPandPort IP_Port;
     FunctionVoidReturnProxyMaster *Parent;
