@@ -20,17 +20,29 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon/cmnConstants.h>
 #include "clockComponent.h"
+
+#include <cisstCommon/cmnConstants.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(clockComponent, mtsComponent, std::string);
 
 clockComponent::clockComponent(const std::string & componentName):
     mtsComponent(componentName)
 {
-    // call generated method to configure this component
-    InitComponent();
+    SetupInterfaces();
+}
 
+void clockComponent::SetupInterfaces(void)
+{
+    mtsInterfaceProvided * interfaceProvided;
+    interfaceProvided = AddInterfaceProvided("MainInterface");
+    if (!interfaceProvided) {
+        CMN_LOG_CLASS_INIT_ERROR << "failed to add \"MainInterface\" to component \"" << this->GetName() << "\"" << std::endl;
+    }
+    if (!interfaceProvided->AddCommandRead(&clockComponent::GetTime, this, "GetTime")) {
+        CMN_LOG_CLASS_INIT_ERROR << "failed to add command to interface\"" << interfaceProvided->GetFullName() << "\"" << std::endl;
+    }
     Timer.Reset(); // reset the clock
     Timer.Start(); // start the clock
 }

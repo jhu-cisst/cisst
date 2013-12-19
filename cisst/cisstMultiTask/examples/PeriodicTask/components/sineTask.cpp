@@ -6,7 +6,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,30 +15,57 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
-#include <cisstCommon/cmnConstants.h>
 #include "sineTask.h"
+
+#include <cisstCommon/cmnConstants.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(sineTask, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg);
 
-sineTask::sineTask(const std::string & taskName, double period):
+sineTask::sineTask(const std::string & componentName, double periodInSeconds):
     // base constructor, same task name and period.
-    mtsTaskPeriodic(taskName, period, false, 500)
+    mtsTaskPeriodic(componentName, periodInSeconds, false, 500)
 {
-    // call generated method to configure this component
-    InitComponent();
+    SetupInterfaces();
 }
 
-sineTask::sineTask(const mtsTaskPeriodicConstructorArg &arg):
+sineTask::sineTask(const mtsTaskPeriodicConstructorArg & arg):
     // base constructor, same task name and period.
     mtsTaskPeriodic(arg)
 {
-    // call generated method to configure this component
-    InitComponent();
+    SetupInterfaces();
+}
+
+void sineTask::SetupInterfaces(void)
+{
+    // state table variables
+    StateTable.AddData(SineData, "SineData");
+
+    // provided interfaces
+    mtsInterfaceProvided * interfaceProvided;
+    interfaceProvided = AddInterfaceProvided("MainInterface");
+    if (!interfaceProvided) {
+        CMN_LOG_CLASS_INIT_ERROR << "failed to add \"MainInterface\" to component \"" << this->GetName() << "\"" << std::endl;
+    }
+    if (!interfaceProvided->AddCommandWrite(&sineTask::SetAmplitude, this, "SetAmplitude",  mtsDouble(1.0))) {
+        CMN_LOG_CLASS_INIT_ERROR << "failed to add command to interface\"" << interfaceProvided->GetFullName() << "\"" << std::endl;
+    }
+    if (!interfaceProvided->AddCommandReadState(StateTable, SineData, "GetData")) {
+        CMN_LOG_CLASS_INIT_ERROR << "failed to add command to interface\"" << interfaceProvided->GetFullName() << "\"" << std::endl;
+    }
+    if (!interfaceProvided->AddCommandWrite(&sineTask::SetTriggerThreshold, this, "SetTriggerThreshold",  mtsDouble(0.0))) {
+        CMN_LOG_CLASS_INIT_ERROR << "failed to add command to interface\"" << interfaceProvided->GetFullName() << "\"" << std::endl;
+    }
+    if (!interfaceProvided->AddCommandVoid(&sineTask::ResetTrigger, this, "ResetTrigger")) {
+        CMN_LOG_CLASS_INIT_ERROR << "failed to add command to interface\"" << interfaceProvided->GetFullName() << "\"" << std::endl;
+    }
+    if (!interfaceProvided->AddEventVoid(MainInterface.TriggerEvent, "TriggerEvent")) {
+        CMN_LOG_CLASS_INIT_ERROR << "failed to add event to interface\"" << interfaceProvided->GetFullName() << "\"" << std::endl;
+    }
 }
 
 void sineTask::SetAmplitude(const mtsDouble & amplitude)

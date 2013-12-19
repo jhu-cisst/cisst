@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaStopwatch.h>
 
 #include <cisstMultiTask/mtsComponent.h>
-#include <cisstMultiTask/mtsComponentGeneratorMacros.h>
 
 // check if this module is built as a DLL
 #ifdef mtsExPeriodicTaskComponents_EXPORTS
@@ -41,17 +40,11 @@ class CISST_EXPORT clockComponent: public mtsComponent {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
 
  protected:
-
-    // macros used by the cisst component generator
-    MTS_DECLARE_COMPONENT(clockComponent, mtsComponent);
-
-    // declaration of interface and available commands
-    MTS_INTERFACE_PROVIDED_BEGIN(MainInterface);
-    MTS_COMMAND_READ(GetTime, this, "GetTime");
-    MTS_INTERFACE_PROVIDED_END(MainInterface);
-
     osaStopwatch Timer;  // this is the actual component (wrapped)
     void GetTime(mtsDouble & time) const;  // used by the command "GetTime"
+
+    // internal method to configure this component
+    void SetupInterfaces(void);
 
  public:
     clockComponent(const std::string & componentName);

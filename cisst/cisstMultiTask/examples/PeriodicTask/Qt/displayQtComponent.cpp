@@ -26,12 +26,15 @@ displayQtComponent::displayQtComponent(void)
     QObject::connect(CentralWidget.DialAmplitude, SIGNAL(valueChanged(int)),
                      this, SLOT(SetAmplitudeQSlot(int)));
 
-    startTimer(50); // in milliseconds 50 secs = 20 Hz 
+    startTimer(100); // in milliseconds 100 = 10 Hz 
 }
 
 
 void displayQtComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
 {
+    if (CentralWidget.isHidden()) {
+        return;
+    }
     Generator.GetData(Data);
     CentralWidget.ValueData->setNum(Data.Data);
     CentralWidget.DataSignal->AppendPoint(vctDouble2(Data.Timestamp(), Data.Data));
