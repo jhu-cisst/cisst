@@ -61,7 +61,7 @@ public:
         return &Serializer;
     }
 
-    inline mtsExecutionResult ExecuteSerialized(std::string &resultArgSerialized)
+    inline mtsExecutionResult ExecuteSerialized(std::string &resultArgSerialized, mtsProxySerializer *serializer)
     {
         resultArgSerialized.clear();
         mtsExecutionResult ret = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
@@ -72,12 +72,13 @@ public:
         if (arg) {
             ret = Execute(*arg);
             if (ret.IsOK()) {
-                if (!Serializer.Serialize(*arg, resultArgSerialized))
+                if (!serializer->Serialize(*arg, resultArgSerialized))
                     ret = mtsExecutionResult::SERIALIZATION_ERROR;
             }
         }
         return ret;
     }
+
 };
 
 #endif // _mtsFunctionReadProxy_h

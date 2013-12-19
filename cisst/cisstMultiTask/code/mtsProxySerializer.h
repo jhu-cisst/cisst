@@ -59,6 +59,10 @@ public:
         delete DeSerializer;
     }
 
+    bool ServicesSerialized(const cmnClassServicesBase *servicesPointer) const {
+        return Serializer->ServicesSerialized(servicesPointer);
+    }
+
     void Reset(void) {
         Serializer->Reset();
     }

@@ -69,7 +69,8 @@ public:
     }
 
     inline mtsExecutionResult ExecuteSerialized(const std::string &inputArgSerialized,
-                                                std::string &resultArgSerialized)
+                                                std::string &resultArgSerialized,
+                                                mtsProxySerializer *serializer)
     {
         mtsExecutionResult ret = mtsExecutionResult:: ARGUMENT_DYNAMIC_CREATION_FAILED;
         // If args have not yet been dynamically constructed, try again because the
@@ -79,10 +80,10 @@ public:
         if (!arg2)
             arg2 = Serializer.DeSerialize(arg2Serialized);
         if (arg1 && arg2) {
-            if (Serializer.DeSerialize(inputArgSerialized, *arg1)) {
+            if (serializer->DeSerialize(inputArgSerialized, *arg1)) {
                 ret = Execute(*arg1, *arg2);
                 if (ret.IsOK()) {
-                    if (!Serializer.Serialize(*arg2, resultArgSerialized))
+                    if (!serializer->Serialize(*arg2, resultArgSerialized))
                         ret = mtsExecutionResult::SERIALIZATION_ERROR;
                 }
             }

@@ -86,6 +86,11 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     osaSocket Socket;
     mtsInterfaceProvidedDescription InterfaceDescription;
 
+    /*! Typedef for client connections. The current design of the cisst serializer
+        only sends the class services the first time an instance of the class is
+        serialized; thus we need a separate serializer for each client. */
+    typedef std::map<osaIPandPort, mtsProxySerializer *> ClientMapType;
+
     /*! Typedef for function proxies */
     typedef cmnNamedMap<mtsFunctionVoid>                FunctionVoidProxyMapType;
     typedef cmnNamedMap<mtsFunctionWriteProxy>          FunctionWriteProxyMapType;
@@ -107,13 +112,16 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     EventGeneratorVoidProxyMapType    EventGeneratorVoidProxyMap;
     EventGeneratorWriteProxyMapType   EventGeneratorWriteProxyMap;
 
+    // List of connected clients
+    ClientMapType                     ClientMap;
+
     // For memory cleanup
     std::vector<mtsCommandBase *> SpecialCommands;
 
     bool Init(const std::string &componentName, const std::string &providedInterfaceName);
 
     /*! \brief Create server proxy
-      \return True if success, false otherwise */
+        \return True if success, false otherwise */
     bool CreateServerProxy(const std::string & requiredInterfaceName);
 
     bool GetInterfaceDescription(mtsInterfaceProvidedDescription &desc) const;
@@ -127,7 +135,13 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     void EventDisable(const std::string &eventHandleAndName);
 
     void AddSpecialCommands(void);
-    mtsExecutionResult GetInitData(std::string &outputArgSerialized) const;
+    mtsExecutionResult GetInitData(std::string &outputArgSerialized, mtsProxySerializer *serializer) const;
+
+    /*! Return serializer for client identified by ip_port; if serializer does not exist, create it.
+        \param ip_port IP address and port number of client
+        \return Pointer to serializer
+    */
+    mtsProxySerializer *GetSerializerForClient(const osaIPandPort &ip_port) const;
 
  public:
     /*! Constructor

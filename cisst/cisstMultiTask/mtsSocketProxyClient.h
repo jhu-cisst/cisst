@@ -77,7 +77,7 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
  protected:
 
     osaSocket Socket;
-    mtsProxySerializer *InternalSerializer;
+    mtsProxySerializer *Serializer;
 
     mtsSocketProxyInitData ServerData;
 
@@ -96,6 +96,7 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
     
     void CheckForEvents(double timeoutInSec);
 
+    friend class CommandWrapperBase;
     friend class MulticastCommandVoidProxy;
     friend class MulticastCommandWriteProxy;
 
@@ -123,6 +124,9 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
 
     // Following used by command wrappers
     bool CheckForEventsImmediate(double timeoutInSec);
+    bool Serialize(const mtsGenericObject & originalObject, std::string & serializedObject);
+    bool DeSerialize(const std::string & serializedObject, mtsGenericObject & originalObject);
+    mtsGenericObject * DeSerialize(const std::string & serializedObject);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSocketProxyClient)
