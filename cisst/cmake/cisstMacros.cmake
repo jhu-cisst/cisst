@@ -594,6 +594,7 @@ endfunction (cisst_add_swig_module)
 # Function to use cisstComponentGenerator, this function assumes input
 # files are provided using a relative path
 function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
+  message (WARNING "cisst_component_generator macro is now deprecated!")
   # debug
   cisst_cmake_debug ("cisst_component_generator called with: ${ARGV}")
   if (${ARGC} LESS 1)

@@ -13,4 +13,3 @@
 
 add_subdirectory (benchmark1) # benchmarking loop time + ICE if available
 add_subdirectory (benchmark2) # benchmarking latency + ICE if available
-
