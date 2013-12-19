@@ -162,11 +162,11 @@ struct CISST_EXPORT osaIPandPort {
     osaIPandPort(const std::string &ip, short port) : IP(ip), Port(port) {}
     ~osaIPandPort() {}
 
-    bool operator == (const osaIPandPort &other);
-    bool operator != (const osaIPandPort &other);
+    bool operator == (const osaIPandPort &other) const;
+    bool operator != (const osaIPandPort &other) const;
 
     // For STL maps and sets
-    bool operator < (const osaIPandPort &other);
+    bool operator < (const osaIPandPort &other) const;
 };
 
 class CISST_EXPORT osaSocket : public cmnGenericObject

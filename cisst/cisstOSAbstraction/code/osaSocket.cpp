@@ -50,17 +50,17 @@ http://www.cisst.org/cisst/license.txt.
 #include <netdb.h>
 #endif
 
-bool osaIPandPort::operator == (const osaIPandPort &other)
+bool osaIPandPort::operator == (const osaIPandPort &other) const
 {
     return (IP == other.IP) && (Port == other.Port);
 }
 
-bool osaIPandPort::operator != (const osaIPandPort &other)
+bool osaIPandPort::operator != (const osaIPandPort &other) const
 {
     return !((*this) == other );
 }
 
-bool osaIPandPort::operator < (const osaIPandPort &other)
+bool osaIPandPort::operator < (const osaIPandPort &other) const
 {
     return (IP < other.IP) || ((IP == other.IP) && (Port < other.Port));
 }
