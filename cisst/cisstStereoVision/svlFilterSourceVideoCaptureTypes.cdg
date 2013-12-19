@@ -48,9 +48,9 @@ namespace svlFilterSourceVideoCaptureTypes {
 
 } // namespace
 
- CMN_DATA_SPECIALIZATION_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PlatformType, int, cmnData<int>::HumanReadable);
- CMN_DATA_SPECIALIZATION_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PixelType, int, cmnData<int>::HumanReadable);
- CMN_DATA_SPECIALIZATION_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PatternType, int, cmnData<int>::HumanReadable);
+ CMN_DATA_SPECIALIZATION_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PlatformType, int);
+ CMN_DATA_SPECIALIZATION_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PixelType, int);
+ CMN_DATA_SPECIALIZATION_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PatternType, int);
 #if CISST_HAS_JSON
  CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PlatformType);
  CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(svlFilterSourceVideoCaptureTypes::PixelType);

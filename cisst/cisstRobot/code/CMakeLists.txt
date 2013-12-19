@@ -40,6 +40,7 @@ if (CISST_HAS_CISSTNETLIB )
        robDH.cpp
        robHayati.cpp
        robModifiedDH.cpp
+       robModifiedHayati.cpp
        robLink.cpp
        robManipulator.cpp
 
@@ -80,6 +81,7 @@ if (CISST_HAS_CISSTNETLIB )
        robDH.h
        robHayati.h
        robModifiedDH.h
+       robModifiedHayati.h
        robLink.h
        robManipulator.h
 

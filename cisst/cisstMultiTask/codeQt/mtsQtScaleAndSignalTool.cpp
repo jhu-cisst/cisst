@@ -7,7 +7,7 @@
   Author(s):  Praneeth Sadda
   Created on: 2012-05-24
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -63,22 +63,22 @@ void mtsQtScaleEditor::BuildTree(vctPlot2DOpenGLQtWidget * visualizer)
 {
     const vctPlot2DOpenGLQtWidget::ScalesType & scales = visualizer->GetScales();
     vctPlot2DOpenGLQtWidget::ScalesType::const_iterator scalesIt = scales.begin();
-    vctPlot2DOpenGLQtWidget::ScalesType::const_iterator scalesEnd = scales.end();
+    const vctPlot2DOpenGLQtWidget::ScalesType::const_iterator scalesEnd = scales.end();
     vctPlot2DOpenGLQtWidget::Scale::SignalsType::const_iterator signalsIt;
     vctPlot2DOpenGLQtWidget::Scale::SignalsType::const_iterator signalsEnd;
     QTreeWidgetItem * scaleItem;
     QStringList strings;
 
-    for( ; scalesIt < scalesEnd; ++scalesIt) {
-        strings << (*scalesIt)->GetName().c_str();
+    for (; scalesIt != scalesEnd; ++scalesIt) {
+        strings << scalesIt->second->GetName().c_str();
         scaleItem = new QTreeWidgetItem(strings);
         scaleItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
         strings.clear();
         addTopLevelItem(scaleItem);
-        signalsIt = (*scalesIt)->GetSignals().begin();
-        signalsEnd = (*scalesIt)->GetSignals().end();
-        for( ; signalsIt < signalsEnd; ++signalsIt) {
-            strings << (*signalsIt)->GetName().c_str();
+        signalsIt = scalesIt->second->GetSignals().begin();
+        signalsEnd = scalesIt->second->GetSignals().end();
+        for (; signalsIt != signalsEnd; ++signalsIt) {
+            strings << signalsIt->second->GetName().c_str();
             scaleItem->addChild(new QTreeWidgetItem(strings));
             strings.clear();
         }

@@ -31,6 +31,29 @@ http://www.cisst.org/cisst/license.txt.
 // always include last
 #include <cisstCommon/cmnExport.h>
 
+size_t CISST_EXPORT cmnDataSerializeBinary(const std::string & data, char * buffer, size_t bufferSize);
+
+size_t CISST_EXPORT cmnDataDeSerializeBinary(std::string & data, const char * buffer, size_t bufferSize,
+                                             const cmnDataFormat & localFormat,
+                                             const cmnDataFormat & remoteFormat);
+
+void CISST_EXPORT cmnDataSerializeBinary(const std::string & data,
+                                         std::ostream & outputStream) throw (std::runtime_error);
+
+void CISST_EXPORT cmnDataDeSerializeBinary(std::string & data,
+                                           std::istream & inputStream,
+                                           const cmnDataFormat & localFormat,
+                                           const cmnDataFormat & remoteFormat) throw (std::runtime_error);
+
+void CISST_EXPORT cmnDataSerializeText(const std::string & data,
+                                       std::ostream & outputStream,
+                                       const char delimiter) throw (std::runtime_error);
+
+void CISST_EXPORT cmnDataDeSerializeText(std::string & data,
+                                         std::istream & inputStream,
+                                         const char delimiter) throw (std::runtime_error);
+
+
 template <>
 class cmnData<std::string>
 {
@@ -51,58 +74,21 @@ public:
 
     static size_t SerializeBinary(const DataType & data,
                                   char * buffer, size_t bufferSize) {
-        // check that buffer is large enough to serialize
-        const size_t dataSize = cmnData<std::string>::SerializeBinaryByteSize(data);
-        if (bufferSize < dataSize) {
-            return 0;
-        }
-        // serialize length as a size_T object
-        const size_t length = data.size();
-        buffer += cmnData<size_t>::SerializeBinary(length, buffer, cmnData<size_t>::SerializeBinaryByteSize(0));
-        // serialize string itself
-        const size_t numberOfBytes = length * sizeof(std::string::value_type);
-        memcpy(buffer, data.data(), length * numberOfBytes);
-        bufferSize -= numberOfBytes;
-        return dataSize;
+        return cmnDataSerializeBinary(data, buffer, bufferSize);
     }
 
     static size_t DeSerializeBinary(DataType & data, const char * buffer, size_t bufferSize,
                                     const cmnDataFormat & localFormat,
                                     const cmnDataFormat & remoteFormat)
     {
-        size_t stringSize;
-        size_t byteRead = cmnData<size_t>::DeSerializeBinary(stringSize, buffer, bufferSize,
-                                                             localFormat, remoteFormat);
-        // make sure we can at least get a string size
-        if (byteRead == 0) {
-            return 0;
-        }
-        // if the string itself was empty, return
-        if (stringSize == 0) {
-            data.clear();
-            return byteRead;
-        }
-        // make sure the buffer has the whole string
-        const size_t sizeOfData = stringSize * sizeof(std::string::value_type);
-        if (bufferSize < sizeOfData) {
-            return 0;
-        }
-        // get the string characters
-        data.resize(stringSize);
-        data.assign(buffer + byteRead, stringSize);
-        bufferSize -= sizeOfData;
-        return byteRead + sizeOfData;
+        return cmnDataDeSerializeBinary(data, buffer, bufferSize, localFormat, remoteFormat);
     }
 
     static void SerializeBinary(const DataType & data,
                                 std::ostream & outputStream)
         throw (std::runtime_error)
     {
-        cmnData<size_t>::SerializeBinary(data.size(), outputStream);
-        outputStream.write(data.data(), data.size());
-        if (outputStream.fail()) {
-            cmnThrow("cmnDataSerializeBinary(std::string): error occured with std::ostream::write");
-        }
+        cmnDataSerializeBinary(data, outputStream);
     }
 
     static void DeSerializeBinary(DataType & data,
@@ -111,14 +97,7 @@ public:
                                   const cmnDataFormat & remoteFormat)
         throw (std::runtime_error)
     {
-        size_t size;
-        // retrieve size of string
-        cmnData<size_t>::DeSerializeBinary(size, inputStream, localFormat, remoteFormat);
-        data.resize(size);
-        inputStream.read(const_cast<char *>(data.data()), size);
-        if (inputStream.fail()) {
-            cmnThrow("cmnDataDeSerializeBinary(std::string): error occured with std::istream::read");
-        }
+        cmnDataDeSerializeBinary(data, inputStream, localFormat, remoteFormat);
     }
 
     static void SerializeText(const DataType & data,
@@ -126,15 +105,7 @@ public:
                               const char delimiter)
         throw (std::runtime_error)
     {
-        const std::string::const_iterator end = data.end();
-        std::string::const_iterator iter = data.begin();
-        for (; iter != end; ++iter) {
-            if ((*iter == delimiter)
-                || (*iter == '\\')) {
-                outputStream << '\\';
-            }
-            outputStream << *iter;
-        }
+        cmnDataSerializeText(data, outputStream, delimiter);
     }
 
     static void DeSerializeText(DataType & data,
@@ -142,32 +113,7 @@ public:
                                 const char delimiter)
         throw (std::runtime_error)
     {
-        // reset string content
-        data = "";
-        bool lastCharWasEscape = false;
-        char newChar;
-
-        // seek around to figure how many characters are left in input stream
-        std::streampos currentPosition = inputStream.tellg();
-        inputStream.seekg(0, inputStream.end);
-        std::streamoff charactersLeft = inputStream.tellg() - currentPosition;
-        inputStream.seekg(currentPosition);
-
-        // keep reading as long as we don't run into comma
-        while (charactersLeft > 0                     // there is still something to read
-               && ((inputStream.peek() != delimiter)  // we are not finding the delimiter
-                   || lastCharWasEscape)              // unless the delimiter has been "escaped"
-               ) {
-            inputStream.get(newChar);
-            --charactersLeft;
-            if ((newChar == '\\')
-                && !lastCharWasEscape) {
-                lastCharWasEscape = true;
-            } else {
-                lastCharWasEscape = false;
-                data.append(1, newChar);
-            }
-        }
+        cmnDataDeSerializeText(data, inputStream, delimiter);
     }
 
     static bool ScalarNumberIsFixed(const std::string & CMN_UNUSED(data)) {

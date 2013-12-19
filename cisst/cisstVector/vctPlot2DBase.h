@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <map>
 #include <string>
 
-#include <cisstCommon/cmnNamedMap.h>
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
@@ -36,12 +35,10 @@ http://www.cisst.org/cisst/license.txt.
   and thicknesses, computation of scales and offsets.
 
   \todo Rename "trace" to "signal", "data set", "set", "point set", ...
-  \todo Add notion of scale, each line and signal should be managed within a "scale"
   \todo Add "grid" and/or "axis" (maybe a special grid) to all scales
   \todo Add a flag to all elements to determine if they should be used or not in auto fit methods (e.g. user might {not} want to see y=0 line)
   \todo Cleanup pointSize vs lineWidth in traces, lines, etc.  use linewidth for everything
   \todo Create a base class "element"/"data" for all elements visible (i.e. signal, vertical line, grid, ...), modifiedSinceLastRender, maybe even render method ...
-  \todo Remove all traceId code, Ids are not that efficient anyway and users should keep a pointer on the trace/line/grid they need or retrieve these by name
   \todo Fit/Render should probably be defined at plot/scale/data level
   \tobo Add flag/method Modified to all elements type to optimize fit/render
 */
@@ -67,7 +64,7 @@ class CISST_EXPORT vctPlot2DBase
         ~Signal();
 
         // see AppendPoint
-        CISST_DEPRECATED void AddPoint(const vctDouble2 & point);
+        void CISST_DEPRECATED AddPoint(const vctDouble2 & point);
 
         /*! Insert point at last position and move last position
           forward.  If the circular buffer is full, this methods
@@ -75,8 +72,8 @@ class CISST_EXPORT vctPlot2DBase
         void AppendPoint(const vctDouble2 & point);
 
         /*! Get point value in the buffer relative to first element.
-          This method will throw an std::runtime_error if the index
-          is invalid, i.e. greater than the buffer size. */
+          This method will throw an std::runtime_error if the index is
+          invalid, i.e. greater than the buffer size. */
         vctDouble2 GetPointAt(size_t index) throw (std::runtime_error);
 
         /*! Set point value at a given position, relative to first
@@ -106,16 +103,15 @@ class CISST_EXPORT vctPlot2DBase
         bool AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
 
         void Freeze(bool freeze);
+        bool GetFreeze(void) const;
 
-        /*! Compute min and max over all points to recenter display.  If the buffer contains no point, returns 0. */
+        /*! Compute min and max over all points to recenter display.
+            If the buffer contains no point, returns 0. */
         //@{
         void ComputeDataRangeX(double & min, double & max, bool assumesDataSorted = false) const;
         void ComputeDataRangeY(double & min, double & max) const;
         void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max) const;
         //@}
-
-        // use ComputeDataRangeX with assumesDataSorted = true
-        void CISST_DEPRECATED GetLeftRightDataX(double & min, double & max) const;
 
         void CISST_DEPRECATED SetNumberOfPoints(size_t numberOfPoints);
         void CISST_DEPRECATED GetNumberOfPoints(size_t & numberOfPoints, size_t & bufferSize) const;
@@ -190,53 +186,91 @@ class CISST_EXPORT vctPlot2DBase
         friend class vctPlot2DVTK;
     public:
 
-        // keep signals in a vector
-        typedef std::vector<Signal *> SignalsType;
+        // keep signals in a std::map
+        typedef std::map<std::string, Signal *> SignalsType;
         SignalsType Signals;
 
-        typedef std::vector<VerticalLine *> VerticalLinesType;
+        // keep vertical lines in a std::map
+        typedef std::map<std::string, VerticalLine *> VerticalLinesType;
         VerticalLinesType VerticalLines;
 
         Scale(const std::string & name, size_t pointDimension = 2);
         ~Scale();
 
-        const std::string & GetName(void);
+        const std::string & GetName(void) const;
+
         vctPlot2DBase::Signal * AddSignal(const std::string & name);
         bool RemoveSignal(const std::string & name);
-        inline const SignalsType & GetSignals() const {
+        bool RemoveSignal(const Signal * signal);
+
+        inline const SignalsType & GetSignals(void) const {
             return Signals;
         }
 
-        vctPlot2DBase::VerticalLine * AddVerticalLine(const std::string &name);
+        vctPlot2DBase::VerticalLine * AddVerticalLine(const std::string & name);
+
         void SetColor(const vctDouble3 & colorInRange0To1);
+
+        void Freeze(bool freeze);
+        bool GetFreeze(void) const;
+
         void ContinuousUpdate(void);
+        /*! Set options to tell Continuous update how to recenter the
+          scale based on the signals. */
+        //@{
         void SetContinuousFitX(bool fit);
         void SetContinuousFitY(bool fit);
+        void SetContinuousExpandY(bool expand);
+        //@}
+        /*! Query automatic recentering settings. */
+        //@{
+        inline bool GetContinuousFitX(void) const {
+            return ContinuousFitX;
+        }
+        inline bool GetContinuousFitY(void) const {
+            return ContinuousFitY;
+        }
+        inline bool GetContinuousExpandY(void) const {
+            return ContinuousExpandY;
+        }
+        //@}
 
+        /*! To fit the data in the viewport we need to compute the
+          range for all signals.  To reduce the number of
+          computations, three methods are provided, one that compute
+          the X range only, one for the Y range only and one for both
+          X and Y.  Each method calls the corresponding compute data
+          range for all signals in the scale. */
+        //@{
         bool ComputeDataRangeX(double & min, double & max, bool assumesDataSorted = false) const;
         bool ComputeDataRangeY(double & min, double & max);
         bool ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
+        //@}
 
-
-        // Centering X,Y or XY
-        void FitX(double padding = 0.0);
+        /*! Data recentering, these methods re-align the data once
+          only, based on all signals.  Padding is used to make sure
+          the data is not plotted at the extreme edges of the window.
+          The padding parameter indicates the percentage of space that
+          should be left empty.  For example, a 200 pixel window with
+          a padding of 0.1 (10%) will leave a band of 10 pixels empty
+          on each side of the window.  By default, the padding in X
+          (horizontal) is null and 10% (0.1) in Y (vertical). */
+        //@{
+        void AutoFitX(double padding = 0.0);
         void FitX(double min, double max, double padding = 0.0);
-        void FitY(double padding = 0.1);
+        void AutoFitY(double padding = 0.1);
+        void AutoExpandY(double padding = 0.1);
         void FitY(double min, double max, double padding = 0.1);
-        void FitXY(const vctDouble2 & padding = vctDouble2(0.0, 0.1));
+        void AutoFitXY(const vctDouble2 & padding = vctDouble2(0.0, 0.1));
+        void AutoFitXExpandY(const vctDouble2 & padding = vctDouble2(0.0, 0.1));
         void FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding = vctDouble2(0.0, 0.1));
-        // void AlignMaxX(void);
+        //@}
 
     protected:
-        // maintain a map to find signal Id by name
-        typedef std::map<std::string, Signal*> SignalsIdType;
-        SignalsIdType SignalsId;
-        typedef std::map<std::string, VerticalLine*> VerticalLinesIdType;
-        VerticalLinesIdType VerticalLinesId;
-
         bool ContinuousFitX;
         bool ContinuousFitY;
-        bool Continuous;
+        bool ContinuousExpandY;
+        double ExpandYMin, ExpandYMax;
 
         // viewport sizes
         vctDouble2 Viewport;
@@ -252,47 +286,51 @@ class CISST_EXPORT vctPlot2DBase
         vctDouble3 Color;
         double LineWidth;
     };
-    // keep scale in a vector
-    typedef std::vector<Scale *> ScalesType;
-    ScalesType Scales;
-    typedef std::map<std::string, Scale*> ScalesIdType;
-    ScalesIdType ScalesId;
 
-    //Scale Manipulate functions, one plot could have several Scales
+    /*! Type used to store all scales used by the plot.  Each scale
+      can contain multiple signals, lines, ... that will be scaled
+      together. */
+    typedef std::map<std::string, Scale *> ScalesType;
+    ScalesType Scales;
+
+    /*! Create a new scale and return a pointer to the newly created
+      scale.  If a scale with the same name already exists the method
+      returns a pointer to the existing scale. */
     vctPlot2DBase::Scale * AddScale(const std::string & name);
+
+    /*! Find an existing scale by name. */
     vctPlot2DBase::Scale * FindScale(const std::string & name);
-    bool RemoveScale(const std::string &name);
-    inline const ScalesType& GetScales(void) const {
+
+    /*! Remove an existing scale by name. */
+    bool RemoveScale(const std::string & name);
+
+    /*! Remove an existing scale by address. */
+    bool RemoveScale(const vctPlot2DBase::Scale * scale);
+
+    /*! Reference to the map of scales. */
+    inline ScalesType & GetScales(void) {
         return Scales;
     }
 
     vctPlot2DBase(size_t PointSize = 2);
-    virtual ~vctPlot2DBase(void) {};
+    virtual ~vctPlot2DBase();
 
     /*! Set the number of points for all signals. */
     void SetNumberOfPoints(size_t numberOfPoints);
 
-    /*! Create a new signal, user needs to provide a placeholder to
-      retrieve the signalId assigned.  This method checks if the name
-      has already been used.  If so, the signal won't be added and the
+    /*! This method is now deprecated.  The user should first use
+      AddScale and then AddSignal on the newly created scale.  Create
+      a new signal.  This method checks if the name has already been
+      used.  If so, the signal won't be added and the method returns a
+      0 pointer. */
+    Signal CISST_DEPRECATED * AddSignal(const std::string & name);
+
+    /*! This method is now deprecated.  The user should first use
+      AddScale and then AddVecticalLine on the newly created scale.
+      Create a new vertical line.  This method checks if the name has
+      already been used.  If so, the line won't be added and the
       method returns a 0 pointer. */
-    Signal * AddSignal(const std::string & name, size_t & signalId);
-
-    /*! Create a new signal.  This method checks if the name has
-      already been used.  If so, the signal won't be added and the
-      method returns a 0 pointer. */
-    Signal * AddSignal(const std::string & name);
-
-    bool RemoveSignal(const std::string & name);
-
-    /*! Create a new vertical line.  This method checks if the name
-      has already been used.  If so, the line won't be added and the
-      method returns a 0 pointer. */
-    VerticalLine * AddVerticalLine(const std::string & name);
-
-    /*! Add a point to a given signal.  Deprecated, use
-      signalPointer->AddPoint instead. */
-    void CISST_DEPRECATED AddPoint(size_t signal, const vctDouble2 & point);
+    VerticalLine CISST_DEPRECATED * AddVerticalLine(const std::string & name);
 
     /*! Data recentering, these methods re-align the data once only,
       based on all signals.  Padding is used to make sure the data is
@@ -303,53 +341,36 @@ class CISST_EXPORT vctPlot2DBase
       window.  By default, the padding in X (horizontal) is null and
       10% (0.1) in Y (vertical). */
     //@{
-    void FitX(double padding = 0.0);
+    void AutoFitX(double padding = 0.0);
     void FitX(double min, double max, double padding = 0.0);
-    void FitY(double padding = 0.1);
+    void AutoFitY(double padding = 0.1);
     void FitY(double min, double max, double padding = 0.1);
-    void FitXY(const vctDouble2 & padding = vctDouble2(0.0, 0.1));
-    void FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding = vctDouble2(0.0, 0.1));
-    //  void AlignMaxX(void);
     //@}
 
     /*! Freeze the circular buffers, i.e. AddPoint does nothing.  When
       turned off (parameter is false), this is equivalent to starting
       with an empty data set.  These methods work on all signals at
       once. */
-    //@{
     void Freeze(bool freeze);
-    inline bool GetFreeze(void) const {
-        return this->Frozen;
-    }
-    //@}
 
-    /*! Automatic recentering */
+    /*! Check if all signals are frozen. */
+    bool GetFreeze(void) const;
+
+    /*! Automatic recentering.  Propagate settings to all scales. */
     //@{
     void SetContinuousFitX(bool fit);
     void SetContinuousFitY(bool fit);
-    void SetContinuousAlignMaxX(bool align);
-
-    inline bool GetContinuousFitX(void) const {
-        return this->ContinuousFitX;
-    }
-    inline bool GetContinuousFitY(void) const {
-        return this->ContinuousFitY;
-    }
-    inline bool GetContinuousAlignMaxX(void) const {
-        return this->ContinuousAlignMaxX;
-    }
+    void SetContinuousExpandY(bool expand);
     //@}
 
-    /*! To fit the data in the viewport we need to compute the range
-      for all signals.  To reduce the number of computations, three
-      methods are provided, one that compute the X range only, one for
-      the Y range only and one for both X and Y.  Each method uses a
-      single loop. */
-    //@{
-    void ComputeDataRangeX(double & min, double & max);
-    void ComputeDataRangeY(double & min, double & max);
-    void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
-    //@}
+    /*! Check if all scales are on continous fit for X. */
+    bool GetContinuousFitX(void) const;
+
+    /*! Check if all scales are on continous fit for Y. */
+    bool GetContinuousFitY(void) const;
+
+    /*! Check if all scales are on continous fit for X and Y. */
+    bool GetContinuousExpandY(void) const;
 
     //*! Get currently used viewing range */
     //@{
@@ -361,24 +382,10 @@ class CISST_EXPORT vctPlot2DBase
     }
     //@}
 
-#if 0
-    // no yet implemented
-    void SetGridColor(const vctDouble3 & colorInRange0To1);
-#endif
-
-    /*! Set color for a specific signal.  Deprecated, use
-      signalPointer->SetColor. */
-    void CISST_DEPRECATED SetColor(size_t signalId, const vctDouble3 & colorInRange0To1);
-
     /*! Set background color, defined as RGB between 0 and 1. */
     void SetBackgroundColor(const vctDouble3 & colorInRange0To1);
 
  protected:
-
-#if 0
-    // no yet implemented
-    DrawGrid(void);
-#endif
 
     /*! Methods required in all derived classes */
     //@{
@@ -392,36 +399,16 @@ class CISST_EXPORT vctPlot2DBase
       points.  Different for OpenGL in 2D, VTK, ... */
     size_t PointSize;
 
-    // keep signals in a vector
-    typedef std::vector<Signal *> SignalsType;
-    SignalsType Signals;
-    // maintain a map to find signal Id by name
-    typedef std::map<std::string, Signal*> SignalsIdType;
-    SignalsIdType SignalsId;
-
-    // keep vertical lines in a vector
-    typedef cmnNamedMap<VerticalLine> VerticalLinesType;
-    VerticalLinesType VerticalLines;
-
     // default number of points for all signals
     size_t NumberOfPoints;
-    bool Frozen;
 
     // viewport sizes
     vctDouble2 Viewport;
     // stores the min and max corresponding to the viewport
     vctDouble2 ViewingRangeX, ViewingRangeY;
-    vctDouble2 Translation;
-    vctDouble2 ScaleValue;
 
-    // continuous computation of scales and offsets
-    bool Continuous;
-    bool ContinuousFitX;
-    bool ContinuousFitY;
-    bool ContinuousAlignMaxX;
-
-    /*! Method called at each iteration to figure out if an automatic
-      update is needed or not. */
+    /*! Method called before each iteration to figure out if an
+      automatic update is needed or not for each scale. */
     void ContinuousUpdate(void);
 
     // background color

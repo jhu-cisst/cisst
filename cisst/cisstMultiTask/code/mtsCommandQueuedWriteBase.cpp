@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -115,6 +114,7 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
     if (!BlockingFlagQueue.Put(blocking)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
+        ArgumentsQueue.Get();   // Remove the argument that was already queued
         cmnThrow("mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
@@ -122,6 +122,8 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
     if (!MailBox->Write(this)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed for \""
                           << this->Name << "\"" << std::endl;
+        ArgumentsQueue.Get();      // Remove the argument that was already queued
+        BlockingFlagQueue.Get();   // Remove the blocking flag that was already queued
         cmnThrow("mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }

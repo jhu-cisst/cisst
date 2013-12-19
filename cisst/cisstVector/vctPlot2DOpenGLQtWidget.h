@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -51,7 +51,8 @@ public slots:
     void FitYSlot(void);
     void SetContinuousFitXSlot(bool);
     void SetContinuousFitYSlot(bool);
-    
+    void SetContinuousExpandYSlot(bool);
+    void SetContinuousExpandYResetSlot(void);
 };
 
 #endif  // _vctPlot2DOpenGLQtWidget_h

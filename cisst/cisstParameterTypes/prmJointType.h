@@ -51,7 +51,7 @@ inline std::string cmnDataHumanReadable(const prmJointType & data)
     return "unknown";
 }
 
-CMN_DATA_SPECIALIZATION_FOR_ENUM(prmJointType, int, cmnDataHumanReadable);
+CMN_DATA_SPECIALIZATION_FOR_ENUM(prmJointType, int);
 
 #endif // _prmJointType_h
 

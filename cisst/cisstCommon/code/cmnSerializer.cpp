@@ -34,6 +34,14 @@ cmnSerializer::~cmnSerializer()
 {
 }
 
+bool cmnSerializer::ServicesSerialized(const cmnClassServicesBase *servicesPointer) const {
+    // search for services pointer to see if the information has been sent
+    const const_iterator begin = ServicesContainer.begin();
+    const const_iterator end = ServicesContainer.end();
+    const_iterator found = std::find(begin, end, servicesPointer);
+    return (found != end);
+}
+
 void cmnSerializer::Reset(void)
 {
     ServicesContainer.clear();
@@ -53,13 +61,8 @@ void cmnSerializer::Serialize(const cmnGenericObject & object, const bool serial
 
 
 void cmnSerializer::SerializeServices(const cmnClassServicesBase * servicesPointer) {
-    // search for services pointer to see if the information has
-    // been sent
-    const const_iterator begin = ServicesContainer.begin();
-    const const_iterator end = ServicesContainer.end();
-    const_iterator found = std::find(begin, end, servicesPointer);
-    // this "services" has not been sent
-    if (found == end) {
+    if (!ServicesSerialized(servicesPointer)) {
+        // if the class "services" has not yet been sent
         CMN_LOG_CLASS_RUN_VERBOSE << "Sending information related to class " << servicesPointer->GetName() << std::endl;
         // sent the info with null pointer so that reader can
         // differentiate from other services pointers

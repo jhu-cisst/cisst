@@ -47,6 +47,9 @@ http://www.cisst.org/cisst/license.txt.
 // For CMN_LOG macro
 #cmakedefine01 CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
 
+// Do we have isfinite global function
+#cmakedefine01 CISST_HAS_ISFINITE
+
 // RTAI Realtime extension for Linux
 #cmakedefine01 CISST_HAS_LINUX_RTAI
 

@@ -149,6 +149,10 @@ robManipulator::robManipulator( const std::string& linkfile,
   }
 }
 
+robManipulator::~robManipulator() 
+{
+}
+
 void robManipulator::Attach( robManipulator* tool )
 { tools.push_back( tool ); }
 				

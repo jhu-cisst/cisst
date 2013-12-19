@@ -18,6 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <set>
+
 #include <cisstMultiTask/mtsSocketProxyServer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -172,208 +174,362 @@ public:
     }
 };
 
-// Following is an alternate to mtsFunctionVoidReturnProxy used for ICE
+// Programmer Note
+// The VoidReturn and WriteReturn implementation uses a "master" proxy object, which keeps
+// a list of proxy objects for each connected client (identified by IP+Port). This is similar
+// to mtsInterfaceProvided, which has the concept of an "end-user interface". There are
+// two reasons for this.
+//
+// The first reason is that the current implementation of the VoidReturn and WriteReturn commands
+// assumes that they alway block the client. Thus, rather than using queues (mtsQueue) for the argument
+// (for WriteReturn) and return value placeholder, as done for example in mtsCommandQueuedWrite, 
+// they just set pointers. In the future, we could change the implementation to allow multiple
+// VoidReturn or WriteReturn commands to be issued by a client, where each command specifies a
+// "completion object" that can be called to get the final result. If we make that change, then
+// it would become necessary to rework mtsCommandQueuedVoidReturn and mtsCommandQueuedWriteReturn
+// to use queues for the argument and return value.
+//
+// The second reason is that we need to send the return value back to the correct client.
+// Currently, mtsCommandQueuedVoidReturn and mtsCommandQueuedWriteReturn can handle just one "event sender"
+// at a time (see EnableFinishedEvent and GenerateFinishedEvent). So, for now we clone these commands
+// (as normally done for a provided interface), even though there is no thread-safety issue because
+// mtsSocketProxyServer is a single thread. This gives us multiple copies of the FinishedEvent.
+// I believe this could be fixed by making an mtsQueue for the event sender commands (FinishedEvent).
+
 class FunctionVoidReturnProxy : public mtsFunctionVoidReturn {
+    osaIPandPort IP_Port;
+    FunctionVoidReturnProxyMaster *Parent;
+    mtsGenericObject *retVal;
+    mtsProxySerializer Serializer;
+    mtsCommandQueuedVoidReturn *Cmd;
+    mtsCommandQueuedWriteGeneric *eventSenderCommand;
+    char EventHandle[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+
+public:
+    FunctionVoidReturnProxy(const osaIPandPort &ip_port, FunctionVoidReturnProxyMaster *parent = 0);
+    ~FunctionVoidReturnProxy();
+
+    void InitObjects(void);
+
+    void SendResult(const mtsGenericObject &argToSend);
+
+    mtsExecutionResult ExecuteSerialized(const std::string &eventHandle);
+
+    bool operator < (const FunctionVoidReturnProxy &other)
+    { return (IP_Port.IP < other.IP_Port.IP) ||
+             ((IP_Port.IP == other.IP_Port.IP) && (IP_Port.Port < other.IP_Port.Port));
+    }
+};
+
+// Following is an alternate to mtsFunctionVoidReturnProxy used for ICE
+class FunctionVoidReturnProxyMaster : public mtsFunctionVoidReturn {
 protected:
+    friend class FunctionVoidReturnProxy;
+
     typedef mtsFunctionVoidReturn BaseType;
     osaSocket &Socket;
     mtsMailBox *MailBox;
     size_t ArgQueueSize;
-    std::string IP;
-    unsigned short Port;
-    mtsProxySerializer Serializer;
     std::string returnSerialized;
-    mtsGenericObject *retVal;
-
-    mtsCommandQueuedWriteGeneric *eventSenderCommand;
-    char EventHandle[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
-
-    void SendResult(const mtsGenericObject &arg)
-    {
-        std::string sendBuffer;
-        if (Serializer.Serialize(arg, sendBuffer)) {
-            sendBuffer.insert(0, "OK ");
-            sendBuffer.insert(0, EventHandle, sizeof(EventHandle));
-            Socket.SetDestination(IP, Port);
-            Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05);
-            mtsCommandQueuedVoidReturn *cmd = dynamic_cast<mtsCommandQueuedVoidReturn *>(GetCommand());
-            if (cmd)
-                cmd->EnableFinishedEvent(0);
-        }
-        else
-            CMN_LOG_RUN_ERROR << "Failed to serialize result for void return" << std::endl;
-    }
+    // proxies allocated for each client
+    typedef std::set<FunctionVoidReturnProxy *> ProxySetType;
+    ProxySetType ProxySet;
 
 public:
 
-    FunctionVoidReturnProxy(const std::string &returnPrototypeSerialized, osaSocket &socket,
+    FunctionVoidReturnProxyMaster(const std::string &returnPrototypeSerialized, osaSocket &socket,
                             mtsMailBox *mbox, size_t argQueueSize)
         : mtsFunctionVoidReturn(true), Socket(socket), MailBox(mbox), ArgQueueSize(argQueueSize),
-          returnSerialized(returnPrototypeSerialized), eventSenderCommand(0)
+          returnSerialized(returnPrototypeSerialized)
     {
-        EventHandle[0] = 0;
         if (!MailBox)
             CMN_LOG_INIT_WARNING << "FunctionVoidReturnProxy: no mailbox" << std::endl;
-        retVal = Serializer.DeSerialize(returnPrototypeSerialized);
-        if (retVal) {
-            mtsCommandWriteBase *cmd = new mtsCommandWriteGeneric<FunctionVoidReturnProxy>
-                                          (&FunctionVoidReturnProxy::SendResult, this, "EventSenderForVoidReturn", retVal);
-            eventSenderCommand = new mtsCommandQueuedWriteGeneric(MailBox, cmd, ArgQueueSize);
+    }
+
+    ~FunctionVoidReturnProxyMaster()
+    {
+        // Clear ProxySet
+        ProxySetType::iterator it;
+        for (it = ProxySet.begin(); it != ProxySet.end(); it++)
+            delete *it;
+        ProxySet.clear();
+    }
+
+    FunctionVoidReturnProxy *AddProxyForClient(const osaIPandPort &ip_port)
+    {
+        FunctionVoidReturnProxy *proxy;
+        FunctionVoidReturnProxy test(ip_port);
+        ProxySetType::iterator it = ProxySet.find(&test);
+        if (it == ProxySet.end()) {
+            proxy = new FunctionVoidReturnProxy(ip_port, this);
+            ProxySet.insert(proxy);
         }
         else
-            CMN_LOG_INIT_WARNING << "FunctionVoidReturnProxy: could not deserialize return prototype" << std::endl;
-    }
-
-    ~FunctionVoidReturnProxy()
-    {
-        delete retVal;
-        if (eventSenderCommand)
-            delete eventSenderCommand->GetActualCommand();
-        delete eventSenderCommand;
-    }
-
-    inline mtsExecutionResult ExecuteSerialized(const std::string &eventHandle)
-    {
-        mtsExecutionResult ret = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
-        // If retVal has not yet been dynamically constructed, try again because the
-        // class may have been dynamically loaded since the last attempt to construct it.
-        if (!retVal) {
-            retVal = Serializer.DeSerialize(returnSerialized);
-            if (retVal) {
-                mtsCommandWriteBase *cmd = new mtsCommandWriteGeneric<FunctionVoidReturnProxy>
-                                              (&FunctionVoidReturnProxy::SendResult, this, "EventSenderForVoidReturn", retVal);
-                eventSenderCommand = new mtsCommandQueuedWriteGeneric(MailBox, cmd, ArgQueueSize);
-            }
-        }
-        if (retVal) {
-            mtsCommandQueuedVoidReturn *cmd = dynamic_cast<mtsCommandQueuedVoidReturn *>(GetCommand());
-            if (cmd) {
-                CMN_ASSERT(eventHandle.size() >= sizeof(EventHandle));
-                memcpy(EventHandle, eventHandle.data(), sizeof(EventHandle));
-                Socket.GetDestination(IP, Port);
-                cmd->EnableFinishedEvent(eventSenderCommand);
-                ret = Execute(*retVal);
-                // ret should be COMMAND_QUEUED
-                if (ret.GetResult() != mtsExecutionResult::COMMAND_QUEUED)
-                    CMN_LOG_RUN_WARNING << "FunctionVoidReturnProxy: result is not queued: " << ret << std::endl;
-            }
-            else
-                ret = mtsExecutionResult::FUNCTION_NOT_BOUND;
-        }
-        return ret;
+            proxy = *it;
+        return proxy;
     }
 
 };
 
-// Following is an alternate to mtsFunctionWriteReturnProxy used for ICE
+FunctionVoidReturnProxy::FunctionVoidReturnProxy(const osaIPandPort &ip_port, FunctionVoidReturnProxyMaster *parent) :
+        IP_Port(ip_port), Parent(parent), retVal(0), Cmd(0), eventSenderCommand(0)
+{
+    EventHandle[0] = 0;
+    if (Parent) {
+        InitObjects();
+        mtsCommandQueuedVoidReturn *cmd = dynamic_cast<mtsCommandQueuedVoidReturn *>(Parent->GetCommand());
+        if (cmd)
+            Cmd = cmd->Clone(Parent->MailBox);
+        else
+            CMN_LOG_RUN_ERROR << "FunctionVoidReturnProxy dynamic_cast failure" << std::endl;
+    }
+}
+
+FunctionVoidReturnProxy::~FunctionVoidReturnProxy()
+{
+    delete retVal;
+    if (eventSenderCommand)
+        delete eventSenderCommand->GetActualCommand();
+    delete eventSenderCommand;
+    delete Cmd;
+}
+
+void FunctionVoidReturnProxy::InitObjects(void)
+{
+    // If retVal has not yet been dynamically constructed, try again because the
+    // class may have been dynamically loaded since the last attempt to construct it.
+    if (!retVal)
+        retVal = Serializer.DeSerialize(Parent->returnSerialized);
+    if (retVal && !eventSenderCommand) {
+        mtsCommandWriteBase *cmd = new mtsCommandWriteGeneric<FunctionVoidReturnProxy>
+                                   (&FunctionVoidReturnProxy::SendResult, this, "EventSenderForVoidReturn", retVal);
+        eventSenderCommand = new mtsCommandQueuedWriteGeneric(Parent->MailBox, cmd, Parent->ArgQueueSize);
+    }
+}
+
+void FunctionVoidReturnProxy::SendResult(const mtsGenericObject &argToSend)
+{
+    CMN_ASSERT(Parent);
+    std::string sendBuffer;
+    if (Serializer.Serialize(argToSend, sendBuffer)) {
+        sendBuffer.insert(0, "OK ");
+        sendBuffer.insert(0, EventHandle, sizeof(EventHandle));
+        Parent->Socket.SetDestination(IP_Port);
+        Parent->Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05);
+        if (Cmd)
+            Cmd->EnableFinishedEvent(0);
+    }
+    else
+        CMN_LOG_RUN_ERROR << "Failed to serialize result for void return" << std::endl;
+}
+
+mtsExecutionResult FunctionVoidReturnProxy::ExecuteSerialized(const std::string &eventHandle)
+{
+    CMN_ASSERT(Parent);
+    // Check IP and Port
+    mtsExecutionResult ret = mtsExecutionResult::NETWORK_ERROR;
+    osaIPandPort ip_port;
+    Parent->Socket.GetDestination(ip_port);
+    if (ip_port != IP_Port) {
+        CMN_LOG_RUN_ERROR << "FunctionVoidReturnProxy: IP:port mismatch, expecting "
+                          << IP_Port.IP << ":" << IP_Port.Port
+                          << ", got " << ip_port.IP << ":" << ip_port.Port << std::endl;
+        return ret;
+    }
+    ret = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+    InitObjects();
+    if (!retVal)
+        CMN_LOG_INIT_WARNING << "FunctionVoidReturnProxy: could not deserialize return prototype" << std::endl;
+    if (retVal) {
+        if (Cmd) {
+            CMN_ASSERT(eventHandle.size() >= sizeof(EventHandle));
+            memcpy(EventHandle, eventHandle.data(), sizeof(EventHandle));
+            Cmd->EnableFinishedEvent(eventSenderCommand);
+            ret = Cmd->Execute(*retVal);
+            // ret should be COMMAND_QUEUED
+            if (ret.GetResult() != mtsExecutionResult::COMMAND_QUEUED)
+                CMN_LOG_RUN_WARNING << "FunctionVoidReturnProxy: result is not queued: " << ret << std::endl;
+        }
+        else
+            ret = mtsExecutionResult::FUNCTION_NOT_BOUND;
+    }
+    return ret;
+}
+
 class FunctionWriteReturnProxy : public mtsFunctionWriteReturn {
+    osaIPandPort IP_Port;
+    FunctionWriteReturnProxyMaster *Parent;
+    mtsGenericObject *arg;
+    mtsGenericObject *retVal;
+    mtsProxySerializer Serializer;
+    mtsCommandQueuedWriteReturn *Cmd;
+    mtsCommandQueuedWriteGeneric *eventSenderCommand;
+    char EventHandle[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
+
+public:
+    FunctionWriteReturnProxy(const osaIPandPort &ip_port, FunctionWriteReturnProxyMaster *parent = 0);
+    ~FunctionWriteReturnProxy();
+
+    void InitObjects(void);
+
+    void SendResult(const mtsGenericObject &argToSend);
+
+    mtsExecutionResult ExecuteSerialized(const std::string &inputArgSerialized, const std::string &eventHandle);
+
+    bool operator < (const FunctionWriteReturnProxy &other)
+    { return (IP_Port.IP < other.IP_Port.IP) ||
+             ((IP_Port.IP == other.IP_Port.IP) && (IP_Port.Port < other.IP_Port.Port));
+    }
+};
+
+// Following is an alternate to mtsFunctionWriteReturnProxy used for ICE
+class FunctionWriteReturnProxyMaster : public mtsFunctionWriteReturn {
 protected:
+    friend class FunctionWriteReturnProxy;
+
     typedef mtsFunctionWriteReturn BaseType;
     osaSocket &Socket;
     mtsMailBox *MailBox;
     size_t ArgQueueSize;
-    std::string IP;
-    unsigned short Port;
-    mtsProxySerializer Serializer;
     std::string argSerialized;
     std::string returnSerialized;
-    mtsGenericObject *arg;
-    mtsGenericObject *retVal;
-
-    mtsCommandQueuedWriteGeneric *eventSenderCommand;
-    char EventHandle[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
-
-    void SendResult(const mtsGenericObject &arg)
-    {
-        std::string sendBuffer;
-        if (Serializer.Serialize(arg, sendBuffer)) {
-            sendBuffer.insert(0, "OK ");
-            sendBuffer.insert(0, EventHandle, sizeof(EventHandle));
-            Socket.SetDestination(IP, Port);
-            Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05);
-            mtsCommandQueuedVoidReturn *cmd = dynamic_cast<mtsCommandQueuedVoidReturn *>(GetCommand());
-            if (cmd)
-                cmd->EnableFinishedEvent(0);
-        }
-        else
-            CMN_LOG_RUN_ERROR << "Failed to serialize result for write return" << std::endl;
-    }
+    // proxies allocated for each client
+    typedef std::set<FunctionWriteReturnProxy *> ProxySetType;
+    ProxySetType ProxySet;
 
 public:
 
-    FunctionWriteReturnProxy(const std::string &argumentPrototypeSerialized, 
-                             const std::string &returnPrototypeSerialized, osaSocket &socket,
-                             mtsMailBox *mbox, size_t argQueueSize)
+    FunctionWriteReturnProxyMaster(const std::string &argumentPrototypeSerialized, 
+                                   const std::string &returnPrototypeSerialized, osaSocket &socket,
+                                   mtsMailBox *mbox, size_t argQueueSize)
         : mtsFunctionWriteReturn(true), Socket(socket), MailBox(mbox), ArgQueueSize(argQueueSize),
-          argSerialized(argumentPrototypeSerialized), returnSerialized(returnPrototypeSerialized),
-          eventSenderCommand(0)
+          argSerialized(argumentPrototypeSerialized), returnSerialized(returnPrototypeSerialized)
     {
-        EventHandle[0] = 0;
         if (!MailBox)
             CMN_LOG_INIT_WARNING << "FunctionWriteReturnProxy: no mailbox" << std::endl;
-        arg = Serializer.DeSerialize(argumentPrototypeSerialized);
-        if (!arg)
-            CMN_LOG_INIT_WARNING << "FunctionWriteReturnProxy: could not deserialize arg prototype" << std::endl;
-        retVal = Serializer.DeSerialize(returnPrototypeSerialized);
-        if (retVal) {
-            mtsCommandWriteBase *cmd = new mtsCommandWriteGeneric<FunctionWriteReturnProxy>
-                                          (&FunctionWriteReturnProxy::SendResult, this, "EventSenderForWriteReturn", retVal);
-            eventSenderCommand = new mtsCommandQueuedWriteGeneric(MailBox, cmd, ArgQueueSize);
+    }
+
+    ~FunctionWriteReturnProxyMaster()
+    {
+        // Clear ProxySet
+        ProxySetType::iterator it;
+        for (it = ProxySet.begin(); it != ProxySet.end(); it++)
+            delete *it;
+        ProxySet.clear();
+    }
+
+    FunctionWriteReturnProxy *AddProxyForClient(const osaIPandPort &ip_port)
+    {
+        FunctionWriteReturnProxy *proxy;
+        FunctionWriteReturnProxy test(ip_port);
+        ProxySetType::iterator it = ProxySet.find(&test);
+        if (it == ProxySet.end()) {
+            proxy = new FunctionWriteReturnProxy(ip_port, this);
+            ProxySet.insert(proxy);
         }
         else
-            CMN_LOG_INIT_WARNING << "FunctionWriteReturnProxy: could not deserialize return prototype" << std::endl;
-    }
-
-    ~FunctionWriteReturnProxy()
-    {
-        delete arg;
-        delete retVal;
-        if (eventSenderCommand)
-            delete eventSenderCommand->GetActualCommand();
-        delete eventSenderCommand;
-    }
-
-    inline mtsExecutionResult ExecuteSerialized(const std::string &inputArgSerialized, const std::string &eventHandle)
-    {
-        mtsExecutionResult ret = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
-        // If arg and/or retVal has not yet been dynamically constructed, try again because the
-        // class may have been dynamically loaded since the last attempt to construct it.
-        if (!arg)
-            arg = Serializer.DeSerialize(argSerialized);
-        if (!retVal) {
-            retVal = Serializer.DeSerialize(returnSerialized);
-            if (retVal) {
-                mtsCommandWriteBase *cmd = new mtsCommandWriteGeneric<FunctionWriteReturnProxy>
-                                              (&FunctionWriteReturnProxy::SendResult, this, "EventSenderForWriteReturn", retVal);
-                eventSenderCommand = new mtsCommandQueuedWriteGeneric(MailBox, cmd, ArgQueueSize);
-            }
-        }
-        if (arg && retVal) {
-            mtsCommandQueuedWriteReturn *cmd = dynamic_cast<mtsCommandQueuedWriteReturn *>(GetCommand());
-            if (cmd) {
-                if (Serializer.DeSerialize(inputArgSerialized, *arg)) {
-                    CMN_ASSERT(eventHandle.size() >= sizeof(EventHandle));
-                    memcpy(EventHandle, eventHandle.data(), sizeof(EventHandle));
-                    Socket.GetDestination(IP, Port);
-                    cmd->EnableFinishedEvent(eventSenderCommand);
-                    ret = Execute(*arg, *retVal);
-                    // ret should be COMMAND_QUEUED
-                    if (ret.GetResult() != mtsExecutionResult::COMMAND_QUEUED)
-                        CMN_LOG_RUN_WARNING << "FunctionWriteReturnProxy: result is not queued: " << ret << std::endl;
-                }
-                else
-                    ret = mtsExecutionResult::SERIALIZATION_ERROR;
-            }
-            else
-                ret = mtsExecutionResult::FUNCTION_NOT_BOUND;
-        }
-        return ret;
+            proxy = *it;
+        return proxy;
     }
 
 };
 
+FunctionWriteReturnProxy::FunctionWriteReturnProxy(const osaIPandPort &ip_port, FunctionWriteReturnProxyMaster *parent) :
+        IP_Port(ip_port), Parent(parent), arg(0), retVal(0), Cmd(0), eventSenderCommand(0)
+{
+    EventHandle[0] = 0;
+    if (Parent) {
+        InitObjects();
+        mtsCommandQueuedWriteReturn *cmd = dynamic_cast<mtsCommandQueuedWriteReturn *>(Parent->GetCommand());
+        if (cmd)
+            Cmd = cmd->Clone(Parent->MailBox);
+        else
+            CMN_LOG_RUN_ERROR << "FunctionWriteReturnProxy dynamic_cast failure" << std::endl;
+    }
+}
+
+FunctionWriteReturnProxy::~FunctionWriteReturnProxy()
+{
+    delete arg;
+    delete retVal;
+    if (eventSenderCommand)
+        delete eventSenderCommand->GetActualCommand();
+    delete eventSenderCommand;
+    delete Cmd;
+}
+
+void FunctionWriteReturnProxy::InitObjects(void)
+{
+    // If arg and/or retVal has not yet been dynamically constructed, try again because the
+    // classes may have been dynamically loaded since the last attempt to construct them.
+    if (!arg)
+        arg = Serializer.DeSerialize(Parent->argSerialized);
+    if (!retVal)
+        retVal = Serializer.DeSerialize(Parent->returnSerialized);
+    if (retVal && !eventSenderCommand) {
+        mtsCommandWriteBase *cmd = new mtsCommandWriteGeneric<FunctionWriteReturnProxy>
+                                   (&FunctionWriteReturnProxy::SendResult, this, "EventSenderForWriteReturn", retVal);
+        eventSenderCommand = new mtsCommandQueuedWriteGeneric(Parent->MailBox, cmd, Parent->ArgQueueSize);
+    }
+}
+
+void FunctionWriteReturnProxy::SendResult(const mtsGenericObject &argToSend)
+{
+    CMN_ASSERT(Parent);
+    std::string sendBuffer;
+    if (Serializer.Serialize(argToSend, sendBuffer)) {
+        sendBuffer.insert(0, "OK ");
+        sendBuffer.insert(0, EventHandle, sizeof(EventHandle));
+        Parent->Socket.SetDestination(IP_Port);
+        Parent->Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05);
+        if (Cmd)
+            Cmd->EnableFinishedEvent(0);
+    }
+    else
+        CMN_LOG_RUN_ERROR << "Failed to serialize result for write return" << std::endl;
+}
+
+mtsExecutionResult FunctionWriteReturnProxy::ExecuteSerialized(const std::string &inputArgSerialized, const std::string &eventHandle)
+{
+    CMN_ASSERT(Parent);
+    // Check IP and Port
+    mtsExecutionResult ret = mtsExecutionResult::NETWORK_ERROR;
+    osaIPandPort ip_port;
+    Parent->Socket.GetDestination(ip_port);
+    if (ip_port != IP_Port) {
+        CMN_LOG_RUN_ERROR << "FunctionWriteReturnProxy: IP:port mismatch, expecting "
+                          << IP_Port.IP << ":" << IP_Port.Port
+                          << ", got " << ip_port.IP << ":" << ip_port.Port << std::endl;
+        return ret;
+    }
+    ret = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
+    InitObjects();
+    if (!arg)
+        CMN_LOG_INIT_WARNING << "FunctionWriteReturnProxy: could not deserialize arg prototype" << std::endl;
+    if (!retVal)
+        CMN_LOG_INIT_WARNING << "FunctionWriteReturnProxy: could not deserialize return prototype" << std::endl;
+    if (arg && retVal) {
+        if (Cmd) {
+            if (Serializer.DeSerialize(inputArgSerialized, *arg)) {
+                CMN_ASSERT(eventHandle.size() >= sizeof(EventHandle));
+                memcpy(EventHandle, eventHandle.data(), sizeof(EventHandle));
+                Cmd->EnableFinishedEvent(eventSenderCommand);
+                ret = Cmd->Execute(*arg, *retVal);
+                // ret should be COMMAND_QUEUED
+                if (ret.GetResult() != mtsExecutionResult::COMMAND_QUEUED)
+                    CMN_LOG_RUN_WARNING << "FunctionWriteReturnProxy: result is not queued: " << ret << std::endl;
+            }
+            else
+                ret = mtsExecutionResult::SERIALIZATION_ERROR;
+        }
+        else
+            ret = mtsExecutionResult::FUNCTION_NOT_BOUND;
+    }
+    return ret;
+}
+
 mtsSocketProxyServer::mtsSocketProxyServer(const std::string & proxyName, const std::string & componentName,
-                                           const std::string & providedInterfaceName, short port) :
+                                           const std::string & providedInterfaceName, unsigned short port) :
     mtsTaskContinuous(proxyName),
     Socket(osaSocket::UDP),
     FunctionVoidProxyMap("FunctionVoidProxyMap"),
@@ -420,8 +576,6 @@ mtsSocketProxyServer::~mtsSocketProxyServer()
 
     for (size_t i = 0; i < SpecialCommands.size(); i++)
         delete SpecialCommands[i];
-
-    delete InternalSerializer;
 }
 
 void mtsSocketProxyServer::Startup(void)
@@ -581,11 +735,15 @@ void mtsSocketProxyServer::Run(void)
                     if (functionRead)
                         ret = functionRead->ExecuteSerialized(outputArgString);
                     else {
-                        FunctionVoidReturnProxy *functionVoidReturn = FunctionVoidReturnProxyMap.GetItem(commandName);
-                        if (functionVoidReturn)
-                            ret = functionVoidReturn->ExecuteSerialized(RecvHandle);
-                        else
-                            ret = mtsExecutionResult::INVALID_COMMAND_ID;
+                        FunctionVoidReturnProxyMaster *masterProxy = FunctionVoidReturnProxyMap.GetItem(commandName);
+                        ret = mtsExecutionResult::INVALID_COMMAND_ID;
+                        if (masterProxy) {
+                            osaIPandPort ip_port;
+                            Socket.GetDestination(ip_port);
+                            FunctionVoidReturnProxy *functionVoidReturn = masterProxy->AddProxyForClient(ip_port);
+                            if (functionVoidReturn)
+                                ret = functionVoidReturn->ExecuteSerialized(RecvHandle);
+                        }
                     }
                 }
             }
@@ -599,11 +757,15 @@ void mtsSocketProxyServer::Run(void)
                     if (functionQualifiedRead)
                         ret = functionQualifiedRead->ExecuteSerialized(inputArgString, outputArgString);
                     else {
-                        FunctionWriteReturnProxy *functionWriteReturn = FunctionWriteReturnProxyMap.GetItem(commandName);
-                        if (functionWriteReturn)
-                            ret = functionWriteReturn->ExecuteSerialized(inputArgString, outputArgString);
-                        else
-                            ret = mtsExecutionResult::INVALID_COMMAND_ID;
+                        FunctionWriteReturnProxyMaster *masterProxy = FunctionWriteReturnProxyMap.GetItem(commandName);
+                        ret = mtsExecutionResult::INVALID_COMMAND_ID;
+                        if (masterProxy) {
+                            osaIPandPort ip_port;
+                            Socket.GetDestination(ip_port);
+                            FunctionWriteReturnProxy *functionWriteReturn = masterProxy->AddProxyForClient(ip_port);
+                            if (functionWriteReturn)
+                                ret = functionWriteReturn->ExecuteSerialized(inputArgString, outputArgString);
+                        }
                     }
                 }
             }
@@ -657,8 +819,6 @@ bool mtsSocketProxyServer::Init(const std::string &componentName, const std::str
     FunctionWriteReturnProxyMap.SetOwner(*this);
     EventGeneratorVoidProxyMap.SetOwner(*this);
     EventGeneratorWriteProxyMap.SetOwner(*this);
-
-    InternalSerializer = new mtsProxySerializer;
 
     bool success = false;
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
@@ -753,7 +913,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
     // Create VoidReturn function proxies
     for (i = 0; i < InterfaceDescription.CommandsVoidReturn.size(); ++i) {
         const mtsCommandVoidReturnDescription &cmd = InterfaceDescription.CommandsVoidReturn[i];
-        FunctionVoidReturnProxy *functionVoidReturnProxy = new FunctionVoidReturnProxy(
+        FunctionVoidReturnProxyMaster *functionVoidReturnProxy = new FunctionVoidReturnProxyMaster(
                                                                  cmd.ResultPrototypeSerialized,
                                                                  Socket,
                                                                  requiredInterfaceProxy->MailBox,
@@ -770,7 +930,7 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
     // Create WriteReturn function proxies
     for (i = 0; i < InterfaceDescription.CommandsWriteReturn.size(); ++i) {
         const mtsCommandWriteReturnDescription &cmd = InterfaceDescription.CommandsWriteReturn[i];
-        FunctionWriteReturnProxy *functionWriteReturnProxy = new FunctionWriteReturnProxy(
+        FunctionWriteReturnProxyMaster *functionWriteReturnProxy = new FunctionWriteReturnProxyMaster(
                                                                  cmd.ArgumentPrototypeSerialized,
                                                                  cmd.ResultPrototypeSerialized,
                                                                  Socket,
@@ -979,22 +1139,30 @@ bool mtsSocketProxyServer::GetHandleQualifiedRead(const std::string &name, std::
 
 bool mtsSocketProxyServer::GetHandleVoidReturn(const std::string &name, std::string &handleString) const
 {
-    FunctionVoidReturnProxy *handle = FunctionVoidReturnProxyMap.GetItem(name);
-    if (handle) {
+    FunctionVoidReturnProxyMaster *masterProxy = FunctionVoidReturnProxyMap.GetItem(name);
+    if (masterProxy) {
+        osaIPandPort ip_port;
+        Socket.GetDestination(ip_port);
+        FunctionVoidReturnProxy *handle = masterProxy->AddProxyForClient(ip_port);
         CommandHandle header('r', handle);
         header.ToString(handleString);
+        return (handle != 0);
     }
-    return (handle != 0);
+    return false;
 }
 
 bool mtsSocketProxyServer::GetHandleWriteReturn(const std::string &name, std::string &handleString) const
 {
-    FunctionWriteReturnProxy *handle = FunctionWriteReturnProxyMap.GetItem(name);
-    if (handle) {
+    FunctionWriteReturnProxyMaster *masterProxy = FunctionWriteReturnProxyMap.GetItem(name);
+    if (masterProxy) {
+        osaIPandPort ip_port;
+        Socket.GetDestination(ip_port);
+        FunctionWriteReturnProxy *handle = masterProxy->AddProxyForClient(ip_port);
         CommandHandle header('q', handle);
         header.ToString(handleString);
+        return (handle != 0);
     }
-    return (handle != 0);
+    return false;
 }
 
 void mtsSocketProxyServer::EventEnable(const std::string &eventHandleAndName)

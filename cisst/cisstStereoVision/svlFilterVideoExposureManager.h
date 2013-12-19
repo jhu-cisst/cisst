@@ -59,7 +59,7 @@ protected:
     int MaxGain;
     int MaxShutter;
 
-    vctFixedSizeVector<unsigned int, 256> Histogram;
+    vctDynamicVector<unsigned int> Histogram;
 
     virtual void GetSaturationRatio(svlSampleImage* image, const unsigned int videoch, double& saturation, unsigned int& maxval);
 };

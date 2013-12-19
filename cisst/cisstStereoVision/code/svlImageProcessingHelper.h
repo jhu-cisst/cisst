@@ -224,7 +224,7 @@ namespace svlImageProcessingHelper
 
         void CalculateCurve();
 
-        vctFixedSizeVector<unsigned char, 255> Curve;
+        vctDynamicVector<unsigned char> Curve;
 
     private:
         double Brightness;
