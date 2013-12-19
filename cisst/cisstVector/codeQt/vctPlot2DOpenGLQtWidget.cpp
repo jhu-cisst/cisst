@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,24 +29,20 @@ vctPlot2DOpenGLQtWidget::vctPlot2DOpenGLQtWidget(QWidget * parent):
 {
 }
 
-
 void vctPlot2DOpenGLQtWidget::initializeGL(void)
 {
     vctPlot2DOpenGL::RenderInitialize();
 }
-
 
 void vctPlot2DOpenGLQtWidget::resizeGL(int width, int height)
 {
     vctPlot2DOpenGL::RenderResize(width, height);
 }
 
-
 void vctPlot2DOpenGLQtWidget::paintGL(void)
 {
     vctPlot2DOpenGL::Render();
 }
-
 
 void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
 {
@@ -76,6 +72,7 @@ void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
         QAction * fitYnow = new QAction("Fit Y now", this);
         QAction * fitYalways = new QAction("Fit Y always", this);
         QAction * expandYalways = new QAction("Expand Y always", this);
+        QAction * expandYreset = new QAction("Expand Y reset", this);
         fitYalways->setCheckable(true);
         fitYalways->setChecked(this->GetContinuousFitY());
         expandYalways->setCheckable(true);
@@ -83,20 +80,20 @@ void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
         menu.addAction(fitYnow);
         menu.addAction(fitYalways);
         menu.addAction(expandYalways);
+        menu.addAction(expandYreset);
         connect(fitYnow, SIGNAL(triggered()), this, SLOT(FitYSlot()));
         connect(fitYalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousFitYSlot(bool)));
         connect(expandYalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousExpandYSlot(bool)));
+        connect(expandYreset, SIGNAL(triggered()), this, SLOT(SetContinuousExpandYResetSlot()));
 
         menu.exec(mapToGlobal(event->pos()));
     }
 }
 
-
 void vctPlot2DOpenGLQtWidget::FreezeSlot(bool checked)
 {
     this->Freeze(checked);
 }
-
 
 void vctPlot2DOpenGLQtWidget::FitXSlot(void)
 {
@@ -104,27 +101,29 @@ void vctPlot2DOpenGLQtWidget::FitXSlot(void)
     this->AutoFitX();
 }
 
-
 void vctPlot2DOpenGLQtWidget::FitYSlot(void)
 {
     this->SetContinuousFitY(false);
     this->AutoFitY();
 }
 
-
 void vctPlot2DOpenGLQtWidget::SetContinuousFitXSlot(bool checked)
 {
     this->SetContinuousFitX(checked);
 }
-
 
 void vctPlot2DOpenGLQtWidget::SetContinuousFitYSlot(bool checked)
 {
     this->SetContinuousFitY(checked);
 }
 
-
 void vctPlot2DOpenGLQtWidget::SetContinuousExpandYSlot(bool checked)
 {
     this->SetContinuousExpandY(checked);
+}
+
+void vctPlot2DOpenGLQtWidget::SetContinuousExpandYResetSlot(void)
+{
+    this->SetContinuousExpandY(false);
+    this->SetContinuousExpandY(true);
 }

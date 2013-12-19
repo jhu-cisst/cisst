@@ -241,7 +241,7 @@ void vctPlot2DBase::Scale::SetContinuousExpandY(bool expand)
     this->ContinuousExpandY = expand;
     // reset Y range
     this->ExpandYMin = std::numeric_limits<double>::max();
-    this->ExpandYMin = std::numeric_limits<double>::min();
+    this->ExpandYMax = std::numeric_limits<double>::min();
 }
 
 void vctPlot2DBase::Scale::Freeze(bool freeze)
