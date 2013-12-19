@@ -11,7 +11,5 @@
 #
 # --- end cisst license ---
 
-if (${CISST_cisstParameterTypes})
-  add_subdirectory (benchmark1) # benchmarking loop time + ICE if available
-  add_subdirectory (benchmark2) # benchmarking latency + ICE if available
-endif()
+add_subdirectory (benchmark1) # benchmarking loop time + ICE if available
+add_subdirectory (benchmark2) # benchmarking latency + ICE if available
