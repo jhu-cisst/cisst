@@ -52,6 +52,7 @@ public:
         arg1 = Serializer.DeSerialize(arg1PrototypeSerialized);
         if (!arg1)
             CMN_LOG_INIT_ERROR << "mtsFunctionQualifiedReadProxy: could not deserialize argument1 prototype" << std::endl;
+        Serializer.Reset();  // eliminates log warning about class information already received
         arg2 = Serializer.DeSerialize(arg2PrototypeSerialized);
         if (!arg2)
             CMN_LOG_INIT_ERROR << "mtsFunctionQualifiedReadProxy: could not deserialize argument2 prototype" << std::endl;

@@ -65,6 +65,7 @@ public:
 
     void Reset(void) {
         Serializer->Reset();
+        DeSerializer->Reset();
     }
 
     bool Serialize(const mtsGenericObject & originalObject, std::string & serializedObject) {

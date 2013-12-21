@@ -428,6 +428,8 @@ public:
     MulticastCommandWriteProxy(const std::string &name, const std::string &argPrototypeSerialized, mtsSocketProxyClient *proxy);
     ~MulticastCommandWriteProxy();
 
+    bool CreateArg(void);
+
     bool AddCommand(BaseType * command);
 
     bool RemoveCommand(BaseType * command);
@@ -441,10 +443,7 @@ MulticastCommandWriteProxy::MulticastCommandWriteProxy(const std::string &name, 
                                                        mtsSocketProxyClient *proxy)
     : mtsMulticastCommandWriteBase(name), argSerialized(argPrototypeSerialized), Proxy(proxy)
 {
-    arg = Proxy->DeSerialize(argPrototypeSerialized);
-    if (arg)
-        SetArgumentPrototype(arg);
-    else
+    if (!CreateArg())
         CMN_LOG_INIT_ERROR << "MulticastCommandWriteProxy: could not deserialize argument prototype" << std::endl;
 }
 
@@ -453,14 +452,27 @@ MulticastCommandWriteProxy::~MulticastCommandWriteProxy()
     delete arg;
 }
 
+bool MulticastCommandWriteProxy::CreateArg(void)
+{
+    if (!arg) {
+        try {
+            std::stringstream argStream(argSerialized);
+            cmnDeSerializer deserializer(argStream);
+            arg = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+            if (arg)
+                SetArgumentPrototype(arg);
+        }  catch (const std::runtime_error &e) {
+            CMN_LOG_RUN_ERROR << "MulticastCommandWriteProxy::CreateArg: DeSerialization failed: " << e.what() << std::endl;
+        }
+    }
+    return (arg != 0);
+}
+
 bool MulticastCommandWriteProxy::AddCommand(mtsMulticastCommandWriteBase::BaseType * command)
 {
     // If arg has not yet been dynamically constructed, try again because the
     // class may have been dynamically loaded since the last attempt to construct it.
-    if (!arg) {
-        arg = Proxy->DeSerialize(argSerialized);
-        SetArgumentPrototype(arg);
-    }
+    CreateArg();
     if (mtsMulticastCommandWriteBase::AddCommand(command)) {
         if (Commands.size() == 1) {
             CMN_LOG_RUN_VERBOSE << "MulticastCommandWriteProxy: enabling event " << GetName() << std::endl;
@@ -505,10 +517,7 @@ mtsExecutionResult MulticastCommandWriteProxy::ExecuteSerialized(const std::stri
     // Note that we could have the deserializer dynamically create the object from
     // inputArgSerialized, but this would lead to unexpected results if the client
     // sends the incorrect type.
-    if (!arg) {
-        arg = Proxy->DeSerialize(argSerialized);
-        SetArgumentPrototype(arg);
-    }
+    CreateArg();
     if (arg) {
         if (Proxy->DeSerialize(inputArgSerialized, *arg))
             ret = Execute(*arg, blocking);
@@ -671,7 +680,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     mtsInterfaceProvidedDescription & providedInterfaceDescription(descProxy.GetData());
 
     // Create a local required interface
-    mtsInterfaceProvided * providedInterface = AddInterfaceProvided(providedInterfaceName);
+    mtsInterfaceProvided * providedInterface = AddInterfaceProvidedWithoutSystemEvents(providedInterfaceName);
     if (!providedInterface) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateClientProxy: failed to add provided interface: " << providedInterfaceName << std::endl;
         return false;
@@ -766,6 +775,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         mtsGenericObject *arg2 = 0;
         try {
             arg1 = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+            deserializer.Reset();    // eliminates log warning about class information already received
             arg2 = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         }
         catch (const std::runtime_error &e) {
@@ -820,6 +830,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         mtsGenericObject *arg2 = 0;
         try {
             arg1 = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+            deserializer.Reset();    // eliminates log warning about class information already received
             arg2 = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         }
         catch (const std::runtime_error &e) {

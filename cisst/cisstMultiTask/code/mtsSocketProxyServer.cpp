@@ -315,8 +315,15 @@ void FunctionVoidReturnProxy::InitObjects(void)
 {
     // If retVal has not yet been dynamically constructed, try again because the
     // class may have been dynamically loaded since the last attempt to construct it.
-    if (!retVal)
-        retVal = Serializer->DeSerialize(Parent->returnSerialized);
+    if (!retVal) {
+        try {
+            std::stringstream argStream(Parent->returnSerialized);
+            cmnDeSerializer deserializer(argStream);
+            retVal = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        }  catch (const std::runtime_error &e) {
+            CMN_LOG_RUN_ERROR << "FunctionVoidReturnProxy::InitObjects: DeSerialization failed: " << e.what() << std::endl;
+        }
+    }
     if (retVal && !eventSenderCommand) {
         mtsCommandWriteBase *cmd = new mtsCommandWriteGeneric<FunctionVoidReturnProxy>
                                    (&FunctionVoidReturnProxy::SendResult, this, "EventSenderForVoidReturn", retVal);
@@ -481,10 +488,24 @@ void FunctionWriteReturnProxy::InitObjects(void)
 {
     // If arg and/or retVal has not yet been dynamically constructed, try again because the
     // classes may have been dynamically loaded since the last attempt to construct them.
-    if (!arg)
-        arg = Serializer->DeSerialize(Parent->argSerialized);
-    if (!retVal)
-        retVal = Serializer->DeSerialize(Parent->returnSerialized);
+    if (!arg) {
+        try {
+            std::stringstream argStream(Parent->argSerialized);
+            cmnDeSerializer deserializer(argStream);
+            arg = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        }  catch (const std::runtime_error &e) {
+            CMN_LOG_RUN_ERROR << "FunctionWriteReturnProxy::InitObjects: DeSerialization of arg failed: " << e.what() << std::endl;
+        }
+    }
+    if (!retVal) {
+        try {
+            std::stringstream argStream(Parent->returnSerialized);
+            cmnDeSerializer deserializer(argStream);
+            retVal = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        }  catch (const std::runtime_error &e) {
+            CMN_LOG_RUN_ERROR << "FunctionWriteReturnProxy::InitObjects: DeSerialization of retVal failed: " << e.what() << std::endl;
+        }
+    }
     if (retVal && !eventSenderCommand) {
         mtsCommandWriteBase *cmd = new mtsCommandWriteGeneric<FunctionWriteReturnProxy>
                                    (&FunctionWriteReturnProxy::SendResult, this, "EventSenderForWriteReturn", retVal);
