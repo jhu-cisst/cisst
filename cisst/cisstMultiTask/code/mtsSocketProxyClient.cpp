@@ -85,20 +85,25 @@ bool mtsSocketProxyClientConstructorArg::FromStreamRaw(std::istream & inputStrea
 
 class EventReceiverWriteProxy
 {
+public:
+    enum ExecutionState { CMD_NONE, CMD_QUEUED, CMD_FINISHED, CMD_ABORTED };
+
+private:
     osaThreadSignal    Signal;
     mtsProxySerializer *Serializer;
     mtsGenericObject   *arg;
-
-    enum ExecutionState { CMD_NONE, CMD_QUEUED, CMD_FINISHED, CMD_ABORTED };
     ExecutionState    state;
+
 public:
     EventReceiverWriteProxy(mtsProxySerializer *serializer) : Serializer(serializer), arg(0), state(CMD_NONE) {}
     ~EventReceiverWriteProxy() {}
 
     void SetArg(mtsGenericObject *a) { state = CMD_NONE; arg = a; }
+    bool EventReceived() const { return (state != CMD_NONE); }
     bool WasQueued() const { return (state == CMD_QUEUED); }
     bool WasFinished() const { return (state == CMD_FINISHED); }
     bool WasAborted() const { return (state == CMD_ABORTED); }
+    bool AtState(ExecutionState s) const { return (s == state); }
 
     void ExecuteSerialized(const std::string &argString)
     {
@@ -174,6 +179,27 @@ public:
     {
         memcpy(Handle, handle, sizeof(Handle));
     }
+
+    // Wait for result (print warning if need to wait more than timeoutInSec)
+    // Returns true if expected state was reached; false otherwise
+    bool WaitForResponse(const char *cmdType, EventReceiverWriteProxy::ExecutionState expectedState, double timeoutInSec) const
+    {
+        if (!Proxy->CheckForEventsImmediate(timeoutInSec))
+            Receiver->Wait(timeoutInSec);
+        if (Receiver->AtState(expectedState))
+            return true;
+        if (Receiver->WasAborted())
+            return false;
+        CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: still waiting for " << cmdType << " command " 
+                            << Name << " after " << timeoutInSec << " seconds..." << std::endl;
+        while (!(Receiver->AtState(expectedState) || Receiver->WasAborted())) {
+            if (!Proxy->CheckForEventsImmediate(timeoutInSec))
+                Receiver->Wait(timeoutInSec);
+        }
+        CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: received response for " << cmdType
+                            << " command " << Name << std::endl;
+        return Receiver->AtState(expectedState);
+    }
 };
 
 class CommandWrapperVoid : public CommandWrapperBase {
@@ -193,10 +219,8 @@ public:
         CommandHandle recv_handle('W', receiveHandler);
         recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
         if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
-            // Wait for result, with 2 second timeout
-            if (!Proxy->CheckForEventsImmediate(2.0))
-                Receiver->Wait(2.0);
-            if (!Receiver->WasQueued())
+            // Wait for response, with warning message after 2 seconds
+            if (!WaitForResponse("void", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
                 CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue void command "
                                     << Name << std::endl;
         }
@@ -224,10 +248,8 @@ public:
             recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
             if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                // Wait for result, with 2 second timeout
-                if (!Proxy->CheckForEventsImmediate(2.0))
-                    Receiver->Wait(2.0);
-                if (!Receiver->WasQueued())
+                // Wait for response, with warning message after 2 seconds
+                if (!WaitForResponse("write", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
                     CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue write command "
                                         << Name << std::endl;
             }
@@ -254,10 +276,8 @@ public:
         CommandHandle recv_handle('W', receiveHandler);
         recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
         if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
-            // Wait for result, with 2 second timeout
-            if (!Proxy->CheckForEventsImmediate(2.0))
-                Receiver->Wait(2.0);
-            if (!Receiver->WasFinished())
+            // Wait for result, with warning message after 2 seconds
+            if (!WaitForResponse("read", EventReceiverWriteProxy::CMD_FINISHED, 2.0))
                 CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to receive result for read command "
                                     << Name << std::endl;
         }
@@ -286,10 +306,8 @@ public:
             recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
             if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                // Wait for result, with 2 second timeout
-                if (!Proxy->CheckForEventsImmediate(2.0))
-                    Receiver->Wait(2.0);
-                if (!Receiver->WasFinished())
+                // Wait for result, with warning message after 2 seconds
+                if (!WaitForResponse("qualified read", EventReceiverWriteProxy::CMD_FINISHED, 2.0))
                     CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to receive result for qualified read command "
                                         << Name << std::endl;
             }
@@ -317,14 +335,10 @@ public:
         CommandHandle recv_handle('W', receiveHandler);
         recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
         if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
-            // Wait for initial result (OK), with 2 second timeout
-            if (!Proxy->CheckForEventsImmediate(2.0))
-                Receiver->Wait(2.0);
-            if (Receiver->WasQueued()) {
-                // Wait for final result, with 20 second timeout (for now)
-                if (!Proxy->CheckForEventsImmediate(20.0))
-                     Receiver->Wait(20.0);
-                if (!Receiver->WasFinished())
+            // Wait for initial result (OK), with warning message after 2 seconds
+            if (WaitForResponse("VoidReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0)) {
+                // Wait for final result, with warning message after 10 seconds
+                if (!WaitForResponse("VoidReturn", EventReceiverWriteProxy::CMD_FINISHED, 10.0))
                     CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: VoidReturn command " << Name
                                         << " did not receive response (timeout)" << std::endl;
             }
@@ -357,14 +371,10 @@ public:
             recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
             if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                // Wait for initial result (OK), with 2 second timeout
-                if (!Proxy->CheckForEventsImmediate(2.0))
-                    Receiver->Wait(2.0);
-                if (Receiver->WasQueued()) {
-                    // Wait for final result, with 20 second timeout (for now)
-                    if (!Proxy->CheckForEventsImmediate(20.0))
-                         Receiver->Wait(20.0);
-                    if (!Receiver->WasFinished())
+                // Wait for initial result (OK), with warning message after 2 seconds
+                if (WaitForResponse("WriteReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0)) {
+                    // Wait for final result, with warning message after 10 seconds
+                    if (!WaitForResponse("WriteReturn", EventReceiverWriteProxy::CMD_FINISHED, 10.0))
                         CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: WriteReturn command " << Name
                                             << " did not receive response (timeout)" << std::endl;
                 }
@@ -679,7 +689,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
         CMN_LOG_CLASS_RUN_ERROR << "GetInterfaceDescription failed" << std::endl;
     mtsInterfaceProvidedDescription & providedInterfaceDescription(descProxy.GetData());
 
-    // Create a local required interface
+    // Create a local provided interface
     mtsInterfaceProvided * providedInterface = AddInterfaceProvidedWithoutSystemEvents(providedInterfaceName);
     if (!providedInterface) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateClientProxy: failed to add provided interface: " << providedInterfaceName << std::endl;
