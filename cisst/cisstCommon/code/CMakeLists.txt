@@ -26,6 +26,7 @@ set (SOURCE_FILES
      cmnDeSerializer.cpp
      cmnGenericObject.cpp
      cmnGetChar.cpp
+     cmnKbHit.cpp
      cmnLogLoD.cpp
      cmnLogger.cpp
      cmnObjectRegister.cpp
@@ -67,6 +68,7 @@ set (HEADER_FILES
      cmnGenericObject.h
      cmnGenericObjectProxy.h
      cmnGetChar.h
+     cmnKbHit.h
      cmnLogLoD.h
      cmnLogger.h
      cmnLODMultiplexerStreambuf.h
