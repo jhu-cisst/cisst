@@ -29,6 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandQueuedWriteReturn_h
 
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
+#include <cisstMultiTask/mtsQueue.h>
+
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
 
 class mtsCommandWriteBase;
 
@@ -37,8 +41,7 @@ class mtsCommandWriteBase;
 
  */
 
-/*! WriteReturn queued command using templated _returnType parameter */
-class mtsCommandQueuedWriteReturn: public mtsCommandWriteReturn
+class CISST_EXPORT mtsCommandQueuedWriteReturn: public mtsCommandWriteReturn
 {
 public:
     typedef mtsCommandWriteReturn BaseType;
@@ -50,43 +53,65 @@ protected:
     /*! Mailbox used to queue the commands */
     mtsMailBox * MailBox;
 
+    size_t ArgumentQueueSize; // size used for queues
+
+    /*! Queue to store arguments */
+    mtsQueueGeneric ArgumentsQueue;
+
+    /*! Queue to store pointer to return value */
+    mtsQueue<mtsGenericObject *> ReturnsQueue;
+
+    /*! Queue for return events (to send result to caller) */
+    mtsQueue<mtsCommandWriteBase *> FinishedEventQueue;
+
 private:
+    /*! Private default constructor to prevent use. */
+    mtsCommandQueuedWriteReturn(void);
+
     /*! Private copy constructor to prevent copies */
     mtsCommandQueuedWriteReturn(const ThisType & CMN_UNUSED(other));
 
 public:
 
+    /*! Constructor */
     mtsCommandQueuedWriteReturn(mtsCallableWriteReturnBase * callable, const std::string & name,
                                 const mtsGenericObject * argumentPrototype,
                                 const mtsGenericObject * resultPrototype,
-                                mtsMailBox * mailBox);
+                                mtsMailBox * mailBox, size_t size);
 
-    // ReturnsQueue destructor should get called
+    /*! Destructor */
     virtual ~mtsCommandQueuedWriteReturn();
 
-    mtsCommandQueuedWriteReturn * Clone(mtsMailBox * mailBox) const;
+    mtsCommandQueuedWriteReturn * Clone(mtsMailBox * mailBox, size_t size) const;
 
+    // virtual method defined in base class
     mtsExecutionResult Execute(const mtsGenericObject & argument,
                                mtsGenericObject & result);
 
-    const mtsGenericObject * GetArgumentPointer(void);
-
-    mtsGenericObject * GetResultPointer(void);
+    // virtual method defined in this class
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
+                                       mtsGenericObject & result,
+                                       mtsCommandWriteBase * finishedEventHandler);
 
     std::string GetMailBoxName(void) const;
 
-    void EnableFinishedEvent(mtsCommandWriteBase *cmd);
-    bool GenerateFinishedEvent(const mtsGenericObject &arg) const;
+    inline virtual mtsGenericObject * ArgumentPeek(void) {
+        return ArgumentsQueue.Peek();
+    }
+
+    inline virtual mtsGenericObject * ArgumentGet(void) {
+        return ArgumentsQueue.Get();
+    }
+
+    inline virtual mtsGenericObject * ReturnGet(void) {
+        return *(ReturnsQueue.Get());
+    }
+
+    inline virtual mtsCommandWriteBase * FinishedEventGet(void) {
+        return *(FinishedEventQueue.Get());
+    }
 
     void ToStream(std::ostream & outputStream) const;
-
-protected:
-    /*! Pointer on caller provided placeholder for result */
-    const mtsGenericObject * ArgumentPointer;
-    mtsGenericObject * ResultPointer;
-
-    /*! Event generator to indicate when execution is finished */
-    mtsCommandWriteBase * FinishedEvent;
 };
 
 

@@ -121,40 +121,41 @@ bool mtsMailBox::ExecuteNext(void)
                return false;
            }
        } else {
+           mtsGenericObject *resultPointer;
+           mtsCommandWriteBase *finishedEvent;
            switch ((*command)->NumberOfArguments()) {
            case 0:
                commandVoidReturn = dynamic_cast<mtsCommandQueuedVoidReturn *>(*command);
                CMN_ASSERT(commandVoidReturn);
                isBlockingReturn = true;
-               result = commandVoidReturn->GetCallable()->Execute( *(commandVoidReturn->GetResultPointer()) );
-               if (result.IsOK()) {
-#if 0
-                   // Don't check for failure to generate event because right now this feature is only
-                   // implemented for the socket proxies.
-                   if (!commandVoidReturn->GenerateFinishedEvent( *(commandVoidReturn->GetResultPointer()) ))
-                       CMN_LOG_RUN_ERROR << "mtsMailBox: failed to generate finished event for void return command "
-                                         << commandVoidReturn->GetName() << std::endl;
-#else
-                   commandVoidReturn->GenerateFinishedEvent( *(commandVoidReturn->GetResultPointer()) );
-#endif
-               }
+               resultPointer = commandVoidReturn->ReturnGet();
+               finishedEvent = commandVoidReturn->FinishedEventGet();
+               result = commandVoidReturn->GetCallable()->Execute(*resultPointer);
+               if (result.IsOK() && finishedEvent) {
+                   mtsExecutionResult evt_result = finishedEvent->Execute(*resultPointer, MTS_NOT_BLOCKING);
+                   if (!evt_result.IsOK())
+                       CMN_LOG_RUN_ERROR << "mtsMailbox: Failed to execute FinishedEvent for command void return " << commandVoidReturn->GetName()
+                                         << ", result = " << evt_result << std::endl;
+                }
                break;
            case 1:
                commandWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(*command);
                CMN_ASSERT(commandWriteReturn);
                isBlockingReturn = true;
-               result = commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->GetArgumentPointer()),
-                                                                    *(commandWriteReturn->GetResultPointer()) );
-               if (result.IsOK()) {
-#if 0
-                   // Don't check for failure to generate event because right now this feature is only
-                   // implemented for the socket proxies.
-                   if (!commandWriteReturn->GenerateFinishedEvent( *(commandWriteReturn->GetResultPointer()) ))
-                       CMN_LOG_RUN_ERROR << "mtsMailBox: failed to generate finished event for write return command "
-                                         << commandWriteReturn->GetName() << std::endl;
-#else
-                   commandWriteReturn->GenerateFinishedEvent( *(commandWriteReturn->GetResultPointer()) );
-#endif
+               resultPointer = commandWriteReturn->ReturnGet();
+               finishedEvent = commandWriteReturn->FinishedEventGet();
+               try {
+                   result = commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->ArgumentPeek()), *resultPointer);
+               }
+               catch (...) {
+                   commandWriteReturn->ArgumentGet();  // Remove from parameter queue
+                   throw;
+               }
+               if (result.IsOK() && finishedEvent) {
+                   mtsExecutionResult evt_result = finishedEvent->Execute(*resultPointer, MTS_NOT_BLOCKING);
+                   if (!evt_result.IsOK())
+                       CMN_LOG_RUN_ERROR << "mtsMailbox: Failed to execute FinishedEvent for command write return " << commandWriteReturn->GetName()
+                                         << ", result = " << evt_result << std::endl;
                }
                break;
            default:

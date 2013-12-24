@@ -129,12 +129,10 @@ int main(int argc, char * argv[])
         return 1;
     }
 #else
-    // For now, we create two proxies because there are two server proxies. It should be possible to use
-    // just one server proxy and one client proxy, but first some changes need to be made. See serverMain.cpp
-    // for a description of the changes needed on the server side. On the client side, I believe there are
-    // additional changes needed to clone the EventReceiverWriteProxy.
+    // For now, we create two client proxies. To use one proxy, additional changes may be needed to clone
+    // the EventReceiverWriteProxy.
     mtsSocketProxyClient * clientProxy1 = new mtsSocketProxyClient("MyClientProxy1", "localhost", 1234);
-    mtsSocketProxyClient * clientProxy2 = new mtsSocketProxyClient("MyClientProxy2", "localhost", 1235);
+    mtsSocketProxyClient * clientProxy2 = new mtsSocketProxyClient("MyClientProxy2", "localhost", 1234);
     componentManager->AddComponent(clientProxy1);
     componentManager->AddComponent(clientProxy2);
 

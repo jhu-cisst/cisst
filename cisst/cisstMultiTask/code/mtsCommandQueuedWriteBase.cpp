@@ -87,7 +87,7 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
     if (!this->IsEnabled()) {
         return mtsExecutionResult::COMMAND_DISABLED;
     }
-    // check if there is a mailbox (i.e. if the command is associated to an interface
+    // check if there is a mailbox (i.e. if the command is associated to an interface)
     if (!MailBox) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: no mailbox for \""
                           << this->Name << "\"" << std::endl;

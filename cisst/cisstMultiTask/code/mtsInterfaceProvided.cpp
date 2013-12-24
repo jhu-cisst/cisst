@@ -168,7 +168,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
              iterVoidReturn++) {
             commandQueuedVoidReturn = dynamic_cast<mtsCommandQueuedVoidReturn *>(iterVoidReturn->second);
             if (commandQueuedVoidReturn) {
-                commandVoidReturn = commandQueuedVoidReturn->Clone(this->MailBox);
+                commandVoidReturn = commandQueuedVoidReturn->Clone(this->MailBox, argumentQueuesSize);
                 CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: cloned queued void return command \"" << iterVoidReturn->first
                                            << "\" for \"" << this->GetFullName() << "\"" << std::endl;
             } else {
@@ -209,7 +209,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
              iterWriteReturn++) {
             commandQueuedWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(iterWriteReturn->second);
             if (commandQueuedWriteReturn) {
-                commandWriteReturn = commandQueuedWriteReturn->Clone(this->MailBox); // no argument queue size, since this is a blocking command there can only be one call
+                commandWriteReturn = commandQueuedWriteReturn->Clone(this->MailBox, argumentQueuesSize);
                 CMN_LOG_CLASS_INIT_VERBOSE << "factory constructor: cloned queued write return command \"" << iterWriteReturn->first
                                            << "\" for \"" << this->GetFullName() << "\"" << std::endl;
             } else {
@@ -454,7 +454,7 @@ mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCallableVoi
             return command;
         } else {
             // create with no mailbox
-            mtsCommandQueuedVoidReturn * queuedCommand = new mtsCommandQueuedVoidReturn(callable, name, resultPrototype, 0);
+            mtsCommandQueuedVoidReturn * queuedCommand = new mtsCommandQueuedVoidReturn(callable, name, resultPrototype, 0, 0);
             if (!CommandsVoidReturn.AddItem(name, queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
                 delete queuedCommand;
                 queuedCommand = 0;
@@ -537,7 +537,7 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableW
             return command;
         } else {
             // create with no mailbox
-            mtsCommandQueuedWriteReturn * queuedCommand = new mtsCommandQueuedWriteReturn(callable, name, argumentPrototype, resultPrototype, 0);
+            mtsCommandQueuedWriteReturn * queuedCommand = new mtsCommandQueuedWriteReturn(callable, name, argumentPrototype, resultPrototype, 0, 0);
             if (!CommandsWriteReturn.AddItem(name, queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
                 delete queuedCommand;
                 queuedCommand = 0;
