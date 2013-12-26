@@ -576,6 +576,10 @@ protected: // PK TEMP
     mtsInterfaceProvided * RemoveEndUserInterface(mtsInterfaceProvided * interfaceProvided,
                                                   const std::string & userName);
 
+    /*! Templated utility method to clone commands */
+    template <class _MapType, class _QueuedType>
+    void CloneCommands(const std::string &cmdType, const _MapType &CommandMapIn, _MapType &CommandMapOut);
+
     /*! Utility method to determine if a command should be queued or
       not based on the default policy for the interface and the user's
       requested policy.  This method also generates a warning or error

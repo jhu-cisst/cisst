@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-15
 
-  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -64,6 +64,7 @@ public:
     typedef typename MapType::const_reverse_iterator const_reverse_iterator;
 
     typedef typename MapType::size_type size_type;
+    typedef _elementType element_type;
 
 protected:
     /*! Map data member, uses an std::map */
