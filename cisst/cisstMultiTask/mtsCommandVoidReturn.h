@@ -7,8 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -52,6 +51,9 @@ public:
 
     /*! This type. */
     typedef mtsCommandVoidReturn ThisType;
+
+    /*! Callable type. */
+    typedef mtsCallableVoidReturnBase CallableType;
 
 private:
     /*! Private copy constructor to prevent copies */

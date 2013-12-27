@@ -61,6 +61,12 @@ mtsExecutionResult mtsCommandRead::Execute(mtsGenericObject & argument)
 }
 
 
+mtsCallableReadBase * mtsCommandRead::GetCallable(void) const
+{
+    return this->Callable;
+}
+
+
 const mtsGenericObject * mtsCommandRead::GetArgumentPrototype(void) const
 {
     return this->ArgumentPrototype;

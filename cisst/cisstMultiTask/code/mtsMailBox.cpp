@@ -151,6 +151,7 @@ bool mtsMailBox::ExecuteNext(void)
                    commandWriteReturn->ArgumentGet();  // Remove from parameter queue
                    throw;
                }
+               commandWriteReturn->ArgumentGet();  // Remove from parameter queue
                if (result.IsOK() && finishedEvent) {
                    mtsExecutionResult evt_result = finishedEvent->Execute(*resultPointer, MTS_NOT_BLOCKING);
                    if (!evt_result.IsOK())

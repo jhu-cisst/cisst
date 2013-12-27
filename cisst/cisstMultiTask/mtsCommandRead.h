@@ -49,6 +49,9 @@ public:
     /*! This type. */
     typedef mtsCommandRead ThisType;
 
+    /*! Callable type */
+    typedef mtsCallableReadBase CallableType;
+
 private:
     /*! Private copy constructor to prevent copies */
     inline mtsCommandRead(const ThisType & CMN_UNUSED(other));
@@ -82,6 +85,13 @@ public:
       \param obj The data passed to the operation method
     */
     virtual mtsExecutionResult Execute(mtsGenericObject & argument);
+
+    /*! Get a direct pointer to the callable object.  This method is
+      used for queued commands.  The caller should still use the
+      Execute method which will queue the command.  When the command
+      is de-queued, one needs access to the callable object to call
+      the final method or function. */
+    mtsCallableReadBase * GetCallable(void) const;
 
     virtual const mtsGenericObject * GetArgumentPrototype(void) const;
 

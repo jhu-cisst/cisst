@@ -81,6 +81,12 @@ const mtsGenericObject * mtsCommandQualifiedRead::GetArgument2Prototype(void) co
 }
 
 
+mtsCallableQualifiedReadBase * mtsCommandQualifiedRead::GetCallable(void) const
+{
+    return this->Callable;
+}
+
+
 size_t mtsCommandQualifiedRead::NumberOfArguments(void) const
 {
     return 2;

@@ -341,19 +341,20 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCallableVoidBase * call
         if (!queued) {
             mtsCommandVoid * command = new mtsCommandVoid(callable, name);
             if (!CommandsVoid.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
-                delete command;
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: unable to add command \""
                                          << command->GetName() << "\"" << std::endl;
+                delete command;
+                command = 0;
             }
             return command;
         } else {
             // create with no mailbox
             mtsCommandQueuedVoid * queuedCommand = new mtsCommandQueuedVoid(callable, name, 0, 0);
             if (!CommandsVoid.AddItem(name, queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
-                delete queuedCommand;
-                queuedCommand = 0;
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: unable to add queued command \""
                                          << queuedCommand->GetName() << "\"" << std::endl;
+                delete queuedCommand;
+                queuedCommand = 0;
             }
             return queuedCommand;
         }
@@ -371,6 +372,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCommandVoid * command)
         if (!CommandsVoid.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
             CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: unable to add command \""
                                      << command->GetName() << "\"" << std::endl;
+            command = 0;
         }
         return command;
     }
@@ -392,19 +394,20 @@ mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCallableVoi
         if (!queued) {
             mtsCommandVoidReturn * command = new mtsCommandVoidReturn(callable, name, resultPrototype);
             if (!CommandsVoidReturn.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
-                delete command;
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoidReturn: unable to add command \""
                                          << command->GetName() << "\"" << std::endl;
+                delete command;
+                command = 0;
             }
             return command;
         } else {
             // create with no mailbox
             mtsCommandQueuedVoidReturn * queuedCommand = new mtsCommandQueuedVoidReturn(callable, name, resultPrototype, 0, 0);
             if (!CommandsVoidReturn.AddItem(name, queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
-                delete queuedCommand;
-                queuedCommand = 0;
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoidReturn: unable to add queued command \""
                                          << queuedCommand->GetName() << "\"" << std::endl;
+                delete queuedCommand;
+                queuedCommand = 0;
             }
             return queuedCommand;
         }
@@ -422,6 +425,7 @@ mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCommandVoid
         if (!CommandsVoidReturn.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
             CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoidReturn: unable to add command \""
                                      << command->GetName() << "\"" << std::endl;
+            command = 0;
         }
         return command;
     }
@@ -439,19 +443,19 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWrite(mtsCommandWriteBase 
         bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddCommandWrite", command->GetName());
         if (!queued) {
             if (!CommandsWrite.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
-                command = 0;
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite: unable to add command \""
                                          << command->GetName() << "\"" << std::endl;
+                command = 0;
             }
             return command;
         } else {
             // create with no mailbox
             mtsCommandQueuedWriteBase * queuedCommand = new mtsCommandQueuedWriteGeneric(0, command, 0);
             if (!CommandsWrite.AddItem(command->GetName(), queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
+                CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite: unable to add queued command \""
+                                         << queuedCommand->GetName() << "\"" << std::endl;
                 delete queuedCommand;
                 queuedCommand = 0;
-                CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite: unable to add queued command \""
-                                         << command->GetName() << "\"" << std::endl;
             }
             return queuedCommand;
         }
@@ -475,19 +479,20 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableW
         if (!queued) {
             mtsCommandWriteReturn * command = new mtsCommandWriteReturn(callable, name, argumentPrototype, resultPrototype);
             if (!CommandsWriteReturn.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
-                delete command;
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: unable to add command \""
                                          << command->GetName() << "\"" << std::endl;
+                delete command;
+                command = 0;
             }
             return command;
         } else {
             // create with no mailbox
             mtsCommandQueuedWriteReturn * queuedCommand = new mtsCommandQueuedWriteReturn(callable, name, argumentPrototype, resultPrototype, 0, 0);
             if (!CommandsWriteReturn.AddItem(name, queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
-                delete queuedCommand;
-                queuedCommand = 0;
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: unable to add queued command \""
                                          << queuedCommand->GetName() << "\"" << std::endl;
+                delete queuedCommand;
+                queuedCommand = 0;
             }
             return queuedCommand;
         }
@@ -505,6 +510,7 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCommandWr
         if (!CommandsWriteReturn.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
             CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: unable to add command \""
                                      << command->GetName() << "\"" << std::endl;
+            command = 0;
         }
         return command;
     }
@@ -522,9 +528,10 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCallableReadBase * call
     if (callable) {
         mtsCommandRead * command = new mtsCommandRead(callable, name, argumentPrototype);
         if (!CommandsRead.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
-            delete command;
             CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead: unable to add command \""
                                      << command->GetName() << "\"" << std::endl;
+            delete command;
+            command = 0;
         }
         return command;
     }
@@ -538,9 +545,9 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCommandRead * command)
 {
     if (command) {
         if (!CommandsRead.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
-            command = 0;
             CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead: unable to add command \""
                                      << command->GetName() << "\"" << std::endl;
+            command = 0;
         }
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead: unable to create command \""
@@ -560,9 +567,10 @@ mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(mtsCalla
         mtsCommandQualifiedRead * command =
             new mtsCommandQualifiedRead(callable, name, argument1Prototype, argument2Prototype);
         if (!CommandsQualifiedRead.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
-            delete command;
             CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: unable to add command \""
                                      << command->GetName() << "\"" << std::endl;
+            delete command;
+            command = 0;
         }
         return command;
     }
@@ -576,9 +584,9 @@ mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(mtsComma
 {
     if (command) {
         if (!CommandsQualifiedRead.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
-            command = 0;
             CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: unable to add command \""
                                      << command->GetName() << "\"" << std::endl;
+            command = 0;
         }
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: unable to create command \""
