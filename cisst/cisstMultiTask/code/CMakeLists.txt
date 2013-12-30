@@ -19,6 +19,7 @@ cisst_data_generator (cisstMultiTask
                       "cisstMultiTask/"        # sub directory for include
                       ../mtsInterfaceCommon.cdg
                       ../mtsComponentState.cdg
+                      ../mtsExecutionResult.cdg
                       ../mtsParameterTypes.cdg)
 # to compile cisst generated code, need to find header file
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
@@ -51,7 +52,7 @@ set (SOURCE_FILES
      mtsConnection.cpp
 
      mtsEventReceiver.cpp
-     mtsExecutionResult.cpp
+     mtsExecutionResult.cpp  # see mtsExecutionResult.cdg
 
      mtsFunctionBase.cpp
      mtsFunctionQualifiedRead.cpp
@@ -143,7 +144,6 @@ set (HEADER_FILES
      mtsConnection.h
 
      mtsEventReceiver.h
-     mtsExecutionResult.h
      mtsExport.h
 
      mtsFixedSizeVector.h

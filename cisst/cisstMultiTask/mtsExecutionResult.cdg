@@ -1,0 +1,133 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+//
+// $Id$
+//
+// Author(s):  Peter Kazanzides
+// Created on: 2013-12-29
+//
+// (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+//
+// --- begin cisst license - do not edit ---
+//
+// This software is provided "as is" under an open source license, with
+// no warranty.  The complete license can be found in license.txt and
+// http://www.cisst.org/cisst/license.txt.
+//
+// --- end cisst license ---
+
+inline-header {
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+}
+
+class {
+
+    name mtsExecutionResult;
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+
+    enum {
+        name Enum;
+        enum-value {
+            name UNDEFINED;
+            description undefined;
+        }
+        enum-value {
+            name COMMAND_SUCCEEDED;
+            description command succeeded;
+        }
+        enum-value {
+            name COMMAND_QUEUED;
+            description command queued;
+        }
+        enum-value {
+            name FUNCTION_NOT_BOUND;
+            description function not bound to a command;
+        }
+        enum-value {
+            name COMMAND_HAS_NO_MAILBOX;
+            description queued command has no mailbox;
+        }
+        enum-value {
+            name COMMAND_DISABLED;
+            description command disabled;
+        }
+        enum-value {
+            name INTERFACE_COMMAND_MAILBOX_FULL;
+            description interface command mailbox full;
+        }
+        enum-value {
+            name COMMAND_ARGUMENT_QUEUE_FULL;
+            description command argument queue full;
+        }
+        enum-value {
+            name INVALID_INPUT_TYPE;
+            description invalid input type;
+        }
+        enum-value {
+            name METHOD_OR_FUNCTION_FAILED;
+            description underlying method or function returned \"false\";
+        }
+        enum-value {
+            name NETWORK_ERROR;
+            description network error;
+        }
+        enum-value {
+            name INVALID_COMMAND_ID;
+            description invalid network command id;
+        }
+        enum-value {
+            name ARGUMENT_DYNAMIC_CREATION_FAILED;
+            description unable to dynamically create an argument;
+        }
+        enum-value {
+            name SERIALIZATION_ERROR;
+            description serialization failed;
+        }
+        enum-value {
+            name DESERIALIZATION_ERROR;
+            description deserialization failed;
+        }
+    }
+
+    member {
+        name Value;
+        type mtsExecutionResult::Enum;
+    }
+
+    typedef {
+        name ThisType;
+        type mtsExecutionResult;
+    }
+
+    inline-header {
+        /*! Assignment operator. */
+        const ThisType & operator = (const Enum & value);
+
+        /*! Equality operators */
+        bool operator == (const ThisType & state) const;
+        bool operator != (const ThisType & state) const;
+
+        /*! Get a human readable description for any state (for backward compatibility) */
+        static const std::string ToString(const Enum & value);
+
+        /*! Getter of current state (for backward compatibility) */
+        Enum GetResult(void) const { return Value(); }
+
+        /*! Test if the result is considered OK */
+        bool IsOK(void) const;
+
+        /*! Downcast to bool to allow code such as if (!myFunction) {
+          ... } */
+        operator bool (void) const;
+    }
+}
+
+inline-header {
+typedef mtsGenericObjectProxy<mtsExecutionResult> mtsExecutionResultProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsExecutionResultProxy)
+}
