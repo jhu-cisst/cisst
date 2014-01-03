@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -178,6 +178,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
       interface. */
     void SetMailBoxSize(size_t desiredSize);
 
+    /*! Get the current mailbox size. */
+    size_t GetMailBoxSize(void) const { return MailBoxSize; }
+
     /*! Set the desired size for all argument queues.  If queueing has
       been enabled for this interface, each write command (write or
       write with return) manages it's own queue of arguments.  The
@@ -193,6 +196,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
       (i.e. while any required interface is connected to the provided
       interface. */
     void SetArgumentQueuesSize(size_t desiredSize);
+
+    /*! Get the current argument queues size. */
+    size_t GetArgumentQueuesSize(void) const { return ArgumentQueuesSize; }
 
     /*! Set the desired size for the command mail box and argument
       queues.  See SetMailBoxSize and SetArgumentQueuesSize. */
@@ -214,6 +220,10 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     std::vector<std::string> GetNamesOfEventsVoid(void) const;
     std::vector<std::string> GetNamesOfEventsWrite(void) const;
     //@}
+
+    /*! Returns true if the event is a system event (e.g., BlockingCommandExecuted
+        or BlockingCommandReturnExecuted) */
+    static bool IsSystemEventVoid(const std::string & name);
 
     /*! Find a command based on its name. */
     //@{

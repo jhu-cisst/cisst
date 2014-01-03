@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -865,6 +865,10 @@ bool mtsInterfaceProvided::AddEvent(const std::string & name, mtsMulticastComman
     return EventWriteGenerators.AddItem(name, generator, CMN_LOG_LEVEL_INIT_ERROR);
 }
 
+bool mtsInterfaceProvided::IsSystemEventVoid(const std::string & name)
+{
+    return ((name == "BlockingCommandExecuted") || (name == "BlockingCommandReturnExecuted"));
+}
 
 bool mtsInterfaceProvided::AddSystemEvents(void)
 {

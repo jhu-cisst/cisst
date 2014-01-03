@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -94,6 +93,9 @@ public:
     mtsCallableReadBase * GetCallable(void) const;
 
     virtual const mtsGenericObject * GetArgumentPrototype(void) const;
+    // GetResultPrototype is same as GetArgumentPrototype, but provided for
+    // consistency with mtsCommandVoidReturn
+    virtual const mtsGenericObject * GetResultPrototype(void) const;
 
     /* documented in base class */
     size_t NumberOfArguments(void) const;

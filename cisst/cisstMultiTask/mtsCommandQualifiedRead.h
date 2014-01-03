@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -99,6 +98,10 @@ public:
     const mtsGenericObject * GetArgument1Prototype(void) const;
 
     const mtsGenericObject * GetArgument2Prototype(void) const;
+
+    // Following are provided for consistency with mtsCommandWriteReturn
+    const mtsGenericObject * GetArgumentPrototype(void) const;
+    const mtsGenericObject * GetResultPrototype(void) const;
 
     /* documented in base class */
     size_t NumberOfArguments(void) const;

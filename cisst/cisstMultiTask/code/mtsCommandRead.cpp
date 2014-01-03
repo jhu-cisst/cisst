@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -68,6 +67,12 @@ mtsCallableReadBase * mtsCommandRead::GetCallable(void) const
 
 
 const mtsGenericObject * mtsCommandRead::GetArgumentPrototype(void) const
+{
+    return this->ArgumentPrototype;
+}
+
+
+const mtsGenericObject * mtsCommandRead::GetResultPrototype(void) const
 {
     return this->ArgumentPrototype;
 }

@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,7 +27,8 @@ bool mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
     if (command) {
         VectorType::iterator it = std::find(Commands.begin(), Commands.end(), command);
         if (it != Commands.end()) {
-            CMN_LOG_INIT_DEBUG << "Class mtsMulticastCommandWriteBase: AddCommand: command already added" << std::endl;
+            CMN_LOG_INIT_WARNING << "Class mtsMulticastCommandWriteBase: AddCommand: command " 
+                                 << command->GetName() << " already added" << std::endl;
             return false;
         }
         // check if the command already has an argument prototype
