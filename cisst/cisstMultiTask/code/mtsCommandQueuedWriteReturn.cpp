@@ -160,3 +160,7 @@ void mtsCommandQueuedWriteReturnBase<_Base>::ToStream(std::ostream & outputStrea
                  << "\" for command(write) with result using " << *(this->Callable)
                  << " currently " << (this->IsEnabled() ? "enabled" : "disabled");
 }
+
+// Force instantiation of these two types
+template class mtsCommandQueuedWriteReturnBase<mtsCommandWriteReturn>;
+template class mtsCommandQueuedWriteReturnBase<mtsCommandQualifiedRead>;
