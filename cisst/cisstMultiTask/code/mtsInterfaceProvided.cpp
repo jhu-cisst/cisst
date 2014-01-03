@@ -94,8 +94,8 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
 template <class _MapType, class _QueuedType>
 void mtsInterfaceProvided::CloneCommands(const std::string &cmdType, const _MapType &CommandMapIn, _MapType &CommandMapOut)
 {
-    _MapType::const_iterator iter;
-    _MapType::element_type * command;
+    typename _MapType::const_iterator iter;
+    typename _MapType::element_type * command;
     _QueuedType * commandQueued;
     for (iter = CommandMapIn.begin(); iter != CommandMapIn.end(); iter++) {
         commandQueued = dynamic_cast<_QueuedType *>(iter->second);

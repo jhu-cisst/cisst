@@ -47,8 +47,8 @@ mtsCommandQueuedVoidReturnBase<_Base>::~mtsCommandQueuedVoidReturnBase()
 {
     // Destructor should probably go through the queue and make sure to send a response to any waiting component
     if (!MailBox->IsEmpty())
-        CMN_LOG_INIT_WARNING << GetClassName() << " destructor: mailbox for "
-                             << GetName() << " is not empty" << std::endl;
+        CMN_LOG_INIT_WARNING << this->GetClassName() << " destructor: mailbox for "
+                             << this->GetName() << " is not empty" << std::endl;
 }
 
 

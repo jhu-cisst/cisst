@@ -641,7 +641,7 @@ public:
     // virtual method in base class
     BaseType * Clone(mtsMailBox * mailBox, size_t size) const
     {
-        return new ThisType(GetName(), commandWrapper->Clone(), GetResultPrototype(), mailBox, size);
+        return new ThisType(this->GetName(), commandWrapper->Clone(), this->GetResultPrototype(), mailBox, size);
     }
 };
 
@@ -677,8 +677,8 @@ public:
     // virtual method in base class
     BaseType * Clone(mtsMailBox * mailBox, size_t size) const
     {
-        return new ThisType(GetName(), commandWrapper->Clone(),
-                            GetArgumentPrototype(), GetResultPrototype(),
+        return new ThisType(this->GetName(), commandWrapper->Clone(),
+                            this->GetArgumentPrototype(), this->GetResultPrototype(),
                             mailBox, size);
     }
 
