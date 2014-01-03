@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -81,6 +81,8 @@ public:
         if (argumentPrototype) {
             ArgumentsQueue.SetSize(size, *argumentPrototype);
             BlockingFlagQueue.SetSize(size, MTS_NOT_BLOCKING);
+            mtsCommandWriteBase *cmd = 0;
+            FinishedEventQueue.SetSize(size, cmd);
         } else {
             CMN_LOG_INIT_ERROR << "Class mtsCommandQueuedWrite: constructor: can't find argument prototype from actual command."
                                << std::endl;
@@ -109,6 +111,8 @@ public:
             if (argumentPrototype) {
                 ArgumentsQueue.SetSize(size, *argumentPrototype);
                 BlockingFlagQueue.SetSize(size, MTS_NOT_BLOCKING);
+                mtsCommandWriteBase *cmd = 0;
+                FinishedEventQueue.SetSize(size, cmd);
             } else {
                 CMN_LOG_INIT_ERROR << "Class mtsCommandQueuedWrite: constructor: can't find argument prototype from actual command."
                                    << std::endl;
@@ -116,9 +120,9 @@ public:
         }
     }
 
-
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
-                                       mtsBlockingType blocking) {
+                                       mtsBlockingType blocking,
+                                       mtsCommandWriteBase *finishedEventHandler) {
         // check if this command is enabled
         if (!this->IsEnabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
@@ -134,26 +138,50 @@ public:
         if (!argumentTyped) {
             return mtsExecutionResult::INVALID_INPUT_TYPE;
         }
+        // check if all queues have some space
+        if (ArgumentsQueue.IsFull() || BlockingFlagQueue.IsFull() || FinishedEventQueue.IsFull() || MailBox->IsFull()) {
+            CMN_LOG_RUN_WARNING << "Class mtsCommandQueuedWrite: Execute: Queue full for \""
+                                << this->Name << "\" ["
+                                << ArgumentsQueue.IsFull() << "|"
+                                << BlockingFlagQueue.IsFull() << "|"
+                                << FinishedEventQueue.IsFull() << "|"
+                                << MailBox->IsFull() << "]"
+                                << std::endl;
+            return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+        }
         // copy the argument to the local storage.
         if (!ArgumentsQueue.Put(*argumentTyped)) {
             CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: ArgumentsQueue full for \""
                               << this->Name << "\"" << std::endl;
-            return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+            cmnThrow("mtsCommandQueuedWrite: Execute: ArgumentsQueue.Put failed");
+            return mtsExecutionResult::UNDEFINED;
         }
         // copy the blocking flag to the local storage.
         if (!BlockingFlagQueue.Put(blocking)) {
             CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: BlockingFlagQueue full for \""
                               << this->Name << "\"" << std::endl;
             ArgumentsQueue.Get(); // pop argument
-            return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+            cmnThrow("mtsCommandQueuedWrite: Execute: BlockingFlagQueue.Put failed");
+            return mtsExecutionResult::UNDEFINED;
+        }
+        // copy the finished event handler to the local storage.
+        if (!FinishedEventQueue.Put(finishedEventHandler)) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: FinishedEventQueue.Put failed for \""
+                              << this->Name << "\"" << std::endl;
+            ArgumentsQueue.Get();       // Remove the argument that was already queued
+            BlockingFlagQueue.Get();    // Remove the blocking flag that was already queued
+            cmnThrow("mtsCommandQueuedWrite: Execute: FinishedEventQueue.Put failed");
+            return mtsExecutionResult::UNDEFINED;
         }
         // finally try to queue to mailbox
         if (!MailBox->Write(this)) {
             CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: mailbox full for \""
                               << this->Name << "\"" << std::endl;
-            ArgumentsQueue.Get();  // pop argument and blocking flag from local storage
+            ArgumentsQueue.Get();  // pop argument, blocking flag, and finished event from local storage
             BlockingFlagQueue.Get();
-            return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
+            FinishedEventQueue.Get();
+            cmnThrow("mtsCommandQueuedWrite: Execute: MailBox.Write failed");
+            return mtsExecutionResult::UNDEFINED;
         }
         return mtsExecutionResult::COMMAND_QUEUED;
     }
@@ -229,7 +257,8 @@ public:
 
 
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
-                                       mtsBlockingType blocking);
+                                       mtsBlockingType blocking,
+                                       mtsCommandWriteBase *finishedEventHandler);
 
 
     /* commented in base class */

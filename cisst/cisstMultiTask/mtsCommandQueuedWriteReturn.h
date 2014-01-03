@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,6 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandQueuedWriteReturn_h
 
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
+#include <cisstMultiTask/mtsCallableQualifiedReadBase.h>
 #include <cisstMultiTask/mtsQueue.h>
 
 // Always include last
@@ -41,13 +43,16 @@ class mtsCommandWriteBase;
 
  */
 
-class CISST_EXPORT mtsCommandQueuedWriteReturn: public mtsCommandWriteReturn
+template <class _Base>
+class mtsCommandQueuedWriteReturnBase: public _Base
 {
 public:
-    typedef mtsCommandWriteReturn BaseType;
+    typedef _Base BaseType;
 
     /*! This type. */
-    typedef mtsCommandQueuedWriteReturn ThisType;
+    typedef mtsCommandQueuedWriteReturnBase<_Base> ThisType;
+
+    typedef typename _Base::CallableType CallableType;
 
 protected:
     /*! Mailbox used to queue the commands */
@@ -66,23 +71,25 @@ protected:
 
 private:
     /*! Private default constructor to prevent use. */
-    mtsCommandQueuedWriteReturn(void);
+    mtsCommandQueuedWriteReturnBase(void);
 
     /*! Private copy constructor to prevent copies */
-    mtsCommandQueuedWriteReturn(const ThisType & CMN_UNUSED(other));
+    mtsCommandQueuedWriteReturnBase(const ThisType & CMN_UNUSED(other));
 
 public:
 
     /*! Constructor */
-    mtsCommandQueuedWriteReturn(mtsCallableWriteReturnBase * callable, const std::string & name,
-                                const mtsGenericObject * argumentPrototype,
-                                const mtsGenericObject * resultPrototype,
-                                mtsMailBox * mailBox, size_t size);
+    mtsCommandQueuedWriteReturnBase(CallableType * callable, const std::string & name,
+                                    const mtsGenericObject * argumentPrototype,
+                                    const mtsGenericObject * resultPrototype,
+                                    mtsMailBox * mailBox, size_t size);
 
     /*! Destructor */
-    virtual ~mtsCommandQueuedWriteReturn();
+    virtual ~mtsCommandQueuedWriteReturnBase();
 
-    mtsCommandQueuedWriteReturn * Clone(mtsMailBox * mailBox, size_t size) const;
+    virtual std::string GetClassName(void) const;
+
+    virtual ThisType * Clone(mtsMailBox * mailBox, size_t size) const;
 
     // virtual method defined in base class
     mtsExecutionResult Execute(const mtsGenericObject & argument,
@@ -114,6 +121,14 @@ public:
     void ToStream(std::ostream & outputStream) const;
 };
 
+typedef mtsCommandQueuedWriteReturnBase<mtsCommandWriteReturn> mtsCommandQueuedWriteReturn;
+typedef mtsCommandQueuedWriteReturnBase<mtsCommandQualifiedRead> mtsCommandQueuedQualifiedRead;
+
+#ifdef CISST_COMPILER_IS_MSVC
+#pragma warning ( disable : 4661 )
+template class CISST_EXPORT mtsCommandQueuedWriteReturnBase<mtsCommandWriteReturn>;
+template class CISST_EXPORT mtsCommandQueuedWriteReturnBase<mtsCommandQualifiedRead>;
+#endif
 
 #endif // _mtsCommandQueuedWriteReturn_h
 

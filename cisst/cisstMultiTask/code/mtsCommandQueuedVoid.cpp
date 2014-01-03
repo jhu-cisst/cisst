@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,8 +34,12 @@ mtsCommandQueuedVoid::mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
                                            size_t size):
     BaseType(callable, name),
     MailBox(mailBox),
-    BlockingFlagQueue(size, MTS_NOT_BLOCKING)
-{}
+    BlockingFlagQueue(size, MTS_NOT_BLOCKING),
+    FinishedEventQueue()
+{
+    mtsCommandWriteBase *cmd = 0;
+    FinishedEventQueue.SetSize(size, cmd);
+}
 
 
 mtsCommandQueuedVoid * mtsCommandQueuedVoid::Clone(mtsMailBox * mailBox, size_t size) const
@@ -46,6 +50,12 @@ mtsCommandQueuedVoid * mtsCommandQueuedVoid::Clone(mtsMailBox * mailBox, size_t 
 
 
 mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking)
+{
+    return Execute(blocking, 0);
+}
+
+mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
+                                                 mtsCommandWriteBase *finishedEventHandler)
 {
     // check if this command is enabled
     if (!this->IsEnabled()) {
@@ -58,10 +68,11 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking)
         return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
     }
     // check if all queues have some space
-    if (BlockingFlagQueue.IsFull() || MailBox->IsFull()) {
+    if (BlockingFlagQueue.IsFull() || FinishedEventQueue.IsFull()|| MailBox->IsFull()) {
         CMN_LOG_RUN_WARNING << "Class mtsCommandQueuedVoid: Execute: Queue full for \""
                             << this->Name << "\" ["
                             << BlockingFlagQueue.IsFull() << "|"
+                            << FinishedEventQueue.IsFull() << "|"
                             << MailBox->IsFull() << "]"
                             << std::endl;
         return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
@@ -73,11 +84,20 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking)
         cmnThrow("mtsCommandQueuedVoid: Execute: BlockingFlagQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
+    // copy the finished event to the local storage.
+    if (!FinishedEventQueue.Put(finishedEventHandler)) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: FinishedEventQueue.Put failed for \""
+                          << this->Name << "\"" << std::endl;
+        BlockingFlagQueue.Get();   // Remove the blocking flag that was already queued
+        cmnThrow("mtsCommandQueuedVoid: Execute: FinishedEventQueue.Put failed");
+        return mtsExecutionResult::UNDEFINED;
+    }
     // finally try to queue to mailbox
     if (!MailBox->Write(this)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: Mailbox.Write failed for \""
                           << this->Name << "\"" <<  std::endl;
         BlockingFlagQueue.Get();   // Remove the blocking flag that was already queued
+        FinishedEventQueue.Get();   // Remove the blocking flag that was already queued
         cmnThrow("mtsCommandQueuedVoid: Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }
@@ -88,6 +108,12 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking)
 mtsBlockingType mtsCommandQueuedVoid::BlockingFlagGet(void)
 {
     return *(this->BlockingFlagQueue.Get());
+}
+
+
+mtsCommandWriteBase *mtsCommandQueuedVoid::FinishedEventGet(void)
+{
+    return *(this->FinishedEventQueue.Get());
 }
 
 

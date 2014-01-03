@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2013-09-08
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,7 +46,9 @@ namespace mtsSocketProxy {
 };
 
 struct CISST_EXPORT CommandHandle {
-    char cmdType;        // V (Void), R (Read), W (Write), Q (Qualified Read), r (VoidReturn), q (WriteReturn)
+    char cmdType;        // V (Void), R (Read), W (Write), Q (Qualified Read),
+                         // v (Void-blocking), r (VoidReturn), w (Write-blocking), q (WriteReturn)
+                         // I (initialization)
     long long int addr;
 
     // Size of serialized version of the CommandHandle (space:1, cmdType:1, addr:8)

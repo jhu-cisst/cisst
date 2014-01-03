@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -212,11 +212,6 @@ set (HEADER_FILES
 
 # Header files in code directory
 set (ADDITIONAL_HEADER_FILES
-
-     mtsFunctionQualifiedReadProxy.h
-     mtsFunctionReadProxy.h
-     mtsFunctionWriteProxy.h
-
      mtsProxySerializer.h
      )
 
@@ -270,6 +265,9 @@ if (CISST_MTS_HAS_ICE)
        mtsCommandReadProxy.h
        mtsCommandQualifiedReadProxy.h
 
+       mtsFunctionReadProxy.h
+       mtsFunctionWriteProxy.h
+       mtsFunctionQualifiedReadProxy.h
        mtsFunctionReturnProxyBase.h
        mtsFunctionVoidReturnProxy.h
        mtsFunctionWriteReturnProxy.h

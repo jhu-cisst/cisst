@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,6 +33,8 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
+class mtsCommandWriteBase;
+
 class CISST_EXPORT mtsCommandQueuedVoid: public mtsCommandVoid
 {
  public:
@@ -48,6 +50,9 @@ class CISST_EXPORT mtsCommandQueuedVoid: public mtsCommandVoid
     /*! Queue of flags to indicate if the command is blocking or
       not */
     mtsQueue<mtsBlockingType> BlockingFlagQueue;
+
+    /*! Queue for return events (to send result to caller) */
+    mtsQueue<mtsCommandWriteBase *> FinishedEventQueue;
 
  private:
     /*! Private copy constructor to prevent copies */
@@ -69,17 +74,25 @@ class CISST_EXPORT mtsCommandQueuedVoid: public mtsCommandVoid
     inline virtual void Allocate(unsigned int CMN_UNUSED(size)) {}
 
     /*! For a queued command, Execute means queueing the command.
-      This method will return mtsExecutionResult::DEV_OK if the command
-      has been queued, it doesn't mean that the actual has been
+      This method will return mtsExecutionResult::COMMAND_QUEUED if the command
+      has been queued; it doesn't mean that the actual has been
       executed yet.  If the command has been disabled (see
       mtsCommandBase::Disable()), Execute will return
-      mtsExecutionResult::DISABLED.  finally, if the mailbox is full,
-      Execute() will return mtsExecutionResult::MAILBOX_FULL.  This can
-      happen if the task receiving the command doesn't process/empty
+      mtsExecutionResult::COMMAND_DISABLED.  Finally, if the mailbox is full,
+      Execute() will return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL.
+      This can happen if the task receiving the command doesn't process/empty
       its mailboxes fast enough. */
     mtsExecutionResult Execute(mtsBlockingType blocking);
 
+    /*! This version of Execute includes a command pointer that the recipient
+        can use to indicate when the command has been finished (e.g., for a
+        blocking command) */
+    virtual mtsExecutionResult Execute(mtsBlockingType blocking,
+                                       mtsCommandWriteBase *finishedEventHandler);
+
     mtsBlockingType BlockingFlagGet(void);
+
+    mtsCommandWriteBase *FinishedEventGet(void);
 
     std::string GetMailBoxName(void) const;
 

@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2013-08-06
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,11 +18,20 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// This file contains the mtsSocketProxyClient class, which provides the client side
+// of a UDP network implementation for the cisst component-based framework.
+// It is an alternative to the ICE network implementation.
+//
+// For now, many of the "helper" proxy classes are defined in this file. In the future,
+// they could be moved to separate classes.
+
 #include <cisstCommon/cmnAssert.h>
 #include <cisstMultiTask/mtsSocketProxyClient.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsCallableReadMethod.h>
 #include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
+#include <cisstMultiTask/mtsCommandQueuedVoidReturn.h>
+#include <cisstMultiTask/mtsCommandQueuedWriteReturn.h>
 
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
@@ -31,6 +40,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 
 #include "mtsProxySerializer.h"
+
+//************************ mtsSocketProxyClientConstructorArg *********************************
+//
+// This data type is used for dynamic creation of the mtsSocketProxyClient. Eventually,
+// it could be implemented using cisstDataGenerator.
 
 CMN_IMPLEMENT_SERVICES(mtsSocketProxyClientConstructorArg);
 
@@ -83,22 +97,48 @@ bool mtsSocketProxyClientConstructorArg::FromStreamRaw(std::istream & inputStrea
     return (typeid(*this) == typeid(mtsSocketProxyClientConstructorArg));
 }
 
+//********************************* EventReceiverWriteProxy **********************************************
+//
+// This class provides a receiver for the write events used by mtsSocketProxyServer to send back
+// execution results. The ExecuteSerialized method receives a string, and expects the first part of
+// the string to be the serialized mtsExecutionResult (actually, an mtsExecutionResultProxy, which
+// is derived from mtsGenericObject). If a return value is expected, it follows the execution result.
+// The CommandWrapper class (see below) contains an instance of this class, and indicates whether
+// a return value is expected by calling SetArg, passing either 0 (no return value expected) or
+// a pointer to the expected type (derived from mtsGenericObject).
+//
+// This class uses an osaThreadSignal to handle blocking. It maintains a pointer to the Serializer
+// for the client (note that there may be multiple clients connected to the provided interface, but
+// they can share a single serializer).
+//
+// The class also contains a pointer to a BlockingFinishedCommand, which is used for blocking void and
+// write commands. This is backward-compatible, and should eventually be removed when there is a better
+// implementation of blocking commands.
+
 class EventReceiverWriteProxy
 {
 public:
     enum ExecutionState { CMD_NONE, CMD_QUEUED, CMD_FINISHED, CMD_ABORTED };
 
 private:
-    osaThreadSignal    Signal;
+    osaThreadSignal     Signal;
     mtsProxySerializer *Serializer;
     mtsGenericObject   *arg;
-    ExecutionState    state;
+    ExecutionState      state;
+    bool                isBlocking;
+    mtsCommandVoid     *BlockingFinishedCmd;
 
 public:
-    EventReceiverWriteProxy(mtsProxySerializer *serializer) : Serializer(serializer), arg(0), state(CMD_NONE) {}
+    EventReceiverWriteProxy(mtsProxySerializer *serializer) : Serializer(serializer), arg(0),
+                                                              state(CMD_NONE), isBlocking(false), BlockingFinishedCmd(0) {}
     ~EventReceiverWriteProxy() {}
 
     void SetArg(mtsGenericObject *a) { state = CMD_NONE; arg = a; }
+    void SetBlockingFlag(bool flag)  { isBlocking = flag; }
+    bool IsBlocking(void) const      { return isBlocking; }
+    void SetBlockingFinishedCommand(mtsCommandVoid *cmd) { BlockingFinishedCmd = cmd; }
+    mtsCommandVoid *GetBlockingFinishedCommand(void) const { return BlockingFinishedCmd; }
+
     bool EventReceived() const { return (state != CMD_NONE); }
     bool WasQueued() const { return (state == CMD_QUEUED); }
     bool WasFinished() const { return (state == CMD_FINISHED); }
@@ -107,11 +147,19 @@ public:
 
     void ExecuteSerialized(const std::string &argString)
     {
-        if (argString == "QUEUED")     // For any command that can be queued
+        // argString contains mtsExecutionResult, possibly followed by a return value
+        mtsExecutionResultProxy resultProxy;
+        if (!Serializer->DeSerialize(argString, resultProxy)) {
+            CMN_LOG_RUN_ERROR << "EventReceiverWriteProxy: failed to deserialize execution result" << std::endl;
+            state = CMD_ABORTED;
+            return;
+        }
+        mtsExecutionResult result(resultProxy.GetData());
+        if (result.Value() == mtsExecutionResult::COMMAND_QUEUED)
             state = CMD_QUEUED;
-        else if (arg) {                // For commands with a return value
-            if ((argString.size() >= 3) && (argString.compare(0, 3, "OK ") == 0)) {
-                if (Serializer->DeSerialize(argString.substr(3), *arg))
+        else if (arg) {
+            if (result.Value() == mtsExecutionResult::COMMAND_SUCCEEDED) {
+                if (Serializer->DeSerializeNext(*arg))
                     state = CMD_FINISHED;
                 else {
                     CMN_LOG_RUN_ERROR << "EventReceiverWriteProxy: failed to deserialize return value of type "
@@ -119,24 +167,23 @@ public:
                     state = CMD_ABORTED;
                 }
             }
-            else if ((argString.size() >= 5) && (argString.compare(0, 5, "FAIL ") == 0))
-                state = CMD_ABORTED;
             else {
-                CMN_LOG_RUN_WARNING << "EventReceiverWriteProxy(arg): unexpected response: " << argString << std::endl;
+                CMN_LOG_RUN_WARNING << "EventReceiverWriteProxy: received result " << mtsExecutionResult::ToString(result.Value()) << std::endl;
                 state = CMD_ABORTED;
             }
         }
-        else {                         // For commands with a return value
-            if (argString == "OK")
+        else {                         // For commands without a return value
+            if (result.Value() == mtsExecutionResult::COMMAND_SUCCEEDED)
                 state = CMD_FINISHED;
-            else if (argString == "FAIL")
-                state = CMD_ABORTED;
             else {
-                CMN_LOG_RUN_WARNING << "EventReceiverWriteProxy: unexpected response: " << argString << std::endl;
+                CMN_LOG_RUN_WARNING << "EventReceiverWriteProxy: received result " << mtsExecutionResult::ToString(result.Value()) << std::endl;
                 state = CMD_ABORTED;
             }
-        }
 
+            // For blocking commands, call BlockingFinishedCmd to raise the system event (mtsInterfaceProvided::BlockingCommandExecuted)
+            if (isBlocking && BlockingFinishedCmd)
+                BlockingFinishedCmd->Execute(MTS_NOT_BLOCKING);
+        }
 
         Signal.Raise();
     }
@@ -144,6 +191,27 @@ public:
     bool Wait(double timeInSec) { return Signal.Wait(timeInSec); }
 };
 
+//****************************************** Command Wrappers **************************************************
+//
+// These classes provide the methods for the mtsCommand objects that populate the provided interface.
+//    CommandWrapperVoid::Method is for mtsCommandVoid
+//    CommandWrapperWrite::Method is for mtsCommandWrite
+//    etc.
+//
+// The implementation uses classes because there is data that needs to be associated with each class instance.
+// The CommandWrapperBase class contains the data that is needed by all derived classes:
+//    Name:           name of command
+//    Socket:         reference to mtsSocketProxyClient::Socket (single socket shared by all)
+//    Handle:         "handle" for this command (see mtsSocketProxyCommon); basically, this is the address of
+//                    the command object, preceeded by some identifying data (space, command type)
+//    Receiver:       An instance of the EventReceiverWriteProxy, which is used to receive return events from the Server
+//    receiveHandler: A (write) command object that is used to call EventReceiverWriteProxy::ExecuteSerialized; this is
+//                    sent to the Server (as a recv_handle)
+//    Proxy:          A pointer to mtsSocketProxyClient; these classes use it to access the Serializer and a few
+//                    methods; it could also be used to access the Socket
+//
+// These classes include a Clone method because some items, such as the Receiver and receiveHandler, should
+// be distinct within each provided interface instance (end-user interface).
 
 class CommandWrapperBase {
 protected:
@@ -159,6 +227,16 @@ public:
     {
         Handle[0] = 0;
         Receiver = new EventReceiverWriteProxy(Proxy->Serializer);
+        receiveHandler = new mtsCommandWrite<EventReceiverWriteProxy, std::string>(&EventReceiverWriteProxy::ExecuteSerialized,
+                                                                                   Receiver, name+"Receiver", std::string());
+    }
+
+    CommandWrapperBase(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy, const char *handle, mtsCommandVoid *blockingFinishedCmd)
+        : Name(name), Socket(socket), Proxy(proxy)
+    {
+        SetHandle(handle);
+        Receiver = new EventReceiverWriteProxy(Proxy->Serializer);
+        Receiver->SetBlockingFinishedCommand(blockingFinishedCmd);
         receiveHandler = new mtsCommandWrite<EventReceiverWriteProxy, std::string>(&EventReceiverWriteProxy::ExecuteSerialized,
                                                                                    Receiver, name+"Receiver", std::string());
     }
@@ -180,25 +258,30 @@ public:
         memcpy(Handle, handle, sizeof(Handle));
     }
 
+    void SetBlockingFinishedCommand(mtsCommandVoid *cmd)
+    {
+        Receiver->SetBlockingFinishedCommand(cmd);
+    }
+
     // Wait for result (print warning if need to wait more than timeoutInSec)
     // Returns true if expected state was reached; false otherwise
     bool WaitForResponse(const char *cmdType, EventReceiverWriteProxy::ExecutionState expectedState, double timeoutInSec) const
     {
         if (!Proxy->CheckForEventsImmediate(timeoutInSec))
             Receiver->Wait(timeoutInSec);
-        if (Receiver->AtState(expectedState))
+        if (Receiver->AtState(expectedState) || Receiver->WasFinished())
             return true;
         if (Receiver->WasAborted())
             return false;
         CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: still waiting for " << cmdType << " command " 
                             << Name << " after " << timeoutInSec << " seconds..." << std::endl;
-        while (!(Receiver->AtState(expectedState) || Receiver->WasAborted())) {
+        while (!(Receiver->AtState(expectedState) || Receiver->WasFinished() || Receiver->WasAborted())) {
             if (!Proxy->CheckForEventsImmediate(timeoutInSec))
                 Receiver->Wait(timeoutInSec);
         }
         CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: received response for " << cmdType
                             << " command " << Name << std::endl;
-        return Receiver->AtState(expectedState);
+        return (Receiver->AtState(expectedState) || Receiver->WasFinished());
     }
 };
 
@@ -206,7 +289,18 @@ class CommandWrapperVoid : public CommandWrapperBase {
 public:
     CommandWrapperVoid(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) {}
+    CommandWrapperVoid(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy, const char *handle, mtsCommandVoid *blockingFinishedCmd)
+        : CommandWrapperBase(name, socket, proxy, handle, blockingFinishedCmd) {}
     ~CommandWrapperVoid() {}
+
+    CommandWrapperVoid *Clone(void) const
+    {
+        return new CommandWrapperVoid(Name, Socket, Proxy, Handle, Receiver->GetBlockingFinishedCommand());
+    }
+
+    // This is called just before the Method is called via the command object
+    void SetBlockingFlag(mtsBlockingType blocking) { Receiver->SetBlockingFlag(blocking == MTS_BLOCKING); }
+
     void Method(void)
     {
         if ((Handle[0] != ' ') || (Handle[1] != 'V')) {
@@ -216,6 +310,8 @@ public:
         Receiver->SetArg(0);
         char sendBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
         memcpy(sendBuffer, Handle, sizeof(Handle));
+        if (Receiver->IsBlocking())
+            sendBuffer[1] = 'v';
         CommandHandle recv_handle('W', receiveHandler);
         recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
         if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
@@ -223,6 +319,8 @@ public:
             if (!WaitForResponse("void", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
                 CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue void command "
                                     << Name << std::endl;
+            // Now return to the caller. If this is a blocking command, the caller will
+            // wait on a thread signal, which will be raised in the Receiver object.
         }
     }
 };
@@ -231,7 +329,17 @@ class CommandWrapperWrite : public CommandWrapperBase {
 public:
     CommandWrapperWrite(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) {}
+    CommandWrapperWrite(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy, const char *handle, mtsCommandVoid *blockingFinishedCmd)
+        : CommandWrapperBase(name, socket, proxy, handle, blockingFinishedCmd) {}
     ~CommandWrapperWrite() {}
+
+    CommandWrapperWrite *Clone(void) const
+    {
+        return new CommandWrapperWrite(Name, Socket, Proxy, Handle, Receiver->GetBlockingFinishedCommand());
+    }
+
+    // This is called just before the Method is called via the command object
+    void SetBlockingFlag(mtsBlockingType blocking) { Receiver->SetBlockingFlag(blocking == MTS_BLOCKING); }
 
     void Method(const mtsGenericObject &arg)
     {
@@ -244,6 +352,8 @@ public:
         if (Proxy->Serialize(arg, sendBuffer)) {
             char cmdBuffer[2*CommandHandle::COMMAND_HANDLE_STRING_SIZE];
             memcpy(cmdBuffer, Handle, sizeof(Handle));
+            if (Receiver->IsBlocking())
+                cmdBuffer[1] = 'w';
             CommandHandle recv_handle('W', receiveHandler);
             recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
@@ -252,6 +362,8 @@ public:
                 if (!WaitForResponse("write", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
                     CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue write command "
                                         << Name << std::endl;
+                // Now return to the caller. If this is a blocking command, the caller will
+                // wait on a thread signal, which will be raised in the Receiver object.
             }
         }
     }
@@ -259,10 +371,19 @@ public:
 
 class CommandWrapperRead : public CommandWrapperBase {
 public:
+    typedef mtsCallableReadMethodGeneric<CommandWrapperRead> CallableType;
+
     CommandWrapperRead(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) { }
+    CommandWrapperRead(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy, const char *handle)
+        : CommandWrapperBase(name, socket, proxy, handle, 0) { }
 
     ~CommandWrapperRead() { }
+
+    CommandWrapperRead *Clone(void) const
+    {
+        return new CommandWrapperRead(Name, Socket, Proxy, Handle);
+    }
 
     bool Method(mtsGenericObject &arg) const
     {
@@ -276,10 +397,10 @@ public:
         CommandHandle recv_handle('W', receiveHandler);
         recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
         if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
-            // Wait for result, with warning message after 2 seconds
-            if (!WaitForResponse("read", EventReceiverWriteProxy::CMD_FINISHED, 2.0))
-                CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to receive result for read command "
-                                    << Name << std::endl;
+            // Wait for final result, with warning message after 10 seconds
+            if (!WaitForResponse("read", EventReceiverWriteProxy::CMD_FINISHED, 10.0))
+                CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: read command " << Name
+                                    << " did not receive response (timeout)" << std::endl;
         }
         return Receiver->WasFinished();
     }
@@ -287,9 +408,18 @@ public:
 
 class CommandWrapperQualifiedRead : public CommandWrapperBase {
 public:
+    typedef mtsCallableQualifiedReadMethodGeneric<CommandWrapperQualifiedRead> CallableType;
+
     CommandWrapperQualifiedRead(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) {}
+    CommandWrapperQualifiedRead(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy, const char *handle)
+        : CommandWrapperBase(name, socket, proxy, handle, 0) {}
     ~CommandWrapperQualifiedRead() {}
+
+    CommandWrapperQualifiedRead *Clone(void) const
+    {
+        return new CommandWrapperQualifiedRead(Name, Socket, Proxy, Handle);
+    }
 
     bool Method(const mtsGenericObject &arg1, mtsGenericObject &arg2) const
     {
@@ -306,10 +436,10 @@ public:
             recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
             if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                // Wait for result, with warning message after 2 seconds
-                if (!WaitForResponse("qualified read", EventReceiverWriteProxy::CMD_FINISHED, 2.0))
-                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to receive result for qualified read command "
-                                        << Name << std::endl;
+                // Wait for final result, with warning message after 10 seconds
+                if (!WaitForResponse("qualified read", EventReceiverWriteProxy::CMD_FINISHED, 10.0))
+                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: qualified read command " << Name
+                                        << " did not receive response (timeout)" << std::endl;
             }
         }
         return Receiver->WasFinished();
@@ -318,10 +448,19 @@ public:
 
 class CommandWrapperVoidReturn : public CommandWrapperBase {
 public:
+    typedef mtsCallableVoidReturnMethodGeneric<CommandWrapperVoidReturn> CallableType;
+
     CommandWrapperVoidReturn(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) { }
+    CommandWrapperVoidReturn(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy, const char *handle)
+        : CommandWrapperBase(name, socket, proxy, handle, 0) { }
 
     ~CommandWrapperVoidReturn() { }
+
+    CommandWrapperVoidReturn *Clone(void) const
+    {
+        return new CommandWrapperVoidReturn(Name, Socket, Proxy, Handle);
+    }
 
     void Method(mtsGenericObject &arg)
     { 
@@ -335,9 +474,11 @@ public:
         CommandHandle recv_handle('W', receiveHandler);
         recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
         if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
-            // Wait for initial result (OK), with warning message after 2 seconds
+            // Wait for initial result (QUEUED), with warning message after 2 seconds
             if (WaitForResponse("VoidReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0)) {
                 // Wait for final result, with warning message after 10 seconds
+                // This makes it backward-compatible with the exiting mtsFunctionVoidReturn implementation.
+                // In the future, we should return, as done for blocking void and write commands.
                 if (!WaitForResponse("VoidReturn", EventReceiverWriteProxy::CMD_FINISHED, 10.0))
                     CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: VoidReturn command " << Name
                                         << " did not receive response (timeout)" << std::endl;
@@ -351,10 +492,19 @@ public:
 
 class CommandWrapperWriteReturn : public CommandWrapperBase {
 public:
+    typedef mtsCallableWriteReturnMethodGeneric<CommandWrapperWriteReturn> CallableType;
+
     CommandWrapperWriteReturn(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) { }
+    CommandWrapperWriteReturn(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy, const char *handle)
+        : CommandWrapperBase(name, socket, proxy, handle, 0) { }
 
     ~CommandWrapperWriteReturn() { }
+
+    CommandWrapperWriteReturn *Clone(void) const
+    {
+        return new CommandWrapperWriteReturn(Name, Socket, Proxy, Handle);
+    }
 
     void Method(const mtsGenericObject &arg1, mtsGenericObject &arg2)
     { 
@@ -374,6 +524,8 @@ public:
                 // Wait for initial result (OK), with warning message after 2 seconds
                 if (WaitForResponse("WriteReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0)) {
                     // Wait for final result, with warning message after 10 seconds
+                    // This makes it backward-compatible with the exiting mtsFunctionWriteReturn implementation.
+                    // In the future, we should return, as done for blocking void and write commands.
                     if (!WaitForResponse("WriteReturn", EventReceiverWriteProxy::CMD_FINISHED, 10.0))
                         CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: WriteReturn command " << Name
                                             << " did not receive response (timeout)" << std::endl;
@@ -385,6 +537,158 @@ public:
         }
     }
 };
+
+//************************************* mtsCommandQueuedXXXX proxies ****************************************************
+//
+// These override the Clone virtual method to also clone the command wrapper.
+
+class mtsCommandQueuedVoidProxy : public mtsCommandQueuedVoid
+{
+    typedef mtsCallableVoidMethod<CommandWrapperVoid> CallableType;
+    CommandWrapperVoid *commandWrapper;
+
+public:
+    // This class takes ownership of the wrapper and deletes it in the destructor
+    mtsCommandQueuedVoidProxy(const std::string &name, CommandWrapperVoid *wrapper, mtsMailBox *mailBox, size_t size) :
+        mtsCommandQueuedVoid(new CallableType(&CommandWrapperVoid::Method, wrapper), name, mailBox, size), commandWrapper(wrapper)
+    {
+        if (mailBox)
+            commandWrapper->SetBlockingFinishedCommand(mailBox->GetPostCommandDequeuedCommand());
+    }
+
+    ~mtsCommandQueuedVoidProxy()
+    {
+        delete this->Callable;   // in base class, mtsCommandVoid
+        delete commandWrapper;
+    }
+
+    // virtual method in base class
+    mtsCommandQueuedVoid * Clone(mtsMailBox * mailBox, size_t size) const
+    {
+        return new mtsCommandQueuedVoidProxy(GetName(), commandWrapper->Clone(), mailBox, size);
+    }
+
+    // virtual method in base class, mtsCommandVoid
+    mtsExecutionResult Execute(mtsBlockingType blocking)
+    {
+        commandWrapper->SetBlockingFlag(blocking);
+        // We do not block over the socket
+        mtsExecutionResult ret = mtsCommandQueuedVoid::Execute(MTS_NOT_BLOCKING);
+        return ret;
+    }
+};
+
+class mtsCommandQueuedWriteProxy : public mtsCommandQueuedWriteGeneric
+{
+    CommandWrapperWrite *commandWrapper;
+
+public:
+    // This class takes ownership of the wrapper and deletes it in the destructor
+    mtsCommandQueuedWriteProxy(const std::string &name, CommandWrapperWrite *wrapper, const mtsGenericObject *argPrototype, mtsMailBox *mailBox, size_t size) :
+        mtsCommandQueuedWriteGeneric(mailBox,
+                                     new mtsCommandWriteGeneric<CommandWrapperWrite>(&CommandWrapperWrite::Method, wrapper, name, argPrototype),
+                                     size), commandWrapper(wrapper)
+    {
+        if (mailBox)
+            commandWrapper->SetBlockingFinishedCommand(mailBox->GetPostCommandDequeuedCommand());
+    }
+
+    ~mtsCommandQueuedWriteProxy()
+    {
+        delete this->ActualCommand;  // in base class, mtsCommandQueuedWriteBase
+        delete commandWrapper;
+    }
+
+    // virtual method in base class
+    mtsCommandQueuedWriteGeneric * Clone(mtsMailBox * mailBox, size_t size) const
+    {
+        return new mtsCommandQueuedWriteProxy(GetName(), commandWrapper->Clone(), GetArgumentPrototype(), mailBox, size);
+    }
+
+    // virtual method in base class, mtsCommandWriteBase
+    mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking)
+    {
+        commandWrapper->SetBlockingFlag(blocking);
+        // We do not block over the socket
+        mtsExecutionResult ret = mtsCommandQueuedWriteBase::Execute(argument, MTS_NOT_BLOCKING);
+        return ret;
+    }
+};
+
+// Following class used for Read and VoidReturn
+template <class _Base, class _Wrapper>
+class mtsCommandQueuedVoidReturnBaseProxy : public _Base
+{
+    typedef _Base BaseType;
+    typedef _Wrapper WrapperType;
+    typedef typename _Wrapper::CallableType CallableType;
+    typedef mtsCommandQueuedVoidReturnBaseProxy<_Base, _Wrapper> ThisType;
+
+    WrapperType *commandWrapper;
+
+public:
+    // This class takes ownership of the wrapper and deletes it in the destructor
+    mtsCommandQueuedVoidReturnBaseProxy(const std::string &name, _Wrapper *wrapper, const mtsGenericObject *resultPrototype, mtsMailBox *mailBox, size_t size) :
+        BaseType(new CallableType(&WrapperType::Method, wrapper), name, resultPrototype, mailBox, size), commandWrapper(wrapper)
+    {}
+
+    ~mtsCommandQueuedVoidReturnBaseProxy()
+    {
+        delete this->Callable;  // in base class
+        delete commandWrapper;
+    }
+
+    // virtual method in base class
+    BaseType * Clone(mtsMailBox * mailBox, size_t size) const
+    {
+        return new ThisType(GetName(), commandWrapper->Clone(), GetResultPrototype(), mailBox, size);
+    }
+};
+
+typedef mtsCommandQueuedVoidReturnBaseProxy<mtsCommandQueuedRead, CommandWrapperRead> mtsCommandQueuedReadProxy;
+typedef mtsCommandQueuedVoidReturnBaseProxy<mtsCommandQueuedVoidReturn, CommandWrapperVoidReturn> mtsCommandQueuedVoidReturnProxy;
+
+// Following class used for QualifiedRead and WriteReturn
+template <class _Base, class _Wrapper>
+class mtsCommandQueuedWriteReturnBaseProxy : public _Base
+{
+    typedef _Base BaseType;
+    typedef _Wrapper WrapperType;
+    typedef typename _Wrapper::CallableType CallableType;
+    typedef mtsCommandQueuedWriteReturnBaseProxy<_Base, _Wrapper> ThisType;
+
+    WrapperType *commandWrapper;
+
+public:
+    // This class takes ownership of the wrapper and deletes it in the destructor
+    mtsCommandQueuedWriteReturnBaseProxy(const std::string &name, WrapperType *wrapper, 
+                                         const mtsGenericObject *argumentPrototype, const mtsGenericObject *resultPrototype,
+                                         mtsMailBox *mailBox, size_t size) :
+        BaseType(new CallableType(&WrapperType::Method, wrapper), name, argumentPrototype, resultPrototype, mailBox, size),
+        commandWrapper(wrapper)
+    {}
+
+    ~mtsCommandQueuedWriteReturnBaseProxy()
+    {
+        delete this->Callable;  // in base class
+        delete commandWrapper;
+    }
+
+    // virtual method in base class
+    BaseType * Clone(mtsMailBox * mailBox, size_t size) const
+    {
+        return new ThisType(GetName(), commandWrapper->Clone(),
+                            GetArgumentPrototype(), GetResultPrototype(),
+                            mailBox, size);
+    }
+
+};
+
+typedef mtsCommandQueuedWriteReturnBaseProxy<mtsCommandQueuedQualifiedRead, CommandWrapperQualifiedRead> mtsCommandQueuedQualifiedReadProxy;
+typedef mtsCommandQueuedWriteReturnBaseProxy<mtsCommandQueuedWriteReturn, CommandWrapperWriteReturn> mtsCommandQueuedWriteReturnProxy;
+
+
+//*********************** MulticastCommand proxies, which are used for events ***************************************
 
 // NOTE: This is an alternative to mtsMulticastCommandVoidProxy.h, which is used for ICE
 class MulticastCommandVoidProxy : public mtsMulticastCommandVoid {
@@ -407,7 +711,7 @@ bool MulticastCommandVoidProxy::AddCommand(mtsMulticastCommandVoid::BaseType * c
             CommandHandle handle('V', this);
             char handleBuf[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
             handle.ToString(handleBuf);
-            Proxy->EventOperation("EventEnable", GetName(), handleBuf);
+            Proxy->EventEnable(GetName(), handleBuf);
         }
         return true;
     }
@@ -422,7 +726,7 @@ bool MulticastCommandVoidProxy::RemoveCommand(mtsMulticastCommandVoid::BaseType 
             CommandHandle handle('V', this);
             char handleBuf[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
             handle.ToString(handleBuf);
-            Proxy->EventOperation("EventDisable", GetName(), handleBuf);
+            Proxy->EventDisable(GetName(), handleBuf);
         }
         return true;
     }
@@ -451,7 +755,7 @@ public:
 
 MulticastCommandWriteProxy::MulticastCommandWriteProxy(const std::string &name, const std::string &argPrototypeSerialized,
                                                        mtsSocketProxyClient *proxy)
-    : mtsMulticastCommandWriteBase(name), argSerialized(argPrototypeSerialized), Proxy(proxy)
+    : mtsMulticastCommandWriteBase(name), argSerialized(argPrototypeSerialized), arg(0), Proxy(proxy)
 {
     if (!CreateArg())
         CMN_LOG_INIT_ERROR << "MulticastCommandWriteProxy: could not deserialize argument prototype" << std::endl;
@@ -489,7 +793,7 @@ bool MulticastCommandWriteProxy::AddCommand(mtsMulticastCommandWriteBase::BaseTy
             CommandHandle handle('W', this);
             char handleBuf[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
             handle.ToString(handleBuf);
-            Proxy->EventOperation("EventEnable", GetName(), handleBuf);
+            Proxy->EventEnable(GetName(), handleBuf);
         }
         return true;
     }
@@ -504,7 +808,7 @@ bool MulticastCommandWriteProxy::RemoveCommand(mtsMulticastCommandWriteBase::Bas
             CommandHandle handle('W', this);
             char handleBuf[CommandHandle::COMMAND_HANDLE_STRING_SIZE];
             handle.ToString(handleBuf);
-            Proxy->EventOperation("EventDisable", GetName(), handleBuf);
+            Proxy->EventDisable(GetName(), handleBuf);
         }
         return true;
     }
@@ -537,9 +841,17 @@ mtsExecutionResult MulticastCommandWriteProxy::ExecuteSerialized(const std::stri
     return ret;
 }
 
+//************************************ mtsSocketProxyClient class ******************************************
+//
+// This class has a provided interface for the client component to connect to.
+// It creates a socket connection to the mtsSocketProxyServer object (server proxy)
+// at the specified IP and port
+
 mtsSocketProxyClient::mtsSocketProxyClient(const std::string & proxyName, const std::string & ip, short port) :
     mtsTaskContinuous(proxyName),
-    Socket(osaSocket::UDP)
+    Socket(osaSocket::UDP),
+    EventEnableCommand(0),
+    EventDisableCommand(0)
 {
     Socket.SetDestination(ip, port);
     CreateClientProxy("Provided");
@@ -547,7 +859,9 @@ mtsSocketProxyClient::mtsSocketProxyClient(const std::string & proxyName, const 
 
 mtsSocketProxyClient::mtsSocketProxyClient(const mtsSocketProxyClientConstructorArg &arg) :
     mtsTaskContinuous(arg.Name),
-    Socket(osaSocket::UDP)
+    Socket(osaSocket::UDP),
+    EventEnableCommand(0),
+    EventDisableCommand(0)
 {
     Socket.SetDestination(arg.IP, arg.Port);
     CreateClientProxy("Provided");
@@ -556,13 +870,15 @@ mtsSocketProxyClient::mtsSocketProxyClient(const mtsSocketProxyClientConstructor
 mtsSocketProxyClient::~mtsSocketProxyClient()
 {
     size_t i;
-    for (i = 0; i < CommandWrappers.size(); i++)
-        delete CommandWrappers[i];
-
     for (i = 0; i < EventGenerators.size(); i++)
         delete EventGenerators[i];
 
     delete Serializer;
+    // PK: Need to do following
+    // delete EventEnableCommand->ClassInstantiation;
+    // delete EventDisableCommand->ClassInstantiation;
+    delete EventEnableCommand;
+    delete EventDisableCommand;
 }
 
 void mtsSocketProxyClient::Startup(void)
@@ -681,6 +997,20 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     else
         CMN_LOG_CLASS_RUN_WARNING << "GetInitData failed" << std::endl;
 
+    // Set up local commands for enabling and disabling events. These write commands are not queued because they are
+    // called internally. In particular, mtsInterfaceProvided::AddObserver and RemoveObserver call the AddCommand
+    // and RemoveCommand methods of the multicast command (write and void) proxies, which may call these commands
+    // to enable or disable sending of events on the server. If thread safety is required, it would be better to
+    // make AddObserver and RemoveObserver available as queued commands.
+    mtsStdString arg;
+    CommandWrapperWrite *eventEnableWrapper = new CommandWrapperWrite("EventEnable", Socket, this, ServerData.EventEnable(), 0);
+    EventEnableCommand = new mtsCommandWriteGeneric<CommandWrapperWrite>(&CommandWrapperWrite::Method, eventEnableWrapper,
+                                                                         "EventEnable", &arg);
+    CommandWrapperWrite *eventDisableWrapper = new CommandWrapperWrite("EventDisable", Socket, this, ServerData.EventDisable(), 0);
+    EventDisableCommand = new mtsCommandWriteGeneric<CommandWrapperWrite>(&CommandWrapperWrite::Method, eventDisableWrapper,
+                                                                          "EventDisable", &arg);
+    
+
     // Create the client proxy based on the provided interface description obtained from the server proxy.
     mtsGenericObjectProxy<mtsInterfaceProvidedDescription> descProxy;
     CommandWrapperRead GetInterfaceDescription("GetInterfaceDescription", Socket, this);
@@ -690,7 +1020,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     mtsInterfaceProvidedDescription & providedInterfaceDescription(descProxy.GetData());
 
     // Create a local provided interface
-    mtsInterfaceProvided * providedInterface = AddInterfaceProvidedWithoutSystemEvents(providedInterfaceName);
+    mtsInterfaceProvided * providedInterface = AddInterfaceProvided(providedInterfaceName);
     if (!providedInterface) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateClientProxy: failed to add provided interface: " << providedInterfaceName << std::endl;
         return false;
@@ -701,8 +1031,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     mtsStdString handleSerialized;
 
     // Create Void command proxies
-    CommandWrapperQualifiedRead GetHandleVoid("GetHandleVoid", Socket, this);
-    GetHandleVoid.SetHandle(ServerData.GetHandleVoid());
+    CommandWrapperQualifiedRead GetHandleVoid("GetHandleVoid", Socket, this, ServerData.GetHandleVoid());
     for (i = 0; i < providedInterfaceDescription.CommandsVoid.size(); ++i) {
         std::string commandName = providedInterfaceDescription.CommandsVoid[i].Name;
         CommandWrapperVoid *wrapper = new CommandWrapperVoid(commandName, Socket, this);
@@ -710,13 +1039,13 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             wrapper->SetHandle(handleSerialized);
         else
             CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for void command " << commandName << std::endl;
-        CommandWrappers.push_back(wrapper);
-        providedInterface->AddCommandVoid(&CommandWrapperVoid::Method, wrapper, commandName);
+        // Make sure that queuedCommand gets deleted
+        mtsCommandQueuedVoidProxy *queuedCommand = new mtsCommandQueuedVoidProxy(commandName, wrapper, 0, 0);
+        providedInterface->AddCommandVoid(queuedCommand);
     }
 
     // Create Write command proxies
-    CommandWrapperQualifiedRead GetHandleWrite("GetHandleWrite", Socket, this);
-    GetHandleWrite.SetHandle(ServerData.GetHandleWrite());
+    CommandWrapperQualifiedRead GetHandleWrite("GetHandleWrite", Socket, this, ServerData.GetHandleWrite());
     for (i = 0; i < providedInterfaceDescription.CommandsWrite.size(); ++i) {
         const mtsCommandWriteDescription &cmd = providedInterfaceDescription.CommandsWrite[i];
         CommandWrapperWrite *wrapper = new CommandWrapperWrite(cmd.Name, Socket, this);
@@ -724,7 +1053,6 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             wrapper->SetHandle(handleSerialized);
         else
             CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for write command " << cmd.Name << std::endl;
-        CommandWrappers.push_back(wrapper);
         std::stringstream argStream(cmd.ArgumentPrototypeSerialized);
         cmnDeSerializer deserializer(argStream);
         mtsGenericObject *arg = 0;
@@ -735,14 +1063,13 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             CMN_LOG_CLASS_INIT_WARNING << "Failed to deserialize arg prototype for write command " << cmd.Name
                                        << ": " << e.what() << std::endl;
         }
-        mtsCommandWriteBase *cmdWrite = new mtsCommandWriteGeneric<CommandWrapperWrite>
-            (&CommandWrapperWrite::Method, wrapper, cmd.Name, arg);
-        providedInterface->AddCommandWrite(cmdWrite);
+        // Make sure that queuedCommand gets deleted
+        mtsCommandQueuedWriteProxy *queuedCommand = new mtsCommandQueuedWriteProxy(cmd.Name, wrapper, arg, 0, 0);
+        providedInterface->AddCommandWrite(queuedCommand);
     }
 
     // Create Read command proxies
-    CommandWrapperQualifiedRead GetHandleRead("GetHandleRead", Socket, this);
-    GetHandleRead.SetHandle(ServerData.GetHandleRead());
+    CommandWrapperQualifiedRead GetHandleRead("GetHandleRead", Socket, this, ServerData.GetHandleRead());
     for (i = 0; i < providedInterfaceDescription.CommandsRead.size(); ++i) {
         const mtsCommandReadDescription &cmd = providedInterfaceDescription.CommandsRead[i];
         CommandWrapperRead *wrapper = new CommandWrapperRead(cmd.Name, Socket, this);
@@ -750,9 +1077,6 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             wrapper->SetHandle(handleSerialized);
         else
             CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for read command " << cmd.Name << std::endl;
-        CommandWrappers.push_back(wrapper);
-        mtsCallableReadBase *callable = new mtsCallableReadMethodGeneric<CommandWrapperRead>
-            (&CommandWrapperRead::Method, wrapper);
         std::stringstream argStream(cmd.ArgumentPrototypeSerialized);
         cmnDeSerializer deserializer(argStream);
         mtsGenericObject *arg = 0;
@@ -763,12 +1087,13 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             CMN_LOG_CLASS_INIT_WARNING << "Failed to deserialize arg prototype for read command " << cmd.Name
                                        << ": " << e.what() << std::endl;
         }
-        providedInterface->AddCommandRead(callable, cmd.Name, arg);
+        // Make sure that queuedCommand gets deleted
+        mtsCommandQueuedReadProxy *queuedCommand = new mtsCommandQueuedReadProxy(cmd.Name, wrapper, arg, 0, 0);
+        providedInterface->AddCommandRead(queuedCommand);
     }
 
     // Create QualifiedRead command proxies
-    CommandWrapperQualifiedRead GetHandleQualifiedRead("GetHandleQualifiedRead", Socket, this);
-    GetHandleQualifiedRead.SetHandle(ServerData.GetHandleQualifiedRead());
+    CommandWrapperQualifiedRead GetHandleQualifiedRead("GetHandleQualifiedRead", Socket, this, ServerData.GetHandleQualifiedRead());
     for (i = 0; i < providedInterfaceDescription.CommandsQualifiedRead.size(); ++i) {
         const mtsCommandQualifiedReadDescription &cmd = providedInterfaceDescription.CommandsQualifiedRead[i];
         CommandWrapperQualifiedRead *wrapper = new CommandWrapperQualifiedRead(cmd.Name, Socket, this);
@@ -776,9 +1101,6 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             wrapper->SetHandle(handleSerialized);
         else
             CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for qualified read command " << cmd.Name << std::endl;
-        CommandWrappers.push_back(wrapper);
-        mtsCallableQualifiedReadBase *callable = new mtsCallableQualifiedReadMethodGeneric<CommandWrapperQualifiedRead>
-            (&CommandWrapperQualifiedRead::Method, wrapper);
         std::stringstream argStream(cmd.Argument1PrototypeSerialized+cmd.Argument2PrototypeSerialized);
         cmnDeSerializer deserializer(argStream);
         mtsGenericObject *arg1 = 0;
@@ -792,12 +1114,13 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             CMN_LOG_CLASS_INIT_WARNING << "Failed to deserialize arg prototypes for qualified read command " << cmd.Name
                                        << ": " << e.what() << std::endl;
         }
-        providedInterface->AddCommandQualifiedRead(callable, cmd.Name, arg1, arg2);
+        // Make sure that queuedCommand gets deleted
+        mtsCommandQueuedQualifiedReadProxy *queuedCommand = new mtsCommandQueuedQualifiedReadProxy(cmd.Name, wrapper, arg1, arg2, 0, 0);
+        providedInterface->AddCommandQualifiedRead(queuedCommand);
     }
 
     // Create VoidReturn command proxies
-    CommandWrapperQualifiedRead GetHandleVoidReturn("GetHandleVoidReturn", Socket, this);
-    GetHandleVoidReturn.SetHandle(ServerData.GetHandleVoidReturn());
+    CommandWrapperQualifiedRead GetHandleVoidReturn("GetHandleVoidReturn", Socket, this, ServerData.GetHandleVoidReturn());
     for (i = 0; i < providedInterfaceDescription.CommandsVoidReturn.size(); ++i) {
         const mtsCommandVoidReturnDescription &cmd = providedInterfaceDescription.CommandsVoidReturn[i];
         CommandWrapperVoidReturn *wrapper = new CommandWrapperVoidReturn(cmd.Name, Socket, this);
@@ -805,9 +1128,6 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             wrapper->SetHandle(handleSerialized);
         else
             CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for void return command " << cmd.Name << std::endl;
-        CommandWrappers.push_back(wrapper);
-        mtsCallableVoidReturnBase *callable = new mtsCallableVoidReturnMethodGeneric<CommandWrapperVoidReturn>
-            (&CommandWrapperVoidReturn::Method, wrapper);
         std::stringstream argStream(cmd.ResultPrototypeSerialized);
         cmnDeSerializer deserializer(argStream);
         mtsGenericObject *arg = 0;
@@ -818,12 +1138,13 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             CMN_LOG_CLASS_INIT_WARNING << "Failed to deserialize arg prototype for void return command " << cmd.Name
                                        << ": " << e.what() << std::endl;
         }
-        providedInterface->AddCommandVoidReturn(callable, cmd.Name, arg);
+        // Make sure that queuedCommand gets deleted
+        mtsCommandQueuedVoidReturnProxy *queuedCommand = new mtsCommandQueuedVoidReturnProxy(cmd.Name, wrapper, arg, 0, 0);
+        providedInterface->AddCommandVoidReturn(queuedCommand);
     }
 
     // Create WriteReturn command proxies
-    CommandWrapperQualifiedRead GetHandleWriteReturn("GetHandleWriteReturn", Socket, this);
-    GetHandleWriteReturn.SetHandle(ServerData.GetHandleWriteReturn());
+    CommandWrapperQualifiedRead GetHandleWriteReturn("GetHandleWriteReturn", Socket, this, ServerData.GetHandleWriteReturn());
     for (i = 0; i < providedInterfaceDescription.CommandsWriteReturn.size(); ++i) {
         const mtsCommandWriteReturnDescription &cmd = providedInterfaceDescription.CommandsWriteReturn[i];
         CommandWrapperWriteReturn *wrapper = new CommandWrapperWriteReturn(cmd.Name, Socket, this);
@@ -831,9 +1152,6 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             wrapper->SetHandle(handleSerialized);
         else
             CMN_LOG_CLASS_INIT_ERROR << "Could not get handle for write return command " << cmd.Name << std::endl;
-        CommandWrappers.push_back(wrapper);
-        mtsCallableWriteReturnBase *callable = new mtsCallableWriteReturnMethodGeneric<CommandWrapperWriteReturn>
-            (&CommandWrapperWriteReturn::Method, wrapper);
         std::stringstream argStream(cmd.ArgumentPrototypeSerialized+cmd.ResultPrototypeSerialized);
         cmnDeSerializer deserializer(argStream);
         mtsGenericObject *arg1 = 0;
@@ -847,15 +1165,19 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
             CMN_LOG_CLASS_INIT_WARNING << "Failed to deserialize arg prototypes for write return command " << cmd.Name
                                        << ": " << e.what() << std::endl;
         }
-        providedInterface->AddCommandWriteReturn(callable, cmd.Name, arg1, arg2);
+        // Make sure that queuedCommand gets deleted
+        mtsCommandQueuedWriteReturnProxy *queuedCommand = new mtsCommandQueuedWriteReturnProxy(cmd.Name, wrapper, arg1, arg2, 0, 0);
+        providedInterface->AddCommandWriteReturn(queuedCommand);
     }
 
     // Create Event Void generators
     for (i = 0; i < providedInterfaceDescription.EventsVoid.size(); ++i) {
         std::string eventName = providedInterfaceDescription.EventsVoid[i].Name;
-        MulticastCommandVoidProxy *eventProxy = new MulticastCommandVoidProxy(eventName, this);
-        EventGenerators.push_back(eventProxy);
-        providedInterface->AddEvent(eventName, eventProxy);
+        if (!mtsInterfaceProvided::IsSystemEventVoid(eventName)) {
+            MulticastCommandVoidProxy *eventProxy = new MulticastCommandVoidProxy(eventName, this);
+            EventGenerators.push_back(eventProxy);
+            providedInterface->AddEvent(eventName, eventProxy);
+        }
     }
 
     // Create Event Write generators
@@ -871,38 +1193,29 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
 }
 
 // Sends EventEnable or EventDisable command to Server.
-// Format of packet:  "CommandName Handle|EventNameSerialized"
+// Format of packet:  "opHandle|Handle|EventNameSerialized"
 // where:
-//     CommandName is "EventEnable" or "EventDisable" (delimited by space character)
-//     Handle is 10 bytes (space:1|cmdType:1|address:8)
-//     EventNameSerialized is the name of the event being enabled or disabled
+//     opHandle is the handle for "EventEnable" or "EventDisable" (10 bytes)
+//     handle is 10 bytes (space:1|cmdType:1|address:8)
+//     eventNameSerialized is the name of the event being enabled or disabled
 // TODO: merge with AddObserver and RemoveObserver in mtsInterfaceProvided (i.e., AddObserver and RemoveObserver
 //     should also be command objects in provided interface)
-bool mtsSocketProxyClient::EventOperation(const std::string &command, const std::string &eventName, const char *handle)
+void mtsSocketProxyClient::EventEnable(const std::string &eventName, const char *handle)
 {
-    bool ret = false;
     std::string handleAndName(handle, CommandHandle::COMMAND_HANDLE_STRING_SIZE);
     handleAndName.append(eventName);
-    std::string handleAndNameSerialized;
-    if (Serialize(mtsStdString(handleAndName), handleAndNameSerialized)) {
-        std::string buffer(command);
-        buffer.append(" ");
-        buffer.append(handleAndNameSerialized);
-        if (Socket.Send(buffer) > 0) {
-            char recvBuffer[8];
-            // Wait for result, with 2 second timeout
-            int nBytes = Socket.Receive(recvBuffer, sizeof(recvBuffer), 2.0);
-            if ((nBytes >= 2) && (recvBuffer[0] == 'O') && (recvBuffer[1] == 'K')) {
-                CMN_LOG_CLASS_RUN_VERBOSE << command << " " << eventName << " succeeded" << std::endl;
-                ret = true;
-            }
-            else
-                CMN_LOG_CLASS_RUN_ERROR << command << " " << eventName << " failed, return message = " << recvBuffer << std::endl;
-        }
-        else
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to send " << command << " for event " << eventName << std::endl;
-    }
+    if (EventEnableCommand)
+        EventEnableCommand->Execute(mtsStdString(handleAndName), MTS_NOT_BLOCKING);
     else
-        CMN_LOG_CLASS_RUN_ERROR << command << " failed to serialize event name: " << eventName << std::endl;
-    return ret;
+        CMN_LOG_CLASS_RUN_ERROR << "EventEnable: null command pointer" << std::endl;
+}
+
+void mtsSocketProxyClient::EventDisable(const std::string &eventName, const char *handle)
+{
+    std::string handleAndName(handle, CommandHandle::COMMAND_HANDLE_STRING_SIZE);
+    handleAndName.append(eventName);
+    if (EventDisableCommand)
+        EventDisableCommand->Execute(mtsStdString(handleAndName), MTS_NOT_BLOCKING);
+    else
+        CMN_LOG_CLASS_RUN_ERROR << "EventDisable: null command pointer" << std::endl;
 }

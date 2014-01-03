@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -836,6 +836,7 @@ bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunc
 bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionRead & function,
                                        mtsRequiredType required)
 {
+    function.SetThreadSignal(&(this->ThreadSignalForBlockingCommands));
     return FunctionsRead.AddItem(functionName, new FunctionInfo(function, required));
 }
 
@@ -843,6 +844,7 @@ bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunc
 bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionQualifiedRead & function,
                                        mtsRequiredType required)
 {
+    function.SetThreadSignal(&(this->ThreadSignalForBlockingCommands));
     return FunctionsQualifiedRead.AddItem(functionName, new FunctionInfo(function, required));
 }
 

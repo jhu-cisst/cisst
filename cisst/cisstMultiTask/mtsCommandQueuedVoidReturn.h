@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,6 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandQueuedVoidReturn_h
 
 #include <cisstMultiTask/mtsCommandVoidReturn.h>
+#include <cisstMultiTask/mtsCommandRead.h>
+#include <cisstMultiTask/mtsCallableReadBase.h>
 #include <cisstMultiTask/mtsQueue.h>
 
 // Always include last
@@ -41,13 +43,16 @@ class mtsCommandWriteBase;
 
  */
 
-class CISST_EXPORT mtsCommandQueuedVoidReturn: public mtsCommandVoidReturn
+template <class _Base>
+class mtsCommandQueuedVoidReturnBase: public _Base
 {
 public:
-    typedef mtsCommandVoidReturn BaseType;
+    typedef _Base BaseType;
 
     /*! This type. */
-    typedef mtsCommandQueuedVoidReturn ThisType;
+    typedef mtsCommandQueuedVoidReturnBase<_Base> ThisType;
+
+    typedef typename _Base::CallableType CallableType;
 
 protected:
     /*! Mailbox used to queue the commands */
@@ -63,21 +68,23 @@ protected:
 
 private:
     /*! Private default constructor to prevent use. */
-    mtsCommandQueuedVoidReturn(void);
+    mtsCommandQueuedVoidReturnBase(void);
 
     /*! Private copy constructor to prevent copies */
-    mtsCommandQueuedVoidReturn(const ThisType & CMN_UNUSED(other));
+    mtsCommandQueuedVoidReturnBase(const ThisType & CMN_UNUSED(other));
 
 public:
 
-    mtsCommandQueuedVoidReturn(mtsCallableVoidReturnBase * callable, const std::string & name,
-                               const mtsGenericObject * resultPrototype,
-                               mtsMailBox * mailBox, size_t size);
+    mtsCommandQueuedVoidReturnBase(CallableType * callable, const std::string & name,
+                                   const mtsGenericObject * resultPrototype,
+                                   mtsMailBox * mailBox, size_t size);
 
     /*! Destructor */
-    virtual ~mtsCommandQueuedVoidReturn();
+    virtual ~mtsCommandQueuedVoidReturnBase();
 
-    mtsCommandQueuedVoidReturn * Clone(mtsMailBox * mailBox, size_t size) const;
+    virtual std::string GetClassName(void) const;
+
+    virtual ThisType * Clone(mtsMailBox * mailBox, size_t size) const;
 
     // virtual method defined in base class
     mtsExecutionResult Execute(mtsGenericObject & result);
@@ -99,6 +106,14 @@ public:
     void ToStream(std::ostream & outputStream) const;
 };
 
+typedef mtsCommandQueuedVoidReturnBase<mtsCommandVoidReturn> mtsCommandQueuedVoidReturn;
+typedef mtsCommandQueuedVoidReturnBase<mtsCommandRead> mtsCommandQueuedRead;
+
+#ifdef CISST_COMPILER_IS_MSVC
+#pragma warning ( disable : 4661 )
+template class CISST_EXPORT mtsCommandQueuedVoidReturnBase<mtsCommandVoidReturn>;
+template class CISST_EXPORT mtsCommandQueuedVoidReturnBase<mtsCommandRead>;
+#endif
 
 #endif // _mtsCommandQueuedVoidReturn_h
 

@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,16 +45,26 @@ protected:
     template <typename _userType, bool>
     class ConditionalWrap {
     public:
-        static mtsExecutionResult Call(mtsCommandRead * command, _userType & argument) {
+        static mtsExecutionResult Call(const mtsFunctionRead * function, mtsCommandRead * command, _userType & argument) {
             mtsGenericObjectProxyRef<_userType> argumentWrapped(argument);
-            return command->Execute(argumentWrapped);
+            mtsExecutionResult executionResult = command->Execute(argumentWrapped);
+            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+                function->ThreadSignalWait();
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
+            }
+            return executionResult;
         }
     };
     template <typename _userType>
     class ConditionalWrap<_userType, true> {
     public:
-        static mtsExecutionResult Call(mtsCommandRead * command, _userType & argument) {
-            return command->Execute(argument);
+        static mtsExecutionResult Call(const mtsFunctionRead * function, mtsCommandRead * command, _userType & argument) {
+            mtsExecutionResult executionResult = command->Execute(argument);
+            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+                function->ThreadSignalWait();
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
+            }
+            return executionResult;
         }
     };
 #endif
@@ -92,7 +102,7 @@ public:
     template <class _userType>
     mtsExecutionResult operator()(_userType & argument) const {
         mtsExecutionResult result = Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(Command, argument)
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(this, Command, argument)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }

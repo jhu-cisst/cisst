@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -129,8 +129,12 @@ int main(int argc, char * argv[])
         return 1;
     }
 #else
-    // For now, we create two client proxies. To use one proxy, additional changes may be needed to clone
-    // the EventReceiverWriteProxy.
+#if 1
+    // For now, we create two client proxies. It is possible to use one proxy, but the disadvantage is that
+    // the current implementation of the commands that return values (Read, QualifiedRead, VoidReturn, and
+    // WriteReturn) will block the client proxy object. This is a consequence of having backward-compatibility
+    // with the existing mtsFunction classes. They should be changed to wait on the "finished event".
+
     mtsSocketProxyClient * clientProxy1 = new mtsSocketProxyClient("MyClientProxy1", "localhost", 1234);
     mtsSocketProxyClient * clientProxy2 = new mtsSocketProxyClient("MyClientProxy2", "localhost", 1234);
     componentManager->AddComponent(clientProxy1);
@@ -145,6 +149,20 @@ int main(int argc, char * argv[])
         CMN_LOG_INIT_ERROR << "Connect failed for client 2" << std::endl;
         return 1;
     }
+#else
+    mtsSocketProxyClient * clientProxy = new mtsSocketProxyClient("MyClientProxy", "localhost", 1234);
+    componentManager->AddComponent(clientProxy);
+
+    if (!componentManager->Connect("Client1", "Required", "MyClientProxy", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed for client 1" << std::endl;
+        return 1;
+    }
+
+    if (!componentManager->Connect("Client2", "Required", "MyClientProxy", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed for client 2" << std::endl;
+        return 1;
+    }
+#endif
 #endif
 
     // create the tasks, i.e. find the commands

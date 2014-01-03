@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2013-08-06
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -82,7 +82,6 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
     mtsSocketProxyInitData ServerData;
 
     // For memory cleanup
-    std::vector<CommandWrapperBase *> CommandWrappers;
     std::vector<mtsCommandBase *> EventGenerators;
 
     /*! \brief Create client proxy
@@ -92,7 +91,10 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
     bool CreateClientProxy(const std::string & providedInterfaceName);
 
     // For use by MulticastCommandVoidProxy and MulticastCommandWriteProxy
-    bool EventOperation(const std::string &command, const std::string &eventName, const char *handle);
+    mtsCommandWriteBase *EventEnableCommand;
+    mtsCommandWriteBase *EventDisableCommand;
+    void EventEnable(const std::string &eventName, const char *handle);
+    void EventDisable(const std::string &eventName, const char *handle);
     
     void CheckForEvents(double timeoutInSec);
 

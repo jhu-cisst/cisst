@@ -156,12 +156,24 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
                                  mailBoxSize,
                                  this->PostCommandQueuedCallable);
 
+#if !CISST_MTS_HAS_ICE
+        // Add system events; we do this before cloning commands in case they need to refer to
+        // any of the system events (e.g., for mtsSocketProxyClient)
+        // NOTE: Currently, ICE will fail if this is done here -- it is done later, in GetEndUserInterface
+        if (!this->IsProxy)
+            this->AddSystemEvents();
+#endif
+
         // clone void commands
         CloneCommands<CommandVoidMapType, mtsCommandQueuedVoid>("void", originalInterface->CommandsVoid, CommandsVoid);
+        // clone read commands
+        CloneCommands<CommandReadMapType, mtsCommandQueuedRead>("read", originalInterface->CommandsRead, CommandsRead);
         // clone void return commands
         CloneCommands<CommandVoidReturnMapType, mtsCommandQueuedVoidReturn>("void return", originalInterface->CommandsVoidReturn, CommandsVoidReturn);
         // clone write commands
         CloneCommands<CommandWriteMapType, mtsCommandQueuedWriteBase>("write", originalInterface->CommandsWrite, CommandsWrite);
+        // clone qualified read commands
+        CloneCommands<CommandQualifiedReadMapType, mtsCommandQueuedQualifiedRead>("qualified read", originalInterface->CommandsQualifiedRead, CommandsQualifiedRead);
         // clone write return commands
         CloneCommands<CommandWriteReturnMapType, mtsCommandQueuedWriteReturn>("write return", originalInterface->CommandsWriteReturn, CommandsWriteReturn);
     }
@@ -185,6 +197,13 @@ void mtsInterfaceProvided::Cleanup(void)
         delete op->second;
     }
     QueuedCommands.erase(QueuedCommands.begin(), QueuedCommands.end());
+#endif
+#if 0 // pk: the following might be good to add
+    // Unblock any clients that may be waiting
+    if (BlockingCommandExecuted)
+        BlockingCommandExecuted->Execute(MTS_NOT_BLOCKING);
+    if (BlockingCommandReturnExecuted)
+        BlockingCommandReturnExecuted->Execute(MTS_NOT_BLOCKING);
 #endif
 	CMN_LOG_CLASS_INIT_VERBOSE << "Done base class Cleanup " << Name << std::endl;
 }
@@ -441,7 +460,12 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWrite(mtsCommandWriteBase 
     if (command) {
         // determine if this should be a queued command or not
         bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddCommandWrite", command->GetName());
+        // check if command is already queued
+        mtsCommandQueuedWriteBase * queuedCommand = dynamic_cast<mtsCommandQueuedWriteBase *>(command);
         if (!queued) {
+            if (queuedCommand)
+                CMN_LOG_CLASS_INIT_WARNING << "AddCommandWrite: command \"" << command->GetName()
+                                           << "\" is queued, but should not be" << std::endl;
             if (!CommandsWrite.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite: unable to add command \""
                                          << command->GetName() << "\"" << std::endl;
@@ -449,12 +473,16 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWrite(mtsCommandWriteBase 
             }
             return command;
         } else {
-            // create with no mailbox
-            mtsCommandQueuedWriteBase * queuedCommand = new mtsCommandQueuedWriteGeneric(0, command, 0);
+            bool wasCreated = false;
+            if (!queuedCommand) {
+                // if not already queued, create with no mailbox
+                queuedCommand = new mtsCommandQueuedWriteGeneric(0, command, 0);
+                wasCreated = true;
+            }
             if (!CommandsWrite.AddItem(command->GetName(), queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite: unable to add queued command \""
                                          << queuedCommand->GetName() << "\"" << std::endl;
-                delete queuedCommand;
+                if (wasCreated) delete queuedCommand;
                 queuedCommand = 0;
             }
             return queuedCommand;
@@ -655,17 +683,19 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
     CMN_LOG_CLASS_INIT_VERBOSE << "GetEndUserInterface: interface \"" << this->GetFullName()
                                << "\" creating new copy (#" << this->UserCounter
                                << ") for user \"" << userName << "\"" << std::endl;
-    // new end user interface created with default size for mailbox
+    // new end user interface created with default size for mailbox; also adds system events
     mtsInterfaceProvided * interfaceProvided = new mtsInterfaceProvided(this,
                                                                         userName,
                                                                         this->MailBoxSize,
                                                                         this->ArgumentQueuesSize);
     InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
 
+#if CISST_MTS_HAS_ICE
     // finally, add system events
     if (!this->IsProxy) {
         interfaceProvided->AddSystemEvents();
     }
+#endif
 
     return interfaceProvided;
 }
@@ -954,18 +984,12 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsWriteReturn(voi
 
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsRead(void) const
 {
-    if (this->OriginalInterface) {
-        return this->OriginalInterface->CommandsRead.GetNames();
-    }
     return CommandsRead.GetNames();
 }
 
 
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommandsQualifiedRead(void) const
 {
-    if (this->OriginalInterface) {
-        return this->OriginalInterface->CommandsQualifiedRead.GetNames();
-    }
     return CommandsQualifiedRead.GetNames();
 }
 
@@ -1063,19 +1087,37 @@ mtsCommandWriteReturn * mtsInterfaceProvided::GetCommandWriteReturn(const std::s
 
 mtsCommandRead * mtsInterfaceProvided::GetCommandRead(const std::string & commandName) const
 {
-    if (this->OriginalInterface) {
-        return this->OriginalInterface->GetCommandRead(commandName);
+    if (this->EndUserInterface) {
+        if (this->MailBox) {
+            return this->CommandsRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+        } else {
+            CMN_ASSERT(this->OriginalInterface);
+            return this->OriginalInterface->CommandsRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+        }
     }
-    return CommandsRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+    CMN_LOG_CLASS_INIT_ERROR << "GetCommandRead: cannot retrieve command " << commandName << " from \"factory\" interface \""
+                             << this->GetFullName()
+                             << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
+                             << std::endl;
+    return 0;
 }
 
 
 mtsCommandQualifiedRead * mtsInterfaceProvided::GetCommandQualifiedRead(const std::string & commandName) const
 {
-    if (this->OriginalInterface) {
-        return this->OriginalInterface->GetCommandQualifiedRead(commandName);
+    if (this->EndUserInterface) {
+        if (this->MailBox) {
+            return this->CommandsQualifiedRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+        } else {
+            CMN_ASSERT(this->OriginalInterface);
+            return this->OriginalInterface->CommandsQualifiedRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+        }
     }
-    return CommandsQualifiedRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+    CMN_LOG_CLASS_INIT_ERROR << "GetCommandQualifiedRead: cannot retrieve command " << commandName << " from \"factory\" interface \""
+                             << this->GetFullName()
+                             << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
+                             << std::endl;
+    return 0;
 }
 
 

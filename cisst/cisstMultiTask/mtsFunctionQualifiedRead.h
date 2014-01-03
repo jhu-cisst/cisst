@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,40 +48,65 @@ protected:
     class ConditionalWrap {
         // default case: both parameters need to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
+        static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
+                                       mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
-            return command->Execute(argument1Wrapped, argument2Wrapped);
+            mtsExecutionResult executionResult = command->Execute(argument1Wrapped, argument2Wrapped);
+            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+                function->ThreadSignalWait();
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
+            }
+            return executionResult;
         }
     };
     template <typename _userType1, typename _userType2>
     class ConditionalWrap<_userType1, _userType2, false, true> {
         // specialization: only first parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
+        static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
+                                       mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
-            return command->Execute(argument1Wrapped, argument2);
+            mtsExecutionResult executionResult = command->Execute(argument1Wrapped, argument2);
+            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+                function->ThreadSignalWait();
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
+            }
+            return executionResult;
         }
     };
     template <typename _userType1, typename _userType2>
     class ConditionalWrap<_userType1, _userType2, true, false> {
         // specialization: only second parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
+        static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
+                                       mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
-            return command->Execute(argument1, argument2Wrapped);
+            mtsExecutionResult executionResult = command->Execute(argument1, argument2Wrapped);
+            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+                function->ThreadSignalWait();
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
+            }
+            return executionResult;
         }
     };
     template <typename _userType1, typename _userType2>
     class ConditionalWrap<_userType1, _userType2, true, true> {
         // specialization: neither parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
+        static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
+                                       mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
-            return command->Execute(argument1, argument2); }
+            mtsExecutionResult executionResult = command->Execute(argument1, argument2);
+            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+                function->ThreadSignalWait();
+                return mtsExecutionResult::COMMAND_SUCCEEDED;
+            }
+            return executionResult;
+        }
     };
 #endif
 
@@ -126,7 +151,7 @@ protected:
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType1, _userType2,
                             cmnIsDerivedFrom<_userType1, mtsGenericObject>::IS_DERIVED,
-                            cmnIsDerivedFrom<_userType2, mtsGenericObject>::IS_DERIVED>::Call(Command, argument1, argument2)
+                            cmnIsDerivedFrom<_userType2, mtsGenericObject>::IS_DERIVED>::Call(this, Command, argument1, argument2)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }

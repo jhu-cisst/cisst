@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2013-08-06
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,14 +33,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
-class mtsFunctionReadProxy;
-class mtsFunctionWriteProxy;
-class mtsFunctionQualifiedReadProxy;
-class FunctionVoidReturnProxyMaster;
-class FunctionWriteReturnProxyMaster;
+class FunctionVoidProxy;
+class FunctionReadProxy;
+class FunctionWriteProxy;
+class FunctionQualifiedReadProxy;
+class FunctionVoidReturnProxy;
+class FunctionWriteReturnProxy;
 class mtsEventSenderVoid;
 class mtsEventSenderWrite;
 class mtsProxySerializer;
+class FinishedEventList;
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -92,12 +94,12 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     typedef std::map<osaIPandPort, mtsProxySerializer *> ClientMapType;
 
     /*! Typedef for function proxies */
-    typedef cmnNamedMap<mtsFunctionVoid>                FunctionVoidProxyMapType;
-    typedef cmnNamedMap<mtsFunctionWriteProxy>          FunctionWriteProxyMapType;
-    typedef cmnNamedMap<mtsFunctionReadProxy>           FunctionReadProxyMapType;
-    typedef cmnNamedMap<mtsFunctionQualifiedReadProxy>  FunctionQualifiedReadProxyMapType;
-    typedef cmnNamedMap<FunctionVoidReturnProxyMaster>  FunctionVoidReturnProxyMapType;
-    typedef cmnNamedMap<FunctionWriteReturnProxyMaster> FunctionWriteReturnProxyMapType;
+    typedef cmnNamedMap<FunctionVoidProxy>              FunctionVoidProxyMapType;
+    typedef cmnNamedMap<FunctionWriteProxy>             FunctionWriteProxyMapType;
+    typedef cmnNamedMap<FunctionReadProxy>              FunctionReadProxyMapType;
+    typedef cmnNamedMap<FunctionQualifiedReadProxy>     FunctionQualifiedReadProxyMapType;
+    typedef cmnNamedMap<FunctionVoidReturnProxy>        FunctionVoidReturnProxyMapType;
+    typedef cmnNamedMap<FunctionWriteReturnProxy>       FunctionWriteReturnProxyMapType;
 
     /*! Typedef for event generator proxies */
     typedef cmnNamedMap<mtsEventSenderVoid>          EventGeneratorVoidProxyMapType;
@@ -115,6 +117,8 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     // List of connected clients
     ClientMapType                     ClientMap;
 
+    FinishedEventList *FinishedEvents;
+ 
     // For memory cleanup
     std::vector<mtsCommandBase *> SpecialCommands;
 
@@ -122,7 +126,7 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
 
     /*! \brief Create server proxy
         \return True if success, false otherwise */
-    bool CreateServerProxy(const std::string & requiredInterfaceName);
+    bool CreateServerProxy(const std::string & requiredInterfaceName, size_t providedMailboxSize);
 
     bool GetInterfaceDescription(mtsInterfaceProvidedDescription &desc) const;
     bool GetHandleVoid(const std::string &commandName, std::string &handleString) const;
@@ -136,12 +140,6 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
 
     void AddSpecialCommands(void);
     mtsExecutionResult GetInitData(std::string &outputArgSerialized, mtsProxySerializer *serializer) const;
-
-    /*! Return serializer for client identified by ip_port; if serializer does not exist, create it.
-        \param ip_port IP address and port number of client
-        \return Pointer to serializer
-    */
-    mtsProxySerializer *GetSerializerForClient(const osaIPandPort &ip_port) const;
 
  public:
     /*! Constructor
@@ -165,6 +163,19 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
     void Run(void);
 
     void Cleanup(void);
+
+    /*! Return serializer for client identified by ip_port; if serializer does not exist, create it.
+        \param ip_port IP address and port number of client
+        \return Pointer to serializer
+    */
+    mtsProxySerializer *GetSerializerForClient(const osaIPandPort &ip_port) const;
+
+    /*! Return serializer for current client (last one to send a message); if serializer does not exist, create it.
+        \return Pointer to serializer
+    */
+    mtsProxySerializer *GetSerializerForCurrentClient(void) const;
+
+    mtsCommandWriteBase *AllocateFinishedEvent(const std::string &eventHandle);
 
 };
 

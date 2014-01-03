@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -54,7 +54,14 @@ bool mtsFunctionRead::Bind(CommandType * command) {
 
 mtsExecutionResult mtsFunctionRead::Execute(mtsGenericObject & argument) const
 {
-    return Command ? Command->Execute(argument) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    mtsExecutionResult executionResult = Command ?
+        Command->Execute(argument)
+        : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+        this->ThreadSignalWait();
+        return mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+    return executionResult;
 }
 
 

@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,9 +34,20 @@ void mtsCommandQueuedWriteBase::ToStream(std::ostream & outputStream) const {
 }
 
 
+mtsExecutionResult mtsCommandQueuedWriteBase::Execute(const mtsGenericObject & argument,
+                                                      mtsBlockingType blocking)
+{
+    return Execute(argument, blocking, 0);
+}
+
 mtsBlockingType mtsCommandQueuedWriteBase::BlockingFlagGet(void)
 {
     return *(this->BlockingFlagQueue.Get());
+}
+
+mtsCommandWriteBase *mtsCommandQueuedWriteBase::FinishedEventGet(void)
+{
+    return *(this->FinishedEventQueue.Get());
 }
 
 
@@ -52,6 +63,8 @@ mtsCommandQueuedWriteGeneric::mtsCommandQueuedWriteGeneric(mtsMailBox * mailBox,
     if (argumentPrototype) {
         ArgumentsQueue.SetSize(size, *argumentPrototype);
         BlockingFlagQueue.SetSize(size, MTS_NOT_BLOCKING);
+        mtsCommandWriteBase *cmd = 0;
+        FinishedEventQueue.SetSize(size, cmd);
     } else {
         CMN_LOG_INIT_DEBUG << "Class mtsCommandQueuedWriteGeneric: constructor: can't find argument prototype from actual command \""
                            << this->GetName() << "\"" << std::endl;
@@ -72,6 +85,8 @@ void mtsCommandQueuedWriteGeneric::Allocate(size_t size)
                                << " with \"" << argumentPrototype->Services()->GetName() << "\"" << std::endl;
             ArgumentsQueue.SetSize(size, *argumentPrototype);
             BlockingFlagQueue.SetSize(size, MTS_NOT_BLOCKING);
+            mtsCommandWriteBase *cmd = 0;
+            FinishedEventQueue.SetSize(size, cmd);
         } else {
             CMN_LOG_INIT_ERROR << "Class mtsCommandQueuedWriteGeneric: Allocate: can't find argument prototype from actual command \""
                                << this->GetName() << "\"" << std::endl;
@@ -81,7 +96,8 @@ void mtsCommandQueuedWriteGeneric::Allocate(size_t size)
 
 
 mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject & argument,
-                                                         mtsBlockingType blocking)
+                                                         mtsBlockingType blocking,
+                                                         mtsCommandWriteBase *finishedEventHandler)
 {
     // check if this command is enabled
     if (!this->IsEnabled()) {
@@ -94,11 +110,12 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
         return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
     }
     // check if all queues have some space
-    if (ArgumentsQueue.IsFull() || BlockingFlagQueue.IsFull() || MailBox->IsFull()) {
+    if (ArgumentsQueue.IsFull() || BlockingFlagQueue.IsFull() || FinishedEventQueue.IsFull() || MailBox->IsFull()) {
         CMN_LOG_RUN_WARNING << "Class mtsCommandQueuedWriteGeneric: Execute: Queue full for \""
                             << this->Name << "\" ["
                             << ArgumentsQueue.IsFull() << "|"
                             << BlockingFlagQueue.IsFull() << "|"
+                            << FinishedEventQueue.IsFull() << "|"
                             << MailBox->IsFull() << "]"
                             << std::endl;
         return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
@@ -118,12 +135,22 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
         cmnThrow("mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
+    // copy the finished event handler to the local storage.
+    if (!FinishedEventQueue.Put(finishedEventHandler)) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: FinishedEventQueue.Put failed for \""
+                          << this->Name << "\"" << std::endl;
+        ArgumentsQueue.Get();       // Remove the argument that was already queued
+        BlockingFlagQueue.Get();    // Remove the blocking flag that was already queued
+        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: FinishedEventQueue.Put failed");
+        return mtsExecutionResult::UNDEFINED;
+    }
     // finally try to queue to mailbox
     if (!MailBox->Write(this)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed for \""
                           << this->Name << "\"" << std::endl;
         ArgumentsQueue.Get();      // Remove the argument that was already queued
         BlockingFlagQueue.Get();   // Remove the blocking flag that was already queued
+        FinishedEventQueue.Get();  // Remove the finished event handler that was already queued
         cmnThrow("mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }
