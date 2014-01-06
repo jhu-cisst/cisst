@@ -22,8 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstCommon/cmnAssert.h>
-#include <cisstCommon/cmnGetChar.h>
+#include <cisstCommon/cmnKbHit.h>
 
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 #include <stdio.h>
@@ -31,28 +30,29 @@ http://www.cisst.org/cisst/license.txt.
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
- 
+
 int cmnKbHit(void)
 {
   struct termios oldt, newt;
   struct timeval tv;
   fd_set rdfs;
- 
+
   tv.tv_sec = 0;
   tv.tv_usec = 0;
 
   // set env to be non blocking
   tcgetattr(STDIN_FILENO, &oldt);
   newt = oldt;
-  newt.c_lflag &= ~(ICANON | ECHO);
+  newt.c_lflag &= ~ICANON;
+  newt.c_lflag &= ~ECHO;
   tcsetattr(STDIN_FILENO, TCSANOW, &newt);
- 
+
   FD_ZERO(&rdfs);
   FD_SET(STDIN_FILENO, &rdfs);
- 
+
   select(STDIN_FILENO + 1, &rdfs, NULL, NULL, &tv);
   int result = FD_ISSET(STDIN_FILENO, &rdfs);
- 
+
   // restore env
   tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
@@ -61,7 +61,7 @@ int cmnKbHit(void)
 #endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_RTAI || CISST_QNX
 
 
-#if (CISST_OS == CISST_WINDOWS___________TO_BE_TESTED)
+#if (CISST_OS == CISST_WINDOWS)
 #include <conio.h>
 int cmnKbHit(void) {
     return _kbhit();
