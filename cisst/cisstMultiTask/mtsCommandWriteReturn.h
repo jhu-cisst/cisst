@@ -94,7 +94,7 @@ public:
       This is intended for derived classes (e.g., mtsCommandQueuedWriteReturn). */
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
                                        mtsGenericObject & result,
-                                       mtsCommandWriteBase * finishedEventHandler)
+                                       mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
     { return Execute(argument, result, 0); }
 
     /*! Get a direct pointer to the callable object.  This method is

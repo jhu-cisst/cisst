@@ -91,7 +91,7 @@ public:
     /*! Execute method that includes a pointer to a handler for the finished event.
       This is intended for derived classes (e.g., mtsCommandQueuedVoidReturn). */
     virtual mtsExecutionResult Execute(mtsGenericObject & result,
-                                       mtsCommandWriteBase * finishedEventHandler)
+                                       mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
     { return Execute(result, 0); }
 
     /*! Get a direct pointer to the callable object.  This method is
