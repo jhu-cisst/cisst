@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-24
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -111,10 +111,13 @@ public:
     mtsEventReceiverBase();
     virtual ~mtsEventReceiverBase();
 
+    void SetName(const std::string &name) { Name = name; }
     virtual std::string GetName() const { return Name; }
 
     /*! Called from mtsInterfaceRequired::AddEventReceiver */
     virtual void SetRequired(const std::string &name, mtsInterfaceRequired *req);
+
+    virtual void SetThreadSignal(osaThreadSignal *signal);
 
     /*! Wait for event to be issued.
         \returns true if successful, false if failed. */

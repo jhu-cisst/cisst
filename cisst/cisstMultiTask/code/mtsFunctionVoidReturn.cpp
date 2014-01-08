@@ -59,7 +59,7 @@ bool mtsFunctionVoidReturn::Bind(CommandType * command)
 }
 
 
-mtsExecutionResult mtsFunctionVoidReturn::Execute(mtsGenericObject & result) const
+mtsExecutionResult mtsFunctionVoidReturn::ExecuteGeneric(mtsGenericObject & result) const
 {
     mtsExecutionResult executionResult = Command ?
         Command->Execute(result)

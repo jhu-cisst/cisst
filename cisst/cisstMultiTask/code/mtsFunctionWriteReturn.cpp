@@ -59,8 +59,8 @@ bool mtsFunctionWriteReturn::Bind(CommandType * command)
 }
 
 
-mtsExecutionResult mtsFunctionWriteReturn::Execute(const mtsGenericObject & argument,
-                                                   mtsGenericObject & result) const
+mtsExecutionResult mtsFunctionWriteReturn::ExecuteGeneric(const mtsGenericObject & argument,
+                                                          mtsGenericObject & result) const
 {
     mtsExecutionResult executionResult = Command ?
         Command->Execute(argument, result)
