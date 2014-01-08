@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,16 +21,20 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionVoidReturn.h>
 #include <cisstMultiTask/mtsCommandVoidReturn.h>
+#include <cisstMultiTask/mtsEventReceiver.h>
 
 
 mtsFunctionVoidReturn::mtsFunctionVoidReturn(const bool isProxy):
     mtsFunctionBase(isProxy),
-    Command(0)
+    Command(0),
+    CompletionCommand(0)
 {}
 
 
 mtsFunctionVoidReturn::~mtsFunctionVoidReturn()
-{}
+{
+    delete CompletionCommand;
+}
 
 
 bool mtsFunctionVoidReturn::Detach(void)
@@ -52,23 +56,45 @@ bool mtsFunctionVoidReturn::IsValid(void) const
 bool mtsFunctionVoidReturn::Bind(CommandType * command)
 {
     if (this->Command) {
-        CMN_LOG_INIT_WARNING << "Class mtsFunctionVoidReturn: Bind called on already bound function:" << this << std::endl;
+        CMN_LOG_INIT_WARNING << "Class mtsFunctionVoidReturn: Bind called on already bound function: " << this << std::endl;
     }
     this->Command = command;
+#if !CISST_MTS_HAS_ICE
+    if (this->Command) {
+        if (!this->CompletionCommand)
+            this->CompletionCommand = new mtsEventReceiverWrite;
+        this->CompletionCommand->SetName(this->Command->GetName() + "Result");
+        this->CompletionCommand->SetThreadSignal(this->ThreadSignal);
+    }
+#endif
     return (command != 0);
 }
 
 
 mtsExecutionResult mtsFunctionVoidReturn::ExecuteGeneric(mtsGenericObject & result) const
 {
+#if CISST_MTS_HAS_ICE
     mtsExecutionResult executionResult = Command ?
         Command->Execute(result)
         : mtsExecutionResult::FUNCTION_NOT_BOUND;
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
         && !this->IsProxy) {
         this->ThreadSignalWait();
-        return mtsExecutionResult::COMMAND_SUCCEEDED;
+        executionResult = mtsExecutionResult::COMMAND_SUCCEEDED;
     }
+#else
+    if (!Command)
+        return mtsExecutionResult::FUNCTION_NOT_BOUND;
+    // If Command is valid (not NULL), then CompletionCommand should also be valid
+    CMN_ASSERT(CompletionCommand);
+    mtsExecutionResult executionResult = Command->Execute(result, CompletionCommand->GetCommand());
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+        if (CompletionCommand->Wait(result))
+            executionResult = (result.Valid() ? mtsExecutionResult::COMMAND_SUCCEEDED : mtsExecutionResult::METHOD_OR_FUNCTION_FAILED);
+        else
+            executionResult = mtsExecutionResult::INVALID_INPUT_TYPE;
+    }
+#endif
     return executionResult;
 }
 
@@ -95,4 +121,3 @@ void mtsFunctionVoidReturn::ToStream(std::ostream & outputStream) const {
         outputStream << "mtsFunctionVoidReturn not initialized";
     }
 }
-

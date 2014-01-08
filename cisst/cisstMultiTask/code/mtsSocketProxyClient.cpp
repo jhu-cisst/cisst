@@ -127,10 +127,12 @@ private:
     ExecutionState      state;
     bool                isBlocking;
     mtsCommandVoid     *BlockingFinishedCmd;
+    mtsCommandWriteBase *CallerEvent;
 
 public:
     EventReceiverWriteProxy(mtsProxySerializer *serializer) : Serializer(serializer), arg(0),
-                                                              state(CMD_NONE), isBlocking(false), BlockingFinishedCmd(0) {}
+                                                              state(CMD_NONE), isBlocking(false), BlockingFinishedCmd(0),
+                                                              CallerEvent(0) {}
     ~EventReceiverWriteProxy() {}
 
     void SetArg(mtsGenericObject *a) { state = CMD_NONE; arg = a; }
@@ -138,6 +140,7 @@ public:
     bool IsBlocking(void) const      { return isBlocking; }
     void SetBlockingFinishedCommand(mtsCommandVoid *cmd) { BlockingFinishedCmd = cmd; }
     mtsCommandVoid *GetBlockingFinishedCommand(void) const { return BlockingFinishedCmd; }
+    void SetCallerEvent(mtsCommandWriteBase *cmd) { CallerEvent = cmd; }
 
     bool EventReceived() const { return (state != CMD_NONE); }
     bool WasQueued() const { return (state == CMD_QUEUED); }
@@ -164,6 +167,7 @@ public:
                 else {
                     CMN_LOG_RUN_ERROR << "EventReceiverWriteProxy: failed to deserialize return value of type "
                                       << arg->Services()->GetName() << std::endl;
+                    arg->SetValid(false);
                     state = CMD_ABORTED;
                 }
             }
@@ -171,6 +175,8 @@ public:
                 CMN_LOG_RUN_WARNING << "EventReceiverWriteProxy: received result " << mtsExecutionResult::ToString(result.Value()) << std::endl;
                 state = CMD_ABORTED;
             }
+            if (CallerEvent)
+                CallerEvent->Execute(*arg, MTS_NOT_BLOCKING);
         }
         else {                         // For commands without a return value
             if (result.Value() == mtsExecutionResult::COMMAND_SUCCEEDED)
@@ -256,6 +262,11 @@ public:
     void SetHandle(const char *handle)
     {
         memcpy(Handle, handle, sizeof(Handle));
+    }
+
+    void SetCallerEvent(mtsCommandWriteBase *cmd)
+    {
+        Receiver->SetCallerEvent(cmd);
     }
 
     void SetBlockingFinishedCommand(mtsCommandVoid *cmd)
@@ -475,17 +486,11 @@ public:
         recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
         if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
             // Wait for initial result (QUEUED), with warning message after 2 seconds
-            if (WaitForResponse("VoidReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0)) {
-                // Wait for final result, with warning message after 10 seconds
-                // This makes it backward-compatible with the exiting mtsFunctionVoidReturn implementation.
-                // In the future, we should return, as done for blocking void and write commands.
-                if (!WaitForResponse("VoidReturn", EventReceiverWriteProxy::CMD_FINISHED, 10.0))
-                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: VoidReturn command " << Name
-                                        << " did not receive response (timeout)" << std::endl;
-            }
-            else
-                CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: VoidReturn command " << Name
-                                    << " failed, not waiting for result" << std::endl;
+            if (!WaitForResponse("VoidReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
+                CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue VoidReturn command "
+                                    << Name << std::endl;
+            // Now return to the caller. The caller will wait on a thread signal, which
+            // will be raised in the Receiver object.
         }
     }
 };
@@ -522,17 +527,11 @@ public:
             sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
             if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
                 // Wait for initial result (OK), with warning message after 2 seconds
-                if (WaitForResponse("WriteReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0)) {
-                    // Wait for final result, with warning message after 10 seconds
-                    // This makes it backward-compatible with the exiting mtsFunctionWriteReturn implementation.
-                    // In the future, we should return, as done for blocking void and write commands.
-                    if (!WaitForResponse("WriteReturn", EventReceiverWriteProxy::CMD_FINISHED, 10.0))
-                        CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: WriteReturn command " << Name
-                                            << " did not receive response (timeout)" << std::endl;
-                }
-                else
-                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: WriteReturn command " << Name
-                                        << " failed, not waiting for result" << std::endl;
+                if (!WaitForResponse("WriteReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
+                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue VoidReturn command "
+                                        << Name << std::endl;
+                // Now return to the caller. The caller will wait on a thread signal, which
+                // will be raised in the Receiver object.
             }
         }
     }
@@ -643,6 +642,13 @@ public:
     {
         return new ThisType(this->GetName(), commandWrapper->Clone(), this->GetResultPrototype(), mailBox, size);
     }
+
+    mtsExecutionResult Execute(mtsGenericObject & result,
+                               mtsCommandWriteBase * finishedEventHandler)
+    {
+        commandWrapper->SetCallerEvent(finishedEventHandler);
+        return BaseType::Execute(result, 0);
+    }
 };
 
 typedef mtsCommandQueuedVoidReturnBaseProxy<mtsCommandQueuedRead, CommandWrapperRead> mtsCommandQueuedReadProxy;
@@ -682,6 +688,13 @@ public:
                             mailBox, size);
     }
 
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsGenericObject & result,
+                               mtsCommandWriteBase * finishedEventHandler)
+    {
+        commandWrapper->SetCallerEvent(finishedEventHandler);
+        return BaseType::Execute(argument, result, 0);
+    }
 };
 
 typedef mtsCommandQueuedWriteReturnBaseProxy<mtsCommandQueuedQualifiedRead, CommandWrapperQualifiedRead> mtsCommandQueuedQualifiedReadProxy;

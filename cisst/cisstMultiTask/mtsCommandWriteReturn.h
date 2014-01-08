@@ -33,6 +33,8 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
+class mtsCommandWriteBase;
+
 /*!
   \ingroup cisstMultiTask
 
@@ -87,6 +89,13 @@ public:
     */
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
                                        mtsGenericObject & result);
+
+    /*! Execute method that includes a pointer to a handler for the finished event.
+      This is intended for derived classes (e.g., mtsCommandQueuedWriteReturn). */
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
+                                       mtsGenericObject & result,
+                                       mtsCommandWriteBase * finishedEventHandler)
+    { return Execute(argument, result, 0); }
 
     /*! Get a direct pointer to the callable object.  This method is
       used for queued commands.  The caller should still use the

@@ -147,7 +147,9 @@ bool mtsMailBox::ExecuteNext(void)
                CMN_ASSERT(commandVoidReturn);
                resultPointer = commandVoidReturn->ReturnGet();
                finishedEvent = commandVoidReturn->FinishedEventGet();
+#if CISST_MTS_HAS_ICE
                isBlockingReturn = true;
+#endif
                result = commandVoidReturn->GetCallable()->Execute(*resultPointer);
                break;
            case 1:
@@ -155,7 +157,9 @@ bool mtsMailBox::ExecuteNext(void)
                CMN_ASSERT(commandWriteReturn);
                resultPointer = commandWriteReturn->ReturnGet();
                finishedEvent = commandWriteReturn->FinishedEventGet();
+#if CISST_MTS_HAS_ICE
                isBlockingReturn = true;
+#endif
                try {
                    result = commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->ArgumentPeek()), *resultPointer);
                }

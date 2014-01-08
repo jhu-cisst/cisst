@@ -89,9 +89,9 @@ public:
     // virtual method defined in base class
     mtsExecutionResult Execute(mtsGenericObject & result);
 
-    // virtual method defined in this class
-    virtual mtsExecutionResult Execute(mtsGenericObject & result,
-                                       mtsCommandWriteBase * finishedEventHandler);
+    // virtual method defined in base class
+    mtsExecutionResult Execute(mtsGenericObject & result,
+                               mtsCommandWriteBase * finishedEventHandler);
 
     std::string GetMailBoxName(void) const;
 

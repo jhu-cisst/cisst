@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,6 +32,8 @@ http://www.cisst.org/cisst/license.txt.
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
+
+class mtsCommandWriteBase;
 
 /*!
   \ingroup cisstMultiTask
@@ -85,6 +87,12 @@ public:
       invoker applies the operation on the receiver.
     */
     virtual mtsExecutionResult Execute(mtsGenericObject & result);
+
+    /*! Execute method that includes a pointer to a handler for the finished event.
+      This is intended for derived classes (e.g., mtsCommandQueuedVoidReturn). */
+    virtual mtsExecutionResult Execute(mtsGenericObject & result,
+                                       mtsCommandWriteBase * finishedEventHandler)
+    { return Execute(result, 0); }
 
     /*! Get a direct pointer to the callable object.  This method is
       used for queued commands.  The caller should still use the
