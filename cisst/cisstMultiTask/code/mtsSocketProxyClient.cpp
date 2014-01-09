@@ -325,14 +325,9 @@ public:
             sendBuffer[1] = 'v';
         CommandHandle recv_handle('W', receiveHandler);
         recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
-        if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
-            // Wait for response, with warning message after 2 seconds
-            if (!WaitForResponse("void", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
-                CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue void command "
-                                    << Name << std::endl;
-            // Now return to the caller. If this is a blocking command, the caller will
-            // wait on a thread signal, which will be raised in the Receiver object.
-        }
+        Socket.Send(sendBuffer, sizeof(sendBuffer));
+        // Now return to the caller. If this is a blocking command, the caller will
+        // wait on a thread signal, which will be raised in the Receiver object.
     }
 };
 
@@ -368,14 +363,9 @@ public:
             CommandHandle recv_handle('W', receiveHandler);
             recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
-            if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                // Wait for response, with warning message after 2 seconds
-                if (!WaitForResponse("write", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
-                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue write command "
-                                        << Name << std::endl;
-                // Now return to the caller. If this is a blocking command, the caller will
-                // wait on a thread signal, which will be raised in the Receiver object.
-            }
+            Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05);
+            // Now return to the caller. If this is a blocking command, the caller will
+            // wait on a thread signal, which will be raised in the Receiver object.
         }
     }
 };
@@ -484,14 +474,9 @@ public:
         memcpy(sendBuffer, Handle, sizeof(Handle));
         CommandHandle recv_handle('W', receiveHandler);
         recv_handle.ToString(sendBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
-        if (Socket.Send(sendBuffer, sizeof(sendBuffer)) > 0) {
-            // Wait for initial result (QUEUED), with warning message after 2 seconds
-            if (!WaitForResponse("VoidReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
-                CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue VoidReturn command "
-                                    << Name << std::endl;
-            // Now return to the caller. The caller will wait on a thread signal, which
-            // will be raised in the Receiver object.
-        }
+        Socket.Send(sendBuffer, sizeof(sendBuffer));
+        // Now return to the caller. The caller will wait on a thread signal, which
+        // will be raised in the Receiver object.
     }
 };
 
@@ -525,14 +510,9 @@ public:
             CommandHandle recv_handle('W', receiveHandler);
             recv_handle.ToString(cmdBuffer+CommandHandle::COMMAND_HANDLE_STRING_SIZE);
             sendBuffer.insert(0, cmdBuffer, sizeof(cmdBuffer));
-            if (Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05) > 0) {
-                // Wait for initial result (OK), with warning message after 2 seconds
-                if (!WaitForResponse("WriteReturn", EventReceiverWriteProxy::CMD_QUEUED, 2.0))
-                    CMN_LOG_RUN_WARNING << "mtsSocketProxyClient: failed to queue VoidReturn command "
-                                        << Name << std::endl;
-                // Now return to the caller. The caller will wait on a thread signal, which
-                // will be raised in the Receiver object.
-            }
+            Socket.SendAsPackets(sendBuffer, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.05);
+            // Now return to the caller. The caller will wait on a thread signal, which
+            // will be raised in the Receiver object.
         }
     }
 };

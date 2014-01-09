@@ -1053,30 +1053,26 @@ void mtsSocketProxyServer::Run(void)
                 CMN_LOG_CLASS_RUN_WARNING << "Command: " << commandName << ", result = " << ret << std::endl;
         }
 
-        if (outputArgString.empty()) {
-            if (!serializer->Serialize(mtsExecutionResultProxy(ret), outputArgString))
-                CMN_LOG_CLASS_RUN_ERROR << "Failed to serialize execution result" << std::endl;
-        }
-        else {
+        if (!outputArgString.empty() && !RecvHandle.empty()) {
+            // If there is output, we send a reply to the caller of the following format:
+            //    RecvHandle | mtsExecutionResultProxy | outputString
             std::string resultString;
             if (serializer->Serialize(mtsExecutionResultProxy(ret), resultString))
                 outputArgString.insert(0, resultString);
             else
                 CMN_LOG_CLASS_RUN_ERROR << "Failed to serialize execution result" << std::endl;
-        }
 
-        if (!RecvHandle.empty()) {
             // Send it back as an event
             outputArgString.insert(0, RecvHandle);
-        }
 
-        size_t nBytes = outputArgString.size();
-        // If the packet size is an exact multiple of SOCKET_PROXY_PACKET_SIZE (nBytes == 0), then we
-        // send an extra byte so that the receiver does not have to rely on a timeout to figure out
-        // when a packet stream is finished.
-        if ((nBytes%mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE) == 0)
-            outputArgString.append(" ");
-        Socket.SendAsPackets(outputArgString, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.1);
+            size_t nBytes = outputArgString.size();
+            // If the packet size is an exact multiple of SOCKET_PROXY_PACKET_SIZE (nBytes == 0), then we
+            // send an extra byte so that the receiver does not have to rely on a timeout to figure out
+            // when a packet stream is finished.
+            if ((nBytes%mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE) == 0)
+                outputArgString.append(" ");
+            Socket.SendAsPackets(outputArgString, mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE, 0.1);
+        }
     }
 }
 
