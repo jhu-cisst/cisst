@@ -7,8 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -231,7 +230,7 @@ public:
     /* documented in base class */
     void ToStream(std::ostream & outputStream) const {
         if (this->ClassInstantiation) {
-            outputStream << "method based callable write return object using class/object \""
+            outputStream << "method based callable qualified read object using class/object \""
                          << mtsObjectName(this->ClassInstantiation) << "\"";
         } else {
             outputStream << "invalid method based callable object";
@@ -299,10 +298,10 @@ public:
     /* documented in base class */
     void ToStream(std::ostream & outputStream) const {
         if (this->ClassInstantiation) {
-            outputStream << "method based callable write return object using class/object \""
+            outputStream << "generic method based callable qualified read object using class/object \""
                          << mtsObjectName(this->ClassInstantiation) << "\"";
         } else {
-            outputStream << "invalid method based callable object";
+            outputStream << "invalid generic method based callable object";
         }
     }
 };
