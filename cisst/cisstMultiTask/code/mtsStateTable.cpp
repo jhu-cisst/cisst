@@ -7,7 +7,7 @@ $Id$
 Author(s):  Ankur Kapoor, Min Yang Jung, Anton Deguet
 Created on: 2004-04-30
 
-(C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
+(C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -108,12 +108,12 @@ bool mtsStateTable::SetSize(const size_t size){
 /* All the const methods that can be called from reader or writer */
 mtsStateIndex mtsStateTable::GetIndexReader(void) const {
     size_t tmp = IndexReader;
-    return mtsStateIndex(this->Tic, tmp, Ticks[tmp], HistoryLength);
+    return mtsStateIndex(this->Tic, static_cast<int>(tmp), Ticks[tmp], static_cast<int>(HistoryLength));
 }
 
 mtsStateIndex mtsStateTable::GetIndexDelayed(void) const {
     size_t tmp = IndexDelayed;
-    return mtsStateIndex(this->Tic, tmp, Ticks[tmp], HistoryLength);
+    return mtsStateIndex(this->Tic, static_cast<int>(tmp), Ticks[tmp], static_cast<int>(HistoryLength));
 }
 
 size_t mtsStateTable::SetDelay(size_t newDelay) {
@@ -146,7 +146,7 @@ mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const size_t id) const{
 
 /* All the non-const methods that can be called from writer only */
 mtsStateIndex mtsStateTable::GetIndexWriter(void) const {
-    return mtsStateIndex(this->Tic, IndexWriter, Ticks[IndexWriter], HistoryLength);
+    return mtsStateIndex(this->Tic, static_cast<int>(IndexWriter), Ticks[IndexWriter], static_cast<int>(HistoryLength));
 }
 
 
@@ -227,7 +227,7 @@ void mtsStateTable::Advance(void) {
     for (i = TicId; i < StateVector.size(); i++) {
         if (StateVectorElements[i]) {
             StateVectorElements[i]->SetTimestampIfAutomatic(Tic.Data);
-            Write(i, *(StateVectorElements[i]));
+            Write(static_cast<mtsStateDataId>(i), *(StateVectorElements[i]));
         }
     }
 
@@ -452,7 +452,7 @@ void mtsStateTable::CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, 
 {
     unsigned int *listColumnId = new unsigned int[number];
     for (unsigned int i = 0; i < number; i++) {
-        listColumnId[i] = StateVectorElements.size();  // init to invalid value
+        listColumnId[i] = static_cast<unsigned int>(StateVectorElements.size());  // init to invalid value
         for (unsigned int j = 0; j < StateVectorElements.size(); j++) {
             if (StateVectorElements[j] == listColumn[i])
                 listColumnId[i] = j;
@@ -467,7 +467,7 @@ int mtsStateTable::GetStateVectorID(const std::string & dataName) const
 {
     for (size_t i = 0; i < StateVectorDataNames.size(); i++) {
         if (StateVectorDataNames[i] == dataName) {
-            return i;
+            return static_cast<int>(i);
         }
     }
     return -1;

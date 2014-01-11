@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -510,9 +510,10 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
     StateVectorElements.push_back(pdata);
 
     StateVectorDataNames.push_back(name);
-    AccessorBase * accessor = new Accessor<_elementType>(*this, StateVector.size() - 1, elementHistory, pdata);
+    mtsStateDataId id = static_cast<mtsStateDataId>(StateVector.size() - 1);
+    AccessorBase * accessor = new Accessor<_elementType>(*this, id, elementHistory, pdata);
     StateVectorAccessors.push_back(accessor);
-    return StateVector.size() - 1;
+    return id;
 }
 
 template <class _elementType>
