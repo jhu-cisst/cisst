@@ -1,8 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -93,6 +92,11 @@ if (NOT MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
   endif (CXX_SUPPORTS_WALL)
 endif (NOT MSVC)
+
+# To disable annoying warnings about sprintf, sscanf, etc. (Visual Studio)
+if (MSVC)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS")
+endif (MSVC)
 
 # Finally, create lib targets
 add_subdirectory (cisst)
