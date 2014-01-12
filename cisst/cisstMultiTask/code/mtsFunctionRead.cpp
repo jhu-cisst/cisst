@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsCommandRead.h>
+#include <cisstMultiTask/mtsEventReceiver.h>
 
 
 mtsFunctionRead::mtsFunctionRead(void):
@@ -48,19 +49,32 @@ bool mtsFunctionRead::IsValid(void) const {
 
 bool mtsFunctionRead::Bind(CommandType * command) {
     Command = command;
+#if !CISST_MTS_HAS_ICE
+    if (Command)
+        InitCompletionCommand(Command->GetName() + "Blocking");
+#endif
     return (command != 0);
 }
 
 
-mtsExecutionResult mtsFunctionRead::Execute(mtsGenericObject & argument) const
+mtsExecutionResult mtsFunctionRead::ExecuteGeneric(mtsGenericObject & argument) const
 {
-    mtsExecutionResult executionResult = Command ?
-        Command->Execute(argument)
-        : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (!Command)
+        return mtsExecutionResult::FUNCTION_NOT_BOUND;
+    mtsExecutionResult executionResult;
+#if CISST_MTS_HAS_ICE
+    executionResult = Command->Execute(argument);
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
         this->ThreadSignalWait();
         return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
+#else
+    // If Command is valid (not NULL), then CompletionCommand should also be valid
+    CMN_ASSERT(CompletionCommand);
+    executionResult = Command->Execute(argument, CompletionCommand->GetCommand());
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+        executionResult = WaitForResult(argument);
+#endif
     return executionResult;
 }
 

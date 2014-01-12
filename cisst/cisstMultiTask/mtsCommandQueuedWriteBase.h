@@ -91,13 +91,13 @@ public:
     virtual void Allocate(size_t size) = 0;
 
 
-    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
-                                       mtsBlockingType blocking);
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsBlockingType blocking);
 
 
-    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
-                                       mtsBlockingType blocking,
-                                       mtsCommandWriteBase *finishedEventHandler) = 0;
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsBlockingType blocking,
+                               mtsCommandWriteBase *finishedEventHandler) = 0;
 
 
     virtual const mtsGenericObject * ArgumentPeek(void) const = 0;

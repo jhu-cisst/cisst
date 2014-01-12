@@ -26,15 +26,12 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsFunctionVoidReturn::mtsFunctionVoidReturn(const bool isProxy):
     mtsFunctionBase(isProxy),
-    Command(0),
-    CompletionCommand(0)
+    Command(0)
 {}
 
 
 mtsFunctionVoidReturn::~mtsFunctionVoidReturn()
-{
-    delete CompletionCommand;
-}
+{}
 
 
 bool mtsFunctionVoidReturn::Detach(void)
@@ -60,12 +57,8 @@ bool mtsFunctionVoidReturn::Bind(CommandType * command)
     }
     this->Command = command;
 #if !CISST_MTS_HAS_ICE
-    if (this->Command) {
-        if (!this->CompletionCommand)
-            this->CompletionCommand = new mtsEventReceiverWrite;
-        this->CompletionCommand->SetName(this->Command->GetName() + "Result");
-        this->CompletionCommand->SetThreadSignal(this->ThreadSignal);
-    }
+    if (this->Command)
+        InitCompletionCommand(this->Command->GetName() + "Result");
 #endif
     return (command != 0);
 }
@@ -73,27 +66,21 @@ bool mtsFunctionVoidReturn::Bind(CommandType * command)
 
 mtsExecutionResult mtsFunctionVoidReturn::ExecuteGeneric(mtsGenericObject & result) const
 {
+    if (!Command)
+        return mtsExecutionResult::FUNCTION_NOT_BOUND;
 #if CISST_MTS_HAS_ICE
-    mtsExecutionResult executionResult = Command ?
-        Command->Execute(result)
-        : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    mtsExecutionResult executionResult = Command->Execute(result);
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
         && !this->IsProxy) {
         this->ThreadSignalWait();
         executionResult = mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 #else
-    if (!Command)
-        return mtsExecutionResult::FUNCTION_NOT_BOUND;
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
     mtsExecutionResult executionResult = Command->Execute(result, CompletionCommand->GetCommand());
-    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-        if (CompletionCommand->Wait(result))
-            executionResult = (result.Valid() ? mtsExecutionResult::COMMAND_SUCCEEDED : mtsExecutionResult::METHOD_OR_FUNCTION_FAILED);
-        else
-            executionResult = mtsExecutionResult::INVALID_INPUT_TYPE;
-    }
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+        executionResult = WaitForResult(result);
 #endif
     return executionResult;
 }

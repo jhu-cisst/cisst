@@ -36,14 +36,11 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
-class mtsEventReceiverWrite;
-
 class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
  public:
     typedef mtsCommandVoidReturn CommandType;
  protected:
     CommandType * Command;
-    mtsEventReceiverWrite *CompletionCommand;
 
 #ifndef SWIG
     template <typename _userType, bool>

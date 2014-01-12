@@ -87,8 +87,8 @@ class CISST_EXPORT mtsCommandQueuedVoid: public mtsCommandVoid
     /*! This version of Execute includes a command pointer that the recipient
         can use to indicate when the command has been finished (e.g., for a
         blocking command) */
-    virtual mtsExecutionResult Execute(mtsBlockingType blocking,
-                                       mtsCommandWriteBase *finishedEventHandler);
+    mtsExecutionResult Execute(mtsBlockingType blocking,
+                               mtsCommandWriteBase *finishedEventHandler);
 
     mtsBlockingType BlockingFlagGet(void);
 

@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -38,6 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT mtsFunctionWrite: public mtsFunctionBase {
 public:
     typedef mtsCommandWriteBase CommandType;
+    typedef mtsExecutionResult(mtsFunctionWrite::*ActionType)(const mtsGenericObject &) const;
 protected:
     /*! Internal pointer to command.  Command pointer should be set
       when interfaces get connected. */
@@ -47,16 +48,16 @@ protected:
     template <typename _userType, bool>
     class ConditionalWrap {
     public:
-        static mtsExecutionResult Call(mtsCommandWriteBase * command, const _userType & argument, mtsBlockingType blocking) {
+        static mtsExecutionResult Call(mtsFunctionWrite::ActionType executeMethod, const mtsFunctionWrite * function, const _userType & argument) {
             mtsGenericObjectProxyRef<_userType> argumentWrapped(argument);
-            return command->Execute(argumentWrapped, blocking);
+            return (function->*executeMethod)(argumentWrapped);
         }
     };
     template <typename _userType>
     class ConditionalWrap<_userType, true> {
     public:
-        static mtsExecutionResult Call(mtsCommandWriteBase * command, const _userType & argument, mtsBlockingType blocking) {
-            return command->Execute(argument, blocking);
+        static mtsExecutionResult Call(mtsFunctionWrite::ActionType executeMethod, const mtsFunctionWrite * function, const _userType & argument) {
+            return (function->*executeMethod)(argument);
         }
     };
 #endif
@@ -85,10 +86,10 @@ public:
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command(argument) instead of Command->Execute(argument). */
     mtsExecutionResult operator()(const mtsGenericObject & argument) const
-    { return Execute(argument); }
+    { return ExecuteGeneric(argument); }
 
-    mtsExecutionResult Execute(const mtsGenericObject & argument) const;
-    mtsExecutionResult ExecuteBlocking(const mtsGenericObject & argument) const;
+    mtsExecutionResult ExecuteGeneric(const mtsGenericObject & argument) const;
+    mtsExecutionResult ExecuteBlockingGeneric(const mtsGenericObject & argument) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types. */
@@ -98,23 +99,12 @@ public:
 
     template <class _userType>
     mtsExecutionResult Execute(const _userType & argument) const {
-        mtsExecutionResult result = Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(Command, argument, MTS_NOT_BLOCKING)
-          : mtsExecutionResult::FUNCTION_NOT_BOUND;
-        return result;
+        return ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(&mtsFunctionWrite::ExecuteGeneric, this, argument);
     }
 
     template <class _userType>
     mtsExecutionResult ExecuteBlocking(const _userType & argument) const {
-        mtsExecutionResult executionResult = Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(Command, argument, MTS_BLOCKING)
-          : mtsExecutionResult::FUNCTION_NOT_BOUND;
-        if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
-            && !this->IsProxy) {
-            this->ThreadSignalWait();
-            return mtsExecutionResult::COMMAND_SUCCEEDED;
-        }
-        return executionResult;
+        return ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(&mtsFunctionWrite::ExecuteBlockingGeneric, this, argument);
     }
 #endif
 

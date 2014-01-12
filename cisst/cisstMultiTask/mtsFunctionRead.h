@@ -45,26 +45,16 @@ protected:
     template <typename _userType, bool>
     class ConditionalWrap {
     public:
-        static mtsExecutionResult Call(const mtsFunctionRead * function, mtsCommandRead * command, _userType & argument) {
+        static mtsExecutionResult Call(const mtsFunctionRead * function, _userType & argument) {
             mtsGenericObjectProxyRef<_userType> argumentWrapped(argument);
-            mtsExecutionResult executionResult = command->Execute(argumentWrapped);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return function->ExecuteGeneric(argumentWrapped);
         }
     };
     template <typename _userType>
     class ConditionalWrap<_userType, true> {
     public:
-        static mtsExecutionResult Call(const mtsFunctionRead * function, mtsCommandRead * command, _userType & argument) {
-            mtsExecutionResult executionResult = command->Execute(argument);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+        static mtsExecutionResult Call(const mtsFunctionRead * function, _userType & argument) {
+            return function->ExecuteGeneric(argument);
         }
     };
 #endif
@@ -93,16 +83,16 @@ public:
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command(argument) instead of Command->Execute(argument). */
     mtsExecutionResult operator()(mtsGenericObject & argument) const
-    { return Execute(argument); }
+    { return ExecuteGeneric(argument); }
 
-    mtsExecutionResult Execute(mtsGenericObject & argument) const;
+    mtsExecutionResult ExecuteGeneric(mtsGenericObject & argument) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types. */
     template <class _userType>
     mtsExecutionResult operator()(_userType & argument) const {
         mtsExecutionResult result = Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(this, Command, argument)
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(this, argument)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }

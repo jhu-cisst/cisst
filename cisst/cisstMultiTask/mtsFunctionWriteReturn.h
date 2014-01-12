@@ -36,14 +36,11 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
-class mtsEventReceiverWrite;
-
 class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
  public:
     typedef mtsCommandWriteReturn CommandType;
  protected:
     CommandType * Command;
-    mtsEventReceiverWrite *CompletionCommand;
 
 #ifndef SWIG
     template <typename __argumentType, typename __resultType, bool a, bool b>
@@ -53,7 +50,7 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
                                        const __argumentType & argument, __resultType & result) {
             const mtsGenericObjectProxyRef<__argumentType> argumentWrapped(argument);
             mtsGenericObjectProxyRef<__resultType> resultWrapped(result);
-            return  function->Execute(argumentWrapped, resultWrapped);
+            return  function->ExecuteGeneric(argumentWrapped, resultWrapped);
         }
     };
 

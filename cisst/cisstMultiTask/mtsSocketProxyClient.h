@@ -84,6 +84,12 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
     // For memory cleanup
     std::vector<mtsCommandBase *> EventGenerators;
 
+    bool LocalWaiting;
+    mtsCommandWriteBase *localUnblockingCommand;
+    void LocalUnblockingHandler(const mtsGenericObject &arg);
+    // Returns false if timed out
+    bool WaitForResponse(double timeoutInSec);
+
     /*! \brief Create client proxy
       \param providedInterfaceDescription Complete information about provided
       interface to be created with arguments serialized

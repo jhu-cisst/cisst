@@ -120,9 +120,9 @@ public:
         }
     }
 
-    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
-                                       mtsBlockingType blocking,
-                                       mtsCommandWriteBase *finishedEventHandler) {
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsBlockingType blocking,
+                               mtsCommandWriteBase *finishedEventHandler) {
         // check if this command is enabled
         if (!this->IsEnabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
@@ -256,9 +256,9 @@ public:
     }
 
 
-    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
-                                       mtsBlockingType blocking,
-                                       mtsCommandWriteBase *finishedEventHandler);
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsBlockingType blocking,
+                               mtsCommandWriteBase *finishedEventHandler);
 
 
     /* commented in base class */

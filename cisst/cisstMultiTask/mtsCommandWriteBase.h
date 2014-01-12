@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -65,10 +64,23 @@ public:
     /*! The execute method. Abstract method to be implemented by
       derived classes to run the actual operation on the receiver
 
-      \param obj The data passed to the operation method
+      \param argument The data passed to the operation method
+      \param blocking Indicates whether caller wishes to block until command finishes
 
-      \result Boolean value, true if success, false otherwise */
+      \result the execution result (mtsExecutionResult) */
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking) = 0;
+
+    /*! The execute method. Method may be implemented by
+      derived classes to run the actual operation on the receiver
+
+      \param argument The data passed to the operation method
+      \param blocking Indicates whether caller wishes to block until command finishes
+      \param finishedEventHandler Command object to invoke when blocking command is finished
+
+      \result the execution result (mtsExecutionResult) */
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking,
+                                       mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
+    { return Execute(argument, blocking); }
 
     /* documented in base class */
     inline size_t NumberOfArguments(void) const {

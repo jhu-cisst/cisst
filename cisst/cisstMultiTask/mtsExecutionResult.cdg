@@ -92,6 +92,10 @@ class {
             name DESERIALIZATION_ERROR;
             description deserialization failed;
         }
+        enum-value {
+            name NO_FINISHED_EVENT;
+            description failed to allocate finished event;
+        }
     }
 
     member {

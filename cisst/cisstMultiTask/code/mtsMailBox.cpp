@@ -147,9 +147,7 @@ bool mtsMailBox::ExecuteNext(void)
                CMN_ASSERT(commandVoidReturn);
                resultPointer = commandVoidReturn->ReturnGet();
                finishedEvent = commandVoidReturn->FinishedEventGet();
-#if CISST_MTS_HAS_ICE
                isBlockingReturn = true;
-#endif
                result = commandVoidReturn->GetCallable()->Execute(*resultPointer);
                break;
            case 1:
@@ -157,9 +155,7 @@ bool mtsMailBox::ExecuteNext(void)
                CMN_ASSERT(commandWriteReturn);
                resultPointer = commandWriteReturn->ReturnGet();
                finishedEvent = commandWriteReturn->FinishedEventGet();
-#if CISST_MTS_HAS_ICE
                isBlockingReturn = true;
-#endif
                try {
                    result = commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->ArgumentPeek()), *resultPointer);
                }
@@ -180,7 +176,8 @@ bool mtsMailBox::ExecuteNext(void)
                            << "\" caught exception \"" << exceptionCaught.what() << "\"" << std::endl;
        this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
        CommandQueue.Get();  // Remove command from mailbox queue
-       TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
+       if (resultPointer || isBlocking)
+          TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
        throw;
    }
    catch (...) {
@@ -188,7 +185,8 @@ bool mtsMailBox::ExecuteNext(void)
                            << "\" caught exception, blocking = " << isBlocking << std::endl;
        this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
        CommandQueue.Get();  // Remove command from mailbox queue
-       TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
+       if (resultPointer || isBlocking)
+           TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
        throw;
    }
    this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
@@ -197,13 +195,15 @@ bool mtsMailBox::ExecuteNext(void)
                            << "\" failed, execution result is \"" << result << "\"" << std::endl;
    }
    CommandQueue.Get();  // Remove command from mailbox queue
-   TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
+   if (resultPointer || isBlocking)
+       TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
    return true;
 }
 
 
 void mtsMailBox::TriggerPostQueuedCommandIfNeeded(bool isBlocking, bool isBlockingReturn)
 {
+#if CISST_MTS_HAS_ICE
    if (isBlocking && this->PostCommandDequeuedCommand) {
        this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
    } else {
@@ -211,6 +211,7 @@ void mtsMailBox::TriggerPostQueuedCommandIfNeeded(bool isBlocking, bool isBlocki
            this->PostCommandReturnDequeuedCommand->Execute(MTS_NOT_BLOCKING);
        }
    }
+#endif
 }
 
 
@@ -218,7 +219,7 @@ void mtsMailBox::TriggerFinishedEventIfNeeded(const std::string &commandName, mt
                                               mtsGenericObject *resultPointer, const mtsExecutionResult &result) const
 {
    if (finishedEvent) {
-       mtsExecutionResult evt_result;
+       mtsExecutionResult evt_result(mtsExecutionResult::COMMAND_SUCCEEDED);
        if (resultPointer) {
            if (resultPointer->Valid() != result.IsOK())
                CMN_LOG_RUN_WARNING << "TriggerFinishedEventIfNeeded: result valid = " << resultPointer->Valid()

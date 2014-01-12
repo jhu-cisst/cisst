@@ -88,6 +88,12 @@ public:
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument1,
                                        mtsGenericObject & argument2);
 
+    /*! Execute method that includes a pointer to a handler for the finished event.
+      This is intended for derived classes (e.g., mtsCommandQueuedQualifiedRead). */
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument1, mtsGenericObject & argument2,
+                                       mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
+    { return Execute(argument1, argument2); }
+
     /*! Get a direct pointer to the callable object.  This method is
       used for queued commands.  The caller should still use the
       Execute method which will queue the command.  When the command

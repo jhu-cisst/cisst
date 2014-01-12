@@ -49,16 +49,10 @@ protected:
         // default case: both parameters need to be wrapped
     public:
         static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
-                                       mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
-            mtsExecutionResult executionResult = command->Execute(argument1Wrapped, argument2Wrapped);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return  function->ExecuteGeneric(argument1Wrapped, argument2Wrapped);
         }
     };
     template <typename _userType1, typename _userType2>
@@ -66,15 +60,9 @@ protected:
         // specialization: only first parameter needs to be wrapped
     public:
         static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
-                                       mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
-            mtsExecutionResult executionResult = command->Execute(argument1Wrapped, argument2);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return  function->ExecuteGeneric(argument1Wrapped, argument2);
         }
     };
     template <typename _userType1, typename _userType2>
@@ -82,15 +70,9 @@ protected:
         // specialization: only second parameter needs to be wrapped
     public:
         static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
-                                       mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
-            mtsExecutionResult executionResult = command->Execute(argument1, argument2Wrapped);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return function->ExecuteGeneric(argument1, argument2Wrapped);
         }
     };
     template <typename _userType1, typename _userType2>
@@ -98,14 +80,8 @@ protected:
         // specialization: neither parameter needs to be wrapped
     public:
         static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
-                                       mtsCommandQualifiedRead * command,
                                        const _userType1 & argument1, _userType2 & argument2) {
-            mtsExecutionResult executionResult = command->Execute(argument1, argument2);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return function->ExecuteGeneric(argument1, argument2);
         }
     };
 #endif
@@ -135,10 +111,10 @@ protected:
       e.g., Command(argument) instead of Command->Execute(argument). */
     mtsExecutionResult operator()(const mtsGenericObject & qualifier,
                                   mtsGenericObject & argument) const
-    { return Execute(qualifier, argument); }
+    { return ExecuteGeneric(qualifier, argument); }
 
-    mtsExecutionResult Execute(const mtsGenericObject & qualifier,
-                               mtsGenericObject & argument) const;
+    mtsExecutionResult ExecuteGeneric(const mtsGenericObject & qualifier,
+                                      mtsGenericObject & argument) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types (for qualified read). */
@@ -151,7 +127,7 @@ protected:
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType1, _userType2,
                             cmnIsDerivedFrom<_userType1, mtsGenericObject>::IS_DERIVED,
-                            cmnIsDerivedFrom<_userType2, mtsGenericObject>::IS_DERIVED>::Call(this, Command, argument1, argument2)
+                            cmnIsDerivedFrom<_userType2, mtsGenericObject>::IS_DERIVED>::Call(this, argument1, argument2)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }
