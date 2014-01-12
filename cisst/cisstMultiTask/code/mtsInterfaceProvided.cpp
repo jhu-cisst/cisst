@@ -156,14 +156,6 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
                                  mailBoxSize,
                                  this->PostCommandQueuedCallable);
 
-#if !CISST_MTS_HAS_ICE
-        // Add system events; we do this before cloning commands in case they need to refer to
-        // any of the system events (e.g., for mtsSocketProxyClient)
-        // NOTE: Currently, ICE will fail if this is done here -- it is done later, in GetEndUserInterface
-        if (!this->IsProxy)
-            this->AddSystemEvents();
-#endif
-
         // clone void commands
         CloneCommands<CommandVoidMapType, mtsCommandQueuedVoid>("void", originalInterface->CommandsVoid, CommandsVoid);
         // clone read commands
@@ -690,12 +682,10 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
                                                                         this->ArgumentQueuesSize);
     InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
 
-#if CISST_MTS_HAS_ICE
     // finally, add system events
     if (!this->IsProxy) {
         interfaceProvided->AddSystemEvents();
     }
-#endif
 
     return interfaceProvided;
 }
