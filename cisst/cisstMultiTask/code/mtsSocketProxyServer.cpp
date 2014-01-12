@@ -208,6 +208,14 @@ public:
 };
 
 //************************************** Finished Events *************************************************
+//
+// A FinishedEventEntry is a proxy object that is allocated on-the-fly (from the FinishedEventList)
+// for every received command that requires a response; this is most commands, since only the non-blocking
+// void and write do not require a response. The client proxy passes a RecvHandle to the server proxy;
+// this RecvHandle is really a pointer to a write command on the client, which acts as an event handler
+// for the "finished event".  After the server dequeues and executes the command from the mailbox,
+// it calls the finished event proxy (this class), which then serializes the argument and passes it,
+// along with the RecvHandle, to the client via the socket.
 
 class FinishedEventEntry {
     osaSocket *Socket;
@@ -265,6 +273,11 @@ void FinishedEventEntry::Method(const mtsStdString &argSerialized)
     Used = false;
 }
 
+// The FinishedEventList is a pre-allocated list of FinishedEventEntry objects. This avoids
+// the need for a lot of dynamic memory allocation at runtime. This is a fixed-size list,
+// but that does not place any further restrictions on the system because there the number of
+// outstanding finished events is bounded by the server's mailbox size. Note that there still
+// is some dynamic memory allocation, since std::string objects are used.
 
 class FinishedEventList {
     mtsMailBox *mailBox;
@@ -333,6 +346,11 @@ bool FinishedEventList::FreeEntry(mtsCommandWriteBase *cmd)
 }
 
 //************************************** Function Proxies *************************************************
+//
+// These are proxies for the mtsFunctionXXXX objects. Their input data comes from the socket, therefore
+// they have an ExecuteSerialized method that accepts an std::string for each parameter. Each of these
+// classes also keeps a pointer to the mtsSocketProxyServer, to enable it to obtain the Serializer associated
+// with the current client (since the server proxy can be associated with multiple client proxies).
 
 class FunctionVoidProxy : public mtsFunctionVoid {
 protected:
@@ -702,6 +720,8 @@ mtsExecutionResult FunctionWriteReturnProxy::ExecuteSerialized(const std::string
 
 
 //**************************************** mtsSocketProxyServer ***********************************************
+//
+// This is the main server proxy class. It is a continuous task so that it can poll the socket for commands.
 
 mtsSocketProxyServer::mtsSocketProxyServer(const std::string & proxyName, const std::string & componentName,
                                            const std::string & providedInterfaceName, unsigned short port) :
@@ -785,7 +805,7 @@ void mtsSocketProxyServer::Run(void)
         //
         // 1) CommandHandle protocol: The first 10 bytes are the CommandHandle, where
         //    the first byte is a space, the second byte is a character that designates
-        //    the type of command ('V', 'R', 'W', 'Q'), and the last 8 bytes are a 64-bit
+        //    the type of command (e.g., 'V', 'R', 'W', 'Q'), and the last 8 bytes are a 64-bit
         //    address of the mtsFunctionXXXX object to be invoked. The next 10 bytes
         //    are the EventReceiverHandle; this is also a CommandHandle, but is actually
         //    the address of the client's EventReceiverWriteProxy object. The serialized command
@@ -798,11 +818,15 @@ void mtsSocketProxyServer::Run(void)
         //    this protocol requires a string lookup to find the address of the mtsFunctionXXXX
         //    object, some efficiency is obtained by splitting the code between the commands
         //    that do not use an argument (Void, Read, VoidReturn) and those that do (Write,
-        //    QualifiedRead, WriteReturn).
+        //    QualifiedRead, WriteReturn). NOTE: This protocol is currently broken, since
+        //    it does not provide a proper return value. This can be fixed by passing a symbolic
+        //    name (string) for the return value; the server proxy can then send a message (event)
+        //    that is identified by this symbolic name.
         //
         // There is currently only one protocol for the response packet. It begins with the
         // EventReceiverHandle (which is an empty string for the CommandString protocol), followed by
-        // the serialized mtsExecutionResult, followed by the serialized return value (if any).
+        // the serialized serialized return value (for read, qualified read, void return, write return)
+        // or by the serialized mtsExecutionResult (for blocking void and write).
 
         mtsExecutionResult ret;
         std::string        RecvHandle;
@@ -1025,6 +1049,8 @@ void mtsSocketProxyServer::Run(void)
                 CMN_LOG_CLASS_RUN_WARNING << "Command: " << commandName << ", result = " << ret << std::endl;
         }
 
+        // If this was a blocking command, but was not queued, we need to send a response now.  If it was
+        // queued, we can rely on mtsMailBox::ExeuteNext to send the response via an event.
         if (isBlocking && (ret.Value() != mtsExecutionResult::COMMAND_QUEUED)) {
             // If the command failed, send the execution result instead
             if (ret.Value() != mtsExecutionResult::COMMAND_SUCCEEDED) {

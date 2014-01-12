@@ -451,7 +451,8 @@ public:
 
 //************************************* mtsCommandQueuedXXXX proxies ****************************************************
 //
-// These override the Clone virtual method to also clone the command wrapper.
+// These override the Clone virtual method to also clone the command wrapper. They also override the Execute method
+// to set the blocking flag and finished event handler address in the command wrapper.
 
 class mtsCommandQueuedVoidProxy : public mtsCommandQueuedVoid
 {
