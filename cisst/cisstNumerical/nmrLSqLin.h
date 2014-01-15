@@ -1801,7 +1801,6 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma,
                           vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &RNorm,
                           vctFixedSizeVector<CISSTNETLIB_DOUBLE, _work> &Work, vctFixedSizeVector<CISSTNETLIB_INTEGER, _iwork> &IWork)
 {
-    typedef vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma + _mg, _n + 1, VCT_COL_MAJOR> InputType;
     CISSTNETLIB_INTEGER ma = static_cast<CISSTNETLIB_INTEGER>(_ma);
     CISSTNETLIB_INTEGER mg = static_cast<CISSTNETLIB_INTEGER>(_mg);
     CISSTNETLIB_INTEGER na = static_cast<CISSTNETLIB_INTEGER>(_n);

@@ -1028,7 +1028,6 @@ class vctGenericContainerTest
     template <class _containerType>
     static void TestMinAndMax(const _containerType & container)
     {
-        typedef _containerType ContainerType;
         typedef typename _containerType::value_type value_type;
 
         const value_type containerMin = container.MinElement();

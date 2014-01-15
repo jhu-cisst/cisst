@@ -280,7 +280,6 @@ void vctDynamicVectorTest::TestSwapElements(void)
     enum {SIZE = 6};
     typedef _elementType value_type;
     typedef vctDynamicVector<_elementType> VectorType;
-    typedef vctDynamicVector<_elementType> HalfVectorType;
     VectorType v1(SIZE);
     VectorType v2(SIZE);
     vctRandom(v1, value_type(-10), value_type(10));

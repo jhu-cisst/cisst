@@ -767,7 +767,6 @@ public:
         {
             typedef _inputMatrixType InputMatrixType;
             typedef typename InputMatrixType::size_type size_type;
-            typedef typename InputMatrixType::stride_type stride_type;
             typedef typename InputMatrixType::const_pointer InputPointerType;
             typedef typename InputMatrixType::value_type value_type;
 

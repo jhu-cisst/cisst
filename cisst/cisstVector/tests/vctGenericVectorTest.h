@@ -123,8 +123,6 @@ class vctGenericVectorTest
     template<class _containerType>
     static void TestConstXYZW(const _containerType & vector1)
     {
-        typedef typename _containerType::value_type value_type;
-
         if (vector1.size() > 0) {
             CPPUNIT_ASSERT(&(vector1.X()) == vector1.Pointer(0));
         }

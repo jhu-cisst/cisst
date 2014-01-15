@@ -313,7 +313,6 @@ void vctFixedSizeVectorTest::TestSwapElements(void)
     enum {SIZE = 6};
     typedef _elementType value_type;
     typedef vctFixedSizeVector<_elementType, SIZE> VectorType;
-    typedef vctFixedSizeVector<_elementType, SIZE/2> HalfVectorType;
     VectorType v1, v2;
     vctRandom(v1, value_type(-10), value_type(10));
     vctRandom(v2, value_type(-10), value_type(10));
