@@ -30,6 +30,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
+#if (CISST_OS == CISST_QNX)
+#include <sys/time.h>
+#endif
 
 int cmnKbHit(void)
 {
