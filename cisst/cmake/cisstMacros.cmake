@@ -44,7 +44,7 @@ macro (cisst_load_package_setting ...)
     find_file (_clps_ADDITIONAL_BUILD_CMAKE
                NAMES ${lib}Build.cmake
                PATHS ${CISST_CMAKE_DIRS}
-               NO_DEFAULT_PATH)
+               NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
     if (_clps_ADDITIONAL_BUILD_CMAKE)
       include (${_clps_ADDITIONAL_BUILD_CMAKE})
     endif (_clps_ADDITIONAL_BUILD_CMAKE)
@@ -53,7 +53,7 @@ macro (cisst_load_package_setting ...)
     find_file (_clps_LIBRARIES_FILE
                NAMES ${lib}Internal.cmake
                PATHS ${CISST_CMAKE_DIRS}
-               NO_DEFAULT_PATH)
+               NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
     if (_clps_LIBRARIES_FILE)
       include (${_clps_LIBRARIES_FILE})
     endif (_clps_LIBRARIES_FILE)
@@ -62,7 +62,7 @@ macro (cisst_load_package_setting ...)
     find_file (_clps_SETTINGS_FILE
                NAMES ${lib}External.cmake
                PATHS ${CISST_CMAKE_DIRS}
-               NO_DEFAULT_PATH)
+               NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
     if (_clps_SETTINGS_FILE)
       include (${_clps_SETTINGS_FILE})
       set (_clps_EXTERNAL_PACKAGES ${CISST_EXTERNAL_PACKAGES_FOR_${lib}})
@@ -70,7 +70,7 @@ macro (cisst_load_package_setting ...)
         find_file (_clps_PACKAGE_FILE
                    NAMES ${lib}${package}.cmake
                    PATHS ${CISST_CMAKE_DIRS}
-                   NO_DEFAULT_PATH)
+                   NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
         if (_clps_PACKAGE_FILE)
           include (${_clps_PACKAGE_FILE})
         else (_clsp_PACKAGE_FILE)
