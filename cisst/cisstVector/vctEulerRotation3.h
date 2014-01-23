@@ -6,7 +6,7 @@
 
   Created on:	2011-05-18
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of vctEulerRotation3
  */
 
+#include <cisstCommon/cmnConstants.h>
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
@@ -203,6 +204,12 @@ public:
         vctEulerFromMatrixRotation3(*this, matrixRotation);
         return *this;
     }
+
+    /*! Returns the Euler angles in radians */
+    vct3 GetAngles(void) const { return Angles; }
+
+    /*! Returns the Euler angles in degrees */
+    vct3 GetAnglesInDegrees(void) const { return (180.0/cmnPI)*Angles; }
 
     /*! Set this rotation as the inverse of another one.  See also
         InverseSelf(). */
