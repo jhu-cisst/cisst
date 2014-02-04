@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-04-29
 
-  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -54,4 +54,27 @@ void prmPositionJointGetTest::TestSerialize(void)
     initial.SerializeRaw(serializationStream);
     final.DeSerializeRaw(serializationStream);
     CPPUNIT_ASSERT(final.Position().Equal(initial.Position()));
+}
+
+void prmPositionJointGetTest::TestTimestamps(void)
+{
+    prmPositionJointGet initial, final;
+    initial.SetSize(10);
+    initial.Timestamps().SetAll(1.0);
+    CPPUNIT_ASSERT(initial.Timestamps().Equal(1.0));
+
+    // set message timestamp shouldn't change all timestamps
+    initial.SetTimestamp(5.0);
+    CPPUNIT_ASSERT_EQUAL(5.0, initial.Timestamp());
+    CPPUNIT_ASSERT(initial.Timestamps().Equal(1.0));
+
+    // set pre axis timestamp shouldn't change message timestamp
+    initial.Timestamps().SetAll(10.0);
+    CPPUNIT_ASSERT_EQUAL(5.0, initial.Timestamp());
+    CPPUNIT_ASSERT(initial.Timestamps().Equal(10.0));
+
+    // copy
+    final = initial;
+    CPPUNIT_ASSERT_EQUAL(initial.Timestamp(), final.Timestamp());
+    CPPUNIT_ASSERT(final.Timestamps().Equal(initial.Timestamps()));
 }

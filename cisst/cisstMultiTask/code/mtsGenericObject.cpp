@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-04-13
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 bool mtsGenericObject::SetTimestampIfAutomatic(double timestamp) {
     if (this->AutomaticTimestampMember) {
-        this->TimestampMember = timestamp;
+        this->SetTimestamp(timestamp);
         return true;
     }
     return false;

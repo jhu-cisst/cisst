@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-04-29
   
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -25,10 +25,11 @@ http://www.cisst.org/cisst/license.txt.
 class prmPositionJointGetTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(prmPositionJointGetTest);
-
-    CPPUNIT_TEST(TestConstructors);
-    CPPUNIT_TEST(TestSerialize);
-
+    {
+        CPPUNIT_TEST(TestConstructors);
+        CPPUNIT_TEST(TestSerialize);
+        CPPUNIT_TEST(TestTimestamps);
+    }
     CPPUNIT_TEST_SUITE_END();
     
 public:
@@ -38,6 +39,7 @@ public:
 
     void TestConstructors(void);
     void TestSerialize(void);
+    void TestTimestamps(void);
 };
 
 
