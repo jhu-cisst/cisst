@@ -17,6 +17,9 @@ project (cisstStereoVisionLibs)
 
 add_subdirectory (code)
 
+# Applications
+add_subdirectory (applications)
+
 cisst_offer_python (cisstStereoVision)
 
 if (CISST_HAS_QT)
