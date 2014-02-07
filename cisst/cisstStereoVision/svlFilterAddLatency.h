@@ -7,7 +7,7 @@
   Author(s):  Daniel Obenshain, Thomas Tantillo, Anton Deguet
   Created on: 2010
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
   \todo Is memcpy the best way to copy the in/out samples, is there a more generic way?
   \todo Add interface provided to set latency
   \todo Add method to report memory size used
- */
+*/
 
 class CISST_EXPORT svlFilterAddLatency : public svlFilterBase
 {
@@ -47,8 +47,9 @@ class CISST_EXPORT svlFilterAddLatency : public svlFilterBase
     svlFilterAddLatency(void);
     virtual ~svlFilterAddLatency();
 
-	void UpLatency(void); //increase latency by 100 ms
-	void DownLatency(void); //decrease latency by 100 ms
+    void UpLatency(void); //increase latency by 100 ms
+    void DownLatency(void); //decrease latency by 100 ms
+    void SetFrameDelayed(const unsigned int numberOfFrames);
 
  protected:
     virtual int Initialize(svlSample * syncInput, svlSample * & syncOutput);
@@ -57,23 +58,21 @@ class CISST_EXPORT svlFilterAddLatency : public svlFilterBase
 
  private:
 
-	int Add(svlSampleImage * in);
-	int Remove(svlSampleImage * out);
+    int Add(svlSampleImage * in);
+    int Remove(svlSampleImage * out);
 
     svlSampleImage * OutputImage;
 
-	int FramesDelayed;
-	int Length;
+    int FramesDelayed;
+    int Length;
 
     // todo, should we use a std::list at that point?
-	typedef struct NodeStruct {
-		NodeStruct * Next;
-		svlSampleImage * Data;
-	} NodeType;
+    typedef struct NodeStruct {
+        NodeStruct * Next;
+        svlSampleImage * Data;
+    } NodeType;
 
-	NodeType * Head, * Tail;
-	bool Stereo;
-
+    NodeType * Head, * Tail;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterAddLatency)

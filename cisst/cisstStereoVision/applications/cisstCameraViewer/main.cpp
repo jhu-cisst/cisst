@@ -22,89 +22,151 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstCommon/cmnCommandLineOptions.h>
 
 #include <cisstStereoVision/svlInitializer.h>
 #include <cisstStereoVision/svlFilterOutput.h>
 #include <cisstStereoVision/svlStreamManager.h>
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
-#include <cisstStereoVision/svlFilterSplitter.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
+#include <cisstStereoVision/svlFilterImageFlipRotate.h>
+#include <cisstStereoVision/svlFilterAddLatency.h>
 #include <cisstStereoVision/svlFilterImageWindow.h>
 #include <cisstStereoVision/svlVideoIO.h>
 #include <cisstStereoVision/svlFilterVideoFileWriter.h>
 
-int main(int argc, char** argv) {
-
+int main(int argc, char** argv)
+{
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
-    
-    svlInitialize();
 
-    /////////////////////////////////////////////////////////////////
+    cmnCommandLineOptions options;
+    const std::string configFile = "camera-viewer.dat";
+
+    std::string portNumber = "0";
+    std::string codecName = ".njpg";
+
+    int numberOfChannels = 1;
+    int latencyInFrames = 0;
+    unsigned int width = 0;
+    unsigned int height = 0;
+
+    options.AddOptionOneValue("c", "channels",
+                              "Number of channels, 1 for mono (default), 2 for stereo",
+                              cmnCommandLineOptions::OPTIONAL, &numberOfChannels);
+    
+    options.AddOptionOneValue("p", "port",
+                              "IP port for network based codec",
+                              cmnCommandLineOptions::OPTIONAL, &portNumber);
+
+    options.AddOptionOneValue("w", "width",
+                              "Resize width (if specified, requires height)",
+                              cmnCommandLineOptions::OPTIONAL, &width);
+
+    options.AddOptionOneValue("h", "height",
+                              "Resize height (if specified, requires width)",
+                              cmnCommandLineOptions::OPTIONAL, &height);
+
+    options.AddOptionNoValue("f", "flip-horizontal",
+                             "Flip image left to right",
+                             cmnCommandLineOptions::OPTIONAL);
+
+    options.AddOptionOneValue("l", "latency",
+                              "Add latency (in number of frames)",
+                              cmnCommandLineOptions::OPTIONAL, &latencyInFrames);
+
+    options.AddOptionNoValue("s", "save-configuration",
+                             std::string("Save camera configuration in ") + configFile,
+                             cmnCommandLineOptions::OPTIONAL);
+
+    options.AddOptionNoValue("n", "no-window",
+                             "don't display preview",
+                             cmnCommandLineOptions::OPTIONAL);
+
+    std::string errorMessage;
+    if (!options.Parse(argc, argv, errorMessage)) {
+        std::cerr << "Error: " << errorMessage << std::endl;
+        options.PrintUsage(std::cerr);
+        return -1;
+    }
+
+    if ((numberOfChannels != 1) && (numberOfChannels != 2)) {
+        std::cerr << "Error: number of channels can be either 1 or 2" << std::endl;
+        return -1;
+    }
+
+    if ((width != 0) || (height != 0)) {
+        if ((width == 0) || (height == 0)) {
+            std::cerr << "Error: you need to specify both width and height, both need to be greater than 0" << std::endl;
+            return -1;
+        }
+    }
+
+    svlInitialize();
     
     // connect the source to the stream
-    svlFilterSourceVideoCapture source(1);
-    if (source.LoadSettings("camera-viewer.dat") != SVL_OK) {
+    svlFilterSourceVideoCapture source(numberOfChannels);
+    if (source.LoadSettings(configFile.c_str()) != SVL_OK) {
         source.DialogSetup(SVL_LEFT);
         source.DialogSetup(SVL_RIGHT);
     }
-    source.SaveSettings("camera-viewer.dat");
+    if (options.IsSet("save-configuration")) {
+        source.SaveSettings(configFile.c_str());
+    }
     
-#if 0
-    svlFilterImageResizer resize;
-    resize.SetName("Resize");
-    resize.SetInterpolation(true);
-    resize.SetOutputSize(640, 480, SVL_LEFT);
-    resize.SetOutputSize(640, 480, SVL_RIGHT);
+    svlFilterImageWindow previewWindow;
+    previewWindow.SetName("Video");
+    previewWindow.SetTitle("Video");
 
-    svlFilterStereoImageJoiner joiner;
-    joiner.SetName("Joiner");
-#endif
-
-    svlFilterSplitter splitter;
-    splitter.SetName("Splitter");
-    splitter.AddOutput("Window",  1, 3);
-
-#if 0    
-    svlFilterAddLatency latency;
-#endif
-
-    svlFilterImageWindow windowlive;
-    windowlive.SetName("LiveVideo");
-    windowlive.SetTitle("Live Video");
-
-    svlFilterImageWindow windowdelay;
-    windowdelay.SetName("DelayVideo");
-    windowdelay.SetTitle("Delay Video");
-
-    svlVideoCodecBase *codec = svlVideoIO::GetCodec(".njpg");
-    svlVideoIO::Compression *compr = codec->GetCompression();
+    svlVideoCodecBase * codec = svlVideoIO::GetCodec(codecName);
+    if (codec == 0) {
+        std::cerr << "Error: can't find codec " << codecName << std::endl;
+        return -1;
+    }
+    svlVideoIO::Compression * compr = codec->GetCompression();
     svlVideoIO::ReleaseCodec(codec);
     compr->data[0] = 75;
-
-    svlFilterVideoFileWriter writer;
-    writer.SetCodecParams(compr);
-    svlVideoIO::ReleaseCompression(compr);
-
-    int port = 10001;
-    char portASCII[20];
-    sprintf(portASCII, "@%d.njpg", port);
-    writer.SetFilePath(portASCII);
-    writer.OpenFile();
-
-    ///////////////////////////////////////////////////////////////////////
 
     svlStreamManager stream(4);
     stream.SetSourceFilter(&source);
 
-    // connect the source to the resize
-    svlFilterOutput *output;
-
+    // connect the source to next filter
+    svlFilterOutput * output;
     output = source.GetOutput();
-    // output->Connect(resize.GetInput());
 
-    // connect the resize to the joiner
-    // output = resize.GetOutput();
+    // first resize if needed
+    svlFilterImageResizer resize;
+    if (width != 0) {
+        resize.SetName("Resize");
+        resize.SetInterpolation(true);
+        resize.SetOutputSize(width, height, SVL_LEFT);
+        resize.SetOutputSize(width, height, SVL_RIGHT);
+        output->Connect(resize.GetInput());
+        output = resize.GetOutput();
+    }
+
+    // flip if needed
+    svlFilterImageFlipRotate flip;
+    if (options.IsSet("flip-horizontal")) {
+        flip.SetHorizontalFlip(true);
+        output->Connect(flip.GetInput());
+        output = flip.GetOutput();
+    }
+
+    // latency if needed
+    svlFilterAddLatency latency;
+    if (latencyInFrames > 0) {
+        latency.SetFrameDelayed(latencyInFrames);
+        output->Connect(latency.GetInput());
+        output = latency.GetOutput();
+    }
+
+#if 0
+
+    svlFilterStereoImageJoiner joiner;
+    joiner.SetName("Joiner");
+#endif
     // output->Connect(joiner.GetInput());
 
     // connect the joiner to the splitter
@@ -118,50 +180,46 @@ int main(int argc, char** argv) {
 
     // connect the latency to the writer
     // output = latency.GetOutput();
+
+    // writer
+    svlFilterVideoFileWriter writer;
+    writer.SetCodecParams(compr);
+    svlVideoIO::ReleaseCompression(compr);
+
+    std::string portASCII = "@" + portNumber + codecName;
+    writer.SetFilePath(portASCII);
+    writer.OpenFile();
+
     output->Connect(writer.GetInput());
+    output = writer.GetOutput();
 
-    if (1 < argc) {
-	// connect the latency to the writer
-	output = writer.GetOutput();
-	output->Connect(windowdelay.GetInput());
-      
-	// connect the splitter output to the window
-	output = splitter.GetOutput("Window");
-	output->Connect(windowlive.GetInput());
+    // connect the last filter to preview if desired
+    if (!options.IsSet("no-window")) {
+        output->Connect(previewWindow.GetInput());
     }
-
-    if (stream.Play() != SVL_OK) {
-	std::cerr << "Failed to start the stream." << std::endl;
-	return 0;
-    }
-    std::cout << "SVL server started, press 'q' to stop." << std::endl;
-	  
-    char c = 'q';
-    do {
-	c = cmnGetChar();
-      
-	switch (c) {
-	    /*
-	      case 'l':
-	      fleaLeftSource.DialogImageProperties();
-	      break;
-	  
-	      case 'r': 
-	      fleaRightSource.DialogImageProperties();
-	      break;
-	    */
-	
-	case '+':
-	    // latency.UpLatency();
-	    break;
-	
-	case '-':
-	    // latency.DownLatency();
-	    break;
-	
-	}
-    } while (c != 'q');
-    std::cout << "Stopping video stream" << std::endl;
     
+    if (stream.Play() != SVL_OK) {
+        std::cerr << "Failed to start the stream." << std::endl;
+        return 0;
+    }
+    std::cout << argv[0] << " started, press 'q' to stop." << std::endl;
+	  
+    char c;
+    do {
+        c = cmnGetChar();
+        switch (c) {
+        case '+':
+            latency.UpLatency();
+            break;
+        case '-':
+            latency.DownLatency();
+            break;
+        }
+    } while (c != 'q');
+
+    std::cout << "Stopping video stream" << std::endl;
+    stream.Release();
+
+    cmnLogger::Kill();
     return 0;
 }
