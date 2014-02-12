@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
 
     cmnCommandLineOptions options;
-    const std::string configFile = "camera-viewer.dat";
+    const std::string configFilePrefix = "camera-viewer";
 
     std::string portNumber = "0";
     std::string codecName = ".njpg";
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
                               cmnCommandLineOptions::OPTIONAL, &latencyInFrames);
 
     options.AddOptionNoValue("s", "save-configuration",
-                             std::string("Save camera configuration in ") + configFile,
+                             std::string("Save camera configuration in ") + configFilePrefix + std::string("-{mono,stereo}.dat"),
                              cmnCommandLineOptions::OPTIONAL);
 
     options.AddOptionNoValue("n", "no-window",
@@ -96,6 +96,13 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    std::string configFile = configFilePrefix;
+    if (numberOfChannels == 1) {
+        configFile.append("-mono.dat");
+    } else {
+        configFile.append("-stereo.dat");
+    }
+        
     if ((width != 0) || (height != 0)) {
         if ((width == 0) || (height == 0)) {
             std::cerr << "Error: you need to specify both width and height, both need to be greater than 0" << std::endl;
@@ -119,9 +126,14 @@ int main(int argc, char** argv)
     previewWindow.SetName("Video");
     previewWindow.SetTitle("Video");
 
+    // detect if codec is available
     svlVideoCodecBase * codec = svlVideoIO::GetCodec(codecName);
     if (codec == 0) {
-        std::cerr << "Error: can't find codec " << codecName << std::endl;
+        std::string formatlist;
+        svlVideoIO::GetFormatList(formatlist);
+        std::cerr << "Error: can't find codec " << codecName << std::endl
+                  << "Supported formats:" << std::endl
+                  << formatlist << std::endl;
         return -1;
     }
     svlVideoIO::Compression * compr = codec->GetCompression();
@@ -162,36 +174,19 @@ int main(int argc, char** argv)
         output = latency.GetOutput();
     }
 
-#if 0
-
-    svlFilterStereoImageJoiner joiner;
-    joiner.SetName("Joiner");
-#endif
-    // output->Connect(joiner.GetInput());
-
-    // connect the joiner to the splitter
-    // output = joiner.GetOutput();
-
-    //    output->Connect(splitter.GetInput());
-
-    // connect the splitter output to the latency
-    // output = splitter.GetOutput();
-    // output->Connect(latency.GetInput());
-
-    // connect the latency to the writer
-    // output = latency.GetOutput();
-
-    // writer
+    // writer on network
     svlFilterVideoFileWriter writer;
-    writer.SetCodecParams(compr);
-    svlVideoIO::ReleaseCompression(compr);
+    if (options.IsSet("port")) {
+        writer.SetCodecParams(compr);
+        svlVideoIO::ReleaseCompression(compr);
 
-    std::string portASCII = "@" + portNumber + codecName;
-    writer.SetFilePath(portASCII);
-    writer.OpenFile();
+        std::string portASCII = "@" + portNumber + codecName;
+        writer.SetFilePath(portASCII);
+        writer.OpenFile();
 
-    output->Connect(writer.GetInput());
-    output = writer.GetOutput();
+        output->Connect(writer.GetInput());
+        output = writer.GetOutput();
+    }
 
     // connect the last filter to preview if desired
     if (!options.IsSet("no-window")) {
