@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     cmnCommandLineOptions options;
     const std::string configFilePrefix = "camera-viewer";
 
-    std::string portNumber = "0";
+    std::string portNumber = "";
     std::string codecName = ".njpg";
 
     int numberOfChannels = 1;
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
     }
 
     if ((numberOfChannels != 1) && (numberOfChannels != 2)) {
-        std::cerr << "Error: number of channels can be either 1 or 2" << std::endl;
+        std::cerr << "Error: number of channels can be either 1 or 2." << std::endl;
         return -1;
     }
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
         
     if ((width != 0) || (height != 0)) {
         if ((width == 0) || (height == 0)) {
-            std::cerr << "Error: you need to specify both width and height, both need to be greater than 0" << std::endl;
+            std::cerr << "Error: you need to specify both width and height, both need to be greater than 0." << std::endl;
             return -1;
         }
     }
@@ -212,7 +212,7 @@ int main(int argc, char** argv)
         }
     } while (c != 'q');
 
-    std::cout << "Stopping video stream" << std::endl;
+    std::cout << "Stopping video stream." << std::endl;
     stream.Release();
 
     cmnLogger::Kill();

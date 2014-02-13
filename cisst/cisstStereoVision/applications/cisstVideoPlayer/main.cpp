@@ -20,30 +20,44 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstStereoVision.h>
+
+#include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnGetChar.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnCommandLineOptions.h>
 
-int main(int argc, char** argv) {
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterSourceVideoFile.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
 
-    // check arguments
-    if (argc != 2) {
-	std::cerr << "Usage: " << argv[0] << " SVLIP" 
-		  << std::endl;
-	return -1;
-    } 
-
+int main(int argc, char** argv)
+{
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
+
+    cmnCommandLineOptions options;
+    std::string ip = "";
+    std::string portNumber = "";
+    std::string codecName = ".njpg";
+
+    options.AddOptionOneValue("i", "ip",
+                              "IP for network based codec",
+                              cmnCommandLineOptions::OPTIONAL, &ip);
+
+    options.AddOptionOneValue("p", "port",
+                              "IP port for network based codec",
+                              cmnCommandLineOptions::OPTIONAL, &portNumber);
   
-    std::cout << "Initializing SVL" << std::endl;
+    std::string errorMessage;
+    if (!options.Parse(argc, argv, errorMessage)) {
+        std::cerr << "Error: " << errorMessage << std::endl;
+        options.PrintUsage(std::cerr);
+        return -1;
+    }
 
-    ////////////////////////////////////////////////////////////
-    // SVL
-    ////////////////////////////////////////////////////////////
-
-    std::string svlpath(std::string(argv[1]) + "@10001.njpg");
+    std::string svlpath(ip + "@" + portNumber + codecName);
 
     svlInitialize();
 
@@ -53,50 +67,35 @@ int main(int argc, char** argv) {
     source.SetName("Source");
     source.SetFilePath(svlpath);
 
-#if 0
-    svlFilterImageFlipRotate flip;
-    flip.SetName("Flip");
-    flip.SetVerticalFlip(true);
-
-    svlFilterImageResizer resize;
-    resize.SetName("Resize");
-    resize.SetInterpolation(true);
-    resize.SetOutputSize(1024*2, 768);
-#endif
-
-    svlFilterImageWindow windowdelay;
-    windowdelay.SetName("DelayVideo");
-    windowdelay.SetTitle("Delay Video");
+    svlFilterImageWindow previewWindow;
+    previewWindow.SetName("DelayVideo");
+    previewWindow.SetTitle("Delay Video");
 
     // connect the source
-    svlFilterOutput *output;
+    svlFilterOutput * output;
     stream.SetSourceFilter(&source);
 
-#if 0
-    // connect the source to the flipper
     output = source.GetOutput();
-    output->Connect(flip.GetInput());
-
-    // connect the flipper to the resizer
-    output = flip.GetOutput();
-    output->Connect(resize.GetInput());
-#endif
-
-    output = source.GetOutput();
-    output->Connect(windowdelay.GetInput());
+    output->Connect(previewWindow.GetInput());
 
     std::cout << "Starting stream" << std::endl;
 
     if (stream.Play() != SVL_OK) { 
-	std::cout << "Failed to start the stream" << std::endl;
-	return 0;
+        std::cout << "Failed to start the stream" << std::endl;
+        return 0;
     }
 
     std::cout << "Stream started" << std::endl;
-    
-    std::cout << "ENTER to exit" << std::endl;
+
+    std::cout << "Press any key to quit." << std::endl;
 
     cmnGetChar();
+    std::cout << "Stopping video stream" << std::endl;
+    stream.Release();
+
+    cmnLogger::Kill();
+    return 0;
+
 
     return 0;
 }
