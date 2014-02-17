@@ -24,6 +24,7 @@ set (SOURCE_FILES
      nmrPolynomialBaseTest.cpp
      nmrPolynomialTermPowerIndexTest.cpp
      nmrStandardPolynomialTest.cpp
+	 nmrControlOptimizerTest.cpp
      )
 
 # all header files
@@ -36,6 +37,7 @@ set (HEADER_FILES
      nmrPolynomialBaseTest.h
      nmrPolynomialTermPowerIndexTest.h
      nmrStandardPolynomialTest.h
+	 nmrControlOptimizerTest.h
      )
 
 # Added tests available for cisstNetlib

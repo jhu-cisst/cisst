@@ -27,6 +27,9 @@ set (SOURCE_FILES
      nmrPolynomialTermPowerIndex.cpp
      nmrSingleVariablePowerBasis.cpp
      nmrStandardPolynomial.cpp
+	 nmrControlOptimizer.cpp
+	 nmrKinematics.cpp
+	 nmrSensorValue.cpp
      )
 
 
@@ -45,6 +48,9 @@ set (HEADER_FILES
      nmrPolynomialTermPowerIndex.h
      nmrSingleVariablePowerBasis.h
      nmrStandardPolynomial.h
+	 nmrControlOptimizer.h
+	 nmrKinematics.h
+	 nmrSensorValue.h
      )
 
 if (CISST_HAS_CISSTNETLIB)
