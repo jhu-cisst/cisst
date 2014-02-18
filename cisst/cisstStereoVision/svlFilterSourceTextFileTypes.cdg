@@ -16,6 +16,7 @@ class {
     name FileInfo;
     namespace svlFilterSourceTextFileTypes;
     attribute CISST_EXPORT;
+    ctor-all-members true;
 
     member {
         name filepath;
@@ -44,9 +45,23 @@ class {
         visibility public;
         description Timestamp overflow value;
     }
+    inline-header {
+        void Assign(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit, const double & _timestamp_overflow_value);
+    }
 }
 
 inline-header {
 typedef mtsGenericObjectProxy<svlFilterSourceTextFileTypes::FileInfo> svlFilterSourceTextFileInfoProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceTextFileInfoProxy);
+}
+
+inline-code {
+void svlFilterSourceTextFileTypes::FileInfo::Assign(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit, const double & _timestamp_overflow_value)
+{
+    filepath = _filepath;
+    timestamp_column = _timestamp_column;
+    timestamp_unit = _timestamp_unit;
+    if (_timestamp_overflow_value < 0.0) timestamp_overflow_value = pow(2.0, 100);
+    else timestamp_overflow_value = _timestamp_overflow_value;
+}
 }
