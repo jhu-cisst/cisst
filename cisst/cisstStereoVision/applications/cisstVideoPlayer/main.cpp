@@ -44,11 +44,11 @@ int main(int argc, char** argv)
 
     options.AddOptionOneValue("i", "ip",
                               "IP for network based codec",
-                              cmnCommandLineOptions::OPTIONAL, &ip);
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &ip);
 
     options.AddOptionOneValue("p", "port",
                               "IP port for network based codec",
-                              cmnCommandLineOptions::OPTIONAL, &portNumber);
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &portNumber);
   
     std::string errorMessage;
     if (!options.Parse(argc, argv, errorMessage)) {

@@ -54,35 +54,35 @@ int main(int argc, char** argv)
 
     options.AddOptionOneValue("c", "channels",
                               "Number of channels, 1 for mono (default), 2 for stereo",
-                              cmnCommandLineOptions::OPTIONAL, &numberOfChannels);
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &numberOfChannels);
     
     options.AddOptionOneValue("p", "port",
                               "IP port for network based codec",
-                              cmnCommandLineOptions::OPTIONAL, &portNumber);
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &portNumber);
 
     options.AddOptionOneValue("w", "width",
                               "Resize width (if specified, requires height)",
-                              cmnCommandLineOptions::OPTIONAL, &width);
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &width);
 
     options.AddOptionOneValue("h", "height",
                               "Resize height (if specified, requires width)",
-                              cmnCommandLineOptions::OPTIONAL, &height);
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &height);
 
     options.AddOptionNoValue("f", "flip-horizontal",
                              "Flip image left to right",
-                             cmnCommandLineOptions::OPTIONAL);
+                             cmnCommandLineOptions::OPTIONAL_OPTION);
 
     options.AddOptionOneValue("l", "latency",
                               "Add latency (in number of frames)",
-                              cmnCommandLineOptions::OPTIONAL, &latencyInFrames);
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &latencyInFrames);
 
     options.AddOptionNoValue("s", "save-configuration",
                              std::string("Save camera configuration in ") + configFilePrefix + std::string("-{mono,stereo}.dat"),
-                             cmnCommandLineOptions::OPTIONAL);
+                             cmnCommandLineOptions::OPTIONAL_OPTION);
 
     options.AddOptionNoValue("n", "no-window",
                              "don't display preview",
-                             cmnCommandLineOptions::OPTIONAL);
+                             cmnCommandLineOptions::OPTIONAL_OPTION);
 
     std::string errorMessage;
     if (!options.Parse(argc, argv, errorMessage)) {

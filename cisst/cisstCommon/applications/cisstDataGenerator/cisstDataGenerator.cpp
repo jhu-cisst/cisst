@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -31,23 +31,23 @@ int main(int argc, char* argv[])
     cmnCommandLineOptions options;
     std::string inputName;
     options.AddOptionOneValue("i", "input", "input file",
-                              cmnCommandLineOptions::REQUIRED, &inputName);
+                              cmnCommandLineOptions::REQUIRED_OPTION, &inputName);
     std::string headerDir;
     options.AddOptionOneValue("d", "header-directory", "destination directory for generated header file",
-                              cmnCommandLineOptions::REQUIRED, &headerDir);
+                              cmnCommandLineOptions::REQUIRED_OPTION, &headerDir);
     std::string headerName;
     options.AddOptionOneValue("h", "header-file", "generated header filename, can contain a subdirectory (e.g. dir/file.h)",
-                              cmnCommandLineOptions::REQUIRED, &headerName);
+                              cmnCommandLineOptions::REQUIRED_OPTION, &headerName);
     std::string codeDir;
     options.AddOptionOneValue("D", "code-directory", "destination directory for generated code file",
-                              cmnCommandLineOptions::REQUIRED, &codeDir);
+                              cmnCommandLineOptions::REQUIRED_OPTION, &codeDir);
     std::string codeName;
     options.AddOptionOneValue("c", "code-file", "generated code filename",
-                              cmnCommandLineOptions::REQUIRED, &codeName);
+                              cmnCommandLineOptions::REQUIRED_OPTION, &codeName);
 
     options.AddOptionNoValue("v", "verbose", "verbose output");
 
-    options.AddOptionNoValue("s", "syntax-only", "display the data description syntax and exit", cmnCommandLineOptions::SQUASH_REQUIRED);
+    options.AddOptionNoValue("s", "syntax-only", "display the data description syntax and exit", cmnCommandLineOptions::SQUASH_REQUIRED_OPTION);
 
     std::string errorMessage;
     if (!options.Parse(argc, argv, errorMessage)) {

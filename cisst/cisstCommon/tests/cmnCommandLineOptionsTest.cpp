@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-28
 
-  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -49,7 +49,7 @@ void cmnCommandLineOptionsTest::TestOneRequiredString(void) {
     // add one required string option
     cmnCommandLineOptions options;
     std::string result;
-    CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &result));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED_OPTION, &result));
     const char * argv[] = {"programName", "-s", "a/strange/string.h", 0};
     int argc = 3;
     std::string errorMessage;
@@ -63,7 +63,7 @@ void cmnCommandLineOptionsTest::TestOneRequiredStringFail(void) {
     cmnCommandLineOptions options;
     std::string result;
     CPPUNIT_ASSERT(options.AddOptionNoValue("v", "verbose", "for testing purposes"));
-    CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &result));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED_OPTION, &result));
     const char * argv[] = {"programName", "-v", 0};
     int argc = 2;
     std::string errorMessage;
@@ -79,9 +79,9 @@ void cmnCommandLineOptionsTest::TestOneRequiredStringIntDouble(void) {
     int resultInt;
     double resultDouble;
     CPPUNIT_ASSERT(options.AddOptionNoValue("v", "verbose", "for testing purposes"));
-    CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultString));
-    CPPUNIT_ASSERT(options.AddOptionOneValue("i", "integer", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultInt));
-    CPPUNIT_ASSERT(options.AddOptionOneValue("d", "double", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultDouble));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED_OPTION, &resultString));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("i", "integer", "for testing purposes", cmnCommandLineOptions::REQUIRED_OPTION, &resultInt));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("d", "double", "for testing purposes", cmnCommandLineOptions::REQUIRED_OPTION, &resultDouble));
     const char * argv[] = {"programName", "-s", "stringValue", "-i", "99", "-d", "3.14", 0};
     int argc = 7;
     std::string errorMessage;
@@ -97,16 +97,16 @@ void cmnCommandLineOptionsTest::TestRepeatedOptions(void) {
     // testing repeated options
     cmnCommandLineOptions options;
     bool dummy;
-    CPPUNIT_ASSERT(options.AddOptionOneValue("v", "verbose", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("v", "verbose", "useless comment", cmnCommandLineOptions::OPTIONAL_OPTION, &dummy));
     // verbose has been used
-    CPPUNIT_ASSERT(!options.AddOptionOneValue("w", "verbose", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    CPPUNIT_ASSERT(!options.AddOptionOneValue("w", "verbose", "useless comment", cmnCommandLineOptions::OPTIONAL_OPTION, &dummy));
     // v has been used
-    CPPUNIT_ASSERT(!options.AddOptionOneValue("v", "silent", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    CPPUNIT_ASSERT(!options.AddOptionOneValue("v", "silent", "useless comment", cmnCommandLineOptions::OPTIONAL_OPTION, &dummy));
     // v has been used
-    CPPUNIT_ASSERT(!options.AddOptionOneValue("-v", "noisy", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    CPPUNIT_ASSERT(!options.AddOptionOneValue("-v", "noisy", "useless comment", cmnCommandLineOptions::OPTIONAL_OPTION, &dummy));
     // add silent and check again
-    CPPUNIT_ASSERT(options.AddOptionOneValue("-s", "silent", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
-    CPPUNIT_ASSERT(!options.AddOptionOneValue("f", "--silent", "useless comment", cmnCommandLineOptions::OPTIONAL, &dummy));
+    CPPUNIT_ASSERT(options.AddOptionOneValue("-s", "silent", "useless comment", cmnCommandLineOptions::OPTIONAL_OPTION, &dummy));
+    CPPUNIT_ASSERT(!options.AddOptionOneValue("f", "--silent", "useless comment", cmnCommandLineOptions::OPTIONAL_OPTION, &dummy));
 }
 
 
@@ -135,9 +135,9 @@ void cmnCommandLineOptionsTest::TestMultipleValues(void) {
     std::list<std::string> resultStrings;
     std::list<int> resultInts;
     std::list<double> resultDoubles;
-    CPPUNIT_ASSERT(options.AddOptionMultipleValues("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultStrings));
-    CPPUNIT_ASSERT(options.AddOptionMultipleValues("i", "integer", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultInts));
-    CPPUNIT_ASSERT(options.AddOptionMultipleValues("d", "double", "for testing purposes", cmnCommandLineOptions::REQUIRED, &resultDoubles));
+    CPPUNIT_ASSERT(options.AddOptionMultipleValues("s", "string", "for testing purposes", cmnCommandLineOptions::REQUIRED_OPTION, &resultStrings));
+    CPPUNIT_ASSERT(options.AddOptionMultipleValues("i", "integer", "for testing purposes", cmnCommandLineOptions::REQUIRED_OPTION, &resultInts));
+    CPPUNIT_ASSERT(options.AddOptionMultipleValues("d", "double", "for testing purposes", cmnCommandLineOptions::REQUIRED_OPTION, &resultDoubles));
     const char * argv[] = {"programName", "-s", "string1", "-i", "99", "-d", "3.14", "--string", "string2", "--double", "3.1", "-d", "-3.14", 0};
     int argc = 13;
     std::string errorMessage;
