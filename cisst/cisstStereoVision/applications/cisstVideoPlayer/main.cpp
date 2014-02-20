@@ -38,9 +38,15 @@ int main(int argc, char** argv)
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
 
     cmnCommandLineOptions options;
+
+    int numberOfChannels = 1;
     std::string ip = "";
-    std::string portNumber = "";
+    int portNumber = 0;
     std::string codecName = ".njpg";
+
+    options.AddOptionOneValue("c", "channels",
+                              "Number of channels, 1 for mono (default), 2 for stereo",
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &numberOfChannels);
 
     options.AddOptionOneValue("i", "ip",
                               "IP for network based codec",
@@ -57,19 +63,32 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    std::string svlpath(ip + "@" + portNumber + codecName);
+    if ((numberOfChannels != 1) && (numberOfChannels != 2)) {
+        std::cerr << "Error: number of channels can be either 1 or 2." << std::endl;
+        return -1;
+    }
 
     svlInitialize();
 
     svlStreamManager stream(4);
 
-    svlFilterSourceVideoFile source(1);
+    svlFilterSourceVideoFile source(numberOfChannels);
     source.SetName("Source");
-    source.SetFilePath(svlpath);
+
+    std::stringstream filePath;
+    filePath << ip << "@" << portNumber << codecName;
+    std::cout << "Opening network using " << filePath.str() << std::endl;
+    source.SetFilePath(filePath.str(), SVL_LEFT);
+    if (numberOfChannels == 2) {
+        filePath.str(std::string());
+        filePath << ip << "@" << portNumber + 1 << codecName;
+        std::cout << "Opening network using " << filePath.str() << std::endl;
+        source.SetFilePath(filePath.str(), SVL_RIGHT);
+    }
 
     svlFilterImageWindow previewWindow;
-    previewWindow.SetName("DelayVideo");
-    previewWindow.SetTitle("Delay Video");
+    previewWindow.SetName("Video");
+    previewWindow.SetTitle("cisstVideoPlayer");
 
     // connect the source
     svlFilterOutput * output;
@@ -78,24 +97,20 @@ int main(int argc, char** argv)
     output = source.GetOutput();
     output->Connect(previewWindow.GetInput());
 
-    std::cout << "Starting stream" << std::endl;
+    std::cout << "Starting stream." << std::endl;
 
     if (stream.Play() != SVL_OK) { 
-        std::cout << "Failed to start the stream" << std::endl;
+        std::cout << "Failed to start the stream." << std::endl;
         return 0;
     }
 
-    std::cout << "Stream started" << std::endl;
-
-    std::cout << "Press any key to quit." << std::endl;
+    std::cout << "Stream started." << std::endl
+              << "Press any key to quit." << std::endl;
 
     cmnGetChar();
-    std::cout << "Stopping video stream" << std::endl;
+    std::cout << "Stopping video stream." << std::endl;
     stream.Release();
 
     cmnLogger::Kill();
-    return 0;
-
-
     return 0;
 }

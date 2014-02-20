@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     cmnCommandLineOptions options;
     const std::string configFilePrefix = "camera-viewer";
 
-    std::string portNumber = "";
+    int portNumber = 0;
     std::string codecName = ".njpg";
 
     int numberOfChannels = 1;
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
     
     svlFilterImageWindow previewWindow;
     previewWindow.SetName("Video");
-    previewWindow.SetTitle("Video");
+    previewWindow.SetTitle("cisstCameraViewer");
 
     // detect if codec is available
     svlVideoCodecBase * codec = svlVideoIO::GetCodec(codecName);
@@ -180,8 +180,16 @@ int main(int argc, char** argv)
         writer.SetCodecParams(compr);
         svlVideoIO::ReleaseCompression(compr);
 
-        std::string portASCII = "@" + portNumber + codecName;
-        writer.SetFilePath(portASCII);
+        std::stringstream filePath;
+        filePath << "@" << portNumber << codecName;
+        std::cout << "Opening network using " << filePath.str() << std::endl;
+        writer.SetFilePath(filePath.str(), SVL_LEFT);
+        if (numberOfChannels == 2) {
+            filePath.str(std::string());
+            filePath << "@" << portNumber + 1 << codecName;
+            std::cout << "Opening network using " << filePath.str() << std::endl;
+            writer.SetFilePath(filePath.str(), SVL_RIGHT);
+        }
         writer.OpenFile();
 
         output->Connect(writer.GetInput());
