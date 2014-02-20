@@ -69,7 +69,6 @@ void clientTask<_dataType>::Startup(void)
     CMN_ASSERT(required);
     mtsCommandWriteBase * eventHandler = required->GetEventHandlerWrite("EventWrite");
     CMN_ASSERT(eventHandler);
-    std::cout << "Event handler argument prototype: " << *(eventHandler->GetArgumentPrototype()) << std::endl;
 }
 
 

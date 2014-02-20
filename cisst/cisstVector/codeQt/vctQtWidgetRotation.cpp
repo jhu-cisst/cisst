@@ -7,8 +7,7 @@
   Author(s):  Zihan Chen
   Created on: 2013-03-20
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -165,6 +164,12 @@ vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeTy
     // Quaternion Groupbox
     QuaternionWidget = new vctQtWidgetDynamicVectorDoubleRead();
 
+    // Euler ZYZ Groupbox
+    EulerZYZWidget = new vctQtWidgetDynamicVectorDoubleRead();
+
+    // Euler ZYX Groupbox
+    EulerZYXWidget = new vctQtWidgetDynamicVectorDoubleRead();
+
     // Visualization Groupbox
     OpenGLWidget = new vctQtWidgetRotationOpenGL();
     OpenGLWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
@@ -191,10 +196,14 @@ void vctQtWidgetRotationDoubleRead::ShowContextMenu(const QPoint & pos)
     QAction * matrix = new QAction("Matrix", this);
     QAction * axisAngle = new QAction("Axis Angle", this);
     QAction * quaternion = new QAction("Quaternion", this);
+    QAction * eulerZYZ = new QAction("Euler ZYZ", this);
+    QAction * eulerZYX = new QAction("Euler ZYX", this);
     QAction * openGL = new QAction("3D", this);
     menu.addAction(matrix);
     menu.addAction(axisAngle);
     menu.addAction(quaternion);
+    menu.addAction(eulerZYZ);
+    menu.addAction(eulerZYX);
     menu.addAction(openGL);
 
     QAction * selectedItem = menu.exec(globalPos);
@@ -205,6 +214,10 @@ void vctQtWidgetRotationDoubleRead::ShowContextMenu(const QPoint & pos)
             SetDisplayMode(AXIS_ANGLE_WIDGET);
         } else if (selectedItem == quaternion) {
             SetDisplayMode(QUATERNION_WIDGET);
+        } else if (selectedItem == eulerZYZ) {
+            SetDisplayMode(EULERZYZ_WIDGET);
+        } else if (selectedItem == eulerZYX) {
+            SetDisplayMode(EULERZYX_WIDGET);
         } else if (selectedItem == openGL) {
             SetDisplayMode(OPENGL_WIDGET);
         }
@@ -215,6 +228,8 @@ void vctQtWidgetRotationDoubleRead::UpdateCurrentWidget(void)
 {
     vctAxAnRot3 rotAxAn;
     vctQuatRot3 rotQuat;
+    vctEulerZYZRotation3 rotEulerZYZ;
+    vctEulerZYXRotation3 rotEulerZYX;
     // compute the value based on the internal Rotation
     switch (DisplayMode) {
     case MATRIX_WIDGET:
@@ -231,6 +246,14 @@ void vctQtWidgetRotationDoubleRead::UpdateCurrentWidget(void)
         break;
     case OPENGL_WIDGET:
         OpenGLWidget->SetValue(Rotation);
+        break;
+    case EULERZYZ_WIDGET:
+        rotEulerZYZ.FromRaw(Rotation);
+        EulerZYZWidget->SetValue(vctDoubleVec(rotEulerZYZ.GetAnglesInDegrees()));
+        break;
+    case EULERZYX_WIDGET:
+        rotEulerZYX.FromRaw(Rotation);
+        EulerZYXWidget->SetValue(vctDoubleVec(rotEulerZYX.GetAnglesInDegrees()));
         break;
     default:
         break;
@@ -268,6 +291,12 @@ void vctQtWidgetRotationDoubleRead::SetDisplayMode(const DisplayModeType display
         break;
     case QUATERNION_WIDGET:
         CurrentWidget = QuaternionWidget;
+        break;
+    case EULERZYZ_WIDGET:
+        CurrentWidget = EulerZYZWidget;
+        break;
+    case EULERZYX_WIDGET:
+        CurrentWidget = EulerZYXWidget;
         break;
     case OPENGL_WIDGET:
         CurrentWidget = OpenGLWidget;

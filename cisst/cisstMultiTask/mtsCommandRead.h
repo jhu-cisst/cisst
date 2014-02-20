@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -49,6 +48,9 @@ public:
     /*! This type. */
     typedef mtsCommandRead ThisType;
 
+    /*! Callable type */
+    typedef mtsCallableReadBase CallableType;
+
 private:
     /*! Private copy constructor to prevent copies */
     inline mtsCommandRead(const ThisType & CMN_UNUSED(other));
@@ -83,7 +85,23 @@ public:
     */
     virtual mtsExecutionResult Execute(mtsGenericObject & argument);
 
+    /*! Execute method that includes a pointer to a handler for the finished event.
+      This is intended for derived classes (e.g., mtsCommandQueuedRead). */
+    virtual mtsExecutionResult Execute(mtsGenericObject & argument,
+                                       mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
+    { return Execute(argument); }
+
+    /*! Get a direct pointer to the callable object.  This method is
+      used for queued commands.  The caller should still use the
+      Execute method which will queue the command.  When the command
+      is de-queued, one needs access to the callable object to call
+      the final method or function. */
+    mtsCallableReadBase * GetCallable(void) const;
+
     virtual const mtsGenericObject * GetArgumentPrototype(void) const;
+    // GetResultPrototype is same as GetArgumentPrototype, but provided for
+    // consistency with mtsCommandVoidReturn
+    virtual const mtsGenericObject * GetResultPrototype(void) const;
 
     /* documented in base class */
     size_t NumberOfArguments(void) const;

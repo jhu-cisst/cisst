@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-24
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 //************************************* mtsEventReceiverBase ***************************************************
 
-mtsEventReceiverBase::mtsEventReceiverBase() : Name("UnknownEventReceiverVoid"), Required(0), EventSignal(0), Waiting(false), OwnEventSignal(false)
+mtsEventReceiverBase::mtsEventReceiverBase() : Name("UnknownEventReceiver"), Required(0), EventSignal(0), Waiting(false), OwnEventSignal(false)
 {}
 
 mtsEventReceiverBase::~mtsEventReceiverBase()
@@ -35,12 +35,17 @@ mtsEventReceiverBase::~mtsEventReceiverBase()
 
 void mtsEventReceiverBase::SetRequired(const std::string & name, mtsInterfaceRequired * interfaceRequired)
 {
-    Name = name;
+    SetName(name);
     Required = interfaceRequired;
     EventSignal = 0;
     if (Required && (Required->MailBox)) {
-      EventSignal = Required->GetThreadSignal();
+        SetThreadSignal(Required->GetThreadSignal());
     }
+}
+
+void mtsEventReceiverBase::SetThreadSignal(osaThreadSignal *signal)
+{
+    EventSignal = signal;
 }
 
 bool mtsEventReceiverBase::CheckRequired() const

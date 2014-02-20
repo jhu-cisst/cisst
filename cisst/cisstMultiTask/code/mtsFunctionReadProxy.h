@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-09-03
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,47 +36,17 @@ class CISST_EXPORT mtsFunctionReadProxy : public mtsFunctionRead {
 protected:
     typedef mtsFunctionRead BaseType;
     mtsProxySerializer Serializer;
-    std::string argSerialized;
-    mtsGenericObject *arg;
 
 public:
-    mtsFunctionReadProxy() : mtsFunctionRead(), arg(0)
+    mtsFunctionReadProxy()
     {}
 
-    mtsFunctionReadProxy(const std::string &argumentPrototypeSerialized)
-        : mtsFunctionRead(), argSerialized(argumentPrototypeSerialized)
-    {
-        arg = Serializer.DeSerialize(argumentPrototypeSerialized);
-        if (!arg)
-            CMN_LOG_INIT_ERROR << "mtsFunctionReadProxy: could not deserialize argument prototype" << std::endl;
-    }
-
     ~mtsFunctionReadProxy()
-    {
-        delete arg;
-    }
+    {}
 
     /*! Getter */
     inline mtsProxySerializer * GetSerializer(void) {
         return &Serializer;
-    }
-
-    inline mtsExecutionResult ExecuteSerialized(std::string &resultArgSerialized)
-    {
-        resultArgSerialized.clear();
-        mtsExecutionResult ret = mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED;
-        // If arg has not yet been dynamically constructed, try again because the
-        // class may have been dynamically loaded since the last attempt to construct it.
-        if (!arg)
-            arg = Serializer.DeSerialize(argSerialized);
-        if (arg) {
-            ret = Execute(*arg);
-            if (ret.IsOK()) {
-                if (!Serializer.Serialize(*arg, resultArgSerialized))
-                    ret = mtsExecutionResult::SERIALIZATION_ERROR;
-            }
-        }
-        return ret;
     }
 };
 

@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2013-09-08
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -37,8 +37,9 @@ CommandHandle::CommandHandle(const std::string &str)
 
 bool CommandHandle::IsValidType(char cmd_type)
 {
-    return ((cmd_type == 'V') || (cmd_type == 'R') || (cmd_type == 'W') || (cmd_type == 'Q')
-            || (cmd_type == 'r') || (cmd_type == 'q') || (cmd_type == 'I'));
+    return ((cmd_type == 'V') || (cmd_type == 'R') || (cmd_type == 'W') || (cmd_type == 'Q') ||
+            (cmd_type == 'v') || (cmd_type == 'r') || (cmd_type == 'w') || (cmd_type == 'q') ||
+            (cmd_type == 'I'));
 }
 
 bool CommandHandle::IsValid(void) const

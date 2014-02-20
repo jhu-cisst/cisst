@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2013-08-06
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -77,13 +77,18 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
  protected:
 
     osaSocket Socket;
-    mtsProxySerializer *InternalSerializer;
+    mtsProxySerializer *Serializer;
 
     mtsSocketProxyInitData ServerData;
 
     // For memory cleanup
-    std::vector<CommandWrapperBase *> CommandWrappers;
     std::vector<mtsCommandBase *> EventGenerators;
+
+    bool LocalWaiting;
+    mtsCommandWriteBase *localUnblockingCommand;
+    void LocalUnblockingHandler(const mtsGenericObject &arg);
+    // Returns false if timed out
+    bool WaitForResponse(double timeoutInSec);
 
     /*! \brief Create client proxy
       \param providedInterfaceDescription Complete information about provided
@@ -92,10 +97,14 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
     bool CreateClientProxy(const std::string & providedInterfaceName);
 
     // For use by MulticastCommandVoidProxy and MulticastCommandWriteProxy
-    bool EventOperation(const std::string &command, const std::string &eventName, const char *handle);
+    mtsCommandWriteBase *EventEnableCommand;
+    mtsCommandWriteBase *EventDisableCommand;
+    void EventEnable(const std::string &eventName, const char *handle);
+    void EventDisable(const std::string &eventName, const char *handle);
     
     void CheckForEvents(double timeoutInSec);
 
+    friend class CommandWrapperBase;
     friend class MulticastCommandVoidProxy;
     friend class MulticastCommandWriteProxy;
 
@@ -123,6 +132,9 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
 
     // Following used by command wrappers
     bool CheckForEventsImmediate(double timeoutInSec);
+    bool Serialize(const mtsGenericObject & originalObject, std::string & serializedObject);
+    bool DeSerialize(const std::string & serializedObject, mtsGenericObject & originalObject);
+    mtsGenericObject * DeSerialize(const std::string & serializedObject);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSocketProxyClient)

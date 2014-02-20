@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,6 +29,12 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandQueuedWriteReturn_h
 
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
+#include <cisstMultiTask/mtsCallableQualifiedReadBase.h>
+#include <cisstMultiTask/mtsQueue.h>
+
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
 
 class mtsCommandWriteBase;
 
@@ -37,58 +43,92 @@ class mtsCommandWriteBase;
 
  */
 
-/*! WriteReturn queued command using templated _returnType parameter */
-class mtsCommandQueuedWriteReturn: public mtsCommandWriteReturn
+template <class _Base>
+class mtsCommandQueuedWriteReturnBase: public _Base
 {
 public:
-    typedef mtsCommandWriteReturn BaseType;
+    typedef _Base BaseType;
 
     /*! This type. */
-    typedef mtsCommandQueuedWriteReturn ThisType;
+    typedef mtsCommandQueuedWriteReturnBase<_Base> ThisType;
+
+    typedef typename _Base::CallableType CallableType;
 
 protected:
     /*! Mailbox used to queue the commands */
     mtsMailBox * MailBox;
 
+    size_t ArgumentQueueSize; // size used for queues
+
+    /*! Queue to store arguments */
+    mtsQueueGeneric ArgumentsQueue;
+
+    /*! Queue to store pointer to return value */
+    mtsQueue<mtsGenericObject *> ReturnsQueue;
+
+    /*! Queue for return events (to send result to caller) */
+    mtsQueue<mtsCommandWriteBase *> FinishedEventQueue;
+
 private:
+    /*! Private default constructor to prevent use. */
+    mtsCommandQueuedWriteReturnBase(void);
+
     /*! Private copy constructor to prevent copies */
-    mtsCommandQueuedWriteReturn(const ThisType & CMN_UNUSED(other));
+    mtsCommandQueuedWriteReturnBase(const ThisType & CMN_UNUSED(other));
 
 public:
 
-    mtsCommandQueuedWriteReturn(mtsCallableWriteReturnBase * callable, const std::string & name,
-                                const mtsGenericObject * argumentPrototype,
-                                const mtsGenericObject * resultPrototype,
-                                mtsMailBox * mailBox);
+    /*! Constructor */
+    mtsCommandQueuedWriteReturnBase(CallableType * callable, const std::string & name,
+                                    const mtsGenericObject * argumentPrototype,
+                                    const mtsGenericObject * resultPrototype,
+                                    mtsMailBox * mailBox, size_t size);
 
-    // ReturnsQueue destructor should get called
-    virtual ~mtsCommandQueuedWriteReturn();
+    /*! Destructor */
+    virtual ~mtsCommandQueuedWriteReturnBase();
 
-    mtsCommandQueuedWriteReturn * Clone(mtsMailBox * mailBox) const;
+    virtual std::string GetClassName(void) const;
 
+    virtual ThisType * Clone(mtsMailBox * mailBox, size_t size) const;
+
+    // virtual method defined in base class
     mtsExecutionResult Execute(const mtsGenericObject & argument,
                                mtsGenericObject & result);
 
-    const mtsGenericObject * GetArgumentPointer(void);
-
-    mtsGenericObject * GetResultPointer(void);
+    // virtual method defined in base class
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsGenericObject & result,
+                               mtsCommandWriteBase * finishedEventHandler);
 
     std::string GetMailBoxName(void) const;
 
-    void EnableFinishedEvent(mtsCommandWriteBase *cmd);
-    bool GenerateFinishedEvent(const mtsGenericObject &arg) const;
+    inline virtual mtsGenericObject * ArgumentPeek(void) {
+        return ArgumentsQueue.Peek();
+    }
+
+    inline virtual mtsGenericObject * ArgumentGet(void) {
+        return ArgumentsQueue.Get();
+    }
+
+    inline virtual mtsGenericObject * ReturnGet(void) {
+        return *(ReturnsQueue.Get());
+    }
+
+    inline virtual mtsCommandWriteBase * FinishedEventGet(void) {
+        return *(FinishedEventQueue.Get());
+    }
 
     void ToStream(std::ostream & outputStream) const;
-
-protected:
-    /*! Pointer on caller provided placeholder for result */
-    const mtsGenericObject * ArgumentPointer;
-    mtsGenericObject * ResultPointer;
-
-    /*! Event generator to indicate when execution is finished */
-    mtsCommandWriteBase * FinishedEvent;
 };
 
+typedef mtsCommandQueuedWriteReturnBase<mtsCommandWriteReturn> mtsCommandQueuedWriteReturn;
+typedef mtsCommandQueuedWriteReturnBase<mtsCommandQualifiedRead> mtsCommandQueuedQualifiedRead;
+
+#ifdef CISST_COMPILER_IS_MSVC
+#pragma warning ( disable : 4661 )
+template class CISST_EXPORT mtsCommandQueuedWriteReturnBase<mtsCommandWriteReturn>;
+template class CISST_EXPORT mtsCommandQueuedWriteReturnBase<mtsCommandQualifiedRead>;
+#endif
 
 #endif // _mtsCommandQueuedWriteReturn_h
 

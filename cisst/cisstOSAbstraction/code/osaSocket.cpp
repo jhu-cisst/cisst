@@ -7,7 +7,7 @@ $Id$
 Author(s):  Peter Kazanzides
 Created on: 2009
 
-(C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights Reserved.
+(C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -436,7 +436,7 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen, const double time
 
     //see if the socket is available for writing
     //timeout is useful here if lots of data is to be sent.
-    retval = select(SocketFD + 1, &writefds, NULL, NULL, &timeout);
+    retval = select(SocketFD + 1, NULL, &writefds, NULL, &timeout);
 
     if (retval == SOCKET_ERROR) {
 

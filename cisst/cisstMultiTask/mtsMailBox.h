@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
+class mtsExecutionResult;
 
 class CISST_EXPORT mtsMailBox
 {
@@ -60,6 +61,11 @@ class CISST_EXPORT mtsMailBox
 
     /*! Method to determine which post queued command needs to be triggered. */
     void TriggerPostQueuedCommandIfNeeded(bool isBlocking, bool isBlockingReturn);
+
+    /*! Method to genereate finished event, if needed. This will eventually replace
+      the TriggerPostQueuedCommandIfNeeded method. */
+    void TriggerFinishedEventIfNeeded(const std::string &commandName, mtsCommandWriteBase *finishedEvent,
+                                      mtsGenericObject *resultPointer, const mtsExecutionResult &result) const;
 
 public:
     mtsMailBox(const std::string & name,
@@ -95,12 +101,14 @@ public:
       event.  The event handler on the client site can then raise a
       thread signal. */
     void SetPostCommandDequeuedCommand(mtsCommandVoid * command);
+    mtsCommandVoid *GetPostCommandDequeuedCommand(void) const;
 
     /*! Set the command to be called after a blocking command with
       return value is de-queued and executed.  This can be used to
       call a trigger for event.  The event handler on the client site
       can then raise a thread signal. */
     void SetPostCommandReturnDequeuedCommand(mtsCommandVoid * command);
+    mtsCommandVoid *GetPostCommandReturnDequeuedCommand(void) const;
 
 };
 

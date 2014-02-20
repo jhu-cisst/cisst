@@ -7,7 +7,7 @@
   Author(s):  Daniel Obenshain, Thomas Tantillo, Anton Deguet
   Created on: 2010
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -26,14 +26,13 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(svlFilterAddLatency)
 
-svlFilterAddLatency::svlFilterAddLatency() :
-svlFilterBase(),
+svlFilterAddLatency::svlFilterAddLatency():
+    svlFilterBase(),
     OutputImage(0),
-	FramesDelayed(0),
-	Length(0),
-	Head(0),
-	Tail(0),
-	Stereo(false)
+    FramesDelayed(0),
+    Length(0),
+    Head(0),
+    Tail(0)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -54,15 +53,15 @@ int svlFilterAddLatency::Initialize(svlSample* syncInput, svlSample* &syncOutput
 {
     Release();
 
-    switch (GetInput()->GetType()) {
+    svlStreamType type = GetInput()->GetType();
+
+    switch (type) {
     case svlTypeImageRGB:
-        OutputImage = new svlSampleImageRGB;
-        Stereo = false;
+        OutputImage = dynamic_cast<svlSampleImage*>(svlSample::GetNewFromType(type));
         break;
 
     case svlTypeImageRGBStereo:
-        OutputImage = new svlSampleImageRGBStereo;
-        Stereo = true;
+        OutputImage = dynamic_cast<svlSampleImage*>(svlSample::GetNewFromType(type));
         break;
 
     case svlTypeCUDAImageRGB:
@@ -124,73 +123,57 @@ int svlFilterAddLatency::Process(svlProcInfo * procInfo, svlSample * syncInput, 
 
     svlSampleImage* input = dynamic_cast<svlSampleImage*>(syncInput);
 
-	_OnSingleThread(procInfo)
-	{
-		if (Add(input) < 0) {
+    _OnSingleThread(procInfo)
+    {
+        if (Add(input) < 0) {
             CMN_LOG_CLASS_RUN_ERROR << "Process: failed to add input to latency linked list" << std::endl;
             return SVL_FAIL;
         }
-		if (Remove(OutputImage) < 0) {
+        if (Remove(OutputImage) < 0) {
             CMN_LOG_CLASS_RUN_ERROR << "Process: failed to remove input from latency linked list" << std::endl;
             return SVL_FAIL;
         }
-	}
+    }
     return SVL_OK;
 }
 
 
 int svlFilterAddLatency::Add(svlSampleImage * input)
 {
-	NodeType * node;
+    NodeType * node;
+    svlStreamType type = GetInput()->GetType();
 
-	while (Length < FramesDelayed) {
-		//this repeats the oldest data on the head of the list
-		node = (NodeType*) malloc(sizeof(NodeType)); // todo: replace with new?  adeguet1
-		if (Stereo) {
-            node->Data = new svlSampleImageRGBStereo;
-        } else {
-            node->Data = new svlSampleImageRGB;
-        }
+    while (Length < FramesDelayed) {
+        //this repeats the oldest data on the head of the list
+        node = (NodeType*) malloc(sizeof(NodeType)); // todo: replace with new?  adeguet1
+        node->Data = dynamic_cast<svlSampleImage*>(svlSample::GetNewFromType(type));
+        node->Data->SetSize(*input);
 
-		node->Data->SetSize(OutputImage);
-
-		if (Head == 0) {
-            memcpy(node->Data->GetUCharPointer(),
-                   OutputImage->GetUCharPointer(),
-                   OutputImage->GetDataSize());
+        if (Head == 0) {
+            node->Data->CopyOf(OutputImage);
             node->Next = 0;
             Head = node;
             Tail = node;
         } else {
-            memcpy(node->Data->GetUCharPointer(),
-                   Head->Data->GetUCharPointer(),
-                   Head->Data->GetDataSize());
+            node->Data->CopyOf(Head->Data);
             node->Next = Head;
             Head = node;
         }
-		Length++;
-	}
-
-
-	// add the data in in to a new NodeType after the tail of the
-	// list.
-
-	// return 0 on success and -1 on failure
-	node = (NodeType*) malloc(sizeof(NodeType));
-
-	if (Stereo) {
-        node->Data = new svlSampleImageRGBStereo;
-    } else {
-        node->Data = new svlSampleImageRGB;
+        Length++;
     }
 
-	node->Data->SetSize(*input);
-	memcpy(node->Data->GetUCharPointer(),
-           input->GetUCharPointer(),
-           input->GetDataSize());
-	Length++;
 
-	if (Head == 0) {
+    // add the data in in to a new NodeType after the tail of the
+    // list.
+
+    // return 0 on success and -1 on failure
+    node = (NodeType*) malloc(sizeof(NodeType));
+    node->Data = dynamic_cast<svlSampleImage*>(svlSample::GetNewFromType(type));
+    node->Data->SetSize(*input);
+    node->Data->CopyOf(input);
+    Length++;
+
+    if (Head == 0) {
         Head = node;
         Tail = node;
         node->Next = 0;
@@ -202,44 +185,42 @@ int svlFilterAddLatency::Add(svlSampleImage * input)
         return 0;
     }
     // todo, do we ever get there?  adeguet1
-	return -1;
+    return -1;
 }
 
 
 int svlFilterAddLatency::Remove(svlSampleImage * output)
 {
     // remove nodes not used anymore
-	while (Length > FramesDelayed + 1) {
-		if (Head != Tail) {
-			NodeType * temp = Head;
-			if (Head->Next == 0) {
-				Head = Tail = 0;
-			} else {
-				Head = Head->Next;
-			}
-			delete temp->Data;
-			temp->Data = 0;
-			free(temp); // todo should we use delete for nodes?  adeguet1
-			temp = 0;
-		} else {
-			delete Head->Data;
-			Head->Data = 0;
-			free(Head);
-			Head = 0;
-			Tail = 0;
-		}
-		Length--;
-	}
+    while (Length > FramesDelayed + 1) {
+        if (Head != Tail) {
+            NodeType * temp = Head;
+            if (Head->Next == 0) {
+                Head = Tail = 0;
+            } else {
+                Head = Head->Next;
+            }
+            delete temp->Data;
+            temp->Data = 0;
+            free(temp); // todo should we use delete for nodes?  adeguet1
+            temp = 0;
+        } else {
+            delete Head->Data;
+            Head->Data = 0;
+            free(Head);
+            Head = 0;
+            Tail = 0;
+        }
+        Length--;
+    }
 
-	//remove the data at the head NodeType, move it to out
-	//and move the list down by one (delete head)
+    //remove the data at the head NodeType, move it to out
+    //and move the list down by one (delete head)
 
-	//return 0 on success and -1 on failure
+    //return 0 on success and -1 on failure
 
-	if (Head != 0) {
-        memcpy(output->GetUCharPointer(),
-               Head->Data->GetUCharPointer(),
-               output->GetDataSize());
+    if (Head != 0) {
+        output->CopyOf(Head->Data);
         if (Head != Tail) {
             NodeType * temp = Head;
             if (Head->Next == 0) {
@@ -261,7 +242,7 @@ int svlFilterAddLatency::Remove(svlSampleImage * output)
         Length--;
         return 0;
     }
-	return -1;
+    return -1;
 }
 
 
@@ -269,7 +250,7 @@ void svlFilterAddLatency::UpLatency(void)
 {
     // assuming 30 fps, 3 frames to delay 100 ms
     FramesDelayed += 3;
-	CMN_LOG_CLASS_RUN_DEBUG << "UpLatency: latency is now " << (FramesDelayed * 1000.0) / 30.0 << " ms." << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "UpLatency: latency is now " << (FramesDelayed * 1000.0) / 30.0 << " ms." << std::endl;
 }
 
 
@@ -277,12 +258,19 @@ void svlFilterAddLatency::DownLatency(void)
 {
     unsigned int i;
     // assuming 30 fps, 3 frames to delay 100 ms
-	for (i = 0; i < 3; i++)	{
-		if (FramesDelayed > 0) {
-			FramesDelayed--;
-		}
-	}
-	CMN_LOG_CLASS_RUN_DEBUG << "DownLatency: latency is now " << (FramesDelayed * 1000.0) / 30.0 << " ms." << std::endl;
+    for (i = 0; i < 3; i++)    {
+        if (FramesDelayed > 0) {
+            FramesDelayed--;
+        }
+    }
+    CMN_LOG_CLASS_RUN_DEBUG << "DownLatency: latency is now " << (FramesDelayed * 1000.0) / 30.0 << " ms." << std::endl;
+}
+
+
+void svlFilterAddLatency::SetFrameDelayed(const unsigned int numberOfFrames)
+{
+    FramesDelayed = numberOfFrames;
+    CMN_LOG_CLASS_RUN_DEBUG << "DownLatency: latency is now " << (FramesDelayed * 1000.0) / 30.0 << " ms." << std::endl;
 }
 
 
@@ -290,7 +278,7 @@ int svlFilterAddLatency::Release(void)
 {
     if (OutputImage) {
         delete OutputImage;
-		// TODO: delete structure list
+        // TODO: delete structure list
         OutputImage = 0;
     }
     return SVL_OK;

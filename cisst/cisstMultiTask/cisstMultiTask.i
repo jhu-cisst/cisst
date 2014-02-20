@@ -276,7 +276,7 @@ http://www.cisst.org/cisst/license.txt.
             except Exception:
                 argument = self.GetResultPrototype()
             # Probably should check return value below
-            self.Execute(argument)
+            self.ExecuteGeneric(argument)
             # If argument has a GetDataCopy method, we assume it is derived from
             # mtsGenericObjectProxy (%extend is used to add this method).
             if hasattr(argument,"GetDataCopy"):
@@ -307,7 +307,7 @@ http://www.cisst.org/cisst/license.txt.
             except Exception:
                 argument = self.GetArgumentPrototype()
             # Probably should check return value below
-            self.Execute(argument)
+            self.ExecuteGeneric(argument)
             # If argument has a GetDataCopy method, we assume it is derived from
             # mtsGenericObjectProxy (%extend is used to add this method).
             if hasattr(argument,"GetDataCopy"):
@@ -332,10 +332,10 @@ http://www.cisst.org/cisst/license.txt.
 
         def __call__(self, argument):
             if isinstance(argument, self.ArgumentType):
-                return self.Execute(argument).GetResult()
+                return self.ExecuteGeneric(argument).GetResult()
             else:
                 realArgument = self.ArgumentType(argument)
-                return self.Execute(realArgument).GetResult()
+                return self.ExecuteGeneric(realArgument).GetResult()
     }
 }
 
@@ -358,10 +358,10 @@ http://www.cisst.org/cisst/license.txt.
             result = self.ResultType(self.GetResultPrototype())
             # Probably should check return value of self.Execute
             if isinstance(argument, self.ArgumentType):
-                self.Execute(argument, result)
+                self.ExecuteGeneric(argument, result)
             else:
                 realArgument = self.ArgumentType(argument1)
-                self.Execute(realArgument, result)
+                self.ExecuteGeneric(realArgument, result)
             # If result has a GetDataCopy method, we assume it is derived from
             # mtsGenericObjectProxy (%extend is used to add this method).
             if hasattr(result,"GetDataCopy"):
@@ -390,10 +390,10 @@ http://www.cisst.org/cisst/license.txt.
             argument2 = self.Argument2Type(self.GetArgument2Prototype())
             # Probably should check return value of self.Execute
             if isinstance(argument1, self.Argument1Type):
-                self.Execute(argument1, argument2)
+                self.ExecuteGeneric(argument1, argument2)
             else:
                 realArgument1 = self.Argument1Type(argument1)
-                self.Execute(realArgument1, argument2)
+                self.ExecuteGeneric(realArgument1, argument2)
             # If argument2 has a GetDataCopy method, we assume it is derived from
             # mtsGenericObjectProxy (%extend is used to add this method).
             if hasattr(argument2,"GetDataCopy"):

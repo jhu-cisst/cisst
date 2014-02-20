@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -28,5 +28,5 @@ add_executable (mtsExQt2DPlotVisualizerQt
                 ../TestComponent.h
                 ../TestComponent.cpp
                 main.cpp)
-set_property (TARGET mtsExQt2DPlotVisualizerQt PROPERTY FOLDER "cisstParameterTypes/examples")
+set_property (TARGET mtsExQt2DPlotVisualizerQt PROPERTY FOLDER "cisstMultiTask/examples")
 cisst_target_link_libraries (mtsExQt2DPlotVisualizerQt ${REQUIRED_CISST_LIBRARIES})

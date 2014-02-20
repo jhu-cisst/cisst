@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
+#include <cisstMultiTask/mtsEventReceiver.h>
 
 
 mtsFunctionVoid::mtsFunctionVoid(const bool isProxy):
@@ -54,6 +55,10 @@ bool mtsFunctionVoid::Bind(CommandType * command)
         CMN_LOG_INIT_WARNING << "Class mtsFunctionVoid: Bind called on already bound function:" << this << std::endl;
     }
     this->Command = command;
+#if !CISST_MTS_HAS_ICE
+    if (this->Command)
+        InitCompletionCommand(this->Command->GetName() + "Blocking");
+#endif
     return (command != 0);
 }
 
@@ -66,13 +71,22 @@ mtsExecutionResult mtsFunctionVoid::Execute(void) const
 
 mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
 {
-    mtsExecutionResult executionResult;
-    executionResult = Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (!Command)
+        return mtsExecutionResult::FUNCTION_NOT_BOUND;
+#if CISST_MTS_HAS_ICE
+    mtsExecutionResult executionResult = Command->Execute(MTS_BLOCKING);
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
         && !this->IsProxy) {
         this->ThreadSignalWait();
-        return mtsExecutionResult::COMMAND_SUCCEEDED;
+        executionResult = mtsExecutionResult::COMMAND_SUCCEEDED;
     }
+#else
+    // If Command is valid (not NULL), then CompletionCommand should also be valid
+    CMN_ASSERT(CompletionCommand);
+    mtsExecutionResult executionResult = Command->Execute(MTS_BLOCKING, CompletionCommand->GetCommand());
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+        executionResult = WaitForResult();
+#endif
     return executionResult;
 }
 

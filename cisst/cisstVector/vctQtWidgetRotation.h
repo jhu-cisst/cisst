@@ -7,8 +7,7 @@
   Author(s):  Zihan Chen
   Created on: 2013-03-20
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -72,7 +71,8 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
  public:
     /*! Possible display modes.  See SetDisplayMode method.  Please
       note that UNDEFINED_WIDGET should never be used. */
-    typedef enum {UNDEFINED_WIDGET, MATRIX_WIDGET, AXIS_ANGLE_WIDGET, QUATERNION_WIDGET, OPENGL_WIDGET} DisplayModeType;
+    typedef enum {UNDEFINED_WIDGET, MATRIX_WIDGET, AXIS_ANGLE_WIDGET, QUATERNION_WIDGET,
+                  EULERZYZ_WIDGET, EULERZYX_WIDGET, OPENGL_WIDGET} DisplayModeType;
 
     /*! Constructor.  Default display mode is rotation matrix.  See
       also SetDisplayMode. */
@@ -81,8 +81,8 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
     inline ~vctQtWidgetRotationDoubleRead(void) {};
 
     /*! Set the rotation value to be displayed.  This method assumes
-      the rotation matrix is valid, i.e. normalized and will nor
-      perform any check nor normalization. */
+      the rotation matrix is valid, i.e. normalized and will not
+      perform any check or normalization. */
     template <class _containerType>
     void SetValue(const vctMatrixRotation3ConstBase<_containerType> & rotation) {
         this->Rotation.FromRaw(rotation);
@@ -90,23 +90,23 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
     }
 
     /*! Set the display mode, i.e. the widget used to represent the
-      rotation.  Option are rotation matrix, axis and angle,
-      quaternion (displayed in order x, y, z, w) and 3D OpenGL based
-      using red, green abnd blue axes.  Please note that the display
-      mode UNDEFINED_WIDGET will be silently ignored. */ 
+      rotation.  Options are rotation matrix, axis and angle, quaternion
+      (displayed in order x, y, z, w), Euler angles (ZYZ or ZYX, in degrees),
+      and 3D OpenGL based using red, green and blue axes.
+      Please note that the display mode UNDEFINED_WIDGET will be silently ignored. */ 
     void SetDisplayMode(const DisplayModeType displayMode);
 
  protected slots:
-    /*! Contextual menu showed when the user right click on the widget */
+    /*! Contextual menu showed when the user right clicks on the widget */
     void ShowContextMenu(const QPoint & position);
 
  protected:
     /*! Current display mode, somewhat redundant with the
       CurrentWidget pointer.  The current widget should always be
-      set by changinf the DisplayMode. */
+      set by changing the DisplayMode. */
     DisplayModeType DisplayMode;
 
-    /*! Update the content of the currennt widget.  This method is
+    /*! Update the content of the current widget.  This method is
       called when the user provides a new rotation with SetValue or
       when the widget used to display the rotation is changed using
       SetDisplayMode. */
@@ -125,6 +125,10 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
 
     // Quaternion
     vctQtWidgetDynamicVectorDoubleRead * QuaternionWidget;
+
+    // Euler Angles (in degrees)
+    vctQtWidgetDynamicVectorDoubleRead * EulerZYZWidget;
+    vctQtWidgetDynamicVectorDoubleRead * EulerZYXWidget;
 
     // Visualization
     vctQtWidgetRotationOpenGL * OpenGLWidget;

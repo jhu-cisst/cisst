@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
-  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -119,7 +119,7 @@ bool cmnCommandLineOptions::Parse(int argc, const char * argv[], std::string & e
         ++argv;
 
         // if the option is a squash requirement, save that
-        if (option->Required == SQUASH_REQUIRED) {
+        if (option->Required == SQUASH_REQUIRED_OPTION) {
             foundOneSquash = true;
         }
 
@@ -158,7 +158,7 @@ bool cmnCommandLineOptions::Parse(int argc, const char * argv[], std::string & e
         OptionsType::const_iterator iter = this->Options.begin();
         for (; iter != end; ++iter) {
             option = *iter;
-            if ((option->Required == REQUIRED) && !(option->Set)) {
+            if ((option->Required == REQUIRED_OPTION) && !(option->Set)) {
                 errorMessage = "Option --" + option->Long + " required but not set";
                 return false;
             }
@@ -200,11 +200,11 @@ void cmnCommandLineOptions::PrintUsage(std::ostream & outputStream)
             value = "";
         }
         outputStream << " -" << option->Short << value << ", --" << option->Long << value << " : " << option->Description;
-        if (option->Required == REQUIRED) {
+        if (option->Required == REQUIRED_OPTION) {
             outputStream << " (required)";
-        } else if (option->Required == OPTIONAL) {
+        } else if (option->Required == OPTIONAL_OPTION) {
             outputStream << " (optional)";
-        } else if (option->Required == SQUASH_REQUIRED) {
+        } else if (option->Required == SQUASH_REQUIRED_OPTION) {
             outputStream << " (optional, no other option required when set)";
         }
         outputStream << std::endl;

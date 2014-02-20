@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -78,6 +77,12 @@ public:
       invoker applies the operation on the receiver.
     */
     virtual mtsExecutionResult Execute(mtsBlockingType CMN_UNUSED(blocking));
+
+    /*! Execute method that includes a pointer to a handler for the finished event.
+      This is intended for derived classes (e.g., mtsCommandQueuedVoid). */
+    virtual mtsExecutionResult Execute(mtsBlockingType blocking,
+                                       mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
+    { return Execute(blocking); }
 
     /*! Get a direct pointer to the callable object.  This method is
       used for queued commands.  The caller should still use the

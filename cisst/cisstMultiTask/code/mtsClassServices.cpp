@@ -337,6 +337,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceRequiredDescriptionProxy);
 #include <cisstMultiTask/mtsComponentState.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStateProxy);
 
+#include <cisstMultiTask/mtsExecutionResult.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsExecutionResultProxy);
+
 #include <cisstMultiTask/mtsParameterTypes.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentProxy);
 

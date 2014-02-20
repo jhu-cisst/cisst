@@ -33,6 +33,6 @@ int main(int argc, char **argv)
 {
     QApplication application(argc, argv);
     ExampleClass * exampleClass = new ExampleClass();
-    return application.exec();
+    application.exec();
     delete exampleClass;
 }

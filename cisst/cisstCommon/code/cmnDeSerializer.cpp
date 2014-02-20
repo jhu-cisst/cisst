@@ -34,6 +34,11 @@ cmnDeSerializer::~cmnDeSerializer()
 {
 }
 
+void cmnDeSerializer::Reset(void)
+{
+    ServicesContainer.clear();
+}
+
 cmnGenericObject * cmnDeSerializer::DeSerialize(const bool serializeObject) {
     cmnGenericObject * object = 0;
     // get object services

@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -47,31 +47,17 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
     class ConditionalWrap {
     public:
         static mtsExecutionResult Call(const mtsFunctionVoidReturn * function,
-                                       mtsCommandVoidReturn * command,
                                        _userType & argument) {
             mtsGenericObjectProxyRef<_userType> argumentWrapped(argument);
-            mtsExecutionResult executionResult = command->Execute(argumentWrapped);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
-                && !function->IsProxy) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return function->ExecuteGeneric(argumentWrapped);
         }
     };
     template <typename _userType>
     class ConditionalWrap<_userType, true> {
     public:
         static mtsExecutionResult Call(const mtsFunctionVoidReturn * function,
-                                       mtsCommandVoidReturn * command,
                                        _userType & argument) {
-            mtsExecutionResult executionResult = command->Execute(argument);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
-                && !function->IsProxy) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return function->ExecuteGeneric(argument);
         }
     };
 #endif
@@ -99,9 +85,9 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command() instead of Command->Execute(). */
     mtsExecutionResult operator()(mtsGenericObject & result) const
-    { return Execute(result); }
+    { return ExecuteGeneric(result); }
 
-    virtual mtsExecutionResult Execute(mtsGenericObject & result) const;
+    virtual mtsExecutionResult ExecuteGeneric(mtsGenericObject & result) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types. */
@@ -112,7 +98,7 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
     template <class _userType>
     mtsExecutionResult Execute(_userType & result) const {
         return Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(this, Command, result)
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::IS_DERIVED>::Call(this, result)
             : mtsExecutionResult::FUNCTION_NOT_BOUND;
     }
 #endif
@@ -129,4 +115,3 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
 
 
 #endif // _mtsFunctionVoidReturn_h
-

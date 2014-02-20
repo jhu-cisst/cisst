@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,6 +27,7 @@ vctPlot2DOpenGLQtWidget::vctPlot2DOpenGLQtWidget(QWidget * parent):
     QGLWidget(parent),
     vctPlot2DOpenGL()
 {
+    this->setFocusPolicy(Qt::StrongFocus);
 }
 
 void vctPlot2DOpenGLQtWidget::initializeGL(void)
@@ -87,6 +88,21 @@ void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
         connect(expandYreset, SIGNAL(triggered()), this, SLOT(SetContinuousExpandYResetSlot()));
 
         menu.exec(mapToGlobal(event->pos()));
+    }
+}
+
+void vctPlot2DOpenGLQtWidget::keyPressEvent(QKeyEvent * event)
+{
+    switch(event->key()) {
+    case Qt::Key_Space:
+        this->Freeze(!this->GetFreeze());
+        break;
+    case Qt::Key_R:
+        this->SetContinuousExpandY(false);
+        this->SetContinuousExpandY(true);
+        break;
+    default:
+        break;
     }
 }
 

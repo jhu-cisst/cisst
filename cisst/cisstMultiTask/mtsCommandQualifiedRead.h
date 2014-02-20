@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,6 +45,9 @@ class CISST_EXPORT mtsCommandQualifiedRead: public mtsCommandBase
 
     /*! This type. */
     typedef mtsCommandQualifiedRead ThisType;
+
+    /*! Callable type */
+    typedef mtsCallableQualifiedReadBase CallableType;
 
 private:
     /*! Private copy constructor to prevent copies */
@@ -86,9 +88,26 @@ public:
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument1,
                                        mtsGenericObject & argument2);
 
+    /*! Execute method that includes a pointer to a handler for the finished event.
+      This is intended for derived classes (e.g., mtsCommandQueuedQualifiedRead). */
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument1, mtsGenericObject & argument2,
+                                       mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
+    { return Execute(argument1, argument2); }
+
+    /*! Get a direct pointer to the callable object.  This method is
+      used for queued commands.  The caller should still use the
+      Execute method which will queue the command.  When the command
+      is de-queued, one needs access to the callable object to call
+      the final method or function. */
+    mtsCallableQualifiedReadBase * GetCallable(void) const;
+
     const mtsGenericObject * GetArgument1Prototype(void) const;
 
     const mtsGenericObject * GetArgument2Prototype(void) const;
+
+    // Following are provided for consistency with mtsCommandWriteReturn
+    const mtsGenericObject * GetArgumentPrototype(void) const;
+    const mtsGenericObject * GetResultPrototype(void) const;
 
     /* documented in base class */
     size_t NumberOfArguments(void) const;

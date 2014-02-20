@@ -24,6 +24,12 @@ class {
         description Desired position;
     }
 
+    member {
+        name Timestamps;
+        type vctDynamicVector<double>;
+        default vctDynamicVector<double>(0, 0.0);
+    }
+
     inline-header {
     public:
         inline prmPositionJointGet(size_t size) {
@@ -32,6 +38,7 @@ class {
 
         inline void SetSize(size_t size) {
             this->mPosition.SetSize(size);
+            this->mTimestamps.SetSize(size);
         }
 
     private:

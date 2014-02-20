@@ -7,8 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-09-01
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -59,8 +58,13 @@ public:
         delete DeSerializer;
     }
 
+    bool ServicesSerialized(const cmnClassServicesBase *servicesPointer) const {
+        return Serializer->ServicesSerialized(servicesPointer);
+    }
+
     void Reset(void) {
         Serializer->Reset();
+        DeSerializer->Reset();
     }
 
     bool Serialize(const mtsGenericObject & originalObject, std::string & serializedObject) {
@@ -68,7 +72,43 @@ public:
             SerializationBuffer.str("");
             Serializer->Serialize(originalObject);
             serializedObject = SerializationBuffer.str();
-        } catch (std::runtime_error e) {
+        } catch (const std::runtime_error &e) {
+            CMN_LOG_RUN_ERROR << "Serialization failed: " << originalObject.ToString() << std::endl;
+            CMN_LOG_RUN_ERROR << e.what() << std::endl;
+            serializedObject = "";
+            return false;
+        }
+        return true;
+    }
+
+    bool SerializeStart(const mtsGenericObject & originalObject) {
+        try {
+            SerializationBuffer.str("");
+            Serializer->Serialize(originalObject);
+        } catch (const std::runtime_error &e) {
+            CMN_LOG_RUN_ERROR << "Serialization failed: " << originalObject.ToString() << std::endl;
+            CMN_LOG_RUN_ERROR << e.what() << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    bool SerializeNext(const mtsGenericObject & originalObject) {
+        try {
+            Serializer->Serialize(originalObject);
+        } catch (const std::runtime_error &e) {
+            CMN_LOG_RUN_ERROR << "Serialization failed: " << originalObject.ToString() << std::endl;
+            CMN_LOG_RUN_ERROR << e.what() << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    bool SerializeEnd(const mtsGenericObject & originalObject, std::string & serializedObject) {
+        try {
+            Serializer->Serialize(originalObject);
+            serializedObject = SerializationBuffer.str();
+        } catch (const std::runtime_error &e) {
             CMN_LOG_RUN_ERROR << "Serialization failed: " << originalObject.ToString() << std::endl;
             CMN_LOG_RUN_ERROR << e.what() << std::endl;
             serializedObject = "";
@@ -82,9 +122,21 @@ public:
             DeSerializationBuffer.str("");
             DeSerializationBuffer << serializedObject;
             DeSerializer->DeSerialize(originalObject);
-        }  catch (std::runtime_error e) {
+        }  catch (const std::runtime_error &e) {
             originalObject.SetValid(false);
             CMN_LOG_RUN_ERROR << "DeSerialization failed: " << e.what() << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    // DeSerialize the next object in the string that was passed to DeSerialize
+    bool DeSerializeNext(mtsGenericObject & originalObject) {
+        try {
+            DeSerializer->DeSerialize(originalObject);
+        }  catch (const std::runtime_error &e) {
+            originalObject.SetValid(false);
+            CMN_LOG_RUN_ERROR << "DeSerializeNext failed: " << e.what() << std::endl;
             return false;
         }
         return true;
@@ -97,7 +149,7 @@ public:
             DeSerializationBuffer.str("");
             DeSerializationBuffer << serializedObject;
             deserializedObject = DeSerializer->DeSerialize();
-        }  catch (std::runtime_error e) {
+        }  catch (const std::runtime_error &e) {
             CMN_LOG_RUN_ERROR << "DeSerialization failed: " << e.what() << std::endl;
             return 0;
         }

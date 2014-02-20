@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionWriteReturn.h>
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
-
+#include <cisstMultiTask/mtsEventReceiver.h>
 
 mtsFunctionWriteReturn::mtsFunctionWriteReturn(const bool isProxy):
     mtsFunctionBase(isProxy),
@@ -55,21 +55,33 @@ bool mtsFunctionWriteReturn::Bind(CommandType * command)
         CMN_LOG_INIT_WARNING << "Class mtsFunctionWriteReturn: Bind called on already bound function: " << this << std::endl;
     }
     this->Command = command;
+#if !CISST_MTS_HAS_ICE
+    if (this->Command)
+        InitCompletionCommand(this->Command->GetName() + "Result");
+#endif
     return (command != 0);
 }
 
 
-mtsExecutionResult mtsFunctionWriteReturn::Execute(const mtsGenericObject & argument,
-                                                   mtsGenericObject & result) const
+mtsExecutionResult mtsFunctionWriteReturn::ExecuteGeneric(const mtsGenericObject & argument,
+                                                          mtsGenericObject & result) const
 {
-    mtsExecutionResult executionResult = Command ?
-        Command->Execute(argument, result)
-        : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (!Command)
+        return mtsExecutionResult::FUNCTION_NOT_BOUND;
+#if CISST_MTS_HAS_ICE
+    mtsExecutionResult executionResult = Command->Execute(argument, result);
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
         && !this->IsProxy) {
         this->ThreadSignalWait();
-        return mtsExecutionResult::COMMAND_SUCCEEDED;
+        executionResult = mtsExecutionResult::COMMAND_SUCCEEDED;
     }
+#else
+    // If Command is valid (not NULL), then CompletionCommand should also be valid
+    CMN_ASSERT(CompletionCommand);
+    mtsExecutionResult executionResult = Command->Execute(argument, result, CompletionCommand->GetCommand());
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+        executionResult = WaitForResult(result);
+#endif
     return executionResult;
 }
 
@@ -105,4 +117,3 @@ void mtsFunctionWriteReturn::ToStream(std::ostream & outputStream) const {
         outputStream << "mtsFunctionWriteReturn not initialized";
     }
 }
-

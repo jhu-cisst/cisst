@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,6 +29,12 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandQueuedVoidReturn_h
 
 #include <cisstMultiTask/mtsCommandVoidReturn.h>
+#include <cisstMultiTask/mtsCommandRead.h>
+#include <cisstMultiTask/mtsCallableReadBase.h>
+#include <cisstMultiTask/mtsQueue.h>
+
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
 
 class mtsCommandWriteBase;
 
@@ -37,54 +43,77 @@ class mtsCommandWriteBase;
 
  */
 
-/*! VoidReturn queued command using templated _returnType parameter */
-class mtsCommandQueuedVoidReturn: public mtsCommandVoidReturn
+template <class _Base>
+class mtsCommandQueuedVoidReturnBase: public _Base
 {
 public:
-    typedef mtsCommandVoidReturn BaseType;
+    typedef _Base BaseType;
 
     /*! This type. */
-    typedef mtsCommandQueuedVoidReturn ThisType;
+    typedef mtsCommandQueuedVoidReturnBase<_Base> ThisType;
+
+    typedef typename _Base::CallableType CallableType;
 
 protected:
     /*! Mailbox used to queue the commands */
     mtsMailBox * MailBox;
 
+    size_t ArgumentQueueSize; // size used for queues
+
+    /*! Queue to store pointer to return value */
+    mtsQueue<mtsGenericObject *> ReturnsQueue;
+
+    /*! Queue for return events (to send result to caller) */
+    mtsQueue<mtsCommandWriteBase *> FinishedEventQueue;
+
 private:
+    /*! Private default constructor to prevent use. */
+    mtsCommandQueuedVoidReturnBase(void);
+
     /*! Private copy constructor to prevent copies */
-    mtsCommandQueuedVoidReturn(const ThisType & CMN_UNUSED(other));
+    mtsCommandQueuedVoidReturnBase(const ThisType & CMN_UNUSED(other));
 
 public:
 
-    mtsCommandQueuedVoidReturn(mtsCallableVoidReturnBase * callable, const std::string & name,
-                               const mtsGenericObject * resultPrototype,
-                               mtsMailBox * mailBox);
+    mtsCommandQueuedVoidReturnBase(CallableType * callable, const std::string & name,
+                                   const mtsGenericObject * resultPrototype,
+                                   mtsMailBox * mailBox, size_t size);
 
-    // ReturnsQueue destructor should get called
-    virtual ~mtsCommandQueuedVoidReturn();
+    /*! Destructor */
+    virtual ~mtsCommandQueuedVoidReturnBase();
 
-    mtsCommandQueuedVoidReturn * Clone(mtsMailBox * mailBox) const;
+    virtual std::string GetClassName(void) const;
 
+    virtual ThisType * Clone(mtsMailBox * mailBox, size_t size) const;
+
+    // virtual method defined in base class
     mtsExecutionResult Execute(mtsGenericObject & result);
 
-    mtsGenericObject * GetResultPointer(void);
+    // virtual method defined in base class
+    mtsExecutionResult Execute(mtsGenericObject & result,
+                               mtsCommandWriteBase * finishedEventHandler);
 
     std::string GetMailBoxName(void) const;
 
-    void EnableFinishedEvent(mtsCommandWriteBase *cmd);
-    bool GenerateFinishedEvent(const mtsGenericObject &arg) const;
+    inline virtual mtsGenericObject * ReturnGet(void) {
+        return *(ReturnsQueue.Get());
+    }
+
+    inline virtual mtsCommandWriteBase * FinishedEventGet(void) {
+        return *(FinishedEventQueue.Get());
+    }
 
     void ToStream(std::ostream & outputStream) const;
-
-protected:
-    /*! Pointer on caller provided placeholder for result */
-    mtsGenericObject * ResultPointer;
-
-    /*! Event generator to indicate when execution is finished */
-    mtsCommandWriteBase * FinishedEvent;
-
 };
 
+typedef mtsCommandQueuedVoidReturnBase<mtsCommandVoidReturn> mtsCommandQueuedVoidReturn;
+typedef mtsCommandQueuedVoidReturnBase<mtsCommandRead> mtsCommandQueuedRead;
+
+#ifdef CISST_COMPILER_IS_MSVC
+#pragma warning ( disable : 4661 )
+template class CISST_EXPORT mtsCommandQueuedVoidReturnBase<mtsCommandVoidReturn>;
+template class CISST_EXPORT mtsCommandQueuedVoidReturnBase<mtsCommandRead>;
+#endif
 
 #endif // _mtsCommandQueuedVoidReturn_h
 

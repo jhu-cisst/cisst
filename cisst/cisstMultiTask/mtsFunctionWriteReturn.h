@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -47,17 +47,10 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
     class ConditionalWrap {
     public:
         static mtsExecutionResult Call(const mtsFunctionWriteReturn * function,
-                                       mtsCommandWriteReturn * command,
                                        const __argumentType & argument, __resultType & result) {
             const mtsGenericObjectProxyRef<__argumentType> argumentWrapped(argument);
             mtsGenericObjectProxyRef<__resultType> resultWrapped(result);
-            mtsExecutionResult executionResult = command->Execute(argumentWrapped, resultWrapped);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
-                && !function->IsProxy) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return  function->ExecuteGeneric(argumentWrapped, resultWrapped);
         }
     };
 
@@ -65,16 +58,9 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
     class ConditionalWrap<__argumentType, __resultType, false, true> {
     public:
         static mtsExecutionResult Call(const mtsFunctionWriteReturn * function,
-                                       mtsCommandWriteReturn * command,
                                        const __argumentType & argument, __resultType & result) {
             const mtsGenericObjectProxyRef<__argumentType> argumentWrapped(argument);
-            mtsExecutionResult executionResult = command->Execute(argumentWrapped, result);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
-                && !function->IsProxy) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return function->ExecuteGeneric(argumentWrapped, result);
         }
     };
 
@@ -82,16 +68,9 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
     class ConditionalWrap<__argumentType, __resultType, true, false> {
     public:
         static mtsExecutionResult Call(const mtsFunctionWriteReturn * function,
-                                       mtsCommandWriteReturn * command,
                                        const __argumentType & argument, __resultType & result) {
             mtsGenericObjectProxyRef<__resultType> resultWrapped(result);
-            mtsExecutionResult executionResult = command->Execute(argument, resultWrapped);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
-                && !function->IsProxy) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return function->ExecuteGeneric(argument, resultWrapped);
         }
     };
 
@@ -99,15 +78,8 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
     class ConditionalWrap<__argumentType, __resultType, true, true> {
     public:
         static mtsExecutionResult Call(const mtsFunctionWriteReturn * function,
-                                       mtsCommandWriteReturn * command,
                                        const __argumentType & argument, __resultType & result) {
-            mtsExecutionResult executionResult = command->Execute(argument, result);
-            if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
-                && !function->IsProxy) {
-                function->ThreadSignalWait();
-                return mtsExecutionResult::COMMAND_SUCCEEDED;
-            }
-            return executionResult;
+            return function->ExecuteGeneric(argument, result);
         }
     };
 #endif
@@ -136,9 +108,9 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
       e.g., Command() instead of Command->Execute(). */
     mtsExecutionResult operator()(const mtsGenericObject & argument,
                                   mtsGenericObject & result) const
-    { return Execute(argument, result); }
+    { return ExecuteGeneric(argument, result); }
 
-    mtsExecutionResult Execute(const mtsGenericObject & argument,
+    mtsExecutionResult ExecuteGeneric(const mtsGenericObject & argument,
                                mtsGenericObject & result) const;
 
 #ifndef SWIG
@@ -153,7 +125,7 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
             ConditionalWrap<__argumentType, __resultType,
                             cmnIsDerivedFrom<__argumentType, mtsGenericObject>::IS_DERIVED,
                             cmnIsDerivedFrom<__resultType, mtsGenericObject>::IS_DERIVED
-                           >::Call(this, Command, argument, result)
+                           >::Call(this, argument, result)
             : mtsExecutionResult::FUNCTION_NOT_BOUND;
     }
 #endif

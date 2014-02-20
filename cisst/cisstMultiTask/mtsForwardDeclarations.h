@@ -7,8 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-10-07
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -71,7 +70,8 @@ class mtsFunctionVoid;
 class mtsCallableVoidReturnBase;
 template <class _classType, class _returnType> class mtsCallableVoidReturnMethod;
 class mtsCommandVoidReturn;
-class mtsCommandQueuedVoidReturn;
+template <class _Base> class mtsCommandQueuedVoidReturnBase;
+typedef mtsCommandQueuedVoidReturnBase<mtsCommandVoidReturn> mtsCommandQueuedVoidReturn;
 class mtsFunctionVoidReturn;
 
 // read commands
@@ -80,6 +80,7 @@ template <class _classType, class _argumentType> class mtsCallableReadMethod;
 template <class _classType, class _argumentType> class mtsCallableReadReturnVoidMethod;
 class mtsCommandRead;
 class mtsFunctionRead;
+typedef mtsCommandQueuedVoidReturnBase<mtsCommandRead> mtsCommandQueuedRead;
 
 // write commands
 class mtsCommandWriteBase;
@@ -90,7 +91,8 @@ class mtsFunctionWrite;
 class mtsCallableWriteReturnBase;
 template <class _classType, class _argumentType, class _returnType> class mtsCallableWriteReturnMethod;
 class mtsCommandWriteReturn;
-class mtsCommandQueuedWriteReturn;
+template <class _Base> class mtsCommandQueuedWriteReturnBase;
+typedef mtsCommandQueuedWriteReturnBase<mtsCommandWriteReturn> mtsCommandQueuedWriteReturn;
 class mtsFunctionWriteReturn;
 
 // qualified read commands
@@ -98,6 +100,7 @@ class mtsCallableQualifiedReadBase;
 template <class _classType, class _argument1Type, class _argument2Type> class mtsCallableQualifiedReadMethod;
 template <class _classType, class _argument1Type, class _argument2Type> class mtsCallableQualifiedReadReturnVoidMethod;
 class mtsCommandQualifiedRead;
+typedef mtsCommandQueuedWriteReturnBase<mtsCommandQualifiedRead> mtsCommandQueuedQualifiedRead;
 class mtsFunctionQualifiedRead;
 
 // event receivers

@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,40 +48,41 @@ protected:
     class ConditionalWrap {
         // default case: both parameters need to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
+        static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
-            return command->Execute(argument1Wrapped, argument2Wrapped);
+            return  function->ExecuteGeneric(argument1Wrapped, argument2Wrapped);
         }
     };
     template <typename _userType1, typename _userType2>
     class ConditionalWrap<_userType1, _userType2, false, true> {
         // specialization: only first parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
+        static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
                                        const _userType1 & argument1, _userType2 & argument2) {
             const mtsGenericObjectProxyRef<_userType1> argument1Wrapped(argument1);
-            return command->Execute(argument1Wrapped, argument2);
+            return  function->ExecuteGeneric(argument1Wrapped, argument2);
         }
     };
     template <typename _userType1, typename _userType2>
     class ConditionalWrap<_userType1, _userType2, true, false> {
         // specialization: only second parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
+        static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
                                        const _userType1 & argument1, _userType2 & argument2) {
             mtsGenericObjectProxyRef<_userType2> argument2Wrapped(argument2);
-            return command->Execute(argument1, argument2Wrapped);
+            return function->ExecuteGeneric(argument1, argument2Wrapped);
         }
     };
     template <typename _userType1, typename _userType2>
     class ConditionalWrap<_userType1, _userType2, true, true> {
         // specialization: neither parameter needs to be wrapped
     public:
-        static mtsExecutionResult Call(mtsCommandQualifiedRead * command,
+        static mtsExecutionResult Call(const mtsFunctionQualifiedRead * function,
                                        const _userType1 & argument1, _userType2 & argument2) {
-            return command->Execute(argument1, argument2); }
+            return function->ExecuteGeneric(argument1, argument2);
+        }
     };
 #endif
 
@@ -110,10 +111,10 @@ protected:
       e.g., Command(argument) instead of Command->Execute(argument). */
     mtsExecutionResult operator()(const mtsGenericObject & qualifier,
                                   mtsGenericObject & argument) const
-    { return Execute(qualifier, argument); }
+    { return ExecuteGeneric(qualifier, argument); }
 
-    mtsExecutionResult Execute(const mtsGenericObject & qualifier,
-                               mtsGenericObject & argument) const;
+    mtsExecutionResult ExecuteGeneric(const mtsGenericObject & qualifier,
+                                      mtsGenericObject & argument) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types (for qualified read). */
@@ -126,7 +127,7 @@ protected:
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType1, _userType2,
                             cmnIsDerivedFrom<_userType1, mtsGenericObject>::IS_DERIVED,
-                            cmnIsDerivedFrom<_userType2, mtsGenericObject>::IS_DERIVED>::Call(Command, argument1, argument2)
+                            cmnIsDerivedFrom<_userType2, mtsGenericObject>::IS_DERIVED>::Call(this, argument1, argument2)
           : mtsExecutionResult::FUNCTION_NOT_BOUND;
         return result;
     }

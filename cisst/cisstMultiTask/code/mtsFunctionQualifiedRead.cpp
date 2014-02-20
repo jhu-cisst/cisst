@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 #include <cisstMultiTask/mtsCommandQualifiedRead.h>
+#include <cisstMultiTask/mtsEventReceiver.h>
 
 
 mtsFunctionQualifiedRead::mtsFunctionQualifiedRead(void):
@@ -49,14 +50,33 @@ bool mtsFunctionQualifiedRead::IsValid(void) const {
 
 bool mtsFunctionQualifiedRead::Bind(CommandType * command) {
     Command = command;
+#if !CISST_MTS_HAS_ICE
+    if (this->Command)
+        InitCompletionCommand(this->Command->GetName() + "Result");
+#endif
     return (command != 0);
 }
 
 
-mtsExecutionResult mtsFunctionQualifiedRead::Execute(const mtsGenericObject & qualifier,
-                                                     mtsGenericObject & argument) const
+mtsExecutionResult mtsFunctionQualifiedRead::ExecuteGeneric(const mtsGenericObject & qualifier,
+                                                            mtsGenericObject & argument) const
 {
-    return Command ? Command->Execute(qualifier, argument) : mtsExecutionResult::FUNCTION_NOT_BOUND;
+    if (!Command)
+        return mtsExecutionResult::FUNCTION_NOT_BOUND;
+#if CISST_MTS_HAS_ICE
+    mtsExecutionResult executionResult = Command->Execute(qualifier, argument);
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+        this->ThreadSignalWait();
+        executionResult = mtsExecutionResult::COMMAND_SUCCEEDED;
+    }
+#else
+    // If Command is valid (not NULL), then CompletionCommand should also be valid
+    CMN_ASSERT(CompletionCommand);
+    mtsExecutionResult executionResult = Command->Execute(qualifier, argument, CompletionCommand->GetCommand());
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+        executionResult = WaitForResult(argument);
+#endif
+    return executionResult;
 }
 
 

@@ -1,8 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -15,7 +14,7 @@
 add_subdirectory (PeriodicTask)
 add_subdirectory (CommandsAndEvents)
 add_subdirectory (ConnectionTest)
-if (${CISST_cisstParameterTypes})
+if (${CISST_cisstParameterTypes} STREQUAL ON)
   add_subdirectory (Benchmarks)
   add_subdirectory (2DPlotVisualizer)
 endif()

@@ -44,7 +44,7 @@ macro (cisst_load_package_setting ...)
     find_file (_clps_ADDITIONAL_BUILD_CMAKE
                NAMES ${lib}Build.cmake
                PATHS ${CISST_CMAKE_DIRS}
-               NO_DEFAULT_PATH)
+               NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
     if (_clps_ADDITIONAL_BUILD_CMAKE)
       include (${_clps_ADDITIONAL_BUILD_CMAKE})
     endif (_clps_ADDITIONAL_BUILD_CMAKE)
@@ -53,7 +53,7 @@ macro (cisst_load_package_setting ...)
     find_file (_clps_LIBRARIES_FILE
                NAMES ${lib}Internal.cmake
                PATHS ${CISST_CMAKE_DIRS}
-               NO_DEFAULT_PATH)
+               NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
     if (_clps_LIBRARIES_FILE)
       include (${_clps_LIBRARIES_FILE})
     endif (_clps_LIBRARIES_FILE)
@@ -62,7 +62,7 @@ macro (cisst_load_package_setting ...)
     find_file (_clps_SETTINGS_FILE
                NAMES ${lib}External.cmake
                PATHS ${CISST_CMAKE_DIRS}
-               NO_DEFAULT_PATH)
+               NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
     if (_clps_SETTINGS_FILE)
       include (${_clps_SETTINGS_FILE})
       set (_clps_EXTERNAL_PACKAGES ${CISST_EXTERNAL_PACKAGES_FOR_${lib}})
@@ -70,7 +70,7 @@ macro (cisst_load_package_setting ...)
         find_file (_clps_PACKAGE_FILE
                    NAMES ${lib}${package}.cmake
                    PATHS ${CISST_CMAKE_DIRS}
-                   NO_DEFAULT_PATH)
+                   NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
         if (_clps_PACKAGE_FILE)
           include (${_clps_PACKAGE_FILE})
         else (_clsp_PACKAGE_FILE)
@@ -663,17 +663,21 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
 
   # make sure cisstDataGenerator is being build and find it
   # try to figure out if this is build along with cisst
-  if (TARGET cisstCommon)
-    # make sure the target existsOUTPUT_NAME
-    if (TARGET cisstDataGenerator)
-      # if the target exists, use its destination
-      cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
-      get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
-    endif (TARGET cisstDataGenerator)
-  else (TARGET cisstCommon)
-    cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
-    find_program (CISST_DG_EXECUTABLE cisstDataGenerator HINTS "${CISST_BINARY_DIR}/bin")
-  endif (TARGET cisstCommon)
+  if (CMAKE_CROSSCOMPILING)
+    find_program (CISST_DG_EXECUTABLE cisstDataGenerator)
+  else (CMAKE_CROSSCOMPILING)
+    if (TARGET cisstCommon)
+      # make sure the target existsOUTPUT_NAME
+      if (TARGET cisstDataGenerator)
+        # if the target exists, use its destination
+        cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
+        get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
+      endif (TARGET cisstDataGenerator)
+    else (TARGET cisstCommon)
+      cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
+      find_program (CISST_DG_EXECUTABLE cisstDataGenerator HINTS "${CISST_BINARY_DIR}/bin")
+    endif (TARGET cisstCommon)
+  endif (CMAKE_CROSSCOMPILING)
   cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator executable found: ${CISST_DG_EXECUTABLE}")
 
   # loop over input files

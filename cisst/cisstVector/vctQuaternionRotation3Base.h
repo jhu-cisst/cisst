@@ -1026,7 +1026,6 @@ vctQuaternionRotation3BaseFromRaw(vctQuaternionRotation3Base<_quaternionType> & 
                                   const vctMatrixRotation3Base<_matrixType> & matrixRotation)
 {
     typedef typename _quaternionType::value_type value_type;
-    typedef typename _quaternionType::TypeTraits TypeTraits;
     typedef typename _quaternionType::NormType NormType;
 
     const NormType a0 = 1.0 + matrixRotation.Element(0, 0) + matrixRotation.Element(1, 1) + matrixRotation.Element(2, 2);

@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides
 
-  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -76,7 +76,7 @@ mtsExecutionResult mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject
             return result;
         }
         // Next, queue the write command
-        return BaseType::Execute(*FilterOutput, blocking);
+        return BaseType::Execute(*FilterOutput, blocking, 0);
     }
     return mtsExecutionResult::COMMAND_DISABLED;
 }

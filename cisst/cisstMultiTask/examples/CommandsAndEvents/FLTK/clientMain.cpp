@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -129,21 +129,15 @@ int main(int argc, char * argv[])
         return 1;
     }
 #else
-    // For now, we create two proxies because there are two server proxies. It should be possible to use
-    // just one server proxy and one client proxy, but first some changes need to be made. See serverMain.cpp
-    // for a description of the changes needed on the server side. On the client side, I believe there are
-    // additional changes needed to clone the EventReceiverWriteProxy.
-    mtsSocketProxyClient * clientProxy1 = new mtsSocketProxyClient("MyClientProxy1", "localhost", 1234);
-    mtsSocketProxyClient * clientProxy2 = new mtsSocketProxyClient("MyClientProxy2", "localhost", 1235);
-    componentManager->AddComponent(clientProxy1);
-    componentManager->AddComponent(clientProxy2);
+    mtsSocketProxyClient * clientProxy = new mtsSocketProxyClient("MyClientProxy", "localhost", 1234);
+    componentManager->AddComponent(clientProxy);
 
-    if (!componentManager->Connect("Client1", "Required", "MyClientProxy1", "Provided")) {
+    if (!componentManager->Connect("Client1", "Required", "MyClientProxy", "Provided")) {
         CMN_LOG_INIT_ERROR << "Connect failed for client 1" << std::endl;
         return 1;
     }
 
-    if (!componentManager->Connect("Client2", "Required", "MyClientProxy2", "Provided")) {
+    if (!componentManager->Connect("Client2", "Required", "MyClientProxy", "Provided")) {
         CMN_LOG_INIT_ERROR << "Connect failed for client 2" << std::endl;
         return 1;
     }

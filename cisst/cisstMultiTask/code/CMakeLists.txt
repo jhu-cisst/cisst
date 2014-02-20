@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -19,6 +19,7 @@ cisst_data_generator (cisstMultiTask
                       "cisstMultiTask/"        # sub directory for include
                       ../mtsInterfaceCommon.cdg
                       ../mtsComponentState.cdg
+                      ../mtsExecutionResult.cdg
                       ../mtsParameterTypes.cdg)
 # to compile cisst generated code, need to find header file
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
@@ -51,7 +52,7 @@ set (SOURCE_FILES
      mtsConnection.cpp
 
      mtsEventReceiver.cpp
-     mtsExecutionResult.cpp
+     mtsExecutionResult.cpp  # see mtsExecutionResult.cdg
 
      mtsFunctionBase.cpp
      mtsFunctionQualifiedRead.cpp
@@ -143,7 +144,6 @@ set (HEADER_FILES
      mtsConnection.h
 
      mtsEventReceiver.h
-     mtsExecutionResult.h
      mtsExport.h
 
      mtsFixedSizeVector.h
@@ -212,11 +212,6 @@ set (HEADER_FILES
 
 # Header files in code directory
 set (ADDITIONAL_HEADER_FILES
-
-     mtsFunctionQualifiedReadProxy.h
-     mtsFunctionReadProxy.h
-     mtsFunctionWriteProxy.h
-
      mtsProxySerializer.h
      )
 
@@ -270,6 +265,9 @@ if (CISST_MTS_HAS_ICE)
        mtsCommandReadProxy.h
        mtsCommandQualifiedReadProxy.h
 
+       mtsFunctionReadProxy.h
+       mtsFunctionWriteProxy.h
+       mtsFunctionQualifiedReadProxy.h
        mtsFunctionReturnProxyBase.h
        mtsFunctionVoidReturnProxy.h
        mtsFunctionWriteReturnProxy.h

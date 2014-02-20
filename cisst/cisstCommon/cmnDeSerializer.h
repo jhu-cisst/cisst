@@ -195,6 +195,8 @@ public:
     /*! Destructor */
     ~cmnDeSerializer();
 
+    /*! Reset the list of types already received. */
+    void Reset(void);
 
     /*! De-serialize an object from the input stream.  This method
       will create an object dynamically therefore the class of the

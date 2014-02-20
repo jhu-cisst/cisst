@@ -7,8 +7,7 @@
   Author(s):	Anton Deguet
   Created on:   2008-02-05
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,7 +35,7 @@ template <class _elementType>
 class prmMaskedVector: public mtsGenericObject
 {
     // declare services, requires dynamic creation
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
 

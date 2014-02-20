@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
-  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -78,9 +78,9 @@ inline bool cmnCommandLineOptionsConvert<std::string>(const char * value, std::s
      int iterations;
      std::list<double> someNumbers;
      options.AddOptionNoValue("v", "verbose", "more messages");
-     options.AddOptionOneValue("f", "file", "file name", cmnCommandLineOptions::REQUIRED, &filename);
-     options.AddOptionOneValue("i", "iterations", "number of iterations", cmnCommandLineOptions::REQUIRED, &iterations);
-     options.AddOptionMultipleValues("n", "number", "one or many numbers", cmnCommandLineOptions::REQUIRED, &someNumbers);
+     options.AddOptionOneValue("f", "file", "file name", cmnCommandLineOptions::REQUIRED_OPTION, &filename);
+     options.AddOptionOneValue("i", "iterations", "number of iterations", cmnCommandLineOptions::REQUIRED_OPTION, &iterations);
+     options.AddOptionMultipleValues("n", "number", "one or many numbers", cmnCommandLineOptions::REQUIRED_OPTION, &someNumbers);
 
      std::string errorMessage;
      if (!options.Parse(argc, argv, errorMessage)) {
@@ -120,7 +120,7 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
-    typedef enum {REQUIRED, OPTIONAL, SQUASH_REQUIRED} RequiredType;
+    typedef enum {REQUIRED_OPTION, OPTIONAL_OPTION, SQUASH_REQUIRED_OPTION} RequiredType;
 
  protected:
     class OptionBase {
@@ -145,7 +145,7 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
         friend class cmnCommandLineOptions;
     protected:
         OptionNoValue(const std::string & shortOption, const std::string & longOption,
-                      const std::string & description, RequiredType required = OPTIONAL);
+                      const std::string & description, RequiredType required = OPTIONAL_OPTION);
         virtual ~OptionNoValue() {};
         bool SetValue(const char * value);
     };
@@ -220,7 +220,7 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
     cmnCommandLineOptions(void);
 
     bool AddOptionNoValue(const std::string & shortOption, const std::string & longOption,
-                          const std::string & description, RequiredType required = OPTIONAL);
+                          const std::string & description, RequiredType required = OPTIONAL_OPTION);
 
     template <typename _elementType>
     bool AddOptionOneValue(const std::string & shortOption, const std::string & longOption,

@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,81 +25,124 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsMailBox.h>
 
 
-mtsCommandQueuedVoidReturn::mtsCommandQueuedVoidReturn(mtsCallableVoidReturnBase * callable, const std::string & name,
-                                                       const mtsGenericObject * resultPrototype,
-                                                       mtsMailBox * mailBox):
+template <class _Base>
+mtsCommandQueuedVoidReturnBase<_Base>::mtsCommandQueuedVoidReturnBase(CallableType * callable, const std::string & name,
+                                                                      const mtsGenericObject * resultPrototype,
+                                                                      mtsMailBox * mailBox, size_t size):
     BaseType(callable, name, resultPrototype),
     MailBox(mailBox),
-    FinishedEvent(0)
-{}
-
-
-mtsCommandQueuedVoidReturn::~mtsCommandQueuedVoidReturn()
-{}
-
-
-mtsCommandQueuedVoidReturn * mtsCommandQueuedVoidReturn::Clone(mtsMailBox * mailBox) const
+    ArgumentQueueSize(size),
+    ReturnsQueue(),
+    FinishedEventQueue()
 {
-    return new mtsCommandQueuedVoidReturn(this->Callable, this->Name, this->ResultPrototype,
-                                          mailBox);
+    mtsGenericObject *obj = 0;
+    ReturnsQueue.SetSize(size, obj);
+    mtsCommandWriteBase *cmd = 0;
+    FinishedEventQueue.SetSize(size, cmd);
 }
 
 
-mtsExecutionResult mtsCommandQueuedVoidReturn::Execute(mtsGenericObject & result)
+template <class _Base>
+mtsCommandQueuedVoidReturnBase<_Base>::~mtsCommandQueuedVoidReturnBase()
+{
+    // Destructor should probably go through the queue and make sure to send a response to any waiting component
+    if (!MailBox->IsEmpty())
+        CMN_LOG_INIT_WARNING << this->GetClassName() << " destructor: mailbox for "
+                             << this->GetName() << " is not empty" << std::endl;
+}
+
+
+template <>
+std::string mtsCommandQueuedVoidReturnBase<mtsCommandVoidReturn>::GetClassName(void) const
+{
+    return std::string("mtsCommandQueuedVoidReturn");
+}
+
+template <>
+std::string mtsCommandQueuedVoidReturnBase<mtsCommandRead>::GetClassName(void) const
+{
+    return std::string("mtsCommandQueuedRead");
+}
+
+template <class _Base>
+mtsCommandQueuedVoidReturnBase<_Base> * mtsCommandQueuedVoidReturnBase<_Base>::Clone(mtsMailBox * mailBox, size_t size) const
+{
+    return new ThisType(this->Callable, this->Name, this->GetResultPrototype(), mailBox, size);
+}
+
+template <class _Base>
+mtsExecutionResult mtsCommandQueuedVoidReturnBase<_Base>::Execute(mtsGenericObject & result)
+{
+    return Execute(result, 0);
+}
+
+template <class _Base>
+mtsExecutionResult mtsCommandQueuedVoidReturnBase<_Base>::Execute(mtsGenericObject & result,
+                                                                  mtsCommandWriteBase * finishedEventHandler)
 {
     // check if this command is enabled
     if (!this->IsEnabled()) {
         return mtsExecutionResult::COMMAND_DISABLED;
     }
-    // check if there is a mailbox (i.e. if the command is associated to an interface
+    // check if there is a mailbox (i.e. if the command is associated to an interface)
     if (!MailBox) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoidReturn: Execute: no mailbox for \""
+        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: no mailbox for \""
                           << this->Name << "\"" << std::endl;
         return mtsExecutionResult::COMMAND_HAS_NO_MAILBOX;
     }
-    // preserve address of result and wait to be dequeued
-    ResultPointer = &result;
+    // check if all queues have some space
+    if (ReturnsQueue.IsFull() || FinishedEventQueue.IsFull() || MailBox->IsFull()) {
+        CMN_LOG_RUN_WARNING << GetClassName() << ": Execute: Queue full for \""
+                            << this->Name << "\" ["
+                            << ReturnsQueue.IsFull() << "|"
+                            << FinishedEventQueue.IsFull() << "|"
+                            << MailBox->IsFull() << "]"
+                            << std::endl;
+        return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
+    }
+    // copy the result to the local storage.
+    if (!ReturnsQueue.Put(&result)) {
+        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: ReturnsQueue.Put failed for \""
+                          << this->Name << "\"" << std::endl;
+        cmnThrow(GetClassName()+": Execute: ReturnsQueue.Put failed");
+        return mtsExecutionResult::UNDEFINED;
+    }
+    // copy the finished event handler to the local storage.
+    if (!FinishedEventQueue.Put(finishedEventHandler)) {
+        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: FinishedEventQueue.Put failed for \""
+                          << this->Name << "\"" << std::endl;
+        ReturnsQueue.Get();     // Remove the result that was already queued
+        cmnThrow(GetClassName()+": Execute: FinishedEventQueue.Put failed");
+        return mtsExecutionResult::UNDEFINED;
+    }
+    // finally try to queue to mailbox
     if (!MailBox->Write(this)) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoidReturn: Execute: mailbox full for \""
+        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: mailbox full for \""
                           << this->Name << "\"" <<  std::endl;
-        return mtsExecutionResult::INTERFACE_COMMAND_MAILBOX_FULL;
+        ReturnsQueue.Get();        // Remove the result that was already queued
+        FinishedEventQueue.Get();  // Remove the finished event handler that was already queued
+        cmnThrow(GetClassName()+": Execute: MailBox.Write failed");
+        return mtsExecutionResult::UNDEFINED;
     }
     return mtsExecutionResult::COMMAND_QUEUED;
 }
 
 
-mtsGenericObject * mtsCommandQueuedVoidReturn::GetResultPointer(void)
-{
-    return ResultPointer;
-}
-
-
-std::string mtsCommandQueuedVoidReturn::GetMailBoxName(void) const
+template <class _Base>
+std::string mtsCommandQueuedVoidReturnBase<_Base>::GetMailBoxName(void) const
 {
     return this->MailBox ? this->MailBox->GetName() : "null pointer!";
 }
 
 
-void mtsCommandQueuedVoidReturn::EnableFinishedEvent(mtsCommandWriteBase *cmd)
-{
-    FinishedEvent = cmd;
-}
-
-bool mtsCommandQueuedVoidReturn::GenerateFinishedEvent(const mtsGenericObject &arg) const
-{
-    bool ret = false;
-    if (FinishedEvent) {
-        mtsExecutionResult result = FinishedEvent->Execute(arg, MTS_NOT_BLOCKING);
-        if (!result.IsOK())
-            CMN_LOG_RUN_ERROR << "mtsCommandQueuedVoidReturn: FinishedEvent returned " << result << std::endl;
-        ret = result.IsOK();
-    }
-    return ret;
-}
-
-void mtsCommandQueuedVoidReturn::ToStream(std::ostream & outputStream) const {
-    outputStream << "mtsCommandQueuedVoidReturn: MailBox \""
+template <class _Base>
+void mtsCommandQueuedVoidReturnBase<_Base>::ToStream(std::ostream & outputStream) const {
+    outputStream << GetClassName() << ": MailBox \""
                  << this->GetMailBoxName()
                  << "\" for command(void) with result using " << *(this->Callable)
                  << " currently " << (this->IsEnabled() ? "enabled" : "disabled");
 }
+
+// Force instantiation of these two types
+template class mtsCommandQueuedVoidReturnBase<mtsCommandVoidReturn>;
+template class mtsCommandQueuedVoidReturnBase<mtsCommandRead>;

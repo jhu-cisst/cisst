@@ -43,6 +43,7 @@ protected:
     virtual void resizeGL(int w, int h);
     virtual void paintGL(void);
     virtual void mouseReleaseEvent(QMouseEvent * event);
+    virtual void keyPressEvent(QKeyEvent * event);
     //@}
 
 public slots:

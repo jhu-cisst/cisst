@@ -23,61 +23,22 @@
 #include <iostream>
 
 
-mtsExecutionResult::mtsExecutionResult(void)
-{
-    this->Value = UNDEFINED;
-}
-
-
-mtsExecutionResult::mtsExecutionResult(const Enum & value)
-{
-    this->Value = value;
-}
-
-
-mtsExecutionResult::~mtsExecutionResult()
-{}
-
-
 const mtsExecutionResult & mtsExecutionResult::operator = (const Enum & value)
 {
-    this->Value = value;
+    this->SetValue(value);
     return *this;
 }
 
 
-void mtsExecutionResult::ToStream(std::ostream & outputStream) const
+const std::string mtsExecutionResult::ToString(const Enum & value)
 {
-    outputStream << mtsExecutionResult::ToString(this->Value);
-}
-
-
-const std::string & mtsExecutionResult::ToString(const Enum & value)
-{
-    static const std::string resultDescription[] = {
-        "undefined",
-        "command succeeded",
-        "command queued",
-        "function not bound to a command",
-        "queued command has no mailbox",
-        "command disabled",
-        "interface command mailbox full",
-        "command argument queue full",
-        "invalid input type",
-        "underlying method or function returned \"false\"",
-        "network error",
-        "invalid network command Id", 
-        "unable to dynamically create an argument",
-        "serialization failed"
-        "deserialization failed"
-    };
-    return resultDescription[value];
+    return cmnData<mtsExecutionResult::Enum>::HumanReadable(value);
 }
 
 
 bool mtsExecutionResult::operator == (const mtsExecutionResult & result) const
 {
-    return (this->Value == result.Value);
+    return (this->Value() == result.Value());
 }
 
 
@@ -89,7 +50,7 @@ bool mtsExecutionResult::operator != (const mtsExecutionResult & result) const
 
 bool mtsExecutionResult::IsOK(void) const
 {
-    return ((this->Value == COMMAND_SUCCEEDED) || (this->Value == COMMAND_QUEUED));
+    return ((this->Value() == COMMAND_SUCCEEDED) || (this->Value() == COMMAND_QUEUED));
 }
 
 
