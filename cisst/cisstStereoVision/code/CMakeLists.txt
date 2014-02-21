@@ -367,7 +367,6 @@ IF(CISST_SVL_USE_USER_OPENCV)
 
     FIND_PACKAGE(OpenCV REQUIRED)
     IF(OpenCV_FOUND)
-
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlFilterImageZoom.cpp
@@ -401,9 +400,35 @@ IF(CISST_SVL_USE_USER_OPENCV)
             svlCCOriginDetector.h
             svlFilterImageCameraCalibrationOpenCV.h
             )
-
-        cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
-        cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBRARIES)
+        
+        set(OpenCV2_PACKAGE_NAME "OpenCV")
+        if (${OpenCV_VERSION} VERSION_GREATER 2.1.9)
+            message("OpenCV Version from 2.2.0. onwards.")
+            message("--${OpenCV_LIBS}--")
+            # NOTE: Anand: To change the OpenCV install directory to a different version,
+            # one needs to delete the CMake cache as the library variables do not get reset.
+            cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
+            cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBS)
+            #  NOTE: Anand: even on deleting cache the variable for link directories doesn't get cleared
+            # after commenting the line below.
+            #cisst_set_package_settings (cisstStereoVision OpenCV2 LINK_DIRECTORIES    OpenCV_LIB_DIR)
+            # NOTE: we may want to include only specific opencv modules that are needed in cisstSvl
+            cisst_set_package_settings (cisstStereoVision OpenCV2 PACKAGES            OpenCV2_PACKAGE_NAME)
+        # OpenCV 2.0 does not define OpenCV_INCLUDE_DIRS
+        # NOTE: OpenCV 2.0. and 2.1. do no specify correct lib path in the OpenCVConfig.cmake files
+        elseif (${OpenCV_VERSION} VERSION_LESS 2.2.0 AND 
+                ${OpenCV_VERSION} VERSION_GREATER 1.9.9)
+            message("OpenCV Version: 2.0.0 and 2.1.0")
+            set(OpenCV2_INCLUDE_DIRS "${THIS_OPENCV_CONFIG_PATH}/include"
+                "${THIS_OPENCV_CONFIG_PATH}/include/opencv")
+            cisst_set_package_settings (cisstStereoVision OpenCV2 PACKAGES            OpenCV2_PACKAGE_NAME)
+            cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
+            cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBS)
+        else (${OpenCV_VERSION} VERSION_GREATER 2.1.9)
+            message(FATAL_ERROR "OpenCV Versions earlier than 2.0 are not supported by cisst.")
+            cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
+            cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBS)
+        endif (${OpenCV_VERSION} VERSION_GREATER 2.1.9)
         OPTION(CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" ON)
     ELSE(OpenCV_FOUND)
         cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
@@ -421,7 +446,7 @@ ELSE(CISST_SVL_USE_USER_OPENCV)
             CACHE INTERNAL "List of OpenCV 2.2+ options"
             )
 
-        FIND_PACKAGE(OpenCV2)
+        FIND_PACKAGE(OpenCV2 REQUIRED)
         IF(OpenCV2_FOUND)
             MARK_AS_ADVANCED(FORCE ${OpenCV2_OPTIONS})
 
