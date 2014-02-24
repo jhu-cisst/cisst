@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on: 2006-05-05
 
-  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -797,6 +797,11 @@ typedef mtsGenericObjectProxy<vct8> mtsVct8;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct8)
 typedef mtsGenericObjectProxy<vct9> mtsVct9;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct9)
+
+// Define proxy for std::vector<vct3>
+typedef std::vector<vct3> stdVct3Vec;
+typedef mtsGenericObjectProxy<stdVct3Vec> mtsStdVct3VecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdVct3VecProxy);
 
 typedef mtsGenericObjectProxy<vctFloat1> mtsVctFloat1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat1)
