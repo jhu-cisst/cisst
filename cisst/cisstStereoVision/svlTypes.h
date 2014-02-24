@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
-  Author(s):  Balazs Vagvolgyi
-  Created on: 2006 
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  Author(s):  Balazs Vagvolgyi
+  Created on: 2006
+
+  (C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -67,21 +67,11 @@ http://www.cisst.org/cisst/license.txt.
     #include <opencv2/video/background_segm.hpp>
     #include <opencv2/gpu/gpu.hpp>
 #else // CISST_SVL_HAS_OPENCV2
-    #if CISST_SVL_HAS_OPENCV
-        #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
-            #include <cv.h>
-            #include <highgui.h>
-        #else
-            #include <opencv/cv.h>
-            #include <opencv/highgui.h>
-        #endif
-    #else // CISST_SVL_HAS_OPENCV
-        // to compile the same API
-        typedef void IplImage;
-        namespace cv {
-            typedef std::string Mat;
-        }
-    #endif // CISST_SVL_HAS_OPENCV
+    // to compile the same API
+    typedef void IplImage;
+    namespace cv {
+        typedef std::string Mat;
+    }
 #endif // CISST_SVL_HAS_OPENCV2
 
 #if (CISST_COMPILER == CISST_CLANG)
