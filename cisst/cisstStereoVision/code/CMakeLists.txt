@@ -355,7 +355,7 @@ ENDIF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
 
 
 # try to find OpenCV automatically
-find_package (OpenCV)
+find_package (OpenCV QUIET)
 if (OpenCV_FOUND)
     option (CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" ON)
     set (OpenCV2_PACKAGE_NAME "OpenCV")
