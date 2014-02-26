@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterOutput.h>
 #include <cisstStereoVision/svlStreamManager.h>
 #include <cisstStereoVision/svlFilterSourceVideoFile.h>
+#include <cisstStereoVision/svlFilterStereoImageSplitter.h>
 #include <cisstStereoVision/svlFilterImageWindow.h>
 
 int main(int argc, char** argv)
@@ -44,6 +45,11 @@ int main(int argc, char** argv)
     int portNumber = 0;
     std::string codecName = ".njpg";
 
+    int numberOfThreads = 4;
+    options.AddOptionOneValue("t", "threads",
+                              "Number of threads, default is 4",
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &numberOfThreads);
+
     options.AddOptionOneValue("c", "channels",
                               "Number of channels, 1 for mono (default), 2 for stereo",
                               cmnCommandLineOptions::OPTIONAL_OPTION, &numberOfChannels);
@@ -56,6 +62,10 @@ int main(int argc, char** argv)
                               "IP port for network based codec",
                               cmnCommandLineOptions::OPTIONAL_OPTION, &portNumber);
   
+    options.AddOptionNoValue("d", "dual-port",
+                             "Create two ports to receive left/right separately (default is single port)",
+                             cmnCommandLineOptions::OPTIONAL_OPTION);
+
     std::string errorMessage;
     if (!options.Parse(argc, argv, errorMessage)) {
         std::cerr << "Error: " << errorMessage << std::endl;
@@ -70,31 +80,49 @@ int main(int argc, char** argv)
 
     svlInitialize();
 
-    svlStreamManager stream(4);
+    svlStreamManager stream(numberOfThreads);
 
-    svlFilterSourceVideoFile source(numberOfChannels);
-    source.SetName("Source");
-
-    std::stringstream filePath;
-    filePath << ip << "@" << portNumber << codecName;
-    std::cout << "Opening network using " << filePath.str() << std::endl;
-    source.SetFilePath(filePath.str(), SVL_LEFT);
-    if (numberOfChannels == 2) {
-        filePath.str(std::string());
-        filePath << ip << "@" << portNumber + 1 << codecName;
-        std::cout << "Opening network using " << filePath.str() << std::endl;
-        source.SetFilePath(filePath.str(), SVL_RIGHT);
+    int sourceNumberOfChannels = 1;
+    if ((numberOfChannels == 2) && options.IsSet("dual-port")) {
+        sourceNumberOfChannels = 2;
     }
-
-    svlFilterImageWindow previewWindow;
-    previewWindow.SetName("Video");
-    previewWindow.SetTitle("cisstVideoPlayer");
+    svlFilterSourceVideoFile source(sourceNumberOfChannels);
+    source.SetName("Source");
 
     // connect the source
     svlFilterOutput * output;
     stream.SetSourceFilter(&source);
-
     output = source.GetOutput();
+
+    // connect to source, split stereo if needed
+    svlFilterStereoImageSplitter stereoSplitter;
+    std::stringstream filePath;
+    filePath << ip << "@" << portNumber << codecName;
+    std::cout << "Opening network using " << filePath.str() << std::endl;
+    // stereo
+    if (numberOfChannels == 2) {
+        // two channels
+        if (options.IsSet("dual-port")) {
+            source.SetFilePath(filePath.str(), SVL_LEFT);
+            filePath.str(std::string());
+            filePath << ip << "@" << portNumber + 1 << codecName;
+            std::cout << "Opening network using " << filePath.str() << std::endl;
+            source.SetFilePath(filePath.str(), SVL_RIGHT);
+        } else {
+            // join the two channels using the stereo image joiner
+            output->Connect(stereoSplitter.GetInput());
+            output = stereoSplitter.GetOutput();
+            source.SetFilePath(filePath.str());
+        }
+    } else {
+        // mono
+        source.SetFilePath(filePath.str());
+    }
+
+    // preview
+    svlFilterImageWindow previewWindow;
+    previewWindow.SetName("Video");
+    previewWindow.SetTitle("cisstVideoPlayer");
     output->Connect(previewWindow.GetInput());
 
     std::cout << "Starting stream." << std::endl;

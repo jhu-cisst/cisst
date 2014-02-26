@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterImageResizer.h>
 #include <cisstStereoVision/svlFilterImageFlipRotate.h>
 #include <cisstStereoVision/svlFilterAddLatency.h>
+#include <cisstStereoVision/svlFilterStereoImageJoiner.h>
 #include <cisstStereoVision/svlFilterImageWindow.h>
 #include <cisstStereoVision/svlVideoIO.h>
 #include <cisstStereoVision/svlFilterVideoFileWriter.h>
@@ -52,6 +53,11 @@ int main(int argc, char** argv)
     unsigned int width = 0;
     unsigned int height = 0;
 
+    int numberOfThreads = 4;
+    options.AddOptionOneValue("t", "threads",
+                              "Number of threads, default is 4",
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &numberOfThreads);
+
     options.AddOptionOneValue("c", "channels",
                               "Number of channels, 1 for mono (default), 2 for stereo",
                               cmnCommandLineOptions::OPTIONAL_OPTION, &numberOfChannels);
@@ -59,6 +65,10 @@ int main(int argc, char** argv)
     options.AddOptionOneValue("p", "port",
                               "IP port for network based codec",
                               cmnCommandLineOptions::OPTIONAL_OPTION, &portNumber);
+
+    options.AddOptionNoValue("d", "dual-port",
+                             "Create two ports to send left/right separately (default is single port)",
+                             cmnCommandLineOptions::OPTIONAL_OPTION);
 
     options.AddOptionOneValue("w", "width",
                               "Resize width (if specified, requires height)",
@@ -140,7 +150,7 @@ int main(int argc, char** argv)
     svlVideoIO::ReleaseCodec(codec);
     compr->data[0] = 75;
 
-    svlStreamManager stream(4);
+    svlStreamManager stream(numberOfThreads);
     stream.SetSourceFilter(&source);
 
     // connect the source to next filter
@@ -176,6 +186,8 @@ int main(int argc, char** argv)
 
     // writer on network
     svlFilterVideoFileWriter writer;
+    svlFilterStereoImageJoiner stereoJoiner;
+
     if (options.IsSet("port")) {
         writer.SetCodecParams(compr);
         svlVideoIO::ReleaseCompression(compr);
@@ -183,12 +195,24 @@ int main(int argc, char** argv)
         std::stringstream filePath;
         filePath << "@" << portNumber << codecName;
         std::cout << "Opening network using " << filePath.str() << std::endl;
-        writer.SetFilePath(filePath.str(), SVL_LEFT);
+
+        // stereo
         if (numberOfChannels == 2) {
-            filePath.str(std::string());
-            filePath << "@" << portNumber + 1 << codecName;
-            std::cout << "Opening network using " << filePath.str() << std::endl;
-            writer.SetFilePath(filePath.str(), SVL_RIGHT);
+            // two channels
+            if (options.IsSet("dual-port")) {
+                writer.SetFilePath(filePath.str(), SVL_LEFT);
+                filePath.str(std::string());
+                filePath << "@" << portNumber + 1 << codecName;
+                std::cout << "Opening network using " << filePath.str() << std::endl;
+                writer.SetFilePath(filePath.str(), SVL_RIGHT);
+            } else {
+                // join the two channels using the stereo image joiner
+                output->Connect(stereoJoiner.GetInput());
+                output = stereoJoiner.GetOutput();
+                writer.SetFilePath(filePath.str());
+            }
+        } else {
+            writer.SetFilePath(filePath.str());
         }
         writer.OpenFile();
 
