@@ -136,20 +136,6 @@ int main(int argc, char** argv)
     previewWindow.SetName("Video");
     previewWindow.SetTitle("cisstCameraViewer");
 
-    // detect if codec is available
-    svlVideoCodecBase * codec = svlVideoIO::GetCodec(codecName);
-    if (codec == 0) {
-        std::string formatlist;
-        svlVideoIO::GetFormatList(formatlist);
-        std::cerr << "Error: can't find codec " << codecName << std::endl
-                  << "Supported formats:" << std::endl
-                  << formatlist << std::endl;
-        return -1;
-    }
-    svlVideoIO::Compression * compr = codec->GetCompression();
-    svlVideoIO::ReleaseCodec(codec);
-    compr->data[0] = 75;
-
     svlStreamManager stream(numberOfThreads);
     stream.SetSourceFilter(&source);
 
@@ -189,6 +175,20 @@ int main(int argc, char** argv)
     svlFilterStereoImageJoiner stereoJoiner;
 
     if (options.IsSet("port")) {
+        // detect if codec is available
+        svlVideoCodecBase * codec = svlVideoIO::GetCodec(codecName);
+        if (codec == 0) {
+            std::string formatlist;
+            svlVideoIO::GetFormatList(formatlist);
+            std::cerr << "Error: can't find codec " << codecName << std::endl
+                      << "Supported formats:" << std::endl
+                      << formatlist << std::endl;
+            return -1;
+        }
+        svlVideoIO::Compression * compr = codec->GetCompression();
+        svlVideoIO::ReleaseCodec(codec);
+        compr->data[0] = 75;
+
         writer.SetCodecParams(compr);
         svlVideoIO::ReleaseCompression(compr);
 
