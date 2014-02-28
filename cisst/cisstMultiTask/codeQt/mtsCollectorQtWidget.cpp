@@ -97,6 +97,9 @@ mtsCollectorQtWidget::mtsCollectorQtWidget(void):
     StatsNbSamples->setNum(0);
     StatsLayout->addWidget(StatsNbSamples, 1, 1);
 
+    // make sure widgets to spread
+    CentralLayout->addStretch();
+
     // connect all
     QObject::connect(this->ManualStartStop, SIGNAL(toggled(bool)),
                      this, SLOT(ManualStartStopSlot(bool)));
