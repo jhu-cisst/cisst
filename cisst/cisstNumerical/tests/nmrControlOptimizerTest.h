@@ -34,10 +34,7 @@ class nmrControlOptimizerTest : public CppUnit::TestCase
     CPPUNIT_TEST(TestResetIndices);
 	CPPUNIT_TEST(TestAllocate);
 	CPPUNIT_TEST(TestReserveSpace);
-	CPPUNIT_TEST(TestGetObjectiveSpace);
-	CPPUNIT_TEST(TestGetIneqConstraintSpace);
-	CPPUNIT_TEST(TestGetEqConstraintSpace);
-	CPPUNIT_TEST(TestSlacks);
+	CPPUNIT_TEST(TestGetRefs);
     CPPUNIT_TEST(TestSolve);
 
     CPPUNIT_TEST_SUITE_END();
@@ -61,17 +58,8 @@ public:
     /*! Test of Reserve Space. */
     void TestReserveSpace(void);
 
-    /*! Test of GetObjectiveSpace. */
-    void TestGetObjectiveSpace(void);
-
-    /*! Test of GetIneqConstraintSpace. */
-    void TestGetIneqConstraintSpace(void);
-
-    /*! Test of GetEqConstraintSpace. */
-    void TestGetEqConstraintSpace(void);
-
-    /*! Test of Slacks. */
-    void TestSlacks(void);
+    /*! Test of GetRefs. */
+    void TestGetRefs(void);
 
     /*! Test of Solve. */
     void TestSolve(void);

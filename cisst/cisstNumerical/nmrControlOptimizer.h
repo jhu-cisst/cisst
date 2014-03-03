@@ -106,47 +106,24 @@ public:
 	*/
 	void ReserveSpace(size_t CRows, size_t ARows, size_t ERows, size_t num_slacks);
 
-    //! Returns a reference to space in the tableau for the objective. 
+    //! Returns references to spaces in the tableau. 
 	/*! GetObjectiveSpace
-	\param CRows Number of rows needed for the data
-	\param SlackIndex The assigned slack index
-	\param CData A reference to the data portion of the matrix
-	\param CSlacks A reference to the slack portion of the matrix
-	\param d A reference to the vector	
+	\param CRows Number of rows needed for the objective data
+	\param ARows Number of rows needed for the inequality constraint data
+	\param ERows Number of rows needed for the equality constraint data
+	\param num_slacks The number of slacks
+	\param CData A reference to the data portion of the objective matrix
+	\param CSlacks A reference to the slack portion of the objective matrix
+	\param d A reference to the objective vector
+	\param AData A reference to the data portion of the inequality constraint matrix
+	\param ASlacks A reference to the slack portion of the inequality constraint matrix
+	\param b A reference to the inequality constraint vector
+	\param EData A reference to the data portion of the equality constraint matrix
+	\param ESlacks A reference to the slack portion of the equality constraint matrix
+	\param f A reference to the equality constraint vector
 	*/
-	void GetObjectiveSpace(size_t CRows, size_t SlackIndex, size_t num_slacks, vctDynamicMatrixRef<double> & CData, vctDynamicMatrixRef<double> & CSlacks, vctDynamicVectorRef<double> & d);
+	void GetRefs(size_t CRows, size_t ARows, size_t ERows, size_t num_slacks, vctDynamicMatrixRef<double> & CData, vctDynamicMatrixRef<double> & CSlacks, vctDynamicVectorRef<double> & dData, vctDynamicMatrixRef<double> & AData, vctDynamicMatrixRef<double> & ASlacks, vctDynamicVectorRef<double> & bData, vctDynamicMatrixRef<double> & EData, vctDynamicMatrixRef<double> & ESlacks, vctDynamicVectorRef<double> & fData);
 
-    //! Returns a reference to space in the tableau for the inequality constraint. 
-	/*! GetIneqConstraintSpace
-	\param ARows Number of rows needed for the data
-	\param SlackIndex The assigned slack index
-	\param AData A reference to the data portion of the matrix
-	\param ASlacks A reference to the slack portion of the matrix
-	\param b A reference to the vector	
-	*/
-	void GetIneqConstraintSpace(size_t ARows, size_t SlackIndex, size_t num_slacks, vctDynamicMatrixRef<double> & AData, vctDynamicMatrixRef<double> & ASlacks, vctDynamicVectorRef<double> & b);
-
-    //! Returns a reference to space in the tableau for the equality constraint. 
-	/*! GetEqConstraintSpace
-	\param ERows Number of rows needed for the data
-	\param SlackIndex The assigned slack index
-	\param EData A reference to the data portion of the matrix
-	\param ESlacks A reference to the slack portion of the matrix
-	\param f A reference to the vector	
-	*/
-	void GetEqConstraintSpace(size_t ERows, size_t SlackIndex, size_t num_slacks, vctDynamicMatrixRef<double> & EData, vctDynamicMatrixRef<double> & ESlacks, vctDynamicVectorRef<double> & f);
-
-	//! Increments the slack index. 
-	/*! IncSlackIndex
-	\param slacks Number of slacks to increment the index
-	*/
-	void IncSlackIndex(size_t slacks);
-
-	//! Gets the slack index. 
-	/*! GetSlackIndex	
-	\return size_t The value of SlackIndex
-	*/
-	size_t GetSlackIndex();
 
 	//! Gets the number of slacks. 
 	/*! GetSlacks	
@@ -233,6 +210,11 @@ public:
 	*/
     std::string GetStatusString(STATUS status);
 
+	//! Allocate memory indicated by input
+	/*! allocate
+	*/
+	void allocate(size_t CRows, size_t CCols, size_t ARows, size_t ACols, size_t ERows, size_t ECols);
+
 private: 
 
 	//!Objective Matrix
@@ -254,12 +236,6 @@ private:
     //!number of variables for incremental joint optimization (can be inferred from objective function).
     size_t NumVars; 
 
-	//!Objective rows
-	size_t CRows;
-	//!Inequality rows
-	size_t ARows;
-	//!Equality rows
-	size_t ERows;
 	//!Number of slacks
 	size_t Slacks;
 	//!Objective Index

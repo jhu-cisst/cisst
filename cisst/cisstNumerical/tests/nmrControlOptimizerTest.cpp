@@ -44,7 +44,6 @@ void nmrControlOptimizerTest::TestResetIndices(void)
 	CPPUNIT_ASSERT_EQUAL(co.GetIneqConstraintRows(),zero);
 	CPPUNIT_ASSERT_EQUAL(co.GetEqConstraintIndex(),zero);
 	CPPUNIT_ASSERT_EQUAL(co.GetEqConstraintRows(),zero);
-	CPPUNIT_ASSERT_EQUAL(co.GetSlackIndex(),zero);
 	CPPUNIT_ASSERT_EQUAL(co.GetSlacks(),zero);
 }
 
@@ -90,8 +89,8 @@ void nmrControlOptimizerTest::TestAllocate(void)
 	CPPUNIT_ASSERT_EQUAL(co.GetEqConstraintVector().size(),eq);
 }
 
-/*! Test of GetObjectiveSpace. */
-void nmrControlOptimizerTest::TestGetObjectiveSpace(void)
+/*! Test of GetRefs. */
+void nmrControlOptimizerTest::TestGetRefs(void)
 {
 	size_t num_vars = 5;
 	size_t slack = 2;
@@ -117,8 +116,20 @@ void nmrControlOptimizerTest::TestGetObjectiveSpace(void)
 	vctDynamicMatrixRef<double> objData2;
 	vctDynamicMatrixRef<double> objSlack2;
 	vctDynamicVectorRef<double> objVec2;
-	co.GetObjectiveSpace(4,0,1,objData1,objSlack1,objVec1);
-	co.GetObjectiveSpace(4,1,1,objData2,objSlack2,objVec2);
+	vctDynamicMatrixRef<double> ineqData1;
+	vctDynamicMatrixRef<double> ineqSlack1;
+	vctDynamicVectorRef<double> ineqVec1;
+	vctDynamicMatrixRef<double> ineqData2;
+	vctDynamicMatrixRef<double> ineqSlack2;
+	vctDynamicVectorRef<double> ineqVec2;
+	vctDynamicMatrixRef<double> eqData1;
+	vctDynamicMatrixRef<double> eqSlack1;
+	vctDynamicVectorRef<double> eqVec1;
+	vctDynamicMatrixRef<double> eqData2;
+	vctDynamicMatrixRef<double> eqSlack2;
+	vctDynamicVectorRef<double> eqVec2;
+	co.GetRefs(4,3,2,1,objData1,objSlack1,objVec1,ineqData1,ineqSlack1,ineqVec1,eqData1,eqSlack1,eqVec1);
+	co.GetRefs(4,3,2,1,objData2,objSlack2,objVec2,ineqData2,ineqSlack2,ineqVec2,eqData2,eqSlack2,eqVec2);
 
 	//Fill in some data, everywhere else is 0
 	objData1.SetAll(dataMat1);
@@ -127,8 +138,20 @@ void nmrControlOptimizerTest::TestGetObjectiveSpace(void)
 	objData2.SetAll(dataMat2);
 	objSlack2.SetAll(slackMat2);
 	objVec2.SetAll(vec2);
+	ineqData1.SetAll(dataMat1);
+	ineqSlack1.SetAll(slackMat1);
+	ineqVec1.SetAll(vec1);
+	ineqData2.SetAll(dataMat2);
+	ineqSlack2.SetAll(slackMat2);
+	ineqVec2.SetAll(vec2);
+	eqData1.SetAll(dataMat1);
+	eqSlack1.SetAll(slackMat1);
+	eqVec1.SetAll(vec1);
+	eqData2.SetAll(dataMat2);
+	eqSlack2.SetAll(slackMat2);
+	eqVec2.SetAll(vec2);
 
-	//Get tableau data
+	//Check against objective data
 	vctDoubleMat objMat_in = co.GetObjectiveMatrix();
 	vctDoubleVec objVec_in = co.GetObjectiveVector();
 	//First set of vf data
@@ -161,47 +184,8 @@ void nmrControlOptimizerTest::TestGetObjectiveSpace(void)
 		//Check that the vector is set correctly
 		CPPUNIT_ASSERT_EQUAL(objVec_in[i],vec2);
 	}
-}
 
-/*! Test of GetIneqConstraintSpace. */
-void nmrControlOptimizerTest::TestGetIneqConstraintSpace(void)
-{
-	size_t num_vars = 5;
-	size_t slack = 2;
-	size_t eq = 4;
-	size_t ineq = 6;
-	size_t obj = 8;
-	double dataMat1 = 1;
-	double slackMat1 = 2;
-	double vec1 = 3;
-	double dataMat2 = 4;
-	double slackMat2 = 5;
-	double vec2 = 6;
-	double zero = 0;
-    nmrControlOptimizer co(num_vars);
-    co.reset_indices();
-	co.ReserveSpace(obj,ineq,eq,slack);	
-	co.allocate();
-
-	//Get references to co tableau
-	vctDynamicMatrixRef<double> ineqData1;
-	vctDynamicMatrixRef<double> ineqSlack1;
-	vctDynamicVectorRef<double> ineqVec1;
-	vctDynamicMatrixRef<double> ineqData2;
-	vctDynamicMatrixRef<double> ineqSlack2;
-	vctDynamicVectorRef<double> ineqVec2;
-	co.GetIneqConstraintSpace(3,0,1,ineqData1,ineqSlack1,ineqVec1);
-	co.GetIneqConstraintSpace(3,1,1,ineqData2,ineqSlack2,ineqVec2);
-
-	//Fill in some data, everywhere else is 0
-	ineqData1.SetAll(dataMat1);
-	ineqSlack1.SetAll(slackMat1);
-	ineqVec1.SetAll(vec1);
-	ineqData2.SetAll(dataMat2);
-	ineqSlack2.SetAll(slackMat2);
-	ineqVec2.SetAll(vec2);
-
-	//Get tableau data
+	//Check against inequality constraint data
 	vctDoubleMat ineqMat_in = co.GetIneqConstraintMatrix();
 	vctDoubleVec ineqVec_in = co.GetIneqConstraintVector();
 	//First set of vf data
@@ -219,7 +203,7 @@ void nmrControlOptimizerTest::TestGetIneqConstraintSpace(void)
 		//Check that the vector is set correctly
 		CPPUNIT_ASSERT_EQUAL(ineqVec_in[i],vec1);
 	}
-	//Second set of vf data
+	//Check against equality constraint data
 	for(size_t i = 3; i < 6; i++)
 	{
 		for(size_t j = 0; j < num_vars; j++)
@@ -234,45 +218,7 @@ void nmrControlOptimizerTest::TestGetIneqConstraintSpace(void)
 		//Check that the vector is set correctly
 		CPPUNIT_ASSERT_EQUAL(ineqVec_in[i],vec2);
 	}
-}
 
-/*! Test of GetEqConstraintSpace. */
-void nmrControlOptimizerTest::TestGetEqConstraintSpace(void)
-{
-	size_t num_vars = 5;
-	size_t slack = 2;
-	size_t eq = 4;
-	size_t ineq = 6;
-	size_t obj = 8;
-	double dataMat1 = 1;
-	double slackMat1 = 2;
-	double vec1 = 3;
-	double dataMat2 = 4;
-	double slackMat2 = 5;
-	double vec2 = 6;
-	double zero = 0;
-    nmrControlOptimizer co(num_vars);
-    co.reset_indices();
-	co.ReserveSpace(obj,ineq,eq,slack);	
-	co.allocate();
-
-	//Get references to tableau
-	vctDynamicMatrixRef<double> eqData1;
-	vctDynamicMatrixRef<double> eqSlack1;
-	vctDynamicVectorRef<double> eqVec1;
-	vctDynamicMatrixRef<double> eqData2;
-	vctDynamicMatrixRef<double> eqSlack2;
-	vctDynamicVectorRef<double> eqVec2;
-	co.GetEqConstraintSpace(2,0,1,eqData1,eqSlack1,eqVec1);
-	co.GetEqConstraintSpace(2,1,1,eqData2,eqSlack2,eqVec2);
-
-	//Fill in some data
-	eqData1.SetAll(dataMat1);
-	eqSlack1.SetAll(slackMat1);
-	eqVec1.SetAll(vec1);
-	eqData2.SetAll(dataMat2);
-	eqSlack2.SetAll(slackMat2);
-	eqVec2.SetAll(vec2);
 	//Get tableau data
 	vctDoubleMat eqMat_in = co.GetEqConstraintMatrix();
 	vctDoubleVec eqVec_in = co.GetEqConstraintVector();
@@ -308,22 +254,6 @@ void nmrControlOptimizerTest::TestGetEqConstraintSpace(void)
 	}
 }
 
-/*! Test of Slacks. */
-void nmrControlOptimizerTest::TestSlacks(void)
-{
-	//Make sure we can increment the slack index manually by specific amounts
-	size_t zero = 0;
-	size_t one = 1;
-	size_t three = 3;
-	nmrControlOptimizer co(5);
-	co.reset_indices();
-	CPPUNIT_ASSERT_EQUAL(co.GetSlackIndex(),zero);
-	co.IncSlackIndex(1);
-	CPPUNIT_ASSERT_EQUAL(co.GetSlackIndex(),one);
-	co.IncSlackIndex(2);
-	CPPUNIT_ASSERT_EQUAL(co.GetSlackIndex(),three);
-}
-
 /*! Test of Solve. */
 void nmrControlOptimizerTest::TestSolve(void)
 {
@@ -336,18 +266,35 @@ void nmrControlOptimizerTest::TestSolve(void)
 	vctDynamicMatrixRef<double> Identity;
 	vctDynamicMatrixRef<double> Slack;
 	vctDynamicVectorRef<double> DesiredMotion;
-	co.GetObjectiveSpace(5,0,0,Identity,Slack,DesiredMotion);
+	vctDynamicMatrixRef<double> ARef;
+	vctDynamicMatrixRef<double> ASlackRef;
+	vctDynamicVectorRef<double> bRef;
+	vctDynamicMatrixRef<double> ERef;
+	vctDynamicMatrixRef<double> ESlackRef;
+	vctDynamicVectorRef<double> fRef;
+	co.GetRefs(5,0,0,0,Identity,Slack,DesiredMotion,ARef,ASlackRef,bRef,ERef,ESlackRef,fRef);
 	Identity.SetAll(0);
 	for(size_t i = 0; i < 5; i++)
 	{
 		Identity[i][i] = 1;
 		DesiredMotion[i] = i;
 	}
-	co.Solve(q);
+	STATUS st = co.Solve(q);
+	CPPUNIT_ASSERT_EQUAL(st,OK);
 	for(size_t i = 0; i < 5; i++)
 	{
 		CPPUNIT_ASSERT_DOUBLES_EQUAL(q[0],DesiredMotion[0],0.05);
 	}
+
+	//dq incorrect size
+	vctDoubleVec q_resized(6);
+	st = co.Solve(q_resized);
+	CPPUNIT_ASSERT_EQUAL(st,MALFORMED);
+
+	//d incorrect size
+    co.reset_indices();
+	co.ReserveSpace(5,0,0,0);
+	co.allocate();
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(nmrControlOptimizerTest);

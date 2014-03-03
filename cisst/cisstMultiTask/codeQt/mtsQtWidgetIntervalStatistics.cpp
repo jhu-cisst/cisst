@@ -89,6 +89,6 @@ void mtsQtWidgetIntervalStatistics::SetValue(const mtsIntervalStatistics & newVa
     QTWIMax->setText(QString("%1 ms").arg(newValue.GetMax() * 1000.0, -6, 'f', 3));
     const double minLoad = newValue.MinComputeTime() / avg * 100.0;
     const double maxLoad = newValue.MaxComputeTime() / avg * 100.0;
-    QTWILoadMin->setText(QString("%1\%").arg(minLoad, -4, 'f', 0));
-    QTWILoadMax->setText(QString("%1\%").arg(maxLoad, -4, 'f', 0));
+    //QTWILoadMin->setText(QString("%1\%").arg(minLoad, -4, 'f', 0));
+    //QTWILoadMax->setText(QString("%1\%").arg(maxLoad, -4, 'f', 0));
 }

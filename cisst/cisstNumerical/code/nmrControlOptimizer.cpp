@@ -58,13 +58,13 @@ STATUS nmrControlOptimizer::Solve(vctDoubleVec &dq)
 {
 	CISSTNETLIB_INTEGER res;
 	// if the sizes don't match for C,d
-	if(C.rows() != d.size() || dq.size() != NumVars) { // removed C->cols() != dq.size()
+	if(C.rows() != d.size() || dq.size() != NumVars) { 
 		return MALFORMED;
 	}
 
 	// if we don't have any constraints, solve
 	if(A.size() == 0 && E.size() == 0) {
-		if(C.cols() != dq.size() || C.rows() != d.size()) {
+		if(C.cols() != dq.size()) {
 			return MALFORMED;
 		}
 		lsiSolution.Allocate(C);
@@ -157,9 +157,6 @@ void nmrControlOptimizer::reset_indices()
 	CIndex = 0;
 	AIndex = 0;
 	EIndex = 0;
-	CRows = 0;
-	ARows = 0;
-	ERows = 0;
 	Slacks = 0;
 	SlackIndex = 0;
 }
@@ -169,18 +166,73 @@ void nmrControlOptimizer::reset_indices()
 */
 void nmrControlOptimizer::allocate()
 {
-	C.SetSize(CRows,NumVars+Slacks,VCT_COL_MAJOR);
-	C.SetAll(0);
-	d.SetSize(CRows);
-	d.SetAll(0);
-	A.SetSize(ARows,NumVars+Slacks,VCT_COL_MAJOR);
-	A.SetAll(0);
-	b.SetSize(ARows);
-	b.SetAll(0);
-	E.SetSize(ERows,NumVars+Slacks,VCT_COL_MAJOR);
-	E.SetAll(0);
-	f.SetSize(ERows);
-	f.SetAll(0);
+	if(C.rows() != CIndex || C.cols() != NumVars+Slacks)
+	{
+		C.SetSize(CIndex,NumVars+Slacks,VCT_COL_MAJOR);
+		C.SetAll(0);
+	}
+	if(d.size() != CIndex)
+	{
+		d.SetSize(CIndex);
+		d.SetAll(0);
+	}
+	if(A.rows() != AIndex || A.cols() != NumVars+Slacks)
+	{
+		A.SetSize(AIndex,NumVars+Slacks,VCT_COL_MAJOR);
+		A.SetAll(0);
+	}
+	if(b.size() != AIndex)
+	{
+		b.SetSize(AIndex);
+		b.SetAll(0);
+	}
+	if(E.rows() != EIndex || E.cols() != NumVars+Slacks)
+	{
+		E.SetSize(EIndex,NumVars+Slacks,VCT_COL_MAJOR);
+		E.SetAll(0);
+	}
+	if(f.size() != EIndex)
+	{
+		f.SetSize(EIndex);
+		f.SetAll(0);
+	}
+}
+
+//! Allocate memory indicated by input
+/*! allocate
+*/
+void nmrControlOptimizer::allocate(size_t CRows, size_t CCols, size_t ARows = 0, size_t ACols = 0, size_t ERows = 0, size_t ECols = 0)
+{
+	if(C.rows() != CRows || C.cols() != CCols)
+	{
+		C.SetSize(CRows,CCols,VCT_COL_MAJOR);
+		C.SetAll(0);
+	}
+	if(d.size() != CRows)
+	{
+		d.SetSize(CRows);
+		d.SetAll(0);
+	}
+	if(A.rows() != ARows || A.cols() != ACols)
+	{
+		A.SetSize(ARows,ACols,VCT_COL_MAJOR);
+		A.SetAll(0);
+	}
+	if(b.size() != ARows)
+	{
+		b.SetSize(ARows);
+		b.SetAll(0);
+	}
+	if(E.rows() != ERows || E.cols() != ECols)
+	{
+		E.SetSize(ERows,ECols,VCT_COL_MAJOR);
+		E.SetAll(0);
+	}
+	if(f.size() != ERows)
+	{
+		f.SetSize(ERows);
+		f.SetAll(0);
+	}
 }
 
 //! Reserves space in the tableau 
@@ -192,100 +244,62 @@ void nmrControlOptimizer::allocate()
 */
 void nmrControlOptimizer::ReserveSpace(size_t CRows_in, size_t ARows_in, size_t ERows_in, size_t num_slacks_in)
 {
-	CRows += CRows_in;
-	ARows += ARows_in;
-	ERows += ERows_in;
+	CIndex += CRows_in;
+	AIndex += ARows_in;
+	EIndex += ERows_in;
 	Slacks += num_slacks_in;
 }
 
-//! Returns a reference to space in the tableau for the objective. 
+//! Returns references to spaces in the tableau. 
 /*! GetObjectiveSpace
-\param CRows Number of rows needed for the data
-\param SlackIndex The assigned slack index
-\param CData A reference to the data portion of the matrix
-\param CSlacks A reference to the slack portion of the matrix
-\param d A reference to the vector	
+\param CRows Number of rows needed for the objective data
+\param ARows Number of rows needed for the inequality constraint data
+\param ERows Number of rows needed for the equality constraint data
+\param SlackIndex_in The assigned slack index
+\param num_slacks The number of slacks
+\param CData A reference to the data portion of the objective matrix
+\param CSlacks A reference to the slack portion of the objective matrix
+\param d A reference to the objective vector
+\param AData A reference to the data portion of the inequality constraint matrix
+\param ASlacks A reference to the slack portion of the inequality constraint matrix
+\param b A reference to the inequality constraint vector
+\param EData A reference to the data portion of the equality constraint matrix
+\param ESlacks A reference to the slack portion of the equality constraint matrix
+\param f A reference to the equality constraint vector
 */
-void nmrControlOptimizer::GetObjectiveSpace(size_t CRows, size_t SlackIndex_in, size_t num_slacks, vctDynamicMatrixRef<double> & CData, vctDynamicMatrixRef<double> & CSlacks, vctDynamicVectorRef<double> & dData)
+void nmrControlOptimizer::GetRefs(size_t CRows, size_t ARows, size_t ERows, size_t num_slacks, vctDynamicMatrixRef<double> & CData, vctDynamicMatrixRef<double> & CSlacks, vctDynamicVectorRef<double> & dData, vctDynamicMatrixRef<double> & AData, vctDynamicMatrixRef<double> & ASlacks, vctDynamicVectorRef<double> & bData, vctDynamicMatrixRef<double> & EData, vctDynamicMatrixRef<double> & ESlacks, vctDynamicVectorRef<double> & fData)
 {
+	//Objectives
 	CData.SetRef(C, CIndex, 0, CRows, NumVars);
 	if(num_slacks > 0)
 	{
-		CSlacks.SetRef(C, CIndex, NumVars+SlackIndex_in, CRows, num_slacks);
-		vctDynamicMatrixRef<double> SetZero;	
-		SetZero.SetRef(C, CIndex, NumVars, CRows, SlackIndex_in);
-		SetZero.SetAll(0);
-		SetZero.SetRef(C, CIndex, NumVars+num_slacks, CRows, C.cols()-(NumVars+num_slacks));
-		SetZero.SetAll(0);
+		CSlacks.SetRef(C, CIndex, NumVars+SlackIndex, CRows, num_slacks);
 	}
 	dData.SetRef(d, CIndex, CRows);
 	CIndex += CRows;
-}
 
-//! Returns a reference to space in the tableau for the inequality constraint. 
-/*! GetIneqConstraintSpace
-\param ARows Number of rows needed for the data
-\param SlackIndex The assigned slack index
-\param AData A reference to the data portion of the matrix
-\param ASlacks A reference to the slack portion of the matrix
-\param b A reference to the vector	
-*/
-void nmrControlOptimizer::GetIneqConstraintSpace(size_t ARows, size_t SlackIndex_in, size_t num_slacks, vctDynamicMatrixRef<double> & AData, vctDynamicMatrixRef<double> & ASlacks, vctDynamicVectorRef<double> & bData)
-{
+	//Inequality Constraints
 	AData.SetRef(A, AIndex, 0, ARows, NumVars);
 	if(num_slacks > 0)
 	{
-		ASlacks.SetRef(A, AIndex, NumVars+SlackIndex_in, ARows, num_slacks);
+		ASlacks.SetRef(A, AIndex, NumVars+SlackIndex, ARows, num_slacks);
 		vctDynamicMatrixRef<double> SetZero;	
-		SetZero.SetRef(A, AIndex, NumVars, ARows, SlackIndex_in);
-		SetZero.SetAll(0);
-		SetZero.SetRef(A, AIndex, NumVars+num_slacks, ARows, A.cols()-(NumVars+num_slacks));
-		SetZero.SetAll(0);
 	}
 	bData.SetRef(b, AIndex, ARows);
 	AIndex += ARows;
-}
 
-//! Returns a reference to space in the tableau for the equality constraint. 
-/*! GetEqConstraintSpace
-\param ERows Number of rows needed for the data
-\param SlackIndex The assigned slack index
-\param EData A reference to the data portion of the matrix
-\param ESlacks A reference to the slack portion of the matrix
-\param f A reference to the vector	
-*/
-void nmrControlOptimizer::GetEqConstraintSpace(size_t ERows, size_t SlackIndex_in, size_t num_slacks, vctDynamicMatrixRef<double> & EData, vctDynamicMatrixRef<double> & ESlacks, vctDynamicVectorRef<double> & fData)
-{
+	//Equality Constraints
 	EData.SetRef(E, EIndex, 0, ERows, NumVars);
 	if(num_slacks > 0)
 	{
-		ESlacks.SetRef(E, EIndex, NumVars+SlackIndex_in, ERows, num_slacks);
+		ESlacks.SetRef(E, EIndex, NumVars+SlackIndex, ERows, num_slacks);
 		vctDynamicMatrixRef<double> SetZero;	
-		SetZero.SetRef(E, EIndex, NumVars, ERows, SlackIndex_in);
-		SetZero.SetAll(0);
-		SetZero.SetRef(E, EIndex, NumVars+num_slacks, ERows, E.cols()-(NumVars+num_slacks));
-		SetZero.SetAll(0);
 	}
 	fData.SetRef(f, EIndex, ERows);
 	EIndex += ERows;
-}
 
-//! Increments the slack index. 
-/*! IncSlackIndex
-\param slacks Number of slacks to increment the index
-*/
-void nmrControlOptimizer::IncSlackIndex(size_t slacks)
-{
-	SlackIndex += slacks;
-}
-
-//! Gets the slack index. 
-/*! GetSlackIndex	
-\return size_t The value of SlackIndex
-*/
-size_t nmrControlOptimizer::GetSlackIndex()
-{
-	return SlackIndex;
+	//Slacks
+	SlackIndex += num_slacks;
 }
 
 //! Gets the number of rows for the objective expression. 
@@ -294,7 +308,7 @@ size_t nmrControlOptimizer::GetSlackIndex()
 */
 size_t nmrControlOptimizer::GetObjectiveRows()
 {
-	return CRows;
+	return C.rows();
 }
 
 //! Gets the number of rows for the inequality constraint. 
@@ -303,7 +317,7 @@ size_t nmrControlOptimizer::GetObjectiveRows()
 */
 size_t nmrControlOptimizer::GetIneqConstraintRows()
 {
-	return ARows;
+	return A.rows();
 }
 
 //! Gets the number of rows for the equality constraint. 
@@ -312,7 +326,7 @@ size_t nmrControlOptimizer::GetIneqConstraintRows()
 */
 size_t nmrControlOptimizer::GetEqConstraintRows()
 {
-	return ERows;
+	return E.rows();
 }
 
 //! Gets the objective index. 
