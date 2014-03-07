@@ -355,7 +355,6 @@ ENDIF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
 
 
 # try to find OpenCV automatically
-# NOTE (Anand): Balazs would check for win32 before including TS and FFMPEG libraries
 set(OpenCV_COMPONENTS core calib3d contrib features2d gpu
                       legacy highgui ml imgproc objdetect ts video)
 find_package (OpenCV QUIET REQUIRED ${OpenCV_COMPONENTS})
@@ -365,16 +364,8 @@ if (OpenCV_FOUND)
         set (OpenCV2_PACKAGE_NAME "OpenCV")
         if (${OpenCV_VERSION} VERSION_GREATER 2.1.9)
             message ("OpenCV Version from 2.2.0. onwards.")
-
-            # NOTE: Anand: To change the OpenCV install directory to a different version,
-            # one needs to delete the CMake cache as the library variables do not get reset.
             cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
             cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBS)
-
-            #  NOTE: Anand: even on deleting cache the variable for link directories doesn't get cleared
-            # after commenting the line below.
-            #cisst_set_package_settings (cisstStereoVision OpenCV2 LINK_DIRECTORIES    OpenCV_LIB_DIR)
-            # NOTE: we may want to include only specific opencv modules that are needed in cisstSvl
             cisst_set_package_settings (cisstStereoVision OpenCV2 PACKAGES            OpenCV2_PACKAGE_NAME)
 
             # OpenCV 2.0 does not define OpenCV_INCLUDE_DIRS

@@ -43,9 +43,6 @@ svlVidCapSrcBMD::svlVidCapSrcBMD() :
     SelectedDeckLink(0),
     SelectedDeckLinkInput(0),
     Delegate(0),
-    /*Width(0),
-    Height(0),
-    FrameRate(0),*/
     PixelFormat(bmdFormat8BitYUV), // not sure if this is an option for the user?
     InputFlags(0),
     Debug(false)
@@ -53,53 +50,6 @@ svlVidCapSrcBMD::svlVidCapSrcBMD() :
     // initialize vector containing flags for cards having input interfaces
     DeckLinkHasInputInterface.SetSize(10);
     DeckLinkHasInputInterface.SetAll(false);
-
-    /// \todo(dmirota1)  This should not be changing at runtime
-    /*supported_displayModes.push_back(bmdModeNTSC);
-    supported_displayModes.push_back(bmdModeNTSC2398);
-    supported_displayModes.push_back(bmdModeNTSCp);
-    supported_displayModes.push_back(bmdModePAL);
-    supported_displayModes.push_back(bmdModePALp);
-    supported_displayModes.push_back(bmdModeHD1080p2398);
-    supported_displayModes.push_back(bmdModeHD1080p24);
-    supported_displayModes.push_back(bmdModeHD1080p25);
-    supported_displayModes.push_back(bmdModeHD1080p2997);
-    supported_displayModes.push_back(bmdModeHD1080p30);
-    supported_displayModes.push_back(bmdModeHD1080p50);
-    supported_displayModes.push_back(bmdModeHD1080p5994);
-    supported_displayModes.push_back(bmdModeHD1080p6000);
-    supported_displayModes.push_back(bmdModeHD1080i50);
-    supported_displayModes.push_back(bmdModeHD1080i5994);
-    supported_displayModes.push_back(bmdModeHD1080i6000);
-    supported_displayModes.push_back(bmdModeHD720p50);
-    supported_displayModes.push_back(bmdModeHD720p5994);
-    supported_displayModes.push_back(bmdModeHD720p60);
-    supported_displayModes.push_back(bmdMode2k2398);
-    supported_displayModes.push_back(bmdMode2k24);
-    supported_displayModes.push_back(bmdMode2k25);*/
-
-
-    /// \todo(dmirota1) Should be a better way to do this.
-    /*bmdDisplayMode_lookup[width_height_framerate(720,486,30)] = bmdModeNTSC;
-    bmdDisplayMode_lookup[width_height_framerate(720,486,23.98)] = bmdModeNTSC2398;
-    bmdDisplayMode_lookup[width_height_framerate(720,486,60)] = bmdModeNTSCp;
-    bmdDisplayMode_lookup[width_height_framerate(720,576,30)] = bmdModePAL;
-    bmdDisplayMode_lookup[width_height_framerate(720,576,60)] = bmdModePALp;
-    bmdDisplayMode_lookup[width_height_framerate(1920,1080,23.98)] = bmdModeHD1080p2398;
-    bmdDisplayMode_lookup[width_height_framerate(1920,1080,24)] = bmdModeHD1080p24;
-    bmdDisplayMode_lookup[width_height_framerate(1920,1080,25)] = bmdModeHD1080p25;
-    bmdDisplayMode_lookup[width_height_framerate(1920,1080,29.97)] = bmdModeHD1080p2997;
-    bmdDisplayMode_lookup[width_height_framerate(1920,1080,30)] = bmdModeHD1080p30;
-    bmdDisplayMode_lookup[width_height_framerate(1920,1080,50)] = bmdModeHD1080p50;
-    bmdDisplayMode_lookup[width_height_framerate(1920,1080,59.94)] = bmdModeHD1080p5994;
-    bmdDisplayMode_lookup[width_height_framerate(1920,1080,60)] = bmdModeHD1080p6000;
-    bmdDisplayMode_lookup[width_height_framerate(1280,720,50)] = bmdModeHD720p50;
-    bmdDisplayMode_lookup[width_height_framerate(1280,720,59.94)] = bmdModeHD720p5994;
-    bmdDisplayMode_lookup[width_height_framerate(1280,720,60)] = bmdModeHD720p60;
-    bmdDisplayMode_lookup[width_height_framerate(2048,1556,23.98)] = bmdMode2k2398;
-    bmdDisplayMode_lookup[width_height_framerate(2048,1556,24)] = bmdMode2k24;
-    bmdDisplayMode_lookup[width_height_framerate(2048,1556,25)] = bmdMode2k25;*/
-
 }
 
 svlVidCapSrcBMD::~svlVidCapSrcBMD()
@@ -111,110 +61,6 @@ svlVidCapSrcBMD::~svlVidCapSrcBMD()
     if (SelectedDeckLinkInput) delete [] SelectedDeckLinkInput;
     if (Delegate) delete [] Delegate;
 }
-
-//void svlVidCapSrcBMD::GetWidthHeightfromBMDDisplayMode(const BMDPixelFormat displayMode_in,
-//                                                       int  &width_out, int &height_out, double &frameRate_out)
-//{
-//    // default settings
-//    width_out = 1920;
-//    height_out = 1080;
-//    frameRate_out = 30;
-//
-//    // width & height
-//    if (displayMode_in == bmdModeNTSC ||
-//        displayMode_in == bmdModeNTSC2398 ||
-//        displayMode_in == bmdModeNTSCp){
-//        width_out = 720;
-//        height_out = 486;
-//    }
-//    else if (displayMode_in == bmdModePAL ||
-//             displayMode_in == bmdModePALp ) {
-//             width_out = 720;
-//             height_out = 576;
-//    }
-//    else if (displayMode_in == bmdModeHD1080p2398 ||
-//             displayMode_in == bmdModeHD1080p24 ||
-//             displayMode_in == bmdModeHD1080p25 ||
-//             displayMode_in == bmdModeHD1080p2997 ||
-//             displayMode_in == bmdModeHD1080p30 ||
-//             displayMode_in == bmdModeHD1080i50 ||
-//             displayMode_in == bmdModeHD1080i5994 ||
-//             displayMode_in == bmdModeHD1080i6000 ||
-//             displayMode_in == bmdModeHD1080p50 ||
-//             displayMode_in == bmdModeHD1080p5994 ||
-//             displayMode_in == bmdModeHD1080p6000) {
-//        width_out = 1920;
-//        height_out = 1080;
-//    }
-//    else if (displayMode_in == bmdModeHD720p50 ||
-//             displayMode_in == bmdModeHD720p5994 ||
-//             displayMode_in == bmdModeHD720p60) {
-//        width_out = 1280;
-//        height_out = 720;
-//    }
-//    else if (displayMode_in == bmdMode2k2398 ||
-//             displayMode_in == bmdMode2k24 ||
-//             displayMode_in == bmdMode2k25) {
-//        width_out = 2048;
-//        height_out = 1556;
-//    }
-//
-//    // frame rate
-//    switch(displayMode_in)
-//    {
-//        case bmdModeNTSC2398:
-//        case bmdModeHD1080p2398:
-//        case bmdMode2k2398:
-//            frameRate_out = 23.98;
-//        break;
-//
-//        case bmdModeHD1080p24:
-//        case bmdMode2k24:
-//            frameRate_out = 24.0;
-//        break;
-//
-//        case bmdModeHD1080p25:
-//        case bmdMode2k25:
-//            frameRate_out = 25.0;
-//        break;
-//
-//        case bmdModeHD1080p2997:
-//            frameRate_out = 29.97;
-//        break;
-//
-//        case bmdModeNTSC:
-//        case bmdModePAL:
-//        case bmdModeHD1080p30:
-//            frameRate_out = 30.0;
-//        break;
-//
-//        case bmdModeHD1080i50:
-//        case bmdModeHD1080p50:
-//        case bmdModeHD720p50:
-//        case bmdModePALp:
-//            frameRate_out = 50.0;
-//        break;
-//
-//        case bmdModeHD1080i5994:
-//        case bmdModeHD1080p5994:
-//        case bmdModeHD720p5994:
-//            frameRate_out = 59.94;
-//        break;
-//
-//        case bmdModeHD1080i6000:
-//        case bmdModeHD1080p6000:
-//        case bmdModeHD720p60:
-//        case bmdModeNTSCp:
-//            frameRate_out = 60;
-//        break;
-//
-//        default:
-//            printf("Unrecognized display mode: %d\n", displayMode_in);
-//        break;
-//    }
-//
-//    //printf("Width:%d, Height:%d at %4.2fHz\n", width_out, height_out, frameRate_out);
-//}
 
 IDeckLinkIterator* CreateDeckLinkIteratorInstance(void);
 
@@ -308,36 +154,12 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
 
     if (BMDNumberOfInputDevices < 0) EnumerateDevices();
     
-    //IDeckLinkIterator * deck_link_iterator = GetIDeckLinkIterator();
-    //IDeckLink * deck_link;
-    //IDeckLinkInput* deck_link_input;
-    //HRESULT result;
-
-    //// Enumerate all cards in this system
-    //int i = 0;
-    //while (deck_link_iterator->Next(&deck_link) == S_OK)
-    //{
-    //    // check if the card has an input interface else ignore e.g. Mini Monitor 
-    //    if (deck_link->QueryInterface(IID_IDeckLinkInput, (void**)&deck_link_input) == S_OK) {
-    //        //available_decklinks.push_back(deck_link);
-    //        deckLinkHasInputInterface[i] = true;
-    //    }
-    //    deck_link->Release();
-    //    BMDNumberOfInputDevices++;
-    //    i++;
-    //}
-    //deckLinkHasInputInterface.resize(BMDNumberOfInputDevices);
-
-    //if(deck_link_iterator != NULL) deck_link_iterator->Release();
-    //if (deck_link_input != NULL) deck_link_input->Release();
-
     // get the deck link iterator
     IDeckLinkIterator * deck_link_iterator = GetIDeckLinkIterator();
     IDeckLink * deck_link;
     HRESULT result;
 
     // Allocate memory for device info array
-    // CALLER HAS TO FREE UP THIS ARRAY!!!
     if (BMDNumberOfInputDevices > 0) {
         deviceinfo[0] = new svlFilterSourceVideoCapture::DeviceInfo[BMDNumberOfInputDevices];
         int d = 0; // indexing through the all decklink devices
@@ -417,13 +239,6 @@ int svlVidCapSrcBMD::SetDevice(int device_id, int CMN_UNUSED(input_id), unsigned
     if (device_id >= BMDNumberOfInputDevices) return SVL_FAIL;
     DeviceID[videoch] = device_id;
     // Input ID is ignored, currently not suppporting multiple input formats
-
-    /*if (supported_displayModes.empty()) {
-        svlFilterSourceVideoCapture::ImageFormat * formatlist;
-        GetFormatList(devid, &formatlist);
-        delete [] formatlist;
-    }*/
-
     return SVL_OK;
 }
 
@@ -475,49 +290,11 @@ int svlVidCapSrcBMD::EnumerateFormats(int device_id, vctDynamicVector<BMDDisplay
     return f;
 }
 
-/// \todo(dmirota1) GetFormatList should not be changing the state of the class
 int svlVidCapSrcBMD::GetFormatList(unsigned int device_id, svlFilterSourceVideoCapture::ImageFormat **format_list)
 {
     if (format_list == 0) return SVL_FAIL;
     vctDynamicVector<BMDDisplayMode> display_modes;
     if (EnumerateFormats(device_id, display_modes) < 0) return SVL_FAIL;
-
-    //IDeckLinkIterator * deck_link_iterator = GetIDeckLinkIterator();
-    //IDeckLink * current_decklink = 0;
-
-    //unsigned int d = 0; // number of devices
-    //int i = 0; // number of input devices
-    //while (deck_link_iterator->Next(&current_decklink) == S_OK) {
-    //    if (deckLinkHasInputInterface[d]) {
-    //        if (i == deviceid) break;
-    //    }
-    //    d++;
-    //}
-    //deck_link_iterator->Release();
-
-    //IDeckLinkInput * current_input;
-    //current_decklink->QueryInterface(IID_IDeckLinkInput,(void **)&current_input);
-    //IDeckLinkDisplayModeIterator * iterator = NULL;
-    //current_input->GetDisplayModeIterator(&iterator);
-    //IDeckLinkDisplayMode * temp_displaymode = NULL;
-    //current_decklink->Release();
-    //current_input->Release();
-
-    //supported_displayModes.clear();
-    ////bmdDisplayMode_lookup.clear();
-    //width_height_framerate_lookup.clear();
-
-    //do {
-    //    iterator->Next(&temp_displaymode);
-    //    if (temp_displaymode != NULL) {
-    //        supported_displayModes.push_back(temp_displaymode->GetDisplayMode());
-    //        BMDTimeValue numerator = 0;
-    //        BMDTimeValue denominator = 0;
-    //        temp_displaymode->GetFrameRate(&denominator, &numerator);
-    //        //bmdDisplayMode_lookup[width_height_framerate(temp_displaymode->GetWidth(),temp_displaymode->GetHeight(),(double)numerator/(double)denominator)] = temp_displaymode->GetDisplayMode();
-    //        width_height_framerate_lookup[temp_displaymode->GetDisplayMode()] = width_height_framerate(temp_displaymode->GetWidth(),temp_displaymode->GetHeight(),(double)numerator/(double)denominator);
-    //    }
-    //} while (temp_displaymode != NULL);
 
     format_list[0] = new svlFilterSourceVideoCapture::ImageFormat[display_modes.size()];
     
@@ -590,12 +367,7 @@ int svlVidCapSrcBMD::Open()
     for (unsigned int i = 0; i < NumOfStreams; i ++)
     {
         IDeckLinkIterator * deck_link_iterator = GetIDeckLinkIterator();
-        /*if (!deck_link_iterator) {
-            std::cerr << "svlVidCapSrcBMD::Open - GetIDeckLinkIterator() returned error" << std::endl;
-            goto labError;
-        }*/
         // Connect to the decklink set by the user stored in DeviceID[streamid]
-        //IDeckLink* deck_link = 0;
         int count = 0;
         for (int d = 0; d <= DeviceID[i]; d++) { 
             result = deck_link_iterator->Next(&SelectedDeckLink[i]);
@@ -607,7 +379,6 @@ int svlVidCapSrcBMD::Open()
         }
         deck_link_iterator->Release();
         std::cout << "BMD::Open: Decklink device: " << count-1 << std::endl;
-        //deck_link->Release();
         // get the input interface for the selected device
         if (SelectedDeckLink[i]->QueryInterface(IID_IDeckLinkInput, reinterpret_cast<void**>(&SelectedDeckLinkInput[i])) != S_OK) {
             std::cerr << "svlVidCapSrcBMD::Open - deck_link_iterator->QueryInterface() returned error" << std::endl;
@@ -616,7 +387,6 @@ int svlVidCapSrcBMD::Open()
 
         // Set callback delegate
         // Allocate capture buffers
-        
         ImageBuffer[i] = new svlBufferImage(WidthHeightFramerateLookup[DisplayMode[i]].Width,
             WidthHeightFramerateLookup[DisplayMode[i]].Height);
         Delegate[i] = new DeckLinkCaptureDelegate(ImageBuffer[i]);

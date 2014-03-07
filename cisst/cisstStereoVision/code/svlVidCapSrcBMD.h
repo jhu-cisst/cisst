@@ -68,8 +68,6 @@ public:
 
 private:
     IDeckLinkIterator* GetIDeckLinkIterator();
-    /*void GetWidthHeightfromBMDDisplayMode(const BMDPixelFormat pixelFormat_in,
-        int  &width_int, int &height_out, double &frameRate_out);*/
     int EnumerateDevices();
     int EnumerateFormats(int device_id,
         vctDynamicVector<BMDDisplayMode> &display_modes = vctDynamicVector<BMDDisplayMode>());
@@ -78,8 +76,6 @@ private:
     unsigned int NumOfStreams;
     bool Running;
     bool Initialized;
-    /*int Width, Height;
-    double FrameRate;*/
     bool Debug;
     int	BMDNumberOfInputDevices;
     vctBoolVec DeckLinkHasInputInterface;
@@ -95,8 +91,6 @@ private:
     // these are currently constants across different streams (channels)
     BMDVideoInputFlags InputFlags;
     BMDPixelFormat PixelFormat;
-
-    //std::vector<BMDDisplayMode> supported_displayModes; /// \todo(dmirota1)  This needs to be expanded to be per device per available inputs.
 
     class widthHeightFramerate
     {
@@ -119,8 +113,6 @@ private:
         int Width;
         int Height;
         double Framerate;
-        //check if below operator is used at all?
-        //bool operator <(const width_height_framerate rhs_in) const {return width < rhs_in.width && height < rhs_in.height && framerate < rhs_in.framerate;}
     };
 
     std::map<BMDDisplayMode, widthHeightFramerate> WidthHeightFramerateLookup;
