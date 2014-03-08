@@ -38,6 +38,9 @@ CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorEvent, mtsCollectorBase)   // derives
 #include <cisstMultiTask/mtsCollectorState.h>
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsCollectorState, mtsCollectorBase)   // derives from mtsTaskFromSignal
 
+#include <cisstMultiTask/mtsCollectorFactory.h>
+CMN_IMPLEMENT_SERVICES(mtsCollectorFactory)
+
 #include <cisstMultiTask/mtsComponent.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndInt)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndUInt)

@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Ali Uneri, Peter Kazanzides
   Created on: 2009-10-22
 
-  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,23 +36,23 @@ class QWidget;
 class mtsCollectorQtWidget;
 class displayQtComponent;
 
-class CISST_EXPORT mainQtComponent : public mtsComponent
+class CISST_EXPORT mainQtComponent: public mtsComponent
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
 
     QWidget * mainWidget;
-    mtsCollectorQtWidget *collectorQtWidget;
+    mtsCollectorQtWidget * collectorQtWidget;
 
-    displayQtComponent *display[NumSineTasks];
+    displayQtComponent * display[NumSineTasks];
 
  public:
 
-    mainQtComponent(const std::string &name);
+    mainQtComponent(const std::string & name);
     ~mainQtComponent();
 
     void Startup(void);
 
-    mtsCollectorQtWidget * GetCollectorQtWidget() const
+    mtsCollectorQtWidget * GetCollectorQtWidget(void) const
     { return collectorQtWidget; }
 
 };

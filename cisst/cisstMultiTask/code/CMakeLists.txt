@@ -32,6 +32,7 @@ set (SOURCE_FILES
      mtsCollectorBase.cpp
      mtsCollectorEvent.cpp
      mtsCollectorState.cpp
+     mtsCollectorFactory.cpp
 
      mtsCommandFilteredQueuedWrite.cpp
      mtsCommandFilteredWrite.cpp
@@ -120,6 +121,7 @@ set (HEADER_FILES
      mtsCollectorBase.h
      mtsCollectorEvent.h
      mtsCollectorState.h
+     mtsCollectorFactory.h
 
      mtsCommandBase.h
      mtsCommandFilteredQueuedWrite.h

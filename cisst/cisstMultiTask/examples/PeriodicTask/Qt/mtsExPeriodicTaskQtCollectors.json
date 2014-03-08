@@ -1,0 +1,27 @@
+{
+    "state-collectors":
+    [
+        {
+            "component": "SIN0",
+            "tables":
+            [
+                {
+                     "table": "StateTable",
+                     "signals": ["Toc", "SineData"]
+                }
+            ]
+        }
+        ,
+        {
+            "component": "SIN1",
+            "tables":
+            [
+                {
+                     "sampling" : 20,
+                     "table": "StateTable",
+                     "signals": ["SineData", "Tic"]
+                }
+            ]
+         }
+    ]
+}

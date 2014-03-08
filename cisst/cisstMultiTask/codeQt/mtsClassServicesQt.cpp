@@ -26,6 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorQtComponent.h>
 CMN_IMPLEMENT_SERVICES(mtsCollectorQtComponent);
 
+#include <cisstMultiTask/mtsCollectorQtFactory.h>
+CMN_IMPLEMENT_SERVICES(mtsCollectorQtFactory);
+
 #include <cisstMultiTask/mtsQtWidgetComponent.h>
 CMN_IMPLEMENT_SERVICES(mtsQtWidgetComponent);
 

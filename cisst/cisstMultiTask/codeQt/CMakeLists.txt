@@ -49,6 +49,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorQtComponent.cpp
                                 mtsCollectorQtWidget.cpp
+                                mtsCollectorQtFactory.cpp
                                 mtsQtCommandSelector.cpp
                                 mtsQtScaleAndSignalTool.cpp
                                 mtsQtVisualizerShell.cpp
@@ -64,6 +65,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtApplication.cpp
                    HEADER_FILES mtsCollectorQtComponent.h
                                 mtsCollectorQtWidget.h
+                                mtsCollectorQtFactory.h
                                 mtsQtCommandSelector.h
                                 mtsQtScaleAndSignalTool.h
                                 mtsQtVisualizerShell.h
