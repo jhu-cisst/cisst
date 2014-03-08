@@ -44,7 +44,7 @@ void mtsCollectorFactory::Configure(const std::string & configuration)
     }
 #if CISST_HAS_JSON
     std::ifstream jsonStream;
-    jsonStream.open(configuration);
+    jsonStream.open(configuration.c_str());
 
     Json::Value jsonConfig;
     Json::Reader jsonReader;
