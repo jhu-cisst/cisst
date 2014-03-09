@@ -354,10 +354,11 @@ ELSE(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
 ENDIF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
 
 
-# try to find OpenCV automatically
-set(OpenCV_COMPONENTS core calib3d contrib features2d gpu
-                      legacy highgui ml imgproc objdetect ts video)
-find_package (OpenCV QUIET REQUIRED ${OpenCV_COMPONENTS})
+# try to find OpenCV automatically, but do not mark as required
+set (OpenCV_COMPONENTS core calib3d contrib features2d gpu
+                       legacy highgui ml imgproc objdetect ts video)
+find_package (OpenCV QUIET COMPONENTS ${OpenCV_COMPONENTS})
+
 if (OpenCV_FOUND)
     option (CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" ON)
     if (CISST_SVL_HAS_OPENCV2)
@@ -390,13 +391,13 @@ if (OpenCV_FOUND)
     endif (CISST_SVL_HAS_OPENCV2)
 else (OpenCV_FOUND)
     cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
-
     option (CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" OFF)
-    if (CISST_SVL_HAS_OPENCV2)
-        message (FATAL_ERROR "OpenCV 2 required. Please specify its location.")
-    endif (CISST_SVL_HAS_OPENCV2)
-
 endif (OpenCV_FOUND)
+
+if (CISST_SVL_HAS_OPENCV2 AND NOT OpenCV_FOUND)
+  find_package (OpenCV QUIET REQUIRED ${OpenCV_COMPONENTS})
+endif (CISST_SVL_HAS_OPENCV2 AND NOT OpenCV_FOUND)
+  
 
 # if we require OpenCV2, add these files to compile
 if (CISST_SVL_HAS_OPENCV2)
