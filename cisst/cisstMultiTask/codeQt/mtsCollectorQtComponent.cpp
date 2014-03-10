@@ -68,7 +68,7 @@ void mtsCollectorQtComponent::ProgressHandler(const mtsUInt & count)
 }
 
 
-void mtsCollectorQtComponent::ConnectToWidget(QWidget * widget)
+void mtsCollectorQtComponent::ConnectToWidget(QWidget * widget) const
 {
     QObject::connect(widget, SIGNAL(StartCollection()),
                      this, SLOT(StartCollectionQSlot()));

@@ -18,12 +18,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstOSAbstraction/osaThreadedLogFile.h>
+#include <cisstCommon/cmnPath.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+
+#include <cisstMultiTask/mtsCollectorFactory.h>
+#include <cisstMultiTask/mtsCollectorQtFactory.h>
+
 #include <cisstMultiTask/mtsCollectorEvent.h>
-#include <cisstMultiTask/mtsCollectorState.h>
 #include <cisstMultiTask/mtsCollectorQtComponent.h>
 #include <cisstMultiTask/mtsCollectorQtWidget.h>
+
 #include <cisstMultiTask/mtsQtApplication.h>
 
 
@@ -48,18 +52,17 @@ int main(int argc, char *argv[])
     cmnLogger::SetMaskClass("mtsStateTable", CMN_LOG_ALLOW_ALL);
 
     // get the component manager to add multiple sine generator tasks
-    mtsManagerLocal *componentManager = mtsManagerLocal::GetInstance();
+    mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
 
-    mtsQtApplication *qtAppTask = new mtsQtApplication("QtApplication", argc, argv);
+    mtsQtApplication * qtAppTask = new mtsQtApplication("QtApplication", argc, argv);
     qtAppTask->Configure();
     componentManager->AddComponent(qtAppTask);
 
-    mainQtComponent *mainQt = new mainQtComponent("mainQt");
+    mainQtComponent * mainQt = new mainQtComponent("mainQt");
     componentManager->AddComponent(mainQt);
 
     sineTask * sine;
     sineTaskWithDelay * sineWithDelay;
-    mtsCollectorState * stateCollector;
     mtsCollectorQtComponent * collectorQtComponent;
 
     // create an event collector
@@ -68,10 +71,10 @@ int main(int argc, char *argv[])
                               mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
     componentManager->AddComponent(eventCollector);
     eventCollector->UseSeparateLogFile("event-collector-log.txt");
-    // add QComponent to control the event collector
+    // add QtComponent to control the event collector
     collectorQtComponent = new mtsCollectorQtComponent("EventCollectorQComponent");
     componentManager->AddComponent(collectorQtComponent);
-    // connect to the existing widget
+    // connect to the existing Qt widget
     collectorQtComponent->ConnectToWidget(mainQt->GetCollectorQtWidget());
     componentManager->Connect(collectorQtComponent->GetName(), "DataCollection",
                               eventCollector->GetName(), "Control");
@@ -101,24 +104,29 @@ int main(int argc, char *argv[])
                                       sine->GetName(), "MainInterface");
         }
 
-        // create the state collector and connect it to the generator
-        stateCollector = new mtsCollectorState(sine->GetName(),
-                                               sine->GetDefaultStateTableName(),
-                                               mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
-        stateCollector->AddSignal("SineData");
-        componentManager->AddComponent(stateCollector);
-        stateCollector->UseSeparateLogFileDefault();
-        stateCollector->Connect();
-        // create the QComponent to bridge between the collection widget and the collector
-        collectorQtComponent = new mtsCollectorQtComponent(sine->GetName() + "StateCollectorQComponent");
-        componentManager->AddComponent(collectorQtComponent);
-        collectorQtComponent->ConnectToWidget(mainQt->GetCollectorQtWidget());
-        componentManager->Connect(collectorQtComponent->GetName(), "DataCollection",
-                                  stateCollector->GetName(), "Control");
-
         // add events to observe
         eventCollector->AddObservedComponent(sine);
     }
+
+    mtsCollectorFactory * collectorFactory = new mtsCollectorFactory("collectors");
+    const std::string collectorConfig = "mtsExPeriodicTaskQtCollectors.json";
+    cmnPath path;
+    path.AddRelativeToCisstShare("/cisstMultiTask/examples");
+    std::string fullPath = path.Find(collectorConfig);
+    if (fullPath != "") {
+        std::cout << "Loading data collection configuration file \"" << fullPath << "\"" << std::endl;
+        collectorFactory->Configure(fullPath);
+    } else {
+        std::cerr << "Unable to find data collection configuration file \"" << collectorConfig << "\"" << std::endl;
+    }
+    componentManager->AddComponent(collectorFactory);
+    collectorFactory->Connect();
+
+    mtsCollectorQtFactory * collectorQtFactory = new mtsCollectorQtFactory("collectorsQt");
+    collectorQtFactory->SetFactory("collectors");
+    componentManager->AddComponent(collectorQtFactory);
+    collectorQtFactory->Connect();
+    collectorQtFactory->ConnectToWidget(mainQt->GetCollectorQtWidget());
 
     // connect all interfaces for event collector
     eventCollector->Connect();

@@ -32,6 +32,13 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
 
+/*! Class used to translate cisstMultiTask commands and events to Qt
+  slots and signals for components derived from mtsCollectorBase
+  (i.e. mtsCollectorState and mtsCollectorEvent).  One can then use
+  the Qt Widget mtsCollectorQtWidget to control one or more data
+  collection components.  It is also possible to use a custom widget
+  as long as it implements some or all slots and signals found in
+  mtsCollectorQtWidget. */
 class CISST_EXPORT mtsCollectorQtComponent: public QObject, public mtsComponent
 {
     Q_OBJECT;
@@ -43,7 +50,10 @@ public:
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
-    void ConnectToWidget(QWidget * widget);
+    /*! Connect to a QtWidget using slots and signals.  One can use
+      the widget mtsCollectorQtWidget or any custom widget with the
+      same slots and signals. */
+    void ConnectToWidget(QWidget * widget) const;
 
 protected:
     struct {
@@ -69,7 +79,7 @@ public slots:
 
 public:
 signals:
-    void CollectorAddedQSignal(void);
+    void CollectorAddedQSignal(void) const;
     void CollectionStartedQSignal(void);
     void CollectionStoppedQSignal(unsigned int);
     void ProgressQSignal(unsigned int);
