@@ -52,62 +52,70 @@ public:
     svlFilterSourceVideoCapture::PlatformType GetPlatformType();
     int SetStreamCount(unsigned int numofstreams);
     int GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo);
+    int SetDevice(int device_id, int input_id, unsigned int videoch = 0);
+    int GetFormatList(unsigned int device_id, svlFilterSourceVideoCapture::ImageFormat **format_list);
+    int GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
+    int SetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
+    int GetWidth(unsigned int videoch = 0);
+    int GetHeight(unsigned int videoch = 0);
     int Open();
     void Close();
     int Start();
     svlImageRGB* GetLatestFrame(bool waitfornew, unsigned int videoch = 0);
     int Stop();
     bool IsRunning();
-    int SetDevice(int devid, int inid, unsigned int videoch = 0);
-    int GetWidth(unsigned int videoch = 0);
-    int GetHeight(unsigned int videoch = 0);
-
-    int GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist);
-    int GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
-    int SetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
+    
 
 private:
-    unsigned int        NumOfStreams;
-    bool                Running;
-    bool                Initialized;
-    BMDVideoInputFlags	inputFlags;
-    BMDDisplayMode		displayMode;
-    BMDPixelFormat		pixelFormat;
-    int                 width, height;
-    double              frameRate;
-    bool                debug;
-
-    int	BMDNumberOfDevices;
-    int* DeviceID;
-    svlBufferImage** ImageBuffer;
-    IDeckLink** deckLink;
-    IDeckLinkInput** deckLinkInput;
-    DeckLinkCaptureDelegate** Delegate;
-
-    std::vector<IDeckLink*> available_decklinks;
-
-    void GetWidthHeightfromBMDDisplayMode(const BMDPixelFormat pixelFormat_in,int  &width_int, int &height_out, double &frameRate_out);
     IDeckLinkIterator* GetIDeckLinkIterator();
+    int EnumerateDevices();
+    int EnumerateFormats(int device_id,
+        vctDynamicVector<BMDDisplayMode> &display_modes = vctDynamicVector<BMDDisplayMode>());
 
-    std::vector<BMDDisplayMode> supported_displayModes; /// \todo(dmirota1)  This needs to be expanded to be per device per available inputs.
+private:
+    unsigned int NumOfStreams;
+    bool Running;
+    bool Initialized;
+    bool Debug;
+    int	BMDNumberOfInputDevices;
+    vctBoolVec DeckLinkHasInputInterface;
 
-    class width_height_framerate{
-        public:
-        width_height_framerate(int width_in, int height_in, double framerate_in){width = width_in;height = height_in;framerate = framerate_in;}
-        width_height_framerate(){width = 0;height = 0;framerate = 0;}
-        width_height_framerate(const width_height_framerate & rhs_in){width = rhs_in.width;height = rhs_in.height;framerate = rhs_in.framerate;}
-        int width;
-        int height;
-        double framerate;
+    // arrays to store device and format properties per stream (channel)
+    int* DeviceID;
+    BMDDisplayMode* DisplayMode;
+    int* NumberOfFormats;
+    svlBufferImage** ImageBuffer;
+    IDeckLink** SelectedDeckLink;
+    IDeckLinkInput** SelectedDeckLinkInput;
+    DeckLinkCaptureDelegate** Delegate;
+    // these are currently constants across different streams (channels)
+    BMDVideoInputFlags InputFlags;
+    BMDPixelFormat PixelFormat;
 
-        bool operator <(const width_height_framerate rhs_in) const {return width < rhs_in.width && height < rhs_in.height && framerate < rhs_in.framerate;}
-
-
+    class widthHeightFramerate
+    {
+    public:
+        widthHeightFramerate(int _width, int _height, double _framerate)
+            : Width(_width),
+            Height(_height),
+            Framerate(_framerate) 
+        {}
+        widthHeightFramerate()
+            :Width(0),
+            Height(0),
+            Framerate(0)
+        {}
+        widthHeightFramerate(const widthHeightFramerate & _whf)
+            :Width(_whf.Width),
+            Height(_whf.Height),
+            Framerate(_whf.Framerate)
+        {}
+        int Width;
+        int Height;
+        double Framerate;
     };
 
-    //std::map<width_height_framerate, BMDDisplayMode> bmdDisplayMode_lookup; /// \note Used to lookup BMDDisplayMode given a height, width and frameRate
-    std::map<BMDDisplayMode, width_height_framerate> width_height_framerate_lookup;
-
+    std::map<BMDDisplayMode, widthHeightFramerate> WidthHeightFramerateLookup;
 };
 
 class DeckLinkCaptureDelegate : public IDeckLinkInputCallback
@@ -123,14 +131,14 @@ public:
 
     virtual HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame*, IDeckLinkAudioInputPacket*); 
 private:
-    void processVideoFrame(IDeckLinkVideoInputFrame* videoFrame);
+    void ProcessVideoFrame(IDeckLinkVideoInputFrame* videoFrame);
 
-    ULONG			    m_refCount;
-    osaMutex*           m_mutex;
-    BMDTimecodeFormat	g_timecodeFormat;
-    int                 frameCount;
-    svlBufferImage*		m_buffer;
-    bool                debug;
+    ULONG			    MRefCount;
+    osaMutex*           MMutex;
+    BMDTimecodeFormat	GTimecodeFormat;
+    int                 FrameCounter;
+    svlBufferImage*		MBuffer;
+    bool                Debug;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(svlVidCapSrcBMD)
