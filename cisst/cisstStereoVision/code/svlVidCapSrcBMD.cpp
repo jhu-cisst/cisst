@@ -378,7 +378,6 @@ int svlVidCapSrcBMD::Open()
             count++;
         }
         deck_link_iterator->Release();
-        std::cout << "BMD::Open: Decklink device: " << count-1 << std::endl;
         // get the input interface for the selected device
         if (SelectedDeckLink[i]->QueryInterface(IID_IDeckLinkInput, reinterpret_cast<void**>(&SelectedDeckLinkInput[i])) != S_OK) {
             std::cerr << "svlVidCapSrcBMD::Open - deck_link_iterator->QueryInterface() returned error" << std::endl;
