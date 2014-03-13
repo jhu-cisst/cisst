@@ -896,6 +896,6 @@ endmacro (cisst_offer_saw_component)
 # the cisstvars.{sh,csh,bat} scripts.
 macro (cisst_use_cisst_output_directories)
   message ("-- All binaries will be generated in the cisst binary directories (bin, lib)")
-  set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
+  set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/lib")
   set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin")
-endmacro (cisst_use_cisst_output_directories)  
+endmacro (cisst_use_cisst_output_directories)

@@ -194,9 +194,8 @@ include (cisstMacros)
 include (cisstInternalMacros)
 
 # Output directories.
-set (CISST_LIBRARY_INSTALL_SUFFIX "lib")
-set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
-set (EXECUTABLE_OUTPUT_PATH ${cisst_BINARY_DIR}/bin)
+set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/lib")
+set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin)")
 
 # Where to find afterwards
 set (cisst_LIBRARY_PATH "${LIBRARY_OUTPUT_PATH}")
