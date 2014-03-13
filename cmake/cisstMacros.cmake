@@ -870,3 +870,32 @@ macro (cisst_find_saw_component ...)
     endif ()
   endif ()
 endmacro (cisst_find_saw_component)
+
+
+# Macro to add option to compile a saw component, also sets the
+# ${component}_DIR variable to allow CMake to find the generated
+# ${component}Config.cmake file.  Component name must match the name
+# of directory to be included using the CMake function
+# add_subdirectory.
+macro (cisst_offer_saw_component component default)
+  set (cosc_OPTION_NAME CISST_${component})
+  option (${cosc_OPTION_NAME} "Build ${component}" ${default})
+  if (${cosc_OPTION_NAME})
+    set (${component}_DIR "${CMAKE_CURRENT_BINARY_DIR}/${component}")
+    mark_as_advanced (${component}_DIR)
+    add_subdirectory (${component})
+  else (${cosc_OPTION_NAME})
+    unset (${component}_DIR)
+  endif (${cosc_OPTION_NAME})
+endmacro (cisst_offer_saw_component)
+
+
+# Macro to set LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH so that
+# all binaries generated will be placed along the cisst binaries.
+# When used, the generated binaries are placed in the paths defined by
+# the cisstvars.{sh,csh,bat} scripts.
+macro (cisst_use_cisst_output_directories)
+  message ("-- All binaries will be generated in the cisst binary directories (bin, lib)")
+  set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
+  set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin")
+endmacro (cisst_use_cisst_output_directories)  
