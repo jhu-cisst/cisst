@@ -878,7 +878,7 @@ endmacro (cisst_find_saw_component)
 # of directory to be included using the CMake function
 # add_subdirectory.
 macro (cisst_offer_saw_component component default)
-  set (cosc_OPTION_NAME CISST_${component})
+  set (cosc_OPTION_NAME SAW_${component})
   option (${cosc_OPTION_NAME} "Build ${component}" ${default})
   if (${cosc_OPTION_NAME})
     set (${component}_DIR "${CMAKE_CURRENT_BINARY_DIR}/${component}")
