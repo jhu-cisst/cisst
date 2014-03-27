@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: cmnCommandLineOptions.h 4734 2014-03-13 16:27:58Z amalpan1 $
 
   Author(s):  Anton Deguet
   Created on: 2012-08-27
@@ -134,6 +134,7 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
                    const std::string & description, RequiredType required);
         virtual ~OptionBase() {};
         virtual bool SetValue(const char * value) = 0;
+        virtual std::string PrintValues(void) const = 0;
         std::string Short;
         std::string Long;
         std::string Description;
@@ -148,6 +149,9 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
                       const std::string & description, RequiredType required = OPTIONAL_OPTION);
         virtual ~OptionNoValue() {};
         bool SetValue(const char * value);
+        std::string PrintValues(void) const {
+            return std::string();
+        }
     };
 
     class CISST_EXPORT OptionOneValueBase: public OptionBase {
@@ -178,6 +182,11 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
                 this->Set = true;
             }
             return result;
+        }
+        std::string PrintValues(void) const {
+            std::stringstream stream;
+            stream << *Value;
+            return stream.str();
         }
         _elementType * Value;
     };
@@ -212,6 +221,20 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
                 this->Set = true;
             }
             return result;
+        }
+        std::string PrintValues(void) const {
+            typedef typename std::list<_elementType> ListType;
+            typedef typename ListType::const_iterator const_iterator;
+            const const_iterator end = Value->end();
+            const_iterator iter;
+            std::stringstream stream;
+            for (iter = Value->begin(); iter != end; ++iter) {
+                if (iter != Value->begin()) {
+                    stream << ", ";
+                }
+                stream << *iter;
+            }
+            return stream.str();
         }
         std::list<_elementType> * Value;
     };
@@ -270,6 +293,10 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
       to check if an optional value has been set or not.  The option
       name can be either the short or long one. */
     bool IsSet(const std::string & option);
+
+    /* Print out the list of options parsed successfully. This can be 
+      used after Parse. */
+    void PrintParsedArguments(std::string & parsedArguments) const;
 
  protected:
     std::string ProgramName;

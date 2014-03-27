@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: cmnCommandLineOptions.cpp 4734 2014-03-13 16:27:58Z amalpan1 $
 
   Author(s):  Anton Deguet
   Created on: 2012-08-27
@@ -290,6 +290,21 @@ bool cmnCommandLineOptions::IsSet(const std::string & option)
     return false;
 }
 
+
+void cmnCommandLineOptions::PrintParsedArguments(std::string & parsedArguments) const
+{
+    std::stringstream strstr;
+    OptionBase * option;
+    const OptionsType::const_iterator end = this->Options.end();
+    OptionsType::const_iterator iter = this->Options.begin();
+    for (; iter != end; ++iter) {
+        option = *iter;
+        if (option->Set) {
+            strstr << " - " << option->Description << " [" << option->PrintValues() << "]" << std::endl;
+        }
+    }
+    parsedArguments = strstr.str();
+}
 
 cmnCommandLineOptions::OptionBase * cmnCommandLineOptions::Get(const std::string & option)
 {
