@@ -291,6 +291,21 @@ bool cmnCommandLineOptions::IsSet(const std::string & option)
 }
 
 
+void cmnCommandLineOptions::PrintParsedArguments(std::string & parsedArguments) const
+{
+    std::stringstream strstr;
+    OptionBase * option;
+    const OptionsType::const_iterator end = this->Options.end();
+    OptionsType::const_iterator iter = this->Options.begin();
+    for (; iter != end; ++iter) {
+        option = *iter;
+        if (option->Set) {
+            strstr << " - " << option->Description << " [" << option->PrintValues() << "]" << std::endl;
+        }
+    }
+    parsedArguments = strstr.str();
+}
+
 cmnCommandLineOptions::OptionBase * cmnCommandLineOptions::Get(const std::string & option)
 {
     const OptionsType::const_iterator end = this->Options.end();
