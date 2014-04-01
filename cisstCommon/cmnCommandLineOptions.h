@@ -294,6 +294,7 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
       name can be either the short or long one. */
     bool IsSet(const std::string & option);
 
+
     /* Print out the list of options parsed successfully. This can be
       used after Parse. */
     void PrintParsedArguments(std::string & parsedArguments) const;

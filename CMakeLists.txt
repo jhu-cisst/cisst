@@ -18,6 +18,9 @@ cmake_minimum_required (VERSION 2.6.2)
 # cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
 project (cisst)
 
+# cisst compiler settings settings
+include (cisstSettings.cmake)
+
 # To organize targets in folders
 option (CISST_USE_FOLDERS "Use folders to organize cisst in IDE (Visual Studio, ...)" OFF)
 mark_as_advanced (CISST_USE_FOLDERS)
@@ -63,30 +66,6 @@ if (CISST_BUILD_SHARED_LIBS)
 else (CISST_BUILD_SHARED_LIBS)
   set (IS_SHARED STATIC)
 endif (CISST_BUILD_SHARED_LIBS)
-
-# To allow mixing static and dynamic libraries
-if (CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-endif (CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
-
-# To have more warnings (mostly for GCC and CLANG)
-if (NOT MSVC)
-  include (CheckCXXCompilerFlag)
-  check_cxx_compiler_flag ("-Wextra" CXX_SUPPORTS_WEXTRA)
-  if (CXX_SUPPORTS_WEXTRA)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
-  endif (CXX_SUPPORTS_WEXTRA)
-
-  check_cxx_compiler_flag ("-Wall" CXX_SUPPORTS_WALL)
-  if (CXX_SUPPORTS_WALL)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-  endif (CXX_SUPPORTS_WALL)
-endif (NOT MSVC)
-
-# To disable annoying warnings about sprintf, sscanf, etc. (Visual Studio)
-if (MSVC)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS")
-endif (MSVC)
 
 # Set the version number
 set (CISST_VERSION_MAJOR "1")
@@ -194,9 +173,8 @@ include (cisstMacros)
 include (cisstInternalMacros)
 
 # Output directories.
-set (CISST_LIBRARY_INSTALL_SUFFIX "lib")
-set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
-set (EXECUTABLE_OUTPUT_PATH ${cisst_BINARY_DIR}/bin)
+set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/lib")
+set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin")
 
 # Where to find afterwards
 set (cisst_LIBRARY_PATH "${LIBRARY_OUTPUT_PATH}")
