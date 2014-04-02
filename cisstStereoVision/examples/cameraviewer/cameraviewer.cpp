@@ -7,7 +7,7 @@
   Author(s):  Balazs Vagvolgyi
   Created on: 2008
 
-  (C) Copyright 2006-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -291,8 +291,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     if (save == true) {
         // If saving is enabled add video writer on separate branch
         splitteroutput->SetBlock(true);
-        output->Connect(videowriter.GetInput());
-            output = videowriter.GetOutput();
+        splitteroutput->Connect(videowriter.GetInput());
     }
 
     // Add image file writer
