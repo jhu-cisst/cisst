@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterOutput.h>
 #include <cisstStereoVision/svlStreamManager.h>
 #include <cisstStereoVision/svlFilterSourceVideoFile.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
 #include <cisstStereoVision/svlFilterStereoImageSplitter.h>
 #include <cisstStereoVision/svlFilterImageWindow.h>
 
@@ -44,6 +45,8 @@ int main(int argc, char** argv)
     std::string ip = "";
     int portNumber = 0;
     std::string codecName = ".njpg";
+    unsigned int width = 0;
+    unsigned int height = 0;
 
     int numberOfThreads = 4;
     options.AddOptionOneValue("t", "threads",
@@ -61,6 +64,14 @@ int main(int argc, char** argv)
     options.AddOptionOneValue("p", "port",
                               "IP port for network based codec",
                               cmnCommandLineOptions::OPTIONAL_OPTION, &portNumber);
+
+    options.AddOptionOneValue("w", "width",
+                              "Resize width (if specified, requires height)",
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &width);
+
+    options.AddOptionOneValue("h", "height",
+                              "Resize height (if specified, requires width)",
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &height);
   
     options.AddOptionNoValue("d", "dual-port",
                              "Create two ports to receive left/right separately (default is single port)",
@@ -76,6 +87,13 @@ int main(int argc, char** argv)
     if ((numberOfChannels != 1) && (numberOfChannels != 2)) {
         std::cerr << "Error: number of channels can be either 1 or 2." << std::endl;
         return -1;
+    }
+
+    if ((width != 0) || (height != 0)) {
+        if ((width == 0) || (height == 0)) {
+            std::cerr << "Error: you need to specify both width and height, both need to be greater than 0." << std::endl;
+            return -1;
+        }
     }
 
     svlInitialize();
@@ -117,6 +135,17 @@ int main(int argc, char** argv)
     } else {
         // mono
         source.SetFilePath(filePath.str());
+    }
+
+    // resize if needed
+    svlFilterImageResizer resize;
+    if (width != 0) {
+        resize.SetName("Resize");
+        resize.SetInterpolation(true);
+        resize.SetOutputSize(width, height, SVL_LEFT);
+        resize.SetOutputSize(width, height, SVL_RIGHT);
+        output->Connect(resize.GetInput());
+        output = resize.GetOutput();
     }
 
     // preview
