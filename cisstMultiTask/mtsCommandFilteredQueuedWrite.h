@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides
 
-  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -67,7 +67,9 @@ public:
     /*! Return a pointer on the argument prototype */
     virtual const mtsGenericObject * GetArgumentPrototype(void) const;
 
-    mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking);
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsBlockingType blocking,
+                               mtsCommandWriteBase *finishedEventHandler);
 };
 
 

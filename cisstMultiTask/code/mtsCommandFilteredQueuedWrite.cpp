@@ -67,7 +67,8 @@ const mtsGenericObject * mtsCommandFilteredQueuedWrite::GetArgumentPrototype(voi
 }
 
 
-mtsExecutionResult mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject & argument, mtsBlockingType blocking)
+mtsExecutionResult mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject & argument, mtsBlockingType blocking,
+                                                          mtsCommandWriteBase *finishedEventHandler)
 {
     if (this->IsEnabled()) {
         // First, call the filter (qualified read)
@@ -76,7 +77,7 @@ mtsExecutionResult mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject
             return result;
         }
         // Next, queue the write command
-        return BaseType::Execute(*FilterOutput, blocking, 0);
+        return BaseType::Execute(*FilterOutput, blocking, finishedEventHandler);
     }
     return mtsExecutionResult::COMMAND_DISABLED;
 }
