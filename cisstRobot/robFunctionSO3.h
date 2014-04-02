@@ -39,6 +39,8 @@ class CISST_EXPORT robFunctionSO3 : public robFunction {
   
  public:
 
+  robFunctionSO3( void );
+
   robFunctionSO3( double t1, 
 		  const vctQuaternionRotation3<double>& qw1,
 		  const vctFixedSizeVector<double,3>&    w1,

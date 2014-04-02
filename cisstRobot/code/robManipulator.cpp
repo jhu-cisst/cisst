@@ -803,7 +803,7 @@ robManipulator::CCG( const vctDynamicVector<double>& q,
   
 
   return RNE( q,           // call Newton-Euler with only the joints positions 
-	      qd,          // and the joints velocities
+          qd,          // and the joints velocities
 	      vctDynamicVector<double>( q.size(), 0.0 ),
 	      vctFixedSizeVector<double,6>(0.0) );
 }

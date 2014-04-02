@@ -26,23 +26,38 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstRobot/robFunctionSO3.h>
 #include <cisstRobot/robExport.h>
 
+
 class CISST_EXPORT robFunctionSE3 : public robFunction {
 
- protected:
+protected:
 
-  vctFrame4x4<double> Rtw1;
-  vctFixedSizeVector<double,6> v1w1;
-  vctFixedSizeVector<double,6> v1dw1d;
+  vctFrame4x4<double> Rtw1;              // start tranform
+  vctFixedSizeVector<double,6> v1w1;     // start velocity
+  vctFixedSizeVector<double,6> v1dw1d;   // start acceleration
 
-  vctFrame4x4<double> Rtw2;
-  vctFixedSizeVector<double,6> v2w2;
-  vctFixedSizeVector<double,6> v2dw2d;
+  vctFrame4x4<double> Rtw2;              // stop  transform
+  vctFixedSizeVector<double,6> v2w2;     // stop  velocity
+  vctFixedSizeVector<double,6> v2dw2d;   // stop  acceleration
 
-  robFunctionRn* translation;
-  robFunctionSO3* rotation;
+  robFunctionRn* translation;     // robFunciton for Rn (R3 for SE3 case)
+  robFunctionSO3* rotation;       // robFunction for SO3 (Rotation)
 
- public:
+public:
 
+  robFunctionSE3( void );
+
+  /*!
+   \brief constructor
+
+   \param t1   start time
+   \param Rtw1 start tranfrom
+   \param v1w1 start velocity
+   \param v1dw1d start acceleration
+   \param t2   stop time
+   \param Rtw2 stop tranfrom
+   \param v2w2 stop velocity
+   \param v2dw2d stop acceleration
+  */
   robFunctionSE3( double t1,
 		  const vctFrame4x4<double>& Rtw1,
 		  const vctFixedSizeVector<double,6>& v1w1,
@@ -54,10 +69,25 @@ class CISST_EXPORT robFunctionSE3 : public robFunction {
 
   ~robFunctionSE3();
 
+  /*!
+   \brief Read initial(start) state
+
+   \param Rtw1 start tranfrom
+   \param v1w1 start velocity
+   \param v1dw1d start acceleration
+  */
   void InitialState( vctFrame4x4<double>& Rtw1,
 		     vctFixedSizeVector<double,6>& v1w1,
 		     vctFixedSizeVector<double,6>& v1dw1d );
 
+
+  /*!
+   \brief Read initial(stop) state
+
+   \param Rtw2 stop tranfrom
+   \param v2w2 stop velocity
+   \param v2dw2d stop acceleration
+  */
   void FinalState( vctFrame4x4<double>& Rtw2,
 		   vctFixedSizeVector<double,6>& v2w2,
 		   vctFixedSizeVector<double,6>& v2dw2d );

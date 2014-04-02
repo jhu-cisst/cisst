@@ -33,16 +33,15 @@ class CISST_EXPORT robSLERP : public robFunctionSO3 {
   
   robSLERP( const vctMatrixRotation3<double>& Rw1, 
 	    const vctMatrixRotation3<double>& Rw2,
-	    double w,
+        double wmax,
 	    double t1 = 0.0 );
   
   
   robSLERP( const vctQuaternionRotation3<double>& qw1, 
 	    const vctQuaternionRotation3<double>& qw2,
-	    double w,
+        double wmax,
 	    double t1 = 0.0 );
-  
-  
+
   //! Evaluate the function
   void Evaluate( double t,
 		 vctQuaternionRotation3<double>& q,

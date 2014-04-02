@@ -22,21 +22,39 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstRobot/robExport.h>
 
+
+/*!
+ \brief Base class for robot function
+
+ \ingroup cisstRobot
+*/
 class CISST_EXPORT robFunction{
 
  protected:
 
-    double t1;
-    double t2;
+    double t1; /*!< start time */
+    double t2; /*!< stop time */
 
  public:
 
     robFunction( void );
     robFunction( double startTime, double stopTime );
 
+    /*!
+     \brief Set start and stop time
+
+     \param startTime start time
+     \param stopTime  stop time
+    */
     void Set( double startTime, double stopTime );
+
+    //! Return start time
     virtual double& StartTime( void );
+
+    //! Return stop time
     virtual double& StopTime( void );
+
+    //! Return duration
     virtual double Duration( void ) const;
 
 };
