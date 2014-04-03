@@ -1,5 +1,4 @@
 /*
-  $Id$
   
   Author(s):	Robert Jacques
   Created on:	2005-07-21

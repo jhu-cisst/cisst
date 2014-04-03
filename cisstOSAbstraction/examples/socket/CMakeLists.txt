@@ -1,5 +1,4 @@
 #
-#   $Id$
 #
 #   Author(s):  Peter Kazanzides
 #   Created on: 2009

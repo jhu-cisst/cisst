@@ -1,5 +1,4 @@
 /*
-  $Id$
   
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01

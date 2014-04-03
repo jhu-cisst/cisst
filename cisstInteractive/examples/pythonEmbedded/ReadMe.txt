@@ -1,5 +1,4 @@
 
-$Id$
 
 Author(s): Anton Deguet
 

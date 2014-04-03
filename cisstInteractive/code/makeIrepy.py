@@ -3,7 +3,6 @@
 # -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
-# $Id$
 #
 #  Author(s):  Andrew LaMora
 #  Created on: 2005-09-06

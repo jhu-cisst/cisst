@@ -1,5 +1,4 @@
 #
-#   $Id$
 #
 #   Author(s):  Anton Deguet
 #   Created on: 2009-11-16

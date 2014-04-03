@@ -3,7 +3,6 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-# $Id$
 #
 # Author(s): Anton Deguet
 # Created on: 2005-05-19
