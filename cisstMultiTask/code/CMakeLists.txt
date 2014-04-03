@@ -364,7 +364,9 @@ cisst_add_library (LIBRARY cisstMultiTask
                                            ${cisstMultiTask_CISST_DG_SRCS}
                    ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES}
                                            ${cisstMultiTask_CISST_DG_HDRS})
-#set_target_properties(cisstMultiTask PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
+
+install (FILES ${cisstMultiTask_CISST_DG_HDRS_FULLPATH}
+         DESTINATION "include/cisstMultiTask")
 
 # Add linking to external libraries
 if (CISST_MTS_HAS_ICE)

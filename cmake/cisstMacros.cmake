@@ -236,8 +236,11 @@ macro (cisst_add_library ...)
        FOLDER
        DEPENDENCIES
        SETTINGS
-       SOURCE_FILES HEADER_FILES
-       ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES ADDITIONAL_HEADER_FILES_RELATIVE)
+       SOURCE_FILES
+       HEADER_FILES
+       ADDITIONAL_SOURCE_FILES
+       ADDITIONAL_HEADER_FILES
+       ADDITIONAL_HEADER_FILES_RELATIVE)
 
   # reset local variables
   foreach(keyword ${FUNCTION_KEYWORDS})
@@ -695,6 +698,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute}")
     set (GENERATED_FILES ${GENERATED_FILES} ${code_absolute} ${header_absolute})
     set (GENERATED_FILES_HDRS ${GENERATED_FILES_HDRS} "${INPUT_WE}.h")
+    set (GENERATED_FILES_HDRS_FULLPATH ${GENERATED_FILES_HDRS_FULLPATH} ${header_absolute})
     # tell cmake the output is generated and how to generate it
     set_source_files_properties (${header_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
@@ -713,6 +717,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
   # create variables to store all generated files names
   set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_SRCS ${GENERATED_FILES} PARENT_SCOPE)
   set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_HDRS ${GENERATED_FILES_HDRS} PARENT_SCOPE)
+  set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_HDRS_FULLPATH ${GENERATED_FILES_HDRS_FULLPATH} PARENT_SCOPE)
 
 endfunction (cisst_data_generator)
 

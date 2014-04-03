@@ -92,3 +92,6 @@ cisst_add_library (LIBRARY cisstParameterTypes
                    ADDITIONAL_SOURCE_FILES ${cisstParameterTypes_CISST_DG_SRCS}
                    ADDITIONAL_HEADER_FILES_RELATIVE ${cisstParameterTypes_CISST_DG_HDRS}
                    )
+
+install (FILES ${cisstParameterTypes_CISST_DG_HDRS_FULLPATH}
+         DESTINATION "include/cisstParameterTypes")

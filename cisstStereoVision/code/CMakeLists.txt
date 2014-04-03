@@ -1273,6 +1273,9 @@ cisst_add_library (
   ADDITIONAL_SOURCE_FILES ${cisstStereoVision_CISST_DG_SRCS}
   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${cisstStereoVision_CISST_DG_HDRS})
 
+install (FILES ${cisstStereoVision_CISST_DG_HDRS_FULLPATH}
+         DESTINATION "include/cisstStereoVision")
+
 # Link `cisstStereoVision` against CUDA generated libraries
 IF(CISST_SVL_HAS_CUDA)
 #    TARGET_LINK_LIBRARIES(cisstStereoVision
