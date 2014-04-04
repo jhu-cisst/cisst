@@ -25,7 +25,7 @@ CISST_DIR="@cisst_BINARY_DIR@"
 OS=`uname`
 
 PATH="${CISST_DIR}/bin:${PATH}"
-CISST_ROOT="${CISST_DIR}/cisst"
+CISST_ROOT="${CISST_DIR}"
 
 # Path to dynamic libraries
 if [ "${OS}" == "Darwin" ]

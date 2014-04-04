@@ -25,7 +25,7 @@ set CISST_DIR="@cisst_BINARY_DIR@"
 set OS=`uname`
 
 setenv PATH "${CISST_DIR}/bin:$PATH"
-setenv CISST_ROOT "${CISST_DIR}/cisst"
+setenv CISST_ROOT "${CISST_DIR}"
 
 # Path to dynamic libraries
 if (${OS} == "Darwin") then
