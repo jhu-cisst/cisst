@@ -103,6 +103,11 @@ if (Subversion_FOUND AND EXISTS "${CISST_REVISION_SVN_DIR}/.svn/")
 endif (Subversion_FOUND AND EXISTS "${CISST_REVISION_SVN_DIR}/.svn/")
 message ("Configuring cisst ${CISST_VERSION} from \"${cisst_SOURCE_DIR}\", revision: ${CISST_WC_REVISION}")
 
+find_package (Git QUIET)
+if (GIT_FOUND)
+  message ("found git at ${GIT_EXECUTABLE}")
+endif (GIT_FOUND)
+
 # Generate cisstRevision.h
 set (CISST_REVISION_HEADER_SRC "${cisst_SOURCE_DIR}/cisstRevision.h.in")
 set (CISST_REVISION_HEADER "${cisst_BINARY_DIR}/include/cisstRevision.h")

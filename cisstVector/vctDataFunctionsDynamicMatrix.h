@@ -43,6 +43,11 @@ public:
         data.ForceAssign(source);
     }
 
+    static std::string HumanReadable(const DataType & data)
+    {
+        return cmnDataMatrixHumanReadable(data);
+    }
+
     static void SerializeBinary(const DataType & data, std::ostream & outputStream)
         throw (std::runtime_error)
     {
