@@ -31,7 +31,7 @@ void cmnDataFunctionsVectorTest::TestCopy(void)
         VectorType source, data;
         source.resize(10);
         for (size_t index = 0; index < source.size(); ++index) {
-            source[index] = index;
+            source[index] = static_cast<int>(index);
         }
         cmnData<VectorType>::Copy(data, source);
         CPPUNIT_ASSERT_EQUAL(data.size(), source.size());
@@ -62,7 +62,7 @@ void cmnDataFunctionsVectorTest::TestCopy(void)
         for (size_t index = 0; index < source.size(); ++index) {
             source[index].resize(index);
             for (size_t subIndex = 0; subIndex < source[index].size(); ++subIndex) {
-                source[index][subIndex] = subIndex;
+                source[index][subIndex] = static_cast<double>(subIndex);
             }
         }
         cmnData<VectorType>::Copy(data, source);
@@ -91,7 +91,7 @@ void cmnDataFunctionsVectorTest::TestBinarySerializationStream(void)
         for (size_t index = 0; index < source.size(); ++index) {
             source[index].resize(index);
             for (size_t subIndex = 0; subIndex < source[index].size(); ++subIndex) {
-                source[index][subIndex] = subIndex;
+                source[index][subIndex] = static_cast<double>(subIndex);
             }
         }
 
@@ -120,7 +120,7 @@ void cmnDataFunctionsVectorTest::TestScalars(void)
         VectorType source;
         source.resize(10);
         for (size_t index = 0; index < source.size(); ++index) {
-            source[index] = index;
+            source[index] = static_cast<int>(index);
         }
         CPPUNIT_ASSERT_EQUAL(source.size() + 1, cmnData<VectorType>::ScalarNumber(source));
         for (size_t index = 0; index < source.size(); ++index) {
@@ -146,7 +146,7 @@ void cmnDataFunctionsVectorTest::TestScalars(void)
             source[index].resize(index);
             nbScalars += source[index].size();
             for (size_t subIndex = 0; subIndex < source[index].size(); ++subIndex) {
-                source[index][subIndex] = subIndex;
+                source[index][subIndex] = static_cast<double>(subIndex);
             }
         }
         CPPUNIT_ASSERT_EQUAL(nbScalars, cmnData<VectorType>::ScalarNumber(source));

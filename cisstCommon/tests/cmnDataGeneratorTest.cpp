@@ -186,8 +186,8 @@ void cmnDataGeneratorTest::TestScalars(void)
                          cmnData<cmnDataGeneratorTestC>::ScalarNumber(objectC));
     // modify content directly
     for (size_t index = 0; index < cmnDataGeneratorTestC::SIZE; ++index) {
-        objectC.StdVector.at(index) = index + 10;
-        objectC.CArray[index] = index + 20;
+        objectC.StdVector.at(index) = static_cast<int>(index + 10);
+        objectC.CArray[index] = static_cast<int>(index + 20);
     }
     for (size_t row = 0; row < cmnDataGeneratorTestC::ROW; ++row) {
         for (size_t col = 0; col < cmnDataGeneratorTestC::COL; ++col) {
