@@ -20,4 +20,4 @@
 
 @call cisstvsvars.bat
 @call cisstvars.bat ${config}
-${CMAKE_MAKE_PROGRAM} /useenv cisst_saw.sln
+${CMAKE_MAKE_PROGRAM} /useenv cisst.sln
