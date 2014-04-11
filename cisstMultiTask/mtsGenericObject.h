@@ -170,5 +170,10 @@ template <> void CISST_EXPORT cmnDataJSON<mtsGenericObject>::SerializeText(const
 template <> void CISST_EXPORT cmnDataJSON<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error);
 #endif // CISST_HAS_JSON
 
+#if CISST_HAS_JSON
+void CISST_EXPORT cmnDataToJSON(const mtsGenericObject & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataFromJSON(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error);
+#endif // CISST_HAS_JSON
+
 #endif // _mtsGenericObject_h
 

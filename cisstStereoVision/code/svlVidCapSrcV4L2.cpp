@@ -1291,6 +1291,10 @@ svlFilterSourceVideoCapture::PixelType svlVidCapSrcV4L2::V4L2_color_to_svlPixelT
         // Using UYVY
         return svlFilterSourceVideoCaptureTypes::PixelYUV422;
     }
+    else if (color_in == V4L2_PIX_FMT_YUYV) {
+        // Using UYVY
+        return svlFilterSourceVideoCapture::PixelYUV422;
+    }
     else {
         // Unsupported format
         return svlFilterSourceVideoCaptureTypes::PixelUnknown;
