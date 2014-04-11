@@ -19,10 +19,11 @@
 */
 
 #include <cisstMultiTask/mtsMonitorComponent.h>
+#include <cisstMultiTask/mtsMonitorFilterBasics.h>
 
 CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
 
-const std::string NameOfMonitorComponent = "cisstMonitor";
+const std::string NameOfMonitorComponent = "Monitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
     //: mtsTaskPeriodic(NameOfMonitorComponent, 10.0 * cmn_ms)
@@ -30,6 +31,14 @@ mtsMonitorComponent::mtsMonitorComponent()
 {
     StateTableAccessors = new StateTableAccessorType(true);
     StateTableAccessInterfaces = new StateTableAccessInterfaceType(true);
+
+    // Create and add filters
+    mtsMonitorFilterBase * filter;
+    // Bypass filter (for testing purpose) MJ: remove this later
+    filter = new mtsMonitorFilterBypass(mtsStateTable::NamesOfDefaultElements::Period);
+    if (!this->StateTableMonitor.AddFilter(filter))
+        cmnThrow(std::string("mtsTask: failed to add filter to monitor state table.  Filter name: ") + filter->GetFilterName());
+    // More to come ...
 }
 
 mtsMonitorComponent::~mtsMonitorComponent()
