@@ -89,7 +89,6 @@ public:
         bool            Running;
     } InternalThreadType;
 
-protected:
     /*! Named map of components being monitored
     typedef cmnNamedMap<mtsComponent> MonitoringTargetsType;
     MonitoringTargetsType * MonitoringTargets; */
@@ -135,6 +134,7 @@ protected:
         bool RefreshSamples(double currentTick, SF::Publisher * publisher);
     };
 
+protected:
     /*! List of TargetComponentAccessor structure */
     typedef cmnNamedMap<TargetComponentAccessor> TargetComponentAccessorType;
     TargetComponentAccessorType * TargetComponentAccessors;
@@ -161,11 +161,15 @@ protected:
     /*! Install monitor: add new column to the monitor state table */
     void InstallMonitorTarget(mtsTask * task, SF::Monitor * monitor);
 
-    /*! Receive event notifications from target components and pass it to
+    /*! Receive event notifications from target components and publishes them to
         the Safety Supervisor of Safety Framework. */
+    // MJ TODO: Is there a better way to allow mtsEventPublisher to be able to access
+    // the following methods, rather than making them as public methods?
+public: // MJ TEMP
     void HandleMonitorEvent(const std::string & json);
     void HandleFaultEvent(const std::string & json);
 
+protected:
     //
     // Message exchange with Safety Framework
     //
@@ -195,6 +199,10 @@ public:
         monitoring and FDD pipelines. */
     bool AddMonitorTarget(SF::cisstMonitor * monitorTarget);
 
+    /*! Create target component accessor (useful when creating monitor for filter) */
+    TargetComponentAccessor * CreateTargetComponentAccessor(
+        const std::string & targetProcessName, const std::string & targetComponentName, bool isAttachedToFilter);
+
     // TODO: replace this with RemoveMonitorTargetFromComponent()
     /*! Unregister component from the registry */
     bool UnregisterComponent(const std::string & componentName);
@@ -207,12 +215,17 @@ public:
     void Run(void);
     void Cleanup(void);
 
+    //-------------------------------------------------- 
     //  Getters
+    //-------------------------------------------------- 
     /*! Return the name of required interface to access a given task's state table */
-    const std::string GetNameOfStateTableAccessInterface(const std::string & taskName) const;
+    static const std::string GetNameOfStateTableAccessInterface(const std::string & taskName);
 
     /*! Return the name of this component */
     static const std::string & GetNameOfMonitorComponent(void);
+
+    /*! Get target component accessor using component name */
+    TargetComponentAccessor * GetTargetComponentAccessor(const std::string & targetComponentName);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMonitorComponent)

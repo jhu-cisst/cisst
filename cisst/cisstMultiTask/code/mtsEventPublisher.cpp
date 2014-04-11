@@ -19,21 +19,38 @@
 */
 
 #include <cisstMultiTask/mtsEventPublisher.h>
+#include <cisstMultiTask/mtsMonitorComponent.h>
 
 //CMN_IMPLEMENT_SERVICES(mtsEventPublisher);
 
-mtsEventPublisher::mtsEventPublisher(): SF::EventPublisherBase()
+mtsEventPublisher::mtsEventPublisher(const SF::FilterBase::FilteringType filteringType)
+    : SF::EventPublisherBase(filteringType), MonitorComponentInstance(0)
 {
 }
 
 bool mtsEventPublisher::PublishEvent(const std::string & eventDescriptionJSON)
 {
-    if (!EventPublisher.IsValid()) {
-        //CMN_LOG_CLASS_RUN_ERROR << "PublishEvent: Failed to publish due to invalid event publisher.  JSON [ " << eventDescriptionJSON << " ]" << std::endl;
-        return false;
-    }
+    // Active filters
+    if (this->Type == SF::FilterBase::ACTIVE) {
+        if (!EventPublisher.IsValid()) {
+            CMN_LOG_RUN_ERROR << "PublishEvent: Failed to publish due to invalid event publisher.  JSON [ " << eventDescriptionJSON << " ]" << std::endl;
+            return false;
+        }
 
-    EventPublisher(eventDescriptionJSON);
+        EventPublisher(eventDescriptionJSON);
+        return true;
+    }
+    // Passive filters
+    else {
+        if (!MonitorComponentInstance) {
+            CMN_LOG_RUN_ERROR << "PublishEvent: Failed to publish event (null monitor component instance): "
+                << std::endl << eventDescriptionJSON << std::endl;
+            return false;
+        }
+
+        // MJ: For now, assume that event publisher only publishes fault events.
+        MonitorComponentInstance->HandleFaultEvent(eventDescriptionJSON);
+    }
 
     return true;
 }

@@ -62,6 +62,10 @@ class CISST_EXPORT mtsTask: public mtsComponent
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
+#if CISST_HAS_SAFETY_PLUGINS
+    // Allow Safety Coordinator to directly access state tables
+    friend class mtsSafetyCoordinator;
+#endif
 
 public:
     typedef mtsComponent BaseType;

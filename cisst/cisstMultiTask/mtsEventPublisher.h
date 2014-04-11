@@ -27,22 +27,44 @@
 
 #include <cisstMultiTask/mtsExport.h>
 
+class mtsMonitorComponent;
+
 class CISST_EXPORT mtsEventPublisher: public SF::EventPublisherBase 
 {
     //CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
-    /*! cisst-specific object that publishes string data encoded in the JSON format to the
-        Safety Framework. */
+    // Event publishers that publish JSON-encoded events or faults to the
+    // Safety Framework.
+
+    /*! Event publisher for active filters */
     mtsFunctionWrite EventPublisher;
+    /*! Event publisher for passive filters */
+    mtsMonitorComponent * MonitorComponentInstance;
 
 public:
-    mtsEventPublisher();
+    mtsEventPublisher(const SF::FilterBase::FilteringType filteringType);
     ~mtsEventPublisher() {}
 
+    /*! Publish events to the Safety Framework */
     bool PublishEvent(const std::string & eventDescriptionJSON);
 
+    //
+    //  Active Filtering
+    //
+    /*! Returns event publisher for active filters */
     mtsFunctionWrite & GetEventPublisherFunction(void) { return EventPublisher; }
+
+    //
+    //  Passive Filtering
+    //
+    /*! Setter for passive filters */
+    inline void SetMonitorComponentInstance(mtsMonitorComponent * instance) {
+        MonitorComponentInstance = instance;
+    }
+    /*! Returns event publisher for passive filters */
+    // MJ: Is there a better way to access mtsMonitorComponent::HandleFaultEvent()???
+    //mtsMonitorComponent * GetEventPublisherInstance(void) const { return MonitorComponentInstance; }
 
     /*
     void ToStream(std::ostream & outputStream) const {}

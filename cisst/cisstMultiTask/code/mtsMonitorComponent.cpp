@@ -212,7 +212,6 @@ void mtsMonitorComponent::Run(void)
     // Subscriber received message(s)
     if (!SubscriberCallback->IsEmptyQueue()) {
         SubscriberCallback->FetchMessages(Messages);
-        // smmy
         //std::cout << "MONITOR COMPONENT fetched " << Messages.size() - before << " items: " << before << std::endl;
     }
 }
@@ -277,6 +276,30 @@ void mtsMonitorComponent::Cleanup(void)
     }
 }
 
+mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::CreateTargetComponentAccessor(
+    const std::string & targetProcessName, const std::string & targetComponentName, bool isAttachedToFilter)
+{   
+    TargetComponentAccessor * targetComponentAccessor = new TargetComponentAccessor;
+    targetComponentAccessor->ProcessName = targetProcessName;
+    targetComponentAccessor->ComponentName = targetComponentName;
+    targetComponentAccessor->InterfaceRequired = 
+        AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName), MTS_OPTIONAL);
+    // Add monitor event handler if new tareget component is to be added.
+    targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
+        &mtsMonitorComponent::HandleMonitorEvent, this, MonitorNames::MonitorEvent);
+    // Add fault event handler if new tareget component is to be added.
+    if (isAttachedToFilter) {
+        //targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
+        //    &mtsMonitorComponent::HandleFaultEvent, this, FaultNames::FaultEvent);
+        targetComponentAccessor->InterfaceRequired->AddEventReceiver(
+            FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
+        targetComponentAccessor->FaultEventReceiver.SetHandler(
+            &mtsMonitorComponent::HandleFaultEvent, this);
+    }
+
+    return targetComponentAccessor;
+}
+
 bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 {
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
@@ -310,24 +333,9 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
     TargetComponentAccessor * targetComponentAccessor = TargetComponentAccessors->GetItem(targetComponentName);
     if (!targetComponentAccessor) {
         newTargetComponent = true;
-        // Add new target component
-        targetComponentAccessor = new TargetComponentAccessor;
-        targetComponentAccessor->ProcessName = thisProcessName;
-        targetComponentAccessor->ComponentName = targetComponentName;
-        targetComponentAccessor->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName));
-        // Add monitor event handler if new tareget component is to be added.
-        targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
-            &mtsMonitorComponent::HandleMonitorEvent, this, MonitorNames::MonitorEvent);
-        // Add fault event handler if new tareget component is to be added.
-#if 0
-        targetComponentAccessor->InterfaceRequired->AddEventHandlerWrite(
-            &mtsMonitorComponent::HandleFaultEvent, this, FaultNames::FaultEvent);
-#else
-        targetComponentAccessor->InterfaceRequired->AddEventReceiver(
-            FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
-        targetComponentAccessor->FaultEventReceiver.SetHandler(
-            &mtsMonitorComponent::HandleFaultEvent, this);
-#endif
+        // Create new connection between monitor component and new target component
+        targetComponentAccessor = CreateTargetComponentAccessor(
+            thisProcessName, targetComponentName, monitorTarget->IsAttachedToFilter());
     } else {
         // Check duplicate monitor target
         if (targetComponentAccessor->FindMonitorTarget(monitorTarget->GetUIDAsString())) {
@@ -698,10 +706,14 @@ bool mtsMonitorComponent::UnregisterComponent(const std::string & componentName)
 //-----------------------------------------------
 //  Getters
 //-----------------------------------------------
-const std::string  mtsMonitorComponent::GetNameOfStateTableAccessInterface(const std::string & taskName) const {
+const std::string  mtsMonitorComponent::GetNameOfStateTableAccessInterface(const std::string & taskName) {
     return "Monitor" + taskName;
 }
 const std::string & mtsMonitorComponent::GetNameOfMonitorComponent(void) {
     return NameOfMonitorComponent;
 }
 
+mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::GetTargetComponentAccessor(const std::string & targetComponentName)
+{
+    return TargetComponentAccessors->GetItem(targetComponentName);
+}

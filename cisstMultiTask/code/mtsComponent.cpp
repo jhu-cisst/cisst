@@ -1030,6 +1030,7 @@ void mtsComponent::InterfaceInternalCommands_ComponentStartOther(const mtsCompon
                                 << " to start" << std::endl;
 }
 
+<<<<<<< HEAD:cisstMultiTask/code/mtsComponent.cpp
 bool mtsComponent::SetReplayMode(void) {
     if (!(this->State == mtsComponentState::CONSTRUCTED)) {
         CMN_LOG_CLASS_RUN_ERROR << "SetReplayMode: component \"" << GetName() << "\" failed to set replay mode." << std::endl;
@@ -1150,3 +1151,5 @@ void mtsComponent::UninstallMonitorTarget(const SF::Monitor::TargetType type)
 */
 
 #endif
+=======
+>>>>>>> branches/fault: Updated cisst plug-ins for safety framework (work in progress):cisst/cisstMultiTask/code/mtsComponent.cpp
