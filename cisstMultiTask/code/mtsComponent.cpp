@@ -36,10 +36,10 @@ mtsComponent::mtsComponent(const std::string & componentName):
     InterfacesOutput("InterfacesOutput"),
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
-    StateTables("StateTables")
 #if CISST_HAS_SAFETY_PLUGINS
-    , FaultState(0)
+    FaultState(0),
 #endif
+    StateTables("StateTables")
 
 {
     Initialize();
@@ -51,10 +51,10 @@ mtsComponent::mtsComponent(void):
     InterfacesOutput("InterfacesOutput"),
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
-    StateTables("StateTables")
 #if CISST_HAS_SAFETY_PLUGINS
-    , FaultState(0)
+    FaultState(0),
 #endif
+    StateTables("StateTables")
 {
     Initialize();
 }
@@ -104,6 +104,23 @@ mtsComponent::~mtsComponent()
 #endif
 }
 
+#if CISST_HAS_SAFETY_PLUGINS
+SF::State::StateType mtsComponent::GetFaultState(void) const
+{
+    if (FaultState) {
+        return FaultState->GetState();
+    } else {
+        return SF::State::INVALID;
+    }
+}
+
+void mtsComponent::SetStateEventHandler(SF::StateEventHandler * instance)
+{
+    if (FaultState) {
+        return FaultState->SetStateEventHandler(instance);
+    }
+}
+#endif
 
 const std::string & mtsComponent::GetName(void) const
 {
@@ -1041,7 +1058,6 @@ void mtsComponent::InterfaceInternalCommands_ComponentStartOther(const mtsCompon
                                 << " to start" << std::endl;
 }
 
-<<<<<<< HEAD:cisstMultiTask/code/mtsComponent.cpp
 bool mtsComponent::SetReplayMode(void) {
     if (!(this->State == mtsComponentState::CONSTRUCTED)) {
         CMN_LOG_CLASS_RUN_ERROR << "SetReplayMode: component \"" << GetName() << "\" failed to set replay mode." << std::endl;
@@ -1162,5 +1178,3 @@ void mtsComponent::UninstallMonitorTarget(const SF::Monitor::TargetType type)
 */
 
 #endif
-=======
->>>>>>> branches/fault: Updated cisst plug-ins for safety framework (work in progress):cisst/cisstMultiTask/code/mtsComponent.cpp
