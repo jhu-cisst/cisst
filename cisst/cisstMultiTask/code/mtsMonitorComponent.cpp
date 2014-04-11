@@ -20,6 +20,7 @@
 
 #include <cisstCommon/cmnConstants.h>
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsMonitorComponent.h>
 #include <cisstMultiTask/mtsFaultDetectorThresholding.h>
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
@@ -32,7 +33,8 @@ const std::string NameOfMonitorComponent = "Monitor";
 mtsMonitorComponent::mtsMonitorComponent()
     // MJ: Maximum monitoring time resolution is 5 msec (somewhat arbitrary but practically
     // enough to cover most monitoring scenarios)
-    : mtsTaskPeriodic(NameOfMonitorComponent, 5.0 * cmn_ms, false, 5000)
+    : mtsTaskPeriodic(NameOfMonitorComponent, 5.0 * cmn_ms, false, 5000),
+      Publisher(0), Subscriber(0)
 {
     TargetComponentAccessors = new TargetComponentAccessorType(true);
 
@@ -40,12 +42,26 @@ mtsMonitorComponent::mtsMonitorComponent()
     // (because one advancement of the state table involves running all FDD pipelines)
     // and is controlled by mtsMonitorComponent::UpdateFilters(void).
     this->StateTableMonitor.SetAutomaticAdvance(false);
+
+    Publisher = new SF::Publisher("/Users/MJ/project/tools/Ice-3.4.2/cpp/demo/IceStorm/clock/config.pub");
+    ThreadPublisher.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunPublisher, 0);
+    ThreadPublisher.ThreadEventBegin.Wait();
+
+    Subscriber = new SF::Subscriber("/Users/MJ/project/tools/Ice-3.4.2/cpp/demo/IceStorm/clock/config.sub");
+    ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
+    ThreadSubscriber.ThreadEventBegin.Wait();
 }
 
 mtsMonitorComponent::~mtsMonitorComponent()
 {
     TargetComponentAccessors->DeleteAll();
     delete TargetComponentAccessors;
+
+    if (ThreadPublisher.Running || ThreadSubscriber.Running)
+        Cleanup();
+
+    delete Publisher;
+    delete Subscriber;
 }
 
 void mtsMonitorComponent::Run(void)
@@ -54,6 +70,47 @@ void mtsMonitorComponent::Run(void)
     ProcessQueuedEvents();
 
     UpdateFilters();
+}
+
+void * mtsMonitorComponent::RunPublisher(unsigned int CMN_UNUSED(arg))
+{
+    ThreadPublisher.Running = true;
+
+    ThreadPublisher.ThreadEventBegin.Raise();
+
+    while (ThreadPublisher.Running) {
+        // MJ TODO: this is blocking call and doesn't return
+        Publisher->Run();
+    }
+
+    ThreadPublisher.ThreadEventEnd.Raise();
+
+    return 0;
+}
+
+void * mtsMonitorComponent::RunSubscriber(unsigned int CMN_UNUSED(arg))
+{
+    ThreadSubscriber.Running = true;
+
+    ThreadSubscriber.ThreadEventBegin.Raise();
+
+    while (ThreadSubscriber.Running) {
+        // MJ TODO: this is blocking call and doesn't return
+        Subscriber->Run();
+    }
+
+    ThreadSubscriber.ThreadEventEnd.Raise();
+
+    return 0;
+}
+
+void mtsMonitorComponent::Cleanup(void)
+{
+    ThreadPublisher.Running = false;
+    ThreadPublisher.ThreadEventEnd.Wait();
+
+    ThreadSubscriber.Running = false;
+    ThreadSubscriber.ThreadEventEnd.Wait();
 }
 
 bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMonitorTarget)
@@ -110,7 +167,6 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
                         return false;
                     }
 
-                    // test
                     SF::SamplingRateType oldSamplingRate = targetComponentAccessor->MinimumPeriod;
                     if (targetComponentAccessor->UpdateMinimumPeriod(newMonitorTarget.GetSamplingPeriod())) {
                         CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetToComponent: sampling period updated from " 
@@ -201,7 +257,6 @@ void mtsMonitorComponent::UpdateFilters(void)
             // [SFUPDATE]
             accessor->GetPeriod(accessor->Period);
             accessor->LastSampledTime = currentTick;
-            std::cout << accessor->Period << std::endl;
             advance = true;
         }
     }

@@ -40,5 +40,6 @@ if(SF_FOUND)
                       ${SF_INCLUDE_DIR}/FDD 
                       ${SF_INCLUDE_DIR}/adapters/cisst
                       ${SF_INCLUDE_DIR}/common
-                      ${SF_INCLUDE_DIR}/monitor)
+                      ${SF_INCLUDE_DIR}/monitor
+                      ${SF_INCLUDE_DIR}/communicator)
 endif(SF_FOUND)

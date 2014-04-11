@@ -27,11 +27,15 @@
 #define _mtsMonitorComponent_h
 
 #include <cisstCommon/cmnNamedMap.h>
+#include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 
 #include "cisstMonitor.h"
+#include "publisher.h"
+#include "subscriber.h"
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -133,6 +137,26 @@ protected:
     //bool InstallFilters(mtsTaskFromSignal * taskFromSignal);
     bool InstallFilters(TargetComponentAccessor * entry, mtsTaskPeriodic * taskPeriodic);
 
+    //
+    // Message exchange with Safety Framework
+    //
+    /*! Ice publisher and subscriber */
+    SF::Publisher *  Publisher;
+    SF::Subscriber * Subscriber;
+
+    typedef struct {
+        osaThread       Thread;
+        osaThreadSignal ThreadEventBegin;
+        osaThreadSignal ThreadEventEnd;
+        bool            Running;
+    } InternalThreadType;
+
+    InternalThreadType ThreadPublisher;
+    InternalThreadType ThreadSubscriber;
+
+    void * RunPublisher(unsigned int arg);
+    void * RunSubscriber(unsigned int arg);
+
 public:
     mtsMonitorComponent();
     ~mtsMonitorComponent();
@@ -152,7 +176,7 @@ public:
     void Configure(const std::string & CMN_UNUSED(filename) = ""){}
     void Startup(void) {};
     void Run(void);
-    void Cleanup(void) {};
+    void Cleanup(void);
 
     //  Getters
     /*! Return the name of required interface to access a given task's state table */
