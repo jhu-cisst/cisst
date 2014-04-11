@@ -315,6 +315,23 @@ void mtsStateTable::Advance(void) {
         }
     }
 
+#if CISST_HAS_SAFETY_PLUGINS
+#define PROCESS_FILTERS( _name )\
+    if (!Filters._name.empty()) {\
+        FiltersType::const_iterator it = Filters._name.begin();\
+        const FiltersType::const_iterator itEnd = Filters._name.end();\
+        for (; it != itEnd; ++it)\
+            (*it)->RunFilter();\
+    }
+    // Process filters sequentially
+    PROCESS_FILTERS(Features)
+    PROCESS_FILTERS(FeatureVectors);
+    PROCESS_FILTERS(Symptoms);
+    PROCESS_FILTERS(SymptomVectors);
+    PROCESS_FILTERS(FaultDetectors);
+#undef PROCESS_FILTERS
+#endif
+
     // Get the Toc value and write it to the state table.
     if (TimeServer) {
         Toc = TimeServer->GetRelativeTime(); // in seconds
@@ -389,6 +406,7 @@ void mtsStateTable::Cleanup(void) {
         FiltersType::const_iterator it = Filters._name.begin();\
         const FiltersType::const_iterator itEnd = Filters._name.end();\
         for (; it != itEnd; ++it)\
+            (*it)->CleanupFilter();\
             delete *it;\
     }\
     Filters._name.clear();
@@ -614,6 +632,15 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
 #if CISST_HAS_SAFETY_PLUGINS
 bool mtsStateTable::RegisterFilter(SF::FilterBase * filter)
 {
+    CMN_ASSERT(filter);
+
+    // initialize filter instance before deployment.  filter is deployed only when
+    // initialization is successful.
+    if (!filter->InitFilter()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RegisterFilter: failed to initialize filter: " << *filter << std::endl;
+        return false;
+    }
+
     switch (filter->GetFilterCategory()) {
         case SF::FilterBase::FEATURE:
             Filters.Features.push_back(filter);
