@@ -495,7 +495,7 @@ public:
 
     static const mtsStateDataId INVALID_STATEVECTOR_ID;
 
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
     typedef std::vector<mtsMonitorFilterBase*> MonitorFiltersType;
     struct MonitorFiltersStruct {
         /*! List of filters attached to this state table to define features */

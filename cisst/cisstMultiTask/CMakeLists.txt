@@ -40,8 +40,21 @@ else (CISST_MTS_HAS_ICE)
   cisst_unset_all_package_settings (cisstMultiTask ZeroCIce)
 endif (CISST_MTS_HAS_ICE)
 
-# support for fault detection and diagnosis
-option (CISST_MTS_SUPPORT_FDD "Enable fault detection and diagnosis features of cisstMultiTask" OFF)
+# Support for Safety Framework plug-ins
+option (CISST_HAS_SAFETY_PLUGINS "Enable support for Safety Framework plug-ins including fault detection and diagnosis" OFF)
+if (CISST_HAS_SAFETY_PLUGINS)
+  find_package(SafetyFramework REQUIRED)
+  cisst_set_package_settings (cisstMultiTask SafetyFramework INCLUDE_DIRECTORIES SF_INCLUDE_DIRS)
+  cisst_set_package_settings (cisstMultiTask SafetyFramework LIBRARIES SF_LIBRARIES)
+  # if SafetyFramework found, include JsonCpp
+  set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SF_INCLUDE_DIR}/../cmake)
+  find_package(JSONCPP REQUIRED)
+  cisst_set_package_settings (cisstMultiTask JSONCPP INCLUDE_DIRECTORIES JSONCPP_INCLUDE_DIR)
+  cisst_set_package_settings (cisstMultiTask JSONCPP LIBRARIES JSONCPP_LIBRARIES)
+else (CISST_HAS_SAFETY_PLUGINS)
+  cisst_unset_all_package_settings (cisstMultiTask SafetyFramework)
+  cisst_unset_all_package_settings (cisstMultiTask JSONCPP)
+endif (CISST_HAS_SAFETY_PLUGINS)
 
 add_subdirectory (code)
 

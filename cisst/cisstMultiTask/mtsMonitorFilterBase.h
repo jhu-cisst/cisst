@@ -143,7 +143,7 @@ public:
     inline int GetFilterUID(void) const {
         return this->FilterUID;
     }
-    inline const FILTER_TYPE GetFilterType(void) const {
+    inline FILTER_TYPE GetFilterType(void) const {
         return this->FilterType;
     }
     inline const std::string & GetFilterName(void) const {

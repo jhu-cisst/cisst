@@ -332,8 +332,8 @@ if (CISST_MTS_HAS_ICE)
   set (ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${ICE_RESOURCE_FILES})
 endif (CISST_MTS_HAS_ICE)
 
-# files to support fault detection and diagnosis
-if (CISST_MTS_SUPPORT_FDD)
+# plug-in files to support Safety Framework including fault detection and diagnosis
+if (CISST_HAS_SAFETY_PLUGINS)
   set (SOURCE_FILES ${SOURCE_FILES}
        # monitors
        mtsMonitorComponent.cpp
@@ -345,6 +345,8 @@ if (CISST_MTS_SUPPORT_FDD)
        # fault detection and diagnosis
        mtsFaultDetectorBase.cpp
        mtsFaultDetectorThresholding.cpp
+       # plug-ins for Safety Framework
+       mtsSafetyCoordinator.cpp
        )
 
   set (HEADER_FILES
@@ -359,8 +361,10 @@ if (CISST_MTS_SUPPORT_FDD)
        # fault detection and diagnosis
        mtsFaultDetectorBase.h
        mtsFaultDetectorThresholding.h
+       # plug-ins for Safety Framework
+       mtsSafetyCoordinator.h
        )
-endif (CISST_MTS_SUPPORT_FDD)
+endif (CISST_HAS_SAFETY_PLUGINS)
 
 # Create the config file
 set (CISST_MTS_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstMultiTask/mtsConfig.h)

@@ -93,7 +93,7 @@ protected:
 
     /*! State table to monitor run-time states of components for fault detection and
         diagnosis purpose */
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
     mtsStateTable StateTableMonitor;
 
     bool AddFilter(mtsMonitorFilterBase * filter);
@@ -252,7 +252,7 @@ public:
         return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
     }
 
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
     /*! Return the name of monitoring state table. */
     inline const std::string GetMonitoringStateTableName(void) const {
         return StateTableMonitor.GetName();

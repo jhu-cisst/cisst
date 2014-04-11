@@ -64,8 +64,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 #include <cisstMultiTask/mtsFaultBase.h>
+#include "coordinator.h"
 #endif
 
 #include <stack>
@@ -203,12 +204,6 @@ private:
     /*! Check if Manager Component Client (MCC) is ready to forward logs to 
         Manager Component Server (MCS) */
     bool MCCReadyForLogForwarding(void) const;
-
-    /*! Monitoring components for fault detection and diagnosis */
-#if CISST_MTS_SUPPORT_FDD
-    typedef std::vector<mtsMonitorComponent*> MonitorComponentList;
-    MonitorComponentList MonitorComponents;
-#endif
 
 public:    
     /*! Callback function for system-wide thread-safe logging */
@@ -364,6 +359,25 @@ protected:
         GCMConnected = connected;
     }
 
+    //-------------------------------------------------------------------------
+    //  Safety Framework Plug-ins
+    //-------------------------------------------------------------------------
+#if CISST_HAS_SAFETY_PLUGINS
+protected:
+    /*! Monitoring components for fault detection and diagnosis */
+    typedef std::vector<mtsMonitorComponent*> MonitorComponentList;
+    MonitorComponentList MonitorComponents;
+
+    SF::Coordinator * SafetyCoordinator;
+
+public:
+    SF::Coordinator & GetCoordinator(void);
+
+    /*! Generate event for fault propataion via manager component service */
+    bool FaultPropagate(const mtsFaultBase & fault) const;
+#endif
+
+
 public:
     //-------------------------------------------------------------------------
     //  Component Management
@@ -479,13 +493,6 @@ public:
                     const std::string & clientInterfaceRequiredName,
                     const std::string & serverProcessName, const std::string & serverComponentName,
                     const std::string & serverInterfaceProvidedName);
-
-    //-------------------------------------------------------------------------
-    //  Fault Detection
-    //-------------------------------------------------------------------------
-#ifdef CISST_MTS_SUPPORT_FDD
-    bool FaultPropagate(const mtsFaultBase & fault) const;
-#endif
 
     //-------------------------------------------------------------------------
     //  Getters and Utilities

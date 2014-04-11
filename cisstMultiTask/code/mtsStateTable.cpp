@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsCollectorState.h>
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 #include <cisstMultiTask/mtsMonitorFilterBase.h>
 #endif
 
@@ -321,7 +321,8 @@ void mtsStateTable::Advance(void) {
         IndexDelayed = IndexReader - Delay;
     }
 
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
+
 #define PROCESS_FILTERS( _name )\
     if (!MonitorFilters._name.empty())\
         for (size_t i = 0; i < MonitorFilters._name.size(); ++i)\
@@ -364,7 +365,7 @@ void mtsStateTable::Cleanup(void) {
                                  << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl;
     }
 
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 #define CLEANUP_FILTERS( _name )\
     if (!MonitorFilters._name.empty())\
         for (size_t i = 0; i < MonitorFilters._name.size(); ++i)\
@@ -589,7 +590,7 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
     }
 }
 
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 bool mtsStateTable::AddFilter(mtsMonitorFilterBase * filter)
 {
     // Filter validity check

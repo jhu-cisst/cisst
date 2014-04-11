@@ -67,7 +67,7 @@ const std::string mtsManagerComponentBase::CommandNames::EnableLogForwarding = "
 const std::string mtsManagerComponentBase::CommandNames::DisableLogForwarding = "DisableLogForwarding";
 const std::string mtsManagerComponentBase::CommandNames::GetAbsoluteTimeInSeconds = "GetAbsoluteTimeInSeconds";
 const std::string mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs = "GetAbsoluteTimeDiffs";
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 const std::string mtsManagerComponentBase::CommandNames::FaultPropagate = "FaultPropagate";
 #endif
 

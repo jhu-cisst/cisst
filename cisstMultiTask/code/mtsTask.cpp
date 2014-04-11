@@ -27,7 +27,7 @@
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 #include <cisstMultiTask/mtsMonitorFilterBase.h>
 #endif
 
@@ -284,7 +284,7 @@ mtsTask::mtsTask(const std::string & name,
     StateChange(),
     StateChangeSignal(),
     StateTable(sizeStateTable, "Default"),
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
     StateTableMonitor(sizeStateTable, "Monitor"),
 #endif
     OverranPeriod(false),
@@ -293,7 +293,7 @@ mtsTask::mtsTask(const std::string & name,
     RunEventCalled(false)
 {
     this->AddStateTable(&this->StateTable);
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
     this->AddStateTable(&this->StateTableMonitor);
 
     // Expose Period of the monitor state table to its provided interface
@@ -475,7 +475,7 @@ void mtsTask::SetInitializationDelay(double delay)
     this->InitializationDelay = delay;
 }
 
-#if CISST_MTS_SUPPORT_FDD
+#if CISST_HAS_SAFETY_PLUGINS
 bool mtsTask::AddFilter(mtsMonitorFilterBase * filter)
 {
     return this->StateTableMonitor.AddFilter(filter);
