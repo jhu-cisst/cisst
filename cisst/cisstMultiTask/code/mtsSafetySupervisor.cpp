@@ -128,8 +128,6 @@ void mtsSafetySupervisor::UDPSenderInternal::operator()(const std::string & mess
     std::cout << MongoDB::GetDBEntryFromMonitorTopic(message) << std::endl;
 #endif
 
-    return;
-
     //Publisher->Publish(MongoDB::GetDBEntryFromMonitorTopic(message));
     if (UDPSocket)
         UDPSocket->Send(MongoDB::GetDBEntryFromMonitorTopic(message));

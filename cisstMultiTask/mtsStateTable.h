@@ -491,6 +491,10 @@ public:
         static const std::string Toc;
         static const std::string Period;
         static const std::string PeriodStatistics;
+#if CISST_HAS_SAFETY_PLUGINS
+        static const std::string ExecTimeUser;
+        static const std::string ExecTimeTotal;
+#endif
     };
 
     static const mtsStateDataId INVALID_STATEVECTOR_ID;
@@ -516,6 +520,11 @@ public:
     /*! Fetch new value from state table */
     double GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const;
     mtsDoubleVec GetNewValueVector(const mtsStateDataId id, double & timeStamp) const;
+
+    // [SFUPDATE]
+    /*! Placeholders for monitoring */
+    mtsDouble ExecTimeUser;
+    mtsDouble ExecTimeTotal;
 #endif
 };
 

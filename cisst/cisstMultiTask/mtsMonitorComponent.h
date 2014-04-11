@@ -116,7 +116,8 @@ protected:
 
         /*! Functions to read state variables from target component */
         mtsFunctionRead GetPeriod;   // for Monitor::TARGET_THREAD_PERIOD
-        mtsFunctionRead GetExecTime; // for Monitor::TARGET_THREAD_DUTYCYCLE
+        mtsFunctionRead GetExecTimeUser;  // for Monitor::TARGET_THREAD_DUTYCYCLE_USER
+        mtsFunctionRead GetExecTimeTotal; // for Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL
 
         /*! Add new cisstMonitor instance.  Returns false if duplicate. */
         bool AddMonitorTargetToAccessor(SF::cisstMonitor * monitor);

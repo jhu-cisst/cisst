@@ -94,28 +94,52 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             // Skip inactive monitor
             if (!monitor->IsActive()) continue;
 
-            // Get new period sample
-            if (!GetPeriod.IsValid()) {
-                CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetPeriod function" << std::endl;
-            } else {
-                double period;
-                this->GetPeriod(period);
-                publisher->Publish(monitor->GetJsonForPublishingPeriod(period));
-                monitor->UpdateLastSamplingTick(currentTick);
-                advance = true;
-            }
+            SF::Monitor::TargetType targetType = monitor->GetTargetType();
+            switch (targetType) {
+                case SF::Monitor::TARGET_THREAD_PERIOD:
+                    // Get new period sample
+                    if (!GetPeriod.IsValid()) {
+                        CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetPeriod function" << std::endl;
+                    } else {
+                        double period;
+                        this->GetPeriod(period);
+                        publisher->Publish(monitor->GetJsonForPublishingPeriod(period));
+                        monitor->UpdateLastSamplingTick(currentTick);
+                        advance = true;
+                    }
+                    break;
 
-            // Get new duty cycle sample
-            if (!this->GetExecTime.IsValid()) {
-                CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetDutyCycle function" << std::endl;
-            } else {
-                double execTime;
-                this->GetExecTime(execTime);
-                publisher->Publish(monitor->GetJsonForPublishingDutyCycle(execTime));
-                monitor->UpdateLastSamplingTick(currentTick);
-                advance = true;
+                case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
+                    // Get new duty cycle (user) sample
+                    if (!this->GetExecTimeUser.IsValid()) {
+                        CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeUser function" << std::endl;
+                    } else {
+                        double execTimeUser;
+                        this->GetExecTimeUser(execTimeUser);
+                        publisher->Publish(monitor->GetJsonForPublishingDutyCycleUser(execTimeUser));
+                        monitor->UpdateLastSamplingTick(currentTick);
+                        advance = true;
+                    }
+                    break;
+
+                case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
+                    // Get new duty cycle (total) sample
+                    if (!this->GetExecTimeTotal.IsValid()) {
+                        CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeTotal function" << std::endl;
+                    } else {
+                        double execTimeTotal;
+                        this->GetExecTimeTotal(execTimeTotal);
+                        publisher->Publish(monitor->GetJsonForPublishingDutyCycleTotal(execTimeTotal));
+                        monitor->UpdateLastSamplingTick(currentTick);
+                        advance = true;
+                    }
+                    break;
+
+                    // [SFUPDATE]
+
+                default:
+                    CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: not supported monitoring type" << std::endl;
             }
-            // [SFUPDATE]
         }
     }
 
@@ -306,7 +330,6 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 
     const SF::Monitor::TargetType targetType = monitorTarget->GetTargetType();
     const std::string targetTypeString = SF::Monitor::GetTargetTypeString(targetType);
-    // [SFUPDATE]
     switch (targetType) {
         case SF::Monitor::TARGET_THREAD_PERIOD:
             {
@@ -327,7 +350,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
             }
             break;
 
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE:
+        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
             {
                 mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
                 if (!taskPeriodic) {
@@ -336,11 +359,28 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
                     return false;
                 }
 
-                targetComponentAccessor->InterfaceRequired->AddFunction("GetExecTime", targetComponentAccessor->GetExecTime);
+                targetComponentAccessor->InterfaceRequired->AddFunction("GetExecTimeUser", targetComponentAccessor->GetExecTimeUser);
 
                 InstallMonitorTarget(taskPeriodic, monitorTarget);
             }
             break;
+
+        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
+            {
+                mtsTaskPeriodic * taskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
+                if (!taskPeriodic) {
+                    CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: " << targetTypeString << " is only applicable to periodic task" << std::endl;
+                    if (newTargetComponent) delete targetComponentAccessor;
+                    return false;
+                }
+
+                targetComponentAccessor->InterfaceRequired->AddFunction("GetExecTimeTotal", targetComponentAccessor->GetExecTimeTotal);
+
+                InstallMonitorTarget(taskPeriodic, monitorTarget);
+            }
+            break;
+
+        // [SFUPDATE]
 
         case SF::Monitor::TARGET_INVALID:
         default:
@@ -460,10 +500,17 @@ void mtsMonitorComponent::InstallMonitorTarget(mtsTaskPeriodic * task, SF::Monit
             this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.Period);
             break;
 
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE:
-            newElementName += "ExecTime";
-            this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.ExecTime);
+        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
+            newElementName += "ExecTimeUser";
+            this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.ExecTimeUser);
             break;
+
+        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
+            newElementName += "ExecTimeTotal";
+            this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.ExecTimeTotal);
+            break;
+
+        // [SFUPDATE]
 
         default:
             ;

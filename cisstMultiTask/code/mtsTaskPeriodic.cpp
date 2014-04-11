@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaGetTime.h>
 
 CMN_IMPLEMENT_SERVICES(mtsTaskPeriodicConstructorArg);
 
@@ -116,6 +117,9 @@ void * mtsTaskPeriodic::RunInternal(void *data)
     }
 
     while ((this->State == mtsComponentState::ACTIVE) || (this->State == mtsComponentState::READY)) {
+#if CISST_HAS_SAFETY_PLUGINS
+        double tic = osaGetTime();
+#endif
         if (this->State == mtsComponentState::ACTIVE) {
             DoRunInternal();
             if (StateTable.GetToc() - StateTable.GetTic() > Period) {
@@ -126,6 +130,9 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 #endif
             }
         }
+#if CISST_HAS_SAFETY_PLUGINS
+        StateTableMonitor.ExecTimeTotal = osaGetTime() - tic;
+#endif
         // Wait for remaining period also handles thread suspension
         ThreadBuddy.WaitForRemainingPeriod();
     }
