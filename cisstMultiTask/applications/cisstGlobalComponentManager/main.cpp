@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-01-20
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
@@ -43,6 +44,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     // specify a higher, more verbose log level for these classes
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
     // enable system-wide thread-safe logging
+    mtsManagerLocal::SetLogForwarding(true);
 
     // Create and start global component manager
     mtsManagerGlobal * globalComponentManager = new mtsManagerGlobal;
@@ -53,21 +55,21 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     CMN_LOG_INIT_VERBOSE << "Global component manager started..." << std::endl;
 
     // Get local component manager instance
-    mtsManagerLocal * localManager;
+    mtsManagerLocal * componentManager;
     try {
-        localManager = mtsManagerLocal::GetInstance(*globalComponentManager);
+        componentManager = mtsManagerLocal::GetInstance(*globalComponentManager);
     } catch (...) {
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
     }
 
     // create the tasks, i.e. find the commands
-    localManager->CreateAll();
-    localManager->WaitForStateAll(mtsComponentState::READY);
+    componentManager->CreateAll();
+    componentManager->WaitForStateAll(mtsComponentState::READY);
 
     // start the periodic Run
-    localManager->StartAll();
-    localManager->WaitForStateAll(mtsComponentState::ACTIVE);
+    componentManager->StartAll();
+    componentManager->WaitForStateAll(mtsComponentState::ACTIVE);
 
     // loop until 'q' is pressed
     int key = ' ';
@@ -99,10 +101,15 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     }
     std::cout << "Quitting ..." << std::endl;
 
-    // cleanup
-    localManager->KillAll();
-    localManager->WaitForStateAll(mtsComponentState::FINISHED, 20.0 * cmn_s);
-    localManager->Cleanup();
+    // Cleanup global component manager
+    if (!globalComponentManager->StopServer()) {
+        CMN_LOG_RUN_ERROR << "Failed to stop global component manager." << std::endl;
+    }
+
+    // Cleanup local component manager
+    componentManager->KillAll();
+    componentManager->WaitForStateAll(mtsComponentState::FINISHED, 5.0 * cmn_s);
+    componentManager->Cleanup();
 
     return 0;
 }
