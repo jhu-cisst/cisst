@@ -159,6 +159,7 @@ http://www.cisst.org/cisst/license.txt.
     (void*)0: \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
 
+<<<<<<< HEAD:cisstCommon/cmnLogger.h
 #else // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
 
 #define CMN_LOG(lod) \
@@ -169,6 +170,8 @@ http://www.cisst.org/cisst/license.txt.
 #endif // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
 
 
+=======
+>>>>>>> branches/fault: merged changes from trunk (fixed broken merge):cisst/cisstCommon/cmnLogger.h
 #if (CISST_OS == CISST_QNX)
   #if BYPASS_CMN_LOG
   #undef CMN_LOG

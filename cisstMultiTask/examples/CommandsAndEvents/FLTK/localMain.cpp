@@ -136,6 +136,6 @@ int main(int argc, char **argv)
     delete client2;
 
     componentManager->Cleanup();
-
+    cmnLogger::Kill();
     return 0;
 }

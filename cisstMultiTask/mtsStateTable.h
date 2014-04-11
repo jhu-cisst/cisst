@@ -32,7 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateArrayBase.h>
 #include <cisstMultiTask/mtsStateArray.h>
 #include <cisstMultiTask/mtsStateIndex.h>
-#include <cisstMultiTask/mtsHistory.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
@@ -171,7 +170,7 @@ public:
         typedef typename mtsGenericTypes<_elementType>::FinalType value_type;
         typedef typename mtsGenericTypes<_elementType>::FinalRefType value_ref_type;
         typedef typename mtsStateTable::Accessor<_elementType> ThisType;
-        const mtsStateArray<value_type> &History;
+        const mtsStateArray<value_type> & History;
         value_ref_type * Current;
 
     public:
@@ -224,27 +223,6 @@ public:
         }
         void SetCurrent(const value_type & data) {
             *Current = data;
-        }
-
-        // Get a vector of data, starting and ending at the specified time indices (inclusive).
-        // For now, set the start index based on the vector size. In the future, we
-        // should define a new parameter type that consists of a pair of mtsStateIndex.
-        bool GetHistory(const mtsStateIndex & end, mtsHistory<value_type> & data) const {
-            bool ret = false;
-            if (data.size() > 0) {
-                mtsStateIndex start = end;
-                start -= (data.size()-1);
-                if (Table.ValidateReadIndex(start) && Table.ValidateReadIndex(end)) {
-                    ret = History.GetHistory(start.Index(), end.Index(), data);
-                    // If GetHistory succeeded, then check if the data is still valid (has not been overwritten).
-                    // Here it is sufficient to just check the oldest index (start).
-                    if (ret)
-                        ret = Table.ValidateReadIndex(start);
-                }
-                else
-                    CMN_LOG_INIT_ERROR << "ReadVectorFromReader: data not available" << std::endl;
-            }
-            return ret;
         }
     };
 

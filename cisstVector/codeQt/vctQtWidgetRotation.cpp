@@ -171,6 +171,7 @@ vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeTy
 
     // Visualization Groupbox
     OpenGLWidget = new vctQtWidgetRotationOpenGL();
+    OpenGLWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     Layout = new QVBoxLayout;
     Layout->setSpacing(0);
@@ -305,5 +306,5 @@ void vctQtWidgetRotationDoubleRead::SetDisplayMode(const DisplayModeType display
     Layout->addWidget(CurrentWidget);
     UpdateCurrentWidget();
     CurrentWidget->show();
-    resize(sizeHint());
+    repaint();
 }

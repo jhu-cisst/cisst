@@ -49,6 +49,13 @@ http://www.cisst.org/cisst/license.txt.
 
 //#include <cisstStereoVision/svlFilterRGBSwapper.h>
 
+#include <cisstStereoVision/svlSampleImage.h>
+#include <cisstVector/vctDynamicMatrixRef.h>
+#include <cisstStereoVision/svlSampleImageCustom.h>
+#include <cisstStereoVision/svlImageProcessing.h>
+#include "code/svlImageProcessingHelper.h"
+#include "code/svlVideoCodecCVI.h"
+
 #include <cisstStereoVision/svlFilterImageWindow.h>
 
 // #include <cisstStereoVision/svlFilterCallback.h>

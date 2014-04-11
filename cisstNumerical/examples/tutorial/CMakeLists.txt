@@ -20,6 +20,7 @@ if (cisst_FOUND_AS_REQUIRED)
   if (CISST_HAS_CISSTNETLIB)
     add_executable (nmrExTutorial
                     main.cpp
+		    ExampleSavitzkyGolay.h
                     ExampleSVDUserOutputWorkspace.h
                     ExampleSVDImplicitWorkspace.h
                     ExampleSVDWorkspaceSize.h
@@ -28,6 +29,7 @@ if (cisst_FOUND_AS_REQUIRED)
                     ExampleSVDFixedSize.h
                     ExampleSVDFixedSizeData.h
                     ExampleInverse.h
+                    ExampleInverseSPD.h
                     ExamplePInverse.h
                     ExampleLUDynamicData.h
                     ExampleIsOrthonormal.h

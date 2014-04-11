@@ -110,7 +110,7 @@ int svlStreamManager::Initialize(void)
     svlSample *inputsample, *outputsample = 0;
     svlFilterSourceBase * source = StreamSource;
     svlFilterBase *prevfilter, *filter;
-    mtsComponent::InterfacesOutputListType::iterator iteroutputs;
+    mtsComponent::InterfacesOutputMapType::iterator iteroutputs;
     svlFilterOutput * output;
     svlFilterInput * input;
     int err;
@@ -137,7 +137,7 @@ int svlStreamManager::Initialize(void)
     for (iteroutputs = source->InterfacesOutput.begin();
          iteroutputs != source->InterfacesOutput.end();
          iteroutputs ++) {
-        output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+        output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
         if (output) {
             if (!output->IsTrunk() && output->Stream) {
                 err = output->Stream->Initialize();
@@ -193,7 +193,7 @@ int svlStreamManager::Initialize(void)
         for (iteroutputs = filter->InterfacesOutput.begin();
              iteroutputs != filter->InterfacesOutput.end();
              iteroutputs ++) {
-            output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+            output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
             if (output) {
                 if (!output->IsTrunk() && output->Stream) {
                     err = output->Stream->Initialize();
@@ -236,7 +236,7 @@ void svlStreamManager::Release(void)
     Stop();
 
     size_t i;
-    mtsComponent::InterfacesOutputListType::iterator iteroutputs;
+    mtsComponent::InterfacesOutputMapType::iterator iteroutputs;
     svlFilterOutput * output;
     svlFilterInput * input;
 
@@ -272,7 +272,7 @@ void svlStreamManager::Release(void)
         for (iteroutputs = filter->InterfacesOutput.begin();
              iteroutputs != filter->InterfacesOutput.end();
              iteroutputs ++) {
-            output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+            output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
             if (output) {
                 if (!output->IsTrunk() && output->Stream) {
                     output->Stream->Release();
@@ -311,7 +311,7 @@ int svlStreamManager::Play(void)
 
     int err;
     size_t i;
-    mtsComponent::InterfacesOutputListType::iterator iteroutputs;
+    mtsComponent::InterfacesOutputMapType::iterator iteroutputs;
     svlFilterOutput * output;
     svlFilterInput * input;
 
@@ -406,7 +406,7 @@ int svlStreamManager::Play(void)
         for (iteroutputs = filter->InterfacesOutput.begin();
              iteroutputs != filter->InterfacesOutput.end();
              iteroutputs ++) {
-            output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+            output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
             if (output) {
                 if (!output->IsTrunk() && output->Stream) {
                     err = output->Stream->Play();
@@ -442,7 +442,7 @@ void svlStreamManager::Stop(void)
 {
     if (!Running) return;
 
-    mtsComponent::InterfacesOutputListType::iterator iteroutputs;
+    mtsComponent::InterfacesOutputMapType::iterator iteroutputs;
     svlFilterOutput * output;
     svlFilterInput * input;
 
@@ -456,7 +456,7 @@ void svlStreamManager::Stop(void)
         for (iteroutputs = filter->InterfacesOutput.begin();
              iteroutputs != filter->InterfacesOutput.end();
              iteroutputs ++) {
-            output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+            output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
             if (output) {
                 if (!output->IsTrunk() && output->Stream) {
                     output->Stream->Stop();
@@ -552,7 +552,7 @@ void svlStreamManager::InternalStop(unsigned int callingthreadID)
 {
     if (!Running) return;
 
-    mtsComponent::InterfacesOutputListType::iterator iteroutputs;
+    mtsComponent::InterfacesOutputMapType::iterator iteroutputs;
     svlFilterOutput * output;
     svlFilterInput * input;
 
@@ -564,7 +564,7 @@ void svlStreamManager::InternalStop(unsigned int callingthreadID)
         for (iteroutputs = filter->InterfacesOutput.begin();
              iteroutputs != filter->InterfacesOutput.end();
              iteroutputs ++) {
-            output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+            output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
             if (!output->IsTrunk() && output->Stream) {
                 output->Stream->Stop();
             }
@@ -683,7 +683,7 @@ void svlStreamManager::DisconnectAll(void)
     // First make sure that the stream is released
     Release();
 
-    mtsComponent::InterfacesOutputListType::iterator iteroutputs;
+    mtsComponent::InterfacesOutputMapType::iterator iteroutputs;
     svlFilterOutput * output;
     svlFilterInput * input;
 
@@ -695,7 +695,7 @@ void svlStreamManager::DisconnectAll(void)
         for (iteroutputs = filter->InterfacesOutput.begin();
              iteroutputs != filter->InterfacesOutput.end();
              iteroutputs ++) {
-            output = dynamic_cast<svlFilterOutput *>(*iteroutputs);
+            output = dynamic_cast<svlFilterOutput *>(iteroutputs->second);
             if (output) {
                 if (!output->IsTrunk()) {
                     // Call DisconnectAll() on branch recursively

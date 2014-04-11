@@ -123,19 +123,19 @@ protected:
 
     /*! \brief Connect two local interfaces.
         \param clientComponentName Name of client component
-        \param clientInterfaceRequiredName Name of required interface
+        \param clientInterfaceName Name of required/input interface
         \param serverComponentName Name of server component
-        \param serverInterfaceProvidedName Name of provided interface
+        \param serverInterfaceName Name of provided/output interface
         \param clientProcessName Name of client process (ignored in standalone
                configuration, used in networked configuration)
         \return true if successful, false otherwise
         \note  It is assumed that the two components are in the same process. */
-    bool ConnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+    bool ConnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceName,
+                        const std::string & serverComponentName, const std::string & serverInterfaceName,
                         const std::string & clientProcessName = "");
 
-    bool DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                           const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+    bool DisconnectLocally(const std::string & clientComponentName, const std::string & clientInterfaceName,
+                           const std::string & serverComponentName, const std::string & serverInterfaceName);
 
     // If connection between InterfaceComponent.required - InterfaceInternal.provided is
     // disconnected, required interface instance of InterfaceComponent that corresponds

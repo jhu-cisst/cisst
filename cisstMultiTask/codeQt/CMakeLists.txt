@@ -27,6 +27,7 @@ qt4_wrap_cpp (QT_WRAPPED_CPP
               ../mtsQtCommandSelector.h
               ../mtsQtScaleAndSignalTool.h
               ../mtsQtVisualizerShell.h
+              ../mtsQtWidgetIntervalStatistics.h
               ../mtsQtWidgetGenericObject.h
               ../mtsQtWidgetGenericObjectProxy.h
               ../mtsQtWidgetVectorTypes.h
@@ -51,6 +52,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtCommandSelector.cpp
                                 mtsQtScaleAndSignalTool.cpp
                                 mtsQtVisualizerShell.cpp
+                                mtsQtWidgetIntervalStatistics.cpp
                                 mtsQtWidgetFactory.cpp
                                 mtsQtWidgetGenericObject.cpp
                                 mtsQtWidgetGenericObjectProxy.cpp
@@ -66,6 +68,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtCommandSelector.h
                                 mtsQtScaleAndSignalTool.h
                                 mtsQtVisualizerShell.h
+                                mtsQtWidgetIntervalStatistics.h
                                 mtsQtWidgetFactory.h
                                 mtsQtWidgetGenericObject.h
                                 mtsQtWidgetGenericObjectProxy.h

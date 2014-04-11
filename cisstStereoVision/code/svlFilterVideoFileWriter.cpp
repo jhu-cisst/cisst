@@ -481,7 +481,7 @@ bool svlFilterVideoFileWriter::GetEnableTimestampsFile(unsigned int videoch) con
 {
     if (videoch >= CodecParam.size()) {
         CMN_LOG_CLASS_INIT_ERROR << "GetEnableTimestampsFile: video channel out of range: " << videoch << std::endl;
-        return -1.0;
+        return false;
     }
     return EnableTimestampsFile[videoch];
 }

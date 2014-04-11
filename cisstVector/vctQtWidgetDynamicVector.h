@@ -108,6 +108,7 @@ public:
     void SetRange(const vctDynamicVector<value_type> & minimums, const vctDynamicVector<value_type> & maximums);
     void SetStep(const value_type step);
 protected:
+    void UpdateWidgetPrecision(void);
     void UpdateWidgetRange(void);
     value_type GetMinimum(const size_t index) const;
     value_type GetMaximum(const size_t index) const;

@@ -26,9 +26,7 @@ prmForceCartesianGet::~prmForceCartesianGet()
 
 void prmForceCartesianGet::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "Reference frame: " << this->ReferenceFrameMember
-                 << "\nMoving frame: " << this->MovingFrameMember
-                 << "\nForce: " << this->ForceMember
+    outputStream << "Force: " << this->ForceMember
                  << "\nMask: " << this->MaskMember;
 }
 

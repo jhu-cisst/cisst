@@ -30,7 +30,7 @@ mtsMulticastCommandVoid::~mtsMulticastCommandVoid()
 {}
 
 
-void mtsMulticastCommandVoid::AddCommand(BaseType * command) {
+bool mtsMulticastCommandVoid::AddCommand(BaseType * command) {
     if (command) {
         VectorType::iterator it = std::find(Commands.begin(), Commands.end(), command);
         if (it != Commands.end()) {
@@ -39,7 +39,9 @@ void mtsMulticastCommandVoid::AddCommand(BaseType * command) {
             return false;
         }
         this->Commands.push_back(command);
+        return true;
     }
+    return false;
 }
 
 bool mtsMulticastCommandVoid::RemoveCommand(BaseType * command) {

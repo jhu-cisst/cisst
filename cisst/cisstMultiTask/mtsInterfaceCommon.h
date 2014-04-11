@@ -35,43 +35,81 @@ namespace mtsInterfaceCommon {
     // Command object definition
 	struct CommandVoidElement {
         std::string Name;
+
+        CommandVoidElement() {}
+        CommandVoidElement(const std::string &name) : Name(name) {}
+        ~CommandVoidElement() {}
 	};
 
 	struct CommandWriteElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
+
+        CommandWriteElement() {}
+        CommandWriteElement(const std::string &name, const std::string &arg)
+            : Name(name), ArgumentPrototypeSerialized(arg) {}
+        ~CommandWriteElement() {}
 	};
 
     struct CommandReadElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
+
+        CommandReadElement() {}
+        CommandReadElement(const std::string &name, const std::string &arg)
+            : Name(name), ArgumentPrototypeSerialized(arg) {}
+        ~CommandReadElement() {}
 	};
 
 	struct CommandQualifiedReadElement {
 		std::string Name;
         std::string Argument1PrototypeSerialized;
         std::string Argument2PrototypeSerialized;
+
+        CommandQualifiedReadElement() {}
+        CommandQualifiedReadElement(const std::string &name, const std::string &arg1, const std::string &arg2)
+            : Name(name), Argument1PrototypeSerialized(arg1), Argument2PrototypeSerialized(arg2) {}
+        ~CommandQualifiedReadElement() {}
 	};
 
 	struct CommandVoidReturnElement {
 		std::string Name;
         std::string ResultPrototypeSerialized;
+
+        CommandVoidReturnElement() {}
+        CommandVoidReturnElement(const std::string &name, const std::string &arg)
+            : Name(name), ResultPrototypeSerialized(arg) {}
+        ~CommandVoidReturnElement() {}
 	};
 
 	struct CommandWriteReturnElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
         std::string ResultPrototypeSerialized;
+
+        CommandWriteReturnElement() {}
+        CommandWriteReturnElement(const std::string &name, const std::string &arg1, const std::string &arg2)
+            : Name(name), ArgumentPrototypeSerialized(arg1), ResultPrototypeSerialized(arg2) {}
+        ~CommandWriteReturnElement() {}
 	};
 
     // Event object definition
 	struct EventVoidElement {
 		std::string Name;
+
+        EventVoidElement() {}
+        EventVoidElement(const std::string &name) : Name(name) {}
+        ~EventVoidElement() {}
 	};
 
 	struct EventWriteElement {
         std::string Name;
         std::string ArgumentPrototypeSerialized;
+
+        EventWriteElement() {}
+        EventWriteElement(const std::string &name, const std::string &arg)
+            : Name(name), ArgumentPrototypeSerialized(arg) {}
+        ~EventWriteElement() {}
 	};
 
     typedef std::vector<CommandVoidElement>          CommandVoidVector;
@@ -86,7 +124,7 @@ namespace mtsInterfaceCommon {
 	class InterfaceProvidedDescription {
     public:
 		// Interface name
-        std::string InterfaceProvidedName;
+        std::string InterfaceName;
 
 		// Commands
 		CommandVoidVector          CommandsVoid;
@@ -111,7 +149,7 @@ namespace mtsInterfaceCommon {
     class InterfaceRequiredDescription {
     public:
         // Interface name
-        std::string InterfaceRequiredName;
+        std::string InterfaceName;
 
         // Functions (i.e., command pointers)
         CommandPointerNames FunctionVoidNames;
@@ -282,7 +320,7 @@ namespace mtsInterfaceCommon {
 
     inline std::ostream & operator << (std::ostream & output,
                                        const InterfaceProvidedDescription & description) {
-        output << "InterfaceProvided: " << description.InterfaceProvidedName
+        output << "InterfaceProvided: " << description.InterfaceName
                << ", Commands Void(" << description.CommandsVoid.size()
                << ") Write(" << description.CommandsWrite.size()
                << ") Read(" << description.CommandsRead.size()
@@ -297,7 +335,7 @@ namespace mtsInterfaceCommon {
     inline void cmnSerializeRaw(std::ostream & outputStream, const InterfaceProvidedDescription & description)
         throw (std::runtime_error)
     {
-        ::cmnSerializeRaw(outputStream, description.InterfaceProvidedName);
+        ::cmnSerializeRaw(outputStream, description.InterfaceName);
         ::cmnSerializeRaw(outputStream, description.CommandsVoid);
         ::cmnSerializeRaw(outputStream, description.CommandsWrite);
         ::cmnSerializeRaw(outputStream, description.CommandsRead);
@@ -313,7 +351,7 @@ namespace mtsInterfaceCommon {
     inline void cmnDeSerializeRaw(std::istream & inputStream, InterfaceProvidedDescription & description)
         throw (std::runtime_error)
     {
-        ::cmnDeSerializeRaw(inputStream, description.InterfaceProvidedName);
+        ::cmnDeSerializeRaw(inputStream, description.InterfaceName);
         ::cmnDeSerializeRaw(inputStream, description.CommandsVoid);
         ::cmnDeSerializeRaw(inputStream, description.CommandsWrite);
         ::cmnDeSerializeRaw(inputStream, description.CommandsRead);
@@ -328,7 +366,7 @@ namespace mtsInterfaceCommon {
 
     inline std::ostream & operator << (std::ostream & output,
                                        const InterfaceRequiredDescription & description) {
-        output << "InterfaceRequired: " << description.InterfaceRequiredName
+        output << "InterfaceRequired: " << description.InterfaceName
                << ", Functions Void(" << description.FunctionVoidNames.size()
                << ") Write(" << description.FunctionWriteNames.size()
                << ") Read(" << description.FunctionReadNames.size()
@@ -343,7 +381,7 @@ namespace mtsInterfaceCommon {
     inline void cmnSerializeRaw(std::ostream & outputStream, const InterfaceRequiredDescription & description)
         throw (std::runtime_error)
     {
-        ::cmnSerializeRaw(outputStream, description.InterfaceRequiredName);
+        ::cmnSerializeRaw(outputStream, description.InterfaceName);
         ::cmnSerializeRaw(outputStream, description.FunctionVoidNames);
         ::cmnSerializeRaw(outputStream, description.FunctionWriteNames);
         ::cmnSerializeRaw(outputStream, description.FunctionReadNames);
@@ -360,7 +398,7 @@ namespace mtsInterfaceCommon {
     inline void cmnDeSerializeRaw(std::istream & inputStream, InterfaceRequiredDescription & description)
         throw (std::runtime_error)
     {
-        ::cmnDeSerializeRaw(inputStream, description.InterfaceRequiredName);
+        ::cmnDeSerializeRaw(inputStream, description.InterfaceName);
         ::cmnDeSerializeRaw(inputStream, description.FunctionVoidNames);
         ::cmnDeSerializeRaw(inputStream, description.FunctionWriteNames);
         ::cmnDeSerializeRaw(inputStream, description.FunctionReadNames);

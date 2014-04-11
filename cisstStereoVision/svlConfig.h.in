@@ -72,6 +72,9 @@ http://www.cisst.org/cisst/license.txt.
 // Support for BLACKMAGIC DECKLINK
 #cmakedefine01 CISST_SVL_HAS_BM_DECKLINK
 
+// Whether or not to use cisstNetlib
+#cmakedefine01 CISST_SVL_HAS_CISSTNETLIB
+
 #endif // _svlConfig_h
 
 

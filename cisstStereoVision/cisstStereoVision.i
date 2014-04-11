@@ -7,8 +7,7 @@
   Author(s):	Anton Deguet
   Created on:   2009-01-26
 
-  (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "swigrun.i"
 
 %import "cisstConfig.h"
+%import "cisstStereoVision/svlConfig.h"
 
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
@@ -70,8 +70,48 @@ http://www.cisst.org/cisst/license.txt.
 
  // %include "cisstStereoVision/svlFilterRGBSwapper.h"
 
+%include "cisstStereoVision/svlSampleImage.h"
+
+//%ignore svlSampleImageCustom::GetMatrixRef;
+
+%include "cisstStereoVision/svlSampleImageCustom.h"
+
+
+%template(svlSampleImageRGB) svlSampleImageCustom<unsigned char,  3, 1>;
+
+%ignore FitEllipse;
+%ignore SetFilterCompactness;
+%ignore SetFilterArea;
+
+///\note SWIG is very picky about string matching the signature needs to be exactly the same
+%rename(RectifyPython) Rectify(svlSampleImage* src_img,
+                               unsigned int src_videoch,
+                               svlSampleImage* dst_img,
+                               unsigned int dst_videoch,
+                               bool interpolation,
+                               Internals& internals);
+
+%include "cisstStereoVision/svlImageProcessing.h"
+
+%rename(SetFromCameraCalibrationPython) SetFromCameraCalibration(unsigned int height,unsigned int width,vct3x3 R,vct2 f, vct2 c, vctFixedSizeVector<double,7> k, double alpha, unsigned int videoch);
+
+%include "code/svlImageProcessingHelper.h"
+
+%apply double& INOUT { double & framerate };
+
+%apply unsigned int & INOUT { unsigned int & };
+
+#if CISST_SVL_HAS_ZLIB
+%include "code/svlVideoCodecCVI.h"
+
+%extend svlVideoCodecCVI {
+   int ReadPython(svlSampleImage &image, const unsigned int videoch, const bool noresize) {
+       return $self->Read(NULL, image, videoch, noresize);
+   }
+}
+#endif  // CISST_SVL_HAS_ZLIB
+
 %include "cisstStereoVision/svlFilterImageWindow.h"
-%import "cisstStereoVision/svlConfig.h"
 #if CISST_SVL_HAS_OPENCV2
 %include "cisstStereoVision/svlFilterImageCameraCalibrationOpenCV.h"
 #endif //CISST_SVL_HAS_OPENCV2

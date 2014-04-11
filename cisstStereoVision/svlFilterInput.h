@@ -48,11 +48,11 @@ class CISST_EXPORT svlFilterInput: public mtsInterfaceInput
     svlFilterInput(svlFilterBase* owner, bool trunk, const std::string &name);
     ~svlFilterInput();
 
-    bool CouldConnectTo(mtsInterfaceProvidedOrOutput * CMN_UNUSED(interfaceProvidedOrOutput)) {
+    bool CouldConnectTo(mtsInterfaceOutput * CMN_UNUSED(interfaceProvidedOrOutput)) {
         return true;
     }
 
-    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
+    bool ConnectTo(mtsInterfaceOutput * interfaceProvidedOrOutput);
 
     bool Disconnect(void) {
         return true;

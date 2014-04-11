@@ -30,7 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsStateArrayBase.h>
-#include <cisstMultiTask/mtsHistory.h>
 
 #include <vector>
 #include <typeinfo>
@@ -128,9 +127,6 @@ public:
 	bool Get(index_type index, mtsGenericObject & object) const;
 	bool Set(index_type index, const mtsGenericObject & object);
     //@}
-
-	/*! Get data vector from array. */
-    virtual bool GetHistory(index_type indexStart, index_type indexEnd, mtsHistory<_elementType> & data) const;
 };
 
 
@@ -166,32 +162,6 @@ bool mtsStateArray<_elementType>::Get(index_type index, mtsGenericObject & objec
     }
     CMN_LOG_RUN_ERROR << "mtsStateArray::Get -- type mismatch, expected " << typeid(_elementType).name() << std::endl;
 	return false;
-}
-
-template <class _elementType>
-bool mtsStateArray<_elementType>::GetHistory(index_type indexStart, index_type indexEnd,
-                                             mtsHistory<_elementType> & data) const
-{
-    // Make sure vector is big enough
-    size_t numToCopy = (Data.size() + indexEnd - indexStart + 1) % Data.size();
-    if (data.size() < numToCopy) {
-		CMN_LOG_INIT_ERROR << "Class mtsStateArray: GetHistory(): provided array too small, size = "
-                           << data.size() << ", requested copy = " << numToCopy << std::endl;
-        return false;
-    }
-    // PK: probably should use iterators instead (or perhaps a cisstVector fastcopy?)
-    size_t i, j;
-    if (indexEnd < indexStart) {  // wrap-around case
-        for (i=0, j=indexStart; j < Data.size(); i++, j++)
-            data[i] = Data[j];
-        for (j=0; j <= indexEnd; i++, j++)
-            data[i] = Data[j];
-    }
-    else {
-        for (i=0; i < numToCopy; i++)
-            data[i] = Data[indexStart+i];
-    }
-	return true;
 }
 
 #endif // _mtsStateArray_h

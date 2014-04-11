@@ -295,8 +295,10 @@ int svlVidCapSrcBMD::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             // name
             if(result!= S_OK)
                 description = "BlackMagic DeckLink";
-            else
-                description = (char *) deviceNameBSTR;
+            else {
+                std::wstring name(deviceNameBSTR);
+                description = std::string(name.begin(), name.end());
+            }
 
 #else
 #if (CISST_OS == CISST_LINUX)
@@ -567,8 +569,8 @@ int svlVidCapSrcBMD::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCa
         if(temp_displaymode != NULL){
             supported_displayModes.push_back(temp_displaymode->GetDisplayMode());
 
-            long int numerator = 0;
-            long int denominator = 0;
+            BMDTimeValue numerator = 0;
+            BMDTimeValue denominator = 0;
 
             temp_displaymode->GetFrameRate(&denominator,&numerator);
 
@@ -627,7 +629,7 @@ int svlVidCapSrcBMD::SetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
     height = format.height;
     frameRate = format.framerate;
 
-    displayMode = format.custom_framerate;//bmdDisplayMode_lookup[width_height_framerate(width,height,frameRate)];
+    displayMode = static_cast<BMDDisplayMode> (format.custom_framerate);//bmdDisplayMode_lookup[width_height_framerate(width,height,frameRate)];
 
     return SVL_OK;
 }

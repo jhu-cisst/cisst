@@ -27,6 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsComponentDispatcher_h
 #define _mtsComponentDispatcher_h
 
+#error mtsComponentDispatcher is obsolete: use component ExecOut/ExecIn instead
+
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>

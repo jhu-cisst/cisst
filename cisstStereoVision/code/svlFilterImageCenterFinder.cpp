@@ -102,6 +102,16 @@ int svlFilterImageCenterFinder::GetRadius(int &x, int &y, unsigned int videoch) 
     return SVL_OK;
 }
 
+int svlFilterImageCenterFinder::GetEllipse(svlEllipse &ellipse, unsigned int videoch) const
+{
+    if (!IsRunning()) return SVL_FAIL;
+    if (videoch >= RadiusX.size()) return SVL_FAIL;
+
+    ellipse = Ellipse[videoch];
+
+    return SVL_OK;
+}
+
 void svlFilterImageCenterFinder::SetTrajectorySmoothing(double smoothing)
 {
     Smoothing = smoothing;

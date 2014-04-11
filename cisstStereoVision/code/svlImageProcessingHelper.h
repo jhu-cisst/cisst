@@ -6,8 +6,7 @@
   Author(s):  Balazs Vagvolgyi
   Created on: 2010
 
-  (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,6 +31,10 @@ http://www.cisst.org/cisst/license.txt.
 #if CISST_SVL_HAS_CISSTNETLIB
     #include <cisstNumerical/nmrNetlib.h>
 #endif // CISST_SVL_HAS_CISSTNETLIB
+
+
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
 
 
 class svlImageProcessingInternals
@@ -118,36 +121,36 @@ namespace svlImageProcessingHelper
     // Convolution //
     /////////////////
 
-    void ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
-    void ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
-    void ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
-    void ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
-    void ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
+    void CISST_EXPORT ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
+    void CISST_EXPORT ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
+    void CISST_EXPORT ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
+    void CISST_EXPORT ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
+    void CISST_EXPORT ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal, bool absres);
 
-    void ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
-    void ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
-    void ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
-    void ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
-    void ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
+    void CISST_EXPORT ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
+    void CISST_EXPORT ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
+    void CISST_EXPORT ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
+    void CISST_EXPORT ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
+    void CISST_EXPORT ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
 
     //////////////
     // Resizing //
     //////////////
 
-    void ResampleMono8(unsigned char* src, const unsigned int srcwidth, const unsigned int srcheight,
+    void CISST_EXPORT ResampleMono8(unsigned char* src, const unsigned int srcwidth, const unsigned int srcheight,
                        unsigned char* dst, const unsigned int dstwidth, const unsigned int dstheight);
-    void ResampleAndInterpolateHMono8(unsigned char* src, const unsigned int srcwidth,
+    void CISST_EXPORT ResampleAndInterpolateHMono8(unsigned char* src, const unsigned int srcwidth,
                                       unsigned char* dst, const unsigned int dstwidth,
                                       const unsigned int height);
-    void ResampleAndInterpolateVMono8(unsigned char* src, const unsigned int srcheight,
+    void CISST_EXPORT ResampleAndInterpolateVMono8(unsigned char* src, const unsigned int srcheight,
                                       unsigned char* dst, const unsigned int dstheight,
                                       const unsigned int width);
-    void ResampleRGB24(unsigned char* src, const unsigned int srcwidth, const unsigned int srcheight,
+    void CISST_EXPORT ResampleRGB24(unsigned char* src, const unsigned int srcwidth, const unsigned int srcheight,
                        unsigned char* dst, const unsigned int dstwidth, const unsigned int dstheight);
-    void ResampleAndInterpolateHRGB24(unsigned char* src, const unsigned int srcwidth,
+    void CISST_EXPORT ResampleAndInterpolateHRGB24(unsigned char* src, const unsigned int srcwidth,
                                       unsigned char* dst, const unsigned int dstwidth,
                                       const unsigned int height);
-    void ResampleAndInterpolateVRGB24(unsigned char* src, const unsigned int srcheight,
+    void CISST_EXPORT ResampleAndInterpolateVRGB24(unsigned char* src, const unsigned int srcheight,
                                       unsigned char* dst, const unsigned int dstheight,
                                       const unsigned int width);
 
@@ -155,16 +158,16 @@ namespace svlImageProcessingHelper
     // Deinterlacing //
     ///////////////////
 
-    void DeinterlaceBlending(unsigned char* buffer, const unsigned int width, const unsigned int height);
-    void DeinterlaceDiscarding(unsigned char* buffer, const unsigned int width, const unsigned int height);
-    void DeinterlaceAdaptiveBlending(unsigned char* buffer, const unsigned int width, const unsigned int height);
-    void DeinterlaceAdaptiveDiscarding(unsigned char* buffer, const unsigned int width, const unsigned int height);
+    void CISST_EXPORT DeinterlaceBlending(unsigned char* buffer, const unsigned int width, const unsigned int height);
+    void CISST_EXPORT DeinterlaceDiscarding(unsigned char* buffer, const unsigned int width, const unsigned int height);
+    void CISST_EXPORT DeinterlaceAdaptiveBlending(unsigned char* buffer, const unsigned int width, const unsigned int height);
+    void CISST_EXPORT DeinterlaceAdaptiveDiscarding(unsigned char* buffer, const unsigned int width, const unsigned int height);
 
     ///////////////////
     // Rectification //
     ///////////////////
 
-    class RectificationInternals : public svlImageProcessingInternals
+    class CISST_EXPORT RectificationInternals : public svlImageProcessingInternals
     {
     public:
         RectificationInternals();
@@ -206,7 +209,7 @@ namespace svlImageProcessingHelper
     // Exposure //
     //////////////
 
-    class ExposureInternals : public svlImageProcessingInternals
+    class CISST_EXPORT ExposureInternals : public svlImageProcessingInternals
     {
     public:
         ExposureInternals();
@@ -233,7 +236,7 @@ namespace svlImageProcessingHelper
     // BlobDetector //
     //////////////////
 
-    class BlobDetectorInternals : public svlImageProcessingInternals
+    class CISST_EXPORT BlobDetectorInternals : public svlImageProcessingInternals
     {
     public:
         BlobDetectorInternals();
@@ -285,7 +288,7 @@ namespace svlImageProcessingHelper
 
 #if CISST_SVL_HAS_CISSTNETLIB
 
-    class EllipseFitterInternals : public svlImageProcessingInternals
+    class CISST_EXPORT EllipseFitterInternals : public svlImageProcessingInternals
     {
     public:
         EllipseFitterInternals();
@@ -315,7 +318,7 @@ namespace svlImageProcessingHelper
 
 #elif CISST_SVL_HAS_OPENCV || CISST_SVL_HAS_OPENCV2
 
-    class EllipseFitterInternals : public svlImageProcessingInternals
+    class CISST_EXPORT EllipseFitterInternals : public svlImageProcessingInternals
     {
     public:
         EllipseFitterInternals();

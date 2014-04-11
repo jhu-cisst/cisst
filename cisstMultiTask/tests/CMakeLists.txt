@@ -40,6 +40,7 @@ set (SOURCE_FILES
      mtsMacrosTest.cpp
      mtsMatrixTest.cpp
      mtsSerializationTest.cpp
+     mtsSocketProxyTest.cpp
      # mtsManagerGlobalTest.cpp
      mtsManagerLocalTest.cpp
      )
@@ -57,6 +58,7 @@ set (HEADER_FILES
      mtsMacrosTest.h
      mtsMatrixTest.h
      mtsSerializationTest.h
+     mtsSocketProxyTest.h
      # mtsManagerGlobalTest.h
      mtsManagerLocalTest.h
     )

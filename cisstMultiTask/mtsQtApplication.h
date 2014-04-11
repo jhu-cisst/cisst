@@ -82,15 +82,15 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtApplicationConstructorArg);
 
-class CISST_EXPORT mtsQtApplication : public mtsTaskContinuous
+class CISST_EXPORT mtsQtApplication: public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_ALL)
 
-    QApplication *qtapp;   // Could also use global variable qApp
+    QApplication * QtApp;   // Could also use global variable qApp
     int ArgcCopy;
     char **ArgvCopy;
-    QBasicTimer *Timer;
-    BasicTimerHandler *timerHandler;
+    QBasicTimer * Timer;
+    BasicTimerHandler * TimerHandler;
 
 public:
     mtsQtApplication(const std::string &name, int &argc, char **argv);
