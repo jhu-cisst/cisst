@@ -278,13 +278,24 @@ mtsTask::mtsTask(const std::string & name,
     InitializationDelay(3.0 * cmn_s), // if this value is modified, update documentation in header file
     StateChange(),
     StateChangeSignal(),
-    StateTable(sizeStateTable, "StateTable"),
+    StateTable(sizeStateTable, "Default"),
+#if CISST_MTS_SUPPORT_FDD
+    StateTableMonitor(sizeStateTable, "Monitor"),
+#endif
     OverranPeriod(false),
     ThreadStartData(0),
     ReturnValue(0),
     RunEventCalled(false)
 {
     this->AddStateTable(&this->StateTable);
+#if CISST_MTS_SUPPORT_FDD
+    this->AddStateTable(&this->StateTableMonitor);
+    // Expose Period of the monitor state table to its provided interface
+    mtsInterfaceProvided * provided = GetInterfaceProvided(mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));
+    CMN_ASSERT(provided);
+    provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.Period, "GetPeriod");
+#endif
+
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
     // ExecIn interface is optional; does not need a mailbox
     ExecIn = this->AddInterfaceRequiredUsingMailbox(mtsManagerComponentBase::InterfaceNames::InterfaceExecIn, 0, MTS_OPTIONAL);

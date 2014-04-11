@@ -91,6 +91,12 @@ protected:
     /*! The state data table object to store the states of the task. */
     mtsStateTable StateTable;
 
+    /*! State table to monitor run-time states of components for fault detection and
+        diagnosis purpose */
+#if CISST_MTS_SUPPORT_FDD
+    mtsStateTable StateTableMonitor;
+#endif
+
     /*! True if the task took more time to do computation than allocated time.
       */
     bool OverranPeriod;
@@ -233,10 +239,17 @@ public:
     /*! Return the average period. */
     double GetAveragePeriod(void) const { return StateTable.GetAveragePeriod(); }
 
-    /*! Return the name of this state table. */
+    /*! Return the name of default state table. */
     inline const std::string GetDefaultStateTableName(void) const {
         return StateTable.GetName();
     }
+
+    /*! Return the name of monitoring state table. */
+#if CISST_MTS_SUPPORT_FDD
+    inline const std::string GetMonitoringStateTableName(void) const {
+        return StateTableMonitor.GetName();
+    }
+#endif
 
     /*! Return a pointer to the default state table.  See
       GetStateTable and GetDefaultStateTableName. */

@@ -197,11 +197,17 @@ private:
     /*! Set up system logger that allows collecting system-wide logs across network */
     void SetupSystemLogger(void);
 
-    /*! If Manager Component Client (MCC) is ready to forward logs to
+    /*! Check if Manager Component Client (MCC) is ready to forward logs to 
         Manager Component Server (MCS) */
     bool MCCReadyForLogForwarding(void) const;
 
-public:
+    /*! Monitoring components for fault detection and diagnosis */
+#if CISST_MTS_SUPPORT_FDD
+    typedef std::vector<mtsMonitorComponent*> MonitorComponentList;
+    MonitorComponentList MonitorComponents;
+#endif
+
+public:    
     /*! Callback function for system-wide thread-safe logging */
     static void LogDispatcher(const char * str, int len);
 
@@ -234,8 +240,9 @@ protected:
     void Initialize(void);
     void InitializeLocal(void);
 
-    /*! \brief Create internal manager components when LCM is instantiated */
-    bool CreateManagerComponents(void);
+    /*! \brief Create internal components when LCM is instantiated.  For now, MCS, MCC,
+               and monitoring components are created. */
+    bool CreateInternalComponents(void);
 
     /*! \brief Add an internal manager component
         \param processName Name of this process (or this LCM)

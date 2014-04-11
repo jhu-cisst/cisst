@@ -647,7 +647,7 @@ mtsStateTable * mtsComponent::GetStateTable(const std::string & stateTableName)
 bool mtsComponent::AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided)
 {
     const std::string tableName = existingStateTable->GetName();
-    const std::string interfaceName = "StateTable" + tableName;
+    const std::string interfaceName = mtsStateTable::GetNameOfStateTableInterface(tableName);
     if (!this->StateTables.AddItem(tableName,
                                    existingStateTable,
                                    CMN_LOG_LEVEL_INIT_ERROR)) {
