@@ -39,6 +39,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 
+#if CISST_HAS_SAFETY_PLUGINS
+#include "cisstMonitor.h"
+#endif
+
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
@@ -529,6 +533,18 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     void InterfaceInternalCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg);
+
+    //-------------------------------------------------------------------------
+    //  Safety Framework Plug-ins
+    //-------------------------------------------------------------------------
+#if CISST_HAS_SAFETY_PLUGINS
+protected:
+    typedef std::vector<SF::cisstMonitor> MonitorTargetsType;
+    MonitorTargetsType MonitorTargets;
+
+public:
+    virtual bool AddMonitorTarget(SF::cisstMonitor & newMonitorTarget);
+#endif
 
  public:
     /*! Send a human readable description of the component. */

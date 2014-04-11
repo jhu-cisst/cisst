@@ -1113,3 +1113,18 @@ bool mtsComponent::SetReplayTime(const double time) {
     }
     return true;
 }
+
+//-------------------------------------------------------------------------
+//  Safety Framework Plug-ins
+//-------------------------------------------------------------------------
+#if CISST_HAS_SAFETY_PLUGINS
+bool mtsComponent::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
+{
+    // MJ TODO: no duplicate entry check for now 
+    MonitorTargets.push_back(newMonitorTarget);
+
+    CMN_LOG_CLASS_RUN_DEBUG << "New monitoring target added: " << newMonitorTarget << std::endl;
+
+    return true;
+}
+#endif

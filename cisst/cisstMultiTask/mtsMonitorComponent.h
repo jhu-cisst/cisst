@@ -27,8 +27,11 @@
 #define _mtsMonitorComponent_h
 
 #include <cisstCommon/cmnNamedMap.h>
+#include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+
+#include "cisstMonitor.h"
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -73,6 +76,11 @@ class CISST_EXPORT mtsMonitorComponent : public mtsTaskPeriodic
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
+    /*! Named map of components being monitored */
+    typedef cmnNamedMap<mtsComponent> MonitoringTargetsType;
+    MonitoringTargetsType * MonitoringTargets;
+
+
     class TargetComponent {
     public:
         // Name of target component
@@ -96,13 +104,28 @@ protected:
     /*! Print list of target components */
     void PrintTargetComponents(void);
 
+    /*! Install filter to component */
+    // [SFUPDATE]
+    //bool InstallFilters(mtsComponent * component);
+    //bool InstallFilters(mtsTask * task);
+    //bool InstallFilters(mtsTaskContinuous * taskContinuous);
+    //bool InstallFilters(mtsTaskFromCallback * taskFromCallback);
+    //bool InstallFilters(mtsTaskFromSignal * taskFromSignal);
+    bool InstallFilters(TargetComponent * entry, mtsTaskPeriodic * taskPeriodic);
+
 public:
     mtsMonitorComponent();
     ~mtsMonitorComponent();
 
-    /*! Add and remove target component to monitor */
-    bool RegisterTargetComponent(mtsTaskPeriodic * task); // MJ: task name can be used instead
-    bool RemoveTargetComponent(const std::string & taskName);
+    /*! Pass monitoring target information to a component which keeps actual 
+        monitoring target specifications (i.e., cisstMonitor instances). */
+    bool AddMonitorTargetToComponent(SF::cisstMonitor & newMonitorTarget);
+
+    /*! Register component that has monitoring target */
+    bool RegisterComponent(const std::string & componentName);
+
+    /*! Unregister component from the registry */
+    bool UnregisterComponent(const std::string & componentName);
 
     void Configure(const std::string & CMN_UNUSED(filename) = ""){}
     void Startup(void) {};

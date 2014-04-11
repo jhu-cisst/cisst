@@ -33,9 +33,9 @@ mtsSafetyCoordinator::mtsSafetyCoordinator()
 
 mtsSafetyCoordinator::~mtsSafetyCoordinator()
 {
-    if (!Monitors.empty()) {
-        for (size_t i = 0; i < Monitors.size(); ++i)
-            delete Monitors[i];
+    if (!Supervisors.empty()) {
+        for (size_t i = 0; i < Supervisors.size(); ++i)
+            delete Supervisors[i];
     }
 }
 
@@ -63,9 +63,42 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const std::string & targetUID, const
         return false;
     }
     
-    // TODO: create new monitor with (uid, json)
-    // TODO: insert new monitor to monitor list
-    // TODO: embed new monitor to cisst system
+    // Monitor which is currently of type mtsTaskPeriodic cannot be monitored(?)
+    const std::string targetComponentName = newMonitorTarget.GetTargetID().ComponentName;
+    if (targetComponentName.compare(mtsMonitorComponent::GetNameOfMonitorComponent()) == 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "Monitor cannot monitor itself: " << newMonitorTarget.GetTargetID().ComponentName << std::endl;
+        return false;
+    }
+
+    // Add new monitor target to monitor 
+    mtsMonitorComponent * monitor = Supervisors[0];
+    if (!monitor->AddMonitorTargetToComponent(newMonitorTarget)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to add monitor target to monitor: " << newMonitorTarget << std::endl;
+        return false;
+    }
+
+    if (!monitor->RegisterComponent(targetComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to register component \"" << targetComponentName << "\" to supervisor component" << std::endl;
+        return false;
+    }
+
+    // Connect new monitoring target component to supervisor component 
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    mtsTask * task = LCM->GetComponentAsTask(targetComponentName); 
+    if (!task) { // [SFUPDATE]
+        CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << targetComponentName << "\"" << std::endl;
+        return false;
+    }
+    if (!LCM->Connect(mtsMonitorComponent::GetNameOfMonitorComponent(), monitor->GetNameOfStateTableAccessInterface(targetComponentName),
+                      targetComponentName, mtsStateTable::GetNameOfStateTableInterface(task->GetMonitoringStateTableName())))
+    {
+        if (!monitor->UnregisterComponent(targetComponentName)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to unregister component \"" << targetComponentName << "\" from monitor component" << std::endl;
+        }
+
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to connect component \"" << targetComponentName << "\" to monitor component" << std::endl;
+        return false;
+    }
 
     std::cout << "SUCCESS: " << targetUID << "\nJSON: " << json.GetJSON() << std::endl;
 
@@ -149,8 +182,6 @@ JSON: {
     newMonitorTarget.SetAddressesToPublish(outputTargets);
     newMonitorTarget.SetOutputType(SF::Monitor::GetOutputFromString(outputType));
 
-    std::cout << newMonitorTarget << std::endl;
-
     return true;
 }
 
@@ -159,7 +190,7 @@ bool mtsSafetyCoordinator::CreateMonitor(void)
     // MJ: For now, keep monitor component only one that monitor all components in the
     // same process.  More monitor components can be dynamically deployed later
     // considering run-time overhead of fault detection and diagnosis methods.
-    if (!Monitors.empty()) {
+    if (!Supervisors.empty()) {
         CMN_LOG_CLASS_RUN_WARNING << "Monitor was already intialized" << std::endl;
         return true;
     }
@@ -172,7 +203,7 @@ bool mtsSafetyCoordinator::CreateMonitor(void)
         return false;
     }
 
-    Monitors.push_back(monitor);
+    Supervisors.push_back(monitor);
 
     return true;
 }
