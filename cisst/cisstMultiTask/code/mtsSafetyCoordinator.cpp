@@ -51,7 +51,7 @@ bool mtsSafetyCoordinator::AddMonitor(SF::Monitor * baseMonitor)
     SF::cisstTargetID * targetID = dynamic_cast<SF::cisstTargetID*>(monitor->GetTargetID());
     CMN_ASSERT(targetID);
 
-    const std::string targetUID = monitor->GetTargetUID();
+    const std::string targetUID = monitor->GetUIDAsString();
     const std::string monitorInJson = monitor->GetMonitorJSON();
 
     // Check if same monitoring target is already registered

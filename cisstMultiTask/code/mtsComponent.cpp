@@ -70,6 +70,10 @@ void mtsComponent::Initialize(void)
     InterfaceProvidedToManager = 0;
 
     ReplayMode = false;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    MonitorTargetSet = SF::Monitor::TARGET_INVALID;
+#endif
 }
 
 
@@ -1128,7 +1132,6 @@ bool mtsComponent::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
 
     return true;
 }
-*/
 
 bool mtsComponent::FindMonitorTargetInstalled(const SF::Monitor::TargetType type) const
 {
@@ -1144,5 +1147,6 @@ void mtsComponent::UninstallMonitorTarget(const SF::Monitor::TargetType type)
 {
     MonitorTargetSet &= ~type;
 }
+*/
 
 #endif
