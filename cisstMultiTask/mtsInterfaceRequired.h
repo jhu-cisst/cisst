@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsInterfaceRequired_h
 #define _mtsInterfaceRequired_h
 
-#include <cisstMultiTask/mtsInterface.h>
+#include <cisstMultiTask/mtsInterfaceRequiredOrInput.h>
 
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstOSAbstraction/osaThread.h>
@@ -82,7 +82,7 @@ class mtsEventHandlerList;
   with a real robot), at this time it is not worth the trouble.
 */
 
-class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
+class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -99,9 +99,6 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
 
  protected:
 
-    /*! Indicates if the interface must be connected. */
-    mtsRequiredType Required;
-
     /*! Mailbox (if supported). */
     mtsMailBox * MailBox;
 
@@ -115,7 +112,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     size_t ArgumentQueuesSize;
 
     /*! Default constructor. Does nothing, should not be used. */
-    mtsInterfaceRequired(void);
+    mtsInterfaceRequired(void) {}
 
     /*! Thread signal used for blocking calls.  It is shared between
       all functions */
@@ -149,7 +146,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     /*! Default destructor. */
     virtual ~mtsInterfaceRequired();
 
-    const mtsInterfaceProvided * GetConnectedInterface(void) const;
+    const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const;
 
     /*! Set the desired size for the event handlers mail box.  If
       queueing has been enabled for this interface, a single mailbox
@@ -217,16 +214,11 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     virtual mtsCommandWriteBase * GetEventHandlerWrite(const std::string & eventName) const;
     //@}
 
-    /* adeguet - seems deprecated or at least not used anywhere?
-    inline bool CouldConnectTo(mtsInterfaceProvided * CMN_UNUSED(interfaceProvidedOrOutput)) {
+    inline bool CouldConnectTo(mtsInterfaceProvidedOrOutput * CMN_UNUSED(interfaceProvidedOrOutput)) {
         return true;
-        } */
-
-    bool ConnectTo(mtsInterfaceProvided * interfaceProvided);  // used by mtsManagerComponentClient.cpp
-    //    bool Disconnect(void) { return DetachCommands(); }  // Should be deprecated -- adeguet1 OrOutput
-
-    /*! Check if this interface is required or not for the component to function. */
-    mtsRequiredType IsRequired(void) const;
+    }
+    bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);  // Should be deprecated
+    bool Disconnect(void) { return DetachCommands(); }  // Should be deprecated
 
     /*!
       \todo update documentation
@@ -242,7 +234,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     void BlockingCommandReturnExecutedHandler(void);
 
     bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
-    bool DetachCommands(void); // used by mtsManagerComponentClient
+    bool DetachCommands(void);
 
     void GetEventList(mtsEventHandlerList & eventList);
     bool CheckEventList(mtsEventHandlerList & eventList) const;

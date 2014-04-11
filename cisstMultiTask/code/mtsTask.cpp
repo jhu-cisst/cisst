@@ -136,10 +136,10 @@ void mtsTask::StartupInternal(void) {
 
     // Loop through the required interfaces and make sure they are all connected. This extra check is probably not needed.
     bool success = true;
-    InterfacesRequiredMapType::const_iterator requiredIterator = InterfacesRequired.begin();
-    const mtsInterfaceProvided * connectedInterface;
+    InterfacesRequiredOrInputMapType::const_iterator requiredIterator = InterfacesRequiredOrInput.begin();
+    const mtsInterfaceProvidedOrOutput * connectedInterface;
     for (;
-         requiredIterator != InterfacesRequired.end();
+         requiredIterator != InterfacesRequiredOrInput.end();
          requiredIterator++) {
         connectedInterface = requiredIterator->second->GetConnectedInterface();
         if (!connectedInterface) {
@@ -177,7 +177,7 @@ void mtsTask::CleanupInternal() {
     StateTables.ForEachVoid(&mtsStateTable::Cleanup);
 
     // Perform Cleanup on all interfaces provided
-    InterfacesProvided.ForEachVoid(&mtsInterfaceProvided::Cleanup);
+    InterfacesProvidedOrOutput.ForEachVoid(&mtsInterfaceProvidedOrOutput::Cleanup);
 
     if (InterfaceProvidedToManagerCallable) {
         delete InterfaceProvidedToManagerCallable;
@@ -344,7 +344,7 @@ mtsTask::mtsTask(const std::string & name,
         ExecIn->AddEventHandlerVoid(&mtsTask::RunEventHandler, this, "RunEvent", MTS_EVENT_NOT_QUEUED);
         ExecIn->AddEventHandlerWrite(&mtsTask::ChangeStateEventHandler, this, "ChangeStateEvent", MTS_EVENT_NOT_QUEUED);
     }
-    else
+    else 
         CMN_LOG_CLASS_INIT_ERROR << "Failed to add ExecIn interface to " << this->GetName() << std::endl;
     // ExecOut interface
     ExecOut = this->AddInterfaceProvided(mtsManagerComponentBase::InterfaceNames::InterfaceExecOut);
@@ -353,7 +353,7 @@ mtsTask::mtsTask(const std::string & name,
         ExecOut->AddEventVoid(RunEventInternal, "RunEvent");
         ExecOut->AddEventWrite(ChangeStateEvent, "ChangeStateEvent", this->State);
     }
-    else
+    else 
         CMN_LOG_CLASS_INIT_ERROR << "Failed to add ExecOut interface to " << this->GetName() << std::endl;
 }
 
@@ -424,7 +424,8 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const st
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
     }
     if (interfaceProvided) {
-        if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {
+        if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided)) {
+            InterfacesProvided.push_back(interfaceProvided);
             return interfaceProvided;
         }
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: task " << this->GetName() << " unable to add interface \""
@@ -490,6 +491,14 @@ void mtsTask::ProcessManagerCommandsIfNotActive()
 bool mtsTask::CheckForOwnThread(void) const
 {
     return (osaGetCurrentThreadId() == Thread.GetId());
+}
+
+void mtsTask::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "Task name: " << Name << std::endl;
+    StateTable.ToStream(outputStream);
+    InterfacesProvidedOrOutput.ToStream(outputStream);
+    InterfacesRequiredOrInput.ToStream(outputStream);
 }
 
 

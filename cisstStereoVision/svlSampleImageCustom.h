@@ -588,7 +588,7 @@ public:
         else return InvalidMatrix;
     }
 
-    vctDynamicConstMatrixRef<_ValueType> GetMatrixRef(const unsigned int videochannel = 0) const
+    const vctDynamicMatrixRef<_ValueType> GetMatrixRef(const unsigned int videochannel = 0) const
     {
         if (videochannel < _VideoChannels) return Image[videochannel];
         else return InvalidMatrix;

@@ -44,9 +44,9 @@ svlFilterInput::~svlFilterInput()
     if (Buffer) delete Buffer;
 }
 
-bool svlFilterInput::ConnectTo(mtsInterfaceOutput * interfaceOutput)
+bool svlFilterInput::ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
 {
-    svlFilterOutput * output = dynamic_cast<svlFilterOutput *>(interfaceOutput);
+    svlFilterOutput * output = dynamic_cast<svlFilterOutput *>(interfaceProvidedOrOutput);
     if (output) {
         output->ConnectInternal(this);
         CMN_LOG_CLASS_INIT_VERBOSE << "ConnectTo: output filter \"" << output->GetName()
@@ -54,7 +54,7 @@ bool svlFilterInput::ConnectTo(mtsInterfaceOutput * interfaceOutput)
                                    << "\"" << std::endl;
         return true;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: provided/output interface \"" << interfaceOutput->GetName()
+    CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: provided/output interface \"" << interfaceProvidedOrOutput->GetName()
                              << "\" can't be connected to input filter \"" << this->GetName()
                              << "\" as it is not of type svlFilterOutput" << std::endl;
     return false;

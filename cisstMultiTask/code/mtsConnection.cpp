@@ -54,7 +54,7 @@ std::string mtsConnection::GetClientComponentName(void) const {
     return ConnectionDescription.Client.ComponentName;
 }
 
-std::string mtsConnection::GetClientInterfaceName(void) const {
+std::string mtsConnection::GetClientInterfaceRequiredName(void) const {
     return ConnectionDescription.Client.InterfaceName;
 }
 
@@ -66,7 +66,7 @@ std::string mtsConnection::GetServerComponentName(void) const {
     return ConnectionDescription.Server.ComponentName;
 }
 
-std::string mtsConnection::GetServerInterfaceName(void) const {
+std::string mtsConnection::GetServerInterfaceProvidedName(void) const {
     return ConnectionDescription.Server.InterfaceName;
 }
 

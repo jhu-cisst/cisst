@@ -107,16 +107,15 @@ class mtsEventReceiverBase;
 class mtsEventReceiverVoid;
 class mtsEventReceiverWrite;
 
-// multicast void command
-class mtsMulticastCommandVoid;
-
 // multicast write commands
 class mtsMulticastCommandWriteBase;
 template <class _argumentType> class mtsMulticastCommandWrite;
 
 // interfaces and tasks
+class mtsInterfaceProvidedOrOutput;
 class mtsInterfaceProvided;
 class mtsInterfaceOutput;
+class mtsInterfaceRequiredOrInput;
 class mtsInterfaceRequired;
 class mtsInterfaceInput;
 

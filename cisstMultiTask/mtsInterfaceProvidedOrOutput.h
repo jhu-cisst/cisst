@@ -18,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#error File deprecated
 
 #ifndef _mtsInterfaceProvidedOrOutput_h
 #define _mtsInterfaceProvidedOrOutput_h

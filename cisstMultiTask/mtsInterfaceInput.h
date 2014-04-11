@@ -21,8 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsInterfaceInput_h
 #define _mtsInterfaceInput_h
 
-#include <cisstMultiTask/mtsInterface.h>
-#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsInterfaceRequiredOrInput.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -38,12 +37,12 @@ http://www.cisst.org/cisst/license.txt.
 
  */
 
-class CISST_EXPORT mtsInterfaceInput: public mtsInterface
+class CISST_EXPORT mtsInterfaceInput: public mtsInterfaceRequiredOrInput
 {
  protected:
 
     /*! Default constructor. Does nothing, should not be used. */
-    mtsInterfaceInput(void);
+    mtsInterfaceInput(void) {}
 
     /*! Pointer to output interface that we are connected to.
         We could instead use the Connection member in svlFilterInput. */
@@ -60,12 +59,9 @@ class CISST_EXPORT mtsInterfaceInput: public mtsInterface
     /*! Default destructor. */
     virtual ~mtsInterfaceInput();
 
-    const mtsInterfaceOutput * GetConnectedInterface(void) const;
-
-    virtual bool CouldConnectTo(mtsInterfaceOutput * interfaceOutput) = 0;
-    virtual bool ConnectTo(mtsInterfaceOutput * interfacePOutput) = 0;
-    virtual bool Disconnect(void) = 0;
+    const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const;
 };
 
 
 #endif // _mtsInterfaceInput_h
+

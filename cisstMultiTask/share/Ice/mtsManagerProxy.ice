@@ -41,11 +41,11 @@ module mtsManagerProxy
         // client side (required interface)
 		string ClientProcessName;
         string ClientComponentName;
-        string ClientInterfaceName;
+        string ClientInterfaceRequiredName;
         // server side (provided interface)
         string ServerProcessName;
         string ServerComponentName;
-        string ServerInterfaceName;
+        string ServerInterfaceProvidedName;
 	};
 
     /*! String vector that contains names of objects (e.g. commands, event generators,
@@ -105,7 +105,7 @@ module mtsManagerProxy
 	//-------------------------------------------
 	struct InterfaceProvidedDescription {
 		// Interface name
-		string InterfaceName;
+		string InterfaceProvidedName;
 		// Commands
 		CommandVoidSequence          CommandsVoid;
 		CommandWriteSequence         CommandsWrite;
@@ -127,7 +127,7 @@ module mtsManagerProxy
 
     struct InterfaceRequiredDescription {
         // Interface name
-        string InterfaceName;
+        string InterfaceRequiredName;
         // Is required
         bool IsRequired;
         // Functions (i.e., command pointers)
@@ -241,13 +241,13 @@ module mtsManagerProxy
         bool RemoveComponent(string processName, string componentName);
 
         // Interface Management
-        bool AddInterfaceProvidedOrOutput(string processName, string componentName, string interfaceName);
-        bool AddInterfaceRequiredOrInput(string processName, string componentName, string interfaceName);
-        bool FindInterfaceProvidedOrOutput(string processName, string componentName, string interfaceName);
+        bool AddInterfaceProvided(string processName, string componentName, string interfaceName);
+        bool AddInterfaceRequired(string processName, string componentName, string interfaceName);
+        bool FindInterfaceProvided(string processName, string componentName, string interfaceName);
         ["cpp:const"] idempotent
-        bool FindInterfaceRequiredOrInput(string processName, string componentName, string interfaceName);
-        bool RemoveInterfaceProvidedOrOutput(string processName, string componentName, string interfaceName);
-        bool RemoveInterfaceRequiredOrInput(string processName, string componentName, string interfaceName);
+        bool FindInterfaceRequired(string processName, string componentName, string interfaceName);
+        bool RemoveInterfaceProvided(string processName, string componentName, string interfaceName);
+        bool RemoveInterfaceRequired(string processName, string componentName, string interfaceName);
 
         // Connection Management
         int Connect(ConnectionStringSet connectionStrings);

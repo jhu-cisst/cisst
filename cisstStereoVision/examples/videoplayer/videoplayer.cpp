@@ -40,6 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 
 using namespace std;
 
+
 ////////////////////////////////////////
 //     Window event handler class     //
 ////////////////////////////////////////
@@ -238,7 +239,6 @@ int my_main(int argc, char** argv)
     else VideoPlayer("");
 
     cerr << "Quit" << endl << endl;
-
 
     return 1;
 }

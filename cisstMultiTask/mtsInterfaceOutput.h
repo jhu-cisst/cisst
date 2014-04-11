@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsInterfaceOutput_h
 #define _mtsInterfaceOutput_h
 
-#include <cisstMultiTask/mtsInterface.h>
+#include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last
@@ -36,10 +36,16 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 */
-class CISST_EXPORT mtsInterfaceOutput: public mtsInterface
+class CISST_EXPORT mtsInterfaceOutput: public mtsInterfaceProvidedOrOutput
 {
  public:
+    typedef mtsInterfaceProvidedOrOutput BaseType;
+
     mtsInterfaceOutput(const std::string & name, mtsComponent * component);
+
+    /*! Default Destructor. */
+    virtual ~mtsInterfaceOutput();
+
 };
 
 #endif // _mtsInterfaceOutput_h
