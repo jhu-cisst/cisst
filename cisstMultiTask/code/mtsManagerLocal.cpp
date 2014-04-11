@@ -77,7 +77,7 @@ std::string    ThisProcessName;
 // }}
 
 #if CISST_HAS_SAFETY_PLUGINS
-bool InstallCoordinator = true;
+bool InstallCoordinator = false;
 #endif
 
 mtsManagerLocal::mtsManagerLocal(void) : ComponentMap("ComponentMap")
@@ -341,6 +341,12 @@ void mtsManagerLocal::Cleanup(void)
         SafetyCoordinator = 0;
     }
 #endif
+
+    if (SystemLogMultiplexer) {
+        SystemLogMultiplexer->RemoveAllChannels();
+        delete SystemLogMultiplexer;
+        SystemLogMultiplexer = 0;
+    }
 
     __os_exit();
 }
@@ -3182,9 +3188,9 @@ SF::Coordinator * mtsManagerLocal::GetCoordinator(void)
     return SafetyCoordinator;
 }
 
-void mtsManagerLocal::SkipCoordinatorInstallation(void)
+void mtsManagerLocal::InstallSafetyCoordinator(void)
 {
-    InstallCoordinator = false;
+    InstallCoordinator = true;
 }
 
 #endif

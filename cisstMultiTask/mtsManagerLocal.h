@@ -372,9 +372,9 @@ public:
     
     SF::Coordinator * GetCoordinator(void);
 
-    /*! Skip the installation of the safety coordinator instance.  Used only when the
-        supervisor component is to be installed. */
-    static void SkipCoordinatorInstallation(void);
+    /*! Instsall the safety coordinator instance.  Used only when the
+        supervisor component needs to be installed. */
+    static void InstallSafetyCoordinator(void);
 #endif
 
 public:

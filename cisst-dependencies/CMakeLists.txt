@@ -33,7 +33,11 @@ endif (CISST_HAS_OPENGL)
 
 
 # Support for QT
-set (CISST_QT_COMPONENTS QtCore QtGui QtOpenGL QtXML QtXMLPatterns)
+if (CISST_HAS_SAFETY_PLUGINS)
+  set (CISST_QT_COMPONENTS QtCore QtGui QtOpenGL QtXML QtXMLPatterns QtWebKit)
+else (CISST_HAS_SAFETY_PLUGINS)
+  set (CISST_QT_COMPONENTS QtCore QtGui QtOpenGL QtXML QtXMLPatterns)
+endif (CISST_HAS_SAFETY_PLUGINS)
 find_package (Qt4 COMPONENTS ${CISST_QT_COMPONENTS})
 if (QT_FOUND)
   option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" ON)

@@ -84,8 +84,6 @@ mtsMonitorComponent::~mtsMonitorComponent()
         Cleanup();
 
     if (Publisher) delete Publisher;
-    if (Subscriber) delete Subscriber;
-    if (SubscriberCallback) delete SubscriberCallback;
 }
 
 void mtsMonitorComponent::Run(void)
@@ -146,13 +144,19 @@ void mtsMonitorComponent::Cleanup(void)
     ThreadPublisher.ThreadEventEnd.Wait();
 #endif
 
-    CMN_LOG_CLASS_RUN_DEBUG << "Cleanup: Monitor component is cleaned up" << std::endl;
+    //CMN_LOG_CLASS_RUN_DEBUG << "Cleanup: Monitor component is cleaned up" << std::endl;
 
     if (Subscriber) {
         ThreadSubscriber.Running = false;
         // Terminating subscriber needs to call shutdown() on the Ice communicator
         Subscriber->Stop();
         ThreadSubscriber.ThreadEventEnd.Wait();
+
+        delete Subscriber;
+        delete SubscriberCallback;
+
+        Subscriber = 0;
+        SubscriberCallback = 0;
     }
 }
 
