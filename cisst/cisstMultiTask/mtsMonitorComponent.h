@@ -33,6 +33,7 @@
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsSubscriberCallback.h>
+#include <cisstMultiTask/mtsEventReceiver.h>
 
 #include "cisstMonitor.h"
 #include "publisher.h"
@@ -119,6 +120,9 @@ protected:
         mtsFunctionRead GetExecTimeUser;  // for Monitor::TARGET_THREAD_DUTYCYCLE_USER
         mtsFunctionRead GetExecTimeTotal; // for Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL
 
+        /*! Event receiver to receive events */
+        mtsEventReceiverWrite FaultEventReceiver;
+
         /*! Add new cisstMonitor instance.  Returns false if duplicate. */
         bool AddMonitorTargetToAccessor(SF::cisstMonitor * monitor);
         /*! Check if given monitor target is already being monitored. */
@@ -157,8 +161,9 @@ protected:
     /*! Install monitor: add new column to the monitor state table */
     void InstallMonitorTarget(mtsTask * task, SF::Monitor * monitor);
 
-    /*! Receive fault event notification from target components and pass it to
+    /*! Receive event notifications from target components and pass it to
         the Safety Supervisor of Safety Framework. */
+    void HandleMonitorEvent(const std::string & json);
     void HandleFaultEvent(const std::string & json);
 
     //
