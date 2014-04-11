@@ -325,6 +325,10 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsBoolMat)
 
 #ifdef MTS_CLASS_SERVICES_PART1
 
+#include <cisstMultiTask/mtsHistory.h>
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDoubleHistory)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDoubleVecHistory)
+
 #include <cisstMultiTask/mtsManagerGlobal.h>
 CMN_IMPLEMENT_SERVICES(mtsManagerGlobal)
 CMN_IMPLEMENT_SERVICES(mtsManagerGlobalInterface)
@@ -369,11 +373,13 @@ CMN_IMPLEMENT_SERVICES(mtsLogMessage);
 #include <cisstMultiTask/mtsComponentViewer.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
 
-#include <cisstMultiTask/mtsSocketProxyClient.h>
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyClient, mtsTaskContinuous, mtsSocketProxyClientConstructorArg)
-
-#include <cisstMultiTask/mtsSocketProxyServer.h>
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyServer, mtsTaskContinuous, mtsSocketProxyServerConstructorArg)
+#include <cisstMultiTask/mtsComponentDispatcher.h>
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(mtsComponentDispatcherPeriodic, 
+                                                mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(mtsComponentDispatcherContinuous, 
+                                                mtsTaskContinuous, mtsTaskContinuousConstructorArg)
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG_TEMPLATED(mtsComponentDispatcherMain, 
+                                                mtsTaskMain, std::string)
 
 /* ICE dependent classes */
 #include <cisstMultiTask/mtsConfig.h>

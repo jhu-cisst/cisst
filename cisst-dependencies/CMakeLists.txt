@@ -265,14 +265,11 @@ if (CISST_HAS_JSON)
   set (CISST_JSON_SVN_REVISION 276)
   ExternalProject_Add (cisstJSONExternal
                        PREFIX ${cisstJSON_PREFIX}
-                       SVN_REPOSITORY ${CISST_JSON_SVN_REPOSITORY}
-                       SVN_REVISION   -r ${CISST_JSON_SVN_REVISION}
+                       GIT_REPOSITORY ${CISST_JSON_GIT}
                        CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                                         -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
                                         -DOPTION_BUILD_EXAMPLES:BOOL=OFF
-                                        -DJSONCPP_WITH_TESTS:BOOL=OFF
-                                        -DJSONCPP_WITH_POST_BUILD_UNITTEST:BOOL=OFF
                                         -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstJSON
                        INSTALL_DIR ${cisst_BINARY_DIR}/cisstJSON
                        )

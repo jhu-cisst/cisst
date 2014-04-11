@@ -29,8 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnNamedMap.h>
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsHistory.h>
 
 #include <string>
 #include <stdexcept>
@@ -81,6 +83,7 @@ protected:
     class SignalMapElement {
     public:
         mtsTask * Task;
+        mtsHistoryBase * History;
 
         SignalMapElement(void) {}
         ~SignalMapElement(void) {}

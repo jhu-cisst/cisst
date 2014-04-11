@@ -239,7 +239,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Returns the name of the component. */
     const std::string & GetName(void) const;
-    void GetName(std::string & placeHolder) const;
 
     /*! Set name.  This method is useful to perform dynamic creation
       using the default constructor and then set the name. */
@@ -254,15 +253,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       initialization code. */
     virtual void Create(void);
 
-    /*! Call the Create method followed by WaitForState */
-    bool CreateAndWait(double timeoutInSeconds);
-
     /*! Virtual method called after components are connected to start
       the computations and message processing. */
     virtual void Start(void);
-
-    /*! Call the Start method followed by WaitForState */
-    bool StartAndWait(double timeoutInSeconds);
 
     /*! Virtual method to suspend the component (same as Stop). */
     virtual void Suspend(void);
@@ -270,9 +263,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Virtual method to stop the computations and message
       processing.  See Start. */
     virtual void Kill(void);
-
-    /*! Call the Kill method followed by WaitForState */
-    bool KillAndWait(double timeoutInSeconds);
 
     /*! Virtual method that gets overloaded, and is run before the
         component is started.

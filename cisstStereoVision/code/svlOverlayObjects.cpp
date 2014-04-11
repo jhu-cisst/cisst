@@ -1635,7 +1635,6 @@ bool svlOverlayStaticEllipse::GetFill() const
 void svlOverlayStaticEllipse::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
 {
     int cx, cy, rx, ry;
-    double angle;
 
     if (Transformed) {
         // Calculate translation
@@ -1650,20 +1649,19 @@ void svlOverlayStaticEllipse::DrawInternal(svlSampleImage* bgimage, svlSample* C
         double norm = rot.Norm();
         rx = static_cast<int>(norm * Ellipse.rx);
         ry = static_cast<int>(norm * Ellipse.ry);
-        // Calculate angle
-        angle = Ellipse.angle + acos(Transform.Element(0, 0));
+
+        // TO DO: need to take care of rotation as well!
     }
     else {
         cx = Ellipse.cx; cy = Ellipse.cy;
         rx = Ellipse.rx; ry = Ellipse.ry;
-        angle = Ellipse.angle;
     }
 
     svlDraw::Ellipse(bgimage, VideoCh,
                      cx, cy, rx, ry,
                      Color,
                      0.0, 360.0,
-                     angle,
+                     Ellipse.angle,
                      (Fill ? -1 : Thickness));
 }
 

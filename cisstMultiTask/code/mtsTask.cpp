@@ -5,7 +5,8 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
+  Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -36,8 +37,6 @@
 #include "dict.h"
 #include "statemachine.h"
 #endif
-
-std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
 
 /********************* Methods that call user methods *****************/
 
@@ -158,16 +157,8 @@ void mtsTask::StartupInternal(void) {
     }
     RunEventCalled = false;
     if (success) {
-        try {
-            // Call user-supplied startup function
-            this->Startup();
-        }
-        catch (const std::exception &excp) {
-            OnStartupException(excp);
-        }
-        catch (...) {
-            OnStartupException(mtsTask::UnknownException);
-        }
+        // Call user-supplied startup function
+        this->Startup();
         ChangeState(mtsComponentState::READY);
     }
     else {
@@ -501,16 +492,6 @@ bool mtsTask::CheckForOwnThread(void) const
     return (osaGetCurrentThreadId() == Thread.GetId());
 }
 
-
-void mtsTask::OnStartupException(const std::exception &excp)
-{
-    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
-}
-
-void mtsTask::OnRunException(const std::exception &excp)
-{
-    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
-}
 
 void mtsTask::SetInitializationDelay(double delay)
 {

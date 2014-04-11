@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _ui3SlaveArm_h
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
-#include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstParameterTypes/prmForwardDeclarations.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>

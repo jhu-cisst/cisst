@@ -30,6 +30,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstParameterTypes/prmTransformationBase.h>
+#include <cisstParameterTypes/prmTransformationManager.h>
+
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -44,11 +47,17 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
 
     /*! default constructor */
     inline prmForceCartesianGet(void):
-        mtsGenericObject()
+        mtsGenericObject(),
+        MovingFrameMember(0),
+        ReferenceFrameMember(0)
     {}
     
     /*! constructor with all parameters */
-    inline prmForceCartesianGet(const vctDouble6 & force):
+    inline prmForceCartesianGet(const prmTransformationBasePtr & movingFrame, 
+                                const prmTransformationBasePtr & referenceFrame, 
+                                const vctDouble6 & force):
+        MovingFrameMember(movingFrame),
+        ReferenceFrameMember(referenceFrame),
         ForceMember(force)
     {
         this->MaskMember.SetAll(true);
@@ -58,6 +67,23 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
      */
     virtual ~prmForceCartesianGet();
     
+
+    /*! Set and Get methods for the reference frame for current
+        force.  This is defined by a node in the transformation
+        tree. */
+    //@{
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
+    //@}
+
+
+    /*! Set and Get methods for the moving frame for current
+        force.  This is defined by a node in the transformation
+        tree. */
+    //@{
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
+    //@}
+
+
     /*! Set and Get methods for force */
     //@{
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDouble6, Force);

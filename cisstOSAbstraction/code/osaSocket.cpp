@@ -512,30 +512,9 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen, const double time
     return retval;
 }
 
-int osaSocket::Send(const std::string & bufsend, double timeoutSec)
+int osaSocket::Send(const std::string & bufsend)
 {
-    return Send(bufsend.data(), static_cast<int>(bufsend.length()), timeoutSec);
-}
-
-int osaSocket::SendAsPackets(const char * bufsend, unsigned int msglen, unsigned int packetSize, double timeoutSec)
-{
-    unsigned int nPackets = 1 + (msglen-1)/packetSize;
-    unsigned int numSent = 0;
-    for (unsigned int i = 0; i < nPackets-1; i++) {
-        int n = Send(bufsend + i*packetSize, packetSize, timeoutSec);
-        if (n > 0) numSent += n;
-        if (n != packetSize)
-            return numSent;
-        msglen -= packetSize;
-    }
-    int n = Send(bufsend + (nPackets-1)*packetSize, msglen, timeoutSec);
-    if (n > 0) numSent += n;
-    return numSent;
-}
-
-int osaSocket::SendAsPackets(const std::string & bufsend, unsigned int packetSize, double timeoutSec)
-{
-    return SendAsPackets(bufsend.data(), static_cast<int>(bufsend.length()), packetSize, timeoutSec);
+    return Send(bufsend.c_str(), static_cast<int>(bufsend.length()));
 }
 
 int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec )
@@ -553,8 +532,8 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
     FD_ZERO(&readfds);
     FD_SET(SocketFD, &readfds);
 
-    long second = static_cast<long>(floor(timeoutSec));
-    long usec = static_cast<long>(floor( (timeoutSec - second) *1e6));
+    long second = floor (timeoutSec);
+    long usec = floor ( (timeoutSec - second) *1e6);
     timeval timeout = { second , usec };
 
     /* Notes for QNX from the QNX library reference (Min)
@@ -578,7 +557,7 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
         err = errno;
 #endif
         //! \Todo : some of the errors here might be soft errors, EAGAIN/EWOULDBLOCK and we might be able to recover from those.
-        CMN_LOG_CLASS_RUN_ERROR << "Receive: failed to receive because socket is not ready " << SocketFD << " Error: " << err << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Receive: failed to receive because socket is not ready " << SocketFD << " Error: " <<err<<std::endl;
 
         if (SocketType == TCP)
             Close();
@@ -595,15 +574,7 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
             socklen_t length = sizeof(fromAddr);
             retval = recvfrom(SocketFD, bufrecv, maxlen, 0, reinterpret_cast<struct sockaddr *>(&fromAddr), &length);
 
-            if (retval == SOCKET_ERROR) {
-#if (CISST_OS == CISST_WINDOWS)
-                err = WSAGetLastError();
-#else
-                err = errno;
-#endif
-                CMN_LOG_CLASS_RUN_ERROR << "Receive error = " << err << std::endl;
-            }
-            else if (retval > 0) {
+            if (retval > 0) {
                 if (static_cast<unsigned int>(retval) < maxlen - 1) {
                     bufrecv[retval] = 0;  // NULL terminate the string for convenience if there is room
                     CMN_LOG_CLASS_RUN_DEBUG << "Receive: received " << retval << " bytes: " << std::endl;
@@ -647,24 +618,6 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
         CMN_LOG_CLASS_RUN_ERROR << "Receive: failed to receive" << std::endl;
     }
     return retval;
-}
-
-int osaSocket::ReceiveAsPackets(std::string & bufrecv, char *packetBuffer, unsigned int packetSize,
-                                double timeoutStartSec, double timeoutNextSec)
-{
-    bufrecv.clear();
-    int n = Receive(packetBuffer, packetSize, timeoutStartSec);
-    if (n > 0) {
-        bufrecv.assign(packetBuffer, n);
-        while (n == packetSize) {
-            n = Receive(packetBuffer, packetSize, timeoutNextSec);
-            if (n > 0)
-                bufrecv.append(packetBuffer, n);
-        }
-    }
-    // If no characters have been received and (n < 0), return n;
-    // otherwise, return the number of characters received.
-    return ((n < 0) && bufrecv.empty()) ? n : static_cast<int>(bufrecv.size());
 }
 
 //! This could be static or external to the osaSocket class
@@ -732,8 +685,8 @@ bool osaSocket::IsConnected(void) {
     FD_SET(SocketFD, &writefds);
 
     double timeoutSec = 0.000;
-    long second = static_cast<long>(floor(timeoutSec));
-    long usec = static_cast<long>(floor( (timeoutSec - second) *1e6));
+    long second = floor (timeoutSec);
+    long usec = floor ( (timeoutSec - second) *1e6);
     timeval timeout = { second , usec };
 
     retval = select(SocketFD + 1, &readfds, &writefds, NULL, &timeout);

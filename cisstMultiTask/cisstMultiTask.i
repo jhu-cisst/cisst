@@ -435,7 +435,7 @@ http://www.cisst.org/cisst/license.txt.
             if not isinstance(interfaceProvided, mtsInterfaceProvidedDescription):
                 print 'Parameter must be of type mtsInterfaceProvidedDescription'
                 return
-            interfaceProvidedNoSpace = interfaceProvided.InterfaceName.replace(' ', '')
+            interfaceProvidedNoSpace = interfaceProvided.InterfaceProvidedName.replace(' ', '')
             interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvidedNoSpace, MTS_OPTIONAL)
             if not interfaceRequired:
                 return
@@ -485,7 +485,7 @@ http://www.cisst.org/cisst/license.txt.
                         print 'Could not get manager component services'
                         return
                     interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
-                    if not interfaceDescription.InterfaceName:
+                    if not interfaceDescription.InterfaceProvidedName:
                         print 'No provided interface (empty string)'
                         return
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)

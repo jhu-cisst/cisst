@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsIntervalStatistics_h
 
 #include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
@@ -117,8 +116,13 @@ private:
     double         StdDev;
     double         Max;
     double         Min;
+<<<<<<< HEAD:cisstMultiTask/mtsIntervalStatistics.h
     double mMinComputeTime;
     double mMaxComputeTime;
+=======
+    double MinComputeTime;
+    double MaxComputeTime;
+>>>>>>> branches/fault: reverted 4497 and 4498:cisst/cisstMultiTask/mtsIntervalStatistics.h
     double         StatisticsUpdatePeriod;
 
 public:

@@ -64,9 +64,15 @@ public:
 	    approximation). If \f$ r<0 \f$, machine precision is used instead.
    \return The \f$ N \times O \f$ minimum norm solutions \f$ \mathbf{x} \f$.
 */
+<<<<<<< HEAD
 vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& A,
 				       vctDynamicMatrix<double>& b,
 				       CISSTNETLIB_DOUBLE r = -1.0 );
+=======
+vctDynamicMatrix<double> CISST_EXPORT nmrLSMinNorm( vctDynamicMatrix<double>& A,
+                                       vctDynamicMatrix<double>& b,
+                                       CISSTNETLIB_DOUBLE r = -1.0 );
+>>>>>>> branches/fault: reverted 4497 and 4498
 
 //! Computes the minimum norm solution to a real linear least squares problem
 /**
@@ -84,8 +90,15 @@ vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& A,
 	    approximation). If \f$ r<0 \f$, machine precision is used instead.
    \return The \f$ N \times O \f$ minimum norm solutions \f$ \mathbf{x} \f$.
 */
+<<<<<<< HEAD
 vctDynamicMatrix<double> nmrLSMinNorm( vctDynamicMatrix<double>& A,
 				       vctDynamicMatrix<double>& b,
 				       nmrLSMinNorm::Data& data,
 				       CISSTNETLIB_DOUBLE r = -1.0 );
+=======
+vctDynamicMatrix<double> CISST_EXPORT nmrLSMinNorm( vctDynamicMatrix<double>& A,
+                                                    vctDynamicMatrix<double>& b,
+                                                    nmrLSMinNorm::Data& data,
+                                                    CISSTNETLIB_DOUBLE r = -1.0 );
+>>>>>>> branches/fault: reverted 4497 and 4498
 

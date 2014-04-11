@@ -86,10 +86,6 @@ set (SOURCE_FILES
 
      mtsParameterTypesOld.cpp
 
-     mtsSocketProxyCommon.cpp
-     mtsSocketProxyClient.cpp
-     mtsSocketProxyServer.cpp
-
      mtsStateIndex.cpp
      mtsStateTable.cpp
 
@@ -102,7 +98,6 @@ set (SOURCE_FILES
 
 # all header files
 set (HEADER_FILES
-
      mtsCallableQualifiedReadBase.h
      mtsCallableQualifiedReadMethod.h
      mtsCallableQualifiedReadReturnVoidMethod.h
@@ -140,6 +135,7 @@ set (HEADER_FILES
 
      mtsComponent.h
      mtsComponentAddLatency.h
+     mtsComponentDispatcher.h
      mtsComponentGeneratorMacros.h
      mtsComponentViewer.h
      mtsConnection.h
@@ -160,6 +156,8 @@ set (HEADER_FILES
 
      mtsGenericObject.h
      mtsGenericObjectProxy.h
+
+     mtsHistory.h
 
      mtsIntervalStatistics.h
      mtsInterface.h
@@ -188,10 +186,6 @@ set (HEADER_FILES
      mtsParameterTypesOld.h
 
      mtsQueue.h
-
-     mtsSocketProxyCommon.h
-     mtsSocketProxyClient.h
-     mtsSocketProxyServer.h
 
      mtsStateArray.h
      mtsStateArrayBase.h
@@ -250,6 +244,7 @@ if (CISST_MTS_HAS_ICE)
        mtsProxyBaseCommon.h
        mtsProxyBaseClient.h
        mtsProxyBaseServer.h
+       mtsProxySerializer.h
 
        mtsInterfaceRequiredProxy.h
        mtsComponentInterfaceProxyServer.h

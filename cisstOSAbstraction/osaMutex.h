@@ -65,13 +65,11 @@ public:
 	};
 
 	/*! Enum type for return values of a lock operation. */
-#if 0 // MJ: obsoleted
 	enum ReturnType {
 		LOCK_FAILED, /*! The lock operation failed because the semaphore couldn't be obtained */
 		SUCCESS,     /*! The lock operation was successful */
 		TIMED_OUT	 /*! The lock operation timed out after waiting for specified time */
 	};
-#endif
 
     /*! Enum type for current lock state */
     enum LockStateType {
@@ -110,7 +108,7 @@ public:
     \return An enumerated type representing if a lock was obtained, or
     operation timed out or lock failed
     */
-	//ReturnType TryLock(int timeout);
+	ReturnType TryLock(int timeout);
 
     /*! Check if the current thread locked this mutex earlier */
     bool IsLocker(void) const;

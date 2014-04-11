@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstParameterTypes/prmTransformationManager.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -43,18 +44,39 @@ class CISST_EXPORT prmVelocityCartesianGet: public mtsGenericObject
     typedef mtsGenericObject BaseType;
 
 	/*! default constructor */
-    inline prmVelocityCartesianGet(void)
+    inline prmVelocityCartesianGet(void):
+        MovingFrameMember(0),
+        ReferenceFrameMember(0)
     {}
     
     /*! constructor with all parameters */
-    inline prmVelocityCartesianGet(const vctDouble3 & velocityLinear,
+    inline prmVelocityCartesianGet(const prmTransformationBasePtr & movingFrame, 
+                                   const prmTransformationBasePtr & referenceFrame,
+                                   const vctDouble3 & velocityLinear,
                                    const vctDouble3 & velocityAngular):
+        MovingFrameMember(movingFrame),
+        ReferenceFrameMember(referenceFrame),  
         VelocityLinearMember(velocityLinear),
         VelocityAngularMember(velocityAngular)
     {}
 
     /*! destructor */
     virtual ~prmVelocityCartesianGet();
+
+
+    /*! Set and Get methods for the reference frame for current
+        position.  This is defined by a node in the transformation
+        tree. */
+    //@{
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
+    //@}
+
+    /*! Set and Get methods for the moving frame for current
+        position.  This is defined by a node in the transformation
+        tree. */
+    //@{
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
+    //@}
 
     /*! Set and Get method the linear velocity parameter. */
     //@{

@@ -872,7 +872,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventNam
 
 
 bool mtsInterfaceProvided::AddEventVoid(mtsFunctionVoid & eventTrigger,
-                                        const std::string & eventName)
+                                        const std::string eventName)
 {
     mtsCommandVoid * command;
     command = this->AddEventVoid(eventName);
@@ -1196,7 +1196,9 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommand
 {
     mtsMulticastCommandVoid * multicastCommand = GetEventVoid(eventName); // EventVoidGenerators.GetItem(eventName);
     if (multicastCommand) {
-        return multicastCommand->AddCommand(handler);
+        // should probably check for duplicates (have AddCommand return bool?)
+        multicastCommand->AddCommand(handler);
+        return true;
     } else {
         // maybe the event is not defined at the end-user level but in
         // the original interface?
@@ -1216,7 +1218,9 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommand
     }
     mtsMulticastCommandWriteBase * multicastCommand = EventWriteGenerators.GetItem(eventName);
     if (multicastCommand) {
-        return multicastCommand->AddCommand(handler);
+        // should probably check for duplicates (have AddCommand return bool?)
+        multicastCommand->AddCommand(handler);
+        return true;
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
         return false;
@@ -1327,7 +1331,6 @@ bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & prov
         elementCommandWrite.Name = writeCommand->GetName();
         // serialize argument
         streamBuffer.str("");
-        serializer.Reset();
         serializer.Serialize(*(writeCommand->GetArgumentPrototype()));
         elementCommandWrite.ArgumentPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsWrite.push_back(elementCommandWrite);
@@ -1348,7 +1351,6 @@ bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & prov
         elementCommandRead.Name = readCommand->GetName();
         // serialize argument
         streamBuffer.str("");
-        serializer.Reset();
         serializer.Serialize(*(readCommand->GetArgumentPrototype()));
         elementCommandRead.ArgumentPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsRead.push_back(elementCommandRead);
@@ -1369,12 +1371,10 @@ bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & prov
         elementCommandQualifiedRead.Name = qualifiedReadCommand->GetName();
         // serialize argument1
         streamBuffer.str("");
-        serializer.Reset();
         serializer.Serialize(*(qualifiedReadCommand->GetArgument1Prototype()));
         elementCommandQualifiedRead.Argument1PrototypeSerialized = streamBuffer.str();
         // serialize argument2
         streamBuffer.str("");
-        serializer.Reset();
         serializer.Serialize(*(qualifiedReadCommand->GetArgument2Prototype()));
         elementCommandQualifiedRead.Argument2PrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsQualifiedRead.push_back(elementCommandQualifiedRead);
@@ -1395,7 +1395,6 @@ bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & prov
         elementCommandVoidReturn.Name = voidReturnCommand->GetName();
         // serialize result
         streamBuffer.str("");
-        serializer.Reset();
         serializer.Serialize(*(voidReturnCommand->GetResultPrototype()));
         elementCommandVoidReturn.ResultPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsVoidReturn.push_back(elementCommandVoidReturn);
@@ -1416,12 +1415,10 @@ bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & prov
         elementCommandWriteReturn.Name = writeReturnCommand->GetName();
         // serialize argument
         streamBuffer.str("");
-        serializer.Reset();
         serializer.Serialize(*(writeReturnCommand->GetArgumentPrototype()));
         elementCommandWriteReturn.ArgumentPrototypeSerialized = streamBuffer.str();
         // serialize result
         streamBuffer.str("");
-        serializer.Reset();
         serializer.Serialize(*(writeReturnCommand->GetResultPrototype()));
         elementCommandWriteReturn.ResultPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsWriteReturn.push_back(elementCommandWriteReturn);
@@ -1456,7 +1453,6 @@ bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & prov
         elementEventWrite.Name = writeEvent->GetName();
         // serialize argument
         streamBuffer.str("");
-        serializer.Reset();
         serializer.Serialize(*(writeEvent->GetArgumentPrototype()));
         elementEventWrite.ArgumentPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.EventsWrite.push_back(elementEventWrite);

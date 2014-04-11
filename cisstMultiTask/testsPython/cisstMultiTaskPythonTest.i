@@ -23,9 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 
 %module cisstMultiTaskPythonTestPython
 
-// Following needed to define ptrdiff_t
-%include "std_common.i"
-
 %import "cisstMultiTask/cisstMultiTask.i"
 
 

@@ -236,7 +236,7 @@ public:
 
 
     /*!
-      Assignment operation between vectors containing the same data type but different owners
+      \name Assignment operation between vectors containing the same data type but different owners
       \param other The vector to be copied.
     */
     //@{
@@ -254,22 +254,6 @@ public:
     }
     //@}
 
-    /*!
-      Assignment operation between vectors containing the same data type but different owners and sizes.
-      The number of elements to be copied must be lower or equal to the vector's size.
-
-      \param other The vector to be copied.
-    */
-    //@{
-    template <class __vectorOwnerType>
-    inline ThisType & Assign(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & other,
-                             size_type length, size_type startPositionThis = 0, size_type startPositionOther = 0) {
-        vctDynamicVectorRef<value_type> thisRef(*this, startPositionThis, length);
-        vctDynamicConstVectorRef<value_type> otherRef(other, startPositionOther, length);
-        thisRef.Assign(otherRef);
-        return *this;
-    }
-    //@}
 
     /*!
       \name Assignment operation between vectors of different types.

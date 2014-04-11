@@ -22,10 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "clientTask.h"
 #include <cisstOSAbstraction/osaSleep.h>
 
-#if !CISST_MTS_HAS_ICE
-#include <cisstMultiTask/mtsSocketProxyClient.h>
-#endif
-
 // Enable or disable system-wide thread-safe logging
 //#define MTS_LOGGING
 
@@ -40,7 +36,6 @@ int main(int argc, char * argv[])
 #endif
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
-    cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
     // get all message to log file
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL);
     // get only errors and warnings to std::cout
@@ -53,10 +48,9 @@ int main(int argc, char * argv[])
     mtsManagerLocal::SetLogForwarding(true);
 #endif
 
-    bool useGeneric;
-
 #if CISST_MTS_HAS_ICE
     std::string globalComponentManagerIP;
+    bool useGeneric;
 
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " [GlobalManagerIP] [flag]" << std::endl;
@@ -79,7 +73,7 @@ int main(int argc, char * argv[])
         exit(-1);
     }
 
-    std::cout << "Starting client, IP = " << globalComponentManagerIP << std::endl;
+    std::cout << "Starting server, IP = " << globalComponentManagerIP << std::endl;
     std::cout << "Using " << (useGeneric ? "mtsDouble" : "double") << std::endl;
 
     // Get the TaskManager instance and set operation mode
@@ -90,15 +84,6 @@ int main(int argc, char * argv[])
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
     }
-#else
-    useGeneric = true;
-    if ((argc > 1) && (argv[1][0] == '1'))
-        useGeneric = false;
-    mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
-    std::cout << "Starting client" << std::endl;
-    std::cout << "Using " << (useGeneric ? "mtsDouble" : "double") << std::endl;
-#endif
-
 
     // create our client task
     clientTaskBase * client1;
@@ -116,13 +101,11 @@ int main(int argc, char * argv[])
     componentManager->AddComponent(client1);
     componentManager->AddComponent(client2);
 
-#if CISST_MTS_HAS_ICE
     // Connect the tasks across networks
     if (!componentManager->Connect("ProcessClient", "Client1", "Required", "ProcessServer", "Server", "Provided")) {
         CMN_LOG_INIT_ERROR << "Connect failed for client 1" << std::endl;
         return 1;
     }
-
     if (!componentManager->Connect("ProcessClient", "Client2", "Required", "ProcessServer", "Server", "Provided")) {
         CMN_LOG_INIT_ERROR << "Connect failed for client 2" << std::endl;
         return 1;

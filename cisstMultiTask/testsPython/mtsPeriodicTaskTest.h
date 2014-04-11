@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsPeriodicTaskTest_h
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
-#include <cisstMultiTask/mtsVector.h>
 
 // code required for the DLL generation
 #ifdef cisstMultiTaskPythonTest_EXPORTS
