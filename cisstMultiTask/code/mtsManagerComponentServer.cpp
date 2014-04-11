@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentServer, mtsManagerComponentBase);
 
-mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
+mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal & gcm)
     : mtsManagerComponentBase(mtsManagerComponentBase::GetNameOfManagerComponentServer()),
       GCM(gcm),
       InterfaceGCMFunctionMap("InterfaceGCMFunctionMap")
@@ -36,7 +36,7 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
     if (instanceCount != 0) {
         cmnThrow(std::runtime_error("Error in creating manager component server: it's already created"));
     }
-    gcm->SetMCS(this);
+    gcm.SetMCS(this);
     InterfaceGCMFunctionMap.SetOwner(*this);
 
     // For system-wide thread-safe logging
@@ -74,7 +74,7 @@ void mtsManagerComponentServer::Cleanup(void)
 
 void mtsManagerComponentServer::GetNamesOfProcesses(std::vector<std::string> & processList) const
 {
-    GCM->GetNamesOfProcesses(processList);
+    GCM.GetNamesOfProcesses(processList);
 }
 
 bool mtsManagerComponentServer::AddInterfaceGCM(void)
@@ -248,7 +248,7 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
 {
     // Check if a new component with the name specified can be created
-    if (GCM->FindComponent(componentDescription.ProcessName,
+    if (GCM.FindComponent(componentDescription.ProcessName,
                            componentDescription.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentCreate: failed to create component: " << componentDescription << std::endl
                                 << "InterfaceGCMCommands_ComponentCreate: component already exists" << std::endl;
@@ -277,7 +277,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentCreate(const mtsDe
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg)
 {
     // Check if component with the name specified can be found
-    if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
+    if (!GCM.FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConfigure - no component found: " << arg << std::endl;
         return;
     }
@@ -330,7 +330,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
 // as connection id should be added.
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {
-    if (!GCM->Disconnect(arg)) {
+    if (!GCM.Disconnect(arg)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\" for: " << arg << std::endl;
         return;
     }
@@ -402,7 +402,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart(const mtsCom
         return;
     }
     // Check if a new component with the name specified can be created
-    if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
+    if (!GCM.FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentStart: failed to start component - no component found: " << arg << std::endl;
         return;;
     }
@@ -431,7 +431,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop(const mtsComp
         return;
     }
     // Check if a new component with the name specified can be created
-    if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
+    if (!GCM.FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentStop: failed to Stop component - no component found: " << arg << std::endl;
         return;
     }
@@ -460,7 +460,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentResume(const mtsCo
         return;
     }
     // Check if a new component with the name specified can be created
-    if (!GCM->FindComponent(arg.ProcessName, arg.ComponentName)) {
+    if (!GCM.FindComponent(arg.ProcessName, arg.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentResume: failed to Resume component - no component found: " << arg << std::endl;
         return;
     }
@@ -491,7 +491,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentGetState(const mts
         state = mtsComponentState::ACTIVE;
         return;
     }
-    if (!GCM->FindComponent(component.ProcessName, component.ComponentName)) {
+    if (!GCM.FindComponent(component.ProcessName, component.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentGetState: failed to get component state - no component found: "
                                 << component << std::endl;
         return;
@@ -516,33 +516,33 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentGetState(const mts
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfProcesses(std::vector<std::string> & names) const
 {
-    GCM->GetNamesOfProcesses(names);
+    GCM.GetNamesOfProcesses(names);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents(const std::string & processName,
                                                                           std::vector<std::string> & names) const
 {
-    GCM->GetNamesOfComponents(processName, names);
+    GCM.GetNamesOfComponents(processName, names);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const
 {
     // Get a list of required interfaces
-    GCM->GetNamesOfInterfacesRequiredOrInput(component.ProcessName, component.ComponentName, interfaces.InterfaceRequiredNames);
+    GCM.GetNamesOfInterfacesRequiredOrInput(component.ProcessName, component.ComponentName, interfaces.InterfaceRequiredNames);
 
     // Get a list of provided interfaces
-    GCM->GetNamesOfInterfacesProvidedOrOutput(component.ProcessName, component.ComponentName, interfaces.InterfaceProvidedNames);
+    GCM.GetNamesOfInterfacesProvidedOrOutput(component.ProcessName, component.ComponentName, interfaces.InterfaceProvidedNames);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const
 {
-    GCM->GetListOfConnections(listOfConnections);
+    GCM.GetListOfConnections(listOfConnections);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
                                                                                      mtsInterfaceProvidedDescription & description) const
 {
-    if (!GCM->FindComponent(intfc.ProcessName, intfc.ComponentName)) {
+    if (!GCM.FindComponent(intfc.ProcessName, intfc.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceProvidedDescription: failed to get interface description - no component found: "
                                 << intfc.ProcessName << ":" << intfc.ComponentName << std::endl;
         return;
@@ -566,7 +566,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceProvidedDescrip
 void mtsManagerComponentServer::InterfaceGCMCommands_GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc,
                                                                                      mtsInterfaceRequiredDescription & description) const
 {
-    if (!GCM->FindComponent(intfc.ProcessName, intfc.ComponentName)) {
+    if (!GCM.FindComponent(intfc.ProcessName, intfc.ComponentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_GetInterfaceRequiredDescription: failed to get interface description - no component found: "
                                 << intfc.ProcessName << ":" << intfc.ComponentName << std::endl;
         return;

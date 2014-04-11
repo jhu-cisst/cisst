@@ -332,6 +332,18 @@ if (CISST_MTS_HAS_ICE)
   set (ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${ICE_RESOURCE_FILES})
 endif (CISST_MTS_HAS_ICE)
 
+# files to support fault detection and diagnosis
+if (CISST_MTS_SUPPORT_FDD)
+  set (SOURCE_FILES ${SOURCE_FILES}
+       #
+       )
+
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       #
+       )
+endif (CISST_MTS_SUPPORT_FDD)
+
 # Create the config file
 set (CISST_MTS_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstMultiTask/mtsConfig.h)
 configure_file (${cisstMultiTaskLibs_SOURCE_DIR}/mtsConfig.h.in

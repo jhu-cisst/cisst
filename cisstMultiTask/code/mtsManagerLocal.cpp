@@ -436,9 +436,9 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
 
         LogMutex.Lock();
         count = 0;
-        for (LogQueueType::iterator it = LogQueue.begin();
-             it != LogQueue.end();
-             ++count)
+        for (LogQueueType::iterator it = LogQueue.begin(); 
+             it != LogQueue.end(); 
+             ++count) 
         {
             if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
                 ++it;
@@ -446,7 +446,7 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
             }
             // MJ: after 30 log messages forwarded, give other threads a chance to queue
             // logs by releasing the lock (30 is arbitrary)
-            if (count == 30)
+            if (count == 30) 
                 break;
         }
         LogMutex.Unlock();
@@ -522,9 +522,10 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
     }
 
     CMN_LOG_INIT_VERBOSE << "Class mtsManagerLocal: Enable network support for local component manager (\"" << Instance->ProcessName << "\")" << std::endl
-                         << ": with global component manager IP : " << globalComponentManagerIP << std::endl
-                         << ": with this process name           : " << thisProcessName << std::endl
-                         << ": with this process IP             : " << (thisProcessIP == "" ? "\"\"" : thisProcessIP) << std::endl;
+                         << "> Global component manager IP : " << globalComponentManagerIP << std::endl
+                         << "> This process name           : " << thisProcessName << std::endl
+                         << "> This process IP             : " << (thisProcessIP == "" ? "\"\"" : thisProcessIP) 
+                         << std::endl;
 
     mtsManagerLocal::ConfigurationChange.Lock();
 
@@ -708,7 +709,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & CMN_UNUSED(glo
 #endif
 }
 
-bool mtsManagerLocal::AddManagerComponent(const std::string & processName, const bool isServer)
+bool mtsManagerLocal::AddManagerComponent(const std::string & processName, bool isServer)
 {
     // Create manager component client
     if (!isServer) {
@@ -732,8 +733,7 @@ bool mtsManagerLocal::AddManagerComponent(const std::string & processName, const
             CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Cannot create manager component server: invalid type of Global Component Manager" << std::endl;
             return false;
         }
-        mtsManagerComponentServer * managerComponentServer = new mtsManagerComponentServer(gcm);
-        gcm->SetMCS(managerComponentServer);
+        mtsManagerComponentServer * managerComponentServer = new mtsManagerComponentServer(*gcm);
 
         CMN_LOG_CLASS_INIT_VERBOSE << "AddManagerComponent: MCS is created: " << managerComponentServer->GetName() << std::endl;
 
@@ -1678,6 +1678,7 @@ bool mtsManagerLocal::CreateManagerComponents(void)
 #else
     if (Configuration == LCM_CONFIG_STANDALONE) {
 #endif
+        // Add Manager Component Server (MCS)
         if (!AddManagerComponent(GetProcessName(), true)) {
             CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add internal manager component server" << std::endl;
             return false;
@@ -1687,6 +1688,7 @@ bool mtsManagerLocal::CreateManagerComponents(void)
     // Always add the MCC and connect it to the MCS
     //if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED)) {
     if (1) {
+        // Add Manager Component Client (MCC)
         if (!AddManagerComponent(GetProcessName())) {
             CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add internal MCC" << std::endl;
             return false;
