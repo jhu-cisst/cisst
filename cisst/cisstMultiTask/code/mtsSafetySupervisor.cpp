@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2012-08-07
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -68,6 +68,7 @@ void mtsSafetySupervisor::Init(void)
         UDPSocket = new osaSocket(osaSocket::UDP);
         // See Cube collector documentation for default port
         // : https://github.com/square/cube/wiki/Collector
+        // MJTODO: CUBE collector can be running on another machine
         UDPSocket->SetDestination("127.0.0.1", 1180); 
     }
 }
@@ -138,18 +139,18 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
     switch (jsonSerializer.GetTopicType()) {
         case SF::JSONSerializer::MONITOR:
             {
-                SendMessageToCubeCollector(MongoDB::ConvertTopicMesssageToDBEntry(
+                SendMessageToCubeCollector(MongoDB::ConvertTopicMessageToDBEntry(
                     jsonSerializer.GetTopicType(), jsonSerializer));
 #if 1 // MJ TEMP for debugging
                 static int count = 0;
                 std::cout << "--------- Monitor " << ++count << std::endl;
-                std::cout << SF::MongoDB::ConvertTopicMesssageToDBEntry(SF::JSONSerializer::MONITOR, jsonSerializer) << std::endl;
+                std::cout << SF::MongoDB::ConvertTopicMessageToDBEntry(SF::JSONSerializer::MONITOR, jsonSerializer) << std::endl;
 #endif
             }
             break;
         case SF::JSONSerializer::EVENT:
             {
-                //SendMessageToCubeCollector(MongoDB::ConvertTopicMesssageToDBEntry(
+                //SendMessageToCubeCollector(MongoDB::ConvertTopicMessageToDBEntry(
                 //    jsonSerializer.GetTopicType(), jsonSerializer));
 #if 1 // MJ TEMP for debugging
                 static int count = 0;
