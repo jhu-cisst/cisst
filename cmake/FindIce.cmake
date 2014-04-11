@@ -158,15 +158,15 @@ if (ICE_ICE_H_INCLUDE_DIR)
     find_library (ICE_LIBRARY_NAME_ZEROC_ICE NAMES ZeroCIce PATHS ${ICE_LIBRARY_DIR} NO_DEFAULT_PATH)
     if (ICE_LIBRARY_NAME_ZEROC_ICE)
       set (ICE_LIBRARY_NAME ZeroCIce)
-    else (ICE_LIBRARY_NAME_ZEROC_ICE)
+    else()
       set (ICE_LIBRARY_NAME Ice)
-    endif (ICE_LIBRARY_NAME_ZEROC_ICE)
+    endif()
     unset (ICEUTIL_LIBRARY_NAME_ZEROC_ICE CACHE)
     # libIceUtil
     find_library (ICEUTIL_LIBRARY_NAME_ZEROC_ICE NAMES ZeroCIceUtil PATHS ${ICE_LIBRARY_DIR} NO_DEFAULT_PATH)
     if (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
       set (ICEUTIL_LIBRARY_NAME ZeroCIceUtil)
-    else (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
+    else()
       set (ICEUTIL_LIBRARY_NAME IceUtil)
     endif (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
     # TODO: investigate this from merge
@@ -182,7 +182,9 @@ if (ICE_ICE_H_INCLUDE_DIR)
   endif (APPLE)
   message (STATUS "Ice library name is ${ICE_LIBRARY_NAME}")
   message (STATUS "IceUtil library name is ${ICEUTIL_LIBRARY_NAME}")
-
+  if (ICESTORM_LIBRARY_NAME_ZEROC_ICE) 
+    message (STATUS "IceStorm library name is ${ICESTORM_LIBRARY_NAME}")
+  endif() 
   # find slice2cpp
   find_program (ICE_SLICE2CPP
                 NAME slice2cpp
