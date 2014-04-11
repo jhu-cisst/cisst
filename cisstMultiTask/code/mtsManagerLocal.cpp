@@ -76,6 +76,10 @@ LogQueueType   LogQueue;
 std::string    ThisProcessName;
 // }}
 
+#if CISST_HAS_SAFETY_PLUGINS
+bool InstallCoordinator = true;
+#endif
+
 mtsManagerLocal::mtsManagerLocal(void) : ComponentMap("ComponentMap")
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager: STANDALONE mode" << std::endl;
@@ -254,9 +258,10 @@ void mtsManagerLocal::Initialize(void)
 
     SetupSystemLogger();
 
-    // Create safety coordinator that runs for this process
+    // Create safety coordinator for this process
 #if CISST_HAS_SAFETY_PLUGINS
-    SafetyCoordinator = new mtsSafetyCoordinator;
+    if (InstallCoordinator)
+        SafetyCoordinator = new mtsSafetyCoordinator;
 #endif
 }
 
@@ -1721,10 +1726,12 @@ bool mtsManagerLocal::CreateInternalComponents(void)
     
     // Add monitoring components
 #if CISST_HAS_SAFETY_PLUGINS
-    if (!SafetyCoordinator->CreateMonitor()) {
-        CMN_LOG_CLASS_INIT_ERROR << "CreateInternalComponents: failed to add monitoring component" << std::endl;
-        return false;
-    }
+    if (SafetyCoordinator)
+        if (!SafetyCoordinator->CreateMonitor()) {
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInternalComponents: failed to add monitoring component" << std::endl;
+            return false;
+        }
+#endif
 
     return true;
 }
@@ -3168,12 +3175,16 @@ bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
     return ManagerComponent.Client->FaultPropagate(fault);
 }
 
-SF::Coordinator & mtsManagerLocal::GetCoordinator(void)
+SF::Coordinator * mtsManagerLocal::GetCoordinator(void)
 {
     // MJ: If more than one monitor needs to be deployed, this method can be an entry
     // point to make a decision on where/how to distribute monitor objects.
-    CMN_ASSERT(SafetyCoordinator);
-
-    return (*SafetyCoordinator);
+    return SafetyCoordinator;
 }
+
+void mtsManagerLocal::SkipCoordinatorInstallation(void)
+{
+    InstallCoordinator = false;
+}
+
 #endif

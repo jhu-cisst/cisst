@@ -28,14 +28,15 @@ using namespace SF::Dict;
 CMN_IMPLEMENT_SERVICES(mtsSafetySupervisor);
 
 mtsSafetySupervisor::mtsSafetySupervisor()
-    : Supervisor(), Publisher(0), Subscriber(0)
+    : mtsTaskPeriodic(Supervisor::GetSupervisorName(), 10 * cmn_ms),
+      Publisher(0), Subscriber(0)
 {
     Init();
 }
 
 mtsSafetySupervisor::~mtsSafetySupervisor()
 {
-    if (ThreadPublisher.Running || ThreadSubscriber.Running)
+    if (ThreadSubscriber.Running)
         Cleanup();
 
     if (Publisher) delete Publisher;
@@ -44,14 +45,30 @@ mtsSafetySupervisor::~mtsSafetySupervisor()
 
 void mtsSafetySupervisor::Init(void)
 {
-#if 0
-    Publisher = new SF::Publisher();
-    Publisher->Startup();
-#endif
+    Publisher = new SF::Publisher(TopicNames::Supervisor);
+    Subscriber = new SF::Subscriber(TopicNames::Monitor);
+}
 
-    Subscriber = new SF::Subscriber();
+void mtsSafetySupervisor::Startup(void)
+{
+    Publisher->Startup();
+
     ThreadSubscriber.Thread.Create<mtsSafetySupervisor, unsigned int>(this, &mtsSafetySupervisor::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
+}
+
+void mtsSafetySupervisor::Run(void)
+{
+    ProcessQueuedCommands();
+    ProcessQueuedEvents();
+
+    if (Publisher) {
+        std::stringstream ss;
+        static int a = 0;
+        ss << "SUPERVISOR's PUBLISHER: " << ++a;
+        Publisher->Publish(ss.str());
+        std::cout << "Published: " << ss.str() << std::endl;
+    }
 }
 
 void * mtsSafetySupervisor::RunSubscriber(unsigned int CMN_UNUSED(arg))
@@ -72,39 +89,11 @@ void * mtsSafetySupervisor::RunSubscriber(unsigned int CMN_UNUSED(arg))
 
 void mtsSafetySupervisor::Cleanup(void)
 {
-#if 0
-    ThreadPublisher.Running = false;
-    ThreadPublisher.ThreadEventEnd.Wait();
-#endif
-
     CMN_LOG_CLASS_RUN_DEBUG << "Cleanup: Supervisor component is cleaned up" << std::endl;
 
     if (Subscriber) {
         ThreadSubscriber.Running = false;
-        // Terminating subscriber needs to call shutdown() on the Ice communicator
         Subscriber->Stop();
         ThreadSubscriber.ThreadEventEnd.Wait();
     }
 }
-
-void mtsSafetySupervisor::ToStream(std::ostream & outputStream) const
-{
-    mtsGenericObject::ToStream(outputStream);
-    // MJ: Nothing to print out for now
-    //outputStream << " Process: \""        << this->Process << "\","
-}
-
-void mtsSafetySupervisor::SerializeRaw(std::ostream & outputStream) const
-{
-    mtsGenericObject::SerializeRaw(outputStream);
-    // MJ: Nothing to serialize for now
-    //cmnSerializeRaw(outputStream, Process);
-}
-
-void mtsSafetySupervisor::DeSerializeRaw(std::istream & inputStream)
-{
-    mtsGenericObject::DeSerializeRaw(inputStream);
-    // MJ: Nothing to deserialize for now
-    //cmnDeSerializeRaw(inputStream, Process);
-}
-

@@ -18,6 +18,8 @@
   --- end cisst license ---
 */
 
+#include "dict.h"
+
 #include <cisstCommon/cmnConstants.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -26,9 +28,11 @@
 #include <cisstMultiTask/mtsMonitorFilterBasics.h>
 #include <cisstMultiTask/mtsFaultTypes.h>
 
+using namespace SF::Dict;
+
 CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);
 
-const std::string NameOfMonitorComponent = "Monitor";
+const std::string NameOfMonitorComponent = "SafetyMonitor";
 
 mtsMonitorComponent::mtsMonitorComponent()
     // MJ: Maximum monitoring time resolution is 5 msec (somewhat arbitrary but practically
@@ -58,18 +62,16 @@ void mtsMonitorComponent::Init(void)
     // mtsMonitorComponent::UpdateFilters(void).
     this->StateTableMonitor.SetAutomaticAdvance(false);
 
-    Publisher = new SF::Publisher();
+    Publisher = new SF::Publisher(TopicNames::Monitor);
     Publisher->Startup();
 #if 0
     ThreadPublisher.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunPublisher, 0);
     ThreadPublisher.ThreadEventBegin.Wait();
 #endif
 
-#if 0
-    Subscriber = new SF::Subscriber();
+    Subscriber = new SF::Subscriber(TopicNames::Supervisor);
     ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
-#endif
 }
 
 mtsMonitorComponent::~mtsMonitorComponent()
@@ -176,6 +178,7 @@ bool mtsMonitorComponent::AddMonitorTargetToComponent(SF::cisstMonitor & newMoni
     if (!targetComponentAccessor) {
         // Add new target component
         targetComponentAccessor = new TargetComponentAccessor;
+        targetComponentAccessor->MonitorTarget = newMonitorTarget;
         targetComponentAccessor->ProcessName = thisProcessName;
         targetComponentAccessor->ComponentName = targetComponentName;
         targetComponentAccessor->InterfaceRequired = AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName));
@@ -290,7 +293,7 @@ void mtsMonitorComponent::UpdateFilters(void)
         if (currentTick - accessor->LastSampledTime > accessor->MinimumPeriod) {
             // [SFUPDATE]
             accessor->GetPeriod(accessor->Period);
-            Publisher->Publish(accessor->ProcessName, accessor->ComponentName, accessor->Period);
+            Publisher->Publish(accessor->MonitorTarget.GetJSON(accessor->Period));
             accessor->LastSampledTime = currentTick;
             advance = true;
         }
