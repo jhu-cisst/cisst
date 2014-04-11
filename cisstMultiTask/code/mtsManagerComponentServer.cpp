@@ -135,7 +135,7 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::GetLogForwardingStates);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetAbsoluteTimeDiffs,
                                       this, mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs);
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_MTS_SUPPORT_FDD
     // MJ: DO NOT QUEUE THIS COMMAND - fault needs to be reported to the system as fast as possible
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_FaultPropage,
                               this, mtsManagerComponentBase::CommandNames::FaultPropagate, MTS_COMMAND_NOT_QUEUED);
@@ -743,7 +743,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses(c
     functionSet->GetListOfComponentClasses(listOfComponentClasses);
 }
 
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_MTS_SUPPORT_FDD
 void mtsManagerComponentServer::InterfaceGCMCommands_FaultPropage(const mtsFaultBase & fault)
 {
     std::cout << "MCS detected fault: " << fault << std::endl;

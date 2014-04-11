@@ -17,11 +17,11 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsConfig.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
+#include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>

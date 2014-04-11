@@ -114,7 +114,7 @@ protected:
                                                    std::vector<double> & processTimes) const;
     void InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName,
                                                         std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
-#ifdef CISST_MTS_SUPPORT_FDD
+#if CISST_MTS_SUPPORT_FDD
     void InterfaceGCMCommands_FaultPropage(const mtsFaultBase & fault);
 #endif
 
