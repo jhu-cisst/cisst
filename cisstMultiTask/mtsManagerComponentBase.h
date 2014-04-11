@@ -167,6 +167,10 @@ public:
         const static std::string AddObserverList;
         const static std::string RemoveEndUserInterface;
         const static std::string RemoveObserverList;
+#ifdef CISST_MTS_SUPPORT_FDD
+        // Fault detection
+        const static std::string FaultPropagate;
+#endif
     };
 
     /*! Event name definitions */

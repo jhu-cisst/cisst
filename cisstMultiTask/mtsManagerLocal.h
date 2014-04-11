@@ -64,6 +64,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
+#ifdef CISST_MTS_SUPPORT_FDD
+#include <cisstMultiTask/mtsFaultBase.h>
+#endif
 
 #include <stack>
 
@@ -476,6 +479,13 @@ public:
                     const std::string & clientInterfaceRequiredName,
                     const std::string & serverProcessName, const std::string & serverComponentName,
                     const std::string & serverInterfaceProvidedName);
+
+    //-------------------------------------------------------------------------
+    //  Fault Detection
+    //-------------------------------------------------------------------------
+#ifdef CISST_MTS_SUPPORT_FDD
+    bool FaultPropagate(const mtsFaultBase & fault) const;
+#endif
 
     //-------------------------------------------------------------------------
     //  Getters and Utilities

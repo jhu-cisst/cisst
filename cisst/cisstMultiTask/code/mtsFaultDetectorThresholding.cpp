@@ -92,9 +92,9 @@ void mtsFaultDetectorThresholding::CheckFault(bool debug)
     // Fault occurs - out of control sample found
     CMN_LOG_CLASS_RUN_WARNING << "CheckFault: OUT OF LIMIT SAMPLE!!! input: " << x << ", time: " << timestamp << std::endl;
 
-    // Fault identification: only timestamp needs to be identified (an instance of
-    // mtsFault associated with this fault detector already contains information 
-    // about fault location).
+    // Fault identification: only timestamp needs to be identified because the fault
+    // associated with this fault detector already has all the other information such as
+    // fault location.
     TargetFault->SetFaultTimestamp(timestamp);
 
     // Generate event for fault propataion via manager component service
