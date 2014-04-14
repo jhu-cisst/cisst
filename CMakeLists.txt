@@ -476,7 +476,6 @@ if (CISST_HAS_OPENGL)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstOpenGL)
 endif (CISST_HAS_OPENGL)
 
-
 # Finally, create lib targets
 cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 cisst_cmake_debug ("General settings: ${CISST_SETTINGS}")

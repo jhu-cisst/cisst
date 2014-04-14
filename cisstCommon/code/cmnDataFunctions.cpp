@@ -190,7 +190,7 @@ double cmnDataScalar_size_t(const size_t & data, const size_t CMN_UNUSED(index))
 size_t cmnDataScalarNumber_size_t(const size_t & CMN_UNUSED(data))
 {
     return 1;
-}
+
 
 bool cmnDataScalarNumberIsFixed_size_t(const size_t & CMN_UNUSED(data))
 {

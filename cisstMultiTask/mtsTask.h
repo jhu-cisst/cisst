@@ -62,6 +62,10 @@ class CISST_EXPORT mtsTask: public mtsComponent
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
+#if CISST_HAS_SAFETY_PLUGINS
+    // Allow Safety Coordinator to directly access state tables
+    friend class mtsSafetyCoordinator;
+#endif
 
 public:
     typedef mtsComponent BaseType;
@@ -90,6 +94,15 @@ protected:
 
     /*! The state data table object to store the states of the task. */
     mtsStateTable StateTable;
+
+    /*! State table to monitor run-time states of components for fault detection and
+        diagnosis purpose */
+#if CISST_HAS_SAFETY_PLUGINS
+    mtsStateTable StateTableMonitor;
+
+    /*! Function to generate monitor event and propagate it to the Safety Supervisor */
+    mtsFunctionWrite GenerateMonitorEvent;
+#endif
 
     /*! True if the task took more time to do computation than allocated time.
       */
@@ -233,7 +246,7 @@ public:
     /*! Return the average period. */
     double GetAveragePeriod(void) const { return StateTable.GetAveragePeriod(); }
 
-    /*! Return the name of this state table. */
+    /*! Return the name of default state table. */
     inline const std::string GetDefaultStateTableName(void) const {
         return StateTable.GetName();
     }
@@ -243,6 +256,17 @@ public:
     inline mtsStateTable * GetDefaultStateTable(void) {
         return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
     }
+
+#if CISST_HAS_SAFETY_PLUGINS
+    /*! Return the name of monitoring state table. */
+    inline const std::string GetMonitoringStateTableName(void) const {
+        return StateTableMonitor.GetName();
+    }
+    /*! Return a pointer to the monitoring state table */
+    inline mtsStateTable * GetMonitoringStateTable(void) {
+        return this->StateTables.GetItem(this->GetMonitoringStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
+    }
+#endif
 
     /********************* Methods to manage interfaces *******************/
 
@@ -300,6 +324,12 @@ public:
         return OverranPeriod;
     }
 
+#if CISST_HAS_SAFETY_PLUGINS
+    /*! Set thread overrun flag and generate a thread overrun fault which gets 
+        propagated to the Safety Supervisor of the safety framework. */
+    void SetOverranPeriod(bool overran = true);
+#endif
+    
     /*! Reset overran period flag. */
     inline virtual void ResetOverranPeriod(void) {
         OverranPeriod = false;

@@ -22,10 +22,25 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsCollectorState.h>
+#if CISST_HAS_SAFETY_PLUGINS
+//#include <cisstMultiTask/mtsMonitorFilterBase.h>
+#endif
 
 #include <iostream>
 #include <string>
 
+const std::string mtsStateTable::NamesOfDefaultElements::Tic = "Tic";
+const std::string mtsStateTable::NamesOfDefaultElements::Toc = "Toc";
+const std::string mtsStateTable::NamesOfDefaultElements::Period = "Period";
+const std::string mtsStateTable::NamesOfDefaultElements::PeriodStatistics = "PeriodStatistics";
+#if CISST_HAS_SAFETY_PLUGINS
+const std::string mtsStateTable::NamesOfDefaultElements::ExecTimeUser = "ExecTimeUser";
+const std::string mtsStateTable::NamesOfDefaultElements::ExecTimeTotal = "ExecTimeTotal";
+
+const std::string mtsStateTable::NameOfStateTableForMonitoring = "Monitor";
+#endif
+
+const mtsStateDataId mtsStateTable::INVALID_STATEVECTOR_ID = -1;
 
 void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const char delimiter,
                                             bool headerOnly, const std::string & headerPrefix) const
@@ -53,6 +68,10 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     SumOfPeriods(0.0),
     AveragePeriod(0.0),
     Name(name)
+#if CISST_HAS_SAFETY_PLUGINS
+    , ExecTimeUser(0.0)
+    , ExecTimeTotal(0.0)
+#endif
 {
     // make sure history length is at least 3
     if (this->HistoryLength < 3) {
@@ -74,13 +93,18 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
 
     // Add Tic and Toc to the StateTable. We add Toc first, to make things easier
     // in mtsStateTable::Advance.  Do not change this.
-    TocId = NewElement("Toc", &Toc);
-    TicId = NewElement("Tic", &Tic);
+    TocId = NewElement(mtsStateTable::NamesOfDefaultElements::Toc, &Toc);
+    TicId = NewElement(mtsStateTable::NamesOfDefaultElements::Tic, &Tic);
     // Add Period to the StateTable.
-    PeriodId = NewElement("Period", &Period);
+    PeriodId = NewElement(mtsStateTable::NamesOfDefaultElements::Period, &Period);
 
     // Add statistics
-    NewElement("PeriodStatistics", &PeriodStats);
+    NewElement(mtsStateTable::NamesOfDefaultElements::PeriodStatistics, &PeriodStats);
+
+#if CISST_HAS_SAFETY_PLUGINS
+    NewElement(mtsStateTable::NamesOfDefaultElements::ExecTimeUser, &ExecTimeUser);
+    NewElement(mtsStateTable::NamesOfDefaultElements::ExecTimeTotal, &ExecTimeTotal);
+#endif
 }
 
 mtsStateTable::~mtsStateTable()
@@ -291,6 +315,23 @@ void mtsStateTable::Advance(void) {
         }
     }
 
+#if CISST_HAS_SAFETY_PLUGINS
+#define PROCESS_FILTERS( _name )\
+    if (!Filters._name.empty()) {\
+        FiltersType::const_iterator it = Filters._name.begin();\
+        const FiltersType::const_iterator itEnd = Filters._name.end();\
+        for (; it != itEnd; ++it)\
+            (*it)->RunFilter();\
+    }
+    // Process filters sequentially
+    PROCESS_FILTERS(Features)
+    PROCESS_FILTERS(FeatureVectors);
+    PROCESS_FILTERS(Symptoms);
+    PROCESS_FILTERS(SymptomVectors);
+    PROCESS_FILTERS(FaultDetectors);
+#undef PROCESS_FILTERS
+#endif
+
     // Get the Toc value and write it to the state table.
     if (TimeServer) {
         Toc = TimeServer->GetRelativeTime(); // in seconds
@@ -311,6 +352,24 @@ void mtsStateTable::Advance(void) {
     if (IndexReader > Delay) {
         IndexDelayed = IndexReader - Delay;
     }
+
+#if CISST_HAS_SAFETY_PLUGINS
+
+#define PROCESS_FILTERS( _name )\
+    if (!Filters._name.empty()) {\
+        FiltersType::const_iterator it = Filters._name.begin();\
+        const FiltersType::const_iterator itEnd = Filters._name.end();\
+        for (; it != itEnd; ++it)\
+            (*it)->DoFiltering();\
+    }
+    // Process filters sequentially
+    PROCESS_FILTERS(Features)
+    PROCESS_FILTERS(FeatureVectors);
+    PROCESS_FILTERS(Symptoms);
+    PROCESS_FILTERS(SymptomVectors);
+    PROCESS_FILTERS(FaultDetectors);
+#undef PROCESS_FILTERS
+#endif
 }
 
 
@@ -340,6 +399,25 @@ void mtsStateTable::Cleanup(void) {
         CMN_LOG_CLASS_INIT_ERROR << "Cleanup: data collection for state table \"" << this->Name
                                  << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl;
     }
+
+#if CISST_HAS_SAFETY_PLUGINS
+#define CLEANUP_FILTERS( _name )\
+    if (!Filters._name.empty()) {\
+        FiltersType::const_iterator it = Filters._name.begin();\
+        const FiltersType::const_iterator itEnd = Filters._name.end();\
+        for (; it != itEnd; ++it)\
+            (*it)->CleanupFilter();\
+            delete *it;\
+    }\
+    Filters._name.clear();
+    // Process filters sequentially
+    CLEANUP_FILTERS(Features);
+    CLEANUP_FILTERS(FeatureVectors);
+    CLEANUP_FILTERS(Symptoms);
+    CLEANUP_FILTERS(SymptomVectors);
+    CLEANUP_FILTERS(FaultDetectors);
+#undef CLEANUP_FILTERS
+#endif
 }
 
 
@@ -469,7 +547,7 @@ int mtsStateTable::GetStateVectorID(const std::string & dataName) const
             return static_cast<int>(i);
         }
     }
-    return -1;
+    return INVALID_STATEVECTOR_ID;
 }
 
 
@@ -550,3 +628,103 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
         }
     }
 }
+
+#if CISST_HAS_SAFETY_PLUGINS
+bool mtsStateTable::RegisterFilter(SF::FilterBase * filter)
+{
+    CMN_ASSERT(filter);
+
+    // initialize filter instance before deployment.  filter is deployed only when
+    // initialization is successful.
+    if (!filter->InitFilter()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RegisterFilter: failed to initialize filter: " << *filter << std::endl;
+        return false;
+    }
+
+    switch (filter->GetFilterCategory()) {
+        case SF::FilterBase::FEATURE:
+            Filters.Features.push_back(filter);
+            break;
+        case SF::FilterBase::FEATURE_VECTOR:
+            Filters.FeatureVectors.push_back(filter);
+            break;
+        case SF::FilterBase::SYMPTOM:
+            Filters.Symptoms.push_back(filter);
+            break;
+        case SF::FilterBase::SYMPTOM_VECTOR:
+            Filters.SymptomVectors.push_back(filter);
+            break;
+        case SF::FilterBase::FAULT_DETECTOR:
+            Filters.FaultDetectors.push_back(filter);
+            break;
+        case SF::FilterBase::INVALID:
+        default:
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterFilter: invalid filter type of filter \"" 
+                << filter->GetFilterName() << "\": " << filter->GetFilterCategory() << std::endl;
+            return false;
+    }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "RegisterFilter: added new filter: " << filter->GetFilterName() << std::endl;
+
+    return true;
+}
+
+void mtsStateTable::PrintFilters(std::ostream & outputStream) const
+{
+#define PRINT_FILTERS( _name )\
+    outputStream << #_name << " -------------------------" << std::endl;\
+    if (!Filters._name.empty()) {\
+        FiltersType::const_iterator it = Filters._name.begin();\
+        const FiltersType::const_iterator itEnd = Filters._name.end();\
+        for (; it != itEnd; ++it)\
+            outputStream << *(*it) << std::endl;\
+    }
+    // Process filters sequentially
+    PRINT_FILTERS(Features);
+    PRINT_FILTERS(FeatureVectors);
+    PRINT_FILTERS(Symptoms);
+    PRINT_FILTERS(SymptomVectors);
+    PRINT_FILTERS(FaultDetectors);
+}
+
+
+double mtsStateTable::GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const
+{
+    mtsDouble value;
+    StateVector[id]->Get(IndexReader, value);
+    value.GetTimestamp(timeStamp);
+
+    return value.Data;
+}
+
+mtsDoubleVec mtsStateTable::GetNewValueVector(const mtsStateDataId id, double & timeStamp) const
+{
+    mtsDoubleVec vec;
+    StateVector[id]->Get(IndexReader, vec);
+    vec.GetTimestamp(timeStamp);
+
+    return vec;
+}
+
+void mtsStateTable::GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & vec, double & timeStamp) const
+{
+    StateVector[id]->Get(IndexReader, vec);
+    vec.GetTimestamp(timeStamp);
+}
+
+void mtsStateTable::GetNewValueVector(const mtsStateDataId id, std::vector<double>& vec, double & timeStamp) const
+{
+    mtsDoubleVec _vec;
+    GetNewValueVector(id, _vec, timeStamp);
+
+    vec.clear();
+    for (size_t i = 0; i < _vec.size(); ++i) {
+        vec.push_back(_vec(i));
+    }
+}
+#endif
+
+// MJ TODO: Following APIs could be added to access old values for convenience:
+//
+// Fetch the history of old values using index
+//   GetValueHistory(const mtsStateDataId id, size_t historyLength, double & timestamp) const

@@ -53,6 +53,8 @@ int main(int argc, char * argv[])
     mtsManagerLocal::SetLogForwarding(true);
 #endif
 
+#if CISST_MTS_HAS_ICE
+    std::string globalComponentManagerIP;
     bool useGeneric;
 
 #if CISST_MTS_HAS_ICE
@@ -128,6 +130,8 @@ int main(int argc, char * argv[])
         return 1;
     }
 #else
+    // Here, we create a single proxy on the client side. Alternatively, we could create two proxies on the client
+    // side connected to one or two proxies on the server side.
     mtsSocketProxyClient * clientProxy = new mtsSocketProxyClient("MyClientProxy", "localhost", 1234);
     componentManager->AddComponent(clientProxy);
 

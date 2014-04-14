@@ -30,7 +30,11 @@ http://www.cisst.org/cisst/license.txt.
 void * mtsTaskFromCallback::RunInternal(void * CMN_UNUSED(data)) {
     if (inRunInternal) {
         if (this->State == mtsComponentState::ACTIVE) {
+#if CISST_HAS_SAFETY_PLUGINS
+            SetOverranPeriod();
+#else
            this->OverranPeriod = true;
+#endif
         }
         return 0;
     }

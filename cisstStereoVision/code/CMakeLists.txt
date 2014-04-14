@@ -383,7 +383,6 @@ if (OpenCV_FOUND)
             message (FATAL_ERROR "OpenCV Versions earlier than 2.0 are not supported by cisst.")
             cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
             cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBS)
-
         endif (${OpenCV_VERSION} VERSION_GREATER 2.1.9)
     else (CISST_SVL_HAS_OPENCV2)
         cisst_unset_all_package_settings (cisstStereoVision OpenCV2)

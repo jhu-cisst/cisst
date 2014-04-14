@@ -95,6 +95,10 @@ protected:
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
         mtsFunctionQualifiedRead GetAbsoluteTimeDiffs;
+#if CISST_HAS_SAFETY_PLUGINS
+        // Fault detection
+        mtsFunctionWrite FaultPropagate;
+#endif
     } InterfaceLCMFunctionType;
 
     InterfaceLCMFunctionType InterfaceLCMFunction;
@@ -157,7 +161,10 @@ protected:
     bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
-    bool IsLocalProcess(const std::string &procName) const;
+    /*! Fault detection */
+#if CISST_HAS_SAFETY_PLUGINS
+    bool FaultPropagate(const mtsFaultBase & fault) const;
+#endif
 
     /*! Commands for InterfaceLCM's provided interface */
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
@@ -218,8 +225,9 @@ protected:
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;
     mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
 
-    void GetAbsoluteTimeInSeconds(mtsDouble &time) const;  // DEPRECATED
+    bool IsLocalProcess(const std::string &procName) const;
 
+    void GetAbsoluteTimeInSeconds(mtsDouble &time) const;  // DEPRECATED
 
 public:
     mtsManagerComponentClient(const std::string & componentName);

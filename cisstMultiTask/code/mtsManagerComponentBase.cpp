@@ -67,6 +67,9 @@ const std::string mtsManagerComponentBase::CommandNames::EnableLogForwarding = "
 const std::string mtsManagerComponentBase::CommandNames::DisableLogForwarding = "DisableLogForwarding";
 const std::string mtsManagerComponentBase::CommandNames::GetAbsoluteTimeInSeconds = "GetAbsoluteTimeInSeconds";
 const std::string mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs = "GetAbsoluteTimeDiffs";
+#if CISST_HAS_SAFETY_PLUGINS
+const std::string mtsManagerComponentBase::CommandNames::FaultPropagate = "FaultPropagate";
+#endif
 
 // Names of events
 const std::string mtsManagerComponentBase::EventNames::AddComponent  = "AddComponentEvent";

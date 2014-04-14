@@ -44,6 +44,10 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsManagerProxyServer.h"
 #endif
 
+#if CISST_HAS_SAFETY_PLUGINS
+#include <cisstMultiTask/mtsSafetyCoordinator.h>
+#endif
+
 // Time server used by all tasks
 osaTimeServer TimeServer;
 bool TimeServerOriginSet = false;
@@ -71,6 +75,10 @@ LogQueueType   LogQueue;
 
 std::string    ThisProcessName;
 // }}
+
+#if CISST_HAS_SAFETY_PLUGINS
+bool InstallCoordinator = false;
+#endif
 
 mtsManagerLocal::mtsManagerLocal(void) : ComponentMap("ComponentMap")
 {
@@ -249,6 +257,14 @@ void mtsManagerLocal::Initialize(void)
     TimeServerOriginSet = true;
 
     SetupSystemLogger();
+
+    // Create safety coordinator for this process
+#if CISST_HAS_SAFETY_PLUGINS
+    if (InstallCoordinator)
+        SafetyCoordinator = new mtsSafetyCoordinator;
+    else
+        SafetyCoordinator = 0;
+#endif
 }
 
 void mtsManagerLocal::InitializeLocal(void)
@@ -282,6 +298,10 @@ void mtsManagerLocal::InitializeLocal(void)
     SetGCMConnected(true); // Always true in case of standalone configuration
 }
 
+// MJ: This method assumes all internal components (e.g. MCS, MCC, Monitoring components)
+// are properly killed already by a user's explicit call to mtsManagerLocal::KillAll()
+// followed by a call to mtsManagerLocal::WaitForStateAll(mtsComponentState::FINISHED, delay).
+// If this is not guaranteed, deleting component objects could lead to seg faults.
 void mtsManagerLocal::Cleanup(void)
 {
     if (LogThreadFinishWaiting) return;
@@ -310,6 +330,21 @@ void mtsManagerLocal::Cleanup(void)
 
     if (SystemLogMultiplexer) {
         cmnLogger::GetMultiplexer()->RemoveMultiplexer(SystemLogMultiplexer);
+        SystemLogMultiplexer->RemoveAllChannels();
+        delete SystemLogMultiplexer;
+        SystemLogMultiplexer = 0;
+    }
+
+#if CISST_HAS_SAFETY_PLUGINS
+    if (SafetyCoordinator) {
+        // MJ TODO: Prior to deleting the instance, should this notify the safety framework of
+        // this deletion?? (via IceStorm)
+        delete SafetyCoordinator;
+        SafetyCoordinator = 0;
+    }
+#endif
+
+    if (SystemLogMultiplexer) {
         SystemLogMultiplexer->RemoveAllChannels();
         delete SystemLogMultiplexer;
         SystemLogMultiplexer = 0;
@@ -436,9 +471,9 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
 
         LogMutex.Lock();
         count = 0;
-        for (LogQueueType::iterator it = LogQueue.begin();
-             it != LogQueue.end();
-             ++count)
+        for (LogQueueType::iterator it = LogQueue.begin(); 
+             it != LogQueue.end(); 
+             ++count) 
         {
             if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
                 ++it;
@@ -446,7 +481,7 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
             }
             // MJ: after 30 log messages forwarded, give other threads a chance to queue
             // logs by releasing the lock (30 is arbitrary)
-            if (count == 30)
+            if (count == 30) 
                 break;
         }
         LogMutex.Unlock();
@@ -474,7 +509,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(void)
         Instance->MainThreadId = osaGetCurrentThreadId();
 
         // Create manager components
-        if (!Instance->CreateManagerComponents()) {
+        if (!Instance->CreateInternalComponents()) {
             CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
         }
     }
@@ -497,7 +532,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         Instance->MainThreadId = osaGetCurrentThreadId();
 
         // Create manager components
-        if (!Instance->CreateManagerComponents()) {
+        if (!Instance->CreateInternalComponents()) {
             CMN_LOG_INIT_ERROR << "GetInstance: Failed to add internal manager components" << std::endl;
         }
 
@@ -522,9 +557,10 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
     }
 
     CMN_LOG_INIT_VERBOSE << "Class mtsManagerLocal: Enable network support for local component manager (\"" << Instance->ProcessName << "\")" << std::endl
-                         << ": with global component manager IP : " << globalComponentManagerIP << std::endl
-                         << ": with this process name           : " << thisProcessName << std::endl
-                         << ": with this process IP             : " << (thisProcessIP == "" ? "\"\"" : thisProcessIP) << std::endl;
+                         << "> Global component manager IP : " << globalComponentManagerIP << std::endl
+                         << "> This process name           : " << thisProcessName << std::endl
+                         << "> This process IP             : " << (thisProcessIP == "" ? "\"\"" : thisProcessIP) 
+                         << std::endl;
 
     mtsManagerLocal::ConfigurationChange.Lock();
 
@@ -551,7 +587,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
 
     // Create internal manager components
     InstanceReconfiguration = newInstance;
-    if (!newInstance->CreateManagerComponents()) {
+    if (!newInstance->CreateInternalComponents()) {
         CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: failed to create MCC/MCS" << std::endl;
 
         // Clean up new LCM object
@@ -574,7 +610,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         for (; it != itEnd; ++it) {
             componentName = it->second->GetName();
             // Do not transfer manager components (both client and server).  They will be created
-            // again by CreateManagerComponents() later.
+            // again by CreateInternalComponents() later.
             if (mtsManagerComponentBase::IsManagerComponentServer(componentName) ||
                 mtsManagerComponentBase::IsManagerComponentClient(componentName))
             {
@@ -612,7 +648,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         const std::vector<mtsDescriptionConnection>::const_iterator itEnd = list.end();
         for (; it != itEnd; ++it) {
             // Do not trasnfer connections between manager components. They will be re-established
-            // again by CreateManagerComponents() later.
+            // again by CreateInternalComponents() later.
             managerComponentInvolvedConnection = false;
 
 #define CHECK_INTERNAL_CONNECTION(_classType, _interfaceType)\
@@ -697,7 +733,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & CMN_UNUSED(glo
         Instance->MainThreadId = osaGetCurrentThreadId();
 
         // Create manager components
-        if (!Instance->CreateManagerComponents()) {
+        if (!Instance->CreateInternalComponents()) {
             CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
         }
     }
@@ -708,18 +744,15 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & CMN_UNUSED(glo
 #endif
 }
 
-bool mtsManagerLocal::AddManagerComponent(const std::string & processName, const bool isServer)
+bool mtsManagerLocal::AddManagerComponent(const std::string & processName, bool isServer)
 {
     // Create manager component client
     if (!isServer) {
         const std::string managerComponentName = mtsManagerComponentBase::GetNameOfManagerComponentClientFor(processName);
 
         mtsManagerComponentClient * managerComponentClient = new mtsManagerComponentClient(managerComponentName);
-        CMN_LOG_CLASS_INIT_VERBOSE << "AddManagerComponent: MCC is created: " << managerComponentClient->GetName() << std::endl;
-
         if (AddComponent(managerComponentClient)) {
             ManagerComponent.Client = managerComponentClient;
-            CMN_LOG_CLASS_INIT_VERBOSE << "AddManagerComponent: MCC is added: " << managerComponentClient->GetName() << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Failed to add MCC" << std::endl;
             return false;
@@ -732,14 +765,10 @@ bool mtsManagerLocal::AddManagerComponent(const std::string & processName, const
             CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Cannot create manager component server: invalid type of Global Component Manager" << std::endl;
             return false;
         }
-        mtsManagerComponentServer * managerComponentServer = new mtsManagerComponentServer(gcm);
-        gcm->SetMCS(managerComponentServer);
 
-        CMN_LOG_CLASS_INIT_VERBOSE << "AddManagerComponent: MCS is created: " << managerComponentServer->GetName() << std::endl;
-
+        mtsManagerComponentServer * managerComponentServer = new mtsManagerComponentServer(*gcm);
         if (AddComponent(managerComponentServer)) {
             ManagerComponent.Server = managerComponentServer;
-            CMN_LOG_CLASS_INIT_VERBOSE << "AddManagerComponent: MCS is added: " << managerComponentServer->GetName() << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Failed to add MCS" << std::endl;
             return false;
@@ -1005,7 +1034,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
 
     // If component does not yet have a valid name, assign one now, based on the class
     // name and the pointer value (to ensure that name is unique).
-    if (componentName == "") {
+    if (componentName.size() == 0) {
         componentName.assign(component->Services()->GetName());
         char buf[20];
         sprintf(buf, "_%p", component);
@@ -1053,9 +1082,9 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         }
         // User(generic) component
         else {
-            // Add a internal provided interface.  This interface is connected to the
-            // manager component client and is used to inform it of the change of
-            // the running state of this component (more features can be added later).
+            // Add an internal provided interface.  The manager component client (MCC)
+            // connects to this interface and the interface is used to provide cisst users 
+            // a set of system-level services such as run-time state changes of a component.
             if (!component->AddInterfaceInternal()) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Internal\" provided interfaces: " << componentName << std::endl;
                 return false;
@@ -1070,7 +1099,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         return false;
     }
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: successfully added component to GCM: " << componentName << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: successfully added component to GCM: " << componentName << std::endl;
     // PK TEMP
     ManagerGlobal->AddComponent(ProcessName, componentName+"-END");
 
@@ -1127,7 +1156,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
                     return false;
                 }
 
-                CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: connected user components "
+                CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: connected user components "
                     << "\"" << componentName << "\" to manager component client "
                     << "\"" << managerComponent->GetName() << "\""
                     << std::endl;
@@ -1135,7 +1164,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         }
     }
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: successfully added component to LCM: " << componentName << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: successfully added component to LCM: " << componentName << std::endl;
 
     return true;
 }
@@ -1670,16 +1699,17 @@ bool mtsManagerLocal::FindComponent(const std::string & componentName) const
     return (GetComponent(componentName) != 0);
 }
 
-bool mtsManagerLocal::CreateManagerComponents(void)
+bool mtsManagerLocal::CreateInternalComponents(void)
 {
-    // Automatically add internal manager component when the LCM is initialized.
+    // Automatically add internal manager components when the LCM is initialized.
 #if CISST_MTS_HAS_ICE
     if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED_WITH_GCM)) {
 #else
     if (Configuration == LCM_CONFIG_STANDALONE) {
 #endif
+        // Add Manager Component Server (MCS)
         if (!AddManagerComponent(GetProcessName(), true)) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add internal manager component server" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInternalComponents: failed to add internal manager component server" << std::endl;
             return false;
         }
     }
@@ -1687,21 +1717,30 @@ bool mtsManagerLocal::CreateManagerComponents(void)
     // Always add the MCC and connect it to the MCS
     //if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED)) {
     if (1) {
+        // Add Manager Component Client (MCC)
         if (!AddManagerComponent(GetProcessName())) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add internal MCC" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInternalComponents: failed to add internal MCC" << std::endl;
             return false;
         }
         // Connect manager component client to manager component server, i.e.,
         // connect InterfaceLCM.Required - InterfaceGCM.Provided
         if (!ConnectManagerComponentClientToServer()) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to connect MCC to server" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInternalComponents: failed to connect MCC to server" << std::endl;
             return false;
         }
     }
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponents: Successfully created manager components" << std::endl;
-
     ManagerComponent.Client->MCSReady = true;
+    
+    // Add monitoring components
+#if CISST_HAS_SAFETY_PLUGINS
+    if (SafetyCoordinator && InstallCoordinator) {
+        if (!SafetyCoordinator->CreateMonitor()) {
+            CMN_LOG_CLASS_INIT_ERROR << "CreateInternalComponents: failed to add monitoring component" << std::endl;
+            return false;
+        }
+    }
+#endif
 
     return true;
 }
@@ -2416,8 +2455,12 @@ bool mtsManagerLocal::Disconnect(
 
 bool mtsManagerLocal::GetInterfaceProvidedDescription(
     const std::string & serverComponentName, const std::string & interfaceName,
+<<<<<<< HEAD:cisstMultiTask/code/mtsManagerLocal.cpp
     mtsInterfaceProvidedDescription & interfaceProvidedDescription,
     const std::string & CMN_UNUSED(listenerID))
+=======
+    InterfaceProvidedDescription & interfaceProvidedDescription, const std::string & CMN_UNUSED(listenerID))
+>>>>>>> branches/fault: merged changes from trunk (fixed broken merge):cisst/cisstMultiTask/code/mtsManagerLocal.cpp
 {
     // Get component specified
     mtsComponent * component = GetComponent(serverComponentName);
@@ -3134,3 +3177,27 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
         return false;
 }
 
+#if CISST_HAS_SAFETY_PLUGINS
+bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
+{
+    if (!ManagerComponent.Client) {
+        CMN_LOG_CLASS_RUN_ERROR << "FaultPropagate: MCC not yet created" << std::endl;
+        return false;
+    }
+
+    return ManagerComponent.Client->FaultPropagate(fault);
+}
+
+mtsSafetyCoordinator * mtsManagerLocal::GetCoordinator(void)
+{
+    // MJ: If more than one monitor needs to be deployed, this method can be an entry
+    // point to make a decision on where/how to distribute monitor objects.
+    return SafetyCoordinator;
+}
+
+void mtsManagerLocal::InstallSafetyCoordinator(void)
+{
+    InstallCoordinator = true;
+}
+
+#endif

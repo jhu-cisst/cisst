@@ -36,6 +36,9 @@ mtsComponent::mtsComponent(const std::string & componentName):
     InterfacesOutput("InterfacesOutput"),
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
+#if CISST_HAS_SAFETY_PLUGINS
+    FaultState(0),
+#endif
     StateTables("StateTables")
 
 {
@@ -48,6 +51,9 @@ mtsComponent::mtsComponent(void):
     InterfacesOutput("InterfacesOutput"),
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
+#if CISST_HAS_SAFETY_PLUGINS
+    FaultState(0),
+#endif
     StateTables("StateTables")
 {
     Initialize();
@@ -70,6 +76,10 @@ void mtsComponent::Initialize(void)
     InterfaceProvidedToManager = 0;
 
     ReplayMode = false;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    MonitorTargetSet = SF::Monitor::TARGET_INVALID;
+#endif
 }
 
 
@@ -87,8 +97,30 @@ mtsComponent::~mtsComponent()
     if (ManagerComponentServices) {
         delete ManagerComponentServices;
     }
+
+#if CISST_HAS_SAFETY_PLUGINS
+    if (FaultState)
+        delete FaultState;
+#endif
 }
 
+#if CISST_HAS_SAFETY_PLUGINS
+SF::State::StateType mtsComponent::GetFaultState(void) const
+{
+    if (FaultState) {
+        return FaultState->GetState();
+    } else {
+        return SF::State::INVALID;
+    }
+}
+
+void mtsComponent::SetStateEventHandler(SF::StateEventHandler * instance)
+{
+    if (FaultState) {
+        return FaultState->SetStateEventHandler(instance);
+    }
+}
+#endif
 
 const std::string & mtsComponent::GetName(void) const
 {
@@ -647,7 +679,7 @@ mtsStateTable * mtsComponent::GetStateTable(const std::string & stateTableName)
 bool mtsComponent::AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided)
 {
     const std::string tableName = existingStateTable->GetName();
-    const std::string interfaceName = "StateTable" + tableName;
+    const std::string interfaceName = mtsStateTable::GetNameOfStateTableInterface(tableName);
     if (!this->StateTables.AddItem(tableName,
                                    existingStateTable,
                                    CMN_LOG_LEVEL_INIT_ERROR)) {
@@ -1113,3 +1145,36 @@ bool mtsComponent::SetReplayTime(const double time) {
     }
     return true;
 }
+
+//-------------------------------------------------------------------------
+//  Safety Framework Plug-ins
+//-------------------------------------------------------------------------
+#if CISST_HAS_SAFETY_PLUGINS
+/* smmy
+bool mtsComponent::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
+{
+    // MJ TODO: no duplicate entry check for now 
+    MonitorTargets.push_back(newMonitorTarget);
+
+    CMN_LOG_CLASS_RUN_DEBUG << "New monitoring target added: " << newMonitorTarget << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::FindMonitorTargetInstalled(const SF::Monitor::TargetType type) const
+{
+    return ((MonitorTargetSet & type) > 0);
+}
+
+void mtsComponent::InstallMonitorTarget(const SF::Monitor::TargetType type)
+{
+    MonitorTargetSet |= type;
+}
+
+void mtsComponent::UninstallMonitorTarget(const SF::Monitor::TargetType type)
+{
+    MonitorTargetSet &= ~type;
+}
+*/
+
+#endif

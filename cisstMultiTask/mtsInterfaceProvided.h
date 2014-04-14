@@ -6,7 +6,11 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
+<<<<<<< HEAD:cisstMultiTask/mtsInterfaceProvided.h
   (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+=======
+  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+>>>>>>> branches/fault: merged changes from trunk (fixed broken merge):cisst/cisstMultiTask/mtsInterfaceProvided.h
 
 --- begin cisst license - do not edit ---
 
@@ -400,6 +404,13 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     mtsCommandRead * AddCommandReadState(const mtsStateTable & stateTable,
                                          const _elementType & stateData, const std::string & commandName);
 
+#if CISST_HAS_SAFETY_PLUGINS
+    mtsCommandRead * AddCommandReadStateInternalScalar(const mtsStateTable & stateTable,
+                                                       const std::string & stateName, const std::string & commandName);
+    mtsCommandRead * AddCommandReadStateInternalVector(const mtsStateTable & stateTable,
+                                                       const std::string & stateName, const std::string & commandName);
+#endif
+
     /*! Adds command objects to read from the state table with a
       delay.  The commands created ('read' and 'qualified read') are
       similar to the commands added using AddCommandReadState except
@@ -721,6 +732,7 @@ protected:
 
 #ifndef SWIG
 
+#include <typeinfo>
 template <class _elementType>
 mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable & stateTable,
                                                            const _elementType & stateData, const std::string & commandName)
@@ -730,7 +742,11 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable &
 
     AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
     if (!stateAccessor) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command \"" << commandName << "\", "
+                                 << "Details: AccessorType * type: " << typeid(AccessorType*).name()
+                                 << ", stateData type: " << typeid(stateData).name()
+                                 << ", stateTableAccessor type: " << typeid(stateTable.GetAccessor(stateData)).name()
+                                 << std::endl;
         return 0;
     }
     // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
@@ -750,7 +766,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateDelayed(const mtsState
 
     AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
     if (!stateAccessor) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadStateDelayed: invalid accessor for command " << commandName << std::endl;
         return 0;
     }
     // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.

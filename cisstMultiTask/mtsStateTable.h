@@ -37,9 +37,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 
-
 #include <vector>
 #include <iostream>
+
+#if CISST_HAS_SAFETY_PLUGINS
+#include <cisstMultiTask/mtsVector.h>
+#endif
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -479,6 +482,61 @@ public:
     void DataCollectionStart(const mtsDouble & delay);
     void DataCollectionStop(const mtsDouble & delay);
     //@}
+
+    /*! Returns the name of provided interface to access state table */
+    static const std::string GetNameOfStateTableInterface(const std::string & stateTableName) {
+        return "StateTable" + stateTableName;
+    }
+
+    /*! Names of default elements */
+    class NamesOfDefaultElements {
+    public:
+        static const std::string Tic;
+        static const std::string Toc;
+        static const std::string Period;
+        static const std::string PeriodStatistics;
+#if CISST_HAS_SAFETY_PLUGINS
+        static const std::string ExecTimeUser;
+        static const std::string ExecTimeTotal;
+#endif
+    };
+
+    static const mtsStateDataId INVALID_STATEVECTOR_ID;
+
+    /*! Fetch new value from state table */
+#if CISST_HAS_SAFETY_PLUGINS
+    double GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const;
+    mtsDoubleVec GetNewValueVector(const mtsStateDataId id, double & timeStamp) const;
+    void GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & vec, double & timeStamp) const;
+    void GetNewValueVector(const mtsStateDataId id, std::vector<double> & vec, double & timeStamp) const;
+
+    typedef std::list<SF::FilterBase*> FiltersType;
+    struct FiltersStruct {
+        /*! List of filters attached to this state table to define features */
+        FiltersType Features;
+        /*! List of filters attached to this state table to define feature vectors */
+        FiltersType FeatureVectors;
+        /*! List of filters attached to this state table to define symptoms */
+        FiltersType Symptoms;
+        /*! List of filters attached to this state table to define symptom vectors */
+        FiltersType SymptomVectors;
+        /*! List of filters attached to this state table for fault detection */
+        FiltersType FaultDetectors;
+    } Filters;
+
+    /*! Register filter.  Registered filters are executed when this state table is updated. */
+    bool RegisterFilter(SF::FilterBase * filter);
+    
+    /*! Print out all filters */
+    void PrintFilters(std::ostream & outputStream) const;
+
+    // [SFUPDATE]
+    /*! Placeholders for monitoring */
+    mtsDouble ExecTimeUser;
+    mtsDouble ExecTimeTotal;
+
+    static const std::string NameOfStateTableForMonitoring;
+#endif
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateTable);

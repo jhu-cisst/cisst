@@ -1,5 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
-/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */ /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
 
@@ -27,9 +26,16 @@
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
+#if CISST_HAS_SAFETY_PLUGINS
+//#include <cisstMultiTask/mtsMonitorFilterBase.h>
+#endif
 
 #include <iostream>
 
+#if CISST_HAS_SAFETY_PLUGINS
+#include "dict.h"
+#include "statemachine.h"
+#endif
 
 std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
 
@@ -43,7 +49,13 @@ void mtsTask::DoRunInternal(void)
         // Make sure following is called
         if (InterfaceProvidedToManager)
             InterfaceProvidedToManager->ProcessMailBoxes();
+#if CISST_HAS_SAFETY_PLUGINS
+        double tic = osaGetTime();
+#endif
         this->Run();
+#if CISST_HAS_SAFETY_PLUGINS
+    StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
+#endif
     }
     catch (const std::exception &excp) {
         OnRunException(excp);
@@ -51,7 +63,9 @@ void mtsTask::DoRunInternal(void)
     catch (...) {
         OnRunException(mtsTask::UnknownException);
     }
+
     // advance all state tables (if automatic)
+    // MJ: Filters installed are processed by mtsStateTable::Advance
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
     RunEvent();  // only generates event if RunEventCalled is false
 }
@@ -176,6 +190,8 @@ void mtsTask::CleanupInternal() {
 
     ChangeState(mtsComponentState::FINISHED);
     CMN_LOG_CLASS_INIT_VERBOSE << "CleanupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
+
+    InterfaceProvidedToManager = 0;
 }
 
 
@@ -215,10 +231,23 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     if (!(ExecIn && ExecIn->GetConnectedInterface()))
         ChangeStateEvent(mtsComponentState(newState));
 
+#if CISST_HAS_SAFETY_PLUGINS
+    mtsComponentState oldState = this->State;
+#endif
+
     StateChange.Lock();
     this->State = newState;
     StateChange.Unlock();
     StateChangeSignal.Raise();
+
+#if CISST_HAS_SAFETY_PLUGINS
+    // If state transition involves the ACTIVE state, notify Safety Framework of the transition.
+    if (oldState == mtsComponentState::ACTIVE && newState != mtsComponentState::ACTIVE) {
+        this->FaultState->ProcessEvent(SF::State::ON_EXIT);
+    } else if (oldState != mtsComponentState::ACTIVE && newState == mtsComponentState::ACTIVE) {
+        this->FaultState->ProcessEvent(SF::State::ON_ENTRY);
+    }
+#endif
 
     // Inform the manager component client of the state change
     if (InterfaceProvidedToManager) {
@@ -278,13 +307,39 @@ mtsTask::mtsTask(const std::string & name,
     InitializationDelay(3.0 * cmn_s), // if this value is modified, update documentation in header file
     StateChange(),
     StateChangeSignal(),
-    StateTable(sizeStateTable, "StateTable"),
+    StateTable(sizeStateTable, "Default"),
+#if CISST_HAS_SAFETY_PLUGINS
+    StateTableMonitor(sizeStateTable, mtsStateTable::NameOfStateTableForMonitoring),
+#endif
     OverranPeriod(false),
     ThreadStartData(0),
     ReturnValue(0),
     RunEventCalled(false)
 {
     this->AddStateTable(&this->StateTable);
+#if CISST_HAS_SAFETY_PLUGINS
+    this->AddStateTable(&this->StateTableMonitor);
+
+    mtsInterfaceProvided * provided = GetInterfaceProvided(
+        mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));
+    CMN_ASSERT(provided);
+    // Make Period available through the command pattern
+    // MJTODO: Rename exec to dutycycle
+    provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.Period, "GetPeriod");
+    provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeUser, "GetExecTimeUser");
+    provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeTotal, "GetExecTimeTotal");
+    // Add fault notification event
+    provided->AddEventWrite(this->GenerateMonitorEvent, SF::Dict::MonitorNames::MonitorEvent, std::string());
+    // [SFUPDATE]
+
+    // Create SF state machine with default state transition event handler and
+    // associate it with the SF state machine.
+    // The event handler will be removed when the state machine is destroyed and thus
+    // it should not be removed outside the state machine of Safety Framework.
+    SF::StateEventHandler * eventHandler = new SF::StateEventHandler;
+    this->FaultState = new SF::StateMachine(eventHandler);
+#endif
+
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
     // ExecIn interface is optional; does not need a mailbox
     ExecIn = this->AddInterfaceRequiredUsingMailbox(mtsManagerComponentBase::InterfaceNames::InterfaceExecIn, 0, MTS_OPTIONAL);
@@ -456,3 +511,21 @@ void mtsTask::SetInitializationDelay(double delay)
 {
     this->InitializationDelay = delay;
 }
+
+#if CISST_HAS_SAFETY_PLUGINS
+void mtsTask::SetOverranPeriod(bool overran)
+{
+    this->OverranPeriod = overran;
+
+    // Generate event to inform the safety supervisor of the thread overrun fault
+    // of this component.
+    if (!this->GenerateMonitorEvent.IsValid()) {
+        CMN_LOG_CLASS_RUN_WARNING << "Monitor event cannot be generated: task \"" << this->GetName() << "\"" << std::endl;
+        return;
+    }
+
+    // MJTODO: How/when to reset overrun flag??
+    std::cout  << "mtsTask::SetOverranPeriod() ---- MONITORING EVENT: TASK \"" << this->GetName() << "\" overran" << std::endl;
+}
+
+#endif

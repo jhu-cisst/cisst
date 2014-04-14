@@ -64,6 +64,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
+#if CISST_HAS_SAFETY_PLUGINS
+#include <cisstMultiTask/mtsFaultBase.h>
+#include <cisstMultiTask/mtsSafetyCoordinator.h>
+//#include "coordinator.h"
+#endif
 
 #include <stack>
 
@@ -113,7 +118,6 @@ public:
         // global component manager on the same process.
         LCM_CONFIG_NETWORKED_WITH_GCM
     };
-
 
 private:
     /*! Singleton object */
@@ -181,7 +185,7 @@ private:
     mtsManagerGlobalInterface * ManagerGlobal;
 
     /*! Manager component instances (for direct access) */
-    struct {
+    struct ManagerComponentStruct {
         mtsManagerComponentClient * Client;
         mtsManagerComponentServer * Server;
     } ManagerComponent;
@@ -198,11 +202,11 @@ private:
     /*! Set up system logger that allows collecting system-wide logs across network */
     void SetupSystemLogger(void);
 
-    /*! If Manager Component Client (MCC) is ready to forward logs to
+    /*! Check if Manager Component Client (MCC) is ready to forward logs to 
         Manager Component Server (MCS) */
     bool MCCReadyForLogForwarding(void) const;
 
-public:
+public:    
     /*! Callback function for system-wide thread-safe logging */
     static void LogDispatcher(const char * str, int len);
 
@@ -235,16 +239,16 @@ protected:
     void Initialize(void);
     void InitializeLocal(void);
 
-    /*! \brief Create internal manager components automatically when LCM is
-               initialized.  */
-    bool CreateManagerComponents(void);
+    /*! \brief Create internal components when LCM is instantiated.  For now, MCS, MCC,
+               and monitoring components are created. */
+    bool CreateInternalComponents(void);
 
     /*! \brief Add an internal manager component
         \param processName Name of this process (or this LCM)
         \param isServer True to create manager component server, false to create
-               manager component client.  Note that this argument should be true
-               only when LCM runs with GCM in the same process. */
-    bool AddManagerComponent(const std::string & processName, const bool isServer = false);
+               manager component client.  Note that this argument is true only when LCM 
+               runs with GCM in the same process. */
+    bool AddManagerComponent(const std::string & processName, bool isServer = false);
 
     /*! \brief Connect manager component client to manager component server
                (connect InterfaceLCM.Required - InterfaceGCM.Provided)
@@ -355,6 +359,24 @@ protected:
     inline void SetGCMConnected(const bool connected) {
         GCMConnected = connected;
     }
+
+    //-------------------------------------------------------------------------
+    //  Safety Framework Plug-ins
+    //-------------------------------------------------------------------------
+#if CISST_HAS_SAFETY_PLUGINS
+protected:
+    mtsSafetyCoordinator * SafetyCoordinator;
+
+public:
+    bool FaultPropagate(const mtsFaultBase & fault) const;
+    
+    //SF::Coordinator * GetCoordinator(void);
+    mtsSafetyCoordinator * GetCoordinator(void);
+
+    /*! Instsall the safety coordinator instance.  Used only when the
+        supervisor component needs to be installed. */
+    static void InstallSafetyCoordinator(void);
+#endif
 
 public:
     //-------------------------------------------------------------------------
@@ -481,33 +503,35 @@ public:
     /*! Name of local component manager running with the global component manager */
     static const std::string ProcessNameOfLCMWithGCM;
 
-    /*! Get a singleton object of local component manager.
-        \note  If this is called first, the local component manager is
-               configured in standalone mode. If one of the other GetInstance
-               methods (with arguments) is later called, the singleton object is
-               reconfigured in networked mode if (CISST_MTS_HAS_ICE is defined)
-               to support inter-process communication. During
-               this reconfiguration process, a caller thread is blocked for
-               thread-safe transition of all internal data.
-    */
+    /*! \brief Get singleton instance of local component manager.
+        \note  This method instantiates and configures the local component manager 
+               (LCM) as standalone configuration if the singleton of LCM has not been 
+               created before.  If the singleton object already exists, the pointer to 
+               the object is returned. */
     static mtsManagerLocal * GetInstance(void);
 
-    /*! \brief Return singleton object of local component manager (networked mode)
+    /*! \brief Returns singleton object of LCM.  Requires CISST_MTS_HAS_ICE enabled.
+        \note  This method instantiates LCM as networked configuration if the singleton 
+               object has not been created before.  If the singleton object created as 
+               networked configuration already exists, the pointer to the object is returned.  
+               If the singleton object was created as standalone configuration, this method 
+               replaces it with a new instance created as networked configuration and migrates all 
+               internal data such as components and connections from the existing LCM to the 
+               new instance.  During this reconfiguration process, a caller thread is blocked
+               for thread-safe transition.
         \param globalComponentManagerIP Ip address of global component manager
                that this local component manager connects to
         \param thisProcessName Name of this process. If not specified, set as
                ip address of this host by default
         \param thisProcessIP IP address of this process. If not specified, set
                as the first ip address detected
-        \return Pointer to singleton object
-    */
+        \return Pointer to singleton object */
     static mtsManagerLocal * GetInstance(const std::string & globalComponentManagerIP,
                                          const std::string & thisProcessName = "",
                                          const std::string & thisProcessIP = "");
 
-    /*! \brief Return singleton object of local component manager (networked mode, as GCM)
-        \param globalComponentManager reference to global component manager (GCM)
-    */
+    /*! \brief Return singleton object of LCM that runs win the global component manager.
+        \param globalComponentManager reference to the global component manager (GCM) */
     static mtsManagerLocal * GetInstance(mtsManagerGlobal & globalComponentManager);
 
     /*! Enumerate all the names of components added */

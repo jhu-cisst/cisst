@@ -17,6 +17,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnUnits.h>
+#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
@@ -24,10 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstMultiTask/mtsInterfaceInput.h>
-#include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaDynamicLoader.h>
-#include <cisstCommon/cmnUnits.h>
+#if CISST_HAS_SAFETY_PLUGINS
+#include <cisstMultiTask/mtsFaultBase.h>
+#endif
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentClient, mtsManagerComponentBase);
 
@@ -158,7 +161,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
             success = clientInterfaceRequired->BindCommands(endUserInterface);
             mtsEventHandlerList eventList(endUserInterface);
             clientInterfaceRequired->GetEventList(eventList);
-
+            
 #if (CISST_OS == CISST_LINUX_XENOMAI && CISST_MTS_64BIT)
             {
                 // From void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout)
@@ -186,7 +189,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                                      << serverComponentName << ":" << serverInterfaceName << std::endl;
             return false;
         }
-
+        
         // Post-connect processing to handle the special case 1:
         // When the manager component server's provided interface (InterfaceGCM's
         // provided interface) gets connected with a manager component client's
@@ -205,7 +208,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                 }
             }
         }
-
+        
     }
     else {  // Input/Output connection
         if (!serverInterfaceOutput) {
@@ -598,6 +601,10 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.GetInterfaceProvidedDescription);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
                           InterfaceLCMFunction.GetInterfaceRequiredDescription);
+#if CISST_HAS_SAFETY_PLUGINS
+    required->AddFunction(mtsManagerComponentBase::CommandNames::FaultPropagate,
+                          InterfaceLCMFunction.FaultPropagate);
+#endif
     // It is not necessary to queue the events because we are just passing them along (it would not
     // hurt to queue them, either).
     required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleAddComponentEvent, this,
@@ -724,6 +731,19 @@ bool mtsManagerComponentClient::ForwardLog(const mtsLogMessage & log) const
 
     return true;
 }
+
+#if CISST_HAS_SAFETY_PLUGINS
+bool mtsManagerComponentClient::FaultPropagate(const mtsFaultBase & fault) const
+{
+    mtsExecutionResult ret = InterfaceLCMFunction.FaultPropagate(fault);
+    if (ret.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED) {
+        CMN_LOG_CLASS_RUN_ERROR << "FaultPropagate: fault is not reported to the system" << std::endl;
+        return false;
+    }
+    
+    return true;
+}
+#endif
 
 bool mtsManagerComponentClient::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
