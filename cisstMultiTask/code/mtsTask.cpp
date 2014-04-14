@@ -54,7 +54,7 @@ void mtsTask::DoRunInternal(void)
 #endif
         this->Run();
 #if CISST_HAS_SAFETY_PLUGINS
-    StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
+        StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
 #endif
     }
     catch (const std::exception &excp) {
