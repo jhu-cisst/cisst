@@ -21,27 +21,6 @@ else (CMAKE_SIZEOF_VOID_P EQUAL 8)
   set (CISST_MTS_64BIT FALSE)
 endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
 
-# Support for Safety Framework plug-ins
-option (CISST_HAS_SAFETY_PLUGINS "Enable support for Safety Framework plug-ins including fault detection and diagnosis" OFF)
-if (CISST_HAS_SAFETY_PLUGINS)
-    find_package(SafetyFramework REQUIRED)
-    if (SF_FOUND)
-        # Include safety framework configurations
-        include(${SF_USE_FILE})
-        set (SF_INCLUDE_DIR ${SF_INCLUDE_DIR} # where to find include files for SF
-                            ${SF_LIB_DEPENDENCY_INCLUDE_DIR}) # paths to SF dependencies
-        cisst_set_package_settings (cisstMultiTask SafetyFramework INCLUDE_DIRECTORIES SF_INCLUDE_DIR)
-        cisst_set_package_settings (cisstMultiTask SafetyFramework LIBRARIES SF_LIBRARY_FILE)
-        # set compiler flags
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SF_CXX_FLAGS}")
-    else (SF_FOUND)
-        message(FATAL_ERROR "Safety Framework is not found.")
-    endif (SF_FOUND)
-else (CISST_HAS_SAFETY_PLUGINS)
-    #cisst_unset_all_package_settings (cisstMultiTask SafetyFramework)
-    #cisst_unset_all_package_settings (cisstMultiTask JSONCPP)
-endif (CISST_HAS_SAFETY_PLUGINS)
-
 # try to find ZeroC Ice
 if (CISST_HAS_IOS)
   find_package (IceTouch)
@@ -70,15 +49,9 @@ if (CISST_MTS_HAS_ICE)
     if (WIN32)
       set (ICE_LIBRARIES_ALL optimized Ice  optimized IceUtil
                              debug     Iced debug     IceUtild)
-    if (CISST_HAS_SAFETY_PLUGINS)
-      set (ICE_LIBRARIES_ALL ${ICE_LIBRARIES_ALL} optimized IceStorm debug IceStormd)
-    endif (CISST_HAS_SAFETY_PLUGINS)
       cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES_ALL)
     else (WIN32)
-    set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} IceUtil)
-    if (CISST_HAS_SAFETY_PLUGINS)
-      set (ICE_LIBRARIES ${ICE_LIBRARIES} IceStorm)
-    endif (CISST_HAS_SAFETY_PLUGINS)
+      set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} ${ICEUTIL_LIBRARY_NAME})
       cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES)
     endif (WIN32)
   endif (CISST_HAS_IOS)
