@@ -161,30 +161,30 @@ if (ICE_ICE_H_INCLUDE_DIR)
     else()
       set (ICE_LIBRARY_NAME Ice)
     endif()
-    unset (ICEUTIL_LIBRARY_NAME_ZEROC_ICE CACHE)
     # libIceUtil
+    unset (ICEUTIL_LIBRARY_NAME_ZEROC_ICE CACHE)
     find_library (ICEUTIL_LIBRARY_NAME_ZEROC_ICE NAMES ZeroCIceUtil PATHS ${ICE_LIBRARY_DIR} NO_DEFAULT_PATH)
     if (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
       set (ICEUTIL_LIBRARY_NAME ZeroCIceUtil)
     else()
       set (ICEUTIL_LIBRARY_NAME IceUtil)
-    endif (ICEUTIL_LIBRARY_NAME_ZEROC_ICE)
-    # TODO: investigate this from merge
-    ##find_library (ICE_LIBRARY_NAME_ZEROC_ICE NAMES Ice PATHS ${ICE_LIBRARY_DIR} NO_DEFAULT_PATH)
-    ##if (ICE_LIBRARY_NAME_ZEROC_ICE)
-    ##  set (ICE_LIBRARY_NAME Ice)
-    ##else (ICE_LIBRARY_NAME_ZEROC_ICE)
-    ##  set (ICE_LIBRARY_NAME ZeroCIce)
-    ##endif (ICE_LIBRARY_NAME_ZEROC_ICE)
+    endif ()
+    # libIceStorm
+    unset (ICESTORM_LIBRARY_NAME_ZEROC_ICE CACHE)
+    find_library (ICESTORM_LIBRARY_NAME_ZEROC_ICE NAMES ZeroCIceStorm PATHS ${ICE_LIBRARY_DIR} NO_DEFAULT_PATH)
+    if (ICESTORM_LIBRARY_NAME_ZEROC_ICE)
+      set (ICESTORM_LIBRARY_NAME ZeroCIceStorm)
+    else ()
+      set (ICESTORM_LIBRARY_NAME IceStorm)
+    endif ()
   else (APPLE)
     set (ICE_LIBRARY_NAME Ice)
     set (ICEUTIL_LIBRARY_NAME IceUtil)
+    set (ICESTORM_LIBRARY_NAME IceStorm)
   endif (APPLE)
   message (STATUS "Ice library name is ${ICE_LIBRARY_NAME}")
   message (STATUS "IceUtil library name is ${ICEUTIL_LIBRARY_NAME}")
-  if (ICESTORM_LIBRARY_NAME_ZEROC_ICE) 
-    message (STATUS "IceStorm library name is ${ICESTORM_LIBRARY_NAME}")
-  endif() 
+  message (STATUS "IceStorm library name is ${ICESTORM_LIBRARY_NAME}")
   # find slice2cpp
   find_program (ICE_SLICE2CPP
                 NAME slice2cpp
@@ -202,6 +202,7 @@ if (ICE_ICE_H_INCLUDE_DIR)
                       ICE_INCLUDE_DIR ICE_ICE_H_INCLUDE_DIR ICE_SLICE_DIR
                       ICE_LIBRARY_NAME ICE_LIBRARY_NAME_ZEROC_ICE
                       ICEUTIL_LIBRARY_NAME ICEUTIL_LIBRARY_NAME_ZEROC_ICE
+                      ICESTORM_LIBRARY_NAME ICESTORM_LIBRARY_NAME_ZEROC_ICE
                       ICE_SLICE2CPP)
   endif (ICE_FOUND)
 

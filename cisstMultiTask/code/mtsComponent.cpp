@@ -76,10 +76,6 @@ void mtsComponent::Initialize(void)
     InterfaceProvidedToManager = 0;
 
     ReplayMode = false;
-
-#if CISST_HAS_SAFETY_PLUGINS
-    MonitorTargetSet = SF::Monitor::TARGET_INVALID;
-#endif
 }
 
 

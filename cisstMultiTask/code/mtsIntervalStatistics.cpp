@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 
 CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsIntervalStatisticsVecProxy);
 
 mtsIntervalStatistics::mtsIntervalStatistics():
     mtsGenericObject(),

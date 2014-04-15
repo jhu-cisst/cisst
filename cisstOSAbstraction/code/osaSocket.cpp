@@ -368,30 +368,6 @@ bool osaSocket::GetDestination(osaIPandPort &ip_port) const
     return GetDestination(ip_port.IP, ip_port.Port);
 }
 
-bool osaSocket::GetDestination(std::string & host, unsigned short & port) const
-{
-    bool ret = false;
-    const struct osaSocketInternals *constInternals = reinterpret_cast<const struct osaSocketInternals *>(Internals);
-    struct in_addr sAddr = constInternals->ServerAddr.sin_addr;
-    const char *str;
-#if (CISST_OS == CISST_WINDOWS)
-    // Windows does not provide inet_ntop prior to Vista, so we use inet_ntoa.
-    // Alternatively, should be able to use getnameinfo.
-    str = inet_ntoa(sAddr);
-#else
-    char buffer[INET_ADDRSTRLEN];
-    str = inet_ntop(AF_INET, &sAddr, buffer, sizeof(buffer));
-#endif
-    if (str) {
-        host.assign(str);
-        port = ntohs(constInternals->ServerAddr.sin_port);
-        ret = true;
-    }
-    else
-        CMN_LOG_CLASS_RUN_ERROR << "GetDestination failed" << std::endl;
-    return ret;
-}
-
 bool osaSocket::Connect(void)
 {
     if (SocketType == UDP) {

@@ -2455,12 +2455,8 @@ bool mtsManagerLocal::Disconnect(
 
 bool mtsManagerLocal::GetInterfaceProvidedDescription(
     const std::string & serverComponentName, const std::string & interfaceName,
-<<<<<<< HEAD:cisstMultiTask/code/mtsManagerLocal.cpp
     mtsInterfaceProvidedDescription & interfaceProvidedDescription,
     const std::string & CMN_UNUSED(listenerID))
-=======
-    InterfaceProvidedDescription & interfaceProvidedDescription, const std::string & CMN_UNUSED(listenerID))
->>>>>>> branches/fault: merged changes from trunk (fixed broken merge):cisst/cisstMultiTask/code/mtsManagerLocal.cpp
 {
     // Get component specified
     mtsComponent * component = GetComponent(serverComponentName);
