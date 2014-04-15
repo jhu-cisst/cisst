@@ -51,7 +51,9 @@ void vctPlot2DOpenGLFLTK::draw(void)
 
 int vctPlot2DOpenGLFLTK::handle(int event) {
     int button;
+#if 0
     Fl_Menu_Button * popup;
+#endif
     switch(event) {
     case FL_PUSH:
         button = Fl::event_button();
