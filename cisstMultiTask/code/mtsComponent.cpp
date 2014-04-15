@@ -1106,7 +1106,7 @@ bool mtsComponent::SetReplayData(const std::string & stateTableName, const std::
     return true;
 }
 
-bool mtsComponent::SetReplayTime(const double time) {
+bool mtsComponent::SetReplayTime(const double CMN_UNUSED(time)) {
     if (!this->ReplayMode) {
         CMN_LOG_CLASS_RUN_ERROR << "SetReplayTime: component \"" << GetName() << "\" not in replay mode." << std::endl;
         return false;
