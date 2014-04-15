@@ -80,6 +80,18 @@ set (CISST_LIBRARIES "@CISST_LIBRARIES@")
 set (CISST_SETTINGS "@CISST_SETTINGS@")
 set (CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@)
 
+# Build static or dynamic libraries
+if (CISST_BUILD_SHARED_LIBS)
+  set (IS_SHARED SHARED)
+  set (BUILD_SHARED_LIBS SHARED)
+  if (WIN32)
+    remove_definitions (-DCISST_DLL)
+    add_definitions (-DCISST_DLL)
+  endif (WIN32)
+else (CISST_BUILD_SHARED_LIBS)
+  set (IS_SHARED STATIC)
+endif (CISST_BUILD_SHARED_LIBS)
+
 # Which flags have been set and include path/libs
 set (CISST_HAS_LINUX_RTAI @CISST_HAS_LINUX_RTAI@)
 set (CISST_HAS_LINUX_XENOMAI @CISST_HAS_LINUX_XENOMAI@)
