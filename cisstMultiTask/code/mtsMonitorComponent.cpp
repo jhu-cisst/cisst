@@ -536,7 +536,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
             return false;
         }
         // check if the command exists
-        mtsCommandRead * command = interfaceProvided->GetCommandRead(targetCommandName);
+        mtsCommandRead * command = interfaceProvided->GetEndUserInterface(targetCommandName)->GetCommandRead(targetCommandName);
         if (!command) {
             CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: no command \"" << targetCommandName 
                 << "\" in provided interface \"" << targetPrvIntfName << "\"" << std::endl;

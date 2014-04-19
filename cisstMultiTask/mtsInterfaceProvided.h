@@ -6,11 +6,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-<<<<<<< HEAD:cisstMultiTask/mtsInterfaceProvided.h
   (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
-=======
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
->>>>>>> branches/fault: merged changes from trunk (fixed broken merge):cisst/cisstMultiTask/mtsInterfaceProvided.h
 
 --- begin cisst license - do not edit ---
 
