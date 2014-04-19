@@ -317,7 +317,10 @@ void mtsMonitorComponent::Initialize(void)
     this->StateTableMonitor.SetAutomaticAdvance(!ManualAdvance);
 
     Publisher = new SF::Publisher(SF::Dict::TopicNames::Monitor);
-    Publisher->Startup();
+    if (!Publisher->Startup()) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to initialize publisher for monitoring components" << std::endl;
+        return;
+    }
 #if 0
     ThreadPublisher.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunPublisher, 0);
     ThreadPublisher.ThreadEventBegin.Wait();
