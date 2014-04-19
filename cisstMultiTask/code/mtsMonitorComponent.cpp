@@ -318,8 +318,8 @@ void mtsMonitorComponent::Initialize(void)
 
     Publisher = new SF::Publisher(SF::Dict::TopicNames::Monitor);
     if (!Publisher->Startup()) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to initialize publisher for monitoring components" << std::endl;
-        return;
+        //throw std::runtime_error(std::string(message))
+        cmnThrow("Failed to initialize publisher for monitoring components");
     }
 #if 0
     ThreadPublisher.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunPublisher, 0);

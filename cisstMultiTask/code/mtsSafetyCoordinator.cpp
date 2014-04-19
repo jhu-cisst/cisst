@@ -713,7 +713,12 @@ bool mtsSafetyCoordinator::CreateMonitor(void)
  
     // Create monitoring component with manual state table advance.  This monitor component
     // is used only for monitoring, not filtering (filtering requires automatic advance).
-    mtsMonitorComponent * monitor = new mtsMonitorComponent(false);
+    mtsMonitorComponent * monitor;
+    try {
+        monitor = new mtsMonitorComponent(false);
+    } catch (const std::exception & e) {
+        return false;
+    }
     mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance(); 
     if (!componentManager->AddComponent(monitor)) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to create monitor" << std::endl;
