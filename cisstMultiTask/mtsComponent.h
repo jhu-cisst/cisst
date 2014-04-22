@@ -159,6 +159,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     friend class mtsManagerLocal;
     friend class mtsComponentProxy;
     friend class mtsSafetyCoordinator;
+#if CISST_HAS_SAFETY_PLUGINS
+    friend class SFGCMTest;
+#endif
 
  protected:
 
@@ -170,9 +173,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
 #if CISST_HAS_SAFETY_PLUGINS
     /*! State machine of Safety Framework.  Instantiated in the constructor of mtsTask. */
+    // TODO: replace pointer with instance
     SF::StateMachine * FaultState;
 
     /*! Returns current state of Safety Framework state machine */
+    // TODO: Add notion of Framework vs. Application
     SF::State::StateType GetFaultState(void) const;
 
     /*! Replace default state event handler with user-defined event handler.

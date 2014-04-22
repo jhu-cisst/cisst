@@ -336,8 +336,10 @@ mtsTask::mtsTask(const std::string & name,
     // associate it with the SF state machine.
     // The event handler will be removed when the state machine is destroyed and thus
     // it should not be removed outside the state machine of Safety Framework.
-    SF::StateEventHandler * eventHandler = new SF::StateEventHandler;
-    this->FaultState = new SF::StateMachine(eventHandler);
+    // MJTEMP
+    //SF::StateEventHandler * eventHandler = new SF::StateEventHandler;
+    //this->FaultState = new SF::StateMachine(eventHandler);
+    this->FaultState = new SF::StateMachine(name);
 #endif
 
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
