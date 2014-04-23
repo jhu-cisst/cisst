@@ -41,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_HAS_SAFETY_PLUGINS
 #include "cisstMonitor.h"
-#include "statemachine.h"
+#include "gcm.h"
 #endif
 
 // Always include last
@@ -173,16 +173,19 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
 #if CISST_HAS_SAFETY_PLUGINS
     /*! State machine of Safety Framework.  Instantiated in the constructor of mtsTask. */
-    // TODO: replace pointer with instance
-    SF::StateMachine * FaultState;
-
     /*! Returns current state of Safety Framework state machine */
     // TODO: Add notion of Framework vs. Application
-    SF::State::StateType GetFaultState(void) const;
+    //SF::State::StateType GetFaultState(void) const;
+
+    /*! Instance of Generic Component Model */
+    SF::GCM * GCMInstance;
 
     /*! Replace default state event handler with user-defined event handler.
         See SF::StateMachine::SetStateEventHandler() for more details. */
-    void SetStateEventHandler(SF::StateEventHandler * instance);
+    //void SetStateEventHandler(SF::StateEventHandler * instance);
+
+    /*! Update GCM to synchronize its state machines with this component */
+    bool UpdateGCM(void);
 #endif
 
     /*! Provided interface for component management. */

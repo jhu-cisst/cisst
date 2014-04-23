@@ -37,7 +37,7 @@ mtsComponent::mtsComponent(const std::string & componentName):
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
 #if CISST_HAS_SAFETY_PLUGINS
-    FaultState(0),
+    GCMInstance(0),
 #endif
     StateTables("StateTables")
 
@@ -52,7 +52,7 @@ mtsComponent::mtsComponent(void):
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
 #if CISST_HAS_SAFETY_PLUGINS
-    FaultState(0),
+    GCMInstance(0),
 #endif
     StateTables("StateTables")
 {
@@ -76,6 +76,10 @@ void mtsComponent::Initialize(void)
     InterfaceProvidedToManager = 0;
 
     ReplayMode = false;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    GCMInstance = new SF::GCM(Name);
+#endif
 }
 
 
@@ -95,28 +99,10 @@ mtsComponent::~mtsComponent()
     }
 
 #if CISST_HAS_SAFETY_PLUGINS
-    if (FaultState)
-        delete FaultState;
+    if (GCMInstance)
+        delete GCMInstance;
 #endif
 }
-
-#if CISST_HAS_SAFETY_PLUGINS
-SF::State::StateType mtsComponent::GetFaultState(void) const
-{
-    if (FaultState) {
-        return FaultState->GetState();
-    } else {
-        return SF::State::INVALID;
-    }
-}
-
-void mtsComponent::SetStateEventHandler(SF::StateEventHandler * instance)
-{
-    if (FaultState) {
-        return FaultState->SetStateEventHandler(instance);
-    }
-}
-#endif
 
 const std::string & mtsComponent::GetName(void) const
 {
@@ -263,6 +249,12 @@ mtsInterfaceProvided * mtsComponent::AddInterfaceProvided(const std::string & in
     if (interfaceProvided) {
         interfaceProvided->AddSystemEvents();
     }
+
+#if CISST_HAS_SAFETY_PLUGINS
+    if (!GCMInstance->AddInterface(interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to add provided interface \"" << interfaceProvidedName << "\" to GCM instance." << std::endl;
+#endif
+
     return interfaceProvided;
 }
 
@@ -288,6 +280,10 @@ mtsInterfaceProvided * mtsComponent::AddInterfaceProvidedWithoutSystemEvents(con
     }
     if (interfaceProvided) {
         if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided, CMN_LOG_LEVEL_INIT_ERROR)) {
+#if CISST_HAS_SAFETY_PLUGINS
+            if (!GCMInstance->AddInterface(interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+                CMN_LOG_CLASS_INIT_ERROR << "Failed to add provided interface \"" << interfaceProvidedName << "\" to GCM instance." << std::endl;
+#endif
             return interfaceProvided;
         }
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: component " << this->GetName() << " unable to add interface \""
@@ -415,6 +411,15 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
     delete interfaceProvided;
     CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceProvided: removed provided interface \""
                               << interfaceProvidedName << "\"" << std::endl;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    if (GCMInstance) {
+        if (!GCMInstance->RemoveInterface(interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+            CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
+                << interfaceProvidedName << "\" from Generic Component Model state" << std::endl;
+    }
+#endif
+
     return true;
 }
 
@@ -491,6 +496,15 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
     delete interfaceRequired;
     CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceRequired: removed required interface \""
                               << interfaceRequiredName << "\"" << std::endl;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    if (GCMInstance) {
+        if (!GCMInstance->RemoveInterface(interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
+            CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
+                << interfaceRequiredName << "\" from Generic Component Model state" << std::endl;
+    }
+#endif
+
     return true;
 }
 
@@ -504,6 +518,10 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredExisting(const std::str
         return 0;
     }
     if (InterfacesRequired.AddItem(interfaceRequiredName, interfaceRequired)) {
+#if CISST_HAS_SAFETY_PLUGINS
+        if (!GCMInstance->AddInterface(interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
+            CMN_LOG_CLASS_INIT_ERROR << "Failed to add required interface \"" << interfaceRequiredName << "\" to GCM instance." << std::endl;
+#endif
         return interfaceRequired;
     }
     return 0;
@@ -522,6 +540,10 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredUsingMailbox(const std:
     mtsInterfaceRequired * interfaceRequired = new mtsInterfaceRequired(interfaceRequiredName, this, mailBox, required);
     if (interfaceRequired) {
         if (InterfacesRequired.AddItem(interfaceRequiredName, interfaceRequired)) {
+#if CISST_HAS_SAFETY_PLUGINS
+            if (!GCMInstance->AddInterface(interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
+                CMN_LOG_CLASS_INIT_ERROR << "Failed to add required interface \"" << interfaceRequiredName << "\" to GCM instance." << std::endl;
+#endif
             return interfaceRequired;
         }
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceRequired: unable to add interface \""
@@ -1146,31 +1168,44 @@ bool mtsComponent::SetReplayTime(const double time) {
 //  Safety Framework Plug-ins
 //-------------------------------------------------------------------------
 #if CISST_HAS_SAFETY_PLUGINS
-/* smmy
-bool mtsComponent::AddMonitorTarget(SF::cisstMonitor & newMonitorTarget)
+bool mtsComponent::UpdateGCM(void)
 {
-    // MJ TODO: no duplicate entry check for now 
-    MonitorTargets.push_back(newMonitorTarget);
+    CMN_ASSERT(GCMInstance);
 
-    CMN_LOG_CLASS_RUN_DEBUG << "New monitoring target added: " << newMonitorTarget << std::endl;
+    // Access each required interface and deploy state machine associated with it
+    std::string name;
+
+    // Required interfaces
+    std::vector<std::string> interfaceNames = GetNamesOfInterfacesRequiredOrInput();
+    for (size_t i = 0; i < interfaceNames.size(); ++i) {
+        name = interfaceNames[i];
+        // Skip existing interface
+        if (GCMInstance->FindInterface(name, SF::GCM::REQUIRED_INTERFACE))
+            continue;
+        // Add new interface
+        if (!GCMInstance->AddInterface(name, SF::GCM::REQUIRED_INTERFACE)) {
+            SFLOG_ERROR << "Failed to add required interface \"" << name << "\" to GCM instance." << std::endl;
+        } else {
+            SFLOG_DEBUG << "Added required interface \"" << name << "\" to GCM instance." << std::endl;
+        }
+    }
+
+    interfaceNames.clear();
+    interfaceNames = GetNamesOfInterfacesProvidedOrOutput();
+    for (size_t i = 0; i < interfaceNames.size(); ++i) {
+        name = interfaceNames[i];
+        // Skip existing interface
+        if (GCMInstance->FindInterface(name, SF::GCM::PROVIDED_INTERFACE))
+            continue;
+        // Add new interface
+        if (!GCMInstance->AddInterface(name, SF::GCM::PROVIDED_INTERFACE)) {
+            SFLOG_ERROR << "Failed to add provided interface \"" << name << "\" to GCM instance." << std::endl;
+        } else {
+            SFLOG_DEBUG << "Added provided interface \"" << name << "\" to GCM instance." << std::endl;
+        }
+    }
 
     return true;
 }
-
-bool mtsComponent::FindMonitorTargetInstalled(const SF::Monitor::TargetType type) const
-{
-    return ((MonitorTargetSet & type) > 0);
-}
-
-void mtsComponent::InstallMonitorTarget(const SF::Monitor::TargetType type)
-{
-    MonitorTargetSet |= type;
-}
-
-void mtsComponent::UninstallMonitorTarget(const SF::Monitor::TargetType type)
-{
-    MonitorTargetSet &= ~type;
-}
-*/
 
 #endif

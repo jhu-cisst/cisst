@@ -243,9 +243,9 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
 #if CISST_HAS_SAFETY_PLUGINS
     // If state transition involves the ACTIVE state, notify Safety Framework of the transition.
     if (oldState == mtsComponentState::ACTIVE && newState != mtsComponentState::ACTIVE) {
-        this->FaultState->ProcessEvent(SF::State::ON_EXIT);
+        GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_EXIT);
     } else if (oldState != mtsComponentState::ACTIVE && newState == mtsComponentState::ACTIVE) {
-        this->FaultState->ProcessEvent(SF::State::ON_ENTRY);
+        GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_ENTRY);
     }
 #endif
 
@@ -331,15 +331,6 @@ mtsTask::mtsTask(const std::string & name,
     // Add fault notification event
     provided->AddEventWrite(this->GenerateMonitorEvent, SF::Dict::MonitorNames::MonitorEvent, std::string());
     // [SFUPDATE]
-
-    // Create SF state machine with default state transition event handler and
-    // associate it with the SF state machine.
-    // The event handler will be removed when the state machine is destroyed and thus
-    // it should not be removed outside the state machine of Safety Framework.
-    // MJTEMP
-    //SF::StateEventHandler * eventHandler = new SF::StateEventHandler;
-    //this->FaultState = new SF::StateMachine(eventHandler);
-    this->FaultState = new SF::StateMachine(name);
 #endif
 
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
