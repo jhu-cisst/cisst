@@ -26,9 +26,6 @@
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
-#if CISST_HAS_SAFETY_PLUGINS
-//#include <cisstMultiTask/mtsMonitorFilterBase.h>
-#endif
 
 #include <iostream>
 

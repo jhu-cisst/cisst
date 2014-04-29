@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2012-07-14
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -104,11 +104,11 @@ public:
     //-------------------------------------------------- 
     //  Filtering
     //-------------------------------------------------- 
-    //! Install a single filter using filter instance
+    //! Install filter using filter instance
     bool AddFilter(SF::FilterBase * filter);
-    //! Install filters by reading JSON file
+    //! Install filter by reading JSON file
     bool AddFilterFromJSONFile(const std::string & jsonFileName);
-    //! Install filters from JSON string
+    //! Install filter from JSON string
     bool AddFilterFromJSON(const std::string & jsonString);
 
     //! Deploy all monitors and FDDs that are installed so far.
