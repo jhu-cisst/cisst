@@ -84,9 +84,9 @@ void robSLERP::ComputeParameters( double w ){
   }
   
   else{
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Angular velocity is zero." 
-		      << std::endl;
+    //CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+    //		      << ": Angular velocity is zero." 
+    //		      << std::endl;
   }
 
 }
