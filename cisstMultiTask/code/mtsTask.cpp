@@ -327,6 +327,28 @@ mtsTask::mtsTask(const std::string & name,
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeTotal, "GetExecTimeTotal");
     // Add fault notification event
     provided->AddEventWrite(this->GenerateMonitorEvent, SF::Dict::MonitorNames::MonitorEvent, std::string());
+
+    // Initialize containers for framework filters
+    StatusException.Count     = 0;
+    StatusException.Timestamp = 0.0;
+    StatusException.Message   = "";
+    StatusOverrun.Count     = 0;
+    StatusOverrun.Timestamp = 0.0;
+    StatusOverrun.Duration  = 0.0;
+
+    // Wrap internal status information with command pattern, which framework filters use.
+    StateTableMonitor.AddData(StatusException.Count,     "ExceptionCount");
+    StateTableMonitor.AddData(StatusException.Timestamp, "ExceptionTimestamp");
+    StateTableMonitor.AddData(StatusException.Message,   "ExceptionMessage");
+    StateTableMonitor.AddData(StatusOverrun.Count,       "OverrunCount");
+    StateTableMonitor.AddData(StatusOverrun.Timestamp,   "OverrunTimestamp");
+    StateTableMonitor.AddData(StatusOverrun.Duration,    "OverrunDuration");
+    provided->AddCommandReadState(StateTableMonitor, StatusException.Count,     "GetExceptionCount");
+    provided->AddCommandReadState(StateTableMonitor, StatusException.Timestamp, "GetExceptionTimestamp");
+    provided->AddCommandReadState(StateTableMonitor, StatusException.Message,   "GetExceptionMessage");
+    provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Count,       "GetOverrunCount");
+    provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Timestamp,   "GetOverrunTimestamp");
+    provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Duration,    "GetOverrunDuration");
     // [SFUPDATE]
 #endif
 
@@ -490,11 +512,20 @@ bool mtsTask::CheckForOwnThread(void) const
 void mtsTask::OnStartupException(const std::exception &excp)
 {
     CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    HandlerException(this->GetName(), excp.what());
+#endif
 }
 
 void mtsTask::OnRunException(const std::exception &excp)
 {
     CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    HandlerException(this->GetName(), excp.what());
+#endif
+
 }
 
 void mtsTask::SetInitializationDelay(double delay)
@@ -503,6 +534,23 @@ void mtsTask::SetInitializationDelay(double delay)
 }
 
 #if CISST_HAS_SAFETY_PLUGINS
+void mtsTask::HandlerException(const std::string & name, const std::string & what)
+{
+    ++StatusException.Count;
+
+    StatusException.Message   = what;
+    StatusException.Timestamp = osaGetTime();
+}
+
+void mtsTask::HandlerOverrun(const std::string & name, const std::string & what)
+{
+    ++StatusOverrun.Count;
+
+    StatusOverrun.Duration  = 0.0; // TODO: get actual overrun time
+    StatusOverrun.Timestamp = osaGetTime();
+}
+
+// To obsolete
 void mtsTask::SetOverranPeriod(bool overran)
 {
     this->OverranPeriod = overran;

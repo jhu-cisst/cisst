@@ -102,6 +102,27 @@ protected:
 
     /*! Function to generate monitor event and propagate it to the Safety Supervisor */
     mtsFunctionWrite GenerateMonitorEvent;
+
+    /*! Containers to support framework filters (exception filter) */
+    struct {
+        size_t Count;
+        double Timestamp;
+        std::string Message;
+    } StatusException;
+
+    /*! Containers to support framework filters (overrun filter) */
+    struct {
+        size_t Count;
+        double Timestamp;
+        double Duration;
+    } StatusOverrun;
+
+    /*! Exception event handler for safety framework */
+    void HandlerException(const std::string & name, const std::string & what);
+
+    /*! Overrun event handler for safety framework */
+    void HandlerOverrun(const std::string & name, const std::string & what);
+
 #endif
 
     /*! True if the task took more time to do computation than allocated time.
