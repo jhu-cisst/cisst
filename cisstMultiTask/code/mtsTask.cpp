@@ -348,8 +348,6 @@ mtsTask::mtsTask(const std::string & name,
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Timestamp,   "GetOverrunTimestamp");
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Duration,    "GetOverrunDuration");
     // [SFUPDATE]
-
-    // Install internal framework filters
 #endif
 
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
@@ -546,22 +544,6 @@ void mtsTask::HandlerOverrun(const std::string & name, const std::string & what)
 
     StatusOverrun.Duration  = 0.0; // TODO: get actual overrun time
     StatusOverrun.Timestamp = osaGetTime();
-}
-
-bool mtsTask::InstallFrameworkFilters(void)
-{
-    mtsSafetyCoordinator * safetyCoordinator = mtsManagerLocal::GetInstance()->GetCoordinator();
-    CMN_ASSERT(safetyCoordinator);
-
-    const std::string jsonFileName(SF_SOURCE_ROOT_DIR"libs/fdd/filters/json/framework_filters.json");
-    if (!safetyCoordinator->AddFilterFromJSONFileToComponent(jsonFileName, this->GetName())) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to add filter(s) from file: \"" << jsonFileName << "\"" << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_DEBUG << "Successfully installed filter(s) from file: \"" << jsonFileName << "\"" << std::endl;
-
-    return true;
 }
 #endif
 

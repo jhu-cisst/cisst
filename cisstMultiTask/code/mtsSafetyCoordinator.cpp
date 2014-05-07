@@ -29,7 +29,7 @@
 #include "utils.h"
 #include "signal.h"
 #include "jsonSerializer.h"
-//#include "filters/threshold.h"
+#include "filters/threshold.h"
 #include "filterFactory.h"
 
 //! Const to set the decimal precision to format floating-point values
@@ -424,9 +424,9 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
 
     // Replace placeholder for target component name with actual target component name
     std::string filterClassName;
-    SF::JSON::JSONVALUE filters = json.GetRoot()[SF::Dict::Json::filter];
+    SF::JSON::JSONVALUE & filters = json.GetRoot()[SF::Dict::Json::filter];
     for (size_t i = 0; i < filters.size(); ++i) {
-        SF::JSON::JSONVALUE filter = filters[i];
+        SF::JSON::JSONVALUE & filter = filters[i];
         filter[SF::Dict::Json::target_component] = targetComponentName;
     }
 
@@ -503,11 +503,7 @@ bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
     SF::FilterBase * filter = 0; 
     for (size_t i = 0; i < filters.size(); ++i) {
         filterClassName = SF::JSON::GetSafeValueString(filters[i], SF::Dict::Json::class_name);
-        SF::to_lowercase(filterClassName);
-        // Create filter instance based on filter class name
-        //if (filterClassName.compare("filterthreshold") == 0)
-        //    filter = new SF::FilterThreshold(filters[i]);
-        // Create filter via filter factory
+        // Create filter instance based on filter class name using filter factory
         filter = SF::FilterFactory::GetInstance()->CreateFilter(filterClassName, filters[i]);
         if (!filter) {
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to create filter instance \"" << filter->GetFilterName() << "\"\n";
@@ -536,16 +532,31 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
     }
 
     // Collect arguments
-    // filter can be only deployed to the process where target component runs.
     const std::string targetProcessName   = mtsManagerLocal::GetInstance()->GetName();
     const std::string targetComponentName = filter->GetNameOfTargetComponent();
     const SF::FilterBase::FilteringType filteringType = filter->GetFilteringType();
 
+    // filter can be only deployed to the process where target component runs.
+    if (mtsManagerLocal::GetInstance()->GetProcessName() != targetProcessName) {
+        CMN_LOG_CLASS_RUN_WARNING << "AddFilter: filters can be deployed to the same process: current process \"" 
+                                  << mtsManagerLocal::GetInstance()->GetProcessName() << "\", target process \""
+                                  << targetProcessName << "\"" << std::endl;
+        return true;
+    }
+
     // Check if task-type target component exists
+    // Framework-level properties such as thread overrun flag or exception occurrence flag
+    // are defined only for task-type components.
+    mtsComponent * component = mtsManagerLocal::GetInstance()->GetComponent(targetComponentName);
+    if (!component) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no component found: \"" << targetComponentName << "\"" << std::endl;
+        return false;
+    }
+
     mtsTask * targetTask = mtsManagerLocal::GetInstance()->GetComponentAsTask(targetComponentName);
     if (!targetTask) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: no task-type component found: \"" << targetComponentName << "\"" << std::endl;
-        return false;
+        CMN_LOG_CLASS_RUN_WARNING << "AddFilter: component found but not task-type: \"" << targetComponentName << "\"" << std::endl;
+        return true;
     }
 
     // Active filters are run by the target component and passive filters are run by

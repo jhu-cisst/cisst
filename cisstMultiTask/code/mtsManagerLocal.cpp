@@ -516,6 +516,9 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(void)
         }
     }
 
+    if (Instance == 0)
+        cmnThrow(std::runtime_error("Failed to initialize Local Component Manager"));
+
     return Instance;
 }
 
@@ -1171,6 +1174,12 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     }
 
     CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: successfully added component to LCM: " << componentName << std::endl;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    // Install internal framework filters
+    if (!InstallFrameworkFilters(componentName))
+        CMN_ASSERT(false);
+#endif
 
     return true;
 }
@@ -3202,4 +3211,16 @@ void mtsManagerLocal::InstallSafetyCoordinator(void)
     InstallCoordinator = true;
 }
 
+bool mtsManagerLocal::InstallFrameworkFilters(const std::string & componentName)
+{
+    const std::string jsonFileName(SF_SOURCE_ROOT_DIR"/libs/fdd/filters/json/framework_filters.json");
+    if (!SafetyCoordinator->AddFilterFromJSONFileToComponent(jsonFileName, componentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to add filter(s) from file: \"" << jsonFileName << "\"" << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "Successfully installed filter(s) from file: \"" << jsonFileName << "\"" << std::endl;
+
+    return true;
+}
 #endif

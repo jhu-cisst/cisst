@@ -376,6 +376,9 @@ public:
     /*! Instsall the safety coordinator instance.  Used only when the
         supervisor component needs to be installed. */
     static void InstallSafetyCoordinator(void);
+
+    /*! Install framework filters */
+    bool InstallFrameworkFilters(const std::string & componentName);
 #endif
 
 public:

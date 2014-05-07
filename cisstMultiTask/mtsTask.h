@@ -105,13 +105,15 @@ protected:
 
     /*! Containers to support framework filters (exception filter) */
     struct {
-        int    Count;
+        //int    Count; // TODO: use int when casros extend supported data types
+        double Count;
         double Timestamp;
     } StatusException;
 
     /*! Containers to support framework filters (overrun filter) */
     struct {
-        int    Count;
+        //int    Count; // TODO: use int when casros extend supported data types
+        double Count;
         double Timestamp;
         double Duration;
     } StatusOverrun;
@@ -121,10 +123,6 @@ protected:
 
     /*! Overrun event handler for safety framework */
     void HandlerOverrun(const std::string & name, const std::string & what);
-
-    /*! Install framework filters */
-    bool InstallFrameworkFilters(void);
-
 #endif
 
     /*! True if the task took more time to do computation than allocated time.
