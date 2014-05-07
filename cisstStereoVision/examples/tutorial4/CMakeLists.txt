@@ -1,29 +1,38 @@
-# See license at http://www.cisst.org/cisst/license.txt
+#
+# (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
+# Reserved.
+#
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
 
+cmake_minimum_required (VERSION 2.6)
 
-PROJECT(svlTutorial4)
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-FIND_PACKAGE(cisst REQUIRED)
+if (cisst_FOUND)
 
-IF(cisst_FOUND)
+  # load cisst configuration
+  include (${CISST_USE_FILE})
 
-    INCLUDE(${CISST_USE_FILE})
+  add_executable (svlExTutorial4
+                  CMyFilter2.h
+                  CMyFilter2.cpp
+                  CMyFilter3.h
+                  CMyFilter3.cpp
+                  main.cpp
+                  )
+  set_property (TARGET svlExTutorial4 PROPERTY FOLDER "cisstStereoVision/examples")
+  cisst_target_link_libraries (svlExTutorial4 ${REQUIRED_CISST_LIBRARIES})
 
-    SET(LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
-
-    CISST_SET_DIRECTORIES(${LIBRARIES_NEEDED})
-
-    ADD_EXECUTABLE(${PROJECT_NAME}
-                   CMyFilter2.h
-                   CMyFilter2.cpp
-                   CMyFilter3.h
-                   CMyFilter3.cpp
-                   main.cpp
-                   )
-
-    CISST_TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES_NEEDED})
-
-ENDIF(cisst_FOUND)
-
+else (cisst_FOUND)
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND)

@@ -1,5 +1,4 @@
 #
-#
 # (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
