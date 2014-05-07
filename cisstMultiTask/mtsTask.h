@@ -105,14 +105,13 @@ protected:
 
     /*! Containers to support framework filters (exception filter) */
     struct {
-        size_t Count;
+        int    Count;
         double Timestamp;
-        std::string Message;
     } StatusException;
 
     /*! Containers to support framework filters (overrun filter) */
     struct {
-        size_t Count;
+        int    Count;
         double Timestamp;
         double Duration;
     } StatusOverrun;
@@ -122,6 +121,9 @@ protected:
 
     /*! Overrun event handler for safety framework */
     void HandlerOverrun(const std::string & name, const std::string & what);
+
+    /*! Install framework filters */
+    bool InstallFrameworkFilters(void);
 
 #endif
 

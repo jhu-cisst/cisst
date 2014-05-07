@@ -29,10 +29,11 @@
 #include "utils.h"
 #include "signal.h"
 #include "jsonSerializer.h"
-#include "filters/threshold.h"
+//#include "filters/threshold.h"
+#include "filterFactory.h"
 
 //! Const to set the decimal precision to format floating-point values
-static const int PRECISION = 9;
+//static const int PRECISION = 9;
 
 using namespace SF::Dict::Json;
 
@@ -410,6 +411,37 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
     return true;
 }
 
+bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & jsonFileName,
+                                                            const std::string & targetComponentName)
+{
+    // Construct JSON structure from JSON file
+    SF::JSON json;
+    if (!json.ReadFromFile(jsonFileName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFileToComponent: Failed to read json file: " << jsonFileName << std::endl;
+        return false;
+    }
+    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFileToComponent: Successfully read json file: " << jsonFileName << std::endl;
+
+    // Replace placeholder for target component name with actual target component name
+    std::string filterClassName;
+    SF::JSON::JSONVALUE filters = json.GetRoot()[SF::Dict::Json::filter];
+    for (size_t i = 0; i < filters.size(); ++i) {
+        SF::JSON::JSONVALUE filter = filters[i];
+        filter[SF::Dict::Json::target_component] = targetComponentName;
+    }
+
+    bool ret = AddFilter(filters);
+    if (!ret) {
+        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+
+    return true;
+}
+
 bool mtsSafetyCoordinator::AddFilterFromJSONFile(const std::string & jsonFileName)
 {
     // Construct JSON structure from JSON file
@@ -422,12 +454,13 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFile(const std::string & jsonFileNam
     const SF::JSON::JSONVALUE filters = json.GetRoot()[SF::Dict::Json::filter];
     bool ret = AddFilter(filters);
 
-    if (ret) {
-        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
-        CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
-    } else {
+    if (!ret) {
         CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
+        return false;
     }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
 
     return ret;
 }
@@ -444,14 +477,15 @@ bool mtsSafetyCoordinator::AddFilterFromJSON(const std::string & jsonString)
     const SF::JSON::JSONVALUE filters = json.GetRoot()[SF::Dict::Json::filter];
     bool ret = AddFilter(filters);
 
-    if (ret) {
-        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Successfully added filter(s) using json string: " << jsonString << std::endl;
-        CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
-    } else {
+    if (!ret) {
         CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Failed to add filter(s) using json string: " << jsonString << std::endl;
+        return false;
     }
 
-    return ret;
+    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Successfully added filter(s) using json string: " << jsonString << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+
+    return true;
 }
 
 bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
@@ -471,13 +505,18 @@ bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
         filterClassName = SF::JSON::GetSafeValueString(filters[i], SF::Dict::Json::class_name);
         SF::to_lowercase(filterClassName);
         // Create filter instance based on filter class name
-        if (filterClassName.compare("filterthreshold") == 0)
-            filter = new SF::FilterThreshold(filters[i]);
-        // [SFUPDATE]
+        //if (filterClassName.compare("filterthreshold") == 0)
+        //    filter = new SF::FilterThreshold(filters[i]);
+        // Create filter via filter factory
+        filter = SF::FilterFactory::GetInstance()->CreateFilter(filterClassName, filters[i]);
+        if (!filter) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to create filter instance \"" << filter->GetFilterName() << "\"\n";
+            continue;
+        }
 
         // Install filter to the target component
         if (!AddFilter(filter)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to add filter \"" << filter->GetFilterName() << "\"\n";
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to add filter \"" << filter->GetFilterName() << "\"\n";
             delete filter;
             return false;
         }

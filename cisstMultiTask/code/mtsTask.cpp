@@ -62,8 +62,9 @@ void mtsTask::DoRunInternal(void)
     }
 
     // advance all state tables (if automatic)
-    // MJ: Filters installed are processed by mtsStateTable::Advance
+    // MJ: mtsStateTable::Advance processes installed and active filters
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
+
     RunEvent();  // only generates event if RunEventCalled is false
 }
 
@@ -331,7 +332,6 @@ mtsTask::mtsTask(const std::string & name,
     // Initialize containers for framework filters
     StatusException.Count     = 0;
     StatusException.Timestamp = 0.0;
-    StatusException.Message   = "";
     StatusOverrun.Count     = 0;
     StatusOverrun.Timestamp = 0.0;
     StatusOverrun.Duration  = 0.0;
@@ -339,17 +339,17 @@ mtsTask::mtsTask(const std::string & name,
     // Wrap internal status information with command pattern, which framework filters use.
     StateTableMonitor.AddData(StatusException.Count,     "ExceptionCount");
     StateTableMonitor.AddData(StatusException.Timestamp, "ExceptionTimestamp");
-    StateTableMonitor.AddData(StatusException.Message,   "ExceptionMessage");
     StateTableMonitor.AddData(StatusOverrun.Count,       "OverrunCount");
     StateTableMonitor.AddData(StatusOverrun.Timestamp,   "OverrunTimestamp");
     StateTableMonitor.AddData(StatusOverrun.Duration,    "OverrunDuration");
     provided->AddCommandReadState(StateTableMonitor, StatusException.Count,     "GetExceptionCount");
     provided->AddCommandReadState(StateTableMonitor, StatusException.Timestamp, "GetExceptionTimestamp");
-    provided->AddCommandReadState(StateTableMonitor, StatusException.Message,   "GetExceptionMessage");
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Count,       "GetOverrunCount");
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Timestamp,   "GetOverrunTimestamp");
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Duration,    "GetOverrunDuration");
     // [SFUPDATE]
+
+    // Install internal framework filters
 #endif
 
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
@@ -511,21 +511,20 @@ bool mtsTask::CheckForOwnThread(void) const
 
 void mtsTask::OnStartupException(const std::exception &excp)
 {
-    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
-
 #if CISST_HAS_SAFETY_PLUGINS
     HandlerException(this->GetName(), excp.what());
 #endif
+
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
 }
 
 void mtsTask::OnRunException(const std::exception &excp)
 {
-    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
-
 #if CISST_HAS_SAFETY_PLUGINS
     HandlerException(this->GetName(), excp.what());
 #endif
-
+    
+    CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
 }
 
 void mtsTask::SetInitializationDelay(double delay)
@@ -538,7 +537,6 @@ void mtsTask::HandlerException(const std::string & name, const std::string & wha
 {
     ++StatusException.Count;
 
-    StatusException.Message   = what;
     StatusException.Timestamp = osaGetTime();
 }
 
@@ -549,6 +547,23 @@ void mtsTask::HandlerOverrun(const std::string & name, const std::string & what)
     StatusOverrun.Duration  = 0.0; // TODO: get actual overrun time
     StatusOverrun.Timestamp = osaGetTime();
 }
+
+bool mtsTask::InstallFrameworkFilters(void)
+{
+    mtsSafetyCoordinator * safetyCoordinator = mtsManagerLocal::GetInstance()->GetCoordinator();
+    CMN_ASSERT(safetyCoordinator);
+
+    const std::string jsonFileName(SF_SOURCE_ROOT_DIR"libs/fdd/filters/json/framework_filters.json");
+    if (!safetyCoordinator->AddFilterFromJSONFileToComponent(jsonFileName, this->GetName())) {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to add filter(s) from file: \"" << jsonFileName << "\"" << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "Successfully installed filter(s) from file: \"" << jsonFileName << "\"" << std::endl;
+
+    return true;
+}
+#endif
 
 // To obsolete
 void mtsTask::SetOverranPeriod(bool overran)
@@ -565,5 +580,3 @@ void mtsTask::SetOverranPeriod(bool overran)
     // MJTODO: How/when to reset overrun flag??
     std::cout  << "mtsTask::SetOverranPeriod() ---- MONITORING EVENT: TASK \"" << this->GetName() << "\" overran" << std::endl;
 }
-
-#endif

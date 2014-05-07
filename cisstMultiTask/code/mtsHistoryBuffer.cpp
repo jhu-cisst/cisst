@@ -33,7 +33,7 @@ mtsHistoryBuffer::mtsHistoryBuffer(const SF::FilterBase::FilteringType type,
 
 void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
                                          SF::SignalElement::ScalarType & value,
-                                         SF::SignalElement::TimestampType & timestamp)
+                                         SF::TimestampType & timestamp)
 {
     if (Type == SF::FilterBase::ACTIVE)
         value = StateTable->GetNewValueScalar(index, timestamp);
@@ -46,7 +46,7 @@ void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::HistoryBufferIndexTy
 
 void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
                                          SF::SignalElement::VectorType & value,
-                                         SF::SignalElement::TimestampType & timestamp)
+                                         SF::TimestampType & timestamp)
 {
     if (Type == SF::FilterBase::ACTIVE)
         StateTable->GetNewValueVector(index, value, timestamp);
@@ -58,7 +58,7 @@ void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::HistoryBufferIndexTy
 }
 
 void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::ScalarType & value,
-                                         SF::SignalElement::TimestampType & timestamp)
+                                         SF::TimestampType & timestamp)
 {
     if (Type == SF::FilterBase::PASSIVE) {
         FetchScalarValue(value);
@@ -73,7 +73,7 @@ void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::ScalarType & value,
 }
 
 void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::VectorType & value,
-                                         SF::SignalElement::TimestampType & timestamp)
+                                         SF::TimestampType & timestamp)
 {
     if (Type == SF::FilterBase::PASSIVE) {
         FetchVectorValue(value);

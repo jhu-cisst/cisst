@@ -54,17 +54,17 @@ public:
     /*! For active filtering: get latest value from history buffer (direct access) */
     void GetNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
                            SF::SignalElement::ScalarType & value,
-                           SF::SignalElement::TimestampType & timestamp);
+                           SF::TimestampType & timestamp);
     void GetNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
                            SF::SignalElement::VectorType & value,
-                           SF::SignalElement::TimestampType & timestamp);
+                           SF::TimestampType & timestamp);
 
     /*! For passive filtering: fetch latest value from history buffer via
         mts data exchange mechanism (indirect access) */
     void GetNewValueScalar(SF::SignalElement::ScalarType & value,
-                           SF::SignalElement::TimestampType & timestamp);
+                           SF::TimestampType & timestamp);
     void GetNewValueVector(SF::SignalElement::VectorType & value,
-                           SF::SignalElement::TimestampType & timestamp);
+                           SF::TimestampType & timestamp);
 
     /*
     void ToStream(std::ostream & outputStream) const;

@@ -315,23 +315,6 @@ void mtsStateTable::Advance(void) {
         }
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
-#define PROCESS_FILTERS( _name )\
-    if (!Filters._name.empty()) {\
-        FiltersType::const_iterator it = Filters._name.begin();\
-        const FiltersType::const_iterator itEnd = Filters._name.end();\
-        for (; it != itEnd; ++it)\
-            (*it)->RunFilter();\
-    }
-    // Process filters sequentially
-    PROCESS_FILTERS(Features)
-    PROCESS_FILTERS(FeatureVectors);
-    PROCESS_FILTERS(Symptoms);
-    PROCESS_FILTERS(SymptomVectors);
-    PROCESS_FILTERS(FaultDetectors);
-#undef PROCESS_FILTERS
-#endif
-
     // Get the Toc value and write it to the state table.
     if (TimeServer) {
         Toc = TimeServer->GetRelativeTime(); // in seconds
@@ -352,6 +335,23 @@ void mtsStateTable::Advance(void) {
     if (IndexReader > Delay) {
         IndexDelayed = IndexReader - Delay;
     }
+
+#if CISST_HAS_SAFETY_PLUGINS
+#define PROCESS_FILTERS( _name )\
+    if (!Filters._name.empty()) {\
+        FiltersType::const_iterator it = Filters._name.begin();\
+        const FiltersType::const_iterator itEnd = Filters._name.end();\
+        for (; it != itEnd; ++it)\
+            (*it)->RunFilter();\
+    }
+    // Process filters sequentially
+    PROCESS_FILTERS(Features)
+    PROCESS_FILTERS(FeatureVectors);
+    PROCESS_FILTERS(Symptoms);
+    PROCESS_FILTERS(SymptomVectors);
+    PROCESS_FILTERS(FaultDetectors);
+#undef PROCESS_FILTERS
+#endif
 }
 
 

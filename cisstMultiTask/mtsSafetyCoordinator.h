@@ -106,10 +106,13 @@ public:
     //-------------------------------------------------- 
     //! Install filter using filter instance
     bool AddFilter(SF::FilterBase * filter);
-    //! Install filter by reading JSON file
-    bool AddFilterFromJSONFile(const std::string & jsonFileName);
     //! Install filter from JSON string
     bool AddFilterFromJSON(const std::string & jsonString);
+    //! Install filter from JSON file
+    bool AddFilterFromJSONFile(const std::string & jsonFileName);
+    //! Install filter from JSON file with target component specified
+    bool AddFilterFromJSONFileToComponent(const std::string & jsonFileName,
+                                          const std::string & targetComponentName);
 
     //! Deploy all monitors and FDDs that are installed so far.
     /*! MJ: Right now, this method should be called user's main.cpp but could be moved
