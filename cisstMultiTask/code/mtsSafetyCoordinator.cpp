@@ -767,6 +767,8 @@ bool mtsSafetyCoordinator::CreateMonitor(void)
     try {
         monitor = new mtsMonitorComponent(false);
     } catch (const std::exception & e) {
+        CMN_LOG_CLASS_RUN_ERROR << "CreateMonitor: failed to create mtsMonitorComponent: " 
+                                << e.what() << std::endl;
         return false;
     }
     mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance(); 
