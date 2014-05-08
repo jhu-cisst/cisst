@@ -54,6 +54,9 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     }
     CMN_LOG_INIT_VERBOSE << "Global component manager started..." << std::endl;
 
+#if CISST_HAS_SAFETY_PLUGINS
+    mtsManagerLocal::InstallSafetyCoordinator();
+#endif
     // Get local component manager instance
     mtsManagerLocal * componentManager;
     try {
