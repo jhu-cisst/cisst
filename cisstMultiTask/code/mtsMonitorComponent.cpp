@@ -424,10 +424,11 @@ void mtsMonitorComponent::Cleanup(void)
         ThreadSubscriber.ThreadEventEnd.Wait();
 
         delete Subscriber;
-        delete SubscriberCallback;
-
         Subscriber = 0;
-        SubscriberCallback = 0;
+
+        // MJ: SubscriberCallback is managed and deteled by SF::Subscriber
+        //delete SubscriberCallback;
+        //SubscriberCallback = 0;
     }
 }
 
