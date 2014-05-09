@@ -387,9 +387,10 @@ void mtsStateTable::Cleanup(void) {
     if (!Filters._name.empty()) {\
         FiltersType::const_iterator it = Filters._name.begin();\
         const FiltersType::const_iterator itEnd = Filters._name.end();\
-        for (; it != itEnd; ++it)\
+        for (; it != itEnd; ++it) {\
             (*it)->CleanupFilter();\
             delete *it;\
+        }\
     }\
     Filters._name.clear();
     // Process filters sequentially
