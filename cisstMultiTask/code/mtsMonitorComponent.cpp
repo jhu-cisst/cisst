@@ -112,7 +112,8 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             } else {
                 double period;
                 this->AccessFunctions.GetPeriod(period);
-                publisher->Publish(monitor->GetJsonForPublish(period, currentTick));
+                publisher->PublishData(SF::Topic::Data::MONITOR, 
+                                       monitor->GetJsonForPublish(period, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
                 if (ManualAdvance)
                     advance = true;
@@ -126,7 +127,8 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             } else {
                 double execTimeUser;
                 this->AccessFunctions.GetExecTimeUser(execTimeUser);
-                publisher->Publish(monitor->GetJsonForPublish(execTimeUser, currentTick));
+                publisher->PublishData(SF::Topic::Data::MONITOR,
+                                       monitor->GetJsonForPublish(execTimeUser, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
                 if (ManualAdvance)
                     advance = true;
@@ -140,7 +142,8 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             } else {
                 double execTimeTotal;
                 this->AccessFunctions.GetExecTimeTotal(execTimeTotal);
-                publisher->Publish(monitor->GetJsonForPublish(execTimeTotal, currentTick));
+                publisher->PublishData(SF::Topic::Data::MONITOR,
+                                       monitor->GetJsonForPublish(execTimeTotal, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
                 if (ManualAdvance)
                     advance = true;
@@ -176,8 +179,9 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
 
                     // publish new reading to the system via Safety Coordinator's publisher
                     //publisher->Publish(monitor->GetJsonForPublish(sample, currentTick));
-                    publisher->Publish(mtsSafetyCoordinator::GetJsonForPublish(
-                        *monitor, tempArgument, osaGetTime()));
+                    publisher->PublishData(SF::Topic::Data::MONITOR,
+                                           mtsSafetyCoordinator::GetJsonForPublish(
+                                               *monitor, tempArgument, osaGetTime()));
                 }
                 delete tempArgument;
 
@@ -316,10 +320,12 @@ void mtsMonitorComponent::Initialize(void)
     // mtsMonitorComponent::RunMonitors(void).
     this->StateTableMonitor.SetAutomaticAdvance(!ManualAdvance);
 
-    Publisher = new SF::Publisher(SF::Dict::TopicNames::Monitor);
+    Publisher = new SF::Publisher(SF::Dict::TopicNames::data);
     if (!Publisher->Startup()) {
-        //throw std::runtime_error(std::string(message))
-        cmnThrow("Failed to initialize publisher for monitoring components");
+        std::stringstream ss;
+        ss << "mtsMonitorComponent: Failed to initialize publisher for topic \""
+           << SF::Dict::TopicNames::data << "\"";
+        cmnThrow(ss.str());
     }
 #if 0
     ThreadPublisher.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunPublisher, 0);
@@ -327,7 +333,7 @@ void mtsMonitorComponent::Initialize(void)
 #endif
 
     SubscriberCallback = new mtsSubscriberCallback;
-    Subscriber = new SF::Subscriber(SF::Dict::TopicNames::Supervisor, SubscriberCallback);
+    Subscriber = new SF::Subscriber(SF::Dict::TopicNames::control, SubscriberCallback);
     ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
 }
@@ -383,9 +389,17 @@ void * mtsMonitorComponent::RunSubscriber(unsigned int CMN_UNUSED(arg))
 
     ThreadSubscriber.ThreadEventBegin.Raise();
 
-    Subscriber->Startup();
-    while (ThreadSubscriber.Running) {
-        Subscriber->Run();
+    try {
+        Subscriber->Startup();
+        while (ThreadSubscriber.Running) {
+            Subscriber->Run();
+        }
+    } catch (const Ice::InitializationException & e) {
+        CMN_LOG_CLASS_RUN_ERROR << "mtsMonitorComponent::RunSubscriber: ice init failed: " << e.what() << std::endl;
+    } catch (const Ice::AlreadyRegisteredException & e) {
+        CMN_LOG_CLASS_RUN_ERROR << "mtsMonitorComponent::RunSubscriber: ice init failed: " << e.what() << std::endl;
+    } catch (const std::exception & e) {
+        CMN_LOG_CLASS_RUN_ERROR << "mtsMonitorComponent::RunSubscriber: exception: " << e.what() << std::endl;
     }
 
     ThreadSubscriber.ThreadEventEnd.Raise();
@@ -918,13 +932,15 @@ void mtsMonitorComponent::HandleMonitorEvent(const std::string & json)
     // If the monitor component receives an event regardless of its type (monitor or
     // fault), publish the event to the safety framework as is.  The Safety Supervisor
     // will take care of the event.
-    Publisher->Publish(json);
+    Publisher->PublishData(SF::Topic::Data::MONITOR, json);
 
     // MJ TODO: Depending on the type of event (esp. in case of fault events),
     // the Safety Coordinator in each process can deal with events or faults locally,
     // i.e., within the process boundary.
     // This would be the best-performance-fault-handling case but it loses the
     // system-wide fault (event) propagation and global coordination by the "brain."
+
+    // TODO: This could be a place to do interesting things!
 }
 
 void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
@@ -932,7 +948,7 @@ void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
     // If the monitor component receives an event regardless of its type (monitor or
     // fault), publish the event to the safety framework.  The Safety Supervisor
     // will handle the event "accordingly" (TODO).
-    Publisher->Publish(json);
+    Publisher->PublishData(SF::Topic::Data::EVENT, json);
 
     // Report event to Safety Coordinator
     mtsManagerLocal::GetInstance()->GetCoordinator()->OnFaultEvent(json);

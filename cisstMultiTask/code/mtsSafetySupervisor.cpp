@@ -58,10 +58,10 @@ mtsSafetySupervisor::~mtsSafetySupervisor()
 
 void mtsSafetySupervisor::Init(void)
 {
-    Publisher = new SF::Publisher(TopicNames::Supervisor);
+    Publisher = new SF::Publisher(TopicNames::control);
 
     SubscriberCallback = new mtsSubscriberCallback;
-    Subscriber = new SF::Subscriber(TopicNames::Monitor, SubscriberCallback);
+    Subscriber = new SF::Subscriber(TopicNames::data, SubscriberCallback);
 
     // Create and initialize UDP socket
     if (!UDPSocket) {
@@ -131,13 +131,15 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
         CMN_LOG_RUN_ERROR << "Parse: invalid json message: " << std::endl << message << std::endl;
         return;
     }
-#if 0
+#if 1
     std::cout << "--------------------------------------------------" << std::endl;
     std::cout << message << std::endl;
 #endif
 
+    // FIXME
+#if 0
     switch (jsonSerializer.GetTopicType()) {
-        case SF::JSONSerializer::MONITOR:
+        case SF::Topic::MONITOR:
             {
                 SendMessageToCubeCollector(MongoDB::ConvertTopicMessageToDBEntry(
                     jsonSerializer.GetTopicType(), jsonSerializer));
@@ -174,6 +176,7 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
             }
             break;
     }
+#endif
 }
 
 void mtsSafetySupervisor::SendMessageToCubeCollector(const std::string & record)

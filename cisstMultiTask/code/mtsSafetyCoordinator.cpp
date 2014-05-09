@@ -822,7 +822,8 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
     // Populate common fields
     SF::cisstEventLocation * locationID =
         dynamic_cast<SF::cisstEventLocation*>(monitorTarget.GetLocationID());
-    serializer.SetTopicType(SF::JSONSerializer::MONITOR);
+    serializer.SetTopicType(SF::Topic::DATA);
+    serializer.SetCategoryTypeData(SF::Topic::Data::MONITOR);
     serializer.SetEventLocation(locationID);
     serializer.SetTimestamp(timestamp);
     serializer.SetMonitorTargetType(SF::Monitor::TARGET_CUSTOM);
