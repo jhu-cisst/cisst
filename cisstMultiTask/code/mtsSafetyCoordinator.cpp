@@ -45,14 +45,16 @@ mtsSafetyCoordinator::mtsSafetyCoordinator() : SF::Coordinator()
 
 mtsSafetyCoordinator::~mtsSafetyCoordinator()
 {
-    if (!Monitors.empty()) {
+    if (!Monitors.empty())
         for (size_t i = 0; i < Monitors.size(); ++i)
             delete Monitors[i];
-    }
 
+    // filter instances are deleted by mtsStateTable::Cleanup()
+    /*
     if (!Filters.empty())
         for (FiltersType::iterator it = Filters.begin(); it != Filters.end(); ++it)
             delete it->second;
+    */
 }
 
 bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON, 
@@ -666,7 +668,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
     // Add filter to the list of filters deployed
     const SF::FilterBase::FilterIDType uid = filter->GetFilterUID();
     if (Filters.find(uid) == Filters.end())
-        Filters[uid] = filter;
+        Filters.insert(std::make_pair(uid, filter));
 
     // Set other properties of filter
     // MJ: Should more fields be required for event localization, middleware-specific class

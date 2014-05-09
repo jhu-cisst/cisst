@@ -347,6 +347,7 @@ mtsMonitorComponent::~mtsMonitorComponent()
         Cleanup();
 
     if (Publisher) delete Publisher;
+    if (Subscriber) delete Subscriber;
 }
 
 void mtsMonitorComponent::Run(void)
