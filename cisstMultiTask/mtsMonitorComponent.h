@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2011-12-29
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -32,49 +32,20 @@
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
-#include <cisstMultiTask/mtsSubscriberCallback.h>
+//#include <cisstMultiTask/mtsSubscriberCallback.h>
 #include <cisstMultiTask/mtsEventReceiver.h>
 
 #include "cisstMonitor.h"
 #include "publisher.h"
-#include "subscriber.h"
+//#include "subscriber.h"
 
 #include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
 
-  This class implements an internal component that monitors other component(s) 
+  This class implements the monitor component that monitors other component(s) 
   in the same process.
-
-    Requirements:
-        - Can be deployed at run-time using dynamic component composition services
-        - Can monitor more than one components simultaneously
-        - Can spwan internal processing thread(s) if monitoring overhead increases (self-monitoring)
-        - Can support flexible deployment of different kinds of "filters"
-          1) Basic filters
-             . Bypass
-             . Sampling
-             . Average
-             . Median
-             . Std
-             . Min, Max
-             . Trend velocity (dx/dt)
-             . Trend acceleration (d/dt)(dx/dt)
-             . Thresholding
-          2) Advanced filters
-             . LPF, HPF
-             . FFT
-             . Wavelet
-             . Statistical distribution
-          3) User-supplied filters
-        - Can support cascaded filters, i.e., filters can be combined
-
-    Inputs:
-        - Raw data collected from target component(s)
-
-    Outputs:
-        - Feature vectors
 */
 
 class CISST_EXPORT mtsMonitorComponent : public mtsTaskPeriodic
@@ -216,16 +187,16 @@ protected:
     //
     /*! Ice publisher and subscriber */
     SF::Publisher *  Publisher;
-    SF::Subscriber * Subscriber;
+    //SF::Subscriber * Subscriber;
 
     /*! Callback for subscriber */
-    mtsSubscriberCallback * SubscriberCallback;
+    //mtsSubscriberCallback * SubscriberCallback;
 
     InternalThreadType ThreadPublisher;
-    InternalThreadType ThreadSubscriber;
+    //InternalThreadType ThreadSubscriber;
 
     void * RunPublisher(unsigned int arg);
-    void * RunSubscriber(unsigned int arg);
+    //void * RunSubscriber(unsigned int arg);
 
 public:
     /*! Default constructor (default: 5 msec period with automatic state table advance) */

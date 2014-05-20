@@ -131,12 +131,6 @@ public:
     void OnFaultEvent(const std::string & json);
 
     //-------------------------------------------------- 
-    //  State Machine Management
-    //-------------------------------------------------- 
-    // TODO
-
-
-    //-------------------------------------------------- 
     //  Misc.
     //-------------------------------------------------- 
     void ToStream(std::ostream & outputStream) const;

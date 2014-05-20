@@ -309,8 +309,8 @@ mtsMonitorComponent::mtsMonitorComponent(double period, bool automaticAdvance)
 void mtsMonitorComponent::Initialize(void)
 {
     Publisher = 0;
-    Subscriber = 0;
-    SubscriberCallback = 0;
+    //Subscriber = 0;
+    //SubscriberCallback = 0;
 
     TargetComponentAccessors = new TargetComponentAccessorType(ManualAdvance);
 
@@ -332,10 +332,12 @@ void mtsMonitorComponent::Initialize(void)
     ThreadPublisher.ThreadEventBegin.Wait();
 #endif
 
+#if 0
     SubscriberCallback = new mtsSubscriberCallback;
     Subscriber = new SF::Subscriber(SF::Dict::TopicNames::CONTROL, SubscriberCallback);
     ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
+#endif
 }
 
 mtsMonitorComponent::~mtsMonitorComponent()
@@ -343,11 +345,11 @@ mtsMonitorComponent::~mtsMonitorComponent()
     TargetComponentAccessors->DeleteAll();
     delete TargetComponentAccessors;
 
-    if (ThreadPublisher.Running || ThreadSubscriber.Running)
+    if (ThreadPublisher.Running)// || ThreadSubscriber.Running)
         Cleanup();
 
     if (Publisher) delete Publisher;
-    if (Subscriber) delete Subscriber;
+    //if (Subscriber) delete Subscriber;
 }
 
 void mtsMonitorComponent::Run(void)
@@ -358,6 +360,7 @@ void mtsMonitorComponent::Run(void)
     RunMonitors();
 
     // Subscriber received message(s)
+#if 0
     if (!SubscriberCallback->IsEmptyQueue()) {
         mtsSubscriberCallback::MessagesType msg;
 
@@ -372,6 +375,7 @@ void mtsMonitorComponent::Run(void)
         // TODO: decode json received
         //std::cout << "MONITOR COMPONENT fetched " << msg.size() << " items" << std::endl;
     }
+#endif
 }
 
 void * mtsMonitorComponent::RunPublisher(unsigned int CMN_UNUSED(arg))
@@ -394,6 +398,7 @@ void * mtsMonitorComponent::RunPublisher(unsigned int CMN_UNUSED(arg))
     return 0;
 }
 
+#if 0
 void * mtsMonitorComponent::RunSubscriber(unsigned int CMN_UNUSED(arg))
 {
     ThreadSubscriber.Running = true;
@@ -417,6 +422,7 @@ void * mtsMonitorComponent::RunSubscriber(unsigned int CMN_UNUSED(arg))
 
     return 0;
 }
+#endif
 
 void mtsMonitorComponent::Cleanup(void)
 {
@@ -427,6 +433,7 @@ void mtsMonitorComponent::Cleanup(void)
 
     //CMN_LOG_CLASS_RUN_DEBUG << "Cleanup: Monitor component is cleaned up" << std::endl;
 
+#if 0
     if (Subscriber) {
         ThreadSubscriber.Running = false;
         // Terminating subscriber needs to call shutdown() on the Ice communicator
@@ -440,6 +447,7 @@ void mtsMonitorComponent::Cleanup(void)
         //delete SubscriberCallback;
         //SubscriberCallback = 0;
     }
+#endif
 }
 
 mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::CreateTargetComponentAccessor(
