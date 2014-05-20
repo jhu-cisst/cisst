@@ -23,6 +23,7 @@ typedef std::vector<int> StdVectorType;
 // of the class scope, so just use "}' to close any scope.
 class {
     name demoData; // required
+    mts-proxy false; // default is true
 
     // 'base-class' is optional, you can use as many base classes as you want
     // for multiple inheritance.  The inheritance order is based on the order of
@@ -132,6 +133,7 @@ inline-code {
 class {
     name demoData2; // required
     namespace TestNamespace;
+    mts-proxy false;
 
     member {
         name Length;

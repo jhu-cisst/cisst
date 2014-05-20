@@ -311,8 +311,8 @@ CMN_IMPLEMENT_SERVICES(mtsManagerLocal)
 CMN_IMPLEMENT_SERVICES(mtsManagerLocalInterface)
 
 #include <cisstMultiTask/mtsInterfaceCommon.h>
-CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceProvidedDescriptionProxy);
-CMN_IMPLEMENT_SERVICES_TEMPLATED(InterfaceRequiredDescriptionProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsInterfaceProvidedDescriptionProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsInterfaceRequiredDescriptionProxy);
 
 #include <cisstMultiTask/mtsComponentState.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentStateProxy);
