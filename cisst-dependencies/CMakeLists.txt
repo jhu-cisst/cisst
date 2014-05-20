@@ -256,7 +256,7 @@ if (CISST_HAS_JSON)
   include (ExternalProject)
   set (cisstJSON_PREFIX cisstJSONExternal)
 
-  set (CISST_JSON_SVN_REPOSITORY https://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp)
+  set (CISST_JSON_SVN_REPOSITORY http://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp)
   set (CISST_JSON_SVN_REVISION 276)
   ExternalProject_Add (cisstJSONExternal
                        PREFIX ${cisstJSON_PREFIX}
