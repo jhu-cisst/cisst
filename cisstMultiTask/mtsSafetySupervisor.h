@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2012-08-07
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -21,9 +21,8 @@
 #ifndef _mtsSafetySupervisor_h
 #define _mtsSafetySupervisor_h
 
-//#include "json.h"
 #include "supervisor.h"
-//#include "cisstMonitor.h"
+#include "cisstAccessor.h"
 
 #include <cisstOSAbstraction/osaSocket.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
@@ -37,31 +36,15 @@ class CISST_EXPORT mtsSafetySupervisor: public mtsTaskPeriodic
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
-    /*! Supervisor instance: the brain of the safety framework */
+    //! Instance of Safety Supervisor
     SF::Supervisor Supervisor;
 
-    /*! Ice publisher and subscriber */
-    SF::Publisher * Publisher;
-    SF::Subscriber * Subscriber;
+    //! Endpoint to access casros network
+    SF::cisstAccessor * casrosAccessor;
 
-    /*! Callback for subscriber */
-    mtsSubscriberCallback * SubscriberCallback;
-    /*! Internal thread for subscriber */
-    mtsMonitorComponent::InternalThreadType ThreadSubscriber;
-
-    /*! Container for messages delivered by subscriber */
-    mtsSubscriberCallback::MessagesType Messages;
-
-    /*! Initialization */
-    void Init(void);
-
-    /*! Internal thread runner for subscriber */
-    void * RunSubscriber(unsigned int arg);
-
-    /*! Parse received messages which come from different topics */
-    struct ParseInternal {
-        void operator()(const std::string & message);
-    } Parse;
+    //! Callback for subscribers
+    //mtsSubscriberCallback * SubscriberCallback[SF::Topic::TOTAL_TOPIC_COUNT];
+    mtsSubscriberCallback * cbSubscriberControl;
 
 public:
     mtsSafetySupervisor();

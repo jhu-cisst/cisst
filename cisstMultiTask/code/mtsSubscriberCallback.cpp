@@ -20,15 +20,11 @@
 
 #include <cisstMultiTask/mtsSubscriberCallback.h>
 
-//#include "dict.h"
-
 using namespace SF;
-//using namespace SF::Dict;
 
-CMN_IMPLEMENT_SERVICES(mtsSubscriberCallback);
-
-mtsSubscriberCallback::mtsSubscriberCallback()
-    : mtsGenericObject(), SFCallback()
+mtsSubscriberCallback::mtsSubscriberCallback(const std::string & topic)
+    : SFCallback(),
+      TopicName(topic)
 {
 }
 
@@ -38,7 +34,7 @@ mtsSubscriberCallback::~mtsSubscriberCallback()
 
 void mtsSubscriberCallback::Callback(const std::string & json)
 {
-    CMN_LOG_CLASS_RUN_DEBUG << "mtsSubscriberCallback::Callback: " << json << std::endl;
+    std::cout << "mtsSubscriberCallback::Callback [ " << TopicName << " ]: " << json << std::endl;
 
     QueueAccess.Lock();
     {
@@ -51,7 +47,6 @@ void mtsSubscriberCallback::FetchMessages(MessagesType & messages)
 {
     QueueAccess.Lock();
     {
-        //messages.splice(messages.end(), Messages, Messages.begin(), Messages.end());
         messages.splice(messages.begin(), Messages, Messages.begin());
     }
     QueueAccess.Unlock();

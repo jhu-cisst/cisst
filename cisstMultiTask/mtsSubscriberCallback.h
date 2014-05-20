@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2012-08-08
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -22,28 +22,24 @@
 #define _mtsSubscriberCallback_h
 
 #include "baseIce.h"
-//#include "json.h"
-//#include "cisstMonitor.h"
 
 #include <cisstOSAbstraction/osaMutex.h>
-#include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstMultiTask/mtsExport.h>
 
-#include <list>
-
-class CISST_EXPORT mtsSubscriberCallback: public mtsGenericObject, public SF::SFCallback
+class CISST_EXPORT mtsSubscriberCallback: public SF::SFCallback
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-
 public:
     typedef std::list<std::string> MessagesType;
 
 protected:
+    //! Name of topic with which this callback is associated
+    const std::string TopicName;
+
     osaMutex QueueAccess;
+
     MessagesType Messages;
 
 public:
-    mtsSubscriberCallback();
+    mtsSubscriberCallback(const std::string & topic);
     ~mtsSubscriberCallback();
 
     /*! Called by Ice and push new message in json format to the internal queue. */
@@ -57,7 +53,5 @@ public:
         the buffer that the cisst plug-ins provide. */
     void FetchMessages(MessagesType & messages);
 };
-
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsSubscriberCallback);
 
 #endif // _mtsSubscriberCallback_h

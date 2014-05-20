@@ -20,9 +20,6 @@
 
 #include <cisstMultiTask/mtsSafetySupervisor.h>
 
-#include "dict.h"
-#include "publisher.h"
-#include "subscriber.h"
 #include "db/MongoDB.h"
 #include "jsonSerializer.h"
 
@@ -36,49 +33,33 @@ CMN_IMPLEMENT_SERVICES(mtsSafetySupervisor);
 
 mtsSafetySupervisor::mtsSafetySupervisor()
     : mtsTaskPeriodic(Supervisor::GetSupervisorName(), 10 * cmn_ms),
-      Publisher(0), Subscriber(0), SubscriberCallback(0)
+      casrosAccessor(new cisstAccessor(true, false, true, false,
+                     new mtsSubscriberCallback(SF::Dict::TopicNames::CONTROL), 0))
 {
-    Init();
+    // Create and initialize UDP socket
+    if (!UDPSocket) {
+        UDPSocket = new osaSocket(osaSocket::UDP);
+        // See Cube collector documentation for default port
+        // : https://github.com/square/cube/wiki/Collector
+        // TODO: CUBE collector can be running on another machine
+        UDPSocket->SetDestination("127.0.0.1", 1180); 
+    }
+
+    cbSubscriberControl = dynamic_cast<mtsSubscriberCallback*>(
+        casrosAccessor->GetSubscriberCallback(SF::Topic::CONTROL));
+    CMN_ASSERT(cbSubscriberControl);
 }
 
 mtsSafetySupervisor::~mtsSafetySupervisor()
 {
-    if (ThreadSubscriber.Running)
-        Cleanup();
-
-    if (Publisher) delete Publisher;
-    if (Subscriber) delete Subscriber;
-    //if (SubscriberCallback) delete SubscriberCallback;
-
     if (UDPSocket) {
         UDPSocket->Close();
         delete UDPSocket;
     }
 }
 
-void mtsSafetySupervisor::Init(void)
-{
-    Publisher = new SF::Publisher(TopicNames::CONTROL);
-
-    SubscriberCallback = new mtsSubscriberCallback;
-    Subscriber = new SF::Subscriber(TopicNames::DATA, SubscriberCallback);
-
-    // Create and initialize UDP socket
-    if (!UDPSocket) {
-        UDPSocket = new osaSocket(osaSocket::UDP);
-        // See Cube collector documentation for default port
-        // : https://github.com/square/cube/wiki/Collector
-        // MJTODO: CUBE collector can be running on another machine
-        UDPSocket->SetDestination("127.0.0.1", 1180); 
-    }
-}
-
 void mtsSafetySupervisor::Startup(void)
 {
-    Publisher->Startup();
-
-    ThreadSubscriber.Thread.Create<mtsSafetySupervisor, unsigned int>(this, &mtsSafetySupervisor::RunSubscriber, 0);
-    ThreadSubscriber.ThreadEventBegin.Wait();
 }
 
 void mtsSafetySupervisor::Run(void)
@@ -86,44 +67,27 @@ void mtsSafetySupervisor::Run(void)
     ProcessQueuedCommands();
     ProcessQueuedEvents();
 
-    if (!SubscriberCallback->IsEmptyQueue()) {
-        SubscriberCallback->FetchMessages(Messages);
-        if (!Messages.empty()) {
-            // Parse all messages fetched
-            for_each(Messages.begin(), Messages.end(), Parse);
-            // Remove all messages processed
-            Messages.clear();
-        }
+    if (cbSubscriberControl->IsEmptyQueue())
+        return;
+
+    mtsSubscriberCallback::MessagesType msg;
+    cbSubscriberControl->FetchMessages(msg);
+
+    mtsSubscriberCallback::MessagesType::const_iterator it = msg.begin();
+    const mtsSubscriberCallback::MessagesType::const_iterator itEnd = msg.end();
+    for (; it != itEnd; ++it) {
+        //CMN_LOG_CLASS_RUN_DEBUG << "mtsMonitorComponent::Run: CONTROL message fetched: " << *it << std::endl;
+        std::cout << "mtsSafetySupervisor: CONTROL subscriber received: " << *it << std::endl;
+
+        // TODO: parse json string
     }
-}
-
-void * mtsSafetySupervisor::RunSubscriber(unsigned int CMN_UNUSED(arg))
-{
-    ThreadSubscriber.Running = true;
-
-    ThreadSubscriber.ThreadEventBegin.Raise();
-
-    Subscriber->Startup();
-    while (ThreadSubscriber.Running) {
-        Subscriber->Run();
-    }
-
-    ThreadSubscriber.ThreadEventEnd.Raise();
-
-    return 0;
 }
 
 void mtsSafetySupervisor::Cleanup(void)
 {
-    CMN_LOG_CLASS_RUN_DEBUG << "Cleanup: Supervisor component is cleaned up" << std::endl;
-
-    if (Subscriber) {
-        ThreadSubscriber.Running = false;
-        Subscriber->Stop();
-        ThreadSubscriber.ThreadEventEnd.Wait();
-    }
 }
 
+#if 0
 void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 {
     SF::JSONSerializer jsonSerializer;
@@ -178,6 +142,7 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
     }
 #endif
 }
+#endif
 
 void mtsSafetySupervisor::SendMessageToCubeCollector(const std::string & record)
 {

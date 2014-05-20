@@ -20,6 +20,7 @@
 
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsSafetyCoordinator.h>
+#include <cisstMultiTask/mtsSubscriberCallback.h>
 #include <cisstMultiTask/mtsMonitorComponent.h>
 #include <cisstMultiTask/mtsHistoryBuffer.h>
 #include <cisstMultiTask/mtsEventPublisher.h>
@@ -32,14 +33,16 @@
 #include "filters/threshold.h"
 #include "filterFactory.h"
 
-//! Const to set the decimal precision to format floating-point values
-//static const int PRECISION = 9;
-
 using namespace SF::Dict::Json;
 
 CMN_IMPLEMENT_SERVICES(mtsSafetyCoordinator);
 
-mtsSafetyCoordinator::mtsSafetyCoordinator() : SF::Coordinator()
+mtsSafetyCoordinator::mtsSafetyCoordinator() : SF::Coordinator(), 
+    // TODO: if accessor is updated not to depend on cisst (for threading stuffs),
+    // accessor should be moved to its base class, i.e., SF::Accessor
+    casrosAccessor(new SF::cisstAccessor(true, false, true, true,
+                       new mtsSubscriberCallback(SF::Dict::TopicNames::CONTROL),
+                       new mtsSubscriberCallback(SF::Dict::TopicNames::DATA)))
 {
 }
 
@@ -55,6 +58,9 @@ mtsSafetyCoordinator::~mtsSafetyCoordinator()
         for (FiltersType::iterator it = Filters.begin(); it != Filters.end(); ++it)
             delete it->second;
     */
+
+    if (casrosAccessor)
+        delete casrosAccessor;
 }
 
 bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON, 

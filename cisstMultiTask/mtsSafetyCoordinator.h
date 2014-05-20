@@ -25,8 +25,8 @@
 #include "coordinator.h"
 #include "cisstMonitor.h"
 #include "filterBase.h"
+#include "cisstAccessor.h"
 
-#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 #include <cisstMultiTask/mtsExport.h>
@@ -62,6 +62,9 @@ protected:
     //! Filter instances.  Grouped by the name of component to which the filter is deployed
     //FilterSetType FilterSet;
     FiltersType Filters;
+
+    //! Endpoint to access casros network
+    SF::cisstAccessor * casrosAccessor;
 
     //! Deploy monitor target to monitor component
     bool DeployMonitorTarget(const std::string & targetJSON, 
