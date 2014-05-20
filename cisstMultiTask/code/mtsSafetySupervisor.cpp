@@ -48,7 +48,7 @@ mtsSafetySupervisor::~mtsSafetySupervisor()
 
     if (Publisher) delete Publisher;
     if (Subscriber) delete Subscriber;
-    if (SubscriberCallback) delete SubscriberCallback;
+    //if (SubscriberCallback) delete SubscriberCallback;
 
     if (UDPSocket) {
         UDPSocket->Close();
@@ -58,10 +58,10 @@ mtsSafetySupervisor::~mtsSafetySupervisor()
 
 void mtsSafetySupervisor::Init(void)
 {
-    Publisher = new SF::Publisher(TopicNames::control);
+    Publisher = new SF::Publisher(TopicNames::CONTROL);
 
     SubscriberCallback = new mtsSubscriberCallback;
-    Subscriber = new SF::Subscriber(TopicNames::data, SubscriberCallback);
+    Subscriber = new SF::Subscriber(TopicNames::DATA, SubscriberCallback);
 
     // Create and initialize UDP socket
     if (!UDPSocket) {

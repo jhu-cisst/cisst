@@ -221,9 +221,6 @@ protected:
     /*! Callback for subscriber */
     mtsSubscriberCallback * SubscriberCallback;
 
-    /*! Container for messages delivered by subscriber */
-    mtsSubscriberCallback::MessagesType Messages;
-
     InternalThreadType ThreadPublisher;
     InternalThreadType ThreadSubscriber;
 

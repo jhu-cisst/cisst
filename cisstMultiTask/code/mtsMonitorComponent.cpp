@@ -320,11 +320,11 @@ void mtsMonitorComponent::Initialize(void)
     // mtsMonitorComponent::RunMonitors(void).
     this->StateTableMonitor.SetAutomaticAdvance(!ManualAdvance);
 
-    Publisher = new SF::Publisher(SF::Dict::TopicNames::data);
+    Publisher = new SF::Publisher(SF::Dict::TopicNames::DATA);
     if (!Publisher->Startup()) {
         std::stringstream ss;
         ss << "mtsMonitorComponent: Failed to initialize publisher for topic \""
-           << SF::Dict::TopicNames::data << "\"";
+           << SF::Dict::TopicNames::DATA << "\"";
         cmnThrow(ss.str());
     }
 #if 0
@@ -333,7 +333,7 @@ void mtsMonitorComponent::Initialize(void)
 #endif
 
     SubscriberCallback = new mtsSubscriberCallback;
-    Subscriber = new SF::Subscriber(SF::Dict::TopicNames::control, SubscriberCallback);
+    Subscriber = new SF::Subscriber(SF::Dict::TopicNames::CONTROL, SubscriberCallback);
     ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
 }
@@ -359,8 +359,18 @@ void mtsMonitorComponent::Run(void)
 
     // Subscriber received message(s)
     if (!SubscriberCallback->IsEmptyQueue()) {
-        SubscriberCallback->FetchMessages(Messages);
-        //std::cout << "MONITOR COMPONENT fetched " << Messages.size() - before << " items: " << before << std::endl;
+        mtsSubscriberCallback::MessagesType msg;
+
+        SubscriberCallback->FetchMessages(msg);
+
+        mtsSubscriberCallback::MessagesType::const_iterator it = msg.begin();
+        const mtsSubscriberCallback::MessagesType::const_iterator itEnd = msg.end();
+        for (; it != itEnd; ++it) {
+            //CMN_LOG_CLASS_RUN_DEBUG << "mtsMonitorComponent::Run: CONTROL message fetched: " << *it << std::endl;
+        }
+
+        // TODO: decode json received
+        //std::cout << "MONITOR COMPONENT fetched " << msg.size() << " items" << std::endl;
     }
 }
 

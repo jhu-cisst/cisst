@@ -3213,6 +3213,11 @@ void mtsManagerLocal::InstallSafetyCoordinator(void)
 
 bool mtsManagerLocal::InstallFrameworkFilters(const std::string & componentName)
 {
+    if (!SafetyCoordinator) {
+        CMN_LOG_CLASS_RUN_WARNING << "No Safety Coordinator deployed: skip filter installation on component \"" << componentName << "\"" << std::endl;
+        return true;
+    }
+
     const std::string jsonFileName(SF_SOURCE_ROOT_DIR"/libs/fdd/filters/json/framework_filters.json");
     if (!SafetyCoordinator->AddFilterFromJSONFileToComponent(jsonFileName, componentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to add filter(s) from file: \"" << jsonFileName << "\"" << std::endl;

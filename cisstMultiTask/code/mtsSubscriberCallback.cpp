@@ -38,6 +38,8 @@ mtsSubscriberCallback::~mtsSubscriberCallback()
 
 void mtsSubscriberCallback::Callback(const std::string & json)
 {
+    CMN_LOG_CLASS_RUN_DEBUG << "mtsSubscriberCallback::Callback: " << json << std::endl;
+
     QueueAccess.Lock();
     {
         Messages.push_back(json); // FIFO
@@ -49,7 +51,8 @@ void mtsSubscriberCallback::FetchMessages(MessagesType & messages)
 {
     QueueAccess.Lock();
     {
-        messages.splice(messages.end(), Messages, Messages.begin(), Messages.end());
+        //messages.splice(messages.end(), Messages, Messages.begin(), Messages.end());
+        messages.splice(messages.begin(), Messages, Messages.begin());
     }
     QueueAccess.Unlock();
 }
