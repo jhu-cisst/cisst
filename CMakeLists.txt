@@ -771,3 +771,8 @@ endif (UNIX)
 # License file
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/license.txt
                 ${CMAKE_CURRENT_BINARY_DIR}/license.txt COPYONLY)
+
+# Copy shared data if git submodule is checked-out properly
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/share/CMakeLists.txt")
+  add_subdirectory (share)
+endif ()
