@@ -34,7 +34,8 @@ CMN_IMPLEMENT_SERVICES(mtsSafetySupervisor);
 mtsSafetySupervisor::mtsSafetySupervisor()
     : mtsTaskPeriodic(Supervisor::GetSupervisorName(), 10 * cmn_ms),
       casrosAccessor(new cisstAccessor(true, false, true, false,
-                     new mtsSubscriberCallback(SF::Dict::TopicNames::CONTROL), 0))
+                     new mtsSubscriberCallback("Safety Supervisor", 
+                                               SF::Dict::TopicNames::CONTROL), 0))
 {
     // Create and initialize UDP socket
     if (!UDPSocket) {

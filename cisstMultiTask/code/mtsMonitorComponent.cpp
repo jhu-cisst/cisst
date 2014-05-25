@@ -344,12 +344,6 @@ mtsMonitorComponent::~mtsMonitorComponent()
 {
     TargetComponentAccessors->DeleteAll();
     delete TargetComponentAccessors;
-
-    if (ThreadPublisher.Running)// || ThreadSubscriber.Running)
-        Cleanup();
-
-    if (Publisher) delete Publisher;
-    //if (Subscriber) delete Subscriber;
 }
 
 void mtsMonitorComponent::Run(void)
@@ -358,96 +352,10 @@ void mtsMonitorComponent::Run(void)
     ProcessQueuedEvents();
 
     RunMonitors();
-
-    // Subscriber received message(s)
-#if 0
-    if (!SubscriberCallback->IsEmptyQueue()) {
-        mtsSubscriberCallback::MessagesType msg;
-
-        SubscriberCallback->FetchMessages(msg);
-
-        mtsSubscriberCallback::MessagesType::const_iterator it = msg.begin();
-        const mtsSubscriberCallback::MessagesType::const_iterator itEnd = msg.end();
-        for (; it != itEnd; ++it) {
-            //CMN_LOG_CLASS_RUN_DEBUG << "mtsMonitorComponent::Run: CONTROL message fetched: " << *it << std::endl;
-        }
-
-        // TODO: decode json received
-        //std::cout << "MONITOR COMPONENT fetched " << msg.size() << " items" << std::endl;
-    }
-#endif
 }
-
-void * mtsMonitorComponent::RunPublisher(unsigned int CMN_UNUSED(arg))
-{
-#if 0
-    ThreadPublisher.Running = true;
-
-    ThreadPublisher.ThreadEventBegin.Raise();
-
-    Publisher->Startup();
-    while (ThreadPublisher.Running) {
-        Publisher->Run();
-        osaSleep(1.0);
-    }
-    Publisher->Stop();
-
-    ThreadPublisher.ThreadEventEnd.Raise();
-#endif
-
-    return 0;
-}
-
-#if 0
-void * mtsMonitorComponent::RunSubscriber(unsigned int CMN_UNUSED(arg))
-{
-    ThreadSubscriber.Running = true;
-
-    ThreadSubscriber.ThreadEventBegin.Raise();
-
-    try {
-        Subscriber->Startup();
-        while (ThreadSubscriber.Running) {
-            Subscriber->Run();
-        }
-    } catch (const Ice::InitializationException & e) {
-        CMN_LOG_CLASS_RUN_ERROR << "mtsMonitorComponent::RunSubscriber: ice init failed: " << e.what() << std::endl;
-    } catch (const Ice::AlreadyRegisteredException & e) {
-        CMN_LOG_CLASS_RUN_ERROR << "mtsMonitorComponent::RunSubscriber: ice init failed: " << e.what() << std::endl;
-    } catch (const std::exception & e) {
-        CMN_LOG_CLASS_RUN_ERROR << "mtsMonitorComponent::RunSubscriber: exception: " << e.what() << std::endl;
-    }
-
-    ThreadSubscriber.ThreadEventEnd.Raise();
-
-    return 0;
-}
-#endif
 
 void mtsMonitorComponent::Cleanup(void)
 {
-#if 0
-    ThreadPublisher.Running = false;
-    ThreadPublisher.ThreadEventEnd.Wait();
-#endif
-
-    //CMN_LOG_CLASS_RUN_DEBUG << "Cleanup: Monitor component is cleaned up" << std::endl;
-
-#if 0
-    if (Subscriber) {
-        ThreadSubscriber.Running = false;
-        // Terminating subscriber needs to call shutdown() on the Ice communicator
-        Subscriber->Stop();
-        ThreadSubscriber.ThreadEventEnd.Wait();
-
-        delete Subscriber;
-        Subscriber = 0;
-
-        // MJ: SubscriberCallback is managed and deteled by SF::Subscriber
-        //delete SubscriberCallback;
-        //SubscriberCallback = 0;
-    }
-#endif
 }
 
 mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::CreateTargetComponentAccessor(

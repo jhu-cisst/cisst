@@ -31,6 +31,8 @@ public:
     typedef std::list<std::string> MessagesType;
 
 protected:
+    //! Name of object that owns (i.e., created) this callback object
+    const std::string OwnerName;
     //! Name of topic with which this callback is associated
     const std::string TopicName;
 
@@ -39,11 +41,13 @@ protected:
     MessagesType Messages;
 
 public:
-    mtsSubscriberCallback(const std::string & topic);
+    mtsSubscriberCallback(const std::string & owner, const std::string & topic);
     ~mtsSubscriberCallback();
 
     /*! Called by Ice and push new message in json format to the internal queue. */
-    void Callback(const std::string & json);
+    void CallbackControl(SF::Topic::Control::CategoryType category, const std::string & json);
+    void CallbackData(SF::Topic::Data::CategoryType category, const std::string & json);
+    
 
     /*! Check if the internal queue has any queued entry */
     inline bool IsEmptyQueue(void) const { return Messages.empty(); }

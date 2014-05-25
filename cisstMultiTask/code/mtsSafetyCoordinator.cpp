@@ -41,8 +41,10 @@ mtsSafetyCoordinator::mtsSafetyCoordinator() : SF::Coordinator(),
     // TODO: if accessor is updated not to depend on cisst (for threading stuffs),
     // accessor should be moved to its base class, i.e., SF::Accessor
     casrosAccessor(new SF::cisstAccessor(true, false, true, true,
-                       new mtsSubscriberCallback(SF::Dict::TopicNames::CONTROL),
-                       new mtsSubscriberCallback(SF::Dict::TopicNames::DATA)))
+                       new mtsSubscriberCallback("Safety Coordinator", 
+                                                 SF::Dict::TopicNames::CONTROL),
+                       new mtsSubscriberCallback("Safety Coordinator",
+                                                 SF::Dict::TopicNames::DATA)))
 {
 }
 

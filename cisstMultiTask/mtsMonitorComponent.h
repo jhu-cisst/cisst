@@ -36,8 +36,6 @@
 #include <cisstMultiTask/mtsEventReceiver.h>
 
 #include "cisstMonitor.h"
-#include "publisher.h"
-//#include "subscriber.h"
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -182,21 +180,7 @@ public: // MJ TEMP
     void HandleFaultEvent(const std::string & json);
 
 protected:
-    //
-    // Message exchange with Safety Framework
-    //
-    /*! Ice publisher and subscriber */
     SF::Publisher *  Publisher;
-    //SF::Subscriber * Subscriber;
-
-    /*! Callback for subscriber */
-    //mtsSubscriberCallback * SubscriberCallback;
-
-    InternalThreadType ThreadPublisher;
-    //InternalThreadType ThreadSubscriber;
-
-    void * RunPublisher(unsigned int arg);
-    //void * RunSubscriber(unsigned int arg);
 
 public:
     /*! Default constructor (default: 5 msec period with automatic state table advance) */

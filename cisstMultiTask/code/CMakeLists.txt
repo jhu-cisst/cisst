@@ -416,10 +416,6 @@ if (CISST_HAS_SAFETY_PLUGINS)
   include_directories (${SF_INCLUDE_DIR} ${SF_LIB_DEPENDENCY_INCLUDE_DIR})
   link_directories (${SF_LIBRARY_DIR})
   target_link_libraries (cisstMultiTask ${SF_LIBRARY_FILE} ${SF_LIB_DEPENDENCY_LIBS})
-  # disable unused parameter warnings with boost msm
-  if (IS_LINUX OR APPLE)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Woverloaded-virtual")
-  endif()
 endif (CISST_HAS_SAFETY_PLUGINS)
 
 # Add linking to external libraries

@@ -22,9 +22,9 @@
 
 using namespace SF;
 
-mtsSubscriberCallback::mtsSubscriberCallback(const std::string & topic)
-    : SFCallback(),
-      TopicName(topic)
+mtsSubscriberCallback::mtsSubscriberCallback(const std::string & owner, 
+                                             const std::string & topic)
+    : SFCallback(), OwnerName(owner), TopicName(topic)
 {
 }
 
@@ -32,9 +32,11 @@ mtsSubscriberCallback::~mtsSubscriberCallback()
 {
 }
 
+#if 0
 void mtsSubscriberCallback::Callback(const std::string & json)
 {
-    std::cout << "mtsSubscriberCallback::Callback [ " << TopicName << " ]: " << json << std::endl;
+    std::cout << "mtsSubscriberCallback::Callback [ " << OwnerName << ", " << TopicName 
+              << " ]: " << json << std::endl;
 
     QueueAccess.Lock();
     {
@@ -42,12 +44,61 @@ void mtsSubscriberCallback::Callback(const std::string & json)
     }
     QueueAccess.Unlock();
 }
+#endif
+
+void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType category,
+                                            const std::string & json)
+{
+    std::string categoryName;
+    switch (category) {
+    case SF::Topic::Control::COMMAND:
+        categoryName = "COMMAND";
+        break;
+    case SF::Topic::Control::READ_REQ:
+        categoryName = "READ_REQ";
+        break;
+    default:
+        categoryName = "INVALID";
+        break;
+    }
+    
+    std::cout << "Callback CONTROL [ " << OwnerName << ", " << TopicName 
+              << " | " << categoryName << " ]: " << json << std::endl;
+
+}
+
+void mtsSubscriberCallback::CallbackData(SF::Topic::Data::CategoryType category,
+                                         const std::string & json)
+{
+    std::string categoryName;
+    switch (category) {
+    case SF::Topic::Data::MONITOR:
+        categoryName = "MONITOR";
+        break;
+    case SF::Topic::Data::EVENT:
+        categoryName = "EVENT";
+        break;
+    case SF::Topic::Data::READ_RES:
+        categoryName = "READ_RES";
+        break;
+    default:
+        categoryName = "INVALID";
+        break;
+    }
+    
+    std::cout << "Callback DATA [ " << OwnerName << ", " << TopicName 
+              << " | " << categoryName << " ]: " << json << std::endl;
+
+}
 
 void mtsSubscriberCallback::FetchMessages(MessagesType & messages)
 {
+    // TODO: remove FetchMessages
+#if 0
     QueueAccess.Lock();
     {
         messages.splice(messages.begin(), Messages, Messages.begin());
     }
     QueueAccess.Unlock();
+#endif
 }

@@ -52,9 +52,6 @@ public:
     //! Typedef for filters deployed in the process
     typedef std::map<SF::FilterBase::FilterIDType, SF::FilterBase*> FiltersType;
 
-    //! Typedef for events reported so far
-    // TODO
-
 protected:
     //! Monitor instances
     MonitorsType Monitors;
