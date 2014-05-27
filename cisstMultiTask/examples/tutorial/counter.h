@@ -32,6 +32,7 @@ class counter: public mtsTaskPeriodic {
     double Counter;
 
     // increment used for the counter
+    mtsStateTable ConfigurationStateTable;
     double Increment;
 
     // overflow event

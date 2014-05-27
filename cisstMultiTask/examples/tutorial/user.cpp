@@ -29,8 +29,9 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES_DERIVED(user, mtsTaskContinuous);
 
 user::user(const std::string & componentName):
-    // base constructor, same task name and period.
-    mtsTaskContinuous(componentName, 500),
+    // base constructor, same component name.  Second parameter, 20,
+    // is the size of the default state table
+    mtsTaskContinuous(componentName, 20),
     Quit(false)
 {
     SetupInterfaces();
@@ -38,26 +39,31 @@ user::user(const std::string & componentName):
 
 void user::SetupInterfaces(void)
 {
+    // add an interface required.
     mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("Counter");
     if (!interfaceRequired) {
         CMN_LOG_CLASS_INIT_ERROR << "failed to add \"Counter\" to component \"" << this->GetName() << "\"" << std::endl;
         return;
     }
-    if (!(interfaceRequired->AddFunction("Reset", this->Reset))) {
-        CMN_LOG_CLASS_INIT_ERROR << "failed to add function to interface \"" << interfaceRequired->GetFullName() << "\"" << std::endl;
-    }
-    if (!(interfaceRequired->AddFunction("GetValue", this->GetValue))) {
-        CMN_LOG_CLASS_INIT_ERROR << "failed to add function to interface \"" << interfaceRequired->GetFullName() << "\"" << std::endl;
-    }
-    if (!(interfaceRequired->AddFunction("SetIncrement", this->SetIncrement))) {
-        CMN_LOG_CLASS_INIT_ERROR << "failed to add function to interface \"" << interfaceRequired->GetFullName() << "\"" << std::endl;
-    }
-    if (!(interfaceRequired->AddEventHandlerVoid(&user::OverflowHandler, this, "Overflow"))) {
-        CMN_LOG_CLASS_INIT_ERROR << "failed to add event handler to interface \"" << interfaceRequired->GetFullName() << "\"" << std::endl;
-    }
-    if (!(interfaceRequired->AddEventHandlerWrite(&user::InvalidIncrementHandler, this, "InvalidIncrement"))) {
-        CMN_LOG_CLASS_INIT_ERROR << "failed to add event handler to interface \"" << interfaceRequired->GetFullName() << "\"" << std::endl;
-    }
+
+    // add a void function, i.e. send a request without payload
+    interfaceRequired->AddFunction("Reset", this->Reset);
+
+    // add a read function, i.e. function to retrieve data
+    interfaceRequired->AddFunction("GetValue", this->GetValue);
+
+    // add a write function, i.e. send a request with a payload
+    interfaceRequired->AddFunction("SetIncrement", this->SetIncrement);
+
+    // add a void event handler, i.e. handle an event without a
+    // payload.  The method used should have the signature "void
+    // method(void)"
+    interfaceRequired->AddEventHandlerVoid(&user::OverflowHandler, this, "Overflow");
+
+    // add a write event handler, i.e. handle an event with a payload.
+    // The method used should have the signature "void method(const
+    // type & payload)"
+    interfaceRequired->AddEventHandlerWrite(&user::InvalidIncrementHandler, this, "InvalidIncrement");
 }
 
 void user::PrintUsage(void) const
@@ -91,7 +97,10 @@ void user::Run(void)
 
     // detect if the user has pressed a key
     if (!cmnKbHit()) {
-        osaSleep(10.0 * cmn_ms); // sleep just a big to not hog resources
+        // sleep just a bit to not hog resources.  Since this is a
+        // continuous task, the Run method will get called again and
+        // again
+        osaSleep(10.0 * cmn_ms);
         return;
     }
 
