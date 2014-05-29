@@ -48,7 +48,7 @@ int main(int argc, char ** argv)
     // connect the components, task.RequiresInterface -> task.ProvidesInterface
     componentManager->Connect("user", "Counter", "counter", "User");
 
-    // create the components, i.e. find the commands
+    // create the components
     componentManager->CreateAll();
     componentManager->WaitForStateAll(mtsComponentState::READY, 2.0 * cmn_s);
 

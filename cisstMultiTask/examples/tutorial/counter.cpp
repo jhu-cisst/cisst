@@ -77,17 +77,17 @@ void counter::SetupInterfaces(void)
     // there is really no need to check the returned value for
     // AddCommand ...
 
-    // add a command to read the latest value from a state table
-    interfaceProvided->AddCommandReadState(StateTable, Counter,
-                                           "GetValue");
-    interfaceProvided->AddCommandReadState(ConfigurationStateTable, Increment,
-                                           "GetIncrement");
-
     // add a write command.  The signature of the method used should
     // be "void method(const type & payload)".  We also need to
     // provide the default value expected by this command.
     interfaceProvided->AddCommandWrite(&counter::SetIncrement, this,
                                        "SetIncrement", 1.0);
+
+    // add a command to read the latest value from a state table
+    interfaceProvided->AddCommandReadState(StateTable, Counter,
+                                           "GetValue");
+    interfaceProvided->AddCommandReadState(ConfigurationStateTable, Increment,
+                                           "GetIncrement");
 
     // add a void event.  We need to provide the function
     // (mtsFunction) that will be used to trigger the event.
@@ -140,7 +140,9 @@ void counter::Startup(void)
 {
     // initialize counter and increment
     Counter = 0.0;
-    Increment = 1.0;
+    // for the increment, use the method to make sure state table gets
+    // updated as well
+    SetIncrement(1.0);
 }
 
 void counter::Run(void)
