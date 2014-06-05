@@ -709,16 +709,13 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
                 outputStream << "    description << cmnData< " << type << " >::HumanReadable(*this) << std::endl;" << std::endl;
             }
         }
-        outputStream << "    description" << std::endl;
         for (index = 0; index < Members.size(); index++) {
             if (Members[index]->GetFieldValue("is-data") == "true") {
                 type = Members[index]->GetFieldValue("type");
-                outputStream << "        << \"  " << Members[index]->GetFieldValue("description") << ":\" << cmnData<" << type << " >::HumanReadable(this->" << Members[index]->MemberName << ")";
-                if (index == (Members.size() - 1)) {
-                    outputStream << ";";
-                }
+                outputStream << "    description << \"  " << Members[index]->GetFieldValue("description")
+                             << ":\" << cmnData<" << type << " >::HumanReadable(this->"
+                             << Members[index]->MemberName << ");" << std::endl;
             }
-            outputStream << std::endl;
         }
         outputStream << "    return description.str();" << std::endl
                      << "}" << std::endl;
