@@ -276,11 +276,6 @@ mtsQtWidgetStateIndexWrite::mtsQtWidgetStateIndexWrite(void):
     TableWidget->setCellWidget(0, 0, IndexSpinBox);
     TableWidget->setCellWidget(0, 1, TicksSpinBox);
     TableWidget->setCellWidget(0, 2, LengthSpinBox);
-
-#if CISST_HAS_QT4
-    TableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    TableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#endif
     TableWidget->verticalHeader()->hide();
 
     int verticalHeight = TableWidget->horizontalHeader()->sizeHint().height() + TableWidget->verticalHeader()->sizeHint().height();

@@ -34,10 +34,6 @@ vctQtWidgetFrame4x4DoubleRead::vctQtWidgetFrame4x4DoubleRead(void):
     this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#endif
     int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
     this->setFixedHeight(verticalHeight);
 }
@@ -68,10 +64,6 @@ vctQtWidgetFrame4x4DoubleWrite::vctQtWidgetFrame4x4DoubleWrite(void):
     this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#endif
     int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
     this->setFixedHeight(verticalHeight);
 }

@@ -29,12 +29,15 @@ mtsQtWidgetIntervalStatistics::mtsQtWidgetIntervalStatistics(void):
     this->setColumnCount(3);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+    this->verticalScrollBar()->hide();
+    this->horizontalScrollBar()->hide();
 #if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
-    this->verticalScrollBar()->hide();
-    this->horizontalScrollBar()->hide();
     int verticalHeight = this->verticalHeader()->sizeHint().height() * this->rowCount();
     this->setFixedHeight(verticalHeight);
     QLabel * label;
