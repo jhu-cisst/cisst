@@ -30,3 +30,8 @@ cisst_add_library (
 
 # link against Qt libraries
 target_link_libraries (cisstCommonQt ${QT_LIBRARIES})
+
+# for Qt 5
+if (CISST_HAS_QT5)
+  qt5_use_modules (cisstCommonQt Core Widgets)
+endif ()

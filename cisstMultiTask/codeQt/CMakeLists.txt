@@ -1,8 +1,8 @@
 #
 #
-# CMakeLists for cisstMultiTask
+# CMakeLists for cisstMultiTaskQt
 #
-# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -21,21 +21,27 @@ cisst_set_directories (cisstQt)
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-qt4_wrap_cpp (QT_WRAPPED_CPP
-              ../mtsCollectorQtComponent.h
-              ../mtsCollectorQtWidget.h
-              ../mtsQtCommandSelector.h
-              ../mtsQtScaleAndSignalTool.h
-              ../mtsQtVisualizerShell.h
-              ../mtsQtWidgetIntervalStatistics.h
-              ../mtsQtWidgetGenericObject.h
-              ../mtsQtWidgetGenericObjectProxy.h
-              ../mtsQtWidgetVectorTypes.h
-              ../mtsQtWidgetComponent.h
-              ../mtsQtWidgetInterfaceRequired.h
-              ../mtsQtWidgetFunction.h
-              ../mtsQtWidgetEvent.h)
+if (CISST_HAS_QT4)
+  qt4_wrap_cpp (QT_WRAPPED_CPP
+                ../mtsCollectorQtComponent.h
+                ../mtsCollectorQtWidget.h
+                ../mtsQtCommandSelector.h
+                ../mtsQtScaleAndSignalTool.h
+                ../mtsQtVisualizerShell.h
+                ../mtsQtWidgetIntervalStatistics.h
+                ../mtsQtWidgetGenericObject.h
+                ../mtsQtWidgetGenericObjectProxy.h
+                ../mtsQtWidgetVectorTypes.h
+                ../mtsQtWidgetComponent.h
+                ../mtsQtWidgetInterfaceRequired.h
+                ../mtsQtWidgetFunction.h
+                ../mtsQtWidgetEvent.h)
+else (CISST_HAS_QT4)
+  # assumes Qt 5 Auto Moc
+  set (CMAKE_AUTOMOC ON)
+endif (CISST_HAS_QT4)
 
+# add the Qt library
 cisst_add_library (LIBRARY cisstMultiTaskQt
                    LIBRARY_DIR cisstMultiTask
                    FOLDER cisstMultiTask
@@ -81,4 +87,10 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsExportQt.h
                    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 
+# link against Qt libraries
 target_link_libraries (cisstMultiTaskQt ${QT_LIBRARIES})
+
+# for Qt5
+if (CISST_HAS_QT5)
+  qt5_use_modules (cisstMultiTaskQt Core Widgets OpenGL)
+endif (CISST_HAS_QT5)

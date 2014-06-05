@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLoggerQtWidget.h>
 #include <cisstCommon/cmnClassRegister.h>
 
-#include <QWidget>
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -29,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <QAbstractTableModel>
 #include <QItemDelegate>
 #include <QTableView>
-
 
 /*! Model class used for class register entries */
 class cmnLoggerQtWidgetClassServicesModel: public QAbstractTableModel

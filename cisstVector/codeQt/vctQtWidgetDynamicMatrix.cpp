@@ -34,8 +34,10 @@ vctQtWidgetDynamicMatrixDoubleRead::vctQtWidgetDynamicMatrixDoubleRead(void):
     this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+#endif
     int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
     this->setFixedHeight(verticalHeight);
 }
@@ -68,8 +70,10 @@ vctQtWidgetDynamicMatrixDoubleWrite::vctQtWidgetDynamicMatrixDoubleWrite(void):
     this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+#endif
     int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
     this->setFixedHeight(verticalHeight);
 }
@@ -118,8 +122,10 @@ vctQtWidgetDynamicMatrixIntRead::vctQtWidgetDynamicMatrixIntRead(void):
     this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+#endif
     int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
     this->setFixedHeight(verticalHeight);
 }
@@ -152,8 +158,10 @@ vctQtWidgetDynamicMatrixIntWrite::vctQtWidgetDynamicMatrixIntWrite(void):
     this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+#endif
     int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
     this->setFixedHeight(verticalHeight);
 }
@@ -201,8 +209,10 @@ vctQtWidgetDynamicMatrixBoolRead::vctQtWidgetDynamicMatrixBoolRead(void):
     this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+#endif
     int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
     this->setFixedHeight(verticalHeight);
 }
@@ -235,8 +245,10 @@ vctQtWidgetDynamicMatrixBoolWrite::vctQtWidgetDynamicMatrixBoolWrite(void):
     this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+#endif
     int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
     this->setFixedHeight(verticalHeight);
 }
