@@ -2,8 +2,6 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 //
-// $Id$
-//
 // Author(s):  Peter Kazanzides
 // Created on: 2013-12-29
 //
@@ -28,6 +26,7 @@ class {
 
     name mtsExecutionResult;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
 
     enum {
@@ -129,9 +128,4 @@ class {
           ... } */
         operator bool (void) const;
     }
-}
-
-inline-header {
-typedef mtsGenericObjectProxy<mtsExecutionResult> mtsExecutionResultProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsExecutionResultProxy)
 }

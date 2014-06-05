@@ -51,6 +51,7 @@ public:
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool Validate(std::string & errorMessage);
+    void GenerateIncludes(std::ostream & output) const;
     void GenerateHeader(std::ostream & output) const;
     void GenerateCode(std::ostream & output) const;
 

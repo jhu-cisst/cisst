@@ -32,8 +32,10 @@ class {
 }
 
 inline-header {
-typedef mtsGenericObjectProxy<svlFilterImageOverlayTypes::ImageTransform> svlFilterImageOverlayImageTransformProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageOverlayImageTransformProxy);
-typedef mtsGenericObjectProxy<vctDynamicVector<svlFilterImageOverlayTypes::ImageTransform> > svlFilterImageOverlayImageTransformVectorProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageOverlayImageTransformVectorProxy);
+typedef mtsGenericObjectProxy<vctDynamicVector<svlFilterImageOverlayTypes::ImageTransform> > svlFilterImageOverlayTypes_ImageTransformVectorProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageOverlayTypes_ImageTransformVectorProxy);
+}
+
+inline-code {
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterImageOverlayTypes_ImageTransformVectorProxy);
 }

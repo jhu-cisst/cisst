@@ -77,6 +77,7 @@ public:
     virtual bool ValidateRecursion(std::string & errorMessage);
     virtual bool Validate(std::string & errorMessage) = 0;
 
+    virtual void GenerateIncludes(std::ostream & CMN_UNUSED(outputStream)) const {};
     virtual void GenerateHeader(std::ostream & outputStream) const = 0;
     virtual void GenerateCode(std::ostream & outputStream) const = 0;
     void DisplaySyntax(std::ostream & outputStream, size_t offset, bool recursive, bool skipScopeName = false) const;

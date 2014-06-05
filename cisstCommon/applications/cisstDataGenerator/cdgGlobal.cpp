@@ -67,6 +67,16 @@ bool cdgGlobal::SetValue(const std::string & keyword,
 }
 
 
+void cdgGlobal::GenerateIncludes(std::ostream & outputStream) const
+{
+    size_t index;
+    GenerateLineComment(outputStream);
+    for (index = 0; index < Scopes.size(); index++) {
+        Scopes[index]->GenerateIncludes(outputStream);
+        outputStream << std::endl;
+    }
+}
+
 void cdgGlobal::GenerateHeader(std::ostream & outputStream) const
 {
     size_t index;

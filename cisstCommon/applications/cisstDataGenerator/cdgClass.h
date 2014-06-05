@@ -70,6 +70,7 @@ public:
     cdgScope::Type GetScope(void) const;
     cdgScope * Create(size_t lineNumber) const;
     bool Validate(std::string & errorMessage);
+    void GenerateIncludes(std::ostream & outputStream) const;
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
 

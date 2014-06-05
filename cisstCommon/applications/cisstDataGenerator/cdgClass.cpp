@@ -43,6 +43,12 @@ cdgClass::cdgClass(size_t lineNumber):
 
     CMN_ASSERT(this->AddField("namespace", "", false, "namespace for the class"));
 
+    field = this->AddField("mts-proxy", "true", false, "generate the code to create a cisstMultiTask proxy, set this to false to avoid proxy generation or \"declaration-only\" to manually instantiate the proxy in a different source file (.cpp)");
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("declaration-only");
+    field->AddPossibleValue("false");
+
     this->AddKnownScope(*this);
 
     cdgBaseClass newBaseClass(0);
@@ -116,17 +122,32 @@ bool cdgClass::Validate(std::string & CMN_UNUSED(errorMessage))
 }
 
 
+void cdgClass::GenerateIncludes(std::ostream & outputStream) const
+{
+    GenerateLineComment(outputStream);
+    const std::string mtsProxy = this->GetFieldValue("mts-proxy");
+    // includes for mts proxy
+    if (mtsProxy != "false") {
+        outputStream << std::endl
+                     << "// mts-proxy set to " << mtsProxy << std::endl
+                     << "#include <cisstCommon/cmnClassServices.h>" << std::endl
+                     << "#include <cisstCommon/cmnClassRegisterMacros.h>" << std::endl
+                     << "#include <cisstMultiTask/mtsGenericObjectProxy.h>" << std::endl
+                     << std::endl;
+    }
+}
+
+
 void cdgClass::GenerateHeader(std::ostream & outputStream) const
 {
     GenerateLineComment(outputStream);
     const std::string className = this->GetFieldValue("name");
+    const std::string classNamespace = this->GetFieldValue("namespace");
+    const std::string mtsProxy = this->GetFieldValue("mts-proxy");
 
     size_t index;
 
-    // forward declaration for the class
-    const std::string classNamespace = this->GetFieldValue("namespace");
-
-    // actual class
+    // class definition
     if (classNamespace != "") {
         outputStream << "namespace " << classNamespace << " {" << std::endl;
     }
@@ -151,10 +172,14 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
                  << "    " << className << "(const " << this->GetFieldValue("name") << " & other);" << std::endl
                  << "    ~" << className << "();" << std::endl << std::endl;
 
+    // generate code for all scopes
     for (index = 0; index < Scopes.size(); index++) {
         Scopes[index]->GenerateHeader(outputStream);
     }
 
+    // create a constructor that requires all data members to be
+    // initialized.  Must appear after all scope code since this might
+    // require some user defined enum and/or typedef
     if (this->GetFieldValue("ctor-all-members") == "true" && Members.size() > 0) {
         outputStream << std::endl
                      << " public:" << std::endl
@@ -172,13 +197,28 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
         outputStream << ");" << std::endl;
     }
 
+    // methods declaration
     GenerateStandardMethodsHeader(outputStream);
     GenerateDataMethodsHeader(outputStream);
 
-    outputStream << "};" << std::endl;
+    outputStream << "}; // " << className << std::endl;
 
     if (classNamespace != "") {
         outputStream << "}; // end of namespace " << classNamespace << std::endl;
+    }
+
+    // make sure mts proxy is registered, use namespace if any
+    if (mtsProxy != "false") {
+        outputStream << std::endl
+                     << "// mts-proxy set to " << mtsProxy << std::endl;
+        if (classNamespace != "") {
+            outputStream << "typedef mtsGenericObjectProxy<" << classNamespace << "::" << className << "> " << classNamespace << "_" << className << "Proxy;" << std::endl
+                         << "CMN_DECLARE_SERVICES_INSTANTIATION(" << classNamespace << "_" << className << "Proxy);" << std::endl;
+        } else {
+            outputStream << "typedef mtsGenericObjectProxy<" << className << "> " << className << "Proxy;" << std::endl
+                         << "CMN_DECLARE_SERVICES_INSTANTIATION(" << className << "Proxy);" << std::endl;
+        }
+        outputStream << std::endl;
     }
 
     // declaration of all global functions
@@ -233,6 +273,22 @@ void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
 void cdgClass::GenerateCode(std::ostream & outputStream) const
 {
     GenerateLineComment(outputStream);
+
+    // if we need instantiation for mts proxy
+    const std::string className = this->GetFieldValue("name");
+    const std::string classNamespace = this->GetFieldValue("namespace");
+    const std::string mtsProxy = this->GetFieldValue("mts-proxy");
+
+    if (mtsProxy == "true") {
+        outputStream << std::endl
+                     << "// mts-proxy set to " << mtsProxy << std::endl;
+        if (classNamespace != "") {
+            outputStream << "CMN_IMPLEMENT_SERVICES_TEMPLATED(" << classNamespace << "_" << className << "Proxy);" << std::endl;
+        } else {
+            outputStream << "CMN_IMPLEMENT_SERVICES_TEMPLATED(" << className << "Proxy);" << std::endl;
+        }
+        outputStream << std::endl;
+    }
 
     size_t index;
     GenerateConstructorsCode(outputStream);

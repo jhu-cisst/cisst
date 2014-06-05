@@ -1,7 +1,6 @@
 #
 #
-# (C) Copyright 2003-2008 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -19,7 +18,8 @@ cisst_data_generator (cisstParameterTypes
                       "cisstParameterTypes/"        # sub directory for include
                       ../prmPositionCartesianGet.cdg
                       ../prmPositionJointGet.cdg
-                      ../prmFixtureGainCartesianSet.cdg)
+                      ../prmFixtureGainCartesianSet.cdg
+                      ../prmIMUSensors.cdg)
 
 # to compile cisst generated code, need to find header file
 include_directories (${CMAKE_CURRENT_BINARY_DIR})

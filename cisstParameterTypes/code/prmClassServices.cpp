@@ -97,3 +97,6 @@ CMN_IMPLEMENT_SERVICES(prmFixtureGainCartesianSet);
 
 #include <cisstParameterTypes/prmJointType.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeProxy);
+
+#include <cisstParameterTypes/prmIMUSensors.h>
+CMN_IMPLEMENT_SERVICES(prmIMUSensors);
