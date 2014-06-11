@@ -1,8 +1,7 @@
 #
-#
 # CMakeLists for cisstNumerical tests
 #
-# (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -41,6 +40,7 @@ set (HEADER_FILES
 if (CISST_HAS_CISSTNETLIB)
   set (SOURCE_FILES
        ${SOURCE_FILES}
+       nmrConstraintOptimizerTest.cpp
        nmrInverseTest.cpp
        nmrIsOrthonormalTest.cpp
        nmrLUTest.cpp
@@ -59,6 +59,7 @@ if (CISST_HAS_CISSTNETLIB)
 
   set (HEADER_FILES
        ${HEADER_FILES}
+       nmrConstraintOptimizerTest.h
        nmrInverseTest.h
        nmrIsOrthonormalTest.h
        nmrLUTest.h
