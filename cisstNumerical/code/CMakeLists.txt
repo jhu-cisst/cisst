@@ -1,8 +1,7 @@
 #
-#
 # CMakeLists for cisstNumerical
 #
-# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -19,7 +18,6 @@ project (cisstNumerical)
 set (SOURCE_FILES
      nmrBernsteinPolynomial.cpp
      nmrBernsteinPolynomialLineIntegral.cpp
-     nmrConstraintOptimizer.cpp
      nmrGaussJordanInverse.cpp
      nmrMultiIndexCounter.cpp
      nmrMultiVariablePowerBasis.cpp
@@ -34,7 +32,6 @@ set (SOURCE_FILES
 set (HEADER_FILES
      nmrBernsteinPolynomial.h
      nmrBernsteinPolynomialLineIntegral.h
-     nmrConstraintOptimizer.h
      nmrDynAllocPolynomialContainer.h
      nmrExport.h
      nmrGaussJordanInverse.h
@@ -51,6 +48,7 @@ set (HEADER_FILES
 if (CISST_HAS_CISSTNETLIB)
   set (SOURCE_FILES
        ${SOURCE_FILES}
+       nmrConstraintOptimizer.cpp
        nmrInverseSPD.cpp
        nmrLSMinNorm.cpp
        nmrPInverse.cpp
@@ -67,6 +65,7 @@ if (CISST_HAS_CISSTNETLIB)
   set (HEADER_FILES
        ${HEADER_FILES}
        nmrNetlib.h
+       nmrConstraintOptimizer.h
        nmrInverse.h
        nmrInverseSPD.h
        nmrLU.h
