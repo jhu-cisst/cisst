@@ -19,6 +19,7 @@ project (cisstNumerical)
 set (SOURCE_FILES
      nmrBernsteinPolynomial.cpp
      nmrBernsteinPolynomialLineIntegral.cpp
+     nmrConstraintOptimizer.cpp
      nmrGaussJordanInverse.cpp
      nmrMultiIndexCounter.cpp
      nmrMultiVariablePowerBasis.cpp
@@ -33,6 +34,7 @@ set (SOURCE_FILES
 set (HEADER_FILES
      nmrBernsteinPolynomial.h
      nmrBernsteinPolynomialLineIntegral.h
+     nmrConstraintOptimizer.h
      nmrDynAllocPolynomialContainer.h
      nmrExport.h
      nmrGaussJordanInverse.h
