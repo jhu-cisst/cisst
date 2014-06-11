@@ -50,7 +50,7 @@ nmrConstraintOptimizer::nmrConstraintOptimizer(const int n)
 */
 nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
 {
-	CISSTNETLIB_INTEGER res;
+    CISSTNETLIB_INTEGER res;
 
 	// if we don't see an objective
 	if(C.rows() == 0 || d.size() == 0)
@@ -110,6 +110,10 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
 			dq[i] = lsiSolution.GetX().Element(i);
 		}
 	}
+    else
+    {
+        res = NMR_MALFORMED;
+    }
 
 	// res is our current status, check and return its value as a STATUS
     return (STATUS)res;
