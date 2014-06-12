@@ -2,8 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlFilterBase.h 3034 2011-10-09 01:53:36Z adeguet1 $
-
   Author(s):  Anton Deguet
   Created on: 2014
 

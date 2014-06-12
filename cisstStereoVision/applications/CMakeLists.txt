@@ -18,3 +18,4 @@ project (cisstStereoVisionApplications)
 # Build applications if needed
 cisst_offer_application (cisstStereoVision CameraViewer ON)
 cisst_offer_application (cisstStereoVision VideoPlayer ON)
+cisst_offer_application (cisstStereoVision VideoConverter ON)
