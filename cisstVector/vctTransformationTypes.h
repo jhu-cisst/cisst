@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+  Author(s):  Anton Deguet
+  Created on: 2003-09-12
 
-  Author(s):	Anton Deguet
-  Created on:	2003-09-12
-
-  (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -40,6 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctFrameBase.h>
 #include <cisstVector/vctFrame4x4.h>
 
+#include <cisstVector/vctDataFunctionsTransformations.h>
 
 /*! Define a vector of barycentric coordinates of 1 double. */
 typedef vctBarycentricVector<double, 1> vctBarycentric1;

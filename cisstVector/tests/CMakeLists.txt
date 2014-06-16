@@ -2,7 +2,7 @@
 #
 # CMakeLists for cisstVector tests
 #
-# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -126,11 +126,16 @@ if (CISST_HAS_JSON)
   set (HEADER_FILES
        ${HEADER_FILES}
        vctDataFunctionsFixedSizeVectorJSONTest.h
-       vctDataFunctionsDynamicVectorJSONTest.h)
+       vctDataFunctionsDynamicVectorJSONTest.h
+       vctDataFunctionsFixedSizeMatrixJSONTest.h
+       vctDataFunctionsDynamicMatrixJSONTest.h)
+
   set (SOURCE_FILES
        ${SOURCE_FILES}
        vctDataFunctionsFixedSizeVectorJSONTest.cpp
-       vctDataFunctionsDynamicVectorJSONTest.cpp)
+       vctDataFunctionsDynamicVectorJSONTest.cpp
+       vctDataFunctionsFixedSizeMatrixJSONTest.cpp
+       vctDataFunctionsDynamicMatrixJSONTest.cpp)
 endif (CISST_HAS_JSON)
 
 # Add executable for C++ tests

@@ -2,13 +2,12 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 // This class is for the sensor output of a generic Inertial Measurement Unit (IMU),
-// which typically contains a 3-axis accelerometer, 3-axis gyroscope, and 
+// which typically contains a 3-axis accelerometer, 3-axis gyroscope, and
 // 3-axis magnetometer. It may also contain a temperature sensor and a barometric
 // pressure sensor.
 
 inline-header {
 #include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctDataFunctions.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 
 // Always include last

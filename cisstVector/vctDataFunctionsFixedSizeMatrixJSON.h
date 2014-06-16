@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -26,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnDataFunctionsJSON.h>
 #include <cisstVector/vctFixedSizeMatrixBase.h>
+#include <cisstVector/vctDataFunctionsFixedSizeVectorJSON.h>
 
 #if CISST_HAS_JSON
 template <class _elementType, vct::size_type _rows, vct::size_type _cols>
@@ -44,7 +44,7 @@ public:
             cmnDataJSON<typename DataType::RowValueType>::SerializeText(matrix.Row(rowIndex), jsonValue[jsonRowIndex]);
         }
     }
-    
+
     static void DeSerializeText(DataType & matrix, const Json::Value & jsonValue)
         throw (std::runtime_error)
     {

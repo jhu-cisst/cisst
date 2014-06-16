@@ -3,10 +3,9 @@
 
 /*
   Author(s):  Anton Deguet
-  Created on: 2012-07-09
+  Created on: 2014-06-16
 
-  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,18 +16,19 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "vctDataFunctionsFixedSizeVectorJSONTest.h"
+#include "vctDataFunctionsDynamicMatrixJSONTest.h"
 
-#include <cisstVector/vctFixedSizeVector.h>
-#include <cisstVector/vctDataFunctionsFixedSizeVectorJSON.h>
-#include <cisstVector/vctRandomFixedSizeVector.h>
+#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVector/vctDataFunctionsDynamicMatrixJSON.h>
+#include <cisstVector/vctRandomDynamicMatrix.h>
 
 #include <json/json.h>
 
-void vctDataFunctionsFixedSizeVectorJSONTest::TestVector(void)
+void vctDataFunctionsDynamicMatrixJSONTest::TestMatrix(void)
 {
-    typedef vctFixedSizeVector<double, 7> DataType;
+    typedef vctDynamicMatrix<double> DataType;
     DataType source, destination;
+    source.SetSize(7, 3);
     vctRandom(source, -1.0, 1.0);
     Json::Value jsonValue;
     cmnDataJSON<DataType>::SerializeText(source, jsonValue["object"]);
@@ -36,4 +36,4 @@ void vctDataFunctionsFixedSizeVectorJSONTest::TestVector(void)
     CPPUNIT_ASSERT(source.Equal(destination));
 }
 
-CPPUNIT_TEST_SUITE_REGISTRATION(vctDataFunctionsFixedSizeVectorJSONTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(vctDataFunctionsDynamicMatrixJSONTest);
