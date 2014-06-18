@@ -18,8 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "vctDataFunctionsDynamicMatrixJSONTest.h"
 
-#include <cisstVector/vctDynamicMatrix.h>
-#include <cisstVector/vctDataFunctionsDynamicMatrixJSON.h>
+#include <cisstVector/vctDynamicMatrixTypes.h>
 #include <cisstVector/vctRandomDynamicMatrix.h>
 
 #include <json/json.h>
