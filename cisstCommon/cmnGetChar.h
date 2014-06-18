@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Balazs Vagvolgyi
   Created on: 2009-03-26
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,26 +27,19 @@ http://www.cisst.org/cisst/license.txt.
 // Always the last cisst include
 #include <cisstCommon/cmnExport.h>
 
-
+// forward declaration for internal data
+#if (CISST_OS != CISST_WINDOWS)
+struct cmnGetCharEnvironmentInternals;
+#endif
 
 /*! Class used to setup a non blocking terminal used to get characters
   without any flushing, i.e. carriage return or new line */
 class CISST_EXPORT cmnGetCharEnvironment
 {
     /*! Internals that are OS-dependent */
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-    enum {INTERNALS_SIZE = 160}; // BALAZS: OS X 10.6 x86_64 requires 152 bytes
-#endif // CISST_LINUX || CISST_DARWIN ||CISST_SOLARIS || CISST_RTAI || CISST_QNX
-#if (CISST_OS == CISST_WINDOWS)
-    enum {INTERNALS_SIZE = 1};
-#endif // CISST_WINDOWS
-
-    char Internals[INTERNALS_SIZE];
-
-    /*! Return the size of the actual object used by the OS.  This is
-      used for testing only. */
-    static unsigned int SizeOfInternals(void);
-    friend class cmnGetCharEnvironmentTest;
+#if (CISST_OS != CISST_WINDOWS)
+    cmnGetCharEnvironmentInternals * Internals;
+#endif
 
     /*! Keep a flag status to make sure the environment is activated only once */
     bool Activated;
