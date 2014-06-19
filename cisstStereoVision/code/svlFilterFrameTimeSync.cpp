@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
- Author(s):  Marcin Balicki
- Created on: 2013
+  Author(s):  Marcin Balicki
+  Created on: 2013
 
- (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
- Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
  --- begin cisst license - do not edit ---
 
@@ -16,7 +15,7 @@
 
  --- end cisst license ---
 
- */
+*/
 
 #include <cisstStereoVision/svlFilterFrameTimeSync.h>
 
@@ -28,6 +27,7 @@ svlFilterFrameTimeSync::svlFilterFrameTimeSync(const std::string & name):
     svlFilterBase(),
     FileLoaded(false)
 {
+    SetName(name);
     CommonConstructor();
 }
 
@@ -61,7 +61,7 @@ int svlFilterFrameTimeSync::Process(svlProcInfo* procInfo, svlSample* syncInput,
     {
         if (FileLoaded) {
             if ( FrameTimeVec.size() == 0) {
-               CMN_LOG_CLASS_RUN_ERROR << "Process: frametime vec is empty" << std::endl;
+                CMN_LOG_CLASS_RUN_ERROR << "Process: frametime vec is empty" << std::endl;
             }
 
             double fTime = syncInput->GetTimestamp();
@@ -70,11 +70,11 @@ int svlFilterFrameTimeSync::Process(svlProcInfo* procInfo, svlSample* syncInput,
             //find the time in the
             while (FrameTimeIdx < FrameTimeVec.size()) {
                 if (FrameTimeVec[FrameTimeIdx] == fTime ) {
-                        found = true;
-                        syncOutput->SetTimestamp(SyncTimeVec[FrameTimeIdx]);
-                        FrameTimeIdx++;
-                        CMN_LOG_CLASS_RUN_DEBUG << "Process: updated timestamp # " << FrameTimeIdx << std::endl;
-                        break;
+                    found = true;
+                    syncOutput->SetTimestamp(SyncTimeVec[FrameTimeIdx]);
+                    FrameTimeIdx++;
+                    CMN_LOG_CLASS_RUN_DEBUG << "Process: updated timestamp # " << FrameTimeIdx << std::endl;
+                    break;
                 }
                 FrameTimeIdx++;
             }
