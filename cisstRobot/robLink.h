@@ -1,9 +1,8 @@
 /*
-
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -130,4 +129,4 @@ class CISST_EXPORT robLink {
 
 };
 
-#endif
+#endif // _robLink_h
