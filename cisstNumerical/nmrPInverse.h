@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -333,7 +331,7 @@ public:
     template <class _matrixOwnerTypeA,
               class _matrixOwnerTypePInverse,
               class _vectorOwnerTypeWorkspace>
-    nmrPInverseDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+    nmrPInverseDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & CMN_UNUSED(A),
                            vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> & pInverse,
                            vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
     {

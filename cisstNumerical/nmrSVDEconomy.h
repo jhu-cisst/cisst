@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Ankur Kapoor, Anton Deguet
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -120,7 +119,7 @@ public:
 protected:
     /*! Memory allocated for Workspace matrices if needed. */
     vctDynamicVector<CISSTNETLIB_DOUBLE> WorkspaceMemory;
-    
+
     /*! Memory allocated for U, Vt Matrices and Vector S if needed.
        This method allocates a single block of memory for these 3
        containers; m x m elements of U followed by n x n elements of
@@ -415,7 +414,7 @@ public:
     {
         this->Allocate(m, n, storageOrder);
     }
-    
+
     /*! Constructor where the user provides the input matrix to
       specify the size and storage order.  Memory allocation is
       performed for the output matrices and vectors as well as
@@ -433,7 +432,7 @@ public:
     {
         this->Allocate(A);
     }
-    
+
     /*! Constructor where the user provides the input matrix to
       specify the size and storage order.  Memory allocation is
       performed for the output matrices and vectors only.  This
@@ -442,7 +441,7 @@ public:
       routines.  Please note that since multiple routines can share
       the workspace, these routines must be called in a thread safe
       manner.
-      
+
       \param A input matrix
       \param inWorkspace workspace
 
@@ -454,7 +453,7 @@ public:
     {
         this->SetRefWorkspace(A, inWorkspace);
     }
-    
+
     /*! Constructor where the user provides the matrices U, Vt and
       vectors S as well as the workspace.  The data object now
       acts as a composite container to hold, pass and manipulate a
@@ -463,7 +462,7 @@ public:
       storage order.  Please note that since the workspace and the
       input are now created by the user, special attention must be
       given to thread safety issues.
-      
+
       \param inU, inS, inVt The output matrices and vector
       \param inWorkspace The workspace for LAPACK.
 
@@ -517,7 +516,7 @@ public:
     {
         this->Allocate(A.rows(), A.cols(), A.StorageOrder());
     }
-    
+
     /*! This method allocates the memory for the output matrices and
       vector and uses the memory provided by user for workspace.  The
       input matrix A is used to determine the size of the problem as
@@ -534,15 +533,15 @@ public:
                                 vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace)
     {
         this->SetDimension(A.rows(), A.cols(), A.StorageOrder());
-        
+
         // allocate output and set references
         this->AllocateOutputWorkspace(true, false);
-        
+
         // set reference on user provided workspace
         this->ThrowUnlessWorkspaceSizeIsCorrect(inWorkspace);
         this->WorkspaceReference.SetRef(inWorkspace);
     }
-    
+
     /*! This method allocates the memory for the output matrices and
       vector as well as the workspace.  This method is not meant to be
       a top-level user API, but is used by other overloaded Allocate
@@ -558,7 +557,7 @@ public:
         this->SetDimension(m, n, storageOrder);
         this->AllocateOutputWorkspace(true, true);
     }
-    
+
     /*! This method doesn't allocate any memory as it relies on user
       provided matrices and vectors for the output as well as the
       workspace.
@@ -585,20 +584,20 @@ public:
         this->AllocateOutputWorkspace(false, false);
         this->ThrowUnlessOutputSizeIsCorrect(inU, inS, inVt);
         this->ThrowUnlessWorkspaceSizeIsCorrect(inWorkspace);
-        
+
         this->SReference.SetRef(inS);
         this->UReference.SetRef(inU);
         this->VtReference.SetRef(inVt);
         this->WorkspaceReference.SetRef(inWorkspace);
     }
-    
-    
+
+
     /*! This method allocates the memory for the workspace.  The
       output memory is provided by the user.  The method computes the
       size of the problem based on the user provided output and
       verifies that the output components (inU, inS, and inVt) are
       consistent with respect to their size and storage order.
- 
+
       \param inU, inS, inVt The output matrices and vector.
     */
     template <typename _matrixOwnerTypeU,
@@ -610,14 +609,14 @@ public:
     {
         this->SetDimension(inU.rows(), inVt.rows(), inU.StorageOrder());
         this->ThrowUnlessOutputSizeIsCorrect(inU, inS, inVt);
-        
+
         this->SReference.SetRef(inS);
         this->UReference.SetRef(inU);
         this->VtReference.SetRef(inVt);
-        
+
         AllocateOutputWorkspace(false, true);
     }
-    
+
     /*! Const reference to the result vector S.  This method must be
       called after the data has been computed by the nmrSVDEconomy
       function. */
@@ -784,7 +783,7 @@ public:
   This function checks for valid input (size, storage order and
   compact) and calls the LAPACK function.  If the input doesn't match
   the data, an exception is thrown (\c std::runtime_error).
-  
+
   This function modifies the input matrix A and stores the results in
   the data.  Each component of the result can be obtained via the
   const methods nmrSVDEconomyDynamicData::U(), nmrSVDEconomyDynamicData::S()
@@ -821,18 +820,18 @@ inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, 
     if (! A.IsCompact()) {
         cmnThrow(std::runtime_error("nmrSVDEconomy: Requires a compact matrix"));
     }
-    
+
     /* Based on storage order, permute U and Vt as well as dimension */
     CISSTNETLIB_DOUBLE *UPtr, *VtPtr;
     CISSTNETLIB_INTEGER m_Lda, m_Ldu, m_Ldvt;
-    
+
     if (A.IsColMajor()) {
         m_Lda = (1 > dataFriend.M()) ? 1 : dataFriend.M();
         m_Ldu = dataFriend.M();
         m_Ldvt = dataFriend.N();
         UPtr = dataFriend.U().Pointer();
         VtPtr = dataFriend.Vt().Pointer();
-    } else if (A.IsRowMajor()) {
+    } else {
         m_Lda = (1 > dataFriend.N()) ? 1 : dataFriend.N();
         m_Ldu = dataFriend.N();
         m_Ldvt = dataFriend.M();
@@ -878,7 +877,7 @@ inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, 
   user (see nmrSVDEconomyDynamicData::SetRef).  While the data is
   being build, the consistency of the output and workspace is checked.
   Then, the nmrSVDEconomy(A, data) function can be used safely.
- 
+
   \param A is a reference to a dynamic matrix of size MxN
   \param U, S, Vt The output matrices and vector for SVD
   \param Workspace The workspace for LAPACK.
@@ -908,7 +907,7 @@ inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA,
   user (see nmrSVDEconomyDynamicData::SetRefOutput).  While the data
   is being build, the consistency of the output is checked.  Then, the
   nmrSVDEconomy(A, data) function can be used safely.
- 
+
   \param A is a reference to a dynamic matrix of size MxN
   \param U, S, Vt The output matrices and vector for SVD
 
