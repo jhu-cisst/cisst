@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _cmnCallbackStreambuf_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <iostream>
 
 /*!
   \brief A Streambuffer class that outputs via a callback function.
