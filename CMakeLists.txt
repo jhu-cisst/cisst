@@ -319,8 +319,8 @@ if (CISST_BUILD_TESTS)
       set (cisstCppUnit_PREFIX cisstCppUnitExternal)
       ExternalProject_Add (cisstCppUnit
                            PREFIX ${cisstCppUnit_PREFIX}
-                           URL http://downloads.sourceforge.net/cppunit/cppunit-1.12.1.tar.gz
-                           URL_MD5 bd30e9cf5523cdfc019b94f5e1d7fd19
+                           URL http://dev-www.libreoffice.org/src/cppunit-1.13.2.tar.gz
+                           URL_MD5 d1c6bdd5a76c66d2c38331e2d287bc01
                            CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                            PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -770,3 +770,8 @@ endif (UNIX)
 # License file
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/license.txt
                 ${CMAKE_CURRENT_BINARY_DIR}/license.txt COPYONLY)
+
+# Copy shared data if git submodule is checked-out properly
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/share/CMakeLists.txt")
+  add_subdirectory (share)
+endif ()

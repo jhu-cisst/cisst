@@ -18,6 +18,10 @@ project (cisstStereoVisionQt)
 # set directories for this project
 cisst_set_directories (cisstQt)
 
+# assumes automoc on Qt5
+if (CISST_HAS_QT5)
+  set (CMAKE_AUTOMOC ON)
+endif (CISST_HAS_QT5)
 
 set (HEADER_FILES
      svlQtObjectFactory.h
@@ -60,30 +64,40 @@ if (CISST_HAS_OPENGL)
        svlFilterImageWindowQtStereo.cpp
        svlFilterImageOpenGLQtWidget.cpp
        )
-  QT4_WRAP_CPP(QT_WRAPPED_CPP
-               winQt4OpenGL.h
-               winQt4OpenGLStereo.h
-               )
+  if (CISST_HAS_QT4)
+    qt4_wrap_cpp (QT_WRAPPED_CPP
+                  winQt4OpenGL.h
+                  winQt4OpenGLStereo.h
+                  )
+  endif (CISST_HAS_QT4)
 
 endif (CISST_HAS_OPENGL)
 
 # Include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-foreach (HEADER ${HEADER_FILES})
-  QT4_WRAP_CPP(QT_WRAPPED_CPP_TEMP
-               ../${HEADER}
-               )
-  set (QT_WRAPPED_CPP
-       ${QT_WRAPPED_CPP}
-       ${QT_WRAPPED_CPP_TEMP}
-       )
-endforeach (HEADER)
+if (CISST_HAS_QT4)
+  foreach (HEADER ${HEADER_FILES})
+    qt4_wrap_cpp (QT_WRAPPED_CPP_TEMP
+                  ../${HEADER}
+                  )
+    set (QT_WRAPPED_CPP
+         ${QT_WRAPPED_CPP}
+         ${QT_WRAPPED_CPP_TEMP}
+         )
+  endforeach (HEADER)
+endif (CISST_HAS_QT4)
 
 foreach (UI ${QT_UI_FILES})
-  QT4_WRAP_UI(QT_WRAPPED_UI
-              ${UI}
-              )
+  if (CISST_HAS_QT4)
+    qt4_wrap_ui (QT_WRAPPED_UI
+                 ${UI}
+                 )
+  else (CISST_HAS_QT4)
+    qt5_wrap_ui (QT_WRAPPED_UI
+                 ${UI}
+                 )
+  endif (CISST_HAS_QT4)
   set (QT_WRAPPED_UI
        ${QT_WRAPPED_UI}
        ${QT_WRAPPED_UI_TEMP}
@@ -114,4 +128,10 @@ cisst_add_library (LIBRARY cisstStereoVisionQt
                                            ${QT_WRAPPED_UI}
                    )
 
+# link against Qt libraries
 target_link_libraries (cisstStereoVisionQt ${QT_LIBRARIES})
+
+# for Qt5
+if (CISST_HAS_QT5)
+  qt5_use_modules (cisstStereoVisionQt Core Widgets OpenGL)
+endif (CISST_HAS_QT5)

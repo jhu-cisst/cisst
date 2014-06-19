@@ -25,8 +25,13 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   include_directories (${CMAKE_CURRENT_BINARY_DIR})
-  qt4_wrap_cpp (QT_WRAPPED_CPP
-                ExampleClass.h)
+
+  if (CISST_HAS_QT4)
+    qt4_wrap_cpp (QT_WRAPPED_CPP
+                  ExampleClass.h)
+  else (CISST_HAS_QT4)
+    set (CMAKE_AUTOMOC ON)
+  endif (CISST_HAS_QT4)
 
   add_executable (vctExQtWidgets
                   main.cpp
@@ -38,6 +43,11 @@ if (cisst_FOUND_AS_REQUIRED)
 
   # link against cisst libraries (and dependencies)
   cisst_target_link_libraries (vctExQtWidgets ${REQUIRED_CISST_LIBRARIES})
+
+  # for Qt 5
+  if (CISST_HAS_QT5)
+    qt5_use_modules (vctExQtWidgets Core Widgets OpenGL)
+  endif (CISST_HAS_QT5)
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

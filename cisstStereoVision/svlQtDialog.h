@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <QtGui>
+#include <QDialog>
 
 // Always include last!
 #include <cisstStereoVision/svlExportQt.h>

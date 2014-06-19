@@ -30,14 +30,16 @@ http://www.cisst.org/cisst/license.txt.
 vctQtWidgetDynamicMatrixDoubleRead::vctQtWidgetDynamicMatrixDoubleRead(void):
     QTableWidget()
 {
-    this->setRowCount(4);
-    this->setColumnCount(4);
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
 }
 
 bool vctQtWidgetDynamicMatrixDoubleRead::SetValue(const vctDynamicMatrix<double> & matrix)
@@ -46,11 +48,14 @@ bool vctQtWidgetDynamicMatrixDoubleRead::SetValue(const vctDynamicMatrix<double>
     QString itemValue;
     const size_t rows = matrix.rows();
     const size_t columns = matrix.cols();
+    this->setRowCount(rows);
+    this->setColumnCount(columns);
     for (size_t row = 0; row < rows; ++row) {
         for (size_t column = 0; column < columns; ++column) {
             tableItem = this->item(row, column);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
+                tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
                 tableItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
                 this->setItem(row, column, tableItem);
             }
@@ -64,14 +69,16 @@ bool vctQtWidgetDynamicMatrixDoubleRead::SetValue(const vctDynamicMatrix<double>
 vctQtWidgetDynamicMatrixDoubleWrite::vctQtWidgetDynamicMatrixDoubleWrite(void):
     QTableWidget()
 {
-    this->setRowCount(4);
-    this->setColumnCount(4);
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
 }
 
 bool vctQtWidgetDynamicMatrixDoubleWrite::SetValue(const vctDynamicMatrix<double> & matrix)
@@ -79,6 +86,8 @@ bool vctQtWidgetDynamicMatrixDoubleWrite::SetValue(const vctDynamicMatrix<double
     QDoubleSpinBox * spinBox;
     const size_t rows = matrix.rows();
     const size_t columns = matrix.cols();
+    this->setRowCount(rows);
+    this->setColumnCount(columns);
     for (size_t row = 0; row < rows; ++row) {
         for (size_t column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(row, column));
@@ -114,14 +123,16 @@ bool vctQtWidgetDynamicMatrixDoubleWrite::GetValue(vctDynamicMatrix<double> & pl
 vctQtWidgetDynamicMatrixIntRead::vctQtWidgetDynamicMatrixIntRead(void):
     QTableWidget()
 {
-    this->setRowCount(4);
-    this->setColumnCount(4);
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
 }
 
 bool vctQtWidgetDynamicMatrixIntRead::SetValue(const vctDynamicMatrix<int> & matrix)
@@ -130,11 +141,14 @@ bool vctQtWidgetDynamicMatrixIntRead::SetValue(const vctDynamicMatrix<int> & mat
     QString itemValue;
     const size_t rows = matrix.rows();
     const size_t columns = matrix.cols();
+    this->setRowCount(rows);
+    this->setColumnCount(columns);
     for (size_t row = 0; row < rows; ++row) {
         for (size_t column = 0; column < columns; ++column) {
             tableItem = this->item(row, column);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
+                tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
                 tableItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
                 this->setItem(row, column, tableItem);
             }
@@ -148,14 +162,15 @@ bool vctQtWidgetDynamicMatrixIntRead::SetValue(const vctDynamicMatrix<int> & mat
 vctQtWidgetDynamicMatrixIntWrite::vctQtWidgetDynamicMatrixIntWrite(void):
     QTableWidget()
 {
-    this->setRowCount(4);
-    this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
 }
 
 bool vctQtWidgetDynamicMatrixIntWrite::SetValue(const vctDynamicMatrix<int> & matrix)
@@ -163,6 +178,8 @@ bool vctQtWidgetDynamicMatrixIntWrite::SetValue(const vctDynamicMatrix<int> & ma
     QSpinBox * spinBox;
     const size_t rows = matrix.rows();
     const size_t columns = matrix.cols();
+    this->setRowCount(rows);
+    this->setColumnCount(columns);
     for (size_t row = 0; row < rows; ++row) {
         for (size_t column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(row, column));
@@ -197,14 +214,15 @@ bool vctQtWidgetDynamicMatrixIntWrite::GetValue(vctDynamicMatrix<int> & placeHol
 vctQtWidgetDynamicMatrixBoolRead::vctQtWidgetDynamicMatrixBoolRead(void):
     QTableWidget()
 {
-    this->setRowCount(4);
-    this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
 }
 
 bool vctQtWidgetDynamicMatrixBoolRead::SetValue(const vctDynamicMatrix<bool> & matrix)
@@ -213,11 +231,14 @@ bool vctQtWidgetDynamicMatrixBoolRead::SetValue(const vctDynamicMatrix<bool> & m
     QString itemValue;
     const size_t rows = matrix.rows();
     const size_t columns = matrix.cols();
+    this->setRowCount(rows);
+    this->setColumnCount(columns);
     for (size_t row = 0; row < rows; ++row) {
         for (size_t column = 0; column < columns; ++column) {
             tableItem = this->item(row, column);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
+                tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
                 tableItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
                 this->setItem(row, column, tableItem);
             }
@@ -231,14 +252,15 @@ bool vctQtWidgetDynamicMatrixBoolRead::SetValue(const vctDynamicMatrix<bool> & m
 vctQtWidgetDynamicMatrixBoolWrite::vctQtWidgetDynamicMatrixBoolWrite(void):
     QTableWidget()
 {
-    this->setRowCount(4);
-    this->setColumnCount(4);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->horizontalHeader()->sizeHint().height() + this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
 }
 
 bool vctQtWidgetDynamicMatrixBoolWrite::SetValue(const vctDynamicMatrix<bool> & matrix)
@@ -246,6 +268,8 @@ bool vctQtWidgetDynamicMatrixBoolWrite::SetValue(const vctDynamicMatrix<bool> & 
     QSpinBox * spinBox;
     const size_t rows = matrix.rows();
     const size_t columns = matrix.cols();
+    this->setRowCount(rows);
+    this->setColumnCount(columns);
     for (size_t row = 0; row < rows; ++row) {
         for (size_t column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(row, column));

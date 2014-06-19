@@ -21,8 +21,14 @@ cisst_set_directories (cisstQt)
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-qt4_wrap_cpp (QT_WRAPPED_CPP
-              ../prmQtWidgetEventButtonsComponent.h)
+
+if (CISST_HAS_QT4)
+  qt4_wrap_cpp (QT_WRAPPED_CPP
+                ../prmQtWidgetEventButtonsComponent.h)
+else (CISST_HAS_QT4)
+  # assumes Qt 5 Auto Moc
+  set (CMAKE_AUTOMOC ON)
+endif (CISST_HAS_QT4)
 
 cisst_add_library (LIBRARY cisstParameterTypesQt
                    LIBRARY_DIR cisstParameterTypes
@@ -39,4 +45,10 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 prmExportQt.h
                    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 
+# link against Qt libraries
 target_link_libraries (cisstParameterTypesQt ${QT_LIBRARIES})
+
+# for Qt5
+if (CISST_HAS_QT5)
+  qt5_use_modules (cisstParameterTypesQt Core Widgets OpenGL)
+endif (CISST_HAS_QT5)

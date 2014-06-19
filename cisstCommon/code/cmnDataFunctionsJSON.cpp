@@ -74,6 +74,15 @@ void cmnDataJSON<unsigned int>::DeSerializeText(DataType & data, const Json::Val
 }
 
 template <>
+void cmnDataJSON<unsigned long int>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = Json::UInt64(data);
+}
+template <>
+void cmnDataJSON<unsigned long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    data = jsonValue.asUInt64();
+}
+
+template <>
 void cmnDataJSON<unsigned long long int>::SerializeText(const DataType & data, Json::Value & jsonValue) {
     jsonValue = Json::UInt64(data);
 }

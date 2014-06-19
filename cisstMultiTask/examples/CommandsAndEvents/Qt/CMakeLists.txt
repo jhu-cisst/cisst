@@ -1,6 +1,6 @@
 #
 #
-# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -29,10 +29,17 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   # wrap all Qt files
-  qt4_wrap_ui (QT_CLIENT_WRAPPED_UI clientQtWidget.ui)
-  qt4_wrap_cpp (QT_CLIENT_WRAPPED_CPP clientQtComponent.h)
-  qt4_wrap_ui (QT_SERVER_WRAPPED_UI serverQtWidget.ui)
-  qt4_wrap_cpp (QT_SERVER_WRAPPED_CPP serverQtComponent.h)
+  if (CISST_HAS_QT4)
+    qt4_wrap_ui (QT_CLIENT_WRAPPED_UI clientQtWidget.ui)
+    qt4_wrap_cpp (QT_CLIENT_WRAPPED_CPP clientQtComponent.h)
+    qt4_wrap_ui (QT_SERVER_WRAPPED_UI serverQtWidget.ui)
+    qt4_wrap_cpp (QT_SERVER_WRAPPED_CPP serverQtComponent.h)
+  else (CISST_HAS_QT4)
+    # assumes Qt 5 Auto Moc
+    set (CMAKE_AUTOMOC ON)
+    qt5_wrap_ui (QT_CLIENT_WRAPPED_UI clientQtWidget.ui)
+    qt5_wrap_ui (QT_SERVER_WRAPPED_UI serverQtWidget.ui)
+  endif (CISST_HAS_QT4)
 
   # needed to include Qt generated header files
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -53,6 +60,11 @@ if (cisst_FOUND_AS_REQUIRED)
                  )
   set_property (TARGET mtsExCommandsAndEventsQtLocal PROPERTY FOLDER "cisstMultiTask/examples")
   cisst_target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
+
+  # for Qt5
+  if (CISST_HAS_QT5)
+    qt5_use_modules (mtsExCommandsAndEventsQtLocal Core Widgets OpenGL)
+  endif (CISST_HAS_QT5)
 
   # compile network version if ICE is available
   if (CISST_MTS_HAS_ICE)
@@ -76,6 +88,12 @@ if (cisst_FOUND_AS_REQUIRED)
                    )
     set_property (TARGET mtsExCommandsAndEventsQtClient PROPERTY FOLDER "cisstMultiTask/examples")
     cisst_target_link_libraries (mtsExCommandsAndEventsQtClient ${REQUIRED_CISST_LIBRARIES})
+
+    # for Qt5
+    if (CISST_HAS_QT5)
+      qt5_use_modules (mtsExCommandsAndEventsQtServer Core Widgets OpenGL)
+      qt5_use_modules (mtsExCommandsAndEventsQtClient Core Widgets OpenGL)
+    endif (CISST_HAS_QT5)
 
   else (CISST_MTS_HAS_ICE)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR}: example will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")

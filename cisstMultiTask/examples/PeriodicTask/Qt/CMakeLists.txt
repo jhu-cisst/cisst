@@ -1,6 +1,6 @@
 #
 #
-# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -22,9 +22,14 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
 # Set include/link directories
 cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
 
-qt4_wrap_cpp (QT_WRAPPED_CPP
-              displayQtComponent.h
-              displayQtWidget.h)
+if (CISST_HAS_QT4)
+  qt4_wrap_cpp (QT_WRAPPED_CPP
+                displayQtComponent.h
+                displayQtWidget.h)
+else (CISST_HAS_QT4)
+  # assumes Qt 5 Auto Moc
+  set (CMAKE_AUTOMOC ON)
+endif (CISST_HAS_QT4)
 
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
@@ -46,6 +51,12 @@ target_link_libraries (mtsExPeriodicTaskQt
                        mtsExPeriodicTaskComponents)
 cisst_target_link_libraries (mtsExPeriodicTaskGuiQt ${REQUIRED_CISST_LIBRARIES})
 cisst_target_link_libraries (mtsExPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})
+
+# for Qt5
+if (CISST_HAS_QT5)
+  qt5_use_modules (mtsExPeriodicTaskQt Core Widgets OpenGL)
+  qt5_use_modules (mtsExPeriodicTaskGuiQt Core Widgets OpenGL)
+endif (CISST_HAS_QT5)
 
 add_custom_target (mtsExPeriodicTaskQt_Scripts ALL
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different

@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -21,10 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 #include "vctDataFunctionsFixedSizeVectorJSONTest.h"
 
 #include <cisstVector/vctFixedSizeVector.h>
-#include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVectorJSON.h>
 #include <cisstVector/vctRandomFixedSizeVector.h>
-#include <cisstVector/vctRandomFixedSizeMatrix.h>
 
 #include <json/json.h>
 

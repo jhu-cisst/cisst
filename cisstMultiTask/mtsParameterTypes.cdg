@@ -10,6 +10,7 @@ inline-header {
 class {
     name mtsDescriptionComponent;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
     member {
         name ProcessName;
@@ -37,11 +38,6 @@ class {
     }
 }
 
-inline-header {
-typedef mtsGenericObjectProxy<mtsDescriptionComponent> mtsDescriptionComponentProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentProxy);
-}
-
 inline-code {
     mtsDescriptionComponent::mtsDescriptionComponent(const std::string & processName, const std::string & componentName):
         ProcessName(processName),
@@ -53,6 +49,7 @@ inline-code {
 class {
     name mtsDescriptionComponentClass;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
     member {
         name ClassName;
@@ -72,18 +69,15 @@ class {
 }
 
 inline-header {
-typedef mtsGenericObjectProxy<mtsDescriptionComponentClass> mtsDescriptionComponentClassProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentClassProxy);
-
 typedef std::vector<mtsDescriptionComponentClass> mtsDescriptionComponentClassVec;
 typedef mtsGenericObjectProxy<mtsDescriptionComponentClassVec> mtsDescriptionComponentClassVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentClassVecProxy);
 }
 
-
 class {
     name mtsDescriptionInterface;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
     member {
         name ProcessName;
@@ -107,15 +101,11 @@ class {
     }
 }
 
-inline-header {
-typedef mtsGenericObjectProxy<mtsDescriptionInterface> mtsDescriptionInterfaceProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionInterfaceProxy);
-}
-
 
 class {
     name mtsDescriptionIntefaceFullName;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
     member {
         name ProcessName;
@@ -138,6 +128,7 @@ class {
 class {
     name mtsDescriptionConnection;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
     member {
         name Client;
@@ -167,8 +158,6 @@ class {
 }
 
 inline-header {
-typedef mtsGenericObjectProxy<mtsDescriptionConnection> mtsDescriptionConnectionProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionProxy);
 typedef std::vector<mtsDescriptionConnection> mtsDescriptionConnectionVec;
 typedef mtsGenericObjectProxy<mtsDescriptionConnectionVec> mtsDescriptionConnectionVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionVecProxy);
@@ -178,6 +167,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionVecProxy);
 class {
     name mtsComponentStatusControl;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
     enum {
         name ComponentStatusCommand;
@@ -218,15 +208,11 @@ class {
     }
 }
 
-inline-header {
-typedef mtsGenericObjectProxy<mtsComponentStatusControl> mtsComponentStatusControlProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStatusControlProxy);
-}
-
 
 class {
     name mtsComponentStateChange;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
     member {
         name ProcessName;
@@ -245,15 +231,11 @@ class {
     }
 }
 
-inline-header {
-typedef mtsGenericObjectProxy<mtsComponentStateChange> mtsComponentStateChangeProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStateChangeProxy);
-}
-
 
 class {
     name mtsDescriptionLoadLibrary;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
     member {
         name ProcessName;
@@ -267,15 +249,11 @@ class {
     }
 }
 
-inline-header {
-typedef mtsGenericObjectProxy<mtsDescriptionLoadLibrary> mtsDescriptionLoadLibraryProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionLoadLibraryProxy);
-}
-
 
 class {
     name mtsEndUserInterfaceArg;
     attribute CISST_EXPORT;
+    mts-proxy declaration-only;
     ctor-all-members true;
     member {
         name OriginalInterface;
@@ -292,9 +270,4 @@ class {
         type size_t;
         visibility public;
     }
-}
-
-inline-header {
-typedef mtsGenericObjectProxy<mtsEndUserInterfaceArg> mtsEndUserInterfaceArgProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsEndUserInterfaceArgProxy);
 }

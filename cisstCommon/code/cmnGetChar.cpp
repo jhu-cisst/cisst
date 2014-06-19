@@ -45,13 +45,12 @@ struct cmnGetCharEnvironmentInternals {
 };
 
 
-#define INTERNALS(A) (reinterpret_cast<cmnGetCharEnvironmentInternals*>(Internals)->A)
-
-
 cmnGetCharEnvironment::cmnGetCharEnvironment(void):
     Activated(false)
 {
-    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
+#if (CISST_OS != CISST_WINDOWS)
+    Internals = new cmnGetCharEnvironmentInternals;
+#endif 
 }
 
 
@@ -60,11 +59,11 @@ cmnGetCharEnvironment::~cmnGetCharEnvironment(void)
     if (this->Activated) {
         this->DeActivate();
     }
-}
-
-
-unsigned int cmnGetCharEnvironment::SizeOfInternals(void) {
-    return sizeof(cmnGetCharEnvironmentInternals);
+#if (CISST_OS != CISST_WINDOWS)
+    if (Internals) {
+        delete Internals;
+    }
+#endif 
 }
 
 
@@ -72,12 +71,12 @@ unsigned int cmnGetCharEnvironment::SizeOfInternals(void) {
 bool cmnGetCharEnvironment::Activate(void)
 {
     if (!this->Activated) {
-        INTERNALS(Keyboard) = open("/dev/tty",O_RDWR);
-        ioctl(INTERNALS(Keyboard), TCGETS, &INTERNALS(OldSettings));
-        INTERNALS(NewSettings) = INTERNALS(OldSettings);
-        INTERNALS(NewSettings).c_lflag &= !ICANON;
-        INTERNALS(NewSettings).c_lflag &= !ECHO;
-        ioctl(INTERNALS(Keyboard), TCSETS, &INTERNALS(NewSettings));
+        Internals->Keyboard = open("/dev/tty",O_RDWR);
+        ioctl(Internals->Keyboard, TCGETS, &Internals->OldSettings);
+        Internals->NewSettings = Internals->OldSettings;
+        Internals->NewSettings.c_lflag &= !ICANON;
+        Internals->NewSettings.c_lflag &= !ECHO;
+        ioctl(Internals->Keyboard, TCSETS, &Internals->NewSettings);
         this->Activated = true;
         return true;
     }
@@ -89,12 +88,12 @@ bool cmnGetCharEnvironment::Activate(void)
 bool cmnGetCharEnvironment::Activate(void)
 {
     if (!this->Activated) {
-        INTERNALS(Keyboard) = open("/dev/tty",O_RDWR);
-        ioctl(INTERNALS(Keyboard), TIOCGETA, &INTERNALS(OldSettings));
-        INTERNALS(NewSettings) = INTERNALS(OldSettings);
-        INTERNALS(NewSettings).c_lflag &= !ICANON;
-        INTERNALS(NewSettings).c_lflag &= !ECHO;
-        ioctl(INTERNALS(Keyboard), TIOCSETA, &INTERNALS(NewSettings));
+        Internals->Keyboard = open("/dev/tty",O_RDWR);
+        ioctl(Internals->Keyboard, TIOCGETA, &Internals->OldSettings);
+        Internals->NewSettings = Internals->OldSettings;
+        Internals->NewSettings.c_lflag &= !ICANON;
+        Internals->NewSettings.c_lflag &= !ECHO;
+        ioctl(Internals->Keyboard, TIOCSETA, &Internals->NewSettings);
         this->Activated = true;
         return true;
     }
@@ -118,8 +117,8 @@ bool cmnGetCharEnvironment::Activate(void)
 bool cmnGetCharEnvironment::DeActivate(void)
 {
     if (this->Activated) {
-        ioctl(INTERNALS(Keyboard), TCSETS, &INTERNALS(OldSettings));
-        close(INTERNALS(Keyboard));
+        ioctl(Internals->Keyboard, TCSETS, &Internals->OldSettings);
+        close(Internals->Keyboard);
         this->Activated = false;
         return true;
     }
@@ -131,8 +130,8 @@ bool cmnGetCharEnvironment::DeActivate(void)
 bool cmnGetCharEnvironment::DeActivate(void)
 {
     if (this->Activated) {
-        ioctl(INTERNALS(Keyboard), TIOCSETA, &INTERNALS(OldSettings));
-        close(INTERNALS(Keyboard));
+        ioctl(Internals->Keyboard, TIOCSETA, &Internals->OldSettings);
+        close(Internals->Keyboard);
         this->Activated = false;
         return true;
     }

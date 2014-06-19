@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctQtWidgetDynamicVector.h>
 
-#include <QTableWidget>
 #include <QHeaderView>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
@@ -32,12 +31,17 @@ vctQtWidgetDynamicVectorReadBase::vctQtWidgetDynamicVectorReadBase(void):
     QTableWidget()
 {
     this->setRowCount(1);
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
+    this->setFixedHeight(this->verticalHeader()->sizeHint().height());
 }
 
 template <class _elementType>
@@ -72,7 +76,7 @@ bool vctQtWidgetDynamicVectorReadFloating<_elementType>::SetValue(const vctDynam
         tableItem = this->item(0, index);
         if (tableItem == 0) {
             tableItem = new QTableWidgetItem();
-            tableItem->setTextAlignment(Qt::AlignRight);
+            tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
             tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
             this->setItem(0, index, tableItem);
         }
@@ -107,7 +111,7 @@ bool vctQtWidgetDynamicVectorReadInteger<_elementType>::SetValue(const vctDynami
         tableItem = this->item(0, index);
         if (tableItem == 0) {
             tableItem = new QTableWidgetItem();
-            tableItem->setTextAlignment(Qt::AlignRight);
+            tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
             tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
             this->setItem(0, index, tableItem);
         }
@@ -129,12 +133,17 @@ vctQtWidgetDynamicVectorWriteBase::vctQtWidgetDynamicVectorWriteBase(const Displ
     DisplayMode(displayMode)
 {
     this->setRowCount(1);
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
+    this->setFixedHeight(this->verticalHeader()->sizeHint().height());
     connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(ItemChangedSlot(QTableWidgetItem *)));
 }
 
@@ -296,7 +305,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const vctDyna
             tableItem = this->item(0, index);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
-                tableItem->setTextAlignment(Qt::AlignRight);
+                tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
                 this->setItem(0, index, tableItem);
             }
             tableItem->setText(QString::number(vector.at(index), Format, Precision));
@@ -340,7 +349,6 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const vctDyna
     default:
         break;
     }
-
     this->blockSignals(previousBlockSignals);
     return true;
 }
@@ -434,7 +442,7 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const vctDynam
             tableItem = this->item(0, index);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
-                tableItem->setTextAlignment(Qt::AlignRight);
+                tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
                 this->setItem(0, index, tableItem);
             }
             tableItem->setText(QString::number(vector.at(index), Base));
@@ -477,7 +485,6 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const vctDynam
     default:
         break;
     }
-
     this->blockSignals(previousBlockSignals);
     return true;
 }
@@ -526,12 +533,17 @@ vctQtWidgetDynamicVectorBoolWrite::vctQtWidgetDynamicVectorBoolWrite(void):
     QTableWidget()
 {
     this->setRowCount(1);
+    this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
+#if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    int verticalHeight = this->verticalHeader()->sizeHint().height();
-    this->setFixedHeight(verticalHeight);
+#else
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
+    this->setFixedHeight(this->verticalHeader()->sizeHint().height());
 }
 
 void vctQtWidgetDynamicVectorBoolWrite::ValueChangedSlot(bool CMN_UNUSED(value))
@@ -557,7 +569,6 @@ bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const vctDynamicVector<bool> & 
         }
         checkBox->setChecked(vector.at(index));
     }
-
     this->blockSignals(previousBlockSignals);
     return true;
 }

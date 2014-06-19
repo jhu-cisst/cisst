@@ -22,6 +22,7 @@ public:
 
 class {
     name cmnDataGeneratorTestB;
+    mts-proxy false;
     base-class {
         type cmnDataGeneratorTestA;
         visibility public;
@@ -41,6 +42,7 @@ class {
 
 class {
     name cmnDataGeneratorTestC;
+    mts-proxy false;
 
     base-class {
         type cmnGenericObject;

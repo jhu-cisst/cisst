@@ -8,9 +8,8 @@
 // code follows the order of declaration in the data file.
 inline-header {
 #include <cisstVector/vctTransformationTypes.h>
-#include <cisstVector/vctDataFunctions.h>
-
-#include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstParameterTypes/prmTransformationBase.h>
+#include <cisstParameterTypes/prmTransformationManager.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -23,7 +22,7 @@ class {
 
     // 'attribute' is optional
     // - the generated code will be "class CISST_EXPORT prmPositionCartesianGet
-    // - this is useful mostly on Windows to create DLLs 
+    // - this is useful mostly on Windows to create DLLs
     attribute CISST_EXPORT;
 
     // 'base-class' is optional

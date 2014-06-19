@@ -1,0 +1,65 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+// This class is for the sensor output of a generic Inertial Measurement Unit (IMU),
+// which typically contains a 3-axis accelerometer, 3-axis gyroscope, and
+// 3-axis magnetometer. It may also contain a temperature sensor and a barometric
+// pressure sensor.
+
+inline-header {
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+
+// Always include last
+#include <cisstParameterTypes/prmExport.h>
+}
+
+class {
+    name prmIMUSensors;
+
+    attribute CISST_EXPORT;
+
+    base-class {
+        type mtsGenericObject;
+        is-data true;
+    }
+
+    member {
+        name Accel;
+        type vct3;
+        description Accelerometer, units m/s*s;
+    }
+
+    member {
+        name Gyro;
+        type vct3;
+        description Gyroscope, units rad/s;
+    }
+
+    member {
+        name Mag;
+        type vct3;
+        description Magnetometer, units G (Gauss);
+    }
+
+    member {
+        name Temp;
+        type double;
+        description Temperature, units deg-C;
+    }
+
+    member {
+        name Pressure;
+        type double;
+        description Barometric pressure, units kPa (kilo-Pascal);
+    }
+
+    inline-header {
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(prmIMUSensors);
+}

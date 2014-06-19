@@ -38,7 +38,7 @@ SET(DEPENDENCIES
 
 # all source files
 SET(SOURCE_FILES
-  # Public System API
+    # Public System API
     svlTypes.cpp
     svlFilterSourceVideoCaptureTypesExtra.cpp
     svlClassServices.cpp
@@ -79,11 +79,12 @@ SET(SOURCE_FILES
     svlDraw.cpp
     svlOverlayObjects.cpp
 
-  # Filter API
+    # Filter API
     svlFilterAddLatency.cpp
     svlFilterCapFramerate.cpp
     svlFilterComputationalStereo.cpp
     svlFilterDisparityMapToSurface.cpp
+    svlFilterFrameTimeSync.cpp
     svlFilterImageBorder.cpp
     svlFilterImageBlobDetector.cpp
     svlFilterImageBlobTracker.cpp
@@ -127,7 +128,7 @@ SET(SOURCE_FILES
     svlWindowManagerBase.cpp
     svlRequiredInterfaces.cpp
 
-  # Private System API
+    # Private System API
     svlImageCodecBMP.h             # private header
     svlImageCodecBMP.cpp
     svlImageCodecPPM.h             # private header
@@ -137,13 +138,13 @@ SET(SOURCE_FILES
     svlStereoDPMono.h              # private header
     svlStereoDPMono.cpp
 
-  # Trackers
+    # Trackers
     svlTrackerMSBruteForce.cpp
     )
 
 # all header files
 SET(HEADER_FILES
-  # Public System API
+    # Public System API
     svlForwardDeclarations.h
     svlDefinitions.h
     svlProcInfo.h
@@ -185,11 +186,12 @@ SET(HEADER_FILES
     svlDraw.h
     svlOverlayObjects.h
 
-  # Filter API
+    # Filter API
     svlFilterAddLatency.h
     svlFilterCapFramerate.h
     svlFilterComputationalStereo.h
     svlFilterDisparityMapToSurface.h
+    svlFilterFrameTimeSync.h
     svlFilterImageBorder.h
     svlFilterImageBlobDetector.h
     svlFilterImageBlobTracker.h
@@ -233,7 +235,7 @@ SET(HEADER_FILES
     svlWindowManagerBase.h
     svlRequiredInterfaces.h
 
-  # Trackers
+    # Trackers
     svlTrackerMSBruteForce.h
     )
 

@@ -4,7 +4,6 @@
 inline-header {
 #include <cisstVector/vctTransformationTypes.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctDataFunctions.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 
 // Always include last

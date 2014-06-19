@@ -333,6 +333,7 @@ void cdgFile::GenerateHeader(std::ostream & outputStream) const
                  << "#include <cisstCommon/cmnDataFunctionsJSON.h>" << std::endl
                  << std::endl;
 
+    this->Global->GenerateIncludes(outputStream);
     this->Global->GenerateHeader(outputStream);
 
     outputStream << std::endl << "#endif // _" << HeaderGuard << std::endl;

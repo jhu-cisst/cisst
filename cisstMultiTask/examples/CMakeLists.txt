@@ -10,6 +10,7 @@
 #
 # --- end cisst license ---
 
+add_subdirectory (tutorial)
 add_subdirectory (PeriodicTask)
 add_subdirectory (CommandsAndEvents)
 add_subdirectory (ConnectionTest)
