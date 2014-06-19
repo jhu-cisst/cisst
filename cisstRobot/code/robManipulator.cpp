@@ -346,9 +346,9 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
 
   // no link? then return the transformation of the base
   if( links.empty() ){
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": Manipulator has no link."
-			<< std::endl;
+    //CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+    //		<< ": Manipulator has no link."
+    //			<< std::endl;
     return Rtw0;
   }
 

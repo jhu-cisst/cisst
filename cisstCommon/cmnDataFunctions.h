@@ -177,7 +177,7 @@ public:
    int
    unsigned int
    long long int
-   unsignef long long int
+   unsigned long long int
    float
    double
 */
@@ -195,24 +195,6 @@ CMN_DATA_SPECIALIZE_ALL_BYTE_SWAP(long long int, lli);
 CMN_DATA_SPECIALIZE_ALL_BYTE_SWAP(unsigned long long int, ulli);
 CMN_DATA_SPECIALIZE_ALL_BYTE_SWAP(float, f);
 CMN_DATA_SPECIALIZE_ALL_BYTE_SWAP(double, d);
-
-
-// size_t specialization, using conditional compilation as size_t is
-// sometimes defined as a typedef
-/*
-CMN_DATA_COPY_USING_ASSIGN(size_t);
-CMN_DATA_SERIALIZE_DESCRIPTION(size_t, s_t)
-CMN_DATA_SERIALIZE_BINARY_BYTE_SIZE_USING_SIZEOF(size_t);
-CMN_DATA_SERIALIZE_BINARY_BUFFER_USING_CAST_TO_CHAR(size_t);
-CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(size_t);
-CMN_DATA_SERIALIZE_TEXT_USING_STREAM_OUT(size_t);
-CMN_DATA_DE_SERIALIZE_TEXT_USING_STREAM_IN(size_t);
-CMN_DATA_HUMAN_READABLE_USING_STREAM_OUT(size_t);
-CMN_DATA_SCALAR_DESCRIPTION(size_t, s_t);
-CMN_DATA_SCALAR_USING_STATIC_CAST(size_t);
-CMN_DATA_SCALAR_NUMBER_IS_ONE(size_t);
-CMN_DATA_SCALAR_NUMBER_IS_FIXED_TRUE(size_t);
-*/
 
 /*! Special case for size_t, binary de-serialization needs to handle
   differences between 32 and 64 bits. */
