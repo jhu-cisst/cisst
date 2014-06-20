@@ -30,7 +30,4 @@ http://www.cisst.org/cisst/license.txt.
 
 #cmakedefine01 CISST_MTS_64BIT
 
-// Using fault tolerant features
-#cmakedefine01 CISST_MTS_SUPPORT_FDD
-
 #endif // _mtsConfig_h
