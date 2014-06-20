@@ -37,9 +37,6 @@ if (CISST_HAS_SAFETY_PLUGINS)
     else (SF_FOUND)
         message(FATAL_ERROR "Safety Framework is not found.")
     endif (SF_FOUND)
-else (CISST_HAS_SAFETY_PLUGINS)
-    #cisst_unset_all_package_settings (cisstMultiTask SafetyFramework)
-    #cisst_unset_all_package_settings (cisstMultiTask JSONCPP)
 endif (CISST_HAS_SAFETY_PLUGINS)
 
 # try to find ZeroC Ice

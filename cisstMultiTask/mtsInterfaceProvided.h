@@ -728,7 +728,6 @@ protected:
 
 #ifndef SWIG
 
-#include <typeinfo>
 template <class _elementType>
 mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable & stateTable,
                                                            const _elementType & stateData, const std::string & commandName)
