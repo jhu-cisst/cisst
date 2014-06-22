@@ -50,10 +50,13 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
 {
     CISSTNETLIB_INTEGER res;
 
+    // make sure input is the correct size
+    dq.SetSize(NumVars+Slacks);
+
     // if we don't see an objective
     if (C.rows() == 0 || d.size() == 0) {
         dq.SetAll(0);
-        return NMR_MALFORMED;
+        return NMR_EMPTY;
     }
 
     // if the sizes don't match for C,d
