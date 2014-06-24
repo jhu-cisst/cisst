@@ -34,7 +34,7 @@
 /*! Initialize control optimizer
   \param n Number of variables
 */
-nmrConstraintOptimizer::nmrConstraintOptimizer(const int n)
+nmrConstraintOptimizer::nmrConstraintOptimizer(const size_t n)
 {
     Slacks = 0;
     NumVars = n;

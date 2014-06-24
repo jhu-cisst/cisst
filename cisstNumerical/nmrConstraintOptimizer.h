@@ -85,7 +85,7 @@ public:
     /*! Initialize control optimizer
       \param n Number of variables
     */
-    nmrConstraintOptimizer(const int n);
+    nmrConstraintOptimizer(const size_t n);
 
     //! Calls the solver and stores the result in dq.
     /*! Solve
