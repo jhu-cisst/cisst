@@ -239,12 +239,12 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     StateChangeSignal.Raise();
 
 #if CISST_HAS_SAFETY_PLUGINS
-    // If state transition involves the ACTIVE state, notify Safety Framework of the transition.
-    if (oldState == mtsComponentState::ACTIVE && newState != mtsComponentState::ACTIVE) {
-        GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_EXIT);
-    } else if (oldState != mtsComponentState::ACTIVE && newState == mtsComponentState::ACTIVE) {
-        GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_ENTRY);
-    }
+    //// If state transition involves the ACTIVE state, notify Safety Framework of the transition.
+    //if (oldState == mtsComponentState::ACTIVE && newState != mtsComponentState::ACTIVE) {
+        //GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_EXIT);
+    //} else if (oldState != mtsComponentState::ACTIVE && newState == mtsComponentState::ACTIVE) {
+        //GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_ENTRY);
+    //}
 #endif
 
     // Inform the manager component client of the state change

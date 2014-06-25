@@ -41,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_HAS_SAFETY_PLUGINS
 #include "cisstMonitor.h"
-#include "gcm.h"
+//#include "gcm.h"
 #endif
 
 // Always include last
@@ -178,14 +178,14 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     //SF::State::StateType GetFaultState(void) const;
 
     /*! Instance of Generic Component Model */
-    SF::GCM * GCMInstance;
+    //SF::GCM * GCMInstance;
 
     /*! Replace default state event handler with user-defined event handler.
         See SF::StateMachine::SetStateEventHandler() for more details. */
     //void SetStateEventHandler(SF::StateEventHandler * instance);
 
     /*! Update GCM to synchronize its state machines with this component */
-    bool UpdateGCM(void);
+    //bool UpdateGCM(void);
 #endif
 
     /*! Provided interface for component management. */
