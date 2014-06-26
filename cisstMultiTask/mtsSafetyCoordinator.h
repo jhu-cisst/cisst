@@ -82,9 +82,11 @@ protected:
                           const std::string & targetProcessName,
                           const std::string & targetComponentName);
 
+
 public:
     //! Constructor
-    mtsSafetyCoordinator(void);
+    mtsSafetyCoordinator(void); // DO NOT USE THIS
+    mtsSafetyCoordinator(const std::string & name);
     //! Destructor
     ~mtsSafetyCoordinator();
 
@@ -133,6 +135,9 @@ public:
     //-------------------------------------------------- 
     //  Misc.
     //-------------------------------------------------- 
+    //! Endpoint to access casros network
+    SF::cisstAccessor * GetCasrosAccessor(void) const { return casrosAccessor; }
+
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);

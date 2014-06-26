@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2012-07-14
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -37,14 +37,29 @@ using namespace SF::Dict::Json;
 
 CMN_IMPLEMENT_SERVICES(mtsSafetyCoordinator);
 
-mtsSafetyCoordinator::mtsSafetyCoordinator() : SF::Coordinator(), 
-    // TODO: if accessor is updated not to depend on cisst (for threading stuffs),
-    // accessor should be moved to its base class, i.e., SF::Accessor
-    casrosAccessor(new SF::cisstAccessor(true, false, true, true,
-                       new mtsSubscriberCallback("Safety Coordinator", 
-                                                 SF::Dict::TopicNames::CONTROL),
-                       new mtsSubscriberCallback("Safety Coordinator",
-                                                 SF::Dict::TopicNames::DATA)))
+mtsSafetyCoordinator::mtsSafetyCoordinator(void)
+    : SF::Coordinator("n/a"), 
+      casrosAccessor(new SF::cisstAccessor(false, // enable publisher for CONTROL
+                                           false, // enable publisher for DATA
+                                           false, // enable subscriber for CONTROL
+                                           false, // enable subscriber for DATA
+                         0, //new mtsSubscriberCallback("Safety Coordinator", 
+                            //                       SF::Dict::TopicNames::CONTROL),
+                         0)) //new mtsSubscriberCallback("Safety Coordinator",
+                            //                       SF::Dict::TopicNames::DATA)))
+{
+}
+
+mtsSafetyCoordinator::mtsSafetyCoordinator(const std::string & name) 
+    : SF::Coordinator(name),
+      casrosAccessor(new SF::cisstAccessor(true,  // enable publisher for CONTROL
+                                           true,  // enable publisher for DATA
+                                           true,  // enable subscriber for CONTROL
+                                           false, // enable subscriber for DATA
+                         new mtsSubscriberCallback("Safety Coordinator", 
+                                                   SF::Dict::TopicNames::CONTROL),
+                         0))//new mtsSubscriberCallback("Safety Coordinator",
+                            //                       SF::Dict::TopicNames::DATA)))
 {
 }
 

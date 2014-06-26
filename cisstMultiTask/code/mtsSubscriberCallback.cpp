@@ -19,6 +19,9 @@
 */
 
 #include <cisstMultiTask/mtsSubscriberCallback.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
+
+#include "json.h"
 
 using namespace SF;
 
@@ -62,9 +65,40 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
         break;
     }
     
-    std::cout << "Callback CONTROL [ " << OwnerName << ", " << TopicName 
-              << " | " << categoryName << " ]: " << json << std::endl;
+    // Parse json to figure out what to do
+    SF::JSON jsonParser;
+    if (!jsonParser.Read(json.c_str())) {
+        SFLOG_ERROR << "Failed to parse JSON (maybe corrupted or invalid format): \"" << json << std::endl;
+        return;
+    }
 
+    const JSON::JSONVALUE & _json = jsonParser.GetRoot();
+
+    // Get target safety coordinator (assigned as process name in cisst)
+    //const std::string targetProcessName = jsonParser.GetSafeValueString(_json, "target");
+    const std::string targetProcessName = 
+        jsonParser.GetSafeValueString(_json["target"], "safety_coordinator");
+    const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
+    if (targetProcessName.compare("*") != 0 && (targetProcessName != thisProcessName)) {
+        std::cout << "targetProcessName: " << targetProcessName
+                  << "thisProcessName  : " << thisProcessName
+                  << "CONTROL [ " << OwnerName << ", " << TopicName 
+                  << " | " << categoryName << " ]: " << _json << std::endl;
+        return;
+    }
+
+    // Reply back with data requested
+    mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
+    SFASSERT(sc);
+    SF::Publisher * publisher = sc->GetCasrosAccessor()->GetPublisher(SF::Topic::DATA);
+    SFASSERT(publisher);
+
+    // Collect state data to publish
+    if (!publisher->PublishData(SF::Topic::Data::READ_RES, 
+                                sc->GetStateSnapshot()))
+    {
+        SFLOG_ERROR << "Failed to publish DATA | READ_RES" << std::endl;
+    }
 }
 
 void mtsSubscriberCallback::CallbackData(SF::Topic::Data::CategoryType category,

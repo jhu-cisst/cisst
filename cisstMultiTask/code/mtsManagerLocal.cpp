@@ -261,7 +261,7 @@ void mtsManagerLocal::Initialize(void)
     // Create safety coordinator for this process
 #if CISST_HAS_SAFETY_PLUGINS
     if (InstallCoordinator)
-        SafetyCoordinator = new mtsSafetyCoordinator;
+        SafetyCoordinator = new mtsSafetyCoordinator(ProcessName);
     else
         SafetyCoordinator = 0;
 #endif
