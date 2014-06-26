@@ -269,12 +269,15 @@ void mtsManagerLocal::Initialize(void)
 
 void mtsManagerLocal::InitializeLocal(void)
 {
-    Initialize();
+    //Initialize();
 
     // In standalone mode, process name is set as ProcessNameOfLCMDefault by
     // default since there is only one instance of local task manager.
     ProcessName = ProcessNameOfLCMDefault;
     ThisProcessName = ProcessName;
+
+    // MJ: SafetyCoordinator requires process name to be set
+    Initialize();
 
     // In standalone mode, the global component manager is an instance of
     // mtsManagerGlobal that runs in the same process in which this local

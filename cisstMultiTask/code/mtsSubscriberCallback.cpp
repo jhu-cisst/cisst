@@ -80,10 +80,13 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
         jsonParser.GetSafeValueString(_json["target"], "safety_coordinator");
     const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
     if (targetProcessName.compare("*") != 0 && (targetProcessName != thisProcessName)) {
-        std::cout << "targetProcessName: " << targetProcessName
-                  << "thisProcessName  : " << thisProcessName
-                  << "CONTROL [ " << OwnerName << ", " << TopicName 
-                  << " | " << categoryName << " ]: " << _json << std::endl;
+        SFLOG_INFO << "targetProcessName: " << targetProcessName
+                   << ", thisProcessName: " << thisProcessName
+                   << ", owner: " << OwnerName
+                   << ", topic: " << TopicName 
+                   << ", category: " << categoryName
+                   << ", json: " << _json
+                   << std::endl;
         return;
     }
 
@@ -94,8 +97,10 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
     SFASSERT(publisher);
 
     // Collect state data to publish
+    const std::string targetComponentName = 
+        jsonParser.GetSafeValueString(_json["target"], "component");
     if (!publisher->PublishData(SF::Topic::Data::READ_RES, 
-                                sc->GetStateSnapshot()))
+                                sc->GetStateSnapshot(targetComponentName)))
     {
         SFLOG_ERROR << "Failed to publish DATA | READ_RES" << std::endl;
     }
