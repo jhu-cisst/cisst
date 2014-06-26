@@ -137,7 +137,8 @@ bool mtsSafetyCoordinator::AddMonitorTarget(SF::cisstMonitor * cisstMonitorTarge
     }
 
     CMN_LOG_CLASS_RUN_DEBUG << "Successfully added monitoring target using monitoring target instance" << std::endl;
-    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+    // MJTODO: resolve this later (oeprator << is ambiguous)
+    //CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
 
     return true;
 }
@@ -186,7 +187,8 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSON(const std::string & jsonStri
 
     if (ret) {
         CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetFromJSON: Successfully added monitoring target(s) using json string: " << jsonString << std::endl;
-        CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+        // MJTODO: resolve this later (oeprator << is ambiguous)
+        //CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
     } else {
         CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetFromJSON: Failed to add monitoring target(s) using json string: " << jsonString << std::endl;
     }
@@ -208,7 +210,8 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSONFile(const std::string & json
 
     if (ret) {
         CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetFromJSONFile: Successfully added monitoring target(s) from JSON file: " << jsonFileName << std::endl;
-        CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+        // MJTODO: resolve this later (oeprator << is ambiguous)
+        //CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
     } else {
         CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTargetFromJSONFile: Failed to add monitoring target(s) from JSON file: " << jsonFileName << std::endl;
     }
@@ -447,7 +450,8 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
     }
 
     CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
-    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+    // MJTODO: resolve this later (oeprator << is ambiguous)
+    //CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
 
     return true;
 }
@@ -470,7 +474,8 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFile(const std::string & jsonFileNam
     }
 
     CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
-    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+    // MJTODO: resolve this later (oeprator << is ambiguous)
+    //CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
 
     return ret;
 }
@@ -493,7 +498,8 @@ bool mtsSafetyCoordinator::AddFilterFromJSON(const std::string & jsonString)
     }
 
     CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Successfully added filter(s) using json string: " << jsonString << std::endl;
-    CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
+    // MJTODO: resolve this later (oeprator << is ambiguous)
+    //CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
 
     return true;
 }

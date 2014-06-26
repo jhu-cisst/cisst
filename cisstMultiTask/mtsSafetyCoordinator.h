@@ -115,8 +115,8 @@ public:
                                           const std::string & targetComponentName);
 
     //! Deploy all monitors and FDDs that are installed so far.
-    /*! MJ: Right now, this method should be called user's main.cpp but could be moved
-        into either cisst or SF such that users don't need to directly call this method.
+    /*! MJ: Right now, this method should be called main.cpp but could be moved
+        into either cisst or SF such that users don't need to explicitly call this method.
     */
     bool DeployMonitorsAndFDDs(void);
 

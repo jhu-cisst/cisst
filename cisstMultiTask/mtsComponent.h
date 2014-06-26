@@ -39,11 +39,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 
-#if CISST_HAS_SAFETY_PLUGINS
-#include "cisstMonitor.h"
-//#include "gcm.h"
-#endif
-
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
