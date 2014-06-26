@@ -74,6 +74,18 @@ void mtsComponent::Initialize(void)
     InterfaceProvidedToManager = 0;
 
     ReplayMode = false;
+
+#if CISST_HAS_SAFETY_PLUGINS
+    // Add this component to Safety Coordinator
+    mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
+    CMN_ASSERT(sc);
+    ComponentId = sc->AddComponent(Name);
+    if (ComponentId == 0) {
+        std::stringstream ss;
+        ss << "class mtsComponent: Failed to add component \"" << Name << "\" to Safety Coordinator";
+        cmnThrow(ss.str());
+    }
+#endif
 }
 
 

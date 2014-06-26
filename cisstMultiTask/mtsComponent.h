@@ -167,6 +167,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsComponentState State;
 
 #if CISST_HAS_SAFETY_PLUGINS
+    unsigned int ComponentId; // defined by Safety Coordinator
+
     /*! State machine of Safety Framework.  Instantiated in the constructor of mtsTask. */
     /*! Returns current state of Safety Framework state machine */
     // TODO: Add notion of Framework vs. Application

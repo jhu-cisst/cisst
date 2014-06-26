@@ -1178,7 +1178,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
 #if CISST_HAS_SAFETY_PLUGINS
     // Install internal framework filters
     if (!InstallFrameworkFilters(componentName))
-        CMN_ASSERT(false);
+        CMN_LOG_CLASS_INIT_ERROR << "AddComponent: Failed to install framework filters to component \"" << componentName << "\"" << std::endl;
 #endif
 
     return true;

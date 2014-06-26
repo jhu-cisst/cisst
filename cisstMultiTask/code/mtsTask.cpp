@@ -531,14 +531,14 @@ void mtsTask::SetInitializationDelay(double delay)
 }
 
 #if CISST_HAS_SAFETY_PLUGINS
-void mtsTask::HandlerException(const std::string & name, const std::string & what)
+void mtsTask::HandlerException(const std::string & CMN_UNUSED(name), const std::string & CMN_UNUSED(what))
 {
     ++StatusException.Count;
 
     StatusException.Timestamp = osaGetTime();
 }
 
-void mtsTask::HandlerOverrun(const std::string & name, const std::string & what)
+void mtsTask::HandlerOverrun(const std::string & CMN_UNUSED(name), const std::string & CMN_UNUSED(what))
 {
     ++StatusOverrun.Count;
 
