@@ -33,7 +33,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#if !CISST_HAS_SAFETY_PLUGINS
 #include <cisstMultiTask/mtsStateTable.h>
+#endif
 #include <cisstMultiTask/mtsMailBox.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
 #include <cisstMultiTask/mtsCommandRead.h>
@@ -98,9 +100,10 @@ protected:
     /*! State table to monitor run-time states of components for fault detection and
         diagnosis purpose */
 #if CISST_HAS_SAFETY_PLUGINS
-    mtsStateTable StateTableMonitor;
+    //mtsStateTable StateTableMonitor;
 
     /*! Function to generate monitor event and propagate it to the Safety Supervisor */
+    // TODO: remove this -- replace this framework-specific event with CASROS broadcasting
     mtsFunctionWrite GenerateMonitorEvent;
 
     /*! Containers to support framework filters (exception filter) */
@@ -278,7 +281,7 @@ public:
         return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if 0//CISST_HAS_SAFETY_PLUGINS
     /*! Return the name of monitoring state table. */
     inline const std::string GetMonitoringStateTableName(void) const {
         return StateTableMonitor.GetName();

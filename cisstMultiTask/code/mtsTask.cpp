@@ -51,7 +51,7 @@ void mtsTask::DoRunInternal(void)
 #endif
         this->Run();
 #if CISST_HAS_SAFETY_PLUGINS
-        StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
+        this->StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
 #endif
     }
     catch (const std::exception &excp) {
@@ -229,23 +229,23 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     if (!(ExecIn && ExecIn->GetConnectedInterface()))
         ChangeStateEvent(mtsComponentState(newState));
 
-#if CISST_HAS_SAFETY_PLUGINS
-    mtsComponentState oldState = this->State;
-#endif
+//#if CISST_HAS_SAFETY_PLUGINS
+    //mtsComponentState oldState = this->State;
+//#endif
 
     StateChange.Lock();
     this->State = newState;
     StateChange.Unlock();
     StateChangeSignal.Raise();
 
-#if CISST_HAS_SAFETY_PLUGINS
+//#if CISST_HAS_SAFETY_PLUGINS
     //// If state transition involves the ACTIVE state, notify Safety Framework of the transition.
     //if (oldState == mtsComponentState::ACTIVE && newState != mtsComponentState::ACTIVE) {
         //GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_EXIT);
     //} else if (oldState != mtsComponentState::ACTIVE && newState == mtsComponentState::ACTIVE) {
         //GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_ENTRY);
     //}
-#endif
+//#endif
 
     // Inform the manager component client of the state change
     if (InterfaceProvidedToManager) {
@@ -306,9 +306,9 @@ mtsTask::mtsTask(const std::string & name,
     StateChange(),
     StateChangeSignal(),
     StateTable(sizeStateTable, "Default"),
-#if CISST_HAS_SAFETY_PLUGINS
-    StateTableMonitor(sizeStateTable, mtsStateTable::NameOfStateTableForMonitoring),
-#endif
+//#if CISST_HAS_SAFETY_PLUGINS
+    //StateTableMonitor(sizeStateTable, mtsStateTable::NameOfStateTableForMonitoring),
+//#endif
     OverranPeriod(false),
     ThreadStartData(0),
     ReturnValue(0),
@@ -316,7 +316,8 @@ mtsTask::mtsTask(const std::string & name,
 {
     this->AddStateTable(&this->StateTable);
 #if CISST_HAS_SAFETY_PLUGINS
-    this->AddStateTable(&this->StateTableMonitor);
+    // This is now done in the base class (mtsComponent)
+    //this->AddStateTable(&this->StateTableMonitor);
 
     mtsInterfaceProvided * provided = GetInterfaceProvided(
         mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));
