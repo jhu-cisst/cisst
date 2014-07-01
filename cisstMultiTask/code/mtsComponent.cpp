@@ -97,6 +97,12 @@ void mtsComponent::Initialize(void)
 
     // Add monitoring state table
     AddStateTable(&StateTableMonitor);
+
+    // Set owner component name
+    StateTableMonitor.SetOwnerComponentName(this->Name);
+    if (this->Name.size() == 0) {
+        CMN_ASSERT(false);
+    }
 #endif
 }
 

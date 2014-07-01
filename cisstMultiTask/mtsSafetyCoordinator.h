@@ -42,24 +42,12 @@ public:
     */
     typedef std::vector<mtsMonitorComponent*> MonitorsType;
 
-    //typedef std::list<SF::FilterBase*> FiltersType;
-
-    //! Typedef for filters deployed in the same process (grouped by component name)
-    /*! Key: component name, Value: list of filters 
-     */
-    //typedef std::map<std::string, FiltersType*> FilterSetType;
-
-    //! Typedef for filters deployed in the process
-    typedef std::map<SF::FilterBase::FilterIDType, SF::FilterBase*> FiltersType;
+    typedef SF::Coordinator BaseType;
 
 protected:
     //! Monitor instances
     MonitorsType Monitors;
     
-    //! Filter instances.  Grouped by the name of component to which the filter is deployed
-    //FilterSetType FilterSet;
-    FiltersType Filters;
-
     //! Endpoint to access casros network
     SF::cisstAccessor * casrosAccessor;
 

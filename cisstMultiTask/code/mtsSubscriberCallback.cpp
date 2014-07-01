@@ -90,17 +90,29 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
         return;
     }
 
-    // Reply back with data requested
+    // Get request
+    const std::string targetComponentName = 
+        jsonParser.GetSafeValueString(_json["target"], "component");
+    const std::string request =
+        jsonParser.GetSafeValueString(_json, "request");
+
     mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
     SFASSERT(sc);
+
+    std::string replyData;
+    if (request.compare("filter_list") == 0) {
+        replyData = sc->GetFilterList(targetComponentName); } else if (request.compare("state_list") == 0) {
+        replyData = sc->GetStateSnapshot(targetComponentName);
+    } else {
+        SFLOG_ERROR << "Invalid request command: " << request << std::endl;
+        return;
+    }
+
+    // Reply back with data requested
     SF::Publisher * publisher = sc->GetCasrosAccessor()->GetPublisher(SF::Topic::DATA);
     SFASSERT(publisher);
 
-    // Collect state data to publish
-    const std::string targetComponentName = 
-        jsonParser.GetSafeValueString(_json["target"], "component");
-    if (!publisher->PublishData(SF::Topic::Data::READ_RES, 
-                                sc->GetStateSnapshot(targetComponentName)))
+    if (!publisher->PublishData(SF::Topic::Data::READ_RES, replyData))
     {
         SFLOG_ERROR << "Failed to publish DATA | READ_RES" << std::endl;
     }

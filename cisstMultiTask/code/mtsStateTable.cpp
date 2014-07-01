@@ -337,28 +337,20 @@ void mtsStateTable::Advance(void) {
     }
 
 #if CISST_HAS_SAFETY_PLUGINS
-    if (!Filters.empty()) {
-        FiltersType::const_iterator it = Filters.begin();
-        const FiltersType::const_iterator itEnd = Filters.end();
-        for (; it != itEnd; ++it)
-            (*it)->RunFilter();
+    // Execute filtering algorithms only for the monitoring state table.  Note that there
+    // are two instances of state tables when casros is enabled: default, monitoring.
+    // Casros plug-ins only use the monitoring state table.
+    if (this->OwnerComponentName.size()) {
+        mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
+        mtsSafetyCoordinator::FiltersType * filters = sc->GetFilters(this->OwnerComponentName);
+        // if the component doesn't have any filter, GetFilters() can return null.
+        if (filters && filters->size()) {
+            mtsSafetyCoordinator::FiltersType::const_iterator it = filters->begin();
+            const mtsSafetyCoordinator::FiltersType::const_iterator itEnd = filters->end();
+            for (; it != itEnd; ++it)
+                it->second->RunFilter();
+        }
     }
-#if 0
-#define PROCESS_FILTERS( _name )\
-    if (!Filters._name.empty()) {\
-        FiltersType::const_iterator it = Filters._name.begin();\
-        const FiltersType::const_iterator itEnd = Filters._name.end();\
-        for (; it != itEnd; ++it)\
-            (*it)->RunFilter();\
-    }
-    // Process filters sequentially
-    PROCESS_FILTERS(Features)
-    PROCESS_FILTERS(FeatureVectors);
-    PROCESS_FILTERS(Symptoms);
-    PROCESS_FILTERS(SymptomVectors);
-    PROCESS_FILTERS(FaultDetectors);
-#undef PROCESS_FILTERS
-#endif
 #endif
 }
 
@@ -391,33 +383,22 @@ void mtsStateTable::Cleanup(void) {
     }
 
 #if CISST_HAS_SAFETY_PLUGINS
-    if (!Filters.empty()) {
-        FiltersType::const_iterator it = Filters.begin();
-        const FiltersType::const_iterator itEnd = Filters.end();
-        for (; it != itEnd; ++it) {
-            (*it)->CleanupFilter();
-            delete *it;
+    // Execute filtering algorithms only for the monitoring state table.  Note that there
+    // are two instances of state tables when casros is enabled: default, monitoring.
+    // Casros plug-ins only use the monitoring state table.
+    if (this->OwnerComponentName.size()) {
+        mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
+        mtsSafetyCoordinator::FiltersType * filters = sc->GetFilters(this->OwnerComponentName);
+        // if the component doesn't have any filter, GetFilters() can return null.
+        if (filters && filters->size()) {
+            mtsSafetyCoordinator::FiltersType::const_iterator it = filters->begin();
+            const mtsSafetyCoordinator::FiltersType::const_iterator itEnd = filters->end();
+            for (; it != itEnd; ++it) {
+                it->second->CleanupFilter();
+                delete it->second;
+            }
         }
     }
-#if 0
-#define CLEANUP_FILTERS( _name )\
-    if (!Filters._name.empty()) {\
-        FiltersType::const_iterator it = Filters._name.begin();\
-        const FiltersType::const_iterator itEnd = Filters._name.end();\
-        for (; it != itEnd; ++it) {\
-            (*it)->CleanupFilter();\
-            delete *it;\
-        }\
-    }\
-    Filters._name.clear();
-    // Process filters sequentially
-    CLEANUP_FILTERS(Features);
-    CLEANUP_FILTERS(FeatureVectors);
-    CLEANUP_FILTERS(Symptoms);
-    CLEANUP_FILTERS(SymptomVectors);
-    CLEANUP_FILTERS(FaultDetectors);
-#undef CLEANUP_FILTERS
-#endif
 #endif
 }
 
@@ -631,76 +612,6 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
 }
 
 #if CISST_HAS_SAFETY_PLUGINS
-bool mtsStateTable::RegisterFilter(SF::FilterBase * filter)
-{
-    CMN_ASSERT(filter);
-
-    // initialize filter instance before deployment.  filter is deployed only when
-    // initialization is successful.
-    if (!filter->InitFilter()) {
-        CMN_LOG_CLASS_RUN_ERROR << "RegisterFilter: failed to initialize filter: " << *filter << std::endl;
-        return false;
-    }
-
-    Filters.push_back(filter);
-#if 0
-    switch (filter->GetFilterCategory()) {
-        case SF::FilterBase::FEATURE:
-            Filters.Features.push_back(filter);
-            break;
-        case SF::FilterBase::FEATURE_VECTOR:
-            Filters.FeatureVectors.push_back(filter);
-            break;
-        case SF::FilterBase::SYMPTOM:
-            Filters.Symptoms.push_back(filter);
-            break;
-        case SF::FilterBase::SYMPTOM_VECTOR:
-            Filters.SymptomVectors.push_back(filter);
-            break;
-        case SF::FilterBase::FAULT_DETECTOR:
-            Filters.FaultDetectors.push_back(filter);
-            break;
-        case SF::FilterBase::INVALID:
-        default:
-            CMN_LOG_CLASS_RUN_ERROR << "RegisterFilter: invalid filter type of filter \"" 
-                << filter->GetFilterName() << "\": " << filter->GetFilterCategory() << std::endl;
-            return false;
-    }
-#endif
-
-    CMN_LOG_CLASS_RUN_DEBUG << "RegisterFilter: added new filter: " << filter->GetFilterName() << std::endl;
-
-    return true;
-}
-
-void mtsStateTable::PrintFilters(std::ostream & outputStream) const
-{
-    outputStream << "Filters -------------------------" << std::endl;
-    if (!Filters.empty()) {
-        FiltersType::const_iterator it = Filters.begin();
-        const FiltersType::const_iterator itEnd = Filters.end();
-        for (; it != itEnd; ++it)
-            outputStream << *(*it) << std::endl;
-    }
-#if 0
-#define PRINT_FILTERS( _name )\
-    outputStream << #_name << " -------------------------" << std::endl;\
-    if (!Filters._name.empty()) {\
-        FiltersType::const_iterator it = Filters._name.begin();\
-        const FiltersType::const_iterator itEnd = Filters._name.end();\
-        for (; it != itEnd; ++it)\
-            outputStream << *(*it) << std::endl;\
-    }
-    // Process filters sequentially
-    PRINT_FILTERS(Features);
-    PRINT_FILTERS(FeatureVectors);
-    PRINT_FILTERS(Symptoms);
-    PRINT_FILTERS(SymptomVectors);
-    PRINT_FILTERS(FaultDetectors);
-#endif
-}
-
-
 double mtsStateTable::GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const
 {
     mtsDouble value;

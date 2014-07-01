@@ -510,35 +510,20 @@ public:
     void GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & vec, double & timeStamp) const;
     void GetNewValueVector(const mtsStateDataId id, std::vector<double> & vec, double & timeStamp) const;
 
-    typedef std::list<SF::FilterBase*> FiltersType;
-#if 0
-    struct FiltersStruct {
-        /*! List of filters attached to this state table to define features */
-        FiltersType Features;
-        /*! List of filters attached to this state table to define feature vectors */
-        FiltersType FeatureVectors;
-        /*! List of filters attached to this state table to define symptoms */
-        FiltersType Symptoms;
-        /*! List of filters attached to this state table to define symptom vectors */
-        FiltersType SymptomVectors;
-        /*! List of filters attached to this state table for fault detection */
-        FiltersType FaultDetectors;
-    } Filters;
-#endif
-    FiltersType Filters;
-
-    /*! Register filter.  Registered filters are executed when this state table is updated. */
-    bool RegisterFilter(SF::FilterBase * filter);
-    
-    /*! Print out all filters */
-    void PrintFilters(std::ostream & outputStream) const;
-
     // [SFUPDATE]
     /*! Placeholders for monitoring */
     mtsDouble ExecTimeUser;
     mtsDouble ExecTimeTotal;
 
     static const std::string NameOfStateTableForMonitoring;
+
+    void SetOwnerComponentName(const std::string & ownerName) {
+        OwnerComponentName = ownerName;
+    }
+
+protected:
+    std::string OwnerComponentName; // name of component that owns this state table
+
 #endif
 };
 

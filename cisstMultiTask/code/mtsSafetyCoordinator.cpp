@@ -338,9 +338,15 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsComponent
         signal->SetHistoryBufferIndex(id);
     }
 
+#if 0
     // Associate filter with the monitoring state table of the target component.
     // Active filters are run by target component.
-    stateTable->RegisterFilter(filter);
+    if (!stateTable->RegisterFilter(targetComponent->GetName(), filter)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilterActive: failed to add ACTIVE filter to component \"" 
+            << targetComponent->GetName() << "\", filter: " << *filter << std::endl;
+        return false;
+    }
+#endif
 
     CMN_LOG_CLASS_RUN_DEBUG << "AddFilterActive: Successfully added ACTIVE filter to component \"" 
         << targetComponent->GetName() << "\", filter: " << *filter << std::endl;
@@ -469,7 +475,14 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
 
     // Associate filter with the monitoring state table of the monitoring component 
     // Passive filters are run by the Monitor component.
-    stateTable->RegisterFilter(filter);
+#if 0
+    const std::string componentName = Monitors[0]->GetName();
+    if (!stateTable->RegisterFilter(componentName, filter)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilterPassive: failed to add PASSIVE filter to component \"" 
+            << componentName << "\", filter: " << *filter << std::endl;
+        return false;
+    }
+#endif
 
     CMN_LOG_CLASS_RUN_DEBUG << "AddFilterPassive: Successfully added PASSIVE filter to component \"" 
         << targetComponent->GetName() << "\", filter: " << *filter << std::endl;
@@ -595,10 +608,7 @@ bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
 
 bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
 {
-    if (!filter) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: NULL filter instance" << std::endl;
-        return false;
-    }
+    CMN_ASSERT(filter);
 
     // Collect arguments
     const std::string targetProcessName   = mtsManagerLocal::GetInstance()->GetName();
@@ -629,6 +639,10 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
         //return true;
     //}
 
+    // name of component that owns the monitoring state table where the filter is going 
+    // to be installed.
+    std::string componentName;
+
     // Active filters are run by the target component and passive filters are run by
     // the monitoring component.
     if (filteringType == SF::FilterBase::ACTIVE) {
@@ -637,10 +651,16 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: failed to add active filter for: " << *filter << std::endl;
             return false;
         }
+        componentName = targetComponentName;
     }
-    else
+    else {
         //AddFilterPassive(filter, targetTask, targetProcessName, targetComponentName);
-        AddFilterPassive(filter, component, targetProcessName, targetComponentName);
+        if (!AddFilterPassive(filter, component, targetProcessName, targetComponentName)) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: failed to add passive filter for: " << *filter << std::endl;
+            return false;
+        }
+        componentName = Monitors[0]->GetName();
+    }
     
     // If this filter is the last one of filtering pipeline, install a new monitor
     // instance to publish events or faults detected by this filter.
@@ -737,9 +757,10 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
     }
 
     // Add filter to the list of filters deployed
-    const SF::FilterBase::FilterIDType uid = filter->GetFilterUID();
-    if (Filters.find(uid) == Filters.end())
-        Filters.insert(std::make_pair(uid, filter));
+    if (!BaseType::AddFilter(componentName, filter)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to add filter to Coordinator: \"" << componentName << "\", [" << *filter << "]" << std::endl;
+        return false;
+    }
 
     // Set other properties of filter
     // MJ: Should more fields be required for event localization, middleware-specific class
@@ -768,6 +789,9 @@ bool mtsSafetyCoordinator::DeployMonitorsAndFDDs(void)
 
 void mtsSafetyCoordinator::OnFaultEvent(const std::string & json)
 {
+    CMN_LOG_CLASS_RUN_WARNING << "OnFaultEvent: UPDATE HERE, " << json << std::endl;
+    // 
+#if 0
     SF::JSONSerializer jsonSerializer;
     if (!jsonSerializer.ParseJSON(json)) {
         CMN_LOG_CLASS_RUN_ERROR << "OnFaultEvent: failed to parse json:\n" << json << std::endl;
@@ -795,6 +819,7 @@ void mtsSafetyCoordinator::OnFaultEvent(const std::string & json)
             return;
         }
     }
+#endif
 
 #if 0 // MJTEMP: disabled test codes
     const std::string targetComponentName = filter->GetNameOfTargetComponent();
