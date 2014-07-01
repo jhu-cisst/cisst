@@ -1174,15 +1174,18 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
                     << std::endl;
             }
         }
+
+#if CISST_HAS_SAFETY_PLUGINS
+        // Install internal framework filters only to mtsTask-type components
+        mtsTask * task = GetComponentAsTask(componentName);
+        if (task) {
+            if (!InstallFrameworkFilters(componentName))
+                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: Failed to install framework filters to component \"" << componentName << "\"" << std::endl;
+        }
+#endif
     }
 
     CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: successfully added component to LCM: " << componentName << std::endl;
-
-#if CISST_HAS_SAFETY_PLUGINS
-    // Install internal framework filters
-    if (!InstallFrameworkFilters(componentName))
-        CMN_LOG_CLASS_INIT_ERROR << "AddComponent: Failed to install framework filters to component \"" << componentName << "\"" << std::endl;
-#endif
 
     return true;
 }

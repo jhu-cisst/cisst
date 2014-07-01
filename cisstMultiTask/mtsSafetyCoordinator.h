@@ -75,10 +75,10 @@ protected:
     /*! Called internally by AddFilterFromJSONFile() and AddFilterFromJSON() */
     bool AddFilter(const SF::JSON::JSONVALUE & filters);
     //! Install active filter
-    bool AddFilterActive(SF::FilterBase * filter, mtsTask * targetTask);
+    bool AddFilterActive(SF::FilterBase * filter, mtsComponent * targetComponent);
     //! Install passive filter
     bool AddFilterPassive(SF::FilterBase    * filter,
-                          mtsTask           * targetTask,
+                          mtsComponent      * targetComponent,
                           const std::string & targetProcessName,
                           const std::string & targetComponentName);
 

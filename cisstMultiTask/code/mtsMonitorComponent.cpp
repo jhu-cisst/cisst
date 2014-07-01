@@ -502,10 +502,10 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 
     // Check duplicate monitor target
     if (targetComponentAccessor->FindMonitorTargetFromAccessor(targetUID)) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Failed to install monitor [ " 
+        CMN_LOG_CLASS_RUN_DEBUG << "AddMonitorTarget: skip installing monitor target [ " 
             << monitorTarget->GetUIDAsString() << " ] to component "
-            << targetComponentName << ": target is already being monitored" << std::endl;
-        return false;
+            << targetComponentName << ": already being monitored" << std::endl;
+        return true;
     }
 
     // In case of CUSTOM target, create required interface if provided interface is

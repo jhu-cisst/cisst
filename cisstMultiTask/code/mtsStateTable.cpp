@@ -337,6 +337,13 @@ void mtsStateTable::Advance(void) {
     }
 
 #if CISST_HAS_SAFETY_PLUGINS
+    if (!Filters.empty()) {
+        FiltersType::const_iterator it = Filters.begin();
+        const FiltersType::const_iterator itEnd = Filters.end();
+        for (; it != itEnd; ++it)
+            (*it)->RunFilter();
+    }
+#if 0
 #define PROCESS_FILTERS( _name )\
     if (!Filters._name.empty()) {\
         FiltersType::const_iterator it = Filters._name.begin();\
@@ -351,6 +358,7 @@ void mtsStateTable::Advance(void) {
     PROCESS_FILTERS(SymptomVectors);
     PROCESS_FILTERS(FaultDetectors);
 #undef PROCESS_FILTERS
+#endif
 #endif
 }
 
@@ -383,6 +391,15 @@ void mtsStateTable::Cleanup(void) {
     }
 
 #if CISST_HAS_SAFETY_PLUGINS
+    if (!Filters.empty()) {
+        FiltersType::const_iterator it = Filters.begin();
+        const FiltersType::const_iterator itEnd = Filters.end();
+        for (; it != itEnd; ++it) {
+            (*it)->CleanupFilter();
+            delete *it;
+        }
+    }
+#if 0
 #define CLEANUP_FILTERS( _name )\
     if (!Filters._name.empty()) {\
         FiltersType::const_iterator it = Filters._name.begin();\
@@ -400,6 +417,7 @@ void mtsStateTable::Cleanup(void) {
     CLEANUP_FILTERS(SymptomVectors);
     CLEANUP_FILTERS(FaultDetectors);
 #undef CLEANUP_FILTERS
+#endif
 #endif
 }
 
@@ -624,6 +642,8 @@ bool mtsStateTable::RegisterFilter(SF::FilterBase * filter)
         return false;
     }
 
+    Filters.push_back(filter);
+#if 0
     switch (filter->GetFilterCategory()) {
         case SF::FilterBase::FEATURE:
             Filters.Features.push_back(filter);
@@ -646,6 +666,7 @@ bool mtsStateTable::RegisterFilter(SF::FilterBase * filter)
                 << filter->GetFilterName() << "\": " << filter->GetFilterCategory() << std::endl;
             return false;
     }
+#endif
 
     CMN_LOG_CLASS_RUN_DEBUG << "RegisterFilter: added new filter: " << filter->GetFilterName() << std::endl;
 
@@ -654,6 +675,14 @@ bool mtsStateTable::RegisterFilter(SF::FilterBase * filter)
 
 void mtsStateTable::PrintFilters(std::ostream & outputStream) const
 {
+    outputStream << "Filters -------------------------" << std::endl;
+    if (!Filters.empty()) {
+        FiltersType::const_iterator it = Filters.begin();
+        const FiltersType::const_iterator itEnd = Filters.end();
+        for (; it != itEnd; ++it)
+            outputStream << *(*it) << std::endl;
+    }
+#if 0
 #define PRINT_FILTERS( _name )\
     outputStream << #_name << " -------------------------" << std::endl;\
     if (!Filters._name.empty()) {\
@@ -668,6 +697,7 @@ void mtsStateTable::PrintFilters(std::ostream & outputStream) const
     PRINT_FILTERS(Symptoms);
     PRINT_FILTERS(SymptomVectors);
     PRINT_FILTERS(FaultDetectors);
+#endif
 }
 
 
