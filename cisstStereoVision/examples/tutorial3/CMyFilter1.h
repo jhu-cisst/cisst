@@ -1,11 +1,9 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
-
 #ifndef _CMyFilter1_h
 #define _CMyFilter1_h
 
 #include <cisstStereoVision/svlFilterBase.h>
-
 
 class CMyFilter1 : public svlFilterBase
 {
@@ -18,4 +16,3 @@ protected:
 };
 
 #endif // _CMyFilter1_h
-

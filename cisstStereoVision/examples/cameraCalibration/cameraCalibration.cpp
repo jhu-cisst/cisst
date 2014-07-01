@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Wen P. Liu
   Created on: 2011
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -18,7 +17,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
 #include <limits>
 
@@ -27,15 +25,15 @@ using namespace std;
 bool debug = false;
 
 /**************************************************************************************************
-* getRectifier()					
+* getRectifier()
 *	Set up a svlFilterImageRectifier object with given camera parameters
-*	
+*
 * Input:
 *	cameraMatrix	const cv::Mat&						- Matrix representation of camera intrinsics
 *	distCoeffs			const cv::Mat&					- Matrix representation of camera distortion coefficients
 
 * Output:
-*	svlFilterImageRectifier*							- A stereo vision library filter which undistorts						
+*	svlFilterImageRectifier*							- A stereo vision library filter which undistorts
 *
 ***********************************************************************************************************/
 
@@ -99,7 +97,7 @@ int main(int argc, char** argv)
         startIndex = atoi(argv[4]);
         stopIndex = atoi(argv[5]);
     }
-    else 
+    else
     {
         cout << endl << "svlExCameraCalibration - cisstStereoVision example by Wen P. Liu" << endl;
         cout << "Command line format:" << endl;
@@ -167,7 +165,7 @@ int main(int argc, char** argv)
 
     // Initialize and start stream
     if (stream.Play() != SVL_OK) goto labError;
-    
+
     // Wait for user input
     do
     {

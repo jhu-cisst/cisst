@@ -2,8 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: example.cpp 4278 2013-06-19 18:57:40Z adeguet1 $
-
   Author(s):  Zihan Chen
   Created on: 2013-08-14
 
@@ -22,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 #include <fstream>
 #include <cisstCommon/cmnPath.h>
-#include <cisstVector.h>
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstRobot/robManipulator.h>
 
 #if CISST_HAS_JSON
