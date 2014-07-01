@@ -100,10 +100,32 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
     SFASSERT(sc);
 
     std::string replyData;
-    if (request.compare("filter_list") == 0) {
-        replyData = sc->GetFilterList(targetComponentName); } else if (request.compare("state_list") == 0) {
+    if (request.compare("filter_list") == 0)
+        replyData = sc->GetFilterList(targetComponentName);
+    else if (request.compare("filter_inject") == 0) {
+        const SF::FilterBase::FilterIDType fuid = 
+            jsonParser.GetSafeValueUInt(_json["target"], "fuid");
+
+        SF::DoubleVecType inputs;
+        const JSON::JSONVALUE & jsonInputData = _json["input"];
+        for (size_t i = 0; i < jsonInputData.size(); ++i)
+            inputs.push_back(jsonInputData[i].asUInt());
+
+        std::stringstream ss;
+        if (!sc->InjectInputToFilter(fuid, inputs))
+            ss << "Failed to inject input data [ ";
+        else
+            ss << "Successfully injected input data [ ";
+
+        for (size_t i = 0; i < inputs.size(); ++i)
+            ss << inputs[i] << " ";
+        ss << " ] to filter " << fuid << std::endl;
+
+        replyData = ss.str();
+    }
+    else if (request.compare("state_list") == 0)
         replyData = sc->GetStateSnapshot(targetComponentName);
-    } else {
+    else {
         SFLOG_ERROR << "Invalid request command: " << request << std::endl;
         return;
     }
@@ -113,9 +135,7 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
     SFASSERT(publisher);
 
     if (!publisher->PublishData(SF::Topic::Data::READ_RES, replyData))
-    {
         SFLOG_ERROR << "Failed to publish DATA | READ_RES" << std::endl;
-    }
 }
 
 void mtsSubscriberCallback::CallbackData(SF::Topic::Data::CategoryType category,
