@@ -18,6 +18,20 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnGetChar.h>
+
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
+
+#include <cisstStereoVision/svlFilterSourceDummy.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlFilterSplitter.h>
+#include <cisstStereoVision/svlFilterImageUnsharpMask.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlFilterImageRectifier.h>
+#include <cisstStereoVision/svlFilterImageCameraCalibrationOpenCV.h>
+
 #include <limits>
 
 using namespace std;
