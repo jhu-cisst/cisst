@@ -586,8 +586,11 @@ bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
     // create and install filter instances while iterating each filter specification
     std::string filterClassName;
     SF::FilterBase * filter = 0; 
+    bool enableLog = false;
     for (size_t i = 0; i < filters.size(); ++i) {
+        enableLog = SF::JSON::GetSafeValueBool(filters[i], "debug");
         filterClassName = SF::JSON::GetSafeValueString(filters[i], SF::Dict::Json::class_name);
+        
         // Create filter instance based on filter class name using filter factory
         filter = SF::FilterFactory::GetInstance()->CreateFilter(filterClassName, filters[i]);
         if (!filter) {
@@ -595,12 +598,17 @@ bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
             continue;
         }
 
+        // enable debug log if specified
+        if (enableLog)
+            filter->EnableDebugLog();
+
         // Install filter to the target component
         if (!AddFilter(filter)) {
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to add filter \"" << filter->GetFilterName() << "\"\n";
             delete filter;
             return false;
         }
+        
         CMN_LOG_CLASS_RUN_DEBUG << "[" << (i + 1) << "/" << filters.size() << "] "
             << "Successfully installed filter: \"" << filter->GetFilterName() << "\"" << std::endl;
         CMN_LOG_CLASS_RUN_DEBUG << *filter << std::endl;
