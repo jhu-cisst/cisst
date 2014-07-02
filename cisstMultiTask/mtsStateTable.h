@@ -517,9 +517,8 @@ public:
 
     static const std::string NameOfStateTableForMonitoring;
 
-    void SetOwnerComponentName(const std::string & ownerName) {
-        OwnerComponentName = ownerName;
-    }
+    inline const std::string GetOwnerComponentName(void) const { return OwnerComponentName; }
+    inline void SetOwnerComponentName(const std::string & ownerName) { OwnerComponentName = ownerName; }
 
 protected:
     std::string OwnerComponentName; // name of component that owns this state table

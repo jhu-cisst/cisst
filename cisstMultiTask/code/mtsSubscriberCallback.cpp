@@ -23,6 +23,8 @@
 
 #include "json.h"
 
+#include <iomanip>
+
 using namespace SF;
 
 mtsSubscriberCallback::mtsSubscriberCallback(const std::string & owner, 
@@ -109,7 +111,7 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
         SF::DoubleVecType inputs;
         const JSON::JSONVALUE & jsonInputData = _json["input"];
         for (size_t i = 0; i < jsonInputData.size(); ++i)
-            inputs.push_back(jsonInputData[i].asUInt());
+            inputs.push_back(jsonInputData[i].asDouble());
 
         std::stringstream ss;
         if (!sc->InjectInputToFilter(fuid, inputs))
@@ -118,8 +120,8 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
             ss << "Successfully injected input data [ ";
 
         for (size_t i = 0; i < inputs.size(); ++i)
-            ss << inputs[i] << " ";
-        ss << " ] to filter " << fuid << std::endl;
+            ss << std::setprecision(5) << inputs[i] << " ";
+        ss << "] to filter " << fuid << std::endl;
 
         replyData = ss.str();
     }
