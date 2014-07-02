@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 
-int main(int argc, char ** argv)
+int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);

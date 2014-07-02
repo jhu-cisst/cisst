@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2008-01-30
 
-  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,13 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaTimeServer.h>
 
 #include <string.h>
-
-
-#if (CISST_OS == CISST_WINDOWS)
-    const double osaTimeServerTestDelta = 10.0 * cmn_ms;
-#else
-    const double osaTimeServerTestDelta = 5.0 * cmn_ms;
-#endif
 
 
 void osaTimeServerTest::TestInternalsSize(void) {

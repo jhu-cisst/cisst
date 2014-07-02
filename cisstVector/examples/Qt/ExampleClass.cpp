@@ -21,6 +21,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "ExampleClass.h"
 
+#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVector/vctRandom.h>
+#include <cisstVector/vctQtWidgetDynamicVector.h>
+#include <cisstVector/vctQtWidgetRotation.h>
+#include <cisstVector/vctQtWidgetFrame.h>
+
 ExampleClass::ExampleClass(void):
     QObject()
 {

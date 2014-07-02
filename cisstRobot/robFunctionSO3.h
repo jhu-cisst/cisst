@@ -1,9 +1,8 @@
 /*
-
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -26,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstRobot/robExport.h>
 
 class CISST_EXPORT robFunctionSO3 : public robFunction {
-  
+
  protected:
 
   vctQuaternionRotation3<double> qw1;  // initial value
@@ -36,12 +35,12 @@ class CISST_EXPORT robFunctionSO3 : public robFunction {
   vctQuaternionRotation3<double> qw2;  // initial value
   vctFixedSizeVector<double,3>    w2;  // initial 1st derivative
   vctFixedSizeVector<double,3>   w2d;  // initial 1st derivative
-  
+
  public:
 
   robFunctionSO3( void );
 
-  robFunctionSO3( double t1, 
+  robFunctionSO3( double t1,
 		  const vctQuaternionRotation3<double>& qw1,
 		  const vctFixedSizeVector<double,3>&    w1,
 		  const vctFixedSizeVector<double,3>&   w1d,
@@ -50,23 +49,25 @@ class CISST_EXPORT robFunctionSO3 : public robFunction {
 		  const vctFixedSizeVector<double,3>&    w2,
 		  const vctFixedSizeVector<double,3>&   w2d );
 
-  robFunctionSO3( double t1, 
+  robFunctionSO3( double t1,
 		  const vctMatrixRotation3<double>&   Rw1,
 		  const vctFixedSizeVector<double,3>&  w1,
 		  const vctFixedSizeVector<double,3>& w1d,
-		  double t2, 
+		  double t2,
 		  const vctMatrixRotation3<double>&   Rw2,
 		  const vctFixedSizeVector<double,3>&  w2,
 		  const vctFixedSizeVector<double,3>& w2d );
 
-  virtual void Evaluate( double, 
-			 vctQuaternionRotation3<double>&, 
-			 vctFixedSizeVector<double,3>&, 
+  virtual ~robFunctionSO3() {}
+
+  virtual void Evaluate( double,
+			 vctQuaternionRotation3<double>&,
+			 vctFixedSizeVector<double,3>&,
 			 vctFixedSizeVector<double,3>& ){}
 
-  virtual void Evaluate( double, 
+  virtual void Evaluate( double,
 			 vctMatrixRotation3<double>,
-			 vctFixedSizeVector<double,3>&, 
+			 vctFixedSizeVector<double,3>&,
 			 vctFixedSizeVector<double,3>& ){}
 
   virtual void Blend( robFunction* function, double wmax, double wdmax ) = 0;
@@ -81,4 +82,4 @@ class CISST_EXPORT robFunctionSO3 : public robFunction {
 
 };
 
-#endif
+#endif // _robFunctionSO3_h

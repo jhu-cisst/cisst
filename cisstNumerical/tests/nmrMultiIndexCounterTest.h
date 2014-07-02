@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):  Ofri Sadowsky
   Created on: 2004-10-21
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnRandomSequence.h>
 
 
-class nmrMultiIndexCounterTest : public CppUnit::TestFixture 
+class nmrMultiIndexCounterTest : public CppUnit::TestFixture
 {
 public:
 	typedef nmrMultiIndexCounter::IndexType IndexType;
@@ -105,7 +103,7 @@ public:
     }
 
 //protected:
-	void setUp() 
+	void setUp()
 	{
 		MakeRandomIndexCounter(DefaultIncrementCounter, RandomGenerator);
 		MakeRandomIndexCounter(RandomIncrementCounter, RandomGenerator);
@@ -114,8 +112,6 @@ public:
 
 	void tearDown()
 	{
-		int a = 0;
-		a = 1;
 	}
 
 	nmrMultiIndexCounterTest()
@@ -129,8 +125,6 @@ public:
 
 	virtual ~nmrMultiIndexCounterTest()
 	{
-		int a = 0;
-		a = 1;
 	}
 
 private:
@@ -153,4 +147,3 @@ private:
 };
 
 #endif
-

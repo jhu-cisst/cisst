@@ -1,10 +1,8 @@
 /*
-
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -67,7 +65,7 @@ public:
 		  const vctFixedSizeVector<double,6>& v2w2,
 		  const vctFixedSizeVector<double,6>& v2dw2d );
 
-  ~robFunctionSE3();
+  virtual ~robFunctionSE3();
 
   /*!
    \brief Read initial(start) state
@@ -92,9 +90,9 @@ public:
 		   vctFixedSizeVector<double,6>& v2w2,
 		   vctFixedSizeVector<double,6>& v2dw2d );
 
-  virtual void Evaluate( double, 
-			 vctFrame4x4<double>&, 
-			 vctFixedSizeVector<double,6>&, 
+  virtual void Evaluate( double,
+			 vctFrame4x4<double>&,
+			 vctFixedSizeVector<double,6>&,
 			 vctFixedSizeVector<double,6>&) = 0;
 
   virtual void Blend( robFunction* function, double vmax, double vdmax ) = 0;
@@ -103,4 +101,4 @@ public:
 
 };
 
-#endif
+#endif // _robFunctionSE3_h

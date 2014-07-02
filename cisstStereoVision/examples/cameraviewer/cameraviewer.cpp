@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Balazs Vagvolgyi
   Created on: 2008
 
@@ -19,12 +18,26 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-
-#include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsComponentViewer.h>
-#include <cisstOSAbstraction/osaSleep.h>
+
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
+
+#include <cisstStereoVision/svlWindowManagerBase.h>
+#include <cisstStereoVision/svlFilterImageFileWriter.h>
+#include <cisstStereoVision/svlFilterVideoFileWriter.h>
+#include <cisstStereoVision/svlFilterImageExposureCorrection.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+#include <cisstStereoVision/svlFilterVideoExposureManager.h>
+#include <cisstStereoVision/svlFilterSplitter.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlFilterImageOverlay.h>
 
 #if CISST_HAS_QT
     #include <cisstStereoVision/svlQtObjectFactory.h>
@@ -496,4 +509,3 @@ int my_main(int argc, char** argv)
 }
 
 SETUP_QT_ENVIRONMENT(my_main)
-

@@ -37,13 +37,13 @@ class CISST_EXPORT robKinematics : public robJoint {
   robKinematics::Convention convention;
 
  protected:
-  
+
   //! Read the parameters of the kinematics convention
   virtual void ReadParameters( std::istream& is ) = 0;
 #if CISST_HAS_JSON
   virtual void ReadParameters(const Json::Value &config) = 0;
 #endif
-  
+
   //! Write the parameters of the kinematics convention
   virtual void WriteParameters( std::ostream& os ) const = 0;
 
@@ -54,7 +54,9 @@ class CISST_EXPORT robKinematics : public robJoint {
 
   //! Overloaded constructor
   robKinematics( const robJoint& joint , robKinematics::Convention convention );
-		 
+
+  virtual ~robKinematics() {}
+
   //! Return the kinematics convention
   /**
      \return The DH convention: robDHStandard or robDHModified
@@ -81,7 +83,7 @@ class CISST_EXPORT robKinematics : public robJoint {
 
   //! Get the orientation of the link
   /**
-     Returns the orientation of the link with respect to the proximal link for 
+     Returns the orientation of the link with respect to the proximal link for
      a given joint vale.
      \param joint The joint associated with the link
      \return The orientation associated with the DH parameters
@@ -90,9 +92,9 @@ class CISST_EXPORT robKinematics : public robJoint {
 
   //! Return the position of the next (distal) link coordinate frame
   /**
-     This method returns the \$XYZ\$ coordinates of the origin of the distal 
-     link in the coordinate frame of the proximal link. "PStar" is not a good 
-     name for this but the literature uses \$ \mathbf{p}^* \$ to denote this 
+     This method returns the \$XYZ\$ coordinates of the origin of the distal
+     link in the coordinate frame of the proximal link. "PStar" is not a good
+     name for this but the literature uses \$ \mathbf{p}^* \$ to denote this
      value.
      \return The position of the next coordinate frame wrt to the current
               frame
@@ -111,4 +113,4 @@ class CISST_EXPORT robKinematics : public robJoint {
 
 };
 
-#endif
+#endif // _robKinematics_h

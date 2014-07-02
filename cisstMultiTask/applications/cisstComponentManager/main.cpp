@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2011-04-03
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -60,8 +59,8 @@ public:
     void SetNumArgs(int nArgs) { numArgs = nArgs; }
     bool IsValidNumArgs(int nArgs) const { return (numArgs<0)?true:(nArgs == numArgs); }
 
-    virtual bool Execute(const std::vector<std::string> &) const 
-    { 
+    virtual bool Execute(const std::vector<std::string> &) const
+    {
         std::cout << "CommandEntryBase::Execute called" << std::endl;
         return false;
     }
@@ -568,7 +567,7 @@ bool shellTask::Connections(const std::vector<std::string> &args) const
     std::vector<mtsDescriptionConnection> connections = ManagerComponentServices->GetListOfConnections();
     for (size_t i = 0; i < connections.size(); i++) {
         mtsDescriptionConnection &connection = connections[i];
-        if ((filterProcess == "") || 
+        if ((filterProcess == "") ||
             (filterProcess == connection.Client.ProcessName) ||
             (filterProcess == connection.Server.ProcessName)) {
             if ((filterComponent == "") ||
@@ -610,7 +609,7 @@ bool shellTask::System(const std::string &cmdString) const
     char *cmd = new char[cmdString.size()+1];
     strcpy(cmd, cmdString.c_str());
 
-    // Start the child process. 
+    // Start the child process.
     if( !CreateProcess( NULL,   // No module name (use command line)
         cmd,                    // Command line
         NULL,           // Process handle not inheritable
@@ -618,10 +617,10 @@ bool shellTask::System(const std::string &cmdString) const
         FALSE,          // Set handle inheritance to FALSE
         CREATE_NEW_CONSOLE,   // Create a new console
         NULL,           // Use parent's environment block
-        NULL,           // Use parent's starting directory 
+        NULL,           // Use parent's starting directory
         &si,            // Pointer to STARTUPINFO structure
         &pi )           // Pointer to PROCESS_INFORMATION structure
-    ) 
+    )
     {
         std::cout << "CreateProcess returns " << GetLastError() << std::endl;
         return false;
@@ -705,7 +704,9 @@ int main(int argc, char * argv[])
     // Enable system-wide thread-safe Logger
     mtsManagerLocal::SetLogForwarding(true);
 
-    mtsManagerGlobal *globalManager = 0;
+#if CISST_MTS_HAS_ICE
+    mtsManagerGlobal * globalManager = 0;
+#endif
     mtsManagerLocal * localManager = 0;;
 
     if ((argc < 2) || (strcmp(argv[1], "local") == 0) || (argv[1][0] == '-')) {

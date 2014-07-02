@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
- Author(s):  Marcin Balicki
- Created on: 2013
+  Author(s):  Marcin Balicki
+  Created on: 2013
 
- (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
- Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
  --- begin cisst license - do not edit ---
 
@@ -68,7 +67,7 @@ protected:
     std::vector<double> SyncTimeVec;
 
     bool FileLoaded;
-    int FrameTimeIdx;
+    size_t FrameTimeIdx;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterFrameTimeSync);

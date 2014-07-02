@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Balazs Vagvolgyi
   Created on: 2009
 
-  (C) Copyright 2006-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,8 +18,14 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
 
-#include <cisstStereoVision.h>
+#include <cisstStereoVision/svlFilterSourceVideoFile.h>
+#include <cisstStereoVision/svlFilterVideoFileWriter.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
+
 
 using namespace std;
 
@@ -29,7 +34,7 @@ using namespace std;
 //  Video Converter  //
 ///////////////////////
 
-int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
+int VideoConverter(std::string & src_path, std::string &dst_path, bool loadcodec)
 {
     const bool resize   = false;
     const bool cropping = false;
@@ -41,7 +46,6 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
     svlStreamManager stream(8);
     svlFilterSourceVideoFile source(1);
     svlFilterVideoFileWriter writer;
-
 
     // setup video file source
     if (!src_path.empty()) {

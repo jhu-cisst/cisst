@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Ofri Sadowsky
   Created on: 2003-10-15
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,12 +22,13 @@ http://www.cisst.org/cisst/license.txt.
    update the tutorial too! */
 
 // include what is needed from cisst
-#include <cisstConfig.h>
-#include <cisstCommon.h>
-#include <cisstVector.h>
-
-// system includes
-#include <iostream>
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctFixedSizeMatrixTypes.h>
+#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstVector/vctDynamicNArray.h>
+#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVector/vctRandom.h>
 
 #include "ExampleFrame.h"
 #include "ExampleDynamic.h"

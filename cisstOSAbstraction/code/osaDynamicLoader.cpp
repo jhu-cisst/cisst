@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Peter Kazanzides
-  Created on: 2007-01-16 
+  Created on: 2007-01-16
 
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,8 +22,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 
-const char UNIX_SEP = '/';  // path separator for UNIX
+#if (CISST_OS == CISST_WINDOWS)
 const char DOS_SEP = '\\';  // path separator for DOS/Windows
+#endif
+
+const char UNIX_SEP = '/';  // path separator for UNIX
+
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>

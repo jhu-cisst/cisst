@@ -5,7 +5,7 @@
   Author(s):  Simon Leonard
   Created on: 2009-11-11
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -90,6 +90,8 @@ class CISST_EXPORT robQuintic : public robFunctionRn {
                 const vctDynamicVector<double>& y2d,
                 const vctDynamicVector<double>& y2dd );
 
+    virtual ~robQuintic() {}
+
     void Set( double t1,
               const vctDynamicVector<double>& y1,
               const vctDynamicVector<double>& y1d,
@@ -118,4 +120,3 @@ class CISST_EXPORT robQuintic : public robFunctionRn {
 };
 
 #endif // _robQuintic_h
-

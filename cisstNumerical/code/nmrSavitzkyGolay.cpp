@@ -3,11 +3,11 @@
 
 /*
   $Id: nmrSavitzkyGolay.cpp 4267 2013-06-11 14:01:21Z sleonar7 $
-  
-  Author(s):	Simon Leonard
-  Created on:	2013-06-11
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  Author(s):  Simon Leonard
+  Created on: 2013-06-11
+
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -22,10 +22,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstNumerical/nmrSavitzkyGolay.h>
 #include <cisstNumerical/nmrInverse.h>
 
-vctDynamicVector<double> CISST_EXPORT nmrSavitzkyGolay( int M, 
-							int D, 
-							int NL, 
-							int NR ){
+vctDynamicVector<double>
+CISST_EXPORT nmrSavitzkyGolay( int M,
+                               int D,
+                               int NL,
+                               int NR ){
 
   vctDynamicMatrix<double> A( NL+NR+1, M+1, 0.0, VCT_COL_MAJOR );
   vctDynamicVector<double> b( M, 0.0 );
@@ -33,7 +34,7 @@ vctDynamicVector<double> CISST_EXPORT nmrSavitzkyGolay( int M,
   for( int t=-NL; t<=NR; t++ ){
     double tk=1.0;
     A[ t+NL ][ 0 ] = tk;
-    for( size_t k=1; k<M+1; k++ ){
+    for( int k=1; k<M+1; k++ ){
       tk *= t;
       A[ t+NL ][ k ] = tk;
     }
@@ -51,11 +52,11 @@ vctDynamicVector<double> CISST_EXPORT nmrSavitzkyGolay( int M,
 
     vctDynamicVector<double> x = ATAAT * en;
     c[n] = x[D];
-  }    
+  }
 
   double frac=1.0;
   if( 1 < D ){
-    for( size_t i=1; i<=D; i++ ){
+    for( int i=1; i<=D; i++ ){
       frac *= i;
     }
   }

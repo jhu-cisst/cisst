@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
  Author(s):  Balazs Vagvolgyi
  Created on: 2010
 
- (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
+ (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights
  Reserved.
 
  --- begin cisst license - do not edit ---
@@ -17,11 +16,28 @@
 
  --- end cisst license ---
 
- */
+*/
 
 
-#include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
+
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
+
+#include <cisstStereoVision/svlWindowManagerBase.h>
+#include <cisstStereoVision/svlFilterSourceVideoFile.h>
+#include <cisstStereoVision/svlFilterImageExposureCorrection.h>
+#include <cisstStereoVision/svlFilterImageTranslation.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlFilterImageOverlay.h>
+#include <cisstStereoVision/svlFilterStereoImageJoiner.h>
+
+#if CISST_SVL_HAS_OPENCV
+  #include <cisstStereoVision/svlFilterImageCenterFinder.h>
+  #include <cisstStereoVision/svlFilterImageZoom.h>
+#endif // CISST_SVL_HAS_OPENCV
 
 using namespace std;
 
@@ -425,4 +441,3 @@ int main(int argc, char** argv)
     cerr << "Quit" << endl;
     return 1;
 }
-

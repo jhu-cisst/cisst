@@ -5,7 +5,7 @@
   Author(s):  Simon Leonard
   Created on: 2009-11-11
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -39,6 +39,8 @@ class CISST_EXPORT robFunction{
 
     robFunction( void );
     robFunction( double startTime, double stopTime );
+
+    virtual ~robFunction() {}
 
     /*!
      \brief Set start and stop time

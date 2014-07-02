@@ -1,11 +1,9 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
-
 #ifndef _CMyEventHandler_h
 #define _CMyEventHandler_h
 
-#include <cisstStereoVision.h>
-
+#include <cisstStereoVision/svlWindowManagerBase.h>
 
 class CMyEventHandler : public svlWindowEventHandlerBase
 {
@@ -21,4 +19,3 @@ private:
 
 
 #endif // _CMyEventHandler_h
-

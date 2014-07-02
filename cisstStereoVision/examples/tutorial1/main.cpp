@@ -1,8 +1,14 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
 
-#include <cisstStereoVision.h>
-
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+#include <cisstStereoVision/svlFilterSplitter.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
+#include <cisstStereoVision/svlFilterImageUnsharpMask.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
 
 void SimpleStream()
 {
@@ -70,4 +76,3 @@ int main()
 
     return 0;
 }
-

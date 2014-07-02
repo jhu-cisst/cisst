@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2007-09-13
 
-  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -86,7 +85,6 @@ template <class _elementType, bool _rowMajor>
 void vctFrame4x4Test::TestApplyTo(void) {
     typedef vctFrame4x4<_elementType, _rowMajor> FrameType;
     typedef typename FrameType::value_type value_type;
-    typedef typename FrameType::AngleType AngleType;
 
     value_type tolerance = cmnTypeTraits<value_type>::Tolerance();
     vctFixedSizeVector<value_type, 3> noTranslation(0.0, 0.0, 0.0);
