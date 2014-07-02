@@ -318,6 +318,11 @@ mtsTask::mtsTask(const std::string & name,
 #if CISST_HAS_SAFETY_PLUGINS
     this->AddStateTable(&this->StateTableMonitor);
 
+    // set owner name for state table.  State table does not run any filter without its owner component name.
+    // Owner (component) name is to look up an instance of filters via Safety Coordinator
+    // that manages all the filter instances based on its owner name.
+    StateTableMonitor.SetOwnerComponentName(name);
+
     mtsInterfaceProvided * provided = GetInterfaceProvided(
         mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));
     CMN_ASSERT(provided);
