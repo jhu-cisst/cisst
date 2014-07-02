@@ -306,9 +306,9 @@ mtsTask::mtsTask(const std::string & name,
     StateChange(),
     StateChangeSignal(),
     StateTable(sizeStateTable, "Default"),
-//#if CISST_HAS_SAFETY_PLUGINS
-    //StateTableMonitor(sizeStateTable, mtsStateTable::NameOfStateTableForMonitoring),
-//#endif
+#if CISST_HAS_SAFETY_PLUGINS
+    StateTableMonitor(sizeStateTable, mtsStateTable::NameOfStateTableForMonitoring),
+#endif
     OverranPeriod(false),
     ThreadStartData(0),
     ReturnValue(0),
@@ -316,8 +316,7 @@ mtsTask::mtsTask(const std::string & name,
 {
     this->AddStateTable(&this->StateTable);
 #if CISST_HAS_SAFETY_PLUGINS
-    // This is now done in the base class (mtsComponent)
-    //this->AddStateTable(&this->StateTableMonitor);
+    this->AddStateTable(&this->StateTableMonitor);
 
     mtsInterfaceProvided * provided = GetInterfaceProvided(
         mtsStateTable::GetNameOfStateTableInterface(StateTableMonitor.GetName()));

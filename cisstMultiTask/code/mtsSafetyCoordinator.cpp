@@ -32,6 +32,7 @@
 #include "jsonSerializer.h"
 #include "filters/threshold.h"
 #include "filterFactory.h"
+#include "cisstEventLocation.h"
 
 using namespace SF::Dict::Json;
 
@@ -236,7 +237,7 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSONFile(const std::string & json
     return ret;
 }
 
-bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsComponent * targetComponent)
+bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * targetComponent)
 {
     std::string         signalName;
     SF::SignalElement * signal = 0;
@@ -258,6 +259,7 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsComponent
         // which state table has the input signal being added.
 
         // search for signal name from the monitoring state table first
+#if 0
         stateTable = targetComponent->GetMonitoringStateTable();
         int stateVectorId = stateTable->GetStateVectorID(signalName);
         if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
@@ -283,7 +285,8 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsComponent
                 return false;
             }
         }
-#if 0
+#endif
+#if 1
         stateTable = targetComponent->GetDefaultStateTable();
         int stateVectorId = stateTable->GetStateVectorID(signalName);
 
@@ -355,7 +358,7 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsComponent
 }
 
 bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
-                                            mtsComponent      * targetComponent,
+                                            mtsTask           * targetComponent,
                                             const std::string & targetProcessName,
                                             const std::string & targetComponentName)
 {
@@ -413,20 +416,20 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
         // Set the name of the read-from-statetable command
         std::string commandName("Get");
         commandName += signalName;
-        // Get state table instance depending on the type of component
-        mtsStateTable * targetStateTable = 0;
-        mtsTask * task = dynamic_cast<mtsTask*>(targetComponent);
-        if (task)
-            targetStateTable = &task->StateTable;
-        else
-            targetStateTable = targetComponent->GetMonitoringStateTable();
+        //// Get state table instance depending on the type of component
+        //mtsStateTable * targetStateTable = 0;
+        //mtsTask * task = dynamic_cast<mtsTask*>(targetComponent);
+        //if (task)
+            //targetStateTable = &task->StateTable;
+        //else
+            //targetStateTable = targetComponent->GetMonitoringStateTable();
         // Add read-from-statetable command for each input signal
         if (signal->GetSignalType() == SF::SignalElement::SCALAR) {
-            //provided->AddCommandReadStateInternalScalar(targetComponent->StateTable, signalName, commandName);
-            provided->AddCommandReadStateInternalScalar(*targetStateTable, signalName, commandName);
+            provided->AddCommandReadStateInternalScalar(targetComponent->StateTable, signalName, commandName);
+            //provided->AddCommandReadStateInternalScalar(*targetStateTable, signalName, commandName);
         } else {
-            //provided->AddCommandReadStateInternalVector(targetComponent->StateTable, signalName, commandName);
-            provided->AddCommandReadStateInternalVector(*targetStateTable, signalName, commandName);
+            provided->AddCommandReadStateInternalVector(targetComponent->StateTable, signalName, commandName);
+            //provided->AddCommandReadStateInternalVector(*targetStateTable, signalName, commandName);
         }
 
         // Get the name of required interface of the target component accessor
@@ -632,12 +635,11 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
         return false;
     }
 
-    // 6/30/14: moved monitoring state table from mtsTask to mtsComponent
-    //mtsTask * targetTask = mtsManagerLocal::GetInstance()->GetComponentAsTask(targetComponentName);
-    //if (!targetTask) {
-        //CMN_LOG_CLASS_RUN_WARNING << "AddFilter: component found but not task-type: \"" << targetComponentName << "\"" << std::endl;
-        //return true;
-    //}
+    mtsTask * targetTask = mtsManagerLocal::GetInstance()->GetComponentAsTask(targetComponentName);
+    if (!targetTask) {
+        CMN_LOG_CLASS_RUN_WARNING << "AddFilter: component found but not task-type: \"" << targetComponentName << "\"" << std::endl;
+        return true;
+    }
 
     // name of component that owns the monitoring state table where the filter is going 
     // to be installed.
@@ -646,16 +648,14 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
     // Active filters are run by the target component and passive filters are run by
     // the monitoring component.
     if (filteringType == SF::FilterBase::ACTIVE) {
-        //if (!AddFilterActive(filter, targetTask)) {
-        if (!AddFilterActive(filter, component)) {
+        if (!AddFilterActive(filter, targetTask)) {
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: failed to add active filter for: " << *filter << std::endl;
             return false;
         }
         componentName = targetComponentName;
     }
     else {
-        //AddFilterPassive(filter, targetTask, targetProcessName, targetComponentName);
-        if (!AddFilterPassive(filter, component, targetProcessName, targetComponentName)) {
+        if (!AddFilterPassive(filter, targetTask, targetProcessName, targetComponentName)) {
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: failed to add passive filter for: " << *filter << std::endl;
             return false;
         }

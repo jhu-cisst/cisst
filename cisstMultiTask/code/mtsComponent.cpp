@@ -26,16 +26,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentBase.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
-#if CISST_HAS_SAFETY_PLUGINS
-#include <cisstMultiTask/mtsSafetyCoordinator.h>
-#endif
 
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
 #if CISST_HAS_SAFETY_PLUGINS
-#include "dict.h"
-#include "statemachine.h"
+#include <cisstMultiTask/mtsSafetyCoordinator.h>
 #endif
 
 mtsComponent::mtsComponent(const std::string & componentName):
@@ -45,9 +41,6 @@ mtsComponent::mtsComponent(const std::string & componentName):
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
     StateTables("StateTables")
-#if CISST_HAS_SAFETY_PLUGINS
-    , StateTableMonitor(5000, mtsStateTable::NameOfStateTableForMonitoring)
-#endif
 {
     Initialize();
 }
@@ -59,9 +52,6 @@ mtsComponent::mtsComponent(void):
     InterfacesRequired("InterfacesRequired"),
     InterfacesInput("InterfacesInput"),
     StateTables("StateTables")
-#if CISST_HAS_SAFETY_PLUGINS
-    , StateTableMonitor(5000, mtsStateTable::NameOfStateTableForMonitoring)
-#endif
 {
     Initialize();
 }
@@ -94,24 +84,12 @@ void mtsComponent::Initialize(void)
         ss << "class mtsComponent: Failed to add component \"" << Name << "\" to Safety Coordinator";
         cmnThrow(ss.str());
     }
-
-    // Add monitoring state table
-    AddStateTable(&StateTableMonitor);
-
-    // Set owner component name
-    StateTableMonitor.SetOwnerComponentName(this->Name);
-    if (this->Name.size() == 0) {
-        CMN_ASSERT(false);
-    }
 #endif
 }
 
 
 mtsComponent::mtsComponent(const mtsComponent & other):
     cmnGenericObject(other)
-#if CISST_HAS_SAFETY_PLUGINS
-    , StateTableMonitor(5000, mtsStateTable::NameOfStateTableForMonitoring)
-#endif
 {
     cmnThrow("Class mtsComponent: copy constructor for mtsComponent should never be called");
 }

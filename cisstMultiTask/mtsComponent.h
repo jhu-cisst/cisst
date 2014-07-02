@@ -38,9 +38,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
-#if CISST_HAS_SAFETY_PLUGINS
-#include <cisstMultiTask/mtsStateTable.h>
-#endif
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -159,8 +156,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     friend class mtsSafetyCoordinator;
 #if CISST_HAS_SAFETY_PLUGINS
     friend class SFGCMTest;
-    // Allow Safety Coordinator to directly access state tables
-    friend class mtsSafetyCoordinator;
 #endif
 
  protected:
@@ -188,8 +183,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Update GCM to synchronize its state machines with this component */
     //bool UpdateGCM(void);
-
-    mtsStateTable StateTableMonitor;
 #endif
 
     /*! Provided interface for component management. */
@@ -574,19 +567,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
  protected:
 
     bool ReplayMode;
-
-#if CISST_HAS_SAFETY_PLUGINS
- public:
-    /*! Return the name of monitoring state table. */
-    inline const std::string GetMonitoringStateTableName(void) const {
-        return StateTableMonitor.GetName();
-    }
-    /*! Return a pointer to the monitoring state table */
-    inline mtsStateTable * GetMonitoringStateTable(void) {
-        return this->StateTables.GetItem(GetMonitoringStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
-    }
-#endif
-
 };
 
 
