@@ -61,11 +61,6 @@ if (cisst_FOUND_AS_REQUIRED)
   set_property (TARGET mtsExCommandsAndEventsQtLocal PROPERTY FOLDER "cisstMultiTask/examples")
   cisst_target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
 
-  # for Qt5
-  if (CISST_HAS_QT5)
-    qt5_use_modules (mtsExCommandsAndEventsQtLocal Core Widgets OpenGL)
-  endif (CISST_HAS_QT5)
-
   # compile network version if ICE is available
   if (CISST_MTS_HAS_ICE)
 
@@ -88,12 +83,6 @@ if (cisst_FOUND_AS_REQUIRED)
                    )
     set_property (TARGET mtsExCommandsAndEventsQtClient PROPERTY FOLDER "cisstMultiTask/examples")
     cisst_target_link_libraries (mtsExCommandsAndEventsQtClient ${REQUIRED_CISST_LIBRARIES})
-
-    # for Qt5
-    if (CISST_HAS_QT5)
-      qt5_use_modules (mtsExCommandsAndEventsQtServer Core Widgets OpenGL)
-      qt5_use_modules (mtsExCommandsAndEventsQtClient Core Widgets OpenGL)
-    endif (CISST_HAS_QT5)
 
   else (CISST_MTS_HAS_ICE)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR}: example will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")

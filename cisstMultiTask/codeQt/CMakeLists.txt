@@ -89,8 +89,3 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
 
 # link against Qt libraries
 target_link_libraries (cisstMultiTaskQt ${QT_LIBRARIES})
-
-# for Qt5
-if (CISST_HAS_QT5)
-  qt5_use_modules (cisstMultiTaskQt Core Widgets OpenGL)
-endif (CISST_HAS_QT5)
