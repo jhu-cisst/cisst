@@ -444,6 +444,12 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const st
     }
     if (interfaceProvided) {
         if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {
+#if CISST_HAS_SAFETY_PLUGINS
+            mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
+            CMN_ASSERT(sc);
+            if (!sc->AddInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+                CMN_LOG_CLASS_INIT_ERROR << "Failed to add provided interface \"" << interfaceProvidedName << "\" to Safety Coordinator." << std::endl;
+#endif
             return interfaceProvided;
         }
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: task " << this->GetName() << " unable to add interface \""
