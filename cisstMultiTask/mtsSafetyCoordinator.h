@@ -59,9 +59,6 @@ protected:
     /*! Called internally by AddMonitorTargetFromJSONFile() and AddMonitorTargetFromJSON() */
     bool AddMonitorTarget(const SF::JSON::JSONVALUE & targets);
 
-    //! Install filter from JSON
-    /*! Called internally by AddFilterFromJSONFile() and AddFilterFromJSON() */
-    bool AddFilter(const SF::JSON::JSONVALUE & filters);
     //! Install active filter
     bool AddFilterActive(SF::FilterBase * filter, mtsTask * targetComponent);
     //! Install passive filter
@@ -102,6 +99,8 @@ public:
     //-------------------------------------------------- 
     //! Install filter using filter instance
     bool AddFilter(SF::FilterBase * filter);
+    //! Install filter from JSON
+    bool AddFilters(const SF::JSON::JSONVALUE & filters);
     //! Install filter from JSON string
     bool AddFilterFromJSON(const std::string & jsonString);
     //! Install filter from JSON file

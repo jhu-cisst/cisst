@@ -512,7 +512,7 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
         filter[SF::Dict::Json::target_component] = targetComponentName;
     }
 
-    bool ret = AddFilter(filters);
+    bool ret = AddFilters(filters);
     if (!ret) {
         CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
         return false;
@@ -534,9 +534,7 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFile(const std::string & jsonFileNam
         return false;
     }
 
-    const SF::JSON::JSONVALUE filters = json.GetRoot()[SF::Dict::Json::filter];
-    bool ret = AddFilter(filters);
-
+    bool ret = AddFilterFromJSON(SF::JSON::GetJSONString(json.GetRoot()));
     if (!ret) {
         CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
         return false;
@@ -557,8 +555,7 @@ bool mtsSafetyCoordinator::AddFilterFromJSON(const std::string & jsonString)
     }
 
     const SF::JSON::JSONVALUE filters = json.GetRoot()[SF::Dict::Json::filter];
-    bool ret = AddFilter(filters);
-
+    bool ret = AddFilters(filters);
     if (!ret) {
         CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Failed to add filter(s) using json string: " << jsonString << std::endl;
         return false;
@@ -569,7 +566,7 @@ bool mtsSafetyCoordinator::AddFilterFromJSON(const std::string & jsonString)
     return true;
 }
 
-bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
+bool mtsSafetyCoordinator::AddFilters(const SF::JSON::JSONVALUE & filters)
 {
     if (filters.isNull() || filters.size() == 0) {
         CMN_LOG_CLASS_RUN_ERROR << "AddFilter: No filter specification found in json: " << filters << std::endl;
@@ -584,13 +581,21 @@ bool mtsSafetyCoordinator::AddFilter(const SF::JSON::JSONVALUE & filters)
     SF::FilterBase * filter = 0; 
     bool enableLog = false;
     for (size_t i = 0; i < filters.size(); ++i) {
-        enableLog = SF::JSON::GetSafeValueBool(filters[i], "debug");
         filterClassName = SF::JSON::GetSafeValueString(filters[i], SF::Dict::Json::class_name);
+        // TODO: target_component
+        // TODO: type (active vs. passive)
+        enableLog = SF::JSON::GetSafeValueBool(filters[i], "debug");
         
         // Create filter instance based on filter class name using filter factory
         filter = SF::FilterFactory::GetInstance()->CreateFilter(filterClassName, filters[i]);
         if (!filter) {
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to create filter instance \"" << filterClassName << "\"\n";
+            continue;
+        }
+
+        // configure filter (process filter-specific arguments)
+        if (!filter->ConfigureFilter(filters[i])) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to process filter-specfic parts for filter instance: \"" << filterClassName << "\"\n";
             continue;
         }
 
@@ -775,6 +780,9 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
     filter->SetEventLocationInstance(location);
 
     filter->Enable();
+
+    // Set instance of Safety Coordinator 
+    filter->SetSafetyCoordinator(mtsManagerLocal::GetInstance()->GetCoordinator());
 
     return true;
 }
@@ -992,6 +1000,7 @@ size_t mtsSafetyCoordinator::ExtractScalarValues(const std::stringstream & ss,
 
 bool mtsSafetyCoordinator::ReadConfigFile(const std::string & jsonFileName)
 {
+    // NOTE: events should be processed first than filters
     if (!BaseType::AddEventFromJSONFile(jsonFileName))
         return false;
     if (!AddFilterFromJSONFile(jsonFileName))
