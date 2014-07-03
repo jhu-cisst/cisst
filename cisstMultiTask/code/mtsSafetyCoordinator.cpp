@@ -514,7 +514,7 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
 
     bool ret = AddFilter(filters);
     if (!ret) {
-        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
         return false;
     }
 
@@ -538,13 +538,11 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFile(const std::string & jsonFileNam
     bool ret = AddFilter(filters);
 
     if (!ret) {
-        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
         return false;
     }
 
     CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
-    // MJTODO: resolve this later (oeprator << is ambiguous)
-    //CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
 
     return ret;
 }
@@ -567,8 +565,6 @@ bool mtsSafetyCoordinator::AddFilterFromJSON(const std::string & jsonString)
     }
 
     CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Successfully added filter(s) using json string: " << jsonString << std::endl;
-    // MJTODO: resolve this later (oeprator << is ambiguous)
-    //CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
 
     return true;
 }
@@ -994,3 +990,12 @@ size_t mtsSafetyCoordinator::ExtractScalarValues(const std::stringstream & ss,
     return values.size();
 }
 
+bool mtsSafetyCoordinator::ReadConfigFile(const std::string & jsonFileName)
+{
+    if (!BaseType::AddEventFromJSONFile(jsonFileName))
+        return false;
+    if (!AddFilterFromJSONFile(jsonFileName))
+        return false;
+
+    return true;
+}

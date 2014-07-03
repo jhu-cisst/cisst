@@ -70,6 +70,8 @@ protected:
                           const std::string & targetProcessName,
                           const std::string & targetComponentName);
 
+    //
+    bool AddEvent(const SF::JSON::JSONVALUE & filters);
 
 public:
     //! Constructor
@@ -78,8 +80,12 @@ public:
     //! Destructor
     ~mtsSafetyCoordinator();
 
+    // Read and process configuration file.  Internally calls AddFilterFromJSONFile()
+    // and/or AddEventFromJSONFile().
+    bool ReadConfigFile(const std::string & jsonFileName);
+
     //-------------------------------------------------- 
-    //  Monitoring
+    //  Monitors
     //-------------------------------------------------- 
     //! Create monitor instance
     bool CreateMonitor(void);
@@ -92,7 +98,7 @@ public:
     bool AddMonitorTargetFromJSON(const std::string & jsonString);
 
     //-------------------------------------------------- 
-    //  Filtering
+    //  Filters
     //-------------------------------------------------- 
     //! Install filter using filter instance
     bool AddFilter(SF::FilterBase * filter);
@@ -119,6 +125,18 @@ public:
      * handling case.
      */
     void OnFaultEvent(const std::string & json);
+
+    //-------------------------------------------------- 
+    //  Events
+    //-------------------------------------------------- 
+#if 0 // all moved to SF::Coordinator
+    //! Register event using event instance
+    bool AddEvent(SF::Event * event);
+    //! Register event using JSON string
+    bool AddEventFromJSON(const std::string & jsonString);
+    //! Register event from file containing JSON
+    bool AddEventFromJSONFile(const std::string & jsonFileName);
+#endif
 
     //-------------------------------------------------- 
     //  Misc.

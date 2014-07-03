@@ -127,6 +127,8 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
     }
     else if (request.compare("state_list") == 0)
         replyData = sc->GetStateSnapshot(targetComponentName);
+    else if (request.compare("event_list") == 0)
+        replyData = sc->GetEventList(targetComponentName);
     else {
         SFLOG_ERROR << "Invalid request command: " << request << std::endl;
         return;
