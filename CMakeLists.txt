@@ -287,6 +287,14 @@ int main(int argc, char ** argv) {
     return 0;
 }" CISST_OSTREAM_CAN_CAST_TO_VOID_PTR)
 
+check_cxx_source_compiles(
+"#include <iostream>
+int main(int argc, char ** argv) {
+    true ? 0 : std::cerr << \"true\";
+    false ? 0 : std::cerr << \"false\";
+    return 0;
+}" CISST_OSTREAM_CAN_CAST_TO_INT)
+
 
 # Look for isfinite function
 include (CheckSymbolExists)

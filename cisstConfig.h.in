@@ -44,6 +44,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // For CMN_LOG macro
 #cmakedefine01 CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+#cmakedefine01 CISST_OSTREAM_CAN_CAST_TO_INT
 
 // Do we have isfinite global function
 #cmakedefine01 CISST_HAS_ISFINITE
