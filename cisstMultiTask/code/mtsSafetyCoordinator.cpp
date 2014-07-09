@@ -509,7 +509,8 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
     SF::JSON::JSONVALUE & filters = json.GetRoot()[SF::Dict::Json::filter];
     for (size_t i = 0; i < filters.size(); ++i) {
         SF::JSON::JSONVALUE & filter = filters[i];
-        filter[SF::Dict::Json::target_component] = targetComponentName;
+        //filter[SF::Dict::Json::target_component] = targetComponentName;
+        filter["target"]["component"] = targetComponentName;
     }
 
     bool ret = AddFilters(filters);
@@ -582,8 +583,6 @@ bool mtsSafetyCoordinator::AddFilters(const SF::JSON::JSONVALUE & filters)
     bool enableLog = false;
     for (size_t i = 0; i < filters.size(); ++i) {
         filterClassName = SF::JSON::GetSafeValueString(filters[i], SF::Dict::Json::class_name);
-        // TODO: target_component
-        // TODO: type (active vs. passive)
         enableLog = SF::JSON::GetSafeValueBool(filters[i], "debug");
         
         // Create filter instance based on filter class name using filter factory
@@ -593,16 +592,6 @@ bool mtsSafetyCoordinator::AddFilters(const SF::JSON::JSONVALUE & filters)
             continue;
         }
 
-        // configure filter (process filter-specific arguments)
-        if (!filter->ConfigureFilter(filters[i])) {
-            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to process filter-specfic parts for filter instance: \"" << filterClassName << "\"\n";
-            continue;
-        }
-
-        // enable debug log if specified
-        if (enableLog)
-            filter->EnableDebugLog();
-
         // Install filter to the target component
         if (!AddFilter(filter)) {
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to add filter \"" << filter->GetFilterName() << "\"\n";
@@ -610,6 +599,17 @@ bool mtsSafetyCoordinator::AddFilters(const SF::JSON::JSONVALUE & filters)
             return false;
         }
         
+        // configure filter (process filter-specific arguments)
+        if (!filter->ConfigureFilter(filters[i])) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to process filter-specfic parts for filter instance: \"" << filterClassName << "\"\n";
+            delete filter;
+            return false;
+        }
+
+        // enable debug log if specified
+        if (enableLog)
+            filter->EnableDebugLog();
+
         CMN_LOG_CLASS_RUN_DEBUG << "[" << (i + 1) << "/" << filters.size() << "] "
             << "Successfully installed filter: \"" << filter->GetFilterName() << "\"" << std::endl;
    }
