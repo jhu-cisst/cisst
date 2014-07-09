@@ -351,8 +351,8 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
     }
 #endif
 
-    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterActive: Successfully added ACTIVE filter to component \"" 
-        << targetComponent->GetName() << "\", filter: " << *filter << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterActive: Successfully added ACTIVE filter \"" << filter->GetFilterName()
+        << "\" to component \"" << targetComponent->GetName() << "\"" << std::endl;
 
     return true;
 }
@@ -612,7 +612,6 @@ bool mtsSafetyCoordinator::AddFilters(const SF::JSON::JSONVALUE & filters)
         
         CMN_LOG_CLASS_RUN_DEBUG << "[" << (i + 1) << "/" << filters.size() << "] "
             << "Successfully installed filter: \"" << filter->GetFilterName() << "\"" << std::endl;
-        CMN_LOG_CLASS_RUN_DEBUG << *filter << std::endl;
    }
 
     return true;
@@ -1005,6 +1004,21 @@ bool mtsSafetyCoordinator::ReadConfigFile(const std::string & jsonFileName)
         return false;
     if (!AddFilterFromJSONFile(jsonFileName))
         return false;
+
+    return true;
+}
+
+bool mtsSafetyCoordinator::OnEventHandler(const SF::Event * e)
+{
+    CMN_ASSERT(e);
+
+    // MJTEMP: Currently, publishing events use cisstAccessor that has dependency on
+    // cisst.  If cisstAccessor is refactored not to have the dependency on cisst,
+    // publishing events can be done without cisst, i.e., SF::Coordinator can use
+    // SF::Accessor to publish events.  At that point, derived classes of SF::Coordinator
+    // (i.e., mtsSafetyCoordinator) don't need to override SF::Coordinator::OnEvent().
+
+    std::cout << "##### mtsSafetyCoordinator:OnEvent: " << e->GetName() << std::endl;
 
     return true;
 }
