@@ -70,15 +70,10 @@ mtsSafetyCoordinator::~mtsSafetyCoordinator()
         for (size_t i = 0; i < Monitors.size(); ++i)
             delete Monitors[i];
 
-    // filter instances are deleted by mtsStateTable::Cleanup()
-    /*
-    if (!Filters.empty())
-        for (FiltersType::iterator it = Filters.begin(); it != Filters.end(); ++it)
-            delete it->second;
-    */
-
-    if (casrosAccessor)
+    if (casrosAccessor) {
         delete casrosAccessor;
+        casrosAccessor = 0;
+    }
 }
 
 bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON, 
