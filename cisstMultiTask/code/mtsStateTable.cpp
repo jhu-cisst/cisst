@@ -614,20 +614,26 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
 #if CISST_HAS_SAFETY_PLUGINS
 double mtsStateTable::GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const
 {
-    mtsDouble value;
-    StateVector[id]->Get(IndexReader, value);
-    value.GetTimestamp(timeStamp);
-
-    return value.Data;
+    mtsDouble value(0.0);
+    if (StateVector[id]->Get(IndexReader, value)) {
+        value.GetTimestamp(timeStamp);
+        return value.Data;
+    } else {
+        timeStamp = 0.0;
+        return 0.0;
+    }
 }
 
 mtsDoubleVec mtsStateTable::GetNewValueVector(const mtsStateDataId id, double & timeStamp) const
 {
     mtsDoubleVec vec;
-    StateVector[id]->Get(IndexReader, vec);
-    vec.GetTimestamp(timeStamp);
-
-    return vec;
+    if (StateVector[id]->Get(IndexReader, vec)) {
+        vec.GetTimestamp(timeStamp);
+        return vec;
+    } else {
+        timeStamp = 0.0;
+        return vec.SetAll(0.0);
+    }
 }
 
 void mtsStateTable::GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & vec, double & timeStamp) const
