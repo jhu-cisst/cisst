@@ -133,6 +133,9 @@ public:
     // framework-specific or application-specific functionalities.
     bool OnEventHandler(const SF::Event * event);
 
+    // TEMP: refer to casros/libs/supervisor/coorinator.h
+    bool PublishStateChangeMessage(const std::string & msg);
+
     //-------------------------------------------------- 
     //  Misc.
     //-------------------------------------------------- 

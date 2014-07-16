@@ -114,14 +114,14 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
             inputs.push_back(jsonInputData[i].asDouble());
 
         std::stringstream ss;
-        if (!sc->InjectInputToFilter(fuid, inputs))
-            ss << "Failed to inject input data [ ";
+        if (sc->InjectInputToFilter(fuid, inputs))
+            ss << "{ \"cmd\": \"message\", \"msg\": \"Successfully injected input data: ";
         else
-            ss << "Successfully injected input data [ ";
+            ss << "{ \"cmd\": \"message\", \"msg\": \"Failed to inject input data: ";
 
         for (size_t i = 0; i < inputs.size(); ++i)
             ss << std::setprecision(5) << inputs[i] << " ";
-        ss << "] to filter " << fuid << std::endl;
+        ss << " (target filter " << fuid << ")\" }";
 
         replyData = ss.str();
     }

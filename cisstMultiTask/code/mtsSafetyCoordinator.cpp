@@ -1017,3 +1017,14 @@ bool mtsSafetyCoordinator::OnEventHandler(const SF::Event * e)
 
     return true;
 }
+
+bool mtsSafetyCoordinator::PublishStateChangeMessage(const std::string & msg)
+{
+    mtsSubscriberCallback * cbControl = 
+        dynamic_cast<mtsSubscriberCallback *>(casrosAccessor->GetSubscriberCallback(SF::Topic::CONTROL));
+    CMN_ASSERT(cbControl);
+
+    cbControl->CallbackControl(SF::Topic::Control::READ_REQ, msg);
+
+    return true;
+}
