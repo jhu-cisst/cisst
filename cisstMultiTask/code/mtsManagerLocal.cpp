@@ -1180,7 +1180,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         mtsTask * task = GetComponentAsTask(componentName);
         if (task) {
             if (!InstallFrameworkFilters(componentName))
-                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: Failed to install framework filters to component \"" << componentName << "\"" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: Failed to install framework events and filters to component \"" << componentName << "\"" << std::endl;
         }
 #endif
     }
@@ -3225,13 +3225,7 @@ bool mtsManagerLocal::InstallFrameworkFilters(const std::string & componentName)
     }
 
     const std::string jsonFileName(SF_SOURCE_ROOT_DIR"/libs/fdd/filters/json/framework_filters.json");
-    if (!SafetyCoordinator->AddFilterFromJSONFileToComponent(jsonFileName, componentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to add filter(s) from file: \"" << jsonFileName << "\"" << std::endl;
-        return false;
-    }
 
-    CMN_LOG_CLASS_RUN_DEBUG << "Successfully installed filter(s) from file: \"" << jsonFileName << "\"" << std::endl;
-
-    return true;
+    return SafetyCoordinator->ReadConfigFileFramework(jsonFileName, componentName);
 }
 #endif

@@ -77,9 +77,9 @@ public:
     //! Destructor
     ~mtsSafetyCoordinator();
 
-    // Read and process configuration file.  Internally calls AddFilterFromJSONFile()
-    // and/or AddEventFromJSONFile().
+    // Read and process configuration file that contains definition for events and filters
     bool ReadConfigFile(const std::string & jsonFileName);
+    bool ReadConfigFileFramework(const std::string & jsonFileName, const std::string & componentName);
 
     //-------------------------------------------------- 
     //  Monitors
