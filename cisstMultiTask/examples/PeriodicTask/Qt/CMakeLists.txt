@@ -66,4 +66,4 @@ add_custom_target (mtsExPeriodicTaskQt_Configs ALL
                            ${CISST_SHARE_DIR}/cisstMultiTask/examples/mtsExPeriodicTaskQtCollectors.json
                    SOURCES mtsExPeriodicTaskQtCollectors.json
                    COMMENT "Copying json config file to the cisst share directory")
-set_property (TARGET mtsExPeriodicTaskQt_Scripts PROPERTY FOLDER "cisstMultiTask/examples")
+set_property (TARGET mtsExPeriodicTaskQt_Configs PROPERTY FOLDER "cisstMultiTask/examples")
