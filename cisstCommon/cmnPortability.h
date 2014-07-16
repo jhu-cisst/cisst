@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
-  (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -51,15 +50,15 @@ http://www.cisst.org/cisst/license.txt.
   #endif
   \endcode
 */
-#define CISST_WINDOWS 1
-#define CISST_LINUX 2
-#define CISST_RTLINUX 3
-#define CISST_IRIX 4
-#define CISST_SOLARIS 5
-#define CISST_LINUX_RTAI 6
-#define CISST_CYGWIN 7
-#define CISST_DARWIN 8
-#define CISST_QNX 9
+#define CISST_WINDOWS        1
+#define CISST_LINUX          2
+#define CISST_RTLINUX        3
+#define CISST_IRIX           4
+#define CISST_SOLARIS        5
+#define CISST_LINUX_RTAI     6
+#define CISST_CYGWIN         7
+#define CISST_DARWIN         8
+#define CISST_QNX            9
 #define CISST_LINUX_XENOMAI 10
 //@}
 
@@ -74,24 +73,26 @@ http://www.cisst.org/cisst/license.txt.
   #endif
   \endcode
 */
-#define CISST_GCC 1
-#define CISST_VCPP6 2
-#define CISST_DOTNET7 3
-#define CISST_SGI_CC 4
-#define CISST_SUN_CC 5
-#define CISST_INTEL_CC 6
-#define CISST_DOTNET2003 7
-#define CISST_DOTNET2005 8
-#define CISST_DOTNET2008 9
+#define CISST_GCC         1
+#define CISST_VCPP6       2
+#define CISST_DOTNET7     3
+#define CISST_SGI_CC      4
+#define CISST_SUN_CC      5
+#define CISST_INTEL_CC    6
+#define CISST_DOTNET2003  7
+#define CISST_DOTNET2005  8
+#define CISST_DOTNET2008  9
 #define CISST_DOTNET2010 10
-#define CISST_CLANG 11
+#define CISST_DOTNET2012 11
+#define CISST_DOTNET2013 12
+#define CISST_CLANG      13
 //@}
 
 
 /*! Data models for 32 and 64 bits architectures. */
 //@{
 #define CISST_ILP32 1 // Integers, Longs and Pointers are 32 bits
-#define CISST_LP64 2 // Longs and Pointers are 64 bits - Linux, MacOS 64
+#define CISST_LP64  2 // Longs and Pointers are 64 bits - Linux, MacOS 64
 #define CISST_LLP64 3 // Long Longs and Pointers are 64 bits, longs are still 32 bits - Windows
 //@}
 
@@ -155,9 +156,9 @@ http://www.cisst.org/cisst/license.txt.
 // Microsoft compilers
 #ifdef _WIN32  // see msdn.microsoft.com
 // we require Windows 2000, XP or more
-#  ifndef _WIN32_WINNT
+#ifndef _WIN32_WINNT
   #define _WIN32_WINNT 0x0500
-#  endif
+#endif
   #define CISST_OS CISST_WINDOWS
 
   // check compiler versions
@@ -170,18 +171,20 @@ http://www.cisst.org/cisst/license.txt.
 
     #if (_MSC_VER == 1200)
       #define CISST_COMPILER CISST_VCPP6
-    #endif
-    #if (_MSC_VER == 1300)
+    #elif (_MSC_VER == 1300)
       #define CISST_COMPILER CISST_DOTNET7
-    #endif
-    #if (_MSC_VER == 1310)
+    #elif (_MSC_VER == 1310)
       #define CISST_COMPILER CISST_DOTNET2003
-    #endif
-    #if (_MSC_VER == 1400)
+    #elif (_MSC_VER == 1400)
       #define CISST_COMPILER CISST_DOTNET2005
-    #endif
-    #if (_MSC_VER >= 1500)
+    #elif (_MSC_VER == 1500)
       #define CISST_COMPILER CISST_DOTNET2008
+    #elif (_MSC_VER == 1600)
+      #define CISST_COMPILER CISST_DOTNET2010
+    #elif (_MSC_VER == 1700)
+      #define CISST_COMPILER CISST_DOTNET2012
+    #elif (_MSC_VER >= 1800)
+      #define CISST_COMPILER CISST_DOTNET2013
     #endif
   #endif
 
@@ -300,10 +303,12 @@ http://www.cisst.org/cisst/license.txt.
 //@{
 #if (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_CLANG)
 #define CISST_DEPRECATED __attribute__ ((deprecated))
-#elif (CISST_COMPILER == CISST_DOTNET7) || (CISST_COMPILER == CISST_DOTNET2003) || (CISST_COMPILER == CISST_DOTNET2005) || (CISST_COMPILER == CISST_DOTNET2008) || (CISST_COMPILER == CISST_DOTNET2010)
-#define CISST_DEPRECATED __declspec(deprecated)
 #else
-#define CISST_DEPRECATED
+  #ifdef CISST_COMPILER_IS_MSVC
+    #define CISST_DEPRECATED __declspec(deprecated)
+  #else
+    #define CISST_DEPRECATED
+  #endif
 #endif
 //@}
 
