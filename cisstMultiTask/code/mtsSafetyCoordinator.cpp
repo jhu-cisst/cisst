@@ -488,6 +488,7 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
     return true;
 }
 
+#if 0
 bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & jsonFileName,
                                                             const std::string & targetComponentName)
 {
@@ -611,6 +612,7 @@ bool mtsSafetyCoordinator::AddFilters(const SF::JSON::JSONVALUE & filters)
 
     return true;
 }
+#endif
 
 bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
 {
@@ -992,44 +994,6 @@ size_t mtsSafetyCoordinator::ExtractScalarValues(const std::stringstream & ss,
     return values.size();
 }
 
-bool mtsSafetyCoordinator::ReadConfigFile(const std::string & jsonFileName)
-{
-    // NOTE: events should be processed first than filters because SC needs event information
-    // to deploy filters.
-    if (!BaseType::AddEventFromJSONFile(jsonFileName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to read config file (event): \"" << jsonFileName << "\"" << std::endl;
-        return false;
-    }
-
-    if (!AddFilterFromJSONFile(jsonFileName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to read config file (filter): \"" << jsonFileName << "\"" << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_DEBUG << "Successfully processed config file: \"" << jsonFileName << "\"" << std::endl;
-
-    return true;
-}
-
-bool mtsSafetyCoordinator::ReadConfigFileFramework(const std::string & jsonFileName, const std::string & componentName)
-{
-    // NOTE: events should be processed first than filters because SC needs event information
-    // to deploy filters.
-    if (!BaseType::AddEventFromJSONFileToComponent(jsonFileName, componentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to read config file for framework (event): \"" << jsonFileName << "\"" << std::endl;
-        return false;
-    }
-
-    if (!AddFilterFromJSONFileToComponent(jsonFileName, componentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to read config file for framework (filter): \"" << jsonFileName << "\"" << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_DEBUG << "Successfully processed config file for framework: \"" << jsonFileName << "\"" << std::endl;
-
-    return true;
-}
-
 bool mtsSafetyCoordinator::OnEventHandler(const SF::Event * e)
 {
     CMN_ASSERT(e);
@@ -1045,13 +1009,13 @@ bool mtsSafetyCoordinator::OnEventHandler(const SF::Event * e)
     return true;
 }
 
-bool mtsSafetyCoordinator::PublishStateChangeMessage(const std::string & msg)
+bool mtsSafetyCoordinator::PublishMessage(SF::Topic::Control::CategoryType category, const std::string & msg)
 {
     mtsSubscriberCallback * cbControl = 
         dynamic_cast<mtsSubscriberCallback *>(casrosAccessor->GetSubscriberCallback(SF::Topic::CONTROL));
     CMN_ASSERT(cbControl);
 
-    cbControl->CallbackControl(SF::Topic::Control::READ_REQ, msg);
+    cbControl->CallbackControl(category, msg);
 
     return true;
 }

@@ -54,6 +54,7 @@ void mtsSubscriberCallback::Callback(const std::string & json)
 void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType category,
                                             const std::string & json)
 {
+#if 0 
     std::string categoryName;
     switch (category) {
     case SF::Topic::Control::COMMAND:
@@ -66,6 +67,7 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
         categoryName = "INVALID";
         break;
     }
+#endif
     
     // Parse json to figure out what to do
     SF::JSON jsonParser;
@@ -82,18 +84,18 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
         jsonParser.GetSafeValueString(_json["target"], "safety_coordinator");
     const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
     if (targetProcessName.compare("*") != 0 && (targetProcessName != thisProcessName)) {
-        SFLOG_INFO << "targetProcessName: " << targetProcessName
-                   << ", thisProcessName: " << thisProcessName
-                   << ", owner: " << OwnerName
-                   << ", topic: " << TopicName 
-                   << ", category: " << categoryName
-                   << ", json: " << _json
-                   << std::endl;
+        //SFLOG_INFO << "targetProcessName: " << targetProcessName
+                   //<< ", thisProcessName: " << thisProcessName
+                   //<< ", owner: " << OwnerName
+                   //<< ", topic: " << TopicName 
+                   //<< ", category: " << categoryName
+                   //<< ", json: " << _json
+                   //<< std::endl;
         return;
     }
 
     // Get request
-    const std::string targetComponentName = 
+    const std::string targetComponentName =
         jsonParser.GetSafeValueString(_json["target"], "component");
     const std::string request =
         jsonParser.GetSafeValueString(_json, "request");
@@ -114,14 +116,14 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
             inputs.push_back(jsonInputData[i].asDouble());
 
         std::stringstream ss;
-        if (sc->InjectInputToFilter(fuid, inputs))
+        if (sc->InjectInputToFilter(fuid, inputs)) {
             ss << "{ \"cmd\": \"message\", \"msg\": \"Successfully injected input data: ";
-        else
-            ss << "{ \"cmd\": \"message\", \"msg\": \"Failed to inject input data: ";
-
-        for (size_t i = 0; i < inputs.size(); ++i)
-            ss << std::setprecision(5) << inputs[i] << " ";
-        ss << " (target filter " << fuid << ")\" }";
+            for (size_t i = 0; i < inputs.size(); ++i)
+                ss << std::setprecision(5) << inputs[i] << " ";
+            ss << " (target filter " << fuid << ")\" }";
+        }
+        //else
+            //ss << "{ \"cmd\": \"message\", \"msg\": \"Failed to inject input data: ";
 
         replyData = ss.str();
     }

@@ -77,10 +77,6 @@ public:
     //! Destructor
     ~mtsSafetyCoordinator();
 
-    // Read and process configuration file that contains definition for events and filters
-    bool ReadConfigFile(const std::string & jsonFileName);
-    bool ReadConfigFileFramework(const std::string & jsonFileName, const std::string & componentName);
-
     //-------------------------------------------------- 
     //  Monitors
     //-------------------------------------------------- 
@@ -97,17 +93,8 @@ public:
     //-------------------------------------------------- 
     //  Filters
     //-------------------------------------------------- 
-    //! Install filter using filter instance
+    //! Install filter using filter instance (cisst-specific)
     bool AddFilter(SF::FilterBase * filter);
-    //! Install filter from JSON
-    bool AddFilters(const SF::JSON::JSONVALUE & filters);
-    //! Install filter from JSON string
-    bool AddFilterFromJSON(const std::string & jsonString);
-    //! Install filter from JSON file
-    bool AddFilterFromJSONFile(const std::string & jsonFileName);
-    //! Install filter from JSON file with target component specified
-    bool AddFilterFromJSONFileToComponent(const std::string & jsonFileName,
-                                          const std::string & targetComponentName);
 
     //! Deploy all monitors and FDDs that are installed so far.
     /*! MJ: Right now, this method should be called main.cpp but could be moved
@@ -134,7 +121,7 @@ public:
     bool OnEventHandler(const SF::Event * event);
 
     // TEMP: refer to casros/libs/supervisor/coorinator.h
-    bool PublishStateChangeMessage(const std::string & msg);
+    bool PublishMessage(SF::Topic::Control::CategoryType category, const std::string & msg);
 
     //-------------------------------------------------- 
     //  Misc.
