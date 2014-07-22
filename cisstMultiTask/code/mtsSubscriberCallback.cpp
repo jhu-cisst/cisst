@@ -54,21 +54,27 @@ void mtsSubscriberCallback::Callback(const std::string & json)
 void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType category,
                                             const std::string & json)
 {
-#if 0 
-    std::string categoryName;
     switch (category) {
     case SF::Topic::Control::COMMAND:
-        categoryName = "COMMAND";
+        CallbackProcess_COMMAND(json);
         break;
     case SF::Topic::Control::READ_REQ:
-        categoryName = "READ_REQ";
+        CallbackProcess_READ_REQ(json);
+        break;
+    case SF::Topic::Control::STATE_UPDATE:
+        CallbackProcess_STATE_UPDATE(json);
         break;
     default:
-        categoryName = "INVALID";
         break;
     }
-#endif
+}
     
+void mtsSubscriberCallback::CallbackProcess_COMMAND(const std::string & json)
+{
+}
+
+void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
+{
     // Parse json to figure out what to do
     SF::JSON jsonParser;
     if (!jsonParser.Read(json.c_str())) {
@@ -144,6 +150,85 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
         SFLOG_ERROR << "Failed to publish DATA | READ_RES" << std::endl;
 }
 
+void mtsSubscriberCallback::CallbackProcess_STATE_UPDATE(const std::string & json)
+{
+    // Parse json to figure out what to do
+    SF::JSON jsonParser;
+    if (!jsonParser.Read(json.c_str())) {
+        SFLOG_ERROR << "Failed to parse JSON (maybe corrupted or invalid format): \"" << json << std::endl;
+        return;
+    }
+
+    std::cout << "############## CallbackProcess_STATE_UPDATE: \n" << json << std::endl;
+#if 0
+    const JSON::JSONVALUE & _json = jsonParser.GetRoot();
+
+    // Get target safety coordinator (assigned as process name in cisst)
+    //const std::string targetProcessName = jsonParser.GetSafeValueString(_json, "target");
+    const std::string targetProcessName = 
+        jsonParser.GetSafeValueString(_json["target"], "safety_coordinator");
+    const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
+    if (targetProcessName.compare("*") != 0 && (targetProcessName != thisProcessName)) {
+        //SFLOG_INFO << "targetProcessName: " << targetProcessName
+                   //<< ", thisProcessName: " << thisProcessName
+                   //<< ", owner: " << OwnerName
+                   //<< ", topic: " << TopicName 
+                   //<< ", category: " << categoryName
+                   //<< ", json: " << _json
+                   //<< std::endl;
+        return;
+    }
+
+    // Get request
+    const std::string targetComponentName =
+        jsonParser.GetSafeValueString(_json["target"], "component");
+    const std::string request =
+        jsonParser.GetSafeValueString(_json, "request");
+
+    mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
+    SFASSERT(sc);
+
+    std::string replyData;
+    if (request.compare("filter_list") == 0)
+        replyData = sc->GetFilterList(targetComponentName);
+    else if (request.compare("filter_inject") == 0) {
+        const SF::FilterBase::FilterIDType fuid = 
+            jsonParser.GetSafeValueUInt(_json["target"], "fuid");
+
+        SF::DoubleVecType inputs;
+        const JSON::JSONVALUE & jsonInputData = _json["input"];
+        for (size_t i = 0; i < jsonInputData.size(); ++i)
+            inputs.push_back(jsonInputData[i].asDouble());
+
+        std::stringstream ss;
+        if (sc->InjectInputToFilter(fuid, inputs)) {
+            ss << "{ \"cmd\": \"message\", \"msg\": \"Successfully injected input data: ";
+            for (size_t i = 0; i < inputs.size(); ++i)
+                ss << std::setprecision(5) << inputs[i] << " ";
+            ss << " (target filter " << fuid << ")\" }";
+        }
+        //else
+            //ss << "{ \"cmd\": \"message\", \"msg\": \"Failed to inject input data: ";
+
+        replyData = ss.str();
+    }
+    else if (request.compare("state_list") == 0)
+        replyData = sc->GetStateSnapshot(targetComponentName);
+    else if (request.compare("event_list") == 0)
+        replyData = sc->GetEventList(targetComponentName);
+    else {
+        SFLOG_ERROR << "Invalid request command: " << request << std::endl;
+        return;
+    }
+
+    // Reply back with data requested
+    SF::Publisher * publisher = sc->GetCasrosAccessor()->GetPublisher(SF::Topic::DATA);
+    SFASSERT(publisher);
+
+    if (!publisher->PublishData(SF::Topic::Data::READ_RES, replyData))
+        SFLOG_ERROR << "Failed to publish DATA | READ_RES" << std::endl;
+#endif
+}
 void mtsSubscriberCallback::CallbackData(SF::Topic::Data::CategoryType category,
                                          const std::string & json)
 {

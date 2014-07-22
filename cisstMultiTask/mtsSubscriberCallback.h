@@ -40,6 +40,10 @@ protected:
 
     MessagesType Messages;
 
+    void CallbackProcess_COMMAND(const std::string & json);
+    void CallbackProcess_READ_REQ(const std::string & json);
+    void CallbackProcess_STATE_UPDATE(const std::string & json);
+
 public:
     mtsSubscriberCallback(const std::string & owner, const std::string & topic);
     ~mtsSubscriberCallback();
