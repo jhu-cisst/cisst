@@ -137,6 +137,8 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
         replyData = sc->GetStateSnapshot(targetComponentName);
     else if (request.compare("event_list") == 0)
         replyData = sc->GetEventList(targetComponentName);
+    else if (request.compare("connection_list") == 0)
+        replyData = sc->GetConnectionList(targetComponentName, "\t");
     else {
         SFLOG_ERROR << "Invalid request command: " << request << std::endl;
         return;
