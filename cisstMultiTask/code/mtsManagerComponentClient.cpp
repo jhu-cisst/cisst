@@ -1193,6 +1193,20 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
                        connectionDescription.Client.ComponentName, connectionDescription.Client.InterfaceName,
                        connectionDescription.Server.ComponentName, connectionDescription.Server.InterfaceName);
 
+#if CISST_HAS_SAFETY_PLUGINS
+    // Register connection information to Safety Coordinator
+    mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
+    if (!sc->AddConnection(connectionDescription.Client.ProcessName,
+                           connectionDescription.Client.ComponentName,
+                           connectionDescription.Client.InterfaceName,
+                           connectionDescription.Server.ProcessName,
+                           connectionDescription.Server.ComponentName,
+                           connectionDescription.Server.InterfaceName))
+    {
+        CMN_LOG_CLASS_RUN_ERROR << "Failed to add connection to Safety Coordinator: " << connectionDescription << std::endl;
+    }
+#endif
+
     CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnect: successfully connected: " << connectionDescription << std::endl;
     // result = true;
 }

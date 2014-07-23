@@ -159,7 +159,16 @@ void mtsSubscriberCallback::CallbackProcess_STATE_UPDATE(const std::string & jso
         return;
     }
 
-    std::cout << "############## CallbackProcess_STATE_UPDATE: \n" << json << std::endl;
+    SFLOG_DEBUG << "CallbackProcess_STATE_UPDATE received: \n" << json << std::endl;
+
+    mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
+    SFASSERT(sc);
+
+    if (!sc->OnEventPropagation(jsonParser.GetRoot()["update"])) {
+        SFLOG_ERROR << "CallbackProcess_STATE_UPDATE: Failed to process event propagation information: json = \n" << json << std::endl;
+        return;
+    }
+
 #if 0
     const JSON::JSONVALUE & _json = jsonParser.GetRoot();
 
@@ -185,8 +194,6 @@ void mtsSubscriberCallback::CallbackProcess_STATE_UPDATE(const std::string & jso
     const std::string request =
         jsonParser.GetSafeValueString(_json, "request");
 
-    mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-    SFASSERT(sc);
 
     std::string replyData;
     if (request.compare("filter_list") == 0)
