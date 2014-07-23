@@ -111,7 +111,9 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
 
     std::string replyData;
     if (request.compare("filter_list") == 0)
-        replyData = sc->GetFilterList(targetComponentName);
+        replyData = sc->GetFilterList(targetComponentName, false); // verbose: false
+    else if (request.compare("filter_info") == 0)
+        replyData = sc->GetFilterList(targetComponentName, true); // verbose: true
     else if (request.compare("filter_inject") == 0) {
         const SF::FilterBase::FilterIDType fuid = 
             jsonParser.GetSafeValueUInt(_json["target"], "fuid");
