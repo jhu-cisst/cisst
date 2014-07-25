@@ -1179,7 +1179,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         // Install internal framework filters only to mtsTask-type components
         mtsTask * task = GetComponentAsTask(componentName);
         if (task) {
-            if (!InstallFrameworkFilters(componentName))
+            if (!InstallFrameworkFiltersAndEvents(componentName))
                 CMN_LOG_CLASS_INIT_ERROR << "AddComponent: Failed to install framework events and filters to component \"" << componentName << "\"" << std::endl;
         }
 #endif
@@ -3217,15 +3217,39 @@ void mtsManagerLocal::InstallSafetyCoordinator(void)
     InstallCoordinator = true;
 }
 
-bool mtsManagerLocal::InstallFrameworkFilters(const std::string & componentName)
+bool mtsManagerLocal::InstallFrameworkFiltersAndEvents(const std::string & componentName)
 {
     if (!SafetyCoordinator) {
         CMN_LOG_CLASS_RUN_WARNING << "No Safety Coordinator deployed: skip filter installation on component \"" << componentName << "\"" << std::endl;
         return true;
     }
 
-    const std::string jsonFileName(SF_SOURCE_ROOT_DIR"/libs/fdd/filters/json/framework_filters.json");
+    // load framework indepdendent configuration file
+    const std::string casrosJson(SF_SOURCE_ROOT_DIR"/libs/fdd/filters/json/framework_filters.json");
+    CMN_ASSERT(cmnPath::Exists(casrosJson));
 
-    return SafetyCoordinator->ReadConfigFileFramework(jsonFileName, componentName);
+    if (!SafetyCoordinator->ReadConfigFileFramework(casrosJson, componentName)) {
+        CMN_LOG_CLASS_INIT_ERROR << "InstallFrameworkFiltersAndEvents: Failed to install casros json for component \"" << componentName << "\"" << std::endl;
+        return false;
+    }
+
+    // load cisst-specific configuration file
+    cmnPath path;
+#if CISST_HAS_IOS
+    path.Add("./");
+#else
+    path.AddRelativeToCisstShare("cisstMultiTask/casros");
+    path.AddFromEnvironment("PATH", cmnPath::TAIL);
+#endif
+
+    const std::string cisstJson = path.Find("cisst_casros.json");
+    CMN_LOG_CLASS_RUN_DEBUG << "cisst framework configuration file for CASROS: " << cisstJson << std::endl;
+
+    if (!cmnPath::Exists(cisstJson)) {
+        CMN_LOG_CLASS_INIT_ERROR << "InstallFrameworkFiltersAndEvents: Failed to install framework filters and events for component \"" << componentName << "\"" << std::endl;
+        return false;
+    }
+
+    return SafetyCoordinator->ReadConfigFileFramework(cisstJson, componentName);
 }
 #endif

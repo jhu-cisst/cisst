@@ -379,8 +379,8 @@ public:
         supervisor component needs to be installed. */
     static void InstallSafetyCoordinator(void);
 
-    /*! Install framework filters */
-    bool InstallFrameworkFilters(const std::string & componentName);
+    /*! Read casros configuration file and install framework filters and events for component */
+    bool InstallFrameworkFiltersAndEvents(const std::string & componentName);
 #endif
 
 public:
