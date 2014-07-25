@@ -52,8 +52,15 @@ public:
         ArgumentPrototype(0)
     {}
 
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandWriteBase(const std::string & name):
         BaseType(name),
+#else
+    mtsCommandWriteBase(const std::string & name,
+                        const std::string & componentName,
+                        const std::string & interfaceName):
+        BaseType(name, componentName, interfaceName),
+#endif
         ArgumentPrototype(0)
     {}
 

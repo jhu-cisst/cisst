@@ -413,10 +413,21 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWrite(void (__
 {
     bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerWrite", eventName);
     mtsCommandWriteBase * actualCommand =
+#if !CISST_HAS_SAFETY_PLUGINS
         new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, eventName, __argumentType());
+#else
+        new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, eventName, __argumentType(),
+                                                         this->GetComponentName(), this->Name);
+#endif
     if (queued) {
         if (MailBox)
+#if !CISST_HAS_SAFETY_PLUGINS
             EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWrite<__argumentType>(MailBox, actualCommand, this->ArgumentQueuesSize));
+#else
+            EventHandlersWrite.AddItem(eventName,  
+                                       new mtsCommandQueuedWrite<__argumentType>(MailBox, actualCommand, this->ArgumentQueuesSize,
+                                                                                 this->GetComponentName(), this->Name));
+#endif
         else
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write \"" << eventName << "\"" << std::endl;
     } else {
@@ -437,11 +448,20 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(v
 {
     bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerWriteGeneric", eventName);
     mtsCommandWriteBase * actualCommand =
+#if !CISST_HAS_SAFETY_PLUGINS
         new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, argumentPrototype);
+#else
+        new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, argumentPrototype, this->GetComponentName(), this->Name);
+#endif
     if (queued) {
         // PK: check for MailBox overlaps with code in UseQueueBasedOnInterfacePolicy
         if (MailBox) {
+#if !CISST_HAS_SAFETY_PLUGINS
             mtsCommandQueuedWriteGeneric *tmp = new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize);
+#else
+            mtsCommandQueuedWriteGeneric *tmp = new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize,
+                                                                                 this->GetComponentName(), this->Name);
+#endif
             if (argumentPrototype)
                 tmp->SetArgumentPrototype(argumentPrototype);
             EventHandlersWrite.AddItem(eventName,  tmp);

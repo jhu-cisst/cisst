@@ -121,9 +121,17 @@ public:
       by the invoker of the command
       \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandWrite(ActionType action, ClassType * classInstantiation, const std::string & name,
                     const ArgumentType & argumentPrototype):
         BaseType(name),
+#else
+    mtsCommandWrite(ActionType action, ClassType * classInstantiation, const std::string & name,
+                    const ArgumentType & argumentPrototype,
+                    const std::string & componentName,
+                    const std::string & interfaceName):
+        BaseType(name, componentName, interfaceName),
+#endif
         Action(action),
         ClassInstantiation(classInstantiation)
     {
@@ -220,9 +228,17 @@ public:
       by the invoker of the command
       \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandWriteGeneric(ActionType action, ClassType * classInstantiation, const std::string & name,
                            const mtsGenericObject * argumentPrototype):
         BaseType(name),
+#else
+    mtsCommandWriteGeneric(ActionType action, ClassType * classInstantiation, const std::string & name,
+                           const mtsGenericObject * argumentPrototype,
+                           const std::string & componentName,
+                           const std::string & interfaceName):
+        BaseType(name, componentName, interfaceName),
+#endif
         Action(action),
         ClassInstantiation(classInstantiation)
     {

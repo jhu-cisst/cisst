@@ -60,7 +60,14 @@ public:
 
     /*! Constructor. Command proxy is disabled by defaultand is enabled when
       command id and network proxy are set. */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandWriteProxy(const std::string & commandName) : BaseType(commandName) {
+#else
+    mtsCommandWriteProxy(const std::string & commandName,
+                         const std::string & componentName,
+                         const std::string & interfaceName)
+        : BaseType(commandName, componentName, interfaceName) {
+#endif
         Disable();
     }
 

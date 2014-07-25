@@ -74,9 +74,17 @@ private:
 
 public:
 
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandQueuedVoidReturnBase(CallableType * callable, const std::string & name,
                                    const mtsGenericObject * resultPrototype,
                                    mtsMailBox * mailBox, size_t size);
+#else
+    mtsCommandQueuedVoidReturnBase(CallableType * callable, const std::string & name,
+                                   const mtsGenericObject * resultPrototype,
+                                   mtsMailBox * mailBox, size_t size,
+                                   const std::string & componentName,
+                                   const std::string & interfaceName);
+#endif
 
     /*! Destructor */
     virtual ~mtsCommandQueuedVoidReturnBase();

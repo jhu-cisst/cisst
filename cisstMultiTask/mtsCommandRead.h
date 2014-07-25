@@ -63,7 +63,13 @@ public:
     /*! The constructor. Does nothing */
     mtsCommandRead(void);
 
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandRead(const std::string & name);
+#else
+    mtsCommandRead(const std::string & name,
+                   const std::string & componentName,
+                   const std::string & interfaceName);
+#endif
 
 
     /*! The constructor.
@@ -71,9 +77,17 @@ public:
       by the invoker of the command
       \param name A string to identify the command
       \param argumentPrototype An instance of the argument being used */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandRead(mtsCallableReadBase * callable,
                    const std::string & name,
                    const mtsGenericObject * argumentPrototype);
+#else
+    mtsCommandRead(mtsCallableReadBase * callable,
+                   const std::string & name,
+                   const mtsGenericObject * argumentPrototype,
+                   const std::string & componentName,
+                   const std::string & interfaceName);
+#endif
 
     /*! The destructor. Does nothing */
     ~mtsCommandRead();

@@ -50,7 +50,11 @@ protected:
     mtsQueue<mtsCommandWriteBase *> FinishedEventQueue;
 
     inline mtsCommandQueuedWriteBase(void):
+#if !CISST_HAS_SAFETY_PLUGINS
         BaseType("??"),
+#else
+        BaseType("??", "NONAME", "NONAME"),
+#endif
         MailBox(0),
         ActualCommand(0),
         BlockingFlagQueue(0, MTS_NOT_BLOCKING)
@@ -60,8 +64,17 @@ protected:
     }
 
 public:
+#if !CISST_HAS_SAFETY_PLUGINS
     inline mtsCommandQueuedWriteBase(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
         BaseType(actualCommand->GetName()),
+#else
+    inline mtsCommandQueuedWriteBase(mtsMailBox * mailBox,
+                                     mtsCommandWriteBase * actualCommand,
+                                     size_t size,
+                                     const std::string & componentName,
+                                     const std::string & interfaceName):
+        BaseType(actualCommand->GetName(), componentName, interfaceName),
+#endif
         MailBox(mailBox),
         ActualCommand(actualCommand),
         BlockingFlagQueue(size, MTS_NOT_BLOCKING)

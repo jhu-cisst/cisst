@@ -55,7 +55,13 @@ protected:
 
 public:
     /*! Default constructor. Does nothing. */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsMulticastCommandVoid(const std::string & name);
+#else
+    mtsMulticastCommandVoid(const std::string & name,
+                            const std::string & componentName,
+                            const std::string & interfaceName);
+#endif
 
     /*! Default destructor. Does nothing. */
     ~mtsMulticastCommandVoid();

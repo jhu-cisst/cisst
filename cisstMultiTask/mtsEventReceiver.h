@@ -153,7 +153,11 @@ public:
     ~mtsEventReceiverVoid();
 
     /*! Called from mtsInterfaceRequired::BindCommandsAndEvents */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandVoid * GetCommand(void);
+#else
+    mtsCommandVoid * GetCommand(const std::string & componentName, const std::string & interfaceName);
+#endif
 
     /*! Called from mtsInterfaceRequired::AddEventHandlerVoid */
     void SetHandlerCommand(mtsCommandVoid * commandHandler);
@@ -191,7 +195,11 @@ public:
     ~mtsEventReceiverWrite();
 
     /*! Called from mtsInterfaceRequired::BindCommandsAndEvents */
-    mtsCommandWriteBase *GetCommand();
+#if !CISST_HAS_SAFETY_PLUGINS
+    mtsCommandWriteBase *GetCommand(void);
+#else
+    mtsCommandWriteBase *GetCommand(const std::string & componentName, const std::string & interfaceName);
+#endif
 
     /*! Called from mtsInterfaceRequired::AddEventHandlerWrite */
     void SetHandlerCommand(mtsCommandWriteBase * commandHandler);

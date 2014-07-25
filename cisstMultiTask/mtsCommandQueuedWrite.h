@@ -66,14 +66,27 @@ public:
     {}
 
 
+#if !CISST_HAS_SAFETY_PLUGINS
     inline mtsCommandQueuedWrite(mtsCommandWriteBase * actualCommand):
         BaseType(0, actualCommand, 0),
+#else
+    inline mtsCommandQueuedWrite(mtsCommandWriteBase * actualCommand,
+                                 const std::string & componentName,
+                                 const std::string & interfaceName):
+        BaseType(0, actualCommand, 0, componentName, interfaceName),
+#endif
         ArgumentsQueue(0, ArgumentQueueType())
     {}
 
 
+#if !CISST_HAS_SAFETY_PLUGINS
     inline mtsCommandQueuedWrite(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
         BaseType(mailBox, actualCommand, size),
+#else
+    inline mtsCommandQueuedWrite(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size,
+                                 const std::string & componentName, const std::string & interfaceName):
+        BaseType(mailBox, actualCommand, size, componentName, interfaceName),
+#endif
         ArgumentsQueue(0, ArgumentQueueType())
     {
         const ArgumentQueueType * argumentPrototype = dynamic_cast<const ArgumentQueueType *>(this->GetArgumentPrototype());
@@ -94,7 +107,11 @@ public:
 
 
     inline virtual mtsCommandQueuedWriteBase * Clone(mtsMailBox * mailBox, size_t size) const {
+#if !CISST_HAS_SAFETY_PLUGINS
         return new mtsCommandQueuedWrite(mailBox, this->ActualCommand, size);
+#else
+        return new mtsCommandQueuedWrite(mailBox, this->ActualCommand, size, this->ComponentName, this->InterfaceName);
+#endif
     }
 
 
@@ -231,7 +248,12 @@ public:
       potentially occur later, i.e. when SetArgumentPrototype is
       used.  This is useful when the queued command is added to a
       multicast command. */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandQueuedWriteGeneric(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size);
+#else
+    mtsCommandQueuedWriteGeneric(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size,
+                                 const std::string & componentName, const std::string & interfaceName);
+#endif
 
 
     /*! Destructor */
@@ -241,7 +263,11 @@ public:
     virtual void ToStream(std::ostream & outputStream) const;
 
     inline virtual mtsCommandQueuedWriteGeneric * Clone(mtsMailBox * mailBox, size_t size) const {
+#if !CISST_HAS_SAFETY_PLUGINS
         return new mtsCommandQueuedWriteGeneric(mailBox, this->ActualCommand, size);
+#else
+        return new mtsCommandQueuedWriteGeneric(mailBox, this->ActualCommand, size, this->ComponentName, this->InterfaceName);
+#endif
     }
 
 

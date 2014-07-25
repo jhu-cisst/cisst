@@ -51,6 +51,12 @@ protected:
       constructor and can be accessed using the method GetName(). */
     std::string Name;
 
+#if CISST_HAS_SAFETY_PLUGINS
+    // Names to identify command owner
+    const std::string ComponentName;
+    const std::string InterfaceName;
+#endif
+
     /*! Flag used to determine is the command actually executes the
       provided method or function.  This "gated" command can be useful
       to turn on/off and event callback or to prevent calling a method
@@ -61,12 +67,25 @@ public:
     /*! The constructor. Does nothing */
     inline mtsCommandBase(void):
         Name("??"),
+#if CISST_HAS_SAFETY_PLUGINS
+        ComponentName("NONAME"),
+        InterfaceName("NONAME"),
+#endif
         EnableFlag(true)
     {}
 
     /*! Constructor with command name. */
+#if !CISST_HAS_SAFETY_PLUGINS
     inline mtsCommandBase(const std::string & name):
         Name(name),
+#else
+    inline mtsCommandBase(const std::string & name,
+                          const std::string & componentName,
+                          const std::string & interfaceName):
+        Name(name),
+        ComponentName(componentName),
+        InterfaceName(interfaceName),
+#endif
         EnableFlag(true)
     {}
 
@@ -116,6 +135,10 @@ public:
     inline const std::string & GetName(void) const {
         return this->Name;
     }
+#if CISST_HAS_SAFETY_PLUGINS
+    inline const std::string & GetComponentName(void) const { return ComponentName; }
+    inline const std::string & GetInterfaceName(void) const { return InterfaceName; }
+#endif
 };
 
 

@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCallableVoidBase.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 mtsCommandQueuedVoid::mtsCommandQueuedVoid(void):
     BaseType(),
@@ -30,8 +31,15 @@ mtsCommandQueuedVoid::mtsCommandQueuedVoid(void):
 mtsCommandQueuedVoid::mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
                                            const std::string & name,
                                            mtsMailBox * mailBox,
+#if !CISST_HAS_SAFETY_PLUGINS
                                            size_t size):
     BaseType(callable, name),
+#else
+                                           size_t size,
+                                           const std::string & componentName,
+                                           const std::string & interfaceName):
+    BaseType(callable, name, componentName, interfaceName),
+#endif
     MailBox(mailBox),
     BlockingFlagQueue(size, MTS_NOT_BLOCKING),
     FinishedEventQueue()
@@ -43,8 +51,13 @@ mtsCommandQueuedVoid::mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
 
 mtsCommandQueuedVoid * mtsCommandQueuedVoid::Clone(mtsMailBox * mailBox, size_t size) const
 {
+#if !CISST_HAS_SAFETY_PLUGINS
     return new mtsCommandQueuedVoid(this->Callable, this->Name,
                                     mailBox, size);
+#else
+    return new mtsCommandQueuedVoid(this->Callable, this->Name,
+                                    mailBox, size, this->ComponentName, this->InterfaceName);
+#endif
 }
 
 
@@ -68,12 +81,32 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
     }
     // check if all queues have some space
     if (BlockingFlagQueue.IsFull() || FinishedEventQueue.IsFull()|| MailBox->IsFull()) {
+        /*
         CMN_LOG_RUN_WARNING << "Class mtsCommandQueuedVoid: Execute: Queue full for \""
                             << this->Name << "\" ["
                             << BlockingFlagQueue.IsFull() << "|"
                             << FinishedEventQueue.IsFull() << "|"
-                            << MailBox->IsFull() << "]"
-                            << std::endl;
+                            << MailBox->IsFull() << "]";
+        */
+        std::stringstream ss;
+        ss << "Class mtsCommandQueuedVoid: Execute: Queue full for \""
+           << this->Name << "\" ["
+           << BlockingFlagQueue.IsFull() << "|"
+           << FinishedEventQueue.IsFull() << "|"
+           << MailBox->IsFull() << "]";
+#if CISST_HAS_SAFETY_PLUGINS
+        GetSafetyCoordinator->GenerateEvent(// event name
+                                            "/EVT_QUEUE_FULL",
+                                            // statemachine type
+                                            SF::State::STATEMACHINE_PROVIDED,
+                                            // description
+                                            ss.str(),
+                                            // component name
+                                            "TODO",
+                                            // interface name
+                                            "TODO");
+#endif
+        CMN_LOG_RUN_WARNING << ss.str() << std::endl;
         return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
     }
     // copy the blocking flag to the local storage.

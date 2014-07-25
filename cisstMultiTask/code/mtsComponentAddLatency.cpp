@@ -358,9 +358,16 @@ bool mtsComponentAddLatency::AddCommandWriteDelayedInternal(const mtsGenericObje
         = new mtsComponentAddLatencyDelayedWrite(commandRequiredName);
     interfaceRequired->AddFunction(commandRequiredName, delayedWrite->Function, MTS_REQUIRED);
     delayedWrite->Command
+#if !CISST_HAS_SAFETY_PLUGINS
         = new mtsCommandWriteGeneric<mtsComponentAddLatencyDelayedWrite>(&mtsComponentAddLatencyDelayedWrite::Method, delayedWrite,
                                                                          commandProvidedName == "" ? commandRequiredName : commandProvidedName,
                                                                          &data);
+#else
+        = new mtsCommandWriteGeneric<mtsComponentAddLatencyDelayedWrite>(&mtsComponentAddLatencyDelayedWrite::Method, delayedWrite,
+                                                                         commandProvidedName == "" ? commandRequiredName : commandProvidedName,
+                                                                         &data,
+                                                                         this->Name, interfaceProvided->GetName());
+#endif
     interfaceProvided->AddCommandWrite(delayedWrite->Command);
     DelayedWrites.push_back(delayedWrite);
     return true;

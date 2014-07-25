@@ -78,10 +78,19 @@ private:
 public:
 
     /*! Constructor */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandQueuedWriteReturnBase(CallableType * callable, const std::string & name,
                                     const mtsGenericObject * argumentPrototype,
                                     const mtsGenericObject * resultPrototype,
                                     mtsMailBox * mailBox, size_t size);
+#else
+    mtsCommandQueuedWriteReturnBase(CallableType * callable, const std::string & name,
+                                    const mtsGenericObject * argumentPrototype,
+                                    const mtsGenericObject * resultPrototype,
+                                    mtsMailBox * mailBox, size_t size,
+                                    const std::string & componentName,
+                                    const std::string & interfaceName);
+#endif
 
     /*! Destructor */
     virtual ~mtsCommandQueuedWriteReturnBase();

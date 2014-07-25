@@ -25,17 +25,33 @@ http://www.cisst.org/cisst/license.txt.
 mtsCommandWriteReturn::mtsCommandWriteReturn(void)
 {}
 
-
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandWriteReturn::mtsCommandWriteReturn(const std::string & name):
     BaseType(name)
+#else
+mtsCommandWriteReturn::mtsCommandWriteReturn(const std::string & name,
+                                             const std::string & componentName,
+                                             const std::string & interfaceName):
+    BaseType(name, componentName, interfaceName)
+#endif
 {}
 
 
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandWriteReturn::mtsCommandWriteReturn(mtsCallableWriteReturnBase * callable,
                                              const std::string & name,
                                              const mtsGenericObject * argumentPrototype,
                                              const mtsGenericObject * resultPrototype):
     BaseType(name),
+#else
+mtsCommandWriteReturn::mtsCommandWriteReturn(mtsCallableWriteReturnBase * callable,
+                                             const std::string & name,
+                                             const mtsGenericObject * argumentPrototype,
+                                             const mtsGenericObject * resultPrototype,
+                                             const std::string & componentName,
+                                             const std::string & interfaceName):
+    BaseType(name, componentName, interfaceName),
+#endif
     Callable(callable),
     ArgumentPrototype(argumentPrototype),
     ResultPrototype(resultPrototype)

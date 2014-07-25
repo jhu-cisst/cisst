@@ -26,18 +26,34 @@ mtsCommandRead::mtsCommandRead(void):
 {}
 
 
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandRead::mtsCommandRead(const std::string & name):
     BaseType(name),
+#else
+mtsCommandRead::mtsCommandRead(const std::string & name,
+                               const std::string & componentName,
+                               const std::string & interfaceName):
+    BaseType(name, componentName, interfaceName),
+#endif
     Callable(0),
     ArgumentPrototype(0)
 {
 }
 
 
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandRead::mtsCommandRead(mtsCallableReadBase * callable,
                                const std::string & name,
                                const mtsGenericObject * argumentPrototype):
     BaseType(name),
+#else
+mtsCommandRead::mtsCommandRead(mtsCallableReadBase * callable,
+                               const std::string & name,
+                               const mtsGenericObject * argumentPrototype,
+                               const std::string & componentName,
+                               const std::string & interfaceName):
+    BaseType(name, componentName, interfaceName),
+#endif
     Callable(callable),
     ArgumentPrototype(argumentPrototype)
 {

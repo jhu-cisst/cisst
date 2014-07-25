@@ -26,15 +26,31 @@ mtsCommandVoidReturn::mtsCommandVoidReturn(void)
 {}
 
 
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandVoidReturn::mtsCommandVoidReturn(const std::string & name):
     BaseType(name)
+#else
+mtsCommandVoidReturn::mtsCommandVoidReturn(const std::string & name,
+                                           const std::string & componentName,
+                                           const std::string & interfaceName):
+    BaseType(name, componentName, interfaceName)
+#endif
 {}
 
 
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandVoidReturn::mtsCommandVoidReturn(mtsCallableVoidReturnBase * callable,
                                            const std::string & name,
                                            const mtsGenericObject * resultPrototype):
     BaseType(name),
+#else
+mtsCommandVoidReturn::mtsCommandVoidReturn(mtsCallableVoidReturnBase * callable,
+                                           const std::string & name,
+                                           const mtsGenericObject * resultPrototype,
+                                           const std::string & componentName,
+                                           const std::string & interfaceName):
+    BaseType(name, componentName, interfaceName),
+#endif
     Callable(callable),
     ResultPrototype(resultPrototype)
 {}

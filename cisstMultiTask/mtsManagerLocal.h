@@ -74,7 +74,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-// Helper macro (useful to connect interfaces in main.cpp)
+// Helper macros
 #define CONNECT_LOCAL(_clientComp, _reqInt, _serverComp, _prvInt)\
     if (!mtsManagerLocal::GetInstance()->Connect(_clientComp, _reqInt, _serverComp, _prvInt)) {\
         CMN_LOG_INIT_ERROR << "Failed to connect: "\
@@ -90,6 +90,8 @@ http://www.cisst.org/cisst/license.txt.
                            << _serverProc << ":" << _serverComp << ":" << _prvInt << std::endl;\
         exit(1);\
     }
+
+#define GetSafetyCoordinator mtsManagerLocal::GetInstance()->GetCoordinator()
 
 class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
 {

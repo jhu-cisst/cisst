@@ -671,7 +671,11 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList & eventList)
          iterReceiverVoid != EventReceiversVoid.end();
          iterReceiverVoid++) {
         eventList.VoidEvents.push_back(mtsEventHandlerList::InfoVoid(iterReceiverVoid->first,
+#if !CISST_HAS_SAFETY_PLUGINS
                                                                      iterReceiverVoid->second->Pointer->GetCommand(),
+#else
+                                                                     iterReceiverVoid->second->Pointer->GetCommand(this->GetComponentName(), this->Name),
+#endif
                                                                      iterReceiverVoid->second->Required));
     }
 
@@ -680,7 +684,11 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList & eventList)
          iterReceiverWrite != EventReceiversWrite.end();
          iterReceiverWrite++) {
         eventList.WriteEvents.push_back(mtsEventHandlerList::InfoWrite(iterReceiverWrite->first,
+#if !CISST_HAS_SAFETY_PLUGINS
                                                                        iterReceiverWrite->second->Pointer->GetCommand(),
+#else
+                                                                       iterReceiverWrite->second->Pointer->GetCommand(this->GetComponentName(), this->Name),
+#endif
                                                                        iterReceiverWrite->second->Required));
     }
 
@@ -870,12 +878,20 @@ mtsCommandVoid * mtsInterfaceRequired::AddEventHandlerVoid(mtsCallableVoidBase *
     bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerVoid", eventName);
     if (queued) {
         if (MailBox) {
+#if !CISST_HAS_SAFETY_PLUGINS
             EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(callable, eventName, MailBox, this->ArgumentQueuesSize));
+#else
+            EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(callable, eventName, MailBox, this->ArgumentQueuesSize, this->GetComponentName(), this->Name));
+#endif
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void \"" << eventName << "\"" << std::endl;
         }
     } else {
+#if !CISST_HAS_SAFETY_PLUGINS
         EventHandlersVoid.AddItem(eventName, new mtsCommandVoid(callable, eventName));
+#else
+        EventHandlersVoid.AddItem(eventName, new mtsCommandVoid(callable, eventName, this->GetComponentName(), this->Name));
+#endif
     }
     mtsCommandVoid * handler = EventHandlersVoid.GetItem(eventName);
     AddEventHandlerToReceiver(eventName, handler);  // does nothing if event receiver does not exist

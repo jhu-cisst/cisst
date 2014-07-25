@@ -25,11 +25,21 @@ http://www.cisst.org/cisst/license.txt.
 
 
 template <class _Base>
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandQueuedWriteReturnBase<_Base>::mtsCommandQueuedWriteReturnBase(CallableType * callable, const std::string & name,
                                                                         const mtsGenericObject * argumentPrototype,
                                                                         const mtsGenericObject * resultPrototype,
                                                                         mtsMailBox * mailBox, size_t size):
     BaseType(callable, name, argumentPrototype, resultPrototype),
+#else
+mtsCommandQueuedWriteReturnBase<_Base>::mtsCommandQueuedWriteReturnBase(CallableType * callable, const std::string & name,
+                                                                        const mtsGenericObject * argumentPrototype,
+                                                                        const mtsGenericObject * resultPrototype,
+                                                                        mtsMailBox * mailBox, size_t size,
+                                                                        const std::string & componentName,
+                                                                        const std::string & interfaceName):
+    BaseType(callable, name, argumentPrototype, resultPrototype, componentName, interfaceName),
+#endif
     MailBox(mailBox),
     ArgumentQueueSize(size),
     ArgumentsQueue(),
@@ -72,7 +82,11 @@ mtsCommandQueuedWriteReturnBase<_Base> * mtsCommandQueuedWriteReturnBase<_Base>:
     return new ThisType(this->Callable, this->Name,
                         this->GetArgumentPrototype(),
                         this->GetResultPrototype(),
+#if !CISST_HAS_SAFETY_PLUGINS
                         mailBox, size);
+#else
+                        mailBox, size, this->ComponentName, this->InterfaceName);
+#endif
 }
 
 template <class _Base>

@@ -68,6 +68,8 @@ protected:
 
     /*! Get a const pointer on the component */
     const mtsComponent * GetComponent(void) const;
+
+    const std::string & GetComponentName(void) const;
 };
 
 

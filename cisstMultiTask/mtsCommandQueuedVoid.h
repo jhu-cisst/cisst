@@ -60,10 +60,19 @@ class CISST_EXPORT mtsCommandQueuedVoid: public mtsCommandVoid
  public:
     mtsCommandQueuedVoid(void);
 
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
                          const std::string & name,
                          mtsMailBox * mailBox,
                          size_t size);
+#else
+    mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
+                         const std::string & name,
+                         mtsMailBox * mailBox,
+                         size_t size,
+                         const std::string & componentName,
+                         const std::string & interfaceName);
+#endif
 
     inline virtual ~mtsCommandQueuedVoid() {}
 

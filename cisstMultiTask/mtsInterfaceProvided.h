@@ -316,8 +316,15 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                  const std::string & commandName,
                                                  const __argumentType & argumentPrototype,
                                                  mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
+#if !CISST_HAS_SAFETY_PLUGINS
         return this->AddCommandWrite(new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, commandName, argumentPrototype),
                                      queueingPolicy);
+#else
+        return this->AddCommandWrite(
+            new mtsCommandWrite<__classType, __argumentType>(
+                method, classInstantiation, commandName, argumentPrototype, this->GetComponentName(), this->Name),
+            queueingPolicy);
+#endif
     }
 
     template <class __classType, class __argumentType>
@@ -790,7 +797,11 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWriteState(const mtsStateT
 template <class __argumentType>
 mtsCommandWriteBase * mtsInterfaceProvided::AddEventWrite(const std::string & eventName,
                                                           const __argumentType & argumentPrototype) {
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsMulticastCommandWriteBase * eventMulticastCommand = new mtsMulticastCommandWrite<__argumentType>(eventName, argumentPrototype);
+#else
+    mtsMulticastCommandWriteBase * eventMulticastCommand = new mtsMulticastCommandWrite<__argumentType>(eventName, argumentPrototype, this->GetComponentName(), this->Name);
+#endif
     if (eventMulticastCommand) {
         if (AddEvent(eventName, eventMulticastCommand)) {
             return eventMulticastCommand;

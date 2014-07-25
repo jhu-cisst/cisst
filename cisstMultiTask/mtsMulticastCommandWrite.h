@@ -52,8 +52,14 @@ public:
 
 public:
     /*! Default constructor. Does nothing. */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsMulticastCommandWrite(const std::string & name, const ArgumentType & argumentPrototype):
         BaseType(name)
+#else
+    mtsMulticastCommandWrite(const std::string & name, const ArgumentType & argumentPrototype,
+                             const std::string & componentName, const std::string & interfaceName):
+        BaseType(name, componentName, interfaceName)
+#endif
     {
         //this->ArgumentPrototype = new ArgumentType(argumentPrototype);
         this->ArgumentPrototype = mtsGenericTypes<ArgumentType>::ConditionalCreate(argumentPrototype, name);
@@ -93,9 +99,17 @@ public:
 
 public:
     /*! Default constructor. Does nothing. */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsMulticastCommandWriteGeneric(const std::string & name,
                                     const mtsGenericObject & argumentPrototype):
         BaseType(name)
+#else
+    mtsMulticastCommandWriteGeneric(const std::string & name,
+                                    const mtsGenericObject & argumentPrototype,
+                                    const std::string & componentName,
+                                    const std::string & interfaceName):
+        BaseType(name, componentName, interfaceName)
+#endif
     {
         this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create(argumentPrototype));
     }

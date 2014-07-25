@@ -349,7 +349,11 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCallableVoidBase * call
         // determine if this should be a queued command or not
         bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddCommandVoid", name);
         if (!queued) {
+#if !CISST_HAS_SAFETY_PLUGINS
             mtsCommandVoid * command = new mtsCommandVoid(callable, name);
+#else
+            mtsCommandVoid * command = new mtsCommandVoid(callable, name, this->GetComponentName(), this->Name);
+#endif
             if (!CommandsVoid.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: unable to add command \""
                                          << command->GetName() << "\"" << std::endl;
@@ -359,7 +363,11 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCallableVoidBase * call
             return command;
         } else {
             // create with no mailbox
+#if !CISST_HAS_SAFETY_PLUGINS
             mtsCommandQueuedVoid * queuedCommand = new mtsCommandQueuedVoid(callable, name, 0, 0);
+#else
+            mtsCommandQueuedVoid * queuedCommand = new mtsCommandQueuedVoid(callable, name, 0, 0, this->GetComponentName(), this->Name);
+#endif
             if (!CommandsVoid.AddItem(name, queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: unable to add queued command \""
                                          << queuedCommand->GetName() << "\"" << std::endl;
@@ -402,7 +410,11 @@ mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCallableVoi
         // determine if this should be a queued command or not
         bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddCommandVoidReturn", name);
         if (!queued) {
+#if !CISST_HAS_SAFETY_PLUGINS
             mtsCommandVoidReturn * command = new mtsCommandVoidReturn(callable, name, resultPrototype);
+#else
+            mtsCommandVoidReturn * command = new mtsCommandVoidReturn(callable, name, resultPrototype, this->GetComponentName(), this->Name);
+#endif
             if (!CommandsVoidReturn.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoidReturn: unable to add command \""
                                          << command->GetName() << "\"" << std::endl;
@@ -412,7 +424,11 @@ mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCallableVoi
             return command;
         } else {
             // create with no mailbox
+#if !CISST_HAS_SAFETY_PLUGINS
             mtsCommandQueuedVoidReturn * queuedCommand = new mtsCommandQueuedVoidReturn(callable, name, resultPrototype, 0, 0);
+#else
+            mtsCommandQueuedVoidReturn * queuedCommand = new mtsCommandQueuedVoidReturn(callable, name, resultPrototype, 0, 0, this->GetComponentName(), this->Name);
+#endif
             if (!CommandsVoidReturn.AddItem(name, queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoidReturn: unable to add queued command \""
                                          << queuedCommand->GetName() << "\"" << std::endl;
@@ -467,7 +483,11 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWrite(mtsCommandWriteBase 
             bool wasCreated = false;
             if (!queuedCommand) {
                 // if not already queued, create with no mailbox
+#if !CISST_HAS_SAFETY_PLUGINS
                 queuedCommand = new mtsCommandQueuedWriteGeneric(0, command, 0);
+#else
+                queuedCommand = new mtsCommandQueuedWriteGeneric(0, command, 0, this->GetComponentName(), this->Name);
+#endif
                 wasCreated = true;
             }
             if (!CommandsWrite.AddItem(command->GetName(), queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
@@ -496,7 +516,11 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableW
         // determine if this should be a queued command or not
         bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddCommandWriteReturn", name);
         if (!queued) {
+#if !CISST_HAS_SAFETY_PLUGINS
             mtsCommandWriteReturn * command = new mtsCommandWriteReturn(callable, name, argumentPrototype, resultPrototype);
+#else
+            mtsCommandWriteReturn * command = new mtsCommandWriteReturn(callable, name, argumentPrototype, resultPrototype, this->GetComponentName(), this->Name);
+#endif
             if (!CommandsWriteReturn.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: unable to add command \""
                                          << command->GetName() << "\"" << std::endl;
@@ -506,7 +530,11 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableW
             return command;
         } else {
             // create with no mailbox
+#if !CISST_HAS_SAFETY_PLUGINS
             mtsCommandQueuedWriteReturn * queuedCommand = new mtsCommandQueuedWriteReturn(callable, name, argumentPrototype, resultPrototype, 0, 0);
+#else
+            mtsCommandQueuedWriteReturn * queuedCommand = new mtsCommandQueuedWriteReturn(callable, name, argumentPrototype, resultPrototype, 0, 0, this->GetComponentName(), this->Name);
+#endif
             if (!CommandsWriteReturn.AddItem(name, queuedCommand, CMN_LOG_LEVEL_INIT_ERROR)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteReturn: unable to add queued command \""
                                          << queuedCommand->GetName() << "\"" << std::endl;
@@ -545,7 +573,11 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCallableReadBase * call
 {
     // check that the input is valid
     if (callable) {
+#if !CISST_HAS_SAFETY_PLUGINS
         mtsCommandRead * command = new mtsCommandRead(callable, name, argumentPrototype);
+#else
+        mtsCommandRead * command = new mtsCommandRead(callable, name, argumentPrototype, this->GetComponentName(), this->Name);
+#endif
         if (!CommandsRead.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
             CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead: unable to add command \""
                                      << command->GetName() << "\"" << std::endl;
@@ -635,7 +667,11 @@ mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(mtsCalla
     // check that the input is valid
     if (callable) {
         mtsCommandQualifiedRead * command =
+#if !CISST_HAS_SAFETY_PLUGINS
             new mtsCommandQualifiedRead(callable, name, argument1Prototype, argument2Prototype);
+#else
+            new mtsCommandQualifiedRead(callable, name, argument1Prototype, argument2Prototype, this->GetComponentName(), this->Name);
+#endif
         if (!CommandsQualifiedRead.AddItem(name, command, CMN_LOG_LEVEL_INIT_ERROR)) {
             CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: unable to add command \""
                                      << command->GetName() << "\"" << std::endl;
@@ -855,7 +891,11 @@ int mtsInterfaceProvided::GetNumberOfEndUsers(void) const
 
 mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventName)
 {
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsMulticastCommandVoid * eventMulticastCommand = new mtsMulticastCommandVoid(eventName);
+#else
+    mtsMulticastCommandVoid * eventMulticastCommand = new mtsMulticastCommandVoid(eventName, this->GetComponentName(), this->Name);
+#endif
     if (eventMulticastCommand) {
         if (AddEvent(eventName, eventMulticastCommand)) {
             return eventMulticastCommand;
@@ -886,7 +926,11 @@ bool mtsInterfaceProvided::AddEventVoid(mtsFunctionVoid & eventTrigger,
 
 mtsCommandWriteBase * mtsInterfaceProvided::AddEventWriteGeneric(const std::string & eventName,
                                                                  const mtsGenericObject & argumentPrototype) {
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsMulticastCommandWriteBase * eventMulticastCommand = new mtsMulticastCommandWriteGeneric(eventName, argumentPrototype);
+#else
+    mtsMulticastCommandWriteBase * eventMulticastCommand = new mtsMulticastCommandWriteGeneric(eventName, argumentPrototype, this->GetComponentName(), this->Name);
+#endif
     if (eventMulticastCommand) {
         if (AddEvent(eventName, eventMulticastCommand)) {
             return eventMulticastCommand;

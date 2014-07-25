@@ -34,8 +34,14 @@ mtsCommandVoid::mtsCommandVoid(void):
 {}
 
 
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandVoid::mtsCommandVoid(mtsCallableVoidBase * callable, const std::string & name):
     BaseType(name),
+#else
+mtsCommandVoid::mtsCommandVoid(mtsCallableVoidBase * callable, const std::string & name,
+                               const std::string & componentName, const std::string & interfaceName):
+    BaseType(name, componentName, interfaceName),
+#endif
     Callable(callable)
 {}
 

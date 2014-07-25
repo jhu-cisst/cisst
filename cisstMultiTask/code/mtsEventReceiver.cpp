@@ -108,10 +108,19 @@ mtsEventReceiverVoid::~mtsEventReceiverVoid()
     delete Command;
 }
 
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandVoid * mtsEventReceiverVoid::GetCommand(void)
+#else
+mtsCommandVoid * mtsEventReceiverVoid::GetCommand(const std::string & componentName, const std::string & interfaceName)
+#endif
 {
     if (!Command) {
+#if !CISST_HAS_SAFETY_PLUGINS
         Command = new mtsCommandVoid(new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this), Name);
+#else
+        Command = new mtsCommandVoid(new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this), Name,
+                                     componentName, interfaceName);
+#endif
     }
     return Command;
 }
@@ -158,10 +167,19 @@ mtsEventReceiverWrite::~mtsEventReceiverWrite()
     delete Command;
 }
 
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandWriteBase *mtsEventReceiverWrite::GetCommand()
+#else
+mtsCommandWriteBase *mtsEventReceiverWrite::GetCommand(const std::string & componentName, const std::string & interfaceName)
+#endif
 {
     if (!Command)
+#if !CISST_HAS_SAFETY_PLUGINS
         Command = new mtsCommandWriteGeneric<mtsEventReceiverWrite>(&mtsEventReceiverWrite::EventHandler, this, Name, 0);
+#else
+        Command = new mtsCommandWriteGeneric<mtsEventReceiverWrite>(&mtsEventReceiverWrite::EventHandler, this, Name, 0,
+                                                                    componentName, interfaceName);
+#endif
     return Command;
 }
 

@@ -39,9 +39,17 @@ public:
 
     /*! Constructor. Command proxy is disabled by default and is enabled when
       command id and network proxy are set. */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandVoidProxyForReturnEvent(const std::string & commandName,
                                       mtsInterfaceRequired * interfaceRequired):
         BaseType(commandName),
+#else
+    mtsCommandVoidProxyForReturnEvent(const std::string & commandName,
+                                      mtsInterfaceRequired * interfaceRequired,
+                                      const std::string & componentName,
+                                      const std::string & interfaceName)
+        : BaseType(commandName, componentName, interfaceName),
+#endif
         InterfaceRequired(0)
     {
         InterfaceRequired = dynamic_cast<mtsInterfaceRequiredProxy *>(interfaceRequired);

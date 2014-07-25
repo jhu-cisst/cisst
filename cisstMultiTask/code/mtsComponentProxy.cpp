@@ -192,9 +192,18 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const mtsInterfaceRequiredD
     for (size_t i = 0; i < requiredInterfaceDescription.EventHandlersVoid.size(); ++i) {
         eventName = requiredInterfaceDescription.EventHandlersVoid[i].Name;
         if (eventName == "BlockingCommandReturnExecuted") {
+#if !CISST_HAS_SAFETY_PLUGINS
             newEventVoidHandlerProxy = new mtsCommandVoidProxyForReturnEvent(eventName, requiredInterfaceProxy);
+#else
+            newEventVoidHandlerProxy = new mtsCommandVoidProxyForReturnEvent(eventName, requiredInterfaceProxy,
+                                                                             this->Name, requiredInterfaceName);
+#endif
         } else {
+#if !CISST_HAS_SAFETY_PLUGINS
             newEventVoidHandlerProxy = new mtsCommandVoidProxy(eventName);
+#else
+            newEventVoidHandlerProxy = new mtsCommandVoidProxy(eventName, this->Name, requiredInterfaceName);
+#endif
         }
         if (!requiredInterfaceProxy->EventHandlersVoid.AddItem(eventName, newEventVoidHandlerProxy)) {
             delete newEventVoidHandlerProxy;
@@ -212,7 +221,11 @@ bool mtsComponentProxy::CreateInterfaceRequiredProxy(const mtsInterfaceRequiredD
     mtsGenericObject * argumentPrototype = 0;
     for (size_t i = 0; i < requiredInterfaceDescription.EventHandlersWrite.size(); ++i) {
         eventName = requiredInterfaceDescription.EventHandlersWrite[i].Name;
+#if !CISST_HAS_SAFETY_PLUGINS
         newEventWriteHandlerProxy = new mtsCommandWriteProxy(eventName);
+#else
+        newEventWriteHandlerProxy = new mtsCommandWriteProxy(eventName, this->Name, requiredInterfaceName);
+#endif
         if (!requiredInterfaceProxy->EventHandlersWrite.AddItem(eventName, newEventWriteHandlerProxy)) {
             delete newEventWriteHandlerProxy;
             CMN_ASSERT(RemoveInterfaceRequired(requiredInterfaceName));
@@ -318,7 +331,11 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const mtsInterfaceProvidedD
     const mtsCommandsVoidDescription::const_iterator itVoidEnd = providedInterfaceDescription.CommandsVoid.end();
     for (; itVoid != itVoidEnd; ++itVoid) {
         commandName = itVoid->Name;
+#if !CISST_HAS_SAFETY_PLUGINS
         newCommandVoid = new mtsCommandVoidProxy(commandName);
+#else
+        newCommandVoid = new mtsCommandVoidProxy(commandName, this->Name, providedInterfaceName);
+#endif
         if (!providedInterfaceProxy->AddCommandVoid(newCommandVoid)) {
             delete newCommandVoid;
             CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
@@ -333,7 +350,11 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const mtsInterfaceProvidedD
     const mtsCommandsWriteDescription::const_iterator itWriteEnd = providedInterfaceDescription.CommandsWrite.end();
     for (; itWrite != itWriteEnd; ++itWrite) {
         commandName = itWrite->Name;
+#if !CISST_HAS_SAFETY_PLUGINS
         newCommandWrite = new mtsCommandWriteProxy(commandName);
+#else
+        newCommandWrite = new mtsCommandWriteProxy(commandName, this->Name, providedInterfaceName);
+#endif
         if (!providedInterfaceProxy->AddCommandWrite(newCommandWrite)) {
             delete newCommandWrite;
             CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
@@ -366,7 +387,11 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const mtsInterfaceProvidedD
     const mtsCommandsReadDescription::const_iterator itReadEnd = providedInterfaceDescription.CommandsRead.end();
     for (; itRead != itReadEnd; ++itRead) {
         commandName = itRead->Name;
+#if !CISST_HAS_SAFETY_PLUGINS
         newCommandRead = new mtsCommandReadProxy(commandName);
+#else
+        newCommandRead = new mtsCommandReadProxy(commandName, this->Name, providedInterfaceName);
+#endif
         if (!providedInterfaceProxy->AddCommandRead(newCommandRead)) {
             delete newCommandRead;
             CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
@@ -399,7 +424,11 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const mtsInterfaceProvidedD
     const mtsCommandsQualifiedReadDescription::const_iterator itQualifiedReadEnd = providedInterfaceDescription.CommandsQualifiedRead.end();
     for (; itQualifiedRead != itQualifiedReadEnd; ++itQualifiedRead) {
         commandName = itQualifiedRead->Name;
+#if !CISST_HAS_SAFETY_PLUGINS
         newCommandQualifiedRead = new mtsCommandQualifiedReadProxy(commandName);
+#else
+        newCommandQualifiedRead = new mtsCommandQualifiedReadProxy(commandName, this->Name, providedInterfaceName);
+#endif
         if (!providedInterfaceProxy->AddCommandQualifiedRead(newCommandQualifiedRead)) {
             delete newCommandQualifiedRead;
             CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
@@ -442,7 +471,11 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const mtsInterfaceProvidedD
     const mtsCommandsVoidReturnDescription::const_iterator itVoidReturnEnd = providedInterfaceDescription.CommandsVoidReturn.end();
     for (; itVoidReturn != itVoidReturnEnd; ++itVoidReturn) {
         commandName = itVoidReturn->Name;
+#if !CISST_HAS_SAFETY_PLUGINS
         newCommandVoidReturn = new mtsCommandVoidReturnProxy(commandName);
+#else
+        newCommandVoidReturn = new mtsCommandVoidReturnProxy(commandName, this->Name, providedInterfaceName);
+#endif
         if (!providedInterfaceProxy->AddCommandVoidReturn(newCommandVoidReturn)) {
             delete newCommandVoidReturn;
             CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
@@ -476,7 +509,11 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const mtsInterfaceProvidedD
     const mtsCommandsWriteReturnDescription::const_iterator itWriteReturnEnd = providedInterfaceDescription.CommandsWriteReturn.end();
     for (; itWriteReturn != itWriteReturnEnd; ++itWriteReturn) {
         commandName = itWriteReturn->Name;
+#if !CISST_HAS_SAFETY_PLUGINS
         newCommandWriteReturn = new mtsCommandWriteReturnProxy(commandName);
+#else
+        newCommandWriteReturn = new mtsCommandWriteReturnProxy(commandName, this->Name, providedInterfaceName);
+#endif
         if (!providedInterfaceProxy->AddCommandWriteReturn(newCommandWriteReturn)) {
             delete newCommandWriteReturn;
             CMN_ASSERT(RemoveInterfaceProvided(providedInterfaceName));
@@ -541,7 +578,11 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const mtsInterfaceProvidedD
             return false;
         }
 
+#if !CISST_HAS_SAFETY_PLUGINS
         eventMulticastCommandVoidProxy = new mtsMulticastCommandVoidProxy(eventName);
+#else
+        eventMulticastCommandVoidProxy = new mtsMulticastCommandVoidProxy(eventName, this->Name, providedInterfaceName);
+#endif
 
         if (!providedInterfaceProxy->AddEvent(eventName, eventMulticastCommandVoidProxy)) {
             delete eventMulticastCommandVoidProxy;
@@ -573,7 +614,11 @@ bool mtsComponentProxy::CreateInterfaceProvidedProxy(const mtsInterfaceProvidedD
             return false;
         }
 
+#if !CISST_HAS_SAFETY_PLUGINS
         eventMulticastCommandWriteProxy = new mtsMulticastCommandWriteProxy(eventName);
+#else
+        eventMulticastCommandWriteProxy = new mtsMulticastCommandWriteProxy(eventName, this->Name, providedInterfaceName);
+#endif
 
         // event argument deserialization
         streamBuffer.str("");

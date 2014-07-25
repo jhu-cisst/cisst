@@ -50,8 +50,14 @@ mtsCommandWriteBase *mtsCommandQueuedWriteBase::FinishedEventGet(void)
 }
 
 
+#if !CISST_HAS_SAFETY_PLUGINS
 mtsCommandQueuedWriteGeneric::mtsCommandQueuedWriteGeneric(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
     BaseType(mailBox, actualCommand, size),
+#else
+mtsCommandQueuedWriteGeneric::mtsCommandQueuedWriteGeneric(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size,
+                                                           const std::string & componentName, const std::string & interfaceName):
+    BaseType(mailBox, actualCommand, size, componentName, interfaceName),
+#endif
     ArgumentQueueSize(size),
     ArgumentsQueue()
 {

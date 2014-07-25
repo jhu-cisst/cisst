@@ -69,15 +69,28 @@ public:
     /*! The constructor. Does nothing. */
     mtsCommandVoidReturn(void);
 
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandVoidReturn(const std::string & name);
+#else
+    mtsCommandVoidReturn(const std::string & name,
+                         const std::string & componentName,
+                         const std::string & interfaceName);
+#endif
 
     /*! The constructor.
       \param action Pointer to the member function that is to be called
       by the invoker of the command
       \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
+#if !CISST_HAS_SAFETY_PLUGINS
     mtsCommandVoidReturn(mtsCallableVoidReturnBase * callable, const std::string & name,
                          const mtsGenericObject * resultPrototype);
+#else
+    mtsCommandVoidReturn(mtsCallableVoidReturnBase * callable, const std::string & name,
+                         const mtsGenericObject * resultPrototype,
+                         const std::string & componentName,
+                         const std::string & interfaceName);
+#endif
 
     /*! The destructor. Does nothing */
     virtual ~mtsCommandVoidReturn();
