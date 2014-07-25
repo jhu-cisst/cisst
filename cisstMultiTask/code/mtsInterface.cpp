@@ -53,3 +53,12 @@ const mtsComponent *  mtsInterface::GetComponent(void) const
 {
     return this->Component;
 }
+
+const std::string & mtsInterface::GetComponentName(void) const
+{
+    // This shouldn't happen
+    if (!component)
+        return "NONAME";
+
+    return component->GetName();
+}
