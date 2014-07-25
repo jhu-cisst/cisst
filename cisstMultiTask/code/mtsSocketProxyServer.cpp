@@ -284,7 +284,12 @@ class FinishedEventList {
     std::vector<FinishedEventEntry> List;
     std::vector<mtsCommandWriteBase *> Cmd;
 public:
+#if !CISST_HAS_SAFETY_PLUGINS
     FinishedEventList(size_t size, mtsMailBox *mbox, size_t mbox_size);
+#else
+    FinishedEventList(size_t size, mtsMailBox *mbox, size_t mbox_size,
+                      const std::string & componentName, const std::string & interfaceName);
+#endif
     ~FinishedEventList();
 
     mtsCommandWriteBase *AllocateEntry(osaSocket *socket, const osaIPandPort &ip_port,
@@ -293,7 +298,12 @@ public:
     bool FreeEntry(mtsCommandWriteBase *cmd);
 };
 
+#if !CISST_HAS_SAFETY_PLUGINS
 FinishedEventList::FinishedEventList(size_t size, mtsMailBox *mbox, size_t mbox_size) :
+#else
+FinishedEventList::FinishedEventList(size_t size, mtsMailBox *mbox, size_t mbox_size,
+                                     const std::string & componentName, const std::string & interfaceName) :
+#endif
                                      mailBox(mbox), mailBoxSize(mbox_size), List(size), Cmd(size)
 {
     char buf[32];
@@ -302,10 +312,18 @@ FinishedEventList::FinishedEventList(size_t size, mtsMailBox *mbox, size_t mbox_
         mtsCallableQualifiedReadBase *callable = new mtsCallableQualifiedReadMethodGeneric<FinishedEventEntry>(&FinishedEventEntry::SerializeFilter, &List[i]);
         // mtsCommandQualifiedRead, input is arg, output is mtsStdString
         sprintf(buf, "FinishedEventEntryFilter%ld", i);
+#if !CISST_HAS_SAFETY_PLUGINS
         mtsCommandQualifiedRead *filter = new mtsCommandQualifiedRead(callable, buf, 0, &stringPrototype);
+#else
+        mtsCommandQualifiedRead *filter = new mtsCommandQualifiedRead(callable, buf, 0, &stringPrototype, componentName, interfaceName);
+#endif
         // mtsCommandQueuedWrite, input is mtsStdString
         sprintf(buf, "FinishedEventEntry%ld", i);
+#if !CISST_HAS_SAFETY_PLUGINS
         mtsCommandWriteBase *cmd = new mtsCommandWrite<FinishedEventEntry, mtsStdString>(&FinishedEventEntry::Method, &List[i], buf, stringPrototype);
+#else
+        mtsCommandWriteBase *cmd = new mtsCommandWrite<FinishedEventEntry, mtsStdString>(&FinishedEventEntry::Method, &List[i], buf, stringPrototype, componentName, interfaceName);
+#endif
         Cmd[i] = new mtsCommandFilteredQueuedWrite(mailBox, filter, cmd, mailBoxSize);
     }
 }
@@ -726,6 +744,10 @@ mtsSocketProxyServer::mtsSocketProxyServer(const std::string & proxyName, const 
                                            const std::string & providedInterfaceName, unsigned short port) :
     mtsTaskContinuous(proxyName),
     Socket(osaSocket::UDP),
+#if CISST_HAS_SAFETY_PLUGINS
+    ComponentName(componentName),
+    ProvidedInterfaceName(providedInterfaceName),
+#endif
     FunctionVoidProxyMap("FunctionVoidProxyMap"),
     FunctionWriteProxyMap("FunctionWriteProxyMap"),
     FunctionReadProxyMap("FunctionReadProxyMap"),
@@ -744,6 +766,10 @@ mtsSocketProxyServer::mtsSocketProxyServer(const std::string & proxyName, const 
 mtsSocketProxyServer::mtsSocketProxyServer(const mtsSocketProxyServerConstructorArg &arg) :
     mtsTaskContinuous(arg.Name),
     Socket(osaSocket::UDP),
+#if CISST_HAS_SAFETY_PLUGINS
+    ComponentName(arg.ComponentName),
+    ProvidedInterfaceName(arg.ProvidedInterfaceName),
+#endif
     FunctionVoidProxyMap("FunctionVoidProxyMap"),
     FunctionWriteProxyMap("FunctionWriteProxyMap"),
     FunctionReadProxyMap("FunctionReadProxyMap"),
@@ -1136,7 +1162,11 @@ bool mtsSocketProxyServer::CreateServerProxy(const std::string & requiredInterfa
     // events if it happens to be processing its mailbox when the client component is adding
     // new commands to the mailbox.
     if (providedMailboxSize > 0)
+#if !CISST_HAS_SAFETY_PLUGINS
         FinishedEvents = new FinishedEventList(providedMailboxSize, requiredInterfaceProxy->MailBox, requiredInterfaceProxy->ArgumentQueuesSize);
+#else
+        FinishedEvents = new FinishedEventList(providedMailboxSize, requiredInterfaceProxy->MailBox, requiredInterfaceProxy->ArgumentQueuesSize, ComponentName, ProvidedInterfaceName);
+#endif
     else
         CMN_LOG_CLASS_INIT_WARNING << "Cannot create finished event list; connected provided interface has no mailbox"
                                    << std::endl;
@@ -1294,7 +1324,11 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
 
     //InterfaceDescription.CommandsRead.push_back(CommandReadElement("GetInterfaceDescription", interfaceDescriptionSerialized));
     callableRead = new mtsCallableReadMethod<mtsSocketProxyServer, mtsInterfaceProvidedDescription>(&mtsSocketProxyServer::GetInterfaceDescription, this);
+#if !CISST_HAS_SAFETY_PLUGINS
     commandRead = new mtsCommandRead(callableRead, "GetInterfaceDescription", descProxy);
+#else
+    commandRead = new mtsCommandRead(callableRead, "GetInterfaceDescription", descProxy, ComponentName, ProvidedInterfaceName);
+#endif
     SpecialCommands.push_back(commandRead);
     functionReadProxy = new FunctionReadProxy(this, interfaceDescriptionSerialized);
     functionReadProxy->Bind(commandRead);
@@ -1316,7 +1350,11 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
     for (int i = 0; i < 6; i++) {
         //InterfaceDescription.CommandsQualifiedRead.push_back(CommandQualifiedReadElement(GetHandleInfo[i].name, stringSerialized, stringSerialized));
         callableQualifiedRead = new mtsCallableQualifiedReadMethod<mtsSocketProxyServer, std::string, std::string>(GetHandleInfo[i].action, this);
+#if !CISST_HAS_SAFETY_PLUGINS
         commandQualifiedRead = new mtsCommandQualifiedRead(callableQualifiedRead, GetHandleInfo[i].name, stringProxy, stringProxy);
+#else
+        commandQualifiedRead = new mtsCommandQualifiedRead(callableQualifiedRead, GetHandleInfo[i].name, stringProxy, stringProxy, ComponentName, ProvidedInterfaceName);
+#endif
         SpecialCommands.push_back(commandQualifiedRead);
         functionQualifiedReadProxy = new FunctionQualifiedReadProxy(this, stringSerialized, stringSerialized);
         functionQualifiedReadProxy->Bind(commandQualifiedRead);
@@ -1327,16 +1365,28 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
     FunctionWriteProxy *functionWriteProxy;
     mtsCommandWriteBase *commandWrite;
     //InterfaceDescription.CommandsWrite.push_back(CommandWriteElement("EventEnable", stringSerialized));
+#if !CISST_HAS_SAFETY_PLUGINS
     commandWrite = new mtsCommandWrite<mtsSocketProxyServer, std::string>(&mtsSocketProxyServer::EventEnable, this,
                                                                           "EventEnable", mtsStdString());
+#else
+    commandWrite = new mtsCommandWrite<mtsSocketProxyServer, std::string>(&mtsSocketProxyServer::EventEnable, this,
+                                                                          "EventEnable", mtsStdString(),
+                                                                          ComponentName, ProvidedInterfaceName);
+#endif
     SpecialCommands.push_back(commandWrite);
     functionWriteProxy = new FunctionWriteProxy(this, stringSerialized);
     functionWriteProxy->Bind(commandWrite);
     FunctionWriteProxyMap.AddItem("EventEnable", functionWriteProxy);
 
     //InterfaceDescription.CommandsWrite.push_back(CommandWriteElement("EventDisable", stringSerialized));
+#if !CISST_HAS_SAFETY_PLUGINS
     commandWrite = new mtsCommandWrite<mtsSocketProxyServer, std::string>(&mtsSocketProxyServer::EventDisable, this,
                                                                           "EventDisable", mtsStdString());
+#else
+    commandWrite = new mtsCommandWrite<mtsSocketProxyServer, std::string>(&mtsSocketProxyServer::EventDisable, this,
+                                                                          "EventDisable", mtsStdString(),
+                                                                          ComponentName, ProvidedInterfaceName);
+#endif
     SpecialCommands.push_back(commandWrite);
     functionWriteProxy = new FunctionWriteProxy(this, stringSerialized);
     functionWriteProxy->Bind(commandWrite);

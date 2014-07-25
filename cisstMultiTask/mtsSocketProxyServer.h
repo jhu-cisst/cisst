@@ -86,6 +86,10 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
 
     osaSocket Socket;
     mtsInterfaceProvidedDescription InterfaceDescription;
+#if CISST_HAS_SAFETY_PLUGINS
+    const std::string ComponentName;
+    const std::string ProvidedInterfaceName;
+#endif
 
     /*! Typedef for client connections. The current design of the cisst serializer
         only sends the class services the first time an instance of the class is
