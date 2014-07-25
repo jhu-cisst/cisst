@@ -463,6 +463,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                          const __filteredType & filteredPrototype,
                                                          mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
         std::string commandNameFilter(commandName + "Filter");
+#if !CISST_HAS_SAFETY_PLUGINS
         return this->AddCommandFilteredWrite(new mtsCommandQualifiedRead(new mtsCallableQualifiedReadReturnVoidMethod<__classType, __argumentType, __filteredType>
                                                                          (premethod, classInstantiation),
                                                                          commandNameFilter,
@@ -470,6 +471,17 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                                          mtsGenericTypes<__filteredType>::ConditionalCreate(filteredPrototype, commandName)),
                                              new mtsCommandWrite<__classType, __filteredType>(method, classInstantiation, commandName, filteredPrototype),
                                              queueingPolicy);
+#else
+        return this->AddCommandFilteredWrite(new mtsCommandQualifiedRead(new mtsCallableQualifiedReadReturnVoidMethod<__classType, __argumentType, __filteredType>
+                                                                         (premethod, classInstantiation),
+                                                                         commandNameFilter,
+                                                                         mtsGenericTypes<__argumentType>::ConditionalCreate(argumentPrototype, commandName),
+                                                                         mtsGenericTypes<__filteredType>::ConditionalCreate(filteredPrototype, commandName),
+                                                                         this->GetComponentName(), this->GetName()),
+                                             new mtsCommandWrite<__classType, __filteredType>(method, classInstantiation, commandName, filteredPrototype,
+                                                                                              this->GetComponentName(), this->GetName()),
+                                             queueingPolicy);
+#endif
     }
 
     template <class __classType, class __argumentType, class __filteredType>
@@ -789,9 +801,15 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWriteState(const mtsStateT
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteState: invalid accessor for command " << commandName << std::endl;
         return 0;
     }
+#if !CISST_HAS_SAFETY_PLUGINS
     return this->AddCommandWrite(new mtsCommandWrite<AccessorType, FinalType>
                                  (&AccessorType::SetCurrent, stateAccessor, commandName, FinalType(stateData)),
                                  queueingPolicy);
+#else
+    return this->AddCommandWrite(new mtsCommandWrite<AccessorType, FinalType>
+                                 (&AccessorType::SetCurrent, stateAccessor, commandName, FinalType(stateData), this->GetComponentName(), this->Name),
+                                 queueingPolicy);
+#endif
 }
 
 template <class __argumentType>
