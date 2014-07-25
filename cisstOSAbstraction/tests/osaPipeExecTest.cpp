@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Martin Kelly, Anton Deguet
   Created on: 2010-09-23
 
-  (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,7 +44,7 @@ void osaPipeExecTest::TestPipe(void)
     CPPUNIT_ASSERT_EQUAL(true, opened);
 
     /* Generate random test string between 10 and 100 characters */
-    const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(10, 100) + 1;
+    const size_t length = cmnRandomSequence::GetInstance().ExtractRandomInt(10, 100) + 1;
     char * testString = new char[length];
     char * s;
     /* Generate random alphabetic characters while avoiding '\0'. Note that,
@@ -57,7 +56,11 @@ void osaPipeExecTest::TestPipe(void)
     *s = '\0';
 
     /* If this gives problems, wrap this in a loop similar to the read loop */
-    int charsWritten = pipe1.Write(testString);
+    int charsWrittenInt = pipe1.Write(testString);
+
+    CPPUNIT_ASSERT(charsWrittenInt >= 0);
+    size_t charsWritten = charsWrittenInt;
+
     CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
     charsWritten = pipe2.Write(testString);
@@ -76,10 +79,10 @@ void osaPipeExecTest::TestPipe(void)
     CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
     std::string current;
-    while (current.length() < (length-1)) {
+    while (current.length() < (length - 1)) {
         current += pipe1.Read(length - static_cast<int>(current.length()));
     }
-    CPPUNIT_ASSERT_EQUAL(static_cast<int>(current.length()), (length-1));
+    CPPUNIT_ASSERT_EQUAL(current.length(), (length - 1));
     CPPUNIT_ASSERT_EQUAL(test, current);
 
     /* Test closing twice, make sure it fails the second time */
@@ -100,14 +103,16 @@ void osaPipeExecTest::TestPipe(void)
     /* Test other Open modes. We don't test "r" because we don't have a good
     test utility for that */
     pipe1.Open(command, "");
-    charsWritten = pipe1.Write(testString);
-    CPPUNIT_ASSERT_EQUAL(-1, charsWritten);
+    charsWrittenInt = pipe1.Write(testString);
+    CPPUNIT_ASSERT_EQUAL(-1, charsWrittenInt);
     std::string returnString = pipe1.Read(length);
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
     pipe1.Close();
 
     pipe1.Open(command, "w");
-    charsWritten = pipe1.Write(testString);
+    charsWrittenInt = pipe1.Write(testString);
+    CPPUNIT_ASSERT(charsWrittenInt >= 0);
+    charsWritten = charsWrittenInt;
     CPPUNIT_ASSERT_EQUAL(length, charsWritten);
     returnString = pipe1.Read(length);
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);

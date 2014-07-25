@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -110,7 +108,7 @@ http://www.cisst.org/cisst/license.txt.
      \note The PInverse functions make use of LAPACK routines.  To activate this
      code, set the CISST_HAS_CISSTNETLIB flag to ON during the configuration
      with CMake.
-     \note The general rule for numerical functions which depend on LAPACK is that 
+     \note The general rule for numerical functions which depend on LAPACK is that
      column-major matrices should be used everywhere, and that all
      matrices should be compact.
      \note For the specific case of PInverse, a valid result is also obtained if
@@ -358,7 +356,7 @@ public:
     friend class Friend;
 #endif // DOXYGEN
 #endif // SWIG
-    
+
     /*! The default constuctor.
       For dynamic size, there are assigned default values,
       which MUST be changed by calling appropriate methods.
@@ -372,14 +370,14 @@ public:
     {
         AllocateOutputWorkspace(false, false);
     };
-    
+
 
     /*! Constructor where user provides the input matrix to specify
       size, Memory allocation is done for output matrices and vectors
       as well as Workspace used by LAPACK. This case covers the
       scenario when user wants to make all system calls for memory
       allocation before entrying time critical code sections.
-      
+
       \param A Input matrix
     */
     template <class _matrixOwnerTypeA>
@@ -395,7 +393,7 @@ public:
       sections and might be using more than one numerical method in
       the *same* thread, allowing her to share the workspace for
       LAPACK.
-      
+
       \param A Input matrix
       \param workspace Workspace for SVD
     */
@@ -420,7 +418,7 @@ public:
     template <class _matrixOwnerTypeA,
               class _matrixOwnerTypePInverse,
               class _vectorOwnerTypeWorkspace>
-    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & CMN_UNUSED(A),
                                   vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> & pInverse,
                                   vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
     {
@@ -441,13 +439,13 @@ public:
       \param pInverse The output matrix for PInverse
     */
     template <class _matrixOwnerTypeA, class _matrixOwnerTypePInverse>
-    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & CMN_UNUSED(A),
                                vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> & pInverse)
     {
         this->SetRefOutput(pInverse);
     }
 
-    
+
     /*! This method allocates memory of output matrices and vector as
       well as the workspace.  This method should be called before the
       nmrPInverseEconomyDynamicData object is passed on to
@@ -481,7 +479,7 @@ public:
       allowing her to share the workspace for LAPACK.  Typically this
       method is called from a code segment where it is safe to
       allocate memory and use the data and workspace space later.
-      
+
       \param A The matrix for which SVD needs to be computed, size MxN
       \param workspace The vector used for workspace by LAPACK.
     */
@@ -495,7 +493,7 @@ public:
         this->ThrowUnlessWorkspaceSizeIsCorrect(workspace);
         this->SetRefSVD(workspace);
     }
-    
+
     /*! This method must be called before the data object is passed to
       nmrPInverseEconomy function.  The user provides the PInverse
       matrix to specify size, along with the workspace.  The data
@@ -503,7 +501,7 @@ public:
       manipulate a convenitent storage for PInverse algorithm. Checks
       are made on the validity of the input and its consitency with
       the size of input matrix.
-      
+
       \param pInverse The output matrix  for PInverse
       \param workspace The workspace for LAPACK.
     */
@@ -546,7 +544,7 @@ public:
     }
 
 
-    
+
 public:
     /*!
       \name Retrieving results.
@@ -582,7 +580,7 @@ public:
   details about nature of the data matrices see text above.
   \param A A matrix of size MxN
   \param data A data object of one of the types corresponding to input matrix
-  
+
   \test nmrPInverseEconomyTest::TestDynamicColumnMajor
         nmrPInverseEconomyTest::TestDynamicRowMajor
         nmrPInverseEconomyTest::TestDynamicColumnMajorUserAlloc
@@ -593,7 +591,7 @@ inline CISSTNETLIB_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerT
                                     nmrPInverseEconomyDynamicData &data) throw (std::runtime_error)
 {
     typedef unsigned int size_type;
-    
+
     typename nmrPInverseEconomyDynamicData::Friend dataFriend(data);
     CISSTNETLIB_INTEGER ret_value;
     /* check that the size and storage order matches with Allocate() */
@@ -606,7 +604,7 @@ inline CISSTNETLIB_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerT
     const size_type rows = A.rows();
     const size_type cols = A.cols();
     const size_type minmn = (rows < cols) ? rows : cols;
-    
+
     ret_value = nmrSVDEconomy(A, dataFriend.U(), dataFriend.S(),
                        dataFriend.Vt(), dataFriend.Workspace());
     const CISSTNETLIB_DOUBLE eps = cmnTypeTraits<CISSTNETLIB_DOUBLE>::Tolerance() * dataFriend.S().at(0);

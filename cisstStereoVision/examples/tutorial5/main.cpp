@@ -1,15 +1,22 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
-
-#include <cisstStereoVision.h>
 #include "CMyEventHandler2.h"
 
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
+
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+#include <cisstStereoVision/svlFilterImageOverlay.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlFilterSourceVideoFile.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
+  
 #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
     const std::string MediaDir = "../";
 #else
     const std::string MediaDir = "";
 #endif
-
 
 int main()
 {
@@ -145,4 +152,3 @@ int main()
 
     return 0;
 }
-

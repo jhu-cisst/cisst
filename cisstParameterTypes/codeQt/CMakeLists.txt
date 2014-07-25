@@ -47,8 +47,3 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
 
 # link against Qt libraries
 target_link_libraries (cisstParameterTypesQt ${QT_LIBRARIES})
-
-# for Qt5
-if (CISST_HAS_QT5)
-  qt5_use_modules (cisstParameterTypesQt Core Widgets OpenGL)
-endif (CISST_HAS_QT5)

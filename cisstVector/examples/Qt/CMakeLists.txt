@@ -44,11 +44,6 @@ if (cisst_FOUND_AS_REQUIRED)
   # link against cisst libraries (and dependencies)
   cisst_target_link_libraries (vctExQtWidgets ${REQUIRED_CISST_LIBRARIES})
 
-  # for Qt 5
-  if (CISST_HAS_QT5)
-    qt5_use_modules (vctExQtWidgets Core Widgets OpenGL)
-  endif (CISST_HAS_QT5)
-
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)

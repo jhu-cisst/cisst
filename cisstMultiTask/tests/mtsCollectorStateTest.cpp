@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-01-06
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -51,7 +50,6 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     mtsExecutionResult executionResult;
 
     // we assume both server and servers use the same type
-    typedef typename _serverType::value_type value_type;
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
 
     // add to manager and start all
@@ -125,7 +123,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->BatchReadyEventCounter);
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->SamplesCollected);
 
-#if 0 
+#if 0
 
     // now collect 300 elements so we can test replay
     executionResult = stateCollectorTestDevice->CollectorState.StartCollection.ExecuteBlocking();
@@ -185,7 +183,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     }
 
 #endif
-    
+
     // stop all and cleanup
     manager->KillAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));

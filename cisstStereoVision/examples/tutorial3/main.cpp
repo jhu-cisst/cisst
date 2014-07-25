@@ -1,9 +1,13 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
-
-#include <cisstStereoVision.h>
 #include "CMyFilter1.h"
 
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
+
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
 
 int main()
 {
@@ -29,4 +33,3 @@ int main()
                                                      //
     return 0;                                        //
 }
-

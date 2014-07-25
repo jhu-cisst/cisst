@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
-
   Author(s):  Balazs Vagvolgyi
   Created on: 2007
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -39,11 +37,18 @@ In IEEE Computer Society Conference on Computer Vision and Pattern Recognition (
 */
 
 
-#include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
 
 using namespace std;
 
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
+
+#include <cisstStereoVision/svlFilterSourceImageFile.h>
+#include <cisstStereoVision/svlFilterComputationalStereo.h>
+#include <cisstStereoVision/svlFilterStreamTypeConverter.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
 
 //////////////////////////////////
 //     Computational Stereo     //
@@ -163,4 +168,3 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     cerr << "Quit" << endl;
     return 1;
 }
-

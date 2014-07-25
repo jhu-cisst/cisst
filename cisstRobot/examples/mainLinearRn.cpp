@@ -1,12 +1,11 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/*
-  $Id: example.cpp 4278 2013-06-19 18:57:40Z adeguet1 $
 
+/*
   Author(s):  Zihan Chen
   Created on: 2013-08-14
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,10 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 #include <fstream>
-#include <cisstVector.h>
+#include <cisstCommon/cmnConstants.h>
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstRobot/robLinearRn.h>
 
-int main(int argc, char *argv[])
+int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     // Example R2
     //  q(0,0) to q(pi, pi)

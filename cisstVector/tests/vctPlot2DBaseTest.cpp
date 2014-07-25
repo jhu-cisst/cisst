@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Joshua Chuang
   Created on: 2011-06-01
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -314,20 +312,3 @@ void vctPlot2DBaseTest::TestAddScaleSignalLine(void)
     // dummy name
     CPPUNIT_ASSERT(!plot.RemoveScale("dummy"));
 }
-
-void vctPlot2DBaseTest::TestAddScaleSignalLineDeprecated(void)
-{
-    vctPlot2DBaseTestClass plot;
-    vctPlot2DBase::Signal * signal = plot.AddSignal("scaleName-signalName");
-    CPPUNIT_ASSERT(signal);
-    // try to add a new one with same name
-    vctPlot2DBase::Signal * signalFail = plot.AddSignal("scaleName-signalName");
-    CPPUNIT_ASSERT(signalFail == 0);
-    // check that the - has been parsed properly and try to add scale with same name
-    CPPUNIT_ASSERT(!plot.AddScale("scaleName"));
-    // get the scale and try to add a signal to make sure the signal has been added
-    vctPlot2DBase::Scale * scale = plot.GetScales()["scaleName"];
-    CPPUNIT_ASSERT(scale);
-    CPPUNIT_ASSERT(!scale->AddSignal("scaleName-signalName"));
-}
-

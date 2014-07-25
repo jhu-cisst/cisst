@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):  Ofri Sadowsky
   Created on: 2004-10-21
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -47,14 +45,14 @@ public:
 	static nmrPolynomialTermPowerIndex CreateRandomPowerIndexDegreeBounds(VariableIndexType numVariables,
         cmnRandomSequence & randomGenerator);
 
-	// Generate a valid power index with even distribution.  We count how many power 
+	// Generate a valid power index with even distribution.  We count how many power
 	// combinations exist for the term, then choose a random number in this range,
 	// and increment the index this number of times.  Currently, we do not have a more
 	// efficient way to enumerate the indices.
 	//
 	// Note: The function uses nmrPolynomialTermPowerIndex::CountPowerCombinations().
 	// Make sure that is has been tested before using this function.
-	static nmrPolynomialTermPowerIndex & 
+	static nmrPolynomialTermPowerIndex &
 		MakeRandomPowerIndex(nmrPolynomialTermPowerIndex & termIndex, cmnRandomSequence & randomGenerator);
 
 
@@ -121,7 +119,7 @@ public:
     }
 
 
-	void setUp() 
+	void setUp()
 	{
 		MakeRandomPowerIndex(TestIndex1, RandomGenerator);
         MakeRandomPowerIndex(TestIndex2, RandomGenerator);
@@ -129,8 +127,6 @@ public:
 
 	void tearDown()
 	{
-		int a = 0;
-		a = 1;
 	}
 
 	nmrPolynomialTermPowerIndexTest()
@@ -141,8 +137,6 @@ public:
 
 	virtual ~nmrPolynomialTermPowerIndexTest()
 	{
-		int a = 0;
-		a = 1;
 	}
 
 
@@ -165,4 +159,3 @@ private:
 };
 
 #endif
-

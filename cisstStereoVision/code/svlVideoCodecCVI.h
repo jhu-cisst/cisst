@@ -28,8 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlTypes.h>
 #include <cisstStereoVision/svlFile.h>
 
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
 
-class svlVideoCodecCVI : public svlVideoCodecBase
+class CISST_EXPORT svlVideoCodecCVI : public svlVideoCodecBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

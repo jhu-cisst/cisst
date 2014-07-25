@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 class mtsQtFunctionListContainerWidget;
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
@@ -36,14 +37,14 @@ class CISST_EXPORT mtsQtWidgetInterfaceRequired: public QWidget, public cmnGener
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
-    mtsQtWidgetInterfaceRequired(mtsInterfaceProvided * interface,
+    mtsQtWidgetInterfaceRequired(mtsInterfaceProvided * interfaceProvided,
                                  mtsInterfaceRequired * executionInterface = 0);
 
  private:
     mtsInterfaceRequired * ExecutionInterface;
     mtsQtFunctionListContainerWidget * FunctionsWidget;
 
-    void CreateWidgets(mtsInterfaceProvided & interface, mtsInterfaceRequired & executionInterface);
+    void CreateWidgets(mtsInterfaceProvided & interfaceProvided, mtsInterfaceRequired & executionInterface);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetInterfaceRequired);

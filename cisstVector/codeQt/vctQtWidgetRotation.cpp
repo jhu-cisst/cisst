@@ -17,10 +17,20 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstVector/vctQtWidgetRotation.h>
-
-
 #include <cisstConfig.h>
+#include <cisstCommon/cmnPortability.h>
+
+#if (CISST_OS == CISST_WINDOWS)
+#include <windows.h>
+#endif
+
+#if (CISST_OS == CISST_DARWIN)
+#include <OpenGL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
+
+#include <cisstVector/vctQtWidgetRotation.h>
 
 // all these widgets should be replaced to use static vectors/matrices
 #include <cisstVector/vctQtWidgetDynamicVector.h>

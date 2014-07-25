@@ -52,12 +52,6 @@ target_link_libraries (mtsExPeriodicTaskQt
 cisst_target_link_libraries (mtsExPeriodicTaskGuiQt ${REQUIRED_CISST_LIBRARIES})
 cisst_target_link_libraries (mtsExPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})
 
-# for Qt5
-if (CISST_HAS_QT5)
-  qt5_use_modules (mtsExPeriodicTaskQt Core Widgets OpenGL)
-  qt5_use_modules (mtsExPeriodicTaskGuiQt Core Widgets OpenGL)
-endif (CISST_HAS_QT5)
-
 add_custom_target (mtsExPeriodicTaskQt_Scripts ALL
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
                            ${CMAKE_CURRENT_SOURCE_DIR}/mtsExPeriodicTaskQt.cisst
@@ -72,4 +66,4 @@ add_custom_target (mtsExPeriodicTaskQt_Configs ALL
                            ${CISST_SHARE_DIR}/cisstMultiTask/examples/mtsExPeriodicTaskQtCollectors.json
                    SOURCES mtsExPeriodicTaskQtCollectors.json
                    COMMENT "Copying json config file to the cisst share directory")
-set_property (TARGET mtsExPeriodicTaskQt_Scripts PROPERTY FOLDER "cisstMultiTask/examples")
+set_property (TARGET mtsExPeriodicTaskQt_Configs PROPERTY FOLDER "cisstMultiTask/examples")

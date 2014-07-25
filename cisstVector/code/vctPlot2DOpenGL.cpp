@@ -17,7 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstVector/vctPlot2DOpenGL.h>
+#include <cisstCommon/cmnPortability.h>
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #else
 #include <GL/gl.h>
 #endif
+
+#include <cisstVector/vctPlot2DOpenGL.h>
 
 vctPlot2DOpenGL::vctPlot2DOpenGL(void):
     vctPlot2DBase()

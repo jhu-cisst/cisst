@@ -387,6 +387,13 @@ macro (cisst_target_link_package_libraries target ...)
   list (REMOVE_AT DEPENDENCIES 0) # remove first argument, i.e. target
   cisst_load_package_setting (${DEPENDENCIES})
   foreach (lib ${DEPENDENCIES})
+    if ("${lib}" STREQUAL "cisstQt")
+      if (CISST_HAS_QT5)
+        cisst_cmake_debug ("cisst_target_link_package_libraries: Qt5 needed for ${target}")
+        qt5_use_modules (${target} Core Widgets Gui OpenGL)
+      endif (CISST_HAS_QT5)
+    endif ("${lib}" STREQUAL "cisstQt")
+
     # find and load setting for external packages
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})

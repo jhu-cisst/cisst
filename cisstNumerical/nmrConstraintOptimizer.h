@@ -42,7 +42,7 @@ public:
     //! 2  Inequality constraints are contradictory.
     //! 3  Both equality and inequality constraints are contradictory.
     //! 4  Input has a NaN or INF
-    enum STATUS {NMR_OK, NMR_EQ_CONTRADICTION, NMR_INEQ_CONTRADICTION, NMR_BOTH_CONTRADICTION, NMR_MALFORMED};
+    enum STATUS {NMR_OK, NMR_EQ_CONTRADICTION, NMR_INEQ_CONTRADICTION, NMR_BOTH_CONTRADICTION, NMR_MALFORMED, NMR_EMPTY};
 
     //!Objective Matrix
     vctDoubleMat C;
@@ -85,7 +85,7 @@ public:
     /*! Initialize control optimizer
       \param n Number of variables
     */
-    nmrConstraintOptimizer(const int n);
+    nmrConstraintOptimizer(const size_t n);
 
     //! Calls the solver and stores the result in dq.
     /*! Solve

@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: 2009-11-11
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -59,6 +59,8 @@ class CISST_EXPORT robFunctionRn : public robFunction {
                    const vctDynamicVector<double>& p2,
                    const vctDynamicVector<double>& p2d,
                    const vctDynamicVector<double>& p2dd );
+
+    virtual ~robFunctionRn() {}
 
     void Set( double t1,
               const vctDynamicVector<double>& p1,

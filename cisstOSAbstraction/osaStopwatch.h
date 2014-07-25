@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Min Yang Jung
   Created on: 2005-02-17
 
-  (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -50,7 +48,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     #include <sys/time.h>
-    #if (CISST_OS == CISST_SOLARIS) || (CISST_COMPILER == CISST_GCC) 
+    #if (CISST_OS == CISST_SOLARIS) || (CISST_COMPILER == CISST_GCC)
     #ifndef timersub
     #define timersub(a, b, res)                         \
     do {                                                \
@@ -87,8 +85,11 @@ public:
     typedef unsigned long MillisecondsCounter;
     typedef double SecondsCounter;
 
-    osaStopwatch(void):
+    osaStopwatch(void)
+#if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
+        :
         HasHighPerformanceCounter(false)
+#endif
     {
 #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
     static LARGE_INTEGER frequency = { 0, 0 };
@@ -105,7 +106,7 @@ public:
 
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
 
-    this->TimeGranularity = 1.0e-9; // 1 microsecond                                                                                           
+    this->TimeGranularity = 1.0e-9; // 1 microsecond
 #elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     this->TimeGranularity = 1.0e-6; // 1 microsecond
 #endif
@@ -187,7 +188,7 @@ public:
         return RunningFlag;
     }
 
-    
+
     /*! Return the current read of the stopwatch without changing the
       running state.  This method is now deprecated as it returns a
       time interval in milliseconds (integer).  Use GetElapsedTime()
@@ -254,7 +255,9 @@ private:
     bool RunningFlag;
     SecondsCounter AccumulatedTime;
 
+#if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
     bool HasHighPerformanceCounter;
+#endif
 	double TimeGranularity;
 
 #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)

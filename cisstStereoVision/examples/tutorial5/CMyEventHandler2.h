@@ -1,11 +1,10 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
-
 #ifndef _CMyEventHandler2_h
 #define _CMyEventHandler2_h
 
-#include <cisstStereoVision.h>
-
+#include <cisstStereoVision/svlWindowManagerBase.h>
+#include <cisstStereoVision/svlFilterImageOverlay.h>
 
 class CMyEventHandler2 : public svlWindowEventHandlerBase
 {
@@ -19,6 +18,4 @@ public:
     bool LMouseButtonPressed;
 };
 
-
 #endif // _CMyEventHandler2_h
-

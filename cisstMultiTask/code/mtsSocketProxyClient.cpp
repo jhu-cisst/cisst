@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2013-08-06
 
@@ -395,7 +394,7 @@ public:
     }
 
     void Method(mtsGenericObject &arg)
-    { 
+    {
         if ((Handle[0] != ' ') || (Handle[1] != 'r')) {
             CMN_LOG_RUN_ERROR << "CommandWrapperVoidReturn: invalid handle = " << Handle[1] << std::endl;
             return;
@@ -428,7 +427,7 @@ public:
     }
 
     void Method(const mtsGenericObject &arg1, mtsGenericObject &arg2)
-    { 
+    {
         if ((Handle[0] != ' ') || (Handle[1] != 'q')) {
             CMN_LOG_RUN_ERROR << "CommandWrapperWriteReturn: invalid handle = " << Handle[1] << std::endl;
             return;
@@ -587,7 +586,7 @@ class mtsCommandQueuedWriteReturnBaseProxy : public _Base
 
 public:
     // This class takes ownership of the wrapper and deletes it in the destructor
-    mtsCommandQueuedWriteReturnBaseProxy(const std::string &name, WrapperType *wrapper, 
+    mtsCommandQueuedWriteReturnBaseProxy(const std::string &name, WrapperType *wrapper,
                                          const mtsGenericObject *argumentPrototype, const mtsGenericObject *resultPrototype,
                                          mtsMailBox *mailBox, size_t size) :
         BaseType(new CallableType(&WrapperType::Method, wrapper), name, argumentPrototype, resultPrototype, mailBox, size),
@@ -905,7 +904,7 @@ void mtsSocketProxyClient::Cleanup(void)
     Socket.Close();
 }
 
-void mtsSocketProxyClient::LocalUnblockingHandler(const mtsGenericObject &arg)
+void mtsSocketProxyClient::LocalUnblockingHandler(const mtsGenericObject & CMN_UNUSED(arg))
 {
     LocalWaiting = false;
 }
@@ -970,7 +969,7 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     CommandWrapperWrite *eventDisableWrapper = new CommandWrapperWrite("EventDisable", Socket, this, ServerData.EventDisable());
     EventDisableCommand = new mtsCommandWriteGeneric<CommandWrapperWrite>(&CommandWrapperWrite::Method, eventDisableWrapper,
                                                                           "EventDisable", &arg);
-    
+
 
     // Create the client proxy based on the provided interface description obtained from the server proxy.
     mtsGenericObjectProxy<mtsInterfaceProvidedDescription> descProxy;

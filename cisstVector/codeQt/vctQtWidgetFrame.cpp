@@ -20,7 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctQtWidgetFrame.h>
 
-vctQtWidgetFrameDoubleRead::vctQtWidgetFrameDoubleRead(const DisplayModeType displayMode)
+vctQtWidgetFrameDoubleRead::vctQtWidgetFrameDoubleRead(const DisplayModeType displayMode):
+    QWidget()
 {
     RotationWidget = new vctQtWidgetRotationDoubleRead(displayMode);
     TranslationWidget = new vctQtWidgetDynamicVectorDoubleRead();

@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Balazs Vagvolgyi
   Created on: 2006
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -18,9 +17,22 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
+#include <cisstCommon/cmnClassRegister.h>
 
+#include <cisstStereoVision/svlInitializer.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstStereoVision/svlStreamManager.h>
+
+#include <cisstStereoVision/svlFilterSourceDummy.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlFilterSplitter.h>
+#include <cisstStereoVision/svlFilterImageUnsharpMask.h>
+#include <cisstStereoVision/svlFilterImageOverlay.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
+
+#include <iostream>
 using namespace std;
 
 
@@ -125,7 +137,7 @@ int main()
                                             svlRGB(64, 128, 64),  // color
                                             true);                // filled
     overlay.AddOverlay(ellipse_overlay);
-    
+
     // Add static triangle overlay
     svlOverlayStaticTriangle tri_overlay(SVL_LEFT,            // background video channel
                                          true,                // visible
@@ -168,7 +180,7 @@ int main()
                                     2,                           // border width
                                     svlRGB(64, 64, 64));         // border color
     overlay.AddOverlay(bar_overlay);
-    
+
     overlay.AddQueuedItems();
 
     // Setup branch window
@@ -209,4 +221,3 @@ labError:
 
     return 1;
 }
-

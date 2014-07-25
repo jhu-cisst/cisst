@@ -309,10 +309,15 @@ public:
     {
         return (void *)(OutputStream);
     }
-#else
+#elif CISST_OSTREAM_CAN_CAST_TO_INT
     inline operator bool (void)
     {
         return OutputStream;
+    }
+#else
+    inline operator bool(void)
+    {
+        return OutputStream.good();
     }
 #endif
 
