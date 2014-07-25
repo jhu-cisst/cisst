@@ -57,9 +57,6 @@ int main(int argc, char * argv[])
     std::string globalComponentManagerIP;
     bool useGeneric;
 
-#if CISST_MTS_HAS_ICE
-    std::string globalComponentManagerIP;
-
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " [GlobalManagerIP] [flag]" << std::endl;
         std::cerr << "       GlobalManagerIP is set as 127.0.0.1 by default" << std::endl;
