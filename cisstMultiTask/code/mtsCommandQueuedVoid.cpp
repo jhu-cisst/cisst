@@ -95,20 +95,47 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
            << FinishedEventQueue.IsFull() << "|"
            << MailBox->IsFull() << "]";
 #if CISST_HAS_SAFETY_PLUGINS
-        GetSafetyCoordinator->GenerateEvent(// event name
-                                            "/EVT_QUEUE_FULL",
-                                            // statemachine type
-                                            SF::State::STATEMACHINE_PROVIDED,
-                                            // description
-                                            ss.str(),
-                                            // component name
-                                            "TODO",
-                                            // interface name
-                                            "TODO");
+        // onset event
+        if (SF::State::NORMAL == 
+            GetSafetyCoordinator->GetState(SF::State::STATEMACHINE_PROVIDED,
+                                           this->ComponentName,
+                                           this->InterfaceName))
+        {
+            GetSafetyCoordinator->GenerateEvent(// event name
+                                                "EVT_COMMAND_QUEUE_FULL",
+                                                // statemachine type
+                                                SF::State::STATEMACHINE_PROVIDED,
+                                                // description
+                                                ss.str(),
+                                                this->ComponentName,
+                                                this->InterfaceName);
+        }
 #endif
         CMN_LOG_RUN_WARNING << ss.str() << std::endl;
         return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
     }
+#if CISST_HAS_SAFETY_PLUGINS
+    else {
+        // offset event
+        if (SF::State::ERROR == 
+            GetSafetyCoordinator->GetState(SF::State::STATEMACHINE_PROVIDED,
+                                           this->ComponentName,
+                                           this->InterfaceName))
+        {
+            std::stringstream ss;
+            ss << "Class mtsCommandQueuedVoid: Execute: Queue is being dequeued\""
+               << this->Name << "\" ["
+               << BlockingFlagQueue.IsFull() << "|"
+               << FinishedEventQueue.IsFull() << "|"
+               << MailBox->IsFull() << "]";
+            GetSafetyCoordinator->GenerateEvent("/EVT_COMMAND_QUEUE_FULL",
+                                                SF::State::STATEMACHINE_PROVIDED,
+                                                ss.str(),
+                                                this->ComponentName,
+                                                this->InterfaceName);
+        }
+    }
+#endif
     // copy the blocking flag to the local storage.
     if (!BlockingFlagQueue.Put(blocking)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: BlockingFlagQueue.Put failed for \""
