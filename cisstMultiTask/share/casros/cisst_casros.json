@@ -1,0 +1,45 @@
+/*
+  
+  Author(s):  Min Yang Jung
+  Created on: 2014-07-25
+  
+  (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
+//
+// This file defines a set of cisst-specific framework events and filters for casros.
+// All task-type cisst components in the system will have events and filters that
+// this file defines.
+// The names of target components are null because they will be replaced by casros later 
+// with actual names when casros processes this file.
+//
+// There is another specification file that defines filters and events that are not
+// dependent on a particular component-based framework.  This includes filters for
+// thread exception detection, thread overrun detection, and error propagation.
+// This file can be accessed in the casros library folder, or in the following URL:
+//
+// https://github.com/minyang/casros/blob/master/libs/fdd/filters/json/framework_filters.json
+//
+{
+    "component": "", // will be set by casros when deployed
+    "event": [
+        // Internal queue full (for provided interface states)
+        {   "name"            : "EVT_COMMAND_QUEUE_FULL",
+            "severity"        : 201,
+            "state_transition": [ "N2E" ]
+        },
+        {   "name"            : "/EVT_COMMAND_QUEUE_FULL",
+            "severity"        : 201,
+            "state_transition": [ "E2N" ]
+        }
+    ]
+}

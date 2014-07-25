@@ -298,6 +298,11 @@ if (CISST_MTS_HAS_ICE)
        mtsManagerProxy
        )
 
+  if (CISST_HAS_SAFETY_PLUGINS)
+    set (CASROS_CONFIG_FILES "${cisstMultiTaskLibs_SOURCE_DIR}/share/casros/cisst_casros.json")
+    install (FILES ${CASROS_CONFIG_FILES} 
+             DESTINATION ${CISST_SHARE_INSTALL_SUFFIX}/cisstMultiTask/casros COMPONENT cisstMultiTask)
+  endif()
 
   # create a list of include directories for slice
   foreach (ice_include_dir ${ICE_INCLUDE_DIR})
@@ -437,6 +442,18 @@ if (CISST_MTS_HAS_ICE)
                                ${CISST_SHARE_DIR}/cisstMultiTask/Ice)
 
   endforeach (configFile)
+  if (CISST_HAS_SAFETY_PLUGINS)
+    file (MAKE_DIRECTORY "${CISST_SHARE_DIR}/cisstMultiTask/casros")
+    foreach (configFile ${CASROS_CONFIG_FILES})
+      add_custom_command (TARGET cisstMultiTask
+                          POST_BUILD
+                          COMMAND ${CMAKE_COMMAND}
+                          ARGS -E copy_if_different
+                                ${configFile}
+                                ${CISST_SHARE_DIR}/cisstMultiTask/casros)
+
+    endforeach (configFile)
+  endif()
 
 endif (CISST_MTS_HAS_ICE)
 
