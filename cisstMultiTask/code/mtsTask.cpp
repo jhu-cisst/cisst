@@ -48,20 +48,64 @@ void mtsTask::DoRunInternal(void)
             InterfaceProvidedToManager->ProcessMailBoxes();
 #if CISST_HAS_SAFETY_PLUGINS
         double tic = osaGetTime();
-#endif
-#if CISST_HAS_SAFETY_PLUGINS
         // Get run-time state of component
-        const SF::Event * e = 0;
-        SF::State::StateType state = 
-            GetSafetyCoordinator->GetComponentState(this->GetName(), e);
-        // MJ: for debugging
-        //CMN_ASSERT(e && (state != SF::State::NORMAL));
-        //CMN_ASSERT(!e && (state == SF::State::NORMAL));
-        switch (state) {
-        default:
-        case SF::State::NORMAL:  this->RunNormal(); break;
-        case SF::State::WARNING: this->RunWarning(e); break;
-        case SF::State::ERROR:   this->RunError(e); break;
+        // TEMP: This component name-based filtering will be removed later after updating all components 
+        // in the system to support casros
+        if (this->GetName().compare("CONTROL") == 0 ||
+            //this->GetName().compare("Dingus") == 0)// ||
+            this->GetName().compare("JR3") == 0)
+        {
+            const SF::Event * e = 0;
+            SF::State::StateType state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
+
+            if (state == SF::State::INVALID) {
+                CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
+            } else {
+                // handle state transition
+                if (LastState != state) {
+                    if (LastState == SF::State::NORMAL) {
+                        if (state == SF::State::WARNING)
+                            this->OnNormal2Warning(e);
+                        else {
+                            CMN_ASSERT(state == SF::State::ERROR);
+                            this->OnNormal2Error(e);
+                        }
+                    } else if (LastState == SF::State::WARNING) {
+                        if (state == SF::State::NORMAL)
+                            this->OnWarning2Normal(e); // TODO: check if e contains offset event
+                        else {
+                            CMN_ASSERT(state == SF::State::ERROR);
+                            this->OnWarning2Error(e);
+                        }
+                    } else if (LastState == SF::State::ERROR) {
+                        if (state == SF::State::WARNING)
+                            this->OnError2Warning(e); // TODO: check if e contains offset event
+                        else {
+                            CMN_ASSERT(state == SF::State::NORMAL);
+                            this->OnError2Normal(e); // TODO: check if e contains offset event
+                        }
+                    } else
+                        CMN_ASSERT(false);
+                }
+                // update cache
+                LastState = state;
+
+                if (e && state == SF::State::NORMAL)
+                    CMN_LOG_CLASS_RUN_ERROR << "task " << this->GetName() << " in NORMAL with event: " << *e << std::endl;
+                if (!e && state != SF::State::NORMAL)
+                    CMN_LOG_CLASS_RUN_ERROR << "task " << this->GetName() << " in "
+                        << SF::State::GetStringState(state) << " but NULL EVENT" << std::endl;
+
+                switch (state) {
+                default:
+                    CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
+                case SF::State::NORMAL:  this->RunNormal(); break;
+                case SF::State::WARNING: this->RunWarning(e); break;
+                case SF::State::ERROR:   this->RunError(e); break;
+                }
+            }
+        } else {
+            this->Run();
         }
 #else
         this->Run();
@@ -369,6 +413,8 @@ mtsTask::mtsTask(const std::string & name,
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Timestamp,   "GetOverrunTimestamp");
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Duration,    "GetOverrunDuration");
     // [SFUPDATE]
+
+    LastState = SF::State::NORMAL;
 #endif
 
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
@@ -536,6 +582,7 @@ bool mtsTask::CheckForOwnThread(void) const
 
 void mtsTask::OnStartupException(const std::exception &excp)
 {
+    exit(1);
 #if CISST_HAS_SAFETY_PLUGINS
     HandlerException(this->GetName(), excp.what());
 #endif
@@ -545,6 +592,7 @@ void mtsTask::OnStartupException(const std::exception &excp)
 
 void mtsTask::OnRunException(const std::exception &excp)
 {
+    exit(1);
 #if CISST_HAS_SAFETY_PLUGINS
     HandlerException(this->GetName(), excp.what());
 #endif

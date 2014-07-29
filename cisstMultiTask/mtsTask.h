@@ -246,8 +246,17 @@ public:
 #if CISST_HAS_SAFETY_PLUGINS
     // TODO: change these to be pure virtual later
     virtual void RunNormal(void) {}
-    virtual void RunWarning(const SF::Event * e) { e; }
-    virtual void RunError(const SF::Event * e) { e; }
+    virtual void RunWarning(const SF::Event *) {}
+    virtual void RunError(const SF::Event *) {}
+    
+    SF::State::StateType LastState;
+
+    virtual void OnNormal2Warning(const SF::Event *) {}
+    virtual void OnNormal2Error(const SF::Event *) {}
+    virtual void OnWarning2Normal(const SF::Event *) {}
+    virtual void OnWarning2Error(const SF::Event *) {}
+    virtual void OnError2Warning(const SF::Event *) {}
+    virtual void OnError2Normal(const SF::Event *) {}
 #endif
 
     /*! Virtual method that gets called if an exception is thrown in the

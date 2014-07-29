@@ -1004,7 +1004,9 @@ bool mtsSafetyCoordinator::OnEventHandler(const SF::Event * e)
     // SF::Accessor to publish events.  At that point, derived classes of SF::Coordinator
     // (i.e., mtsSafetyCoordinator) don't need to override SF::Coordinator::OnEvent().
 
-    std::cout << "##### mtsSafetyCoordinator:OnEvent: " << e->GetName() << std::endl;
+    CMN_LOG_RUN_DEBUG << "mtsSafetyCoordinator:OnEventHandler: " << e->GetName() << std::endl;
+
+    // TODO: cisst-specific event handling
 
     return true;
 }

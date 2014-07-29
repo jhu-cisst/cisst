@@ -69,8 +69,55 @@ void mtsSubscriberCallback::CallbackControl(SF::Topic::Control::CategoryType cat
     }
 }
     
-void mtsSubscriberCallback::CallbackProcess_COMMAND(const std::string & json)
+void mtsSubscriberCallback::CallbackProcess_COMMAND(const std::string & jsonString)
 {
+    // Parse json to figure out what to do
+    SF::JSON _json;
+    if (!_json.Read(jsonString.c_str())) {
+        SFLOG_ERROR << "Failed to parse JSON (maybe corrupted or invalid format): \"" << jsonString << std::endl;
+        return;
+    }
+
+    const SF::JSON::JSONVALUE & json = _json.GetRoot();
+
+    // Get target safety coordinator (assigned as process name in cisst)
+    const std::string targetProcessName = _json.GetSafeValueString(json["target"], "safety_coordinator");
+    const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
+    if (targetProcessName.compare("*") != 0 && (targetProcessName != thisProcessName))
+        return;
+
+    // Get command 
+    const std::string command = _json.GetSafeValueString(json, "command");
+
+    mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
+    SFASSERT(sc);
+
+    if (command.compare("event_generate") == 0) {
+        const std::string eventName = _json.GetSafeValueString(json["event"], "name");
+        const std::string what = "casros console requested event generation";
+        const std::string componentName = _json.GetSafeValueString(json["target"], "component");
+        std::string interfaceName("");
+        if (json["target"]["interface"] != JSON::JSONVALUE::null)
+            interfaceName = _json.GetSafeValueString(json["target"], "interface");
+
+        State::StateMachineType type;
+        const std::string _type = _json.GetSafeValueString(json["event"], "type");
+        if (_type.compare("framework") == 0)
+            type = SF::State::STATEMACHINE_FRAMEWORK;
+        else if (_type.compare("application") == 0)
+            type = SF::State::STATEMACHINE_APP;
+        else if (_type.compare("provided") == 0)
+            type = SF::State::STATEMACHINE_PROVIDED;
+        else if (_type.compare("required") == 0)
+            type = SF::State::STATEMACHINE_REQUIRED;
+        else
+            type = SF::State::STATEMACHINE_INVALID;
+
+        sc->GenerateEvent(eventName, type, what, componentName, interfaceName);
+    } else {
+        SFLOG_ERROR << "Invalid command: " << command << std::endl;
+        return;
+    }
 }
 
 void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
