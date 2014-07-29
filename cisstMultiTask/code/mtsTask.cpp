@@ -49,7 +49,23 @@ void mtsTask::DoRunInternal(void)
 #if CISST_HAS_SAFETY_PLUGINS
         double tic = osaGetTime();
 #endif
+#if CISST_HAS_SAFETY_PLUGINS
+        // Get run-time state of component
+        const SF::Event * e = 0;
+        SF::State::StateType state = 
+            GetSafetyCoordinator->GetComponentState(this->GetName(), e);
+        // MJ: for debugging
+        //CMN_ASSERT(e && (state != SF::State::NORMAL));
+        //CMN_ASSERT(!e && (state == SF::State::NORMAL));
+        switch (state) {
+        default:
+        case SF::State::NORMAL:  this->RunNormal(); break;
+        case SF::State::WARNING: this->RunWarning(e); break;
+        case SF::State::ERROR:   this->RunError(e); break;
+        }
+#else
         this->Run();
+#endif
 #if CISST_HAS_SAFETY_PLUGINS
         this->StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
 #endif

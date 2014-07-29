@@ -97,9 +97,9 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
 #if CISST_HAS_SAFETY_PLUGINS
         // onset event
         if (SF::State::NORMAL == 
-            GetSafetyCoordinator->GetState(SF::State::STATEMACHINE_PROVIDED,
-                                           this->ComponentName,
-                                           this->InterfaceName))
+            GetSafetyCoordinator->GetInterfaceState(this->ComponentName,
+                                                    this->InterfaceName,
+                                                    SF::GCM::PROVIDED_INTERFACE))
         {
             GetSafetyCoordinator->GenerateEvent(// event name
                                                 "EVT_COMMAND_QUEUE_FULL",
@@ -118,9 +118,9 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
     else {
         // offset event
         if (SF::State::ERROR == 
-            GetSafetyCoordinator->GetState(SF::State::STATEMACHINE_PROVIDED,
-                                           this->ComponentName,
-                                           this->InterfaceName))
+            GetSafetyCoordinator->GetInterfaceState(this->ComponentName,
+                                                    this->InterfaceName,
+                                                    SF::GCM::PROVIDED_INTERFACE))
         {
             std::stringstream ss;
             ss << "Class mtsCommandQueuedVoid: Execute: Queue is being dequeued\""

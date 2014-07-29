@@ -243,6 +243,12 @@ public:
     /*! Pure virtual method that gets overloaded to run the actual task.
       */
     virtual void Run(void) = 0;
+#if CISST_HAS_SAFETY_PLUGINS
+    // TODO: change these to be pure virtual later
+    virtual void RunNormal(void) {}
+    virtual void RunWarning(const SF::Event * e) { e; }
+    virtual void RunError(const SF::Event * e) { e; }
+#endif
 
     /*! Virtual method that gets called if an exception is thrown in the
         Run method. */
