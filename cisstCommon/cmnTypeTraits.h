@@ -363,12 +363,12 @@ inline bool cmnTypeTraits<unsigned char>::HasInfinity(void) {
 /* Define IsFinite for some basic types */
 template<>
 inline bool cmnTypeTraits<float>::IsFinite(const float & value) {
-    return CMN_ISFINITE(value);
+    return cmnIsFinite(value);
 }
 
 template<>
 inline bool cmnTypeTraits<double>::IsFinite(const double & value) {
-    return CMN_ISFINITE(value);
+    return cmnIsFinite(value);
 }
 
 template<>
