@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-13
 
