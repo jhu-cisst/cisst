@@ -34,15 +34,7 @@
 class CISST_EXPORT nmrConstraintOptimizer
 {
 
-public:
-
-    //! enum used for solver results.
-    //! 0  Both equality and inequality constraints are compatible and have been satisfied.
-    //! 1  Equality constraints are contradictory. A generalized inverse solution of EX=F was used to minimize the residual vector length F-EX. In this sense, the solution is still meaningful.
-    //! 2  Inequality constraints are contradictory.
-    //! 3  Both equality and inequality constraints are contradictory.
-    //! 4  Input has a NaN or INF
-    enum STATUS {NMR_OK, NMR_EQ_CONTRADICTION, NMR_INEQ_CONTRADICTION, NMR_BOTH_CONTRADICTION, NMR_MALFORMED, NMR_EMPTY};
+private:
 
     //!Objective Matrix
     vctDoubleMat C;
@@ -73,6 +65,16 @@ public:
     size_t EIndex;
     //!Slack Index
     size_t SlackIndex;
+
+public:
+
+    //! enum used for solver results.
+    //! 0  Both equality and inequality constraints are compatible and have been satisfied.
+    //! 1  Equality constraints are contradictory. A generalized inverse solution of EX=F was used to minimize the residual vector length F-EX. In this sense, the solution is still meaningful.
+    //! 2  Inequality constraints are contradictory.
+    //! 3  Both equality and inequality constraints are contradictory.
+    //! 4  Input has a NaN or INF
+    enum STATUS {NMR_OK, NMR_EQ_CONTRADICTION, NMR_INEQ_CONTRADICTION, NMR_BOTH_CONTRADICTION, NMR_MALFORMED, NMR_EMPTY};
 
     /*! Constructor
      */
