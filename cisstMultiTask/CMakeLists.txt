@@ -26,16 +26,16 @@ option (CISST_HAS_SAFETY_PLUGINS "Enable support for Safety Framework plug-ins i
 if (CISST_HAS_SAFETY_PLUGINS)
     find_package(SafetyFramework REQUIRED)
     if (SF_FOUND)
-        # Include safety framework configurations
-        include(${SF_USE_FILE})
-        set (SF_INCLUDE_DIR ${SF_INCLUDE_DIR} # where to find include files for SF
-                            ${SF_LIB_DEPENDENCY_INCLUDE_DIR}) # paths to SF dependencies
-        cisst_set_package_settings (cisstMultiTask SafetyFramework INCLUDE_DIRECTORIES SF_INCLUDE_DIR)
-        cisst_set_package_settings (cisstMultiTask SafetyFramework LIBRARIES SF_LIBRARY_FILE)
-        # set compiler flags
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SF_CXX_FLAGS}")
+      include (${SF_CONFIG_FILE})
+      # Include casros configurations
+      set (SF_INCLUDE_DIR ${SF_INCLUDE_DIR} # where to find include files for SF
+                          ${SF_LIB_DEPENDENCY_INCLUDE_DIR}) # paths to SF dependencies
+      cisst_set_package_settings (cisstMultiTask SafetyFramework INCLUDE_DIRECTORIES SF_INCLUDE_DIR)
+      cisst_set_package_settings (cisstMultiTask SafetyFramework LIBRARIES SF_LIBRARY_FILE)
+      # set compiler flags
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SF_CXX_FLAGS}")
     else (SF_FOUND)
-        message(FATAL_ERROR "Safety Framework is not found.")
+      message(FATAL_ERROR "Safety Framework is not found.")
     endif (SF_FOUND)
 endif (CISST_HAS_SAFETY_PLUGINS)
 
