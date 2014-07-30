@@ -244,19 +244,32 @@ public:
       */
     virtual void Run(void) = 0;
 #if CISST_HAS_SAFETY_PLUGINS
-    // TODO: change these to be pure virtual later
-    virtual void RunNormal(void) {}
-    virtual void RunWarning(const SF::Event *) {}
-    virtual void RunError(const SF::Event *) {}
+    // MJ: The following three methods could be made pure virtual, but it would 
+    // break existing codes and requires a lot of changes on user's codes.  
+    // Thus, mtsTask defines these base methods as placeholder.
+    //
+    // Note that these three methods internally calls Run() method so that user
+    // codes without casros still can run same as before.
+    // In other words, derived classes have to override these methods to execute 
+    // their own codes to benefit from the casros state management facility.
+    virtual void RunNormal(void);
+    virtual void RunWarning(const SF::Event *);
+    virtual void RunError(const SF::Event *);
     
     SF::State::StateType LastState;
 
-    virtual void OnNormal2Warning(const SF::Event *) {}
-    virtual void OnNormal2Error(const SF::Event *) {}
-    virtual void OnWarning2Normal(const SF::Event *) {}
-    virtual void OnWarning2Error(const SF::Event *) {}
-    virtual void OnError2Warning(const SF::Event *) {}
-    virtual void OnError2Normal(const SF::Event *) {}
+    virtual void OnNormal2Warning(const SF::Event * e);
+    virtual void OnNormal2Error(const SF::Event * e);
+    virtual void OnWarning2Normal(const SF::Event * e);
+    virtual void OnWarning2Error(const SF::Event * e);
+    virtual void OnError2Warning(const SF::Event * e);
+    virtual void OnError2Normal(const SF::Event * e);
+
+    // For user's convenience
+    inline SF::State::StateType GetComponentState(void) const {
+        return GetSafetyCoordinator->GetComponentState(this->GetName());
+    }
+ 
 #endif
 
     /*! Virtual method that gets called if an exception is thrown in the
@@ -362,6 +375,7 @@ public:
     }
 
 #if CISST_HAS_SAFETY_PLUGINS
+    // To be obsoleted
     /*! Set thread overrun flag and generate a thread overrun fault which gets 
         propagated to the Safety Supervisor of the safety framework. */
     void SetOverranPeriod(bool overran = true);

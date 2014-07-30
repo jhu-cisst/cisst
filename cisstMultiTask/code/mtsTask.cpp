@@ -47,65 +47,52 @@ void mtsTask::DoRunInternal(void)
         if (InterfaceProvidedToManager)
             InterfaceProvidedToManager->ProcessMailBoxes();
 #if CISST_HAS_SAFETY_PLUGINS
-        double tic = osaGetTime();
-        // Get run-time state of component
-        // TEMP: This component name-based filtering will be removed later after updating all components 
-        // in the system to support casros
-        if (this->GetName().compare("CONTROL") == 0 ||
-            //this->GetName().compare("Dingus") == 0)// ||
-            this->GetName().compare("JR3") == 0)
-        {
-            const SF::Event * e = 0;
-            SF::State::StateType state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
+        double tic;
+        const SF::Event * e = 0;
+        SF::State::StateType state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
 
-            if (state == SF::State::INVALID) {
-                CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
-            } else {
-                // handle state transition
-                if (LastState != state) {
-                    if (LastState == SF::State::NORMAL) {
-                        if (state == SF::State::WARNING)
-                            this->OnNormal2Warning(e);
-                        else {
-                            CMN_ASSERT(state == SF::State::ERROR);
-                            this->OnNormal2Error(e);
-                        }
-                    } else if (LastState == SF::State::WARNING) {
-                        if (state == SF::State::NORMAL)
-                            this->OnWarning2Normal(e); // TODO: check if e contains offset event
-                        else {
-                            CMN_ASSERT(state == SF::State::ERROR);
-                            this->OnWarning2Error(e);
-                        }
-                    } else if (LastState == SF::State::ERROR) {
-                        if (state == SF::State::WARNING)
-                            this->OnError2Warning(e); // TODO: check if e contains offset event
-                        else {
-                            CMN_ASSERT(state == SF::State::NORMAL);
-                            this->OnError2Normal(e); // TODO: check if e contains offset event
-                        }
-                    } else
-                        CMN_ASSERT(false);
-                }
-                // update cache
-                LastState = state;
-
-                if (e && state == SF::State::NORMAL)
-                    CMN_LOG_CLASS_RUN_ERROR << "task " << this->GetName() << " in NORMAL with event: " << *e << std::endl;
-                if (!e && state != SF::State::NORMAL)
-                    CMN_LOG_CLASS_RUN_ERROR << "task " << this->GetName() << " in "
-                        << SF::State::GetStringState(state) << " but NULL EVENT" << std::endl;
-
-                switch (state) {
-                default:
-                    CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
-                case SF::State::NORMAL:  this->RunNormal(); break;
-                case SF::State::WARNING: this->RunWarning(e); break;
-                case SF::State::ERROR:   this->RunError(e); break;
-                }
-            }
+        if (state == SF::State::INVALID) {
+            tic = osaGetTime(); // MJ: maybe meaningless..
+            CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
         } else {
-            this->Run();
+            // handle state transition
+            if (LastState != state) {
+                if (LastState == SF::State::NORMAL) {
+                    if (state == SF::State::WARNING)
+                        this->OnNormal2Warning(e);
+                    else {
+                        CMN_ASSERT(state == SF::State::ERROR);
+                        this->OnNormal2Error(e);
+                    }
+                } else if (LastState == SF::State::WARNING) {
+                    if (state == SF::State::NORMAL)
+                        this->OnWarning2Normal(e);
+                    else {
+                        CMN_ASSERT(state == SF::State::ERROR);
+                        this->OnWarning2Error(e);
+                    }
+                } else if (LastState == SF::State::ERROR) {
+                    if (state == SF::State::WARNING)
+                        this->OnError2Warning(e);
+                    else {
+                        CMN_ASSERT(state == SF::State::NORMAL);
+                        this->OnError2Normal(e);
+                    }
+                } else
+                    CMN_ASSERT(false);
+            }
+            // update state cache
+            LastState = state;
+
+            tic = osaGetTime();
+
+            switch (state) {
+            default:
+                CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
+            case SF::State::NORMAL:  this->RunNormal(); break;
+            case SF::State::WARNING: this->RunWarning(e); break;
+            case SF::State::ERROR:   this->RunError(e); break;
+            }
         }
 #else
         this->Run();
@@ -127,6 +114,23 @@ void mtsTask::DoRunInternal(void)
 
     RunEvent();  // only generates event if RunEventCalled is false
 }
+
+#if CISST_HAS_SAFETY_PLUGINS
+void mtsTask::RunNormal(void)
+{
+    this->Run();
+}
+
+void mtsTask::RunWarning(const SF::Event * CMN_UNUSED(e))
+{
+    this->Run();
+}
+
+void mtsTask::RunError(const SF::Event * CMN_UNUSED(e))
+{
+    this->Run();
+}
+#endif
 
 void mtsTask::RunEventHandler(void)
 {
@@ -582,7 +586,6 @@ bool mtsTask::CheckForOwnThread(void) const
 
 void mtsTask::OnStartupException(const std::exception &excp)
 {
-    exit(1);
 #if CISST_HAS_SAFETY_PLUGINS
     HandlerException(this->GetName(), excp.what());
 #endif
@@ -592,7 +595,6 @@ void mtsTask::OnStartupException(const std::exception &excp)
 
 void mtsTask::OnRunException(const std::exception &excp)
 {
-    exit(1);
 #if CISST_HAS_SAFETY_PLUGINS
     HandlerException(this->GetName(), excp.what());
 #endif
@@ -620,9 +622,74 @@ void mtsTask::HandlerOverrun(const std::string & CMN_UNUSED(name), const std::st
     StatusOverrun.Duration  = 0.0; // TODO: get actual overrun time
     StatusOverrun.Timestamp = osaGetTime();
 }
-#endif
 
-// To obsolete
+void mtsTask::OnNormal2Warning(const SF::Event * e)
+{
+    std::stringstream ss;
+    ss << "State transition: NORMAL to WARNING";
+    if (e)
+        ss << ", " << *e;
+    ss << std::endl;
+
+    CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
+}
+
+void mtsTask::OnNormal2Error(const SF::Event * e)
+{
+    std::stringstream ss;
+    ss << "State transition: NORMAL to ERROR";
+    if (e)
+        ss << ", " << *e;
+    ss << std::endl;
+
+    CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
+}
+
+void mtsTask::OnWarning2Normal(const SF::Event * e)
+{
+    std::stringstream ss;
+    ss << "State transition: WARNING to NORMAL";
+    if (e)
+        ss << ", " << *e;
+    ss << std::endl;
+
+    CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
+}
+
+void mtsTask::OnWarning2Error(const SF::Event * e)
+{
+    std::stringstream ss;
+    ss << "State transition: WARNING to ERROR";
+    if (e)
+        ss << ", " << *e;
+    ss << std::endl;
+
+    CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
+}
+
+void mtsTask::OnError2Warning(const SF::Event * e)
+{
+    std::stringstream ss;
+    ss << "State transition: ERROR to WARNING";
+    if (e)
+        ss << ", " << *e;
+    ss << std::endl;
+
+    CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
+}
+
+void mtsTask::OnError2Normal(const SF::Event * e)
+{
+    std::stringstream ss;
+    ss << "State transition: ERROR to NORMAL";
+    if (e)
+        ss << ", " << *e;
+    ss << std::endl;
+
+    CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
+}
+
+// To be obsoleted
 void mtsTask::SetOverranPeriod(bool overran)
 {
     this->OverranPeriod = overran;
@@ -637,3 +704,4 @@ void mtsTask::SetOverranPeriod(bool overran)
     // MJTODO: How/when to reset overrun flag??
     std::cout  << "mtsTask::SetOverranPeriod() ---- MONITORING EVENT: TASK \"" << this->GetName() << "\" overran" << std::endl;
 }
+#endif
