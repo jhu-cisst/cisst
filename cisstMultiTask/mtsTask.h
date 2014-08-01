@@ -266,9 +266,13 @@ public:
     virtual void OnError2Normal(const SF::Event * e);
 
     // For user's convenience
-    inline SF::State::StateType GetComponentState(void) const {
-        return GetSafetyCoordinator->GetComponentState(this->GetName());
-    }
+    SF::State::StateType GetComponentState(void) const;
+    SF::State::StateType GetProvidedInterfaceState(const std::string & interfaceName) const;
+    SF::State::StateType GetProvidedInterfaceState(const std::string & interfaceName,
+                                                   const SF::Event* & e) const;
+    SF::State::StateType GetRequiredInterfaceState(const std::string & interfaceName) const;
+    SF::State::StateType GetRequiredInterfaceState(const std::string & interfaceName,
+                                                   const SF::Event* & e) const;
  
 #endif
 

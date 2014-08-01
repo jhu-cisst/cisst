@@ -704,4 +704,39 @@ void mtsTask::SetOverranPeriod(bool overran)
     // MJTODO: How/when to reset overrun flag??
     std::cout  << "mtsTask::SetOverranPeriod() ---- MONITORING EVENT: TASK \"" << this->GetName() << "\" overran" << std::endl;
 }
+
+SF::State::StateType mtsTask::GetComponentState(void) const
+{
+    return GetSafetyCoordinator->GetComponentState(this->GetName());
+}
+
+SF::State::StateType mtsTask::GetProvidedInterfaceState(const std::string & interfaceName) const
+{
+    return GetSafetyCoordinator->GetInterfaceState(this->GetName(),
+                                                   interfaceName,
+                                                   SF::GCM::PROVIDED_INTERFACE);
+}
+
+SF::State::StateType mtsTask::GetProvidedInterfaceState(const std::string & interfaceName, const SF::Event* & e) const
+{
+    return GetSafetyCoordinator->GetInterfaceState(this->GetName(),
+                                                   interfaceName,
+                                                   e,
+                                                   SF::GCM::PROVIDED_INTERFACE);
+}
+
+SF::State::StateType mtsTask::GetRequiredInterfaceState(const std::string & interfaceName) const
+{
+    return GetSafetyCoordinator->GetInterfaceState(this->GetName(),
+                                                   interfaceName,
+                                                   SF::GCM::REQUIRED_INTERFACE);
+}
+
+SF::State::StateType mtsTask::GetRequiredInterfaceState(const std::string & interfaceName, const SF::Event* & e) const
+{
+    return GetSafetyCoordinator->GetInterfaceState(this->GetName(),
+                                                   interfaceName,
+                                                   e,
+                                                   SF::GCM::REQUIRED_INTERFACE);
+}
 #endif
