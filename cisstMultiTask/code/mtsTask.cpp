@@ -52,7 +52,7 @@ void mtsTask::DoRunInternal(void)
         SF::State::StateType state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
 
         if (state == SF::State::INVALID) {
-            tic = osaGetTime(); // MJ: maybe meaningless..
+            tic = osaGetTime(); // still need to be updated for ExecTimeUser
             CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
         } else {
             // handle state transition
@@ -60,38 +60,30 @@ void mtsTask::DoRunInternal(void)
                 if (LastState == SF::State::NORMAL) {
                     if (state == SF::State::WARNING)
                         this->OnNormal2Warning(e);
-                    else {
-                        CMN_ASSERT(state == SF::State::ERROR);
+                    else
                         this->OnNormal2Error(e);
-                    }
                 } else if (LastState == SF::State::WARNING) {
                     if (state == SF::State::NORMAL)
                         this->OnWarning2Normal(e);
-                    else {
-                        CMN_ASSERT(state == SF::State::ERROR);
+                    else
                         this->OnWarning2Error(e);
-                    }
                 } else if (LastState == SF::State::ERROR) {
                     if (state == SF::State::WARNING)
                         this->OnError2Warning(e);
-                    else {
-                        CMN_ASSERT(state == SF::State::NORMAL);
+                    else
                         this->OnError2Normal(e);
-                    }
-                } else
-                    CMN_ASSERT(false);
+                }
             }
-            // update state cache
+            // update last state
             LastState = state;
 
             tic = osaGetTime();
-
             switch (state) {
-            default:
-                CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
             case SF::State::NORMAL:  this->RunNormal(); break;
             case SF::State::WARNING: this->RunWarning(e); break;
             case SF::State::ERROR:   this->RunError(e); break;
+            default:
+                CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
             }
         }
 #else
