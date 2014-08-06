@@ -95,7 +95,10 @@ public:
     //-------------------------------------------------- 
     //! Install filter using filter instance (cisst-specific)
     bool AddFilter(SF::FilterBase * filter);
-
+    // Override method in the base class for cisst-specific processing
+    bool AddFilterFromJSONFileToComponent(const std::string & jsonFileName,
+                                          const std::string & targetComponentName);
+    
     //! Deploy all monitors and FDDs that are installed so far.
     /*! MJ: Right now, this method should be called main.cpp but could be moved
         into either cisst or SF such that users don't need to explicitly call this method.

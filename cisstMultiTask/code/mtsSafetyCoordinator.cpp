@@ -25,6 +25,7 @@
 #include <cisstMultiTask/mtsHistoryBuffer.h>
 #include <cisstMultiTask/mtsEventPublisher.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsStateTable.h>
 
 #include "dict.h"
 #include "utils.h"
@@ -488,7 +489,6 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
     return true;
 }
 
-#if 0
 bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & jsonFileName,
                                                             const std::string & targetComponentName)
 {
@@ -498,121 +498,51 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
         CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFileToComponent: Failed to read json file: " << jsonFileName << std::endl;
         return false;
     }
-    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFileToComponent: Successfully read json file: " << jsonFileName << std::endl;
 
     // Replace placeholder for target component name with actual target component name
-    std::string filterClassName;
-    SF::JSON::JSONVALUE & filters = json.GetRoot()[SF::Dict::Json::filter];
+    SF::JSON::JSONVALUE & filters = json.GetRoot()["filter"];
+    SF::JSON::JSONVALUE filtersPeriodic;
+
+    // Override filter json to fill in unspecified fields
     for (size_t i = 0; i < filters.size(); ++i) {
         SF::JSON::JSONVALUE & filter = filters[i];
-        //filter[SF::Dict::Json::target_component] = targetComponentName;
         filter["target"]["component"] = targetComponentName;
-    }
 
-    bool ret = AddFilters(filters);
-    if (!ret) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
-    // MJTODO: resolve this later (oeprator << is ambiguous)
-    //CMN_LOG_CLASS_RUN_DEBUG << *this << std::endl;
-
-    return true;
-}
-
-bool mtsSafetyCoordinator::AddFilterFromJSONFile(const std::string & jsonFileName)
-{
-    // Construct JSON structure from JSON file
-    SF::JSON json;
-    if (!json.ReadFromFile(jsonFileName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to read json file: " << jsonFileName << std::endl;
-        return false;
-    }
-
-    bool ret = AddFilterFromJSON(SF::JSON::GetJSONString(json.GetRoot()));
-    if (!ret) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
-
-    return ret;
-}
-
-bool mtsSafetyCoordinator::AddFilterFromJSON(const std::string & jsonString)
-{
-    // Construct JSON structure from JSON string
-    SF::JSON json;
-    if (!json.Read(jsonString.c_str())) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSON: Failed to read json string: " << jsonString << std::endl;
-        return false;
-    }
-
-    const SF::JSON::JSONVALUE filters = json.GetRoot()[SF::Dict::Json::filter];
-    bool ret = AddFilters(filters);
-    if (!ret) {
-        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Failed to add filter(s) using json string: " << jsonString << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSON: Successfully added filter(s) using json string: " << jsonString << std::endl;
-
-    return true;
-}
-
-bool mtsSafetyCoordinator::AddFilters(const SF::JSON::JSONVALUE & filters)
-{
-    if (filters.isNull() || filters.size() == 0) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilter: No filter specification found in json: " << filters << std::endl;
-        return false;
-    }
-
-    // Create filter target instance
-
-    // Figure out how many filters are defined, and 
-    // create and install filter instances while iterating each filter specification
-    std::string filterClassName;
-    SF::FilterBase * filter = 0; 
-    bool enableLog = false;
-    for (size_t i = 0; i < filters.size(); ++i) {
-        filterClassName = SF::JSON::GetSafeValueString(filters[i], SF::Dict::Json::class_name);
-        enableLog = SF::JSON::GetSafeValueBool(filters[i], "debug");
-        
-        // Create filter instance based on filter class name using filter factory
-        filter = SF::FilterFactory::GetInstance()->CreateFilter(filterClassName, filters[i]);
-        if (!filter) {
-            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to create filter instance \"" << filterClassName << "\"\n";
+        if (filter["argument"]["event_below"].isNull() || filter["argument"]["event_above"].isNull())
             continue;
-        }
 
-        // Install filter to the target component
-        if (!AddFilter(filter)) {
-            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to add filter \"" << filter->GetFilterName() << "\"\n";
-            delete filter;
-            return false;
-        }
+        // If name of onset event is EVT_THREAD_OVERRUN
+        std::string eventName = SF::JSON::GetJSONString(filter["argument"]["event_above"]);
+        eventName = SF::rtrim(eventName);
+        if (eventName.compare("\"EVT_THREAD_OVERRUN\"") != 0)
+            continue;
+
+        // If target component is periodic task
+        mtsTaskPeriodic * periodicTask = 
+            dynamic_cast<mtsTaskPeriodic*>(mtsManagerLocal::GetInstance()->GetComponent(targetComponentName));
+        if (!periodicTask)
+            continue;
         
-        // configure filter (process filter-specific arguments)
-        if (!filter->ConfigureFilter(filters[i])) {
-            CMN_LOG_CLASS_RUN_ERROR << "AddFilter: Failed to process filter-specfic parts for filter instance: \"" << filterClassName << "\"\n";
-            delete filter;
-            return false;
-        }
+        // set threshold based on its nominal period
+        filter["argument"]["input_signal"] = mtsStateTable::NamesOfDefaultElements::ExecTimeUser;
+        filter["argument"]["threshold"] = periodicTask->GetPeriodicity(true); // fetch nominal period
 
-        // enable debug log if specified
-        if (enableLog)
-            filter->EnableDebugLog();
+        filtersPeriodic.append(filter);
+    }
+    filters = filtersPeriodic;
 
-        CMN_LOG_CLASS_RUN_DEBUG << "[" << (i + 1) << "/" << filters.size() << "] "
-            << "Successfully installed filter: \"" << filter->GetFilterName() << "\"" << std::endl;
-   }
+    bool ret = this->AddFilters(filters);
+    if (!ret) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
+        return false;
+    }
+
+#if VERBOSE
+    CMN_LOG_CLASS_RUN_VERBOSE << "AddEventFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
+#endif
 
     return true;
 }
-#endif
 
 bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
 {
