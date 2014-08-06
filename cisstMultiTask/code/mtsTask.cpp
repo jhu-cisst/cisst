@@ -681,7 +681,8 @@ void mtsTask::OnError2Normal(const SF::Event * e)
     CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
 }
 
-// To be obsoleted
+// Obsoleted
+#if 0
 void mtsTask::SetOverranPeriod(bool overran)
 {
     this->OverranPeriod = overran;
@@ -696,6 +697,7 @@ void mtsTask::SetOverranPeriod(bool overran)
     // MJTODO: How/when to reset overrun flag??
     std::cout  << "mtsTask::SetOverranPeriod() ---- MONITORING EVENT: TASK \"" << this->GetName() << "\" overran" << std::endl;
 }
+#endif
 
 SF::State::StateType mtsTask::GetComponentState(void) const
 {

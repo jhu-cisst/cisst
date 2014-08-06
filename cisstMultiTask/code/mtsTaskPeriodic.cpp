@@ -127,14 +127,24 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 #endif
             if (StateTable.GetToc() - StateTable.GetTic() > Period) {
 #if CISST_HAS_SAFETY_PLUGINS
-                SetOverranPeriod();
+                CMN_LOG_CLASS_RUN_WARNING << "Periodic task \"" << GetName() << "\" missed deadline" << std::endl;
 #else
                 this->OverranPeriod = true;
 #endif
             }
         }
+#if !CISST_HAS_SAFETY_PLUGINS
         // Wait for remaining period also handles thread suspension
         ThreadBuddy.WaitForRemainingPeriod();
+#else
+        // In case of thread overrun, do not wait for the next period if casros is enabled
+        const SF::Event * e = 0;
+        SF::State state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
+        if (state != SF::State::WARNING || e->GetName().compare("EVT_THREAD_OVERRUN") != 0)
+            ThreadBuddy.WaitForRemainingPeriod();
+        else
+            CMN_LOG_CLASS_RUN_WARNING << "Periodic task \"" << GetName() << "\" continues running without thread suspension" << std::endl;
+#endif
     }
 
     CMN_LOG_CLASS_RUN_WARNING << "End of task " << Name << std::endl;

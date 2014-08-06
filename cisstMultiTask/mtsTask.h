@@ -378,13 +378,6 @@ public:
         return OverranPeriod;
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
-    // To be obsoleted
-    /*! Set thread overrun flag and generate a thread overrun fault which gets 
-        propagated to the Safety Supervisor of the safety framework. */
-    void SetOverranPeriod(bool overran = true);
-#endif
-    
     /*! Reset overran period flag. */
     inline virtual void ResetOverranPeriod(void) {
         OverranPeriod = false;
