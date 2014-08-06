@@ -95,10 +95,6 @@ protected:
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
         mtsFunctionQualifiedRead GetAbsoluteTimeDiffs;
-#if CISST_HAS_SAFETY_PLUGINS
-        // Fault detection
-        mtsFunctionWrite FaultPropagate;
-#endif
     } InterfaceLCMFunctionType;
 
     InterfaceLCMFunctionType InterfaceLCMFunction;
@@ -160,11 +156,6 @@ protected:
     // Called from LCM
     bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
-
-    /*! Fault detection */
-#if CISST_HAS_SAFETY_PLUGINS
-    bool FaultPropagate(const mtsFaultBase & fault) const;
-#endif
 
     /*! Commands for InterfaceLCM's provided interface */
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);

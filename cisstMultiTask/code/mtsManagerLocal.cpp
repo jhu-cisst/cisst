@@ -1824,6 +1824,11 @@ void mtsManagerLocal::CreateAll(void)
     }
 
     ComponentMapChange.Unlock();
+
+#if CISST_HAS_SAFETY_PLUGINS
+    if (!SafetyCoordinator->DeployMonitorsAndFDDs())
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to deploy casros monitors and filters" << std::endl;
+#endif
 }
 
 
@@ -3195,16 +3200,6 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
 }
 
 #if CISST_HAS_SAFETY_PLUGINS
-bool mtsManagerLocal::FaultPropagate(const mtsFaultBase & fault) const
-{
-    if (!ManagerComponent.Client) {
-        CMN_LOG_CLASS_RUN_ERROR << "FaultPropagate: MCC not yet created" << std::endl;
-        return false;
-    }
-
-    return ManagerComponent.Client->FaultPropagate(fault);
-}
-
 mtsSafetyCoordinator * mtsManagerLocal::GetCoordinator(void)
 {
     // MJ: If more than one monitor needs to be deployed, this method can be an entry

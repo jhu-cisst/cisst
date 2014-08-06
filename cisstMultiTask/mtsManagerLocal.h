@@ -370,8 +370,6 @@ protected:
     mtsSafetyCoordinator * SafetyCoordinator;
 
 public:
-    bool FaultPropagate(const mtsFaultBase & fault) const;
-    
     //SF::Coordinator * GetCoordinator(void);
     mtsSafetyCoordinator * GetCoordinator(void);
 

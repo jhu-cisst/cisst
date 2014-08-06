@@ -601,10 +601,6 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.GetInterfaceProvidedDescription);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
                           InterfaceLCMFunction.GetInterfaceRequiredDescription);
-#if CISST_HAS_SAFETY_PLUGINS
-    required->AddFunction(mtsManagerComponentBase::CommandNames::FaultPropagate,
-                          InterfaceLCMFunction.FaultPropagate);
-#endif
     // It is not necessary to queue the events because we are just passing them along (it would not
     // hurt to queue them, either).
     required->AddEventHandlerWrite(&mtsManagerComponentClient::HandleAddComponentEvent, this,
@@ -731,19 +727,6 @@ bool mtsManagerComponentClient::ForwardLog(const mtsLogMessage & log) const
 
     return true;
 }
-
-#if CISST_HAS_SAFETY_PLUGINS
-bool mtsManagerComponentClient::FaultPropagate(const mtsFaultBase & fault) const
-{
-    mtsExecutionResult ret = InterfaceLCMFunction.FaultPropagate(fault);
-    if (ret.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED) {
-        CMN_LOG_CLASS_RUN_ERROR << "FaultPropagate: fault is not reported to the system" << std::endl;
-        return false;
-    }
-    
-    return true;
-}
-#endif
 
 bool mtsManagerComponentClient::Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                                         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
