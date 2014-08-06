@@ -104,8 +104,8 @@ int main(int, char *[])
     // Get instance of local component manager
     try {
         ComponentManager = mtsComponentManager::GetInstance();
-    } catch (...) {
-        std::cerr << "Failed to initialize local component manager" << std::endl;
+    } catch (std::exception & e) {
+        std::cerr << "Failed to initialize local component manager: " << e.what() << std::endl;
         return 1;
     }
 
