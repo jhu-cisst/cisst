@@ -342,15 +342,7 @@ if (CISST_HAS_SAFETY_PLUGINS)
   set (SOURCE_FILES ${SOURCE_FILES}
        # monitors
        mtsMonitorComponent.cpp
-       #mtsMonitorFilterBase.cpp
-       #mtsMonitorFilterBasics.cpp
-       # faults
-       mtsFaultBase.cpp
-       mtsFaultTypes.cpp
-       # fault detection and diagnosis
-       #mtsFaultDetectorBase.cpp
-       #mtsFaultDetectorThresholding.cpp
-       # plug-ins for Safety Framework
+       # plug-ins for casros
        mtsSafetyCoordinator.cpp
        mtsSafetySupervisor.cpp
        mtsSubscriberCallback.cpp
@@ -362,15 +354,7 @@ if (CISST_HAS_SAFETY_PLUGINS)
        ${HEADER_FILES}
        # monitors
        mtsMonitorComponent.h
-       #mtsMonitorFilterBase.h
-       #mtsMonitorFilterBasics.h
-       # faults
-       mtsFaultBase.h
-       mtsFaultTypes.h
-       # fault detection and diagnosis
-       #mtsFaultDetectorBase.h
-       #mtsFaultDetectorThresholding.h
-       # plug-ins for Safety Framework
+       # plug-ins for casros
        mtsSafetyCoordinator.h
        mtsSafetySupervisor.h
        mtsSubscriberCallback.h

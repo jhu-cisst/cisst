@@ -26,9 +26,6 @@
 #include <cisstCommon/cmnConstants.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstMultiTask/mtsFaultDetectorThresholding.h>
-#include <cisstMultiTask/mtsMonitorFilterBasics.h>
-#include <cisstMultiTask/mtsFaultTypes.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES(mtsMonitorComponent);

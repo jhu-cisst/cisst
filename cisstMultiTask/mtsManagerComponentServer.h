@@ -114,10 +114,6 @@ protected:
                                                    std::vector<double> & processTimes) const;
     void InterfaceGCMCommands_GetListOfComponentClasses(const std::string & processName,
                                                         std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
-#if CISST_HAS_SAFETY_PLUGINS
-    void InterfaceGCMCommands_FaultPropage(const mtsFaultBase & fault);
-#endif
-
     /*! Event generators */
     mtsFunctionWrite InterfaceGCMEvents_AddComponent;
     mtsFunctionWrite InterfaceGCMEvents_AddConnection;
