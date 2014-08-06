@@ -26,6 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 
+#include <algorithm> // std::max
+
 CMN_IMPLEMENT_SERVICES(mtsTaskPeriodicConstructorArg);
 
 void mtsTaskPeriodicConstructorArg::SerializeRaw(std::ostream & outputStream) const
@@ -124,10 +126,14 @@ void * mtsTaskPeriodic::RunInternal(void *data)
             DoRunInternal();
 #if CISST_HAS_SAFETY_PLUGINS
             this->StateTableMonitor.ExecTimeTotal = osaGetTime() - tic;
+            // store overrun duration for later use (e.g., dynamic adjustment of actual
+            // period in the control loop)
+            this->StatusOverrun.Duration = std::max(0.0, this->StateTableMonitor.ExecTimeTotal - Period);
 #endif
             if (StateTable.GetToc() - StateTable.GetTic() > Period) {
 #if CISST_HAS_SAFETY_PLUGINS
-                CMN_LOG_CLASS_RUN_WARNING << "Periodic task \"" << GetName() << "\" missed deadline" << std::endl;
+                CMN_LOG_CLASS_RUN_WARNING << "Periodic task \"" << GetName() << "\" missed deadline by " 
+                                          << this->StatusOverrun.Duration << " second" << std::endl;
 #else
                 this->OverranPeriod = true;
 #endif
@@ -137,7 +143,9 @@ void * mtsTaskPeriodic::RunInternal(void *data)
         // Wait for remaining period also handles thread suspension
         ThreadBuddy.WaitForRemainingPeriod();
 #else
-        // In case of thread overrun, do not wait for the next period if casros is enabled
+        // At this moment, thread overrun detection filter has already detected overrun
+        // event if casros enabled.  If the event occurs, skip WaitForRemainingPeriod() and
+        // go on to the next iteration.
         const SF::Event * e = 0;
         SF::State state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
         if (state != SF::State::WARNING || e->GetName().compare("EVT_THREAD_OVERRUN") != 0)

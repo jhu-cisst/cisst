@@ -92,6 +92,20 @@ void mtsTask::DoRunInternal(void)
 #if CISST_HAS_SAFETY_PLUGINS
         this->StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
 #endif
+
+        // If this line is reached without exception and the framework state is in NORMAL
+        // state due to thread exception, generate offset event.
+        if (state == SF::State::ERROR && e->GetName().compare("EVT_THREAD_EXCEPTION") == 0) {
+            std::stringstream ss;
+            ss << "Component \"" << GetName() << "\" goes back to NORMAL state (exception resolved)";
+            //CMN_LOG_CLASS_RUN_VERBOSE
+            CMN_LOG_CLASS_RUN_WARNING << ss.str() << std::endl;
+            // Inform casros of this offset event
+            GetSafetyCoordinator->GenerateEvent("/EVT_THREAD_EXCEPTION",
+                                                SF::State::STATEMACHINE_FRAMEWORK,
+                                                ss.str(),
+                                                this->Name);
+        }
     }
     catch (const std::exception &excp) {
         OnRunException(excp);
@@ -575,23 +589,36 @@ bool mtsTask::CheckForOwnThread(void) const
     return (osaGetCurrentThreadId() == Thread.GetId());
 }
 
-
 void mtsTask::OnStartupException(const std::exception &excp)
 {
-#if CISST_HAS_SAFETY_PLUGINS
-    HandlerException(this->GetName(), excp.what());
-#endif
-
+#if !CISST_HAS_SAFETY_PLUGINS
     CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
+#else
+    std::stringstream ss;
+    ss << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << ss.str();
+
+    GetSafetyCoordinator->GenerateEvent("EVT_THREAD_EXCEPTION",
+                                        SF::State::STATEMACHINE_FRAMEWORK,
+                                        ss.str(),
+                                        this->Name);
+#endif
 }
 
 void mtsTask::OnRunException(const std::exception &excp)
 {
-#if CISST_HAS_SAFETY_PLUGINS
-    HandlerException(this->GetName(), excp.what());
-#endif
-    
+#if !CISST_HAS_SAFETY_PLUGINS
     CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
+#else
+    std::stringstream ss;
+    ss << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << ss.str();
+
+    GetSafetyCoordinator->GenerateEvent("EVT_THREAD_EXCEPTION",
+                                        SF::State::STATEMACHINE_FRAMEWORK,
+                                        ss.str(),
+                                        this->Name);
+#endif
 }
 
 void mtsTask::SetInitializationDelay(double delay)
@@ -600,6 +627,7 @@ void mtsTask::SetInitializationDelay(double delay)
 }
 
 #if CISST_HAS_SAFETY_PLUGINS
+#if 0
 void mtsTask::HandlerException(const std::string & CMN_UNUSED(name), const std::string & CMN_UNUSED(what))
 {
     ++StatusException.Count;
@@ -614,6 +642,7 @@ void mtsTask::HandlerOverrun(const std::string & CMN_UNUSED(name), const std::st
     StatusOverrun.Duration  = 0.0; // TODO: get actual overrun time
     StatusOverrun.Timestamp = osaGetTime();
 }
+#endif
 
 void mtsTask::OnNormal2Warning(const SF::Event * e)
 {

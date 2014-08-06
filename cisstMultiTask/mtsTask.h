@@ -119,11 +119,13 @@ protected:
         double Duration;
     } StatusOverrun;
 
+#if 0
     /*! Exception event handler for safety framework */
     void HandlerException(const std::string & name, const std::string & what);
 
     /*! Overrun event handler for safety framework */
     void HandlerOverrun(const std::string & name, const std::string & what);
+#endif
 #endif
 
     /*! True if the task took more time to do computation than allocated time.
