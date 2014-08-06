@@ -32,6 +32,15 @@ http://www.cisst.org/cisst/license.txt.
 {
     "component": "", // will be set by casros when deployed
     "event": [
+        // Periodic thread overrun
+        {   "name"            : "EVT_THREAD_OVERRUN",
+            "severity"        : 201,
+            "state_transition": [ "N2W" ]
+        },
+        {   "name"            : "/EVT_THREAD_OVERRUN",
+            "severity"        : 201,
+            "state_transition": [ "W2N" ]
+        },
         // Internal queue full (for provided interface states)
         {   "name"            : "EVT_COMMAND_QUEUE_FULL",
             "severity"        : 201,
@@ -40,6 +49,26 @@ http://www.cisst.org/cisst/license.txt.
         {   "name"            : "/EVT_COMMAND_QUEUE_FULL",
             "severity"        : 201,
             "state_transition": [ "E2N" ]
+        }
+    ],
+    "filter": [
+        // Filter to detect periodic thread overrun
+        {   "class_name"       : "FilterThreshold",
+            "target"           : {
+                "type"         : "s_F",
+                "component"    : ""  // "component" defined above is used instead
+            },
+            "type"             : "ACTIVE",
+            "argument" : {
+                "input_signal" : "",  // set by casros when deployed
+                "threshold"    : 0.0, // set by casros when deployed
+                "tolerance"    : 0.0, // up to this % of overrun from nominal period is ignored
+                "output_above" : 2,
+                "output_below" : 1,
+                "event_above"  : "EVT_THREAD_OVERRUN",
+                "event_below"  : "/EVT_THREAD_OVERRUN"
+            },
+            "last_filter"      : true
         }
     ]
 }
