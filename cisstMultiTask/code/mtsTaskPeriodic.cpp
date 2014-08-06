@@ -117,11 +117,14 @@ void * mtsTaskPeriodic::RunInternal(void *data)
     }
 
     while ((this->State == mtsComponentState::ACTIVE) || (this->State == mtsComponentState::READY)) {
-#if CISST_HAS_SAFETY_PLUGINS
-        double tic = osaGetTime();
-#endif
         if (this->State == mtsComponentState::ACTIVE) {
+#if CISST_HAS_SAFETY_PLUGINS
+            const double tic = osaGetTime(); 
+#endif
             DoRunInternal();
+#if CISST_HAS_SAFETY_PLUGINS
+            this->StateTableMonitor.ExecTimeTotal = osaGetTime() - tic;
+#endif
             if (StateTable.GetToc() - StateTable.GetTic() > Period) {
 #if CISST_HAS_SAFETY_PLUGINS
                 SetOverranPeriod();
@@ -130,9 +133,6 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 #endif
             }
         }
-#if CISST_HAS_SAFETY_PLUGINS
-        StateTableMonitor.ExecTimeTotal = osaGetTime() - tic;
-#endif
         // Wait for remaining period also handles thread suspension
         ThreadBuddy.WaitForRemainingPeriod();
     }

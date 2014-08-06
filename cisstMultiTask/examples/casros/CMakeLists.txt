@@ -10,6 +10,7 @@
 #
 # --- end cisst license ---
 
-# Example demonstrating CASROS framework allows system designers to be able
-# to catch and handle queue full events
+# Example demonstrating that casros-enabled cisst can catch and handle queue full events
 add_subdirectory (queueFull)
+# Example demonstrating that casros-enabled cisst can catch and handle thread overrun
+add_subdirectory (overrun)

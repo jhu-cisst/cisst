@@ -283,7 +283,8 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
         }
 #endif
 #if 1
-        stateTable = targetComponent->GetDefaultStateTable();
+        //stateTable = targetComponent->GetDefaultStateTable();
+        stateTable = targetComponent->GetMonitoringStateTable();
         int stateVectorId = stateTable->GetStateVectorID(signalName);
 
         if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
@@ -530,6 +531,11 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
         filtersPeriodic.append(filter);
     }
     filters = filtersPeriodic;
+
+    if (filters.isNull()) {
+        CMN_LOG_CLASS_RUN_WARNING << "AddFilterFromJSONFile: no filter to register for component \"" << targetComponentName << "\"" << std::endl;
+        return true;
+    }
 
     bool ret = this->AddFilters(filters);
     if (!ret) {

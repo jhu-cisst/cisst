@@ -63,8 +63,8 @@ http://www.cisst.org/cisst/license.txt.
                 "input_signal" : "",  // set by casros when deployed
                 "threshold"    : 0.0, // set by casros when deployed
                 "tolerance"    : 0.0, // up to this % of overrun from nominal period is ignored
-                "output_above" : 2,
-                "output_below" : 1,
+                "output_above" : 1,
+                "output_below" : 0,
                 "event_above"  : "EVT_THREAD_OVERRUN",
                 "event_below"  : "/EVT_THREAD_OVERRUN"
             },
