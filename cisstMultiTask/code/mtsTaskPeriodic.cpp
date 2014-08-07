@@ -133,7 +133,8 @@ void * mtsTaskPeriodic::RunInternal(void *data)
             if (StateTable.GetToc() - StateTable.GetTic() > Period) {
 #if CISST_HAS_SAFETY_PLUGINS
                 CMN_LOG_CLASS_RUN_WARNING << "Periodic task \"" << GetName() << "\" missed deadline by " 
-                                          << this->StatusOverrun.Duration << " second" << std::endl;
+                                          << (StateTable.GetToc() - StateTable.GetTic() - Period) << " ("
+                                          << this->StatusOverrun.Duration << ") second" << std::endl;
 #else
                 this->OverranPeriod = true;
 #endif

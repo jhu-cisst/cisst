@@ -83,9 +83,6 @@ int main(int, char *[])
         return 1;
     }
 
-    // Get instance of safety coordinator
-    mtsSafetyCoordinator * SafetyCoordinator = ComponentManager->GetCoordinator();
-
     // Create two test components
     PeriodicTask task("task", 1.0);
     ComponentManager->AddComponent(&task);
