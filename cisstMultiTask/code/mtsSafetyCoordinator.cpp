@@ -533,18 +533,18 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
     filters = filtersPeriodic;
 
     if (filters.isNull()) {
-        CMN_LOG_CLASS_RUN_WARNING << "AddFilterFromJSONFile: no filter to register for component \"" << targetComponentName << "\"" << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "AddFilterFromJSONFileToComponent: no filter to register for component \"" << targetComponentName << "\"" << std::endl;
         return true;
     }
 
     bool ret = this->AddFilters(filters);
     if (!ret) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFile: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFileToComponent: Failed to add filter(s) from JSON file: " << jsonFileName << std::endl;
         return false;
     }
 
 #if VERBOSE
-    CMN_LOG_CLASS_RUN_VERBOSE << "AddEventFromJSONFile: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "AddFilterFromJSONFileToComponent: Successfully added filter(s) from JSON file: " << jsonFileName << std::endl;
 #endif
 
     return true;
