@@ -162,8 +162,8 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
     else if (request.compare("filter_info") == 0)
         replyData = sc->GetFilterList(targetComponentName, true); // verbose: true
     else if (request.compare("filter_inject") == 0) {
-        const SF::FilterBase::FilterIDType fuid = 
-            jsonParser.GetSafeValueUInt(_json["target"], "fuid");
+        const SF::FilterBase::FilterIDType fuid = jsonParser.GetSafeValueUInt(_json["target"], "fuid");
+        bool deepInjection = jsonParser.GetSafeValueBool(_json, "deep");
 
         SF::DoubleVecType inputs;
         const JSON::JSONVALUE & jsonInputData = _json["input"];
@@ -171,7 +171,7 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
             inputs.push_back(jsonInputData[i].asDouble());
 
         std::stringstream ss;
-        if (sc->InjectInputToFilter(fuid, inputs)) {
+        if (sc->InjectInputToFilter(fuid, inputs, deepInjection)) {
             ss << "{ \"cmd\": \"message\", \"msg\": \"Successfully injected input data: ";
             for (size_t i = 0; i < inputs.size(); ++i)
                 ss << std::setprecision(5) << inputs[i] << " ";

@@ -42,6 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_HAS_SAFETY_PLUGINS
 #include <cisstMultiTask/mtsVector.h>
+#include <cisstOSAbstraction/osaMutex.h> // for deep fault injection
 #endif
 
 // Always include last
@@ -510,6 +511,10 @@ public:
     void GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & vec, double & timeStamp) const;
     void GetNewValueVector(const mtsStateDataId id, std::vector<double> & vec, double & timeStamp) const;
 
+    // for deep fault injection
+    void PushNewValueScalar(const mtsStateDataId id, const mtsDouble & value);
+    void PushNewValueScalar(const mtsStateDataId id, const mtsDoubleVec & values);
+
     // [SFUPDATE]
     /*! Placeholders for monitoring */
     mtsDouble ExecTimeUser;
@@ -523,6 +528,12 @@ public:
 protected:
     std::string OwnerComponentName; // name of component that owns this state table
 
+    // for deep fault injection
+    typedef std::queue<mtsDouble> FaultInjectionQueueType;
+    typedef std::vector<FaultInjectionQueueType*> FaultInjectionTableType;
+    FaultInjectionTableType FaultInjectionTable;
+
+    osaMutex FaultInjectionMutex;
 #endif
 };
 
@@ -552,6 +563,9 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
     StateVector.push_back(elementHistory);
     FinalRefType *pdata = mtsGenericTypes<_elementType>::ConditionalWrap(*element);
     StateVectorElements.push_back(pdata);
+#if CISST_HAS_SAFETY_PLUGINS
+    FaultInjectionTable.push_back(new FaultInjectionQueueType);
+#endif
 
     StateVectorDataNames.push_back(name);
     mtsStateDataId id = static_cast<mtsStateDataId>(StateVector.size() - 1);

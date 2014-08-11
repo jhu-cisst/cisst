@@ -275,6 +275,9 @@ public:
     SF::State::StateType GetRequiredInterfaceState(const std::string & interfaceName) const;
     SF::State::StateType GetRequiredInterfaceState(const std::string & interfaceName,
                                                    const SF::Event* & e) const;
+    
+    // For deep fault inject
+    bool GetLatestDataFromStateTable(const std::string & signalName, double & value) const;
  
 #endif
 

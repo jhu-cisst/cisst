@@ -762,4 +762,19 @@ SF::State::StateType mtsTask::GetRequiredInterfaceState(const std::string & inte
                                                    e,
                                                    SF::GCM::REQUIRED_INTERFACE);
 }
+
+bool mtsTask::GetLatestDataFromStateTable(const std::string & signalName, double & value) const
+{
+    typedef mtsStateTable::Accessor<double> AccessorType;
+    AccessorType * accessor = dynamic_cast<AccessorType*>(this->StateTableMonitor.GetAccessor(signalName));
+    if (!accessor) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetLatestDataFromStateTable: failed to get accessor for \"" << signalName << "\"" << std::endl;
+        return false;
+    }
+    mtsDouble _value;
+    accessor->GetLatest(_value);
+    value = _value.Data;
+
+    return true;
+}
 #endif

@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2012-09-04
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -66,6 +66,10 @@ public:
     void GetNewValueVector(SF::SignalElement::VectorType & value,
                            SF::TimestampType & timestamp);
 
+    // Support for "deep" fault inject: modify actual values in the buffer
+    void PushNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
+                           SF::SignalElement::ScalarType & value);
+    
     /*
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;

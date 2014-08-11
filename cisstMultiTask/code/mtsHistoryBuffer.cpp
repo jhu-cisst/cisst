@@ -108,3 +108,10 @@ void mtsHistoryBuffer::DeSerializeRaw(std::istream & inputStream)
     //cmnDeSerializeRaw(inputStream, Process);
 }
 #endif
+
+void mtsHistoryBuffer::PushNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
+                                          SF::SignalElement::ScalarType & value)
+{
+    // MJ TODO: Check if this method needs to work for both types of filters
+    StateTable->PushNewValueScalar(index, mtsDouble(value));
+}

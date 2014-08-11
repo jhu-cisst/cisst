@@ -22,9 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsCollectorState.h>
-#if CISST_HAS_SAFETY_PLUGINS
-//#include <cisstMultiTask/mtsMonitorFilterBase.h>
-#endif
 
 #include <iostream>
 #include <string>
@@ -109,6 +106,11 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
 
 mtsStateTable::~mtsStateTable()
 {
+#if CISST_HAS_SAFETY_PLUGINS
+    for (size_t i = 0; i < FaultInjectionTable.size(); ++i) {
+        delete FaultInjectionTable[i];
+    }
+#endif
 }
 
 bool mtsStateTable::SetSize(const size_t size){
@@ -250,7 +252,16 @@ void mtsStateTable::Advance(void) {
     for (i = TicId; i < StateVector.size(); i++) {
         if (StateVectorElements[i]) {
             StateVectorElements[i]->SetTimestampIfAutomatic(Tic.Data);
+#if CISST_HAS_SAFETY_PLUGINS
+            if (!FaultInjectionTable[i]->empty()) {
+                Write(static_cast<mtsStateDataId>(i), FaultInjectionTable[i]->front());
+                FaultInjectionMutex.Lock();
+                FaultInjectionTable[i]->pop();
+                FaultInjectionMutex.Unlock();
+            }
+#else
             Write(static_cast<mtsStateDataId>(i), *(StateVectorElements[i]));
+#endif
         }
     }
 
@@ -652,9 +663,27 @@ void mtsStateTable::GetNewValueVector(const mtsStateDataId id, std::vector<doubl
         vec.push_back(_vec(i));
     }
 }
-#endif
 
-// MJ TODO: Following APIs could be added to access old values for convenience:
-//
-// Fetch the history of old values using index
-//   GetValueHistory(const mtsStateDataId id, size_t historyLength, double & timestamp) const
+void mtsStateTable::PushNewValueScalar(const mtsStateDataId id, const mtsDouble & value)
+{
+    CMN_ASSERT(id < (int) FaultInjectionTable.size());
+
+    FaultInjectionMutex.Lock();
+    {
+        FaultInjectionTable[id]->push(value);
+    }
+    FaultInjectionMutex.Unlock();
+}
+
+void mtsStateTable::PushNewValueScalar(const mtsStateDataId id, const mtsDoubleVec & values)
+{
+    CMN_ASSERT(id < (int) FaultInjectionTable.size());
+
+    FaultInjectionMutex.Lock();
+    {
+        for (size_t i = 0; i < values.size(); ++i)
+            FaultInjectionTable[id]->push(values[i]);
+    }
+    FaultInjectionMutex.Unlock();
+}
+#endif

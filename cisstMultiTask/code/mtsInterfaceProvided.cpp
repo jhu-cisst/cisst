@@ -612,8 +612,10 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCommandRead * command)
 mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateInternalScalar(const mtsStateTable & stateTable,
                                                                          const std::string & stateDataName, const std::string & commandName)
 {
-    typedef typename mtsGenericTypes<double>::FinalType FinalType;
-    typedef typename mtsStateTable::Accessor<double> AccessorType;
+    //typedef typename mtsGenericTypes<double>::FinalType FinalType;
+    //typedef typename mtsStateTable::Accessor<double> AccessorType;
+    typedef mtsGenericTypes<double>::FinalType FinalType;
+    typedef mtsStateTable::Accessor<double> AccessorType;
 
     AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateDataName));
     if (!stateAccessor) {
