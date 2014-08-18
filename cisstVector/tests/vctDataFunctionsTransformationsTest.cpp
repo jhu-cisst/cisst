@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
@@ -23,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctTransformationTypes.h>
 #include <cisstVector/vctDataFunctionsTransformations.h>
 #include <cisstVector/vctRandomFixedSizeVector.h>
+#include <cisstVector/vctRandomFixedSizeMatrix.h>
 #include <cisstVector/vctRandomTransformations.h>
 
 void vctDataFunctionsTransformationsTest::TestFrm3DataCopy(void)
@@ -75,6 +75,69 @@ void vctDataFunctionsTransformationsTest::TestFrm3Scalar(void)
             CPPUNIT_ASSERT_EQUAL(1.0, cmnData<vctFrm3>::Scalar(f, index));
         } else {
             CPPUNIT_ASSERT_EQUAL(0.0, cmnData<vctFrm3>::Scalar(f, index));
+        }
+    }
+}
+
+
+void vctDataFunctionsTransformationsTest::TestFrm4x4DataCopy(void)
+{
+    vctFrm4x4 source, data;
+    vct3 translation;
+    vctMatRot3 rotation;
+    vctRandom(translation, -10.0, 10.0);
+    vctRandom(rotation);
+    source.Translation().Assign(translation);
+    source.Rotation().Assign(rotation);
+    cmnData<vctFrm4x4>::Copy(data, source);
+    CPPUNIT_ASSERT(source.Equal(data));
+}
+
+
+void vctDataFunctionsTransformationsTest::TestFrm4x4BinarySerializationStream(void)
+{
+    cmnDataFormat local, remote;
+    std::stringstream stream;
+    vctFrm4x4 f1, f2, fReference;
+    vct3 translation;
+    vctMatRot3 rotation;
+    vctRandom(translation, -10.0, 10.0);
+    vctRandom(rotation);
+    fReference.Translation().Assign(translation);
+    fReference.Rotation().Assign(rotation);
+    f1 = fReference;
+    cmnData<vctFrm4x4>::SerializeBinary(f1, stream);
+    f1.Rotation().From(f1.Rotation().Identity());
+    cmnData<vctFrm4x4>::DeSerializeBinary(f2, stream, local, remote);
+    CPPUNIT_ASSERT_EQUAL(fReference, f2);
+}
+
+
+void vctDataFunctionsTransformationsTest::TestFrm4x4Scalar(void)
+{
+    vctFrm4x4 f;
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(16), cmnData<vctFrm4x4>::ScalarNumber(f));
+    CPPUNIT_ASSERT_EQUAL(true, cmnData<vctFrm4x4>::ScalarNumberIsFixed(f));
+
+    size_t index;
+    bool exceptionReceived = false;
+    std::string description;
+
+    // exception expected if index too high
+    try {
+        description = cmnData<vctFrm4x4>::ScalarDescription(f, cmnData<vctFrm4x4>::ScalarNumber(f) + 1);
+    } catch (std::out_of_range) {
+        exceptionReceived = true;
+    }
+    CPPUNIT_ASSERT(exceptionReceived);
+
+    // get scalar
+    for (index = 0; index < cmnData<vctFrm4x4>::ScalarNumber(f); ++index) {
+        // all should be null, except for rotation diagonal, index = 0, 5, 10 and 15
+        if ((index == 0) || (index == 5) || (index == 10) || (index == 15)) {
+            CPPUNIT_ASSERT_EQUAL(1.0, cmnData<vctFrm4x4>::Scalar(f, index));
+        } else {
+            CPPUNIT_ASSERT_EQUAL(0.0, cmnData<vctFrm4x4>::Scalar(f, index));
         }
     }
 }
