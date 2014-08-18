@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2007-02-11
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -110,6 +108,4 @@ template CISST_EXPORT void vctRandom(vctMatrixRotation2Base<vctFixedSizeMatrix<f
 CISST_EXPORT void vctRandom(vctAngleRotation2 & angleRotation);
 //@}
 
-
 #endif  // _vctRandomTransformations_h
-
