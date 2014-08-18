@@ -174,8 +174,8 @@ mtsTaskContinuous::~mtsTaskContinuous() {
 void mtsTaskContinuous::Create(void *data)
 {
     if (this->State != mtsComponentState::CONSTRUCTED) {
-        CMN_LOG_CLASS_INIT_ERROR << "Create: task " << this->GetName() << " cannot be created, state = "
-                                 << this->State << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Create: task " << this->GetName() << " cannot be created, state = "
+                                   << this->State << std::endl;
         return;
     }
     if (ExecIn && ExecIn->GetConnectedInterface()) {
