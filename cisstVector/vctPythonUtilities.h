@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-08-21
 
-  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -165,10 +164,21 @@ bool vctThrowUnlessIsSameTypeArray<unsigned long int>(PyObject * input)
 
 
 template <>
+bool vctThrowUnlessIsSameTypeArray<float>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_FLOAT) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type float");
+        return false;
+    }
+    return true;
+}
+
+
+template <>
 bool vctThrowUnlessIsSameTypeArray<double>(PyObject * input)
 {
     if (PyArray_ObjectType(input, 0) != NPY_DOUBLE) {
-        PyErr_SetString(PyExc_ValueError, "Array must be of type double ()");
+        PyErr_SetString(PyExc_ValueError, "Array must be of type double");
         return false;
     }
     return true;
