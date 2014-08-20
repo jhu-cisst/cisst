@@ -777,4 +777,23 @@ bool mtsTask::GetLatestDataFromStateTable(const std::string & signalName, double
 
     return true;
 }
+
+bool mtsTask::GetLatestDataFromStateTable(const std::string & signalName, SF::DoubleVecType & values) const
+{
+    typedef mtsStateTable::Accessor<std::vector<double> > AccessorType;
+    AccessorType * accessor = dynamic_cast<AccessorType*>(this->StateTableMonitor.GetAccessor(signalName));
+    if (!accessor) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetLatestDataFromStateTable: failed to get accessor for \"" << signalName << "\"" << std::endl;
+        return false;
+    }
+    mtsDoubleVec _values;
+    accessor->GetLatest(_values);
+
+    values.clear();
+    values.resize(_values.size());
+    for (size_t i = 0; i < _values.size(); ++i)
+        values[i] = _values[i];
+
+    return true;
+}
 #endif

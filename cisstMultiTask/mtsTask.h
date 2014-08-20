@@ -278,6 +278,7 @@ public:
     
     // For deep fault inject
     bool GetLatestDataFromStateTable(const std::string & signalName, double & value) const;
+    bool GetLatestDataFromStateTable(const std::string & signalName, SF::DoubleVecType & value) const;
  
 #endif
 

@@ -164,23 +164,56 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
     else if (request.compare("filter_inject") == 0) {
         const SF::FilterBase::FilterIDType fuid = jsonParser.GetSafeValueUInt(_json["target"], "fuid");
         bool deepInjection = jsonParser.GetSafeValueBool(_json, "deep");
-
-        SF::DoubleVecType inputs;
-        const JSON::JSONVALUE & jsonInputData = _json["input"];
-        for (size_t i = 0; i < jsonInputData.size(); ++i)
-            inputs.push_back(jsonInputData[i].asDouble());
-
         std::stringstream ss;
-        if (sc->InjectInputToFilter(fuid, inputs, deepInjection)) {
-            ss << "{ \"cmd\": \"message\", \"msg\": \"Successfully injected input data: ";
-            for (size_t i = 0; i < inputs.size(); ++i)
-                ss << std::setprecision(5) << inputs[i] << " ";
-            ss << " (target filter " << fuid << ")\" }";
-        }
-        //else
-            //ss << "{ \"cmd\": \"message\", \"msg\": \"Failed to inject input data: ";
+        // fault injection with scalar-type
+        if (_json["input"] != SF::JSON::JSONVALUE::null) {
+            SF::DoubleVecType inputs; // stream of scalars
+            const JSON::JSONVALUE & jsonInputData = _json["input"];
+            for (size_t i = 0; i < jsonInputData.size(); ++i)
+                inputs.push_back(jsonInputData[i].asDouble());
 
-        replyData = ss.str();
+            if (sc->InjectInputToFilter(fuid, inputs, deepInjection)) {
+                ss << "{ \"cmd\": \"message\", \"msg\": \"Successfully injected input data: ";
+                for (size_t i = 0; i < inputs.size(); ++i)
+                    ss << std::setprecision(5) << inputs[i] << " ";
+                ss << " (target filter " << fuid << ")\" }";
+            }
+            //else
+                //ss << "{ \"cmd\": \"message\", \"msg\": \"Failed to inject input data: ";
+            replyData = ss.str();
+        } else if (_json["input_vector"] != SF::JSON::JSONVALUE::null) {
+            std::vector<SF::DoubleVecType> inputVectors; // stream of vectors
+            const JSON::JSONVALUE & jsonInputData = _json["input_vector"];
+            for (size_t i = 0; i < jsonInputData.size(); ++i) {
+                SF::DoubleVecType row;
+                for (size_t j = 0; j < jsonInputData[i].size(); ++j)
+                    row.push_back(jsonInputData[i][j].asDouble());
+                inputVectors.push_back(row);
+            }
+
+            std::stringstream ss;
+            if (sc->InjectInputToFilter(fuid, inputVectors, deepInjection)) {
+                ss << "{ \"cmd\": \"message\", \"msg\": \"Successfully injected input data (fuid "
+                   << fuid << ") : " << std::setprecision(5);
+                for (size_t i = 0; i < inputVectors.size(); ++i) {
+                    if (i != 0)
+                        ss << ", ";
+                    ss << "[ ";
+                    for (size_t j = 0; j < inputVectors[i].size(); ++j) {
+                        if (j != 0)
+                            ss << ", ";
+                        ss << inputVectors[i][j];
+                    }
+                    ss <<  " ]";
+                }
+            }
+            //else
+                //ss << "{ \"cmd\": \"message\", \"msg\": \"Failed to inject input data: ";
+            replyData = ss.str();
+        } else {
+            SFLOG_ERROR << "Invalid input data" << std::endl;
+        }
+
     }
     else if (request.compare("state_list") == 0)
         replyData = sc->GetStateSnapshot(targetComponentName);

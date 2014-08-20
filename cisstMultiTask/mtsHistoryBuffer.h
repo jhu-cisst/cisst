@@ -68,7 +68,10 @@ public:
 
     // Support for "deep" fault inject: modify actual values in the buffer
     void PushNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
-                           SF::SignalElement::ScalarType & value);
+                            SF::SignalElement::ScalarType & value);
+    void PushNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
+                            const SF::SignalElement::VectorType & value);
+    
     
     /*
     void ToStream(std::ostream & outputStream) const;

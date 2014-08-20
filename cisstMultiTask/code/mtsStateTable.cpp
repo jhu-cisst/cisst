@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 #include <string>
+#include <typeinfo>
 
 const std::string mtsStateTable::NamesOfDefaultElements::Tic = "Tic";
 const std::string mtsStateTable::NamesOfDefaultElements::Toc = "Toc";
@@ -109,6 +110,7 @@ mtsStateTable::~mtsStateTable()
 #if CISST_HAS_SAFETY_PLUGINS
     for (size_t i = 0; i < FaultInjectionTable.size(); ++i) {
         delete FaultInjectionTable[i];
+        delete FaultInjectionVectorTable[i];
     }
 #endif
 }
@@ -257,6 +259,12 @@ void mtsStateTable::Advance(void) {
                 Write(static_cast<mtsStateDataId>(i), FaultInjectionTable[i]->front());
                 FaultInjectionMutex.Lock();
                 FaultInjectionTable[i]->pop();
+                FaultInjectionMutex.Unlock();
+            }
+            if (!FaultInjectionVectorTable[i]->empty()) {
+                Write(static_cast<mtsStateDataId>(i), FaultInjectionVectorTable[i]->front());
+                FaultInjectionMutex.Lock();
+                FaultInjectionVectorTable[i]->pop();
                 FaultInjectionMutex.Unlock();
             }
 #else
@@ -683,6 +691,29 @@ void mtsStateTable::PushNewValueScalar(const mtsStateDataId id, const mtsDoubleV
     {
         for (size_t i = 0; i < values.size(); ++i)
             FaultInjectionTable[id]->push(values[i]);
+    }
+    FaultInjectionMutex.Unlock();
+}
+
+void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const mtsDoubleVec & value)
+{
+    CMN_ASSERT(id < (int) FaultInjectionVectorTable.size());
+
+    FaultInjectionMutex.Lock();
+    {
+        FaultInjectionVectorTable[id]->push(value);
+    }
+    FaultInjectionMutex.Unlock();
+}
+
+void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const std::vector<mtsDoubleVec> & values)
+{
+    CMN_ASSERT(id < (int) FaultInjectionVectorTable.size());
+
+    FaultInjectionMutex.Lock();
+    {
+        for (size_t i = 0; i < values.size(); ++i)
+            FaultInjectionVectorTable[id]->push(values[i]);
     }
     FaultInjectionMutex.Unlock();
 }

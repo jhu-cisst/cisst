@@ -514,6 +514,8 @@ public:
     // for deep fault injection
     void PushNewValueScalar(const mtsStateDataId id, const mtsDouble & value);
     void PushNewValueScalar(const mtsStateDataId id, const mtsDoubleVec & values);
+    void PushNewValueVector(const mtsStateDataId id, const mtsDoubleVec & value);
+    void PushNewValueVector(const mtsStateDataId id, const std::vector<mtsDoubleVec> & values);
 
     // [SFUPDATE]
     /*! Placeholders for monitoring */
@@ -529,11 +531,16 @@ protected:
     std::string OwnerComponentName; // name of component that owns this state table
 
     // for deep fault injection
-    typedef std::queue<mtsDouble> FaultInjectionQueueType;
-    typedef std::vector<FaultInjectionQueueType*> FaultInjectionTableType;
-    FaultInjectionTableType FaultInjectionTable;
+    typedef std::queue<mtsDouble>    FaultInjectionQueueType;
+    typedef std::queue<mtsDoubleVec> FaultInjectionVectorQueueType;
+    typedef std::vector<FaultInjectionQueueType*>       FaultInjectionTableType;
+    typedef std::vector<FaultInjectionVectorQueueType*> FaultInjectionVectorTableType;
 
+    // for thread safety
     osaMutex FaultInjectionMutex;
+    // table to store data to inject (2D array of variable length)
+    FaultInjectionTableType       FaultInjectionTable;
+    FaultInjectionVectorTableType FaultInjectionVectorTable;
 #endif
 };
 
@@ -564,7 +571,11 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
     FinalRefType *pdata = mtsGenericTypes<_elementType>::ConditionalWrap(*element);
     StateVectorElements.push_back(pdata);
 #if CISST_HAS_SAFETY_PLUGINS
+    // MJ: this is not a good design because a state vector is either scalar or vector,
+    // and thus these two fault injection tables can be consolidated into one if the table
+    // can handle both types.
     FaultInjectionTable.push_back(new FaultInjectionQueueType);
+    FaultInjectionVectorTable.push_back(new FaultInjectionVectorQueueType);
 #endif
 
     StateVectorDataNames.push_back(name);

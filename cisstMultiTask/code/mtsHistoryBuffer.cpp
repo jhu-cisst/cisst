@@ -112,6 +112,20 @@ void mtsHistoryBuffer::DeSerializeRaw(std::istream & inputStream)
 void mtsHistoryBuffer::PushNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
                                           SF::SignalElement::ScalarType & value)
 {
-    // MJ TODO: Check if this method needs to work for both types of filters
+    // MJ TODO: Check if this method needs to work regardless the type of filter
+    // deployment (i.e., passive vs. active)
     StateTable->PushNewValueScalar(index, mtsDouble(value));
+}
+
+void mtsHistoryBuffer::PushNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
+                                          const SF::SignalElement::VectorType & value)
+{
+    // MJ TODO: Check if this method needs to work regardless of filter
+    // deployment type (i.e., passive vs. active)
+    const size_t n = value.size();
+    mtsDoubleVec vec(n);
+    for (size_t i = 0; i < n; ++i)
+        vec(i) = value[i];
+
+    StateTable->PushNewValueVector(index, vec);
 }
