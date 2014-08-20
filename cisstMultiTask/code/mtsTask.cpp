@@ -47,65 +47,72 @@ void mtsTask::DoRunInternal(void)
         if (InterfaceProvidedToManager)
             InterfaceProvidedToManager->ProcessMailBoxes();
 #if CISST_HAS_SAFETY_PLUGINS
-        double tic;
+        double tic, toc;
         const SF::Event * e = 0;
-        SF::State::StateType state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
-
-        if (state == SF::State::INVALID) {
-            tic = osaGetTime(); // still need to be updated for ExecTimeUser
-            CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
-        } else {
-            // handle state transition
-            if (LastState != state) {
-                if (LastState == SF::State::NORMAL) {
-                    if (state == SF::State::WARNING)
-                        this->OnNormal2Warning(e);
-                    else
-                        this->OnNormal2Error(e);
-                } else if (LastState == SF::State::WARNING) {
-                    if (state == SF::State::NORMAL)
-                        this->OnWarning2Normal(e);
-                    else
-                        this->OnWarning2Error(e);
-                } else if (LastState == SF::State::ERROR) {
-                    if (state == SF::State::WARNING)
-                        this->OnError2Warning(e);
-                    else
-                        this->OnError2Normal(e);
-                }
-            }
-            // update last state
-            LastState = state;
-
+        if (!GetSafetyCoordinator) {
             tic = osaGetTime();
-            switch (state) {
-            case SF::State::NORMAL:  this->RunNormal(); break;
-            case SF::State::WARNING: this->RunWarning(e); break;
-            case SF::State::ERROR:   this->RunError(e); break;
-            default:
+            this->Run();
+            toc = osaGetTime();
+        }
+        else {
+
+            SF::State::StateType state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
+
+            if (state == SF::State::INVALID) {
+                //tic = osaGetTime(); // still need to be updated for ExecTimeUser
                 CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
+                toc = tic = 0.0;
+            } else {
+                // handle state transition
+                if (LastState != state) {
+                    if (LastState == SF::State::NORMAL) {
+                        if (state == SF::State::WARNING)
+                            this->OnNormal2Warning(e);
+                        else
+                            this->OnNormal2Error(e);
+                    } else if (LastState == SF::State::WARNING) {
+                        if (state == SF::State::NORMAL)
+                            this->OnWarning2Normal(e);
+                        else
+                            this->OnWarning2Error(e);
+                    } else if (LastState == SF::State::ERROR) {
+                        if (state == SF::State::WARNING)
+                            this->OnError2Warning(e);
+                        else
+                            this->OnError2Normal(e);
+                    }
+                }
+                // update last state
+                LastState = state;
+
+                tic = osaGetTime();
+                switch (state) {
+                case SF::State::NORMAL:  this->RunNormal(); break;
+                case SF::State::WARNING: this->RunWarning(e); break;
+                case SF::State::ERROR:   this->RunError(e); break;
+                default:
+                    CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
+                }
+                toc = osaGetTime();
+            }
+
+            // If this line is reached without exception and the framework state is in NORMAL
+            // state due to thread exception, generate offset event.
+            if (state == SF::State::ERROR && e->GetName().compare("EVT_THREAD_EXCEPTION") == 0) {
+                std::stringstream ss;
+                ss << "Component \"" << GetName() << "\" goes back to NORMAL state (exception resolved)";
+                CMN_LOG_CLASS_RUN_WARNING << ss.str() << std::endl;
+                // Inform casros of this offset event
+                GetSafetyCoordinator->GenerateEvent("/EVT_THREAD_EXCEPTION",
+                                                    SF::State::STATEMACHINE_FRAMEWORK,
+                                                    ss.str(),
+                                                    this->Name);
             }
         }
+        this->StateTableMonitor.ExecTimeUser = toc - tic;
 #else
         this->Run();
 #endif
-#if CISST_HAS_SAFETY_PLUGINS
-        this->StateTableMonitor.ExecTimeUser = osaGetTime() - tic;
-#endif
-
-        // If this line is reached without exception and the framework state is in NORMAL
-        // state due to thread exception, generate offset event.
-        if (state == SF::State::ERROR && e->GetName().compare("EVT_THREAD_EXCEPTION") == 0) {
-            std::stringstream ss;
-            ss << "Component \"" << GetName() << "\" goes back to NORMAL state (exception resolved)";
-            //CMN_LOG_CLASS_RUN_VERBOSE
-            CMN_LOG_CLASS_RUN_WARNING << ss.str() << std::endl;
-            // Inform casros of this offset event
-            GetSafetyCoordinator->GenerateEvent("/EVT_THREAD_EXCEPTION",
-                                                SF::State::STATEMACHINE_FRAMEWORK,
-                                                ss.str(),
-                                                this->Name);
-        }
     }
     catch (const std::exception &excp) {
         OnRunException(excp);
@@ -518,9 +525,9 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const st
         if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {
 #if CISST_HAS_SAFETY_PLUGINS
             mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-            CMN_ASSERT(sc);
-            if (!sc->AddInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
-                CMN_LOG_CLASS_INIT_ERROR << "Failed to add provided interface \"" << interfaceProvidedName << "\" to Safety Coordinator." << std::endl;
+            if (sc)
+                if (!sc->AddInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+                    CMN_LOG_CLASS_INIT_ERROR << "Failed to add provided interface \"" << interfaceProvidedName << "\" to Safety Coordinator." << std::endl;
 #endif
             return interfaceProvided;
         }

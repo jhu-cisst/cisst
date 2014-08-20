@@ -1826,8 +1826,9 @@ void mtsManagerLocal::CreateAll(void)
     ComponentMapChange.Unlock();
 
 #if CISST_HAS_SAFETY_PLUGINS
-    if (!SafetyCoordinator->DeployMonitorsAndFDDs())
-        CMN_LOG_CLASS_INIT_ERROR << "Failed to deploy casros monitors and filters" << std::endl;
+    if (SafetyCoordinator)
+        if (!SafetyCoordinator->DeployMonitorsAndFDDs())
+            CMN_LOG_CLASS_INIT_ERROR << "Failed to deploy casros monitors and filters" << std::endl;
 #endif
 }
 

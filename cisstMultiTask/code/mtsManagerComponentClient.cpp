@@ -28,9 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstMultiTask/mtsInterfaceInput.h>
-#if CISST_HAS_SAFETY_PLUGINS
-#include <cisstMultiTask/mtsFaultBase.h>
-#endif
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentClient, mtsManagerComponentBase);
 
@@ -1179,15 +1176,16 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
 #if CISST_HAS_SAFETY_PLUGINS
     // Register connection information to Safety Coordinator
     mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-    if (!sc->AddConnection(connectionDescription.Client.ProcessName,
-                           connectionDescription.Client.ComponentName,
-                           connectionDescription.Client.InterfaceName,
-                           connectionDescription.Server.ProcessName,
-                           connectionDescription.Server.ComponentName,
-                           connectionDescription.Server.InterfaceName))
-    {
-        CMN_LOG_CLASS_RUN_ERROR << "Failed to add connection to Safety Coordinator: " << connectionDescription << std::endl;
-    }
+    if (sc)
+        if (!sc->AddConnection(connectionDescription.Client.ProcessName,
+                            connectionDescription.Client.ComponentName,
+                            connectionDescription.Client.InterfaceName,
+                            connectionDescription.Server.ProcessName,
+                            connectionDescription.Server.ComponentName,
+                            connectionDescription.Server.InterfaceName))
+        {
+            CMN_LOG_CLASS_RUN_ERROR << "Failed to add connection to Safety Coordinator: " << connectionDescription << std::endl;
+        }
 #endif
 
     CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnect: successfully connected: " << connectionDescription << std::endl;

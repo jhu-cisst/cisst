@@ -77,12 +77,13 @@ void mtsComponent::Initialize(void)
 #if CISST_HAS_SAFETY_PLUGINS
     // Add this component to Safety Coordinator
     mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-    CMN_ASSERT(sc);
-    ComponentId = sc->AddComponent(Name);
-    if (ComponentId == 0) {
-        std::stringstream ss;
-        ss << "class mtsComponent: Failed to add component \"" << Name << "\" to Safety Coordinator";
-        cmnThrow(ss.str());
+    if (sc) {
+        ComponentId = sc->AddComponent(Name);
+        if (ComponentId == 0) {
+            std::stringstream ss;
+            ss << "class mtsComponent: Failed to add component \"" << Name << "\" to Safety Coordinator";
+            cmnThrow(ss.str());
+        }
     }
 #endif
 }
@@ -277,9 +278,9 @@ mtsInterfaceProvided * mtsComponent::AddInterfaceProvidedWithoutSystemEvents(con
         if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided, CMN_LOG_LEVEL_INIT_ERROR)) {
 #if CISST_HAS_SAFETY_PLUGINS
             mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-            CMN_ASSERT(sc);
-            if (!sc->AddInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
-                CMN_LOG_CLASS_INIT_ERROR << "Failed to add provided interface \"" << interfaceProvidedName << "\" to Safety Coordinator." << std::endl;
+            if (sc)
+                if (!sc->AddInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+                    CMN_LOG_CLASS_INIT_ERROR << "Failed to add provided interface \"" << interfaceProvidedName << "\" to Safety Coordinator." << std::endl;
 #endif
             return interfaceProvided;
         }
@@ -411,10 +412,11 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
 
 #if CISST_HAS_SAFETY_PLUGINS
     mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-    CMN_ASSERT(sc);
-    if (!sc->RemoveInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
-            << interfaceProvidedName << "\" from Safety Coordinator" << std::endl;
+    if (sc) {
+        if (!sc->RemoveInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+            CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
+                << interfaceProvidedName << "\" from Safety Coordinator" << std::endl;
+    }
 #endif
 
     return true;
@@ -496,10 +498,10 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
 
 #if CISST_HAS_SAFETY_PLUGINS
     mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-    CMN_ASSERT(sc);
-    if (!sc->RemoveInterface(Name, interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
-            << interfaceRequiredName << "\" from Safety Coordinator" << std::endl;
+    if (sc)
+        if (!sc->RemoveInterface(Name, interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
+            CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
+                << interfaceRequiredName << "\" from Safety Coordinator" << std::endl;
 #endif
 
     return true;
@@ -517,9 +519,9 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredExisting(const std::str
     if (InterfacesRequired.AddItem(interfaceRequiredName, interfaceRequired)) {
 #if CISST_HAS_SAFETY_PLUGINS
         mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-        CMN_ASSERT(sc);
-        if (!sc->AddInterface(Name, interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
-            CMN_LOG_CLASS_INIT_ERROR << "Failed to add required interface \"" << interfaceRequiredName << "\" to Safety Coordinator." << std::endl;
+        if (sc)
+            if (!sc->AddInterface(Name, interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
+                CMN_LOG_CLASS_INIT_ERROR << "Failed to add required interface \"" << interfaceRequiredName << "\" to Safety Coordinator." << std::endl;
 #endif
         return interfaceRequired;
     }
@@ -541,9 +543,9 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredUsingMailbox(const std:
         if (InterfacesRequired.AddItem(interfaceRequiredName, interfaceRequired)) {
 #if CISST_HAS_SAFETY_PLUGINS
             mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-            CMN_ASSERT(sc);
-            if (!sc->AddInterface(Name, interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
-                CMN_LOG_CLASS_INIT_ERROR << "Failed to add required interface \"" << interfaceRequiredName << "\" to Safety Coordinator." << std::endl;
+            if (sc)
+                if (!sc->AddInterface(Name, interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
+                    CMN_LOG_CLASS_INIT_ERROR << "Failed to add required interface \"" << interfaceRequiredName << "\" to Safety Coordinator." << std::endl;
 #endif
             return interfaceRequired;
         }

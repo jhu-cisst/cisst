@@ -370,13 +370,15 @@ void mtsStateTable::Advance(void) {
     // Casros plug-ins only use the monitoring state table.
     if (this->OwnerComponentName.size()) {
         mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-        mtsSafetyCoordinator::FiltersType * filters = sc->GetFilters(this->OwnerComponentName);
-        // if the component doesn't have any filter, GetFilters() can return null.
-        if (filters && filters->size()) {
-            mtsSafetyCoordinator::FiltersType::const_iterator it = filters->begin();
-            const mtsSafetyCoordinator::FiltersType::const_iterator itEnd = filters->end();
-            for (; it != itEnd; ++it)
-                it->second->RunFilter();
+        if (sc) {
+            mtsSafetyCoordinator::FiltersType * filters = sc->GetFilters(this->OwnerComponentName);
+            // if the component doesn't have any filter, GetFilters() can return null.
+            if (filters && filters->size()) {
+                mtsSafetyCoordinator::FiltersType::const_iterator it = filters->begin();
+                const mtsSafetyCoordinator::FiltersType::const_iterator itEnd = filters->end();
+                for (; it != itEnd; ++it)
+                    it->second->RunFilter();
+            }
         }
     }
 #endif
@@ -416,14 +418,16 @@ void mtsStateTable::Cleanup(void) {
     // Casros plug-ins only use the monitoring state table.
     if (this->OwnerComponentName.size()) {
         mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
-        mtsSafetyCoordinator::FiltersType * filters = sc->GetFilters(this->OwnerComponentName);
-        // if the component doesn't have any filter, GetFilters() can return null.
-        if (filters && filters->size()) {
-            mtsSafetyCoordinator::FiltersType::const_iterator it = filters->begin();
-            const mtsSafetyCoordinator::FiltersType::const_iterator itEnd = filters->end();
-            for (; it != itEnd; ++it) {
-                it->second->CleanupFilter();
-                delete it->second;
+        if (sc) {
+            mtsSafetyCoordinator::FiltersType * filters = sc->GetFilters(this->OwnerComponentName);
+            // if the component doesn't have any filter, GetFilters() can return null.
+            if (filters && filters->size()) {
+                mtsSafetyCoordinator::FiltersType::const_iterator it = filters->begin();
+                const mtsSafetyCoordinator::FiltersType::const_iterator itEnd = filters->end();
+                for (; it != itEnd; ++it) {
+                    it->second->CleanupFilter();
+                    delete it->second;
+                }
             }
         }
     }
