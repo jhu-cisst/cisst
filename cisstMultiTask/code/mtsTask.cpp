@@ -786,13 +786,9 @@ bool mtsTask::GetLatestDataFromStateTable(const std::string & signalName, SF::Do
         CMN_LOG_CLASS_RUN_ERROR << "GetLatestDataFromStateTable: failed to get accessor for \"" << signalName << "\"" << std::endl;
         return false;
     }
-    mtsDoubleVec _values;
+    mtsStdDoubleVecProxy _values;
     accessor->GetLatest(_values);
-
-    values.clear();
-    values.resize(_values.size());
-    for (size_t i = 0; i < _values.size(); ++i)
-        values[i] = _values[i];
+    values = _values.Data;
 
     return true;
 }

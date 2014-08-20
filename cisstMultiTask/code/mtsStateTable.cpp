@@ -190,7 +190,16 @@ bool mtsStateTable::Write(mtsStateDataId id, const mtsGenericObject & object) {
     }
     result = StateVector[id]->Set(IndexWriter, object);
     if (!result) {
+#if !CISST_HAS_SAFETY_PLUGINS
         CMN_LOG_CLASS_INIT_ERROR << "Write: error setting data array value in id: " << id << std::endl;
+#else
+        std::stringstream ss;
+        ss << "Write: error setting data array value in id: " << id << std::endl;
+        ss << "Expected type: " << typeid(*StateVector[id]).name() << std::endl;
+        ss << "Object type: " << typeid(object).name() << std::endl;
+        ss << "Object: " << object << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << ss.str();
+#endif
     }
     return result;
 }
@@ -695,25 +704,33 @@ void mtsStateTable::PushNewValueScalar(const mtsStateDataId id, const mtsDoubleV
     FaultInjectionMutex.Unlock();
 }
 
-void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const mtsDoubleVec & value)
+void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const SF::DoubleVecType & value)
 {
+    mtsStdDoubleVecProxy _value;
+    _value.Data = value;
+
+    std::cout << __LINE__ << " PushNewValueVector: " << _value << std::endl;
+
     CMN_ASSERT(id < (int) FaultInjectionVectorTable.size());
 
     FaultInjectionMutex.Lock();
     {
-        FaultInjectionVectorTable[id]->push(value);
+        FaultInjectionVectorTable[id]->push(_value);
     }
     FaultInjectionMutex.Unlock();
 }
 
-void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const std::vector<mtsDoubleVec> & values)
+void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const std::vector<SF::DoubleVecType> & values)
 {
     CMN_ASSERT(id < (int) FaultInjectionVectorTable.size());
 
     FaultInjectionMutex.Lock();
     {
-        for (size_t i = 0; i < values.size(); ++i)
-            FaultInjectionVectorTable[id]->push(values[i]);
+        for (size_t i = 0; i < values.size(); ++i) {
+            mtsStdDoubleVecProxy _value;
+            _value.Data = values[i];
+            FaultInjectionVectorTable[id]->push(_value);
+        }
     }
     FaultInjectionMutex.Unlock();
 }

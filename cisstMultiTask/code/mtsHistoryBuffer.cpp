@@ -122,10 +122,5 @@ void mtsHistoryBuffer::PushNewValueVector(SF::SignalElement::HistoryBufferIndexT
 {
     // MJ TODO: Check if this method needs to work regardless of filter
     // deployment type (i.e., passive vs. active)
-    const size_t n = value.size();
-    mtsDoubleVec vec(n);
-    for (size_t i = 0; i < n; ++i)
-        vec(i) = value[i];
-
-    StateTable->PushNewValueVector(index, vec);
+    StateTable->PushNewValueVector(index, value);
 }

@@ -514,8 +514,8 @@ public:
     // for deep fault injection
     void PushNewValueScalar(const mtsStateDataId id, const mtsDouble & value);
     void PushNewValueScalar(const mtsStateDataId id, const mtsDoubleVec & values);
-    void PushNewValueVector(const mtsStateDataId id, const mtsDoubleVec & value);
-    void PushNewValueVector(const mtsStateDataId id, const std::vector<mtsDoubleVec> & values);
+    void PushNewValueVector(const mtsStateDataId id, const SF::DoubleVecType & value);
+    void PushNewValueVector(const mtsStateDataId id, const std::vector<SF::DoubleVecType> & values);
 
     // [SFUPDATE]
     /*! Placeholders for monitoring */
@@ -531,8 +531,8 @@ protected:
     std::string OwnerComponentName; // name of component that owns this state table
 
     // for deep fault injection
-    typedef std::queue<mtsDouble>    FaultInjectionQueueType;
-    typedef std::queue<mtsDoubleVec> FaultInjectionVectorQueueType;
+    typedef std::queue<mtsDouble>            FaultInjectionQueueType;
+    typedef std::queue<mtsStdDoubleVecProxy> FaultInjectionVectorQueueType;
     typedef std::vector<FaultInjectionQueueType*>       FaultInjectionTableType;
     typedef std::vector<FaultInjectionVectorQueueType*> FaultInjectionVectorTableType;
 
