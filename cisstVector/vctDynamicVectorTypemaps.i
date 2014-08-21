@@ -613,7 +613,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 
-%typecheck(SWIG_TYPECHECK_POINTER) vctDynamicVector &, 
+%typecheck(SWIG_TYPECHECK_POINTER) vctDynamicVector, vctDynamicVector &, 
      vctDynamicVectorRef, const vctDynamicVectorRef &,
      vctDynamicConstVectorRef, const vctDynamicConstVectorRef & {
     // test that the parameter is an array
