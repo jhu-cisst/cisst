@@ -269,13 +269,13 @@ void mtsStateTable::Advance(void) {
                 FaultInjectionMutex.Lock();
                 FaultInjectionTable[i]->pop();
                 FaultInjectionMutex.Unlock();
-            }
-            if (!FaultInjectionVectorTable[i]->empty()) {
+            } else if (!FaultInjectionVectorTable[i]->empty()) {
                 Write(static_cast<mtsStateDataId>(i), FaultInjectionVectorTable[i]->front());
                 FaultInjectionMutex.Lock();
                 FaultInjectionVectorTable[i]->pop();
                 FaultInjectionMutex.Unlock();
-            }
+            } else
+                Write(static_cast<mtsStateDataId>(i), *(StateVectorElements[i]));
 #else
             Write(static_cast<mtsStateDataId>(i), *(StateVectorElements[i]));
 #endif

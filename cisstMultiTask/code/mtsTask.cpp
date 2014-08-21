@@ -53,11 +53,8 @@ void mtsTask::DoRunInternal(void)
             tic = osaGetTime();
             this->Run();
             toc = osaGetTime();
-        }
-        else {
-
+        } else {
             SF::State::StateType state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
-
             if (state == SF::State::INVALID) {
                 //tic = osaGetTime(); // still need to be updated for ExecTimeUser
                 CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
