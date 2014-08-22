@@ -122,7 +122,13 @@ bool vctThrowUnlessIsSameTypeArray<unsigned short>(PyObject * input)
 template <>
 bool vctThrowUnlessIsSameTypeArray<int>(PyObject * input)
 {
-    if (PyArray_ObjectType(input, 0) != NPY_INT32) {
+    // NPY_INT and NPY_LONG are considered different types; NPY_INT32 is an alias for one of these
+#if (CISST_DATA_MODEL == CISST_ILP32) || (CISST_DATA_MODEL == CISST_LLP64)
+    if ((PyArray_ObjectType(input, 0) != NPY_INT) && (PyArray_ObjectType(input, 0) != NPY_LONG))
+#else
+    if (PyArray_ObjectType(input, 0) != NPY_INT)
+#endif
+    {
         PyErr_SetString(PyExc_ValueError, "Array must be of type int (int32)");
         return false;
     }
@@ -133,7 +139,13 @@ bool vctThrowUnlessIsSameTypeArray<int>(PyObject * input)
 template <>
 bool vctThrowUnlessIsSameTypeArray<unsigned int>(PyObject * input)
 {
-    if (PyArray_ObjectType(input, 0) != NPY_UINT32) {
+    // NPY_UINT and NPY_ULONG are considered different types; NPY_UINT32 is an alias for one of these
+#if (CISST_DATA_MODEL == CISST_ILP32) || (CISST_DATA_MODEL == CISST_LLP64)
+    if ((PyArray_ObjectType(input, 0) != NPY_UINT) && (PyArray_ObjectType(input, 0) != NPY_ULONG))
+#else
+    if (PyArray_ObjectType(input, 0) != NPY_UINT)
+#endif
+    {
         PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned int (uint32)");
         return false;
     }
