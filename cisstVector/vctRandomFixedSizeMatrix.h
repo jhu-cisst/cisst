@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+  Author(s):  Anton Deguet
+  Created on: 2007-02-11
 
-  Author(s):	Anton Deguet
-  Created on:	2007-02-11
-
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,17 +51,13 @@ void vctRandom(vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride,
                const _elementType min,
                const _elementType max) {
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    const vct::size_type rows = matrix.rows();
-    const vct::size_type cols = matrix.cols();
-    vct::index_type rowIndex, colIndex;
-    for (rowIndex = 0; rowIndex < rows; ++rowIndex) {
-        for (colIndex = 0; colIndex < cols; ++colIndex) {
-            randomSequence.ExtractRandomValue(min, max,
-                                              matrix.Element(rowIndex, colIndex));
-        }
+    typedef vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> MatrixType;
+    const typename MatrixType::iterator end = matrix.end();
+    typename MatrixType::iterator iter;
+    for (iter = matrix.begin(); iter != end; ++iter) {
+        randomSequence.ExtractRandomValue(min, max,
+                                          *iter);
     }
 }
 
-
 #endif  // _vctRandomFixedSizeMatrix_h
-

@@ -68,6 +68,25 @@ class cmnDataJSON<vctMatrixRotation3<_elementType, _rowMajor> >
     }
 };
 
+// pass through class for frame4x4
+template <class _elementType, bool _rowMajor>
+class cmnDataJSON<vctFrame4x4<_elementType, _rowMajor> >
+{
+ public:
+    typedef vctFrame4x4<_elementType, _rowMajor> DataType;
+    typedef typename DataType::ContainerType ContainerType;
+
+    static void SerializeText(const DataType & data, Json::Value & jsonValue)
+    {
+        cmnDataJSON<ContainerType>::SerializeText(data, jsonValue);
+    }
+
+    static void DeSerializeText(DataType & data, const Json::Value & jsonValue)
+    {
+        cmnDataJSON<ContainerType>::DeSerializeText(data, jsonValue);
+    }
+};
+
 #endif // CISST_HAS_JSON
 
 #endif // _vctDataFunctionsTransformationsJSON_h
