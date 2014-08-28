@@ -375,13 +375,14 @@ public:
             unsigned int i;
             for (i = 0; i < size; ++i) {
                 CMN_ASSERT(nodes->nodeTab[i] != 0);
-                if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
+                if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE || nodes->nodeTab[i]->type == XML_ELEMENT_NODE) {
                     currentNode = nodes->nodeTab[i];
                     storage = reinterpret_cast<char *>(xmlNodeGetContent(currentNode));
                     attributeFound = true;
                     CMN_LOG_CLASS_RUN_VERBOSE << "QueryStdString (libxml2): query [" << query << "] Node name ["
                                               << currentNode->name << "] Content [" << storage << "]" << std::endl;
-                } else {
+                }
+                else {
                     currentNode = nodes->nodeTab[i];
                     CMN_LOG_CLASS_RUN_WARNING << "QueryStdString (libxml2): node is not attribute node [" << query
                                               << "] Node name [" << currentNode->name << "]" << std::endl;
