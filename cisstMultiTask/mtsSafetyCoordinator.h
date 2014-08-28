@@ -33,7 +33,7 @@
 
 class CISST_EXPORT mtsSafetyCoordinator: public mtsGenericObject, public SF::Coordinator 
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     //! Typedef for monitor components for fault detection and diagnosis.
