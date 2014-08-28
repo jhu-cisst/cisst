@@ -1901,6 +1901,16 @@ void mtsManagerLocal::StartAll(void)
     if (lastTask != end) {
         lastTask->second->Start();
     }
+
+#if CISST_HAS_SAFETY_PLUGINS
+    // Send out current states (e.g., to refresh state viewer) 
+    SF::Publisher * publisher = GetSafetyCoordinator->GetCasrosAccessor()->GetPublisher(SF::Topic::DATA);
+    CMN_ASSERT(publisher);
+
+    const std::string states(GetSafetyCoordinator->GetStateSnapshot());
+    if (!publisher->PublishData(SF::Topic::Data::READ_RES, states))
+        CMN_LOG_CLASS_RUN_ERROR << "StartAll: Failed to publish casros state data" << std::endl;
+#endif
 }
 
 
