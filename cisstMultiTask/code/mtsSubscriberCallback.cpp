@@ -213,10 +213,17 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
         } else {
             SFLOG_ERROR << "Invalid input data" << std::endl;
         }
-
     }
     else if (request.compare("state_list") == 0)
         replyData = sc->GetStateSnapshot(targetComponentName);
+    else if (request.compare("state_reset") == 0) {
+        const std::string source = jsonParser.GetSafeValueString(_json, "source");
+        if (thisProcessName.compare(source) != 0)
+            sc->ResetStateMachines(false); // don't broadcast again
+        else
+            SFLOG_ERROR << "mtsSubscriberCallback: same name, skip processing" << std::endl;
+        replyData = "";
+    }
     else if (request.compare("event_list") == 0)
         replyData = sc->GetEventList(targetComponentName);
     else if (request.compare("connection_list") == 0)
@@ -232,8 +239,9 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
     SF::Publisher * publisher = sc->GetCasrosAccessor()->GetPublisher(SF::Topic::DATA);
     SFASSERT(publisher);
 
-    if (!publisher->PublishData(SF::Topic::Data::READ_RES, replyData))
-        SFLOG_ERROR << "Failed to publish DATA | READ_RES" << std::endl;
+    if (replyData.size())
+        if (!publisher->PublishData(SF::Topic::Data::READ_RES, replyData))
+            SFLOG_ERROR << "Failed to publish DATA | READ_RES" << std::endl;
 }
 
 void mtsSubscriberCallback::CallbackProcess_STATE_UPDATE(const std::string & json)
