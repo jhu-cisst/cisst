@@ -73,6 +73,14 @@ namespace svlImageProcessing
                                  vctDynamicMatrix<double> kernel,
                                  bool absres = false);
 
+    int CISST_EXPORT UnsharpMask(const svlSampleImage* src_img,
+                                 unsigned int src_videoch,
+                                 svlSampleImage* dst_img,
+                                 unsigned int dst_videoch,
+                                 int radius,
+                                 double amount,
+                                 int threshold = 0);
+
     int CISST_EXPORT Crop(svlSampleImage* src_img,
                           unsigned int src_videoch,
                           svlSampleImage* dst_img,

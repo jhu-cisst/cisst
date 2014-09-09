@@ -173,6 +173,60 @@ int svlImageProcessing::Convolution(svlSampleImage* src_img, unsigned int src_vi
     return SVL_OK;
 }
 
+int svlImageProcessing::UnsharpMask(const svlSampleImage* src_img,
+                                    unsigned int src_videoch,
+                                    svlSampleImage* dst_img,
+                                    unsigned int dst_videoch,
+                                    int radius,
+                                    double amount,
+                                    int threshold)
+{
+    if (!src_img || !dst_img ||
+        src_img->GetType() != svlTypeImageRGB ||
+        dst_img->GetType() != svlTypeImageRGB) {
+        return SVL_FAIL;
+    }
+
+    unsigned int width = src_img->GetWidth(src_videoch);
+    unsigned int height = src_img->GetWidth(src_videoch);
+    if (width == 0 || height == 0 ||
+        dst_img->GetWidth(dst_videoch) != width ||
+        dst_img->GetHeight(dst_videoch) != height) {
+        return SVL_FAIL;
+    }
+
+    if (radius == 0 || amount == 1.0) {
+        memcpy(dst_img->GetUCharPointer(dst_videoch), src_img->GetUCharPointer(src_videoch), dst_img->GetDataSize(dst_videoch));
+        return SVL_OK;
+    }
+
+#if CISST_SVL_HAS_OPENCV
+
+    cvSmooth(src_img->IplImageRef(src_videoch), dst_img->IplImageRef(dst_videoch), CV_GAUSSIAN, radius * 2 + 1);
+
+#else // CISST_SVL_HAS_OPENCV
+
+    svlImageProcessingHelper::UnsharpMaskBlurRGB(src_img->GetUCharPointer(src_videoch),
+                                                 dst_img->GetUCharPointer(dst_videoch),
+                                                 width,
+                                                 height,
+                                                 radius);
+
+#endif // CISST_SVL_HAS_OPENCV
+
+    if (std::abs(amount) < 0.004) return SVL_OK;
+
+    svlImageProcessingHelper::UnsharpMaskSharpenRGB(src_img->GetUCharPointer(src_videoch),
+                                                    dst_img->GetUCharPointer(dst_videoch),
+                                                    dst_img->GetUCharPointer(dst_videoch),
+                                                    width,
+                                                    height,
+                                                    static_cast<int>(amount * 256.0),
+                                                    threshold);
+
+    return SVL_OK;
+}
+
 int svlImageProcessing::Crop(svlSampleImage* src_img, unsigned int src_videoch,
                              svlSampleImage* dst_img, unsigned int dst_videoch,
                              int left, int top)

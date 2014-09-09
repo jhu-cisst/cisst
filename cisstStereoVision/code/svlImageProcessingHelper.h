@@ -133,6 +133,13 @@ namespace svlImageProcessingHelper
     void CISST_EXPORT ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
     void CISST_EXPORT ConvolutionMono32(unsigned int* input, unsigned int* output, const int width, const int height, vctDynamicMatrix<int> & kernel, bool absres);
 
+    //////////////////
+    // Unsharp Mask //
+    //////////////////
+
+    void CISST_EXPORT UnsharpMaskBlurRGB(const unsigned char* img_in, unsigned char* img_out, const int width, const int height, int radius);
+    void CISST_EXPORT UnsharpMaskSharpenRGB(const unsigned char* img_in, const unsigned char* img_mask, unsigned char* img_out, const int width, const int height, const int amount, const int threshold);
+
     //////////////
     // Resizing //
     //////////////
