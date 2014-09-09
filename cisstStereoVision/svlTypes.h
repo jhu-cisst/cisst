@@ -325,6 +325,7 @@ struct CISST_EXPORT svlTarget2D
     svlPoint2D    pos;
     int           feature_quality;
     vctDynamicVector<unsigned char> feature_data;
+    vctDynamicVector<unsigned char> image_data;
 };
 
 #pragma pack()

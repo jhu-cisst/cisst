@@ -43,6 +43,9 @@ public:
     void SetTemplateUpdate(bool enable);
     void SetTemplateUpdateWeight(double weight);
     void SetConfidenceThreshold(double threshold);
+    void SetHighPassFilterRadius(int radius);
+    void SetHighPassFilterStrength(double strength);
+    void SetNoiseFilterRadius(int radius);
 
     svlErrorMetric GetErrorMetric() const;
     unsigned int GetScales() const;
@@ -52,8 +55,12 @@ public:
     bool GetTemplateUpdate() const;
     double GetTemplateUpdateWeight() const;
     double GetConfidenceThreshold() const;
+    int GetHighPassFilterRadius() const;
+    double GetHighPassFilterStrength() const;
+    int GetNoiseFilterRadius() const;
 
     int GetFeatureRef(unsigned int targetid, vctDynamicVectorRef<unsigned char> & feature);
+    int GetImageRef(unsigned int targetid, vctDynamicVectorRef<unsigned char> & feature);
 
     virtual int GetROIMargin();
     virtual int SetTarget(unsigned int targetid, const svlTarget2D & target);
@@ -76,22 +83,28 @@ protected:
     unsigned int SearchRadiusRequested;
     unsigned int TemplateRadius;
     unsigned int SearchRadius;
-    vctDynamicVector<unsigned char*> OrigTemplates;
     vctDynamicMatrix<int> MatchMap;
     vctFixedSizeVector<vctDynamicMatrix<unsigned int>, 3> SumTable;
     vctFixedSizeVector<vctDynamicMatrix<unsigned int>, 3> SqSumTable;
     vctFixedSizeVector<vctDynamicVector<int>, 128> ZeroMeanTemplate;
+
+    int HighPassFilterRadius;
+    double HighPassFilterStrength;
+    int NoiseFilterRadius;
 
     svlErrorMetric Metric;
     unsigned int Scale;
     unsigned char TemplateUpdateWeight;
     unsigned char ConfidenceThreshold;
     svlTrackerMSBruteForce* LowerScale;
+    svlSampleImageRGB* PreProcessedImage;
+    svlSampleImageRGB* PreProcessedImageTemp;
     svlSampleImageRGB* LowerScaleImage;
-    svlSampleImageRGB* PreviousImage;
+    svlSampleImageRGB* PreviousRawImage;
+    svlSampleImageRGB* PreviousPreProcessedImage;
 
     virtual void CopyTemplate(unsigned char* img, unsigned char* tmp, unsigned int left, unsigned int top);
-    virtual void UpdateTemplate(unsigned char* img, unsigned char* origtmp, unsigned char* tmp, unsigned int left, unsigned int top);
+    virtual void UpdateTemplate(unsigned char* img, unsigned char* tmp, unsigned int left, unsigned int top);
     virtual void MatchTemplateSAD(unsigned char* img, unsigned char* tmp, int x, int y);
     virtual void MatchTemplateSSD(unsigned char* img, unsigned char* tmp, int x, int y);
     virtual void MatchTemplateNCC(unsigned char* img, unsigned char* tmp, int x, int y);
