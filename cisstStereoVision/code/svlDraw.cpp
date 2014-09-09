@@ -492,8 +492,8 @@ void svlDraw::Ellipse(svlSampleImage* image,
               cvPoint(ellipse.cx, ellipse.cy),
               cvSize(ellipse.rx, ellipse.ry),
               ellipse.angle * 180.0f / 3.14159265358979f,
-              from_angle,
-              to_angle,
+              from_angle * 180.0f / 3.14159265358979f,
+              to_angle * 180.0f / 3.14159265358979f,
               cvScalar(r, g, b),
               thickness);
 }
