@@ -396,33 +396,23 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 /*!
   \brief Detect a finite number
 
-  This macro is a wrapper for different compilers to simplify the use
+  This function is a wrapper for different compilers to simplify the use
   of the finite number macro.  With gcc and icc, is uses finite() and
   for Microsoft compilers, _finite().  In most cases, the test should
   look like:
   \code
-  if (!CMN_ISFINITE(myValue)) {
+  if (!cmnIsFinite(myValue)) {
       ... deal with the problem, i.e. infinite number;
   }
   \endcode
 
   \param x The number to be tested.
 */
-#if CISST_HAS_ISFINITE
-  #define CMN_ISFINITE(x) isfinite(x)
-#else
-  #ifdef CISST_COMPILER_IS_MSVC
-    #define CMN_ISFINITE(x) ((_finite(x) == 1) ? true : false)
-  #elif (CISST_OS == CISST_QNX)
-    #define CMN_ISFINITE(x) isfinite(x)
-  #else
-    #if (CISST_OS == CISST_SOLARIS)
-      #include <ieeefp.h>
-    #endif
-    #define CMN_ISFINITE(x) finite(x)
-  #endif
-#endif
+bool CISST_EXPORT cmnIsFinite(const float & value);
+bool CISST_EXPORT cmnIsFinite(const double & value);
 
+// for backward compatibility
+#define CMN_ISFINITE(x) cmnIsFinite(x)
 
 /*!
   For whatever reason, there is a syntactic incompatiblity between .NET and gcc

@@ -80,6 +80,12 @@ bool ireTaskConstructorArg::FromStreamRaw(std::istream & inputStream, const char
         return false;
     if (inputStream.eof())
         return (typeid(*this) == typeid(ireTaskConstructorArg));
+    // PK TEMP: cmnData<std::string>::SerializeText adds an escape character ('\') before each space.
+    // Same problem exists in other constructor arg FromStreamRaw methods.
+    size_t len = Name.length();
+    if (Name[len-1] == '\\')
+        Name.erase(len-1);
+    // END TEMP
     std::string ShellString;
     inputStream >> ShellString;
     if (inputStream.fail())

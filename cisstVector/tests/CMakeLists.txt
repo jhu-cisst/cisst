@@ -128,14 +128,16 @@ if (CISST_HAS_JSON)
        vctDataFunctionsFixedSizeVectorJSONTest.h
        vctDataFunctionsDynamicVectorJSONTest.h
        vctDataFunctionsFixedSizeMatrixJSONTest.h
-       vctDataFunctionsDynamicMatrixJSONTest.h)
+       vctDataFunctionsDynamicMatrixJSONTest.h
+       vctDataFunctionsTransformationsJSONTest.h)
 
   set (SOURCE_FILES
        ${SOURCE_FILES}
        vctDataFunctionsFixedSizeVectorJSONTest.cpp
        vctDataFunctionsDynamicVectorJSONTest.cpp
        vctDataFunctionsFixedSizeMatrixJSONTest.cpp
-       vctDataFunctionsDynamicMatrixJSONTest.cpp)
+       vctDataFunctionsDynamicMatrixJSONTest.cpp
+       vctDataFunctionsTransformationsJSONTest.cpp)
 endif (CISST_HAS_JSON)
 
 # Add executable for C++ tests

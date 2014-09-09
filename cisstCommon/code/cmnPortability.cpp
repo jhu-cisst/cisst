@@ -47,3 +47,39 @@ const std::string cmnCompilersStrings[] = {"Undefined",
                                            ".NET 2013",
                                            "clang"
 };
+
+
+#if (CISST_OS == CISST_SOLARIS)
+#include <ieeefp.h>
+#endif // CISST_SOLARIS
+
+bool cmnIsFinite(const float & value)
+{
+#if CISST_HAS_ISFINITE
+    return isfinite(value);
+#else
+#ifdef CISST_COMPILER_IS_MSVC
+    return _finite(value) == 1;
+#elif (CISST_OS == CISST_QNX)
+    return isfinite(value);
+#elif (CISST_OS == CISST_SOLARIS)
+    return finite(value);
+#endif
+#endif
+}
+
+bool cmnIsFinite(const double & value)
+{
+#if CISST_HAS_ISFINITE
+    return isfinite(value);
+#else
+#ifdef CISST_COMPILER_IS_MSVC
+    return _finite(value) == 1;
+#elif (CISST_OS == CISST_QNX)
+    return isfinite(value);
+#elif (CISST_OS == CISST_SOLARIS)
+    return finite(value);
+#endif
+#endif
+}
+

@@ -197,4 +197,78 @@ public:
     }
 };
 
+
+// pass through class for frame4x4
+template <class _elementType, bool _rowMajor>
+class cmnData<vctFrame4x4<_elementType, _rowMajor> >
+{
+public:
+    enum {IS_SPECIALIZED = 1};
+    typedef vctFrame4x4<_elementType, _rowMajor> DataType;
+    typedef typename DataType::ContainerType ContainerType;
+
+    static void Copy(DataType & data, const DataType & source)
+    {
+        cmnData<ContainerType>::Copy(data, source);
+    }
+
+    static void SerializeBinary(const DataType & data, std::ostream & outputStream)
+        throw (std::runtime_error)
+    {
+        cmnData<ContainerType>::SerializeBinary(data, outputStream);
+    }
+
+    static void DeSerializeBinary(DataType & data, std::istream & inputStream,
+                                  const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat)
+        throw (std::runtime_error)
+    {
+        cmnData<ContainerType>::DeSerializeBinary(data, inputStream, localFormat, remoteFormat);
+    }
+
+    static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter)
+        throw (std::runtime_error)
+    {
+        cmnData<ContainerType>::SerializeText(data, outputStream, delimiter);
+    }
+
+    static std::string HumanReadable(const DataType & data)
+    {
+        return cmnData<ContainerType>::HumanReadable(data);
+    }
+
+    static std::string SerializeDescription(const DataType & data, const char delimiter, const std::string & userDescription = "mr3")
+    {
+        return cmnData<ContainerType>::SerializeDescription(data, delimiter, userDescription);
+    }
+
+    static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter)
+        throw (std::runtime_error)
+    {
+        return cmnData<ContainerType>::DeSerializeText(data, inputStream, delimiter);
+    }
+
+    static bool ScalarNumberIsFixed(const DataType & data)
+    {
+        return cmnData<ContainerType>::ScalarNumberIsFixed(data);
+    }
+
+    static size_t ScalarNumber(const DataType & data)
+    {
+        return cmnData<ContainerType>::ScalarNumber(data);
+    }
+
+    static std::string ScalarDescription(const DataType & data, const size_t & index,
+                                         const std::string & userDescription = "mr3")
+        throw (std::out_of_range)
+    {
+       return  cmnData<ContainerType>::ScalarDescription(data, index, userDescription);
+    }
+
+    static double Scalar(const DataType & data, const size_t & index)
+        throw (std::out_of_range)
+    {
+        return cmnData<ContainerType>::Scalar(data, index);
+    }
+};
+
 #endif // _vctDataFunctionsTransformations_h

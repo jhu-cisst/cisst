@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,7 +42,7 @@ class CISST_EXPORT mtsInterface: public cmnGenericObject
 {
 protected:
 
-    /*! A string identifying the 'Name' of the required interface. */
+    /*! A string identifying the 'Name' of this interface. */
     const std::string Name;
 
     /*! Pointer on the device itself. */
@@ -51,7 +50,7 @@ protected:
 
  public:
     /*! Constructor. Sets the name.
-        \param interfaceName Name of required interface
+        \param interfaceName Name of interface
     */
     mtsInterface(const std::string & interfaceName,
                  mtsComponent * component);
@@ -68,6 +67,9 @@ protected:
 
     /*! Get a const pointer on the component */
     const mtsComponent * GetComponent(void) const;
+
+    /*! Returns name of owner component */
+    const std::string & GetComponentName(void) const;
 };
 
 
