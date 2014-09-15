@@ -31,15 +31,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterImageWindow.h>
 #include <cisstStereoVision/svlFilterImageOverlay.h>
 
-#if CISST_HAS_QT
+#if CISST_HAS_QT4
     #include <cisstStereoVision/svlQtObjectFactory.h>
     #include <cisstStereoVision/svlQtWidgetFileOpen.h>
     #if CISST_HAS_OPENGL
         #include <cisstStereoVision/svlFilterImageWindowQt.h>
     #endif
     // Qt dialogs are disabled by default
-    #define _USE_QT_        0
-    #define _NO_CONSOLE_    0
+    #define _USE_QT_        1
+    #define _NO_CONSOLE_    1
 #else
     #define _USE_QT_        0
     #define _NO_CONSOLE_    0
