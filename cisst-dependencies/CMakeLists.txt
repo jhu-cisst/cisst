@@ -315,7 +315,6 @@ option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some
 if (CISST_HAS_JSON)
   include (ExternalProject)
   set (cisstJSON_PREFIX cisstJSONExternal)
-
   set (CISST_JSON_SVN_REPOSITORY http://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp)
   set (CISST_JSON_SVN_REVISION 276)
   ExternalProject_Add (cisstJSONExternal
@@ -330,6 +329,7 @@ if (CISST_HAS_JSON)
                                         -DJSONCPP_WITH_POST_BUILD_UNITTEST:BOOL=OFF
                                         -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstJSON
                        INSTALL_DIR ${cisst_BINARY_DIR}/cisstJSON
+                       UPDATE_COMMAND ""
                        )
 
   # Set all JSON variables based on install directory
