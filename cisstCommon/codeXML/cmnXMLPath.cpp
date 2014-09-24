@@ -396,7 +396,7 @@ public:
             }
         }
         if (!attributeFound) {
-            CMN_LOG_CLASS_RUN_WARNING << "QueryStdString (libxml2): not result for query [" << query
+            CMN_LOG_CLASS_RUN_VERBOSE << "QueryStdString (libxml2): no result for query [" << query
                                       << "]" << std::endl;
             return false;
         }
