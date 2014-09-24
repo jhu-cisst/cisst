@@ -43,8 +43,8 @@ robQuintic::robQuintic( double t1,
     }
 
     for( int i=0; i<3; i++ )
-        X.push_back( ComputeParameters( t1, q1[i], q1d[i], q1dd[i],
-                                        t2, q2[i], q2d[i], q2dd[i] ) );
+        X.push_back( ComputeParameters( 0    , q1[i], q1d[i], q1dd[i],
+                                        t2-t1, q2[i], q2d[i], q2dd[i] ) );
 
 }
 
@@ -87,8 +87,8 @@ void robQuintic::Set( double t1,
         y1.size() == y2dd.size() ){
 
         for( size_t i=0; i<y1.size(); i++ )
-            X.push_back( ComputeParameters( t1, y1[i], y1d[i], y1dd[i],
-                                            t2, y2[i], y2d[i], y2dd[i] ) );
+            X.push_back( ComputeParameters( 0    , y1[i], y1d[i], y1dd[i],
+                                            t2-t1, y2[i], y2d[i], y2dd[i] ) );
     }
     else{
         problem = true;
@@ -177,7 +177,7 @@ void robQuintic::Evaluate( double t,
     if( t1 <= t && t <=t2 ){
         if( X.size() == 3 ){
             for( size_t i=0; i<3; i++ ){
-                EvaluateQuintic( t, X[i], y[i], yd[i], ydd[i] );
+                EvaluateQuintic( t-t1, X[i], y[i], yd[i], ydd[i] );
             }
         }
         else{
@@ -245,7 +245,7 @@ void robQuintic::Evaluate( double t,
         ydd.SetSize( X.size() );
 
         for( size_t i=0; i<X.size(); i++ )
-            { EvaluateQuintic( t, X[i], y[i], yd[i], ydd[i] ); }
+            { EvaluateQuintic( t-t1, X[i], y[i], yd[i], ydd[i] ); }
     }
 
     // Clip the trajectory at the final values
