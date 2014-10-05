@@ -1038,4 +1038,15 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLongVec)
 typedef mtsGenericObjectProxy<vctULongVec> mtsVctULongVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULongVec)
 
+// Dynamic matrices (see also mtsMatrix.h, which uses
+// multiple inheritance)
+#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstVector/vctDataFunctionsDynamicMatrix.h>
+typedef mtsGenericObjectProxy<vctDoubleMat> mtsVctDoubleMat;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctDoubleMat)
+typedef mtsGenericObjectProxy<vctFloatMat> mtsVctFloatMat;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloatMat)
+typedef mtsGenericObjectProxy<vctIntMat> mtsVctIntMat;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctIntMat)
+
 #endif
