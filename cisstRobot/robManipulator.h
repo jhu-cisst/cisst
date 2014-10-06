@@ -3,7 +3,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _robManipulator_h
 
 #include <string>
+#include <vector>
 
 #include <cisstVector/vctTransformationTypes.h>
 #include <cisstRobot/robLink.h>
@@ -70,6 +71,7 @@ class CISST_EXPORT robManipulator{
   robManipulator::Errno LoadRobot(const Json::Value & config);
 #endif
 
+  robManipulator::Errno LoadRobot(std::vector<robKinematics *> KinParms);
   
   //! Evaluate the body Jacobian
   /**
@@ -178,6 +180,9 @@ public:
   */
   robManipulator( const std::string& robotfilename,
 		  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
+
+  robManipulator( const std::vector<robKinematics *> linkParms,
+                  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
 
   //! Manipulator destructor
   virtual ~robManipulator();

@@ -3,8 +3,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -149,6 +148,18 @@ robManipulator::robManipulator( const std::string& linkfile,
   }
 }
 
+robManipulator::robManipulator( const std::vector<robKinematics *> linkParms,
+				const vctFrame4x4<double>& Rtw0 ){
+
+  this->Rtw0 = Rtw0;
+
+  if( LoadRobot( linkParms ) == robManipulator::EFAILURE ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to load the robot configuration."
+		      << std::endl;
+  }
+}
+
 robManipulator::~robManipulator() 
 {
 }
@@ -269,6 +280,23 @@ robManipulator::Errno robManipulator::LoadRobot(const Json::Value &config)
 }
 #endif
 
+
+robManipulator::Errno robManipulator::LoadRobot(std::vector<robKinematics *> KinParms)
+{
+  // Number of links
+  size_t N = KinParms.size();
+
+  // read the links (kinematics+dynamics+geometry) from the input
+  for( size_t i=0; i<N; i++ ){
+    robLink li( KinParms[i], robMass() );
+    links.push_back( li );
+  }
+
+  Js = rmatrix(0, links.size()-1, 0, 5);
+  Jn = rmatrix(0, links.size()-1, 0, 5);
+
+  return robManipulator::ESUCCESS;
+}
 
 //////////////////////////////////////
 //         KINEMATICS
