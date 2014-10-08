@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-18
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -160,6 +159,9 @@ public:
                                 << ", other = " << other.Services()->GetName() << std::endl;
             return false;
         }
+        // If they already point to the same memory, just return
+        if (existing == &other)
+            return true;
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         if (otherPointer) {
             existing->Services()->Delete(existing);
