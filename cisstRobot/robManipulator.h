@@ -79,6 +79,12 @@ class CISST_EXPORT robManipulator{
      Paul, Shimano, Mayer (SMC81)
   */
   void JacobianBody( const vctDynamicVector<double>& q ) const;
+
+  //! Evaluate the body Jacobian and return it in the dynamic matrix J
+  //  Returns true if successful; false otherwise (e.g., J is wrong size)
+  bool JacobianBody(const vctDynamicVector<double>& q,
+                    vctDynamicMatrix<double>& J) const;
+
   
   //! Evaluate the spatial Jacobian
   /**
@@ -88,6 +94,11 @@ class CISST_EXPORT robManipulator{
   */
   void JacobianSpatial( const vctDynamicVector<double>& q ) const;
   
+  //! Evaluate the spatial Jacobian and return it in the dynamic matrix J
+  //  Returns true if successful; false otherwise (e.g., J is wrong size)
+  bool JacobianSpatial(const vctDynamicVector<double>& q,
+                       vctDynamicMatrix<double>& J) const;
+
   //! Recursive Newton-Euler altorithm
   /**
      Evaluate the inverse dynamics through RNE. The joint positions, 

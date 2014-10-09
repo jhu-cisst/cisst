@@ -516,8 +516,8 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   }
 
   // A is a pointer to the 6xN spatial Jacobian
-  int M = 6;                  // The number or rows of matrix A
-  int N = links.size();      // The number of columns of matrix A
+  int M = 6;                  // The number of rows of matrix A
+  int N = links.size();       // The number of columns of matrix A
   int NHRS = 1;               // The number of right hand side vectors
 
   double* A = &(Js[0][0]);    // Pointer to the spatial Jacobian
@@ -665,6 +665,18 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
   }
 }
 
+bool robManipulator::JacobianBody(const vctDynamicVector<double>& q,
+                                  vctDynamicMatrix<double>& J) const
+{
+  JacobianBody(q);
+  if ((J.rows() != 6) && (J.cols() != links.size()))
+    return false;
+  for (size_t r = 0; r < 6; r++)
+    for (size_t c = 0; c < links.size(); c++)
+      J[r][c] = Jn[c][r];
+  return true;
+}
+
 void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const{
   
   JacobianBody( q );
@@ -726,6 +738,17 @@ void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const{
        &BETA,  C, &LDC);
 }
 
+bool robManipulator::JacobianSpatial(const vctDynamicVector<double>& q,
+                                     vctDynamicMatrix<double>& J) const
+{
+  JacobianSpatial(q);
+  if ((J.rows() != 6) && (J.cols() != links.size()))
+    return false;
+  for (size_t r = 0; r < 6; r++)
+    for (size_t c = 0; c < links.size(); c++)
+      J[r][c] = Js[c][r];
+  return true;
+}
 
 //////////////////////////////////////
 //         DYNAMICS
