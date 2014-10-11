@@ -111,6 +111,9 @@ public:
     }
 
     inline static bool Create(cmnGenericObject * existing, const cmnGenericObject & other) {
+        // If they already point to the same memory, just return
+        if (existing == &other)
+            return true;
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         if (otherPointer) {
             new(existing) value_type(*otherPointer);
