@@ -214,7 +214,7 @@ int svlImageProcessing::UnsharpMask(const svlSampleImage* src_img,
 
 #endif // CISST_SVL_HAS_OPENCV
 
-    if (std::abs(amount) < 0.004) return SVL_OK;
+    if (fabs(amount) < 0.004) return SVL_OK;
 
     svlImageProcessingHelper::UnsharpMaskSharpenRGB(src_img->GetUCharPointer(src_videoch),
                                                     dst_img->GetUCharPointer(dst_videoch),
