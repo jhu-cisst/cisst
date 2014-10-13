@@ -55,6 +55,7 @@ svlFilterImageCenterFinder::svlFilterImageCenterFinder() :
     svlFilterBase(),
     Smoothing(0.0),
     ThresholdLevel(10),
+    MinRadius(20),
     MassRatio(50),
     LinkHorizontally(false),
     LinkVertically(true),
@@ -122,6 +123,11 @@ void svlFilterImageCenterFinder::SetThreshold(unsigned char thresholdlevel)
     ThresholdLevel = thresholdlevel;
 }
 
+void svlFilterImageCenterFinder::SetMinRadius(unsigned int radius)
+{
+    MinRadius = radius;
+}
+
 void svlFilterImageCenterFinder::SetMassRatio(unsigned int ratio)
 {
     if (ratio > 100) ratio = 100;
@@ -146,6 +152,11 @@ double svlFilterImageCenterFinder::GetTrajectorySmoothing() const
 unsigned char svlFilterImageCenterFinder::GetThreshold() const
 {
     return static_cast<unsigned char>(ThresholdLevel);
+}
+
+unsigned int svlFilterImageCenterFinder::GetMinRadius() const
+{
+    return MinRadius;
 }
 
 unsigned int svlFilterImageCenterFinder::GetMassRatio() const
@@ -401,6 +412,9 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
             ry ++;
         }
 
+        if (rx < MinRadius) rx = MinRadius;
+        if (ry < MinRadius) ry = MinRadius;
+
         // Smoothing results
         if (FrameCounter > 0 && Smoothing > 0.0) {
             x  = static_cast<int>((Smoothing * CenterXInternal[vch] + x ) / (1.0 + Smoothing));
@@ -416,10 +430,21 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
         RadiusYInternal[vch] = ry;
 
         if (EllipseFittingEnabled) {
-            if (FindEllipse(image, vch, x, y, Ellipse[vch])) {
+            x = Ellipse[vch].cx;
+            y = Ellipse[vch].cy;
+
+            if (FindEllipse(image, vch, x, y, Ellipse[vch]) && Ellipse[vch].rx > 0 &&
+                                                               Ellipse[vch].ry > 0) {
+
+                // Smoothing results
+                if (FrameCounter > 0 && Smoothing > 0.0) {
+                    x  = static_cast<int>((Smoothing * x + Ellipse[vch].cx) / (1.0 + Smoothing));
+                    y  = static_cast<int>((Smoothing * y + Ellipse[vch].cy) / (1.0 + Smoothing));
+                }
+
                 // Adjust with margin
-                Ellipse[vch].rx = std::max(0, Ellipse[vch].rx - EllipseMargin);
-                Ellipse[vch].ry = std::max(0, Ellipse[vch].ry - EllipseMargin);
+                Ellipse[vch].rx = std::max(static_cast<int>(MinRadius), Ellipse[vch].rx - EllipseMargin);
+                Ellipse[vch].ry = std::max(static_cast<int>(MinRadius), Ellipse[vch].ry - EllipseMargin);
 
                 svlRect bounding;
                 Ellipse[vch].GetBoundingRect(bounding);
@@ -431,6 +456,9 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
 
                 if (EllipseFittingDrawEllipse) svlDraw::Ellipse(image, vch, Ellipse[vch], svlRGB(255, 255, 255));
                 if (EllipseMaskEnabled) UpdateMaskImage(vch, Ellipse[vch]);
+            }
+            else {
+                Ellipse[vch].Assign(CenterXInternal[vch], CenterYInternal[vch], RadiusXInternal[vch], RadiusYInternal[vch], 0.0);
             }
         }
     }
