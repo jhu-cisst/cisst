@@ -6,8 +6,7 @@
   Author(s):	Anton Deguet
   Created on:   2009-04-29
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVector/vctDataFunctionsDynamicMatrix.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last

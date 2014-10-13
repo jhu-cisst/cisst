@@ -3,7 +3,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _robManipulator_h
 
 #include <string>
+#include <vector>
 
 #include <cisstVector/vctTransformationTypes.h>
 #include <cisstRobot/robLink.h>
@@ -70,6 +71,7 @@ class CISST_EXPORT robManipulator{
   robManipulator::Errno LoadRobot(const Json::Value & config);
 #endif
 
+  robManipulator::Errno LoadRobot(std::vector<robKinematics *> KinParms);
   
   //! Evaluate the body Jacobian
   /**
@@ -77,6 +79,12 @@ class CISST_EXPORT robManipulator{
      Paul, Shimano, Mayer (SMC81)
   */
   void JacobianBody( const vctDynamicVector<double>& q ) const;
+
+  //! Evaluate the body Jacobian and return it in the dynamic matrix J
+  //  Returns true if successful; false otherwise (e.g., J is wrong size)
+  bool JacobianBody(const vctDynamicVector<double>& q,
+                    vctDynamicMatrix<double>& J) const;
+
   
   //! Evaluate the spatial Jacobian
   /**
@@ -86,6 +94,11 @@ class CISST_EXPORT robManipulator{
   */
   void JacobianSpatial( const vctDynamicVector<double>& q ) const;
   
+  //! Evaluate the spatial Jacobian and return it in the dynamic matrix J
+  //  Returns true if successful; false otherwise (e.g., J is wrong size)
+  bool JacobianSpatial(const vctDynamicVector<double>& q,
+                       vctDynamicMatrix<double>& J) const;
+
   //! Recursive Newton-Euler altorithm
   /**
      Evaluate the inverse dynamics through RNE. The joint positions, 
@@ -178,6 +191,9 @@ public:
   */
   robManipulator( const std::string& robotfilename,
 		  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
+
+  robManipulator( const std::vector<robKinematics *> linkParms,
+                  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
 
   //! Manipulator destructor
   virtual ~robManipulator();
