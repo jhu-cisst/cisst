@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <set>
 #include <functional>
 
+#include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnLogger.h>
 
 #include <cisstCommon/cmnExport.h>
