@@ -1,6 +1,5 @@
 #
-#
-# (C) Copyright 2003-2008 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -14,7 +13,7 @@
 # set dependencies
 set (DEPENDENCIES cisstCommon cisstVector cisstNumerical)
 
-if (CISST_HAS_CISSTNETLIB )
+if (CISST_HAS_CISSTNETLIB)
 
   set (SOURCE_FILES
        robFunction.cpp
@@ -31,6 +30,8 @@ if (CISST_HAS_CISSTNETLIB )
 
        robLinearSE3.cpp
        #  robCSCSO3.cpp
+
+       robLSPB.cpp
 
        robJoint.cpp
        robMass.cpp
@@ -59,6 +60,8 @@ if (CISST_HAS_CISSTNETLIB )
 
   # all header files
   set (HEADER_FILES
+       robExport.h
+
        robFunction.h
        robFunctionRn.h
        robFunctionSE3.h
@@ -72,7 +75,8 @@ if (CISST_HAS_CISSTNETLIB )
        robCubicSO3.h
        #  robCSCSO3.h
 
-       robExport.h
+       robLSPB.h
+
        robMass.h
        robJoint.h
 
@@ -109,7 +113,3 @@ else (CISST_HAS_CISSTNETLIB)
   message ("cisstRobot requires cisstNumerical to be compiled with the option CISST_HAS_CISSTNETLIB")
   set (CISST_cisstRobot OFF CACHE BOOL "Build cisstRobot" FORCE)
 endif (CISST_HAS_CISSTNETLIB)
-
-
-
-
