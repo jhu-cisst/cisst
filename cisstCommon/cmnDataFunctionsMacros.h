@@ -40,7 +40,8 @@ http://www.cisst.org/cisst/license.txt.
 /*! Macro to overload the function cmnDataSerializeDescription. */
 #define CMN_DATA_SERIALIZE_DESCRIPTION(_type, _description)             \
     static std::string SerializeDescription(const _type & CMN_UNUSED(data), \
-                                            const char CMN_UNUSED(delimiter), const std::string & userDescription = "") \
+                                            const char CMN_UNUSED(delimiter) = ',', \
+                                            const std::string & userDescription = "") \
     {                                                                   \
         return (userDescription == "" ? "{"#_description"}" : (userDescription + ":{"#_description"}")); \
     }
@@ -159,7 +160,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CMN_DATA_SERIALIZE_TEXT_USING_STREAM_OUT(_type)                 \
     static void SerializeText(const _type & data,                       \
                               std::ostream & outputStream,              \
-                              const char CMN_UNUSED(delimiter))         \
+                              const char CMN_UNUSED(delimiter) = ',')   \
         throw (std::runtime_error)                                      \
     {                                                                   \
         outputStream << data;                                           \
@@ -174,7 +175,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CMN_DATA_DE_SERIALIZE_TEXT_USING_STREAM_IN(_type)               \
     static void DeSerializeText(_type & data,                           \
                                 std::istream & inputStream,             \
-                                const char CMN_UNUSED(delimiter))       \
+                                const char CMN_UNUSED(delimiter) = ',') \
         throw (std::runtime_error)                                      \
     {                                                                   \
         inputStream >> data;                                            \

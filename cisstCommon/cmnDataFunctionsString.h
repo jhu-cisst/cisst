@@ -46,11 +46,11 @@ void CISST_EXPORT cmnDataDeSerializeBinary(std::string & data,
 
 void CISST_EXPORT cmnDataSerializeText(const std::string & data,
                                        std::ostream & outputStream,
-                                       const char delimiter) throw (std::runtime_error);
+                                       const char delimiter = ',') throw (std::runtime_error);
 
 void CISST_EXPORT cmnDataDeSerializeText(std::string & data,
                                          std::istream & inputStream,
-                                         const char delimiter) throw (std::runtime_error);
+                                         const char delimiter = ',') throw (std::runtime_error);
 
 
 template <>
@@ -101,7 +101,7 @@ public:
 
     static void SerializeText(const DataType & data,
                               std::ostream & outputStream,
-                              const char delimiter)
+                              const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnDataSerializeText(data, outputStream, delimiter);
@@ -109,7 +109,7 @@ public:
 
     static void DeSerializeText(DataType & data,
                                 std::istream & inputStream,
-                                const char delimiter)
+                                const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnDataDeSerializeText(data, inputStream, delimiter);

@@ -58,7 +58,8 @@ public:
         cmnData<RotationType>::DeSerializeBinary(data.Rotation(), inputStream, localFormat, remoteFormat);
     }
 
-    static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter)
+    static void SerializeText(const DataType & data, std::ostream & outputStream,
+                              const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnData<TranslationType>::SerializeText(data.Translation(), outputStream, delimiter);
@@ -71,7 +72,8 @@ public:
         return data.ToString();
     }
 
-    static std::string SerializeDescription(const DataType & data, const char delimiter, const std::string & userDescription = "frm3")
+    static std::string SerializeDescription(const DataType & data, const char delimiter = ',',
+                                            const std::string & userDescription = "frm3")
     {
         const std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
         std::stringstream description;
@@ -81,7 +83,8 @@ public:
         return description.str();
     }
 
-    static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter)
+    static void DeSerializeText(DataType & data, std::istream & inputStream,
+                                const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnData<TranslationType>::DeSerializeText(data.Translation(), inputStream, delimiter);
@@ -151,7 +154,8 @@ public:
         cmnData<ContainerType>::DeSerializeBinary(data, inputStream, localFormat, remoteFormat);
     }
 
-    static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter)
+    static void SerializeText(const DataType & data, std::ostream & outputStream,
+                              const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnData<ContainerType>::SerializeText(data, outputStream, delimiter);
@@ -162,12 +166,14 @@ public:
         return cmnData<ContainerType>::HumanReadable(data);
     }
 
-    static std::string SerializeDescription(const DataType & data, const char delimiter, const std::string & userDescription = "mr3")
+    static std::string SerializeDescription(const DataType & data, const char delimiter = ',',
+                                            const std::string & userDescription = "mr3")
     {
         return cmnData<ContainerType>::SerializeDescription(data, delimiter, userDescription);
     }
 
-    static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter)
+    static void DeSerializeText(DataType & data, std::istream & inputStream,
+                                const char delimiter = ',')
         throw (std::runtime_error)
     {
         return cmnData<ContainerType>::DeSerializeText(data, inputStream, delimiter);
@@ -225,7 +231,8 @@ public:
         cmnData<ContainerType>::DeSerializeBinary(data, inputStream, localFormat, remoteFormat);
     }
 
-    static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter)
+    static void SerializeText(const DataType & data, std::ostream & outputStream,
+                              const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnData<ContainerType>::SerializeText(data, outputStream, delimiter);
@@ -236,12 +243,14 @@ public:
         return cmnData<ContainerType>::HumanReadable(data);
     }
 
-    static std::string SerializeDescription(const DataType & data, const char delimiter, const std::string & userDescription = "mr3")
+    static std::string SerializeDescription(const DataType & data, const char delimiter = ',',
+                                            const std::string & userDescription = "mr3")
     {
         return cmnData<ContainerType>::SerializeDescription(data, delimiter, userDescription);
     }
 
-    static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter)
+    static void DeSerializeText(DataType & data, std::istream & inputStream,
+                                const char delimiter = ',')
         throw (std::runtime_error)
     {
         return cmnData<ContainerType>::DeSerializeText(data, inputStream, delimiter);

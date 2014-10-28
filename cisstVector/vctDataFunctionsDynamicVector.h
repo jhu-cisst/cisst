@@ -67,7 +67,7 @@ public:
 
     static void SerializeText(const DataType & data,
                               std::ostream & outputStream,
-                              const char delimiter)
+                              const char delimiter = ',')
         throw (std::runtime_error)
     {
         const size_t size = data.size();
@@ -79,7 +79,7 @@ public:
     }
 
     static std::string SerializeDescription(const DataType & data,
-                                            const char delimiter,
+                                            const char delimiter = ',',
                                             const std::string & userDescription = "v")
     {
         return cmnDataVectorSerializeDescription(data, delimiter, userDescription, true /* need to serialize size */);
@@ -87,7 +87,7 @@ public:
 
     static void DeSerializeText(DataType & data,
                                 std::istream & inputStream,
-                                const char delimiter)
+                                const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnDataVectorDeSerializeTextResize(data, inputStream, delimiter);

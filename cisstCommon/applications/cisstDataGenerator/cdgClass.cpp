@@ -255,7 +255,7 @@ void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
                  << "    void SerializeBinary(std::ostream & outputStream) const throw (std::runtime_error);" << std::endl
                  << "    void DeSerializeBinary(std::istream & inputStream, const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat) throw (std::runtime_error);" << std::endl
                  << "    void SerializeText(std::ostream & outputStream, const char delimiter = ',') const throw (std::runtime_error);" << std::endl
-                 << "    std::string SerializeDescription(const char delimiter, const std::string & userDescription = \"\") const;" << std::endl
+                 << "    std::string SerializeDescription(const char delimiter = ',', const std::string & userDescription = \"\") const;" << std::endl
                  << "    void DeSerializeText(std::istream & inputStream, const char delimiter = ',') throw (std::runtime_error);" << std::endl
                  << "    std::string HumanReadable(void) const;" << std::endl
                  << "    bool ScalarNumberIsFixed(void) const;" << std::endl
