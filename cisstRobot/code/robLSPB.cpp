@@ -42,19 +42,19 @@ void robLSPB::Set(const vctDoubleVec & start,
     // sanity checks
     mDimension = start.size();
     if (finish.size() != mDimension) {
-        cmnThrow("robLSPB: finish point doesn't match start point dimension");
+        cmnThrow("robLSPB::Set: finish point doesn't match start point dimension");
     }
     if (velocity.size() != mDimension) {
-        cmnThrow("robLSPB: velocity doesn't match start point dimension");
+        cmnThrow("robLSPB::Set: velocity doesn't match start point dimension");
     }
     if (acceleration.size() != mDimension) {
-        cmnThrow("robLSPB: acceleration doesn't match start point dimension");
+        cmnThrow("robLSPB::Set: acceleration doesn't match start point dimension");
     }
     if (!velocity.Greater(0.0)) {
-        cmnThrow("robLSPB: velocity must be greater than zero");
+        cmnThrow("robLSPB::Set: velocity must be greater than zero");
     }
     if (!acceleration.Greater(0.0)) {
-        cmnThrow("robLSPB: acceleration must be greater than zero");
+        cmnThrow("robLSPB::Set: acceleration must be greater than zero");
     }
     // store information and resize data members
     mStartTime = startTime;
@@ -78,43 +78,27 @@ void robLSPB::Set(const vctDoubleVec & start,
             mVelocity[i] = 0.0;
             mAcceleration[i] = 0.0;
         }
-        // compute time to reach constant velocity
 
-        // compute position at end of acceleration
-        
-    }
-    mIsSet = true;
-}
-
-void robLSPB::Evaluate(const double absoluteTime,
-                       vctDoubleVec & position)
-{
-    if (!mIsSet) {
-        cmnThrow("robLSPB: trajectory parameters are not set yet");
-    }
-    const double time = absoluteTime - mStartTime;
-    const double time2 = time * time;
-    if (time <= 0) {
-        position.ForceAssign(mStart);
-    }
-    for (size_t i = 0;
-         i < mDimension;
-         ++i) {
-        if (time >= mFinishTime[i]) {
-            position[i] = mFinish[i];
-        } else {
-            // acceleration phase
-            if (time <= mAccelerationTime[i]) {
-                position[i] = mStart[i]
-                    + 0.5 * mAcceleration[i] * time2;
+        // compute time if distance != 0
+        if (distance != 0) {
+            mAccelerationTime[i] = mVelocity[i] / mAcceleration[i];
+            // check distance over max accel and max decel at end of
+            // acceleration phase to see if we're past mid-point.
+            const double accelDistance = mAcceleration[i]
+                * mAccelerationTime[i] * mAccelerationTime[i];
+            if (fabs(accelDistance) >= fabs(distance)) {
+                mFinishTime[i] = 2.0
+                    * sqrt(distance / mAcceleration[i]);
+                mAccelerationTime[i] = mFinishTime[i] * 0.5;
             } else {
-
-
-
-
+                mFinishTime[i] = distance / mVelocity[i] + mAccelerationTime[i];
             }
+        } else {
+            mAccelerationTime[i] = 0.0;
+            mFinishTime[i] = 0.0;
         }
     }
+    mIsSet = true;
 }
 
 void robLSPB::Evaluate(const double absoluteTime,
@@ -122,9 +106,20 @@ void robLSPB::Evaluate(const double absoluteTime,
                        vctDoubleVec & velocity,
                        vctDoubleVec & acceleration)
 {
+    // sanity checks
     if (!mIsSet) {
-        cmnThrow("robLSPB: trajectory parameters are not set yet");
+        cmnThrow("robLSPB::Evaluate trajectory parameters are not set yet");
     }
+    if (position.size() != mDimension) {
+        cmnThrow("robLSPB::Evaluate: position doesn't match dimension");
+    }
+    if (velocity.size() != mDimension) {
+        cmnThrow("robLSPB::Evaluate: velocity doesn't match dimension");
+    }
+    if (acceleration.size() != mDimension) {
+        cmnThrow("robLSPB::Evaluate: acceleration doesn't match dimension");
+    }
+
     const double time = absoluteTime - mStartTime;
     const double time2 = time * time;
     if (time <= 0) {
@@ -142,14 +137,29 @@ void robLSPB::Evaluate(const double absoluteTime,
         } else {
             // acceleration phase
             if (time <= mAccelerationTime[i]) {
-                position[i] = mStart[i]
+                position[i] =
+                    mStart[i]
                     + 0.5 * mAcceleration[i] * time2;
                 velocity[i] = mAcceleration[i] * time;
                 acceleration[i] = mAcceleration[i];
+            } else if (time >= (mFinishTime[i] - mAccelerationTime[i])) {
+                // deceleration phase
+                position[i] =
+                    mFinish[i]
+                    - 0.5 * mAcceleration[i] * mFinishTime[i] * mFinishTime[i]
+                    + mAcceleration[i] * mFinishTime[i] * time
+                    - 0.5 * mAcceleration[i] * time2;
+                velocity[i] = 
+                    mAcceleration[i] * mFinishTime[i]
+                    - mAcceleration[i] * time;
+                acceleration[i] = -mAcceleration[i];
             } else {
-
-
-
+                // constant velocity
+                position[i] =
+                    0.5 * (mFinish[i] + mStart[i] - mVelocity[i] * mFinishTime[i])
+                    + mVelocity[i] * time;
+                velocity[i] = mVelocity[i];
+                acceleration[i] = 0.0;
             }
         }
     }
