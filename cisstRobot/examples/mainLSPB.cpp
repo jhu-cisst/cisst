@@ -51,7 +51,9 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     const double startTime = 2.0;
 
     robLSPB trajectory;
-    trajectory.Set(start, finish, maxVelocity, maxAcceleration, startTime);
+    trajectory.Set(start, finish,
+                   maxVelocity, maxAcceleration,
+                   startTime, robLSPB::LSPB_DURATION); // default is LSPB_NONE
 
     const double duration = trajectory.Duration();
     const double extraPlotTime = 2.0;
@@ -62,8 +64,8 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     std::cout << "duration: " << duration << std::endl;
 
     std::ofstream log, logHeader;
-    const std::string logName = "robLSPB.txt";
-    const std::string logHeaderName = "robLSPB-header.txt";
+    const char * logName = "robLSPB.txt";
+    const char * logHeaderName = "robLSPB-header.txt";
     log.open(logName);
     logHeader.open(logHeaderName);
 
@@ -94,7 +96,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     log.close();
     logHeader.close();
 
-    std::cout << "trajectory saved in " << logName << " (format description: " << logHeaderName << ")" << std::endl; 
+    std::cout << "trajectory saved in " << logName << " (format description: " << logHeaderName << ")" << std::endl;
 
     return 0;
 }
