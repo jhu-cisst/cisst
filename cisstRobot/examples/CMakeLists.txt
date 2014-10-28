@@ -1,7 +1,5 @@
 #
-# $Id: CMakeLists.txt 3331 2012-01-10 22:34:09Z adeguet1 $
-#
-# (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -16,11 +14,9 @@
 
 # create a list of required cisst libraries
 set (REQUIRED_CISST_LIBRARIES cisstCommon
-  cisstVector
-  cisstOSAbstraction
-  cisstMultiTask
-  cisstParameterTypes
-  cisstRobot)
+     cisstVector
+     cisstOSAbstraction
+     cisstRobot)
 
 find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
