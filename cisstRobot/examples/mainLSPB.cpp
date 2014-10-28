@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
-    const size_t dimension = 2;
+    const size_t dimension = 3;
     vctDoubleVec
         start,
         finish,
@@ -44,25 +44,57 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     acceleration.SetSize(dimension);
 
     // set parameters
-    start.Assign(           0.0,   0.0);
-    finish.Assign(         10.0, -20.0);
-    maxVelocity.Assign(     2.0,  20.0);
-    maxAcceleration.Assign( 1.0,  50.0);
+    start.Assign(           0.0,   0.0,  -10.0);
+    finish.Assign(         10.0, -20.0,   10.0);
+    maxVelocity.Assign(     2.0,  20.0,  100.0);
+    maxAcceleration.Assign( 1.0,  50.0,    5.0);
+    const double startTime = 2.0;
 
     robLSPB trajectory;
-    trajectory.Set(start, finish, maxVelocity, maxAcceleration);
+    trajectory.Set(start, finish, maxVelocity, maxAcceleration, startTime);
 
     const double duration = trajectory.Duration();
-    const size_t nbSteps = 100;
-    const double step = duration / nbSteps;
+    const double extraPlotTime = 2.0;
+    const double plotTime = extraPlotTime + duration + extraPlotTime;
+    const size_t nbSteps = 500;
+    const double step = plotTime / nbSteps;
+
+    std::cout << "duration: " << duration << std::endl;
+
+    std::ofstream log, logHeader;
+    const std::string logName = "robLSPB.txt";
+    const std::string logHeaderName = "robLSPB-header.txt";
+    log.open(logName);
+    logHeader.open(logHeaderName);
+
+    // header for logs
+    logHeader << cmnData<double>::SerializeDescription(duration, ',', "time")
+              << ','
+              << cmnData<vctDoubleVec>::SerializeDescription(position, ',', "position")
+              << ','
+              << cmnData<vctDoubleVec>::SerializeDescription(velocity, ',', "velocity")
+              << ','
+              << cmnData<vctDoubleVec>::SerializeDescription(acceleration, ',', "acceleration")
+              << std::endl;
 
     for (size_t i = 0; i < nbSteps; ++i) {
-        trajectory.Evaluate(i * step, position, velocity, acceleration);
-        std::cout << "time:         " << i * step << std::endl
-                  << "position:     " << position << std::endl
-                  << "velocity:     " << velocity << std::endl
-                  << "acceleration: " << acceleration << std::endl;
+        double now = (startTime - extraPlotTime) + i * step;
+        trajectory.Evaluate(now , position, velocity, acceleration);
+        // csv file
+        cmnData<double>::SerializeText(now, log);
+        log << ',';
+        cmnData<vctDoubleVec>::SerializeText(position, log);
+        log << ',';
+        cmnData<vctDoubleVec>::SerializeText(velocity, log);
+        log << ',';
+        cmnData<vctDoubleVec>::SerializeText(acceleration, log);
+        log << std::endl;
     }
+
+    log.close();
+    logHeader.close();
+
+    std::cout << "trajectory saved in " << logName << " (format description: " << logHeaderName << ")" << std::endl; 
 
     return 0;
 }

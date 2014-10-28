@@ -98,6 +98,8 @@ void robLSPB::Set(const vctDoubleVec & start,
             mFinishTime[i] = 0.0;
         }
     }
+    // compute max time
+    mDuration = mFinishTime.MaxElement();
     mIsSet = true;
 }
 
@@ -126,6 +128,7 @@ void robLSPB::Evaluate(const double absoluteTime,
         position.ForceAssign(mStart);
         velocity.Zeros();
         acceleration.Zeros();
+        return;
     }
     for (size_t i = 0;
          i < mDimension;
@@ -170,5 +173,5 @@ double & robLSPB::StartTime(void) {
 }
 
 double robLSPB::Duration(void) const {
-    return mTotalTime - mStartTime;
+    return mDuration;
 }

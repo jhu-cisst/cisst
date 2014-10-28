@@ -35,8 +35,8 @@ class CISST_EXPORT robLSPB {
  protected:
     bool mIsSet;        /*!< To ensure we don't evaluate if the parameters are not set */
     size_t mDimension;  /*!< Number of degrees of freedom */
-    double mStartTime;  /*!< start time */
-    double mTotalTime; /*!< finish time */
+    double mStartTime;  /*!< Start time, used to evaluate relative to 0 */
+    double mDuration;   /*!< Max of all finish times */
 
     vctDoubleVec
         mStart,
