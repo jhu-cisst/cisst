@@ -69,7 +69,8 @@ class CISST_EXPORT robLSPB {
         mAcceleration,
         mAccelerationTime,
         mFinishTime,
-        mTimeScale;
+        mTimeScale,
+        mTemp;
 
  public:
     robLSPB(void);

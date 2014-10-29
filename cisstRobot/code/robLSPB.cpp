@@ -187,53 +187,8 @@ void robLSPB::Evaluate(const double absoluteTime,
 void robLSPB::Evaluate(const double absoluteTime,
                        vctDoubleVec & position)
 {
-    // sanity checks
-    if (!mIsSet) {
-        cmnThrow("robLSPB::Evaluate trajectory parameters are not set yet");
-    }
-    if (position.size() != mDimension) {
-        cmnThrow("robLSPB::Evaluate: position doesn't match dimension");
-    }
-
-    const double time = absoluteTime - mStartTime;
-    if (time <= 0) {
-        position.ForceAssign(mStart);
-        return;
-    }
-    for (size_t i = 0;
-         i < mDimension;
-         ++i) {
-        double dimTime;
-        if (mCoordination == LSPB_DURATION) {
-            dimTime = time * mTimeScale[i];
-        } else {
-            dimTime = time;
-        }
-        const double time2 = dimTime * dimTime;
-
-        if (dimTime >= mFinishTime[i]) {
-            position[i] = mFinish[i];
-        } else {
-            // acceleration phase
-            if (dimTime <= mAccelerationTime[i]) {
-                position[i] =
-                    mStart[i]
-                    + 0.5 * mAcceleration[i] * time2;
-            } else if (dimTime >= (mFinishTime[i] - mAccelerationTime[i])) {
-                // deceleration phase
-                position[i] =
-                    mFinish[i]
-                    - 0.5 * mAcceleration[i] * mFinishTime[i] * mFinishTime[i]
-                    + mAcceleration[i] * mFinishTime[i] * dimTime
-                    - 0.5 * mAcceleration[i] * time2;
-            } else {
-                // constant velocity
-                position[i] =
-                    0.5 * (mFinish[i] + mStart[i] - mVelocity[i] * mFinishTime[i])
-                    + mVelocity[i] * dimTime;
-            }
-        }
-    }
+    mTemp.SetSize(mDimension);
+    Evaluate(absoluteTime, position, mTemp, mTemp);
 }
 
 double & robLSPB::StartTime(void) {
