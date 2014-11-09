@@ -98,6 +98,9 @@ set (SOURCE_FILES
      mtsTaskFromCallback.cpp
      mtsTaskFromSignal.cpp
      mtsTaskPeriodic.cpp
+
+     mtsWatchdogClient.cpp
+     mtsWatchdogServer.cpp
      )
 
 # all header files
@@ -205,6 +208,9 @@ set (HEADER_FILES
      mtsTaskFromSignal.h
      mtsTaskPeriodic.h
      mtsTaskManager.h    # to be deleted
+
+     mtsWatchdogClient.h
+     mtsWatchdogServer.h
 
      mtsTransformationTypes.h
 
