@@ -87,6 +87,7 @@ if (CISST_HAS_CISSTNETLIB)
        robModifiedHayati.h
        robLink.h
        robManipulator.h
+       robHelper.h
 
 #    BH/robBH.h
 #    BH/robBHF1.h
