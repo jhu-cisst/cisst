@@ -10,7 +10,7 @@ namespace Jacobian{
 
 static void ChangeBase(const vctDoubleMat & src, const vctRot3 & Rt, vctDoubleMat & out )
 {
-    if(src.cols() != 6) {
+    if(src.rows() != 6) {
         std::cerr << "ChangeBase: Jacobian matrix size error" << std::endl;
         return;
     }
