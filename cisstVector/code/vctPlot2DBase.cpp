@@ -160,7 +160,7 @@ bool vctPlot2DBase::Scale::ComputeDataRangeX(double & min, double & max, bool as
         const SignalsType::const_iterator end = Signals.end();
         SignalsType::const_iterator signal = Signals.begin();
         for (; signal != end; ++signal) {
-            if(signal->second->IsVisible()) {
+            if (signal->second->IsVisible()) {
                 signal->second->ComputeDataRangeX(min, max, assumesDataSorted);
                 rmin = (rmin > min) ? min : rmin;
                 rmax = (rmax < max) ? max : rmax;
@@ -185,7 +185,7 @@ bool vctPlot2DBase::Scale::ComputeDataRangeY(double & min, double & max)
         const SignalsType::const_iterator end = Signals.end();
         SignalsType::const_iterator signal = Signals.begin();
         for (; signal != end; ++signal) {
-            if(signal->second->IsVisible()) {
+            if (signal->second->IsVisible()) {
                 signal->second->ComputeDataRangeY(min, max);
                 rmin = (rmin > min) ? min : rmin;
                 rmax = (rmax < max) ? max : rmax;
@@ -211,7 +211,7 @@ bool vctPlot2DBase::Scale::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
         const SignalsType::const_iterator end = Signals.end();
         SignalsType::const_iterator signal = Signals.begin();
         for (; signal != end; ++signal) {
-            if(signal->second->IsVisible()) {
+            if (signal->second->IsVisible()) {
                 signal->second->ComputeDataRangeXY(min, max);
                 rmin.X() = (rmin.X() > min.X()) ? min.X():rmin.X();
                 rmin.Y() = (rmin.Y() > min.Y()) ? min.Y():rmin.Y();
@@ -776,12 +776,12 @@ void vctPlot2DBase::Signal::SetSize(size_t numberOfPoints)
     }
 }
 
-bool vctPlot2DBase::Signal::IsVisible(void)
+bool vctPlot2DBase::Signal::IsVisible(void) const
 {
     return this->Visible;
 }
 
-void vctPlot2DBase::Signal::SetVisible(bool visible)
+void vctPlot2DBase::Signal::SetVisible(const bool visible)
 {
     this->Visible = visible;
 }

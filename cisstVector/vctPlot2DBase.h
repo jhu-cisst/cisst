@@ -128,8 +128,8 @@ class CISST_EXPORT vctPlot2DBase
           beginning. */
         void SetSize(size_t numberOfPoints);
 
-        bool IsVisible(void);
-        void SetVisible(bool visible);
+        bool IsVisible(void) const;
+        void SetVisible(const bool visible);
 
         /*! Non destructive resize.  If the new buffer is bigger,
           preserves all points.  If the new buffer is smaller,
