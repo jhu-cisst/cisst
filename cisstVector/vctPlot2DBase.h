@@ -128,6 +128,9 @@ class CISST_EXPORT vctPlot2DBase
           beginning. */
         void SetSize(size_t numberOfPoints);
 
+        bool IsVisible(void) const;
+        void SetVisible(const bool visible);
+
         /*! Non destructive resize.  If the new buffer is bigger,
           preserves all points.  If the new buffer is smaller,
           preserves the data at the end by default. */
@@ -231,6 +234,12 @@ class CISST_EXPORT vctPlot2DBase
         }
         inline bool GetContinuousExpandY(void) const {
             return ContinuousExpandY;
+        }
+        const vctDouble2 & GetViewingRangeX(void) {
+            return this->ViewingRangeX;
+        }
+        const vctDouble2 & GetViewingRangeY(void) {
+            return this->ViewingRangeY;
         }
         //@}
 

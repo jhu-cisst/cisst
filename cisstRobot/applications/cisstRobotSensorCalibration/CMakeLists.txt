@@ -12,15 +12,25 @@
 #
 # --- end cisst license ---
 
-set(REQUIRED_CISST_LIBRARIES
-    cisstCommon
-    cisstVector
-    cisstOSAbstraction
-    cisstRobot
-    cisstNumerical)
+set (REQUIRED_CISST_LIBRARIES
+     cisstCommon
+     cisstVector
+     cisstOSAbstraction
+     cisstRobot
+     cisstNumerical)
 
-cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-add_executable (cisstRobotSensorCalibration RobotSensorCalibration.cpp)
-set_property (TARGET cisstRobotSensorCalibration PROPERTY FOLDER "cisstRobot/applications")
-cisst_target_link_libraries (cisstRobotSensorCalibration ${REQUIRED_CISST_LIBRARIES})
+if (cisst_FOUND_AS_REQUIRED)
+
+  # load cisst configuration
+  include (${CISST_USE_FILE})
+
+  add_executable (cisstRobotSensorCalibration RobotSensorCalibration.cpp)
+  set_property (TARGET cisstRobotSensorCalibration PROPERTY FOLDER "cisstRobot/applications")
+  cisst_target_link_libraries (cisstRobotSensorCalibration ${REQUIRED_CISST_LIBRARIES})
+
+else (cisst_FOUND_AS_REQUIRED)
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
+endif (cisst_FOUND_AS_REQUIRED)
