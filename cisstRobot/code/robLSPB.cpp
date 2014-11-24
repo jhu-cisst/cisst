@@ -107,7 +107,11 @@ void robLSPB::Set(const vctDoubleVec & start,
     // scale time to all arrive at same time
     if (mCoordination == LSPB_DURATION) {
         mTimeScale.SetSize(mDimension);
-        mTimeScale.RatioOf(mFinishTime, mDuration);
+        if (mDuration > 0) {
+            mTimeScale.RatioOf(mFinishTime, mDuration);
+        } else {
+            mTimeScale.SetAll(1.0);
+        }
     }
     mIsSet = true;
 }
