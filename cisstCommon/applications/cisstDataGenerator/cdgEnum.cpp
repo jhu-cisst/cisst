@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -66,8 +65,9 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
 {
     GenerateLineComment(outputStream);
     size_t index;
+    const std::string enumName = this->GetFieldValue("name");
     outputStream << "public:" << std::endl
-                 << "    enum " << this->GetFieldValue("name") << " {";
+                 << "    enum " << enumName << " {";
     for (index = 0; index < Scopes.size(); index++) {
         outputStream << Scopes[index]->GetFieldValue("name");
         if (Scopes[index]->GetFieldValue("value") != "") {
@@ -77,7 +77,9 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
             outputStream << ", ";
         }
     }
-    outputStream << " };" << std::endl;
+    outputStream << " };" << std::endl
+                 << "    static std::string " << enumName << "ToString(const " << enumName << " & value) throw (std::runtime_error);" << std::endl
+                 << "    static " << enumName << " " << enumName << "FromString(const std::string & value) throw (std::runtime_error);" << std::endl;
 }
 
 
@@ -102,19 +104,52 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
 {
     size_t index;
     const std::string name = this->GetFieldValue("name");
+
+    // human readable
     outputStream << "std::string cmnDataHumanReadable_" << cScope << "_" << name << "(const " << cScope << "::" << name << " & data) {" << std::endl
                  << "    switch (data) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
-        outputStream << "        case " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ": return \""
-                     << Scopes[index]->GetFieldValue("description") << "\";" << std::endl
+        outputStream << "        case " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ":" << std::endl
+                     << "            return \"" << Scopes[index]->GetFieldValue("description") << "\";" << std::endl
                      << "            break;" << std::endl;
     }
     outputStream << "        default: return \"undefined enum " << cScope << "::" << name << "\";" << std::endl
                  << "            break;" << std::endl
                  << "    }" << std::endl
                  << "}" << std::endl
-                 << std::endl
-                 << "#if CISST_HAS_JSON" << std::endl
+                 << std::endl;
+
+    // to string
+    std::string methodName = cScope + "::" + name + "ToString";
+    outputStream << "std::string " << methodName << "(const " << cScope << "::" << name << " & data) throw (std::runtime_error) {" << std::endl
+                 << "    switch (data) {" << std::endl;
+    for (index = 0; index < Scopes.size(); index++) {
+        outputStream << "        case " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ":" << std::endl
+                     << "            return \"" << Scopes[index]->GetFieldValue("name") << "\";" << std::endl
+                     << "            break;" << std::endl;
+    }
+    outputStream << "        default:" << std::endl
+                 << "            break;" << std::endl
+                 << "    }" << std::endl
+                 << "    cmnThrow(\"" << methodName << " called with invalid enum\");" << std::endl
+                 << "    return \"\";" << std::endl
+                 << "}" << std::endl
+                 << std::endl;
+
+    // from string
+    methodName = cScope + "::" + name + "FromString";
+    outputStream << cScope << "::" << name << " " << methodName << "(const std::string & value) throw (std::runtime_error) {" << std::endl;
+    for (index = 0; index < Scopes.size(); index++) {
+        outputStream << "    if (value == \"" << Scopes[index]->GetFieldValue("name") << "\") {" << std::endl
+                     << "        return " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ";" << std::endl
+                     << "    };" << std::endl;
+    }
+    outputStream << "    cmnThrow(\"" << methodName << " can't find matching enum for \" + value);" << std::endl
+                 << "    return static_cast<" << cScope << "::" << name << " >(0);" << std::endl
+                 << "}" << std::endl
+                 << std::endl;
+        
+    outputStream << "#if CISST_HAS_JSON" << std::endl
                  << "  CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(" << cScope << "::" << name << ", int);" << std::endl
                  << "#endif // CISST_HAS_JSON" << std::endl;
 }
