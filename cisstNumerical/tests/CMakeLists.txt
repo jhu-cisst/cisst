@@ -40,6 +40,7 @@ set (HEADER_FILES
 if (CISST_HAS_CISSTNETLIB)
   set (SOURCE_FILES
        ${SOURCE_FILES}
+       nmrIncludesTest.cpp
        nmrConstraintOptimizerTest.cpp
        nmrInverseTest.cpp
        nmrIsOrthonormalTest.cpp
@@ -59,6 +60,7 @@ if (CISST_HAS_CISSTNETLIB)
 
   set (HEADER_FILES
        ${HEADER_FILES}
+       nmrIncludesTest.h
        nmrConstraintOptimizerTest.h
        nmrInverseTest.h
        nmrIsOrthonormalTest.h
