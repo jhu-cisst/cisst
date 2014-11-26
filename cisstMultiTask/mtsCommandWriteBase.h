@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
@@ -78,8 +77,7 @@ public:
 
       \result the execution result (mtsExecutionResult) */
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking,
-                                       mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
-    { return Execute(argument, blocking); }
+                                       mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler)) = 0;
 
     /* documented in base class */
     inline size_t NumberOfArguments(void) const {
@@ -114,4 +112,3 @@ protected:
 
 
 #endif // _mtsCommandWriteBase_h
-

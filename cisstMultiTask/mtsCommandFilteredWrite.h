@@ -2,10 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -59,6 +58,11 @@ public:
 
     /* documented in base class */
     mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking);
+
+    inline mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking,
+                                      mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler)) {
+        return Execute(argument, blocking);
+    }
 
     /* documented in base class */
     const mtsGenericObject * GetArgumentPrototype(void) const;

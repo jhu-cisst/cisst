@@ -691,6 +691,11 @@ public:
 
     mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking);
 
+    inline mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking,
+                                      mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler)) {
+        return Execute(argument, blocking);
+    }
+
     mtsExecutionResult ExecuteSerialized(const std::string &inputArgSerialized, mtsBlockingType blocking);
 };
 
