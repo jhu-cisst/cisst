@@ -121,7 +121,7 @@ public:
 
     mtsExecutionResult Execute(const mtsGenericObject & argument,
                                mtsBlockingType blocking,
-                               mtsCommandWriteBase *finishedEventHandler) {
+                               mtsCommandWriteBase * finishedEventHandler) {
         // check if this command is enabled
         if (!this->IsEnabled()) {
             return mtsExecutionResult::COMMAND_DISABLED;
