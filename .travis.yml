@@ -15,8 +15,8 @@
 
  script: make
 
- #notifications:
- #  email:
- #    - xxx@users.sourceforge.net
- #  on_success: change
- #  on_failure: always
+ notifications:
+   email:
+     - anton.deguet@jhu.edu
+   on_success: change
+   on_failure: always
