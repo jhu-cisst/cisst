@@ -2,13 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-$Id: $
-
 Author(s):  Marcin Balicki
 Created on: 2014
 
-(C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights
-Reserved.
+(C) Copyright 2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,17 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsWatchdogClient_h
 #define _mtsWatchdogClient_h
 
-#include <cisstCommon.h>
-#include <cisstMultiTask/mtsFunctionWrite.h>
-#include <cisstMultiTask/mtsFunctionRead.h>
-#include <cisstMultiTask/mtsFunctionVoid.h>
-#include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsStateTable.h>
-#include <cisstOSAbstraction/osaThread.h>
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
-
-#include <queue>
+#include <cisstMultiTask/mtsFunctionRead.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
+#include <cisstMultiTask/mtsFunctionVoid.h>
 
 class mtsWatchdogClient: public cmnGenericObject {
     // used to control the log level, "Run Error" by default
@@ -41,31 +32,33 @@ protected:
     osaStopwatch StopWatch;
     double Timeout;
     struct {
-        mtsFunctionRead ReadState;
+        mtsFunctionRead  ReadState;
         mtsFunctionWrite WriteState;
         mtsFunctionVoid  ResetState;
     } Watchdog;
 
-    bool        Is_OK;
+    bool IsOK;
 public:
-    mtsWatchdogClient():
+    inline mtsWatchdogClient():
         Timeout(0),
-        Is_OK(false){};
+        IsOK(false)
+    {};
 
-    ~mtsWatchdogClient(){};
+    ~mtsWatchdogClient() {};
 
-    void AddToRequiredInterface(mtsInterfaceRequired &reqInt);
+    void AddToRequiredInterface(mtsInterfaceRequired & reqInt);
 
-    void SetTimeoutPeriod(const double &seconds) {
+    void SetTimeoutPeriod(const double & seconds) {
         Timeout = seconds;
     }
 
-    bool Start();
+    bool Start(void);
 
-    //true if everything is ok;
-    bool CheckAndUpdate();
-    bool Reset();
+    // true if everything is ok;
+    bool CheckAndUpdate(void);
+    bool Reset(void);
 };
+
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsWatchdogClient);
 
-#endif
+#endif // _mtsWatchdogClient_h

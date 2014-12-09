@@ -2,13 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-$Id: $
+ Author(s):  Marcin Balicki
+ Created on: 2014
 
-Author(s):  Marcin Balicki
-Created on: 2014
-
-(C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights
-Reserved.
+ (C) Copyright 2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,8 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsWatchdogServer.h>
-#include <cisstOSAbstraction.h>
-#include <cisstCommon.h>
+#include <cisstMultiTask/mtsStateTable.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES(mtsWatchdogServer);
@@ -36,9 +33,9 @@ void mtsWatchdogServer::AddToProvidedInterface(mtsInterfaceProvided &provInt, mt
      provInt.AddCommandVoid(&mtsWatchdogServer::Reset,          this,   "WatchdogReset");
 
 }
-bool mtsWatchdogServer::CheckAndUpdate() {
+bool mtsWatchdogServer::CheckAndUpdate(void) {
 
-    if (!Is_OK)
+    if (!IsOK)
         return false;
     //check if variable on the this end is false - i.e. it has been update by the client
     //if it is OK reset watchdogtimer and set the state to True so that client sees that we are alive
@@ -49,22 +46,21 @@ bool mtsWatchdogServer::CheckAndUpdate() {
     }
     //else check if time has exceeded timeout, if not return true, else return false;
     else if (StopWatch.GetElapsedTime() > Timeout) {
-            Is_OK = false;
+            IsOK = false;
             return false;
     }
 
     return true;
 }
 
-
-void mtsWatchdogServer::Reset() {
+void mtsWatchdogServer::Reset(void) {
     WatchdogState = true;
     StopWatch.Reset();
     StopWatch.Start();
-    Is_OK = true;
+    IsOK = true;
 }
 
-void mtsWatchdogServer::Start() {
+void mtsWatchdogServer::Start(void) {
     Reset();
 }
 

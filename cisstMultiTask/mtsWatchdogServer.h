@@ -2,13 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-$Id: $
+ Author(s):  Marcin Balicki
+ Created on: 2014
 
-Author(s):  Marcin Balicki
-Created on: 2014
-
-(C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights
-Reserved.
+ (C) Copyright 2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,17 +18,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsWatchdogServer_h
 #define _mtsWatchdogServer_h
 
-#include <cisstCommon.h>
-#include <cisstMultiTask/mtsFunctionWrite.h>
-#include <cisstMultiTask/mtsFunctionRead.h>
-#include <cisstMultiTask/mtsFunctionVoid.h>
-#include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsStateTable.h>
-#include <cisstOSAbstraction/osaThread.h>
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
-
-#include <queue>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 
 /// A tool for observing a connection between two components for a set amount of time.
 /// \todo Should be easy to merge server and client into a single object. Could integrate into standard component interfaces.
@@ -43,38 +32,37 @@ protected:
     osaStopwatch StopWatch;
     double Timeout;
 
-    mtsFunctionWrite *WatchdogReadBool;
-    mtsFunctionWrite *WatchdogWriteBool;
+    mtsFunctionWrite * WatchdogReadBool;
+    mtsFunctionWrite * WatchdogWriteBool;
 
-    bool Is_OK;
+    bool IsOK;
 
     //if false then it was remotely updated
     //set to true locally as an acknowledgment
-    mtsBool  WatchdogState;
+    bool WatchdogState;
 
 public:
-    mtsWatchdogServer():
+    mtsWatchdogServer(void):
         Timeout(0),
-        Is_OK(false),
+        IsOK(false),
         WatchdogState(true)
-        {};
+    {};
   
     ~mtsWatchdogServer(){};
 
-    void AddToProvidedInterface(mtsInterfaceProvided &provInt, mtsStateTable &stateTable);
+    void AddToProvidedInterface(mtsInterfaceProvided & provInt, mtsStateTable & stateTable);
 
-    void SetTimeoutPeriod(const double &seconds) {
+    void SetTimeoutPeriod(const double & seconds) {
         Timeout = seconds;
     }
 
-    void Start();
+    void Start(void);
 
     //true if everything is ok;
-    bool CheckAndUpdate();
-    void Reset();
+    bool CheckAndUpdate(void);
+    void Reset(void);
 };
-
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsWatchdogServer);
 
-#endif
+#endif // _mtsWatchdogServer_h
