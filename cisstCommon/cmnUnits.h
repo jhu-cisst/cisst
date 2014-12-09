@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2008-08-21
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,10 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 
   This file include the definition and implementation of constants and
   global functions used to defines measuring units in the cisst
-  libraries.  The internal units of the cisst libraries are
-  millimeters, grams, seconds and radians.  These unusual units have
-  been choosen to match the scale of problems encountered in computer
-  assisted medical interventions.
+  libraries.  The internal units of the cisst libraries are meters,
+  grams, seconds and radians.
 
   For all units, the cisst libraries provide a constant as well as a
   global function to convert from the internal units to other
@@ -61,7 +57,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*! Millimeter constant, use to convert a length in millimeters to
   internal units.  */
-const double cmn_mm = 1.0;
+const double cmn_mm = 0.001;
 
 /*! Convert a length in internal units to millimeters */
 inline double cmnInternalTo_mm(double valueInternalUnits) {
@@ -88,7 +84,7 @@ inline double cmnInternalTo_cm(double valueInternalUnits) {
 
 /*! Meter constant, use to convert a length in meters to
   internal units.  */
-const double cmn_m = 1000.0 * cmn_mm;
+const double cmn_m = 1.0;
 
 /*! Convert a length in internal units to meters */
 inline double cmnInternalTo_m(double valueInternalUnits) {
@@ -227,4 +223,3 @@ inline double cmnInternalTo_day(double valueInternalUnits) {
 
 
 #endif // _cmnUnits_h
-
