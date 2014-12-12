@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
@@ -177,7 +176,7 @@ bool cmnCommandLineOptions::Parse(int argc, char * argv[], std::string & errorMe
         argv_const[index] = argv[index];
     }
     bool result = Parse(argc, argv_const, errorMessage);
-    delete argv_const;
+    delete[] argv_const;
     return result;
 }
 
