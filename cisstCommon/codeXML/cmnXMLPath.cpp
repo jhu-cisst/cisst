@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Anton Deguet, Ali Uneri
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -260,6 +259,20 @@ public:
     // Xpath context used by libxml2
     xmlXPathContextPtr XPathContext;
 
+    cmnXMLPathData(void):
+        Document(0),
+        XPathContext(0)
+    {};
+
+    ~cmnXMLPathData() {
+        if (this->XPathContext != 0) {
+            xmlXPathFreeContext(this->XPathContext);
+        }
+        if (this->Document != 0) {
+            xmlFreeDoc(this->Document);
+        }
+    }
+
     // set input
     void SetInputSource(const char * filename)
     {
@@ -377,10 +390,14 @@ public:
                 CMN_ASSERT(nodes->nodeTab[i] != 0);
                 if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE || nodes->nodeTab[i]->type == XML_ELEMENT_NODE) {
                     currentNode = nodes->nodeTab[i];
-                    storage = reinterpret_cast<char *>(xmlNodeGetContent(currentNode));
-                    attributeFound = true;
-                    CMN_LOG_CLASS_RUN_VERBOSE << "QueryStdString (libxml2): query [" << query << "] Node name ["
-                                              << currentNode->name << "] Content [" << storage << "]" << std::endl;
+                    xmlChar * xmlCharPointer = xmlNodeGetContent(currentNode);
+                    if (xmlCharPointer) {
+                        storage = reinterpret_cast<char *>(xmlCharPointer);
+                        attributeFound = true;
+                        CMN_LOG_CLASS_RUN_VERBOSE << "QueryStdString (libxml2): query [" << query << "] Node name ["
+                                                  << currentNode->name << "] Content [" << storage << "]" << std::endl;
+                        xmlFree(xmlCharPointer);
+                    }
                 }
                 else {
                     currentNode = nodes->nodeTab[i];
