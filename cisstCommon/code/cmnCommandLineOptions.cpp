@@ -69,6 +69,16 @@ cmnCommandLineOptions::cmnCommandLineOptions(void)
 }
 
 
+cmnCommandLineOptions::~cmnCommandLineOptions()
+{
+    const OptionsType::iterator end = this->Options.end();
+    OptionsType::iterator iter = this->Options.begin();
+    for (; iter != end; ++iter) {
+        delete *iter;
+    }
+}
+
+
 bool cmnCommandLineOptions::AddOptionNoValue(const std::string & shortOption, const std::string & longOption,
                                              const std::string & description, RequiredType required)
 {

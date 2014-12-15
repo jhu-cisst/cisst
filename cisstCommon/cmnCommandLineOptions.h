@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
@@ -240,6 +239,8 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
 
  public:
     cmnCommandLineOptions(void);
+
+    ~cmnCommandLineOptions();
 
     bool AddOptionNoValue(const std::string & shortOption, const std::string & longOption,
                           const std::string & description, RequiredType required = OPTIONAL_OPTION);

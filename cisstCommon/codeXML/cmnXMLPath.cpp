@@ -392,7 +392,7 @@ public:
                     currentNode = nodes->nodeTab[i];
                     xmlChar * xmlCharPointer = xmlNodeGetContent(currentNode);
                     if (xmlCharPointer) {
-                        storage = reinterpret_cast<char *>(xmlCharPointer);
+                        storage.assign(reinterpret_cast<char *>(xmlCharPointer));
                         attributeFound = true;
                         CMN_LOG_CLASS_RUN_VERBOSE << "QueryStdString (libxml2): query [" << query << "] Node name ["
                                                   << currentNode->name << "] Content [" << storage << "]" << std::endl;
@@ -755,7 +755,7 @@ bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const dou
 // -------------------- methods to set/get std::string ---------------------
 bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, std::string & storage)
 {
-    storage = "";
+    storage.clear();
     return this->Data->GetXMLValueStdString(context, XPath, storage);
 }
 
