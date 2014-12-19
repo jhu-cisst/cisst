@@ -1,22 +1,21 @@
 #
-#
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 # name of project
 PROJECT(mtsExBenchmark2)
 
-set(REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes) 
+set(REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
 
@@ -46,7 +45,7 @@ if (cisst_FOUND_AS_REQUIRED)
                    serverMain.cpp
                    serverTask.h
                    configuration.h
-                   )	    
+                   )
     set_property (TARGET mtsExBenchmark2Server PROPERTY FOLDER "cisstMultiTask/examples")
 
     # link with the cisst libraries
@@ -69,4 +68,3 @@ if (cisst_FOUND_AS_REQUIRED)
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND_AS_REQUIRED)
-

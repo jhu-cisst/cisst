@@ -1,11 +1,8 @@
 #
-# $Id$
-#
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
