@@ -487,7 +487,11 @@ include (CMakePackageConfigHelpers)
 write_basic_package_version_file ("${cisst_BINARY_DIR}/cisst-config-version.cmake"
                                   VERSION ${CISST_VERSION}
                                   COMPATIBILITY SameMajorVersion)
+install (FILES "${cisst_BINARY_DIR}/cisst-config-version.cmake"
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+         COMPONENT cisstCommon)
 
+# Modify some settings just for the installed version of cisst-config.cmake
 set (CISST_BINARY_DIR_FOR_CONFIG "")
 set (CISST_INCLUDE_DIR_FOR_CONFIG "")
 set (CISST_CMAKE_DIRS_FOR_CONFIG "")
