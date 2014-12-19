@@ -1,5 +1,4 @@
 #
-#
 # (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -482,6 +481,12 @@ set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
                 "${cisst_BINARY_DIR}/cisst-config.cmake"
                 @ONLY)
+
+# Version file
+include (CMakePackageConfigHelpers)
+write_basic_package_version_file ("${cisst_BINARY_DIR}/cisst-config-version.cmake"
+                                  VERSION ${CISST_VERSION}
+                                  COMPATIBILITY SameMajorVersion)
 
 set (CISST_BINARY_DIR_FOR_CONFIG "")
 set (CISST_INCLUDE_DIR_FOR_CONFIG "")
