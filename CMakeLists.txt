@@ -1,3 +1,5 @@
+## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
 #
 # (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
@@ -483,13 +485,10 @@ configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
                 @ONLY)
 
 # Version file
-include (CMakePackageConfigHelpers)
-write_basic_package_version_file ("${cisst_BINARY_DIR}/cisst-config-version.cmake"
-                                  VERSION ${CISST_VERSION}
-                                  COMPATIBILITY SameMajorVersion)
-install (FILES "${cisst_BINARY_DIR}/cisst-config-version.cmake"
-         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-         COMPONENT cisstCommon)
+cisst_add_config_version ("${cisst_BINARY_DIR}/cisst-config-version.cmake"
+                          VERSION ${CISST_VERSION}
+                          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+                          COMPONENT cisstCommon)
 
 # Modify some settings just for the installed version of cisst-config.cmake
 set (CISST_BINARY_DIR_FOR_CONFIG "")

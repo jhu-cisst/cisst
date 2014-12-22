@@ -1,8 +1,10 @@
+## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
 #
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -776,7 +778,7 @@ function (cisst_add_test ...)
   set (ALL_ARGS ${ARGV})
   list (GET ALL_ARGS 0 TEST_PROGRAM)
   list (REMOVE_AT ALL_ARGS 0) # first one is the test program
-  cisst_cmake_debug ("cisst_add_test, test program ${TEST_PROGRAM} to ne used with options ${ALL_ARGS}")
+  cisst_cmake_debug ("cisst_add_test, test program ${TEST_PROGRAM} to be used with options ${ALL_ARGS}")
 
   # set all keywords and their values to ""
   set (FUNCTION_KEYWORDS
@@ -907,3 +909,65 @@ macro (cisst_use_cisst_output_directories)
   set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/lib")
   set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin")
 endmacro (cisst_use_cisst_output_directories)
+
+
+# function to generate a config version file
+function (cisst_add_config_version ...)
+  # debug
+  cisst_cmake_debug ("cisst_add_config_version called with: ${ARGV}")
+
+  # get name of config file
+  set (ALL_ARGS ${ARGV})
+  list (GET ALL_ARGS 0 _cacv_configFile)
+  list (REMOVE_AT ALL_ARGS 0) # first one is the config file
+  cisst_cmake_debug ("cisst_add_config_version, config file ${_cacv_configFile} to be generated with options ${ALL_ARGS}")
+
+  # set all keywords and their values to ""
+  set (FUNCTION_KEYWORDS
+       VERSION
+       DESTINATION
+       COMPONENT)
+
+  # reset local variables
+  foreach(keyword ${FUNCTION_KEYWORDS})
+    set (${keyword} "")
+  endforeach(keyword)
+
+  # parse input
+  foreach (arg ${ALL_ARGS})
+    list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
+    if (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (CURRENT_PARAMETER ${arg})
+      set (${CURRENT_PARAMETER} "")
+    else (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (${CURRENT_PARAMETER} ${${CURRENT_PARAMETER}} ${arg})
+    endif (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+  endforeach (arg)
+
+  # debug
+  foreach (keyword ${FUNCTION_KEYWORDS})
+    cisst_cmake_debug ("cisst_add_config_version: ${keyword}: ${${keyword}}")
+  endforeach (keyword)
+
+  set (_cacv_versionTemplateFile "cisstConfigVersion.cmake.in")
+  find_file (_cacv_versionTemplatePath
+             NAMES ${_cacv_versionTemplateFile}
+             PATHS ${CISST_CMAKE_DIRS}
+             NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  if (_cacv_versionTemplatePath)
+    configure_file("${_cacv_versionTemplatePath}" "${_cacv_configFile}" @ONLY)
+    if (DESTINATION)
+      if (COMPONENT)
+        install (FILES ${_cacv_configFile}
+                 DESTINATION ${DESTINATION}
+                 COMPONENT ${COMPONENT})
+      else (COMPONENT)
+        install (FILES ${_cacv_configFile}
+                 DESTINATION ${DESTINATION})
+      endif (COMPONENT)
+    endif (DESTINATION)
+  else ()
+    message (FATAL_ERROR "cisst_add_config_version can't find template file: \"${_cacv_versionTemplateFile}\"")
+  endif ()
+
+endfunction (cisst_add_config_version)
