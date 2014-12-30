@@ -673,7 +673,7 @@ bool robManipulator::JacobianBody(const vctDynamicVector<double>& q,
     return false;
   for (size_t r = 0; r < 6; r++)
     for (size_t c = 0; c < links.size(); c++)
-      J[r][c] = Jn[c][r];
+      J.Element(r,c) = Jn[c][r];
   return true;
 }
 
@@ -746,7 +746,7 @@ bool robManipulator::JacobianSpatial(const vctDynamicVector<double>& q,
     return false;
   for (size_t r = 0; r < 6; r++)
     for (size_t c = 0; c < links.size(); c++)
-      J[r][c] = Js[c][r];
+      J.Element(r,c) = Js[c][r];
   return true;
 }
 

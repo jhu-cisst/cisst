@@ -26,7 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 #include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
+
+#if CISST_HAS_JSON
 #include <cisstVector/vctDataFunctionsTransformationsJSON.h>
+#endif // CISST_HAS_JSON
 
 template <class _rotationType>
 class cmnData<vctFrameBase<_rotationType> >

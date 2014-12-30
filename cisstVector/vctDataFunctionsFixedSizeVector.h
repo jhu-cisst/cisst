@@ -26,7 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctFixedSizeVectorBase.h>
 #include <cisstCommon/cmnDataFunctionsVectorHelpers.h>
+
+#if CISST_HAS_JSON
 #include <cisstVector/vctDataFunctionsFixedSizeVectorJSON.h>
+#endif // CISST_HAS_JSON
 
 template <class _elementType, vct::size_type _size>
 class cmnData<vctFixedSizeVector<_elementType, _size> >

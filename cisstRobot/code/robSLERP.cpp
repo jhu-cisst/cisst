@@ -52,10 +52,10 @@ robSLERP::robSLERP( const vctMatrixRotation3<double>& Rw1,
 void robSLERP::ComputeParameters( double w ){
 
   // cos( theta/2 )
-  double ctheta = ( qw1.X()*qw2.X() + 
-		    qw1.Y()*qw2.Y() + 
-		    qw1.Z()*qw2.Z() + 
-		    qw1.R()*qw2.R() );
+  double ctheta = ( qw1.X()*qw2.X() +
+                    qw1.Y()*qw2.Y() +
+                    qw1.Z()*qw2.Z() +
+                    qw1.R()*qw2.R() );
 
 
 
@@ -65,7 +65,7 @@ void robSLERP::ComputeParameters( double w ){
     qw2.Y() = -qw2.Y();
     qw2.Z() = -qw2.Z();
     qw2.R() = -qw2.R();
-  }  
+  }
 
 
   // Compute the final time t2
@@ -80,21 +80,19 @@ void robSLERP::ComputeParameters( double w ){
     vctAxisAngleRotation3<double> r12( R12, VCT_NORMALIZE );
     StopTime() = StartTime() + r12.Angle() / fabs( w );
     this->w = r12.Axis() * r12.Angle() / Duration();
-
   }
   
   else{
-    //CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-    //		      << ": Angular velocity is zero." 
-    //		      << std::endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                      << ": Angular velocity is zero."
+                      << std::endl;
   }
-
 }
 
 void robSLERP::Evaluate( double t,
-			 vctQuaternionRotation3<double>& q,
-			 vctFixedSizeVector<double,3>& w,
-			 vctFixedSizeVector<double,3>& wd ){
+                         vctQuaternionRotation3<double>& q,
+                         vctFixedSizeVector<double,3>& w,
+                         vctFixedSizeVector<double,3>& wd ){
 				       
 
   // normalize the time between [0,1]
@@ -106,9 +104,8 @@ void robSLERP::Evaluate( double t,
     w.SetAll( 0.0 );
     wd.SetAll( 0.0 );
     return;
-  }
-    
-    
+  }    
+
   // deal with tiime greater than one, then we return the final orientation
   if( 1.0 < t ){
     q = qw2;
@@ -116,14 +113,12 @@ void robSLERP::Evaluate( double t,
     wd.SetAll( 0.0 );
     return;
   }
-    
-
 
   // cos(theta)
-  double ctheta = ( qw1.X()*qw2.X() + 
-		    qw1.Y()*qw2.Y() +
-		    qw1.Z()*qw2.Z() +
-		    qw1.R()*qw2.R() );
+  double ctheta = ( qw1.X()*qw2.X() +
+                    qw1.Y()*qw2.Y() +
+                    qw1.Z()*qw2.Z() +
+                    qw1.R()*qw2.R() );
     
   // if qw1~=qw2, then theta~=0, then cos(theta)~=1 and return qw2
   if ( 1.0 <= fabs(ctheta) ){
@@ -156,14 +151,13 @@ void robSLERP::Evaluate( double t,
   
   // Interpolate the slerp between qi and qf.
   q = vctQuaternionRotation3<double>( qw1.X()*A + qw2.X()*B,
-				      qw1.Y()*A + qw2.Y()*B,
-				      qw1.Z()*A + qw2.Z()*B,
-				      qw1.R()*A + qw2.R()*B,
-				      VCT_NORMALIZE );
+              qw1.Y()*A + qw2.Y()*B,
+              qw1.Z()*A + qw2.Z()*B,
+              qw1.R()*A + qw2.R()*B,
+              VCT_NORMALIZE );
 
   w = vctMatrixRotation3<double>( q ) * this->w;
-  wd.SetAll(0.0);
-  
+  wd.SetAll(0.0);  
 }
 
 void robSLERP::Blend( robFunction* function, double, double ){
@@ -180,8 +174,6 @@ void robSLERP::Blend( robFunction* function, double, double ){
 
     // Create a new cruise segment but this one will start at StopTime 
     *next = robSLERP( qi, qf, next->wmax, this->StopTime() );
-
   }
-
 }
 

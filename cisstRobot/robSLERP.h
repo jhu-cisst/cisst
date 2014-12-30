@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 //! Define a spherical linear interpolation function 
 class CISST_EXPORT robSLERP : public robFunctionSO3 {
 
+private:
   double wmax;
   vctFixedSizeVector<double,3> w;
 
@@ -32,24 +33,23 @@ class CISST_EXPORT robSLERP : public robFunctionSO3 {
  public:
   
   robSLERP( const vctMatrixRotation3<double>& Rw1, 
-	    const vctMatrixRotation3<double>& Rw2,
-        double wmax,
-	    double t1 = 0.0 );
+            const vctMatrixRotation3<double>& Rw2,
+            double wmax,
+            double t1 = 0.0 );
   
-  
-  robSLERP( const vctQuaternionRotation3<double>& qw1, 
-	    const vctQuaternionRotation3<double>& qw2,
-        double wmax,
-	    double t1 = 0.0 );
+
+  robSLERP( const vctQuaternionRotation3<double>& qw1,
+            const vctQuaternionRotation3<double>& qw2,
+            double wmax,
+            double t1 = 0.0 );
 
   //! Evaluate the function
   void Evaluate( double t,
-		 vctQuaternionRotation3<double>& q,
-		 vctFixedSizeVector<double,3>& w,
-		 vctFixedSizeVector<double,3>& wd );
+                 vctQuaternionRotation3<double>& q,
+                 vctFixedSizeVector<double,3>& w,
+                 vctFixedSizeVector<double,3>& wd );
   
   void Blend( robFunction* function, double wmax, double wdmax );
-
 };
 
 #endif

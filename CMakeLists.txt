@@ -1,4 +1,5 @@
-#
+## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
 #
 # (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
@@ -69,7 +70,8 @@ endif (CISST_BUILD_SHARED_LIBS)
 # Set the version number
 set (CISST_VERSION_MAJOR "1")
 set (CISST_VERSION_MINOR "0")
-set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}")
+set (CISST_VERSION_PATCH "1")
+set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
 
 # To compile examples within this project
 set (CURRENT_PROJECT_IS_CISST ON)
@@ -77,7 +79,7 @@ set (CURRENT_PROJECT_IS_CISST ON)
 # The upper case variables have been used in the past and need to be preserved
 set (CISST_BINARY_DIR "${cisst_BINARY_DIR}")
 set (CISST_SOURCE_DIR "${cisst_SOURCE_DIR}")
-set (CISST_SHARE_INSTALL_SUFFIX "share/cisst-${CISST_VERSION}")
+set (CISST_SHARE_INSTALL_SUFFIX "share/cisst-${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}")
 set (CISST_SHARE_DIR  "${CISST_BINARY_DIR}/${CISST_SHARE_INSTALL_SUFFIX}")
 set (CISST_CMAKE_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake")
 set (CISST_CMAKE_MODULES_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake/Modules")
@@ -94,37 +96,11 @@ set (CISST_INCLUDE_DIR
      ${cisst_SOURCE_DIR})
 include_directories (${CISST_INCLUDE_DIR})
 
-# Try to find SVN version number
-find_package (Subversion QUIET)
-set (CISST_WC_REVISION "undefined")
-set (CISST_REVISION_SVN_DIR "${cisst_SOURCE_DIR}")
-if (Subversion_FOUND AND EXISTS "${CISST_REVISION_SVN_DIR}/.svn/")
-  Subversion_WC_INFO ("${CISST_REVISION_SVN_DIR}" CISST)
-endif (Subversion_FOUND AND EXISTS "${CISST_REVISION_SVN_DIR}/.svn/")
-message ("Configuring cisst ${CISST_VERSION} from \"${cisst_SOURCE_DIR}\", revision: ${CISST_WC_REVISION}")
-
-find_package (Git QUIET)
-if (GIT_FOUND)
-  message ("found git at ${GIT_EXECUTABLE}")
-endif (GIT_FOUND)
-
 # Generate cisstRevision.h
-set (CISST_REVISION_HEADER_SRC "${cisst_SOURCE_DIR}/cisstRevision.h.in")
-set (CISST_REVISION_HEADER "${cisst_BINARY_DIR}/include/cisstRevision.h")
-# Script to be executed everytime
-configure_file ("${cisst_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
-                "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake")
-add_custom_target (cisstRevision ALL
-                   COMMAND ${CMAKE_COMMAND} -P "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake"
-                   COMMENT "Generating ${CISST_REVISION_HEADER} from ${CISST_REVISION_HEADER_SRC}"
-                   SOURCES "${CISST_REVISION_HEADER_SRC}"
-                           "${CISST_REVISION_HEADER}"
-                           "${cisst_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
-                           "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake")
-set_property (TARGET cisstRevision PROPERTY FOLDER "cisstCommon")
+configure_file ("${cisst_SOURCE_DIR}/cisstRevision.h.in"
+                "${cisst_BINARY_DIR}/include/cisstRevision.h")
 
 # Install cisstRevision.h
-set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)
 install (FILES "${cisst_BINARY_DIR}/include/cisstRevision.h"
          DESTINATION include
          COMPONENT cisstCommon)
@@ -508,6 +484,13 @@ configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
                 "${cisst_BINARY_DIR}/cisst-config.cmake"
                 @ONLY)
 
+# Version file
+cisst_add_config_version ("${cisst_BINARY_DIR}/cisst-config-version.cmake"
+                          VERSION ${CISST_VERSION}
+                          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+                          COMPONENT cisstCommon)
+
+# Modify some settings just for the installed version of cisst-config.cmake
 set (CISST_BINARY_DIR_FOR_CONFIG "")
 set (CISST_INCLUDE_DIR_FOR_CONFIG "")
 set (CISST_CMAKE_DIRS_FOR_CONFIG "")
@@ -564,10 +547,10 @@ if (CISST_cisstCommonXML) # we can only test CISST_XML_LIB if cisstCommonXML is 
   endif (${CISST_XML_LIB} STREQUAL "LibXml2")
 endif (CISST_cisstCommonXML)
 set (CPACK_PACKAGE_VENDOR "JHU")
-set (CPACK_PACKAGE_VERSION "${CISST_VERSION}.${CISST_WC_REVISION}")
+set (CPACK_PACKAGE_VERSION "${CISST_VERSION}")
 set (CPACK_PACKAGE_VERSION_MAJOR ${CISST_VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${CISST_VERSION_MINOR})
-set (CPACK_PACKAGE_VERSION_PATCH ${CISST_WC_REVISION})
+set (CPACK_PACKAGE_VERSION_PATCH ${CISST_VERSION_PATCH})
 set (CPACK_RESOURCE_FILE_LICENSE "${cisst_SOURCE_DIR}/license.txt")
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "cisst")
 set (CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)

@@ -26,7 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDynamicVectorBase.h>
 #include <cisstCommon/cmnDataFunctionsVectorHelpers.h>
+
+#if CISST_HAS_JSON
 #include <cisstVector/vctDataFunctionsDynamicVectorJSON.h>
+#endif // CISST_HAS_JSON
 
 template <typename _elementType>
 class cmnData<vctDynamicVector<_elementType> >
