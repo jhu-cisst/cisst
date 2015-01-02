@@ -75,7 +75,7 @@ endif (CISST_BUILD_SHARED_LIBS)
 # Set the version number
 set (CISST_VERSION_MAJOR "1")
 set (CISST_VERSION_MINOR "0")
-set (CISST_VERSION_PATCH "1")
+set (CISST_VERSION_PATCH "2")
 set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
 
 # To compile examples within this project
@@ -514,8 +514,13 @@ configure_file ("${CISST_CMAKE_SOURCE_DIR}/Usecisst.cmake"
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstMacros.cmake"
                 "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
                 COPYONLY)
+configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstConfigVersion.cmake.in"
+                "${CISST_CMAKE_BINARY_DIR}/cisstConfigVersion.cmake.in"
+                COPYONLY)
+
 install (FILES "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
                "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
+               "${CISST_CMAKE_BINARY_DIR}/cisstConfigVersion.cmake.in"
          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
          COMPONENT cisstCommon)
 
