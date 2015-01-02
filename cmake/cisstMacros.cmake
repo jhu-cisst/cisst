@@ -950,12 +950,13 @@ function (cisst_add_config_version ...)
   endforeach (keyword)
 
   set (_cacv_versionTemplateFile "cisstConfigVersion.cmake.in")
-  find_file (_cacv_versionTemplatePath
+  find_file (CISST_CONFIG_VERSION_TEMPLATE
              NAMES ${_cacv_versionTemplateFile}
              PATHS ${CISST_CMAKE_DIRS}
              NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
-  if (_cacv_versionTemplatePath)
-    configure_file("${_cacv_versionTemplatePath}" "${_cacv_configFile}" @ONLY)
+  mark_as_advanced (CISST_CONFIG_VERSION_TEMPLATE)
+  if (CISST_CONFIG_VERSION_TEMPLATE)
+    configure_file("${CISST_CONFIG_VERSION_TEMPLATE}" "${_cacv_configFile}" @ONLY)
     if (DESTINATION)
       if (COMPONENT)
         install (FILES ${_cacv_configFile}
