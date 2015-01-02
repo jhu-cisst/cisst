@@ -18,6 +18,11 @@ cmake_minimum_required (VERSION 2.6.2)
 # cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
 project (cisst)
 
+# for ROS/catkin
+if (DEFINED CATKIN_DEVEL_PREFIX)
+  include (ros-settings.cmake)
+endif ()
+
 # cisst compiler settings settings
 include (cisstSettings.cmake)
 
