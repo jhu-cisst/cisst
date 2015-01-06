@@ -19,8 +19,14 @@ cmake_minimum_required (VERSION 2.6.2)
 project (cisst)
 
 # for ROS/catkin
-if (DEFINED CATKIN_DEVEL_PREFIX)
-  include (ros-settings.cmake)
+set (CISST_CATKIN_BUILT FALSE)
+if (DEFINED ENV{ROS_ROOT})
+  message (WARNING "Assuming cisst is built using ROS/catkin since ROS_ROOT is defined in environment")
+  if (DEFINED CATKIN_DEVEL_PREFIX)
+    set (CISST_CATKIN_BUILT TRUE)
+  else ()
+    message (WARNING "CATKIN_DEVEL_PREFIX is not defined so assuming this is NOT a ROS/catkin build after all")
+  endif ()
 endif ()
 
 # cisst compiler settings settings
@@ -485,12 +491,20 @@ set (CISST_CMAKE_DIRS_FOR_CONFIG ${CISST_CMAKE_BINARY_DIR})
 set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR})
 set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
 
+# Destination for CMake package config files
+if (CISST_CATKIN_BUILT)
+  set (CISST_PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
+else ()
+  set (CISST_PACKAGE_CONFIG_DIRECTORY "${cisst_BINARY_DIR}")
+endif ()
+
+# Config file
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
-                "${cisst_BINARY_DIR}/cisst-config.cmake"
+                "${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config.cmake"
                 @ONLY)
 
 # Version file
-cisst_add_config_version ("${cisst_BINARY_DIR}/cisst-config-version.cmake"
+cisst_add_config_version ("${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config-version.cmake"
                           VERSION ${CISST_VERSION}
                           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
                           COMPONENT cisstCommon)
