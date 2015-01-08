@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -18,18 +18,7 @@ cmake_minimum_required (VERSION 2.6.2)
 # cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
 project (cisst)
 
-# for ROS/catkin
-set (CISST_CATKIN_BUILT FALSE)
-if (DEFINED ENV{ROS_ROOT})
-  message (WARNING "Assuming cisst is built using ROS/catkin since ROS_ROOT is defined in environment")
-  if (DEFINED CATKIN_DEVEL_PREFIX)
-    set (CISST_CATKIN_BUILT TRUE)
-  else ()
-    message (WARNING "CATKIN_DEVEL_PREFIX is not defined so assuming this is NOT a ROS/catkin build after all")
-  endif ()
-endif ()
-
-# cisst compiler settings settings
+# cisst compiler settings
 include (cisstSettings.cmake)
 
 # To organize targets in folders
@@ -162,6 +151,9 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CISST_CMAKE_SOURCE_DIR}")
 # Include all useful CMake macros and functions for cisst
 include (cisstMacros)
 include (cisstInternalMacros)
+
+# Set CISST_CATKIN_BUILT
+cisst_is_catkin_build (CISST_CATKIN_BUILT)
 
 # Output directories.
 set (CISST_LIBRARY_INSTALL_SUFFIX "lib")
@@ -445,11 +437,6 @@ foreach (lib ${CISST_LIBS})
   endif (CISST_${lib})
 endforeach (lib)
 
-# Add cisstCommonXML if needed
-if (CISST_cisstCommonXML)
-  set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
-endif (CISST_cisstCommonXML)
-
 # create equivalent for cisstInteractive
 set (CISST_HAS_IRE ${CISST_cisstInteractive})
 
@@ -482,6 +469,7 @@ foreach (lib ${CISST_LIBS})
     add_subdirectory (${lib})
   endif (CISST_${lib})
 endforeach (lib)
+
 
 # Create misc. config files
 set (CISST_INCLUDE_DIR_FOR_CONFIG ${CISST_INCLUDE_DIR})
