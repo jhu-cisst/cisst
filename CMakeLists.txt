@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -18,7 +18,7 @@ cmake_minimum_required (VERSION 2.6.2)
 # cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
 project (cisst)
 
-# cisst compiler settings settings
+# cisst compiler settings
 include (cisstSettings.cmake)
 
 # To organize targets in folders
@@ -70,7 +70,7 @@ endif (CISST_BUILD_SHARED_LIBS)
 # Set the version number
 set (CISST_VERSION_MAJOR "1")
 set (CISST_VERSION_MINOR "0")
-set (CISST_VERSION_PATCH "1")
+set (CISST_VERSION_PATCH "2")
 set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
 
 # To compile examples within this project
@@ -151,6 +151,9 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CISST_CMAKE_SOURCE_DIR}")
 # Include all useful CMake macros and functions for cisst
 include (cisstMacros)
 include (cisstInternalMacros)
+
+# Set CISST_CATKIN_BUILT
+cisst_is_catkin_build (CISST_CATKIN_BUILT)
 
 # Output directories.
 set (CISST_LIBRARY_INSTALL_SUFFIX "lib")
@@ -434,11 +437,6 @@ foreach (lib ${CISST_LIBS})
   endif (CISST_${lib})
 endforeach (lib)
 
-# Add cisstCommonXML if needed
-if (CISST_cisstCommonXML)
-  set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
-endif (CISST_cisstCommonXML)
-
 # create equivalent for cisstInteractive
 set (CISST_HAS_IRE ${CISST_cisstInteractive})
 
@@ -472,6 +470,7 @@ foreach (lib ${CISST_LIBS})
   endif (CISST_${lib})
 endforeach (lib)
 
+
 # Create misc. config files
 set (CISST_INCLUDE_DIR_FOR_CONFIG ${CISST_INCLUDE_DIR})
 set (CISST_BINARY_DIR_FOR_CONFIG ${CISST_BINARY_DIR})
@@ -480,12 +479,20 @@ set (CISST_CMAKE_DIRS_FOR_CONFIG ${CISST_CMAKE_BINARY_DIR})
 set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR})
 set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
 
+# Destination for CMake package config files
+if (CISST_CATKIN_BUILT)
+  set (CISST_PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
+else ()
+  set (CISST_PACKAGE_CONFIG_DIRECTORY "${cisst_BINARY_DIR}")
+endif ()
+
+# Config file
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
-                "${cisst_BINARY_DIR}/cisst-config.cmake"
+                "${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config.cmake"
                 @ONLY)
 
 # Version file
-cisst_add_config_version ("${cisst_BINARY_DIR}/cisst-config-version.cmake"
+cisst_add_config_version ("${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config-version.cmake"
                           VERSION ${CISST_VERSION}
                           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
                           COMPONENT cisstCommon)
@@ -509,8 +516,13 @@ configure_file ("${CISST_CMAKE_SOURCE_DIR}/Usecisst.cmake"
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstMacros.cmake"
                 "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
                 COPYONLY)
+configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstConfigVersion.cmake.in"
+                "${CISST_CMAKE_BINARY_DIR}/cisstConfigVersion.cmake.in"
+                COPYONLY)
+
 install (FILES "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
                "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
+               "${CISST_CMAKE_BINARY_DIR}/cisstConfigVersion.cmake.in"
          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
          COMPONENT cisstCommon)
 

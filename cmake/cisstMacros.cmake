@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -328,7 +328,7 @@ macro (cisst_add_library ...)
       list (FIND CISST_LIBRARIES ${dependency} FOUND_IT)
       if (${FOUND_IT} EQUAL -1)
         # not found
-        message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
+        message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled (available libraries: ${CISST_LIBRARIES}")
       else (${FOUND_IT} EQUAL -1)
         # found
         cisst_library_use_libraries (${LIBRARY} ${dependency})
@@ -349,7 +349,7 @@ macro (cisst_add_library ...)
         if (DEFINED ${setting}_OPTION_NAME)
           message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled, use the flag ${${setting}_OPTION_NAME} to compile it")
         else (DEFINED ${setting}_OPTION_NAME)
-          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled")
+          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled  (available settings: ${CISST_SETTINGS}")
         endif (DEFINED ${setting}_OPTION_NAME)
       else (${FOUND_IT} EQUAL -1 )
         # found
@@ -446,7 +446,7 @@ macro (cisst_target_link_libraries TARGET ...)
         if (DEFINED ${required}_OPTION_NAME)
           message (SEND_ERROR "${_WHO_REQUIRES} requires ${requires} which doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
         else (DEFINED ${required}_OPTION_NAME)
-          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
+          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled (available libraries: ${CISST_LIBRARIES}")
         endif (DEFINED ${required}_OPTION_NAME)
       endif (${FOUND_IT} EQUAL -1 )
     endforeach (required)
@@ -950,12 +950,13 @@ function (cisst_add_config_version ...)
   endforeach (keyword)
 
   set (_cacv_versionTemplateFile "cisstConfigVersion.cmake.in")
-  find_file (_cacv_versionTemplatePath
+  find_file (CISST_CONFIG_VERSION_TEMPLATE
              NAMES ${_cacv_versionTemplateFile}
              PATHS ${CISST_CMAKE_DIRS}
              NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
-  if (_cacv_versionTemplatePath)
-    configure_file("${_cacv_versionTemplatePath}" "${_cacv_configFile}" @ONLY)
+  mark_as_advanced (CISST_CONFIG_VERSION_TEMPLATE)
+  if (CISST_CONFIG_VERSION_TEMPLATE)
+    configure_file("${CISST_CONFIG_VERSION_TEMPLATE}" "${_cacv_configFile}" @ONLY)
     if (DESTINATION)
       if (COMPONENT)
         install (FILES ${_cacv_configFile}
@@ -971,3 +972,19 @@ function (cisst_add_config_version ...)
   endif ()
 
 endfunction (cisst_add_config_version)
+
+
+#
+# Test if this build using ROS/catkin
+#
+function (cisst_is_catkin_build RESULT)
+  set (${RESULT} FALSE PARENT_SCOPE)
+  if (DEFINED ENV{ROS_ROOT})
+    message (WARNING "Assuming cisst is built using ROS/catkin since ROS_ROOT is defined in environment")
+    if (DEFINED CATKIN_DEVEL_PREFIX)
+      set (${RESULT} TRUE PARENT_SCOPE)
+    else ()
+      message (WARNING "CATKIN_DEVEL_PREFIX is not defined so assuming this is NOT a ROS/catkin build after all")
+    endif ()
+  endif ()
+endfunction (cisst_is_catkin_build)
