@@ -73,6 +73,23 @@ set (CISST_VERSION_MINOR "0")
 set (CISST_VERSION_PATCH "2")
 set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
 
+# Generate cisstRevision.h
+find_package (Git QUIET)
+set (CISST_REVISION_HEADER_SRC "${cisst_SOURCE_DIR}/cisstRevision.h.in")
+set (CISST_REVISION_HEADER "${cisst_BINARY_DIR}/include/cisstRevision.h")
+# Script to be executed everytime
+configure_file ("${cisst_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
+                "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake"
+                @ONLY)
+add_custom_target (cisstRevision ALL
+                   COMMAND ${CMAKE_COMMAND} -P "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake"
+                   COMMENT "Generating ${CISST_REVISION_HEADER} from ${CISST_REVISION_HEADER_SRC}"
+                   SOURCES "${CISST_REVISION_HEADER_SRC}"
+                           "${CISST_REVISION_HEADER}"
+                           "${cisst_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
+                           "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake")
+set_property (TARGET cisstRevision PROPERTY FOLDER "cisstCommon")
+
 # To compile examples within this project
 set (CURRENT_PROJECT_IS_CISST ON)
 
@@ -101,6 +118,7 @@ configure_file ("${cisst_SOURCE_DIR}/cisstRevision.h.in"
                 "${cisst_BINARY_DIR}/include/cisstRevision.h")
 
 # Install cisstRevision.h
+set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)
 install (FILES "${cisst_BINARY_DIR}/include/cisstRevision.h"
          DESTINATION include
          COMPONENT cisstCommon)
