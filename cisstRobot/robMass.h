@@ -35,15 +35,15 @@ class CISST_EXPORT robMass{
  private:
 
   //! The mass (kg)
-  double mass; 
+  double mass;
 
   //! The center of mass (m)
   /**
      The center of mass is expressed with respect to the coordinate frame
-     of the body. That is, this member represents the translation of the center 
-     of mass with respect to the body's coordinate frame.This implies that the 
-     coordinate frame of the body does not necessarily coincide with the center 
-     of mass. 
+     of the body. That is, this member represents the translation of the center
+     of mass with respect to the body's coordinate frame.This implies that the
+     coordinate frame of the body does not necessarily coincide with the center
+     of mass.
   */
   vctFixedSizeVector<double,3> com;
 
@@ -51,25 +51,25 @@ class CISST_EXPORT robMass{
   /**
      The principal moments of inertia are defined in a coordinate frame that
      is centered at the center of mass and with axes aligned with the principal
-     axes. The principal moments are contained in the diagonal matrix 
-     \f$ D = 
-     \begin{bmatrix} I_x & 0 & 0 \\ 0 & I_y & 0 \\ 0 & 0 & I_z \end{bmatrix}
+     axes. The principal moments are contained in the diagonal matrix
+     \f$ D =
+     \matrix{ I_x & 0 & 0 \\ 0 & I_y & 0 \\ 0 & 0 & I_z }
      \f$
   */
-  vctFixedSizeMatrix<double,3,3> D; 
+  vctFixedSizeMatrix<double,3,3> D;
 
   //! The principal axes
   /**
-     This matrix represents the coordinates of the principal axes associated 
-     with the principal moment of inertia. The three axes are defined with 
-     respect to the body's coordinate frame. The axes represent a similarity 
+     This matrix represents the coordinates of the principal axes associated
+     with the principal moment of inertia. The three axes are defined with
+     respect to the body's coordinate frame. The axes represent a similarity
      transformation that diagonalizes a moment of inertia tensor. Given a moment
-     of inertia tensor \f$ I \f$, the principal axes define a similarity 
-     transformation \f$V\f$ that diagonalizes \f$ I \f$ with 
-     \f$ D = V^T I V \f$, where \f$ V\f$ are the eigenvectors of \f$ I\f$ given 
-     by \f$ IV = VD\f$. The matrix \f$ V\f$ refpresents the principal axes as 
-     follow 
-     \f$V=\begin{bmatrix}\mathbf{e}_1&\mathbf{e}_2&\mathbf{e}_3\end{bmatrix}\f$.
+     of inertia tensor \f$ I \f$, the principal axes define a similarity
+     transformation \f$V\f$ that diagonalizes \f$ I \f$ with
+     \f$ D = V^T I V \f$, where \f$ V\f$ are the eigenvectors of \f$ I\f$ given
+     by \f$ IV = VD\f$. The matrix \f$ V\f$ refpresents the principal axes as
+     follow
+     \f$V=\matrix{\mathbf{e}_1&\mathbf{e}_2&\mathbf{e}_3}\f$.
   */
   vctMatrixRotation3<double> V;
 
@@ -79,9 +79,9 @@ public:
   /**
      Finds the moment of inertia with respect to a parallel axis
   */
-  vctFixedSizeMatrix<double,3,3> 
-  ParallelAxis( double m, 
-		const vctFixedSizeVector<double,3>& t, 
+  vctFixedSizeMatrix<double,3,3>
+  ParallelAxis( double m,
+		const vctFixedSizeVector<double,3>& t,
 		const vctFixedSizeMatrix<double,3,3>& I ) const;
 
 
@@ -104,7 +104,7 @@ public:
 
   //! Return the center of mass
   /**
-     Return the center of mass. The center of mass is expressed in the 
+     Return the center of mass. The center of mass is expressed in the
      coordinate frame of the body.
      \return A 3D vector representing the center of mass
   */
@@ -118,7 +118,7 @@ public:
      \return A 3x3 moment of inertia tensor
   */
   vctFixedSizeMatrix<double,3,3> MomentOfInertia() const;
-  
+
   vctFixedSizeMatrix<double,3,3> MomentOfInertiaAtCOM() const;
 
   //! Read the mass from a input stream
@@ -126,7 +126,7 @@ public:
 #if CISST_HAS_JSON
   robMass::Errno ReadMass( const Json::Value &config );
 #endif
-  
+
   //! Write the mass from a output stream
   robMass::Errno WriteMass( std::ostream& os ) const;
 
