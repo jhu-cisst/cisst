@@ -173,6 +173,14 @@ include (cisstInternalMacros)
 # Set CISST_CATKIN_BUILT
 cisst_is_catkin_build (CISST_CATKIN_BUILT)
 
+# Destination for CMake package config files
+if (CISST_CATKIN_BUILT)
+  set (CISST_PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
+  set (CISST_HAS_JSON ON CACHE "" BOOL)
+else ()
+  set (CISST_PACKAGE_CONFIG_DIRECTORY "${cisst_BINARY_DIR}")
+endif ()
+
 # Output directories.
 set (CISST_LIBRARY_INSTALL_SUFFIX "lib")
 set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
@@ -496,13 +504,6 @@ set (CISST_CMAKE_DIRS_FOR_CONFIG ${CISST_CMAKE_BINARY_DIR})
 
 set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR})
 set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
-
-# Destination for CMake package config files
-if (CISST_CATKIN_BUILT)
-  set (CISST_PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
-else ()
-  set (CISST_PACKAGE_CONFIG_DIRECTORY "${cisst_BINARY_DIR}")
-endif ()
 
 # Config file
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
