@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2003-07-31
 #
-# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -101,6 +101,7 @@ set (CISST_HAS_QT4 @CISST_HAS_QT4@)
 set (CISST_HAS_QT5 @CISST_HAS_QT5@)
 set (CISST_HAS_FLTK @CISST_HAS_FLTK@)
 set (CISST_HAS_JSON @CISST_HAS_JSON@)
+set (CISST_CATKIN_BUILT @CISST_CATKIN_BUILT@)
 
 # Include settings per library
 foreach (lib ${CISST_LIBRARIES})
