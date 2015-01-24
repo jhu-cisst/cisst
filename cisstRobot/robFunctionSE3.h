@@ -80,7 +80,7 @@ public:
 
 
   /*!
-   \brief Read initial(stop) state
+   \brief Read final(stop) state
 
    \param Rtw2 stop tranfrom
    \param v2w2 stop velocity
