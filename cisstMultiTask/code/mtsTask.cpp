@@ -92,19 +92,6 @@ void mtsTask::DoRunInternal(void)
                 }
                 toc = osaGetTime();
             }
-
-            // If this line is reached without exception and the framework state is in NORMAL
-            // state due to thread exception, generate offset event.
-            if (state == SF::State::ERROR && e->GetName().compare("EVT_THREAD_EXCEPTION") == 0) {
-                std::stringstream ss;
-                ss << "Component \"" << GetName() << "\" goes back to NORMAL state (exception resolved)";
-                CMN_LOG_CLASS_RUN_WARNING << ss.str() << std::endl;
-                // Inform casros of this offset event
-                GetSafetyCoordinator->GenerateEvent("/EVT_THREAD_EXCEPTION",
-                                                    SF::State::STATEMACHINE_FRAMEWORK,
-                                                    ss.str(),
-                                                    this->Name);
-            }
         }
         this->StateTableMonitor.ExecTimeUser = toc - tic;
 #else
@@ -116,6 +103,18 @@ void mtsTask::DoRunInternal(void)
     }
     catch (...) {
         OnRunException(mtsTask::UnknownException);
+    }
+
+    // Generate completion event of thread exception if onset event has occurred earlier.
+    if (state == SF::State::ERROR && e->GetName().compare("EVT_THREAD_EXCEPTION") == 0) {
+        std::stringstream ss;
+        ss << "Component \"" << GetName() << "\" goes back to NORMAL state (exception resolved)";
+        CMN_LOG_CLASS_RUN_WARNING << ss.str() << std::endl;
+        // Inform casros of this offset event
+        GetSafetyCoordinator->GenerateEvent("/EVT_THREAD_EXCEPTION",
+                                            SF::State::STATEMACHINE_FRAMEWORK,
+                                            ss.str(),
+                                            this->Name);
     }
 
     // advance all state tables (if automatic)
