@@ -42,19 +42,22 @@ void mtsTask::DoRunInternal(void)
 {
     RunEventCalled = false;
     StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
+#if CISST_HAS_SAFETY_PLUGINS
+    double tic = 0.0, toc = 0.0;
+    const SF::Event * e = 0;
+    SF::State::StateType state = SF::State::INVALID;
+#endif
     try {
         // Make sure following is called
         if (InterfaceProvidedToManager)
             InterfaceProvidedToManager->ProcessMailBoxes();
 #if CISST_HAS_SAFETY_PLUGINS
-        double tic, toc;
-        const SF::Event * e = 0;
         if (!GetSafetyCoordinator) {
             tic = osaGetTime();
             this->Run();
             toc = osaGetTime();
         } else {
-            SF::State::StateType state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
+            state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
             if (state == SF::State::INVALID) {
                 //tic = osaGetTime(); // still need to be updated for ExecTimeUser
                 CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
@@ -105,17 +108,23 @@ void mtsTask::DoRunInternal(void)
         OnRunException(mtsTask::UnknownException);
     }
 
+#if CISST_HAS_SAFETY_PLUGINS
     // Generate completion event of thread exception if onset event has occurred earlier.
-    if (state == SF::State::ERROR && e->GetName().compare("EVT_THREAD_EXCEPTION") == 0) {
-        std::stringstream ss;
-        ss << "Component \"" << GetName() << "\" goes back to NORMAL state (exception resolved)";
-        CMN_LOG_CLASS_RUN_WARNING << ss.str() << std::endl;
-        // Inform casros of this offset event
-        GetSafetyCoordinator->GenerateEvent("/EVT_THREAD_EXCEPTION",
-                                            SF::State::STATEMACHINE_FRAMEWORK,
-                                            ss.str(),
-                                            this->Name);
+    state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
+    if (state == SF::State::ERROR) {
+        CMN_ASSERT(e);
+        if (e->GetName().compare("EVT_THREAD_EXCEPTION") == 0) {
+            std::stringstream ss;
+            ss << "Component \"" << GetName() << "\" goes back to NORMAL state (exception resolved)";
+            CMN_LOG_CLASS_RUN_WARNING << ss.str() << std::endl;
+            // Inform casros of this offset event
+            GetSafetyCoordinator->GenerateEvent("/EVT_THREAD_EXCEPTION",
+                                                SF::State::STATEMACHINE_FRAMEWORK,
+                                                ss.str(),
+                                                this->Name);
+        }
     }
+#endif
 
     // advance all state tables (if automatic)
     // MJ: mtsStateTable::Advance processes installed and active filters
