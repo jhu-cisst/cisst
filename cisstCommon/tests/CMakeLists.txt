@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstCommon tests
 #
-# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -115,7 +113,7 @@ endif (NOT CISST_BUILD_SHARED_LIBS)
 cisst_add_test (cisstCommonTests ITERATIONS 2 INSTANCES 2)
 
 if (CISST_HAS_XML)
-  cisst_target_link_libraries (cisstCommonTests cisstCommonXML)
+  target_link_libraries (cisstCommonTests cisstCommonXML)
 endif (CISST_HAS_XML)
 
 set_target_properties (cisstCommonTests
