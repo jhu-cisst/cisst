@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2003-09-30
 
-  (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -408,6 +406,14 @@ class vctFixedSizeConstVectorBase
         return ColConstMatrixRefType(Pointer());
     }
     //@}
+
+    /*! Create a const reference to a sub vector */
+    template <vct::size_type __subSize>
+    const vctFixedSizeConstVectorRef<_elementType, __subSize, _stride>
+    Ref(const size_t startPosition = 0) const throw (std::out_of_range) {
+        vctFixedSizeConstVectorRef<_elementType, __subSize, _stride> result(*this, startPosition);
+        return result;
+    }
 
     /*! \name Incremental operations returning a scalar.
       Compute a scalar from all the elements of the vector. */
@@ -1197,4 +1203,3 @@ std::ostream & operator << (std::ostream & output,
 }
 
 #endif  // _vctFixedSizeConstVectorBase_h
-

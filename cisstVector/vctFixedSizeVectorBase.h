@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2003-09-30
 
-  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -746,6 +744,23 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     //@}
 
+    /*! Create a reference to a sub vector */
+    //@{
+    template <vct::size_type __subSize>
+    const vctFixedSizeConstVectorRef<_elementType, __subSize, _stride>
+    Ref(const size_t startPosition = 0) const throw (std::out_of_range) {
+        vctFixedSizeConstVectorRef<_elementType, __subSize, _stride> result(*this, startPosition);
+        return result;
+    }
+
+    template <vct::size_type __subSize>
+    vctFixedSizeVectorRef<_elementType, __subSize, _stride>
+    Ref(const size_t startPosition = 0) throw (std::out_of_range) {
+        vctFixedSizeVectorRef<_elementType, __subSize, _stride> result(*this, startPosition);
+        return result;
+    }
+    //@}
+
     /*! Select a subset of elements by a given sequence of indexes.  The selected
       elements from the input vector are stored in this vector.  There is no
       requirement of order or uniqueness in the indexes sequence, and no verification
@@ -1408,4 +1423,3 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
 
 #endif  // _vctFixedSizeVectorBase_h
-
