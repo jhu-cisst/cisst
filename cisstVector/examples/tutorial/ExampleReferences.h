@@ -39,7 +39,7 @@ void ExampleReferences(void)
     try {
         v2.Assign(v4.Ref<2>(3));
     } catch (std::out_of_range _exception) {
-        std::cout << "Exception received: " << _exception.what() << std::endl;
+        std::cout << " - exception received: " << _exception.what() << std::endl;
     }
 
     // The following line WILL NOT compile because the sizes don't
@@ -58,4 +58,47 @@ void ExampleReferences(void)
     // start position
     v4.Ref<2>().SetAll(-1.0);
     std::cout << "v4, first 2 elements replaced:" << std::endl << v4 << std::endl;
+
+    // For fun, we even have a concatenation operator
+    vct2 head(2.0);
+    vct3 tail(3.0);
+    v5 = head & tail;
+    std::cout << "v5 = head & tail: " << std::endl << v5 << std::endl;
+
+    // Dynamic vectors
+    vctDoubleVec vA, vB;
+    vA.SetSize(10); vA.SetAll(1.0);
+    vB.SetSize(10); vB.SetAll(2.0);
+    vA.Ref(5) = vB.Ref(5, 5); // assign second half of vB to first 5 elements of vA
+    std::cout << "vA: " << std::endl << vA << std::endl;
+
+    // Possible errors
+    try {
+        std::cout << "Size mismatch between dynamic vector references" << std::endl;
+        vA.Ref(5) = vB.Ref(6, 3);
+    } catch (std::runtime_error _exception) {
+        std::cout << " - exception received: " << _exception.what() << std::endl;
+    }
+
+    try {
+        std::cout << "Reference out of range" << std::endl;
+        std::cout << vA.Ref(5, 6) << std::endl;
+    } catch (std::out_of_range _exception) {
+        std::cout << " - exception received: " << _exception.what() << std::endl;
+    }
+
+    // Mixing fixed size and dynamic vectors
+    // From fixed to dynamic
+    vA.Ref(4) = v4;
+    std::cout << "vA.Ref(4) = v4:" << std::endl << vA << std::endl;
+
+    // From dynamic to fixed
+    vctRandom(vA, 0.0, 10.0);
+    v4 = vA.Ref(4, vA.size() - 4); // last 4 elements
+    std::cout << "vA: " << std::endl << vA << std::endl
+              << "v4: " << std::endl << v4 << std::endl;
+
+    v4.Ref<2>(2) = vA.Ref(2); // replace last 2 elements of v4 with first 2 from vA
+    std::cout << "vA: " << std::endl << vA << std::endl
+              << "v4: " << std::endl << v4 << std::endl;
 }

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -659,6 +657,25 @@ public:
     vctDynamicConstVectorRef<_elementType> XYZW(void) const {
         return BaseType::XYZW();
     }
+
+    /*! Create a reference to a sub vector */
+    //@{
+    vctDynamicVectorRef<_elementType>
+    Ref(const size_type size, const size_type startPosition = 0) throw (std::out_of_range) {
+        if ((startPosition + size) > this->size()) {
+            cmnThrow(std::out_of_range("vctDynamicConstVectorBase::Ref: reference is out of range"));
+        }
+        return vctDynamicVectorRef<_elementType>(size, Pointer(startPosition), this->stride());
+    }
+
+    vctDynamicConstVectorRef<_elementType>
+    Ref(const size_type size, const size_type startPosition = 0) const throw (std::out_of_range) {
+        if ((startPosition + size) > this->size()) {
+            cmnThrow(std::out_of_range("vctDynamicConstVectorBase::Ref: reference is out of range"));
+        }
+        return vctDynamicConstVectorRef<_elementType>(size, Pointer(startPosition), this->stride());
+    }
+    //@}
 
     /*! Select a subset of elements by a given sequence of indexes.  The selected
       elements from the input vector are stored in this vector.  There is no

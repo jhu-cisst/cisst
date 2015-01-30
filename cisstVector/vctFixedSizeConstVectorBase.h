@@ -409,8 +409,8 @@ class vctFixedSizeConstVectorBase
 
     /*! Create a const reference to a sub vector */
     template <vct::size_type __subSize>
-    const vctFixedSizeConstVectorRef<_elementType, __subSize, _stride>
-    Ref(const size_t startPosition = 0) const throw (std::out_of_range) {
+    vctFixedSizeConstVectorRef<_elementType, __subSize, _stride>
+    Ref(const size_type startPosition = 0) const throw (std::out_of_range) {
         vctFixedSizeConstVectorRef<_elementType, __subSize, _stride> result(*this, startPosition);
         return result;
     }
