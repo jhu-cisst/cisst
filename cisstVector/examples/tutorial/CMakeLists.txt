@@ -27,6 +27,7 @@ if (cisst_FOUND_AS_REQUIRED)
                   ExampleFrame.h
                   ExampleCommon.h
                   ExampleReference.h
+                  ExampleReferences.h
                   ExampleReferenceFixedSize.h
                   ExampleDynamic.h
                   ExampleFixedSizeFunctions.h
