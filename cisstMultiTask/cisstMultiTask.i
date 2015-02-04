@@ -96,15 +96,15 @@ http://www.cisst.org/cisst/license.txt.
 
 // Extend mtsCommandVoid
 %extend mtsCommandVoid {
-    %pythoncode {
+    %pythoncode %{
         def __call__(self):
             return self.Execute(MTS_NOT_BLOCKING).GetResult()
-    }
+    %}
 }
 
 // Extend mtsCommandVoidReturn
 %extend mtsCommandVoidReturn {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             try:
                 tmpObject = self.GetResultPrototype().Services().Create()
@@ -127,12 +127,12 @@ http://www.cisst.org/cisst/license.txt.
                 return argument.GetDataCopy()
             else:
                 return argument
-    }
+    %}
 }
 
 // Extend mtsCommandWrite
 %extend mtsCommandWriteBase {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             try:
                 tmpObject = self.GetArgumentClassServices().Create()
@@ -146,12 +146,12 @@ http://www.cisst.org/cisst/license.txt.
             else:
                 realArgument = self.ArgumentType(argument)
                 return self.Execute(realArgument, MTS_NOT_BLOCKING).GetResult()
-    }
+    %}
 }
 
 // Extend mtsCommandWriteReturn
 %extend mtsCommandWriteReturn {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             try:
                 tmp1Object = self.GetArgumentPrototype().Services().Create()
@@ -175,12 +175,12 @@ http://www.cisst.org/cisst/license.txt.
                 return result.GetDataCopy()
             else:
                 return result
-    }
+    %}
 }
 
 // Extend mtsCommandRead
 %extend mtsCommandRead {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             try:
                 tmpObject = self.GetArgumentPrototype().Services().Create()
@@ -205,12 +205,12 @@ http://www.cisst.org/cisst/license.txt.
                 return argument.GetDataCopy()
             else:
                 return argument
-    }
+    %}
 }
 
 // Extend mtsCommandQualifiedRead
 %extend mtsCommandQualifiedRead {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             try:
                 tmp1Object = self.GetArgument1Prototype().Services().Create()
@@ -234,7 +234,7 @@ http://www.cisst.org/cisst/license.txt.
                 return argument2.GetDataCopy()
             else:
                 return argument2
-    }
+    %}
 }
 
 // Wrap functions
@@ -249,15 +249,15 @@ http://www.cisst.org/cisst/license.txt.
 
 // Extend mtsFunctionVoid
 %extend mtsFunctionVoid {
-    %pythoncode {
+    %pythoncode %{
         def __call__(self):
             return self.Execute().GetResult()
-    }
+    %}
 }
 
 // Extend mtsFunctionVoidReturn
 %extend mtsFunctionVoidReturn {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             if self.IsValid():
                 try:
@@ -283,12 +283,12 @@ http://www.cisst.org/cisst/license.txt.
                 return argument.GetDataCopy()
             else:
                 return argument
-    }
+    %}
 }
 
 // Extend mtsFunctionRead
 %extend mtsFunctionRead {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             if self.IsValid():
                 try:
@@ -314,12 +314,12 @@ http://www.cisst.org/cisst/license.txt.
                 return argument.GetDataCopy()
             else:
                 return argument
-    }
+    %}
 }
 
 // Extend mtsFunctionWrite
 %extend mtsFunctionWrite {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             if self.IsValid():
                 try:
@@ -336,12 +336,12 @@ http://www.cisst.org/cisst/license.txt.
             else:
                 realArgument = self.ArgumentType(argument)
                 return self.ExecuteGeneric(realArgument).GetResult()
-    }
+    %}
 }
 
 // Extend mtsFunctionWriteReturn
 %extend mtsFunctionWriteReturn {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             if self.IsValid():
                 try:
@@ -368,12 +368,12 @@ http://www.cisst.org/cisst/license.txt.
                 return result.GetDataCopy()
             else:
                 return result
-    }
+    %}
 }
 
 // Extend mtsFunctionQualifiedRead
 %extend mtsFunctionQualifiedRead {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             if self.IsValid():
                 try:
@@ -400,7 +400,7 @@ http://www.cisst.org/cisst/license.txt.
                 return argument2.GetDataCopy()
             else:
                 return argument2
-    }
+    %}
 }
 
 
@@ -415,7 +415,7 @@ http://www.cisst.org/cisst/license.txt.
 %template(mtsComponentConstructorNameAndString) mtsComponentConstructorNameAndArg<std::string>;
 
 %extend mtsComponent {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             interfaces = mtsComponent.GetNamesOfInterfacesProvided(self)
             for interface in interfaces:
@@ -501,7 +501,7 @@ http://www.cisst.org/cisst/license.txt.
                     print 'Parameter error: must specify (process, component, interface) or (component, interface)'
             except TypeError, e:
                 print 'Parameter error: must specify (process, component, interface) or (component, interface)'
-    }
+    %}
 }
 
 // For IRE, because EnableDynamicComponentManagement is protected (see also mtsPython.h)
@@ -515,7 +515,7 @@ public:
 %include "cisstMultiTask/mtsInterface.h"
 %include "cisstMultiTask/mtsInterfaceProvided.h"
 %extend mtsInterfaceProvided {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             commands = mtsInterfaceProvided.GetNamesOfCommandsVoid(self)
             for command in commands:
@@ -539,12 +539,12 @@ public:
             for command in commands:
                 self.__dict__[command] = mtsInterfaceProvided.GetCommandRead(self, command)
                 self.__dict__[command].UpdateFromC()
-    }
+    %}
 }
 
 %include "cisstMultiTask/mtsInterfaceRequired.h"
 %extend mtsInterfaceRequired {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             if not self.GetConnectedInterface():
                 print 'Required interface ', self.GetName(), ' not yet connected.'
@@ -572,7 +572,7 @@ public:
             for function in functions:
                 self.__dict__[function] = mtsInterfaceRequired.GetFunctionRead(self, function)
                 self.__dict__[function].UpdateFromC()
-    }
+    %}
 }
 
 // Wrap manager component services (includes internal required interface)
@@ -624,13 +624,13 @@ public:
 %include "cisstMultiTask/mtsManagerLocalInterface.h"
 %include "cisstMultiTask/mtsManagerLocal.h"
 %extend mtsManagerLocal {
-    %pythoncode {
+    %pythoncode %{
         def UpdateFromC(self):
             comps = mtsManagerLocal.GetNamesOfComponents(self)
             for comp in comps:
                 self.__dict__[comp] = mtsManagerLocal.GetComponent(self, comp)
                 self.__dict__[comp].UpdateFromC()
-    }
+    %}
 }
 
 %include "cisstMultiTask/mtsCollectorBase.h"

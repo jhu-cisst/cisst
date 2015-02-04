@@ -131,10 +131,10 @@ http://www.cisst.org/cisst/license.txt.
     swig::SwigPyIterator* iterator(PyObject **PYTHON_SELF) {
         return swig::make_output_iterator(self->begin(), self->begin(), self->end(), *PYTHON_SELF);
     }
-    %pythoncode {
+    %pythoncode %{
         def __iter__(self):
             return self.iterator()
-    }
+    %}
 }
 
 
@@ -150,10 +150,10 @@ http://www.cisst.org/cisst/license.txt.
     swig::SwigPyIterator* iterator(PyObject **PYTHON_SELF) {
         return swig::make_output_iterator(self->begin(), self->begin(), self->end(), *PYTHON_SELF);
     }
-    %pythoncode {
+    %pythoncode %{
         def __iter__(self):
             return self.iterator()
-    }
+    %}
 }
 
 // Wrap some basic types
