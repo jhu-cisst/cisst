@@ -670,10 +670,7 @@ public:
 
     vctDynamicConstVectorRef<_elementType>
     Ref(const size_type size, const size_type startPosition = 0) const throw (std::out_of_range) {
-        if ((startPosition + size) > this->size()) {
-            cmnThrow(std::out_of_range("vctDynamicConstVectorBase::Ref: reference is out of range"));
-        }
-        return vctDynamicConstVectorRef<_elementType>(size, Pointer(startPosition), this->stride());
+        return BaseType::Ref(size, startPosition);
     }
     //@}
 

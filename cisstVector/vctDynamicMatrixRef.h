@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
-  Author(s):	Ofri Sadowsky, Anton Deguet
+  Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -334,18 +332,23 @@ public:
       \param other The matrix to be copied.
     */
     //@{
-	inline ThisType & operator = (const ThisType & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    inline ThisType & operator = (const ThisType & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
 
-	inline ThisType & operator = (const vctDynamicConstMatrixRef<_elementType> & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    inline ThisType & operator = (const vctDynamicConstMatrixRef<_elementType> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
 
     template <class __matrixOwnerType, typename __elementType>
-	inline ThisType & operator = (const vctDynamicConstMatrixBase<__matrixOwnerType, __elementType> & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    inline ThisType & operator = (const vctDynamicConstMatrixBase<__matrixOwnerType, __elementType> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
+
+    template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, typename __dataPtrType>
+    inline ThisType & operator = (const vctFixedSizeConstMatrixBase<__rows, __cols, __rowStride, __colStride, _elementType, __dataPtrType> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
     //@}
 
     /*! Assignement of a scalar to all elements.  See also SetAll. */
@@ -417,4 +420,3 @@ void vctMultiplyVectorMatrix(vctDynamicVectorBase<_resultVectorOwnerType, _eleme
 #endif // DOXYGEN
 
 #endif // _vctDynamicMatrixRef_h
-

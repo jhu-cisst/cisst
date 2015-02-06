@@ -32,10 +32,11 @@ void ExampleReferences(void)
 
     // Create a vector of 2 elements starting at index 1
     vct2 v2(v4.Ref<2>(1));
-    std::cout << "Ref<2>(1):" << std::endl << v2 << std::endl;
+    std::cout << "v4: " << std::endl << v4 << std::endl
+              << "v4.Ref<2>(1):" << std::endl << v2 << std::endl;
 
     // This will throw an exception
-    std::cout << "Ref<2>(3) on a vector of 4 elements will throw an out of range exception" << std::endl;
+    std::cout << "v4.Ref<2>(3) on a vector of 4 elements will throw an out of range exception" << std::endl;
     try {
         v2.Assign(v4.Ref<2>(3));
     } catch (std::out_of_range _exception) {
@@ -69,7 +70,7 @@ void ExampleReferences(void)
     vctDoubleVec vA, vB;
     vA.SetSize(10); vA.SetAll(1.0);
     vB.SetSize(10); vB.SetAll(2.0);
-    vA.Ref(5) = vB.Ref(5, 5); // assign second half of vB to first 5 elements of vA
+    vA.Ref(4) = vB.Ref(4, 6); // assign last 4 elements of vB to first 4 of vA
     std::cout << "vA: " << std::endl << vA << std::endl;
 
     // Possible errors
@@ -101,4 +102,65 @@ void ExampleReferences(void)
     v4.Ref<2>(2) = vA.Ref(2); // replace last 2 elements of v4 with first 2 from vA
     std::cout << "vA: " << std::endl << vA << std::endl
               << "v4: " << std::endl << v4 << std::endl;
+
+
+    vct4x4 m4;
+    vctRandom(m4, -10.0, 10.0);
+
+    // Create a matrix of 2x2 elements starting at index 1,1
+    vct2x2 m2(m4.Ref<2, 2>(1, 1));
+    std::cout << "m4:" << std::endl << m4 << std::endl
+              << "m4Ref<2, 2>(1, 1):" << std::endl << m2 << std::endl;
+
+    // This will throw an exception
+    std::cout << "m4.Ref<2, 2>(3, 2) on a matrix of 4 rows will throw an out of range exception" << std::endl;
+    try {
+        m2.Assign(m4.Ref<2, 2>(3, 2));
+    } catch (std::out_of_range _exception) {
+        std::cout << " - exception received: " << _exception.what() << std::endl;
+    }
+
+    vctFixedSizeMatrix<double, 5, 5> m5;
+    m5.SetAll(5.5);
+
+    // Assign part of a vector to another
+    m4.Ref<2, 2>(2, 2) = m5.Ref<2, 2>(3, 3);
+    std::cout << "m4, bottom right 2x2 elements replaced:" << std::endl << m4 << std::endl;
+
+    // Dynamic matrices
+    vctDoubleMat mA, mB;
+    mA.SetSize(10, 10); mA.SetAll(1.0); mA(9, 9) = 10.0;
+    mB.SetSize(10, 10); mB.SetAll(2.0); mB(9, 9) = 20.0;
+    mA.Ref(4, 4) = mB.Ref(4, 4, 6, 6); // assign bottom right 4x4 elements of mB to top left 4x4 of mA
+    std::cout << "mA: " << std::endl << mA << std::endl;
+
+    // Possible errors
+    try {
+        std::cout << "Size mismatch between dynamic matrix references" << std::endl;
+        mA.Ref(5, 4) = mB.Ref(6, 3);
+    } catch (std::runtime_error _exception) {
+        std::cout << " - exception received: " << _exception.what() << std::endl;
+    }
+
+    try {
+        std::cout << "Reference out of range" << std::endl;
+        std::cout << mA.Ref(5, 5, 6, 6) << std::endl;
+    } catch (std::out_of_range _exception) {
+        std::cout << " - exception received: " << _exception.what() << std::endl;
+    }
+
+    // Mixing fixed size and dynamic vectors
+    // From fixed to dynamic
+    mA.Ref(4, 4) = m4;
+    std::cout << "mA.Ref(4) = m4:" << std::endl << mA << std::endl;
+
+    // From dynamic to fixed
+    vctRandom(mA, 0.0, 10.0);
+    m4 = mA.Ref(4, 4, mA.rows() - 4, mA.cols() - 4); // bottom left 4x4 elements
+    std::cout << "mA: " << std::endl << mA << std::endl
+              << "m4: " << std::endl << m4 << std::endl;
+
+    m4.Ref<2, 2>(2, 2) = mA.Ref(2, 2); // replace last 2x2 elements of m4 with first 2x2 from mA
+    std::cout << "mA: " << std::endl << mA << std::endl
+              << "m4: " << std::endl << m4 << std::endl;
 }
