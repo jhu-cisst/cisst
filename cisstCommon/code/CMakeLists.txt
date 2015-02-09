@@ -104,8 +104,8 @@ cisst_add_library (
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES})
 
-add_dependencies (cisstCommon cisstBuildType)
+add_dependencies (cisstCommon cisstRevision cisstBuildType)
 
 if (CISST_HAS_JSON)
-  add_dependencies (cisstCommon cisstRevision cisstJSONExternal)
+  add_dependencies (cisstCommon cisstJSONExternal)
 endif (CISST_HAS_JSON)
