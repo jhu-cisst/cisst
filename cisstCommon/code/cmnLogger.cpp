@@ -25,7 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnClassRegister.h>
+
+// to provide some information regarding this build
 #include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnUnits.h>
 
 cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     Mask(CMN_LOG_ALLOW_ALL),
@@ -40,6 +43,7 @@ cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     result = "undefined";
     cmnPath::GetCisstShare(result);
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " cisst share: " << result << std::endl;
+    *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " cmn_m: " << cmn_m << ", cmn_kg: " << cmn_kg << ", CISST_USE_SI_UNITS is set to " << CISST_USE_SI_UNITS << std::endl;
 }
 
 

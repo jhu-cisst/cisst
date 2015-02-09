@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2008-08-21
 
-  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,18 +46,25 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnUnits_h
 #define _cmnUnits_h
 
+// To determine if we are using SI (m) or millimeters by default
+#include <cisstConfig.h>
 
 // Always include last
 #include <cisstCommon/cmnExport.h>
 
 
 
-/*! \name Length units.  The internal unit is millimeter. */
+/*! \name Length units.  The internal unit is millimeter is
+  CISST_USE_SI_UNITS is set to false, meters otherwise. */
 //@{
 
 /*! Millimeter constant, use to convert a length in millimeters to
   internal units.  */
+#if CISST_USE_SI_UNITS
 const double cmn_mm = 0.001;
+#else
+const double cmn_mm = 1.0;
+#endif
 
 /*! Convert a length in internal units to millimeters */
 inline double cmnInternalTo_mm(double valueInternalUnits) {
@@ -84,7 +91,11 @@ inline double cmnInternalTo_cm(double valueInternalUnits) {
 
 /*! Meter constant, use to convert a length in meters to
   internal units.  */
+#if CISST_USE_SI_UNITS
 const double cmn_m = 1.0;
+#else
+const double cmn_m = 1000.0;
+#endif
 
 /*! Convert a length in internal units to meters */
 inline double cmnInternalTo_m(double valueInternalUnits) {
@@ -103,12 +114,17 @@ inline double cmnInternalTo_km(double valueInternalUnits) {
 
 
 
-/*! \name Mass units.  The internal unit is grams. */
+/*! \name Mass units.  The internal unit is grams if
+  CISST_USE_SI_UNITS is set to false, kilograms otherwise. */
 //@{
 
 /*! Gram constant, use to convert a mass in grams to
   internal units.  */
+#if CISST_USE_SI_UNITS
+const double cmn_g = 0.001;
+#else
 const double cmn_g = 1.0;
+#endif
 
 /*! Convert a mass in internal units to grams */
 inline double cmnInternalTo_g(double valueInternalUnits) {

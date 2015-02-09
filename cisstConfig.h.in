@@ -82,4 +82,7 @@ http://www.cisst.org/cisst/license.txt.
 // Using JSonCpp, compiled along cisst
 #cmakedefine01 CISST_HAS_JSON
 
+// Using SI units (ie meters) or mm for distances
+#cmakedefine01 CISST_USE_SI_UNITS
+
 #endif // _cisstConfig_h

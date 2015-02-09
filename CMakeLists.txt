@@ -245,6 +245,7 @@ if (APPLE)
   option (CISST_HAS_IOS "Compile for IOS." OFF)
 endif (APPLE)
 
+
 # Determine if cmnThrow uses "throw" or "abort"
 option (CISST_CMN_THROW_DOES_ABORT "cmnThrow uses abort() instead of throw" OFF)
 mark_as_advanced (CISST_CMN_THROW_DOES_ABORT)
@@ -267,6 +268,11 @@ mark_as_advanced (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 if (CISST_CMN_ASSERT_THROWS_EXCEPTION)
   add_definitions (-DCISST_CMN_ASSERT_THROWS_EXCEPTION)
 endif (CISST_CMN_ASSERT_THROWS_EXCEPTION)
+
+
+# Determine is cisst is SI or not
+option (CISST_USE_SI_UNITS "Use SI units, if not, distances are in millimeters (default if OFF)" OFF)
+mark_as_advanced (CISST_USE_SI_UNITS)
 
 
 # Determine if size_t is a native type
