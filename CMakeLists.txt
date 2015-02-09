@@ -97,10 +97,24 @@ set (CISST_INCLUDE_DIR
 include_directories (${CISST_INCLUDE_DIR})
 
 # Generate cisstRevision.h
-configure_file ("${cisst_SOURCE_DIR}/cisstRevision.h.in"
-                "${cisst_BINARY_DIR}/include/cisstRevision.h")
+find_package (Git QUIET)
+set (CISST_REVISION_HEADER_SRC "${cisst_SOURCE_DIR}/cisstRevision.h.in")
+set (CISST_REVISION_HEADER "${cisst_BINARY_DIR}/include/cisstRevision.h")
+# Script to be executed everytime
+configure_file ("${cisst_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
+                "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake"
+                @ONLY)
+add_custom_target (cisstRevision ALL
+                   COMMAND ${CMAKE_COMMAND} -P "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake"
+                   COMMENT "Generating ${CISST_REVISION_HEADER} from ${CISST_REVISION_HEADER_SRC}"
+                   SOURCES "${CISST_REVISION_HEADER_SRC}"
+                           "${CISST_REVISION_HEADER}"
+                           "${cisst_SOURCE_DIR}/cmake/cisstGenerateRevision.cmake.in"
+                           "${cisst_BINARY_DIR}/cisstGenerateRevision.cmake")
+set_property (TARGET cisstRevision PROPERTY FOLDER "cisstCommon")
 
 # Install cisstRevision.h
+set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)
 install (FILES "${cisst_BINARY_DIR}/include/cisstRevision.h"
          DESTINATION include
          COMPONENT cisstCommon)
@@ -130,10 +144,6 @@ install (FILES "${cisst_BINARY_DIR}/include/cisstBuildType.h"
          DESTINATION include
          COMPONENT cisstCommon)
 
-
-# Create some variables so that find_package (cisst) can be used in subdirectories (examples)
-set (CURRENT_PROJECT_IS_CISST ON)
-
 # Option to make cisst CMake functions more verbose
 option (CISST_HAS_CMAKE_DEBUG "Print extra messages when configuring with CMake" OFF)
 mark_as_advanced (CISST_HAS_CMAKE_DEBUG)
@@ -154,6 +164,14 @@ include (cisstInternalMacros)
 
 # Set CISST_CATKIN_BUILT
 cisst_is_catkin_build (CISST_CATKIN_BUILT)
+
+# Destination for CMake package config files
+if (CISST_CATKIN_BUILT)
+  set (CISST_PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
+  set (CISST_HAS_JSON ON CACHE "" BOOL)
+else ()
+  set (CISST_PACKAGE_CONFIG_DIRECTORY "${cisst_BINARY_DIR}")
+endif ()
 
 # Output directories.
 set (CISST_LIBRARY_INSTALL_SUFFIX "lib")
@@ -478,13 +496,6 @@ set (CISST_CMAKE_DIRS_FOR_CONFIG ${CISST_CMAKE_BINARY_DIR})
 
 set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR})
 set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
-
-# Destination for CMake package config files
-if (CISST_CATKIN_BUILT)
-  set (CISST_PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
-else ()
-  set (CISST_PACKAGE_CONFIG_DIRECTORY "${cisst_BINARY_DIR}")
-endif ()
 
 # Config file
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"

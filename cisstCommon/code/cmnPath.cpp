@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -115,7 +113,7 @@ bool cmnPath::AddRelativeToCisstRoot(const std::string & relativePath, bool head
 
 bool cmnPath::AddRelativeToCisstShare(const std::string & relativePath, bool head) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
-                               << relativePath << "\" relative to CISST_ROOT/share/cisst-" << CISST_VERSION << "/ at the "
+                               << relativePath << "\" relative to CISST_ROOT/share/cisst-" << CISST_VERSION_MAJOR << "." << CISST_VERSION_MINOR << "/ at the "
                                << (head ? "beginning" : "end") << std::endl;
     std::string path;
     if (cmnPath::GetCisstShare(path)) {
@@ -250,7 +248,9 @@ bool cmnPath::GetCisstRoot(std::string & result)
 bool cmnPath::GetCisstShare(std::string & result)
 {
     if (cmnPath::GetCisstRoot(result)) {
-        result = result + "/share/cisst-" + CISST_VERSION;
+        std::stringstream tmp;
+        tmp << result << "/share/cisst-" << CISST_VERSION_MAJOR << "." << CISST_VERSION_MINOR;
+        result = tmp.str();
         return true;
     }
     return false;
