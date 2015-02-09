@@ -37,9 +37,4 @@ endif (GIT_FOUND)
 message ("Found Git revision: ${CISST_GIT_DESCRIBE}")
 
 configure_file ("${CISST_REVISION_HEADER_SRC}"
-                "${CMAKE_CURRENT_SOURCE_DIR}/cisstRevision.h.tmp")
-
-execute_process (COMMAND
-                 ${CMAKE_COMMAND} -E copy_if_different
-                 "${CMAKE_CURRENT_SOURCE_DIR}/cisstRevision.h.tmp"
-                 "${CISST_REVISION_HEADER}")
+                "${CISST_REVISION_HEADER}")
