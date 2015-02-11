@@ -26,14 +26,17 @@ http://www.cisst.org/cisst/license.txt.
   This file include the definition and implementation of constants and
   global functions used to defines measuring units in the cisst
   libraries.  The internal units of the cisst libraries are meters,
-  grams, seconds and radians.
+  kilograms, seconds and radians if CISST_USE_SI_UNITS is set to true.
+  Otherwise, units are millimeters and grams.  Older versions of cisst
+  didn't define CISST_USE_SI_UNITS and the default units were
+  millimeters and grams.
 
   For all units, the cisst libraries provide a constant as well as a
   global function to convert from the internal units to other
   representations.
 
   <code>
-    double distance = 5000 * cmn_m; // 5000 meters, distance is actually in mm
+    double distance = 5000 * cmn_m; // 5000 meters
     AnExampleOfFunction(50 * cmn_mm); // 50 millimeters
     std::cout << "distance in cm: " << cmnInternalTo_cm(distance) << std::endl;
   </code>
@@ -54,7 +57,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 
-/*! \name Length units.  The internal unit is millimeter is
+/*! \name Length units.  The internal unit is millimeter if
   CISST_USE_SI_UNITS is set to false, meters otherwise. */
 //@{
 
