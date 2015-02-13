@@ -530,6 +530,9 @@ install (FILES "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/Usecisst.cmake"
                 "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
                 COPYONLY)
+configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/cisstSettings.cmake"
+                "${CISST_CMAKE_BINARY_DIR}/cisstSettings.cmake"
+                COPYONLY)
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstMacros.cmake"
                 "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
                 COPYONLY)
@@ -538,6 +541,7 @@ configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstConfigVersion.cmake.in"
                 COPYONLY)
 
 install (FILES "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
+               "${CISST_CMAKE_BINARY_DIR}/cisstSettings.cmake"
                "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
                "${CISST_CMAKE_BINARY_DIR}/cisstConfigVersion.cmake.in"
          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
