@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -246,6 +244,12 @@ public:
     inline ThisType & operator = (const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
     }
+
+    template <size_type __size, stride_type __stride, class __elementType, class __dataPtrType>
+    inline ThisType & operator =
+    (const vctFixedSizeConstVectorBase<__size, __stride, __elementType, __dataPtrType> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
     //@}
 
     /*! Assignement of a scalar to all elements.  See also SetAll. */
@@ -277,4 +281,3 @@ public:
 };
 
 #endif // _vctDynamicVectorRef_h
-

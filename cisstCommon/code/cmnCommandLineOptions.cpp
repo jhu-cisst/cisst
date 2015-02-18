@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
-  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2012-2015 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -67,6 +66,16 @@ cmnCommandLineOptions::OptionMultipleValuesBase::OptionMultipleValuesBase(const 
 
 cmnCommandLineOptions::cmnCommandLineOptions(void)
 {
+}
+
+
+cmnCommandLineOptions::~cmnCommandLineOptions()
+{
+    const OptionsType::iterator end = this->Options.end();
+    OptionsType::iterator iter = this->Options.begin();
+    for (; iter != end; ++iter) {
+        delete *iter;
+    }
 }
 
 
@@ -177,7 +186,7 @@ bool cmnCommandLineOptions::Parse(int argc, char * argv[], std::string & errorMe
         argv_const[index] = argv[index];
     }
     bool result = Parse(argc, argv_const, errorMessage);
-    delete argv_const;
+    delete[] argv_const;
     return result;
 }
 

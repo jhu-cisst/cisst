@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 //! A robot link
 /**
    robLink implements the methods necessary to model a robot link. The class is
-   derived from robBody to store the dynamics parameters of the body and the 
+   derived from robBody to store the dynamics parameters of the body and the
    link's position and orientation. The link is also derived from robDH to
    determine the link's position and orientation from joint values
 */
@@ -45,19 +45,19 @@ class CISST_EXPORT robLink {
  public:
 
   enum Errno { ESUCCESS, EFAILURE };
-  
+
   //! Default constructor
   robLink();
 
   //! Copy constructor
   robLink( const robLink& link );
-  
+
   //! Overloaded constructor
   robLink( robKinematics* kinematics, const robMass& mass );
 
   //! Default destructor
   ~robLink();
-  
+
   //! Read the DH and body parameters
   /**
      First read the DH parameters and then the body's parameters. At the
@@ -74,20 +74,20 @@ class CISST_EXPORT robLink {
      joint maximum position (1 double): upper joint limit
      joint maximum force/torque (1 double): absolute force/torque limit
      mass (1 double): The mass of the body
-     center of mass (3 double): \f$ \begin{matrix}x&y&z\end{matrix} \f$
-     principal moment of inertia (3 double): 
-                          \f$\begin{bmatrix}I_{xx}&I_{yy}&I_{zz}\end{bmatrix} \f$
-     body principal axis (9 double): 
+     center of mass (3 double): \f$ \matrix{x & y & z} \f$
+     principal moment of inertia (3 double):
+                          \f$ \matrix{I_{xx} & I_{yy} & I_{zz}} \f$
+     body principal axis (9 double):
   */
   robLink::Errno Read( std::istream& is );
 
 #if CISST_HAS_JSON
   robLink::Errno Read( const Json::Value & linkConfig );
 #endif
-  
+
   //! Write the DH and body parameters
   robLink::Errno Write( std::ostream& os ) const;
- 
+
   vctFrame4x4<double> ForwardKinematics( double q ) const;
 
 
@@ -100,12 +100,12 @@ class CISST_EXPORT robLink {
   robKinematics::Convention GetConvention() const;
 
   robJoint::Type GetType() const;
- 
+
   double Mass() const { return mass.Mass(); }
 
-  vctFixedSizeVector<double,3> CenterOfMass() const 
+  vctFixedSizeVector<double,3> CenterOfMass() const
   { return mass.CenterOfMass(); }
-  
+
   vctFixedSizeMatrix<double,3,3> MomentOfInertiaAtCOM() const
   { return mass.MomentOfInertiaAtCOM(); }
 

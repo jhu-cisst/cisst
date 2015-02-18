@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -343,7 +341,14 @@ public:
 
     //@}
 
-
+    /*! Create a const reference to a sub vector */
+    vctDynamicConstVectorRef<_elementType>
+    Ref(const size_type size, const size_type startPosition = 0) const throw (std::out_of_range) {
+        if ((startPosition + size) > this->size()) {
+            cmnThrow(std::out_of_range("vctDynamicConstVectorBase::Ref: reference is out of range"));
+        }
+        return vctDynamicConstVectorRef<_elementType>(size, Pointer(startPosition), this->stride());
+    }
 
     /*! \name Incremental operations returning a scalar.
       Compute a scalar from all the elements of the vector. */
@@ -1127,4 +1132,3 @@ inline void vctFixedSizeVectorBaseAssignDynamicConstVectorBase(
 
 
 #endif // _vctDynamicConstVectorBase_h
-

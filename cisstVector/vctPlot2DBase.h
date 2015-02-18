@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
   \todo Cleanup pointSize vs lineWidth in traces, lines, etc.  use linewidth for everything
   \todo Create a base class "element"/"data" for all elements visible (i.e. signal, vertical line, grid, ...), modifiedSinceLastRender, maybe even render method ...
   \todo Fit/Render should probably be defined at plot/scale/data level
-  \tobo Add flag/method Modified to all elements type to optimize fit/render
+  \todo Add flag/method Modified to all elements type to optimize fit/render
 */
 class CISST_EXPORT vctPlot2DBase
 {

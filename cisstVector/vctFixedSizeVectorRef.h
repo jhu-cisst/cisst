@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+  Author(s):  Ofri Sadowsky, Anton Deguet
+  Created on: 2003-09-30
 
-  Author(s):	Ofri Sadowsky, Anton Deguet
-  Created on:	2003-09-30
-
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -143,19 +141,24 @@ class vctFixedSizeVectorRef : public vctFixedSizeVectorBase<
       \param other The vector to be copied.
     */
     //@{
-	inline CISST_DEPRECATED ThisType & operator = (const ThisType & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    inline ThisType & operator = (const ThisType & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
 
-	template <stride_type __stride>
-	inline ThisType & operator = (const vctFixedSizeConstVectorRef<value_type, _size, __stride> & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    template <stride_type __stride>
+    inline ThisType & operator = (const vctFixedSizeConstVectorRef<value_type, _size, __stride> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
 
-	template <stride_type __stride, class __elementType, class __dataPtrType>
-	inline ThisType & operator = (const vctFixedSizeConstVectorBase<_size, __stride, __elementType, __dataPtrType> & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    template <stride_type __stride, class __elementType, class __dataPtrType>
+    inline ThisType & operator = (const vctFixedSizeConstVectorBase<_size, __stride, __elementType, __dataPtrType> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
+
+    template <class __vectorOwnerType>
+    inline ThisType & operator = (const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
     //@}
 
     /*! Assignement of a scalar to all elements.  See also SetAll. */
@@ -163,9 +166,6 @@ class vctFixedSizeVectorRef : public vctFixedSizeVectorBase<
         this->SetAll(value);
         return *this;
     }
-
 };
 
-
 #endif  // _vctFixedSizeVectorRef_h
-

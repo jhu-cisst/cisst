@@ -1,11 +1,8 @@
 #
-# $Id$
-#
 # Author(s):  Anton Deguet
 # Created on: 2010-08-11
 #
-# (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2010-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -29,6 +26,16 @@ if (NOT CURRENT_PROJECT_IS_CISST)
 
   # Load all settings for external dependencies
   cisst_load_package_setting (${CISST_LIBRARIES_REQUIRED_INTERNAL})
+
+  # Include default cisst settings
+  find_file (_cisstSettings_file
+             cisstSettings.cmake
+             PATHS ${CISST_CMAKE_DIRS})
+  if (EXISTS ${_cisstSettings_file})
+    include (${_cisstSettings_file})
+  else ()
+    message (FATAL_ERROR "Can't find cisstSettings.cmake in path: ${CISST_CMAKE_DIRS}")
+  endif ()
 
 endif (NOT CURRENT_PROJECT_IS_CISST)
 

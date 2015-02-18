@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+ Author(s):  Ankur Kapoor, Min Yang Jung, Anton Deguet
+ Created on: 2004-04-30
 
-Author(s):  Ankur Kapoor, Min Yang Jung, Anton Deguet
-Created on: 2004-04-30
-
-(C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+ (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,6 +42,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     IndexWriter(0),
     IndexReader(0),
     IndexDelayed(0),
+    Delay(0.0),
     AutomaticAdvanceFlag(true),
     StateVector(0),
     StateVectorDataNames(0),

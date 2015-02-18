@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -106,7 +104,7 @@ cisst_add_library (
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES})
 
-add_dependencies (cisstCommon cisstBuildType)
+add_dependencies (cisstCommon cisstRevision cisstBuildType)
 
 if (CISST_HAS_JSON)
   add_dependencies (cisstCommon cisstJSONExternal)
