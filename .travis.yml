@@ -12,7 +12,12 @@
    - cd build
    - cmake -C ../.travis.cache.cmake ..
 
- script: make
+ script:
+   - make
+   - cd bin
+   - cisstCommonTests -r
+   - cisstVectorTests -r
+   - cisstOSAbstractionTests -r
 
  notifications:
    email:
