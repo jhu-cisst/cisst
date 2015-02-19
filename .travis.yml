@@ -6,7 +6,7 @@
 
  before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq cmake libxml2-dev qt5-default libcppunit-dev libopencv-dev 
+  - sudo apt-get install -qq cmake libxml2-dev libcppunit-dev libopencv-dev 
 
  before_script:
    - mkdir build
