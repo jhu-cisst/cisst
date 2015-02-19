@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2004-08-31
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,6 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnClassRegister.h>
 
+// to provide some information regarding this build
+#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnUnits.h>
 
 cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     Mask(CMN_LOG_ALLOW_ALL),
@@ -36,6 +37,13 @@ cmnLogger::cmnLogger(const std::string & defaultLogFileName):
 {
     LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), CMN_LOG_ALLOW_DEFAULT);
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " " << CISST_FULL_REVISION << std::endl;
+    std::string result = "undefined";
+    cmnPath::GetCisstRoot(result);
+    *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " CISST_ROOT: " << result << std::endl;
+    result = "undefined";
+    cmnPath::GetCisstShare(result);
+    *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " cisst share: " << result << std::endl;
+    *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " cmn_m: " << cmn_m << ", cmn_kg: " << cmn_kg << ", CISST_USE_SI_UNITS is set to " << CISST_USE_SI_UNITS << std::endl;
 }
 
 

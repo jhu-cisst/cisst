@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2003-11-04
 
-  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -253,7 +251,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /*! Create a reference to the main diagonal */
-    DiagonalRefType Diagonal() {
+    DiagonalRefType Diagonal(void) {
         return DiagonalRefType(this->Data);
     }
 
@@ -268,12 +266,27 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented in base class */
-    ConstDiagonalRefType Diagonal() const {
+    ConstDiagonalRefType Diagonal(void) const {
         return BaseType::Diagonal();
     }
-
     //@}
 
+    /*! Create a reference to a sub matrix */
+    //@{
+    template <vct::size_type __subRows, vct::size_type __subCols>
+    vctFixedSizeMatrixRef<_elementType, __subRows, __subCols, _rowStride, _colStride>
+    Ref(const size_type startRow = 0, const size_type startCol = 0) throw (std::out_of_range) {
+        vctFixedSizeMatrixRef<_elementType, __subRows, __subCols, _rowStride, _colStride>
+            result(*this, startRow, startCol);
+        return result;
+    }
+
+    template <vct::size_type __subRows, vct::size_type __subCols>
+    vctFixedSizeConstMatrixRef<_elementType, __subRows, __subCols, _rowStride, _colStride>
+    Ref(const size_type startRow = 0, const size_type startCol = 0) const throw (std::out_of_range) {
+        return BaseType::Ref(startRow, startCol);
+    }
+    //@}
 
     //@{ Methods to change the order of rows and columns of a matrix
     /*! Exchange two rows of the matrix */
@@ -1340,4 +1353,3 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
 
 #endif // _vctFixedSizeMatrixBase_h
-

@@ -1,9 +1,7 @@
 # -*- Mode: CMAKE; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set filetype=cmake softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 #
-#
-# (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2010-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -31,7 +29,12 @@ set (SOURCE_FILES_FROM_cisstCommon
      ${cisstCommonLibs_SOURCE_DIR}/code/cmnGenericObject.cpp
      ${cisstCommonLibs_SOURCE_DIR}/code/cmnLogger.cpp
      ${cisstCommonLibs_SOURCE_DIR}/code/cmnLogLoD.cpp
-    )
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnPath.cpp
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnTokenizer.cpp
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnClassServices.cpp
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnSerializer.cpp
+     ${cisstCommonLibs_SOURCE_DIR}/code/cmnDeSerializer.cpp
+     )
 
 # make sure no cisst symbols is considered "imported" by declspec
 if (WIN32)

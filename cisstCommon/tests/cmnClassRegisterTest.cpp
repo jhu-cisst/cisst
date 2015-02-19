@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2003-07-28
 
-  (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -271,7 +270,7 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
     CPPUNIT_ASSERT(createdOjectC2DefaultCtor->Elements[0] == 1.0);
     CPPUNIT_ASSERT(createdOjectC2DefaultCtor->Elements[1] == 2.0);
     /* now test the copy constructor */
-    free(createdOjectC2DefaultCtor->Elements);
+    delete[] createdOjectC2DefaultCtor->Elements;
     createdOjectC2DefaultCtor->Size = 3;
     createdOjectC2DefaultCtor->Elements = new double[3];
     createdOjectC2DefaultCtor->Elements[0] = 3;
@@ -296,7 +295,7 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
 
     /* use the placement new to recreate the object */
     /* now test the copy constructor */
-    free(realObjectC2.Elements);
+    delete[] realObjectC2.Elements;
     realObjectC2.Size = 4;
     realObjectC2.Elements = new double[4];
     realObjectC2.Elements[0] = 4;
@@ -332,7 +331,6 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
     CPPUNIT_ASSERT(typeid(*objectD34) == typeid(realObjectD34a));
     TestD<3, 4> realObjectD34b;
     CPPUNIT_ASSERT(typeid(*objectD34) == typeid(realObjectD34b));
-
 }
 
 

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+  Author(s):  Ofri Sadowsky
+  Created on: 2003-11-04
 
-  Author(s):	Ofri Sadowsky
-  Created on:	2003-11-04
-
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -168,19 +166,24 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
       \param other The matrix to be copied.
     */
     //@{
-	inline ThisType & operator=(const ThisType & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    inline ThisType & operator = (const ThisType & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
 
-	template <stride_type __rowStride, stride_type __colStride>
-	inline ThisType & operator=(const vctFixedSizeConstMatrixRef<_elementType, _rows, _cols, __rowStride, __colStride> & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    template <stride_type __rowStride, stride_type __colStride>
+    inline ThisType & operator = (const vctFixedSizeConstMatrixRef<_elementType, _rows, _cols, __rowStride, __colStride> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
 
-	template <stride_type __rowStride, stride_type __colStride, class __elementType, class __dataPtrType>
-	inline ThisType & operator=(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, __elementType, __dataPtrType> & other) {
-		return reinterpret_cast<ThisType &>(this->Assign(other));
-	}
+    template <stride_type __rowStride, stride_type __colStride, class __elementType, class __dataPtrType>
+    inline ThisType & operator = (const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, __elementType, __dataPtrType> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
+
+    template <class __matrixOwnerType>
+    inline ThisType & operator = (const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & other) {
+        return reinterpret_cast<ThisType &>(this->Assign(other));
+    }
     //@}
 
     /*! Assignement of a scalar to all elements.  See also SetAll. */
@@ -240,4 +243,3 @@ inline void MultiplyVectorMatrix(
 
 
 #endif // _vctFixedSizeMatrixRef_h
-
