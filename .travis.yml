@@ -15,6 +15,7 @@
  script:
    - make
    - cd bin
+   - ls -lR
    - cisstCommonTests -r
    - cisstVectorTests -r
    - cisstOSAbstractionTests -r
