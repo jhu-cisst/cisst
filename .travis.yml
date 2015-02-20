@@ -16,9 +16,9 @@
    - make
    - cd bin
    - ls -lR
-   - cisstCommonTests -r
-   - cisstVectorTests -r
-   - cisstOSAbstractionTests -r
+   - ./cisstCommonTests -r
+   - ./cisstVectorTests -r
+   - ./cisstOSAbstractionTests -r
 
  notifications:
    email:
