@@ -79,11 +79,11 @@ extern "C" {
             doublereal *alpha, doublereal *a, integer *lda,
             doublereal* b, integer *ldb, doublereal *beta,
             doublereal *c, integer *ldc);
-  void gemm(char *transa, char *transb, 
-	    integer *m, integer *n, integer *k,
+  void gemm(char *transa, char *transb,
+            integer *m, integer *n, integer *k,
             doublereal *alpha, doublereal *a, integer *lda,
-	    doublereal *b, integer *ldb, 
-	    doublereal *beta,  doublereal *c, integer *ldc);
+            doublereal *b, integer *ldb,
+            doublereal *beta,  doublereal *c, integer *ldc);
   void symv(char *uplo, integer *n,
             doublereal *alpha, doublereal *a, integer *lda,
             doublereal *x, integer *incx, doublereal *beta,
@@ -97,13 +97,13 @@ extern "C" {
              doublereal *A, integer *LDA, integer *IPIV,
              doublereal *B, integer *LDB, integer *INFO);
   void gelss(integer* M, integer* N, integer* NRHS,
-	     doublereal* A, integer* LDA, 
-	     doublereal* B, integer* LDB, 
-	     doublereal* S, doublereal* RCOND, integer* RANK, 
-	     doublereal* WORK, integer* LWORK, integer* INFO );
+             doublereal* A, integer* LDA,
+             doublereal* B, integer* LDB,
+             doublereal* S, doublereal* RCOND, integer* RANK,
+             doublereal* WORK, integer* LWORK, integer* INFO );
 
   doublereal nrm2(integer *N, doublereal* X, integer *INC);
-  
+
 }
 
 #define NR_END 1
@@ -136,43 +136,43 @@ void free_rmatrix(double** m, long nrl, long ncl){
 robManipulator::robManipulator( const vctFrame4x4<double>& Rtw0 )
 {  this->Rtw0 = Rtw0;  }
 
-robManipulator::robManipulator( const std::string& linkfile, 
-				const vctFrame4x4<double>& Rtw0 ){
-  
+robManipulator::robManipulator( const std::string& linkfile,
+                                const vctFrame4x4<double>& Rtw0 ){
+
   this->Rtw0 = Rtw0;
-  
+
   if( LoadRobot( linkfile ) == robManipulator::EFAILURE ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << " Failed to load the robot configuration."
-		      << std::endl;
+                      << " Failed to load the robot configuration."
+                      << std::endl;
   }
 }
 
 robManipulator::robManipulator( const std::vector<robKinematics *> linkParms,
-				const vctFrame4x4<double>& Rtw0 ){
+                                const vctFrame4x4<double>& Rtw0 ){
 
   this->Rtw0 = Rtw0;
 
   if( LoadRobot( linkParms ) == robManipulator::EFAILURE ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << " Failed to load the robot configuration."
-		      << std::endl;
+                      << " Failed to load the robot configuration."
+                      << std::endl;
   }
 }
 
-robManipulator::~robManipulator() 
+robManipulator::~robManipulator()
 {
 }
 
 void robManipulator::Attach( robManipulator* tool )
 { tools.push_back( tool ); }
-				
+
 robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
 
   if( filename.empty() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << " No configuration file!."
-		      << std::endl;
+                      << " No configuration file!."
+                      << std::endl;
     return robManipulator::EFAILURE;
   }
 
@@ -180,8 +180,8 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
   ifs.open( filename.data() );
   if(!ifs){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << " Couldn't open configuration file " << filename 
-		      << std::endl;
+                      << " Couldn't open configuration file " << filename
+                      << std::endl;
     return robManipulator::EFAILURE;
   }
 
@@ -209,11 +209,11 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
     try{ kinematics = robKinematics::Instantiate( convention ); }
     catch( std::bad_alloc& ){
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			<< "Failed to allocate a kinematics of type: " 
-			<< convention
-			<< std::endl;
+                        << "Failed to allocate a kinematics of type: "
+                        << convention
+                        << std::endl;
     }
-    
+
     CMN_ASSERT( kinematics != NULL );
     robLink li( kinematics, robMass() );
     li.Read( stringstream );
@@ -302,9 +302,9 @@ robManipulator::Errno robManipulator::LoadRobot(std::vector<robKinematics *> Kin
 //         KINEMATICS
 //////////////////////////////////////
 
-vctFrame4x4<double> 
+vctFrame4x4<double>
 robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
-				   int N ) const {
+                                   int N ) const {
 
   if( N == 0 ) return Rtw0;
 
@@ -313,17 +313,17 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
 
   if( ((int)q.size()) < N ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected " << N << " joint positions but "
-		      << "size(q) = " << q.size() << "."
-		      << std::endl;
+                      << ": Expected " << N << " joint positions but "
+                      << "size(q) = " << q.size() << "."
+                      << std::endl;
     return Rtw0;
   }
 
   // no link? then return the transformation of the base
   if( links.empty() ){
     //CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-    //		<< ": Manipulator has no link."
-    //			<< std::endl;
+    //                << ": Manipulator has no link."
+    //                        << std::endl;
     return Rtw0;
   }
 
@@ -344,36 +344,36 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
   return Rtwi;
 }
 
-robManipulator::Errno 
-robManipulator::InverseKinematics( vctDynamicVector<double>& q, 
-				   const vctFrm3& Rts,
-				   double tolerance, 
-				   size_t Niterations ){
+robManipulator::Errno
+robManipulator::InverseKinematics( vctDynamicVector<double>& q,
+                                   const vctFrm3& Rts,
+                                   double tolerance,
+                                   size_t Niterations ){
   vctFrm3 Rtsn( Rts );
   Rtsn.Rotation().NormalizedSelf();
   vctFrame4x4<double> Rts4x4( Rtsn.Rotation(), Rtsn.Translation());
   return InverseKinematics( q, Rts4x4, tolerance, Niterations );
 }
 
-robManipulator::Errno 
-robManipulator::InverseKinematics( vctDynamicVector<double>& q, 
-				   const vctFrame4x4<double>& Rts,
-				   double tolerance, 
-				   size_t Niterations,
-				   double LAMBDA ){
+robManipulator::Errno
+robManipulator::InverseKinematics( vctDynamicVector<double>& q,
+                                   const vctFrame4x4<double>& Rts,
+                                   double tolerance,
+                                   size_t Niterations,
+                                   double LAMBDA ){
 
   if( q.size() != links.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected " << links.size() << " joints values. "
-		      << " Got " << q.size() 
-		      << std::endl;
+                      << ": Expected " << links.size() << " joints values. "
+                      << " Got " << q.size()
+                      << std::endl;
     return robManipulator::EFAILURE;
   }
 
   if( links.size() == 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": The manipulator has no links."
-		      << std::endl;
+                      << ": The manipulator has no links."
+                      << std::endl;
     return robManipulator::EFAILURE;
   }
 
@@ -390,14 +390,14 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
   // These values are used for the SVD computation
   integer INFO;                   // The info code
-  integer INC = 1;                // The index increment 
+  integer INC = 1;                // The index increment
 
   doublereal ndq=1;               // norm of the iteration error
   size_t i;                   // the iteration counter
   char TRANSN = 'N';          // "N"ormal
   char TRANST = 'T';          // "T"transpose
   doublereal ALPHA = 1.0;
-  doublereal* dq = new doublereal[links.size()];
+  doublereal* dq = new doublereal[N];
 
   // loop until Niter are executed or the error is bellow the tolerance
   for( i=0; i<Niterations && tolerance<ndq; i++ ){
@@ -408,11 +408,11 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     JacobianSpatial( q );
 
     // compute the translation error
-    vctFixedSizeVector<double,3> dt( Rts[0][3]-Rt[0][3],   
-				     Rts[1][3]-Rt[1][3],  
-				     Rts[2][3]-Rt[2][3] );
-    
-    // compute the orientation error 
+    vctFixedSizeVector<double,3> dt( Rts[0][3]-Rt[0][3],
+                                     Rts[1][3]-Rt[1][3],
+                                     Rts[2][3]-Rt[2][3] );
+
+    // compute the orientation error
     // first build the [ n o a ] vectors
     vctFixedSizeVector<double,3> n1( Rt[0][0],  Rt[1][0],  Rt[2][0] );
     vctFixedSizeVector<double,3> o1( Rt[0][1],  Rt[1][1],  Rt[2][1] );
@@ -427,7 +427,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     // combine both errors in one R^6 vector
     doublereal e[6] = { dt[0], dt[1], dt[2], dr[0], dr[1], dr[2] };
 
-    // 
+    //
     for( integer j=0; j<N; j++ )
       { B[j] = 0.0; }
     for( integer j=0; j<6; j++ )
@@ -443,31 +443,31 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
     // We need to solve dq = J' ( JJ' + lambda I )^-1 e
 
-    // I = JJ' + lambda I 
-    gemm( &TRANSN, &TRANST, &M, &M, &N, 
-	  &ALPHA, 
-	  &Js[0][0], &LDA, 
-	  &Js[0][0], &LDA,
-	  &LAMBDA,
-	  &(I[0][0]), &M );
+    // I = JJ' + lambda I
+    gemm( &TRANSN, &TRANST, &M, &M, &N,
+          &ALPHA,
+          &Js[0][0], &LDA,
+          &Js[0][0], &LDA,
+          &LAMBDA,
+          &(I[0][0]), &M );
 
     // solve B = I\B
     integer IPIV[6];
     LDB=6;
-    gesv( &M, &NRHS, 
-	  &(I[0][0]), &LDA,
-	  &(IPIV[0]),
-	  &(B[0]), &LDB,
-	  &INFO );
+    gesv( &M, &NRHS,
+          &(I[0][0]), &LDA,
+          &(IPIV[0]),
+          &(B[0]), &LDB,
+          &INFO );
     // should check the pivots
 
     // dq = J'B
     doublereal GAMMA = 0.0;
     gemv( &TRANST, &M, &N, &ALPHA,
-	  &(Js[0][0]), &LDA,
-	  &(B[0]), &INC,
-	  &GAMMA,
-	  dq, &INC );
+          &(Js[0][0]), &LDA,
+          &(B[0]), &INC,
+          &GAMMA,
+          dq, &INC );
 
     // compute the L2 norm of the error
     ndq = nrm2(&N, dq, &INC);
@@ -475,8 +475,8 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     // update the solution
     for(size_t j=0; j<links.size(); j++) q[j] += dq[j];
   }
-  
-  // copy the joint values and 
+
+  // copy the joint values and
   for(size_t j=0; j<links.size(); j++){
     q[j] = fmod((double)q[j], (double)2.0*cmnPI);
     if (cmnPI < q[j]) {
@@ -494,24 +494,24 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 }
 
 #if 0
-robManipulator::Errno 
-robManipulator::InverseKinematics( vctDynamicVector<double>& q, 
-				   const vctFrame4x4<double>& Rts,
-				   double tolerance, 
-				   size_t Niterations ){
+robManipulator::Errno
+robManipulator::InverseKinematics( vctDynamicVector<double>& q,
+                                   const vctFrame4x4<double>& Rts,
+                                   double tolerance,
+                                   size_t Niterations ){
 
   if( q.size() != links.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected " << links.size() << " joints values. "
-		      << " Got " << q.size() 
-		      << std::endl;
+                      << ": Expected " << links.size() << " joints values. "
+                      << " Got " << q.size()
+                      << std::endl;
     return robManipulator::EFAILURE;
   }
 
   if( links.size() == 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": The manipulator has no links."
-		      << std::endl;
+                      << ": The manipulator has no links."
+                      << std::endl;
     return robManipulator::EFAILURE;
   }
 
@@ -527,7 +527,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   double* B;                  // The N-by-NRHS matrix of right hand side matrix
   int LDB;                    // The leading dimension of the array B.
   if( N < 6 )    { B = new double[6]; LDB = 6; }
-  else           { B = new double[N]; LDB = N; }    
+  else           { B = new double[N]; LDB = N; }
 
   // These values are used for the SVD computation
   double* S = new double[M];  // The singular values of A in decreasing order
@@ -536,7 +536,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   int LWORK = 128;            // The (safe) size of the workspace
   double WORK[128];           // The workspace
   int INFO;                   // The info code
-  int INC = 1;                // The index increment 
+  int INC = 1;                // The index increment
 
   double ndq=1;               // norm of the iteration error
   size_t i = 0;               // the iteration counter
@@ -550,11 +550,11 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     JacobianSpatial( q );
 
     // compute the translation error
-    vctFixedSizeVector<double,3> dt( Rts[0][3]-Rt[0][3],   
-				     Rts[1][3]-Rt[1][3],  
-				     Rts[2][3]-Rt[2][3] );
-    
-    // compute the orientation error 
+    vctFixedSizeVector<double,3> dt( Rts[0][3]-Rt[0][3],
+                                     Rts[1][3]-Rt[1][3],
+                                     Rts[2][3]-Rt[2][3] );
+
+    // compute the orientation error
     // first build the [ n o a ] vectors
     vctFixedSizeVector<double,3> n1( Rt[0][0],  Rt[1][0],  Rt[2][0] );
     vctFixedSizeVector<double,3> o1( Rt[0][1],  Rt[1][1],  Rt[2][1] );
@@ -578,21 +578,21 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
     // compute the minimum norm solution
     gelss( &M, &N, &NHRS,       // 6xN matrix
-	   A, &LDA,             // Jacobian matrix
-	   B, &LDB,             // error vector
-	   S, &RCOND, &RANK,    // SVD parameters
-	   WORK, &LWORK, &INFO );
-    
+           A, &LDA,             // Jacobian matrix
+           B, &LDB,             // error vector
+           S, &RCOND, &RANK,    // SVD parameters
+           WORK, &LWORK, &INFO );
+
     // process the errors (if any)
     if(INFO < 0)
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			<< ": the i-th argument of gelss is illegal." 
-			<< std::endl;
+                        << ": the i-th argument of gelss is illegal."
+                        << std::endl;
     if(0 < INFO)
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			<< ": gelss failed to converge."
-			<< std::endl;
-    
+                        << ": gelss failed to converge."
+                        << std::endl;
+
     // compute the L2 norm of the error
     ndq = nrm2(&N, B, &INC);
 
@@ -600,8 +600,8 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     for(size_t j=0; j<links.size(); j++) q[j] += B[j];
 
   }
-  
-  // copy the joint values and 
+
+  // copy the joint values and
   for(size_t j=0; j<links.size(); j++){
     q[j] = fmod((double)q[j], (double)2.0*cmnPI);
     if(cmnPI < q[j])
@@ -631,7 +631,7 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
   for(int j=(int)links.size()-1; 0<=j; j--){
 
     if( links[j].GetConvention() == robKinematics::STANDARD_DH ||  // DH
-	links[j].GetConvention() == robKinematics::HAYATI ){       // Hayati
+        links[j].GetConvention() == robKinematics::HAYATI ){       // Hayati
       U = links[j].ForwardKinematics( q[j] ) * U;
     }
 
@@ -678,7 +678,7 @@ bool robManipulator::JacobianBody(const vctDynamicVector<double>& q,
 }
 
 void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const{
-  
+
   JacobianBody( q );
 
   /*
@@ -707,9 +707,9 @@ void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const{
   Ad[2][5] = -Rt0n[1][3]*Rt0n[0][2] + Rt0n[0][3]*Rt0n[1][2];
 
   // lower left block
-  Ad[3][0] = 0.0;            Ad[3][1] = 0.0;            Ad[3][2] = 0.0; 
-  Ad[4][0] = 0.0;            Ad[4][1] = 0.0;            Ad[4][2] = 0.0; 
-  Ad[5][0] = 0.0;            Ad[5][1] = 0.0;            Ad[5][2] = 0.0; 
+  Ad[3][0] = 0.0;            Ad[3][1] = 0.0;            Ad[3][2] = 0.0;
+  Ad[4][0] = 0.0;            Ad[4][1] = 0.0;            Ad[4][2] = 0.0;
+  Ad[5][0] = 0.0;            Ad[5][1] = 0.0;            Ad[5][2] = 0.0;
 
   // lower right block
   Ad[3][3] = Rt0n[0][0];     Ad[3][4] = Rt0n[0][1];     Ad[3][5] = Rt0n[0][2];
@@ -717,24 +717,24 @@ void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const{
   Ad[5][3] = Rt0n[2][0];     Ad[5][4] = Rt0n[2][1];     Ad[5][5] = Rt0n[2][2];
 
   char TRANSA[] = "T";  // op(Ad): transpose of Ad coz it's row major
-  char TRANSB[] = "N";  // op(Jn) 
+  char TRANSB[] = "N";  // op(Jn)
   integer M = 6;            // specifies  the number  of rows  of op( Ad )
   integer N = links.size();// specifies the number  of columns of the matrix Jn
   integer K = 6;            // specifies  the number of columns of op( Ad )
   doublereal ALPHA = 1.0;     // C := alpha*op( A )*op( B ) + beta*C
-  doublereal* A = &Ad[0][0];  // 
-  integer LDA = 6;          // specifies the first dimension of A 
-  doublereal* B = &Jn[0][0];  // 
-  integer LDB = 6;          // specifies  the first dimension of B 
+  doublereal* A = &Ad[0][0];  //
+  integer LDA = 6;          // specifies the first dimension of A
+  doublereal* B = &Jn[0][0];  //
+  integer LDB = 6;          // specifies  the first dimension of B
   doublereal BETA = 0.0;      // C := alpha*op( A )*op( B ) + beta*C
-  doublereal* C = &Js[0][0];  // 
+  doublereal* C = &Js[0][0];  //
   integer LDC = 6;          // specifies the first dimension of C
 
   // Js = Ad * Jn
   gemm(TRANSA, TRANSB,
-       &M, &N, &K, 
+       &M, &N, &K,
        &ALPHA, A, &LDA,
-               B, &LDB, 
+               B, &LDB,
        &BETA,  C, &LDC);
 }
 
@@ -754,25 +754,25 @@ bool robManipulator::JacobianSpatial(const vctDynamicVector<double>& q,
 //         DYNAMICS
 //////////////////////////////////////
 
-vctDynamicVector<double> 
+vctDynamicVector<double>
 robManipulator::RNE( const vctDynamicVector<double>& q,
-		     const vctDynamicVector<double>& qd,
-		     const vctDynamicVector<double>& qdd,
-		     const vctFixedSizeVector<double,6>& fext,
-		     double g ) const {
+                     const vctDynamicVector<double>& qd,
+                     const vctDynamicVector<double>& qdd,
+                     const vctFixedSizeVector<double,6>& fext,
+                     double g ) const {
 
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
   vctFixedSizeVector<double,3> v    (0.0); // linear velocity
   vctFixedSizeVector<double,3> vd   (0.0); // linear acceleration
-  vctFixedSizeVector<double,3> vdhat(0.0); 
+  vctFixedSizeVector<double,3> vdhat(0.0);
 
   //total moment exerted on each link
   std::vector<vctFixedSizeVector<double,3> > N(links.size(),
-					       vctFixedSizeVector<double,3>(0));
-  //total force exerted on each link 
+                                               vctFixedSizeVector<double,3>(0));
+  //total force exerted on each link
   std::vector<vctFixedSizeVector<double,3> > F(links.size(),
-					       vctFixedSizeVector<double,3>(0));
+                                               vctFixedSizeVector<double,3>(0));
   // torques
   vctDynamicVector<double> tau(links.size(), 0.0);
 
@@ -783,8 +783,8 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // extract the rotation of the base and map the vector [0 0 1] in the robot
   // coordinate frame
   vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1],Rtw0[0][2],
-				Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
-				Rtw0[2][0], Rtw0[2][1],Rtw0[2][2] );
+                                Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
+                                Rtw0[2][0], Rtw0[2][1],Rtw0[2][2] );
   vd = R.Transpose() * z0 * g;
 
   // Forward recursion
@@ -807,14 +807,14 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     w  = A*( w  + (z0*qd[i]) );                   // angular velocity
     vd = (wd%ps) + (w%(w%ps)) + A*vd;             // linear acceleration
 
-    vdhat = (wd%s) + (w%(w%s)) + vd;              // 
+    vdhat = (wd%s) + (w%(w%s)) + vd;              //
     F[i] = m*vdhat;                               // total force
     N[i] = (I*wd) + (w%(I*w));                    // total moment
   }
 
   // external force applied on the TCP
   vctFixedSizeVector<double,3> f( fext[0], fext[1], fext[2] );
-  // external moment applied on the TCP 
+  // external moment applied on the TCP
   vctFixedSizeVector<double,3> n( fext[3], fext[4], fext[5] );
 
   // Backward recursion
@@ -823,45 +823,45 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     vctFixedSizeVector<double,3> ps = links[i].PStar();
     vctFixedSizeVector<double,3> s  = links[i].CenterOfMass();
 
-    if(i != (int)links.size()-1)              // 
-      A = links[i+1].Orientation( q[i+1] );    // 
+    if(i != (int)links.size()-1)              //
+      A = links[i+1].Orientation( q[i+1] );    //
 
     f = A*f + F[i];                            // force exterted on i by i-1
     n = A*n + (ps%f) + (s%F[i]) + N[i];        // moment externed on i by i-1
-    A = links[i].Orientation(q[i]).InverseSelf(); // 
+    A = links[i].Orientation(q[i]).InverseSelf(); //
 
     if (links[i].GetType() == robJoint::HINGE )
-      tau[i] = n*(A*z0);                       // 
+      tau[i] = n*(A*z0);                       //
     if( links[i].GetType() == robJoint::SLIDER )
-      tau[i] = f*(A*z0);                       // 
+      tau[i] = f*(A*z0);                       //
 
   }
 
   return tau;
 }
 
-vctDynamicVector<double> 
+vctDynamicVector<double>
 robManipulator::CCG( const vctDynamicVector<double>& q,
-		     const vctDynamicVector<double>& qd ) const {
+                     const vctDynamicVector<double>& qd ) const {
 
   if( q.size() != qd.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Size of q and qd do not match."
-		      << std::endl;
+                      << ": Size of q and qd do not match."
+                      << std::endl;
     return vctDynamicVector<double>();
   }
 
-  
 
-  return RNE( q,           // call Newton-Euler with only the joints positions 
+
+  return RNE( q,           // call Newton-Euler with only the joints positions
           qd,          // and the joints velocities
-	      vctDynamicVector<double>( q.size(), 0.0 ),
-	      vctFixedSizeVector<double,6>(0.0) );
+              vctDynamicVector<double>( q.size(), 0.0 ),
+              vctFixedSizeVector<double,6>(0.0) );
 }
 
-vctFixedSizeVector<double,6> 
+vctFixedSizeVector<double,6>
 robManipulator::BiasAcceleration( const vctDynamicVector<double>& q,
-				  const vctDynamicVector<double>& qd ) const {
+                                  const vctDynamicVector<double>& qd ) const {
 
   vctFixedSizeVector<double,3> w (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd(0.0); // angular acceleration
@@ -886,14 +886,14 @@ robManipulator::BiasAcceleration( const vctDynamicVector<double>& q,
 }
 
 // A is column major!
-vctDynamicMatrix<double> 
+vctDynamicMatrix<double>
 robManipulator::JSinertia( const vctDynamicVector<double>& q ) const {
 
   if( q.size() != links.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected " << links.size() << " values. "
-		      << "Got " << q.size() 
-		      << std::endl;
+                      << ": Expected " << links.size() << " values. "
+                      << "Got " << q.size()
+                      << std::endl;
     return vctDynamicMatrix<double>();
   }
 
@@ -915,12 +915,12 @@ robManipulator::JSinertia( const vctDynamicVector<double>& q ) const {
 }
 
 void robManipulator::JSinertia( double **A,
-				const vctDynamicVector<double>& q ) const {
+                                const vctDynamicVector<double>& q ) const {
 
   if( q.size() != links.size() ){
     std::cerr << "robManipulator::JSinertia: Expected " << links.size()
-	      << " values. Got " << q.size()
-	      << std::endl;
+              << " values. Got " << q.size()
+              << std::endl;
     return;
   }
 
@@ -938,8 +938,8 @@ void robManipulator::JSinertia( double **A,
 }
 
 // Ac is column major!
-void robManipulator::OSinertia( double Ac[6][6], 
-				const vctDynamicVector<double>& q ) const {
+void robManipulator::OSinertia( double Ac[6][6],
+                                const vctDynamicVector<double>& q ) const {
   char SIDE = 'R';                // dsymm C := alpha*B*A + beta*C,
   char UPLO = 'L';                // lower triangular (upper triangular for CM)
   char TRANST = 'T';
@@ -955,7 +955,7 @@ void robManipulator::OSinertia( double Ac[6][6],
   doublereal** JAi = rmatrix(0, links.size()-1, 0, 5);
   integer LDJAi = 6;
   integer LDJ = 6;
-  
+
   for(size_t r=0; r<links.size(); r++)
     for(size_t c=0; c<links.size(); c++)
       A[r][c] = 0.0;
@@ -968,24 +968,24 @@ void robManipulator::OSinertia( double Ac[6][6],
   potrf(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
   if(INFO<0)
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": The " << INFO << "th argument to potrf is illegal."
-		      << std::endl;
+                      << ": The " << INFO << "th argument to potrf is illegal."
+                      << std::endl;
   else if(0<INFO)
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": The matrix for potrf is not positive definite." 
-		      << std::endl;
+                      << ": The matrix for potrf is not positive definite."
+                      << std::endl;
 
   // invert A
   //
   potri(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
   if(INFO<0)
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": The " << INFO << "th argument to potri is illegal."
-		      << std::endl;
+                      << ": The " << INFO << "th argument to potri is illegal."
+                      << std::endl;
   else if(0<INFO)
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": The matrix passed to potri is singular."
-		      << std::endl;
+                      << ": The matrix passed to potri is singular."
+                      << std::endl;
 
   for( size_t c=0; c<links.size(); c++ )
     for( size_t r=c; r<links.size(); r++ )
@@ -996,15 +996,15 @@ void robManipulator::OSinertia( double Ac[6][6],
   // J*A^-1 : a 6xN matrix column major
   // C := alpha*B*A + beta*C,
   symm(&SIDE, &UPLO, &NEQS, &NJOINTS,
-       &ALPHA, &A [0][0], &LDA, 
+       &ALPHA, &A [0][0], &LDA,
        &Jn[0][0], &LDJ,
        &BETA, &JAi[0][0], &LDJAi);
-  
+
   // J*A^-1*J'
   // C := alpha*op( A )*op( B ) + beta*C
   integer LDAc = 6;
   gemm(&TRANSN, &TRANST, &NEQS, &NEQS, &NJOINTS,
-       &ALPHA, &JAi[0][0], &LDJAi, 
+       &ALPHA, &JAi[0][0], &LDJAi,
        &Jn[0][0],  &LDJ,
        &BETA,  &Ac[0][0],  &LDAc);
   /*
@@ -1036,14 +1036,14 @@ void robManipulator::OSinertia( double Ac[6][6],
   integer RANK;                   // The effective rank of A
   integer LWORK = 128;            // The (safe) size of the workspace
   doublereal WORK[128];           // The workspace
-  
+
   // compute the minimum norm solution
   gelss( &NEQS, &NEQS, &NEQS,
-	 &Ac[0][0], &LDI,           // 
-	 &I[0][0],  &LDI,           // error vector
-	 S, &RCOND, &RANK,          // SVD parameters
-	 WORK, &LWORK, &INFO );
-  
+         &Ac[0][0], &LDI,           //
+         &I[0][0],  &LDI,           // error vector
+         S, &RCOND, &RANK,          // SVD parameters
+         WORK, &LWORK, &INFO );
+
   for( int r=0; r<6; r++ )
     for( int c=0; c<6; c++ )
       Ac[r][c] = I[r][c];
@@ -1052,17 +1052,17 @@ void robManipulator::OSinertia( double Ac[6][6],
   free_rmatrix( JAi, 0, 0 );
 }
 
-vctDynamicVector<double> 
+vctDynamicVector<double>
 robManipulator::InverseDynamics(const vctDynamicVector<double>& q,
-				const vctDynamicVector<double>& qd,
-				const vctFixedSizeVector<double,6>& vdwd )const{
+                                const vctDynamicVector<double>& qd,
+                                const vctFixedSizeVector<double,6>& vdwd )const{
 
-  
+
   doublereal* JTAcF = new doublereal[links.size()];
   doublereal* JTAch = new doublereal[links.size()];
   for(size_t i=0; i<links.size(); i++) JTAcF[i] = 0.0;
   for(size_t i=0; i<links.size(); i++) JTAch[i] = 0.0;
-    
+
   // make sure there's a force, otherwise skip this and just consider ccg
   if(0.0 < vdwd.Norm()){
 
@@ -1071,61 +1071,61 @@ robManipulator::InverseDynamics(const vctDynamicVector<double>& q,
     integer INC = 1;
     char TRANST = 'T';
     integer NJOINTS = links.size();
-    
+
     doublereal ALPHA =  1.0;      //
-    doublereal BETA  =  0.0;      // 
-    
+    doublereal BETA  =  0.0;      //
+
     doublereal Ac[6][6];          // OS inertia matrix
     integer LDAc = 6;             // 1st dimension of Ac
     OSinertia( Ac, q );       // compute OS inertia matrix
-    
+
     integer LDJ = 6;              // 1st dimention of Jn
-    
+
     vctFixedSizeVector<double,6> h;
     h = BiasAcceleration( q, qd ); // h = Jdqd
 
     doublereal hv[6];            // make an array of h
     for( int i=0; i<6; i++ ) { hv[i] = h[i]; }
-    
+
     // Ac*h
     // y := alpha*A*x + beta*y,
     doublereal Ach[6];                                  // symmetric matrix*vector
     symv( &UPLO, &NEQS,
-	  &ALPHA, 
-	  &Ac[0][0], &LDAc, 
-	  &hv[0],    &INC,
-	  &BETA,  
-	  &Ach[0],   &INC );
-    
+          &ALPHA,
+          &Ac[0][0], &LDAc,
+          &hv[0],    &INC,
+          &BETA,
+          &Ach[0],   &INC );
+
     // J'*Ac*h
     // y := alpha*A'*x + beta*y,
     gemv( &TRANST, &NEQS, &NJOINTS,
-	  &ALPHA, 
-	  &Jn[0][0], &LDJ, 
-	  &Ach[0],   &INC, 
-	  &BETA, 
-	  &JTAch[0], &INC );
-    
+          &ALPHA,
+          &Jn[0][0], &LDJ,
+          &Ach[0],   &INC,
+          &BETA,
+          &JTAch[0], &INC );
+
     // Ac*F
     doublereal Fv[6];            // make an array of vdwd
     for( int i=0; i<6; i++ ) { Fv[i] = vdwd[i]; }
 
     doublereal AcF[6];
     symv( &UPLO, &NEQS,
-	  &ALPHA, 
-	  &Ac[0][0], &LDAc, 
-	  &Fv[0],    &INC,
-	  &BETA, 
-	  &AcF[0],   &INC );
+          &ALPHA,
+          &Ac[0][0], &LDAc,
+          &Fv[0],    &INC,
+          &BETA,
+          &AcF[0],   &INC );
 
     // J'*Ac*F
     gemv(&TRANST, &NEQS, &NJOINTS,
-         &ALPHA, 
-	 &Jn[0][0], &LDJ, 
-	 &AcF[0], &INC,
-         &BETA, 
-	 &JTAcF[0], &INC);
-    
+         &ALPHA,
+         &Jn[0][0], &LDJ,
+         &AcF[0], &INC,
+         &BETA,
+         &JTAcF[0], &INC);
+
   }
 
   vctDynamicVector<double> ccg = CCG(q, qd);        // compute the coriolis+grav
@@ -1140,15 +1140,15 @@ robManipulator::InverseDynamics(const vctDynamicVector<double>& q,
   return trq;
 }
 
-vctDynamicVector<double> 
+vctDynamicVector<double>
 robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
-				 const vctDynamicVector<double>& qd,
-				 const vctDynamicVector<double>& qdd ) const {
+                                 const vctDynamicVector<double>& qd,
+                                 const vctDynamicVector<double>& qdd ) const {
 
   vctDynamicVector<double> ccg = CCG(q, qd);
 
   doublereal* Inertterm  = new doublereal[ links.size() ];
-  for( size_t i=0; i<links.size(); i++ ) 
+  for( size_t i=0; i<links.size(); i++ )
     Inertterm [i] = 0;
 
   // Ensure there's an acceleration. Orthewise only consider ccg
@@ -1169,7 +1169,7 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
     for( size_t i=0; i<links.size(); i++ ) qddv[i] = qdd[i];
 
     symv(&LOW, &N,
-         &ALPHA, &A[0][0], &LDA, 
+         &ALPHA, &A[0][0], &LDA,
          qddv, &INC,
          &BETA, Inertterm, &INC);
 
@@ -1193,8 +1193,8 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
 
 vctFixedSizeMatrix<double,4,4>
 robManipulator::SE3Difference( const vctFrame4x4<double>& Rt1,
-			       const vctFrame4x4<double>& Rt2 ) const {
-  
+                               const vctFrame4x4<double>& Rt2 ) const {
+
   vctFixedSizeMatrix<double,4,4> dRt(0.0);
 
   for( size_t r=0; r<4; r++ ){
@@ -1205,9 +1205,9 @@ robManipulator::SE3Difference( const vctFrame4x4<double>& Rt1,
   return dRt;
 }
 
-void 
+void
 robManipulator::AddIdentificationColumn
-( vctDynamicMatrix<double>& J, 
+( vctDynamicMatrix<double>& J,
   vctFixedSizeMatrix<double,4,4>& delRt ) const{
 
   size_t c = J.cols();
@@ -1219,10 +1219,10 @@ robManipulator::AddIdentificationColumn
   J[3][c] = (delRt[2][1] - delRt[1][2])/2.0;  // average wx
   J[4][c] = (delRt[0][2] - delRt[2][0])/2.0;  // average wy
   J[5][c] = (delRt[1][0] - delRt[0][1])/2.0;  // average wz
-  
+
 }
 
-vctDynamicMatrix<double> 
+vctDynamicMatrix<double>
 robManipulator::JacobianKinematicsIdentification
 ( const vctDynamicVector<double>& q, double epsilon ) const {
 
@@ -1245,199 +1245,199 @@ robManipulator::JacobianKinematicsIdentification
 
     // for each parameter
     switch( ki->GetConvention() ){
-      
+
     case robKinematics::STANDARD_DH:
       {
-	robDH* dh = dynamic_cast<robDH*>( ki );
+        robDH* dh = dynamic_cast<robDH*>( ki );
 
-	{
-	  double old = dh->GetRotationX();
-	  dh->SetRotationX( old + epsilon );
-	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	  dh->SetRotationX( old );
-	  vctFixedSizeMatrix<double,4,4> delRt;
-	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	  AddIdentificationColumn( J, delRt );
-	}
+        {
+          double old = dh->GetRotationX();
+          dh->SetRotationX( old + epsilon );
+          vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+          dh->SetRotationX( old );
+          vctFixedSizeMatrix<double,4,4> delRt;
+          delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+          AddIdentificationColumn( J, delRt );
+        }
 
-	{
-	  double old = dh->GetTranslationX();
-	  dh->SetTranslationX( old + epsilon );
-	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	  dh->SetTranslationX( old );
-	  vctFixedSizeMatrix<double,4,4> delRt;
-	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	  AddIdentificationColumn( J, delRt );
-	}
+        {
+          double old = dh->GetTranslationX();
+          dh->SetTranslationX( old + epsilon );
+          vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+          dh->SetTranslationX( old );
+          vctFixedSizeMatrix<double,4,4> delRt;
+          delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+          AddIdentificationColumn( J, delRt );
+        }
 
-	{
-	  double old = dh->GetRotationZ();
-	  dh->SetRotationZ( old + epsilon );
-	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	  dh->SetRotationZ( old );
-	  vctFixedSizeMatrix<double,4,4> delRt;
-	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	  AddIdentificationColumn( J, delRt );
-	}
+        {
+          double old = dh->GetRotationZ();
+          dh->SetRotationZ( old + epsilon );
+          vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+          dh->SetRotationZ( old );
+          vctFixedSizeMatrix<double,4,4> delRt;
+          delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+          AddIdentificationColumn( J, delRt );
+        }
 
-	{
-	  double old = dh->GetTranslationZ();
-	  dh->SetTranslationZ( old + epsilon );
-	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	  dh->SetTranslationZ( old );
-	  vctFixedSizeMatrix<double,4,4> delRt;
-	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	  AddIdentificationColumn( J, delRt );
-	}
-	
+        {
+          double old = dh->GetTranslationZ();
+          dh->SetTranslationZ( old + epsilon );
+          vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+          dh->SetTranslationZ( old );
+          vctFixedSizeMatrix<double,4,4> delRt;
+          delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+          AddIdentificationColumn( J, delRt );
+        }
+
       }
       break;
-      
+
     case robKinematics::MODIFIED_DH:
       {
-	robModifiedDH* mdh = dynamic_cast<robModifiedDH*>( ki );
+        robModifiedDH* mdh = dynamic_cast<robModifiedDH*>( ki );
 
-	{
-	  double old = mdh->GetRotationX();
-	  mdh->SetRotationX( old + epsilon );
-	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	  mdh->SetRotationX( old );
-	  vctFixedSizeMatrix<double,4,4> delRt;
-	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	  AddIdentificationColumn( J, delRt );
-	}
+        {
+          double old = mdh->GetRotationX();
+          mdh->SetRotationX( old + epsilon );
+          vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+          mdh->SetRotationX( old );
+          vctFixedSizeMatrix<double,4,4> delRt;
+          delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+          AddIdentificationColumn( J, delRt );
+        }
 
-	{
-	  double old = mdh->GetTranslationX();
-	  mdh->SetTranslationX( old + epsilon );
-	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	  mdh->SetTranslationX( old );
-	  vctFixedSizeMatrix<double,4,4> delRt;
-	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	  AddIdentificationColumn( J, delRt );
-	}
+        {
+          double old = mdh->GetTranslationX();
+          mdh->SetTranslationX( old + epsilon );
+          vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+          mdh->SetTranslationX( old );
+          vctFixedSizeMatrix<double,4,4> delRt;
+          delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+          AddIdentificationColumn( J, delRt );
+        }
 
-	{
-	  double old = mdh->GetRotationZ();
-	  mdh->SetRotationZ( old + epsilon );
-	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	  mdh->SetRotationZ( old );
-	  vctFixedSizeMatrix<double,4,4> delRt;
-	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	  AddIdentificationColumn( J, delRt );
-	}
+        {
+          double old = mdh->GetRotationZ();
+          mdh->SetRotationZ( old + epsilon );
+          vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+          mdh->SetRotationZ( old );
+          vctFixedSizeMatrix<double,4,4> delRt;
+          delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+          AddIdentificationColumn( J, delRt );
+        }
 
-	{
-	  double old = mdh->GetTranslationZ();
-	  mdh->SetTranslationZ( old + epsilon );
-	  vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	  mdh->SetTranslationZ( old );
-	  vctFixedSizeMatrix<double,4,4> delRt;
-	  delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	  AddIdentificationColumn( J, delRt );
-	}
+        {
+          double old = mdh->GetTranslationZ();
+          mdh->SetTranslationZ( old + epsilon );
+          vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+          mdh->SetTranslationZ( old );
+          vctFixedSizeMatrix<double,4,4> delRt;
+          delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+          AddIdentificationColumn( J, delRt );
+        }
 
       }
       break;
-      
+
     case robKinematics::HAYATI:
       {
-	robHayati* h = dynamic_cast<robHayati*>( ki );
+        robHayati* h = dynamic_cast<robHayati*>( ki );
 
-	switch( h->GetType() ){
-	case robJoint::HINGE:
-	  {
+        switch( h->GetType() ){
+        case robJoint::HINGE:
+          {
 
-	    {
-	      double old = h->GetRotationX();
-	      h->SetRotationX( old + epsilon );
-	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	      h->SetRotationX( old );
-	      vctFixedSizeMatrix<double,4,4> delRt;
-	      delRt = Rti*SE3Difference( Rt_,Rt )/epsilon;
-	      AddIdentificationColumn( J, delRt );
-	    }
+            {
+              double old = h->GetRotationX();
+              h->SetRotationX( old + epsilon );
+              vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+              h->SetRotationX( old );
+              vctFixedSizeMatrix<double,4,4> delRt;
+              delRt = Rti*SE3Difference( Rt_,Rt )/epsilon;
+              AddIdentificationColumn( J, delRt );
+            }
 
-	    {
-	      double old = h->GetRotationY();
-	      h->SetRotationY( old + epsilon );
-	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	      h->SetRotationY( old );
-	      vctFixedSizeMatrix<double,4,4> delRt;
-	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	      AddIdentificationColumn( J, delRt );
-	    }
+            {
+              double old = h->GetRotationY();
+              h->SetRotationY( old + epsilon );
+              vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+              h->SetRotationY( old );
+              vctFixedSizeMatrix<double,4,4> delRt;
+              delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+              AddIdentificationColumn( J, delRt );
+            }
 
-	    {
-	      double old = h->GetRotationZ();
-	      h->SetRotationZ( old + epsilon );
-	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	      h->SetRotationZ( old );
-	      vctFixedSizeMatrix<double,4,4> delRt;
-	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	      AddIdentificationColumn( J, delRt );
-	    }
-	    
-	    {
-	      double old = h->GetTranslationX();
-	      h->SetTranslationX( old + epsilon );
-	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	      h->SetTranslationX( old );
-	      vctFixedSizeMatrix<double,4,4> delRt;
-	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	      AddIdentificationColumn( J, delRt );
-	    }
+            {
+              double old = h->GetRotationZ();
+              h->SetRotationZ( old + epsilon );
+              vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+              h->SetRotationZ( old );
+              vctFixedSizeMatrix<double,4,4> delRt;
+              delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+              AddIdentificationColumn( J, delRt );
+            }
 
-	  }
-	  break;
+            {
+              double old = h->GetTranslationX();
+              h->SetTranslationX( old + epsilon );
+              vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+              h->SetTranslationX( old );
+              vctFixedSizeMatrix<double,4,4> delRt;
+              delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+              AddIdentificationColumn( J, delRt );
+            }
 
-	case robJoint::SLIDER:
-	  {
+          }
+          break;
 
-	    {
-	      double old = h->GetRotationX();
-	      h->SetRotationX( old + epsilon );
-	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	      h->SetRotationX( old );
-	      vctFixedSizeMatrix<double,4,4> delRt;
-	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	      AddIdentificationColumn( J, delRt );
-	    }
+        case robJoint::SLIDER:
+          {
 
-	    {
-	      double old = h->GetRotationY();
-	      h->SetRotationY( old + epsilon );
-	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	      h->SetRotationY( old );
-	      vctFixedSizeMatrix<double,4,4> delRt;
-	      delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
-	      AddIdentificationColumn( J, delRt );
-	    }
+            {
+              double old = h->GetRotationX();
+              h->SetRotationX( old + epsilon );
+              vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+              h->SetRotationX( old );
+              vctFixedSizeMatrix<double,4,4> delRt;
+              delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+              AddIdentificationColumn( J, delRt );
+            }
 
-	    {
-	      double old = h->GetTranslationZ();
-	      h->SetTranslationZ( old + epsilon );
-	      vctFrame4x4<double> Rt_ = ForwardKinematics( q );
-	      h->SetTranslationZ( old );
-	      vctFixedSizeMatrix<double,4,4> delRt;
-	      delRt = Rti*SE3Difference( Rt_,Rt )/epsilon;
-	      AddIdentificationColumn( J, delRt );
-	    }
+            {
+              double old = h->GetRotationY();
+              h->SetRotationY( old + epsilon );
+              vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+              h->SetRotationY( old );
+              vctFixedSizeMatrix<double,4,4> delRt;
+              delRt = Rti*SE3Difference( Rt_, Rt )/epsilon;
+              AddIdentificationColumn( J, delRt );
+            }
 
-	  }
-	  break;
+            {
+              double old = h->GetTranslationZ();
+              h->SetTranslationZ( old + epsilon );
+              vctFrame4x4<double> Rt_ = ForwardKinematics( q );
+              h->SetTranslationZ( old );
+              vctFixedSizeMatrix<double,4,4> delRt;
+              delRt = Rti*SE3Difference( Rt_,Rt )/epsilon;
+              AddIdentificationColumn( J, delRt );
+            }
 
-	default:
-	  CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			    << "Unsupported Hayati joint." << std::endl;
-	}
+          }
+          break;
+
+        default:
+          CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                            << "Unsupported Hayati joint." << std::endl;
+        }
 
       }
       break;
 
     default:
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			<< "Unsupported kinematic convention." << std::endl;
+                        << "Unsupported kinematic convention." << std::endl;
 
     }
 
@@ -1449,8 +1449,8 @@ robManipulator::JacobianKinematicsIdentification
 
 void robManipulator::PrintKinematics( std::ostream& os ) const {
 
-  for( size_t i=0; i<links.size(); i++ ){ 
-    links[i].GetKinematics()->Write( os ); 
+  for( size_t i=0; i<links.size(); i++ ){
+    links[i].GetKinematics()->Write( os );
     os << std::endl;
   }
 
@@ -1463,5 +1463,5 @@ void robManipulator::PrintKinematics( std::ostream& os ) const {
 
 
 /*
-      
+
 */
