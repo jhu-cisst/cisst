@@ -389,7 +389,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   if( N < 6 ) 
     { B = new doublereal[6]; }   // The N-by-NRHS matrix of 
   else
-    { B = new doublereal[6]; }
+    { B = new doublereal[N]; }
 
   integer LDB = N;                // The leading dimension of the array B.
 
