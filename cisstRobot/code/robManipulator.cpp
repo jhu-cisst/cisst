@@ -385,7 +385,12 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   integer LDA = M;                // The leading dimension of the array A.
 
   // B is a pointer the the N vector containing the solution
-  doublereal* B = new doublereal[N];  // The N-by-NRHS matrix of right hand side matrix
+  doublereal* B;
+  if( N < 6 )
+    { B = new doublereal[6]; }   // The N-by-NRHS matrix of
+  else
+    { B = new doublereal[N]; }
+
   integer LDB = N;                // The leading dimension of the array B.
 
   // These values are used for the SVD computation
@@ -484,6 +489,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     } else if (q[j] < -cmnPI) {
         q[j] = q[j] + 2.0 * cmnPI;
     }
+
   }
 
   delete[] B;
