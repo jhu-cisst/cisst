@@ -52,12 +52,6 @@ void robLSPB::Set(const vctDoubleVec & start,
     if (acceleration.size() != mDimension) {
         cmnThrow("robLSPB::Set: acceleration doesn't match start point dimension");
     }
-    if (!velocity.Greater(0.0)) {
-        cmnThrow("robLSPB::Set: velocity must be greater than zero");
-    }
-    if (!acceleration.Greater(0.0)) {
-        cmnThrow("robLSPB::Set: acceleration must be greater than zero");
-    }
     // store information and resize data members
     mCoordination = coordination;
     mStartTime = startTime;
@@ -84,6 +78,12 @@ void robLSPB::Set(const vctDoubleVec & start,
 
         // compute time if distance != 0
         if (distance != 0) {
+            if (mVelocity[i] == 0.0) {
+                cmnThrow("robLSPB::Set: velocity must be greater than zero");
+            }
+            if (mAcceleration[i] == 0.0) {
+                cmnThrow("robLSPB::Set: acceleration must be greater than zero");
+            }
             mAccelerationTime[i] = mVelocity[i] / mAcceleration[i];
             // check distance over max accel and max decel at end of
             // acceleration phase to see if we're past mid-point.
