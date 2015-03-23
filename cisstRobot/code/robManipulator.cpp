@@ -1,9 +1,11 @@
-/*
+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-    */
+/* ex: set filetype=cpp softtabstop=2 shiftwidth=2 tabstop=2 cindent expandtab: */
 
+/*
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -385,7 +387,12 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   integer LDA = M;                // The leading dimension of the array A.
 
   // B is a pointer the the N vector containing the solution
-  doublereal* B = new doublereal[N];  // The N-by-NRHS matrix of right hand side matrix
+  doublereal* B;
+  if( N < 6 )
+    { B = new doublereal[6]; }   // The N-by-NRHS matrix of
+  else
+    { B = new doublereal[N]; }
+
   integer LDB = N;                // The leading dimension of the array B.
 
   // These values are used for the SVD computation
@@ -476,21 +483,28 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     for(size_t j=0; j<links.size(); j++) q[j] += dq[j];
   }
 
-  // copy the joint values and
-  for(size_t j=0; j<links.size(); j++){
-    q[j] = fmod((double)q[j], (double)2.0*cmnPI);
-    if (cmnPI < q[j]) {
-        q[j] = q[j] - 2.0*cmnPI;
-    } else if (q[j] < -cmnPI) {
-        q[j] = q[j] + 2.0 * cmnPI;
-    }
-  }
+  NormalizeAngles(q);
 
   delete[] B;
   delete[] dq;
 
   if( i==Niterations ) return robManipulator::EFAILURE;
-  else return robManipulator::ESUCCESS;;
+  else return robManipulator::ESUCCESS;
+}
+
+void robManipulator::NormalizeAngles( vctDynamicVector<double> &q )
+{
+  // normalize joint values
+  for (size_t j=0; j<links.size(); j++) {
+    if (links[j].GetType() == robJoint::HINGE) {
+      q[j] = fmod((double)q[j], (double)2.0*cmnPI);
+      if (cmnPI < q[j]) {
+        q[j] = q[j] - 2.0*cmnPI;
+      } else if (q[j] < -cmnPI) {
+        q[j] = q[j] + 2.0 * cmnPI;
+      }
+    }
+  }
 }
 
 #if 0
@@ -601,18 +615,14 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
   }
 
-  // copy the joint values and
-  for(size_t j=0; j<links.size(); j++){
-    q[j] = fmod((double)q[j], (double)2.0*cmnPI);
-    if(cmnPI < q[j])
-      q[j] = q[j] - 2.0*cmnPI;
-  }
+  NormalizeAngles(q);
 
   delete[] S;
   delete[] B;
 
-  if( i==Niterations ) return robManipulator::EFAILURE;
-  else return robManipulator::ESUCCESS;;
+  std::cerr << "Nb iter " << i << "/" << Niterations << std::endl;
+  if( i==(Niterations-1) ) return robManipulator::EFAILURE;
+  else return robManipulator::ESUCCESS;
 }
 #endif
 
@@ -1155,7 +1165,7 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
   if( 0.0 < qdd.Norm() ){
 
     char LOW = 'L';
-    integer N = links.size();;
+    integer N = links.size();
     integer LDA = links.size();
     integer INC = 1;
     doublereal ALPHA = 1.0;

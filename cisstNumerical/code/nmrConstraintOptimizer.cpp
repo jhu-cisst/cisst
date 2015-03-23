@@ -60,7 +60,7 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
     }
 
     // if the sizes don't match for C,d
-    if (C.rows() != d.size() || dq.size() != NumVars) {
+    if (C.rows() != d.size() || dq.size() != NumVars+Slacks) {
         return NMR_MALFORMED;
     }
 
@@ -77,7 +77,7 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
     }
     // if we have an inequality constraint, solve
     else if (A.size() > 0 && b.size() > 0 && E.size() == 0 && f.size() == 0) {
-        if (A.cols() != dq.size() + Slacks || A.rows() != b.size()) {
+        if (A.cols() != dq.size() || A.rows() != b.size()) {
             return NMR_INEQ_CONTRADICTION;
         }
         lsiSolution.Allocate(C, A);
@@ -87,14 +87,14 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
         }
     }
     else if (E.size() > 0 && f.size() > 0) {
-        if (A.cols() != dq.size() + Slacks || A.rows() != b.size()) {
-            if (E.cols() != dq.size() + Slacks || E.rows() != f.size()) {
+        if (A.cols() != dq.size() || A.rows() != b.size()) {
+            if (E.cols() != dq.size() || E.rows() != f.size()) {
                 return NMR_BOTH_CONTRADICTION;
             }
             else {
                 return NMR_INEQ_CONTRADICTION;
             }
-        } else if (E.cols() != dq.size() + Slacks || E.rows() != f.size()) {
+        } else if (E.cols() != dq.size() || E.rows() != f.size()) {
             return NMR_EQ_CONTRADICTION;
         }
         lsiSolution.Allocate(C, E, A);
