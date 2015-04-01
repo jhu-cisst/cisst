@@ -385,7 +385,12 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   integer LDA = M;                // The leading dimension of the array A.
 
   // B is a pointer the the N vector containing the solution
-  doublereal* B = new doublereal[N];  // The N-by-NRHS matrix of right hand side matrix
+  doublereal* B;
+  if( N < 6 ) 
+    { B = new doublereal[6]; }   // The N-by-NRHS matrix of 
+  else
+    { B = new doublereal[N]; }
+
   integer LDB = N;                // The leading dimension of the array B.
 
   // These values are used for the SVD computation
@@ -442,7 +447,6 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
                            { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 } };
 
     // We need to solve dq = J' ( JJ' + lambda I )^-1 e
-
     // I = JJ' + lambda I 
     gemm( &TRANSN, &TRANST, &M, &M, &N, 
 	  &ALPHA, 
@@ -475,7 +479,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     // update the solution
     for(size_t j=0; j<links.size(); j++) q[j] += dq[j];
   }
-  
+
   // copy the joint values and 
   for(size_t j=0; j<links.size(); j++){
     q[j] = fmod((double)q[j], (double)2.0*cmnPI);
@@ -484,6 +488,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     } else if (q[j] < -cmnPI) {
         q[j] = q[j] + 2.0 * cmnPI;
     }
+
   }
 
   delete[] B;
