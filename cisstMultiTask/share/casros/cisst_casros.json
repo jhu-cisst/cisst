@@ -58,8 +58,8 @@ http://www.cisst.org/cisst/license.txt.
                 "tolerance"    : 0.0, // up to this % of overrun from nominal period is ignored
                 "output_above" : 1,
                 "output_below" : 0,
-                "event_above"  : "EVT_THREAD_OVERRUN",
-                "event_below"  : "/EVT_THREAD_OVERRUN"
+                "event_onset"     : "EVT_THREAD_OVERRUN",
+                "event_completion": "/EVT_THREAD_OVERRUN"
             },
             "last_filter"      : true
         }

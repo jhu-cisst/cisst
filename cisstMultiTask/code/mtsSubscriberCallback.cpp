@@ -224,8 +224,12 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
             SFLOG_ERROR << "mtsSubscriberCallback: same name, skip processing" << std::endl;
         replyData = "";
     }
+    else if (request.compare("state_history") == 0)
+        replyData = sc->GetStateHistory(targetComponentName);
     else if (request.compare("event_list") == 0)
         replyData = sc->GetEventList(targetComponentName);
+    else if (request.compare("event_history") == 0)
+        replyData = sc->GetEventHistory(targetComponentName);
     else if (request.compare("connection_list") == 0)
         replyData = sc->GetConnectionList(targetComponentName, "\t");
     else if (request.compare("service_list") == 0)

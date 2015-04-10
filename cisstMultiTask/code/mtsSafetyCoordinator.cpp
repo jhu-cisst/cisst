@@ -283,8 +283,8 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
         }
 #endif
 #if 1
-        //stateTable = targetComponent->GetDefaultStateTable();
-        stateTable = targetComponent->GetMonitoringStateTable();
+        stateTable = targetComponent->GetDefaultStateTable();
+        //stateTable = targetComponent->GetMonitoringStateTable();
         int stateVectorId = stateTable->GetStateVectorID(signalName);
 
         if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
@@ -509,11 +509,11 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
         SF::JSON::JSONVALUE & filter = filters[i];
         filter["target"]["component"] = targetComponentName;
 
-        if (filter["argument"]["event_below"].isNull() || filter["argument"]["event_above"].isNull())
+        if (filter["argument"]["event_completion"].isNull() || filter["argument"]["event_onset"].isNull())
             continue;
 
         // If name of onset event is EVT_THREAD_OVERRUN
-        std::string eventName = SF::JSON::GetJSONString(filter["argument"]["event_above"]);
+        std::string eventName = SF::JSON::GetJSONString(filter["argument"]["event_onset"]);
         eventName = SF::rtrim(eventName);
         if (eventName.compare("\"EVT_THREAD_OVERRUN\"") != 0)
             continue;
@@ -525,7 +525,8 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
             continue;
         
         // set threshold based on its nominal period
-        filter["argument"]["input_signal"] = mtsStateTable::NamesOfDefaultElements::ExecTimeUser;
+        //filter["argument"]["input_signal"] = mtsStateTable::NamesOfDefaultElements::ExecTimeUser;
+        filter["argument"]["input_signal"] = mtsStateTable::NamesOfDefaultElements::ExecTimeTotal;
         filter["argument"]["threshold"] = periodicTask->GetPeriodicity(true); // fetch nominal period
 
         filtersPeriodic.append(filter);
