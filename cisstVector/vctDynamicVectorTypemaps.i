@@ -7,7 +7,7 @@
   Author(s):  Daniel Li, Anton Deguet, Mitch Williams
   Created on: 2009-05-20
 
-  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -638,7 +638,7 @@ http://www.cisst.org/cisst/license.txt.
 %apply vctDynamicVector         {vctDoubleVec, vctVec, vctFloatVec, vctIntVec, vctUIntVec,
                                  vctCharVec, vctUCharVec, vctBoolVec,
                                  vctShortVec, vctUShortVec, vctLongVec, vctULongVec};
-%apply vctDynamicVector &       {vctDoubleVec &, vctVec &, vctFloatVec &, vctIntVec &, vctUIntVec,
+%apply vctDynamicVector &       {vctDoubleVec &, vctVec &, vctFloatVec &, vctIntVec &, vctUIntVec &,
                                  vctCharVec &, vctUCharVec &, vctBoolVec &,
                                  vctShortVec &, vctUShortVec &, vctLongVec &, vctULongVec &};
 %apply const vctDynamicVector & {const vctDoubleVec &, const vctVec &, const vctFloatVec &, const vctIntVec &, const vctUIntVec &,
