@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstStereoVision
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -372,7 +370,7 @@ if (OpenCV_FOUND)
 
             # OpenCV 2.0 does not define OpenCV_INCLUDE_DIRS
             # NOTE: OpenCV 2.0. and 2.1. do no specify correct lib path in the OpenCVConfig.cmake files
-        elseif (${OpenCV_VERSION} VERSION_LESS 2.2.0 AND 
+        elseif (${OpenCV_VERSION} VERSION_LESS 2.2.0 AND
                 ${OpenCV_VERSION} VERSION_GREATER 1.9.9)
             message ("OpenCV Version: 2.0.0 and 2.1.0")
             set (OpenCV2_INCLUDE_DIRS "${THIS_OPENCV_CONFIG_PATH}/include"
@@ -398,7 +396,7 @@ endif (OpenCV_FOUND)
 if (CISST_SVL_HAS_OPENCV2 AND NOT OpenCV_FOUND)
   find_package (OpenCV QUIET REQUIRED ${OpenCV_COMPONENTS})
 endif (CISST_SVL_HAS_OPENCV2 AND NOT OpenCV_FOUND)
-  
+
 
 # if we require OpenCV2, add these files to compile
 if (CISST_SVL_HAS_OPENCV2)
@@ -1217,6 +1215,8 @@ MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_FFMPEG)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_X11)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_XV)
 MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_CUDA)
+MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_BM_DECKLINK)
+
 IF(UNIX)
     MARK_AS_ADVANCED(FORCE CISST_SVL_DC1394_ENABLE_800Mbps)
 ENDIF(UNIX)
@@ -1265,6 +1265,14 @@ set_source_files_properties ("${CISST_SVL_CONFIG_FILE}"
                              PROPERTIES GENERATED TRUE)
 set (ADDITIONAL_HEADER_FILES ${CISST_SVL_CONFIG_FILE})
 
+# Create the CMake config file
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstStereoVisionBuild.cmake.in
+                ${CISST_CMAKE_BINARY_DIR}/cisstStereoVisionBuild.cmake
+                @ONLY)
+install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstStereoVisionBuild.cmake
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+         COMPONENT cisstStereoVision)
+
 # Finally create the library
 cisst_add_library (
   LIBRARY cisstStereoVision
@@ -1285,4 +1293,3 @@ IF(CISST_SVL_HAS_CUDA)
 #                          ${CUDA_GENERATED_LIBRARIES}
 #                          )
 ENDIF(CISST_SVL_HAS_CUDA)
-
