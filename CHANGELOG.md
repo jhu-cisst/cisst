@@ -1,6 +1,22 @@
 Change log
 ==========
 
+1.0.4 (2015-04-28)
+==================
+
+* API changes:
+  * None
+* Deprecated features:
+  * None
+* New features:
+  * More libraries compiled for Travis, now run some unit tests
+* Bug fixes:
+  * cisstVector: more types supported in Python
+  * cisstMultiTask: more proxy declared for cisstVector types
+  * Fixed propagation of CMake settings for cisstStereoVision
+  * robManipulator: fixed normalization modulo 2 pi for rotations only, fixed memory allocation for under actuated robots
+  * robLSPB: only require non-zero velocity/accel when joint is moving
+
 1.0.3 (2015-02-19)
 ==================
 
