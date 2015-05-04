@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -255,7 +254,7 @@ void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
                  << "    void SerializeBinary(std::ostream & outputStream) const throw (std::runtime_error);" << std::endl
                  << "    void DeSerializeBinary(std::istream & inputStream, const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat) throw (std::runtime_error);" << std::endl
                  << "    void SerializeText(std::ostream & outputStream, const char delimiter = ',') const throw (std::runtime_error);" << std::endl
-                 << "    std::string SerializeDescription(const char delimiter, const std::string & userDescription = \"\") const;" << std::endl
+                 << "    std::string SerializeDescription(const char delimiter = ',', const std::string & userDescription = \"\") const;" << std::endl
                  << "    void DeSerializeText(std::istream & inputStream, const char delimiter = ',') throw (std::runtime_error);" << std::endl
                  << "    std::string HumanReadable(void) const;" << std::endl
                  << "    bool ScalarNumberIsFixed(void) const;" << std::endl
@@ -320,7 +319,7 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
     bool commaNeeded = false;
 
     defaultConstructor << classWithNamespace << "::" << name << "(void)";
-    copyConstructor    << classWithNamespace << "::" << name << "(const " << name << " & other)";
+    copyConstructor    << classWithNamespace << "::" << name << "(const " << name << " & " << CMN_UNUSED_wrapped("other") << ")";
     membersConstructor << classWithNamespace << "::" << name << "(";
     std::string memberName, memberType;
     for (index = 0; index < Members.size(); index++) {
@@ -399,7 +398,7 @@ void cdgClass::GenerateMethodSerializeRawCode(std::ostream & outputStream) const
     size_t index;
     const std::string name = this->ClassWithNamespace();
     outputStream << std::endl
-                 << "void " << name << "::SerializeRaw(std::ostream & outputStream) const" << std::endl
+                 << "void " << name << "::SerializeRaw(std::ostream & " << CMN_UNUSED_wrapped("outputStream") << ") const" << std::endl
                  << "{" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
@@ -425,7 +424,7 @@ void cdgClass::GenerateMethodDeSerializeRawCode(std::ostream & outputStream) con
     size_t index;
     const std::string name = this->ClassWithNamespace();
     outputStream << std::endl
-                 << "void " << name << "::DeSerializeRaw(std::istream & inputStream)" << std::endl
+                 << "void " << name << "::DeSerializeRaw(std::istream & " << CMN_UNUSED_wrapped("inputStream") << ")" << std::endl
                  << "{" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
@@ -559,7 +558,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
     outputStream << "/* data functions */" << std::endl;
 
-    outputStream << "void " << className << "::Copy(const " << className << " & source) {" << std::endl;
+    outputStream << "void " << className << "::Copy(const " << className << " & " << CMN_UNUSED_wrapped("source") << ") {" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -577,7 +576,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
 
 
-    outputStream << "void " << className << "::SerializeBinary(std::ostream & outputStream) const throw (std::runtime_error) {" << std::endl;
+    outputStream << "void " << className << "::SerializeBinary(std::ostream & " << CMN_UNUSED_wrapped("outputStream") << ") const throw (std::runtime_error) {" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -595,8 +594,9 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
 
 
-    outputStream << "void " << className << "::DeSerializeBinary(std::istream & inputStream," << std::endl
-                 << "                                            const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat) throw (std::runtime_error) {"<< std::endl;
+    outputStream << "void " << className << "::DeSerializeBinary(std::istream & " << CMN_UNUSED_wrapped("inputStream") << "," << std::endl
+                 << "                                            const cmnDataFormat & " << CMN_UNUSED_wrapped("localFormat") << "," << std::endl
+                 << "                                            const cmnDataFormat & " << CMN_UNUSED_wrapped("remoteFormat") << ") throw (std::runtime_error) {"<< std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -618,8 +618,9 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
 
 
-    outputStream << "void " << className << "::SerializeText(std::ostream & outputStream, const char delimiter) const throw (std::runtime_error) {" << std::endl
-                 << "    bool someData = false;" << std::endl;
+    outputStream << "void " << className << "::SerializeText(std::ostream & " << CMN_UNUSED_wrapped("outputStream")
+                 << ", const char " << CMN_UNUSED_wrapped("delimiter") << ") const throw (std::runtime_error) {" << std::endl;
+    outputStream << SkipIfEmpty("    bool someData = false;\n");
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -643,10 +644,11 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
     }
     outputStream << "}" << std::endl;
 
-    outputStream << "std::string " << className << "::SerializeDescription(const char delimiter, const std::string & userDescription) const {" << std::endl
-                 << "    bool someData = false;" << std::endl
-                 << "    const std::string prefix = (userDescription == \"\") ? \"\" : (userDescription + \".\");" << std::endl
-                 << "    std::stringstream description;" << std::endl;
+    outputStream << "std::string " << className << "::SerializeDescription(const char " << CMN_UNUSED_wrapped("delimiter")
+                 << ", const std::string & " << CMN_UNUSED_wrapped("userDescription") << ") const {" << std::endl;
+    outputStream << SkipIfEmpty("    bool someData = false;\n");
+    outputStream << SkipIfEmpty("    const std::string prefix = (userDescription == \"\") ? \"\" : (userDescription + \".\");\n");
+    outputStream << "    std::stringstream description;" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -672,9 +674,9 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
     outputStream << "    return description.str();" << std::endl
                  << "}" << std::endl;
 
-    outputStream << "void " << className << "::DeSerializeText(std::istream & inputStream," << std::endl
-                 << "                                          const char delimiter) throw (std::runtime_error) {"<< std::endl
-                 << "    bool someData = false;" << std::endl;
+    outputStream << "void " << className << "::DeSerializeText(std::istream & " << CMN_UNUSED_wrapped("inputStream") << "," << std::endl
+                 << "                                          const char " << CMN_UNUSED_wrapped("delimiter") << ") throw (std::runtime_error) {"<< std::endl;
+    outputStream << SkipIfEmpty("    bool someData = false;\n");
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -761,10 +763,11 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
 
 
-    outputStream << "std::string " << className << "::ScalarDescription(const size_t index, const std::string & userDescription) const throw (std::out_of_range) {" << std::endl
-                 << "    std::string prefix = (userDescription == \"\") ? \"\" : (userDescription + \".\");" << std::endl
-                 << "    size_t baseIndex = 0;" << std::endl
-                 << "    size_t currentMaxIndex = 0;" << std::endl;
+    outputStream << "std::string " << className << "::ScalarDescription(const size_t " << CMN_UNUSED_wrapped("index")
+                 << ", const std::string & userDescription) const throw (std::out_of_range) {" << std::endl
+                 << "    std::string prefix = (userDescription == \"\") ? \"\" : (userDescription + \".\");" << std::endl;
+    outputStream << SkipIfEmpty("    size_t baseIndex = 0;\n");
+    outputStream << SkipIfEmpty("    size_t currentMaxIndex = 0;\n");
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -793,9 +796,9 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
 
 
-    outputStream << "double " << className << "::Scalar(const size_t index) const throw (std::out_of_range) {" << std::endl
-                 << "    size_t baseIndex = 0;" << std::endl
-                 << "    size_t currentMaxIndex = 0;" << std::endl;
+    outputStream << "double " << className << "::Scalar(const size_t " << CMN_UNUSED_wrapped("index") << ") const throw (std::out_of_range) {" << std::endl;
+    outputStream << SkipIfEmpty("    size_t baseIndex = 0;\n");
+    outputStream << SkipIfEmpty("    size_t currentMaxIndex = 0;\n");
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -828,7 +831,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
                  << "void cmnDataJSON<" << className << " >::SerializeText(const " << className << " & data, Json::Value & jsonValue) {" << std::endl
                  << "    data.SerializeTextJSON(jsonValue);" << std::endl
                  << "}" << std::endl
-                 << "void " << className << "::SerializeTextJSON(Json::Value & jsonValue) const {" << std::endl;
+                 << "void " << className << "::SerializeTextJSON(Json::Value & " << CMN_UNUSED_wrapped("jsonValue") << ") const {" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -848,7 +851,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
                  << "void cmnDataJSON<" << className << " >::DeSerializeText(" << className << " & data, const Json::Value & jsonValue) throw (std::runtime_error) {" << std::endl
                  << "    data.DeSerializeTextJSON(jsonValue);" << std::endl
                  << "}" << std::endl
-                 << "void " << className << "::DeSerializeTextJSON(const Json::Value & jsonValue) throw (std::runtime_error) {" << std::endl;
+                 << "void " << className << "::DeSerializeTextJSON(const Json::Value & " << CMN_UNUSED_wrapped("jsonValue") << ") throw (std::runtime_error) {" << std::endl;
     for (index = 0; index < BaseClasses.size(); index++) {
         if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
             type = BaseClasses[index]->GetFieldValue("type");
@@ -879,4 +882,22 @@ std::string cdgClass::ClassWithNamespace(void) const
     } else {
         return this->GetFieldValue("name");
     }
+}
+
+
+std::string cdgClass::SkipIfEmpty(const std::string & code) const
+{
+    if ((BaseClasses.size() > 0) || (Members.size() > 0)) {
+        return code;
+    }
+    return "";
+}
+
+
+std::string cdgClass::CMN_UNUSED_wrapped(const std::string & parameter) const
+{
+    if ((BaseClasses.size() > 0) || (Members.size() > 0)) {
+        return parameter;
+    }
+    return "CMN_UNUSED(" + parameter + ")";
 }

@@ -40,6 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "ExampleDynamicFunctions.h"
 #include "ExampleFixedSizeFunctions.h"
 #include "ExampleMatrix.h"
+#include "ExampleReferences.h"
 
 int main(void)
 {
@@ -58,6 +59,8 @@ int main(void)
     std::cout << "=== ExampleCommon ===" << std::endl;
     ExampleCommon();
     std::cout << "=== ExampleMatrix ===" << std::endl;
-    MatrixExample();
+    ExampleMatrix();
+    std::cout << "=== ExampleReferences ===" << std::endl;
+    ExampleReferences();
     return 0;
 }

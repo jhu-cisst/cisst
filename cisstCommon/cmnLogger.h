@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2004-08-31
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -84,14 +83,20 @@ http://www.cisst.org/cisst/license.txt.
     (void*)0:\
     ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
 
-#else // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+#elif CISST_OSTREAM_CAN_CAST_TO_INT
 
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
     (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod))? \
     0:\
     ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
 
-#endif // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+#else
+
+#define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
+if (cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod) \
+    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
+
+#endif
 
 #if (CISST_OS == CISST_QNX)
   #if BYPASS_CMN_LOG
@@ -159,15 +164,20 @@ http://www.cisst.org/cisst/license.txt.
     (void*)0: \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
 
-#else // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+#elif CISST_OSTREAM_CAN_CAST_TO_INT
 
 #define CMN_LOG(lod) \
-    (!(cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod))?  \
+    (!(cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod)) ? \
     0: \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
 
-#endif // CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+#else
 
+#define CMN_LOG(lod) \
+    if (cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod) \
+    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
+
+#endif
 
 #if (CISST_OS == CISST_QNX)
   #if BYPASS_CMN_LOG

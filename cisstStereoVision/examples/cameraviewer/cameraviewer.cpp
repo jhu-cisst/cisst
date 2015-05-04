@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterImageWindow.h>
 #include <cisstStereoVision/svlFilterImageOverlay.h>
 
-#if CISST_HAS_QT
+#if CISST_HAS_QT4
     #include <cisstStereoVision/svlQtObjectFactory.h>
     #include <cisstStereoVision/svlQtWidgetFileOpen.h>
     #include <cisstStereoVision/svlQtWidgetFramerate.h>

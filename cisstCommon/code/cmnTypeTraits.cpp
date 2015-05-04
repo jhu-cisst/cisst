@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2004-01-23
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -26,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 // ---------- float ----------
 static float zeroFloat = 0.0f;
 template<>
-float & cmnTypeTraits<float>::ToleranceValue()
+float & cmnTypeTraits<float>::ToleranceValue(void)
 {
     static float tolerance = 1.0e-5f;
     return tolerance;
@@ -36,27 +34,27 @@ template<>
 const float cmnTypeTraits<float>::DefaultTolerance = cmnTypeTraits<float>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<float>::TypeName()
+std::string cmnTypeTraits<float>::TypeName(void)
 {
     return "float";
 }
 
 template<>
-float cmnTypeTraits<float>::PlusInfinity()
+float cmnTypeTraits<float>::PlusInfinity(void)
 {
     static const float inf = 1.0f / zeroFloat;
     return inf;
 }
 
 template<>
-float cmnTypeTraits<float>::MinusInfinity()
+float cmnTypeTraits<float>::MinusInfinity(void)
 {
     static const float inf = -1.0f / zeroFloat;
     return inf;
 }
 
 template<>
-float cmnTypeTraits<float>::NaN()
+float cmnTypeTraits<float>::NaN(void)
 {
     static const float nan = zeroFloat / zeroFloat;
     return nan;
@@ -67,7 +65,7 @@ float cmnTypeTraits<float>::NaN()
 // ---------- double ----------
 static double zeroDouble = 0.0;
 template<>
-double & cmnTypeTraits<double>::ToleranceValue()
+double & cmnTypeTraits<double>::ToleranceValue(void)
 {
     static double tolerance = 1.0e-9;
     return tolerance;
@@ -77,27 +75,27 @@ template<>
 const double cmnTypeTraits<double>::DefaultTolerance = cmnTypeTraits<double>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<double>::TypeName()
+std::string cmnTypeTraits<double>::TypeName(void)
 {
     return "double";
 }
 
 template<>
-double cmnTypeTraits<double>::PlusInfinity()
+double cmnTypeTraits<double>::PlusInfinity(void)
 {
     static const double inf = 1.0 / zeroDouble;
     return inf;
 }
 
 template<>
-double cmnTypeTraits<double>::MinusInfinity()
+double cmnTypeTraits<double>::MinusInfinity(void)
 {
     static const double inf = -1.0 / zeroDouble;
     return inf;
 }
 
 template<>
-double cmnTypeTraits<double>::NaN()
+double cmnTypeTraits<double>::NaN(void)
 {
     static const double nan = zeroDouble / zeroDouble;
     return nan;
@@ -106,7 +104,7 @@ double cmnTypeTraits<double>::NaN()
 
 // ---------- int ----------
 template<>
-int & cmnTypeTraits<int>::ToleranceValue()
+int & cmnTypeTraits<int>::ToleranceValue(void)
 {
     static int tolerance = 0;
     return tolerance;
@@ -116,25 +114,28 @@ template<>
 const int cmnTypeTraits<int>::DefaultTolerance = cmnTypeTraits<int>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<int>::TypeName()
+std::string cmnTypeTraits<int>::TypeName(void)
 {
     return "int";
 }
 
 template<>
-int cmnTypeTraits<int>::PlusInfinity() {
+int cmnTypeTraits<int>::PlusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-int cmnTypeTraits<int>::MinusInfinity() {
+int cmnTypeTraits<int>::MinusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-int cmnTypeTraits<int>::NaN() {
+int cmnTypeTraits<int>::NaN(void)
+{
     // Not meaningful!  Here to avoid link errors
     return 0;
 }
@@ -142,7 +143,7 @@ int cmnTypeTraits<int>::NaN() {
 
 // ---------- char ----------
 template<>
-char & cmnTypeTraits<char>::ToleranceValue()
+char & cmnTypeTraits<char>::ToleranceValue(void)
 {
     static char tolerance = 0;
     return tolerance;
@@ -152,25 +153,28 @@ template<>
 const char cmnTypeTraits<char>::DefaultTolerance = cmnTypeTraits<char>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<char>::TypeName()
+std::string cmnTypeTraits<char>::TypeName(void)
 {
     return "char";
 }
 
 template<>
-char cmnTypeTraits<char>::PlusInfinity() {
+char cmnTypeTraits<char>::PlusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-char cmnTypeTraits<char>::MinusInfinity() {
+char cmnTypeTraits<char>::MinusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-char cmnTypeTraits<char>::NaN() {
+char cmnTypeTraits<char>::NaN(void)
+{
     // Not meaningful!  Here to avoid link errors
     return 0;
 }
@@ -178,7 +182,7 @@ char cmnTypeTraits<char>::NaN() {
 
 // ---------- short ----------
 template<>
-short & cmnTypeTraits<short>::ToleranceValue()
+short & cmnTypeTraits<short>::ToleranceValue(void)
 {
     static short tolerance = 0;
     return tolerance;
@@ -188,25 +192,28 @@ template<>
 const short cmnTypeTraits<short>::DefaultTolerance = cmnTypeTraits<short>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<short>::TypeName()
+std::string cmnTypeTraits<short>::TypeName(void)
 {
     return "short";
 }
 
 template<>
-short cmnTypeTraits<short>::PlusInfinity() {
+short cmnTypeTraits<short>::PlusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-short cmnTypeTraits<short>::MinusInfinity() {
+short cmnTypeTraits<short>::MinusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-short cmnTypeTraits<short>::NaN() {
+short cmnTypeTraits<short>::NaN(void)
+{
     // Not meaningful!  Here to avoid link errors
     return 0;
 }
@@ -214,7 +221,7 @@ short cmnTypeTraits<short>::NaN() {
 
 // ---------- long long ----------
 template<>
-long long & cmnTypeTraits<long long>::ToleranceValue()
+long long & cmnTypeTraits<long long>::ToleranceValue(void)
 {
     static long long tolerance = 0;
     return tolerance;
@@ -224,32 +231,35 @@ template<>
 const long long cmnTypeTraits<long long>::DefaultTolerance = cmnTypeTraits<long long>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<long long>::TypeName()
+std::string cmnTypeTraits<long long>::TypeName(void)
 {
     return "long long";
 }
 
 template<>
-long long cmnTypeTraits<long long>::PlusInfinity() {
+long long cmnTypeTraits<long long>::PlusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-long long cmnTypeTraits<long long>::MinusInfinity() {
+long long cmnTypeTraits<long long>::MinusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-long long cmnTypeTraits<long long>::NaN() {
+long long cmnTypeTraits<long long>::NaN(void)
+{
     // Not meaningful!  Here to avoid link errors
     return 0;
 }
 
 // ---------- unsigned long long ----------
 template<>
-unsigned long long & cmnTypeTraits<unsigned long long>::ToleranceValue()
+unsigned long long & cmnTypeTraits<unsigned long long>::ToleranceValue(void)
 {
     static unsigned long long tolerance = 0;
     return tolerance;
@@ -259,32 +269,35 @@ template<>
 const unsigned long long cmnTypeTraits<unsigned long long>::DefaultTolerance = cmnTypeTraits<unsigned long long>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<unsigned long long>::TypeName()
+std::string cmnTypeTraits<unsigned long long>::TypeName(void)
 {
     return "unsigned long long";
 }
 
 template<>
-unsigned long long cmnTypeTraits<unsigned long long>::PlusInfinity() {
+unsigned long long cmnTypeTraits<unsigned long long>::PlusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-unsigned long long cmnTypeTraits<unsigned long long>::MinusInfinity() {
+unsigned long long cmnTypeTraits<unsigned long long>::MinusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-unsigned long long cmnTypeTraits<unsigned long long>::NaN() {
+unsigned long long cmnTypeTraits<unsigned long long>::NaN(void)
+{
     // Not meaningful!  Here to avoid link errors
     return 0;
 }
 
 // ---------- unsigned int ----------
 template<>
-unsigned int & cmnTypeTraits<unsigned int>::ToleranceValue()
+unsigned int & cmnTypeTraits<unsigned int>::ToleranceValue(void)
 {
     static unsigned int tolerance = 0;
     return tolerance;
@@ -294,32 +307,35 @@ template<>
 const unsigned int cmnTypeTraits<unsigned int>::DefaultTolerance = cmnTypeTraits<unsigned int>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<unsigned int>::TypeName()
+std::string cmnTypeTraits<unsigned int>::TypeName(void)
 {
     return "unsigned int";
 }
 
 template<>
-unsigned int cmnTypeTraits<unsigned int>::PlusInfinity() {
+unsigned int cmnTypeTraits<unsigned int>::PlusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-unsigned int cmnTypeTraits<unsigned int>::MinusInfinity() {
+unsigned int cmnTypeTraits<unsigned int>::MinusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-unsigned int cmnTypeTraits<unsigned int>::NaN() {
+unsigned int cmnTypeTraits<unsigned int>::NaN(void)
+{
     // Not meaningful!  Here to avoid link errors
     return 0;
 }
 
 // ---------- unsigned short ----------
 template<>
-unsigned short & cmnTypeTraits<unsigned short>::ToleranceValue()
+unsigned short & cmnTypeTraits<unsigned short>::ToleranceValue(void)
 {
     static unsigned short tolerance = 0;
     return tolerance;
@@ -329,32 +345,35 @@ template<>
 const unsigned short cmnTypeTraits<unsigned short>::DefaultTolerance = cmnTypeTraits<unsigned short>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<unsigned short>::TypeName()
+std::string cmnTypeTraits<unsigned short>::TypeName(void)
 {
     return "unsigned short";
 }
 
 template<>
-unsigned short cmnTypeTraits<unsigned short>::PlusInfinity() {
+unsigned short cmnTypeTraits<unsigned short>::PlusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-unsigned short cmnTypeTraits<unsigned short>::MinusInfinity() {
+unsigned short cmnTypeTraits<unsigned short>::MinusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-unsigned short cmnTypeTraits<unsigned short>::NaN() {
+unsigned short cmnTypeTraits<unsigned short>::NaN(void)
+{
     // Not meaningful!  Here to avoid link errors
     return 0;
 }
 
 // ---------- unsigned char ----------
 template<>
-unsigned char & cmnTypeTraits<unsigned char>::ToleranceValue()
+unsigned char & cmnTypeTraits<unsigned char>::ToleranceValue(void)
 {
     static unsigned char tolerance = 0;
     return tolerance;
@@ -364,25 +383,28 @@ template<>
 const unsigned char cmnTypeTraits<unsigned char>::DefaultTolerance = cmnTypeTraits<unsigned char>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<unsigned char>::TypeName()
+std::string cmnTypeTraits<unsigned char>::TypeName(void)
 {
     return "unsigned char";
 }
 
 template<>
-unsigned char cmnTypeTraits<unsigned char>::PlusInfinity() {
+unsigned char cmnTypeTraits<unsigned char>::PlusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-unsigned char cmnTypeTraits<unsigned char>::MinusInfinity() {
+unsigned char cmnTypeTraits<unsigned char>::MinusInfinity(void)
+{
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-unsigned char cmnTypeTraits<unsigned char>::NaN() {
+unsigned char cmnTypeTraits<unsigned char>::NaN(void)
+{
     // Not meaningful!  Here to avoid link errors
     return 0;
 }
@@ -390,7 +412,7 @@ unsigned char cmnTypeTraits<unsigned char>::NaN() {
 
 // ---------- bool ----------
 template<>
-bool & cmnTypeTraits<bool>::ToleranceValue()
+bool & cmnTypeTraits<bool>::ToleranceValue(void)
 {
     static bool tolerance = 0;
     return tolerance;
@@ -400,7 +422,7 @@ template<>
 const bool cmnTypeTraits<bool>::DefaultTolerance = cmnTypeTraits<bool>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<bool>::TypeName()
+std::string cmnTypeTraits<bool>::TypeName(void)
 {
     return "bool";
 }

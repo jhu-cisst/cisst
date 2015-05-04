@@ -1,8 +1,5 @@
 #
-# $Id: CMakeLists.txt 3331 2012-01-10 22:34:09Z adeguet1 $
-#
-# (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -16,13 +13,11 @@
 
 # create a list of required cisst libraries
 set (REQUIRED_CISST_LIBRARIES cisstCommon
-  cisstVector
-  cisstOSAbstraction
-  cisstMultiTask
-  cisstParameterTypes
-  cisstRobot)
+     cisstVector
+     cisstOSAbstraction
+     cisstRobot)
 
-find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
@@ -38,6 +33,10 @@ if (cisst_FOUND_AS_REQUIRED)
   add_executable (robExQuinticRn mainQuinticRn.cpp)
   set_property (TARGET robExQuinticRn PROPERTY FOLDER "cisstRobot/examples")
   cisst_target_link_libraries (robExQuinticRn ${REQUIRED_CISST_LIBRARIES})
+
+  add_executable (robExLSPB mainLSPB.cpp)
+  set_property (TARGET robExLSPB PROPERTY FOLDER "cisstRobot/examples")
+  cisst_target_link_libraries (robExLSPB ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires " ${REQUIRED_CISST_LIBRARIES})

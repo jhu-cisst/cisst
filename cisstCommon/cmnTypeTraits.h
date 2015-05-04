@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
-  Author(s):	Anton Deguet
+  Author(s):  Anton Deguet
   Created on: 2004-01-13
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -234,10 +232,13 @@ public:
       negative infinity. */
     inline static bool HasInfinity(void);
 
+    /*! Test if the value is finite. */
+    static bool IsFinite(const Type & value);
+
     /*! Special Not a Number value, defined for floating point types.
       For templated code, one can use HasNaN to check if this
       method is meaningful. */
-    static CISST_EXPORT Type NaN();
+    static CISST_EXPORT Type NaN(void);
 
     /*! Test if the value is nan. */
     static CISST_EXPORT bool IsNaN(const Type & value);
@@ -249,7 +250,7 @@ public:
     static CISST_EXPORT const Type DefaultTolerance;
 
 private:
-    static CISST_EXPORT Type & ToleranceValue();
+    static CISST_EXPORT Type & ToleranceValue(void);
 };
 
 
@@ -257,155 +258,208 @@ private:
 
 /* Define which types are signed and which are unsigned */
 template<>
-inline bool cmnTypeTraits<float>::HasSign() {
+inline bool cmnTypeTraits<float>::HasSign(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<double>::HasSign() {
+inline bool cmnTypeTraits<double>::HasSign(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<long long int>::HasSign() {
+inline bool cmnTypeTraits<long long int>::HasSign(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<int>::HasSign() {
+inline bool cmnTypeTraits<int>::HasSign(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<short>::HasSign() {
+inline bool cmnTypeTraits<short>::HasSign(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<char>::HasSign() {
+inline bool cmnTypeTraits<char>::HasSign(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long long int>::HasSign() {
+inline bool cmnTypeTraits<unsigned long long int>::HasSign(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned int>::HasSign() {
+inline bool cmnTypeTraits<unsigned int>::HasSign(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned short>::HasSign() {
+inline bool cmnTypeTraits<unsigned short>::HasSign(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned char>::HasSign() {
+inline bool cmnTypeTraits<unsigned char>::HasSign(void) {
     return false;
 }
 
 
 /* Define HasInfinity for some basic types */
 template<>
-inline bool cmnTypeTraits<float>::HasInfinity() {
+inline bool cmnTypeTraits<float>::HasInfinity(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<double>::HasInfinity() {
+inline bool cmnTypeTraits<double>::HasInfinity(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<long long int>::HasInfinity() {
+inline bool cmnTypeTraits<long long int>::HasInfinity(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<int>::HasInfinity() {
+inline bool cmnTypeTraits<int>::HasInfinity(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<short>::HasInfinity() {
+inline bool cmnTypeTraits<short>::HasInfinity(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<char>::HasInfinity() {
+inline bool cmnTypeTraits<char>::HasInfinity(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long long int>::HasInfinity() {
+inline bool cmnTypeTraits<unsigned long long int>::HasInfinity(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned int>::HasInfinity() {
+inline bool cmnTypeTraits<unsigned int>::HasInfinity(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned short>::HasInfinity() {
+inline bool cmnTypeTraits<unsigned short>::HasInfinity(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned char>::HasInfinity() {
+inline bool cmnTypeTraits<unsigned char>::HasInfinity(void) {
     return false;
 }
+
+
+/* Define IsFinite for some basic types */
+template<>
+inline bool cmnTypeTraits<float>::IsFinite(const float & value) {
+    return cmnIsFinite(value);
+}
+
+template<>
+inline bool cmnTypeTraits<double>::IsFinite(const double & value) {
+    return cmnIsFinite(value);
+}
+
+template<>
+inline bool cmnTypeTraits<long long int>::IsFinite(const long long int & CMN_UNUSED(value)) {
+    return true;
+}
+
+template<>
+inline bool cmnTypeTraits<int>::IsFinite(const int & CMN_UNUSED(value)) {
+    return true;
+}
+
+template<>
+inline bool cmnTypeTraits<short>::IsFinite(const short & CMN_UNUSED(value)) {
+    return true;
+}
+
+template<>
+inline bool cmnTypeTraits<char>::IsFinite(const char & CMN_UNUSED(value)) {
+    return true;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned long long int>::IsFinite(const unsigned long long int & CMN_UNUSED(value)) {
+    return true;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned int>::IsFinite(const unsigned int & CMN_UNUSED(value)) {
+    return true;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned short>::IsFinite(const unsigned short & CMN_UNUSED(value)) {
+    return true;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned char>::IsFinite(const unsigned char & CMN_UNUSED(value)) {
+    return true;
+}
+
 
 /* Define HasNaN for some basic types */
 template<>
-inline bool cmnTypeTraits<float>::HasNaN() {
+inline bool cmnTypeTraits<float>::HasNaN(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<double>::HasNaN() {
+inline bool cmnTypeTraits<double>::HasNaN(void) {
     return true;
 }
 
 template<>
-inline bool cmnTypeTraits<long long int>::HasNaN() {
+inline bool cmnTypeTraits<long long int>::HasNaN(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<int>::HasNaN() {
+inline bool cmnTypeTraits<int>::HasNaN(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<short>::HasNaN() {
+inline bool cmnTypeTraits<short>::HasNaN(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<char>::HasNaN() {
+inline bool cmnTypeTraits<char>::HasNaN(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long long int>::HasNaN() {
+inline bool cmnTypeTraits<unsigned long long int>::HasNaN(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned int>::HasNaN() {
+inline bool cmnTypeTraits<unsigned int>::HasNaN(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned short>::HasNaN() {
+inline bool cmnTypeTraits<unsigned short>::HasNaN(void) {
     return false;
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned char>::HasNaN() {
+inline bool cmnTypeTraits<unsigned char>::HasNaN(void) {
     return false;
 }
 
@@ -463,16 +517,16 @@ inline bool cmnTypeTraits<unsigned char>::IsNaN(const unsigned char & CMN_UNUSED
 
 /* Define limits for some types as inline functions */
 #define CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(type, maxPositiveValue, minPositiveValue, maxNegativeValue, minNegativeValue) \
-template<> inline type cmnTypeTraits<type>::MaxPositiveValue() { \
+template<> inline type cmnTypeTraits<type>::MaxPositiveValue(void) { \
     return maxPositiveValue; \
 } \
-template<> inline type cmnTypeTraits<type>::MinPositiveValue() { \
+template<> inline type cmnTypeTraits<type>::MinPositiveValue(void) { \
     return minPositiveValue; \
 } \
-template<> inline type cmnTypeTraits<type>::MaxNegativeValue() { \
+template<> inline type cmnTypeTraits<type>::MaxNegativeValue(void) { \
     return maxNegativeValue; \
 } \
-template<> inline type cmnTypeTraits<type>::MinNegativeValue() { \
+template<> inline type cmnTypeTraits<type>::MinNegativeValue(void) { \
     return minNegativeValue; \
 }
 

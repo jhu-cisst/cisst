@@ -1,11 +1,10 @@
-#
-# $Id$
+## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+
 #
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -329,7 +328,7 @@ macro (cisst_add_library ...)
       list (FIND CISST_LIBRARIES ${dependency} FOUND_IT)
       if (${FOUND_IT} EQUAL -1)
         # not found
-        message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled")
+        message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled (available libraries: ${CISST_LIBRARIES}")
       else (${FOUND_IT} EQUAL -1)
         # found
         cisst_library_use_libraries (${LIBRARY} ${dependency})
@@ -350,7 +349,7 @@ macro (cisst_add_library ...)
         if (DEFINED ${setting}_OPTION_NAME)
           message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled, use the flag ${${setting}_OPTION_NAME} to compile it")
         else (DEFINED ${setting}_OPTION_NAME)
-          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled")
+          message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled  (available settings: ${CISST_SETTINGS}")
         endif (DEFINED ${setting}_OPTION_NAME)
       else (${FOUND_IT} EQUAL -1 )
         # found
@@ -387,6 +386,13 @@ macro (cisst_target_link_package_libraries target ...)
   list (REMOVE_AT DEPENDENCIES 0) # remove first argument, i.e. target
   cisst_load_package_setting (${DEPENDENCIES})
   foreach (lib ${DEPENDENCIES})
+    if ("${lib}" STREQUAL "cisstQt")
+      if (CISST_HAS_QT5)
+        cisst_cmake_debug ("cisst_target_link_package_libraries: Qt5 needed for ${target}")
+        qt5_use_modules (${target} Core Widgets Gui OpenGL)
+      endif (CISST_HAS_QT5)
+    endif ("${lib}" STREQUAL "cisstQt")
+
     # find and load setting for external packages
     set (PACKAGES CISST_EXTERNAL_PACKAGES_FOR_${lib})
     if (${PACKAGES})
@@ -440,7 +446,7 @@ macro (cisst_target_link_libraries TARGET ...)
         if (DEFINED ${required}_OPTION_NAME)
           message (SEND_ERROR "${_WHO_REQUIRES} requires ${requires} which doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
         else (DEFINED ${required}_OPTION_NAME)
-          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
+          message (SEND_ERROR "${_WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled (available libraries: ${CISST_LIBRARIES}")
         endif (DEFINED ${required}_OPTION_NAME)
       endif (${FOUND_IT} EQUAL -1 )
     endforeach (required)
@@ -772,7 +778,7 @@ function (cisst_add_test ...)
   set (ALL_ARGS ${ARGV})
   list (GET ALL_ARGS 0 TEST_PROGRAM)
   list (REMOVE_AT ALL_ARGS 0) # first one is the test program
-  cisst_cmake_debug ("cisst_add_test, test program ${TEST_PROGRAM} to ne used with options ${ALL_ARGS}")
+  cisst_cmake_debug ("cisst_add_test, test program ${TEST_PROGRAM} to be used with options ${ALL_ARGS}")
 
   # set all keywords and their values to ""
   set (FUNCTION_KEYWORDS
@@ -903,3 +909,82 @@ macro (cisst_use_cisst_output_directories)
   set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/lib")
   set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin")
 endmacro (cisst_use_cisst_output_directories)
+
+
+# function to generate a config version file
+function (cisst_add_config_version ...)
+  # debug
+  cisst_cmake_debug ("cisst_add_config_version called with: ${ARGV}")
+
+  # get name of config file
+  set (ALL_ARGS ${ARGV})
+  list (GET ALL_ARGS 0 _cacv_configFile)
+  list (REMOVE_AT ALL_ARGS 0) # first one is the config file
+  cisst_cmake_debug ("cisst_add_config_version, config file ${_cacv_configFile} to be generated with options ${ALL_ARGS}")
+
+  # set all keywords and their values to ""
+  set (FUNCTION_KEYWORDS
+       VERSION
+       DESTINATION
+       COMPONENT)
+
+  # reset local variables
+  foreach(keyword ${FUNCTION_KEYWORDS})
+    set (${keyword} "")
+  endforeach(keyword)
+
+  # parse input
+  foreach (arg ${ALL_ARGS})
+    list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
+    if (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (CURRENT_PARAMETER ${arg})
+      set (${CURRENT_PARAMETER} "")
+    else (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (${CURRENT_PARAMETER} ${${CURRENT_PARAMETER}} ${arg})
+    endif (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+  endforeach (arg)
+
+  # debug
+  foreach (keyword ${FUNCTION_KEYWORDS})
+    cisst_cmake_debug ("cisst_add_config_version: ${keyword}: ${${keyword}}")
+  endforeach (keyword)
+
+  set (_cacv_versionTemplateFile "cisstConfigVersion.cmake.in")
+  find_file (CISST_CONFIG_VERSION_TEMPLATE
+             NAMES ${_cacv_versionTemplateFile}
+             PATHS ${CISST_CMAKE_DIRS}
+             NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  mark_as_advanced (CISST_CONFIG_VERSION_TEMPLATE)
+  if (CISST_CONFIG_VERSION_TEMPLATE)
+    configure_file("${CISST_CONFIG_VERSION_TEMPLATE}" "${_cacv_configFile}" @ONLY)
+    if (DESTINATION)
+      if (COMPONENT)
+        install (FILES ${_cacv_configFile}
+                 DESTINATION ${DESTINATION}
+                 COMPONENT ${COMPONENT})
+      else (COMPONENT)
+        install (FILES ${_cacv_configFile}
+                 DESTINATION ${DESTINATION})
+      endif (COMPONENT)
+    endif (DESTINATION)
+  else ()
+    message (FATAL_ERROR "cisst_add_config_version can't find template file: \"${_cacv_versionTemplateFile}\"")
+  endif ()
+
+endfunction (cisst_add_config_version)
+
+
+#
+# Test if this build using ROS/catkin
+#
+function (cisst_is_catkin_build RESULT)
+  set (${RESULT} FALSE PARENT_SCOPE)
+  if (DEFINED ENV{ROS_ROOT})
+    message (WARNING "Assuming cisst is built using ROS/catkin since ROS_ROOT is defined in environment")
+    if (DEFINED CATKIN_DEVEL_PREFIX)
+      set (${RESULT} TRUE PARENT_SCOPE)
+    else ()
+      message (WARNING "CATKIN_DEVEL_PREFIX is not defined so assuming this is NOT a ROS/catkin build after all")
+    endif ()
+  endif ()
+endfunction (cisst_is_catkin_build)

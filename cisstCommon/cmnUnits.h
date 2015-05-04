@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2008-08-21
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,17 +25,18 @@ http://www.cisst.org/cisst/license.txt.
 
   This file include the definition and implementation of constants and
   global functions used to defines measuring units in the cisst
-  libraries.  The internal units of the cisst libraries are
-  millimeters, grams, seconds and radians.  These unusual units have
-  been choosen to match the scale of problems encountered in computer
-  assisted medical interventions.
+  libraries.  The internal units of the cisst libraries are meters,
+  kilograms, seconds and radians if CISST_USE_SI_UNITS is set to true.
+  Otherwise, units are millimeters and grams.  Older versions of cisst
+  didn't define CISST_USE_SI_UNITS and the default units were
+  millimeters and grams.
 
   For all units, the cisst libraries provide a constant as well as a
   global function to convert from the internal units to other
   representations.
 
   <code>
-    double distance = 5000 * cmn_m; // 5000 meters, distance is actually in mm
+    double distance = 5000 * cmn_m; // 5000 meters
     AnExampleOfFunction(50 * cmn_mm); // 50 millimeters
     std::cout << "distance in cm: " << cmnInternalTo_cm(distance) << std::endl;
   </code>
@@ -50,18 +49,25 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnUnits_h
 #define _cmnUnits_h
 
+// To determine if we are using SI (m) or millimeters by default
+#include <cisstConfig.h>
 
 // Always include last
 #include <cisstCommon/cmnExport.h>
 
 
 
-/*! \name Length units.  The internal unit is millimeter. */
+/*! \name Length units.  The internal unit is millimeter if
+  CISST_USE_SI_UNITS is set to false, meters otherwise. */
 //@{
 
 /*! Millimeter constant, use to convert a length in millimeters to
   internal units.  */
+#if CISST_USE_SI_UNITS
+const double cmn_mm = 0.001;
+#else
 const double cmn_mm = 1.0;
+#endif
 
 /*! Convert a length in internal units to millimeters */
 inline double cmnInternalTo_mm(double valueInternalUnits) {
@@ -88,7 +94,11 @@ inline double cmnInternalTo_cm(double valueInternalUnits) {
 
 /*! Meter constant, use to convert a length in meters to
   internal units.  */
-const double cmn_m = 1000.0 * cmn_mm;
+#if CISST_USE_SI_UNITS
+const double cmn_m = 1.0;
+#else
+const double cmn_m = 1000.0;
+#endif
 
 /*! Convert a length in internal units to meters */
 inline double cmnInternalTo_m(double valueInternalUnits) {
@@ -107,12 +117,17 @@ inline double cmnInternalTo_km(double valueInternalUnits) {
 
 
 
-/*! \name Mass units.  The internal unit is grams. */
+/*! \name Mass units.  The internal unit is grams if
+  CISST_USE_SI_UNITS is set to false, kilograms otherwise. */
 //@{
 
 /*! Gram constant, use to convert a mass in grams to
   internal units.  */
+#if CISST_USE_SI_UNITS
+const double cmn_g = 0.001;
+#else
 const double cmn_g = 1.0;
+#endif
 
 /*! Convert a mass in internal units to grams */
 inline double cmnInternalTo_g(double valueInternalUnits) {
@@ -227,4 +242,3 @@ inline double cmnInternalTo_day(double valueInternalUnits) {
 
 
 #endif // _cmnUnits_h
-

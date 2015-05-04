@@ -1,0 +1,28 @@
+ language: cpp
+
+ compiler:
+  - gcc
+
+ before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq cmake libxml2-dev libcppunit-dev libopencv-dev
+
+ before_script:
+   - mkdir build
+   - cd build
+   - cmake -C ../.travis.cache.cmake ..
+
+ script:
+   - make
+   - cd bin
+   - ls -lR
+   - ./cisstCommonTests -r
+   - ./cisstVectorTests -r
+   - ./cisstOSAbstractionTests -r
+   - ./cisstNumericalTests -r
+
+ notifications:
+   email:
+     - anton.deguet@jhu.edu
+   on_success: change
+   on_failure: always

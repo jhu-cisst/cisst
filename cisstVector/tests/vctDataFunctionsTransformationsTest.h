@@ -29,6 +29,10 @@ class vctDataFunctionsTransformationsTest : public CppUnit::TestFixture
         CPPUNIT_TEST(TestFrm3DataCopy);
         CPPUNIT_TEST(TestFrm3BinarySerializationStream);
         CPPUNIT_TEST(TestFrm3Scalar);
+        CPPUNIT_TEST(TestFrm4x4DataCopy);
+        CPPUNIT_TEST(TestFrm4x4BinarySerializationStream);
+        CPPUNIT_TEST(TestFrm4x4Scalar);
+
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -42,4 +46,7 @@ class vctDataFunctionsTransformationsTest : public CppUnit::TestFixture
     void TestFrm3DataCopy(void);
     void TestFrm3BinarySerializationStream(void);
     void TestFrm3Scalar(void);
+    void TestFrm4x4DataCopy(void);
+    void TestFrm4x4BinarySerializationStream(void);
+    void TestFrm4x4Scalar(void);
 };

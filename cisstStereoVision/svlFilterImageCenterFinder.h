@@ -46,12 +46,14 @@ public:
 
     void SetTrajectorySmoothing(double smoothing);
     void SetThreshold(unsigned char thresholdlevel);
+    void SetMinRadius(unsigned int radius);
     void SetMassRatio(unsigned int ratio);
     void SetHorizontalLink(bool enable);
     void SetVerticalLink(bool enable);
 
     double GetTrajectorySmoothing() const;
     unsigned char GetThreshold() const;
+    unsigned int GetMinRadius() const;
     unsigned int GetMassRatio() const;
     bool GetHorizontalLink() const;
     bool GetVerticalLink() const;
@@ -85,6 +87,7 @@ private:
 
     double       Smoothing;
     unsigned int ThresholdLevel;
+    unsigned int MinRadius;
     unsigned int MassRatio;
     bool         LinkHorizontally;
     bool         LinkVertically;

@@ -1127,6 +1127,148 @@ void svlImageProcessingHelper::ConvolutionMono32(unsigned int* input, unsigned i
     }
 }
 
+void svlImageProcessingHelper::UnsharpMaskBlurRGB(const unsigned char* img_in, unsigned char* img_out, const int width, const int height, int radius)
+{
+    const int rowstride = width * 3;
+    const int rs_minus2 = rowstride - 2;
+
+    int i, j, k, l;
+    int xstart, xend, ystart, yend;
+    int sum_r, sum_g, sum_b, divider;
+    const unsigned char* input;
+    unsigned char* output;
+
+    for (j = 0; j < height; j ++) {
+
+        sum_r = 0;
+        sum_g = 0;
+        sum_b = 0;
+        divider = 0;
+
+        // Initializing region of processing
+        xstart = 0;
+        xend = radius;
+        ystart = j - radius;
+        if (ystart < 0) ystart = 0;
+        yend = j + radius;
+        if (yend >= height) yend = height - 1;
+
+        // Computing initial sum
+        for (l = ystart; l <= yend; l ++) {
+            input = img_in + l * rowstride + xstart * 3;
+            for (k = xstart; k <= xend; k ++) {
+
+                sum_r += *input;
+                input ++;
+                sum_g += *input;
+                input ++;
+                sum_b += *input;
+                input ++;
+
+                divider ++;
+            }
+        }
+
+        // Setting value of first column
+        output = img_out + j * rowstride;
+        *output = sum_r / divider;
+        output ++;
+        *output = sum_g / divider;
+        output ++;
+        *output = sum_b / divider;
+        output ++;
+
+        // Proceeding on the rest of the line
+        for (i = 1; i < width; i ++) {
+
+            // Subtracting previous column
+            xstart = i - radius - 1;
+            if (xstart >= 0) {
+                input = img_in + ystart * rowstride + xstart * 3;
+                for (l = ystart; l <= yend; l ++) {
+
+                    sum_r -= *input;
+                    input ++;
+                    sum_g -= *input;
+                    input ++;
+                    sum_b -= *input;
+                    input += rs_minus2;
+
+                    divider --;
+                }
+            }
+
+            // Adding next column
+            xend = i + radius;
+            if (xend < width) {
+                input = img_in + ystart * rowstride + xend * 3;
+                for (l = ystart; l <= yend; l ++) {
+
+                    sum_r += *input;
+                    input ++;
+                    sum_g += *input;
+                    input ++;
+                    sum_b += *input;
+                    input += rs_minus2;
+
+                    divider ++;
+                }
+            }
+
+            // Setting value
+            *output = sum_r / divider;
+            output ++;
+            *output = sum_g / divider;
+            output ++;
+            *output = sum_b / divider;
+            output ++;
+        }
+    }
+}
+
+void svlImageProcessingHelper::UnsharpMaskSharpenRGB(const unsigned char* img_in, const unsigned char* img_mask, unsigned char* img_out, const int width, const int height, const int amount, const int threshold)
+{
+    int i, in, mask, diff, out;
+    const int size = width * height * 3;
+
+    if (threshold > 0) {
+        for (i = 0; i < size; i ++) {
+            in = *img_in; mask = *img_mask;
+
+            if (in < mask) diff = mask - in;
+            else diff = in - mask;
+
+            if (diff < threshold) {
+                *img_out = in;
+            }
+            else {
+                out = mask + (((in - mask) * amount) >> 8);
+                if (out < 0) out = 0;
+                if (out > 255) out = 255;
+                *img_out = out;
+            }
+
+            img_in ++;
+            img_mask ++;
+            img_out ++;
+        }
+    }
+    else {
+        for (i = 0; i < size; i ++) {
+            in = *img_in; mask = *img_mask;
+
+            out = mask + (((in - mask) * amount) >> 8);
+            if (out < 0) out = 0;
+            if (out > 255) out = 255;
+            *img_out = out;
+
+            img_in ++;
+            img_mask ++;
+            img_out ++;
+        }
+    }
+}
+
 void svlImageProcessingHelper::ResampleMono8(unsigned char* src, const unsigned int srcwidth, const unsigned int srcheight,
                                              unsigned char* dst, const unsigned int dstwidth, const unsigned int dstheight)
 {

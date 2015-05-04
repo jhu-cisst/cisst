@@ -133,6 +133,12 @@ public:
         return result;
     }
 
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsBlockingType blocking,
+                               mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler)) {
+        return Execute(argument, blocking);
+    }
+
     /*! Getter for per-command (de)serializer */
     inline mtsProxySerializer * GetSerializer(void) {
         return &Serializer;

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+  Author(s):  Ofri Sadowsky
+  Created on: 2003-08-18
 
-  Author(s):	Ofri Sadowsky
-  Created on:	2003-08-18
-
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -188,7 +186,7 @@ class vctUnaryOperations
     class IsFinite {
     public:
         static inline OutputElementType Operate(const InputElementType & input) {
-            return OutputElementType(CMN_ISFINITE(input));
+            return OutputElementType(cmnTypeTraits<InputElementType>::IsFinite(input));
         }
     };
 
@@ -196,7 +194,7 @@ class vctUnaryOperations
     class IsNaN {
     public:
         static inline OutputElementType Operate(const InputElementType & input) {
-            return OutputElementType(CMN_ISNAN(input));
+            return OutputElementType(cmnTypeTraits<InputElementType>::IsNaN(input));
         }
     };
 

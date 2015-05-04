@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -412,6 +410,18 @@ public:
         return rowPointers;
     }
 
+    /*! Create a const reference to a sub matrix */
+    vctDynamicConstMatrixRef<_elementType>
+    Ref(const size_type rows, const size_type cols,
+        const size_type startRow = 0, const size_type startCol = 0) const throw (std::out_of_range) {
+        if (((startRow + rows) > this->rows())
+            || ((startCol + cols) > this->cols())) {
+            cmnThrow(std::out_of_range("vctDynamicConstMatrixBase::Ref: reference is out of range"));
+        }
+        return vctDynamicConstMatrixRef<_elementType>(rows, cols,
+                                                      this->row_stride(), this->col_stride(),
+                                                      Pointer(startRow, startCol));
+    }
 
     /*! \name Incremental operations returning a scalar.
       Compute a scalar from all the elements of the matrix. */
@@ -1196,4 +1206,3 @@ inline void vctFixedSizeMatrixBaseAssignDynamicConstMatrixBase(
 
 
 #endif // _vctDynamicConstMatrixBase_h
-

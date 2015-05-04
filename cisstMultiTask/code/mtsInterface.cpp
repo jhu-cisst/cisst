@@ -6,7 +6,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,6 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsInterface.h>
 #include <cisstMultiTask/mtsComponent.h>
+
+
+static const std::string mtsInterfaceNoComponentName = "NoName";
 
 
 mtsInterface::mtsInterface(const std::string & interfaceName,
@@ -54,7 +57,12 @@ const mtsComponent *  mtsInterface::GetComponent(void) const
     return this->Component;
 }
 
+
 const std::string & mtsInterface::GetComponentName(void) const
 {
+    // This shouldn't happen
+    if (!Component) {
+        return mtsInterfaceNoComponentName;
+    }
     return Component->GetName();
 }

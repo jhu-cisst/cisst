@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
   \todo Cleanup pointSize vs lineWidth in traces, lines, etc.  use linewidth for everything
   \todo Create a base class "element"/"data" for all elements visible (i.e. signal, vertical line, grid, ...), modifiedSinceLastRender, maybe even render method ...
   \todo Fit/Render should probably be defined at plot/scale/data level
-  \tobo Add flag/method Modified to all elements type to optimize fit/render
+  \todo Add flag/method Modified to all elements type to optimize fit/render
 */
 class CISST_EXPORT vctPlot2DBase
 {
@@ -127,6 +127,9 @@ class CISST_EXPORT vctPlot2DBase
           and sets the first and last pointers to the buffer's
           beginning. */
         void SetSize(size_t numberOfPoints);
+
+        bool IsVisible(void) const;
+        void SetVisible(const bool visible);
 
         /*! Non destructive resize.  If the new buffer is bigger,
           preserves all points.  If the new buffer is smaller,
@@ -231,6 +234,12 @@ class CISST_EXPORT vctPlot2DBase
         }
         inline bool GetContinuousExpandY(void) const {
             return ContinuousExpandY;
+        }
+        const vctDouble2 & GetViewingRangeX(void) {
+            return this->ViewingRangeX;
+        }
+        const vctDouble2 & GetViewingRangeY(void) {
+            return this->ViewingRangeY;
         }
         //@}
 

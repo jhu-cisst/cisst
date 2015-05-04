@@ -91,6 +91,15 @@ bool mtsSocketProxyClientConstructorArg::FromStreamRaw(std::istream & inputStrea
     if (inputStream.fail())
         return false;
     inputStream >> Name >> IP >> Port;
+    // PK TEMP: cmnData<std::string>::SerializeText adds an escape character ('\') before each space.
+    // Same problem exists in other constructor arg FromStreamRaw methods.
+    size_t len = Name.length();
+    if (Name[len-1] == '\\')
+        Name.erase(len-1);
+    len = IP.length();
+    if (IP[len-1] == '\\')
+        IP.erase(len-1);
+    // END TEMP
     if (inputStream.fail())
         return false;
     return (typeid(*this) == typeid(mtsSocketProxyClientConstructorArg));
@@ -858,6 +867,11 @@ public:
     bool RemoveCommand(BaseType * command);
 
     mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking);
+
+    inline mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking,
+                                      mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler)) {
+        return Execute(argument, blocking);
+    }
 
     mtsExecutionResult ExecuteSerialized(const std::string &inputArgSerialized, mtsBlockingType blocking);
 };

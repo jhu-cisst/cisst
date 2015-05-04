@@ -5,7 +5,7 @@
 
   Author(s):	Peter Kazanzides
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <set>
 #include <functional>
 
+#include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnLogger.h>
 
 #include <cisstCommon/cmnExport.h>
@@ -78,7 +79,8 @@ http://www.cisst.org/cisst/license.txt.
      \endcode
 
      Note that the AddEntry method is templated, so that any data type can
-     be used, as long as it contains the FromStreamRaw and ToStreamRaw methods.
+     be used, as long as its cmnData class is defined (for the DeSerializeText
+     and SerializeText methods).
      Similarly, the AddEntryStreamable method is templated, so that any data
      type can be used that defines the stream in (>>) and stream out (<<) operators.
 
@@ -122,15 +124,28 @@ class CISST_EXPORT cmnStreamRawParser
 
        bool Parse(std::istream &inputStream) {
            if (valid) CMN_LOG_INIT_WARNING << "cmnStreamRawParser: duplicate entry for " << key << std::endl;
-           if (valuePtr)
-               valid = valuePtr->FromStreamRaw(inputStream, delimiter);
+           if (valuePtr) {
+               try {
+                   cmnData<_elementType>::DeSerializeText(*valuePtr, inputStream, delimiter);
+                   valid = true;
+               }
+               catch (const std::runtime_error &) {
+                   valid = false;
+               }
+           }
            return valid;
        }
 
        void ToStream(std::ostream & outputStream) const {
            outputStream << key << " ";
-           if (valuePtr && valid)
-               valuePtr->ToStreamRaw(outputStream, delimiter);
+           if (valuePtr && valid) {
+               try {
+                   cmnData<_elementType>::SerializeText(*valuePtr, outputStream, delimiter);
+               }
+               catch (const std::runtime_error &e) {
+                   outputStream << "(invalid: " << e.what() << ")";
+               }
+           }
            else
                outputStream << "(invalid)";
        }

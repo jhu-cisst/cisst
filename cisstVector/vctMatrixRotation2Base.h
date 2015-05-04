@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctMatrixRotation2Base_h
 
 /*!
-  \File
+  \file
   \brief Declaration of vctMatrixRotation2Base
  */
 

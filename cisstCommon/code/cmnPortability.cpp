@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
-  (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,5 +43,43 @@ const std::string cmnCompilersStrings[] = {"Undefined",
                                            ".NET 2005",
                                            ".NET 2008",
                                            ".NET 2010",
-                                           "clang"};
+                                           ".NET 2012",
+                                           ".NET 2013",
+                                           "clang"
+};
+
+
+#if (CISST_OS == CISST_SOLARIS)
+#include <ieeefp.h>
+#endif // CISST_SOLARIS
+
+bool cmnIsFinite(const float & value)
+{
+#if CISST_HAS_ISFINITE
+    return isfinite(value);
+#else
+#ifdef CISST_COMPILER_IS_MSVC
+    return _finite(value) == 1;
+#elif (CISST_OS == CISST_QNX)
+    return isfinite(value);
+#elif (CISST_OS == CISST_SOLARIS)
+    return finite(value);
+#endif
+#endif
+}
+
+bool cmnIsFinite(const double & value)
+{
+#if CISST_HAS_ISFINITE
+    return isfinite(value);
+#else
+#ifdef CISST_COMPILER_IS_MSVC
+    return _finite(value) == 1;
+#elif (CISST_OS == CISST_QNX)
+    return isfinite(value);
+#elif (CISST_OS == CISST_SOLARIS)
+    return finite(value);
+#endif
+#endif
+}
 

@@ -2,13 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
-
   Author(s):  Anton Deguet
   Created on: 2004-02-18
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,8 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cisstRevision_h
 #define _cisstRevision_h
 
-// cisst subversion revision number
-#define CISST_WC_REVISION "${CISST_WC_REVISION}"
-#define CISST_FULL_REVISION "cisst ${CISST_VERSION}, revision: ${CISST_WC_REVISION}"
+#define CISST_GIT_DESCRIBE "${CISST_GIT_DESCRIBE}"
+#define CISST_FULL_REVISION "cisst ${CISST_VERSION} (git: ${CISST_GIT_DESCRIBE})"
 
 #endif // _cisstRevision_h

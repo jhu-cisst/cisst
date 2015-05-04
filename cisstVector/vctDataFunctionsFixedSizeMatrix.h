@@ -26,7 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctFixedSizeMatrixBase.h>
 #include <cisstCommon/cmnDataFunctionsMatrixHelpers.h>
+
+#if CISST_HAS_JSON
 #include <cisstVector/vctDataFunctionsFixedSizeMatrixJSON.h>
+#endif // CISST_HAS_JSON
 
 template <class _elementType, vct::size_type _rows, vct::size_type _cols, bool _rowMajor>
 class cmnData<vctFixedSizeMatrix<_elementType, _rows, _cols, _rowMajor> >
@@ -63,14 +66,14 @@ public:
 
     static void SerializeText(const DataType & data,
                               std::ostream & outputStream,
-                              const char delimiter)
+                              const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnDataMatrixSerializeText(data, outputStream, delimiter);
     }
 
     static std::string SerializeDescription(const DataType & data,
-                                            const char delimiter,
+                                            const char delimiter = ',',
                                             const std::string & userDescription = "m")
     {
         return cmnDataMatrixSerializeDescription(data, delimiter, userDescription, false /* no need to serialize size */);
@@ -78,7 +81,7 @@ public:
 
     static void DeSerializeText(DataType & data,
                                 std::istream & inputStream,
-                                const char delimiter)
+                                const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnDataMatrixDeSerializeText(data, inputStream, delimiter);

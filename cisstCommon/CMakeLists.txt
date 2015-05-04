@@ -36,6 +36,12 @@ if (CISST_cisstCommonXML)
   add_subdirectory (codeXML)
   set (CISST_HAS_XML ON PARENT_SCOPE) # to generate cisstConfig.h properly
   set (CISST_HAS_XML ON) # both seems needed so sub-directory "tests" also knows if CISST_HAS_XML
+
+  # Add cisstCommonXML if needed
+  if (CISST_HAS_XML)
+    set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES} PARENT_SCOPE)
+  endif (CISST_HAS_XML)
+
 else (CISST_cisstCommonXML)
   set (CISST_HAS_XML OFF PARENT_SCOPE)
   set (CISST_HAS_XML OFF)

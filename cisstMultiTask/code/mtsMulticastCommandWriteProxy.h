@@ -86,6 +86,12 @@ public:
         return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
 
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsBlockingType blocking,
+                               mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler)) {
+        return Execute(argument, blocking);
+    }
+
     /*! Test if all arguments are supported.  See ArgumentsSupportedFlag. */
     inline bool ArgumentsSupported(void) const {
         return this->ArgumentsSupportedFlag;

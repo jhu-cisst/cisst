@@ -28,18 +28,19 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlWindowManagerBase.h>
 #include <cisstStereoVision/svlFilterSourceVideoFile.h>
+#include <cisstStereoVision/svlFilterImageResizer.h>
 #include <cisstStereoVision/svlFilterImageWindow.h>
 #include <cisstStereoVision/svlFilterImageOverlay.h>
 
-#if CISST_HAS_QT
+#if CISST_HAS_QT4
     #include <cisstStereoVision/svlQtObjectFactory.h>
     #include <cisstStereoVision/svlQtWidgetFileOpen.h>
     #if CISST_HAS_OPENGL
         #include <cisstStereoVision/svlFilterImageWindowQt.h>
     #endif
     // Qt dialogs are disabled by default
-    #define _USE_QT_        0
-    #define _NO_CONSOLE_    0
+    #define _USE_QT_        1
+    #define _NO_CONSOLE_    1
 #else
     #define _USE_QT_        0
     #define _NO_CONSOLE_    0
@@ -126,6 +127,7 @@ int VideoPlayer(std::string pathname)
     // instantiating SVL stream and filters
     svlStreamManager stream(4);
     svlFilterSourceVideoFile source(1);
+    svlFilterImageResizer resizer;
     svlFilterImageOverlay overlay;
 #if _USE_QT_ && CISST_HAS_OPENGL
     svlFilterImageWindowQt window;
@@ -133,6 +135,9 @@ int VideoPlayer(std::string pathname)
     svlFilterImageWindow window;
 #endif // _USE_QT_ && CISST_HAS_OPENGL
     CViewerEventHandler window_cb;
+
+    // setup resizer
+    resizer.SetOutputRatio(0.5, 0.5);
 
     // setup overlay
     svlOverlayFramerate ovrl_fps(0, true, &overlay, svlRect(4, 24, 49, 41),
@@ -172,7 +177,12 @@ int VideoPlayer(std::string pathname)
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);
+#if 0
+    source.GetOutput()->Connect(resizer.GetInput());
+    resizer.GetOutput()->Connect(overlay.GetInput());
+#else
     source.GetOutput()->Connect(overlay.GetInput());
+#endif
     overlay.GetOutput()->Connect(window.GetInput());
 
     cerr << endl << "Starting stream... " << endl;

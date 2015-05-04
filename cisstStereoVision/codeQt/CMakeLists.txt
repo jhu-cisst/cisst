@@ -130,8 +130,3 @@ cisst_add_library (LIBRARY cisstStereoVisionQt
 
 # link against Qt libraries
 target_link_libraries (cisstStereoVisionQt ${QT_LIBRARIES})
-
-# for Qt5
-if (CISST_HAS_QT5)
-  qt5_use_modules (cisstStereoVisionQt Core Widgets OpenGL)
-endif (CISST_HAS_QT5)

@@ -63,6 +63,8 @@ public:
         if (numberOfRows > 0) {
             // get number of columns from first element
             numberOfColumns = jsonValue[0].size();
+        } else {
+            numberOfColumns = 0;
         }
         // empty matrix
         if ((numberOfRows == 0) || (numberOfColumns == 0)) {

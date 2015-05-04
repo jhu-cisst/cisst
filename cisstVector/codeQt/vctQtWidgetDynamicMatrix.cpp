@@ -46,12 +46,13 @@ bool vctQtWidgetDynamicMatrixDoubleRead::SetValue(const vctDynamicMatrix<double>
 {
     QTableWidgetItem * tableItem;
     QString itemValue;
-    const size_t rows = matrix.rows();
-    const size_t columns = matrix.cols();
+    // Qt uses int, not size_t
+    const int rows = static_cast<int>(matrix.rows());
+    const int columns = static_cast<int>(matrix.cols());
     this->setRowCount(rows);
     this->setColumnCount(columns);
-    for (size_t row = 0; row < rows; ++row) {
-        for (size_t column = 0; column < columns; ++column) {
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
             tableItem = this->item(row, column);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
@@ -84,12 +85,13 @@ vctQtWidgetDynamicMatrixDoubleWrite::vctQtWidgetDynamicMatrixDoubleWrite(void):
 bool vctQtWidgetDynamicMatrixDoubleWrite::SetValue(const vctDynamicMatrix<double> & matrix)
 {
     QDoubleSpinBox * spinBox;
-    const size_t rows = matrix.rows();
-    const size_t columns = matrix.cols();
+    // Qt uses int, not size_t
+    const int rows = static_cast<int>(matrix.rows());
+    const int columns = static_cast<int>(matrix.cols());
     this->setRowCount(rows);
     this->setColumnCount(columns);
-    for (size_t row = 0; row < rows; ++row) {
-        for (size_t column = 0; column < columns; ++column) {
+    for (int row = 0; row < rows; ++row) {
+        for ( int column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(row, column));
             if(spinBox == 0) {
                 spinBox = new QDoubleSpinBox();
@@ -104,12 +106,13 @@ bool vctQtWidgetDynamicMatrixDoubleWrite::SetValue(const vctDynamicMatrix<double
 
 bool vctQtWidgetDynamicMatrixDoubleWrite::GetValue(vctDynamicMatrix<double> & placeHolder) const
 {
-    const size_t rows = this->rowCount();
-    const size_t columns = this->columnCount();
+    // Qt uses int, not size_t
+    const int rows = static_cast<int>(this->rowCount());
+    const int columns = static_cast<int>(this->columnCount());
     vctDynamicMatrix<double> newMatrix(rows, columns);
     QDoubleSpinBox * spinBox;
-    for (size_t row = 0; row < rows; ++row) {
-        for (size_t column = 0; column < columns; ++column) {
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(row, column));
             newMatrix.Element(row, column) = spinBox->value();
         }
@@ -139,12 +142,13 @@ bool vctQtWidgetDynamicMatrixIntRead::SetValue(const vctDynamicMatrix<int> & mat
 {
     QTableWidgetItem * tableItem;
     QString itemValue;
-    const size_t rows = matrix.rows();
-    const size_t columns = matrix.cols();
+    // Qt uses int, not size_t
+    const int rows = static_cast<int>(matrix.rows());
+    const int columns = static_cast<int>(matrix.cols());
     this->setRowCount(rows);
     this->setColumnCount(columns);
-    for (size_t row = 0; row < rows; ++row) {
-        for (size_t column = 0; column < columns; ++column) {
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
             tableItem = this->item(row, column);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
@@ -176,12 +180,13 @@ vctQtWidgetDynamicMatrixIntWrite::vctQtWidgetDynamicMatrixIntWrite(void):
 bool vctQtWidgetDynamicMatrixIntWrite::SetValue(const vctDynamicMatrix<int> & matrix)
 {
     QSpinBox * spinBox;
-    const size_t rows = matrix.rows();
-    const size_t columns = matrix.cols();
+    // Qt uses int, not size_t
+    const int rows = static_cast<int>(matrix.rows());
+    const int columns = static_cast<int>(matrix.cols());
     this->setRowCount(rows);
     this->setColumnCount(columns);
-    for (size_t row = 0; row < rows; ++row) {
-        for (size_t column = 0; column < columns; ++column) {
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(row, column));
             if(spinBox == 0) {
                 spinBox = new QSpinBox();
@@ -195,12 +200,13 @@ bool vctQtWidgetDynamicMatrixIntWrite::SetValue(const vctDynamicMatrix<int> & ma
 
 bool vctQtWidgetDynamicMatrixIntWrite::GetValue(vctDynamicMatrix<int> & placeHolder) const
 {
-    const size_t rows = this->rowCount();
-    const size_t columns = this->columnCount();
+    // Qt uses int, not size_t
+    const int rows = static_cast<int>(this->rowCount());
+    const int columns = static_cast<int>(this->columnCount());
     vctDynamicMatrix<int> newMatrix(rows, columns);
     QSpinBox * spinBox;
-    for (size_t row = 0; row < rows; ++row) {
-        for (size_t column = 0; column < columns; ++column) {
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(row, column));
             newMatrix.Element(row, column) = spinBox->value();
         }
@@ -229,12 +235,13 @@ bool vctQtWidgetDynamicMatrixBoolRead::SetValue(const vctDynamicMatrix<bool> & m
 {
     QTableWidgetItem * tableItem;
     QString itemValue;
-    const size_t rows = matrix.rows();
-    const size_t columns = matrix.cols();
+    // Qt uses int, not size_t
+    const int rows = static_cast<int>(matrix.rows());
+    const int columns = static_cast<int>(matrix.cols());
     this->setRowCount(rows);
     this->setColumnCount(columns);
-    for (size_t row = 0; row < rows; ++row) {
-        for (size_t column = 0; column < columns; ++column) {
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
             tableItem = this->item(row, column);
             if (tableItem == 0) {
                 tableItem = new QTableWidgetItem();
@@ -266,12 +273,13 @@ vctQtWidgetDynamicMatrixBoolWrite::vctQtWidgetDynamicMatrixBoolWrite(void):
 bool vctQtWidgetDynamicMatrixBoolWrite::SetValue(const vctDynamicMatrix<bool> & matrix)
 {
     QSpinBox * spinBox;
-    const size_t rows = matrix.rows();
-    const size_t columns = matrix.cols();
+    // Qt uses int, not size_t
+    const int rows = static_cast<int>(matrix.rows());
+    const int columns = static_cast<int>(matrix.cols());
     this->setRowCount(rows);
     this->setColumnCount(columns);
-    for (size_t row = 0; row < rows; ++row) {
-        for (size_t column = 0; column < columns; ++column) {
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(row, column));
             if(spinBox == 0) {
                 spinBox = new QSpinBox();
@@ -287,12 +295,13 @@ bool vctQtWidgetDynamicMatrixBoolWrite::SetValue(const vctDynamicMatrix<bool> & 
 
 bool vctQtWidgetDynamicMatrixBoolWrite::GetValue(vctDynamicMatrix<bool> & placeHolder) const
 {
-    const size_t rows = this->rowCount();
-    const size_t columns = this->columnCount();
+    // Qt uses int, not size_t
+    const int rows = static_cast<int>(this->rowCount());
+    const int columns = static_cast<int>(this->columnCount());
     vctDynamicMatrix<bool> newMatrix(rows, columns);
     QSpinBox * spinBox;
-    for (size_t row = 0; row < rows; ++row) {
-        for (size_t column = 0; column < columns; ++column) {
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(row, column));
             newMatrix.Element(row, column) = (bool)spinBox->value();
         }

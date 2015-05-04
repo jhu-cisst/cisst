@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
-  Author(s):	Ankur Kapoor
-  Created on:	2004-10-30
+  Author(s):  Ankur Kapoor
+  Created on: 2004-10-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Declaration of nmrHFTISolver
  */
 
@@ -30,6 +29,23 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDynamicMatrix.h>
 #include <cisstNumerical/nmrNetlib.h>
 
+// forward declaration of fortran routine for very old cisstNetlib
+#ifndef CISSTNETLIB_VERSION
+#  define NEEDS_HFTI_FORWARD_DECLARATION
+#else
+#  if (CISSTNETLIB_VERSION_MAJOR == 3)
+#    define NEEDS_HFTI_FORWARD_DECLARATION
+#  endif
+#endif
+
+
+#ifdef NEEDS_HFTI_FORWARD_DECLARATION
+CISSTNETLIB_INTEGER hfti_(CISSTNETLIB_DOUBLE * a, CISSTNETLIB_INTEGER * mda, CISSTNETLIB_INTEGER * m, CISSTNETLIB_INTEGER * n,
+                          CISSTNETLIB_DOUBLE * b, CISSTNETLIB_INTEGER * mdb, CISSTNETLIB_INTEGER * nb, CISSTNETLIB_DOUBLE * tau,
+                          CISSTNETLIB_INTEGER * krank, CISSTNETLIB_DOUBLE * rnorm, CISSTNETLIB_DOUBLE * h__, CISSTNETLIB_DOUBLE * g,
+                          CISSTNETLIB_INTEGER * ip);
+#  undef NEEDS_HFTI_FORWARD_DECLARATION
+#endif
 
 /*!
   \ingroup cisstNumerical
@@ -52,7 +68,7 @@ http://www.cisst.org/cisst/license.txt.
   - B: A \f$ M \times NB \f$ matrix, the \f$ NB \f$ columns of \f$ B \f$
    represent the right-side vectors \f$ b_j \f$ vectors for \f$ NB \f$
    linear least squares problem
-  - tau: An absolute tolerance parameter 
+  - tau: An absolute tolerance parameter
   - X: A \f$ M \times NB \f$ matrix having column vectors \f$ x_j \f$
   (NOTE: if \f$ B \f$ is a \f$ M \times M \f$ matrix then \f$ X \f$ is
   the pseudoinverse of \f$ A \f$ .
@@ -86,7 +102,7 @@ protected:
     vctDynamicMatrix<CISSTNETLIB_DOUBLE> H;
     vctDynamicMatrix<CISSTNETLIB_INTEGER> IP;
     vctDynamicMatrix<CISSTNETLIB_DOUBLE> X;
-    
+
 public:
     /*! Default constructor.  This constructor doesn't allocate any
       memory.  If you use this constructor, you will need to use one
@@ -99,13 +115,13 @@ public:
     {
         Allocate(M, N, NB);
     }
-    
-    
+
+
     /*! Constructor with memory allocation.  This constructor
       allocates the memory based on M, N and NB.  It relies on the method
       Allocate().  The next call to the Solve() method will check that
       the parameters match the dimension.
-      
+
       \param m Number of rows of A
       \param n Number of columns of A
       \param nb Number of columns of B
@@ -113,8 +129,8 @@ public:
     nmrHFTISolver(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n, CISSTNETLIB_INTEGER nb) {
         Allocate(m, n, nb);
     }
-    
-	
+
+
     /*! Constructor with memory allocation.  This constructor
       allocates the memory based on the actual input of the Solve()
       method.  It relies on the method Allocate().  The next call to
@@ -123,12 +139,12 @@ public:
     nmrHFTISolver(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B) {
         Allocate(A, B);
     }
-    
+
 
     /*! This method allocates the memory based on Ma, Na and Nb.  The
       next call to the Solve() method will check that the parameters
       match the dimension.
-      
+
       \param m Number of rows of A
       \param n Number of columns of A
       \param nb Number of columns of B
@@ -149,7 +165,7 @@ public:
         IP.SetSize(N, 1, VCT_COL_MAJOR);
         X.SetSize(M, NB, VCT_COL_MAJOR);
     }
-    
+
 
     /*! Allocate memory to solve this problem.  This method provides a
       convenient way to extract the required sizes from the input
@@ -158,8 +174,8 @@ public:
     inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B) {
         Allocate(A.rows(), A.cols(), B.cols());
     }
-    
-    
+
+
     /*!  \note This method verifies that the input parameters are
       using a column major storage order and that they are compact.
       Both conditions are tested using vctDynamicMatrix::IsFortran().
@@ -173,14 +189,14 @@ public:
             || (NB != static_cast<CISSTNETLIB_INTEGER>(B.cols()))) {
             cmnThrow(std::runtime_error("nmrHFTISolver Solve: Sizes used for Allocate were different"));
         }
-        
+
         /* check that the matrices are Fortran like */
         if (! (A.IsFortran()
                && B.IsFortran())) {
             cmnThrow(std::runtime_error("nmrHFTISolver Solve: All parameters must be Fortran compatible"));
         }
-        
-        hfti_(A.Pointer(), &M, &M, &N, B.Pointer(), &M, &NB, &tau, 
+
+        hfti_(A.Pointer(), &M, &M, &N, B.Pointer(), &M, &NB, &tau,
               &krank, RNORM.Pointer(),
               H.Pointer(), G.Pointer(), IP.Pointer());
         //error handling??
@@ -189,4 +205,3 @@ public:
 
 
 #endif // _nmrHFTISolver_h
-

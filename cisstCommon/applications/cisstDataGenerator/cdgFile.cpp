@@ -330,7 +330,9 @@ void cdgFile::GenerateHeader(std::ostream & outputStream) const
 
     outputStream << "#include <cisstCommon/cmnDataFunctions.h>" << std::endl
                  << "#include <cisstCommon/cmnDataFunctionsEnumMacros.h>" << std::endl
+                 << "#if CISST_HAS_JSON" << std::endl
                  << "#include <cisstCommon/cmnDataFunctionsJSON.h>" << std::endl
+                 << "#endif // CISST_HAS_JSON" << std::endl
                  << std::endl;
 
     this->Global->GenerateIncludes(outputStream);
@@ -349,7 +351,6 @@ void cdgFile::GenerateCode(std::ostream & outputStream) const
                  << "#include <cisstCommon/cmnDataFunctionsEnumMacros.h>" << std::endl
                  << "#include <cisstCommon/cmnDataFunctionsString.h>" << std::endl
                  << "#include <cisstCommon/cmnDataFunctionsVector.h>" << std::endl
-                 << "#include <cisstCommon/cmnDataFunctionsJSON.h>" << std::endl
                  << std::endl;
     this->Global->GenerateCode(outputStream);
 }

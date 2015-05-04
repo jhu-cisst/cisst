@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-02-18
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -26,7 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 // cisst version
 #define CISST_VERSION_MAJOR ${CISST_VERSION_MAJOR}
 #define CISST_VERSION_MINOR ${CISST_VERSION_MINOR}
-#define CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}"
+#define CISST_VERSION_PATCH ${CISST_VERSION_PATCH}
+#define CISST_VERSION "${CISST_VERSION}"
 
 // Deprecated paths/macros
 #define CISST_SOURCE_ROOT                       CISST_SOURCE_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
@@ -44,6 +44,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // For CMN_LOG macro
 #cmakedefine01 CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+#cmakedefine01 CISST_OSTREAM_CAN_CAST_TO_INT
 
 // Do we have isfinite global function
 #cmakedefine01 CISST_HAS_ISFINITE
@@ -83,5 +84,8 @@ http://www.cisst.org/cisst/license.txt.
 
 // Using JSonCpp, compiled along cisst
 #cmakedefine01 CISST_HAS_JSON
+
+// Using SI units (ie meters) or mm for distances
+#cmakedefine01 CISST_USE_SI_UNITS
 
 #endif // _cisstConfig_h

@@ -26,7 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctFixedSizeVectorBase.h>
 #include <cisstCommon/cmnDataFunctionsVectorHelpers.h>
+
+#if CISST_HAS_JSON
 #include <cisstVector/vctDataFunctionsFixedSizeVectorJSON.h>
+#endif // CISST_HAS_JSON
 
 template <class _elementType, vct::size_type _size>
 class cmnData<vctFixedSizeVector<_elementType, _size> >
@@ -61,20 +64,20 @@ public:
     }
 
     static void SerializeText(const DataType & data, std::ostream & outputStream,
-                              const char delimiter)
+                              const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnDataVectorSerializeText(data, outputStream, delimiter);
     }
 
-    static std::string SerializeDescription(const DataType & data, const char delimiter,
+    static std::string SerializeDescription(const DataType & data, const char delimiter = ',',
                                             const std::string & userDescription = "v")
     {
         return cmnDataVectorSerializeDescription(data, delimiter, userDescription, false /* no need to serialize size */);
     }
 
     static void DeSerializeText(DataType & data, std::istream & inputStream,
-                                const char delimiter)
+                                const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnDataVectorDeSerializeText(data, inputStream, delimiter);

@@ -26,7 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDynamicMatrixBase.h>
 #include <cisstCommon/cmnDataFunctionsMatrixHelpers.h>
+
+#if CISST_HAS_JSON
 #include <cisstVector/vctDataFunctionsDynamicMatrixJSON.h>
+#endif // CISST_HAS_JSON
 
 template <typename _elementType>
 class cmnData<vctDynamicMatrix<_elementType> >
@@ -64,7 +67,7 @@ public:
         cmnDataMatrixDeSerializeBinaryResize(data, inputStream, localFormat, remoteFormat);
     }
 
-    static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter)
+    static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter = ',')
         throw (std::runtime_error)
     {
         const vct::size_type myRows = data.rows();
@@ -78,13 +81,13 @@ public:
         }
     }
 
-    static std::string SerializeDescription(const DataType & data, const char delimiter,
+    static std::string SerializeDescription(const DataType & data, const char delimiter = ',',
                                             const std::string & userDescription = "m")
     {
         return cmnDataMatrixSerializeDescription(data, delimiter, userDescription, true /* need to serialize size */);
     }
 
-    static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter)
+    static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnDataMatrixDeSerializeTextResize(data, inputStream, delimiter);

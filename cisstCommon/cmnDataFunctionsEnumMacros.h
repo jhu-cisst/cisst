@@ -53,17 +53,17 @@ public:                                                                 \
      data = static_cast<DataType>(dataPromoted);                        \
  }                                                                      \
  static void SerializeText(const DataType & data, std::ostream & outputStream, \
-                           const char CMN_UNUSED(delimiter)) throw (std::runtime_error) { \
+                           const char CMN_UNUSED(delimiter) = ',') throw (std::runtime_error) { \
      CMN_ASSERT(sizeof(_promotedType) >= sizeof(DataType));             \
      outputStream << static_cast<_promotedType>(data);                  \
  }                                                                      \
  static std::string SerializeDescription(const DataType & CMN_UNUSED(data), \
-                                         const char CMN_UNUSED(delimiter), \
-                                         const std::string & userDescription) { \
+                                         const char CMN_UNUSED(delimiter) = ',', \
+                                         const std::string & userDescription = "") { \
      return (userDescription == "") ? #_enum : (userDescription + #_enum); \
  }                                                                      \
  static void DeSerializeText(DataType & data, std::istream & inputStream, \
-                             const char CMN_UNUSED(delimiter)) throw (std::runtime_error) { \
+                             const char CMN_UNUSED(delimiter) = ',') throw (std::runtime_error) { \
      CMN_ASSERT(sizeof(_promotedType) >= sizeof(DataType));             \
      _promotedType dataPromoted;                                        \
      inputStream >> dataPromoted;                                       \

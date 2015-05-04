@@ -26,7 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstVector/vctDynamicVectorBase.h>
 #include <cisstCommon/cmnDataFunctionsVectorHelpers.h>
+
+#if CISST_HAS_JSON
 #include <cisstVector/vctDataFunctionsDynamicVectorJSON.h>
+#endif // CISST_HAS_JSON
 
 template <typename _elementType>
 class cmnData<vctDynamicVector<_elementType> >
@@ -67,7 +70,7 @@ public:
 
     static void SerializeText(const DataType & data,
                               std::ostream & outputStream,
-                              const char delimiter)
+                              const char delimiter = ',')
         throw (std::runtime_error)
     {
         const size_t size = data.size();
@@ -79,7 +82,7 @@ public:
     }
 
     static std::string SerializeDescription(const DataType & data,
-                                            const char delimiter,
+                                            const char delimiter = ',',
                                             const std::string & userDescription = "v")
     {
         return cmnDataVectorSerializeDescription(data, delimiter, userDescription, true /* need to serialize size */);
@@ -87,7 +90,7 @@ public:
 
     static void DeSerializeText(DataType & data,
                                 std::istream & inputStream,
-                                const char delimiter)
+                                const char delimiter = ',')
         throw (std::runtime_error)
     {
         cmnDataVectorDeSerializeTextResize(data, inputStream, delimiter);

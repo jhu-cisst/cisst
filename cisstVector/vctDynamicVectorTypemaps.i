@@ -7,8 +7,7 @@
   Author(s):  Daniel Li, Anton Deguet, Mitch Williams
   Created on: 2009-05-20
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -55,11 +54,11 @@ http://www.cisst.org/cisst/license.txt.
     *   Passing a vctDynamicVector by copy
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     *****************************************************************************/
 
     /*****************************************************************************
-     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPE MAP
+     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPEMAP
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
     typedef $1_ltype VectorType;
@@ -94,7 +93,7 @@ http://www.cisst.org/cisst/license.txt.
     *   Returning a vctDynamicVector
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     *****************************************************************************/
 
     /*****************************************************************************
@@ -139,7 +138,7 @@ http://www.cisst.org/cisst/license.txt.
     *****************************************************************************/
 
     /*****************************************************************************
-     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPE MAP
+     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPEMAP
      IS A PYARRAY, IS OF THE CORRECT DTYPE, IS ONE-DIMENSIONAL, AND IS WRITABLE
     *****************************************************************************/
 
@@ -178,7 +177,7 @@ http://www.cisst.org/cisst/license.txt.
     *   Passing a vctDynamicVector by reference
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     *****************************************************************************/
 
     /*************************************************************************
@@ -253,11 +252,11 @@ http://www.cisst.org/cisst/license.txt.
     *   Passing a vctDynamicVector by const &
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     *****************************************************************************/
 
     /*****************************************************************************
-     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPE MAP
+     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPEMAP
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
 
@@ -293,7 +292,7 @@ http://www.cisst.org/cisst/license.txt.
     *   Passing a vctDynamicVector by const reference
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     **************************************************************************/
 
     /**************************************************************************
@@ -377,7 +376,7 @@ http://www.cisst.org/cisst/license.txt.
     *   Returning a vctDynamicVectorRef
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     *****************************************************************************/
 
     /*****************************************************************************
@@ -418,11 +417,11 @@ http://www.cisst.org/cisst/license.txt.
     *   Passing a vctDynamicVectorRef by const reference
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     **************************************************************************/
 
     /*****************************************************************************
-     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPE MAP
+     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPEMAP
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
 
@@ -455,7 +454,7 @@ http://www.cisst.org/cisst/license.txt.
     *   Passing a vctDynamicVectorRef by const reference
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     **************************************************************************/
 
     /**************************************************************************
@@ -479,11 +478,11 @@ http://www.cisst.org/cisst/license.txt.
     *   Passing a vctDynamicConstVectorRef by copy
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     *****************************************************************************/
 
     /*****************************************************************************
-     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPE MAP
+     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPEMAP
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
 
@@ -518,7 +517,7 @@ http://www.cisst.org/cisst/license.txt.
     *   Returning a vctDynamicConstVectorRef
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     *****************************************************************************/
 
     /*****************************************************************************
@@ -563,11 +562,11 @@ http://www.cisst.org/cisst/license.txt.
     *   Passing a vctDynamicConstVectorRef by const reference
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     **************************************************************************/
 
     /*****************************************************************************
-     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPE MAP
+     CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPEMAP
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
 
@@ -600,7 +599,7 @@ http://www.cisst.org/cisst/license.txt.
     *   Passing a vctDynamicConstVectorRef by const reference
     *
     *   See the documentation ``Developer's Guide to Writing Typemaps'' for documentation on the logic behind
-    *   this type map.
+    *   this typemap.
     **************************************************************************/
 
     /**************************************************************************
@@ -613,7 +612,9 @@ http://www.cisst.org/cisst/license.txt.
 
 
 
-%typecheck(SWIG_TYPECHECK_POINTER) vctDynamicVector & {
+%typecheck(SWIG_TYPECHECK_POINTER) vctDynamicVector, vctDynamicVector &, 
+     vctDynamicVectorRef, const vctDynamicVectorRef &,
+     vctDynamicConstVectorRef, const vctDynamicConstVectorRef & {
     // test that the parameter is an array
     if (!PyArray_Check($input)) {
         $1 = 0;
@@ -633,11 +634,17 @@ http://www.cisst.org/cisst/license.txt.
 *                          Applying Typemaps
 **************************************************************************/
 
-%apply vctDynamicVector         {vctDoubleVec, vctVec, vctIntVec};
-%apply vctDynamicVector &       {vctDoubleVec &, vctVec &, vctIntVec &};
-%apply const vctDynamicVector & {const vctDoubleVec &, const vctVec &, const vctIntVec &};
+%apply vctDynamicVector         {vctDoubleVec, vctVec, vctFloatVec, vctIntVec, vctUIntVec,
+                                 vctCharVec, vctUCharVec, vctBoolVec,
+                                 vctShortVec, vctUShortVec, vctLongVec, vctULongVec};
+%apply vctDynamicVector &       {vctDoubleVec &, vctVec &, vctFloatVec &, vctIntVec &, vctUIntVec &,
+                                 vctCharVec &, vctUCharVec &, vctBoolVec &,
+                                 vctShortVec &, vctUShortVec &, vctLongVec &, vctULongVec &};
+%apply const vctDynamicVector & {const vctDoubleVec &, const vctVec &, const vctFloatVec &, const vctIntVec &, const vctUIntVec &,
+                                 const vctCharVec &, const vctUCharVec &, const vctBoolVec &,
+                                 const vctShortVec &, const vctUShortVec &, const vctLongVec &, const vctULongVec &};
 
-%define VCT_TYPEMAPS_APPLY_DYNAMIC_VECTORS(name)
+%define VCT_TYPEMAPS_APPLY_DYNAMIC_VECTORS(elementType)
 %apply vctDynamicVector         {vctDynamicVector<elementType>};
 %apply vctDynamicVector &       {vctDynamicVector<elementType> &};
 %apply const vctDynamicVector & {const vctDynamicVector<elementType> &};
@@ -647,6 +654,7 @@ http://www.cisst.org/cisst/license.txt.
 %apply const vctDynamicConstVectorRef & {const vctDynamicConstVectorRef<elementType> &};
 %enddef
 
+VCT_TYPEMAPS_APPLY_DYNAMIC_VECTORS(bool);
 VCT_TYPEMAPS_APPLY_DYNAMIC_VECTORS(char);
 VCT_TYPEMAPS_APPLY_DYNAMIC_VECTORS(unsigned char);
 VCT_TYPEMAPS_APPLY_DYNAMIC_VECTORS(short);

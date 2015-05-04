@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -151,8 +150,8 @@ public:
       applies the operation on the receiver.
       \param obj The data passed to the operation method
     */
-    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
-                                       mtsBlockingType CMN_UNUSED(blocking)) {
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsBlockingType CMN_UNUSED(blocking)) {
         if (this->IsEnabled()) {
             return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::IS_DERIVED
                                   >::CallMethod(ClassInstantiation, Action, argument);
@@ -168,6 +167,11 @@ public:
             return mtsExecutionResult::COMMAND_SUCCEEDED;
         }
         return mtsExecutionResult::COMMAND_DISABLED;
+    }
+
+    inline mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking,
+                                      mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler)) {
+        return Execute(argument, blocking);
     }
 
     /* commented in base class */
@@ -275,6 +279,11 @@ public:
         return mtsExecutionResult::COMMAND_DISABLED;
     }
 
+    inline mtsExecutionResult Execute(const mtsGenericObject & argument, mtsBlockingType blocking,
+                                      mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler)) {
+        return Execute(argument, blocking);
+    }
+
     /* documented in base class */
     void ToStream(std::ostream & outputStream) const {
         outputStream << "mtsCommandWriteGeneric: ";
@@ -290,4 +299,3 @@ public:
 
 
 #endif // _mtsCommandWrite_h
-

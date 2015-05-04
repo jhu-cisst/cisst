@@ -600,6 +600,8 @@ void svlTarget2D::Assign(const svlTarget2D & target)
     feature_quality = target.feature_quality;
     feature_data.SetSize(target.feature_data.size());
     memcpy(feature_data.Pointer(), target.feature_data.Pointer(), feature_data.size());
+    image_data.SetSize(target.image_data.size());
+    memcpy(image_data.Pointer(), target.image_data.Pointer(), image_data.size());
 }
 
 void svlTarget2D::Assign(bool used, bool visible, unsigned char conf, int x, int y)

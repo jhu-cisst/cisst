@@ -155,26 +155,29 @@ std::string osaSocket::GetLocalhostIP(void)
                           << std::endl;
         return 0;
     }
-
-    int family = ifaddr->ifa_addr->sa_family;
+    
+    std::string host_str;
+    
+    for (; host_str.empty() && ifaddr; ifaddr = ifaddr->ifa_next) {
+        int family = ifaddr->ifa_addr->sa_family;
         
-    // Only keep AF_INET interfaces
-    if( family == AF_INET ){
-        char host[255];
-        int s = getnameinfo( ifaddr->ifa_addr,
-                             (family==AF_INET) ? sizeof(struct sockaddr_in) :
-                             sizeof(struct sockaddr_in6),
-                             host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-        if(s != 0) {
-            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                              << "Failed to convert socket address."
-                              << std::endl;
-            return 0;
+        // Only keep AF_INET interfaces
+        if ( family == AF_INET ) {
+            char host[NI_MAXHOST];
+            int s = getnameinfo( ifaddr->ifa_addr,
+                                 sizeof(struct sockaddr_in),
+                                 host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            if(s != 0) {
+                CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                                  << "Failed to convert socket address."
+                                  << std::endl;
+                break;
+            }
+            host_str = host;
         }
-        return std::string(host);
     }
     
-    return std::string();
+    return host_str;
 
 #else
 

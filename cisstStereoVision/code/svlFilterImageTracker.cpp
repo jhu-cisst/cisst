@@ -1136,7 +1136,7 @@ int svlFilterImageTracker::UpdateMosaicImage(unsigned int videoch, unsigned int 
 
         if (!target->used || target->feature_quality < 0) continue;
 
-        tracker->GetFeatureRef(i, template_ref);
+        tracker->GetImageRef(i, template_ref);
         tdata = template_ref.Pointer();
         if (!tdata) continue;
 

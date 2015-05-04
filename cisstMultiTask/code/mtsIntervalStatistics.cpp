@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+ Author(s): Marcin Balicki, Anton Deguet
+ Created on: 2010-03-31
 
-Author(s): Marcin Balicki
-Created on: 2010-03-31
-
-(C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
+ (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,6 +26,7 @@ mtsIntervalStatistics::mtsIntervalStatistics():
     Sum(0.0),
     SumOfSquares(0.0),
     NumberOfSamples(0),
+    LastUpdateTime(0.0),
     TempMax(0.0),
     TempMin(0.0),
     Avg(0.0),

@@ -25,11 +25,11 @@ if (cisst_FOUND)
 
   if (CISST_SVL_HAS_X11 OR WIN32)
 
-    if (CISST_HAS_QT)
+    if (CISST_HAS_QT4)
       set (USED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt)
-    else (CISST_HAS_QT)
+    else (CISST_HAS_QT4)
       set (USED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
-    endif (CISST_HAS_QT)
+    endif (CISST_HAS_QT4)
 
     add_executable (svlExCameraViewer cameraviewer.cpp)
     set_property (TARGET svlExCameraViewer PROPERTY FOLDER "cisstStereoVision/examples")

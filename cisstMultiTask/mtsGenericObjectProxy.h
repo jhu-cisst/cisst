@@ -111,6 +111,9 @@ public:
     }
 
     inline static bool Create(cmnGenericObject * existing, const cmnGenericObject & other) {
+        // If they already point to the same memory, just return
+        if (existing == &other)
+            return true;
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         if (otherPointer) {
             new(existing) value_type(*otherPointer);
@@ -1037,5 +1040,16 @@ typedef mtsGenericObjectProxy<vctLongVec> mtsVctLongVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLongVec)
 typedef mtsGenericObjectProxy<vctULongVec> mtsVctULongVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULongVec)
+
+// Dynamic matrices (see also mtsMatrix.h, which uses
+// multiple inheritance)
+#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstVector/vctDataFunctionsDynamicMatrix.h>
+typedef mtsGenericObjectProxy<vctDoubleMat> mtsVctDoubleMat;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctDoubleMat)
+typedef mtsGenericObjectProxy<vctFloatMat> mtsVctFloatMat;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloatMat)
+typedef mtsGenericObjectProxy<vctIntMat> mtsVctIntMat;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctIntMat)
 
 #endif

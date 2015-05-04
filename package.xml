@@ -1,0 +1,16 @@
+<package>
+  <name>cisst</name>
+  <version>1.0.4</version>
+  <description>
+  This package provides the cisst libraries
+  </description>
+  <maintainer email="anton.deguet@jhu.edu">Anton Deguet</maintainer>
+  <license>cisst</license>
+  <url>https://github.com/jhu-cisst/cisst</url>
+
+  <build_depend>cisst_netlib</build_depend>
+  <run_depend>cisst_netlib</run_depend>
+  <export>
+    <build_type>catkin</build_type>
+  </export>
+</package>
