@@ -3249,7 +3249,7 @@ bool mtsManagerLocal::InstallFrameworkFiltersAndEvents(const std::string & compo
 #endif
 
     const std::string cisstJson = path.Find("cisst_casros.json");
-    CMN_LOG_CLASS_RUN_DEBUG << "cisst framework configuration file for CASROS: " << cisstJson << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "cisst framework configuration file for SAFECASS: " << cisstJson << std::endl;
 
     if (!cmnPath::Exists(cisstJson)) {
         CMN_LOG_CLASS_INIT_ERROR << "InstallFrameworkFiltersAndEvents: Failed to install framework filters and events for component \"" << componentName << "\"" << std::endl;

@@ -305,8 +305,8 @@ if (CISST_MTS_HAS_ICE)
        )
 
   if (CISST_HAS_SAFECASS_EXT)
-    set (CASROS_CONFIG_FILES "${cisstMultiTaskLibs_SOURCE_DIR}/share/casros/cisst_casros.json")
-    install (FILES ${CASROS_CONFIG_FILES} 
+    set (SAFECASS_CONFIG_FILES "${cisstMultiTaskLibs_SOURCE_DIR}/share/casros/cisst_casros.json")
+    install (FILES ${SAFECASS_CONFIG_FILES} 
              DESTINATION ${CISST_SHARE_INSTALL_SUFFIX}/cisstMultiTask/casros COMPONENT cisstMultiTask)
   endif()
 
@@ -434,7 +434,7 @@ if (CISST_MTS_HAS_ICE)
   endforeach (configFile)
   if (CISST_HAS_SAFECASS_EXT)
     file (MAKE_DIRECTORY "${CISST_SHARE_DIR}/cisstMultiTask/casros")
-    foreach (configFile ${CASROS_CONFIG_FILES})
+    foreach (configFile ${SAFECASS_CONFIG_FILES})
       add_custom_command (TARGET cisstMultiTask
                           POST_BUILD
                           COMMAND ${CMAKE_COMMAND}

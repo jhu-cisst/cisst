@@ -16,12 +16,12 @@ project (casrosOverrun)
 include (${SC_CONFIG_FILE})
 
 if (NOT SC_HAS_CISST)
-  message ("This version of CASROS example requires cisst")
+  message ("This version of SAFECASS example requires cisst")
   return()
 endif()
 
 # required casros libs (defined by casros build)
-set (CASROS_LIBS ${SC_LIBRARY_FILE} ${SC_LIB_DEPENDENCY_LIBS})
+set (SAFECASS_LIBS ${SC_LIBRARY_FILE} ${SC_LIB_DEPENDENCY_LIBS})
 # required cisst libs
 set (CISST_LIBS cisstCommon cisstOSAbstraction cisstMultiTask)
 
@@ -36,7 +36,7 @@ endif ()
 include (${CISST_USE_FILE})
 
 # required libs
-set (REQUIRED_LIBS ${CISST_LIBS} ${CASROS_LIBS})
+set (REQUIRED_LIBS ${CISST_LIBS} ${SAFECASS_LIBS})
 
 include_directories (${SC_INCLUDE_DIR} ${SC_LIB_DEPENDENCY_INCLUDE_DIR})
 add_executable (casrosOverrun main.cpp)

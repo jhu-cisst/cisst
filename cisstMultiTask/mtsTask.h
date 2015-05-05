@@ -101,7 +101,7 @@ protected:
     mtsStateTable StateTableMonitor;
 
     /*! Function to generate monitor event and propagate it to the Safety Supervisor */
-    // TODO: remove this -- replace this framework-specific event with CASROS broadcasting
+    // TODO: remove this -- replace this framework-specific event with SAFECASS broadcasting
     mtsFunctionWrite GenerateMonitorEvent;
 
     /*! Containers to support framework filters (exception filter) */
