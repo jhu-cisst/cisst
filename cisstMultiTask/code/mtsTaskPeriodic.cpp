@@ -120,18 +120,18 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 
     while ((this->State == mtsComponentState::ACTIVE) || (this->State == mtsComponentState::READY)) {
         if (this->State == mtsComponentState::ACTIVE) {
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
             const double tic = osaGetTime(); 
 #endif
             DoRunInternal();
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
             this->StateTableMonitor.ExecTimeTotal = osaGetTime() - tic;
             // store overrun duration for later use (e.g., dynamic adjustment of actual
             // period in the control loop)
             this->StatusOverrun.Duration = std::max(0.0, this->StateTableMonitor.ExecTimeTotal - Period);
 #endif
             if (StateTable.GetToc() - StateTable.GetTic() > Period) {
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
                 CMN_LOG_CLASS_RUN_WARNING << "Periodic task \"" << GetName() << "\" missed deadline by " 
                                           << (StateTable.GetToc() - StateTable.GetTic() - Period) << " ("
                                           << this->StatusOverrun.Duration << ") second" << std::endl;
@@ -140,16 +140,16 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 #endif
             }
         }
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
         // Wait for remaining period also handles thread suspension
         ThreadBuddy.WaitForRemainingPeriod();
 #else
         // At this moment, thread overrun detection filter has already detected overrun
         // event if casros enabled.  If the event occurs, skip WaitForRemainingPeriod() and
         // go on to the next iteration.
-        const SF::Event * e = 0;
-        SF::State state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
-        if (state != SF::State::WARNING || e->GetName().compare("EVT_THREAD_OVERRUN") != 0)
+        const SC::Event * e = 0;
+        SC::State state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
+        if (state != SC::State::WARNING || e->GetName().compare("EVT_THREAD_OVERRUN") != 0)
             ThreadBuddy.WaitForRemainingPeriod();
         else
             CMN_LOG_CLASS_RUN_WARNING << "Periodic task \"" << GetName() << "\" continues running without thread suspension" << std::endl;

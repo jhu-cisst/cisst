@@ -54,7 +54,7 @@ public:
 
 protected:
     /*! The constructor with a name. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsMulticastCommandWriteProxy(const std::string & name):
         BaseType(name)
 #else

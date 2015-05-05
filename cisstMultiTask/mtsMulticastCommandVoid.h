@@ -55,7 +55,7 @@ protected:
 
 public:
     /*! Default constructor. Does nothing. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsMulticastCommandVoid(const std::string & name);
 #else
     mtsMulticastCommandVoid(const std::string & name,

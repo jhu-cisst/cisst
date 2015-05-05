@@ -51,7 +51,7 @@ protected:
 
 public:
     /*! Default constructor. Does nothing. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsMulticastCommandWriteBase(const std::string & name):
         BaseType(name)
 #else

@@ -1173,7 +1173,7 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
                        connectionDescription.Client.ComponentName, connectionDescription.Client.InterfaceName,
                        connectionDescription.Server.ComponentName, connectionDescription.Server.InterfaceName);
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // Register connection information to Safety Coordinator
     mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
     if (sc)

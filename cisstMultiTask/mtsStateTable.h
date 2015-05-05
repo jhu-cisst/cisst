@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 #include <iostream>
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 #include <cisstMultiTask/mtsVector.h>
 #include <cisstOSAbstraction/osaMutex.h> // for deep fault injection
 #endif
@@ -495,7 +495,7 @@ public:
         static const std::string Toc;
         static const std::string Period;
         static const std::string PeriodStatistics;
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
         static const std::string ExecTimeUser;
         static const std::string ExecTimeTotal;
 #endif
@@ -504,7 +504,7 @@ public:
     static const mtsStateDataId INVALID_STATEVECTOR_ID;
 
     /*! Fetch new value from state table */
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     double GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const;
     mtsDoubleVec GetNewValueVector(const mtsStateDataId id, double & timeStamp) const;
     void GetNewValueVector(const mtsStateDataId id, mtsDoubleVec & vec, double & timeStamp) const;
@@ -513,10 +513,10 @@ public:
     // for deep fault injection
     void PushNewValueScalar(const mtsStateDataId id, const mtsDouble & value);
     void PushNewValueScalar(const mtsStateDataId id, const mtsDoubleVec & values);
-    void PushNewValueVector(const mtsStateDataId id, const SF::DoubleVecType & value);
-    void PushNewValueVector(const mtsStateDataId id, const std::vector<SF::DoubleVecType> & values);
+    void PushNewValueVector(const mtsStateDataId id, const SC::DoubleVecType & value);
+    void PushNewValueVector(const mtsStateDataId id, const std::vector<SC::DoubleVecType> & values);
 
-    // [SFUPDATE]
+    // [SCUPDATE]
     /*! Placeholders for monitoring */
     mtsDouble ExecTimeUser;
     mtsDouble ExecTimeTotal;
@@ -569,7 +569,7 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
     StateVector.push_back(elementHistory);
     FinalRefType *pdata = mtsGenericTypes<_elementType>::ConditionalWrap(*element);
     StateVectorElements.push_back(pdata);
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // MJ: this is not a good design because a state vector is either scalar or vector,
     // and thus these two fault injection tables can be consolidated into one if the table
     // can handle both types.

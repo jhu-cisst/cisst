@@ -60,7 +60,7 @@ class CISST_EXPORT mtsCommandQueuedVoid: public mtsCommandVoid
  public:
     mtsCommandQueuedVoid(void);
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
                          const std::string & name,
                          mtsMailBox * mailBox,

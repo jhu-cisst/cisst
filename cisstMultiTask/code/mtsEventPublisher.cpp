@@ -23,15 +23,15 @@
 
 //CMN_IMPLEMENT_SERVICES(mtsEventPublisher);
 
-mtsEventPublisher::mtsEventPublisher(const SF::FilterBase::FilteringType filteringType)
-    : SF::EventPublisherBase(filteringType), MonitorComponentInstance(0)
+mtsEventPublisher::mtsEventPublisher(const SC::FilterBase::FilteringType filteringType)
+    : SC::EventPublisherBase(filteringType), MonitorComponentInstance(0)
 {
 }
 
 bool mtsEventPublisher::PublishEvent(const std::string & eventDescriptionJSON)
 {
     // Active filters
-    if (this->Type == SF::FilterBase::ACTIVE) {
+    if (this->Type == SC::FilterBase::ACTIVE) {
         if (!EventPublisher.IsValid()) {
             CMN_LOG_RUN_ERROR << "PublishEvent: Failed to publish due to invalid event publisher.  JSON [ " << eventDescriptionJSON << " ]" << std::endl;
             return false;

@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 mtsCommandWriteReturn::mtsCommandWriteReturn(void)
 {}
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandWriteReturn::mtsCommandWriteReturn(const std::string & name):
     BaseType(name)
 #else
@@ -37,7 +37,7 @@ mtsCommandWriteReturn::mtsCommandWriteReturn(const std::string & name,
 {}
 
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandWriteReturn::mtsCommandWriteReturn(mtsCallableWriteReturnBase * callable,
                                              const std::string & name,
                                              const mtsGenericObject * argumentPrototype,

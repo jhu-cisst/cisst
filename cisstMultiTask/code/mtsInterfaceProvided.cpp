@@ -349,7 +349,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCallableVoidBase * call
         // determine if this should be a queued command or not
         bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddCommandVoid", name);
         if (!queued) {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             mtsCommandVoid * command = new mtsCommandVoid(callable, name);
 #else
             mtsCommandVoid * command = new mtsCommandVoid(callable, name, this->GetComponentName(), this->Name);
@@ -363,7 +363,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCallableVoidBase * call
             return command;
         } else {
             // create with no mailbox
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             mtsCommandQueuedVoid * queuedCommand = new mtsCommandQueuedVoid(callable, name, 0, 0);
 #else
             mtsCommandQueuedVoid * queuedCommand = new mtsCommandQueuedVoid(callable, name, 0, 0, this->GetComponentName(), this->Name);
@@ -410,7 +410,7 @@ mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCallableVoi
         // determine if this should be a queued command or not
         bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddCommandVoidReturn", name);
         if (!queued) {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             mtsCommandVoidReturn * command = new mtsCommandVoidReturn(callable, name, resultPrototype);
 #else
             mtsCommandVoidReturn * command = new mtsCommandVoidReturn(callable, name, resultPrototype, this->GetComponentName(), this->Name);
@@ -424,7 +424,7 @@ mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCallableVoi
             return command;
         } else {
             // create with no mailbox
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             mtsCommandQueuedVoidReturn * queuedCommand = new mtsCommandQueuedVoidReturn(callable, name, resultPrototype, 0, 0);
 #else
             mtsCommandQueuedVoidReturn * queuedCommand = new mtsCommandQueuedVoidReturn(callable, name, resultPrototype, 0, 0, this->GetComponentName(), this->Name);
@@ -483,7 +483,7 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWrite(mtsCommandWriteBase 
             bool wasCreated = false;
             if (!queuedCommand) {
                 // if not already queued, create with no mailbox
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
                 queuedCommand = new mtsCommandQueuedWriteGeneric(0, command, 0);
 #else
                 queuedCommand = new mtsCommandQueuedWriteGeneric(0, command, 0, this->GetComponentName(), this->Name);
@@ -516,7 +516,7 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableW
         // determine if this should be a queued command or not
         bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddCommandWriteReturn", name);
         if (!queued) {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             mtsCommandWriteReturn * command = new mtsCommandWriteReturn(callable, name, argumentPrototype, resultPrototype);
 #else
             mtsCommandWriteReturn * command = new mtsCommandWriteReturn(callable, name, argumentPrototype, resultPrototype, this->GetComponentName(), this->Name);
@@ -530,7 +530,7 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableW
             return command;
         } else {
             // create with no mailbox
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             mtsCommandQueuedWriteReturn * queuedCommand = new mtsCommandQueuedWriteReturn(callable, name, argumentPrototype, resultPrototype, 0, 0);
 #else
             mtsCommandQueuedWriteReturn * queuedCommand = new mtsCommandQueuedWriteReturn(callable, name, argumentPrototype, resultPrototype, 0, 0, this->GetComponentName(), this->Name);
@@ -573,7 +573,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCallableReadBase * call
 {
     // check that the input is valid
     if (callable) {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
         mtsCommandRead * command = new mtsCommandRead(callable, name, argumentPrototype);
 #else
         mtsCommandRead * command = new mtsCommandRead(callable, name, argumentPrototype, this->GetComponentName(), this->Name);
@@ -608,7 +608,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCommandRead * command)
 }
 
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateInternalScalar(const mtsStateTable & stateTable,
                                                                          const std::string & stateDataName, const std::string & commandName)
 {
@@ -669,7 +669,7 @@ mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(mtsCalla
     // check that the input is valid
     if (callable) {
         mtsCommandQualifiedRead * command =
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             new mtsCommandQualifiedRead(callable, name, argument1Prototype, argument2Prototype);
 #else
             new mtsCommandQualifiedRead(callable, name, argument1Prototype, argument2Prototype, this->GetComponentName(), this->Name);
@@ -893,7 +893,7 @@ int mtsInterfaceProvided::GetNumberOfEndUsers(void) const
 
 mtsCommandVoid * mtsInterfaceProvided::AddEventVoid(const std::string & eventName)
 {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsMulticastCommandVoid * eventMulticastCommand = new mtsMulticastCommandVoid(eventName);
 #else
     mtsMulticastCommandVoid * eventMulticastCommand = new mtsMulticastCommandVoid(eventName, this->GetComponentName(), this->Name);
@@ -928,7 +928,7 @@ bool mtsInterfaceProvided::AddEventVoid(mtsFunctionVoid & eventTrigger,
 
 mtsCommandWriteBase * mtsInterfaceProvided::AddEventWriteGeneric(const std::string & eventName,
                                                                  const mtsGenericObject & argumentPrototype) {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsMulticastCommandWriteBase * eventMulticastCommand = new mtsMulticastCommandWriteGeneric(eventName, argumentPrototype);
 #else
     mtsMulticastCommandWriteBase * eventMulticastCommand = new mtsMulticastCommandWriteGeneric(eventName, argumentPrototype, this->GetComponentName(), this->Name);

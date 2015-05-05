@@ -413,7 +413,7 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWrite(void (__
 {
     bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerWrite", eventName);
     mtsCommandWriteBase * actualCommand =
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
         new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, eventName, __argumentType());
 #else
         new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, eventName, __argumentType(),
@@ -421,7 +421,7 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWrite(void (__
 #endif
     if (queued) {
         if (MailBox)
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWrite<__argumentType>(MailBox, actualCommand, this->ArgumentQueuesSize));
 #else
             EventHandlersWrite.AddItem(eventName,  
@@ -448,7 +448,7 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(v
 {
     bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerWriteGeneric", eventName);
     mtsCommandWriteBase * actualCommand =
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
         new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, argumentPrototype);
 #else
         new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, argumentPrototype, this->GetComponentName(), this->Name);
@@ -456,7 +456,7 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(v
     if (queued) {
         // PK: check for MailBox overlaps with code in UseQueueBasedOnInterfacePolicy
         if (MailBox) {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             mtsCommandQueuedWriteGeneric *tmp = new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize);
 #else
             mtsCommandQueuedWriteGeneric *tmp = new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize,

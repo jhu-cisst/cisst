@@ -26,7 +26,7 @@ mtsCommandRead::mtsCommandRead(void):
 {}
 
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandRead::mtsCommandRead(const std::string & name):
     BaseType(name),
 #else
@@ -41,7 +41,7 @@ mtsCommandRead::mtsCommandRead(const std::string & name,
 }
 
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandRead::mtsCommandRead(mtsCallableReadBase * callable,
                                const std::string & name,
                                const mtsGenericObject * argumentPrototype):

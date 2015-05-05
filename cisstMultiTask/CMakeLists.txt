@@ -1,6 +1,6 @@
 #
 #
-# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -21,23 +21,23 @@ else (CMAKE_SIZEOF_VOID_P EQUAL 8)
   set (CISST_MTS_64BIT FALSE)
 endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
 
-# Support for Safety Framework plug-ins
-option (CISST_HAS_SAFETY_PLUGINS "Enable support for Safety Framework plug-ins including fault detection and diagnosis" OFF)
-if (CISST_HAS_SAFETY_PLUGINS)
-    find_package(SafetyFramework REQUIRED)
-    if (SF_FOUND)
-      include (${SF_CONFIG_FILE})
-      # Include casros configurations
-      set (SF_INCLUDE_DIR ${SF_INCLUDE_DIR} # where to find include files for SF
-                          ${SF_LIB_DEPENDENCY_INCLUDE_DIR}) # paths to SF dependencies
-      cisst_set_package_settings (cisstMultiTask SafetyFramework INCLUDE_DIRECTORIES SF_INCLUDE_DIR)
-      cisst_set_package_settings (cisstMultiTask SafetyFramework LIBRARIES SF_LIBRARY_FILE)
-      # set compiler flags
-      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SF_CXX_FLAGS}")
-    else (SF_FOUND)
-      message(FATAL_ERROR "Safety Framework is not found.")
-    endif (SF_FOUND)
-endif (CISST_HAS_SAFETY_PLUGINS)
+# Support for SAFECASS plug-ins
+option (CISST_HAS_SAFECASS_EXT "Enable cisst extension to support SAFECASS" OFF)
+if (CISST_HAS_SAFECASS_EXT)
+  find_package(Safecass REQUIRED)
+  if (SC_FOUND)
+    include (${SC_CONFIG_FILE})
+    # Include casros configurations
+    set (SC_INCLUDE_DIR ${SC_INCLUDE_DIR} # where to find include files for SC
+      ${SC_LIB_DEPENDENCY_INCLUDE_DIR}) # paths to SC dependencies
+    cisst_set_package_settings (cisstMultiTask Safecass INCLUDE_DIRECTORIES SC_INCLUDE_DIR)
+    cisst_set_package_settings (cisstMultiTask Safecass LIBRARIES SC_LIBRARY_FILE)
+    # set compiler flags
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SC_CXX_FLAGS}")
+  else (SC_FOUND)
+    message(FATAL_ERROR "SAFECASS is not found.")
+  endif (SC_FOUND)
+endif (CISST_HAS_SAFECASS_EXT)
 
 # try to find ZeroC Ice
 if (CISST_HAS_IOS)
@@ -67,15 +67,15 @@ if (CISST_MTS_HAS_ICE)
     if (WIN32)
       set (ICE_LIBRARIES_ALL optimized Ice  optimized IceUtil
                              debug     Iced debug     IceUtild)
-      if (CISST_HAS_SAFETY_PLUGINS)
+      if (CISST_HAS_SAFECASS_EXT)
         set (ICE_LIBRARIES_ALL ${ICE_LIBRARIES_ALL} optimized IceStorm debug IceStormd)
-      endif (CISST_HAS_SAFETY_PLUGINS)
+      endif (CISST_HAS_SAFECASS_EXT)
       cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES_ALL)
     else (WIN32)
       set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} ${ICEUTIL_LIBRARY_NAME})
-      if (CISST_HAS_SAFETY_PLUGINS)
+      if (CISST_HAS_SAFECASS_EXT)
         set (ICE_LIBRARIES ${ICE_LIBRARIES} ${ICESTORM_LIBRARY_NAME})
-      endif (CISST_HAS_SAFETY_PLUGINS)
+      endif (CISST_HAS_SAFECASS_EXT)
       cisst_set_package_settings (cisstMultiTask ZeroCIce LIBRARIES ICE_LIBRARIES)
     endif (WIN32)
   endif (CISST_HAS_IOS)

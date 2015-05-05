@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsManagerComponentServer_h
 
 #include <cisstMultiTask/mtsManagerComponentBase.h>
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 #include <cisstMultiTask/mtsFaultBase.h>
 #endif
 

@@ -31,7 +31,7 @@ mtsCommandQueuedVoid::mtsCommandQueuedVoid(void):
 mtsCommandQueuedVoid::mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
                                            const std::string & name,
                                            mtsMailBox * mailBox,
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
                                            size_t size):
     BaseType(callable, name),
 #else
@@ -51,7 +51,7 @@ mtsCommandQueuedVoid::mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
 
 mtsCommandQueuedVoid * mtsCommandQueuedVoid::Clone(mtsMailBox * mailBox, size_t size) const
 {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     return new mtsCommandQueuedVoid(this->Callable, this->Name,
                                     mailBox, size);
 #else
@@ -94,17 +94,17 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
            << BlockingFlagQueue.IsFull() << "|"
            << FinishedEventQueue.IsFull() << "|"
            << MailBox->IsFull() << "]";
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
         // onset event
-        if (SF::State::NORMAL == 
+        if (SC::State::NORMAL == 
             GetSafetyCoordinator->GetInterfaceState(this->ComponentName,
                                                     this->InterfaceName,
-                                                    SF::GCM::PROVIDED_INTERFACE))
+                                                    SC::GCM::PROVIDED_INTERFACE))
         {
             GetSafetyCoordinator->GenerateEvent(// event name
                                                 "EVT_COMMAND_QUEUE_FULL",
                                                 // statemachine type
-                                                SF::State::STATEMACHINE_PROVIDED,
+                                                SC::State::STATEMACHINE_PROVIDED,
                                                 // description
                                                 ss.str(),
                                                 this->ComponentName,
@@ -114,13 +114,13 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
         CMN_LOG_RUN_WARNING << ss.str() << std::endl;
         return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
     }
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     else {
         // offset event
-        if (SF::State::ERROR == 
+        if (SC::State::ERROR == 
             GetSafetyCoordinator->GetInterfaceState(this->ComponentName,
                                                     this->InterfaceName,
-                                                    SF::GCM::PROVIDED_INTERFACE))
+                                                    SC::GCM::PROVIDED_INTERFACE))
         {
             std::stringstream ss;
             ss << "Class mtsCommandQueuedVoid: Execute: Queue is being dequeued\""
@@ -129,7 +129,7 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
                << FinishedEventQueue.IsFull() << "|"
                << MailBox->IsFull() << "]";
             GetSafetyCoordinator->GenerateEvent("/EVT_COMMAND_QUEUE_FULL",
-                                                SF::State::STATEMACHINE_PROVIDED,
+                                                SC::State::STATEMACHINE_PROVIDED,
                                                 ss.str(),
                                                 this->ComponentName,
                                                 this->InterfaceName);

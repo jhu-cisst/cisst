@@ -78,7 +78,7 @@ private:
 public:
 
     /*! Constructor */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandQueuedWriteReturnBase(CallableType * callable, const std::string & name,
                                     const mtsGenericObject * argumentPrototype,
                                     const mtsGenericObject * resultPrototype,

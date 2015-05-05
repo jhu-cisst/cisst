@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsMulticastCommandVoid::mtsMulticastCommandVoid(const std::string & name):
     BaseType(0, name)
 #else

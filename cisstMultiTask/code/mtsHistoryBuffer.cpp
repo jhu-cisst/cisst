@@ -24,18 +24,18 @@
 
 //CMN_IMPLEMENT_SERVICES(mtsHistoryBuffer);
 
-mtsHistoryBuffer::mtsHistoryBuffer(const SF::FilterBase::FilteringType type,
+mtsHistoryBuffer::mtsHistoryBuffer(const SC::FilterBase::FilteringType type,
                                    mtsStateTable * stateTable)
     : Type(type), StateTable(stateTable)
 {
     CMN_ASSERT(StateTable);
 }
 
-void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
-                                         SF::SignalElement::ScalarType & value,
-                                         SF::TimestampType & timestamp)
+void mtsHistoryBuffer::GetNewValueScalar(SC::SignalElement::HistoryBufferIndexType index,
+                                         SC::SignalElement::ScalarType & value,
+                                         SC::TimestampType & timestamp)
 {
-    if (Type == SF::FilterBase::ACTIVE)
+    if (Type == SC::FilterBase::ACTIVE)
         value = StateTable->GetNewValueScalar(index, timestamp);
     else {
         CMN_LOG_RUN_WARNING << "GetNewValueScalar: Passive filters should not call this method" << std::endl;
@@ -44,11 +44,11 @@ void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::HistoryBufferIndexTy
     }
 }
 
-void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
-                                         SF::SignalElement::VectorType & value,
-                                         SF::TimestampType & timestamp)
+void mtsHistoryBuffer::GetNewValueVector(SC::SignalElement::HistoryBufferIndexType index,
+                                         SC::SignalElement::VectorType & value,
+                                         SC::TimestampType & timestamp)
 {
-    if (Type == SF::FilterBase::ACTIVE)
+    if (Type == SC::FilterBase::ACTIVE)
         StateTable->GetNewValueVector(index, value, timestamp);
     else {
         CMN_LOG_RUN_WARNING << "GetNewValueVector: Passive filters should not call this method" << std::endl;
@@ -57,10 +57,10 @@ void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::HistoryBufferIndexTy
     }
 }
 
-void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::ScalarType & value,
-                                         SF::TimestampType & timestamp)
+void mtsHistoryBuffer::GetNewValueScalar(SC::SignalElement::ScalarType & value,
+                                         SC::TimestampType & timestamp)
 {
-    if (Type == SF::FilterBase::PASSIVE) {
+    if (Type == SC::FilterBase::PASSIVE) {
         FetchScalarValue(value);
         // MJ FIXME: better way to get timestamp in case of passive filtering???
         timestamp = osaGetTime();
@@ -72,10 +72,10 @@ void mtsHistoryBuffer::GetNewValueScalar(SF::SignalElement::ScalarType & value,
     }
 }
 
-void mtsHistoryBuffer::GetNewValueVector(SF::SignalElement::VectorType & value,
-                                         SF::TimestampType & timestamp)
+void mtsHistoryBuffer::GetNewValueVector(SC::SignalElement::VectorType & value,
+                                         SC::TimestampType & timestamp)
 {
-    if (Type == SF::FilterBase::PASSIVE) {
+    if (Type == SC::FilterBase::PASSIVE) {
         FetchVectorValue(value);
         // MJ FIXME: better way to get timestamp in case of passive filtering???
         timestamp = osaGetTime();
@@ -109,16 +109,16 @@ void mtsHistoryBuffer::DeSerializeRaw(std::istream & inputStream)
 }
 #endif
 
-void mtsHistoryBuffer::PushNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
-                                          SF::SignalElement::ScalarType & value)
+void mtsHistoryBuffer::PushNewValueScalar(SC::SignalElement::HistoryBufferIndexType index,
+                                          SC::SignalElement::ScalarType & value)
 {
     // MJ TODO: Check if this method needs to work regardless the type of filter
     // deployment (i.e., passive vs. active)
     StateTable->PushNewValueScalar(index, mtsDouble(value));
 }
 
-void mtsHistoryBuffer::PushNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
-                                          const SF::SignalElement::VectorType & value)
+void mtsHistoryBuffer::PushNewValueVector(SC::SignalElement::HistoryBufferIndexType index,
+                                          const SC::SignalElement::VectorType & value)
 {
     // MJ TODO: Check if this method needs to work regardless of filter
     // deployment type (i.e., passive vs. active)

@@ -29,7 +29,7 @@
 
 class mtsMonitorComponent;
 
-class CISST_EXPORT mtsEventPublisher: public SF::EventPublisherBase 
+class CISST_EXPORT mtsEventPublisher: public SC::EventPublisherBase 
 {
     //CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -43,7 +43,7 @@ protected:
     mtsMonitorComponent * MonitorComponentInstance;
 
 public:
-    mtsEventPublisher(const SF::FilterBase::FilteringType filteringType);
+    mtsEventPublisher(const SC::FilterBase::FilteringType filteringType);
     ~mtsEventPublisher() {}
 
     /*! Publish events to the Safety Framework */

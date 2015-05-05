@@ -30,7 +30,7 @@ const std::string mtsStateTable::NamesOfDefaultElements::Tic = "Tic";
 const std::string mtsStateTable::NamesOfDefaultElements::Toc = "Toc";
 const std::string mtsStateTable::NamesOfDefaultElements::Period = "Period";
 const std::string mtsStateTable::NamesOfDefaultElements::PeriodStatistics = "PeriodStatistics";
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 const std::string mtsStateTable::NamesOfDefaultElements::ExecTimeUser = "ExecTimeUser";
 const std::string mtsStateTable::NamesOfDefaultElements::ExecTimeTotal = "ExecTimeTotal";
 
@@ -66,7 +66,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     SumOfPeriods(0.0),
     AveragePeriod(0.0),
     Name(name)
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     , ExecTimeUser(0.0)
     , ExecTimeTotal(0.0)
 #endif
@@ -99,7 +99,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     // Add statistics
     NewElement(mtsStateTable::NamesOfDefaultElements::PeriodStatistics, &PeriodStats);
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     NewElement(mtsStateTable::NamesOfDefaultElements::ExecTimeUser, &ExecTimeUser);
     NewElement(mtsStateTable::NamesOfDefaultElements::ExecTimeTotal, &ExecTimeTotal);
 #endif
@@ -107,7 +107,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
 
 mtsStateTable::~mtsStateTable()
 {
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     for (size_t i = 0; i < FaultInjectionTable.size(); ++i) {
         delete FaultInjectionTable[i];
         delete FaultInjectionVectorTable[i];
@@ -190,7 +190,7 @@ bool mtsStateTable::Write(mtsStateDataId id, const mtsGenericObject & object) {
     }
     result = StateVector[id]->Set(IndexWriter, object);
     if (!result) {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
         CMN_LOG_CLASS_INIT_ERROR << "Write: error setting data array value in id: " << id << std::endl;
 #else
         std::stringstream ss;
@@ -263,7 +263,7 @@ void mtsStateTable::Advance(void) {
     for (i = TicId; i < StateVector.size(); i++) {
         if (StateVectorElements[i]) {
             StateVectorElements[i]->SetTimestampIfAutomatic(Tic.Data);
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
             if (!FaultInjectionTable[i]->empty()) {
                 Write(static_cast<mtsStateDataId>(i), FaultInjectionTable[i]->front());
                 FaultInjectionMutex.Lock();
@@ -364,7 +364,7 @@ void mtsStateTable::Advance(void) {
         IndexDelayed = IndexReader - Delay;
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // Execute filtering algorithms only for the monitoring state table.  Note that there
     // are two instances of state tables when casros is enabled: default, monitoring.
     // Casros plug-ins only use the monitoring state table.
@@ -412,7 +412,7 @@ void mtsStateTable::Cleanup(void) {
                                  << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl;
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // Execute filtering algorithms only for the monitoring state table.  Note that there
     // are two instances of state tables when casros is enabled: default, monitoring.
     // Casros plug-ins only use the monitoring state table.
@@ -643,7 +643,7 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
     }
 }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 double mtsStateTable::GetNewValueScalar(const mtsStateDataId id, double & timeStamp) const
 {
     mtsDouble value(0.0);
@@ -708,7 +708,7 @@ void mtsStateTable::PushNewValueScalar(const mtsStateDataId id, const mtsDoubleV
     FaultInjectionMutex.Unlock();
 }
 
-void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const SF::DoubleVecType & value)
+void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const SC::DoubleVecType & value)
 {
     mtsStdDoubleVecProxy _value;
     _value.Data = value;
@@ -724,7 +724,7 @@ void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const SF::Double
     FaultInjectionMutex.Unlock();
 }
 
-void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const std::vector<SF::DoubleVecType> & values)
+void mtsStateTable::PushNewValueVector(const mtsStateDataId id, const std::vector<SC::DoubleVecType> & values)
 {
     CMN_ASSERT(id < (int) FaultInjectionVectorTable.size());
 

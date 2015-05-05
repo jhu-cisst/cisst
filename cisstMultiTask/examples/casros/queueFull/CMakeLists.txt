@@ -17,45 +17,45 @@ project (casrosQueueFull)
 # following cmake variables:
 #
 # Version
-#   SF_VERSION_MAJOR
-#   SF_VERSION_MINOR
-#   SF_VERSION_PATCH
-#   SF_VERSION
+#   SC_VERSION_MAJOR
+#   SC_VERSION_MINOR
+#   SC_VERSION_PATCH
+#   SC_VERSION
 #
 # Paths
-#   SF_BUILD_ROOT
-#   SF_BUILD_EXECUTABLE_PATH
-#   SF_BUILD_LIBRARY_DIR
+#   SC_BUILD_ROOT
+#   SC_BUILD_EXECUTABLE_PATH
+#   SC_BUILD_LIBRARY_DIR
 #
-# For external project that uses SF
-#   SF_SOURCE_DIR
-#   SF_LIBRARY_DIR
-#   SF_INCLUDE_DIR
-#   SF_CMAKE_MODULE_PATH
+# For external project that uses SC
+#   SC_SOURCE_DIR
+#   SC_LIBRARY_DIR
+#   SC_INCLUDE_DIR
+#   SC_CMAKE_MODULE_PATH
 #
 # Logger option
-#   SF_USE_G2LOG
+#   SC_USE_G2LOG
 #
 # Compiler options (e.g., g2log requires c++11 standard)
-#   SF_CXX_FLAGS
+#   SC_CXX_FLAGS
 #
 # Supported framework
-#   SF_HAS_CISST
+#   SC_HAS_CISST
 #
 # External dependencies of Safety Framework
-#   SF_BUILD_SHARED_LIBS
-#   SF_LIB_DEPENDENCY_LIBS
-#   SF_LIB_DEPENDENCY_INCLUDE_DIR
+#   SC_BUILD_SHARED_LIBS
+#   SC_LIB_DEPENDENCY_LIBS
+#   SC_LIB_DEPENDENCY_INCLUDE_DIR
 #
-include (${SF_CONFIG_FILE})
+include (${SC_CONFIG_FILE})
 
-if (NOT SF_HAS_CISST)
+if (NOT SC_HAS_CISST)
   message ("This version of CASROS example requires cisst")
   return()
 endif()
 
 # required casros libs (defined by casros build)
-set (CASROS_LIBS ${SF_LIBRARY_FILE} ${SF_LIB_DEPENDENCY_LIBS})
+set (CASROS_LIBS ${SC_LIBRARY_FILE} ${SC_LIB_DEPENDENCY_LIBS})
 # required cisst libs
 set (CISST_LIBS cisstCommon cisstOSAbstraction cisstMultiTask)
 
@@ -72,7 +72,7 @@ include (${CISST_USE_FILE})
 # required libs
 set (REQUIRED_LIBS ${CISST_LIBS} ${CASROS_LIBS})
 
-include_directories (${SF_INCLUDE_DIR} ${SF_LIB_DEPENDENCY_INCLUDE_DIR})
+include_directories (${SC_INCLUDE_DIR} ${SC_LIB_DEPENDENCY_INCLUDE_DIR})
 add_executable (casrosQueueFull main.cpp)
 set_property (TARGET casrosQueueFull PROPERTY FOLDER "cisstMultiTask/applications")
 target_link_libraries (casrosQueueFull ${REQUIRED_LIBS})

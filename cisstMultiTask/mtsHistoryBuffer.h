@@ -29,8 +29,8 @@
 
 #include <cisstMultiTask/mtsExport.h>
 
-//class CISST_EXPORT mtsHistoryBuffer: public mtsGenericObject, public SF::HistoryBufferBase 
-class CISST_EXPORT mtsHistoryBuffer: public SF::HistoryBufferBase 
+//class CISST_EXPORT mtsHistoryBuffer: public mtsGenericObject, public SC::HistoryBufferBase 
+class CISST_EXPORT mtsHistoryBuffer: public SC::HistoryBufferBase 
 {
     //CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
@@ -38,7 +38,7 @@ class CISST_EXPORT mtsHistoryBuffer: public SF::HistoryBufferBase
 
 protected:
     /*! Filtering type */
-    SF::FilterBase::FilteringType Type;
+    SC::FilterBase::FilteringType Type;
 
     /*! For active filtering */
     mtsStateTable * StateTable;
@@ -48,29 +48,29 @@ protected:
     mtsFunctionRead FetchVectorValue;
 
 public:
-    mtsHistoryBuffer(const SF::FilterBase::FilteringType type, mtsStateTable * stateTable);
+    mtsHistoryBuffer(const SC::FilterBase::FilteringType type, mtsStateTable * stateTable);
     ~mtsHistoryBuffer() {}
 
     /*! For active filtering: get latest value from history buffer (direct access) */
-    void GetNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
-                           SF::SignalElement::ScalarType & value,
-                           SF::TimestampType & timestamp);
-    void GetNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
-                           SF::SignalElement::VectorType & value,
-                           SF::TimestampType & timestamp);
+    void GetNewValueScalar(SC::SignalElement::HistoryBufferIndexType index,
+                           SC::SignalElement::ScalarType & value,
+                           SC::TimestampType & timestamp);
+    void GetNewValueVector(SC::SignalElement::HistoryBufferIndexType index,
+                           SC::SignalElement::VectorType & value,
+                           SC::TimestampType & timestamp);
 
     /*! For passive filtering: fetch latest value from history buffer via
         mts data exchange mechanism (indirect access) */
-    void GetNewValueScalar(SF::SignalElement::ScalarType & value,
-                           SF::TimestampType & timestamp);
-    void GetNewValueVector(SF::SignalElement::VectorType & value,
-                           SF::TimestampType & timestamp);
+    void GetNewValueScalar(SC::SignalElement::ScalarType & value,
+                           SC::TimestampType & timestamp);
+    void GetNewValueVector(SC::SignalElement::VectorType & value,
+                           SC::TimestampType & timestamp);
 
     // Support for "deep" fault inject: modify actual values in the buffer
-    void PushNewValueScalar(SF::SignalElement::HistoryBufferIndexType index,
-                            SF::SignalElement::ScalarType & value);
-    void PushNewValueVector(SF::SignalElement::HistoryBufferIndexType index,
-                            const SF::SignalElement::VectorType & value);
+    void PushNewValueScalar(SC::SignalElement::HistoryBufferIndexType index,
+                            SC::SignalElement::ScalarType & value);
+    void PushNewValueVector(SC::SignalElement::HistoryBufferIndexType index,
+                            const SC::SignalElement::VectorType & value);
     
     
     /*

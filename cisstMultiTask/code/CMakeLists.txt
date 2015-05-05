@@ -304,7 +304,7 @@ if (CISST_MTS_HAS_ICE)
        mtsManagerProxy
        )
 
-  if (CISST_HAS_SAFETY_PLUGINS)
+  if (CISST_HAS_SAFECASS_EXT)
     set (CASROS_CONFIG_FILES "${cisstMultiTaskLibs_SOURCE_DIR}/share/casros/cisst_casros.json")
     install (FILES ${CASROS_CONFIG_FILES} 
              DESTINATION ${CISST_SHARE_INSTALL_SUFFIX}/cisstMultiTask/casros COMPONENT cisstMultiTask)
@@ -344,7 +344,7 @@ if (CISST_MTS_HAS_ICE)
 endif (CISST_MTS_HAS_ICE)
 
 # plug-in files to support Safety Framework including fault detection and diagnosis
-if (CISST_HAS_SAFETY_PLUGINS)
+if (CISST_HAS_SAFECASS_EXT)
   set (SOURCE_FILES ${SOURCE_FILES}
        # monitors
        mtsMonitorComponent.cpp
@@ -367,7 +367,7 @@ if (CISST_HAS_SAFETY_PLUGINS)
        mtsHistoryBuffer.h
        mtsEventPublisher.h
        )
-endif (CISST_HAS_SAFETY_PLUGINS)
+endif (CISST_HAS_SAFECASS_EXT)
 
 # Create the config file
 set (CISST_MTS_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstMultiTask/mtsConfig.h)
@@ -406,12 +406,12 @@ install (FILES ${cisstMultiTask_CISST_DG_HDRS_FULLPATH}
          DESTINATION "include/cisstMultiTask")
 
 # For Safety Framework
-if (CISST_HAS_SAFETY_PLUGINS)
-  include (${SF_CONFIG_FILE})
-  include_directories (${SF_INCLUDE_DIR} ${SF_LIB_DEPENDENCY_INCLUDE_DIR})
-  link_directories (${SF_LIBRARY_DIR})
-  target_link_libraries (cisstMultiTask ${SF_LIBRARY_FILE} ${SF_LIB_DEPENDENCY_LIBS})
-endif (CISST_HAS_SAFETY_PLUGINS)
+if (CISST_HAS_SAFECASS_EXT)
+  include (${SC_CONFIG_FILE})
+  include_directories (${SC_INCLUDE_DIR} ${SC_LIB_DEPENDENCY_INCLUDE_DIR})
+  link_directories (${SC_LIBRARY_DIR})
+  target_link_libraries (cisstMultiTask ${SC_LIBRARY_FILE} ${SC_LIB_DEPENDENCY_LIBS})
+endif (CISST_HAS_SAFECASS_EXT)
 
 # Add linking to external libraries
 if (CISST_MTS_HAS_ICE)
@@ -432,7 +432,7 @@ if (CISST_MTS_HAS_ICE)
                                ${CISST_SHARE_DIR}/cisstMultiTask/Ice)
 
   endforeach (configFile)
-  if (CISST_HAS_SAFETY_PLUGINS)
+  if (CISST_HAS_SAFECASS_EXT)
     file (MAKE_DIRECTORY "${CISST_SHARE_DIR}/cisstMultiTask/casros")
     foreach (configFile ${CASROS_CONFIG_FILES})
       add_custom_command (TARGET cisstMultiTask

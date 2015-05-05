@@ -74,7 +74,7 @@ private:
 
 public:
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandQueuedVoidReturnBase(CallableType * callable, const std::string & name,
                                    const mtsGenericObject * resultPrototype,
                                    mtsMailBox * mailBox, size_t size);

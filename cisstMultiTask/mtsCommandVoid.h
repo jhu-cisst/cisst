@@ -67,7 +67,7 @@ public:
       by the invoker of the command
       \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandVoid(mtsCallableVoidBase * callable, const std::string & name);
 #else
     mtsCommandVoid(mtsCallableVoidBase * callable, const std::string & name,

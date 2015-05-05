@@ -34,7 +34,7 @@ mtsCommandVoid::mtsCommandVoid(void):
 {}
 
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandVoid::mtsCommandVoid(mtsCallableVoidBase * callable, const std::string & name):
     BaseType(name),
 #else

@@ -108,14 +108,14 @@ mtsEventReceiverVoid::~mtsEventReceiverVoid()
     delete Command;
 }
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandVoid * mtsEventReceiverVoid::GetCommand(void)
 #else
 mtsCommandVoid * mtsEventReceiverVoid::GetCommand(const std::string & componentName, const std::string & interfaceName)
 #endif
 {
     if (!Command) {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
         Command = new mtsCommandVoid(new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this), Name);
 #else
         Command = new mtsCommandVoid(new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this), Name,
@@ -167,14 +167,14 @@ mtsEventReceiverWrite::~mtsEventReceiverWrite()
     delete Command;
 }
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandWriteBase *mtsEventReceiverWrite::GetCommand()
 #else
 mtsCommandWriteBase *mtsEventReceiverWrite::GetCommand(const std::string & componentName, const std::string & interfaceName)
 #endif
 {
     if (!Command)
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
         Command = new mtsCommandWriteGeneric<mtsEventReceiverWrite>(&mtsEventReceiverWrite::EventHandler, this, Name, 0);
 #else
         Command = new mtsCommandWriteGeneric<mtsEventReceiverWrite>(&mtsEventReceiverWrite::EventHandler, this, Name, 0,

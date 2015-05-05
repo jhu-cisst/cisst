@@ -154,8 +154,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     friend class mtsManagerLocal;
     friend class mtsComponentProxy;
     friend class mtsSafetyCoordinator;
-#if CISST_HAS_SAFETY_PLUGINS
-    friend class SFGCMTest;
+#if CISST_HAS_SAFECASS_EXT
+    friend class SCGCMTest;
 #endif
 
  protected:
@@ -166,20 +166,20 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Component state. */
     mtsComponentState State;
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     unsigned int ComponentId; // defined by Safety Coordinator
 
     /*! State machine of Safety Framework.  Instantiated in the constructor of mtsTask. */
     /*! Returns current state of Safety Framework state machine */
     // TODO: Add notion of Framework vs. Application
-    //SF::State::StateType GetFaultState(void) const;
+    //SC::State::StateType GetFaultState(void) const;
 
     /*! Instance of Generic Component Model */
-    //SF::GCM * GCMInstance;
+    //SC::GCM * GCMInstance;
 
     /*! Replace default state event handler with user-defined event handler.
-        See SF::StateMachine::SetStateEventHandler() for more details. */
-    //void SetStateEventHandler(SF::StateEventHandler * instance);
+        See SC::StateMachine::SetStateEventHandler() for more details. */
+    //void SetStateEventHandler(SC::StateEventHandler * instance);
 
     /*! Update GCM to synchronize its state machines with this component */
     //bool UpdateGCM(void);

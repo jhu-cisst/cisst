@@ -159,7 +159,7 @@ class mtsManagerComponentClient;
 class mtsManagerComponentServer;
 
 // monitoring for fault detection and diagnosis
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 class mtsMonitorComponent;
 #endif
 

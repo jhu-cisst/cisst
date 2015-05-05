@@ -51,7 +51,7 @@ public:
 
 public:
     /*! Default constructor. Does nothing. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsMulticastCommandWrite(const std::string & name, const ArgumentType & argumentPrototype):
         BaseType(name)
 #else
@@ -103,7 +103,7 @@ public:
 
 public:
     /*! Default constructor. Does nothing. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsMulticastCommandWriteGeneric(const std::string & name,
                                     const mtsGenericObject & argumentPrototype):
         BaseType(name)

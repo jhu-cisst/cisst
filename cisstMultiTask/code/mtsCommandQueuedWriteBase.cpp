@@ -50,7 +50,7 @@ mtsCommandWriteBase *mtsCommandQueuedWriteBase::FinishedEventGet(void)
 }
 
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandQueuedWriteGeneric::mtsCommandQueuedWriteGeneric(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
     BaseType(mailBox, actualCommand, size),
 #else

@@ -50,7 +50,7 @@ protected:
     mtsQueue<mtsCommandWriteBase *> FinishedEventQueue;
 
     inline mtsCommandQueuedWriteBase(void):
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
         BaseType("??"),
 #else
         BaseType("??", "NONAME", "NONAME"),
@@ -64,7 +64,7 @@ protected:
     }
 
 public:
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     inline mtsCommandQueuedWriteBase(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
         BaseType(actualCommand->GetName()),
 #else

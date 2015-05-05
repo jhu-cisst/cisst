@@ -69,7 +69,7 @@ public:
     /*! The constructor. Does nothing. */
     mtsCommandWriteReturn(void);
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandWriteReturn(const std::string & name);
 #else
     mtsCommandWriteReturn(const std::string & name,
@@ -82,7 +82,7 @@ public:
       by the invoker of the command
       \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandWriteReturn(mtsCallableWriteReturnBase * callable, const std::string & name,
                           const mtsGenericObject * argumentPrototype,
                           const mtsGenericObject * resultPrototype);

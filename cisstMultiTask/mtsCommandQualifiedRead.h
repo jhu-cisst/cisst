@@ -65,7 +65,7 @@ public:
     /*! The constructor. Does nothing */
     mtsCommandQualifiedRead(void);
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandQualifiedRead(const std::string & name);
 #else
     mtsCommandQualifiedRead(const std::string & name,
@@ -78,7 +78,7 @@ public:
       by the invoker of the command
       \param interface Pointer to the receiver of the command
       \param name A string to identify the command. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
                             const std::string & name,
                             const mtsGenericObject * argument1Prototype,

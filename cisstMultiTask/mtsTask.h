@@ -62,7 +62,7 @@ class CISST_EXPORT mtsTask: public mtsComponent
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // Allow Safety Coordinator to directly access state tables
     friend class mtsSafetyCoordinator;
 #endif
@@ -97,7 +97,7 @@ protected:
 
     /*! State table to monitor run-time states of components for fault detection and
         diagnosis purpose */
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     mtsStateTable StateTableMonitor;
 
     /*! Function to generate monitor event and propagate it to the Safety Supervisor */
@@ -245,7 +245,7 @@ public:
     /*! Pure virtual method that gets overloaded to run the actual task.
       */
     virtual void Run(void) = 0;
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // MJ: The following three methods could be made pure virtual, but it would 
     // break existing codes and requires a lot of changes on user's codes.  
     // Thus, mtsTask defines these base methods as placeholder.
@@ -255,30 +255,30 @@ public:
     // In other words, derived classes have to override these methods to execute 
     // their own codes to benefit from the casros state management facility.
     virtual void RunNormal(void);
-    virtual void RunWarning(const SF::Event *);
-    virtual void RunError(const SF::Event *);
+    virtual void RunWarning(const SC::Event *);
+    virtual void RunError(const SC::Event *);
     
-    SF::State::StateType LastState;
+    SC::State::StateType LastState;
 
-    virtual void OnNormal2Warning(const SF::Event * e);
-    virtual void OnNormal2Error(const SF::Event * e);
-    virtual void OnWarning2Normal(const SF::Event * e);
-    virtual void OnWarning2Error(const SF::Event * e);
-    virtual void OnError2Warning(const SF::Event * e);
-    virtual void OnError2Normal(const SF::Event * e);
+    virtual void OnNormal2Warning(const SC::Event * e);
+    virtual void OnNormal2Error(const SC::Event * e);
+    virtual void OnWarning2Normal(const SC::Event * e);
+    virtual void OnWarning2Error(const SC::Event * e);
+    virtual void OnError2Warning(const SC::Event * e);
+    virtual void OnError2Normal(const SC::Event * e);
 
     // For user's convenience
-    SF::State::StateType GetComponentState(void) const;
-    SF::State::StateType GetProvidedInterfaceState(const std::string & interfaceName) const;
-    SF::State::StateType GetProvidedInterfaceState(const std::string & interfaceName,
-                                                   const SF::Event* & e) const;
-    SF::State::StateType GetRequiredInterfaceState(const std::string & interfaceName) const;
-    SF::State::StateType GetRequiredInterfaceState(const std::string & interfaceName,
-                                                   const SF::Event* & e) const;
+    SC::State::StateType GetComponentState(void) const;
+    SC::State::StateType GetProvidedInterfaceState(const std::string & interfaceName) const;
+    SC::State::StateType GetProvidedInterfaceState(const std::string & interfaceName,
+                                                   const SC::Event* & e) const;
+    SC::State::StateType GetRequiredInterfaceState(const std::string & interfaceName) const;
+    SC::State::StateType GetRequiredInterfaceState(const std::string & interfaceName,
+                                                   const SC::Event* & e) const;
     
     // For deep fault inject
     bool GetLatestDataFromStateTable(const std::string & signalName, double & value) const;
-    bool GetLatestDataFromStateTable(const std::string & signalName, SF::DoubleVecType & value) const;
+    bool GetLatestDataFromStateTable(const std::string & signalName, SC::DoubleVecType & value) const;
  
 #endif
 
@@ -317,7 +317,7 @@ public:
         return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LEVEL_INIT_ERROR);
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     /*! Return the name of monitoring state table. */
     inline const std::string GetMonitoringStateTableName(void) const {
         return StateTableMonitor.GetName();

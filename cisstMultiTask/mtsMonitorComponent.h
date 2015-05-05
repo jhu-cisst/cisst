@@ -69,9 +69,9 @@ public:
         /*! Typedef for cisstMonitor container 
          *
          *  key: string representation of target UID
-         *  value: instance of SF::cisstMonitor 
+         *  value: instance of SC::cisstMonitor 
          */
-        typedef std::map<std::string, SF::cisstMonitor *> MonitorTargetSetType;
+        typedef std::map<std::string, SC::cisstMonitor *> MonitorTargetSetType;
 
         /*! Predefined monitoring targets are accessed via this->InterfaceRequiredPredefined
          *  and custom monitoring targets are accessed via separate required interface.
@@ -85,9 +85,9 @@ public:
         /*! Copy of mtsMonitorComponent::ManualAdvance */
         bool ManualAdvance;
 
-        /*! Set of SF::cisstMonitor instances (each defines one monitoring target element)
+        /*! Set of SC::cisstMonitor instances (each defines one monitoring target element)
             in the same component */
-        // MJ: SF::cisstMonitor instances should be allocated and deallocated externally.
+        // MJ: SC::cisstMonitor instances should be allocated and deallocated externally.
         MonitorTargetSetType MonitorTargetSet;
 
         /*! Functions to read state variables from target component */
@@ -118,21 +118,21 @@ public:
         mtsEventReceiverWrite FaultEventReceiver;
 
         /*! Add new cisstMonitor instance.  Returns false if duplicate. */
-        bool AddMonitorTargetToAccessor(SF::cisstMonitor * monitor);
+        bool AddMonitorTargetToAccessor(SC::cisstMonitor * monitor);
         /*! Check if given monitor target is already being monitored. */
         bool FindMonitorTargetFromAccessor(const std::string & targetUID) const;
         /*! Remove cisstMonitor instance.  Returns false if not found. */
         void RemoveMonitorTargetFromAccessor(const std::string & targetUID);
 
         /*! Get new samples for all monitor targets if necessary */
-        bool RefreshSamples(double currentTick, SF::Publisher * publisher);
+        bool RefreshSamples(double currentTick, SC::Publisher * publisher);
 
         /*! Add mts function object to this accessor
-         *  \param type Monitoring target type (see SF::Monitor::TargetType)
+         *  \param type Monitoring target type (see SC::Monitor::TargetType)
          *  \param targetLocationID UID string of monitoring target.  Should be specified
-         *         if type is SF::Monitor::CUSTOM.
+         *         if type is SC::Monitor::CUSTOM.
          */
-        bool AddMonitoringFunction(SF::Monitor::TargetType type, 
+        bool AddMonitoringFunction(SC::Monitor::TargetType type, 
                                    const std::string & providedInterfaceName = "",
                                    const std::string & targetCommandName = "");
 
@@ -158,7 +158,7 @@ protected:
     void PrintTargetComponents(void);
 
     /*! Install filter to component */
-    // [SFUPDATE]
+    // [SCUPDATE]
     //bool InstallFilters(mtsComponent * component);
     //bool InstallFilters(mtsTask * task);
     //bool InstallFilters(mtsTaskContinuous * taskContinuous);
@@ -169,7 +169,7 @@ protected:
 
     /*! Add new column vector to the monitoring state table */
     void AddStateVectorForMonitoring(mtsTaskPeriodic * targetTaskPeriodic,
-                                     SF::cisstMonitor * monitor);
+                                     SC::cisstMonitor * monitor);
 
     /*! Receive event notifications from target components and publishes them to
         the Safety Supervisor of Safety Framework. */
@@ -180,7 +180,7 @@ public: // MJ TEMP
     void HandleFaultEvent(const std::string & json);
 
 protected:
-    SF::Publisher *  Publisher;
+    SC::Publisher *  Publisher;
 
 public:
     /*! Default constructor (default: 5 msec period with automatic state table advance) */
@@ -201,13 +201,13 @@ public:
     /*! Pass monitoring target information (i.e., cisstMonitor instance) to the 
         component to be monitored.  The component uses this information to install
         monitoring and FDD pipelines. */
-    bool AddMonitorTarget(SF::cisstMonitor * monitorTarget);
+    bool AddMonitorTarget(SC::cisstMonitor * monitorTarget);
 
     /*! Create target component accessor (useful when creating monitor for filter) */
-    TargetComponentAccessor * CreateTargetComponentAccessor(SF::cisstMonitor * monitorTarget);
+    TargetComponentAccessor * CreateTargetComponentAccessor(SC::cisstMonitor * monitorTarget);
     TargetComponentAccessor * CreateTargetComponentAccessor(const std::string & targetProcessName, 
                                                             const std::string & targetComponentName,
-                                                            SF::Monitor::TargetType targetType,
+                                                            SC::Monitor::TargetType targetType,
                                                             bool attachFaultEventHandler, 
                                                             bool addAccessor);
 

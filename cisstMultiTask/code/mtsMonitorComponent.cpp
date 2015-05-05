@@ -50,7 +50,7 @@ mtsMonitorComponent::TargetComponentAccessor::~TargetComponentAccessor()
     // TODO: add nother cleanups
 }
 
-bool mtsMonitorComponent::TargetComponentAccessor::AddMonitorTargetToAccessor(SF::cisstMonitor * monitorTarget)
+bool mtsMonitorComponent::TargetComponentAccessor::AddMonitorTargetToAccessor(SC::cisstMonitor * monitorTarget)
 {
     std::string targetUID = monitorTarget->GetUIDAsString();
     if (FindMonitorTargetFromAccessor(targetUID))
@@ -78,11 +78,11 @@ bool mtsMonitorComponent::TargetComponentAccessor::FindMonitorTargetFromAccessor
     return false;
 }
 
-bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double currentTick, SF::Publisher * publisher)
+bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double currentTick, SC::Publisher * publisher)
 {
     // used only for manual advance
     bool advance = false;
-    SF::cisstMonitor * monitor = 0;
+    SC::cisstMonitor * monitor = 0;
     // for custom monitoring type
     mtsInterfaceRequired * required = 0;
     mtsFunctionRead * functionRead = 0;
@@ -100,16 +100,16 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
         if (!monitor->IsSamplingNecessary(currentTick))
             continue;
 
-        SF::Monitor::TargetType targetType = monitor->GetTargetType();
+        SC::Monitor::TargetType targetType = monitor->GetTargetType();
         switch (targetType) {
-        case SF::Monitor::TARGET_THREAD_PERIOD:
+        case SC::Monitor::TARGET_THREAD_PERIOD:
             // Get new period sample
             if (!AccessFunctions.GetPeriod.IsValid()) {
                 CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetPeriod function" << std::endl;
             } else {
                 double period;
                 this->AccessFunctions.GetPeriod(period);
-                publisher->PublishData(SF::Topic::Data::MONITOR, 
+                publisher->PublishData(SC::Topic::Data::MONITOR, 
                                        monitor->GetJsonForPublish(period, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
                 if (ManualAdvance)
@@ -117,14 +117,14 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             }
             break;
 
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
+        case SC::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
             // Get new duty cycle (user) sample
             if (!this->AccessFunctions.GetExecTimeUser.IsValid()) {
                 CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeUser function" << std::endl;
             } else {
                 double execTimeUser;
                 this->AccessFunctions.GetExecTimeUser(execTimeUser);
-                publisher->PublishData(SF::Topic::Data::MONITOR,
+                publisher->PublishData(SC::Topic::Data::MONITOR,
                                        monitor->GetJsonForPublish(execTimeUser, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
                 if (ManualAdvance)
@@ -132,14 +132,14 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             }
             break;
 
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
+        case SC::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
             // Get new duty cycle (total) sample
             if (!this->AccessFunctions.GetExecTimeTotal.IsValid()) {
                 CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: Failed to fetch new sample: invalid GetExecTimeTotal function" << std::endl;
             } else {
                 double execTimeTotal;
                 this->AccessFunctions.GetExecTimeTotal(execTimeTotal);
-                publisher->PublishData(SF::Topic::Data::MONITOR,
+                publisher->PublishData(SC::Topic::Data::MONITOR,
                                        monitor->GetJsonForPublish(execTimeTotal, currentTick));
                 monitor->UpdateLastSamplingTick(currentTick);
                 if (ManualAdvance)
@@ -147,7 +147,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             }
             break;
 
-        case SF::Monitor::TARGET_CUSTOM:
+        case SC::Monitor::TARGET_CUSTOM:
             it2 = InterfaceRequiredCustom.find(monitor->GetLocationID()->GetInterfaceProvidedName());
             CMN_ASSERT(it2 != InterfaceRequiredCustom.end());
             required = it2->second;
@@ -176,7 +176,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
 
                     // publish new reading to the system via Safety Coordinator's publisher
                     //publisher->Publish(monitor->GetJsonForPublish(sample, currentTick));
-                    publisher->PublishData(SF::Topic::Data::MONITOR,
+                    publisher->PublishData(SC::Topic::Data::MONITOR,
                                            mtsSafetyCoordinator::GetJsonForPublish(
                                                *monitor, tempArgument, osaGetTime()));
                 }
@@ -188,7 +188,7 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
             }
             break;
 
-            // [SFUPDATE]
+            // [SCUPDATE]
 
         default:
             CMN_LOG_RUN_WARNING << "TargetComponentAccessor::RefreshSamples: not supported monitoring type" << std::endl;
@@ -198,26 +198,26 @@ bool mtsMonitorComponent::TargetComponentAccessor::RefreshSamples(double current
     return (ManualAdvance ? advance : true);
 }
 
-bool mtsMonitorComponent::TargetComponentAccessor::AddMonitoringFunction(SF::Monitor::TargetType type,
+bool mtsMonitorComponent::TargetComponentAccessor::AddMonitoringFunction(SC::Monitor::TargetType type,
                                                                          const std::string & providedInterfaceName,
                                                                          const std::string & targetCommandName)
 {
     bool ret = false;
 
     switch (type) {
-        case SF::Monitor::TARGET_THREAD_PERIOD:
+        case SC::Monitor::TARGET_THREAD_PERIOD:
             ret = InterfaceRequiredPredefined->AddFunction("GetPeriod", this->AccessFunctions.GetPeriod);
             break;
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
+        case SC::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
             ret = InterfaceRequiredPredefined->AddFunction("GetExecTimeUser", this->AccessFunctions.GetExecTimeUser);
             break;
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
+        case SC::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
             ret = InterfaceRequiredPredefined->AddFunction("GetExecTimeTotal", this->AccessFunctions.GetExecTimeTotal);
             break;
-        case SF::Monitor::TARGET_FILTER_EVENT: // MJTEMP: what is this???
+        case SC::Monitor::TARGET_FILTER_EVENT: // MJTEMP: what is this???
             // NOP
             break;
-        case SF::Monitor::TARGET_CUSTOM:
+        case SC::Monitor::TARGET_CUSTOM:
             {
                 // Check if required interface for custom monitoring target already exists
                 CMN_ASSERT(InterfaceRequiredCustom.find(providedInterfaceName) != InterfaceRequiredCustom.end());
@@ -228,11 +228,11 @@ bool mtsMonitorComponent::TargetComponentAccessor::AddMonitoringFunction(SF::Mon
                 ret = true;
             }
             break;
-        case SF::Monitor::TARGET_INVALID:
+        case SC::Monitor::TARGET_INVALID:
             ret = false;
             break;
         default:
-            SFASSERT(false);
+            SCASSERT(false);
     }
 
     return ret;
@@ -317,11 +317,11 @@ void mtsMonitorComponent::Initialize(void)
     // mtsMonitorComponent::RunMonitors(void).
     this->StateTableMonitor.SetAutomaticAdvance(!ManualAdvance);
 
-    Publisher = new SF::Publisher(SF::Dict::TopicNames::DATA);
+    Publisher = new SC::Publisher(SC::Dict::TopicNames::DATA);
     if (!Publisher->Startup()) {
         std::stringstream ss;
         ss << "mtsMonitorComponent: Failed to initialize publisher for topic \""
-           << SF::Dict::TopicNames::DATA << "\"";
+           << SC::Dict::TopicNames::DATA << "\"";
         cmnThrow(ss.str());
     }
 #if 0
@@ -331,7 +331,7 @@ void mtsMonitorComponent::Initialize(void)
 
 #if 0
     SubscriberCallback = new mtsSubscriberCallback;
-    Subscriber = new SF::Subscriber(SF::Dict::TopicNames::CONTROL, SubscriberCallback);
+    Subscriber = new SC::Subscriber(SC::Dict::TopicNames::CONTROL, SubscriberCallback);
     ThreadSubscriber.Thread.Create<mtsMonitorComponent, unsigned int>(this, &mtsMonitorComponent::RunSubscriber, 0);
     ThreadSubscriber.ThreadEventBegin.Wait();
 #endif
@@ -356,12 +356,12 @@ void mtsMonitorComponent::Cleanup(void)
 }
 
 mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::CreateTargetComponentAccessor(
-    SF::cisstMonitor * monitorTarget)
+    SC::cisstMonitor * monitorTarget)
 {
     const std::string targetProcessName(monitorTarget->GetLocationID()->GetProcessName());
     const std::string targetComponentName(monitorTarget->GetLocationID()->GetComponentName());
     bool  attachedToActiveFilter = monitorTarget->IsAttachedToActiveFilter();
-    const SF::Monitor::TargetType targetType = monitorTarget->GetTargetType();
+    const SC::Monitor::TargetType targetType = monitorTarget->GetTargetType();
     
     return CreateTargetComponentAccessor(targetProcessName, 
                                          targetComponentName, 
@@ -373,7 +373,7 @@ mtsMonitorComponent::TargetComponentAccessor * mtsMonitorComponent::CreateTarget
 mtsMonitorComponent::TargetComponentAccessor * 
     mtsMonitorComponent::CreateTargetComponentAccessor(const std::string & targetProcessName, 
                                                        const std::string & targetComponentName,
-                                                       const SF::Monitor::TargetType targetType,
+                                                       const SC::Monitor::TargetType targetType,
                                                        bool attachFaultEventHandler, 
                                                        bool addAccessor)
 {
@@ -385,7 +385,7 @@ mtsMonitorComponent::TargetComponentAccessor *
     // component's monitoring state table
     mtsInterfaceRequired * required = 0;
     // If predefined targets
-    if (targetType != SF::Monitor::TARGET_CUSTOM) {
+    if (targetType != SC::Monitor::TARGET_CUSTOM) {
         targetComponentAccessor->InterfaceRequiredPredefined = 
             this->AddInterfaceRequired(GetNameOfStateTableAccessInterface(targetComponentName), MTS_OPTIONAL);
         required = targetComponentAccessor->InterfaceRequiredPredefined;
@@ -396,10 +396,10 @@ mtsMonitorComponent::TargetComponentAccessor *
 
         // MJ FIXME: can't HandleMonitorEvent be moved to if () down below?
         // Add monitor event handler if new tareget component is to be added.
-        required->AddEventHandlerWrite(&mtsMonitorComponent::HandleMonitorEvent, this, SF::Dict::MonitorNames::MonitorEvent);
+        required->AddEventHandlerWrite(&mtsMonitorComponent::HandleMonitorEvent, this, SC::Dict::MonitorNames::MonitorEvent);
         // Add fault event handler if new tareget component is to be added.
         if (attachFaultEventHandler) {
-            required->AddEventReceiver(SF::Dict::FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
+            required->AddEventReceiver(SC::Dict::FaultNames::FaultEvent, targetComponentAccessor->FaultEventReceiver, MTS_OPTIONAL);
             targetComponentAccessor->FaultEventReceiver.SetHandler(&mtsMonitorComponent::HandleFaultEvent, this);
         }
 
@@ -418,7 +418,7 @@ mtsMonitorComponent::TargetComponentAccessor *
     return targetComponentAccessor;
 }
 
-bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
+bool mtsMonitorComponent::AddMonitorTarget(SC::cisstMonitor * monitorTarget)
 {
     if (!monitorTarget) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: null monitoring target instance" << std::endl;
@@ -426,7 +426,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
     }
 
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    SF::cisstEventLocation * locationID = monitorTarget->GetLocationID();
+    SC::cisstEventLocation * locationID = monitorTarget->GetLocationID();
     if (!locationID) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: Null monitoring target location" << std::endl;
         return false;
@@ -455,10 +455,10 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
     // If monitoring target is of type CUSTOM, check if the target provided interface and command exist.
     // NOTE: currently, required interface, function, and event generators cannot be used
     // as part of monitoring targets.
-    const SF::Monitor::TargetType targetType = monitorTarget->GetTargetType();
+    const SC::Monitor::TargetType targetType = monitorTarget->GetTargetType();
     const std::string targetPrvIntfName = locationID->GetInterfaceProvidedName();
     const std::string targetCommandName = locationID->GetCommandName();
-    if (targetType == SF::Monitor::TARGET_CUSTOM) {
+    if (targetType == SC::Monitor::TARGET_CUSTOM) {
         // check name of provided interface
         if (targetPrvIntfName.empty()) {
             CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: null provided interface name" << std::endl;
@@ -507,7 +507,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
 
     // In case of CUSTOM target, create required interface if provided interface is
     // not yet known to the target component accessor.
-    if (targetType == SF::Monitor::TARGET_CUSTOM) {
+    if (targetType == SC::Monitor::TARGET_CUSTOM) {
         if (targetComponentAccessor->InterfaceRequiredCustom.find(targetPrvIntfName) 
             == targetComponentAccessor->InterfaceRequiredCustom.end())
         {
@@ -529,11 +529,11 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
     CMN_ASSERT(targetComponentAccessor->AddMonitorTargetToAccessor(monitorTarget));
 
     // Create mtsFunctionRead object
-    const std::string targetTypeString = SF::Monitor::GetTargetTypeString(targetType);
+    const std::string targetTypeString = SC::Monitor::GetTargetTypeString(targetType);
     switch (targetType) {
-        case SF::Monitor::TARGET_THREAD_PERIOD:
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
+        case SC::Monitor::TARGET_THREAD_PERIOD:
+        case SC::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
+        case SC::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
             {
                 mtsTaskPeriodic * targetTaskPeriodic = dynamic_cast<mtsTaskPeriodic*>(LCM->GetComponent(targetComponentName));
                 if (!targetTaskPeriodic) {
@@ -547,7 +547,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
             }
             break;
 
-        case SF::Monitor::TARGET_FILTER_EVENT:
+        case SC::Monitor::TARGET_FILTER_EVENT:
             {
                 // NOP: Do not add function to fetch data sample from target component.
                 // Events generated by filters are propagated to the entire system, i.e., 
@@ -555,9 +555,9 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
             }
             break;
 
-            // [SFUPDATE]
+            // [SCUPDATE]
 
-        case SF::Monitor::TARGET_CUSTOM:
+        case SC::Monitor::TARGET_CUSTOM:
             {
                 mtsTask * task = LCM->GetComponentAsTask(targetComponentName);
                 if (!task) {
@@ -574,7 +574,7 @@ bool mtsMonitorComponent::AddMonitorTarget(SF::cisstMonitor * monitorTarget)
             }
             break;
 
-        case SF::Monitor::TARGET_INVALID:
+        case SC::Monitor::TARGET_INVALID:
         default:
             CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: invalid or unsupported monitor type: " << std::endl;
             if (newTargetComponent) delete targetComponentAccessor;
@@ -615,7 +615,7 @@ bool mtsMonitorComponent::InitializeAccessors(void)
         // Establish connections for predefined monitoring targets
         if (accessor->InterfaceRequiredPredefined) {
             task = LCM->GetComponentAsTask(accessor->ComponentName); 
-            if (!task) { // [SFUPDATE]
+            if (!task) { // [SCUPDATE]
                 CMN_LOG_CLASS_RUN_ERROR << "Only task-type components can be monitored: component \"" << accessor->ComponentName << "\"" << std::endl;
             } else {
                 clientComponentName = mtsMonitorComponent::GetNameOfMonitorComponent();
@@ -703,14 +703,14 @@ void mtsMonitorComponent::PrintTargetComponents(void)
     */
 }
 
-void mtsMonitorComponent::AddStateVectorForMonitoring(mtsTaskPeriodic * targetTaskPeriodic, SF::cisstMonitor * monitor)
+void mtsMonitorComponent::AddStateVectorForMonitoring(mtsTaskPeriodic * targetTaskPeriodic, SC::cisstMonitor * monitor)
 {
     const std::string taskName = targetTaskPeriodic->GetName();
     std::string newElementName(taskName);
 
     // MJ TEMP: Adding a new element (column vector) to state table on the fly may be not thread safe.
     switch (monitor->GetTargetType()) {
-        case SF::Monitor::TARGET_THREAD_PERIOD:
+        case SC::Monitor::TARGET_THREAD_PERIOD:
             // Add "Period" to the monitoring state table of this component with the name of
             // (component name)+"Period"
             newElementName += "PeriodActual";
@@ -719,28 +719,28 @@ void mtsMonitorComponent::AddStateVectorForMonitoring(mtsTaskPeriodic * targetTa
             monitor->Samples.PeriodNominal = targetTaskPeriodic->GetPeriodicity(true);
             break;
 
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
+        case SC::Monitor::TARGET_THREAD_DUTYCYCLE_USER:
             newElementName += "ExecTimeUser";
             this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.ExecTimeUser);
             break;
 
-        case SF::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
+        case SC::Monitor::TARGET_THREAD_DUTYCYCLE_TOTAL:
             newElementName += "ExecTimeTotal";
             this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.ExecTimeTotal);
             break;
 
-        case SF::Monitor::TARGET_FILTER_EVENT:
+        case SC::Monitor::TARGET_FILTER_EVENT:
             // This should not be called: Output of filter doesn't need to be tracked.
             CMN_ASSERT(false);
             break;
 
-        case SF::Monitor::TARGET_CUSTOM:
+        case SC::Monitor::TARGET_CUSTOM:
             //newElementName = monitor->GetUIDAsString();
             //this->StateTableMonitor.NewElement(newElementName, &monitor->Samples.ExecTimeTotal);
             // Custom monitoring target doesn't need
             break;
 
-        // [SFUPDATE]
+        // [SCUPDATE]
 
         default:
             ;
@@ -857,7 +857,7 @@ void mtsMonitorComponent::HandleMonitorEvent(const std::string & json)
     // If the monitor component receives an event regardless of its type (monitor or
     // fault), publish the event to the safety framework as is.  The Safety Supervisor
     // will take care of the event.
-    Publisher->PublishData(SF::Topic::Data::MONITOR, json);
+    Publisher->PublishData(SC::Topic::Data::MONITOR, json);
 
     // MJ TODO: Depending on the type of event (esp. in case of fault events),
     // the Safety Coordinator in each process can deal with events or faults locally,
@@ -873,7 +873,7 @@ void mtsMonitorComponent::HandleFaultEvent(const std::string & json)
     // If the monitor component receives an event regardless of its type (monitor or
     // fault), publish the event to the safety framework.  The Safety Supervisor
     // will handle the event "accordingly" (TODO).
-    Publisher->PublishData(SF::Topic::Data::EVENT, json);
+    Publisher->PublishData(SC::Topic::Data::EVENT, json);
 
     // Report event to Safety Coordinator
     mtsManagerLocal::GetInstance()->GetCoordinator()->OnFaultEvent(json);

@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsCommandQualifiedRead * actualFilter,
                                                              mtsCommandWriteBase * actualCommand):
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     BaseType(0, actualCommand, 0), ActualFilter(actualFilter)
 #else
     BaseType(0, actualCommand, 0, actualCommand->GetComponentName(), actualCommand->GetInterfaceName()),
@@ -39,7 +39,7 @@ mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsCommandQualified
 mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsMailBox * mailBox,
                                                              mtsCommandQualifiedRead * actualFilter,
                                                              mtsCommandWriteBase * actualCommand, size_t size):
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     BaseType(mailBox, actualCommand, size),
 #else
     BaseType(mailBox, actualCommand, size, actualCommand->GetComponentName(), actualCommand->GetInterfaceName()),

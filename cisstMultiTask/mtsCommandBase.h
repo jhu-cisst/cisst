@@ -51,7 +51,7 @@ protected:
       constructor and can be accessed using the method GetName(). */
     std::string Name;
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // Names to identify command owner
     const std::string ComponentName;
     const std::string InterfaceName;
@@ -67,7 +67,7 @@ public:
     /*! The constructor. Does nothing */
     inline mtsCommandBase(void):
         Name("??"),
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
         ComponentName("NONAME"),
         InterfaceName("NONAME"),
 #endif
@@ -75,7 +75,7 @@ public:
     {}
 
     /*! Constructor with command name. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     inline mtsCommandBase(const std::string & name):
         Name(name),
 #else
@@ -135,7 +135,7 @@ public:
     inline const std::string & GetName(void) const {
         return this->Name;
     }
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     inline const std::string & GetComponentName(void) const { return ComponentName; }
     inline const std::string & GetInterfaceName(void) const { return InterfaceName; }
 #endif

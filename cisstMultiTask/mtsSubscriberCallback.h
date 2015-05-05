@@ -25,7 +25,7 @@
 
 #include <cisstOSAbstraction/osaMutex.h>
 
-class CISST_EXPORT mtsSubscriberCallback: public SF::SFCallback
+class CISST_EXPORT mtsSubscriberCallback: public SC::SCCallback
 {
 public:
     typedef std::list<std::string> MessagesType;
@@ -49,8 +49,8 @@ public:
     ~mtsSubscriberCallback();
 
     /*! Called by Ice and push new message in json format to the internal queue. */
-    void CallbackControl(SF::Topic::Control::CategoryType category, const std::string & json);
-    void CallbackData(SF::Topic::Data::CategoryType category, const std::string & json);
+    void CallbackControl(SC::Topic::Control::CategoryType category, const std::string & json);
+    void CallbackData(SC::Topic::Data::CategoryType category, const std::string & json);
     
 
     /*! Check if the internal queue has any queued entry */

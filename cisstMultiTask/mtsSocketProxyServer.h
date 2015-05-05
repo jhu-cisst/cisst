@@ -86,7 +86,7 @@ class CISST_EXPORT mtsSocketProxyServer : public mtsTaskContinuous
 
     osaSocket Socket;
     mtsInterfaceProvidedDescription InterfaceDescription;
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     const std::string ComponentName;
     const std::string ProvidedInterfaceName;
 #endif

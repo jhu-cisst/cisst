@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 #include <cisstMultiTask/mtsSafetyCoordinator.h>
 #endif
 
@@ -74,7 +74,7 @@ void mtsComponent::Initialize(void)
 
     ReplayMode = false;
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // Add this component to Safety Coordinator
     mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
     if (sc) {
@@ -276,10 +276,10 @@ mtsInterfaceProvided * mtsComponent::AddInterfaceProvidedWithoutSystemEvents(con
     }
     if (interfaceProvided) {
         if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided, CMN_LOG_LEVEL_INIT_ERROR)) {
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
             mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
             if (sc)
-                if (!sc->AddInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+                if (!sc->AddInterface(Name, interfaceProvidedName, SC::GCM::PROVIDED_INTERFACE))
                     CMN_LOG_CLASS_INIT_ERROR << "Failed to add provided interface \"" << interfaceProvidedName << "\" to Safety Coordinator." << std::endl;
 #endif
             return interfaceProvided;
@@ -410,10 +410,10 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
     CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceProvided: removed provided interface \""
                               << interfaceProvidedName << "\"" << std::endl;
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
     if (sc) {
-        if (!sc->RemoveInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+        if (!sc->RemoveInterface(Name, interfaceProvidedName, SC::GCM::PROVIDED_INTERFACE))
             CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
                 << interfaceProvidedName << "\" from Safety Coordinator" << std::endl;
     }
@@ -496,10 +496,10 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
     CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceRequired: removed required interface \""
                               << interfaceRequiredName << "\"" << std::endl;
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
     if (sc)
-        if (!sc->RemoveInterface(Name, interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
+        if (!sc->RemoveInterface(Name, interfaceRequiredName, SC::GCM::REQUIRED_INTERFACE))
             CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: failed to remove required interface \""
                 << interfaceRequiredName << "\" from Safety Coordinator" << std::endl;
 #endif
@@ -517,10 +517,10 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredExisting(const std::str
         return 0;
     }
     if (InterfacesRequired.AddItem(interfaceRequiredName, interfaceRequired)) {
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
         mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
         if (sc)
-            if (!sc->AddInterface(Name, interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
+            if (!sc->AddInterface(Name, interfaceRequiredName, SC::GCM::REQUIRED_INTERFACE))
                 CMN_LOG_CLASS_INIT_ERROR << "Failed to add required interface \"" << interfaceRequiredName << "\" to Safety Coordinator." << std::endl;
 #endif
         return interfaceRequired;
@@ -541,10 +541,10 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredUsingMailbox(const std:
     mtsInterfaceRequired * interfaceRequired = new mtsInterfaceRequired(interfaceRequiredName, this, mailBox, required);
     if (interfaceRequired) {
         if (InterfacesRequired.AddItem(interfaceRequiredName, interfaceRequired)) {
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
             mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
             if (sc)
-                if (!sc->AddInterface(Name, interfaceRequiredName, SF::GCM::REQUIRED_INTERFACE))
+                if (!sc->AddInterface(Name, interfaceRequiredName, SC::GCM::REQUIRED_INTERFACE))
                     CMN_LOG_CLASS_INIT_ERROR << "Failed to add required interface \"" << interfaceRequiredName << "\" to Safety Coordinator." << std::endl;
 #endif
             return interfaceRequired;
@@ -1168,7 +1168,7 @@ bool mtsComponent::SetReplayTime(const double CMN_UNUSED(time)) {
 }
 
 /*
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 bool mtsComponent::UpdateGCM(void)
 {
     CMN_ASSERT(GCMInstance);
@@ -1181,13 +1181,13 @@ bool mtsComponent::UpdateGCM(void)
     for (size_t i = 0; i < interfaceNames.size(); ++i) {
         name = interfaceNames[i];
         // Skip existing interface
-        if (GCMInstance->FindInterface(name, SF::GCM::REQUIRED_INTERFACE))
+        if (GCMInstance->FindInterface(name, SC::GCM::REQUIRED_INTERFACE))
             continue;
         // Add new interface
-        if (!GCMInstance->AddInterface(name, SF::GCM::REQUIRED_INTERFACE)) {
-            SFLOG_ERROR << "Failed to add required interface \"" << name << "\" to GCM instance." << std::endl;
+        if (!GCMInstance->AddInterface(name, SC::GCM::REQUIRED_INTERFACE)) {
+            SCLOG_ERROR << "Failed to add required interface \"" << name << "\" to GCM instance." << std::endl;
         } else {
-            SFLOG_DEBUG << "Added required interface \"" << name << "\" to GCM instance." << std::endl;
+            SCLOG_DEBUG << "Added required interface \"" << name << "\" to GCM instance." << std::endl;
         }
     }
 
@@ -1196,13 +1196,13 @@ bool mtsComponent::UpdateGCM(void)
     for (size_t i = 0; i < interfaceNames.size(); ++i) {
         name = interfaceNames[i];
         // Skip existing interface
-        if (GCMInstance->FindInterface(name, SF::GCM::PROVIDED_INTERFACE))
+        if (GCMInstance->FindInterface(name, SC::GCM::PROVIDED_INTERFACE))
             continue;
         // Add new interface
-        if (!GCMInstance->AddInterface(name, SF::GCM::PROVIDED_INTERFACE)) {
-            SFLOG_ERROR << "Failed to add provided interface \"" << name << "\" to GCM instance." << std::endl;
+        if (!GCMInstance->AddInterface(name, SC::GCM::PROVIDED_INTERFACE)) {
+            SCLOG_ERROR << "Failed to add provided interface \"" << name << "\" to GCM instance." << std::endl;
         } else {
-            SFLOG_DEBUG << "Added provided interface \"" << name << "\" to GCM instance." << std::endl;
+            SCLOG_DEBUG << "Added provided interface \"" << name << "\" to GCM instance." << std::endl;
         }
     }
 

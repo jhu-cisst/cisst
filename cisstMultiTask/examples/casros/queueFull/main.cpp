@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "common.h"
 #include "json.h"
 
-using namespace SF;
+using namespace SC;
 
 mtsManagerLocal      * ComponentManager = 0;
 mtsSafetyCoordinator * SafetyCoordinator = 0;

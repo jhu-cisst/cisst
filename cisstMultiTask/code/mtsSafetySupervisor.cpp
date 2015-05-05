@@ -23,8 +23,8 @@
 #include "db/MongoDB.h"
 #include "jsonSerializer.h"
 
-using namespace SF;
-using namespace SF::Dict;
+using namespace SC;
+using namespace SC::Dict;
 
 /*! Socket to send data to Cube collector */
 static osaSocket * UDPSocket = 0;
@@ -35,7 +35,7 @@ mtsSafetySupervisor::mtsSafetySupervisor()
     : mtsTaskPeriodic(Supervisor::GetSupervisorName(), 10 * cmn_ms),
       casrosAccessor(new cisstAccessor(true, false, true, false,
                      new mtsSubscriberCallback("Safety Supervisor", 
-                                               SF::Dict::TopicNames::CONTROL), 0))
+                                               SC::Dict::TopicNames::CONTROL), 0))
 {
     // Create and initialize UDP socket
     if (!UDPSocket) {
@@ -47,7 +47,7 @@ mtsSafetySupervisor::mtsSafetySupervisor()
     }
 
     cbSubscriberControl = dynamic_cast<mtsSubscriberCallback*>(
-        casrosAccessor->GetSubscriberCallback(SF::Topic::CONTROL));
+        casrosAccessor->GetSubscriberCallback(SC::Topic::CONTROL));
     CMN_ASSERT(cbSubscriberControl);
 }
 
@@ -91,7 +91,7 @@ void mtsSafetySupervisor::Cleanup(void)
 #if 0
 void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 {
-    SF::JSONSerializer jsonSerializer;
+    SC::JSONSerializer jsonSerializer;
     if (!jsonSerializer.ParseJSON(message)) {
         CMN_LOG_RUN_ERROR << "Parse: invalid json message: " << std::endl << message << std::endl;
         return;
@@ -104,18 +104,18 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
     // FIXME
 #if 0
     switch (jsonSerializer.GetTopicType()) {
-        case SF::Topic::MONITOR:
+        case SC::Topic::MONITOR:
             {
                 SendMessageToCubeCollector(MongoDB::ConvertTopicMessageToDBEntry(
                     jsonSerializer.GetTopicType(), jsonSerializer));
 #if 1 // MJ TEMP for debugging
                 static int count = 0;
                 std::cout << "--------- Monitor " << ++count << std::endl;
-                std::cout << SF::MongoDB::ConvertTopicMessageToDBEntry(SF::JSONSerializer::MONITOR, jsonSerializer) << std::endl;
+                std::cout << SC::MongoDB::ConvertTopicMessageToDBEntry(SC::JSONSerializer::MONITOR, jsonSerializer) << std::endl;
 #endif
             }
             break;
-        case SF::JSONSerializer::EVENT:
+        case SC::JSONSerializer::EVENT:
             {
                 //SendMessageToCubeCollector(MongoDB::ConvertTopicMessageToDBEntry(
                 //    jsonSerializer.GetTopicType(), jsonSerializer));
@@ -130,12 +130,12 @@ void mtsSafetySupervisor::ParseInternal::operator()(const std::string & message)
 #endif
             }
             break;
-        case SF::JSONSerializer::SUPERVISOR:
+        case SC::JSONSerializer::SUPERVISOR:
             {
                 // TODO: implement this
             }
             break;
-        case SF::JSONSerializer::INVALID:
+        case SC::JSONSerializer::INVALID:
             {
                 std::cout << "INVALID_EVENT" << std::endl;
             }

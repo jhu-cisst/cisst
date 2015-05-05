@@ -44,7 +44,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsManagerProxyServer.h"
 #endif
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 #include <cisstMultiTask/mtsSafetyCoordinator.h>
 #endif
 
@@ -76,7 +76,7 @@ LogQueueType   LogQueue;
 std::string    ThisProcessName;
 // }}
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 bool InstallCoordinator = false;
 #endif
 
@@ -259,7 +259,7 @@ void mtsManagerLocal::Initialize(void)
     SetupSystemLogger();
 
     // Create safety coordinator for this process
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     if (InstallCoordinator)
         SafetyCoordinator = new mtsSafetyCoordinator(ProcessName);
     else
@@ -338,7 +338,7 @@ void mtsManagerLocal::Cleanup(void)
         SystemLogMultiplexer = 0;
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     if (SafetyCoordinator) {
         // MJ TODO: Prior to deleting the instance, should this notify the safety framework of
         // this deletion?? (via IceStorm)
@@ -1175,7 +1175,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
             }
         }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
         // Install internal framework filters only to mtsTask-type components
         mtsTask * task = GetComponentAsTask(componentName);
         if (task) {
@@ -1754,7 +1754,7 @@ bool mtsManagerLocal::CreateInternalComponents(void)
     ManagerComponent.Client->MCSReady = true;
     
     // Add monitoring components
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     if (SafetyCoordinator && InstallCoordinator) {
         if (!SafetyCoordinator->CreateMonitor()) {
             CMN_LOG_CLASS_INIT_ERROR << "CreateInternalComponents: failed to add monitoring component" << std::endl;
@@ -1825,7 +1825,7 @@ void mtsManagerLocal::CreateAll(void)
 
     ComponentMapChange.Unlock();
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     if (SafetyCoordinator)
         if (!SafetyCoordinator->DeployMonitorsAndFDDs())
             CMN_LOG_CLASS_INIT_ERROR << "Failed to deploy casros monitors and filters" << std::endl;
@@ -1902,13 +1902,13 @@ void mtsManagerLocal::StartAll(void)
         lastTask->second->Start();
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // Send out current states (e.g., to refresh state viewer) 
-    SF::Publisher * publisher = GetSafetyCoordinator->GetCasrosAccessor()->GetPublisher(SF::Topic::DATA);
+    SC::Publisher * publisher = GetSafetyCoordinator->GetCasrosAccessor()->GetPublisher(SC::Topic::DATA);
     CMN_ASSERT(publisher);
 
     const std::string states(GetSafetyCoordinator->GetStateSnapshot());
-    if (!publisher->PublishData(SF::Topic::Data::READ_RES, states))
+    if (!publisher->PublishData(SC::Topic::Data::READ_RES, states))
         CMN_LOG_CLASS_RUN_ERROR << "StartAll: Failed to publish casros state data" << std::endl;
 #endif
 }
@@ -3210,7 +3210,7 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
         return false;
 }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 mtsSafetyCoordinator * mtsManagerLocal::GetCoordinator(void)
 {
     // MJ: If more than one monitor needs to be deployed, this method can be an entry
@@ -3231,7 +3231,7 @@ bool mtsManagerLocal::InstallFrameworkFiltersAndEvents(const std::string & compo
     }
 
     // load framework indepdendent configuration file
-    const std::string casrosJson(SF_SOURCE_ROOT_DIR"/libs/fdd/filters/json/framework_filters.json");
+    const std::string casrosJson(SC_SOURCE_ROOT_DIR"/libs/fdd/filters/json/framework_filters.json");
     CMN_ASSERT(cmnPath::Exists(casrosJson));
 
     if (!SafetyCoordinator->ReadConfigFileFramework(casrosJson, componentName)) {

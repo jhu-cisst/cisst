@@ -37,13 +37,13 @@ class CISST_EXPORT mtsSafetySupervisor: public mtsTaskPeriodic
 
 protected:
     //! Instance of Safety Supervisor
-    SF::Supervisor Supervisor;
+    SC::Supervisor Supervisor;
 
     //! Endpoint to access casros network
-    SF::cisstAccessor * casrosAccessor;
+    SC::cisstAccessor * casrosAccessor;
 
     //! Callback for subscribers
-    //mtsSubscriberCallback * SubscriberCallback[SF::Topic::TOTAL_TOPIC_COUNT];
+    //mtsSubscriberCallback * SubscriberCallback[SC::Topic::TOTAL_TOPIC_COUNT];
     mtsSubscriberCallback * cbSubscriberControl;
 
 public:

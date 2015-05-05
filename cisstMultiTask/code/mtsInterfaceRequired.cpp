@@ -671,7 +671,7 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList & eventList)
          iterReceiverVoid != EventReceiversVoid.end();
          iterReceiverVoid++) {
         eventList.VoidEvents.push_back(mtsEventHandlerList::InfoVoid(iterReceiverVoid->first,
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
                                                                      iterReceiverVoid->second->Pointer->GetCommand(),
 #else
                                                                      iterReceiverVoid->second->Pointer->GetCommand(this->GetComponentName(), this->Name),
@@ -684,7 +684,7 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList & eventList)
          iterReceiverWrite != EventReceiversWrite.end();
          iterReceiverWrite++) {
         eventList.WriteEvents.push_back(mtsEventHandlerList::InfoWrite(iterReceiverWrite->first,
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
                                                                        iterReceiverWrite->second->Pointer->GetCommand(),
 #else
                                                                        iterReceiverWrite->second->Pointer->GetCommand(this->GetComponentName(), this->Name),
@@ -878,7 +878,7 @@ mtsCommandVoid * mtsInterfaceRequired::AddEventHandlerVoid(mtsCallableVoidBase *
     bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerVoid", eventName);
     if (queued) {
         if (MailBox) {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
             EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(callable, eventName, MailBox, this->ArgumentQueuesSize));
 #else
             EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(callable, eventName, MailBox, this->ArgumentQueuesSize, this->GetComponentName(), this->Name));
@@ -887,7 +887,7 @@ mtsCommandVoid * mtsInterfaceRequired::AddEventHandlerVoid(mtsCallableVoidBase *
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void \"" << eventName << "\"" << std::endl;
         }
     } else {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
         EventHandlersVoid.AddItem(eventName, new mtsCommandVoid(callable, eventName));
 #else
         EventHandlersVoid.AddItem(eventName, new mtsCommandVoid(callable, eventName, this->GetComponentName(), this->Name));

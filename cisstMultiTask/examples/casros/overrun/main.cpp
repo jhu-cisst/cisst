@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "common.h"
 #include "json.h"
 
-using namespace SF;
+using namespace SC;
 
 // Periodic component
 class PeriodicTask: public mtsTaskPeriodic

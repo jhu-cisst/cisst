@@ -64,7 +64,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 #include <cisstMultiTask/mtsFaultBase.h>
 #include <cisstMultiTask/mtsSafetyCoordinator.h>
 //#include "coordinator.h"
@@ -365,12 +365,12 @@ protected:
     //-------------------------------------------------------------------------
     //  Safety Framework Plug-ins
     //-------------------------------------------------------------------------
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 protected:
     mtsSafetyCoordinator * SafetyCoordinator;
 
 public:
-    //SF::Coordinator * GetCoordinator(void);
+    //SC::Coordinator * GetCoordinator(void);
     mtsSafetyCoordinator * GetCoordinator(void);
 
     /*! Instsall the safety coordinator instance.  Used only when the

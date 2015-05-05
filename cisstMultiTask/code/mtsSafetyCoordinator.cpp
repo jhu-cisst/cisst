@@ -35,33 +35,33 @@
 #include "filterFactory.h"
 #include "cisstEventLocation.h"
 
-using namespace SF::Dict::Json;
+using namespace SC::Dict::Json;
 
 CMN_IMPLEMENT_SERVICES(mtsSafetyCoordinator);
 
 mtsSafetyCoordinator::mtsSafetyCoordinator(void)
-    : SF::Coordinator("n/a"), 
-      casrosAccessor(new SF::cisstAccessor(false, // enable publisher for CONTROL
+    : SC::Coordinator("n/a"), 
+      casrosAccessor(new SC::cisstAccessor(false, // enable publisher for CONTROL
                                            false, // enable publisher for DATA
                                            false, // enable subscriber for CONTROL
                                            false, // enable subscriber for DATA
                          0, //new mtsSubscriberCallback("Safety Coordinator", 
-                            //                       SF::Dict::TopicNames::CONTROL),
+                            //                       SC::Dict::TopicNames::CONTROL),
                          0)) //new mtsSubscriberCallback("Safety Coordinator",
-                            //                       SF::Dict::TopicNames::DATA)))
+                            //                       SC::Dict::TopicNames::DATA)))
 {
 }
 
 mtsSafetyCoordinator::mtsSafetyCoordinator(const std::string & name) 
-    : SF::Coordinator(name),
-      casrosAccessor(new SF::cisstAccessor(true,  // enable publisher for CONTROL
+    : SC::Coordinator(name),
+      casrosAccessor(new SC::cisstAccessor(true,  // enable publisher for CONTROL
                                            true,  // enable publisher for DATA
                                            true,  // enable subscriber for CONTROL
                                            false, // enable subscriber for DATA
                          new mtsSubscriberCallback("Safety Coordinator", 
-                                                   SF::Dict::TopicNames::CONTROL),
+                                                   SC::Dict::TopicNames::CONTROL),
                          0))//new mtsSubscriberCallback("Safety Coordinator",
-                            //                       SF::Dict::TopicNames::DATA)))
+                            //                       SC::Dict::TopicNames::DATA)))
 {
 }
 
@@ -78,7 +78,7 @@ mtsSafetyCoordinator::~mtsSafetyCoordinator()
 }
 
 bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON, 
-                                               SF::cisstMonitor * targetInstance)
+                                               SC::cisstMonitor * targetInstance)
 {
     if (!targetInstance) {
         CMN_LOG_CLASS_RUN_ERROR << "Null cisstMonitorTargetInstance" << std::endl;
@@ -99,17 +99,17 @@ bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON,
     }
 
     // Check if json syntax is valid
-    SF::JSON json;
+    SC::JSON json;
     if (!json.Read(targetJSON.c_str())) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json for monitor target: [ " << targetJSON << " ]" << std::endl;
         return false;
     }
     
     // Add new monitor target to monitor 
-    // [SFUPDATE] Use single monitor instance per process.  Should more than one
+    // [SCUPDATE] Use single monitor instance per process.  Should more than one
     // monitoring component instances be deployed within the same process, review 
     // the comments of
-    //      bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
+    //      bool mtsSafetyCoordinator::AddFilter(SC::FilterBase * filter)
     // Also, the following important method should be updated as well:
     //      bool mtsMonitorComponent::InitializeAccessors(void)
     const std::string targetUID = targetInstance->GetUIDAsString();
@@ -130,14 +130,14 @@ bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON,
     return true;
 }
 
-bool mtsSafetyCoordinator::AddMonitorTarget(SF::cisstMonitor * cisstMonitorTarget)
+bool mtsSafetyCoordinator::AddMonitorTarget(SC::cisstMonitor * cisstMonitorTarget)
 {
     if (!cisstMonitorTarget) {
         CMN_LOG_CLASS_RUN_ERROR << "Null cisst monitoring target" << std::endl;
         return false;
     }
 
-    SF::cisstEventLocation * locationID = cisstMonitorTarget->GetLocationID();
+    SC::cisstEventLocation * locationID = cisstMonitorTarget->GetLocationID();
     if (!locationID) {
         CMN_LOG_CLASS_RUN_ERROR << "Null cisst monitoring target location" << std::endl;
         return false;
@@ -157,7 +157,7 @@ bool mtsSafetyCoordinator::AddMonitorTarget(SF::cisstMonitor * cisstMonitorTarge
     return true;
 }
 
-bool mtsSafetyCoordinator::AddMonitorTarget(const SF::JSON::JSONVALUE & targets)
+bool mtsSafetyCoordinator::AddMonitorTarget(const SC::JSON::JSONVALUE & targets)
 {
     if (targets.isNull() || targets.size() == 0) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: No monitor specification found in json: " << targets << std::endl;
@@ -167,7 +167,7 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const SF::JSON::JSONVALUE & targets)
     // Create and install monitor instances, iterating each monitor specification
     for (size_t i = 0; i < targets.size(); ++i) {
         // Create monitoring target instance
-        SF::cisstMonitor * cisstMonitorTarget = new SF::cisstMonitor(targets[i]);
+        SC::cisstMonitor * cisstMonitorTarget = new SC::cisstMonitor(targets[i]);
 
         // Check if same monitoring target is already registered
         const std::string targetUID = cisstMonitorTarget->GetUIDAsString();
@@ -190,13 +190,13 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const SF::JSON::JSONVALUE & targets)
 bool mtsSafetyCoordinator::AddMonitorTargetFromJSON(const std::string & jsonString)
 {
     // Construct JSON structure from JSON string
-    SF::JSON json;
+    SC::JSON json;
     if (!json.Read(jsonString.c_str())) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetFromJSON: Failed to read json string: " << jsonString << std::endl;
         return false;
     }
 
-    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::monitor];
+    const SC::JSON::JSONVALUE targets = json.GetRoot()[SC::Dict::Json::monitor];
     bool ret = AddMonitorTarget(targets);
 
     if (ret) {
@@ -213,13 +213,13 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSON(const std::string & jsonStri
 bool mtsSafetyCoordinator::AddMonitorTargetFromJSONFile(const std::string & jsonFileName)
 {
     // Construct JSON structure from JSON file
-    SF::JSON json;
+    SC::JSON json;
     if (!json.ReadFromFile(jsonFileName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetFromJSONFile: Failed to read json file: " << jsonFileName << std::endl;
         return false;
     }
 
-    const SF::JSON::JSONVALUE targets = json.GetRoot()[SF::Dict::Json::monitor];
+    const SC::JSON::JSONVALUE targets = json.GetRoot()[SC::Dict::Json::monitor];
     bool ret = AddMonitorTarget(targets);
 
     if (ret) {
@@ -233,10 +233,10 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSONFile(const std::string & json
     return ret;
 }
 
-bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * targetComponent)
+bool mtsSafetyCoordinator::AddFilterActive(SC::FilterBase * filter, mtsTask * targetComponent)
 {
     std::string         signalName;
-    SF::SignalElement * signal = 0;
+    SC::SignalElement * signal = 0;
     mtsHistoryBuffer  * historyBuffer = 0;
     mtsStateTable     * stateTable = 0;
 
@@ -248,7 +248,7 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
         signalName = signal->GetName();
 
         // Each component has two state tables -- the default state table 
-        // and the monitoring state table (if the SF plug-in option enabled).
+        // and the monitoring state table (if the SC plug-in option enabled).
         // Because input signals can be either raw signals from other component,
         // which is managed by the default one, or output of other filters
         // that the monitoring state table maintains, we first need to figure out 
@@ -259,7 +259,7 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
         stateTable = targetComponent->GetMonitoringStateTable();
         int stateVectorId = stateTable->GetStateVectorID(signalName);
         if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
-            historyBuffer = new mtsHistoryBuffer(SF::FilterBase::ACTIVE, stateTable);
+            historyBuffer = new mtsHistoryBuffer(SC::FilterBase::ACTIVE, stateTable);
             signal->SetHistoryBufferInstance(historyBuffer);
             // associate output signal with state vector
             signal->SetHistoryBufferIndex(stateVectorId);
@@ -271,7 +271,7 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
                 stateTable = task->GetDefaultStateTable();
                 stateVectorId = stateTable->GetStateVectorID(signalName);
                 if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
-                    historyBuffer = new mtsHistoryBuffer(SF::FilterBase::ACTIVE, stateTable);
+                    historyBuffer = new mtsHistoryBuffer(SC::FilterBase::ACTIVE, stateTable);
                     signal->SetHistoryBufferInstance(historyBuffer);
                     // associate output signal with state vector
                     signal->SetHistoryBufferIndex(stateVectorId);
@@ -288,7 +288,7 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
         int stateVectorId = stateTable->GetStateVectorID(signalName);
 
         if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
-            historyBuffer = new mtsHistoryBuffer(SF::FilterBase::ACTIVE, stateTable);
+            historyBuffer = new mtsHistoryBuffer(SC::FilterBase::ACTIVE, stateTable);
             signal->SetHistoryBufferInstance(historyBuffer);
             // associate output signal with state vector
             signal->SetHistoryBufferIndex(stateVectorId);
@@ -298,7 +298,7 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
             stateVectorId = stateTable->GetStateVectorID(signalName);
 
             if (stateVectorId != mtsStateTable::INVALID_STATEVECTOR_ID) {
-                historyBuffer = new mtsHistoryBuffer(SF::FilterBase::ACTIVE, stateTable);
+                historyBuffer = new mtsHistoryBuffer(SC::FilterBase::ACTIVE, stateTable);
                 signal->SetHistoryBufferInstance(historyBuffer);
                 // associate output signal with state vector
                 signal->SetHistoryBufferIndex(stateVectorId);
@@ -319,14 +319,14 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
         CMN_ASSERT(signal);
         signalName = signal->GetName();
 
-        SF::SignalElement::SignalType outputSignalType = signal->GetSignalType();
+        SC::SignalElement::SignalType outputSignalType = signal->GetSignalType();
         // Create new state vector for output and add it to the monitoring state table.
         // MJ: adding a new element on the fly may not be thread-safe but adding a new
         // filter is usually done before starting components.
         // Should filters be added at run-time, this thread-safety issue may need to
         // be reviewed.
         mtsStateDataId id;
-        if (outputSignalType == SF::SignalElement::SCALAR) {
+        if (outputSignalType == SC::SignalElement::SCALAR) {
             id = stateTable->NewElement(signalName, signal->GetPlaceholderScalarPointer());
         } else {
             id = stateTable->NewElement(signalName, signal->GetPlaceholderVectorPointer());
@@ -354,13 +354,13 @@ bool mtsSafetyCoordinator::AddFilterActive(SF::FilterBase * filter, mtsTask * ta
     return true;
 }
 
-bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
+bool mtsSafetyCoordinator::AddFilterPassive(SC::FilterBase    * filter,
                                             mtsTask           * targetComponent,
                                             const std::string & targetProcessName,
                                             const std::string & targetComponentName)
 {
     std::string         signalName;
-    SF::SignalElement * signal;
+    SC::SignalElement * signal;
     mtsHistoryBuffer  * historyBuffer = 0;
 
     // Get target component accessor
@@ -374,7 +374,7 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
         // to the monitoring component.
         accessor = Monitors[0]->CreateTargetComponentAccessor(targetProcessName, 
                                                               targetComponentName, 
-                                                              SF::Monitor::TARGET_FILTER_EVENT, 
+                                                              SC::Monitor::TARGET_FILTER_EVENT, 
                                                               false, // this is not active filter
                                                               true); // add accessor to internal data structure
         if (!accessor) {
@@ -421,7 +421,7 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
         //else
             //targetStateTable = targetComponent->GetMonitoringStateTable();
         // Add read-from-statetable command for each input signal
-        if (signal->GetSignalType() == SF::SignalElement::SCALAR) {
+        if (signal->GetSignalType() == SC::SignalElement::SCALAR) {
             provided->AddCommandReadStateInternalScalar(targetComponent->StateTable, signalName, commandName);
             //provided->AddCommandReadStateInternalScalar(*targetStateTable, signalName, commandName);
         } else {
@@ -436,12 +436,12 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
         mtsInterfaceRequired * required = Monitors[0]->GetInterfaceRequired(requiredInterfaceName);
         CMN_ASSERT(required);
 
-        historyBuffer = new mtsHistoryBuffer(SF::FilterBase::PASSIVE, stateTable);
+        historyBuffer = new mtsHistoryBuffer(SC::FilterBase::PASSIVE, stateTable);
         signal->SetHistoryBufferInstance(historyBuffer);
 
         // Add functions to fetch data from the monitoring state table of the target component
         // using read-from-statetable commands added above.
-        if (signal->GetSignalType() == SF::SignalElement::SCALAR) {
+        if (signal->GetSignalType() == SC::SignalElement::SCALAR) {
             required->AddFunction(commandName, historyBuffer->FetchScalarValue);
         } else {
             required->AddFunction(commandName, historyBuffer->FetchVectorValue);
@@ -456,11 +456,11 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
         signalName = signal->GetName();
 
         // The monitoring state table of the monitor component maintains all output signals
-        SF::SignalElement::SignalType outputSignalType = signal->GetSignalType();
+        SC::SignalElement::SignalType outputSignalType = signal->GetSignalType();
         // Create new state vector and add it to the monitoring state table.
         // MJ: adding a new element on the fly may not be thread-safe (?)
         mtsStateDataId id;
-        if (outputSignalType == SF::SignalElement::SCALAR) {
+        if (outputSignalType == SC::SignalElement::SCALAR) {
             id = stateTable->NewElement(signalName, signal->GetPlaceholderScalarPointer());
         } else {
             id = stateTable->NewElement(signalName, signal->GetPlaceholderVectorPointer());
@@ -468,7 +468,7 @@ bool mtsSafetyCoordinator::AddFilterPassive(SF::FilterBase    * filter,
         // associate output signal with state vector
         id = stateTable->GetStateVectorID(signalName);
         CMN_ASSERT(id != mtsStateTable::INVALID_STATEVECTOR_ID);
-        historyBuffer = new mtsHistoryBuffer(SF::FilterBase::PASSIVE, stateTable);
+        historyBuffer = new mtsHistoryBuffer(SC::FilterBase::PASSIVE, stateTable);
         signal->SetHistoryBufferInstance(historyBuffer);
         signal->SetHistoryBufferIndex(id);
     }
@@ -494,27 +494,27 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
                                                             const std::string & targetComponentName)
 {
     // Construct JSON structure from JSON file
-    SF::JSON json;
+    SC::JSON json;
     if (!json.ReadFromFile(jsonFileName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFileToComponent: Failed to read json file: " << jsonFileName << std::endl;
         return false;
     }
 
     // Replace placeholder for target component name with actual target component name
-    SF::JSON::JSONVALUE & filters = json.GetRoot()["filter"];
-    SF::JSON::JSONVALUE filtersPeriodic;
+    SC::JSON::JSONVALUE & filters = json.GetRoot()["filter"];
+    SC::JSON::JSONVALUE filtersPeriodic;
 
     // Override filter json to fill in unspecified fields
     for (size_t i = 0; i < filters.size(); ++i) {
-        SF::JSON::JSONVALUE & filter = filters[i];
+        SC::JSON::JSONVALUE & filter = filters[i];
         filter["target"]["component"] = targetComponentName;
 
         if (filter["argument"]["event_completion"].isNull() || filter["argument"]["event_onset"].isNull())
             continue;
 
         // If name of onset event is EVT_THREAD_OVERRUN
-        std::string eventName = SF::JSON::GetJSONString(filter["argument"]["event_onset"]);
-        eventName = SF::rtrim(eventName);
+        std::string eventName = SC::JSON::GetJSONString(filter["argument"]["event_onset"]);
+        eventName = SC::rtrim(eventName);
         if (eventName.compare("\"EVT_THREAD_OVERRUN\"") != 0)
             continue;
 
@@ -551,14 +551,14 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
     return true;
 }
 
-bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
+bool mtsSafetyCoordinator::AddFilter(SC::FilterBase * filter)
 {
     CMN_ASSERT(filter);
 
     // Collect arguments
     const std::string targetProcessName   = mtsManagerLocal::GetInstance()->GetName();
     const std::string targetComponentName = filter->GetNameOfTargetComponent();
-    const SF::FilterBase::FilteringType filteringType = filter->GetFilteringType();
+    const SC::FilterBase::FilteringType filteringType = filter->GetFilteringType();
 
     // filter can be only deployed to the process where target component runs.
     if (mtsManagerLocal::GetInstance()->GetProcessName() != targetProcessName) {
@@ -589,7 +589,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
 
     // Active filters are run by the target component and passive filters are run by
     // the monitoring component.
-    if (filteringType == SF::FilterBase::ACTIVE) {
+    if (filteringType == SC::FilterBase::ACTIVE) {
         if (!AddFilterActive(filter, targetTask)) {
             CMN_LOG_CLASS_RUN_ERROR << "AddFilter: failed to add active filter for: " << *filter << std::endl;
             return false;
@@ -618,15 +618,15 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
         // propagates the event to the Safety Supervisor.
 
         // Define monitoring target
-        SF::cisstEventLocation * locationID = new SF::cisstEventLocation;
+        SC::cisstEventLocation * locationID = new SC::cisstEventLocation;
         locationID->SetProcessName(targetProcessName);
         locationID->SetComponentName(targetComponentName);
 
-        SF::cisstMonitor * monitor = new SF::cisstMonitor(SF::Monitor::TARGET_FILTER_EVENT,
+        SC::cisstMonitor * monitor = new SC::cisstMonitor(SC::Monitor::TARGET_FILTER_EVENT,
                                                             locationID,
-                                                            SF::Monitor::STATE_ON,
-                                                            SF::Monitor::OUTPUT_EVENT);
-        if (filteringType == SF::FilterBase::ACTIVE) {
+                                                            SC::Monitor::STATE_ON,
+                                                            SC::Monitor::OUTPUT_EVENT);
+        if (filteringType == SC::FilterBase::ACTIVE) {
             // Install fault event handler to target component accessor of the monitor component
             monitor->SetAttachedToActiveFilter(true);
 
@@ -642,7 +642,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
             // MJ TODO: Then, the mtsFunction of mtsEventPublisher should be added
             // to the internal monitoring required interface (so that the command can use
             // mts-communication for fault report).
-            mtsEventPublisher * eventPublisher = new mtsEventPublisher(SF::FilterBase::ACTIVE);
+            mtsEventPublisher * eventPublisher = new mtsEventPublisher(SC::FilterBase::ACTIVE);
             filter->SetEventPublisherInstance(eventPublisher);
 
             // Add event generator of the event publisher to the target component's internal
@@ -658,7 +658,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
             // Register event generator to the required interface so that filter can publish
             // events or faults through the monitoring mechanism.
             provided->AddEventWrite(eventPublisher->GetEventPublisherFunction(),
-                                    SF::Dict::FaultNames::FaultEvent, std::string());
+                                    SC::Dict::FaultNames::FaultEvent, std::string());
             // MJ: DESIGN REVIEW:  For now, each process has a single instance of
             // mtsMonitorComponent and thus having an event publisher as an event generator
             // of the monitoring provided interface of the target component is fine.
@@ -679,7 +679,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
         // pass the fault to mtsMonitorComponent::HandleFaultEvent() which then propagates
         // the event to the Safety Supervisor.
         else {
-            mtsEventPublisher * eventPublisher = new mtsEventPublisher(SF::FilterBase::PASSIVE);
+            mtsEventPublisher * eventPublisher = new mtsEventPublisher(SC::FilterBase::PASSIVE);
             filter->SetEventPublisherInstance(eventPublisher);
 
             // Register the instance of the monitoring component to the event publisher so
@@ -707,7 +707,7 @@ bool mtsSafetyCoordinator::AddFilter(SF::FilterBase * filter)
     // Set other properties of filter
     // MJ: Should more fields be required for event localization, middleware-specific class
     // which is derived from the base class can be defined.
-    SF::cisstEventLocation * location = new SF::cisstEventLocation;
+    SC::cisstEventLocation * location = new SC::cisstEventLocation;
     location->SetProcessName(mtsManagerLocal::GetInstance()->GetName());
     location->SetComponentName(targetComponentName);
     filter->SetEventLocationInstance(location);
@@ -737,24 +737,24 @@ void mtsSafetyCoordinator::OnFaultEvent(const std::string & json)
     CMN_LOG_CLASS_RUN_WARNING << "OnFaultEvent: UPDATE HERE, " << json << std::endl;
     // 
 #if 0
-    SF::JSONSerializer jsonSerializer;
+    SC::JSONSerializer jsonSerializer;
     if (!jsonSerializer.ParseJSON(json)) {
         CMN_LOG_CLASS_RUN_ERROR << "OnFaultEvent: failed to parse json:\n" << json << std::endl;
         return;
     }
 
     // Get filter instance based on filter UID
-    const SF::FilterBase::FilterIDType uid = jsonSerializer.GetFilterUID();
+    const SC::FilterBase::FilterIDType uid = jsonSerializer.GetFilterUID();
     FiltersType::const_iterator it = Filters.find(uid);
     if (it == Filters.end()) {
         CMN_LOG_CLASS_RUN_WARNING << "OnFaultEvent: no filter with uid " << uid << " found" << std::endl;
         return;
     }
-    SF::FilterBase * filter = it->second;
+    SC::FilterBase * filter = it->second;
     CMN_ASSERT(filter);
 
     // If filter has reported an event which has not been resolved yet, ignore it.
-    // MJTODO: If SF::FilterBase is updated to handle multiple events simultaneously, 
+    // MJTODO: If SC::FilterBase is updated to handle multiple events simultaneously, 
     // HasPendingEvent can accept argument to specify the type of event of interest.
     if (!filter->HasPendingEvent()) {
         CMN_LOG_CLASS_RUN_WARNING << "OnFaultEvent: Filter [ " << filter->GetFilterName() << " ] "
@@ -779,10 +779,10 @@ void mtsSafetyCoordinator::OnFaultEvent(const std::string & json)
     // TEMP: THIS SHOULD BE OTHER STATE depending on json (e.g., severity information)
     static int cnt = 0;
     if (cnt++ == 0) {
-        component->FaultState->ProcessEvent(SF::State::ERROR_DETECTION);
+        component->FaultState->ProcessEvent(SC::State::ERROR_DETECTION);
     }
     if (cnt == 500) {
-        component->FaultState->ProcessEvent(SF::State::ERROR_REMOVAL);
+        component->FaultState->ProcessEvent(SC::State::ERROR_REMOVAL);
         cnt = 0;
     }
 #endif
@@ -849,30 +849,30 @@ void mtsSafetyCoordinator::DeSerializeRaw(std::istream & inputStream)
 }
 
 const std::string mtsSafetyCoordinator::GetJsonForPublish(
-    const SF::cisstMonitor & monitorTarget, mtsGenericObject * payload, double timestamp)
+    const SC::cisstMonitor & monitorTarget, mtsGenericObject * payload, double timestamp)
 {
     if (!payload)
         return std::string("");
 
     // JSONSerializer instance
-    SF::JSONSerializer serializer;
+    SC::JSONSerializer serializer;
 
-    // Predefined monitoring targets are handled by SF::cisstMonitor
-    const SF::Monitor::TargetType targetType = monitorTarget.GetTargetType();
-    if (targetType != SF::Monitor::TARGET_CUSTOM)
+    // Predefined monitoring targets are handled by SC::cisstMonitor
+    const SC::Monitor::TargetType targetType = monitorTarget.GetTargetType();
+    if (targetType != SC::Monitor::TARGET_CUSTOM)
         return std::string("");
 
     // Populate common fields
-    SF::cisstEventLocation * locationID =
-        dynamic_cast<SF::cisstEventLocation*>(monitorTarget.GetLocationID());
-    serializer.SetTopicType(SF::Topic::DATA);
-    serializer.SetCategoryTypeData(SF::Topic::Data::MONITOR);
+    SC::cisstEventLocation * locationID =
+        dynamic_cast<SC::cisstEventLocation*>(monitorTarget.GetLocationID());
+    serializer.SetTopicType(SC::Topic::DATA);
+    serializer.SetCategoryTypeData(SC::Topic::Data::MONITOR);
     serializer.SetEventLocation(locationID);
     serializer.SetTimestamp(timestamp);
-    serializer.SetMonitorTargetType(SF::Monitor::TARGET_CUSTOM);
+    serializer.SetMonitorTargetType(SC::Monitor::TARGET_CUSTOM);
 
     // Populate monitor-specific fields
-    SF::JSON::JSONVALUE & fields = serializer.GetMonitorFields();
+    SC::JSON::JSONVALUE & fields = serializer.GetMonitorFields();
 
     // Extract double values from payload
     std::stringstream ss;
@@ -881,11 +881,11 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
     size_t numberOfScalar = mtsSafetyCoordinator::ExtractScalarValues(ss, values);
     if (numberOfScalar == 1) {
         // If single element scalr, key is "value" (otherwise, "values")
-        fields[SF::Dict::Json::value] = values[0];
+        fields[SC::Dict::Json::value] = values[0];
     } else {
-        fields[SF::Dict::Json::values].resize(numberOfScalar);
+        fields[SC::Dict::Json::values].resize(numberOfScalar);
         for (size_t i = 0; i < numberOfScalar; ++i)
-            fields[SF::Dict::Json::values][i] = values[i];
+            fields[SC::Dict::Json::values][i] = values[i];
     }
 
 #if 0
@@ -893,7 +893,7 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
     size_t numberOfElement = payload->ScalarNumber();
     // If single element scalr, key is "value" (otherwise, "values")
     if (numberOfElement == 1)
-        fields[SF::Dict::Json::value] = payload->Scalar(0);
+        fields[SC::Dict::Json::value] = payload->Scalar(0);
     else {
         std::stringstream ss;
         ss << "[ ";
@@ -902,7 +902,7 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
             ss << std::setprecision(PRECISION) << payload->Scalar(i);
         }
         ss << " ]";
-        fields[SF::Dict::Json::values] = ss.str();
+        fields[SC::Dict::Json::values] = ss.str();
     }
 #endif
 
@@ -931,15 +931,15 @@ size_t mtsSafetyCoordinator::ExtractScalarValues(const std::stringstream & ss,
     return values.size();
 }
 
-bool mtsSafetyCoordinator::OnEventHandler(const SF::Event * e)
+bool mtsSafetyCoordinator::OnEventHandler(const SC::Event * e)
 {
     CMN_ASSERT(e);
 
     // MJTEMP: Currently, publishing events use cisstAccessor that has dependency on
     // cisst.  If cisstAccessor is refactored not to have the dependency on cisst,
-    // publishing events can be done without cisst, i.e., SF::Coordinator can use
-    // SF::Accessor to publish events.  At that point, derived classes of SF::Coordinator
-    // (i.e., mtsSafetyCoordinator) don't need to override SF::Coordinator::OnEvent().
+    // publishing events can be done without cisst, i.e., SC::Coordinator can use
+    // SC::Accessor to publish events.  At that point, derived classes of SC::Coordinator
+    // (i.e., mtsSafetyCoordinator) don't need to override SC::Coordinator::OnEvent().
 
     CMN_LOG_RUN_DEBUG << "mtsSafetyCoordinator:OnEventHandler: " << e->GetName() << std::endl;
 
@@ -948,10 +948,10 @@ bool mtsSafetyCoordinator::OnEventHandler(const SF::Event * e)
     return true;
 }
 
-bool mtsSafetyCoordinator::PublishMessage(SF::Topic::Control::CategoryType category, const std::string & msg)
+bool mtsSafetyCoordinator::PublishMessage(SC::Topic::Control::CategoryType category, const std::string & msg)
 {
     mtsSubscriberCallback * cbControl = 
-        dynamic_cast<mtsSubscriberCallback *>(casrosAccessor->GetSubscriberCallback(SF::Topic::CONTROL));
+        dynamic_cast<mtsSubscriberCallback *>(casrosAccessor->GetSubscriberCallback(SC::Topic::CONTROL));
     CMN_ASSERT(cbControl);
 
     cbControl->CallbackControl(category, msg);

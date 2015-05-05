@@ -29,7 +29,7 @@
 
 #include <iostream>
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 #include "dict.h"
 #include "statemachine.h"
 #endif
@@ -42,41 +42,41 @@ void mtsTask::DoRunInternal(void)
 {
     RunEventCalled = false;
     StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     double tic = 0.0, toc = 0.0;
-    const SF::Event * e = 0;
-    SF::State::StateType state = SF::State::INVALID;
+    const SC::Event * e = 0;
+    SC::State::StateType state = SC::State::INVALID;
 #endif
     try {
         // Make sure following is called
         if (InterfaceProvidedToManager)
             InterfaceProvidedToManager->ProcessMailBoxes();
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
         if (!GetSafetyCoordinator) {
             tic = osaGetTime();
             this->Run();
             toc = osaGetTime();
         } else {
             state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
-            if (state == SF::State::INVALID) {
+            if (state == SC::State::INVALID) {
                 //tic = osaGetTime(); // still need to be updated for ExecTimeUser
-                CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
+                CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SC::State::GetStringState(state) << std::endl;
                 toc = tic = 0.0;
             } else {
                 // handle state transition
                 if (LastState != state) {
-                    if (LastState == SF::State::NORMAL) {
-                        if (state == SF::State::WARNING)
+                    if (LastState == SC::State::NORMAL) {
+                        if (state == SC::State::WARNING)
                             this->OnNormal2Warning(e);
                         else
                             this->OnNormal2Error(e);
-                    } else if (LastState == SF::State::WARNING) {
-                        if (state == SF::State::NORMAL)
+                    } else if (LastState == SC::State::WARNING) {
+                        if (state == SC::State::NORMAL)
                             this->OnWarning2Normal(e);
                         else
                             this->OnWarning2Error(e);
-                    } else if (LastState == SF::State::ERROR) {
-                        if (state == SF::State::WARNING)
+                    } else if (LastState == SC::State::ERROR) {
+                        if (state == SC::State::WARNING)
                             this->OnError2Warning(e);
                         else
                             this->OnError2Normal(e);
@@ -87,11 +87,11 @@ void mtsTask::DoRunInternal(void)
 
                 tic = osaGetTime();
                 switch (state) {
-                case SF::State::NORMAL:  this->RunNormal(); break;
-                case SF::State::WARNING: this->RunWarning(e); break;
-                case SF::State::ERROR:   this->RunError(e); break;
+                case SC::State::NORMAL:  this->RunNormal(); break;
+                case SC::State::WARNING: this->RunWarning(e); break;
+                case SC::State::ERROR:   this->RunError(e); break;
                 default:
-                    CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SF::State::GetStringState(state) << std::endl;
+                    CMN_LOG_CLASS_RUN_ERROR << "Invalid state: " << SC::State::GetStringState(state) << std::endl;
                 }
                 toc = osaGetTime();
             }
@@ -108,10 +108,10 @@ void mtsTask::DoRunInternal(void)
         OnRunException(mtsTask::UnknownException);
     }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     // Generate completion event of thread exception if onset event has occurred earlier.
     state = GetSafetyCoordinator->GetComponentState(this->GetName(), e);
-    if (state == SF::State::ERROR) {
+    if (state == SC::State::ERROR) {
         CMN_ASSERT(e);
         if (e->GetName().compare("EVT_THREAD_EXCEPTION") == 0) {
             std::stringstream ss;
@@ -119,7 +119,7 @@ void mtsTask::DoRunInternal(void)
             CMN_LOG_CLASS_RUN_WARNING << ss.str() << std::endl;
             // Inform casros of this offset event
             GetSafetyCoordinator->GenerateEvent("/EVT_THREAD_EXCEPTION",
-                                                SF::State::STATEMACHINE_FRAMEWORK,
+                                                SC::State::STATEMACHINE_FRAMEWORK,
                                                 ss.str(),
                                                 this->Name);
         }
@@ -133,18 +133,18 @@ void mtsTask::DoRunInternal(void)
     RunEvent();  // only generates event if RunEventCalled is false
 }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 void mtsTask::RunNormal(void)
 {
     this->Run();
 }
 
-void mtsTask::RunWarning(const SF::Event * CMN_UNUSED(e))
+void mtsTask::RunWarning(const SC::Event * CMN_UNUSED(e))
 {
     this->Run();
 }
 
-void mtsTask::RunError(const SF::Event * CMN_UNUSED(e))
+void mtsTask::RunError(const SC::Event * CMN_UNUSED(e))
 {
     this->Run();
 }
@@ -311,7 +311,7 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     if (!(ExecIn && ExecIn->GetConnectedInterface()))
         ChangeStateEvent(mtsComponentState(newState));
 
-//#if CISST_HAS_SAFETY_PLUGINS
+//#if CISST_HAS_SAFECASS_EXT
     //mtsComponentState oldState = this->State;
 //#endif
 
@@ -320,12 +320,12 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     StateChange.Unlock();
     StateChangeSignal.Raise();
 
-//#if CISST_HAS_SAFETY_PLUGINS
+//#if CISST_HAS_SAFECASS_EXT
     //// If state transition involves the ACTIVE state, notify Safety Framework of the transition.
     //if (oldState == mtsComponentState::ACTIVE && newState != mtsComponentState::ACTIVE) {
-        //GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_EXIT);
+        //GCMInstance->ProcessEvent_ComponentFramework(SC::State::ON_EXIT);
     //} else if (oldState != mtsComponentState::ACTIVE && newState == mtsComponentState::ACTIVE) {
-        //GCMInstance->ProcessEvent_ComponentFramework(SF::State::ON_ENTRY);
+        //GCMInstance->ProcessEvent_ComponentFramework(SC::State::ON_ENTRY);
     //}
 //#endif
 
@@ -398,7 +398,7 @@ mtsTask::mtsTask(const std::string & name,
     StateChange(),
     StateChangeSignal(),
     StateTable(sizeStateTable, "Default"),
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     StateTableMonitor(sizeStateTable, mtsStateTable::NameOfStateTableForMonitoring),
 #endif
     OverranPeriod(false),
@@ -407,7 +407,7 @@ mtsTask::mtsTask(const std::string & name,
     RunEventCalled(false)
 {
     this->AddStateTable(&this->StateTable);
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
     this->AddStateTable(&this->StateTableMonitor);
 
     // set owner name for state table.  State table does not run any filter without its owner component name.
@@ -424,7 +424,7 @@ mtsTask::mtsTask(const std::string & name,
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeUser, "GetExecTimeUser");
     provided->AddCommandReadState(this->StateTableMonitor, this->StateTableMonitor.ExecTimeTotal, "GetExecTimeTotal");
     // Add fault notification event
-    provided->AddEventWrite(this->GenerateMonitorEvent, SF::Dict::MonitorNames::MonitorEvent, std::string());
+    provided->AddEventWrite(this->GenerateMonitorEvent, SC::Dict::MonitorNames::MonitorEvent, std::string());
 
     // Initialize containers for framework filters
     StatusException.Count     = 0;
@@ -444,9 +444,9 @@ mtsTask::mtsTask(const std::string & name,
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Count,       "GetOverrunCount");
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Timestamp,   "GetOverrunTimestamp");
     provided->AddCommandReadState(StateTableMonitor, StatusOverrun.Duration,    "GetOverrunDuration");
-    // [SFUPDATE]
+    // [SCUPDATE]
 
-    LastState = SF::State::NORMAL;
+    LastState = SC::State::NORMAL;
 #endif
 
     this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
@@ -538,10 +538,10 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const st
     }
     if (interfaceProvided) {
         if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
             mtsSafetyCoordinator * sc = mtsManagerLocal::GetInstance()->GetCoordinator();
             if (sc)
-                if (!sc->AddInterface(Name, interfaceProvidedName, SF::GCM::PROVIDED_INTERFACE))
+                if (!sc->AddInterface(Name, interfaceProvidedName, SC::GCM::PROVIDED_INTERFACE))
                     CMN_LOG_CLASS_INIT_ERROR << "Failed to add provided interface \"" << interfaceProvidedName << "\" to Safety Coordinator." << std::endl;
 #endif
             return interfaceProvided;
@@ -613,7 +613,7 @@ bool mtsTask::CheckForOwnThread(void) const
 
 void mtsTask::OnStartupException(const std::exception &excp)
 {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught startup exception: " << excp.what() << std::endl;
 #else
     std::stringstream ss;
@@ -621,7 +621,7 @@ void mtsTask::OnStartupException(const std::exception &excp)
     CMN_LOG_CLASS_RUN_WARNING << ss.str();
 
     GetSafetyCoordinator->GenerateEvent("EVT_THREAD_EXCEPTION",
-                                        SF::State::STATEMACHINE_FRAMEWORK,
+                                        SC::State::STATEMACHINE_FRAMEWORK,
                                         ss.str(),
                                         this->Name);
 #endif
@@ -629,7 +629,7 @@ void mtsTask::OnStartupException(const std::exception &excp)
 
 void mtsTask::OnRunException(const std::exception &excp)
 {
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     CMN_LOG_CLASS_RUN_WARNING << "Task " << this->GetName() << " caught run exception: " << excp.what() << std::endl;
 #else
     std::stringstream ss;
@@ -637,7 +637,7 @@ void mtsTask::OnRunException(const std::exception &excp)
     CMN_LOG_CLASS_RUN_WARNING << ss.str();
 
     GetSafetyCoordinator->GenerateEvent("EVT_THREAD_EXCEPTION",
-                                        SF::State::STATEMACHINE_FRAMEWORK,
+                                        SC::State::STATEMACHINE_FRAMEWORK,
                                         ss.str(),
                                         this->Name);
 #endif
@@ -648,7 +648,7 @@ void mtsTask::SetInitializationDelay(double delay)
     this->InitializationDelay = delay;
 }
 
-#if CISST_HAS_SAFETY_PLUGINS
+#if CISST_HAS_SAFECASS_EXT
 #if 0
 void mtsTask::HandlerException(const std::string & CMN_UNUSED(name), const std::string & CMN_UNUSED(what))
 {
@@ -666,7 +666,7 @@ void mtsTask::HandlerOverrun(const std::string & CMN_UNUSED(name), const std::st
 }
 #endif
 
-void mtsTask::OnNormal2Warning(const SF::Event * e)
+void mtsTask::OnNormal2Warning(const SC::Event * e)
 {
     std::stringstream ss;
     ss << "State transition: NORMAL to WARNING";
@@ -677,7 +677,7 @@ void mtsTask::OnNormal2Warning(const SF::Event * e)
     CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
 }
 
-void mtsTask::OnNormal2Error(const SF::Event * e)
+void mtsTask::OnNormal2Error(const SC::Event * e)
 {
     std::stringstream ss;
     ss << "State transition: NORMAL to ERROR";
@@ -688,7 +688,7 @@ void mtsTask::OnNormal2Error(const SF::Event * e)
     CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
 }
 
-void mtsTask::OnWarning2Normal(const SF::Event * e)
+void mtsTask::OnWarning2Normal(const SC::Event * e)
 {
     std::stringstream ss;
     ss << "State transition: WARNING to NORMAL";
@@ -699,7 +699,7 @@ void mtsTask::OnWarning2Normal(const SF::Event * e)
     CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
 }
 
-void mtsTask::OnWarning2Error(const SF::Event * e)
+void mtsTask::OnWarning2Error(const SC::Event * e)
 {
     std::stringstream ss;
     ss << "State transition: WARNING to ERROR";
@@ -710,7 +710,7 @@ void mtsTask::OnWarning2Error(const SF::Event * e)
     CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
 }
 
-void mtsTask::OnError2Warning(const SF::Event * e)
+void mtsTask::OnError2Warning(const SC::Event * e)
 {
     std::stringstream ss;
     ss << "State transition: ERROR to WARNING";
@@ -721,7 +721,7 @@ void mtsTask::OnError2Warning(const SF::Event * e)
     CMN_LOG_CLASS_RUN_VERBOSE << ss.str();
 }
 
-void mtsTask::OnError2Normal(const SF::Event * e)
+void mtsTask::OnError2Normal(const SC::Event * e)
 {
     std::stringstream ss;
     ss << "State transition: ERROR to NORMAL";
@@ -750,39 +750,39 @@ void mtsTask::SetOverranPeriod(bool overran)
 }
 #endif
 
-SF::State::StateType mtsTask::GetComponentState(void) const
+SC::State::StateType mtsTask::GetComponentState(void) const
 {
     return GetSafetyCoordinator->GetComponentState(this->GetName());
 }
 
-SF::State::StateType mtsTask::GetProvidedInterfaceState(const std::string & interfaceName) const
+SC::State::StateType mtsTask::GetProvidedInterfaceState(const std::string & interfaceName) const
 {
     return GetSafetyCoordinator->GetInterfaceState(this->GetName(),
                                                    interfaceName,
-                                                   SF::GCM::PROVIDED_INTERFACE);
+                                                   SC::GCM::PROVIDED_INTERFACE);
 }
 
-SF::State::StateType mtsTask::GetProvidedInterfaceState(const std::string & interfaceName, const SF::Event* & e) const
+SC::State::StateType mtsTask::GetProvidedInterfaceState(const std::string & interfaceName, const SC::Event* & e) const
 {
     return GetSafetyCoordinator->GetInterfaceState(this->GetName(),
                                                    interfaceName,
                                                    e,
-                                                   SF::GCM::PROVIDED_INTERFACE);
+                                                   SC::GCM::PROVIDED_INTERFACE);
 }
 
-SF::State::StateType mtsTask::GetRequiredInterfaceState(const std::string & interfaceName) const
+SC::State::StateType mtsTask::GetRequiredInterfaceState(const std::string & interfaceName) const
 {
     return GetSafetyCoordinator->GetInterfaceState(this->GetName(),
                                                    interfaceName,
-                                                   SF::GCM::REQUIRED_INTERFACE);
+                                                   SC::GCM::REQUIRED_INTERFACE);
 }
 
-SF::State::StateType mtsTask::GetRequiredInterfaceState(const std::string & interfaceName, const SF::Event* & e) const
+SC::State::StateType mtsTask::GetRequiredInterfaceState(const std::string & interfaceName, const SC::Event* & e) const
 {
     return GetSafetyCoordinator->GetInterfaceState(this->GetName(),
                                                    interfaceName,
                                                    e,
-                                                   SF::GCM::REQUIRED_INTERFACE);
+                                                   SC::GCM::REQUIRED_INTERFACE);
 }
 
 bool mtsTask::GetLatestDataFromStateTable(const std::string & signalName, double & value) const
@@ -800,7 +800,7 @@ bool mtsTask::GetLatestDataFromStateTable(const std::string & signalName, double
     return true;
 }
 
-bool mtsTask::GetLatestDataFromStateTable(const std::string & signalName, SF::DoubleVecType & values) const
+bool mtsTask::GetLatestDataFromStateTable(const std::string & signalName, SC::DoubleVecType & values) const
 {
     typedef mtsStateTable::Accessor<std::vector<double> > AccessorType;
     AccessorType * accessor = dynamic_cast<AccessorType*>(this->StateTableMonitor.GetAccessor(signalName));

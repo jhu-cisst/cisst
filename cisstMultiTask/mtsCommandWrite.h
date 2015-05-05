@@ -120,7 +120,7 @@ public:
       by the invoker of the command
       \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandWrite(ActionType action, ClassType * classInstantiation, const std::string & name,
                     const ArgumentType & argumentPrototype):
         BaseType(name),
@@ -232,7 +232,7 @@ public:
       by the invoker of the command
       \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
     mtsCommandWriteGeneric(ActionType action, ClassType * classInstantiation, const std::string & name,
                            const mtsGenericObject * argumentPrototype):
         BaseType(name),

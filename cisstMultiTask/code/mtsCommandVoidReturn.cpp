@@ -26,7 +26,7 @@ mtsCommandVoidReturn::mtsCommandVoidReturn(void)
 {}
 
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandVoidReturn::mtsCommandVoidReturn(const std::string & name):
     BaseType(name)
 #else
@@ -38,7 +38,7 @@ mtsCommandVoidReturn::mtsCommandVoidReturn(const std::string & name,
 {}
 
 
-#if !CISST_HAS_SAFETY_PLUGINS
+#if !CISST_HAS_SAFECASS_EXT
 mtsCommandVoidReturn::mtsCommandVoidReturn(mtsCallableVoidReturnBase * callable,
                                            const std::string & name,
                                            const mtsGenericObject * resultPrototype):
