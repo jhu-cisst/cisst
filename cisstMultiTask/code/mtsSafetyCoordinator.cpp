@@ -99,7 +99,7 @@ bool mtsSafetyCoordinator::DeployMonitorTarget(const std::string & targetJSON,
     }
 
     // Check if json syntax is valid
-    SC::JSON json;
+    SC::JsonWrapper json;
     if (!json.Read(targetJSON.c_str())) {
         CMN_LOG_CLASS_RUN_ERROR << "Failed to parse json for monitor target: [ " << targetJSON << " ]" << std::endl;
         return false;
@@ -157,7 +157,7 @@ bool mtsSafetyCoordinator::AddMonitorTarget(SC::cisstMonitor * cisstMonitorTarge
     return true;
 }
 
-bool mtsSafetyCoordinator::AddMonitorTarget(const SC::JSON::JSONVALUE & targets)
+bool mtsSafetyCoordinator::AddMonitorTarget(const SC::JsonWrapper::JsonValue & targets)
 {
     if (targets.isNull() || targets.size() == 0) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTarget: No monitor specification found in json: " << targets << std::endl;
@@ -165,7 +165,7 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const SC::JSON::JSONVALUE & targets)
     }
 
     // Create and install monitor instances, iterating each monitor specification
-    for (size_t i = 0; i < targets.size(); ++i) {
+    for (Json::ArrayIndex i = 0; i < targets.size(); ++i) {
         // Create monitoring target instance
         SC::cisstMonitor * cisstMonitorTarget = new SC::cisstMonitor(targets[i]);
 
@@ -190,13 +190,13 @@ bool mtsSafetyCoordinator::AddMonitorTarget(const SC::JSON::JSONVALUE & targets)
 bool mtsSafetyCoordinator::AddMonitorTargetFromJSON(const std::string & jsonString)
 {
     // Construct JSON structure from JSON string
-    SC::JSON json;
+    SC::JsonWrapper json;
     if (!json.Read(jsonString.c_str())) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetFromJSON: Failed to read json string: " << jsonString << std::endl;
         return false;
     }
 
-    const SC::JSON::JSONVALUE targets = json.GetRoot()[SC::Dict::Json::monitor];
+    const SC::JsonWrapper::JsonValue targets = json.GetRoot()[SC::Dict::Json::monitor];
     bool ret = AddMonitorTarget(targets);
 
     if (ret) {
@@ -213,13 +213,13 @@ bool mtsSafetyCoordinator::AddMonitorTargetFromJSON(const std::string & jsonStri
 bool mtsSafetyCoordinator::AddMonitorTargetFromJSONFile(const std::string & jsonFileName)
 {
     // Construct JSON structure from JSON file
-    SC::JSON json;
+    SC::JsonWrapper json;
     if (!json.ReadFromFile(jsonFileName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddMonitorTargetFromJSONFile: Failed to read json file: " << jsonFileName << std::endl;
         return false;
     }
 
-    const SC::JSON::JSONVALUE targets = json.GetRoot()[SC::Dict::Json::monitor];
+    const SC::JsonWrapper::JsonValue targets = json.GetRoot()[SC::Dict::Json::monitor];
     bool ret = AddMonitorTarget(targets);
 
     if (ret) {
@@ -494,36 +494,36 @@ bool mtsSafetyCoordinator::AddFilterFromJSONFileToComponent(const std::string & 
                                                             const std::string & targetComponentName)
 {
     // Construct JSON structure from JSON file
-    SC::JSON json;
+    SC::JsonWrapper json;
     if (!json.ReadFromFile(jsonFileName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddFilterFromJSONFileToComponent: Failed to read json file: " << jsonFileName << std::endl;
         return false;
     }
 
     // Replace placeholder for target component name with actual target component name
-    SC::JSON::JSONVALUE & filters = json.GetRoot()["filter"];
-    SC::JSON::JSONVALUE filtersPeriodic;
+    SC::JsonWrapper::JsonValue & filters = json.GetRoot()["filter"];
+    SC::JsonWrapper::JsonValue filtersPeriodic;
 
     // Override filter json to fill in unspecified fields
-    for (size_t i = 0; i < filters.size(); ++i) {
-        SC::JSON::JSONVALUE & filter = filters[i];
+    for (Json::ArrayIndex i = 0; i < filters.size(); ++i) {
+        SC::JsonWrapper::JsonValue & filter = filters[i];
         filter["target"]["component"] = targetComponentName;
 
         if (filter["argument"]["event_completion"].isNull() || filter["argument"]["event_onset"].isNull())
             continue;
 
         // If name of onset event is EVT_THREAD_OVERRUN
-        std::string eventName = SC::JSON::GetJSONString(filter["argument"]["event_onset"]);
+        std::string eventName = SC::JsonWrapper::GetJSONString(filter["argument"]["event_onset"]);
         eventName = SC::rtrim(eventName);
         if (eventName.compare("\"EVT_THREAD_OVERRUN\"") != 0)
             continue;
 
         // If target component is periodic task
-        mtsTaskPeriodic * periodicTask = 
+        mtsTaskPeriodic * periodicTask =
             dynamic_cast<mtsTaskPeriodic*>(mtsManagerLocal::GetInstance()->GetComponent(targetComponentName));
         if (!periodicTask)
             continue;
-        
+
         // set threshold based on its nominal period
         //filter["argument"]["input_signal"] = mtsStateTable::NamesOfDefaultElements::ExecTimeUser;
         filter["argument"]["input_signal"] = mtsStateTable::NamesOfDefaultElements::ExecTimeTotal;
@@ -854,6 +854,10 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
     if (!payload)
         return std::string("");
 
+    // MJTEMP:
+    return "";
+
+#if 0
     // JSONSerializer instance
     SC::JSONSerializer serializer;
 
@@ -872,7 +876,7 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
     serializer.SetMonitorTargetType(SC::Monitor::TARGET_CUSTOM);
 
     // Populate monitor-specific fields
-    SC::JSON::JSONVALUE & fields = serializer.GetMonitorFields();
+    SC::JsonWrapper::JsonValue & fields = serializer.GetMonitorFields();
 
     // Extract double values from payload
     std::stringstream ss;
@@ -884,7 +888,7 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
         fields[SC::Dict::Json::value] = values[0];
     } else {
         fields[SC::Dict::Json::values].resize(numberOfScalar);
-        for (size_t i = 0; i < numberOfScalar; ++i)
+        for (Json::ArrayIndex i = 0; i < numberOfScalar; ++i)
             fields[SC::Dict::Json::values][i] = values[i];
     }
 
@@ -907,6 +911,7 @@ const std::string mtsSafetyCoordinator::GetJsonForPublish(
 #endif
 
     return serializer.GetJSON();
+#endif
 }
 
 size_t mtsSafetyCoordinator::ExtractScalarValues(const std::stringstream & ss, 

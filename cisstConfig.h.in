@@ -76,8 +76,8 @@ http://www.cisst.org/cisst/license.txt.
 // Using OpenGL or not
 #cmakedefine01 CISST_HAS_OPENGL
 
-// Support for Safety Framework Plug-ins
-#cmakedefine01 CISST_HAS_SAFETY_PLUGINS
+// Extension for SAFECASS
+#cmakedefine01 CISST_HAS_SAFECASS_EXT
 
 // Using IOS or not
 #cmakedefine01 CISST_HAS_IOS

@@ -68,17 +68,17 @@ void mtsSubscriberCallback::CallbackControl(SC::Topic::Control::CategoryType cat
         break;
     }
 }
-    
+
 void mtsSubscriberCallback::CallbackProcess_COMMAND(const std::string & jsonString)
 {
     // Parse json to figure out what to do
-    SC::JSON _json;
+    SC::JsonWrapper _json;
     if (!_json.Read(jsonString.c_str())) {
         SCLOG_ERROR << "Failed to parse JSON (maybe corrupted or invalid format): \"" << jsonString << std::endl;
         return;
     }
 
-    const SC::JSON::JSONVALUE & json = _json.GetRoot();
+    const SC::JsonWrapper::JsonValue & json = _json.GetRoot();
 
     // Get target safety coordinator (assigned as process name in cisst)
     const std::string targetProcessName = _json.GetSafeValueString(json["target"], "safety_coordinator");
@@ -97,7 +97,7 @@ void mtsSubscriberCallback::CallbackProcess_COMMAND(const std::string & jsonStri
         const std::string what = "casros console requested event generation";
         const std::string componentName = _json.GetSafeValueString(json["target"], "component");
         std::string interfaceName("");
-        if (json["target"]["interface"] != JSON::JSONVALUE::null)
+        if (json["target"]["interface"] != JsonWrapper::JsonValue::null)
             interfaceName = _json.GetSafeValueString(json["target"], "interface");
 
         State::StateMachineType type;
@@ -123,13 +123,13 @@ void mtsSubscriberCallback::CallbackProcess_COMMAND(const std::string & jsonStri
 void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
 {
     // Parse json to figure out what to do
-    SC::JSON jsonParser;
+    SC::JsonWrapper jsonParser;
     if (!jsonParser.Read(json.c_str())) {
         SCLOG_ERROR << "Failed to parse JSON (maybe corrupted or invalid format): \"" << json << std::endl;
         return;
     }
 
-    const JSON::JSONVALUE & _json = jsonParser.GetRoot();
+    const JsonWrapper::JsonValue & _json = jsonParser.GetRoot();
 
     // Get target safety coordinator (assigned as process name in cisst)
     //const std::string targetProcessName = jsonParser.GetSafeValueString(_json, "target");
@@ -166,10 +166,10 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
         bool deepInjection = jsonParser.GetSafeValueBool(_json, "deep");
         std::stringstream ss;
         // fault injection with scalar-type
-        if (_json["input"] != SC::JSON::JSONVALUE::null) {
+        if (_json["input"] != SC::JsonWrapper::JsonValue::null) {
             SC::DoubleVecType inputs; // stream of scalars
-            const JSON::JSONVALUE & jsonInputData = _json["input"];
-            for (size_t i = 0; i < jsonInputData.size(); ++i)
+            const JsonWrapper::JsonValue & jsonInputData = _json["input"];
+            for (Json::ArrayIndex i = 0; i < jsonInputData.size(); ++i)
                 inputs.push_back(jsonInputData[i].asDouble());
 
             if (sc->InjectInputToFilter(fuid, inputs, deepInjection)) {
@@ -181,12 +181,12 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
             //else
                 //ss << "{ \"cmd\": \"message\", \"msg\": \"Failed to inject input data: ";
             replyData = ss.str();
-        } else if (_json["input_vector"] != SC::JSON::JSONVALUE::null) {
+        } else if (_json["input_vector"] != SC::JsonWrapper::JsonValue::null) {
             std::vector<SC::DoubleVecType> inputVectors; // stream of vectors
-            const JSON::JSONVALUE & jsonInputData = _json["input_vector"];
-            for (size_t i = 0; i < jsonInputData.size(); ++i) {
+            const JsonWrapper::JsonValue & jsonInputData = _json["input_vector"];
+            for (Json::ArrayIndex i = 0; i < jsonInputData.size(); ++i) {
                 SC::DoubleVecType row;
-                for (size_t j = 0; j < jsonInputData[i].size(); ++j)
+                for (Json::ArrayIndex j = 0; j < jsonInputData[i].size(); ++j)
                     row.push_back(jsonInputData[i][j].asDouble());
                 inputVectors.push_back(row);
             }
@@ -251,7 +251,7 @@ void mtsSubscriberCallback::CallbackProcess_READ_REQ(const std::string & json)
 void mtsSubscriberCallback::CallbackProcess_STATE_UPDATE(const std::string & json)
 {
     // Parse json to figure out what to do
-    SC::JSON jsonParser;
+    SC::JsonWrapper jsonParser;
     if (!jsonParser.Read(json.c_str())) {
         SCLOG_ERROR << "Failed to parse JSON (maybe corrupted or invalid format): \"" << json << std::endl;
         return;
@@ -268,7 +268,7 @@ void mtsSubscriberCallback::CallbackProcess_STATE_UPDATE(const std::string & jso
     }
 
 #if 0
-    const JSON::JSONVALUE & _json = jsonParser.GetRoot();
+    const JsonWrapper::JsonValue & _json = jsonParser.GetRoot();
 
     // Get target safety coordinator (assigned as process name in cisst)
     //const std::string targetProcessName = jsonParser.GetSafeValueString(_json, "target");
@@ -301,7 +301,7 @@ void mtsSubscriberCallback::CallbackProcess_STATE_UPDATE(const std::string & jso
             jsonParser.GetSafeValueUInt(_json["target"], "fuid");
 
         SC::DoubleVecType inputs;
-        const JSON::JSONVALUE & jsonInputData = _json["input"];
+        const JsonWrapper::JsonValue & jsonInputData = _json["input"];
         for (size_t i = 0; i < jsonInputData.size(); ++i)
             inputs.push_back(jsonInputData[i].asDouble());
 
@@ -334,6 +334,7 @@ void mtsSubscriberCallback::CallbackProcess_STATE_UPDATE(const std::string & jso
         SCLOG_ERROR << "Failed to publish DATA | READ_RES" << std::endl;
 #endif
 }
+
 void mtsSubscriberCallback::CallbackData(SC::Topic::Data::CategoryType category,
                                          const std::string & json)
 {
@@ -352,13 +353,13 @@ void mtsSubscriberCallback::CallbackData(SC::Topic::Data::CategoryType category,
         categoryName = "INVALID";
         break;
     }
-    
-    std::cout << "Callback DATA [ " << OwnerName << ", " << TopicName 
+
+    std::cout << "Callback DATA [ " << OwnerName << ", " << TopicName
               << " | " << categoryName << " ]: " << json << std::endl;
 
 }
 
-void mtsSubscriberCallback::FetchMessages(MessagesType & messages)
+void mtsSubscriberCallback::FetchMessages(MessagesType & UNUSED(messages))
 {
     // TODO: remove FetchMessages
 #if 0

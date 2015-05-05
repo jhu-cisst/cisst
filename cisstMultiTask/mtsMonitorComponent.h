@@ -36,6 +36,7 @@
 #include <cisstMultiTask/mtsEventReceiver.h>
 
 #include "cisstMonitor.h"
+#include "publisher.h"
 
 #include <cisstMultiTask/mtsExport.h>
 
