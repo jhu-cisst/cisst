@@ -1,0 +1,34 @@
+#
+# CMake configuration file for the installed version of cisstStereoVision
+#
+# Author(s):  Anton Deguet
+# Created on: 2015-03-24
+#
+# (C) Copyright 2015 Johns Hopkins University (JHU), All Rights Reserved.
+#
+# --- begin cisst license - do not edit ---
+#
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+#
+# --- end cisst license ---
+
+
+# Which flags have been set and include path/libs
+set (CISST_SVL_HAS_CISSTNETLIB @CISST_SVL_HAS_CISSTNETLIB@)
+set (CISST_SVL_HAS_JPEG @CISST_SVL_HAS_JPEG@)
+set (CISST_SVL_HAS_OPENCV @CISST_SVL_HAS_OPENCV2@) # for backward compatibility
+set (CISST_SVL_HAS_OPENCV2 @CISST_SVL_HAS_OPENCV2@)
+set (CISST_SVL_HAS_ZLIB @CISST_SVL_HAS_ZLIB@)
+set (CISST_SVL_HAS_PNG @CISST_SVL_HAS_PNG@)
+set (CISST_SVL_HAS_FFMPEG @CISST_SVL_HAS_FFMPEG@)
+set (CISST_SVL_HAS_MIL @CISST_SVL_HAS_MIL@)
+set (CISST_SVL_HAS_DIRECTSHOW @CISST_SVL_HAS_DIRECTSHOW@)
+set (CISST_SVL_HAS_SVS @CISST_SVL_HAS_SVS@)
+set (CISST_SVL_HAS_VIDEO4LINUX2 @CISST_SVL_HAS_VIDEO4LINUX2@)
+set (CISST_SVL_HAS_DC1394 @CISST_SVL_HAS_DC1394@)
+set (CISST_SVL_HAS_X11 @CISST_SVL_HAS_X11@)
+set (CISST_SVL_HAS_XV @CISST_SVL_HAS_XV@)
+set (CISST_SVL_HAS_CUDA @CISST_SVL_HAS_CUDA@)
+set (CISST_SVL_HAS_BM_DECKLINK @CISST_SVL_HAS_BM_DECKLINK@)

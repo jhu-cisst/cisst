@@ -1013,6 +1013,8 @@ typedef mtsGenericObjectProxy<vctMatRot3> mtsVctMatRot3;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctMatRot3)
 typedef mtsGenericObjectProxy<vctFrm3> mtsVctFrm3;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFrm3)
+typedef mtsGenericObjectProxy<vctFrm4x4> mtsVctFrm4x4;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFrm4x4)
 
 // Dynamic vectors (see also mtsVector.h, which uses
 // multiple inheritance)

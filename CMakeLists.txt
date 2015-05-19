@@ -70,7 +70,7 @@ endif (CISST_BUILD_SHARED_LIBS)
 # Set the version number
 set (CISST_VERSION_MAJOR "1")
 set (CISST_VERSION_MINOR "0")
-set (CISST_VERSION_PATCH "3")
+set (CISST_VERSION_PATCH "4")
 set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
 
 # To compile examples within this project
@@ -167,16 +167,24 @@ cisst_is_catkin_build (CISST_CATKIN_BUILT)
 
 # Destination for CMake package config files
 if (CISST_CATKIN_BUILT)
+  # Output directories
   set (CISST_PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
+  set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
+  # Options defaults
   set (CISST_HAS_JSON ON CACHE "" BOOL)
+  set (CISST_BUILD_SHARED_LIBS ON CACHE "" BOOL FORCE)
+  set (IS_SHARED SHARED)
+  set (BUILD_SHARED_LIBS SHARED)
+  set (CISST_USE_SI_UNITS ON CACHE "" BOOL)
 else ()
+  # Output directories
   set (CISST_PACKAGE_CONFIG_DIRECTORY "${cisst_BINARY_DIR}")
+  set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin")
 endif ()
 
-# Output directories.
+# Output directories
 set (CISST_LIBRARY_INSTALL_SUFFIX "lib")
 set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
-set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin")
 
 # Where to find afterwards
 set (cisst_LIBRARY_PATH "${LIBRARY_OUTPUT_PATH}")
