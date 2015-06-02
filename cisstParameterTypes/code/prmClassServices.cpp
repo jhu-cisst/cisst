@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-10-20
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -100,3 +98,6 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeProxy);
 
 #include <cisstParameterTypes/prmIMUSensors.h>
 CMN_IMPLEMENT_SERVICES(prmIMUSensors);
+
+#include <cisstParameterTypes/prmJointState.h>
+CMN_IMPLEMENT_SERVICES(prmJointState);
