@@ -99,5 +99,5 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeProxy);
 #include <cisstParameterTypes/prmIMUSensors.h>
 CMN_IMPLEMENT_SERVICES(prmIMUSensors);
 
-#include <cisstParameterTypes/prmJointState.h>
-CMN_IMPLEMENT_SERVICES(prmJointState);
+#include <cisstParameterTypes/prmStateJoint.h>
+CMN_IMPLEMENT_SERVICES(prmStateJoint);
