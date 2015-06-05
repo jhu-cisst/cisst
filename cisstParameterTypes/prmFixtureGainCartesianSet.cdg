@@ -20,9 +20,14 @@ class {
         is-data true;
     }
     member {
-        name RefPoint;
+        name RefFrame;
+        type vctFrm4x4;
+        description Current Reference frame;
+    }
+    member {
+        name RefVelocity;
         type vct3;
-        description Current Reference Point;
+        description Reference point velocity;
     }
     member {
         name RotationRefToMaster;
