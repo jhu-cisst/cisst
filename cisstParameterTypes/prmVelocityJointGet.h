@@ -61,7 +61,7 @@ public:
     void SetSize(size_type size);
 
     /*! constructor with all possible parameters */
-    inline prmVelocityJointGet(const vctDoubleVec & velocity):
+    inline explicit prmVelocityJointGet(const vctDoubleVec & velocity):
         BaseType(),
         VelocityMember(velocity)
      {}
