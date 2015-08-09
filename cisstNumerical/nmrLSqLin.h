@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _nmrLSqLin_h
 #define _nmrLSqLin_h
 
+#include <algorithm>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctDynamicMatrix.h>
@@ -174,15 +175,35 @@ public:
         CISSTNETLIB_INTEGER lwork = -1;
         CISSTNETLIB_INTEGER k = -1;
         if ((me == 0) && (mg ==0)) {// case LS
-            minmn = (ma < n)?ma:n;
-            minmn = (1 > minmn)?1:minmn;
+            minmn = std::max(std::min(ma,n),1);
             lwork = 2*minmn;
             return lwork;
         } else if (me == 0) { // case LSI
-            k = (ma+mg>n)?(ma+mg):n;
+            k = std::max(ma+mg,n);
             return k+n+(mg+2)*(n+7);
+        } else if (mg == 0) { // case dgels
+            /// @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
+            // ma = rows of matrix A, aka M
+            // n  = cols of matrix A, aka N
+            // me = dimension of vector b
+            char trans;
+            // ma
+            // n
+            CISSTNETLIB_INTEGER nrhs; ///< @todo can we assume nhrs=1?
+            double a;
+            CISSTNETLIB_INTEGER lda;
+            double b;
+            CISSTNETLIB_INTEGER ldb;
+            double work;
+            CISSTNETLIB_INTEGER lwork; // calculate what lwork should be
+            CISSTNETLIB_INTEGER info;
+            init_dgels(ma,n,me,&trans, &ma, &n, &nrhs,
+                               &a, &lda,
+                               &b, &ldb,
+                               &work, &lwork, &info);
+            return lwork;
         } else { // case LSEI
-            k = (ma+mg>n)?(ma+mg):n;
+            k = std::max(ma+mg,n);
             return 2*(me+n)+k+(mg+2)*(n+7);
         }
     }
@@ -691,6 +712,25 @@ public:
     {
         this->Allocate(A.rows(), 0, 0, A.cols());
     }
+      /*! This method allocates memory of output vector
+      as well as the workspace.
+      This method should be called before the nmrLSqLinSolutionDynamic
+      object is passed on to nmrLSqLin function, as the memory
+      required for output matrices and workspace are allocated
+      here or to reallocate memory previously allocated by constructor.
+      Typically this method is called from a code segment
+      where it is safe to allocate memory and use
+      the solution and work space later.
+      \param A The matrix for which LS needs to be computed, size MxN
+      \param b The vector containing right hand side values, size LDB >= MAX(1,M,N), stored columnwise
+    */
+    template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb>
+    inline void Allocate_dgels(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                                vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b)
+    {
+        //             ma        me        mg n
+        this->Allocate(A.rows(), b.size(), 0, A.cols());
+    }
     /*! This method allocates memory of output vector
       and uses the memory provided by user for workspace.
       Check is made to ensure that memory provided by user is sufficient
@@ -1187,6 +1227,88 @@ public:
     inline const vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &GetRNormE(void) const {
         return RNormE;
     }
+    
+    // initialize parameters for the dgels call in netlib
+    static CISSTNETLIB_INTEGER
+    init_dgels(const CISSTNETLIB_INTEGER rows_ma, const CISSTNETLIB_INTEGER cols_n, const CISSTNETLIB_INTEGER size_b, char* trans, CISSTNETLIB_INTEGER* m, CISSTNETLIB_INTEGER* n, CISSTNETLIB_INTEGER* nrhs, double* a, CISSTNETLIB_INTEGER* lda, double* b, CISSTNETLIB_INTEGER*ldb,
+	    double* work, CISSTNETLIB_INTEGER* lwork, CISSTNETLIB_INTEGER* info)
+    {
+            CISSTNETLIB_INTEGER ret;
+    
+            /// @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
+            // ma = rows of matrix A, aka M
+            // n  = cols of matrix A, aka N
+            // me = dimension of vector b
+            *trans = 'N';
+            *m = rows_ma;
+            *n = cols_n;
+            *nrhs = 1; ///< @todo can we assume nhrs=1?
+            // a;
+            *lda = std::max(rows_ma,1);
+            // b;
+            *ldb = std::max(std::max(std::max(1,rows_ma),cols_n),*nrhs);
+            // work;
+            *lwork = -1; // calculate what lwork should be
+    
+            if(!(size_b >= *ldb))
+            {
+               cmnThrow(std::runtime_error("nmrLSqLin: init_dgels: check for vector b >= max(1,A.rows(),A.cols()) failed. see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c"));
+            }
+            // info;
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+            ret = cisstNetlib_dgels_(trans, m, n, nrhs,
+                               a, lda,
+                               b, ldb,
+                               work, lwork, info);
+#endif
+#else // no major version
+            ret = dgels_(trans, m, n, nrhs,
+                               a, lda,
+                               b, ldb,
+                               work, lwork, info);
+#endif // CISSTNETLIB_VERSION
+            *lwork = *work; // optimal work array size lwork is stored in first entry of work array
+            return ret;
+    }
+    
+    /// @todo should ret_value and info be handled differently or separately?
+    /// @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
+    static CISSTNETLIB_INTEGER
+    run_dgels(const CISSTNETLIB_INTEGER rows_ma, const CISSTNETLIB_INTEGER cols_n, const CISSTNETLIB_INTEGER size_b, double* a, double* b, double* work)
+    {
+    char trans;
+    CISSTNETLIB_INTEGER m;
+    CISSTNETLIB_INTEGER n;
+    CISSTNETLIB_INTEGER nrhs;
+    CISSTNETLIB_INTEGER lda;
+    CISSTNETLIB_INTEGER ldb;
+    CISSTNETLIB_INTEGER lwork;
+    CISSTNETLIB_INTEGER info;
+    
+    init_dgels(rows_ma,cols_n,size_b,&trans, &m, &n, &nrhs,
+                               a, &lda,
+                               b, &ldb,
+                               work, &lwork, &info);
+    
+            CISSTNETLIB_INTEGER ret;
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+            ret = cisstNetlib_dgels_(&trans, &m, &n, &nrhs,
+                               a, &lda,
+                               b, &ldb,
+                               work, &lwork, &info);
+#endif
+#else // no major version
+            ret = dgels_(&trans, &m, &n, &nrhs,
+                               a, &lda,
+                               b, &ldb,
+                               work, &lwork, &info);
+#endif // CISSTNETLIB_VERSION
+
+            /// @todo do anything with ret?
+            return info;
+    }
 };
 
 /*! This function checks for valid input and
@@ -1220,33 +1342,19 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerType, CISS
     if (A.IsRowMajor() != VCT_COL_MAJOR) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Input must be in Column Major format"));
     }
-    CISSTNETLIB_INTEGER rows = static_cast<CISSTNETLIB_INTEGER>(A.rows());
-    CISSTNETLIB_INTEGER cols = static_cast<CISSTNETLIB_INTEGER>(A.cols());
-    if ((rows != solutionFriend.GetMa()) || (cols != solutionFriend.GetN())) {
+    CISSTNETLIB_INTEGER Mrows = static_cast<CISSTNETLIB_INTEGER>(A.rows());
+    CISSTNETLIB_INTEGER Ncols = static_cast<CISSTNETLIB_INTEGER>(A.cols());
+    if ((Mrows != solutionFriend.GetMa()) || (Ncols != solutionFriend.GetN())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size used for Allocate was different"));
     }
-    if (rows != static_cast<CISSTNETLIB_INTEGER>(b.size())) {
+    CISSTNETLIB_INTEGER b_size = static_cast<CISSTNETLIB_INTEGER>(b.size());
+    if (Mrows != b_size) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size of b must be same as number of rows of A"));
     }
-    char trans = 'N';
-    CISSTNETLIB_INTEGER nrhs = 1;
-    CISSTNETLIB_INTEGER lda = (1>rows)?1:rows;
-    CISSTNETLIB_INTEGER maxmn = (rows > cols)?rows:cols;
-    maxmn  = (1>maxmn)?1:maxmn;
-    CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(rows, 0, 0, cols);
-#if defined(CISSTNETLIB_VERSION_MAJOR)
-#if (CISSTNETLIB_VERSION_MAJOR >= 3)
-    cisstNetlib_dgels_(&trans, &rows, &cols, &nrhs,
-                       A.Pointer(), &lda,
-                       b.Pointer(), &maxmn,
-                       solutionFriend.GetWork().Pointer(), &lwork, &ret_value);
-#endif
-#else // no major version
-    dgels_(&trans, &rows, &cols, &nrhs,
-           A.Pointer(), &lda,
-           b.Pointer(), &maxmn,
-           solutionFriend.GetWork().Pointer(), &lwork, &ret_value);
-#endif // CISSTNETLIB_VERSION
+    double* a = A.Pointer();
+    double* b_ = b.Pointer();
+    double* work = solutionFriend.GetWork().Pointer();
+    ret_value = nmrLSqLinSolutionDynamic::run_dgels(Mrows,Ncols,b_size,a,b_,work);
     solutionFriend.GetX().Assign(b.Pointer());
     return ret_value;
 }
@@ -1741,29 +1849,13 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma,
                           vctFixedSizeVector<CISSTNETLIB_DOUBLE, _work> &Work)
 {
     CISSTNETLIB_INTEGER ret_value;
-    char trans = 'N';
-    CISSTNETLIB_INTEGER rows = static_cast<CISSTNETLIB_INTEGER>(_ma);
-    CISSTNETLIB_INTEGER cols = static_cast<CISSTNETLIB_INTEGER>(_n);
-    CISSTNETLIB_INTEGER nrhs = 1;
-    CISSTNETLIB_INTEGER lda = (1>_ma)?1:_ma;
-    CISSTNETLIB_INTEGER maxmn = (_ma > _n)?_ma:_n;
-    maxmn  = (1>maxmn)?1:maxmn;
-    CISSTNETLIB_INTEGER lwork = static_cast<CISSTNETLIB_INTEGER>(nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n>::LWORK);
-    CMN_ASSERT(lwork <= static_cast<CISSTNETLIB_INTEGER>(_work));
-#if defined(CISSTNETLIB_VERSION_MAJOR)
-#if (CISSTNETLIB_VERSION_MAJOR >= 3)
-    cisstNetlib_dgels_(&trans, &rows, &cols, &nrhs,
-                       A.Pointer(), &lda,
-                       b.Pointer(), &maxmn,
-                       Work.Pointer(), &lwork, &ret_value);
-#endif
-#else // no major version
-    dgels_(&trans, &rows, &cols, &nrhs,
-           A.Pointer(), &lda,
-           b.Pointer(), &maxmn,
-           Work.Pointer(), &lwork, &ret_value);
-#endif // CISSTNETLIB_VERSION
-
+    CISSTNETLIB_INTEGER Mrows = static_cast<CISSTNETLIB_INTEGER>(_ma);
+    CISSTNETLIB_INTEGER Ncols = static_cast<CISSTNETLIB_INTEGER>(_n);
+    CISSTNETLIB_INTEGER b_size = static_cast<CISSTNETLIB_INTEGER>(b.size());
+    double* a = A.Pointer();
+    double* b_ = b.Pointer();
+    double* work = Work.Pointer();
+    ret_value = nmrLSqLinSolutionDynamic::run_dgels(Mrows,Ncols,b_size,a,b_,work);
     x.Assign(b.Pointer());
     return ret_value;
 }

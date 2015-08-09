@@ -16,6 +16,7 @@
  --- end cisst license ---
  */
 
+#include <algorithm>
 #include <cisstNumerical/nmrConstraintOptimizer.h>
 
 //! This is a container for constrained control optimizer.
@@ -69,7 +70,8 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
         if (C.cols() != dq.size() + Slacks) {
             return NMR_MALFORMED;
         }
-        lsiSolution.Allocate(C);
+        // note that in this case "d" is what will be refered to internally to nmrLSqLin as "b"
+        lsiSolution.Allocate_dgels(C,d);
         res = nmrLSqLin(C, d, lsiSolution);
         for (size_t i = 0; i < dq.size(); i++) {
             dq[i] = lsiSolution.GetX().Element(i);
@@ -167,13 +169,14 @@ void nmrConstraintOptimizer::Allocate(void)
         C.SetSize(CIndex,NumVars+Slacks,VCT_COL_MAJOR);
         C.SetAll(0);
     }
-    if (d.size() != CIndex) {
-        d.SetSize(CIndex);
-        d.SetAll(0);
-    }
     if (A.rows() != AIndex || A.cols() != NumVars+Slacks) {
         A.SetSize(AIndex,NumVars+Slacks,VCT_COL_MAJOR);
         A.SetAll(0);
+    }
+    size_t expected_d_size = std::max(std::max(std::max(std::max(static_cast<size_t>(1),C.cols()),C.rows()),A.rows()),A.cols());
+    if (d.size() != expected_d_size) {
+        d.SetSize(expected_d_size);
+        d.SetAll(0);
     }
     if (b.size() != AIndex) {
         b.SetSize(AIndex);
@@ -198,8 +201,9 @@ void nmrConstraintOptimizer::Allocate(const size_t CRows, const size_t CCols, co
         C.SetSize(CRows,CCols,VCT_COL_MAJOR);
         C.SetAll(0);
     }
-    if (d.size() != CRows) {
-        d.SetSize(CRows);
+    size_t expected_d_size = std::max(std::max(std::max(std::max(static_cast<size_t>(1),CCols),CRows),ARows),ACols);
+    if (d.size() != expected_d_size) {
+        d.SetSize(expected_d_size);
         d.SetAll(0);
     }
     if (A.rows() != ARows || A.cols() != ACols) {
