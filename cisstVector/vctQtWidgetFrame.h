@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctQtForwardDeclarations.h>
 #include <cisstVector/vctTransformationTypes.h>
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstVector/vctQtWidgetRotation.h>
 #include <cisstVector/vctQtWidgetDynamicVector.h>
 
@@ -64,7 +65,12 @@ class CISST_EXPORT vctQtWidgetFrameDoubleRead: public QWidget
         vctMatRot3 rotationMatrix;
         rotationMatrix.FromNormalized(frame.Rotation());
         this->RotationWidget->SetValue(rotationMatrix);
-        this->TranslationWidget->SetValue(vctDoubleVec(frame.Translation()));
+        // always display translations in mm
+        vctDoubleVec translation(frame.Translation());
+#if CISST_USE_SI_UNITS
+        translation.Multiply(1000.0);
+#endif
+        this->TranslationWidget->SetValue(translation);
     }
 
     /*! Set the display mode.  This method applies the display mode to
