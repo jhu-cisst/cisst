@@ -61,7 +61,7 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
     }
 
     // if the sizes don't match for C,d
-    if (C.rows() != d.size() || dq.size() != NumVars+Slacks) {
+    if ((C.rows() != d.size() && d.size() != expected_d_size )|| dq.size() != NumVars+Slacks) {
         return NMR_MALFORMED;
     }
 
@@ -173,7 +173,7 @@ void nmrConstraintOptimizer::Allocate(void)
         A.SetSize(AIndex,NumVars+Slacks,VCT_COL_MAJOR);
         A.SetAll(0);
     }
-    size_t expected_d_size = std::max(std::max(std::max(std::max(static_cast<size_t>(1),C.cols()),C.rows()),A.rows()),A.cols());
+    expected_d_size = std::max(std::max(std::max(std::max(static_cast<size_t>(1),C.cols()),C.rows()),A.rows()),A.cols());
     if (d.size() != expected_d_size) {
         d.SetSize(expected_d_size);
         d.SetAll(0);
@@ -201,7 +201,7 @@ void nmrConstraintOptimizer::Allocate(const size_t CRows, const size_t CCols, co
         C.SetSize(CRows,CCols,VCT_COL_MAJOR);
         C.SetAll(0);
     }
-    size_t expected_d_size = std::max(std::max(std::max(std::max(static_cast<size_t>(1),CCols),CRows),ARows),ACols);
+    expected_d_size = std::max(std::max(std::max(std::max(static_cast<size_t>(1),CCols),CRows),ARows),ACols);
     if (d.size() != expected_d_size) {
         d.SetSize(expected_d_size);
         d.SetAll(0);

@@ -1348,9 +1348,6 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerType, CISS
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size used for Allocate was different"));
     }
     CISSTNETLIB_INTEGER b_size = static_cast<CISSTNETLIB_INTEGER>(b.size());
-    if (Mrows != b_size) {
-        cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size of b must be same as number of rows of A"));
-    }
     double* a = A.Pointer();
     double* b_ = b.Pointer();
     double* work = solutionFriend.GetWork().Pointer();

@@ -65,6 +65,9 @@ private:
     size_t EIndex;
     //!Slack Index
     size_t SlackIndex;
+    //! Expected size of objective vector d based on return of netlib config calls. @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
+    //! @todo update this variable to account for optimization calls other than dgels
+    size_t expected_d_size;
 
 public:
 
