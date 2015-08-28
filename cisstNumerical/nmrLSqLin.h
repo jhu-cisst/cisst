@@ -1263,13 +1263,13 @@ public:
                                work, lwork, info);
 #endif
 #else // no major version
-            ret = dgels_(trans, m, n, nrhs,
+            dgels_(trans, m, n, nrhs,
                                a, lda,
                                b, ldb,
                                work, lwork, info);
 #endif // CISSTNETLIB_VERSION
             *lwork = *work; // optimal work array size lwork is stored in first entry of work array
-            return ret;
+            return *info;
     }
     
     /// @todo should ret_value and info be handled differently or separately?
@@ -1300,7 +1300,7 @@ public:
                                work, &lwork, &info);
 #endif
 #else // no major version
-            ret = dgels_(&trans, &m, &n, &nrhs,
+            dgels_(&trans, &m, &n, &nrhs,
                                a, &lda,
                                b, &ldb,
                                work, &lwork, &info);
