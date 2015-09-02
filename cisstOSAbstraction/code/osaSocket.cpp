@@ -6,7 +6,7 @@
 Author(s):  Peter Kazanzides
 Created on: 2009
 
-(C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
+(C) Copyright 2007-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -37,7 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <sys/select.h>
 #endif
 #if (CISST_OS == CISST_DARWIN)
-#include <sys/types.h>
 #include <ifaddrs.h>
 #endif
 #endif
@@ -432,8 +431,13 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen, const double time
     FD_ZERO(&writefds);
     FD_SET(SocketFD, &writefds);
 
+#if (CISST_OS == CISST_WINDOWS)
     long sec = static_cast<long>(floor(timeoutSec));
     long usec = static_cast<long>((timeoutSec - sec) * 1e6);
+#else
+    time_t sec = static_cast<time_t>(floor(timeoutSec));
+    suseconds_t usec = static_cast<suseconds_t>((timeoutSec - sec) * 1e6);
+#endif
     timeval timeout = { sec, usec };
 
     //see if the socket is available for writing
