@@ -6,8 +6,7 @@
   Author(s): Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -175,7 +174,7 @@ public:
         CISSTNETLIB_INTEGER lwork = -1;
         CISSTNETLIB_INTEGER k = -1;
         if ((me == 0) && (mg ==0)) {// case LS
-            minmn = std::max(std::min(ma,n),1);
+            minmn = std::max(std::min(ma,n),static_cast<CISSTNETLIB_INTEGER>(1));
             lwork = 2*minmn;
             return lwork;
         } else if (me == 0) { // case LSI
@@ -1244,9 +1243,9 @@ public:
             *n = cols_n;
             *nrhs = 1; ///< @todo can we assume nhrs=1?
             // a;
-            *lda = std::max(rows_ma,1);
+            *lda = std::max(rows_ma,static_cast<CISSTNETLIB_INTEGER>(1));
             // b;
-            *ldb = std::max(std::max(std::max(1,rows_ma),cols_n),*nrhs);
+            *ldb = std::max(std::max(std::max(static_cast<CISSTNETLIB_INTEGER>(1),rows_ma),cols_n),*nrhs);
             // work;
             *lwork = -1; // calculate what lwork should be
     
