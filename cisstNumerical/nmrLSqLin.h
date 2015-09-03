@@ -1232,8 +1232,6 @@ public:
     init_dgels(const CISSTNETLIB_INTEGER rows_ma, const CISSTNETLIB_INTEGER cols_n, const CISSTNETLIB_INTEGER size_b, char* trans, CISSTNETLIB_INTEGER* m, CISSTNETLIB_INTEGER* n, CISSTNETLIB_INTEGER* nrhs, double* a, CISSTNETLIB_INTEGER* lda, double* b, CISSTNETLIB_INTEGER*ldb,
 	    double* work, CISSTNETLIB_INTEGER* lwork, CISSTNETLIB_INTEGER* info)
     {
-            CISSTNETLIB_INTEGER ret;
-    
             /// @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
             // ma = rows of matrix A, aka M
             // n  = cols of matrix A, aka N
@@ -1256,7 +1254,7 @@ public:
             // info;
 #if defined(CISSTNETLIB_VERSION_MAJOR)
 #if (CISSTNETLIB_VERSION_MAJOR >= 3)
-            ret = cisstNetlib_dgels_(trans, m, n, nrhs,
+            cisstNetlib_dgels_(trans, m, n, nrhs,
                                a, lda,
                                b, ldb,
                                work, lwork, info);
@@ -1290,10 +1288,9 @@ public:
                                b, &ldb,
                                work, &lwork, &info);
     
-            CISSTNETLIB_INTEGER ret;
 #if defined(CISSTNETLIB_VERSION_MAJOR)
 #if (CISSTNETLIB_VERSION_MAJOR >= 3)
-            ret = cisstNetlib_dgels_(&trans, &m, &n, &nrhs,
+            cisstNetlib_dgels_(&trans, &m, &n, &nrhs,
                                a, &lda,
                                b, &ldb,
                                work, &lwork, &info);
