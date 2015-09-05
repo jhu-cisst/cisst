@@ -163,10 +163,10 @@ protected:
        For LSI problem Me == 0
        Otherwise LSEI problem
     */
-    CISSTNETLIB_INTEGER m_Ma;
-    CISSTNETLIB_INTEGER m_Me;
-    CISSTNETLIB_INTEGER m_Mg;
-    CISSTNETLIB_INTEGER m_N;
+    size_t m_Ma;
+    size_t m_Me;
+    size_t m_Mg;
+    size_t m_N;
 
 public:
     /*! Helper methods for user to set min working space required by LAPACK
@@ -174,60 +174,60 @@ public:
       \param ma, me, mg, n The size of matrix whose LS/LSI/LSEI needs to be computed
     */
 
-    static inline CISSTNETLIB_INTEGER GetWorkspaceSize(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
+    static inline CISSTNETLIB_INTEGER GetWorkspaceSize(size_t ma, size_t me, size_t mg, size_t n)
     {
-        CISSTNETLIB_INTEGER minmn = -1;
-        CISSTNETLIB_INTEGER lwork = -1;
-        CISSTNETLIB_INTEGER k = -1;
+        CISSTNETLIB_INTEGER lwork;
         if ((me == 0) && (mg ==0)) { // case LS (dgels)
             // Following produces same result as QueryWorkspaceSize_LS().
-            minmn = std::max(std::min(ma,n),static_cast<CISSTNETLIB_INTEGER>(1));
+            CISSTNETLIB_INTEGER minmn = static_cast<CISSTNETLIB_INTEGER>(std::max(std::min(ma,n),static_cast<size_t>(1)));
             lwork = 2*minmn;
-            return lwork;
         } else if (me == 0) { // case LSI
-            k = std::max(ma+mg,n);
-            return k+n+(mg+2)*(n+7);
+            size_t k = std::max(ma+mg,n);
+            lwork = static_cast<CISSTNETLIB_INTEGER>(k+n+(mg+2)*(n+7));
         } else { // case LSEI
-            k = std::max(ma+mg,n);
-            return 2*(me+n)+k+(mg+2)*(n+7);
+            size_t k = std::max(ma+mg,n);
+            lwork = static_cast<CISSTNETLIB_INTEGER>(2*(me+n)+k+(mg+2)*(n+7));
         }
+        return lwork;
     }
 
-    static inline CISSTNETLIB_INTEGER GetIWorkspaceSize(CISSTNETLIB_INTEGER CMN_UNUSED(ma), CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
+    static inline CISSTNETLIB_INTEGER GetIWorkspaceSize(size_t CMN_UNUSED(ma), size_t me, size_t mg, size_t n)
     {
         if ((me == 0) && (mg ==0)) { // case LS
             return 0;
         } else if (me == 0) { // case LSI
-            return mg+2*n+1;
+            return static_cast<CISSTNETLIB_INTEGER>(mg+2*n+1);
         } else { // case LSEI
-            return mg+2*n+2;
+            return static_cast<CISSTNETLIB_INTEGER>(mg+2*n+2);
         }
     }
 
     /*! Method to query LAPACK routine for optimal workspace size. So far, only implemented for LS (dgels).
         Not needed because result is same as GetWorkspaceSize() above. */
-    static CISSTNETLIB_INTEGER QueryWorkspaceSize_LS(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n)
+    static CISSTNETLIB_INTEGER QueryWorkspaceSize_LS(size_t ma, size_t n)
     {
         // @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
         // ma = rows of matrix A, aka M
         // n  = cols of matrix A, aka N
         char trans = 'N';
+        CISSTNETLIB_INTEGER Mrows = static_cast<CISSTNETLIB_INTEGER>(ma);
+        CISSTNETLIB_INTEGER Ncols = static_cast<CISSTNETLIB_INTEGER>(n);
         CISSTNETLIB_INTEGER nrhs = 1; ///< @todo can we assume nhrs=1?
-        CISSTNETLIB_INTEGER lda = std::max(ma,static_cast<CISSTNETLIB_INTEGER>(1));
-        CISSTNETLIB_INTEGER ldb = std::max(std::max(std::max(static_cast<CISSTNETLIB_INTEGER>(1),ma),n),nrhs);
+        CISSTNETLIB_INTEGER lda = static_cast<CISSTNETLIB_INTEGER>(std::max(ma,static_cast<size_t>(1)));
+        CISSTNETLIB_INTEGER ldb = static_cast<CISSTNETLIB_INTEGER>(std::max(std::max(static_cast<size_t>(1),ma),n));
         CISSTNETLIB_INTEGER lwork = -1; // calculate what lwork should be
         CISSTNETLIB_INTEGER info;
         CISSTNETLIB_DOUBLE work;
 
 #if defined(CISSTNETLIB_VERSION_MAJOR)
 #if (CISSTNETLIB_VERSION_MAJOR >= 3)
-        cisstNetlib_dgels_(&trans, &ma, &n, &nrhs,
+        cisstNetlib_dgels_(&trans, &Mrows, &Ncols, &nrhs,
                                    0, &lda,
                                    0, &ldb,
                                    &work, &lwork, &info);
 #endif
 #else // no major version
-        dgels_(&trans, &ma, &n, &nrhs,
+        dgels_(&trans, &Mrows, &Ncols, &nrhs,
                       0, &lda,
                       0, &ldb,
                       &work, &lwork, &info);
@@ -394,16 +394,16 @@ public:
             return solution.IWork;
         }
         inline CISSTNETLIB_INTEGER GetMa(void) {
-            return solution.m_Ma;
+            return static_cast<CISSTNETLIB_INTEGER>(solution.m_Ma);
         }
         inline CISSTNETLIB_INTEGER GetMe(void) {
-            return solution.m_Me;
+            return static_cast<CISSTNETLIB_INTEGER>(solution.m_Me);
         }
         inline CISSTNETLIB_INTEGER GetMg(void) {
-            return solution.m_Mg;
+            return static_cast<CISSTNETLIB_INTEGER>(solution.m_Mg);
         }
         inline CISSTNETLIB_INTEGER GetN(void) {
-            return solution.m_N;
+            return static_cast<CISSTNETLIB_INTEGER>(solution.m_N);
         }
     };
     friend class Friend;
@@ -415,23 +415,23 @@ public:
       nmrLSqLinSolutionDynamic::SetRef)
     */
     nmrLSqLinSolutionDynamic():
-        m_Ma(static_cast<CISSTNETLIB_INTEGER>(0)),
-        m_Me(static_cast<CISSTNETLIB_INTEGER>(0)),
-        m_Mg(static_cast<CISSTNETLIB_INTEGER>(0)),
-        m_N(static_cast<CISSTNETLIB_INTEGER>(0)) {};
+        m_Ma(0),
+        m_Me(0),
+        m_Mg(0),
+        m_N(0) {};
 
     /*! constructor to use with LS */
-    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n)
+    nmrLSqLinSolutionDynamic(size_t ma, size_t n)
     {
         this->Allocate(ma, 0, 0, n);
     }
     /*! constructor to use with LSI */
-    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
+    nmrLSqLinSolutionDynamic(size_t ma, size_t mg, size_t n)
     {
         this->Allocate(ma, 0, mg, n);
     }
     /*! constructor to use with LSEI */
-    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
+    nmrLSqLinSolutionDynamic(size_t ma, size_t me, size_t mg, size_t n)
     {
         this->Allocate(ma, me, mg, n);
     }
@@ -477,7 +477,7 @@ public:
       \param inWork The workspace for LAPACK.
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
-    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n,
+    nmrLSqLinSolutionDynamic(size_t ma, size_t n,
                              vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
                              vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
@@ -496,7 +496,7 @@ public:
       \param inX The output vector for LSqLin
     */
     template <typename _vectorOwnerTypeX>
-    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n,
+    nmrLSqLinSolutionDynamic(size_t ma, size_t n,
                              vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
         this->SetRef(ma, 0, 0, n, inX);
@@ -563,7 +563,7 @@ public:
       \output inWork, inIWork workspace for LSI
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    nmrLSqLinSolutionDynamic(size_t ma, size_t mg, size_t n,
                              vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
                              vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
                              vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_INTEGER> &inIWork)
@@ -583,7 +583,7 @@ public:
       \param inX The output vector for LSqLin
     */
     template <typename _vectorOwnerTypeX>
-    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    nmrLSqLinSolutionDynamic(size_t ma, size_t mg, size_t n,
                              vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
         this->SetRef(ma, 0, mg, n, inX);
@@ -658,7 +658,7 @@ public:
       \output inWork, inIWork workspace for LSI
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    nmrLSqLinSolutionDynamic(size_t ma, size_t me, size_t mg, size_t n,
                              vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
                              vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
                              vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_INTEGER> &inIWork)
@@ -678,7 +678,7 @@ public:
       \param inX The output vector for LSqLin
     */
     template <typename _vectorOwnerTypeX>
-    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    nmrLSqLinSolutionDynamic(size_t ma, size_t me, size_t mg, size_t n,
                              vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
         this->SetRef(ma, me, mg, n, inX);
@@ -1011,7 +1011,7 @@ public:
       \param mg Number of rows of input matrix G (inequality constraints)
       \param n Number of cols of input matrix A
     */
-    inline void Allocate(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
+    inline void Allocate(size_t ma, size_t me, size_t mg, size_t n)
     {
         this->Malloc(ma, me, mg, n, true, true, true);
         this->SetRef(ma, me, mg, n, this->WorkspaceMemory, this->InputMemory, this->OutputMemory);
@@ -1028,7 +1028,7 @@ public:
       \param inWork Workspace provided by user
     */
     template <typename _vectorOwnerTypeWork>
-    inline void Allocate(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    inline void Allocate(size_t ma, size_t me, size_t mg, size_t n,
                          vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
         CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
@@ -1049,7 +1049,7 @@ public:
       \param inWork, inIWork Workspace provided by user
     */
     template <typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    inline void Allocate(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    inline void Allocate(size_t ma, size_t me, size_t mg, size_t n,
                          vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
                          vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inIWork)
     {
@@ -1080,7 +1080,7 @@ public:
       \param inWork The workspace for LS.
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
-    void SetRef(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    void SetRef(size_t ma, size_t me, size_t mg, size_t n,
                 vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX, vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
         CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
@@ -1103,7 +1103,7 @@ public:
       \param inWork/inIWork The workspace for LSI/LSEI.
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    void SetRef(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    void SetRef(size_t ma, size_t me, size_t mg, size_t n,
                 vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
                 vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
                 vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_DOUBLE> &inIWork)
@@ -1116,7 +1116,7 @@ public:
         if (liwork > static_cast<CISSTNETLIB_INTEGER>(inIWork.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for IWork"));
         }
-        if (n > static_cast<CISSTNETLIB_INTEGER>(inX.size())) {
+        if (n > inX.size()) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for X"));
         }
         this->Malloc(ma, me, mg, n, false, true, false);
@@ -1133,10 +1133,10 @@ public:
       \param inX The output matrix for LSqLin
     */
     template <typename _vectorOwnerTypeX>
-    void SetRef(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    void SetRef(size_t ma, size_t me, size_t mg, size_t n,
                 vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
-        if (n > static_cast<CISSTNETLIB_INTEGER>(inX.size())) {
+        if (n > inX.size()) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for X"));
         }
         this->Malloc(ma, me, mg, n, true, true, false);
@@ -1158,7 +1158,7 @@ protected:
       \param allocateOutput If true, allocate memory of output as well.
     */
 
-    void Malloc(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n, bool allocateWorkspace, bool allocateInput, bool allocateOutput)
+    void Malloc(size_t ma, size_t me, size_t mg, size_t n, bool allocateWorkspace, bool allocateInput, bool allocateOutput)
     {
         m_Ma = ma; m_N = n;
         m_Me = me; m_Mg = mg;
@@ -1178,7 +1178,7 @@ protected:
         (this->RNormE).SetRef(me, (this->RNorm).Pointer(ma), 1);
     }
     template <typename _vectorOwnerTypeWork, typename _matrixOwnerTypeI, typename _vectorOwnerTypeX>
-    void SetRef(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+    void SetRef(size_t ma, size_t me, size_t mg, size_t n,
                 vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &work,
                 vctDynamicMatrixBase<_matrixOwnerTypeI, CISSTNETLIB_DOUBLE> &input,
                 vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &x)
