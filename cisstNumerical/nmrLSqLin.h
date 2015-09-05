@@ -39,17 +39,17 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstNumerical
 
-  \note *On exit*, the content of *A is altered.*
+  \note *On exit*, the contents of *A and b are altered.*
 
   There are three ways to call this method to solve the least-squares problem Ax = b, possibly
   subject to constraints.
      LS:   Solves Ax = b
      LSI:  Solves Ax = b, subject to Gx >= h (inequality constraint)
      LSEI: Solves Ax = b, subject to Ex = f and Gx >= h (inequality and equality constraints)
-  Following examples illustrate LS solution.
+  Following examples illustrate the LS solution.
 
   METHOD 1: User provides input and output matrices/vectors
-     1) The User allocates memory for these matrices and vector.
+     1) The User allocates memory for these matrices and vectors.
      vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4, VCT_COL_MAJOR);
      vctDynamicVector<CISSTNETLIB_DOUBLE> b(5);
      vctDynamicVector<CISSTNETLIB_DOUBLE> x(4);
@@ -58,7 +58,7 @@ http://www.cisst.org/cisst/license.txt.
      The LSqLin method verifies that the size of the solution object matches
      the input, and allocates workspace memory, which is deallocated when
      the function ends.
-     The LSqLin function alters the contents of matrix A.
+     The LSqLin function alters the contents of matrix A and vector b.
      For fixed size the function call is templated by size, e.g.
      nmrLSqLin<4, 3>(A, b, x);
 
@@ -72,7 +72,7 @@ http://www.cisst.org/cisst/license.txt.
      nmrLSqLinSolutionDynamic solution(A);
      3) Call the nmrLSqLin function
      nmrLSqLin(A, b, solution);
-     The contents of the input matrix A are modified by this routine.
+     The contents of the input matrix A and vector b are modified by this routine.
      The output vector is available through solution.GetX().
 
   METHOD 3: User provides input and output matrices/vectors and
@@ -84,7 +84,7 @@ http://www.cisst.org/cisst/license.txt.
      2) User also needs to allocate memory for the workspace. This method is particularly
      useful when the user is using more than one numerical method from the library
      and is willing to share the workspace between them. In such a case, the user
-     can allocate  memory greater than the maximum required by the different methods.
+     can allocate memory greater than the maximum required by the different methods.
      To aid the user to determine the minimum workspace required (and not spend time digging
      into LAPACK documentation) the library provides helper function
      nmrLSqLinSolutionDynamic::GetWorkspaceSize(input)
@@ -102,9 +102,6 @@ http://www.cisst.org/cisst/license.txt.
      \note The general rule for numerical functions which depend on LAPACK is that
      column-major matrices should be used everywhere, and that all
      matrices should be compact.
-     \note For the specific case of LSqLin, a valid result is also obtained if
-     all the matrices are stored in row-major order.  This is an exception to
-     the general rule.  However, mixed-order is not tolerated. -- TRUE??
  */
 
 /*
