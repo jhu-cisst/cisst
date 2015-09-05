@@ -5,7 +5,7 @@
   Author(s):  Paul Wilkening
   Created on: 2014
 
-  (C) Copyright 2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2014-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
  --- begin cisst license - do not edit ---
 
@@ -65,9 +65,6 @@ private:
     size_t EIndex;
     //!Slack Index
     size_t SlackIndex;
-    //! Expected size of objective vector d based on return of netlib config calls. @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
-    //! @todo update this variable to account for optimization calls other than dgels
-    size_t expected_d_size;
 
 public:
 

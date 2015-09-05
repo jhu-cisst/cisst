@@ -6,8 +6,7 @@
   Author(s):  Ankur Kapoor
   Created on: 2005-11-04
   
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -172,7 +171,9 @@ class nmrLSqLinTest: public CppUnit::TestCase
     CPPUNIT_TEST_SUITE(nmrLSqLinTest);
 
     CPPUNIT_TEST(TestDynamicLS);
+    CPPUNIT_TEST(TestDynamicLS_Underconstrained);
     CPPUNIT_TEST(TestDynamicLSUserAlloc);
+    CPPUNIT_TEST(TestDynamicLSUserAlloc_Underconstrained);
 #ifdef BUILD_MULTITHREADED_TESTS
     CPPUNIT_TEST(TestDynamicLSThreadSafety);
 #endif
@@ -190,7 +191,9 @@ class nmrLSqLinTest: public CppUnit::TestCase
 #endif
 
     CPPUNIT_TEST(TestFixedSizeLS);
+    CPPUNIT_TEST(TestFixedSizeLS_Underconstrained);
     CPPUNIT_TEST(TestFixedSizeLSObject);
+    CPPUNIT_TEST(TestFixedSizeLSObject_Underconstrained);
 
     CPPUNIT_TEST(TestFixedSizeLSI);
     CPPUNIT_TEST(TestFixedSizeLSIObject);
@@ -291,9 +294,15 @@ public:
     
     /*! Test using column major matrices. */
     void TestDynamicLS(void);
+
+    /*! Test using column major matrices, underconstrained system (more unknowns than equations). */
+    void TestDynamicLS_Underconstrained(void);
     
     /*! Test using column major matrices. */
     void TestDynamicLSUserAlloc(void);
+
+    /*! Test using column major matrices, underconstrained system (more unknowns than equations). */
+    void TestDynamicLSUserAlloc_Underconstrained(void);
 
 #ifdef BUILD_MULTITHREADED_TESTS
     /*! Test using column major matrices. */
@@ -323,8 +332,10 @@ public:
 #endif
 
     void TestFixedSizeLS(void);
+    void TestFixedSizeLS_Underconstrained(void);
 
     void TestFixedSizeLSObject(void);
+    void TestFixedSizeLSObject_Underconstrained(void);
 
     void TestFixedSizeLSI(void);
 

@@ -19,4 +19,3 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstNumerical/nmrLSqLin.h>
-

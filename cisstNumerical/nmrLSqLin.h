@@ -41,66 +41,70 @@ http://www.cisst.org/cisst/license.txt.
 
   \note *On exit*, the content of *A is altered.*
 
-  There are three ways to call this method to compute the pseudo-inverse of
-  the matrix A.
-  METHOD 1: User provides matrices A and A^{+}
-     1) The User allocates memory for these matrices and
-     vector.
-     vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4);
-     vctDynamicMatrix<CISSTNETLIB_DOUBLE> AP(4, 5);
-     ...
+  There are three ways to call this method to solve the least-squares problem Ax = b, possibly
+  subject to constraints.
+     LS:   Solves Ax = b
+     LSI:  Solves Ax = b, subject to Gx >= h (inequality constraint)
+     LSEI: Solves Ax = b, subject to Ex = f and Gx >= h (inequality and equality constraints)
+  Following examples illustrate LS solution.
+
+  METHOD 1: User provides input and output matrices/vectors
+     1) The User allocates memory for these matrices and vector.
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4, VCT_COL_MAJOR);
+     vctDynamicVector<CISSTNETLIB_DOUBLE> b(5);
+     vctDynamicVector<CISSTNETLIB_DOUBLE> x(4);
      2) The user calls the LS routine
-     nmrLSqLin(A, AP);
-     The LSqLin method verifies that the size of the solution objects matches
+     nmrLSqLin(A, b, x);
+     The LSqLin method verifies that the size of the solution object matches
      the input, and allocates workspace memory, which is deallocated when
      the function ends.
      The LSqLin function alters the contents of matrix A.
-     For fixed size the function call is templated by size and row/column major, e.g.
-     nmrLSqLin<4, 3, VCT_COL_MAJOR>(A, AP);
+     For fixed size the function call is templated by size, e.g.
+     nmrLSqLin<4, 3>(A, b, x);
 
   METHOD 2: Using a preallocated solution object
-     1) The user creates the input matrix
-     vctDynamicMatrix<CISSTNETLIB_DOUBLE> input(rows, cols , VCT_ROW_MAJOR);
-     2) The user allocats a solution object which could be of
+     1) The user creates the input matrix/vector
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(rows, cols, VCT_COL_MAJOR);
+     vctDynamicVector<CISSTNETLIB_DOUBLE> b(rows);
+     2) The user allocates a solution object which could be of
      type nmrLSqLinSolutionFixedSize, nmrLSqLinSolutionDynamic and nmrLSqLinSolutionDynamicRef
      corresponding to fixed size, dynamic matrix or dynamic matrix reference.
-     nmrLSqLinSolutionDynamic solution(input);
+     nmrLSqLinSolutionDynamic solution(A);
      3) Call the nmrLSqLin function
-     nmrLSqLin(input, solution);
-     The contents of input matrix is modified by this routine.
-     The matrices U, Vt and vector S are available through the following methods
-     std::cout << solution.GetU() << solution.GetS() << solution.GetVt() << std::endl;
-     The pseudo-inverse is available through solution.GetLSqLin()
+     nmrLSqLin(A, b, solution);
+     The contents of the input matrix A are modified by this routine.
+     The output vector is available through solution.GetX().
 
-  METHOD 3: User provides matrix AP
-     with workspace required by pseudo-inverse routine of LAPACK.
-     1) User creates matrices and vector
-     vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4);
-     vctDynamicMatrix<CISSTNETLIB_DOUBLE> AP(4, 5);
-     2) User also needs to allocate memory for workspace. This method is particularly
-     useful when the user is using more than one numerical methods from the library
-     and is willing to share the workspace between them. In such as case, the user
-     can allocate the a memory greater than the maximum required by different methods.
-     To aid the user determine the minimum workspace required (and not spend time digging
-     LAPACK documentation) the library provides helper function
+  METHOD 3: User provides input and output matrices/vectors and
+     workspace required by LAPACK routine.
+     1) User creates input and output matrices and vector
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4, VCT_COL_MAJOR);
+     vctDynamicVector<CISSTNETLIB_DOUBLE> b(5);
+     vctDynamicVector<CISSTNETLIB_DOUBLE> x(4);
+     2) User also needs to allocate memory for the workspace. This method is particularly
+     useful when the user is using more than one numerical method from the library
+     and is willing to share the workspace between them. In such a case, the user
+     can allocate  memory greater than the maximum required by the different methods.
+     To aid the user to determine the minimum workspace required (and not spend time digging
+     into LAPACK documentation) the library provides helper function
      nmrLSqLinSolutionDynamic::GetWorkspaceSize(input)
      vctDynamicVector<CISSTNETLIB_DOUBLE> Work(nmrLSqLinSolutionDynamic::GetWorkspaceSize(A));
      3) Call the LS function
-     nmrLSqLin(A, AP, Work);
+     nmrLSqLin(A, b, x, Work);
      or
      For fixed size the above two steps are replaced by
-     nmrLSqLinSolutionFixedSize<4, 3, VCT_COL_MAJOR>::TypeWork Work;
-     nmrLSqLin<4, 3, VCT_COL_MAJOR>(A, AP, Work);
+     nmrLSqLinSolutionFixedSize<5, 0, 0, 4>::TypeWork Work;
+     nmrLSqLin<5, 4>(A, b, x, Work);
 
      \note The LSqLin functions make use of LAPACK routines.  To activate this
-     code, set the CISST_HAS_CNETLIB flag to ON during the configuration
+     code, set the CISST_HAS_CISSTNETLIB flag to ON during the configuration
      with CMake.
      \note The general rule for numerical functions which depend on LAPACK is that
      column-major matrices should be used everywhere, and that all
      matrices should be compact.
      \note For the specific case of LSqLin, a valid result is also obtained if
-     all the matrices are stored in row-major order.  This is an exeption to
-     the general rule.  However, mixed-order is not tolerated.
+     all the matrices are stored in row-major order.  This is an exception to
+     the general rule.  However, mixed-order is not tolerated. -- TRUE??
  */
 
 /*
@@ -125,11 +129,11 @@ protected:
     vctDynamicVector<CISSTNETLIB_DOUBLE> RNorm;
     /*!
       Memory allocated for input if needed
-      The LSEI (constrained least squares) require
-      that the the input matrices be in one continous
-      memory block ordered accoring to fortran order (Column
+      The LSEI (constrained least squares) requires
+      that the input matrices be in one continuous
+      memory block ordered according to fortran order (Column
       Major format), such that first Mc rows and N columns
-      represent A, Ma rows and N+1 th column represent b
+      represent A, Ma rows and N+1 th column represent b,
       next Me rows represent (E, f) and last Mg rows represent
       (G, h) where the original LSEI problem is
       arg min || A x - b ||, s.t. E x = f and G x >= h.
@@ -152,11 +156,12 @@ protected:
     vctDynamicVectorRef<CISSTNETLIB_DOUBLE> Work;
     vctDynamicVectorRef<CISSTNETLIB_INTEGER> IWork;
 
-    /* Just store Ma, Me, Mg, N, and which are needed
+    /* Just store Ma, Me, Mg, and N, which are needed
        to check if A matrix passed to solve method matches
        the allocated size.
        For LS problem Me == 0 and Mg ==0
        For LSI problem Me == 0
+       Otherwise LSEI problem
     */
     CISSTNETLIB_INTEGER m_Ma;
     CISSTNETLIB_INTEGER m_Me;
@@ -168,47 +173,29 @@ public:
       LS routine.
       \param ma, me, mg, n The size of matrix whose LS/LSI/LSEI needs to be computed
     */
+
     static inline CISSTNETLIB_INTEGER GetWorkspaceSize(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
         CISSTNETLIB_INTEGER minmn = -1;
         CISSTNETLIB_INTEGER lwork = -1;
         CISSTNETLIB_INTEGER k = -1;
-        if ((me == 0) && (mg ==0)) {// case LS
+        if ((me == 0) && (mg ==0)) { // case LS (dgels)
+            // Following produces same result as QueryWorkspaceSize_LS().
             minmn = std::max(std::min(ma,n),static_cast<CISSTNETLIB_INTEGER>(1));
             lwork = 2*minmn;
             return lwork;
         } else if (me == 0) { // case LSI
             k = std::max(ma+mg,n);
             return k+n+(mg+2)*(n+7);
-        } else if (mg == 0) { // case dgels
-            /// @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
-            // ma = rows of matrix A, aka M
-            // n  = cols of matrix A, aka N
-            // me = dimension of vector b
-            char trans;
-            // ma
-            // n
-            CISSTNETLIB_INTEGER nrhs; ///< @todo can we assume nhrs=1?
-            double a;
-            CISSTNETLIB_INTEGER lda;
-            double b;
-            CISSTNETLIB_INTEGER ldb;
-            double work;
-            CISSTNETLIB_INTEGER lwork; // calculate what lwork should be
-            CISSTNETLIB_INTEGER info;
-            init_dgels(ma,n,me,&trans, &ma, &n, &nrhs,
-                               &a, &lda,
-                               &b, &ldb,
-                               &work, &lwork, &info);
-            return lwork;
         } else { // case LSEI
             k = std::max(ma+mg,n);
             return 2*(me+n)+k+(mg+2)*(n+7);
         }
     }
+
     static inline CISSTNETLIB_INTEGER GetIWorkspaceSize(CISSTNETLIB_INTEGER CMN_UNUSED(ma), CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
-        if ((me == 0) && (mg ==0)) {// case LS
+        if ((me == 0) && (mg ==0)) { // case LS
             return 0;
         } else if (me == 0) { // case LSI
             return mg+2*n+1;
@@ -216,8 +203,41 @@ public:
             return mg+2*n+2;
         }
     }
-    /*! Helper method to determine the min working space required by LAPACK
-      LS routine.
+
+    /*! Method to query LAPACK routine for optimal workspace size. So far, only implemented for LS (dgels).
+        Not needed because result is same as GetWorkspaceSize() above. */
+    static CISSTNETLIB_INTEGER QueryWorkspaceSize_LS(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n)
+    {
+        // @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
+        // ma = rows of matrix A, aka M
+        // n  = cols of matrix A, aka N
+        char trans = 'N';
+        CISSTNETLIB_INTEGER nrhs = 1; ///< @todo can we assume nhrs=1?
+        CISSTNETLIB_INTEGER lda = std::max(ma,static_cast<CISSTNETLIB_INTEGER>(1));
+        CISSTNETLIB_INTEGER ldb = std::max(std::max(std::max(static_cast<CISSTNETLIB_INTEGER>(1),ma),n),nrhs);
+        CISSTNETLIB_INTEGER lwork = -1; // calculate what lwork should be
+        CISSTNETLIB_INTEGER info;
+        CISSTNETLIB_DOUBLE work;
+
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+        cisstNetlib_dgels_(&trans, &ma, &n, &nrhs,
+                                   0, &lda,
+                                   0, &ldb,
+                                   &work, &lwork, &info);
+#endif
+#else // no major version
+        dgels_(&trans, &ma, &n, &nrhs,
+                      0, &lda,
+                      0, &ldb,
+                      &work, &lwork, &info);
+#endif // CISSTNETLIB_VERSION
+        CMN_ASSERT(info == 0);
+        // optimal work array size lwork is stored in first entry of work array
+        return static_cast<CISSTNETLIB_INTEGER>(work);
+    }
+
+    /*! Helper method to determine the min working space required by LAPACK LS (dgels) routine.
       \param inA The matrix whose LS needs to be computed
     */
     template <typename _matrixOwnerTypeA>
@@ -225,8 +245,7 @@ public:
     {
         return nmrLSqLinSolutionDynamic::GetWorkspaceSize(inA.rows(), 0, 0, inA.cols());
     }
-    /*! Helper method to determine the min working space required by LAPACK
-      LSI routine.
+    /*! Helper method to determine the min working space required by LAPACK LSI routine.
       \param inA, inG The input matrices for LSI.
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG>
@@ -241,8 +260,7 @@ public:
     {
         return nmrLSqLinSolutionDynamic::GetIWorkspaceSize(inA.rows(), 0, inG.rows(), inA.cols());
     }
-    /*! Helper method to determine the min working space required by LAPACK
-      LSEI routine.
+    /*! Helper method to determine the min working space required by LAPACK LSEI routine.
       \param inA, inE, inG The input matrices for LSEI.
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE, typename _matrixOwnerTypeG>
@@ -260,8 +278,7 @@ public:
         return nmrLSqLinSolutionDynamic::GetIWorkspaceSize(inA.rows(), inE.rows(), inG.rows(), inA.cols());
     }
 
-    /*! Helper methods for user to set min working space required by LAPACK
-      LS/LSI/LSEI routine.
+    /*! Helper methods for user to set min working space required by LAPACK LS/LSI/LSEI routine.
       \param ma, me, mg, n The size of matrix whose LS/LSI/LSEI needs to be computed
       \param inWork A vector that would be resized to meet the requirements of
       LAPACK LS/LSI/LSEI routine.
@@ -274,8 +291,7 @@ public:
     {
         inIWork.SetSize(nmrLSqLinSolutionDynamic::GetIWorkspaceSize(ma,me,mg,n));
     }
-    /*! Helper methods for user to set min working space required by LAPACK
-      LS routine.
+    /*! Helper methods for user to set min working space required by LAPACK LS routine.
       \param inA The matrix whose LS needs to be computed
       \param inWork A vector that would be resized to meet the requirements of
       LAPACK LS routine.
@@ -285,8 +301,7 @@ public:
     {
         inWork.SetSize(nmrLSqLinSolutionDynamic::GetWorkspaceSize(inA));
     }
-    /*! Helper methods for user to set min working space required by LAPACK
-      LSI routine.
+    /*! Helper methods for user to set min working space required by LAPACK LSI routine.
       \param inA, inG The input matrices for LSI.
       \param inWork A vector that would be resized to meet the requirements of
       LAPACK LSI routine.
@@ -305,8 +320,7 @@ public:
     {
         inIWork.SetSize(nmrLSqLinSolutionDynamic::GetIWorkspaceSize(inA, inG));
     }
-    /*! Helper methods for user to set min working space required by LAPACK
-      LSEI routine.
+    /*! Helper methods for user to set min working space required by LAPACK LSEI routine.
       \param inA, inE, inG  The input matrices for LSEI.
       \param inWork A vector that would be resized to meet the requirements of
       LAPACK LSEI routine.
@@ -329,15 +343,15 @@ public:
     }
 
     /*! This class is not intended to be a top-level API.
-      It has been provided to avoid making the tempalted
+      It has been provided to avoid making the templated
       LSqLin function as a friend of this class, which turns
       out to be not so easy in .NET. Instead the Friend class
       provides a cumbersome way to get non-const references
       to the private data.
-      Inorder to get non-const references the user has
-      to first create a object of nmrLSqLinSolutionDynamic::Friend
-      and then user get* method on that object. Our philosophy
-      here is that this should be deterent for a general user
+      In order to get non-const references the user has
+      to first create an object of nmrLSqLinSolutionDynamic::Friend
+      and then use the get* method on that object. Our philosophy
+      here is that this should be a deterent for a general user
       and should ring alarm bells in a reasonable programmer.
     */
     class Friend {
@@ -406,30 +420,30 @@ public:
         m_Mg(static_cast<CISSTNETLIB_INTEGER>(0)),
         m_N(static_cast<CISSTNETLIB_INTEGER>(0)) {};
 
-    /*! contructor to use with LS */
+    /*! constructor to use with LS */
     nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n)
     {
         this->Allocate(ma, 0, 0, n);
     }
-    /*! contructor to use with LSI */
+    /*! constructor to use with LSI */
     nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
         this->Allocate(ma, 0, mg, n);
     }
-    /*! contructor to use with LSEI */
+    /*! constructor to use with LSEI */
     nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
         this->Allocate(ma, me, mg, n);
     }
 
     /************************************************************************/
-    /* The following are various contructors for LS problem */
+    /* The following are various constructors for the LS problem            */
     /************************************************************************/
 
-    /*! Constructor where user provides the input matrix to specify size,
-      Memory allocation is done for output matrices and vectors as well as
-      Workspace used by LAPACK. This case covers the scenario when user
-      wants to make all system calls for memory allocation before entrying
+    /*! Constructor where user provides the input matrix to specify size.
+      Memory allocation is done for output vector as well as for the
+      Workspace used by LAPACK. This case covers the scenario where the user
+      wants to make all system calls for memory allocation before entering
       time critical code sections.
       \param A input matrix
     */
@@ -438,12 +452,12 @@ public:
     {
         this->Allocate(A.rows(), 0, 0, A.cols());
     }
-    /*! Constructor where user provides the input matrix to specify size,
-      Memory allocation is done for output vectors.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+    /*! Constructor where user provides the input matrix to specify size.
+      Memory allocation is done for the workspace, inWork.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using more than one numerical method in the *same* thread,
-      allowing her to share the workspace for LAPACK.
+      allowing him/her to share the workspace for LAPACK.
       \param A input matrix
       \output inWork workspace for LS
     */
@@ -453,13 +467,12 @@ public:
     {
         this->Allocate(A.rows(), 0, 0, A.cols(), inWork);
     }
-    /*! Constructor where user provides the size and storage order of the input matrix,
-      along with workspace.
+    /*! Constructor where user provides the size of the input matrix, along with the 
+      output vector X and workspace.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LSqLin algorithm. Checks are made on the
-      validity of the input and its consitency with the size of input matrix.
+      manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
+      validity of the input and its consistency with the size of the input matrix.
       \param ma, n The size of input matrix
-      \param storageOrder The storage order of input matrix
       \param inX The output vector for LSqLin
       \param inWork The workspace for LAPACK.
     */
@@ -470,14 +483,14 @@ public:
     {
         this->SetRef(ma, 0, 0, n, inX, inWork);
     }
-    /*! Constructor where user provides the size and storage order of the input matrix,
+    /*! Constructor where user provides the size of the input matrix,
       along with vector X.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LS algorithm. Checks are made on thec
-      validity of the input and its consitency with the size of input matrix.
-      Memory allocation for workspace is done by the method.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+      manipulate a convenient storage for the LS algorithm. Checks are made on the
+      validity of the input and its consistency with the size of input matrix.
+      Memory allocation for the workspace is done by the method.
+      This case covers the scenario where user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using the LS matrix elsewhere in the *same* thread.
       \param ma, n The size of input matrix
       \param inX The output vector for LSqLin
@@ -489,10 +502,10 @@ public:
         this->SetRef(ma, 0, 0, n, inX);
     }
     /*! Constructor where user provides the input matrix to specify size,
-      along with vector X.
+      along with vector X and workspace.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LS algorithm. Checks are made on the
-      validity of the input and its consitency with the size of input matrix.
+      manipulate a convenient storage for the LS algorithm. Checks are made on the
+      validity of the input and its consistency with the size of input matrix.
       \param inA The input matrix
       \param inX The output vector for LSqLin
       \param inWork The workspace for LAPACK.
@@ -506,13 +519,13 @@ public:
     }
 
     /************************************************************************/
-    /* The following are various contructors for LSI problem */
+    /* The following are various constructors for the LSI problem           */
     /************************************************************************/
 
-    /*! Constructor where user provides the input matrices to specify size,
-      Memory allocation is done for output matrices and vectors as well as
-      Workspace used by LAPACK. This case covers the scenario when user
-      wants to make all system calls for memory allocation before entrying
+    /*! Constructor where user provides the input matrices to specify size.
+      Memory allocation is done for the output vector as well as for the
+      Workspace used by LAPACK. This case covers the scenario where the user
+      wants to make all system calls for memory allocation before entering
       time critical code sections.
       \param A, G input matrices
     */
@@ -522,12 +535,12 @@ public:
     {
         this->Allocate(A.rows(), 0, G.rows(), A.cols());
     }
-    /*! Constructor where user provides the input matrices to specify size,
-      Memory allocation is done for output vectors.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+    /*! Constructor where user provides the input matrices to specify size and the workspaces.
+      Memory allocation is done for the output vectors.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using more than one numerical method in the *same* thread,
-      allowing her to share the workspace for LAPACK.
+      allowing him/her to share the workspace for LAPACK.
       \param A, G input matrices
       \output inWork, inIWork workspace for LSI
     */
@@ -540,11 +553,11 @@ public:
     {
         this->Allocate(A.rows(), 0, G.rows(), A.cols(), inWork, inIWork);
     }
-    /*! Constructor where user provides the size and storage order of the input matrices
-      along with workspace.
+    /*! Constructor where user provides the size of the input matrices
+      along with output X and workspaces.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LSqLin algorithm. Checks are made on the
-      validity of the input and its consitency with the size of input matrices.
+      manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
+      validity of the input and its consistency with the size of the input matrices.
       \param ma, mg, n The size of input matrices
       \param inX The output vector for LSqLin
       \output inWork, inIWork workspace for LSI
@@ -560,11 +573,11 @@ public:
     /*! Constructor where user provides the size and storage order of the input matrices,
       along with vector X.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LS algorithm. Checks are made on thec
-      validity of the input and its consitency with the size of input matrices.
-      Memory allocation for workspace is done by the method.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+      manipulate a convenient storage for the LSI algorithm. Checks are made on the
+      validity of the input and its consistency with the size of input matrices.
+      Memory allocation for the workspace is done by the method.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using the LSI matrix elsewhere in the *same* thread.
       \param ma, mg, n The size of input matrices
       \param inX The output vector for LSqLin
@@ -578,9 +591,9 @@ public:
     /*! Constructor where user provides the input matrices to specify size,
       along with vector X.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LS algorithm. Checks are made on the
-      validity of the input and its consitency with the size of input matrix.
-      \param inA, inE The input matrices
+      manipulate a convenient storage for the LSI algorithm. Checks are made on the
+      validity of the input and its consistency with the size of the input matrix.
+      \param inA, inG The input matrices
       \param inX The output vector for LSqLin
       \output inWork, inIWork workspace for LSI
     */
@@ -597,13 +610,13 @@ public:
     }
 
     /************************************************************************/
-    /* The following are various contructors for LSEI problem */
+    /* The following are various constructors for LSEI problem              */
     /************************************************************************/
 
-    /*! Constructor where user provides the input matrices to specify size,
-      Memory allocation is done for output matrices and vectors as well as
-      Workspace used by LAPACK. This case covers the scenario when user
-      wants to make all system calls for memory allocation before entrying
+    /*! Constructor where user provides the input matrices to specify size.
+      Memory allocation is done for the output vector as well as the
+      Workspace used by LAPACK. This case covers the scenario where the user
+      wants to make all system calls for memory allocation before entering
       time critical code sections.
       \param A, E, G input matrices
     */
@@ -614,12 +627,13 @@ public:
     {
         this->Allocate(A.rows(), E.rows(), G.rows(), A.cols());
     }
-    /*! Constructor where user provides the input matrices to specify size,
-      Memory allocation is done for output vectors.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+    /*! Constructor where user provides the input matrices to specify size
+      and the workspaces.
+      Memory allocation is done for the output vector.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using more than one numerical method in the *same* thread,
-      allowing her to share the workspace for LAPACK.
+      allowing him/her to share the workspace for LAPACK.
       \param A, E, G input matrices
       \output inWork, inIWork workspace for LSI
     */
@@ -634,12 +648,12 @@ public:
     {
         this->Allocate(A.rows(), E.rows(), G.rows(), A.cols(), inWork, inIWork);
     }
-    /*! Constructor where user provides the size and storage order of the input matrices
-      along with workspace.
+    /*! Constructor where user provides the size of the input matrices, the output vector X,
+      and the workspaces.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LSqLin algorithm. Checks are made on the
-      validity of the input and its consitency with the size of input matrices.
-      \param ma, me, mg, n The size of input matrices
+      manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
+      validity of the input and its consistency with the sizes of the input matrices.
+      \param ma, me, mg, n The sizes of input matrices
       \param inX The output vector for LSqLin
       \output inWork, inIWork workspace for LSI
     */
@@ -651,15 +665,15 @@ public:
     {
         this->SetRef(ma, me, mg, n, inX, inWork, inIWork);
     }
-    /*! Constructor where user provides the size and storage order of the input matrices,
+    /*! Constructor where user provides the size of the input matrices,
       along with vector X.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LS algorithm. Checks are made on thec
-      validity of the input and its consitency with the size of input matrices.
-      Memory allocation for workspace is done by the method.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
-      and might be using the LSI matrix elsewhere in the *same* thread.
+      manipulate a convenient storage for the LSEI algorithm. Checks are made on the
+      validity of the input and its consistency with the size of input matrices.
+      Memory allocation for the workspace is done by the method.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
+      and might be using the LSEI matrix elsewhere in the *same* thread.
       \param ma, me, mg, n The size of input matrices
       \param inX The output vector for LSqLin
     */
@@ -670,10 +684,10 @@ public:
         this->SetRef(ma, me, mg, n, inX);
     }
     /*! Constructor where user provides the input matrices to specify size,
-      along with vector X.
+      along with vector X and the workspaces
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LS algorithm. Checks are made on the
-      validity of the input and its consitency with the size of input matrix.
+      manipulate a convenient storage for the LSEI algorithm. Checks are made on the
+      validity of the input and its consistency with the sizes of input matrices.
       \param inA, inE, inG The input matrices
       \param inX The output vector for LSqLin
       \output inWork, inIWork workspace for LSI
@@ -692,18 +706,18 @@ public:
     }
 
     /************************************************************************/
-    /* The following are Allocate methods for LS problem */
+    /* The following are Allocate methods for the LS problem                */
     /************************************************************************/
 
-    /*! This method allocates memory of output vector
+    /*! This method allocates memory of the output vector
       as well as the workspace.
       This method should be called before the nmrLSqLinSolutionDynamic
-      object is passed on to nmrLSqLin function, as the memory
-      required for output matrices and workspace are allocated
-      here or to reallocate memory previously allocated by constructor.
-      Typically this method is called from a code segment
+      object is passed to the nmrLSqLin function, as the memory
+      required for the output matrices and workspace are allocated
+      here or to reallocate memory previously allocated by the constructor.
+      Typically, this method is called from a code segment
       where it is safe to allocate memory and use
-      the solution and work space later.
+      the solution and workspace later.
       \param A The matrix for which LS needs to be computed, size MxN
     */
     template <typename _matrixOwnerTypeA>
@@ -711,40 +725,21 @@ public:
     {
         this->Allocate(A.rows(), 0, 0, A.cols());
     }
-      /*! This method allocates memory of output vector
-      as well as the workspace.
-      This method should be called before the nmrLSqLinSolutionDynamic
-      object is passed on to nmrLSqLin function, as the memory
-      required for output matrices and workspace are allocated
-      here or to reallocate memory previously allocated by constructor.
-      Typically this method is called from a code segment
-      where it is safe to allocate memory and use
-      the solution and work space later.
-      \param A The matrix for which LS needs to be computed, size MxN
-      \param b The vector containing right hand side values, size LDB >= MAX(1,M,N), stored columnwise
-    */
-    template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb>
-    inline void Allocate_dgels(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
-                                vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b)
-    {
-        //             ma        me        mg n
-        this->Allocate(A.rows(), b.size(), 0, A.cols());
-    }
-    /*! This method allocates memory of output vector
-      and uses the memory provided by user for workspace.
+    /*! This method allocates memory of the output vector
+      and uses the memory provided by the user for the workspace.
       Check is made to ensure that memory provided by user is sufficient
       for LS routine of LAPACK.
       This method should be called before the nmrLSqLinSolutionDynamic
-      object is passed on to nmrLSqLin function, as the memory
-      required for output matrices and workspace are allocated
-      here or to reallocate memory previously allocated by constructor.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+      object is passed on to the nmrLSqLin function, as the memory
+      required for the output vector and workspace are allocated
+      here or to reallocate memory previously allocated by the constructor.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using more than one numerical method in the *same* thread,
-      allowing her to share the workspace for LAPACK.
+      allowing him/her to share the workspace for LAPACK.
       Typically this method is called from a code segment
       where it is safe to allocate memory and use
-      the solution and work space later.
+      the solution and workspace later.
       \param A The matrix for which LS needs to be computed, size MxN
       \param inWork The vector used for workspace by LS.
     */
@@ -756,18 +751,18 @@ public:
     }
 
     /************************************************************************/
-    /* The following are SetRef methods for LS problem */
+    /* The following are SetRef methods for the LS problem                  */
     /************************************************************************/
 
     /*! This method must be called before the solution object
-      is passed to nmrLSqLin function.
+      is passed to the nmrLSqLin function.
       The user provides the input matrix to specify size,
       along with vector X and workspace.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LSqLin algorithm. Checks are made on the
-      validity of the input and its consitency with the size of input matrix.
+      manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
+      validity of the input and its consistency with the size of the input matrix.
       \param inA The input matrix
-      \param inX The output vector  for LSqLin
+      \param inX The output vector for LSqLin
       \param inWork The workspace for LS.
     */
     template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
@@ -778,15 +773,15 @@ public:
         this->SetRef(inA.rows(), 0, 0, inA.cols(), inX, inWork);
     }
     /*! This method must be called before the solution object
-      is passed to nmrLSqLin function.
+      is passed to the nmrLSqLin function.
       The user provides the input matrix to specify size,
       along with vector X.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LSqLin algorithm. Checks are made on thec
-      validity of the input and its consitency with the size of input matrix.
-      Memory allocation for workspace is done by the method.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+      manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
+      validity of the input and its consistency with the size of the input matrix.
+      Memory allocation for the workspace is done by the method.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using the LS matrix elsewhere in the *same* thread.
       \param inA The input matrix
       \param inX The output matrix for LSqLin
@@ -799,20 +794,20 @@ public:
     }
 
     /************************************************************************/
-    /* The following are Allocate methods for LSI problem */
+    /* The following are Allocate methods for the LSI problem               */
     /************************************************************************/
 
-    /*! This method allocates memory of output vector
+    /*! This method allocates memory of the output vector
       as well as the workspace.
       This method should be called before the nmrLSqLinSolutionDynamic
-      object is passed on to nmrLSqLin function, as the memory
-      required for output matrices and workspace are allocated
-      here or to reallocate memory previously allocated by constructor.
-      Typically this method is called from a code segment
+      object is passed to the nmrLSqLin function, as the memory
+      required for the output vector and workspace are allocated
+      here or to reallocate memory previously allocated by the constructor.
+      Typically, this method is called from a code segment
       where it is safe to allocate memory and use
-      the solution and work space later.
+      the solution and workspace later.
       \param A The matrix for which LSI needs to be computed, size Ma x N
-      \param G The contraints matrix  for LSI, size Mg x N
+      \param G The constraints matrix for LSI, size Mg x N
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG>
     inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
@@ -820,24 +815,24 @@ public:
     {
         this->Allocate(A.rows(), 0, G.rows(), A.cols());
     }
-    /*! This method allocates memory of output vector
-      and uses the memory provided by user for workspace.
+    /*! This method allocates memory of the output vector
+      and uses the memory provided by the user for the workspace.
       Check is made to ensure that memory provided by user is sufficient
-      for LS routine of LAPACK.
+      for LSI routine of LAPACK.
       This method should be called before the nmrLSqLinSolutionDynamic
-      object is passed on to nmrLSqLin function, as the memory
-      required for output matrices and workspace are allocated
-      here or to reallocate memory previously allocated by constructor.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+      object is passed to the nmrLSqLin function, as the memory
+      required for the output vector and workspace are allocated
+      here or to reallocate memory previously allocated by the constructor.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using more than one numerical method in the *same* thread,
-      allowing her to share the workspace for LAPACK.
+      allowing him/her to share the workspace for LAPACK.
       Typically this method is called from a code segment
       where it is safe to allocate memory and use
-      the solution and work space later.
+      the solution and workspace later.
       \param A The matrix for which LSI needs to be computed, size Ma x N
-      \param G The contraints matrix  for LSI, size Mg x N
-      \param inWork, inIWork The workspace for LS.
+      \param G The constraints matrix  for LSI, size Mg x N
+      \param inWork, inIWork The workspace for LSI.
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG,
               typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
@@ -850,18 +845,18 @@ public:
     }
 
     /************************************************************************/
-    /* The following are SetRef methods for LSI problem */
+    /* The following are SetRef methods for the LSI problem                 */
     /************************************************************************/
 
     /*! This method must be called before the solution object
-      is passed to nmrLSqLin function.
+      is passed to the nmrLSqLin function.
       The user provides the input matrices to specify size,
       along with vector X and workspace.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LSqLin algorithm. Checks are made on the
-      validity of the input and its consitency with the size of input matrices.
+      manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
+      validity of the input and its consistency with the size of input matrices.
       \param inA, inG The input matrices
-      \param inX The output vector  for LSqLin
+      \param inX The output vector for LSqLin
       \param inWork, inIWork The workspace for LSI.
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG,
@@ -876,15 +871,15 @@ public:
         this->SetRef(inA.rows(), 0, inG.rows(), inA.cols(), inX, inWork, inIWork);
     }
     /*! This method must be called before the solution object
-      is passed to nmrLSqLin function.
+      is passed to the nmrLSqLin function.
       The user provides the input matrices to specify size,
       along with vector X.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LSqLin algorithm. Checks are made on thec
-      validity of the input and its consitency with the size of input matrices.
-      Memory allocation for workspace is done by the method.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+      manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
+      validity of the input and its consistency with the size of the input matrices.
+      Memory allocation for the workspace is done by the method.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using the LS matrix elsewhere in the *same* thread.
       \param inA, inG The input matrices
       \param inX The output matrix for LSqLin
@@ -898,21 +893,21 @@ public:
     }
 
     /************************************************************************/
-    /* The following are Allocate methods for LSEI problem */
+    /* The following are Allocate methods for the LSEI problem              */
     /************************************************************************/
 
     /*! This method allocates memory of output vector
       as well as the workspace.
       This method should be called before the nmrLSqLinSolutionDynamic
-      object is passed on to nmrLSqLin function, as the memory
-      required for output matrices and workspace are allocated
-      here or to reallocate memory previously allocated by constructor.
-      Typically this method is called from a code segment
+      object is passed to the nmrLSqLin function, as the memory
+      required for the output vector and workspace are allocated
+      here or to reallocate memory previously allocated by the constructor.
+      Typically, this method is called from a code segment
       where it is safe to allocate memory and use
-      the solution and work space later.
+      the solution and workspace later.
       \param A The matrix for which LSEI needs to be computed, size MxN
       \param E The equality constraints matrix  for LSEI, size Me x N
-      \param G The contraints matrix  for LSEI, size Mg x N
+      \param G The inequality constraints matrix  for LSEI, size Mg x N
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE, typename _matrixOwnerTypeG>
     inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
@@ -924,21 +919,21 @@ public:
     /*! This method allocates memory of output vector
       and uses the memory provided by user for workspace.
       Check is made to ensure that memory provided by user is sufficient
-      for LS routine of LAPACK.
+      for LSEI routine of LAPACK.
       This method should be called before the nmrLSqLinSolutionDynamic
-      object is passed on to nmrLSqLin function, as the memory
-      required for output matrices and workspace are allocated
-      here or to reallocate memory previously allocated by constructor.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
+      object is passed to the nmrLSqLin function, as the memory
+      required for the output vector and workspace are allocated
+      here or to reallocate memory previously allocated by the constructor.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
       and might be using more than one numerical method in the *same* thread,
-      allowing her to share the workspace for LAPACK.
+      allowing him/her to share the workspace for LAPACK.
       Typically this method is called from a code segment
       where it is safe to allocate memory and use
-      the solution and work space later.
-      \param A The matrix for which LS needs to be computed, size MxN
-      \param E The equality constraints matrix  for LSEI, size Me x N
-      \param G The contraints matrix  for LSEI, size Mg x N
+      the solution and workspace later.
+      \param A The matrix for which LSEI needs to be computed, size MxN
+      \param E The equality constraints matrix for LSEI, size Me x N
+      \param G The inequality constraints matrix for LSEI, size Mg x N
       \param inWork, inIWork The vector used for workspace by LSEI.
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE,
@@ -953,18 +948,18 @@ public:
     }
 
     /************************************************************************/
-    /* The following are SetRef methods for LSEI problem */
+    /* The following are SetRef methods for the LSEI problem                */
     /************************************************************************/
 
     /*! This method must be called before the solution object
-      is passed to nmrLSqLin function.
+      is passed to the nmrLSqLin function.
       The user provides the input matrices to specify size,
       along with vector X and workspace.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LSqLin algorithm. Checks are made on the
-      validity of the input and its consitency with the size of input matrices.
+      manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
+      validity of the input and its consistency with the size of the input matrices.
       \param inA, inE, inG The input matrices
-      \param inX The output vector  for LSqLin
+      \param inX The output vector for LSqLin
       \param inWork, inIWork The workspace for LSI.
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE, typename _matrixOwnerTypeG,
@@ -980,16 +975,16 @@ public:
         this->SetRef(inA.rows(), inE.rows(), inG.rows(), inA.cols(), inX, inWork, inIWork);
     }
     /*! This method must be called before the solution object
-      is passed to nmrLSqLin function.
+      is passed to the nmrLSqLin function.
       The user provides the input matrices to specify size,
       along with vector X.
       The solution object now acts as a composite container to hold, pass and
-      manipulate a convenitent storage for LSqLin algorithm. Checks are made on thec
-      validity of the input and its consitency with the size of input matrices.
-      Memory allocation for workspace is done by the method.
-      This case covers the scenario when user wants to make all system
-      calls for memory allocation before entrying time critical code sections
-      and might be using the LS matrix elsewhere in the *same* thread.
+      manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
+      validity of the input and its consistency with the sizes of the input matrices.
+      Memory allocation for the workspace is done by the method.
+      This case covers the scenario where the user wants to make all system
+      calls for memory allocation before entering time critical code sections
+      and might be using the LSEI matrix elsewhere in the *same* thread.
       \param inA, inE, inG The input matrices
       \param inX The output matrix for LSqLin
     */
@@ -1004,16 +999,16 @@ public:
     }
 
     /************************************************************************/
-    /* The following is Base Allocate Method called by others */
+    /* The following is the Base Allocate Method called by others           */
     /************************************************************************/
 
-    /*! This method allocates memory of output matrices and vector
+    /*! This method allocates memory of the output vector
       and optionally for the workspace required by LS/LSI/LSEI.
       This method is not meant to be a top-level user API, but is
       used by other overloaded Allocate methods.
-      \param ma Number of rows of input matrix A
-      \param me Number of rows of input matrix E
-      \param mg Number of rows of input matrix G
+      \param ma Number of rows of input matrix A (objective)
+      \param me Number of rows of input matrix E (equality constraints)
+      \param mg Number of rows of input matrix G (inequality constraints)
       \param n Number of cols of input matrix A
     */
     inline void Allocate(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
@@ -1022,13 +1017,13 @@ public:
         this->SetRef(ma, me, mg, n, this->WorkspaceMemory, this->InputMemory, this->OutputMemory);
         (this->IWork).SetRef((this->IWorkspaceMemory));
     }
-    /*! This method allocates memory of output matrices and vector
+    /*! This method allocates memory of the output vector
       and optionally for the workspace required by LS/LSI/LSEI.
       This method is not meant to be a top-level user API, but is
       used by other overloaded Allocate methods.
-      \param ma Number of rows of input matrix A
-      \param me Number of rows of input matrix E
-      \param mg Number of rows of input matrix G
+      \param ma Number of rows of input matrix A (objective)
+      \param me Number of rows of input matrix E (equality constraints)
+      \param mg Number of rows of input matrix G (inequality constraints)
       \param n Number of cols of input matrix A
       \param inWork Workspace provided by user
     */
@@ -1043,13 +1038,13 @@ public:
         this->Malloc(ma, me, mg, n, false, true, true);
         this->SetRef(ma, me, mg, n, inWork, this->InputMemory, this->OutputMemory);
     }
-    /*! This method allocates memory of output matrices and vector
+    /*! This method allocates memory of the output vector
       and optionally for the workspace required by LS/LSI/LSEI.
       This method is not meant to be a top-level user API, but is
       used by other overloaded Allocate methods.
-      \param ma Number of rows of input matrix A
-      \param me Number of rows of input matrix E
-      \param mg Number of rows of input matrix G
+      \param ma Number of rows of input matrix A (objective)
+      \param me Number of rows of input matrix E (equality constraints)
+      \param mg Number of rows of input matrix G (inequality constraints)
       \param n Number of cols of input matrix A
       \param inWork, inIWork Workspace provided by user
     */
@@ -1072,10 +1067,10 @@ public:
     }
 
     /************************************************************************/
-    /* The following is Base SetRef Method called by others */
+    /* The following is the Base SetRef Method called by others             */
     /************************************************************************/
 
-    /*! This method memory references of output matrices and vector
+    /*! This method sets memory references of the output vector
       and for the workspace required by LS/LSI/LSEI.
       This method is not meant to be a top-level user API, but is
       used by other overloaded SetRef methods.
@@ -1098,7 +1093,7 @@ public:
         this->Malloc(ma, me, mg, n, false, true, false);
         this->SetRef(ma, me, mg, n, inWork, this->InputMemory, inX);
     }
-    /*! This method memory references of output matrices and vector
+    /*! This method sets memory references of the output vector
       and for the workspace required by LS/LSI/LSEI.
       This method is not meant to be a top-level user API, but is
       used by other overloaded SetRef methods.
@@ -1129,7 +1124,7 @@ public:
         (this->IWork).SetRef(inIWork);
     }
 
-    /*! This method memory references of output matrices and vector
+    /*! This method sets memory references of the output vector
       and for the workspace required by LS/LSI/LSEI.
       This method is not meant to be a top-level user API, but is
       used by other overloaded SetRef methods.
@@ -1150,13 +1145,13 @@ public:
     }
 
 protected:
-    /*! This method allocates memory of output matrices and vector
+    /*! This method allocates memory of the output vector
       and optionally for the workspace required by LS/LSI/LSEI.
       This method is not meant to be a top-level user API, but is
       used by other overloaded Allocate methods.
-      \param ma Number of rows of input matrix A
-      \param me Number of rows of input matrix E
-      \param mg Number of rows of input matrix G
+      \param ma Number of rows of input matrix A (objective)
+      \param me Number of rows of input matrix E (equality constraints)
+      \param mg Number of rows of input matrix G (inequality constraints)
       \param n Number of cols of input matrix A
       \param allocateWorkspace If true, allocate memory of workspace as well.
       \param allocateInput If true, allocate memory of input as well.
@@ -1167,15 +1162,15 @@ protected:
     {
         m_Ma = ma; m_N = n;
         m_Me = me; m_Mg = mg;
-        if (allocateWorkspace == true) {
+        if (allocateWorkspace) {
             (this->WorkspaceMemory).SetSize(nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n));
             (this->IWorkspaceMemory).SetSize(nmrLSqLinSolutionDynamic::GetIWorkspaceSize(ma, me, mg, n));
         }
         // allocate InputMemory if mg >0 (LSI or LSEI)
-        if (mg > 0 && allocateInput == true) {
+        if (mg > 0 && allocateInput) {
             (this->InputMemory).SetSize(ma + me + mg, n+1, VCT_COL_MAJOR);
         }
-        if (allocateOutput == true) {
+        if (allocateOutput) {
             (this->OutputMemory).SetSize(n);
         }
         (this->RNorm).SetSize(ma+me);
@@ -1214,7 +1209,7 @@ protected:
 
 public:
     /*! In order to get access to X, after
-      the have been computed by calling nmrLSqLin function.
+      it has been computed by calling the nmrLSqLin function,
       use the following methods.
     */
     inline const vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &GetX(void) const {
@@ -1226,97 +1221,18 @@ public:
     inline const vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &GetRNormE(void) const {
         return RNormE;
     }
-    
-    // initialize parameters for the dgels call in netlib
-    static CISSTNETLIB_INTEGER
-    init_dgels(const CISSTNETLIB_INTEGER rows_ma, const CISSTNETLIB_INTEGER cols_n, const CISSTNETLIB_INTEGER size_b, char* trans, CISSTNETLIB_INTEGER* m, CISSTNETLIB_INTEGER* n, CISSTNETLIB_INTEGER* nrhs, double* a, CISSTNETLIB_INTEGER* lda, double* b, CISSTNETLIB_INTEGER*ldb,
-	    double* work, CISSTNETLIB_INTEGER* lwork, CISSTNETLIB_INTEGER* info)
-    {
-            /// @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
-            // ma = rows of matrix A, aka M
-            // n  = cols of matrix A, aka N
-            // me = dimension of vector b
-            *trans = 'N';
-            *m = rows_ma;
-            *n = cols_n;
-            *nrhs = 1; ///< @todo can we assume nhrs=1?
-            // a;
-            *lda = std::max(rows_ma,static_cast<CISSTNETLIB_INTEGER>(1));
-            // b;
-            *ldb = std::max(std::max(std::max(static_cast<CISSTNETLIB_INTEGER>(1),rows_ma),cols_n),*nrhs);
-            // work;
-            *lwork = -1; // calculate what lwork should be
-    
-            if(!(size_b >= *ldb))
-            {
-               cmnThrow(std::runtime_error("nmrLSqLin: init_dgels: check for vector b >= max(1,A.rows(),A.cols()) failed. see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c"));
-            }
-            // info;
-#if defined(CISSTNETLIB_VERSION_MAJOR)
-#if (CISSTNETLIB_VERSION_MAJOR >= 3)
-            cisstNetlib_dgels_(trans, m, n, nrhs,
-                               a, lda,
-                               b, ldb,
-                               work, lwork, info);
-#endif
-#else // no major version
-            dgels_(trans, m, n, nrhs,
-                               a, lda,
-                               b, ldb,
-                               work, lwork, info);
-#endif // CISSTNETLIB_VERSION
-            *lwork = *work; // optimal work array size lwork is stored in first entry of work array
-            return *info;
-    }
-    
-    /// @todo should ret_value and info be handled differently or separately?
-    /// @see http://www.netlib.org/clapack/CLAPACK-3.1.1/SRC/dgels.c
-    static CISSTNETLIB_INTEGER
-    run_dgels(const CISSTNETLIB_INTEGER rows_ma, const CISSTNETLIB_INTEGER cols_n, const CISSTNETLIB_INTEGER size_b, double* a, double* b, double* work)
-    {
-    char trans;
-    CISSTNETLIB_INTEGER m;
-    CISSTNETLIB_INTEGER n;
-    CISSTNETLIB_INTEGER nrhs;
-    CISSTNETLIB_INTEGER lda;
-    CISSTNETLIB_INTEGER ldb;
-    CISSTNETLIB_INTEGER lwork;
-    CISSTNETLIB_INTEGER info;
-    
-    init_dgels(rows_ma,cols_n,size_b,&trans, &m, &n, &nrhs,
-                               a, &lda,
-                               b, &ldb,
-                               work, &lwork, &info);
-    
-#if defined(CISSTNETLIB_VERSION_MAJOR)
-#if (CISSTNETLIB_VERSION_MAJOR >= 3)
-            cisstNetlib_dgels_(&trans, &m, &n, &nrhs,
-                               a, &lda,
-                               b, &ldb,
-                               work, &lwork, &info);
-#endif
-#else // no major version
-            dgels_(&trans, &m, &n, &nrhs,
-                               a, &lda,
-                               b, &ldb,
-                               work, &lwork, &info);
-#endif // CISSTNETLIB_VERSION
-
-            /// @todo do anything with ret?
-            return info;
-    }
 };
 
 /*! This function checks for valid input and
-  calls the LAPACK function. The approach behind this defintion of the
+  calls the LAPACK function. The approach behind this definition of the
   function is that the user creates a solution object from a code
   wherein it is safe to do memory allocation. This solution object
-  is then passed on to this method along with the matrix whose
+  is then passed to this method along with the matrix and vector whose
   LSqLin is to be computed. The solution object has members X
   and Work etc., which can be accessed through calls to method
   get*() along with adequate workspace for LAPACK.
-  This function modifies the contents of matrix A.
-  For details about nature of the solution matrices see text above.
+  This function modifies the contents of matrix A and possibly the contents of vector b.
+  For details about the nature of the solution matrices see the text above.
   \param A A matrix of size MxN, of one of vctDynamicMatrix or vctDynamicMatrixRef
   \param b A vector of size N, of one of vctDynamicVector or vctDynamicVectorRef
   \param solution A solution object of one of the types corresponding to
@@ -1343,25 +1259,58 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerType, CISS
     if ((Mrows != solutionFriend.GetMa()) || (Ncols != solutionFriend.GetN())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size used for Allocate was different"));
     }
-    CISSTNETLIB_INTEGER b_size = static_cast<CISSTNETLIB_INTEGER>(b.size());
-    double* a = A.Pointer();
-    double* b_ = b.Pointer();
-    double* work = solutionFriend.GetWork().Pointer();
-    ret_value = nmrLSqLinSolutionDynamic::run_dgels(Mrows,Ncols,b_size,a,b_,work);
-    solutionFriend.GetX().Assign(b.Pointer());
+    if (Mrows != static_cast<CISSTNETLIB_INTEGER>(b.size())) {
+        cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size of b must be same as number of rows of A"));
+    }
+    char trans = 'N';
+    CISSTNETLIB_INTEGER nrhs = 1;
+    CISSTNETLIB_INTEGER lda = std::max(Mrows,static_cast<CISSTNETLIB_INTEGER>(1));
+    CISSTNETLIB_INTEGER ldb = std::max(std::max(static_cast<CISSTNETLIB_INTEGER>(1),Mrows),Ncols);
+    CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(Mrows, 0, 0, Ncols);
+
+    CISSTNETLIB_DOUBLE *b_ptr = b.Pointer();
+    if (Mrows < Ncols) {
+        // Since dgels returns the result, x, in the input array, b, we need
+        // to make sure that b is large enough. In the underdetermined case (M < N)
+        // we would therefore have to resize b from M to N; it is more efficient to instead
+        // pass x, after assigning all M elements of b to x.
+        solutionFriend.GetX().Assign(b, Mrows);
+        b_ptr = solutionFriend.GetX().Pointer();
+    }
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgels_(&trans, &Mrows, &Ncols, &nrhs,
+                       A.Pointer(), &lda,
+                       b_ptr, &ldb,
+                       solutionFriend.GetWork().Pointer(), &lwork, &ret_value);
+#endif
+#else // no major version
+    dgels_(&trans, &Mrows, &Ncols, &nrhs,
+           A.Pointer(), &lda,
+           b_ptr, &ldb,
+           solutionFriend.GetWork().Pointer(), &lwork, &ret_value);
+#endif // CISSTNETLIB_VERSION
+
+    if (Mrows >= Ncols) {
+        // Dgels returns the result in the "b" vector. For the underdetermined case
+        // (M < N), we already passed the solution vector, x, as "b". Thus, we only
+        // need to handle the other case here (M >= N), where we need to copy the
+        // first Ncols elements of b to the solution vector, x.
+        solutionFriend.GetX().Assign(b, Ncols);
+    }
     return ret_value;
 }
 
 /*! This function checks for valid input and
-  calls the LAPACK function. The approach behind this defintion of the
+  calls the LAPACK function. The approach behind this definition of the
   function is that the user creates a solution object from a code
   wherein it is safe to do memory allocation. This solution object
-  is then passed on to this method along with the matrix whose
+  is then passed to this method along with the matrix and vector whose
   LSqLin is to be computed. The solution object has members X
   and Work etc., which can be accessed through calls to method
   get*() along with adequate workspace for LAPACK.
-  This function modifies the contents of matrix A.
-  For details about nature of the solution matrices see text above.
+  This function modifies the contents of matrix A and possibly the contents of vector b.
+  For details about the nature of the solution matrices see the text above.
   \param A A matrix of size MxN, of one of vctDynamicMatrix or vctDynamicMatrixRef
   \param b A vector of size N, of one of vctDynamicVector or vctDynamicVectorRef
   \param G is a reference to a dynamic matrix of size McxN
@@ -1427,15 +1376,15 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
 }
 
 /*! This function checks for valid input and
-  calls the LAPACK function. The approach behind this defintion of the
+  calls the LAPACK function. The approach behind this definition of the
   function is that the user creates a solution object from a code
   wherein it is safe to do memory allocation. This solution object
-  is then passed on to this method along with the matrix whose
+  is then passed to this method along with the matrix and vector whose
   LSqLin is to be computed. The solution object has members X
   and Work etc., which can be accessed through calls to method
   get*() along with adequate workspace for LAPACK.
-  This function modifies the contents of matrix A.
-  For details about nature of the solution matrices see text above.
+  This function modifies the contents of matrix A and possibly the contents of vector b.
+  For details about the nature of the solution matrices see the text above.
   \param A is a reference to a dynamic matrix of size MaxN
   \param b A vector of size Ma, of one of vctDynamicVector or vctDynamicVectorRef
   \param E is a reference to a dynamic matrix of size MexN
@@ -1519,10 +1468,10 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
   by LAPACK.
   No mem allocation is done in this function, user allocates everything
   inlcuding workspace. The LSqLin method verifies that the size
-  of the solution objects matchesc
+  of the solution objects matches
   the input. See static methods in nmrLSqLinSolutionDynamic for helper
   functions that help determine the min workspace required.
-  This function modifies the contents of matrix A.
+  This function modifies the contents of matrix A and possibly vector b.
   For sizes of other matrices see text above.
   \param A is a reference to a dynamic matrix of size MxN
   \param b A vector of size N, of one of vctDynamicVector or vctDynamicVectorRef
@@ -1549,7 +1498,7 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
   of the solution objects matches
   the input and allocates workspace memory, which is deallocated when
   the function ends.
-  This function modifies the contents of matrix A.
+  This function modifies the contents of matrix A and possibly vector b.
   For sizes of other matrices see text above.
   \param A is a reference to a dynamic matrix of size MxN
   \param b A vector of size N, of one of vctDynamicVector or vctDynamicVectorRef
@@ -1574,7 +1523,7 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
   of the solution objects matches
   the input and allocates workspace memory, which is deallocated when
   the function ends.
-  This function modifies the contents of matrix A.
+  This function modifies the contents of matrix A and possibly vector b.
   For sizes of other matrices see text above.
   \param A is a reference to a dynamic matrix of size MaxN
   \param b A vector of size Ma, of one of vctDynamicVector or vctDynamicVectorRef
@@ -1606,7 +1555,7 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
   of the solution objects matches
   the input and allocates workspace memory, which is deallocated when
   the function ends.
-  This function modifies the contents of matrix A.
+  This function modifies the contents of matrix A and possibly vector b.
   For sizes of other matrices see text above.
   \param A is a reference to a dynamic matrix of size MaxN
   \param b A vector of size Ma, of one of vctDynamicVector or vctDynamicVectorRef
@@ -1636,7 +1585,7 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
   of the solution objects matches
   the input and allocates workspace memory, which is deallocated when
   the function ends.
-  This function modifies the contents of matrix A.
+  This function modifies the contents of matrix A and possibly vector b.
   For sizes of other matrices see text above.
   \param A is a reference to a dynamic matrix of size MaxN
   \param b A vector of size Ma, of one of vctDynamicVector or vctDynamicVectorRef
@@ -1674,7 +1623,7 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
   of the solution objects matches
   the input and allocates workspace memory, which is deallocated when
   the function ends.
-  This function modifies the contents of matrix A.
+  This function modifies the contents of matrix A and possibly vector b.
   For sizes of other matrices see text above.
   \param A is a reference to a dynamic matrix of size MaxN
   \param b A vector of size Ma, of one of vctDynamicVector or vctDynamicVectorRef
@@ -1711,7 +1660,7 @@ FIXED SIZE
 */
 
 /*! This provides the solution class for fixed size matrices
-  and provides a easy to use template. That is
+  and provides an easy to use template. That is
   nmrSVDSolutionFixedSize<4, 3, VCT_COL_MAJOR> vs.
   nmrSVDSolutionBase<vctFixedSizeMatrix<4, 3, VCT_COL_MAJOR>
   No extra work of allocation etc is required for fixed size.
@@ -1729,7 +1678,7 @@ public:
     enum {LWORK = ((vct::size_type)LWORK_LSEI > (vct::size_type)LWORK_TMP) ? (vct::size_type)LWORK_LSEI : (vct::size_type)LWORK_TMP};
     enum {LIWORK = _mg + 2*_n + 2};
     typedef vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, _ma, _n, 1, _ma> TypeA;
-    //make sizes 1 if 0, it does not effect anything else
+    //make sizes 1 if 0, it does not affect anything else
     typedef vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, (_me==0)?1:_me, _n, 1, (_me==0)?1:_me> TypeE;
     typedef vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, (_mg==0)?1:_mg, _n, 1, (_mg==0)?1:_mg> TypeG;
     typedef vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, _ma, 1> Typeb;
@@ -1755,11 +1704,11 @@ protected:
     TypeRNorm RNorm;
     /*!
       Memory allocated for input if needed
-      The LSEI (constrained least squares) require
-      that the the input matrices be in one continous
-      memory block ordered accoring to fortran order (Column
+      The LSEI (constrained least squares) requires
+      that the input matrices be in one continuous
+      memory block ordered according to fortran order (Column
       Major format), such that first Mc rows and N columns
-      represent A, Ma rows and N+1 th column represent b
+      represent A, Ma rows and N+1 th column represent b,
       next Me rows represent (E, f) and last Mg rows represent
       (G, h) where the original LSEI problem is
       arg min || A x - b ||, s.t. E x = f and G x >= h.
@@ -1775,15 +1724,15 @@ protected:
 
 public:
     /*! This class is not intended to be a top-level API.
-      It has been provided to avoid making the tempalted
+      It has been provided to avoid making the templated
       LSqLin function as a friend of this class, which turns
-      out to be not so easy in .NET. Instead the Friend class
+      out to be not so easy in .NET. Instead, the Friend class
       provides a cumbersome way to get non-const references
       to the private data.
-      Inorder to get non-const references the user has
+      In order to get non-const references the user has
       to first create a object of nmrLSqLinSolutionDynamic::Friend
-      and then user get* method on that object. Our philosophy
-      here is that this should be deterent for a general user
+      and then use the get* method on that object. Our philosophy
+      here is that this should be a deterrent for a general user
       and should ring alarm bells in a reasonable programmer.
     */
     class Friend {
@@ -1817,7 +1766,7 @@ public:
         RNormE(RNorm.Pointer(_ma)) {}
 
     /*! In order to get access to X, after
-      the have been computed by calling nmrLSqLin function.
+      it has been computed by calling the nmrLSqLin function,
       use the following methods.
     */
     inline const TypeX &GetX(void) const {
@@ -1832,7 +1781,7 @@ public:
 };
 
 /******************************************************************************/
-/* Overloaded function for Least Squares (LS) */
+/* Overloaded functions for Least Squares (LS)                                 */
 /******************************************************************************/
 
 template <vct::size_type _ma, vct::size_type _n, vct::size_type _work>
@@ -1842,14 +1791,45 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma,
                           vctFixedSizeVector<CISSTNETLIB_DOUBLE, _work> &Work)
 {
     CISSTNETLIB_INTEGER ret_value;
+    char trans = 'N';
     CISSTNETLIB_INTEGER Mrows = static_cast<CISSTNETLIB_INTEGER>(_ma);
     CISSTNETLIB_INTEGER Ncols = static_cast<CISSTNETLIB_INTEGER>(_n);
-    CISSTNETLIB_INTEGER b_size = static_cast<CISSTNETLIB_INTEGER>(b.size());
-    double* a = A.Pointer();
-    double* b_ = b.Pointer();
-    double* work = Work.Pointer();
-    ret_value = nmrLSqLinSolutionDynamic::run_dgels(Mrows,Ncols,b_size,a,b_,work);
-    x.Assign(b.Pointer());
+    CISSTNETLIB_INTEGER nrhs = 1;
+    CISSTNETLIB_INTEGER lda = std::max(Mrows,static_cast<CISSTNETLIB_INTEGER>(1));
+    CISSTNETLIB_INTEGER ldb = std::max(std::max(static_cast<CISSTNETLIB_INTEGER>(1),Mrows),Ncols);
+    CISSTNETLIB_INTEGER lwork = static_cast<CISSTNETLIB_INTEGER>(nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n>::LWORK);
+    CMN_ASSERT(lwork <= static_cast<CISSTNETLIB_INTEGER>(_work));
+    CISSTNETLIB_DOUBLE *b_ptr = b.Pointer();
+    if (Mrows < Ncols) {
+        // Since dgels returns the result, x, in the input array, b, we need
+        // to make sure that b is large enough. In the underdetermined case (M < N)
+        // we would therefore have to resize b from M to N; it is more efficient to instead
+        // pass x, after assigning all M elements of b to x.
+        memcpy(x.Pointer(), b.Pointer(), Mrows*sizeof(CISSTNETLIB_DOUBLE));
+        b_ptr = x.Pointer();
+    }
+
+#if defined(CISSTNETLIB_VERSION_MAJOR)
+#if (CISSTNETLIB_VERSION_MAJOR >= 3)
+    cisstNetlib_dgels_(&trans, &Mrows, &Ncols, &nrhs,
+                       A.Pointer(), &lda,
+                       b_ptr, &ldb,
+                       Work.Pointer(), &lwork, &ret_value);
+#endif
+#else // no major version
+    dgels_(&trans, &Mrows, &Ncols, &nrhs,
+           A.Pointer(), &lda,
+           b_ptr, &ldb,
+           Work.Pointer(), &lwork, &ret_value);
+#endif // CISSTNETLIB_VERSION
+
+    if (Mrows >= Ncols) {
+        // Dgels returns the result in the "b" vector. For the underdetermined case
+        // (M < N), we already passed the solution vector, x, as "b". Thus, we only
+        // need to handle the other case here (M >= N), where we need to copy the
+        // first Ncols elements of b to the solution vector, x.
+        x.Assign(b.Pointer());
+    }
     return ret_value;
 }
 
@@ -1874,7 +1854,7 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma,
 }
 
 /******************************************************************************/
-/* Overloaded function for Least Squares Inequality (LSI) */
+/* Overloaded functions for Least Squares Inequality (LSI)                    */
 /******************************************************************************/
 
 template <vct::size_type _ma, vct::size_type _mg, vct::size_type _n, vct::size_type _work, vct::size_type _iwork>
@@ -1956,7 +1936,7 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma,
 }
 
 /******************************************************************************/
-/* Overloaded function for Least Squares Equality & Inequality (LSEI) */
+/* Overloaded functions for Least Squares Equality & Inequality (LSEI)        */
 /******************************************************************************/
 
 template <vct::size_type _ma, vct::size_type _me, vct::size_type _mg,
@@ -2043,4 +2023,3 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma,
 }
 
 #endif
-
