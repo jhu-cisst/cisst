@@ -384,10 +384,14 @@ bool osaSocket::Connect(void)
     //create a new one just in case we closed it.
     if (SocketFD == INVALID_SOCKET ) {   
         SocketFD = socket(PF_INET, SOCK_STREAM, 0);
-        if (SocketFD == INVALID_SOCKET) 
+        if (SocketFD == INVALID_SOCKET)
+        {
             CMN_LOG_CLASS_RUN_ERROR << "osaSocket: failed to create a socket" << std::endl;
-        else 
+        }
+        else
+        {
             CMN_LOG_CLASS_RUN_VERBOSE << "osaSocket: created socket " << SocketFD << std::endl;
+        }
     }
 
     int retval = connect(SocketFD, reinterpret_cast<struct sockaddr *>(&SERVER_ADDR), sizeof(SERVER_ADDR));
@@ -560,9 +564,15 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
     FD_ZERO(&readfds);
     FD_SET(SocketFD, &readfds);
 
-    long second = static_cast<long>(floor(timeoutSec));
-    long usec = static_cast<long>(floor( (timeoutSec - second) *1e6));
-    timeval timeout = { second , usec };
+
+#if (CISST_OS == CISST_WINDOWS)
+    long sec = static_cast<long>(floor(timeoutSec));
+    long usec = static_cast<long>((timeoutSec - sec) * 1e6);
+#else
+    time_t sec = static_cast<time_t>(floor(timeoutSec));
+    suseconds_t usec = static_cast<suseconds_t>((timeoutSec - sec) * 1e6);
+#endif
+    timeval timeout = { sec , usec };
 
     /* Notes for QNX from the QNX library reference (Min)
     *
@@ -739,9 +749,15 @@ bool osaSocket::IsConnected(void) {
     FD_SET(SocketFD, &writefds);
 
     double timeoutSec = 0.000;
-    long second = static_cast<long>(floor(timeoutSec));
-    long usec = static_cast<long>(floor( (timeoutSec - second) *1e6));
-    timeval timeout = { second , usec };
+    
+#if (CISST_OS == CISST_WINDOWS)
+    long sec = static_cast<long>(floor(timeoutSec));
+    long usec = static_cast<long>((timeoutSec - sec) * 1e6);
+#else
+    time_t sec = static_cast<time_t>(floor(timeoutSec));
+    suseconds_t usec = static_cast<suseconds_t>((timeoutSec - sec) * 1e6);
+#endif
+    timeval timeout = { sec , usec };
 
     retval = select(SocketFD + 1, &readfds, &writefds, NULL, &timeout);
 
