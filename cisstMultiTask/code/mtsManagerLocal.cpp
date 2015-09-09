@@ -127,9 +127,7 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
 
     // Give proxies some time to start up
 #if !IMPROVE_ICE_THREADING
-    if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
-        osaSleep(0.1 * cmn_s);
-    } else {
+    if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
         osaSleep(2.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
     }
 #endif
@@ -194,9 +192,7 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
 
     // Wait for proxies to be in active state (PROXY_STATE_ACTIVE)
 #if !IMPROVE_ICE_THREADING
-    if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
-        osaSleep(0.05 * cmn_s);
-    } else {
+    if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
         osaSleep(1.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
     }
 #endif
@@ -2316,9 +2312,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
-            osaSleep(0.01 * cmn_s);
-        } else {
+        if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
             osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
         }
     }
@@ -2339,9 +2333,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
-            osaSleep(0.01 * cmn_s);
-        } else {
+        if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
             osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
         }
     }
@@ -2363,9 +2355,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
-            osaSleep(0.01 * cmn_s);
-        } else {
+        if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
             osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
         }
     }
@@ -2387,9 +2377,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
-            osaSleep(0.01 * cmn_s);
-        } else {
+        if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
             osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
         }
     }
