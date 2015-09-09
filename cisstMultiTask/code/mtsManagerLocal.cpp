@@ -1888,9 +1888,6 @@ bool mtsManagerLocal::KillAllAndWait(double timeoutInSeconds)
 bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceName,
                               const std::string & serverComponentName, const std::string & serverInterfaceName)
 {
-    static int counter = 0;
-    counter++;
-    std::cerr << "counter: " << counter << std::endl;
     if (!ManagerComponent.Client) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: MCC not yet created" << std::endl;
         return false;
