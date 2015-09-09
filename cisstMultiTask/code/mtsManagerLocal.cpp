@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -129,7 +127,11 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
 
     // Give proxies some time to start up
 #if !IMPROVE_ICE_THREADING
-    osaSleep(2.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+    if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
+        osaSleep(0.1 * cmn_s);
+    } else {
+        osaSleep(2.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+    }
 #endif
 
     SetGCMConnected(true);
@@ -192,7 +194,11 @@ bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
 
     // Wait for proxies to be in active state (PROXY_STATE_ACTIVE)
 #if !IMPROVE_ICE_THREADING
-    osaSleep(1.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+    if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
+        osaSleep(0.05 * cmn_s);
+    } else {
+        osaSleep(1.0 * cmn_s); // MJ TEMP: Better way to handle this without sleep??
+    }
 #endif
 
     // Register process name to the global component manager.
@@ -424,13 +430,13 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
 
     while (!LogThreadFinishWaiting) {
         if (LogQueue.size() == 0) {
-            osaSleep(1 * cmn_ms);
+            osaSleep(1.0 * cmn_ms);
             continue;
         }
 
         // Wait for MCC to be ready (activated and connected) before starting log fowarding
         if (!MCCReadyForLogForwarding()) {
-            osaSleep(100 * cmn_ms);
+            osaSleep(100.0 * cmn_ms);
             continue;
         }
 
@@ -1882,6 +1888,9 @@ bool mtsManagerLocal::KillAllAndWait(double timeoutInSeconds)
 bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceName,
                               const std::string & serverComponentName, const std::string & serverInterfaceName)
 {
+    static int counter = 0;
+    counter++;
+    std::cerr << "counter: " << counter << std::endl;
     if (!ManagerComponent.Client) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: MCC not yet created" << std::endl;
         return false;
@@ -2310,7 +2319,11 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        osaSleep(0.1);  // PK TEMP until blocking commands supported
+        if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
+            osaSleep(0.01 * cmn_s);
+        } else {
+            osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
+        }
     }
     mtsInterfaceOutput * interfaceOutput;
     interfaceNames = component->GetNamesOfInterfacesOutput();
@@ -2329,7 +2342,11 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        osaSleep(0.1);  // PK TEMP until blocking commands supported
+        if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
+            osaSleep(0.01 * cmn_s);
+        } else {
+            osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
+        }
     }
 
     mtsInterfaceRequired * interfaceRequired;
@@ -2349,7 +2366,11 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        osaSleep(0.1);  // PK TEMP until blocking commands supported
+        if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
+            osaSleep(0.01 * cmn_s);
+        } else {
+            osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
+        }
     }
 
     mtsInterfaceInput * interfaceInput;
@@ -2369,7 +2390,11 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-        osaSleep(0.1);  // PK TEMP until blocking commands supported
+        if (this->GetConfiguration() == LCM_CONFIG_STANDALONE) {
+            osaSleep(0.01 * cmn_s);
+        } else {
+            osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
+        }
     }
 
     return true;
@@ -2802,7 +2827,7 @@ bool mtsManagerLocal::ConnectServerSideInterface(const mtsDescriptionConnection 
 
     int numTrial = 0;
     const int maxTrial = 10;
-    const double sleepTime = 200 * cmn_ms;
+    const double sleepTime = 200.0 * cmn_ms;
 
     const ConnectionIDType connectionID           = description.ConnectionID;
     const std::string serverProcessName           = description.Server.ProcessName;
@@ -3077,7 +3102,7 @@ bool mtsManagerLocal::ConnectClientSideInterface(const mtsDescriptionConnection 
 
     // Sleep for unit tests which include networking
     if (UnitTestEnabled && UnitTestNetworkProxyEnabled) {
-        osaSleep(3);
+        osaSleep(3.0 * cmn_s);
     }
 
     // Inform the GCM that the connection is successfully established and
