@@ -28,6 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
 
+%init %{
+        import_array()   /* Initial function for NumPy */
+%}
+
 %header %{
 #include <cisstNumerical/nmrPython.h>
 %}
@@ -35,9 +39,20 @@ http://www.cisst.org/cisst/license.txt.
 // Generate parameter documentation for IRE
 %feature("autodoc", "1");
 
-// Import following for definition of CISST_HAS_CISSTNETLIB
+// Import nmrConfig.h for definition of CISST_HAS_CISSTNETLIB
+// Note: Even though nmrNetlib.h includes nmrConfig.h, importing just nmrNetlib.h
+//       does not work.
 %import "cisstNumerical/nmrConfig.h"
+%import "cisstNumerical/nmrNetlib.h"
 
 #if CISST_HAS_CISSTNETLIB
+// Programmer note: Following Python wrapping doesn't really work, as it does not properly use
+//                  the cisstVector/numpy typemaps (e.g., vctDynamicMatrixTypemaps.i).
+//                  Anyway, it is questionable whether it is useful to wrap cisstNumerical, since one
+//                  could use methods from numpy / scipy.
 %include "cisstNumerical/nmrSVD.i"
+
+%include "cisstNumerical/nmrPInverse.h"
+// Instantiate for vctDynamicMatrix. Could also have combinations of vctDynamicMatrix and vctDynamicMatrixRef.
+%template(nmrPInverse) nmrPInverse<vctDynamicMatrixOwner<CISSTNETLIB_DOUBLE>, vctDynamicMatrixOwner<CISSTNETLIB_DOUBLE> >;
 #endif

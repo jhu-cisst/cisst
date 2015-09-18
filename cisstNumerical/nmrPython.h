@@ -6,8 +6,7 @@
   Author(s):	Anton Deguet
   Created on:	2010-07-12
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,6 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #if CISST_HAS_CISSTNETLIB
 #include <cisstNumerical/nmrSVD.h>
+#include <cisstNumerical/nmrPInverse.h>
 #endif
  
 #endif // _nmrPython_h
