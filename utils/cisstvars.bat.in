@@ -41,7 +41,7 @@
 @echo Setting environment variables for the cisst package
 
 @set CISST_PATH=%CISST_DIR%\bin\%CISST_INTDIR%;%CISST_DIR%\lib\%CISST_INTDIR%
-@set CISST_PYTHONPATH=%CISST_DIR%\cisst\lib;%CISST_DIR%\lib\%CISST_INTDIR%
+@set CISST_PYTHONPATH=%CISST_DIR%\lib;%CISST_DIR%\lib\%CISST_INTDIR%
 
 @set PATH=%CISST_PATH%;%PATH%
 @set CISST_ROOT=%CISST_DIR%
