@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -273,7 +273,7 @@ public:
     };
     friend class Friend;
 #endif // DOXYGEN
-#endif // SWIG
+#endif // #ifndef SWIG
 
     /*! The default constuctor.
       For dynamic size, there are assigned default values,
@@ -480,7 +480,7 @@ public:
 };
 
 
-
+#ifndef SWIG
 /*
    ****************************************************************************
                                   FIXED SIZE
@@ -623,7 +623,7 @@ public:
     }
     //@}
 };
-
+#endif  // #ifndef SWIG
 
 
 /*!
@@ -859,6 +859,7 @@ inline CISSTNETLIB_INTEGER nmrPInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, C
   \test nmrPInverseTest::TestDynamicColumnMajorUserAlloc
         nmrPInverseTest::TestDynamicRowMajorUserAlloc
  */
+
 template <class _matrixOwnerTypeA, class _matrixOwnerTypePInverse>
 inline CISSTNETLIB_INTEGER nmrPInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
                              vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> &PInverse)
@@ -869,7 +870,7 @@ inline CISSTNETLIB_INTEGER nmrPInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, C
 }
 
 
-
+#ifndef SWIG
 /*!  Basic version of pseudo inverse where user provides the input
   matrix as well as storage for output and workspace needed by LAPACK.
   No memory allocation is done in this function, user allocates
@@ -998,6 +999,8 @@ inline CISSTNETLIB_INTEGER nmrPInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _r
     CISSTNETLIB_INTEGER ret_value = nmrPInverse(A, dataFriend.PInverse(), dataFriend.Workspace());
     return ret_value;
 }
+#endif  // #ifndef SWIG
+
 //@}
 
 
