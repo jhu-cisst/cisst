@@ -2,13 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  File: cisstNumerical.i
 
   Author(s):  Anton Deguet
   Created on: 2005-08-14
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,7 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 // Generate parameter documentation for IRE
 %feature("autodoc", "1");
 
-%include "cisstNumerical/nmrNetlib.h"
+// Import following for definition of CISST_HAS_CISSTNETLIB
+%import "cisstNumerical/nmrConfig.h"
 
 #if CISST_HAS_CISSTNETLIB
 %include "cisstNumerical/nmrSVD.i"
