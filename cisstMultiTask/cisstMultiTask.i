@@ -468,7 +468,7 @@ http://www.cisst.org/cisst/license.txt.
 
         # otherComponentInterface should be a tuple ('process', 'component', 'interfaceProvided')
         # or ('component', 'interfaceProvided')
-        def AddInterfaceRequiredAndConnect(self, otherComponentInterface):
+        def AddInterfaceRequiredAndConnect(self, otherComponentInterface, connectionAttempts = 1):
             try:
                 localProcessName = mtsManagerLocal_GetInstance().GetProcessName()
                 num = len(otherComponentInterface)
@@ -489,14 +489,18 @@ http://www.cisst.org/cisst/license.txt.
                         print 'No provided interface (empty string)'
                         return
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
-                    if interfaceRequired:
+                    attempt = 0
+                    while (attempt < connectionAttempts):
+                        attempt = attempt + 1
+                        print 'Trying to connect:', interfaceRequired.GetName(), ' - attempt # ', attempt
                         manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
                         # PK TEMP: need time.sleep until blocking commands supported over network
                         time.sleep(2.0)
                         interfaceRequired.UpdateFromC()
-                    else:
-                        print 'Unable to add required interface for ', interfaceName
-                    return interfaceRequired
+                        if interfaceRequired.GetConnectedInterface():
+                           print 'Required interface ', interfaceRequired.GetName(), ' connected.'
+                           return interfaceRequired
+                    print 'Unable to add required interface for ', interfaceName
                 else:
                     print 'Parameter error: must specify (process, component, interface) or (component, interface)'
             except TypeError, e:
