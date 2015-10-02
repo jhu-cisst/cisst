@@ -19,31 +19,19 @@ class {
         type mtsGenericObject;
         is-data true;
     }
-    member {
-        name RefFrame;
-        type vctFrm4x4;
-        description Current Reference frame;
-    }
-    member {
-        name RefVelocity;
-        type vct3;
-        description Reference point velocity;
-    }
-    member {
-        name RotationRefToMaster;
-        type vctMatRot3;
-        description Converts vector in master base frame to ref base frame;
-    }
+
     member {
         name ForceOrientation;
         type vctMatRot3;
         description Force orientation matrix;
     }
+
     member {
         name ForcePosition;
         type vct3;
         description Force position vector;
     }
+
     member {
         name TorqueOrientation;
         type vctMatRot3;
