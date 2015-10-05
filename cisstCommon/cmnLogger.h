@@ -75,8 +75,15 @@ http://www.cisst.org/cisst/license.txt.
   \endcode
 
   \param lod The log level of detail of the message.
+
+  \todo replace (CISST_OS == CISST_DARWIN) with a better solution for OS X logging compiler errors
 */
-#if CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
+#if (CISST_OS == CISST_DARWIN)
+
+#undef BYPASS_CMN_LOG
+#define BYPASS_CMN_LOG 1
+
+#elif CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
 
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
     (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod))? \
@@ -98,7 +105,7 @@ if (cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod) \
 
 #endif
 
-#if (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
   #if BYPASS_CMN_LOG
   #undef CMN_LOG_CLASS_INSTANCE
   #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) std::cout
