@@ -20,7 +20,12 @@ else ()
 endif ()
 
 if (CISST_HAS_CISSTNETLIB)
-  find_package (CisstNetlib)
+    if(FORCE_CISSTNETLIB_CONFIG)
+        find_package (CisstNetlib REQUIRED CONFIG)
+    else()
+        find_package (CisstNetlib REQUIRED)
+    endif()
+  
   cisst_set_package_settings (cisstNumerical cisstNetlib INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
   cisst_set_package_settings (cisstNumerical cisstNetlib LIBRARIES           CISSTNETLIB_LIBRARIES)
   set (CISST_HAS_CISSTNETLIB_CONFIG ON)
