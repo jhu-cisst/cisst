@@ -139,6 +139,13 @@ std::string cmnPath::FindWithSubdirectory(const std::string & filename,
     std::string fullName("");
     const_iterator iter = Path.begin();
     const const_iterator end = Path.end();
+    // first check if this file exists as absolute path
+    if ((filename.size() > 0)
+        && (filename[0] == '/')
+        && (access(filename.c_str(), mode) == 0)) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "Found \"" << filename << "\", it seems to be a valid absolute file name" << std::endl;
+        return filename;
+    }
     while (iter != end) {
         if (subdirectory != "") {
             fullName = (*iter) + "/" + subdirectory + "/" + filename;
