@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-31
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,13 +42,8 @@ http://www.cisst.org/cisst/license.txt.
 
 // MJ: some thirdparty drivers on QNX make CMN_LOG macro throw exceptions
 // (e.g., std::bad_cast) and the following preprocessor can be used to bypass
-// this issue by replacing CMN_LOG with std::cout. Uncomment the following line
-// to enable the bypass, or define it on the command line via CMake.
-// One case when you may want to use it is when #if (CISST_OS == CISST_QNX)
-// #define BYPASS_CMN_LOG
-
-// Workaround for cisst bug occuring in OS X Xcode 7.0 https://github.com/jhu-cisst/cisst/issues/34
-#if (CISST_OS == CISST_DARWIN)
+// this issue by replacing CMN_LOG with std::cout.
+#if (CISST_OS == CISST_QNX)
 #define BYPASS_CMN_LOG
 #endif
 
@@ -87,27 +81,13 @@ http://www.cisst.org/cisst/license.txt.
 */
 #ifdef BYPASS_CMN_LOG
 
-#undef CMN_LOG_CLASS_INSTANCE
-#define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) std::cout
-
-#elif CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
-
-#define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
-    (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod))? \
-    (void*)0:\
-    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
-
-#elif CISST_OSTREAM_CAN_CAST_TO_INT
-
-#define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
-    (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod))? \
-    0:\
-    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
+  #undef CMN_LOG_CLASS_INSTANCE
+  #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) std::cout
 
 #else
 
-#define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
-if (cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod) \
+  #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod)                      \
+  if (cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod) \
     ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
 
 #endif
@@ -165,26 +145,14 @@ if (cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod) \
   \param lod The log level of detail of the message.
 */
 #ifdef BYPASS_CMN_LOG
+
   #undef CMN_LOG
   #define CMN_LOG(lod) std::cout
-#elif CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
-
-#define CMN_LOG(lod) \
-    (!(cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod))?  \
-    (void*)0: \
-    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
-
-#elif CISST_OSTREAM_CAN_CAST_TO_INT
-
-#define CMN_LOG(lod) \
-    (!(cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod)) ? \
-    0: \
-    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
 
 #else
 
-#define CMN_LOG(lod) \
-    if (cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod) \
+  #define CMN_LOG(lod) \
+  if (cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod) \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
 
 #endif
@@ -511,4 +479,3 @@ class CISST_EXPORT cmnLogger {
 
 
 #endif // _cmnLogger_h
-
