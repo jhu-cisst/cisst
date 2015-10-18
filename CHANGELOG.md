@@ -10,7 +10,7 @@ Change log
   * None
 * New features:
   * Added prmStateJoint data type
-  * cmnPath 
+  * cmnPath now checks if file exists using absolute path
 * Bug fixes:
   * CMake: added FORCE_CISST_NETLIB_CONFIG to force use of CisstNetlibConfig.cmake (see 47379dbb16024726963d799b6a7a1c8a04097ff0)
   * CMake: now use github to download jsoncpp (see 9bd108a022585fdedf3bcccb0f1e0e37e3a1d62c)
