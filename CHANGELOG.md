@@ -1,6 +1,27 @@
 Change log
 ==========
 
+1.0.5 (2015-10-18)
+==================
+
+* API changes:
+  * None
+* Deprecated features:
+  * None
+* New features:
+  * Added prmStateJoint data type
+  * cmnPath 
+* Bug fixes:
+  * CMake: added FORCE_CISST_NETLIB_CONFIG to force use of CisstNetlibConfig.cmake (see 47379dbb16024726963d799b6a7a1c8a04097ff0)
+  * CMake: now use github to download jsoncpp (see 9bd108a022585fdedf3bcccb0f1e0e37e3a1d62c)
+  * cisstCommon: CMN_LOG use if statement instead of ?: to support recent compilers (see #34)
+  * cisstOSAbstraction: osaSocket updated to support latest OSX (see #28, #33)
+  * cisstVectorQt: translation widget always converts to mm for display (see 946cb0341ec01b284f1ef41567dc43ae1465db51)
+  * cisstMultiTask: removed sleep on connect when manager is in standalone mode (i.e. not distributed)
+  * cisstMultiTask python: add optional argument to reconnect for # of attempts to AddInterfaceRequiredAndConnect() (see bbb69bc7bbdb7add304f3f2f36dd226540aea5ee)
+  * cisstNumerical: fixed nmrLSqLin, solver for underdetermined case (underconstrained) and added unit tests (see 8d736e626d8c8b8971699a7579787332ba24e796 and #32)
+
+
 1.0.4 (2015-04-28)
 ==================
 
