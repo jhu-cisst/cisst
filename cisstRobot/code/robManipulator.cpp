@@ -136,10 +136,12 @@ void free_rmatrix(double** m, long nrl, long ncl){
 }
 
 robManipulator::robManipulator( const vctFrame4x4<double>& Rtw0 )
+  : Jn(NULL),Js(NULL)
 {  this->Rtw0 = Rtw0;  }
 
 robManipulator::robManipulator( const std::string& linkfile,
-                                const vctFrame4x4<double>& Rtw0 ){
+                                const vctFrame4x4<double>& Rtw0 )
+  : Jn(NULL),Js(NULL){
 
   this->Rtw0 = Rtw0;
 
@@ -151,7 +153,8 @@ robManipulator::robManipulator( const std::string& linkfile,
 }
 
 robManipulator::robManipulator( const std::vector<robKinematics *> linkParms,
-                                const vctFrame4x4<double>& Rtw0 ){
+                                const vctFrame4x4<double>& Rtw0 )
+  : Jn(NULL),Js(NULL){
 
   this->Rtw0 = Rtw0;
 
@@ -164,9 +167,8 @@ robManipulator::robManipulator( const std::vector<robKinematics *> linkParms,
 
 robManipulator::~robManipulator()
 {
-    // add free here
-    free_rmatrix(Js, 0, 0);
-    free_rmatrix(Jn, 0, 0);
+  if( Jn != NULL ){ free_rmatrix(Jn, 0, 0); }
+  if( Js != NULL ){ free_rmatrix(Js, 0, 0); }
 }
 
 void robManipulator::Attach( robManipulator* tool )
