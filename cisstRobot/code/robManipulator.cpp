@@ -164,6 +164,9 @@ robManipulator::robManipulator( const std::vector<robKinematics *> linkParms,
 
 robManipulator::~robManipulator()
 {
+    // add free here
+    free_rmatrix(Js, 0, 0);
+    free_rmatrix(Jn, 0, 0);
 }
 
 void robManipulator::Attach( robManipulator* tool )
