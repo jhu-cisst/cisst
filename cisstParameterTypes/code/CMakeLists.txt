@@ -15,6 +15,7 @@ project (cisstParameterTypes)
 cisst_data_generator (cisstParameterTypes
                       "${cisst_BINARY_DIR}/include" # where to save the file
                       "cisstParameterTypes/"        # sub directory for include
+                      ../prmActuatorJointCoupling.cdg
                       ../prmPositionCartesianGet.cdg
                       ../prmPositionJointGet.cdg
                       ../prmFixtureGainCartesianSet.cdg
