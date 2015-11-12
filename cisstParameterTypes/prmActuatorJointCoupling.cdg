@@ -30,5 +30,28 @@ class {
       name JointToActuatorEffort;
       type vctDoubleMat;
     }
-}
 
+    inline-header {
+    public:
+        inline const prmActuatorJointCoupling & Assign(const prmActuatorJointCoupling & other) {
+            ActuatorToJointPosition().ForceAssign(other.ActuatorToJointPosition());
+            JointToActuatorPosition().ForceAssign(other.JointToActuatorPosition());
+            ActuatorToJointEffort().ForceAssign(other.ActuatorToJointEffort());
+            JointToActuatorEffort().ForceAssign(other.JointToActuatorEffort());
+            return *this;
+        }
+        inline const prmActuatorJointCoupling & Assign(const vctDoubleMat & other) {
+            ActuatorToJointPosition().ForceAssign(other);
+            JointToActuatorPosition().ForceAssign(other);
+            ActuatorToJointEffort().ForceAssign(other);
+            JointToActuatorEffort().ForceAssign(other);
+            return *this;
+        }
+        inline bool Equal(const prmActuatorJointCoupling & other) {
+            return (ActuatorToJointPosition().Equal(other.ActuatorToJointPosition()) &&
+                    JointToActuatorPosition().Equal(other.JointToActuatorPosition()) &&
+                    ActuatorToJointEffort().Equal(other.ActuatorToJointEffort()) &&
+                    JointToActuatorEffort().Equal(other.JointToActuatorEffort()));
+        }
+    }
+}
