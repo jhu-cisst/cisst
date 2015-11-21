@@ -130,8 +130,10 @@ void mtsTask::StartupInternal(void) {
                                          << this->GetName() << ":" << requiredIterator->first
                                          << "\" (required/input not connected to provided/output)" << std::endl;
                 success = false;
-            } else {
-                CMN_LOG_CLASS_INIT_WARNING << "StartupInternal: void pointer to optional required/input interface \""
+            }
+
+            else {
+                CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: void pointer to optional required/input interface \""
                                            << this->GetName() << ":" << requiredIterator->first
                                            << "\" (required/input not connected to provided/output)" << std::endl;
             }
