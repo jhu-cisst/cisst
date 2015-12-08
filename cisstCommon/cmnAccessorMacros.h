@@ -1,12 +1,11 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
-/*!
+/*
   Author(s):	Anton Deguet
   Created on:	2008-06-26
 
-  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2015 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -38,7 +37,7 @@ public:                                                                 \
  inline void Set##memberName(const memberType & newValue) {             \
      this->memberName##Member = newValue;                               \
  }                                                                      \
- inline void Get##memberName(memberType & placeHolder) {                \
+ inline void Get##memberName(memberType & placeHolder) const {          \
      placeHolder = this->memberName##Member;                            \
  }                                                                      \
  inline const memberType & memberName(void) const {                     \
@@ -60,7 +59,7 @@ protected:
     double & Timestamp(void);
     const double & Timestamp(void);
     void SetTimestamp(double newValue);
-    void GetTimestamp(double & placeHolder);
+    void GetTimestamp(double & placeHolder) const;
   \endcode
 
   Finally, when used in conjunction with SWIG, the method Get is
