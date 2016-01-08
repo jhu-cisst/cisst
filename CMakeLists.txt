@@ -69,8 +69,8 @@ endif (CISST_BUILD_SHARED_LIBS)
 
 # Set the version number
 set (CISST_VERSION_MAJOR "1")
-set (CISST_VERSION_MINOR "1")
-set (CISST_VERSION_PATCH "0")
+set (CISST_VERSION_MINOR "0")
+set (CISST_VERSION_PATCH "6")
 set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
 
 # To compile examples within this project
