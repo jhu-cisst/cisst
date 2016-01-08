@@ -1,6 +1,21 @@
 Change log
 ==========
 
+1.1.0 (2016-01-08)
+==================
+
+* API changes:
+  * None
+* Deprecated features:
+  * None
+* New features:
+  * Added prmActuatorJointCoupling
+  * mtsComponent: added GetIndexReader for default state table
+* Bug fixes:
+  * robManipulator: initialize data members Jn and Js
+  * cmnAccessorMacros: added missing const on Get method
+
+
 1.0.5 (2015-10-18)
 ==================
 
