@@ -13,7 +13,7 @@
 cmake_minimum_required (VERSION 2.6)
 
 # create a list of libraries needed for this project
-set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt cisstQt)
 
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
