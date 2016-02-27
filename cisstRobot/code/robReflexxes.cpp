@@ -85,7 +85,9 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
 
 void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
                             vctDoubleVec & CurrentVelocity,
-                            vctDoubleVec & CurrentAcceleration)
+                            vctDoubleVec & CurrentAcceleration,
+                            const vctDoubleVec & TargetPosition,
+                            const vctDoubleVec & TargetVelocity)
 {
     // sanity checks
     if (!mIsSet) {
@@ -100,6 +102,12 @@ void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
     if (CurrentAcceleration.size() != mDimension) {
         cmnThrow("robReflexxes::Evaluate: acceleration doesn't match dimension");
     }
+    if (TargetPosition.size() != mDimension) {
+        cmnThrow("robReflexxes::Evaluate: target position doesn't match dimension");
+    }
+    if (TargetVelocity.size() != mDimension) {
+        cmnThrow("robReflexxes::Evaluate: target velocity doesn't match dimension");
+    }
 
     // Set-up the input parameters
     for (size_t i = 0;
@@ -108,6 +116,8 @@ void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
         IP->CurrentPositionVector->VecData[i] = CurrentPosition[i];
         IP->CurrentVelocityVector->VecData[i] = CurrentVelocity[i];
         IP->CurrentAccelerationVector->VecData[i] = CurrentAcceleration[i];
+        IP->TargetPositionVector->VecData[i] = TargetPosition[i];
+        IP->TargetVelocityVector->VecData[i] = TargetVelocity[i];
     }
 
     // Calling the Reflexxes OTG algorithm

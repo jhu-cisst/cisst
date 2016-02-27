@@ -82,7 +82,9 @@ class CISST_EXPORT robReflexxes {
 
     void Evaluate(vctDoubleVec & CurrentPosition,
                   vctDoubleVec & CurrentVelocity,
-                  vctDoubleVec & CurrentAcceleration);
+                  vctDoubleVec & CurrentAcceleration,
+                  const vctDoubleVec & TargetPosition,
+                  const vctDoubleVec & TargetVelocity);
 };
 
 #endif // _robReflexxes_h

@@ -74,7 +74,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
               << std::endl;
 
     while (trajectory.ResultValue != ReflexxesAPI::RML_FINAL_STATE_REACHED) {
-        trajectory.Evaluate(CurrentPosition, CurrentVelocity, CurrentAcceleration);
+        trajectory.Evaluate(CurrentPosition, CurrentVelocity, CurrentAcceleration, TargetPosition, TargetVelocity);
         // csv file
         cmnData<vctDoubleVec>::SerializeText(CurrentPosition, log);
         log << ',';
