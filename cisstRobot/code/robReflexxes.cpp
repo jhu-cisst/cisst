@@ -21,7 +21,10 @@
 robReflexxes::robReflexxes(void):
     mIsSet(false),
     cycle_time_in_seconds(0.001),
-    ResultValue(0)
+    IntermediateTargetStateSet(false),
+    IntermediateStateReached(false),
+    ResultValue(0),
+    Time(0.0)
 {}
 
 robReflexxes::robReflexxes(const vctDoubleVec & MaxVelocity,
@@ -31,9 +34,19 @@ robReflexxes::robReflexxes(const vctDoubleVec & MaxVelocity,
                            const CoordinationType coordination):
     mIsSet(false),
     cycle_time_in_seconds(0.001),
-    ResultValue(0)
+    IntermediateTargetStateSet(false),
+    IntermediateStateReached(false),
+    ResultValue(0),
+    Time(0.0)
 {
     Set(MaxVelocity, MaxAcceleration, TargetPosition, TargetVelocity, coordination);
+}
+
+robReflexxes::~robReflexxes()
+{
+    delete RML;
+    delete IP;
+    delete OP;
 }
 
 void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
@@ -67,7 +80,7 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
          ++i) {
         IP->MaxVelocityVector->VecData[i] = MaxVelocity[i];
         IP->MaxAccelerationVector->VecData[i] = MaxAcceleration[i];
-        IP->MaxJerkVector->VecData[i] = 300.0;
+        IP->MaxJerkVector->VecData[i] = 500.0;
         IP->TargetPositionVector->VecData[i] = TargetPosition[i];
         IP->TargetVelocityVector->VecData[i] = TargetVelocity[i];
         IP->SelectionVector->VecData[i] = true;

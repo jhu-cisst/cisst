@@ -25,15 +25,15 @@ http://www.cisst.org/cisst/license.txt.
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
-    const size_t dimension = 3;
+    const size_t dimension = 2;
     vctDoubleVec
-        CurrentPosition,
-        CurrentVelocity,
-        CurrentAcceleration,
-        MaxVelocity,
-        MaxAcceleration,
-        TargetPosition,
-        TargetVelocity;
+            CurrentPosition,
+            CurrentVelocity,
+            CurrentAcceleration,
+            MaxVelocity,
+            MaxAcceleration,
+            TargetPosition,
+            TargetVelocity;
 
     CurrentPosition.SetSize(dimension);
     CurrentVelocity.SetSize(dimension);
@@ -44,13 +44,13 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     TargetVelocity.SetSize(dimension);
 
     // set parameters
-    CurrentPosition.Assign(      100.0,    0.0,   50.0);
-    CurrentVelocity.Assign(      100.0, -220.0,  -50.0);
-    CurrentAcceleration.Assign( -150.0,  250.0,  -50.0);
-    MaxVelocity.Assign(          300.0,  100.0,  300.0);
-    MaxAcceleration.Assign(      300.0,  200.0,  100.0);
-    TargetPosition.Assign(      -600.0, -200.0, -350.0);
-    TargetVelocity.Assign(        50.0,  -50.0, -200.0);
+    CurrentPosition.Assign(      100.0,  100.0);
+    CurrentVelocity.Assign(        0.0,    0.0);
+    CurrentAcceleration.Assign(    0.0,    0.0);
+    MaxVelocity.Assign(          300.0,  300.0);
+    MaxAcceleration.Assign(      400.0,  400.0);
+    TargetPosition.Assign(       700.0,  300.0);
+    TargetVelocity.Assign(         0.0,    0.0);
 
     robReflexxes trajectory;
     trajectory.Set(MaxVelocity,
@@ -73,8 +73,27 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
               << cmnData<vctDoubleVec>::SerializeDescription(CurrentAcceleration, ',', "acceleration")
               << std::endl;
 
-    while (trajectory.ResultValue != ReflexxesAPI::RML_FINAL_STATE_REACHED) {
+    trajectory.Flags.SynchronizationBehavior = RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
+
+    std::cout << "wzr" << std::endl;
+
+    while (1) {
         trajectory.Evaluate(CurrentPosition, CurrentVelocity, CurrentAcceleration, TargetPosition, TargetVelocity);
+        trajectory.Time += trajectory.cycle_time_in_seconds;
+
+        if ( (trajectory.Time >= 1.0) && (!trajectory.IntermediateTargetStateSet) ) {
+            trajectory.IntermediateTargetStateSet = true;
+            TargetPosition.Assign(  550.0, 250.0 );
+            TargetVelocity.Assign( -150.0, -50.0 );
+        }
+
+        if ( (trajectory.ResultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED) && (!trajectory.IntermediateStateReached) ) {
+            trajectory.IntermediateStateReached = true;
+            TargetPosition.Assign(  700.0, 300.0 );
+            TargetVelocity.Assign(    0.0,   0.0 );
+
+            continue;
+        }
         // csv file
         cmnData<vctDoubleVec>::SerializeText(CurrentPosition, log);
         log << ',';
@@ -82,6 +101,9 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         log << ',';
         cmnData<vctDoubleVec>::SerializeText(CurrentAcceleration, log);
         log << std::endl;
+
+        if ( trajectory.ResultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED )
+            break;
     }
 
     log.close();

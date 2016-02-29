@@ -39,21 +39,25 @@
 class CISST_EXPORT robReflexxes {
 
  public:
+    bool IntermediateTargetStateSet;
+    bool IntermediateStateReached;
     int ResultValue;
+    double Time;
     typedef enum {Reflexxes_NONE, Reflexxes_DURATION} CoordinationType;
+    const double cycle_time_in_seconds; /*!< Reflexxes OTG algorithm cycle time, default value is 0.001 (1kHz) */
+    RMLPositionFlags Flags;
     // I don't whether the duration is needed or not
 
  protected:
     bool mIsSet;                        /*!< To ensure we don't evaluate if the parameters are not set */
     size_t mDimension;                  /*!< Number of degrees of freedom */
-    const double cycle_time_in_seconds; /*!< Reflexxes OTG algorithm cycle time, default value is 0.001 (1kHz) */
 
     CoordinationType mCoordination;
 
     ReflexxesAPI *RML = NULL;
     RMLPositionInputParameters *IP = NULL;
     RMLPositionOutputParameters *OP = NULL;
-    RMLPositionFlags Flags;
+
 
  public:
     robReflexxes(void);
@@ -63,7 +67,7 @@ class CISST_EXPORT robReflexxes {
                  const vctDoubleVec & TargetVelocity,
                  const CoordinationType coordination = Reflexxes_NONE);
 
-    ~robReflexxes() {};
+    ~robReflexxes();
 
     /*!  \brief Set target positions and velocities as well as desired
       maximum velocities and accelerations. All vectors must match the
