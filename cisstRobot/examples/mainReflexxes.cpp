@@ -69,8 +69,8 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     logHeader << cmnData<vctDoubleVec>::SerializeDescription(CurrentPosition, ',', "position")
               << ','
               << cmnData<vctDoubleVec>::SerializeDescription(CurrentVelocity, ',', "velocity")
-              << ','
-              << cmnData<vctDoubleVec>::SerializeDescription(CurrentAcceleration, ',', "acceleration")
+              // << ','
+              // << cmnData<vctDoubleVec>::SerializeDescription(CurrentAcceleration, ',', "acceleration")
               << std::endl;
 
     trajectory.Flags.SynchronizationBehavior = RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
@@ -98,8 +98,8 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         cmnData<vctDoubleVec>::SerializeText(CurrentPosition, log);
         log << ',';
         cmnData<vctDoubleVec>::SerializeText(CurrentVelocity, log);
-        log << ',';
-        cmnData<vctDoubleVec>::SerializeText(CurrentAcceleration, log);
+        // log << ',';
+        // cmnData<vctDoubleVec>::SerializeText(CurrentAcceleration, log);
         log << std::endl;
 
         if ( trajectory.ResultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED )

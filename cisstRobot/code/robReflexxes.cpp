@@ -23,26 +23,27 @@ robReflexxes::robReflexxes(void):
     IntermediateTargetStateSet(false),
     IntermediateStateReached(false),
     ResultValue(0),
-    Time(0.0),
-    RML(NULL),
-    IP(NULL),
-    OP(NULL)
-{}
+    Time(0.0)
+{
+    RML = NULL;
+    IP = NULL;
+    OP = NULL;
+}
 
 robReflexxes::robReflexxes(const vctDoubleVec & MaxVelocity,
                            const vctDoubleVec & MaxAcceleration,
                            const double CycleTime,
                            const CoordinationType coordination):
     mIsSet(false),
-    cycle_time_in_seconds(0.001),
     IntermediateTargetStateSet(false),
     IntermediateStateReached(false),
     ResultValue(0),
     Time(0.0)
-    RML(NULL),
-    IP(NULL),
-    OP(NULL)
 {
+    RML = NULL;
+    IP = NULL;
+    OP = NULL;
+
     Set(MaxVelocity, MaxAcceleration, CycleTime, coordination);
 }
 
@@ -52,15 +53,15 @@ robReflexxes::robReflexxes(const vctDoubleVec & MaxVelocity,
                            const double CycleTime,
                            const CoordinationType coordination):
     mIsSet(false),
-    cycle_time_in_seconds(0.001),
     IntermediateTargetStateSet(false),
     IntermediateStateReached(false),
     ResultValue(0),
     Time(0.0)
-    RML(NULL),
-    IP(NULL),
-    OP(NULL)
 {
+    RML = NULL;
+    IP = NULL;
+    OP = NULL;
+
     Set(MaxVelocity, MaxAcceleration, MaxJerk, CycleTime, coordination);
 }
 
@@ -83,7 +84,7 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     if (MaxAcceleration.size() != mDimension) {
         cmnThrow("robReflexxes::Set: maximum acceleration doesn't match start point dimension");
     }
-    CurrentAcceleration.SetSize(dimension);
+    CurrentAcceleration.SetSize(mDimension);
     for(size_t i = 0;
         i < mDimension;
         ++i)
@@ -135,7 +136,7 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     if (MaxJerk.size() != mDimension) {
         cmnThrow("robReflexxes::Set: maximum jerk doesn't match start point dimension");
     }
-    CurrentAcceleration.SetSize(dimension);
+    CurrentAcceleration.SetSize(mDimension);
     for(size_t i = 0;
         i < mDimension;
         ++i)
@@ -147,7 +148,7 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     if (RML != NULL) delete RML;
     if (IP != NULL) delete IP;
     if (OP != NULL) delete OP;
-    RML = new ReflexxesAPI(mDimension, cycle_time_in_seconds);
+    RML = new ReflexxesAPI(mDimension, CycleTime);
     IP = new RMLPositionInputParameters(mDimension);
     OP = new RMLPositionOutputParameters(mDimension);
 
