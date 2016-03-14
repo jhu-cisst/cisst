@@ -38,33 +38,37 @@
 */
 class CISST_EXPORT robReflexxes {
 
- public:
+public:
     bool IntermediateTargetStateSet;
     bool IntermediateStateReached;
     int ResultValue;
     double Time;
     typedef enum {Reflexxes_NONE, Reflexxes_DURATION} CoordinationType;
-    const double cycle_time_in_seconds; /*!< Reflexxes OTG algorithm cycle time, default value is 0.001 (1kHz) */
+    
     RMLPositionFlags Flags;
     // I don't whether the duration is needed or not
 
- protected:
+protected:
     bool mIsSet;                        /*!< To ensure we don't evaluate if the parameters are not set */
     size_t mDimension;                  /*!< Number of degrees of freedom */
 
     CoordinationType mCoordination;
 
-    ReflexxesAPI *RML = NULL;
-    RMLPositionInputParameters *IP = NULL;
-    RMLPositionOutputParameters *OP = NULL;
+    ReflexxesAPI *RML;
+    RMLPositionInputParameters *IP;
+    RMLPositionOutputParameters *OP;
+    vctDoubleVec CurrentAcceleration;
 
-
- public:
+public:
     robReflexxes(void);
     robReflexxes(const vctDoubleVec & MaxVelocity,
                  const vctDoubleVec & MaxAcceleration,
-                 const vctDoubleVec & TargetPosition,
-                 const vctDoubleVec & TargetVelocity,
+                 const double CycleTime,
+                 const CoordinationType coordination = Reflexxes_NONE);
+    robReflexxes(const vctDoubleVec & MaxVelocity,
+                 const vctDoubleVec & MaxAcceleration,
+                 const vctDoubleVec & MaxJerk,
+                 const double CycleTime,
                  const CoordinationType coordination = Reflexxes_NONE);
 
     ~robReflexxes();
@@ -75,18 +79,26 @@ class CISST_EXPORT robReflexxes {
 
       \param maximum velocities
       \param maximum acceleration
-      \param target position
-      \param target velocities
     */
     void Set(const vctDoubleVec & MaxVelocity,
              const vctDoubleVec & MaxAcceleration,
-             const vctDoubleVec & TargetPosition,
-             const vctDoubleVec & TargetVelocity,
+             const double CycleTime,
              const CoordinationType coordination = Reflexxes_NONE);
 
+    void Set(const vctDoubleVec & MaxVelocity,
+             const vctDoubleVec & MaxAcceleration,
+             const vctDoubleVec & MaxJerk,
+             const double CycleTime,
+             const CoordinationType coordination = Reflexxes_NONE);
+
+    /*
+      \param current position
+      \param current velocity
+      \param target position
+      \param target velocities
+    */
     void Evaluate(vctDoubleVec & CurrentPosition,
                   vctDoubleVec & CurrentVelocity,
-                  vctDoubleVec & CurrentAcceleration,
                   const vctDoubleVec & TargetPosition,
                   const vctDoubleVec & TargetVelocity);
 };

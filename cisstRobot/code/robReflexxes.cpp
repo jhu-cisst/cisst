@@ -20,17 +20,18 @@
 
 robReflexxes::robReflexxes(void):
     mIsSet(false),
-    cycle_time_in_seconds(0.001),
     IntermediateTargetStateSet(false),
     IntermediateStateReached(false),
     ResultValue(0),
-    Time(0.0)
+    Time(0.0),
+    RML(NULL),
+    IP(NULL),
+    OP(NULL)
 {}
 
 robReflexxes::robReflexxes(const vctDoubleVec & MaxVelocity,
                            const vctDoubleVec & MaxAcceleration,
-                           const vctDoubleVec & TargetPosition,
-                           const vctDoubleVec & TargetVelocity,
+                           const double CycleTime,
                            const CoordinationType coordination):
     mIsSet(false),
     cycle_time_in_seconds(0.001),
@@ -38,8 +39,29 @@ robReflexxes::robReflexxes(const vctDoubleVec & MaxVelocity,
     IntermediateStateReached(false),
     ResultValue(0),
     Time(0.0)
+    RML(NULL),
+    IP(NULL),
+    OP(NULL)
 {
-    Set(MaxVelocity, MaxAcceleration, TargetPosition, TargetVelocity, coordination);
+    Set(MaxVelocity, MaxAcceleration, CycleTime, coordination);
+}
+
+robReflexxes::robReflexxes(const vctDoubleVec & MaxVelocity,
+                           const vctDoubleVec & MaxAcceleration,
+                           const vctDoubleVec & MaxJerk,
+                           const double CycleTime,
+                           const CoordinationType coordination):
+    mIsSet(false),
+    cycle_time_in_seconds(0.001),
+    IntermediateTargetStateSet(false),
+    IntermediateStateReached(false),
+    ResultValue(0),
+    Time(0.0)
+    RML(NULL),
+    IP(NULL),
+    OP(NULL)
+{
+    Set(MaxVelocity, MaxAcceleration, MaxJerk, CycleTime, coordination);
 }
 
 robReflexxes::~robReflexxes()
@@ -51,26 +73,29 @@ robReflexxes::~robReflexxes()
 
 void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
                        const vctDoubleVec & MaxAcceleration,
-                       const vctDoubleVec & TargetPosition,
-                       const vctDoubleVec & TargetVelocity,
+                       const double CycleTime,
                        const CoordinationType coordination)
 {
     mIsSet = false;
 
     // sanity checks
-    mDimension = TargetPosition.size();
-    if (MaxVelocity.size() != mDimension) {
-        cmnThrow("robReflexxes::Set: maximum velocity doesn't match start point dimension");
-    }
+    mDimension = MaxVelocity.size();
     if (MaxAcceleration.size() != mDimension) {
         cmnThrow("robReflexxes::Set: maximum acceleration doesn't match start point dimension");
     }
-    if (TargetVelocity.size() != mDimension) {
-        cmnThrow("robReflexxes::Set: target velocity doesn't match start point dimension");
+    CurrentAcceleration.SetSize(dimension);
+    for(size_t i = 0;
+        i < mDimension;
+        ++i)
+    {
+        CurrentAcceleration[i] = 0;
     }
 
     // Creating all relevant objects of the Reflexxes Motion Library
-    RML = new ReflexxesAPI(mDimension, cycle_time_in_seconds);
+    if (RML != NULL) delete RML;
+    if (IP != NULL) delete IP;
+    if (OP != NULL) delete OP;
+    RML = new ReflexxesAPI(mDimension, CycleTime);
     IP = new RMLPositionInputParameters(mDimension);
     OP = new RMLPositionOutputParameters(mDimension);
 
@@ -81,8 +106,58 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
         IP->MaxVelocityVector->VecData[i] = MaxVelocity[i];
         IP->MaxAccelerationVector->VecData[i] = MaxAcceleration[i];
         IP->MaxJerkVector->VecData[i] = 500.0;
-        IP->TargetPositionVector->VecData[i] = TargetPosition[i];
-        IP->TargetVelocityVector->VecData[i] = TargetVelocity[i];
+        IP->SelectionVector->VecData[i] = true;
+    }
+
+    // Checking for input parameters
+    if (IP->CheckForValidity()) {
+        printf("Input values are valid!\n");
+    } else {
+        printf("input values are INVALID!\n");
+    }
+    
+    mIsSet = true;
+}
+
+void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
+                       const vctDoubleVec & MaxAcceleration,
+                       const vctDoubleVec & MaxJerk,
+                       const double CycleTime,
+                       const CoordinationType coordination)
+{
+    mIsSet = false;
+
+    // sanity checks
+    mDimension = MaxVelocity.size();
+    if (MaxAcceleration.size() != mDimension) {
+        cmnThrow("robReflexxes::Set: maximum acceleration doesn't match start point dimension");
+    }
+    if (MaxJerk.size() != mDimension) {
+        cmnThrow("robReflexxes::Set: maximum jerk doesn't match start point dimension");
+    }
+    CurrentAcceleration.SetSize(dimension);
+    for(size_t i = 0;
+        i < mDimension;
+        ++i)
+    {
+        CurrentAcceleration[i] = 0;
+    }
+
+    // Creating all relevant objects of the Reflexxes Motion Library
+    if (RML != NULL) delete RML;
+    if (IP != NULL) delete IP;
+    if (OP != NULL) delete OP;
+    RML = new ReflexxesAPI(mDimension, cycle_time_in_seconds);
+    IP = new RMLPositionInputParameters(mDimension);
+    OP = new RMLPositionOutputParameters(mDimension);
+
+    // Set-up the input parameters
+    for (size_t i = 0;
+         i < mDimension;
+         ++i) {
+        IP->MaxVelocityVector->VecData[i] = MaxVelocity[i];
+        IP->MaxAccelerationVector->VecData[i] = MaxAcceleration[i];
+        IP->MaxJerkVector->VecData[i] = MaxJerk[i];
         IP->SelectionVector->VecData[i] = true;
     }
 
@@ -98,7 +173,6 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
 
 void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
                             vctDoubleVec & CurrentVelocity,
-                            vctDoubleVec & CurrentAcceleration,
                             const vctDoubleVec & TargetPosition,
                             const vctDoubleVec & TargetVelocity)
 {
@@ -111,9 +185,6 @@ void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
     }
     if (CurrentVelocity.size() != mDimension) {
         cmnThrow("robReflexxes::Evaluate: velocity doesn't match dimension");
-    }
-    if (CurrentAcceleration.size() != mDimension) {
-        cmnThrow("robReflexxes::Evaluate: acceleration doesn't match dimension");
     }
     if (TargetPosition.size() != mDimension) {
         cmnThrow("robReflexxes::Evaluate: target position doesn't match dimension");

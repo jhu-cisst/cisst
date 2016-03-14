@@ -7,13 +7,13 @@
 
   (C) Copyright 2016 Johns Hopkins University (JHU), All Rights Reserved.
 
---- begin cisst license - do not edit ---
+  --- begin cisst license - do not edit ---
 
-This software is provided "as is" under an open source license, with
-no warranty.  The complete license can be found in license.txt and
-http://www.cisst.org/cisst/license.txt.
+  This software is provided "as is" under an open source license, with
+  no warranty.  The complete license can be found in license.txt and
+  http://www.cisst.org/cisst/license.txt.
 
---- end cisst license ---
+  --- end cisst license ---
 
 */
 
@@ -27,26 +27,27 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     const size_t dimension = 2;
     vctDoubleVec
-            CurrentPosition,
-            CurrentVelocity,
-            CurrentAcceleration,
-            MaxVelocity,
-            MaxAcceleration,
-            TargetPosition,
-            TargetVelocity;
+        CurrentPosition,
+        CurrentVelocity,
+        MaxVelocity,
+        MaxAcceleration,
+        MaxJerk,
+        TargetPosition,
+        TargetVelocity;
+    double CycleTime = 0.001;
 
     CurrentPosition.SetSize(dimension);
     CurrentVelocity.SetSize(dimension);
-    CurrentAcceleration.SetSize(dimension);
+
     MaxVelocity.SetSize(dimension);
     MaxAcceleration.SetSize(dimension);
+    MaxJerk.SetSize(dimension);
     TargetPosition.SetSize(dimension);
     TargetVelocity.SetSize(dimension);
 
     // set parameters
     CurrentPosition.Assign(      100.0,  100.0);
     CurrentVelocity.Assign(        0.0,    0.0);
-    CurrentAcceleration.Assign(    0.0,    0.0);
     MaxVelocity.Assign(          300.0,  300.0);
     MaxAcceleration.Assign(      400.0,  400.0);
     TargetPosition.Assign(       700.0,  300.0);
@@ -55,8 +56,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     robReflexxes trajectory;
     trajectory.Set(MaxVelocity,
                    MaxAcceleration,
-                   TargetPosition,
-                   TargetVelocity,
+                   CycleTime,
                    robReflexxes::Reflexxes_DURATION); // default is Reflexxes_NONE
 
     std::ofstream log, logHeader;
@@ -78,8 +78,8 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     std::cout << "wzr" << std::endl;
 
     while (1) {
-        trajectory.Evaluate(CurrentPosition, CurrentVelocity, CurrentAcceleration, TargetPosition, TargetVelocity);
-        trajectory.Time += trajectory.cycle_time_in_seconds;
+        trajectory.Evaluate(CurrentPosition, CurrentVelocity, TargetPosition, TargetVelocity);
+        trajectory.Time += CycleTime;
 
         if ( (trajectory.Time >= 1.0) && (!trajectory.IntermediateTargetStateSet) ) {
             trajectory.IntermediateTargetStateSet = true;
