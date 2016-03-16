@@ -39,40 +39,43 @@
 class CISST_EXPORT robReflexxes {
 
 public:
-    bool IntermediateTargetStateSet;
-    bool IntermediateStateReached;
-    int ResultValue;
-    double Time;
-    typedef enum {Reflexxes_NONE, Reflexxes_DURATION} CoordinationType;
+    typedef enum {Reflexxes_NONE, Reflexxes_TIME, Reflexxes_PHASE} SynchronizationType;
     
-    RMLPositionFlags Flags;
-    // I don't whether the duration is needed or not
+    RMLPositionFlags Flags; //need to be hided
 
 protected:
-    bool mIsSet;                        /*!< To ensure we don't evaluate if the parameters are not set */
-    size_t mDimension;                  /*!< Number of degrees of freedom */
+    bool mIsSet;                          /*!< To ensure we don't evaluate if the parameters are not set */
+    size_t mDimension;                    /*!< Number of degrees of freedom */
+    SynchronizationType mSynchronization; /*!< synchronization type we can set*/
 
-    CoordinationType mCoordination;
+    ReflexxesAPI *RML;                    /*!< */
+    RMLPositionInputParameters *IP;       /*!< */
+    RMLPositionOutputParameters *OP;      /*!< */
+    int mResultValue;                     /*!< */
+    double mTime;                         /*!< */
 
-    ReflexxesAPI *RML;
-    RMLPositionInputParameters *IP;
-    RMLPositionOutputParameters *OP;
-    vctDoubleVec CurrentAcceleration;
+    vctDoubleVec mCurrentAcceleration;    /*!< */
 
 public:
     robReflexxes(void);
     robReflexxes(const vctDoubleVec & MaxVelocity,
                  const vctDoubleVec & MaxAcceleration,
                  const double CycleTime,
-                 const CoordinationType coordination = Reflexxes_NONE);
+                 const SynchronizationType synchronization = Reflexxes_NONE);
     robReflexxes(const vctDoubleVec & MaxVelocity,
                  const vctDoubleVec & MaxAcceleration,
                  const vctDoubleVec & MaxJerk,
                  const double CycleTime,
-                 const CoordinationType coordination = Reflexxes_NONE);
+                 const SynchronizationType synchronization = Reflexxes_NONE);
 
     ~robReflexxes();
 
+    void Init(void);
+
+    int getResultValue(void) const;
+    double getTime(void) const;
+    void setTime(const double);
+    
     /*!  \brief Set target positions and velocities as well as desired
       maximum velocities and accelerations. All vectors must match the
       target position size.
@@ -83,13 +86,13 @@ public:
     void Set(const vctDoubleVec & MaxVelocity,
              const vctDoubleVec & MaxAcceleration,
              const double CycleTime,
-             const CoordinationType coordination = Reflexxes_NONE);
+             const SynchronizationType synchronization = Reflexxes_NONE);
 
     void Set(const vctDoubleVec & MaxVelocity,
              const vctDoubleVec & MaxAcceleration,
              const vctDoubleVec & MaxJerk,
              const double CycleTime,
-             const CoordinationType coordination = Reflexxes_NONE);
+             const SynchronizationType synchronization = Reflexxes_NONE);
 
     /*
       \param current position

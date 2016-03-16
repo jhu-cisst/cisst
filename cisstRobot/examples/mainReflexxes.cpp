@@ -29,35 +29,37 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     vctDoubleVec
         CurrentPosition,
         CurrentVelocity,
+        TargetPosition,
+        TargetVelocity,
         MaxVelocity,
         MaxAcceleration,
-        MaxJerk,
-        TargetPosition,
-        TargetVelocity;
+        MaxJerk;
     double CycleTime = 0.001;
 
     CurrentPosition.SetSize(dimension);
     CurrentVelocity.SetSize(dimension);
+    TargetPosition.SetSize(dimension);
+    TargetVelocity.SetSize(dimension);
 
     MaxVelocity.SetSize(dimension);
     MaxAcceleration.SetSize(dimension);
     MaxJerk.SetSize(dimension);
-    TargetPosition.SetSize(dimension);
-    TargetVelocity.SetSize(dimension);
 
     // set parameters
     CurrentPosition.Assign(      100.0,  100.0);
     CurrentVelocity.Assign(        0.0,    0.0);
-    MaxVelocity.Assign(          300.0,  300.0);
-    MaxAcceleration.Assign(      400.0,  400.0);
     TargetPosition.Assign(       700.0,  300.0);
     TargetVelocity.Assign(         0.0,    0.0);
+    MaxVelocity.Assign(          300.0,  300.0);
+    MaxAcceleration.Assign(      400.0,  400.0);
 
     robReflexxes trajectory;
     trajectory.Set(MaxVelocity,
                    MaxAcceleration,
                    CycleTime,
-                   robReflexxes::Reflexxes_DURATION); // default is Reflexxes_NONE
+                   robReflexxes::Reflexxes_TIME); // default is Reflexxes_NONE
+
+    std::cout << "wzr" << std::endl;
 
     std::ofstream log, logHeader;
     const char * logName = "robReflexxes.txt";
@@ -76,19 +78,24 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     trajectory.Flags.SynchronizationBehavior = RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
 
     std::cout << "wzr" << std::endl;
-
+    bool IntermediateTargetStateSet = false;
+    bool IntermediateStateReached = false;
     while (1) {
         trajectory.Evaluate(CurrentPosition, CurrentVelocity, TargetPosition, TargetVelocity);
-        trajectory.Time += CycleTime;
+        trajectory.setTime(trajectory.getTime() + CycleTime);
+        //trajectory.mTime += CycleTime;
 
-        if ( (trajectory.Time >= 1.0) && (!trajectory.IntermediateTargetStateSet) ) {
-            trajectory.IntermediateTargetStateSet = true;
+        //if ( (trajectory.mTime >= 1.0) && (!trajectory.mIntermediateTargetStateSet) ) {
+        if ( (trajectory.getTime() >= 1.0) && (!IntermediateTargetStateSet) ) {
+            IntermediateTargetStateSet = true;
             TargetPosition.Assign(  550.0, 250.0 );
             TargetVelocity.Assign( -150.0, -50.0 );
         }
 
-        if ( (trajectory.ResultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED) && (!trajectory.IntermediateStateReached) ) {
-            trajectory.IntermediateStateReached = true;
+        //if ( (trajectory.mResultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED) && (!trajectory.mIntermediateStateReached) ) {
+        if ( (trajectory.getResultValue() == ReflexxesAPI::RML_FINAL_STATE_REACHED) && (!IntermediateStateReached) ) {
+            //trajectory.mIntermediateStateReached = true;
+            IntermediateStateReached = true;
             TargetPosition.Assign(  700.0, 300.0 );
             TargetVelocity.Assign(    0.0,   0.0 );
 
@@ -102,7 +109,8 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         // cmnData<vctDoubleVec>::SerializeText(CurrentAcceleration, log);
         log << std::endl;
 
-        if ( trajectory.ResultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED )
+        //if ( trajectory.mResultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED )
+        if ( trajectory.getResultValue() == ReflexxesAPI::RML_FINAL_STATE_REACHED )
             break;
     }
 

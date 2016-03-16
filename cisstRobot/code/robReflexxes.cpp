@@ -18,64 +18,66 @@
 
 #include <cisstRobot/robReflexxes.h>
 
-robReflexxes::robReflexxes(void):
-    mIsSet(false),
-    IntermediateTargetStateSet(false),
-    IntermediateStateReached(false),
-    ResultValue(0),
-    Time(0.0)
+robReflexxes::robReflexxes(void)
 {
-    RML = NULL;
-    IP = NULL;
-    OP = NULL;
+    Init();
 }
 
 robReflexxes::robReflexxes(const vctDoubleVec & MaxVelocity,
                            const vctDoubleVec & MaxAcceleration,
                            const double CycleTime,
-                           const CoordinationType coordination):
-    mIsSet(false),
-    IntermediateTargetStateSet(false),
-    IntermediateStateReached(false),
-    ResultValue(0),
-    Time(0.0)
+                           const SynchronizationType synchronization)
 {
-    RML = NULL;
-    IP = NULL;
-    OP = NULL;
-
-    Set(MaxVelocity, MaxAcceleration, CycleTime, coordination);
+    Init();
+    Set(MaxVelocity, MaxAcceleration, CycleTime, synchronization);
 }
 
 robReflexxes::robReflexxes(const vctDoubleVec & MaxVelocity,
                            const vctDoubleVec & MaxAcceleration,
                            const vctDoubleVec & MaxJerk,
                            const double CycleTime,
-                           const CoordinationType coordination):
-    mIsSet(false),
-    IntermediateTargetStateSet(false),
-    IntermediateStateReached(false),
-    ResultValue(0),
-    Time(0.0)
+                           const SynchronizationType synchronization)
 {
-    RML = NULL;
-    IP = NULL;
-    OP = NULL;
-
-    Set(MaxVelocity, MaxAcceleration, MaxJerk, CycleTime, coordination);
+    Init();
+    Set(MaxVelocity, MaxAcceleration, MaxJerk, CycleTime, synchronization);
 }
 
 robReflexxes::~robReflexxes()
 {
-    delete RML;
-    delete IP;
-    delete OP;
+    if (RML != 0) delete RML;
+    if (IP != 0) delete IP;
+    if (OP != 0) delete OP;
+}
+
+void robReflexxes::Init(void)
+{
+    mIsSet = false;
+    mResultValue = 0;
+    mTime = 0.0;
+    RML = 0;
+    IP = 0;
+    OP = 0;
+}
+
+double robReflexxes::getTime(void) const
+{
+    return mTime;
+}
+
+void robReflexxes::setTime(const double time)
+{
+    mTime = time;
+}
+
+int robReflexxes::getResultValue(void) const
+{
+    return mResultValue;
 }
 
 void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
                        const vctDoubleVec & MaxAcceleration,
                        const double CycleTime,
-                       const CoordinationType coordination)
+                       const SynchronizationType synchronization)
 {
     mIsSet = false;
 
@@ -84,18 +86,18 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     if (MaxAcceleration.size() != mDimension) {
         cmnThrow("robReflexxes::Set: maximum acceleration doesn't match start point dimension");
     }
-    CurrentAcceleration.SetSize(mDimension);
+    mCurrentAcceleration.SetSize(mDimension);
     for(size_t i = 0;
         i < mDimension;
         ++i)
     {
-        CurrentAcceleration[i] = 0;
+        mCurrentAcceleration[i] = 0;
     }
 
     // Creating all relevant objects of the Reflexxes Motion Library
-    if (RML != NULL) delete RML;
-    if (IP != NULL) delete IP;
-    if (OP != NULL) delete OP;
+    if (RML != 0) delete RML;
+    if (IP != 0) delete IP;
+    if (OP != 0) delete OP;
     RML = new ReflexxesAPI(mDimension, CycleTime);
     IP = new RMLPositionInputParameters(mDimension);
     OP = new RMLPositionOutputParameters(mDimension);
@@ -112,9 +114,10 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
 
     // Checking for input parameters
     if (IP->CheckForValidity()) {
-        printf("Input values are valid!\n");
+        std::cout << "robReflexxes::Set: input values are valid!" << std::endl;
+        //cmnThrow("robReflexxes::Set: input values are valid!");
     } else {
-        printf("input values are INVALID!\n");
+        cmnThrow("robReflexxes::Set: input values are INVALID!");
     }
     
     mIsSet = true;
@@ -124,7 +127,7 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
                        const vctDoubleVec & MaxAcceleration,
                        const vctDoubleVec & MaxJerk,
                        const double CycleTime,
-                       const CoordinationType coordination)
+                       const SynchronizationType synchronization)
 {
     mIsSet = false;
 
@@ -136,18 +139,18 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     if (MaxJerk.size() != mDimension) {
         cmnThrow("robReflexxes::Set: maximum jerk doesn't match start point dimension");
     }
-    CurrentAcceleration.SetSize(mDimension);
+    mCurrentAcceleration.SetSize(mDimension);
     for(size_t i = 0;
         i < mDimension;
         ++i)
     {
-        CurrentAcceleration[i] = 0;
+        mCurrentAcceleration[i] = 0;
     }
 
     // Creating all relevant objects of the Reflexxes Motion Library
-    if (RML != NULL) delete RML;
-    if (IP != NULL) delete IP;
-    if (OP != NULL) delete OP;
+    if (RML != 0) delete RML;
+    if (IP != 0) delete IP;
+    if (OP != 0) delete OP;
     RML = new ReflexxesAPI(mDimension, CycleTime);
     IP = new RMLPositionInputParameters(mDimension);
     OP = new RMLPositionOutputParameters(mDimension);
@@ -164,9 +167,10 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
 
     // Checking for input parameters
     if (IP->CheckForValidity()) {
-        printf("Input values are valid!\n");
+        std::cout << "robReflexxes::Set: input values are valid!" << std::endl;
+        //cmnThrow("robReflexxes::Set: input values are valid!");
     } else {
-        printf("input values are INVALID!\n");
+        cmnThrow("robReflexxes::Set: input values are INVALID!");
     }
     
     mIsSet = true;
@@ -200,16 +204,16 @@ void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
          ++i) {
         IP->CurrentPositionVector->VecData[i] = CurrentPosition[i];
         IP->CurrentVelocityVector->VecData[i] = CurrentVelocity[i];
-        IP->CurrentAccelerationVector->VecData[i] = CurrentAcceleration[i];
+        IP->CurrentAccelerationVector->VecData[i] = mCurrentAcceleration[i];
         IP->TargetPositionVector->VecData[i] = TargetPosition[i];
         IP->TargetVelocityVector->VecData[i] = TargetVelocity[i];
     }
 
     // Calling the Reflexxes OTG algorithm
-    ResultValue = RML->RMLPosition(*IP, OP, Flags);
+    mResultValue = RML->RMLPosition(*IP, OP, Flags);
 
-    if (ResultValue < 0) {
-        printf("An error occurred (%d).\n", ResultValue);
+    if (mResultValue < 0) {
+        printf("An error occurred (%d).\n", mResultValue);
         //break;
     }
 
@@ -219,6 +223,6 @@ void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
          ++i) {
         CurrentPosition[i] = OP->NewPositionVector->VecData[i];
         CurrentVelocity[i] = OP->NewVelocityVector->VecData[i];
-        CurrentAcceleration[i] = OP->NewAccelerationVector->VecData[i];
+        mCurrentAcceleration[i] = OP->NewAccelerationVector->VecData[i];
     }
 }
