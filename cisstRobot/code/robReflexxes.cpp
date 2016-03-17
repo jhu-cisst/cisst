@@ -69,9 +69,14 @@ void robReflexxes::setTime(const double time)
     mTime = time;
 }
 
-int robReflexxes::getResultValue(void) const
+const int & robReflexxes::ResultValue(void) const
 {
     return mResultValue;
+}
+
+double robReflexxes::Duration(void) const
+{
+    return OP->GetGreatestExecutionTime();
 }
 
 void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
@@ -211,7 +216,6 @@ void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
 
     // Calling the Reflexxes OTG algorithm
     mResultValue = RML->RMLPosition(*IP, OP, Flags);
-
     if (mResultValue < 0) {
         printf("An error occurred (%d).\n", mResultValue);
         //break;

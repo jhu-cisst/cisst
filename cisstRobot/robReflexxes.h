@@ -72,7 +72,11 @@ public:
 
     void Init(void);
 
-    int getResultValue(void) const;
+    const int & ResultValue(void) const;
+
+    /*! Returns expected time left after last Evaluate call. */ 
+    double Duration(void) const;
+    
     double getTime(void) const;
     void setTime(const double);
     

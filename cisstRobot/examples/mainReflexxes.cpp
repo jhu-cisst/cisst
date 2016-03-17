@@ -83,18 +83,14 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     while (1) {
         trajectory.Evaluate(CurrentPosition, CurrentVelocity, TargetPosition, TargetVelocity);
         trajectory.setTime(trajectory.getTime() + CycleTime);
-        //trajectory.mTime += CycleTime;
 
-        //if ( (trajectory.mTime >= 1.0) && (!trajectory.mIntermediateTargetStateSet) ) {
         if ( (trajectory.getTime() >= 1.0) && (!IntermediateTargetStateSet) ) {
             IntermediateTargetStateSet = true;
             TargetPosition.Assign(  550.0, 250.0 );
             TargetVelocity.Assign( -150.0, -50.0 );
         }
 
-        //if ( (trajectory.mResultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED) && (!trajectory.mIntermediateStateReached) ) {
-        if ( (trajectory.getResultValue() == ReflexxesAPI::RML_FINAL_STATE_REACHED) && (!IntermediateStateReached) ) {
-            //trajectory.mIntermediateStateReached = true;
+        if ( (trajectory.ResultValue() == ReflexxesAPI::RML_FINAL_STATE_REACHED) && (!IntermediateStateReached) ) {
             IntermediateStateReached = true;
             TargetPosition.Assign(  700.0, 300.0 );
             TargetVelocity.Assign(    0.0,   0.0 );
@@ -109,8 +105,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         // cmnData<vctDoubleVec>::SerializeText(CurrentAcceleration, log);
         log << std::endl;
 
-        //if ( trajectory.mResultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED )
-        if ( trajectory.getResultValue() == ReflexxesAPI::RML_FINAL_STATE_REACHED )
+        if ( trajectory.ResultValue() == ReflexxesAPI::RML_FINAL_STATE_REACHED )
             break;
     }
 
