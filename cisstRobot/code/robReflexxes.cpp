@@ -106,6 +106,8 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     RML = new ReflexxesAPI(mDimension, CycleTime);
     IP = new RMLPositionInputParameters(mDimension);
     OP = new RMLPositionOutputParameters(mDimension);
+    // reset RML state
+    mResultValue = 0;
 
     // Set-up the input parameters
     for (size_t i = 0;
@@ -124,7 +126,7 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     } else {
         cmnThrow("robReflexxes::Set: input values are INVALID!");
     }
-    
+
     mIsSet = true;
 }
 
@@ -159,6 +161,8 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     RML = new ReflexxesAPI(mDimension, CycleTime);
     IP = new RMLPositionInputParameters(mDimension);
     OP = new RMLPositionOutputParameters(mDimension);
+    // reset RML state
+    mResultValue = 0;
 
     // Set-up the input parameters
     for (size_t i = 0;
@@ -177,7 +181,7 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     } else {
         cmnThrow("robReflexxes::Set: input values are INVALID!");
     }
-    
+
     mIsSet = true;
 }
 
