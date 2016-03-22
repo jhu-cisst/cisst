@@ -2,13 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
-
   Author(s):  Anton Deguet
   Created on: 2010-01-10
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -41,7 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstVector/vctTransformationTypes.h"
 
 // ------------- types used for vctFrm3 -------------------
- 
+
 // to get access to the translation data member
 %include "cisstVector/vctDynamicVectorTypemaps.i"
 %apply vctDynamicVector         {vctFixedSizeVector< vctMatrixRotation3< double,VCT_ROW_MAJOR >::value_type,vctFrameBase< vctMatrixRotation3< double,VCT_ROW_MAJOR > >::DIMENSION >};
@@ -68,7 +65,9 @@ typedef vctFrameBase<vctRot3 > vctFrm3;
 
 
 // ------------- types used for vctFrm4x4 -------------------
-
+%apply vctDynamicMatrix         {vctFrame4x4<double>};
+%apply vctDynamicMatrix &       {vctFrame4x4<double> &};
+%apply const vctDynamicMatrix & {const vctFrame4x4<double> &};
 %apply vctDynamicMatrix         {vctFrame4x4<double, VCT_ROW_MAJOR >};
 %apply vctDynamicMatrix &       {vctFrame4x4<double, VCT_ROW_MAJOR > &};
 %apply const vctDynamicMatrix & {const vctFrame4x4<double, VCT_ROW_MAJOR > &};

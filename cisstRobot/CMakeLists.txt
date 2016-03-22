@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2016 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -17,7 +15,9 @@ project (cisstRobotLibs)
 add_subdirectory (code)
 add_subdirectory (applications)
 
+# SWIG Python wrappers
+cisst_offer_python (cisstRobot)
+
 # build examples and tests, add an option to skip them
 cisst_offer_examples (cisstRobot)
-# build tests, add an option to skip them
 cisst_offer_tests (cisstRobot)
