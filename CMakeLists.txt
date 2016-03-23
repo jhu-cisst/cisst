@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2016 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -172,6 +172,7 @@ if (CISST_CATKIN_BUILT)
   set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
   # Options defaults
   set (CISST_HAS_JSON ON CACHE "" BOOL)
+  set (CISST_HAS_SWIG_PYTHON ON CACHE "" BOOL FORCE)
   set (CISST_BUILD_SHARED_LIBS ON CACHE "" BOOL FORCE)
   set (IS_SHARED SHARED)
   set (BUILD_SHARED_LIBS SHARED)
@@ -790,13 +791,19 @@ endif (WIN32)
 
 # Environment variables for Unix
 if (UNIX)
+  if (CISST_CATKIN_BUILT)
+    set (CISST_SCRIPTS_DIRECTORY "${CATKIN_DEVEL_PREFIX}")
+  else ()
+    set (CISST_SCRIPTS_DIRECTORY "${cisst_BINARY_DIR}")
+  endif ()
+
   # Script to set cisst environment variables
-  configure_file (${cisst_SOURCE_DIR}/utils/cisstvars.csh.in
-                  ${cisst_BINARY_DIR}/cisstvars.csh
+  configure_file ("${cisst_SOURCE_DIR}/utils/cisstvars.csh.in"
+                  "${CISST_SCRIPTS_DIRECTORY}/cisstvars.csh"
                   @ONLY)
   # Script to set cisst environment variables
-  configure_file (${cisst_SOURCE_DIR}/utils/cisstvars.sh.in
-                  ${cisst_BINARY_DIR}/cisstvars.sh
+  configure_file ("${cisst_SOURCE_DIR}/utils/cisstvars.sh.in"
+                  "${CISST_SCRIPTS_DIRECTORY}/cisstvars.sh"
                   @ONLY)
 endif (UNIX)
 

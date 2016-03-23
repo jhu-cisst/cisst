@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 %module cisstRobotPython
 
 %include "swigrun.i"
+%include "std_vector.i"
 
 %import "cisstConfig.h"
 
@@ -43,3 +44,11 @@ http://www.cisst.org/cisst/license.txt.
 
 // Wrap manipulator class
 %include "cisstRobot/robManipulator.h"
+
+%include "cisstRobot/robLink.h"
+namespace std {
+    %template(robLinkVector) vector<robLink>;
+}
+
+%include "cisstRobot/robJoint.h"
+%include "cisstRobot/robKinematics.h"

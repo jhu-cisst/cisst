@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2016 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -266,16 +264,14 @@ if (CISST_HAS_SWIG_PYTHON)
   cisst_set_package_settings (cisstPython Python INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
   set (PYTHON_ALL_LIBRARIES "debug;${PYTHON_DEBUG_LIBRARIES};optimized;${PYTHON_LIBRARIES}")
   cisst_set_package_settings (cisstPython Python LIBRARIES PYTHON_ALL_LIBRARIES)
-  # We also need numpy if we have cisstVector
-  if (CISST_cisstVector)
-    find_package (Numpy REQUIRED)
-    if (NUMPY_FOUND)
-      cisst_set_package_settings (cisstPython NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
-      mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
-    else (NUMPY_FOUND)
-      cisst_unset_all_package_settings (cisstPython NumPy)
-    endif (NUMPY_FOUND)
-  endif (CISST_cisstVector)
+  # We also need numpy for cisstVector, cisstMultiTask and cisstNumerical
+  find_package (Numpy REQUIRED)
+  if (NUMPY_FOUND)
+    cisst_set_package_settings (cisstPython NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
+    mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
+  else (NUMPY_FOUND)
+    cisst_unset_all_package_settings (cisstPython NumPy)
+  endif (NUMPY_FOUND)
 
   # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and PYTHON_EXECUTABLE.
   # (Currently, this is only created if the correct version of SWIG was found -- should that check be removed?
