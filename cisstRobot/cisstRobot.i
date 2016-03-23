@@ -42,6 +42,53 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_EXPORT
 #define CISST_DEPRECATED
 
+// try to determine the pointer type, robDH, robModifiedDH, robHayati
+// then "type" cast to SWIG wrapped
+%typemap(out) robKinematics * {
+    if (result != NULL) {
+        std::string className;
+        robDH * dh = dynamic_cast<robDH *>(result);
+        if (dh) {
+            className = "robDH *";
+        } else {
+            robModifiedDH * mod_dh = dynamic_cast<robModifiedDH *>(result);
+            if (mod_dh) {
+                className = "robModifiedDH *";
+            } else {
+                robHayati * hayati = dynamic_cast<robHayati *>(result);
+                if (hayati) {
+                    className = "robHayati *";
+                }
+            }
+        }
+
+        if (className != "") {
+            swig_type_info *typeInfo = 0;
+            typeInfo = SWIG_TypeQuery(className.c_str());
+            // if the type info exists, i.e. this class has been wrapped, convert pointer
+            if (typeInfo)
+                resultobj = SWIG_NewPointerObj((void*)(result), typeInfo, $owner | %newpointer_flags);
+            else {  // failed
+                char buffer[256];
+                sprintf(buffer, "cisstRobotPython.i: sorry, can't create a python object of type %s.",
+                        className.c_str());
+                PyErr_SetString(PyExc_TypeError, buffer);
+                SWIG_fail;
+            }
+        } else {
+            char buffer[256];
+            sprintf(buffer, "cisstRobotPython.i: sorry, can't create a python object of type %s (not a supported derived class).",
+                    className.c_str());
+            PyErr_SetString(PyExc_TypeError, buffer);
+            SWIG_fail;
+        }
+    } else {
+        // Return None if object not found
+        Py_INCREF(Py_None);
+        resultobj = Py_None;
+    }
+}
+
 // Wrap manipulator class
 %include "cisstRobot/robManipulator.h"
 
@@ -52,3 +99,6 @@ namespace std {
 
 %include "cisstRobot/robJoint.h"
 %include "cisstRobot/robKinematics.h"
+%include "cisstRobot/robDH.h"
+%include "cisstRobot/robModifiedDH.h"
+%include "cisstRobot/robHayati.h"
