@@ -231,6 +231,13 @@ public:
                        size_t Niteration=1000,
                        double LAMBDA=0.001 );
 
+  virtual
+    robManipulator::Errno
+    InverseKinematicsConstrained( vctDynamicVector<double>& q,
+                                  const vctFrame4x4<double>& Rts,
+                                  double tolerance=1e-12,
+                                  size_t Niteration=1000 );
+
 
   virtual
     robManipulator::Errno
@@ -257,6 +264,11 @@ public:
     InverseDynamics( const vctDynamicVector<double>& q,
                      const vctDynamicVector<double>& qd,
                      const vctDynamicVector<double>& qdd ) const;
+
+  virtual
+    vctDynamicVector<double>
+    ConstrainedRMRC( const vctDynamicVector<double>& q,
+                     const vctFixedSizeVector<double,6>& vw );
 
   //! Inverse dynamics in operation space
   /**
