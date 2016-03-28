@@ -18,6 +18,11 @@
 
 #include <cisstRobot/robReflexxes.h>
 
+#include <ReflexxesAPI.h>
+#include <RMLPositionFlags.h>
+#include <RMLPositionInputParameters.h>
+#include <RMLPositionOutputParameters.h>
+
 robReflexxes::robReflexxes(void)
 {
     Init();
@@ -47,16 +52,18 @@ robReflexxes::~robReflexxes()
     if (RML != 0) delete RML;
     if (IP != 0) delete IP;
     if (OP != 0) delete OP;
+    if (mFlags != 0) delete mFlags;
 }
 
 void robReflexxes::Init(void)
 {
     mIsSet = false;
-    mResultValue = 0;
+    mResultValue = Reflexxes_UNDEFINDED;
     mTime = 0.0;
     RML = 0;
     IP = 0;
     OP = 0;
+    mFlags = 0;
 }
 
 double robReflexxes::getTime(void) const
@@ -69,7 +76,7 @@ void robReflexxes::setTime(const double time)
     mTime = time;
 }
 
-const int & robReflexxes::ResultValue(void) const
+const robReflexxes::ResultType & robReflexxes::ResultValue(void) const
 {
     return mResultValue;
 }
@@ -84,50 +91,10 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
                        const double CycleTime,
                        const SynchronizationType synchronization)
 {
-    mIsSet = false;
-
-    // sanity checks
-    mDimension = MaxVelocity.size();
-    if (MaxAcceleration.size() != mDimension) {
-        cmnThrow("robReflexxes::Set: maximum acceleration doesn't match start point dimension");
-    }
-    mCurrentAcceleration.SetSize(mDimension);
-    for(size_t i = 0;
-        i < mDimension;
-        ++i)
-    {
-        mCurrentAcceleration[i] = 0;
-    }
-
-    // Creating all relevant objects of the Reflexxes Motion Library
-    if (RML != 0) delete RML;
-    if (IP != 0) delete IP;
-    if (OP != 0) delete OP;
-    RML = new ReflexxesAPI(mDimension, CycleTime);
-    IP = new RMLPositionInputParameters(mDimension);
-    OP = new RMLPositionOutputParameters(mDimension);
-    // reset RML state
-    mResultValue = 0;
-
-    // Set-up the input parameters
-    for (size_t i = 0;
-         i < mDimension;
-         ++i) {
-        IP->MaxVelocityVector->VecData[i] = MaxVelocity[i];
-        IP->MaxAccelerationVector->VecData[i] = MaxAcceleration[i];
-        IP->MaxJerkVector->VecData[i] = 500.0;
-        IP->SelectionVector->VecData[i] = true;
-    }
-
-    // Checking for input parameters
-    if (IP->CheckForValidity()) {
-        std::cout << "robReflexxes::Set: input values are valid!" << std::endl;
-        //cmnThrow("robReflexxes::Set: input values are valid!");
-    } else {
-        cmnThrow("robReflexxes::Set: input values are INVALID!");
-    }
-
-    mIsSet = true;
+    // create a jerk vector and then call method Set with jerk
+    vctDoubleVec jerk(MaxVelocity.size());
+    jerk.SetAll(500.0);
+    Set(MaxVelocity, MaxAcceleration, jerk, CycleTime, synchronization);
 }
 
 void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
@@ -158,11 +125,14 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     if (RML != 0) delete RML;
     if (IP != 0) delete IP;
     if (OP != 0) delete OP;
+    if (mFlags != 0) delete mFlags;
     RML = new ReflexxesAPI(mDimension, CycleTime);
     IP = new RMLPositionInputParameters(mDimension);
     OP = new RMLPositionOutputParameters(mDimension);
+    mFlags = new RMLPositionFlags();
+
     // reset RML state
-    mResultValue = 0;
+    mResultValue = Reflexxes_UNDEFINDED;
 
     // Set-up the input parameters
     for (size_t i = 0;
@@ -219,10 +189,22 @@ void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
     }
 
     // Calling the Reflexxes OTG algorithm
-    mResultValue = RML->RMLPosition(*IP, OP, Flags);
-    if (mResultValue < 0) {
-        printf("An error occurred (%d).\n", mResultValue);
+    int rmlResult = RML->RMLPosition(*IP, OP, *mFlags);
+    if (rmlResult < 0) {
+        printf("An error occurred (%d).\n", rmlResult);
         //break;
+    }
+
+    switch (rmlResult) {
+    case ReflexxesAPI::RML_WORKING:
+        mResultValue = Reflexxes_WORKING;
+        break;
+    case ReflexxesAPI::RML_FINAL_STATE_REACHED:
+        mResultValue = Reflexxes_FINAL_STATE_REACHED;
+        break;
+    default:
+        mResultValue = Reflexxes_ERROR;
+        break;
     }
 
     // Feed the output values of the current control cycle back to input values of the next control cycle

@@ -19,10 +19,16 @@
 #ifndef _robReflexxes_h
 #define _robReflexxes_h
 
-#include <ReflexxesAPI.h>
-#include <RMLPositionFlags.h>
-#include <RMLPositionInputParameters.h>
-#include <RMLPositionOutputParameters.h>
+// #include <ReflexxesAPI.h>
+// #include <RMLPositionFlags.h>
+// #include <RMLPositionInputParameters.h>
+// #include <RMLPositionOutputParameters.h>
+
+// forward declarations for Reflexxes types
+class ReflexxesAPI;
+class RMLPositionInputParameters;
+class RMLPositionOutputParameters;
+class RMLPositionFlags;
 
 #include <cisstVector/vctDynamicVectorTypes.h>
 
@@ -40,18 +46,20 @@ class CISST_EXPORT robReflexxes {
 
 public:
     typedef enum {Reflexxes_NONE, Reflexxes_TIME, Reflexxes_PHASE} SynchronizationType;
-    
-    RMLPositionFlags Flags; //need to be hided
+    typedef enum {Reflexxes_UNDEFINDED, Reflexxes_WORKING,
+                  Reflexxes_FINAL_STATE_REACHED, Reflexxes_ERROR} ResultType;
+    // RMLPositionFlags Flags; //need to be hided
 
 protected:
     bool mIsSet;                          /*!< To ensure we don't evaluate if the parameters are not set */
     size_t mDimension;                    /*!< Number of degrees of freedom */
     SynchronizationType mSynchronization; /*!< synchronization type we can set*/
 
-    ReflexxesAPI *RML;                    /*!< */
+    ReflexxesAPI * RML;                    /*!< */
     RMLPositionInputParameters *IP;       /*!< */
     RMLPositionOutputParameters *OP;      /*!< */
-    int mResultValue;                     /*!< */
+    RMLPositionFlags * mFlags;
+    ResultType mResultValue;                     /*!< */
     double mTime;                         /*!< */
 
     vctDoubleVec mCurrentAcceleration;    /*!< */
@@ -72,7 +80,7 @@ public:
 
     void Init(void);
 
-    const int & ResultValue(void) const;
+    const ResultType & ResultValue(void) const;
 
     /*! Returns expected time left after last Evaluate call. */ 
     double Duration(void) const;
