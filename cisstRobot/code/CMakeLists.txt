@@ -103,11 +103,24 @@ if (CISST_HAS_CISSTNETLIB)
 
       )
 
+  if (CISST_CATKIN_BUILT)
+    set (Reflexxes_LIBRARIES ReflexxesTypeII)
+    set (Reflexxes_LINK_DIRECTORIES "${CATKIN_DEVEL_PREFIX}/lib")
+    cisst_set_package_settings (cisstRobot Reflexxes LIBRARIES Reflexxes_LIBRARIES)
+    cisst_set_package_settings (cisstRobot Reflexxes LINK_DIRECTORIES Reflexxes_LINK_DIRECTORIES)
+
+    set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
+    set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
+
+  endif (CISST_CATKIN_BUILT)
+
   cisst_add_library (LIBRARY cisstRobot
                      FOLDER cisstRobot
                      DEPENDENCIES ${DEPENDENCIES}
                      SOURCE_FILES ${SOURCE_FILES}
                      HEADER_FILES ${HEADER_FILES})
+
+  target_link_libraries(cisstRobot ReflexxesTypeII)
 
 else (CISST_HAS_CISSTNETLIB)
   message ("cisstRobot requires cisstNumerical to be compiled with the option CISST_HAS_CISSTNETLIB")
