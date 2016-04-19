@@ -36,7 +36,7 @@ class CISST_EXPORT robJoint {
 
  public:
 
-  enum Type{ 
+  enum Type{
     UNDEFINED,   // no clue
     HINGE,       // revolute joint
     SLIDER,      // prismatic joint
@@ -48,7 +48,7 @@ class CISST_EXPORT robJoint {
   /**
      Each joint can be active (powered by a motor) or passive
   */
-  enum Mode{    
+  enum Mode{
     ACTIVE,
     PASSIVE
   };
@@ -65,7 +65,7 @@ private:
      Determine if the joint is a hinge, slider, universal, ball and socket, etc.
   */
   robJoint::Type type;
-  
+
   //! The mode of the joint
   /**
      Determine if the joint is active (actuated) or passive
@@ -83,7 +83,7 @@ private:
 
   //! The absolute maximum force or torque
   double ftmax;
-  
+
 public:
 
   //! Default constructor
@@ -158,30 +158,31 @@ public:
      \return The offset position of the joint. This value has no unit.
   */
   double PositionOffset() const;
+  void SetPositionOffset(const double offset);
 
   //! Return the minimum position
   /**
      \return The minimum position of the joint. This value has no unit.
   */
   double PositionMin() const;
-  
+
   //! Return the maximum position
   /**
      \return The maximum position of the joint. This value has no unit.
   */
   double PositionMax() const;
-  
+
   //! Return the maximum force/torque
   /**
      \return The absolute value for the maximum force or torque that can be
              applied by the joint.
   */
   double ForceTorqueMax() const;
-  
+
   //! Read from an input stream
   /**
      Use this method to configure the parameters of the joints from an input
-     stream. The parameters are in the following order: type, mode, position 
+     stream. The parameters are in the following order: type, mode, position
      offset, min position, max position, max force/torque.
      \param is[in] The input stream
   */

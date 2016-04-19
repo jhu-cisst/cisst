@@ -5,7 +5,7 @@
 #include <iomanip>    // setw
 #include <cctype>    // toupper
 
-robJoint::robJoint() : 
+robJoint::robJoint() :
   type( robJoint::UNDEFINED ),
   mode( robJoint::ACTIVE ),
   qoffset( 0.0 ),
@@ -73,31 +73,33 @@ void robJoint::SetForceTorque( double ){
 
 double robJoint::PositionOffset() const { return qoffset; }
 
+void robJoint::SetPositionOffset(const double offset) { qoffset = offset; }
+
 double robJoint::PositionMin()    const { return qmin; }
 
 double robJoint::PositionMax()    const { return qmax; }
 
 double robJoint::ForceTorqueMax() const { return ftmax; }
 
-robJoint::Errno robJoint::Read( std::istream& is ){ 
+robJoint::Errno robJoint::Read( std::istream& is ){
 
   std::string type, mode;
-  
+
   is >> type        // read the stuff from the stream
      >> mode
      >> this->qoffset
-     >> this->qmin 
-     >> this->qmax 
+     >> this->qmin
+     >> this->qmax
      >> this->ftmax;
 
   // convert the strings to upper cases
   std::transform( type.begin(), type.end(), type.begin(), ::toupper );
   std::transform( mode.begin(), mode.end(), mode.begin(), ::toupper );
-  
+
   // match to string to a joint type
   if( (type.compare("REVOLUTE") == 0) || (type.compare("HINGE") == 0) )
     this->type = robJoint::HINGE;
-      
+
   else if( (type.compare("PRISMATIC") == 0) || (type.compare("SLIDER") == 0) )
     this->type = robJoint::SLIDER;
 
@@ -117,10 +119,10 @@ robJoint::Errno robJoint::Read( std::istream& is ){
   // match the mode string to a joint mode
   if( mode.compare( "PASSIVE" ) == 0 )
     this->mode = robJoint::PASSIVE;
-  
+
   else if( mode.compare( "ACTIVE" ) == 0 )
     this->mode = robJoint::ACTIVE;
-  
+
   else{
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected a joint mode. Got " << mode << "."
@@ -211,7 +213,7 @@ robJoint::Errno robJoint::Write( std::ostream& os ) const {
   else
     os << "passive ";
 
-  os << std::setw(13) << PositionOffset() 
+  os << std::setw(13) << PositionOffset()
      << std::setw(13) << PositionMin()
      << std::setw(13) << PositionMax()
      << std::setw(13) << ForceTorqueMax();
