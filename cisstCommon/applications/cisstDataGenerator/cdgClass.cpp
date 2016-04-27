@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -31,6 +31,11 @@ cdgClass::cdgClass(size_t lineNumber):
 
     cdgField * field;
     field = this->AddField("ctor-all-members", "false", false, "adds a constructor requiring an initial value for each member");
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("false");
+
+    field = this->AddField("virtual-dtor", "false", false, "make the destructor virtual");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");
@@ -168,8 +173,13 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     outputStream << " /* default constructors and destructors. */" << std::endl
                  << " public:" << std::endl
                  << "    " << className << "(void);" << std::endl
-                 << "    " << className << "(const " << this->GetFieldValue("name") << " & other);" << std::endl
-                 << "    ~" << className << "();" << std::endl << std::endl;
+                 << "    " << className << "(const " << this->GetFieldValue("name") << " & other);" << std::endl;
+    if (this->GetFieldValue("virtual-dtor") == "true") {
+        outputStream << "    virtual ~";
+    } else {
+        outputStream << "    ~";
+    }
+    outputStream << className << "();" << std::endl << std::endl;
 
     // generate code for all scopes
     for (index = 0; index < Scopes.size(); index++) {
