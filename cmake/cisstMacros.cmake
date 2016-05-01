@@ -892,6 +892,9 @@ macro (cisst_offer_saw_component component default)
   option (${cosc_OPTION_NAME} "Build ${component}" ${default})
   if (${cosc_OPTION_NAME})
     set (${component}_DIR "${CMAKE_CURRENT_BINARY_DIR}/${component}")
+    list (APPEND CMAKE_PREFIX_PATH
+                 "${CMAKE_CURRENT_BINARY_DIR}/${component}"
+                 "${CMAKE_CURRENT_BINARY_DIR}/${component}/components")
     mark_as_advanced (${component}_DIR)
     add_subdirectory (${component})
   else (${cosc_OPTION_NAME})
