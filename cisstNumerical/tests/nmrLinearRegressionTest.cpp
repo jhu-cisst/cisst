@@ -33,8 +33,8 @@ static double mse1 = 10.3348923076932;
 template <class _vectorType>
 void nmrLinearRegressionTest::TestLinearRegression(void)
 {
-    typedef _vectorType::value_type ElementType;
-    typedef nmrLinearRegressionSolver<ElementType>::SummationType SummationType;
+    typedef typename _vectorType::value_type ElementType;
+    typedef typename nmrLinearRegressionSolver<ElementType>::SummationType SummationType;
     bool isIntegralType = (cmnTypeTraits<ElementType>::MinPositiveValue() == 1);
     ElementType tol = cmnTypeTraits<ElementType>::Tolerance();
 

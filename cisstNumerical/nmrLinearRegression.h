@@ -272,7 +272,7 @@ bool nmrLinearRegression(const _vectorType &x, const _vectorType &y,
                          typename _vectorType::value_type *mse = 0,
                          typename _vectorType::value_type tolerance = cmnTypeTraits<typename _vectorType::value_type>::DefaultTolerance)
 {
-    nmrLinearRegressionSolver<_vectorType::value_type> solver(tolerance);
+    nmrLinearRegressionSolver<typename _vectorType::value_type> solver(tolerance);
     bool ret = solver.Sample(x,y);
     if (ret)
        ret = solver.Estimate(slope, yint, mse);
