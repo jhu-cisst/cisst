@@ -79,7 +79,9 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
     }
     outputStream << " };" << std::endl
                  << "    static std::string " << enumName << "ToString(const " << enumName << " & value) throw (std::runtime_error);" << std::endl
-                 << "    static " << enumName << " " << enumName << "FromString(const std::string & value) throw (std::runtime_error);" << std::endl;
+                 << "    static " << enumName << " " << enumName << "FromString(const std::string & value) throw (std::runtime_error);" << std::endl
+                 << "    static const std::list<int> & " << enumName << "ListInt(void);" << std::endl
+                 << "    static const std::list<std::string> & " << enumName << "ListString(void);" << std::endl;
 }
 
 
@@ -148,7 +150,35 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
                  << "    return static_cast<" << cScope << "::" << name << " >(0);" << std::endl
                  << "}" << std::endl
                  << std::endl;
-        
+
+    // to list int
+    methodName = cScope + "::" + name + "ListInt(void)";
+    outputStream << "const std::list<int> & " << methodName << " {" << std::endl
+                 << "    static std::list<int> listInt;" << std::endl
+                 << "    if (listInt.empty()) {" << std::endl;
+    for (index = 0; index < Scopes.size(); index++) {
+        outputStream << "        listInt.push_back(static_cast<int>("
+                     << Scopes[index]->GetFieldValue("name") << "));" << std::endl;
+    }
+    outputStream << "    }" << std::endl
+                 << "    return listInt;" << std::endl
+                 << "}" << std::endl
+                 << std::endl;
+
+    // to list string
+    methodName = cScope + "::" + name + "ListString(void)";
+    outputStream << "const std::list<std::string> & " << methodName << " {" << std::endl
+                 << "    static std::list<std::string> listString;" << std::endl
+                 << "    if (listString.empty()) {" << std::endl;
+    for (index = 0; index < Scopes.size(); index++) {
+        outputStream << "        listString.push_back(\""
+                     << Scopes[index]->GetFieldValue("name") << "\");" << std::endl;
+    }
+    outputStream << "    }" << std::endl
+                 << "    return listString;" << std::endl
+                 << "}" << std::endl
+                 << std::endl;
+
     outputStream << "#if CISST_HAS_JSON" << std::endl
                  << "  CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(" << cScope << "::" << name << ", int);" << std::endl
                  << "#endif // CISST_HAS_JSON" << std::endl;
