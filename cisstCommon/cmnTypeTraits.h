@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-01-13
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -273,6 +273,11 @@ inline bool cmnTypeTraits<long long int>::HasSign(void) {
 }
 
 template<>
+inline bool cmnTypeTraits<long int>::HasSign(void) {
+    return true;
+}
+
+template<>
 inline bool cmnTypeTraits<int>::HasSign(void) {
     return true;
 }
@@ -289,6 +294,11 @@ inline bool cmnTypeTraits<char>::HasSign(void) {
 
 template<>
 inline bool cmnTypeTraits<unsigned long long int>::HasSign(void) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned long int>::HasSign(void) {
     return false;
 }
 
@@ -325,6 +335,11 @@ inline bool cmnTypeTraits<long long int>::HasInfinity(void) {
 }
 
 template<>
+inline bool cmnTypeTraits<long int>::HasInfinity(void) {
+    return false;
+}
+
+template<>
 inline bool cmnTypeTraits<int>::HasInfinity(void) {
     return false;
 }
@@ -341,6 +356,11 @@ inline bool cmnTypeTraits<char>::HasInfinity(void) {
 
 template<>
 inline bool cmnTypeTraits<unsigned long long int>::HasInfinity(void) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned long int>::HasInfinity(void) {
     return false;
 }
 
@@ -377,6 +397,11 @@ inline bool cmnTypeTraits<long long int>::IsFinite(const long long int & CMN_UNU
 }
 
 template<>
+inline bool cmnTypeTraits<long int>::IsFinite(const long int & CMN_UNUSED(value)) {
+    return true;
+}
+
+template<>
 inline bool cmnTypeTraits<int>::IsFinite(const int & CMN_UNUSED(value)) {
     return true;
 }
@@ -393,6 +418,11 @@ inline bool cmnTypeTraits<char>::IsFinite(const char & CMN_UNUSED(value)) {
 
 template<>
 inline bool cmnTypeTraits<unsigned long long int>::IsFinite(const unsigned long long int & CMN_UNUSED(value)) {
+    return true;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned long int>::IsFinite(const unsigned long int & CMN_UNUSED(value)) {
     return true;
 }
 
@@ -429,6 +459,11 @@ inline bool cmnTypeTraits<long long int>::HasNaN(void) {
 }
 
 template<>
+inline bool cmnTypeTraits<long int>::HasNaN(void) {
+    return false;
+}
+
+template<>
 inline bool cmnTypeTraits<int>::HasNaN(void) {
     return false;
 }
@@ -445,6 +480,11 @@ inline bool cmnTypeTraits<char>::HasNaN(void) {
 
 template<>
 inline bool cmnTypeTraits<unsigned long long int>::HasNaN(void) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned long int>::HasNaN(void) {
     return false;
 }
 
@@ -480,6 +520,11 @@ inline bool cmnTypeTraits<long long int>::IsNaN(const long long int & CMN_UNUSED
 }
 
 template<>
+inline bool cmnTypeTraits<long int>::IsNaN(const long int & CMN_UNUSED(value)) {
+    return false;
+}
+
+template<>
 inline bool cmnTypeTraits<int>::IsNaN(const int & CMN_UNUSED(value)) {
     return false;
 }
@@ -496,6 +541,11 @@ inline bool cmnTypeTraits<char>::IsNaN(const char & CMN_UNUSED(value)) {
 
 template<>
 inline bool cmnTypeTraits<unsigned long long int>::IsNaN(const unsigned long long int & CMN_UNUSED(value)) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned long int>::IsNaN(const unsigned long int & CMN_UNUSED(value)) {
     return false;
 }
 

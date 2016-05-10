@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-01-23
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -101,6 +101,44 @@ double cmnTypeTraits<double>::NaN(void)
     return nan;
 }
 
+
+// ---------- long int ----------
+template<>
+long int & cmnTypeTraits<long int>::ToleranceValue(void)
+{
+    static long int tolerance = 0;
+    return tolerance;
+}
+
+template<>
+const long int cmnTypeTraits<long int>::DefaultTolerance = cmnTypeTraits<long int>::ToleranceValue();
+
+template<>
+std::string cmnTypeTraits<long int>::TypeName(void)
+{
+    return "long";
+}
+
+template<>
+long int cmnTypeTraits<long int>::PlusInfinity(void)
+{
+    // Not meaningful!  Here to avoid link errors
+    return MaxPositiveValue();
+}
+
+template<>
+long int cmnTypeTraits<long int>::MinusInfinity(void)
+{
+    // Not meaningful!  Here to avoid link errors
+    return MinNegativeValue();
+}
+
+template<>
+long int cmnTypeTraits<long int>::NaN(void)
+{
+    // Not meaningful!  Here to avoid link errors
+    return 0;
+}
 
 // ---------- int ----------
 template<>
@@ -290,6 +328,44 @@ unsigned long long cmnTypeTraits<unsigned long long>::MinusInfinity(void)
 
 template<>
 unsigned long long cmnTypeTraits<unsigned long long>::NaN(void)
+{
+    // Not meaningful!  Here to avoid link errors
+    return 0;
+}
+
+// ---------- unsigned long int ----------
+template<>
+unsigned long int & cmnTypeTraits<unsigned long int>::ToleranceValue(void)
+{
+    static unsigned long int tolerance = 0;
+    return tolerance;
+}
+
+template<>
+const unsigned long int cmnTypeTraits<unsigned long int>::DefaultTolerance = cmnTypeTraits<unsigned long int>::ToleranceValue();
+
+template<>
+std::string cmnTypeTraits<unsigned long int>::TypeName(void)
+{
+    return "unsigned long";
+}
+
+template<>
+unsigned long int cmnTypeTraits<unsigned long int>::PlusInfinity(void)
+{
+    // Not meaningful!  Here to avoid link errors
+    return MaxPositiveValue();
+}
+
+template<>
+unsigned long int cmnTypeTraits<unsigned long int>::MinusInfinity(void)
+{
+    // Not meaningful!  Here to avoid link errors
+    return MinNegativeValue();
+}
+
+template<>
+unsigned long int cmnTypeTraits<unsigned long int>::NaN(void)
 {
     // Not meaningful!  Here to avoid link errors
     return 0;

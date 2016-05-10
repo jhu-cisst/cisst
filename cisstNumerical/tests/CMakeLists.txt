@@ -18,6 +18,7 @@ set (SOURCE_FILES
      nmrBernsteinPolynomialLineIntegralTest.cpp
      nmrDynAllocPolynomialContainerTest.cpp
      nmrGaussJordanInverseTest.cpp
+     nmrLinearRegressionTest.cpp
      nmrMultiIndexCounterTest.cpp
      nmrPolynomialBaseTest.cpp
      nmrPolynomialTermPowerIndexTest.cpp
@@ -30,6 +31,7 @@ set (HEADER_FILES
      nmrBernsteinPolynomialLineIntegralTest.h
      nmrDynAllocPolynomialContainerTest.h
      nmrGaussJordanInverseTest.h
+     nmrLinearRegressionTest.h
      nmrMultiIndexCounterTest.h
      nmrPolynomialBaseTest.h
      nmrPolynomialTermPowerIndexTest.h
