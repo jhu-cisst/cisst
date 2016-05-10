@@ -315,13 +315,14 @@ if (CISST_HAS_JSON)
   # set (CISST_JSON_SVN_REVISION 276)
   set (CISST_JSON_SVN_REPOSITORY  https://github.com/open-source-parsers/jsoncpp/tags/1.6.2)
   set (CISST_JSON_SVN_REVISION 1218)
+  set (JSON_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
   ExternalProject_Add (cisstJSONExternal
                        PREFIX ${cisstJSON_PREFIX}
                        SVN_REPOSITORY ${CISST_JSON_SVN_REPOSITORY}
                        SVN_REVISION   -r ${CISST_JSON_SVN_REVISION}
                        CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                                        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+                                        -DCMAKE_CXX_FLAGS:STRING=${JSON_CMAKE_CXX_FLAGS}
                                         -DOPTION_BUILD_EXAMPLES:BOOL=OFF
                                         -DJSONCPP_WITH_TESTS:BOOL=OFF
                                         -DJSONCPP_WITH_POST_BUILD_UNITTEST:BOOL=OFF
