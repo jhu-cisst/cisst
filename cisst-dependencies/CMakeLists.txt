@@ -315,7 +315,14 @@ if (CISST_HAS_JSON)
   # set (CISST_JSON_SVN_REVISION 276)
   set (CISST_JSON_SVN_REPOSITORY  https://github.com/open-source-parsers/jsoncpp/tags/1.6.2)
   set (CISST_JSON_SVN_REVISION 1218)
-  set (JSON_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
+  # add fPIC if possible
+  include (CheckCXXCompilerFlag)
+  check_cxx_compiler_flag ("-fPIC" CXX_SUPPORTS_FPIC)
+  if (CXX_SUPPORTS_FPIC)
+    set (JSON_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  endif (CXX_SUPPORTS_WALL)
+
   ExternalProject_Add (cisstJSONExternal
                        PREFIX ${cisstJSON_PREFIX}
                        SVN_REPOSITORY ${CISST_JSON_SVN_REPOSITORY}
