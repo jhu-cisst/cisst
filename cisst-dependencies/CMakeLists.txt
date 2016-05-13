@@ -321,7 +321,7 @@ if (CISST_HAS_JSON)
   check_cxx_compiler_flag ("-fPIC" CXX_SUPPORTS_FPIC)
   if (CXX_SUPPORTS_FPIC)
     set (JSON_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-  endif (CXX_SUPPORTS_WALL)
+  endif (CXX_SUPPORTS_FPIC)
 
   ExternalProject_Add (cisstJSONExternal
                        PREFIX ${cisstJSON_PREFIX}
