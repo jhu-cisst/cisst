@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor
   Created on: 2003-06-25
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -77,26 +75,30 @@ http://www.cisst.org/cisst/license.txt.
 #ifdef CISST_CMN_ASSERT_THROWS_EXCEPTION
 
 #define CMN_ASSERT(expr) \
-	if (!(expr)) { \
-        std::stringstream messageBuffer; \
-        messageBuffer << __FILE__ << ": Assertion '" << #expr \
-			          << "' failed in: " << CMN_PRETTY_FUNCTION \
-			          << ", line #" << __LINE__; \
-		cmnThrow(std::logic_error(messageBuffer.str())); \
-	}
+    { \
+        if (!(expr)) { \
+            std::stringstream messageBuffer; \
+            messageBuffer << __FILE__ << ": Assertion '" << #expr \
+                          << "' failed in: " << CMN_PRETTY_FUNCTION \
+                          << ", line #" << __LINE__; \
+            cmnThrow(std::logic_error(messageBuffer.str())); \
+        } \
+    }
 
 #else // CISST_CMN_ASSERT_THROWS_EXCEPTION
 
 #define CMN_ASSERT(expr) \
-	if (!(expr)) { \
-        std::stringstream messageBuffer; \
-        messageBuffer << __FILE__ << ": Assertion '" << #expr \
-			          << "' failed in: " << CMN_PRETTY_FUNCTION \
-			          << ", line #" << __LINE__; \
-        std::cerr << messageBuffer.str() << std::endl; \
-		CMN_LOG_INIT_ERROR << messageBuffer.str() << std::endl; \
-		abort(); \
-	}
+    { \
+        if (!(expr)) { \
+            std::stringstream messageBuffer; \
+            messageBuffer << __FILE__ << ": Assertion '" << #expr \
+                          << "' failed in: " << CMN_PRETTY_FUNCTION \
+                          << ", line #" << __LINE__; \
+            std::cerr << messageBuffer.str() << std::endl; \
+            CMN_LOG_INIT_ERROR << messageBuffer.str() << std::endl; \
+            abort(); \
+        } \
+    }
 
 #endif // CISST_CMN_ASSERT_THROWS_EXCEPTION
 
@@ -104,4 +106,3 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #endif // _cmnAssert_h
-

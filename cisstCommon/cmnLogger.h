@@ -152,7 +152,7 @@ http://www.cisst.org/cisst/license.txt.
 #else
 
   #define CMN_LOG(lod) \
-  if (cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod) \
+  if (!(cmnLogger::GetMask() & cmnLogger::GetMaskFunction() & lod)) ; else \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " ")
 
 #endif

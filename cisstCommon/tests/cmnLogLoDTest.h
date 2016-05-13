@@ -31,6 +31,7 @@ class cmnLogLoDTest : public CppUnit::TestFixture
         CPPUNIT_TEST(TestLogLevelToIndex);
         CPPUNIT_TEST(TestIndexToLogLevel);
         CPPUNIT_TEST(TestMasks);
+        CPPUNIT_TEST(TestIfElse);
     }
     CPPUNIT_TEST_SUITE_END();
     
@@ -44,6 +45,7 @@ class cmnLogLoDTest : public CppUnit::TestFixture
     void TestLogLevelToIndex(void);
     void TestIndexToLogLevel(void);
     void TestMasks(void);
+    void TestIfElse(void);
 };
 
 
