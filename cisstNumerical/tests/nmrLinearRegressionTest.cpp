@@ -30,6 +30,25 @@ static double slope1 = 149.924615384615;
 static double yint1 = 25.2646153846151;
 static double mse1 = 10.3348923076932;
 
+// Ground-truth values for above with moving window size of 7
+static double slope_mw7[] = { 0, 152, 151, 151.5, 152.1, 151.542857142857, 150.535714285714, 150.428571428571000,
+                              149.928571428571, 149.821428571429, 149.964285714286, 150.071428571429, 150.642857142857,
+                              149.428571428571, 149.642857142857, 149.178571428571, 149.75, 149.607142857143,
+                              149.142857142857, 149.714285714286, 149.178571428571, 149.464285714286, 150.214285714286,
+                              151.464285714286, 150.678571428571 };
+
+static double yint_mw7[] = { 0, 21, 21.3333333333333, 21, 20.4, 21.1428571428572, 22.8214285714287, 23.7142857142858,
+                             25.9285714285714, 27.3571428571432, 26.8214285714287, 25.0000000000002, 20.0714285714289,
+                             31.5714285714282, 29.3571428571429, 35.1428571428573, 28.3928571428571, 29.5000000000005,
+                             36.5714285714289, 27.2857142857142, 36.5357142857142, 31.7857142857151, 18.7857142857147,
+                             -6.14285714285643, 8.892857142858250 };
+
+static double mse_mw7[] =  { 0, 0, 0.222222222222218, 0.374999999999993, 1.02, 2.05714285714283, 8.5255102040817,
+                             8.0816326530612, 8.22448979591828, 7.50510204081646, 7.95408163265301, 7.08163265306105,
+                             6.75510204081646, 7.10204081632651, 7.16326530612268, 5.50510204081638, 7.30102040816313,
+                             8.23979591836761, 6.97959183673436, 5.02040816326529, 3.26020408163263, 3.83163265306138,
+                             9.08163265306114, 3.54591836734697, 10.2806122448979 };
+
 template <class _vectorType>
 void nmrLinearRegressionTest::TestLinearRegression(void)
 {
@@ -102,6 +121,16 @@ void nmrLinearRegressionTest::TestLinearRegression(void)
         CPPUNIT_ASSERT((mse1-tol <= mse) && (mse <= mse1+tol));
     }
 
+    // Test moving window
+    const int WINDOW_SIZE = 7;
+    nmrLinearRegressionWindowSolver<ElementType> solverWindow(WINDOW_SIZE);
+    CPPUNIT_ASSERT(solverWindow.WindowLength() == WINDOW_SIZE);
+    TestMovingWindow(&solverWindow, x, y);
+
+    nmrLinearRegressionWindowRecursiveSolver<ElementType> solverWindowRecursive(WINDOW_SIZE);
+    CPPUNIT_ASSERT(solverWindowRecursive.WindowLength() == WINDOW_SIZE);
+    TestMovingWindow(&solverWindowRecursive, x, y);
+
     // Finally, verify that we detect vertical lines (infinite slope),
     // in which case nmrLinearRegression should return false.
     x.resize(10);
@@ -122,6 +151,42 @@ void nmrLinearRegressionTest::TestLinearRegression(void)
         CPPUNIT_ASSERT(denom == 0);
     else
         CPPUNIT_ASSERT((-tol <= denom) && (denom <= tol));
+}
+
+template <class _vectorType>
+void nmrLinearRegressionTest::TestMovingWindow(nmrLinearRegressionWindowSolver<typename _vectorType::value_type> *solver,
+                                               _vectorType x, _vectorType y)
+{
+    typedef typename _vectorType::value_type ElementType;
+    typedef typename nmrLinearRegressionSolver<ElementType>::SummationType SummationType;
+    bool isIntegralType = (cmnTypeTraits<ElementType>::MinPositiveValue() == 1);
+    ElementType tol = cmnTypeTraits<ElementType>::Tolerance();
+
+    CPPUNIT_ASSERT(solver->Sample(x[0], y[0]));
+    CPPUNIT_ASSERT(solver->NumPoints() == 1);
+    for (size_t i = 1; i < x.size(); i++) {
+        CPPUNIT_ASSERT(solver->Sample(x[i], y[i]));
+        CPPUNIT_ASSERT(solver->NumPoints() == ((i < solver->WindowLength()) ? i+1 : solver->WindowLength()));
+        if (isIntegralType) {
+            SummationType slope_num, yint_num, denom, tse_num;
+            solver->EstimateAsFractions(slope_num, yint_num, denom, &tse_num);
+            CPPUNIT_ASSERT((denom < -tol) || (denom > tol));
+            double slopef = static_cast<double>(slope_num)/static_cast<double>(denom);
+            double yintf = static_cast<double>(yint_num)/static_cast<double>(denom);
+            double msef = static_cast<double>(tse_num)/static_cast<double>(denom*solver->NumPoints());;
+            double tolf = cmnTypeTraits<double>::Tolerance();
+            CPPUNIT_ASSERT((slope_mw7[i]-tolf <= slopef) && (slopef <= slope_mw7[i]+tolf));
+            CPPUNIT_ASSERT((yint_mw7[i]-tolf <= yintf) && (yintf <= yint_mw7[i]+tolf));
+            CPPUNIT_ASSERT((mse_mw7[i]-tolf <= msef) && (msef <= mse_mw7[i]+tolf));
+        }
+        else {
+            ElementType slope, yint, mse;
+            solver->Estimate(slope, yint, &mse);
+            CPPUNIT_ASSERT((slope_mw7[i]-tol <= slope) && (slope <= slope_mw7[i]+tol));
+            CPPUNIT_ASSERT((yint_mw7[i]-tol <= yint) && (yint <= yint_mw7[i]+tol));
+            CPPUNIT_ASSERT((mse_mw7[i]-tol <= mse) && (mse <= mse_mw7[i]+tol));
+        }
+    }
 }
 
 void nmrLinearRegressionTest::TestLinearRegression_vctDoubleVec(void)

@@ -170,17 +170,20 @@ public:
           tse = tse_num/denom   (total square error, divide by numpts to get mse)
     */
     virtual bool EstimateAsFractions(SummationType &slope_num, SummationType &yint_num,
-                                     SummationType &denom, SummationType *tse_num = 0) const;
+                                     SummationType &denom, SummationType *tse_num = 0);
 
     /*! Estimate the slope and y intercept and (optionally) return the mean square error (MSE).
         RMS error is the square root of MSE. */
-    virtual bool Estimate(_elementType &slope, _elementType &yint, _elementType *mse = 0) const;    
+    virtual bool Estimate(_elementType &slope, _elementType &yint, _elementType *mse = 0);
 
 protected:
     size_t numpts;                // Number of data points
     SummationType Sx, Sy;         // Sums of X and Y values
     SummationType Sxx, Sxy, Syy;  // Sums of X*X, X*Y, and Y*Y
     SummationType tolerance;      // Tolerance for avoiding divide by 0
+
+    /*! Computes the summations used for the linear regression. */
+    virtual bool ComputeSums(const _elementType &x, const _elementType &y);
 
     /*! Common code to sample multiple x,y pairs, provided as two dynamic vectors.
         Returns true unless vector sizes are not equal. */
@@ -201,9 +204,8 @@ protected:
 };
 
 template <class _elementType>
-bool nmrLinearRegressionSolver<_elementType>::Sample(const _elementType &x, const _elementType &y)
+bool nmrLinearRegressionSolver<_elementType>::ComputeSums(const _elementType &x, const _elementType &y)
 {
-    numpts++;
     Sx += x;
     Sy += y;
     Sxx += x*x;
@@ -213,9 +215,18 @@ bool nmrLinearRegressionSolver<_elementType>::Sample(const _elementType &x, cons
 }
 
 template <class _elementType>
+bool nmrLinearRegressionSolver<_elementType>::Sample(const _elementType &x, const _elementType &y)
+{
+    // ComputeSums always returns true, but in future could check for overflow
+    bool ret = ComputeSums(x,y);
+    if (ret) numpts++;
+    return ret;
+}
+
+template <class _elementType>
 bool nmrLinearRegressionSolver<_elementType>::EstimateAsFractions(SummationType &slope_num,
                                                                   SummationType &yint_num, SummationType &denom,
-                                                                  SummationType *tse_num) const
+                                                                  SummationType *tse_num)
 {
     denom = static_cast<SummationType>(numpts)*Sxx - Sx*Sx;
     slope_num = static_cast<SummationType>(numpts)*Sxy - Sx*Sy;
@@ -228,7 +239,7 @@ bool nmrLinearRegressionSolver<_elementType>::EstimateAsFractions(SummationType 
 
 template <class _elementType>
 bool nmrLinearRegressionSolver<_elementType>::Estimate(_elementType &slope, _elementType &yint,
-                                                       _elementType *mse) const
+                                                       _elementType *mse)
 {
     SummationType slope_num, yint_num, denom, tse_num;
     EstimateAsFractions(slope_num, yint_num, denom, &tse_num);
@@ -278,5 +289,124 @@ bool nmrLinearRegression(const _vectorType &x, const _vectorType &y,
        ret = solver.Estimate(slope, yint, mse);
     return ret;
 }
+
+/*!
+  \ingroup cisstNumerical
+
+  This class provides a moving window linear regression solver using a least-squares solution.
+  The window size is specified in the constructor. This implementation recomputes the intermediate
+  sums each time the Estimate or EstimateAsFractions method is called; for a more efficient
+  recursive implementation, use the nmrLinearRegressionWindowRecursive solver. But, note that
+  for floating point types, there is a chance for accumulation of round-off error with the
+  recursive solver.
+*/
+
+template <class _elementType>
+class nmrLinearRegressionWindowSolver : public nmrLinearRegressionSolver<_elementType>
+{
+protected:
+    typedef nmrLinearRegressionSolver<_elementType> BaseClass;
+    typedef typename std::vector<vctFixedSizeVector<_elementType, 2> > WindowType;
+    typedef typename std::vector<vctFixedSizeVector<_elementType, 2> >::iterator WindowTypeIterator;
+    WindowType window;
+    WindowTypeIterator iter;
+public:
+    nmrLinearRegressionWindowSolver(size_t length) : window(length)
+    { iter = window.begin(); }
+    ~nmrLinearRegressionWindowSolver() {}
+
+    virtual size_t WindowLength() const { return window.size(); }
+
+    bool Sample(const _elementType &x, const _elementType &y)
+    {
+        // Update the window
+        *iter++ = vctFixedSizeVector<_elementType, 2>(x,y);
+        if (iter == window.end())
+           iter = window.begin();
+        // Increment numpts up to size of window
+        if (numpts < window.size())
+            numpts++;
+        return true;
+    }
+
+    // The methods that take vector inputs are not currently implemented, as they
+    // are less likely to be useful with a moving window.
+    bool Sample(const vctDynamicVector<_elementType> &x,
+                const vctDynamicVector<_elementType> &y)
+    { return false; }
+    bool Sample(const vctDynamicConstVectorRef<_elementType> &x,
+                const vctDynamicConstVectorRef<_elementType> &y)
+    { return false; }
+    bool Sample(const std::vector<_elementType> &x, const std::vector<_elementType> &y)
+    { return false; }
+
+    /*! Recalculate the intermediate sums */
+    virtual bool Recalculate()
+    {
+        size_t num = numpts;
+        Clear();
+        for (size_t i = 0; i < num; i++)
+            ComputeSums(window[i].X(), window[i].Y());
+        numpts = num;
+        return true;
+    }
+
+    bool EstimateAsFractions(SummationType &slope_num, SummationType &yint_num,
+                             SummationType &denom, SummationType *tse_num = 0)
+    {
+        Recalculate();
+        return BaseClass::EstimateAsFractions(slope_num, yint_num, denom, tse_num);
+    }
+
+};
+
+/*!
+  \ingroup cisstNumerical
+
+  This class provides a recursive moving window linear regression solver using a least-squares solution.
+  The window size is specified in the constructor. This implementation is recursive and therefore
+  extremely efficient, regardless of window size. But, note that for floating point types, there is a chance
+  for accumulation of round-off error with the recursive solver. There are two solutions: (1) use the
+  non-recursive solver, nmrLinearRegressionWindowSolver, or (2) periodically call the Recalculate method,
+  which is inherited from nmrLinearRegressionWindowSolver.
+*/
+
+template <class _elementType>
+class nmrLinearRegressionWindowRecursiveSolver : public nmrLinearRegressionWindowSolver<_elementType>
+{
+    typedef nmrLinearRegressionWindowSolver<_elementType> BaseClass;
+public:
+    nmrLinearRegressionWindowRecursiveSolver(size_t length) : BaseClass(length) {}
+    ~nmrLinearRegressionWindowRecursiveSolver() {}
+
+    /*! Sample new element; overridden from base class */
+    bool Sample(const _elementType &x, const _elementType &y)
+    {
+        if (numpts >= window.size()) {
+            // First, remove the oldest sample
+            ElementType old_x = iter->X();
+            ElementType old_y = iter->Y();
+            Sx -= old_x;
+            Sy -= old_y;
+            Sxx -= old_x*old_x;
+            Sxy -= old_x*old_y;
+            Syy -= old_y*old_y;
+        }
+        // Add the new value
+        bool ret = ComputeSums(x,y);
+        // Update the window (and increment numpts if needed)
+        if (ret)
+           ret = BaseClass::Sample(x,y);
+        return ret;
+    }
+
+    /*! Call nmrLinearRegression::EstimateAsFractions (bypassing the version in the immediate base class) */
+    bool EstimateAsFractions(SummationType &slope_num, SummationType &yint_num,
+                             SummationType &denom, SummationType *tse_num = 0)
+    {
+        return nmrLinearRegressionSolver<_elementType>::EstimateAsFractions(slope_num, yint_num, denom, tse_num);
+    }
+
+};
 
 #endif

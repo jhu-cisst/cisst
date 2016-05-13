@@ -48,6 +48,9 @@ public:
     template <class _vectorType>
     void TestLinearRegression(void);
 
+    template <class _vectorType>
+    void TestMovingWindow(nmrLinearRegressionWindowSolver<typename _vectorType::value_type> *solver, _vectorType x, _vectorType y);
+
     void TestLinearRegression_vctDoubleVec(void);
     void TestLinearRegression_vctIntVec(void);
     void TestLinearRegression_StdVecDouble(void);
