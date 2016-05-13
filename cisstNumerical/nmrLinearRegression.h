@@ -259,7 +259,7 @@ bool nmrLinearRegressionSolver<_elementType>::Estimate(_elementType &slope, _ele
 
 /*!
   \ingroup cisstNumerical
- 
+
   This computes a linear regression using the least-squares solution. If the regression
   is successfully computed, the function returns true; otherwise it returns false. Possible
   reasons for failure are if the x and y vectors are different sizes, if there are fewer
@@ -267,7 +267,7 @@ bool nmrLinearRegressionSolver<_elementType>::Estimate(_elementType &slope, _ele
   check is based on a specified tolerance value. The default tolerances are obtained from
   cmnTypeTraits. These defaults may be too large for some applications (e.g., the default for
   float is currently 1e-5 and for double it is 1e-9).
- 
+
   \param x A vector of all the x values
   \param y A vector of all the y values
   \param slope Pointer for returning computed slope (if not null)
@@ -306,6 +306,7 @@ class nmrLinearRegressionWindowSolver : public nmrLinearRegressionSolver<_elemen
 {
 protected:
     typedef nmrLinearRegressionSolver<_elementType> BaseClass;
+    typedef typename BaseClass::SummationType SummationType;
     typedef typename std::vector<vctFixedSizeVector<_elementType, 2> > WindowType;
     typedef typename std::vector<vctFixedSizeVector<_elementType, 2> >::iterator WindowTypeIterator;
     WindowType window;
@@ -324,8 +325,8 @@ public:
         if (iter == window.end())
            iter = window.begin();
         // Increment numpts up to size of window
-        if (numpts < window.size())
-            numpts++;
+        if (this->numpts < window.size())
+            this->numpts++;
         return true;
     }
 
@@ -343,11 +344,11 @@ public:
     /*! Recalculate the intermediate sums */
     virtual bool Recalculate()
     {
-        size_t num = numpts;
-        Clear();
+        size_t num = this->numpts;
+        BaseClass::Clear();
         for (size_t i = 0; i < num; i++)
-            ComputeSums(window[i].X(), window[i].Y());
-        numpts = num;
+            BaseClass::ComputeSums(window[i].X(), window[i].Y());
+        this->numpts = num;
         return true;
     }
 
@@ -375,6 +376,9 @@ template <class _elementType>
 class nmrLinearRegressionWindowRecursiveSolver : public nmrLinearRegressionWindowSolver<_elementType>
 {
     typedef nmrLinearRegressionWindowSolver<_elementType> BaseClass;
+    typedef typename BaseClass::SummationType SummationType;
+    typedef typename BaseClass::ElementType ElementType;
+
 public:
     nmrLinearRegressionWindowRecursiveSolver(size_t length) : BaseClass(length) {}
     ~nmrLinearRegressionWindowRecursiveSolver() {}
@@ -382,18 +386,18 @@ public:
     /*! Sample new element; overridden from base class */
     bool Sample(const _elementType &x, const _elementType &y)
     {
-        if (numpts >= window.size()) {
+        if (this->numpts >= this->window.size()) {
             // First, remove the oldest sample
-            ElementType old_x = iter->X();
-            ElementType old_y = iter->Y();
-            Sx -= old_x;
-            Sy -= old_y;
-            Sxx -= old_x*old_x;
-            Sxy -= old_x*old_y;
-            Syy -= old_y*old_y;
+            ElementType old_x = this->iter->X();
+            ElementType old_y = this->iter->Y();
+            this->Sx -= old_x;
+            this->Sy -= old_y;
+            this->Sxx -= old_x*old_x;
+            this->Sxy -= old_x*old_y;
+            this->Syy -= old_y*old_y;
         }
         // Add the new value
-        bool ret = ComputeSums(x,y);
+        bool ret = BaseClass::ComputeSums(x,y);
         // Update the window (and increment numpts if needed)
         if (ret)
            ret = BaseClass::Sample(x,y);
