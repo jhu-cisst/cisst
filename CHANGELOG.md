@@ -1,6 +1,28 @@
 Change log
 ==========
 
+1.0.7 (2016-05-16)
+==================
+
+* API changes:
+  * None
+* Deprecated features:
+  * None
+* New features:
+  * CMake: added -fPIC for external projects, now compiles with clang on Ubuntu 12.04 and 14.04
+  * CMake: modifications to use find_package instead of cisst_find_saw_components
+  * cisstDataGenerator:
+    * Added methods to generate lists of enum values/strings
+    * Destructor can now be virtual to avoid warnings if user adds virtual methods
+  * cisstNumerical: added nmrLinearRegression
+  * cisstRobot:
+    * Added accessor to modify position offsets in robJoint
+    * Now partially wrapped using SWIG
+* Bug fixes:
+  * cisstCommon: fix major bug in CMN_LOG macros (#45)
+  * cisstCommon: cmnTypeTraits, added some missing specializations for unsigned long
+
+
 1.0.6 (2016-01-08)
 ==================
 
