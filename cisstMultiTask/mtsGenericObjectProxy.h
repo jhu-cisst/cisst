@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on: 2006-05-05
 
-  (C) Copyright 2006-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -647,17 +646,19 @@ public:
 
     static T* CastArg(mtsGenericObject &arg) {
         T* temp = dynamic_cast<T * >(&arg);
-        if (!temp)
+        if (!temp) {
             CMN_LOG_INIT_ERROR << "CastArg for mts, could not cast from " << arg.Services()->GetName()
                                << " to " << T::ClassServices()->GetName() << std::endl;
+        }
         return temp;
     }
 
     static const T* CastArg(const mtsGenericObject &arg) {
         const T* temp = dynamic_cast<const T * >(&arg);
-        if (!temp)
+        if (!temp) {
             CMN_LOG_INIT_ERROR << "CastArg for mts, could not cast from const " << arg.Services()->GetName()
                                <<" to " << T::ClassServices()->GetName() << std::endl;
+        }
         return temp;
     }
 };
@@ -675,8 +676,10 @@ public:
     static void ConditionalFree(const FinalRefType *obj) { impl::ConditionalFree(obj); }
     static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &name) {
         mtsGenericObject *tmp = impl::ConditionalCreate(arg, name);
-        if (!tmp)
-            CMN_LOG_INIT_ERROR << "ConditionalCreate returning NULL for " << name << " (maybe you should use CMN_DECLARE_SERVICES with CMN_DYNAMIC_CREATION)" << std::endl;
+        if (!tmp) {
+            CMN_LOG_INIT_ERROR << "ConditionalCreate returning NULL for " << name
+                               << " (maybe you should use CMN_DECLARE_SERVICES with CMN_DYNAMIC_CREATION)" << std::endl;
+        }
         return tmp;
     }
 

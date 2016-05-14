@@ -2,10 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -116,8 +115,9 @@ public:
         Table = &table;
         Id = Table->NewElement(dataName, &Data);
         Accessor = dynamic_cast<const AccessorType *>(table.GetAccessor(dataName));
-        if (!Accessor)
+        if (!Accessor) {
             CMN_LOG_INIT_ERROR << "mtsStateData: could not get data accessor for " << dataName << std::endl;
+        }
     }
 
     /*! Adds command objects to the specified device interface. Note
@@ -155,4 +155,3 @@ std::string mtsObjectName(const mtsStateData<_elementType> * CMN_UNUSED(object))
 
 
 #endif // _mtsStateData_h
-

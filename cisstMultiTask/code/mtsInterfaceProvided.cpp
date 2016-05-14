@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -454,9 +453,10 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWrite(mtsCommandWriteBase 
         // check if command is already queued
         mtsCommandQueuedWriteBase * queuedCommand = dynamic_cast<mtsCommandQueuedWriteBase *>(command);
         if (!queued) {
-            if (queuedCommand)
+            if (queuedCommand) {
                 CMN_LOG_CLASS_INIT_WARNING << "AddCommandWrite: command \"" << command->GetName()
                                            << "\" is queued, but should not be" << std::endl;
+            }
             if (!CommandsWrite.AddItem(command->GetName(), command, CMN_LOG_LEVEL_INIT_ERROR)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite: unable to add command \""
                                          << command->GetName() << "\"" << std::endl;

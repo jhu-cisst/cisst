@@ -332,13 +332,14 @@ public:
 
     // The methods that take vector inputs are not currently implemented, as they
     // are less likely to be useful with a moving window.
-    bool Sample(const vctDynamicVector<_elementType> &x,
-                const vctDynamicVector<_elementType> &y)
+    bool Sample(const vctDynamicVector<_elementType> & CMN_UNUSED(x),
+                const vctDynamicVector<_elementType> & CMN_UNUSED(y))
     { return false; }
-    bool Sample(const vctDynamicConstVectorRef<_elementType> &x,
-                const vctDynamicConstVectorRef<_elementType> &y)
+    bool Sample(const vctDynamicConstVectorRef<_elementType> & CMN_UNUSED(x),
+                const vctDynamicConstVectorRef<_elementType> & CMN_UNUSED(y))
     { return false; }
-    bool Sample(const std::vector<_elementType> &x, const std::vector<_elementType> &y)
+    bool Sample(const std::vector<_elementType> & CMN_UNUSED(x),
+                const std::vector<_elementType> & CMN_UNUSED(y))
     { return false; }
 
     /*! Recalculate the intermediate sums */

@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2013-08-06
 
-  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -261,8 +260,9 @@ bool FinishedEventEntry::SerializeFilter(const mtsGenericObject &arg, mtsGeneric
 
 void FinishedEventEntry::Method(const mtsStdString &argSerialized)
 {
-    if (!Used)
+    if (!Used) {
         CMN_LOG_RUN_WARNING << "FinishedEventEntry: attempt to execute unused entry" << std::endl;
+    }
     CMN_ASSERT(Socket);
     CMN_ASSERT(Serializer);
     std::string sendBuffer(RecvHandle, sizeof(RecvHandle));
@@ -392,8 +392,9 @@ FunctionWriteProxy::FunctionWriteProxy(mtsSocketProxyServer *proxy, const std::s
     : mtsFunctionWrite(true), Proxy(proxy), argSerialized(argumentPrototypeSerialized), arg(0)
 {
     InitObjects();
-    if (!arg)
+    if (!arg) {
         CMN_LOG_INIT_ERROR << "FunctionWriteProxy: could not deserialize argument prototype" << std::endl;
+    }
 }
 
 FunctionWriteProxy::~FunctionWriteProxy()
@@ -422,8 +423,9 @@ mtsExecutionResult FunctionWriteProxy::ExecuteSerialized(const std::string &inpu
     CMN_ASSERT(Proxy);
     mtsExecutionResult ret(mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED);
     InitObjects();
-    if (!arg)
+    if (!arg) {
         CMN_LOG_INIT_WARNING << "FunctionWriteProxy: could not deserialize argument prototype" << std::endl;
+    }
     if (arg) {
         mtsProxySerializer *serializer = Proxy->GetSerializerForCurrentClient();
         if (serializer->DeSerialize(inputArgSerialized, *arg)) {
@@ -451,15 +453,16 @@ public:
     void InitObjects(void);
 
     mtsExecutionResult ExecuteSerialized(std::string &resultArgSerialized, mtsCommandWriteBase *eventSenderCommand);
-                                                         
+
 };
 
 FunctionReadProxy::FunctionReadProxy(mtsSocketProxyServer *proxy, const std::string &argumentPrototypeSerialized)
     : mtsFunctionRead(), Proxy(proxy), argSerialized(argumentPrototypeSerialized), arg(0)
 {
     InitObjects();
-    if (!arg)
+    if (!arg) {
         CMN_LOG_INIT_ERROR << "FunctionReadProxy: could not deserialize argument prototype" << std::endl;
+    }
 }
 
 FunctionReadProxy::~FunctionReadProxy()
@@ -526,10 +529,12 @@ FunctionQualifiedReadProxy::FunctionQualifiedReadProxy(mtsSocketProxyServer *pro
       arg1(0), arg2(0)
 {
     InitObjects();
-    if (!arg1)
+    if (!arg1) {
         CMN_LOG_INIT_ERROR << "FunctionQualifiedReadProxy: could not deserialize argument1 prototype" << std::endl;
-    if (!arg2)
+    }
+    if (!arg2) {
         CMN_LOG_INIT_ERROR << "FunctionQualifiedReadProxy: could not deserialize argument2 prototype" << std::endl;
+    }
 }
 
 FunctionQualifiedReadProxy::~FunctionQualifiedReadProxy()
@@ -569,10 +574,12 @@ mtsExecutionResult FunctionQualifiedReadProxy::ExecuteSerialized(const std::stri
     CMN_ASSERT(Proxy);
     mtsExecutionResult ret(mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED);
     InitObjects();
-    if (!arg1)
+    if (!arg1) {
         CMN_LOG_INIT_WARNING << "FunctionQualifiedReadProxy: could not deserialize argument1 prototype" << std::endl;
-    if (!arg2)
+    }
+    if (!arg2) {
         CMN_LOG_INIT_WARNING << "FunctionQualifiedReadProxy: could not deserialize argument2 prototype" << std::endl;
+    }
     if (arg1 && arg2) {
         mtsProxySerializer *serializer = Proxy->GetSerializerForCurrentClient();
         if (serializer->DeSerialize(inputArgSerialized, *arg1)) {
@@ -633,10 +640,12 @@ mtsExecutionResult FunctionVoidReturnProxy::ExecuteSerialized(mtsCommandWriteBas
     CMN_ASSERT(Proxy);
     mtsExecutionResult ret(mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED);
     InitObjects();
-    if (!retVal)
+    if (!retVal) {
         CMN_LOG_INIT_WARNING << "FunctionVoidReturnProxy: could not deserialize return prototype" << std::endl;
-    if (retVal)
+    }
+    if (retVal) {
         ret = GetCommand()->Execute(*retVal, eventSenderCommand);
+    }
     return ret;
 }
 
@@ -656,15 +665,16 @@ public:
     mtsExecutionResult ExecuteSerialized(const std::string &inputArgSerialized, mtsCommandWriteBase *eventSenderCommand);
 };
 
-FunctionWriteReturnProxy::FunctionWriteReturnProxy(mtsSocketProxyServer *proxy, 
+FunctionWriteReturnProxy::FunctionWriteReturnProxy(mtsSocketProxyServer *proxy,
                                                    const std::string &argumentPrototypeSerialized,
                                                    const std::string &returnPrototypeSerialized) :
     mtsFunctionWriteReturn(true), Proxy(proxy), argSerialized(argumentPrototypeSerialized), returnSerialized(returnPrototypeSerialized),
     arg(0), retVal(0)
 {
     InitObjects();
-    if (!arg)
+    if (!arg) {
         CMN_LOG_INIT_WARNING << "FunctionWriteReturnProxy: could not deserialize arg prototype" << std::endl;
+    }
 }
 
 FunctionWriteReturnProxy::~FunctionWriteReturnProxy()
@@ -705,10 +715,12 @@ mtsExecutionResult FunctionWriteReturnProxy::ExecuteSerialized(const std::string
     CMN_ASSERT(Proxy);
     mtsExecutionResult ret(mtsExecutionResult::ARGUMENT_DYNAMIC_CREATION_FAILED);
     InitObjects();
-    if (!arg)
+    if (!arg) {
         CMN_LOG_INIT_WARNING << "FunctionWriteReturnProxy: could not deserialize arg prototype" << std::endl;
-    if (!retVal)
+    }
+    if (!retVal) {
         CMN_LOG_INIT_WARNING << "FunctionWriteReturnProxy: could not deserialize return prototype" << std::endl;
+    }
     if (arg && retVal) {
         mtsProxySerializer *serializer = Proxy->GetSerializerForCurrentClient();
         if (serializer->DeSerialize(inputArgSerialized, *arg))
@@ -736,8 +748,9 @@ mtsSocketProxyServer::mtsSocketProxyServer(const std::string & proxyName, const 
     EventGeneratorWriteProxyMap("EventGeneratorWriteProxyMap"),
     FinishedEvents(0)
 {
-    if (Init(componentName, providedInterfaceName))
+    if (Init(componentName, providedInterfaceName)) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Created required interface in " << proxyName << std::endl;
+    }
     Socket.AssignPort(port);
 }
 
@@ -754,8 +767,9 @@ mtsSocketProxyServer::mtsSocketProxyServer(const mtsSocketProxyServerConstructor
     EventGeneratorWriteProxyMap("EventGeneratorWriteProxyMap"),
     FinishedEvents(0)
 {
-    if (Init(arg.ComponentName, arg.ProvidedInterfaceName))
+    if (Init(arg.ComponentName, arg.ProvidedInterfaceName)) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Created required interface in " << arg.Name << std::endl;
+    }
     Socket.AssignPort(arg.Port);
 }
 
@@ -975,8 +989,9 @@ void mtsSocketProxyServer::Run(void)
                                         << ", addr = " << std::hex << handle.addr << ": " << e.what() << std::endl;
                 ret = mtsExecutionResult::INVALID_COMMAND_ID;
             }
-            if (!ret.IsOK())
+            if (!ret.IsOK()) {
                 CMN_LOG_CLASS_RUN_WARNING << "Command type: " << handle.cmdType << ", result = " << ret << std::endl;
+            }
         }
         else {
             // PK TODO: RecvHandle is not handled
@@ -1044,8 +1059,9 @@ void mtsSocketProxyServer::Run(void)
                     }
                 }
             }
-            if (!ret.IsOK())
+            if (!ret.IsOK()) {
                 CMN_LOG_CLASS_RUN_WARNING << "Command: " << commandName << ", result = " << ret << std::endl;
+            }
         }
 
         // If this was a blocking command, but was not queued, we need to send a response now.  If it was
@@ -1054,12 +1070,13 @@ void mtsSocketProxyServer::Run(void)
             // If the command failed, send the execution result instead
             if (ret.Value() != mtsExecutionResult::COMMAND_SUCCEEDED) {
                 outputArgString.clear();
-                CMN_LOG_CLASS_RUN_WARNING << "Returning failed execution result: " 
+                CMN_LOG_CLASS_RUN_WARNING << "Returning failed execution result: "
                                           << mtsExecutionResult::ToString(ret.Value()) << std::endl;
             }
             if (outputArgString.empty()) {
-                if (!serializer->Serialize(mtsExecutionResultProxy(ret), outputArgString))
+                if (!serializer->Serialize(mtsExecutionResultProxy(ret), outputArgString)) {
                     CMN_LOG_CLASS_RUN_ERROR << "Failed to serialize execution result for blocking command" << std::endl;
+                }
             }
             // We won't be using the eventSender, so free it
             if (eventSenderCommand)
@@ -1479,9 +1496,10 @@ void mtsSocketProxyServer::EventEnable(const std::string &eventHandleAndName)
         osaIPandPort ip_port;
         Socket.GetDestination(ip_port);
         mtsProxySerializer *serializer = GetSerializerForClient(ip_port);
-        if (!eventSender->AddClient(ip_port, handle, serializer))
+        if (!eventSender->AddClient(ip_port, handle, serializer)) {
             CMN_LOG_CLASS_RUN_ERROR << "EventEnable " << eventName << " failed for "
                                     << ip_port.IP << ":" << ip_port.Port << std::endl;
+        }
     }
     else {
         CMN_LOG_CLASS_RUN_ERROR << "EventEnable " << eventName << " not found" << std::endl;
@@ -1502,9 +1520,10 @@ void mtsSocketProxyServer::EventDisable(const std::string &eventHandleAndName)
     if (eventSender) {
         osaIPandPort ip_port;
         Socket.GetDestination(ip_port);
-        if (!eventSender->RemoveClient(ip_port, handle))
+        if (!eventSender->RemoveClient(ip_port, handle)) {
             CMN_LOG_CLASS_RUN_ERROR << "EventDisable " << eventName << " failed for "
                                     << ip_port.IP << ":" << ip_port.Port << std::endl;
+        }
     }
     else {
         CMN_LOG_CLASS_RUN_ERROR << "EventDisable " << eventName << " not found" << std::endl;

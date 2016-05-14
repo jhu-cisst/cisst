@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -220,18 +219,21 @@ void mtsMailBox::TriggerFinishedEventIfNeeded(const std::string &commandName, mt
    if (finishedEvent) {
        mtsExecutionResult evt_result(mtsExecutionResult::COMMAND_SUCCEEDED);
        if (resultPointer) {
-           if (resultPointer->Valid() != result.IsOK())
+           if (resultPointer->Valid() != result.IsOK()) {
                CMN_LOG_RUN_WARNING << "TriggerFinishedEventIfNeeded: result valid = " << resultPointer->Valid()
                                    << ", result OK = " << result.IsOK()
                                    << ", msg = " << mtsExecutionResult::ToString(result.Value()) << std::endl;
+           }
            resultPointer->SetValid(result.IsOK());  // Set data valid flag based on execution result
            evt_result = finishedEvent->Execute(*resultPointer, MTS_NOT_BLOCKING);
        }
-       else
+       else {
            evt_result = finishedEvent->Execute(mtsExecutionResultProxy(result), MTS_NOT_BLOCKING);
-       if (!evt_result.IsOK())
+       }
+       if (!evt_result.IsOK()) {
            CMN_LOG_RUN_ERROR << "mtsMailbox: Failed to execute FinishedEvent for command " << commandName
                              << ", result = " << evt_result << std::endl;
+       }
    }
 }
 

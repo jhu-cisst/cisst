@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-31
 
-  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -87,7 +87,7 @@ http://www.cisst.org/cisst/license.txt.
 #else
 
   #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod)                      \
-  if (cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod) \
+if (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod)) ; else \
     ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " Class " << objectPointer->Services()->GetName() << ": ")
 
 #endif

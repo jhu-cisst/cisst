@@ -2,10 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Peter Kazanzides
 
-  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -123,7 +122,9 @@ class CISST_EXPORT cmnStreamRawParser
        ~Entry() {}
 
        bool Parse(std::istream &inputStream) {
-           if (valid) CMN_LOG_INIT_WARNING << "cmnStreamRawParser: duplicate entry for " << key << std::endl;
+           if (valid) {
+               CMN_LOG_INIT_WARNING << "cmnStreamRawParser: duplicate entry for " << key << std::endl;
+           }
            if (valuePtr) {
                try {
                    cmnData<_elementType>::DeSerializeText(*valuePtr, inputStream, delimiter);
@@ -160,7 +161,9 @@ class CISST_EXPORT cmnStreamRawParser
        ~EntryStreamable() {}
 
        bool Parse(std::istream &inputStream) {
-           if (valid) CMN_LOG_INIT_WARNING << "cmnStreamRawParser: duplicate entry for " << key << std::endl;
+           if (valid) {
+               CMN_LOG_INIT_WARNING << "cmnStreamRawParser: duplicate entry for " << key << std::endl;
+           }
            if (valuePtr)
                inputStream >> *valuePtr;
            valid = inputStream.good();

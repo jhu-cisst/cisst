@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -143,7 +142,7 @@ bool mtsManagerComponentClient::ConnectLocally(const std::string & clientCompone
                 //endUserInterfaceArg.EndUserInterface = endUserInterfaceArg.OriginalInterface->GetEndUserInterface(clientInterfaceName);
                 mtsInterfaceProvided * originalInterface = reinterpret_cast<mtsInterfaceProvided*>(endUserInterfaceArg.OriginalInterface);
                 CMN_ASSERT(originalInterface);
-                endUserInterfaceArg.EndUserInterface = 
+                endUserInterfaceArg.EndUserInterface =
                     reinterpret_cast<size_t>(originalInterface->GetEndUserInterface(clientInterfaceName));
             }
 #else
@@ -1414,11 +1413,13 @@ void mtsManagerComponentClient::InterfaceLCMCommands_GetListOfComponentClasses(
 
 void mtsManagerComponentClient::InterfaceLCMCommands_SetLogForwarding(const bool &state)
 {
-    if (!state)
+    if (!state) {
         CMN_LOG_CLASS_RUN_VERBOSE << "Disabling log forwarding" << std::endl;
+    }
     mtsManagerLocal::SetLogForwarding(state);
-    if (state)
+    if (state) {
         CMN_LOG_CLASS_RUN_VERBOSE << "Enabled log forwarding" << std::endl;
+    }
 }
 
 void mtsManagerComponentClient::InterfaceLCMCommands_GetLogForwardingState(bool & state) const
