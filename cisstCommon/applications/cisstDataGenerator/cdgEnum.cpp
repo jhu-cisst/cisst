@@ -80,8 +80,8 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
     outputStream << " };" << std::endl
                  << "    static std::string " << enumName << "ToString(const " << enumName << " & value) throw (std::runtime_error);" << std::endl
                  << "    static " << enumName << " " << enumName << "FromString(const std::string & value) throw (std::runtime_error);" << std::endl
-                 << "    static const std::list<int> & " << enumName << "ListInt(void);" << std::endl
-                 << "    static const std::list<std::string> & " << enumName << "ListString(void);" << std::endl;
+                 << "    static const std::vector<int> & " << enumName << "VectorInt(void);" << std::endl
+                 << "    static const std::vector<std::string> & " << enumName << "VectorString(void);" << std::endl;
 }
 
 
@@ -151,31 +151,31 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
                  << "}" << std::endl
                  << std::endl;
 
-    // to list int
-    methodName = cScope + "::" + name + "ListInt(void)";
-    outputStream << "const std::list<int> & " << methodName << " {" << std::endl
-                 << "    static std::list<int> listInt;" << std::endl
-                 << "    if (listInt.empty()) {" << std::endl;
+    // to vector int
+    methodName = cScope + "::" + name + "VectorInt(void)";
+    outputStream << "const std::vector<int> & " << methodName << " {" << std::endl
+                 << "    static std::vector<int> vectorInt;" << std::endl
+                 << "    if (vectorInt.empty()) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
-        outputStream << "        listInt.push_back(static_cast<int>("
+        outputStream << "        vectorInt.push_back(static_cast<int>("
                      << Scopes[index]->GetFieldValue("name") << "));" << std::endl;
     }
     outputStream << "    }" << std::endl
-                 << "    return listInt;" << std::endl
+                 << "    return vectorInt;" << std::endl
                  << "}" << std::endl
                  << std::endl;
 
-    // to list string
-    methodName = cScope + "::" + name + "ListString(void)";
-    outputStream << "const std::list<std::string> & " << methodName << " {" << std::endl
-                 << "    static std::list<std::string> listString;" << std::endl
-                 << "    if (listString.empty()) {" << std::endl;
+    // to vector string
+    methodName = cScope + "::" + name + "VectorString(void)";
+    outputStream << "const std::vector<std::string> & " << methodName << " {" << std::endl
+                 << "    static std::vector<std::string> vectorString;" << std::endl
+                 << "    if (vectorString.empty()) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
-        outputStream << "        listString.push_back(\""
+        outputStream << "        vectorString.push_back(\""
                      << Scopes[index]->GetFieldValue("name") << "\");" << std::endl;
     }
     outputStream << "    }" << std::endl
-                 << "    return listString;" << std::endl
+                 << "    return vectorString;" << std::endl
                  << "}" << std::endl
                  << std::endl;
 
