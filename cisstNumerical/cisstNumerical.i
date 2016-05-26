@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-08-14
 
-  (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 %module cisstNumericalPython
 
+%include <std_pair.i>
 %include <std_string.i>
 %include <std_except.i>
 %include <std_vector.i>
@@ -55,4 +56,13 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstNumerical/nmrPInverse.h"
 // Instantiate for vctDynamicMatrix. Could also have combinations of vctDynamicMatrix and vctDynamicMatrixRef.
 %template(nmrPInverse) nmrPInverse<vctDynamicMatrixOwner<CISSTNETLIB_DOUBLE>, vctDynamicMatrixOwner<CISSTNETLIB_DOUBLE> >;
+
+// The following is more Python-friendly than the templated C++ code in "cisstNumerical/nmrRegistrationRigid.h".
+// Due to the typemaps, dataSet1 and dataSet2 are provided as Python numpy arrays (2D arrays).
+// The transformation and FRE are returned as a Python tuple.
+// The body of the code is in nmrPython.h
+%template() std::pair<vctFrm3, double>;
+std::pair<vctFrm3, double> nmrRegistrationRigid(const vctDynamicMatrix<double> &dataSet1,
+                                                const vctDynamicMatrix<double> &dataSet2) throw(std::runtime_error);
+
 #endif
