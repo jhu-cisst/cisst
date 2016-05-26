@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _nmrPython_h
 #define _ntmPython_h
 
-#include <vector>
 #include <cisstCommon/cmnPython.h>
 #include <cisstVector/vctPython.h>
 

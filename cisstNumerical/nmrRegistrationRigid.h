@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _nmrRegistrationRigid_h
 #define _nmrRegistrationRigid_h
 
+#include <cisstCommon/cmnPortability.h>
 #include <cisstVector/vctTypes.h>
 
 // Always include last
@@ -42,6 +43,17 @@ template <class _vectorOwnerType>
 bool CISST_EXPORT nmrRegistrationRigid(vctDynamicConstVectorBase<_vectorOwnerType, vct3> &dataSet1,
                                        vctDynamicConstVectorBase<_vectorOwnerType, vct3> &dataSet2,
                                        vctFrm3 &transform, double *fre = 0);
+
+#if (CISST_OS == CISST_WINDOWS) && defined(CISST_COMPILER_IS_MSVC)
+template CISST_EXPORT bool nmrRegistrationRigid<vctDynamicVectorRefOwner<vct3> >(
+                                       vctDynamicConstVectorBase<vctDynamicVectorRefOwner<vct3>, vct3> &dataSet1,
+                                       vctDynamicConstVectorBase<vctDynamicVectorRefOwner<vct3>, vct3> &dataSet2,
+                                       vctFrm3 &transform, double *fre);
+template CISST_EXPORT bool nmrRegistrationRigid<vctDynamicVectorOwner<vct3> >(
+                                       vctDynamicConstVectorBase<vctDynamicVectorOwner<vct3>, vct3> &dataSet1,
+                                       vctDynamicConstVectorBase<vctDynamicVectorOwner<vct3>, vct3> &dataSet2,
+                                       vctFrm3 &transform, double *fre);
+#endif
 
 #endif
 
