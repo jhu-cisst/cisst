@@ -5,7 +5,7 @@
 
   Author(s):  Peter Kazanzides
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -92,7 +92,7 @@ template bool nmrRegistrationRigid<vctDynamicVectorRefOwner<vct3> >(
                                vctFrm3&, double *);
 
 // For vctDynamicConstVector
-template bool CISST_EXPORT nmrRegistrationRigid<vctDynamicVectorOwner<vct3> >(
+template bool nmrRegistrationRigid<vctDynamicVectorOwner<vct3> >(
                                vctDynamicConstVectorBase<vctDynamicVectorOwner<vct3>, vct3>&,
                                vctDynamicConstVectorBase<vctDynamicVectorOwner<vct3>, vct3>&,
                                vctFrm3&, double *);
