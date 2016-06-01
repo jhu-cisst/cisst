@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -259,7 +259,7 @@ public:
       compact, i.e. if the column stride is not equal to 1.
     */
     VectorPointerType & RowPointers(VectorPointerType & rowPointers) throw(std::runtime_error) {
-        if (! this->col_stride() == 1) {
+        if (! (this->col_stride() == 1)) {
             cmnThrow(std::runtime_error("vctDynamicMatrix: RowPointers requires compact rows"));
         }
         const size_type rows = this->rows();
