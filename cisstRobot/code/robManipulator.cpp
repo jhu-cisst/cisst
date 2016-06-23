@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctFixedSizeMatrix.h>
 
 #include <cisstNumerical/nmrLSEISolver.h>
+#include <cisstNumerical/nmrLSMinNorm.h>
 
 //#include <cisstNumerical/nmrNetlib.h>
 
@@ -411,6 +412,105 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 }
 
 robManipulator::Errno
+robManipulator::InverseKinematicsMinNorm( vctDynamicVector<double>& q,
+                                          const vctFrame4x4<double>& Rts,
+                                          double tolerance,
+                                          size_t Niterations,
+                                          double LAMBDA ){
+  if( q.size() != links.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                      << ": Expected " << links.size() << " joints values. "
+                      << " Got " << q.size()
+                      << std::endl;
+    return robManipulator::EFAILURE;
+  }
+
+  if( links.size() == 0 ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                      << ": The manipulator has no links."
+                      << std::endl;
+    return robManipulator::EFAILURE;
+  }
+
+  integer N = links.size();       // The number of columns of matrix A
+  integer INC = 1;                // The index increment
+
+  // B is a pointer the the N vector containing the solution
+  doublereal* B;
+  if( N < 6 )  { B = new doublereal[6]; }   // The N-by-NRHS matrix of
+  else         { B = new doublereal[N]; }
+
+
+  size_t i;                   // the iteration counter
+  doublereal ndq=1;               // norm of the iteration error
+  doublereal* dq = new doublereal[N];
+
+  // loop until Niter are executed or the error is bellow the tolerance
+  for( i=0; i<Niterations && tolerance<ndq; i++ ){
+
+    // Evaluate the forward kinematics
+    vctFrame4x4<double,VCT_ROW_MAJOR> Rt = ForwardKinematics( q );
+    // Evaluate the spatial Jacobian (also evaluate the forward kin)
+    vctDynamicMatrix<double> J(6, links.size(), VCT_COL_MAJOR );
+    JacobianSpatial( q, J );
+
+    // compute the translation error
+    vctFixedSizeVector<double,3> dt( Rts[0][3]-Rt[0][3],
+                                     Rts[1][3]-Rt[1][3],
+                                     Rts[2][3]-Rt[2][3] );
+
+    // compute the orientation error
+    // first build the [ n o a ] vectors
+    vctFixedSizeVector<double,3> n1( Rt[0][0],  Rt[1][0],  Rt[2][0] );
+    vctFixedSizeVector<double,3> o1( Rt[0][1],  Rt[1][1],  Rt[2][1] );
+    vctFixedSizeVector<double,3> a1( Rt[0][2],  Rt[1][2],  Rt[2][2] );
+    vctFixedSizeVector<double,3> n2( Rts[0][0], Rts[1][0], Rts[2][0] );
+    vctFixedSizeVector<double,3> o2( Rts[0][1], Rts[1][1], Rts[2][1] );
+    vctFixedSizeVector<double,3> a2( Rts[0][2], Rts[1][2], Rts[2][2] );
+
+    // This is the orientation error
+    vctFixedSizeVector<double,3> dr = 0.5*( (n1%n2) + (o1%o2) + (a1%a2) );
+
+    vctDynamicMatrix<double> e(6,1,VCT_COL_MAJOR);
+    e[0] = dt[0]; e[1] = dt[1]; e[2] = dt[2];
+    e[3] = dr[0]; e[4] = dr[1]; e[5] = dr[2];
+
+    vctDynamicMatrix<double> I(6,6,VCT_COL_MAJOR);
+    for( int r=0; r<6; r++ )
+      for( int c=0; c<6; c++ )
+        I[r][c] = 0.0;
+    for( int r=0; r<6; r++ ){ I[r][r] = 1.0; }
+
+    vctDynamicMatrix<double> jjt;
+    jjt = J*J.Transpose() + LAMBDA*I;
+
+    vctDynamicMatrix<double> JJt(6,6,VCT_COL_MAJOR);
+    for( int r=0; r<6; r++ )
+      for( int c=0; c<6; c++ )
+        JJt[r][c] = jjt[r][c];
+
+    vctDynamicMatrix<double> d_q = J.Transpose()*nmrLSMinNorm( JJt, e );
+    for( size_t i=0; i<links.size(); i++ )
+      { dq[i] = d_q[i][0]; }
+
+    // compute the L2 norm of the error
+    ndq = nrm2(&N, dq, &INC);
+
+    // update the solution
+    for(size_t j=0; j<links.size(); j++) q[j] += dq[j];
+  }
+
+  NormalizeAngles(q);
+
+  delete[] B;
+  delete[] dq;
+  //std::cout << i << std::endl;
+  if( i==Niterations ) { return robManipulator::EFAILURE; }
+  else                 { return robManipulator::ESUCCESS; }
+
+}
+
+robManipulator::Errno
 robManipulator::InverseKinematics( vctDynamicVector<double>& q,
                                    const vctFrame4x4<double>& Rts,
                                    double tolerance,
@@ -540,9 +640,8 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
   delete[] B;
   delete[] dq;
-
-  if( i==Niterations ) return robManipulator::EFAILURE;
-  else return robManipulator::ESUCCESS;
+  if( i==Niterations ) { return robManipulator::EFAILURE; }
+  else                 { return robManipulator::ESUCCESS; }
 }
 
 robManipulator::Errno
@@ -1094,27 +1193,29 @@ void robManipulator::OSinertia( double Ac[6][6],
   // Cholesky factorization of the symmetric positive definite matrix A
   // A = L  * L**T
   potrf(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
-  if(INFO<0)
+  if(INFO<0){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": The " << INFO << "th argument to potrf is illegal."
                       << std::endl;
-  else if(0<INFO)
+  }
+  else if(0<INFO){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": The matrix for potrf is not positive definite."
                       << std::endl;
-
+  }
   // invert A
   //
   potri(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
-  if(INFO<0)
+  if(INFO<0){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": The " << INFO << "th argument to potri is illegal."
                       << std::endl;
-  else if(0<INFO)
+  }
+  else if(0<INFO){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": The matrix passed to potri is singular."
                       << std::endl;
-
+  }
   for( size_t c=0; c<links.size(); c++ )
     for( size_t r=c; r<links.size(); r++ )
       A[r][c] = A[c][r];

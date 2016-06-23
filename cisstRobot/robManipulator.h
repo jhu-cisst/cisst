@@ -224,6 +224,14 @@ public:
                      number of iterations. ERROR otherwise.
   */
   virtual
+
+    robManipulator::Errno
+    InverseKinematicsMinNorm( vctDynamicVector<double>& q,
+                              const vctFrame4x4<double>& Rts,
+                              double tolerance,
+                              size_t Niterations,
+                              double LAMBDA );
+
     robManipulator::Errno
     InverseKinematics( vctDynamicVector<double>& q,
                        const vctFrame4x4<double>& Rts,
