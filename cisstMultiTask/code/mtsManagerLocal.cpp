@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1244,15 +1244,18 @@ mtsTaskContinuous *mtsManagerLocal::PopCurrentMainTask(void)
     mtsTaskContinuous *previousMainTask = 0;
     while (!previousMainTask && !MainTaskNames.empty()) {
         previousMainTask = dynamic_cast<mtsTaskContinuous *>(GetComponent(MainTaskNames.top()));
-        if (!previousMainTask)
+        if (!previousMainTask) {
             CMN_LOG_CLASS_RUN_WARNING << "PopCurrentMainTask: could not find " << MainTaskNames.top() << std::endl;
+        }
         MainTaskNames.pop();
     }
-    if (previousMainTask)
+    if (previousMainTask) {
         CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, so main task reverts to "
                                   << previousMainTask->GetName() << std::endl;
-    else
+    }
+    else {
         CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, no main task remaining" << std::endl;
+    }
     CurrentMainTask = previousMainTask;
     return CurrentMainTask;
 }
@@ -1781,8 +1784,9 @@ void mtsManagerLocal::StartAll(void)
     // Get the current thread id in order to check if any task will use the current thread.
     // If so, start that task last.
     const osaThreadId threadId = osaGetCurrentThreadId();
-    if (threadId != this->MainThreadId)
+    if (threadId != this->MainThreadId) {
         CMN_LOG_CLASS_RUN_WARNING << "StartAll: current thread is not main thread." << std::endl;
+    }
 
     mtsTask * componentTask;
 
@@ -1821,8 +1825,9 @@ void mtsManagerLocal::StartAll(void)
             } else {
                 CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << iterator->first << "\"" << std::endl;
                 if (componentTask->Thread.GetId() == MainThreadId) {
-                    if (dynamic_cast<mtsTaskContinuous *>(componentTask))
+                    if (dynamic_cast<mtsTaskContinuous *>(componentTask)) {
                         CMN_LOG_CLASS_INIT_WARNING << "StartAll: is the main task really " << iterator->first << "???" << std::endl;
+                    }
                 }
                 iterator->second->Start();  // If task will not use current thread, start it immediately.
             }
@@ -3143,4 +3148,3 @@ bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNa
     else
         return false;
 }
-

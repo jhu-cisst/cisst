@@ -86,3 +86,17 @@ void cmnLogLoDTest::TestMasks(void)
     CPPUNIT_ASSERT((CMN_LOG_ALLOW_ALL & CMN_LOG_LEVEL_INIT_DEBUG));
     CPPUNIT_ASSERT((CMN_LOG_ALLOW_ALL & CMN_LOG_LEVEL_RUN_DEBUG));
 }
+
+#include <cisstCommon/cmnLogger.h>
+
+void cmnLogLoDTest::TestIfElse(void)
+{
+    bool beenThere;
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    beenThere = false;
+    if (false)
+        CMN_LOG_RUN_ERROR << "cmnLogLoDTest::TestIfElse" << std::endl;
+    else
+        beenThere = true;
+    CPPUNIT_ASSERT(beenThere);
+}

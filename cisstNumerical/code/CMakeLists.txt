@@ -36,6 +36,7 @@ set (HEADER_FILES
      nmrExport.h
      nmrGaussJordanInverse.h
      nmrIsOrthonormal.h
+     nmrLinearRegression.h
      nmrMultiIndexCounter.h
      nmrMultiVariablePowerBasis.h
      nmrPolynomialBase.h

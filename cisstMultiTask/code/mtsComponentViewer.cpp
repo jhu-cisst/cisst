@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2010-09-07
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -173,8 +172,9 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
         for (int i = 0; (i < 100) && (UDrawResponse == ""); i++)
             osaSleep(0.01);
         ProcessResponse();
-        if (WaitingForResponse)
-            CMN_LOG_CLASS_RUN_ERROR << "Failed to receive response" << std::endl;
+        if (WaitingForResponse) {
+            CMN_LOG_CLASS_RUN_ERROR << "ConnectToUDrawGraph: Failed to receive response" << std::endl;
+        }
 
         /// Now initialize the system
         WriteString(UDrawPipe, "window(title(\"CISST Component Viewer\"))\n");

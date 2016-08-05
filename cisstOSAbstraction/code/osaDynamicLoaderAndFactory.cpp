@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Peter Kazanzides
-  Created on: 2007-01-16 
+  Created on: 2007-01-16
 
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2016 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -71,8 +70,9 @@ bool osaDynamicLoaderAndFactoryBase::Init(const char *name, const char *file, co
         // a pointer (address) comparison and therefore relies on having a single type_info structure
         // for the base class (rather than one in the main module and another in the dynamically-loaded
         // module). So far, it seems to work, but if not we do not consider it an error.
-        if (tinfo != **basetypep)
+        if (tinfo != **basetypep) {
             CMN_LOG_INIT_WARNING << "osaDynamicLoaderAndFactory: comparison of type_info failed (ignored)." << std::endl;
+        }
     }
     else {
         CMN_LOG_INIT_ERROR << "osaDynamicLoaderAndFactory: could not find BaseType for " << name << std::endl;
@@ -115,4 +115,3 @@ bool osaDynamicLoaderAndFactoryBase::Init(const char *name, const char *file, co
                          << version << ")." << std::endl;
     return true;
 }
-

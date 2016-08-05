@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -983,26 +983,30 @@ void robManipulator::OSinertia( double Ac[6][6],
   // Cholesky factorization of the symmetric positive definite matrix A
   // A = L  * L**T
   potrf(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
-  if(INFO<0)
+  if(INFO<0) {
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": The " << INFO << "th argument to potrf is illegal."
                       << std::endl;
-  else if(0<INFO)
+  }
+  else if(0<INFO) {
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": The matrix for potrf is not positive definite."
                       << std::endl;
+  }
 
   // invert A
   //
   potri(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
-  if(INFO<0)
+  if(INFO<0) {
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": The " << INFO << "th argument to potri is illegal."
                       << std::endl;
-  else if(0<INFO)
+  }
+  else if(0<INFO) {
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": The matrix passed to potri is singular."
                       << std::endl;
+  }
 
   for( size_t c=0; c<links.size(); c++ )
     for( size_t r=c; r<links.size(); r++ )

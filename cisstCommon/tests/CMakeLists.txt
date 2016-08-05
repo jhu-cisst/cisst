@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstCommon tests
 #
-# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2016 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -24,7 +24,7 @@ get_filename_component (CMAKE_C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
 get_filename_component (CMAKE_CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cmnPortabilityTestCMake.h.in
                 ${CMAKE_CURRENT_BINARY_DIR}/cmnPortabilityTestCMake.h
-                @ONLY@)
+                @ONLY)
 # Add the path for the includes
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 

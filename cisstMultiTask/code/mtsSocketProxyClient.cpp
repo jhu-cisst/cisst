@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2013-08-06
 
-  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -142,11 +142,13 @@ public:
 
     void ExecuteSerialized(const std::string &argString)
     {
-        if (!CallerEvent)
+        if (!CallerEvent) {
             CMN_LOG_RUN_WARNING << "EventReceiverWriteProxy: CallerEvent is NULL" << std::endl;
+        }
         if (arg && Serializer->DeSerialize(argString, *arg)) {
-            if (CallerEvent)
+            if (CallerEvent) {
                 CallerEvent->Execute(*arg, MTS_NOT_BLOCKING);
+            }
         }
         else {
             mtsExecutionResultProxy resultProxy;
@@ -164,10 +166,12 @@ public:
                     CallerEvent->Execute(*arg, MTS_NOT_BLOCKING);
             }
             else {
-                if (result.Value() == mtsExecutionResult::COMMAND_QUEUED)
+                if (result.Value() == mtsExecutionResult::COMMAND_QUEUED) {
                     CMN_LOG_RUN_ERROR << "EventReceiverWriteProxy: got unexpected COMMAND_QUEUED" << std::endl;
-                if (CallerEvent)
+                }
+                if (CallerEvent) {
                     CallerEvent->Execute(resultProxy, MTS_NOT_BLOCKING);
+                }
             }
         }
     }
@@ -703,8 +707,9 @@ MulticastCommandWriteProxy::MulticastCommandWriteProxy(const std::string &name, 
                                                        mtsSocketProxyClient *proxy)
     : mtsMulticastCommandWriteBase(name), argSerialized(argPrototypeSerialized), arg(0), Proxy(proxy)
 {
-    if (!CreateArg())
+    if (!CreateArg()) {
         CMN_LOG_INIT_ERROR << "MulticastCommandWriteProxy: could not deserialize argument prototype" << std::endl;
+    }
 }
 
 MulticastCommandWriteProxy::~MulticastCommandWriteProxy()
@@ -930,8 +935,9 @@ bool mtsSocketProxyClient::WaitForResponse(double timeoutInSec)
 {
     // If LocalWaiting is initially false, it is probably an error; but it could be due to a
     // race condition, in which case it is not an error.
-    if (!LocalWaiting)
+    if (!LocalWaiting) {
         CMN_LOG_CLASS_RUN_WARNING << "WaitForResponse, LocalWaiting is false on entry" << std::endl;
+    }
     double startTime = osaGetTime();
     double endTime = startTime + timeoutInSec;
     double timeout = timeoutInSec;
@@ -939,8 +945,9 @@ bool mtsSocketProxyClient::WaitForResponse(double timeoutInSec)
         CheckForEvents(timeout);
         timeout = endTime - osaGetTime();
     }
-    if (LocalWaiting)
+    if (LocalWaiting) {
         CMN_LOG_CLASS_RUN_ERROR << "WaitForResponse timed out, timeout = " << timeoutInSec << std::endl;
+    }
     return !LocalWaiting;
 }
 
@@ -959,12 +966,14 @@ bool mtsSocketProxyClient::CreateClientProxy(const std::string & providedInterfa
     GetInitData.SetCallerEvent(localUnblockingCommand);
     LocalWaiting = true;
     if (GetInitData.Method(ServerData) && WaitForResponse(3.0)) {
-        if (ServerData.InterfaceVersion() != mtsSocketProxy::SOCKET_PROXY_VERSION)
+        if (ServerData.InterfaceVersion() != mtsSocketProxy::SOCKET_PROXY_VERSION) {
             CMN_LOG_CLASS_RUN_WARNING << "Client interface version = " << mtsSocketProxy::SOCKET_PROXY_VERSION
                                       << ", Server interface version = " << ServerData.InterfaceVersion() << std::endl;
-        if (ServerData.PacketSize() != mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE)
+        }
+        if (ServerData.PacketSize() != mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE) {
             CMN_LOG_CLASS_RUN_WARNING << "Client packet size = " << mtsSocketProxy::SOCKET_PROXY_PACKET_SIZE
                                       << ", Server packet size = " << ServerData.PacketSize() << std::endl;
+        }
     }
     else {
         CMN_LOG_CLASS_RUN_WARNING << "GetInitData failed" << std::endl;

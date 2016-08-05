@@ -6,8 +6,7 @@
   Author(s): Anton Deguet, Min Yang Jung
   Created on: 2004-12-10
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <string.h>
 #endif
 
-/* MJUNG: For detailed information about serial/paralle devices on QNX, please refer
+/* MJUNG: For detailed information about serial/parallel devices on QNX, please refer
    to the following link:
 
    Connecting Character Devices,
@@ -47,7 +46,10 @@ std::string osaSerialPort::SetPortNumber(unsigned int portNumber) {
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI)
     portName << "/dev/ttyS" << (portNumber - 1);
 #elif (CISST_OS == CISST_WINDOWS)
-    portName << "COM" << portNumber;
+    if (portNumber < 10)
+        portName << "COM" << portNumber;
+    else
+        portName << "\\\\.\\COM" << portNumber;
 #elif (CISST_OS == CISST_QNX)
     portName << "/dev/ser" << portNumber;
 #endif

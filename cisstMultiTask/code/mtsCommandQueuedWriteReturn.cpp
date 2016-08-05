@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,9 +47,10 @@ template <class _Base>
 mtsCommandQueuedWriteReturnBase<_Base>::~mtsCommandQueuedWriteReturnBase()
 {
     // Destructor should probably go through the queue and make sure to send a response to any waiting component
-    if (!MailBox->IsEmpty())
+    if (!MailBox->IsEmpty()) {
         CMN_LOG_INIT_WARNING << this->GetClassName() << " destructor: mailbox for "
                              << this->GetName() << " is not empty" << std::endl;
+    }
 }
 
 
