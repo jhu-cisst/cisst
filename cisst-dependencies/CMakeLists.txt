@@ -311,10 +311,11 @@ option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some
 if (CISST_HAS_JSON)
   include (ExternalProject)
   set (cisstJSON_PREFIX cisstJSONExternal)
-  # set (CISST_JSON_SVN_REPOSITORY http://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp)
-  # set (CISST_JSON_SVN_REVISION 276)
-  set (CISST_JSON_SVN_REPOSITORY  https://github.com/open-source-parsers/jsoncpp/tags/1.6.2)
-  set (CISST_JSON_SVN_REVISION 1218)
+  # set (CISST_JSON_SVN_REPOSITORY  https://github.com/open-source-parsers/jsoncpp/tags/1.6.2)
+  # set (CISST_JSON_SVN_REVISION 1218)
+
+  set (CISST_JSON_GIT_REPOSITORY https://github.com/jhu-cisst-external/jsoncpp.git)
+  set (CISST_JSON_GIT_TAG 1.7.4)
 
   # add fPIC if possible
   include (CheckCXXCompilerFlag)
@@ -325,8 +326,8 @@ if (CISST_HAS_JSON)
 
   ExternalProject_Add (cisstJSONExternal
                        PREFIX ${cisstJSON_PREFIX}
-                       SVN_REPOSITORY ${CISST_JSON_SVN_REPOSITORY}
-                       SVN_REVISION   -r ${CISST_JSON_SVN_REVISION}
+                       GIT_REPOSITORY    ${CISST_JSON_GIT_REPOSITORY}
+                       GIT_TAG           ${CISST_JSON_GIT_TAG}
                        CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                                         -DCMAKE_CXX_FLAGS:STRING=${JSON_CMAKE_CXX_FLAGS}
