@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstStereoVision
 #
-# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2016 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -356,7 +356,7 @@ ENDIF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
 # try to find OpenCV automatically, but do not mark as required
 set (OpenCV_COMPONENTS core calib3d contrib features2d gpu
                        legacy highgui ml imgproc objdetect ts video)
-find_package (OpenCV QUIET COMPONENTS ${OpenCV_COMPONENTS})
+find_package (OpenCV 2 QUIET COMPONENTS ${OpenCV_COMPONENTS})
 
 if (OpenCV_FOUND)
     option (CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" ON)
@@ -394,7 +394,7 @@ else (OpenCV_FOUND)
 endif (OpenCV_FOUND)
 
 if (CISST_SVL_HAS_OPENCV2 AND NOT OpenCV_FOUND)
-  find_package (OpenCV QUIET REQUIRED ${OpenCV_COMPONENTS})
+  find_package (OpenCV 2 gQUIET REQUIRED ${OpenCV_COMPONENTS})
 endif (CISST_SVL_HAS_OPENCV2 AND NOT OpenCV_FOUND)
 
 
