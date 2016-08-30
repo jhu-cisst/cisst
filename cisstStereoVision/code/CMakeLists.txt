@@ -394,7 +394,7 @@ else (OpenCV_FOUND)
 endif (OpenCV_FOUND)
 
 if (CISST_SVL_HAS_OPENCV2 AND NOT OpenCV_FOUND)
-  find_package (OpenCV 2 gQUIET REQUIRED ${OpenCV_COMPONENTS})
+  find_package (OpenCV 2 QUIET REQUIRED ${OpenCV_COMPONENTS})
 endif (CISST_SVL_HAS_OPENCV2 AND NOT OpenCV_FOUND)
 
 
