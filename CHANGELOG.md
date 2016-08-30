@@ -1,6 +1,22 @@
 Change log
 ==========
 
+1.0.8 (2016-08-30)
+==================
+
+* API changes:
+  * cisstDataGenerator: use std::vector instead of std::list for possible enum values/strings
+* Deprecated features:
+  * None
+* New features:
+  * cisstNumerical: nmrRegistrationRigid Python wrapper
+* Bug fixes:
+  * cisstVector: fixed bug in RowPointers methods for dynamic matrices
+  * cisstOSAbstraction: fix serial port name on Windows when number greater than 9
+  * CMake: fixed configure_file @ONLY
+  * CMake: set messages as STATUS for informational messages
+  * CMake: cisstStereoVision looks explicitly for OpenCV 2
+
 1.0.7 (2016-05-16)
 ==================
 
