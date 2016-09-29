@@ -33,7 +33,7 @@ endif (CISST_HAS_OPENGL)
 # Support for QT
 
 # first try to find Qt5
-set (CISST_QT5_PACKAGES Qt5Core Qt5Widgets Qt5Gui Qt5OpenGL)
+set (CISST_QT5_PACKAGES Qt5Core Qt5Xml Qt5XmlPatterns Qt5Widgets Qt5Gui Qt5OpenGL)
 
 set (CISST_QT5_FOUND ON)
 foreach (package ${CISST_QT5_PACKAGES})
@@ -83,18 +83,6 @@ if (CISST_HAS_QT5)
     find_package (${package} REQUIRED)
     cisst_set_package_settings (cisstQt ${package} PACKAGES package)
   endforeach ()
-  # OpenGL
-  set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
-  mark_as_advanced (CISST_HAS_OPENGL)
-
-  # Create the CMake config file, save path to qmake to make it easy to find
-  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstQtBuild.cmake.in
-                  ${CISST_CMAKE_BINARY_DIR}/cisstQtBuild.cmake
-                  @ONLY)
-  install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstQtBuild.cmake
-           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-           COMPONENT cisstCommon)
-
 else (CISST_HAS_QT5)
   cisst_unset_all_package_settings (cisstQt Qt5)
 endif (CISST_HAS_QT5)
@@ -110,6 +98,12 @@ if (CISST_HAS_QT4)
   cisst_set_package_settings (cisstQt Qt4 PACKAGE_COMPONENTS CISST_QT4_COMPONENTS)
   cisst_set_package_settings (cisstQt Qt4 CMAKE_FILES        QT_USE_FILE)
   cisst_set_package_settings (cisstQt Qt4 LIBRARIES          QT_LIBRARIES)
+else (CISST_HAS_QT4)
+  cisst_unset_all_package_settings (cisstQt Qt4)
+endif (CISST_HAS_QT4)
+
+# for both version of Qt
+if (CISST_HAS_QT4 OR CISST_HAS_QT5)
   # OpenGL
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)
@@ -124,13 +118,12 @@ if (CISST_HAS_QT4)
   install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstQtBuild.cmake
            DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
            COMPONENT cisstCommon)
-
-else (CISST_HAS_QT4)
-  cisst_unset_all_package_settings (cisstQt Qt4)
+else ()
   # XML Qt based
   set (CISST_FOUND_QT_XML OFF CACHE BOOL "Is Qt XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
   mark_as_advanced (CISST_FOUND_QT_XML)
-endif (CISST_HAS_QT4)
+endif ()
+
 
 
 # Support for FLTK
