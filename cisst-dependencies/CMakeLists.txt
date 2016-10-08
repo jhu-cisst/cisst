@@ -310,10 +310,8 @@ option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some
 
 if (CISST_HAS_JSON)
   include (ExternalProject)
-  set (cisstJSON_PREFIX cisstJSONExternal)
-  # set (CISST_JSON_SVN_REPOSITORY  https://github.com/open-source-parsers/jsoncpp/tags/1.6.2)
-  # set (CISST_JSON_SVN_REVISION 1218)
 
+  set (cisstJSON_PREFIX cisstJSONExternal)
   set (CISST_JSON_GIT_REPOSITORY https://github.com/jhu-cisst-external/jsoncpp.git)
   set (CISST_JSON_GIT_TAG 1.7.4)
 

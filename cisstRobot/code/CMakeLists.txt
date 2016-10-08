@@ -1,6 +1,5 @@
 #
-# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2016 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -44,15 +43,6 @@ if (CISST_HAS_CISSTNETLIB)
        robLink.cpp
        robManipulator.cpp
 
-#    BH/robBH.cpp
-#    BH/robBHF1.cpp
-#    BH/robBHF2.cpp
-#    BH/robBHF3.cpp
-
-#    SAH/robSAH.cpp
-#    SAH/robSAHFinger.cpp
-#    SAH/robSAHThumb.cpp
-
 #    robComputedTorque.cpp
 #    robPD.cpp
 
@@ -88,40 +78,52 @@ if (CISST_HAS_CISSTNETLIB)
        robLink.h
        robManipulator.h
 
-#    BH/robBH.h
-#    BH/robBHF1.h
-#    BH/robBHF2.h
-#    BH/robBHF3.h
-
-#    SAH/robSAH.h
-#    SAH/robSAHFinger.h
-#    SAH/robSAHThumb.h
-
 #    robControllerJoints.h
 #    robComputedTorque.h
 #    robPD.h
 
       )
 
-  # if (CISST_CATKIN_BUILT)
+  option (CISST_ROB_HAS_REFLEXXES_TYPEII "Compile cisstRobot with TypeIIRML wrappers" ON)
 
-  #   set (Reflexxes_LIBRARIES ReflexxesTypeII)
-  #   set (Reflexxes_LINK_DIRECTORIES "${CATKIN_DEVEL_PREFIX}/lib")
-  #   cisst_set_package_settings (cisstRobot Reflexxes LIBRARIES Reflexxes_LIBRARIES)
-  #   cisst_set_package_settings (cisstRobot Reflexxes LINK_DIRECTORIES Reflexxes_LINK_DIRECTORIES)
+  if (CISST_ROB_HAS_REFLEXXES_TYPEII)
+    include (ExternalProject)
 
-  #   set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
-  #   set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
+    # download and build options
+    set (cisstReflexxesTypeII_PREFIX cisstReflexxesTypeIIExternal)
+    set (cisstReflexxesTypeII_GIT_REPOSITORY https://github.com/jhu-cisst-external/ReflexxesTypeII.git)
+    set (cisstReflexxesTypeII_GIT_TAG 1.2.6)
 
-  # endif ()
+    ExternalProject_Add (cisstReflexxesTypeIIExternal
+                         PREFIX ${cisstReflexxesTypeII_PREFIX}
+                         GIT_REPOSITORY    ${cisstReflexxesTypeII_GIT_REPOSITORY}
+                         GIT_TAG           ${cisstReflexxesTypeII_GIT_TAG}
+                         CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                          -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                          -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstReflexxesTypeII
+                         INSTALL_DIR ${cisst_BINARY_DIR}/cisstReflexxesTypeII
+                         UPDATE_COMMAND ""
+                         )
+    # set all cisstReflexxesTypeII variables based on install directory
+    set (cisstReflexxesTypeII_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstReflexxesTypeII/include/ReflexxesTypeII")
+    set (cisstReflexxesTypeII_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib")
+    set (cisstReflexxesTypeII_LIBRARIES ReflexxesTypeII)
+    # save for external packages
+    cisst_set_package_settings (cisstRobot cisstReflexxesTypeII INCLUDE_DIRECTORIES cisstReflexxesTypeII_INCLUDE_DIR)
+    cisst_set_package_settings (cisstRobot cisstReflexxesTypeII LIBRARIES           cisstReflexxesTypeII_LIBRARIES)
+    cisst_set_package_settings (cisstRobot cisstReflexxesTypeII LINK_DIRECTORIES    cisstReflexxesTypeII_LIBRARY_DIRS)
+    # add wrappers to cisstRobot
+    set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
+    set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
+  else ()
+    cisst_unset_all_package_settings (cisstRobot Reflexxes)
+  endif ()
 
   cisst_add_library (LIBRARY cisstRobot
                      FOLDER cisstRobot
                      DEPENDENCIES ${DEPENDENCIES}
                      SOURCE_FILES ${SOURCE_FILES}
                      HEADER_FILES ${HEADER_FILES})
-
-  # target_link_libraries(cisstRobot ReflexxesTypeII)
 
 else (CISST_HAS_CISSTNETLIB)
   message ("cisstRobot requires cisstNumerical to be compiled with the option CISST_HAS_CISSTNETLIB")
