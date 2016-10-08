@@ -58,18 +58,19 @@ install (FILES ${CISST_CMN_XML_CONFIG_FILE}
 set_source_files_properties ("${CISST_CMN_XML_CONFIG_FILE}"
                              PROPERTIES GENERATED TRUE)
 
+# link against Qt libraries if needed
+if (${CISST_XML_LIB} STREQUAL "QtXML")
+  cisst_set_directories (cisstQt)
+  set (cisstCommonXML_EXTRA_DEP cisstCommonQt)
+endif ()
+
 cisst_add_library (LIBRARY cisstCommonXML
                    LIBRARY_DIR cisstCommon
                    FOLDER cisstCommon
-                   DEPENDENCIES cisstCommon
+                   DEPENDENCIES cisstCommon ${cisstCommonXML_EXTRA_DEP}
                    SOURCE_FILES cmnXMLPath.cpp
                    HEADER_FILES cmnExportXML.h cmnXMLPath.h
                    ADDITIONAL_HEADER_FILES ${CISST_CMN_XML_CONFIG_FILE})
-
-# link against Qt libraries if needed
-if (${CISST_XML_LIB} STREQUAL "QtXML")
-  target_link_libraries (cisstCommonXML ${QT_LIBRARIES})
-endif (${CISST_XML_LIB} STREQUAL "QtXML")
 
 # Add libxml2 runtime dependencies (so far, only tested on WIN32).
 # There must be a better way to do this.
