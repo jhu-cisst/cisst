@@ -313,7 +313,7 @@ if (CISST_HAS_JSON)
 
   set (cisstJSON_PREFIX cisstJSONExternal)
   set (CISST_JSON_GIT_REPOSITORY https://github.com/jhu-cisst-external/jsoncpp.git)
-  set (CISST_JSON_GIT_TAG 1.7.4)
+  set (CISST_JSON_GIT_TAG 1.7.4.1)
 
   # add fPIC if possible
   include (CheckCXXCompilerFlag)
@@ -332,6 +332,7 @@ if (CISST_HAS_JSON)
                                         -DOPTION_BUILD_EXAMPLES:BOOL=OFF
                                         -DJSONCPP_WITH_TESTS:BOOL=OFF
                                         -DJSONCPP_WITH_POST_BUILD_UNITTEST:BOOL=OFF
+                                        -DJSONCPP_WITH_STRICT_ISO:BOOL=OFF
                                         -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstJSON
                        INSTALL_DIR ${cisst_BINARY_DIR}/cisstJSON
                        UPDATE_COMMAND ""
