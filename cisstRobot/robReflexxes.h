@@ -19,11 +19,6 @@
 #ifndef _robReflexxes_h
 #define _robReflexxes_h
 
-// #include <ReflexxesAPI.h>
-// #include <RMLPositionFlags.h>
-// #include <RMLPositionInputParameters.h>
-// #include <RMLPositionOutputParameters.h>
-
 // forward declarations for Reflexxes types
 class ReflexxesAPI;
 class RMLPositionInputParameters;
@@ -48,21 +43,19 @@ public:
     typedef enum {Reflexxes_NONE, Reflexxes_TIME, Reflexxes_PHASE} SynchronizationType;
     typedef enum {Reflexxes_UNDEFINDED, Reflexxes_WORKING,
                   Reflexxes_FINAL_STATE_REACHED, Reflexxes_ERROR} ResultType;
-    // RMLPositionFlags Flags; //need to be hided
 
 protected:
     bool mIsSet;                          /*!< To ensure we don't evaluate if the parameters are not set */
     size_t mDimension;                    /*!< Number of degrees of freedom */
     SynchronizationType mSynchronization; /*!< synchronization type we can set*/
 
-    ReflexxesAPI * RML;                    /*!< */
-    RMLPositionInputParameters *IP;       /*!< */
-    RMLPositionOutputParameters *OP;      /*!< */
+    ReflexxesAPI * RML;
+    RMLPositionInputParameters * IP;
+    RMLPositionOutputParameters * OP;
     RMLPositionFlags * mFlags;
-    ResultType mResultValue;                     /*!< */
-    double mTime;                         /*!< */
-
-    vctDoubleVec mCurrentAcceleration;    /*!< */
+    ResultType mResultValue;
+    double mTime;
+    vctDoubleVec mCurrentAcceleration;
 
 public:
     robReflexxes(void);
@@ -85,8 +78,8 @@ public:
     /*! Returns expected time left after last Evaluate call. */ 
     double Duration(void) const;
     
-    double getTime(void) const;
-    void setTime(const double);
+    const double & Time(void) const;
+    void SetTime(const double & time);
     
     /*!  \brief Set target positions and velocities as well as desired
       maximum velocities and accelerations. All vectors must match the

@@ -66,12 +66,12 @@ void robReflexxes::Init(void)
     mFlags = 0;
 }
 
-double robReflexxes::getTime(void) const
+const double & robReflexxes::Time(void) const
 {
     return mTime;
 }
 
-void robReflexxes::setTime(const double time)
+void robReflexxes::SetTime(const double & time)
 {
     mTime = time;
 }
@@ -114,9 +114,9 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
         cmnThrow("robReflexxes::Set: maximum jerk doesn't match start point dimension");
     }
     mCurrentAcceleration.SetSize(mDimension);
-    for(size_t i = 0;
-        i < mDimension;
-        ++i)
+    for (size_t i = 0;
+         i < mDimension;
+         ++i)
     {
         mCurrentAcceleration[i] = 0;
     }
@@ -145,10 +145,7 @@ void robReflexxes::Set(const vctDoubleVec & MaxVelocity,
     }
 
     // Checking for input parameters
-    if (IP->CheckForValidity()) {
-        std::cout << "robReflexxes::Set: input values are valid!" << std::endl;
-        //cmnThrow("robReflexxes::Set: input values are valid!");
-    } else {
+    if (!IP->CheckForValidity()) {
         cmnThrow("robReflexxes::Set: input values are INVALID!");
     }
 
@@ -192,7 +189,6 @@ void robReflexxes::Evaluate(vctDoubleVec & CurrentPosition,
     int rmlResult = RML->RMLPosition(*IP, OP, *mFlags);
     if (rmlResult < 0) {
         printf("An error occurred (%d).\n", rmlResult);
-        //break;
     }
 
     switch (rmlResult) {
