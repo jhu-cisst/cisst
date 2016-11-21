@@ -32,7 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QWidget>
 
-class QWidget;
 class QVBoxLayout;
 
 
