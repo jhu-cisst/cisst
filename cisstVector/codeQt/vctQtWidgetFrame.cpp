@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstVector/vctQtWidgetFrame.h>
+#include <QVBoxLayout>
 
 vctQtWidgetFrameDoubleRead::vctQtWidgetFrameDoubleRead(const DisplayModeType displayMode):
     QWidget()
