@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctPlot2DOpenGLQtWidget_h
 
 #include <QtGlobal>
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= 0x050400
 #include <QOpenGLWidget>
 typedef QOpenGLWidget OpenGLBaseWidget;
 #else
