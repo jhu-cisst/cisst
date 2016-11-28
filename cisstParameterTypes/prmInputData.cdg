@@ -20,13 +20,13 @@ class {
     }
 
     member {
-        name AnalogInput;
+        name AnalogInputs;
         type vctDoubleVec;
         description Analog inputs;
     }
 
     member {
-        name DigitalInput;
+        name DigitalInputs;
         type vctBoolVec;
         description Digital inputs;
     }
