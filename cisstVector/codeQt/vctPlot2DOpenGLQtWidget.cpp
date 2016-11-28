@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QMenu>
 
 vctPlot2DOpenGLQtWidget::vctPlot2DOpenGLQtWidget(QWidget * parent):
-    QGLWidget(parent),
+    OpenGLBaseWidget(parent),
     vctPlot2DOpenGL()
 {
     this->setFocusPolicy(Qt::StrongFocus);

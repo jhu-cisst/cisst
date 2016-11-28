@@ -30,6 +30,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <GL/gl.h>
 #endif
 
+#include <QGridLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QAction>
+
 #include <cisstVector/vctQtWidgetRotation.h>
 
 // all these widgets should be replaced to use static vectors/matrices
@@ -60,13 +65,13 @@ void vctQtWidgetRotationOpenGL::SetValue(const vctMatRot3 & rot)
     orientation.Z() = rotEuler.alpha() * 180.0 / cmnPI;  // z
 
     // update GL display
-    updateGL();
+    update();
 }
 
 
 void vctQtWidgetRotationOpenGL::initializeGL(void)
 {
-    qglClearColor(Qt::lightGray);
+    glClearColor(0.68, 0.67, 0.67, 1.0);
     glShadeModel(GL_SMOOTH);
 }
 
