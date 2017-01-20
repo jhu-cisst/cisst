@@ -45,7 +45,7 @@ class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating: public vctQtWidgetDynam
     char Format;
 public:
     vctQtWidgetDynamicVectorReadFloating(void);
-    virtual bool SetValue(const vctDynamicVector<value_type> & value);
+    virtual bool SetValue(const vctDynamicConstVectorRef<value_type> & value);
     void SetPrecision(const int precision);
     void SetFormat(const char format);
 };
@@ -57,7 +57,7 @@ class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger: public vctQtWidgetDynami
     int Base;
 public:
     vctQtWidgetDynamicVectorReadInteger(void);
-    virtual bool SetValue(const vctDynamicVector<value_type> & value);
+    virtual bool SetValue(const vctDynamicConstVectorRef<value_type> & value);
     void SetBase(const int base);
 };
 
