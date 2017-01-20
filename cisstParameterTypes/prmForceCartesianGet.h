@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
+
   Author(s):	Anton Deguet
   Created on:	2009-02-06
 
@@ -19,8 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Cartesian force get parameters.
 */
 
@@ -42,22 +42,28 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
  public:
     typedef mtsGenericObject BaseType;
 
+    typedef vctFixedSizeConstVectorRef<double, 3, 1> ConstForceType;
+    typedef vctFixedSizeVectorRef<double, 3, 1> ForceType;
+
+    typedef ConstForceType ConstTorqueType;
+    typedef ForceType TorqueType;
+
     /*! default constructor */
     inline prmForceCartesianGet(void):
         mtsGenericObject()
     {}
-    
+
     /*! constructor with all parameters */
     inline prmForceCartesianGet(const vctDouble6 & force):
         ForceMember(force)
     {
         this->MaskMember.SetAll(true);
     }
-    
+
     /*!destructor
      */
     virtual ~prmForceCartesianGet();
-    
+
     /*! Set and Get methods for force */
     //@{
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDouble6, Force);
@@ -71,13 +77,29 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
 
 public:
 
+    inline ConstForceType F(void) const {
+        return ConstForceType(ForceMember.Pointer(0));
+    }
+
+    inline ForceType F(void) {
+        return ForceType(ForceMember.Pointer(0));
+    }
+
+    inline ConstTorqueType T(void) const {
+        return ConstTorqueType(ForceMember.Pointer(3));
+    }
+
+    inline TorqueType T(void) {
+        return TorqueType(ForceMember.Pointer(3));
+    }
+
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 
     /*! To stream raw data. */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                      bool headerOnly = false, const std::string & headerPrefix = "") const;
-    
+
     /*! Binary serialization */
     void SerializeRaw(std::ostream & outputStream) const;
 
@@ -91,4 +113,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(prmForceCartesianGet);
 
 
 #endif // _prmForceCartesianGet_h
-
