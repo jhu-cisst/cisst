@@ -24,6 +24,7 @@ if (CISST_HAS_QT4)
                 ../vctQtWidgetRotation.h
                 ../vctQtWidgetFrame.h
                 ../vctQtWidgetFrame4x4.h
+		../vctForceTorqueQtWidget.h
                 )
 else (CISST_HAS_QT4)
   # assumes Qt 5 Auto Moc
@@ -48,6 +49,7 @@ cisst_add_library (
                vctQtWidgetRotation.cpp
                vctQtWidgetFrame.cpp
                vctQtWidgetFrame4x4.cpp
+               vctForceTorqueQtWidget.cpp
   HEADER_FILES vctQtForwardDeclarations.h
                vctPlot2DOpenGLQtWidget.h
                vctQtWidgetDynamicVector.h
@@ -55,6 +57,7 @@ cisst_add_library (
                vctQtWidgetRotation.h
                vctQtWidgetFrame.h
                vctQtWidgetFrame4x4.h
+               vctForceTorqueQtWidget.h
                vctExportQt.h
   ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 
