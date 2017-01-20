@@ -20,7 +20,9 @@ cisst_data_generator (cisstParameterTypes
                       ../prmPositionJointGet.cdg
                       ../prmFixtureGainCartesianSet.cdg
                       ../prmIMUSensors.cdg
-                      ../prmStateJoint.cdg)
+                      ../prmStateJoint.cdg
+                      ../prmInputData.cdg
+                      )
 
 # to compile cisst generated code, need to find header file
 include_directories (${CMAKE_CURRENT_BINARY_DIR})

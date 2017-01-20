@@ -101,3 +101,6 @@ CMN_IMPLEMENT_SERVICES(prmIMUSensors);
 
 #include <cisstParameterTypes/prmStateJoint.h>
 CMN_IMPLEMENT_SERVICES(prmStateJoint);
+
+#include <cisstParameterTypes/prmInputData.h>
+CMN_IMPLEMENT_SERVICES(prmInputData);

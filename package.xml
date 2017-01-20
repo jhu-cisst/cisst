@@ -9,7 +9,9 @@
   <url>https://github.com/jhu-cisst/cisst</url>
 
   <build_depend>cisst_netlib</build_depend>
+  <build_depend>reflexxes_type2</build_depend>
   <run_depend>cisst_netlib</run_depend>
+  <run_depend>reflexxes_type2</run_depend>
   <export>
     <build_type>catkin</build_type>
   </export>

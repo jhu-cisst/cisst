@@ -26,10 +26,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctQtForwardDeclarations.h>
 #include <cisstVector/vctTransformationTypes.h>
 
-#include <QWidget>
-#include <QtOpenGL>
+#include <QtGlobal>
+#if QT_VERSION >= 0x050400
+#include <QOpenGLWidget>
+typedef QOpenGLWidget OpenGLBaseWidget;
+#else
+#include <QGLWidget>
+typedef QGLWidget OpenGLBaseWidget;
+#endif
 
-class QWidget;
 class QVBoxLayout;
 
 
@@ -43,7 +48,7 @@ class QVBoxLayout;
   \todo use a GL list to create the axes once and re-use later
   \todo remove reference frame?
 */
-class CISST_EXPORT vctQtWidgetRotationOpenGL: public QGLWidget
+class CISST_EXPORT vctQtWidgetRotationOpenGL: public OpenGLBaseWidget
 {
     Q_OBJECT;
 

@@ -337,16 +337,17 @@ if (CISST_BUILD_TESTS)
     if (CISST_USE_EXTERNAL)
       include (ExternalProject)
       set (cisstCppUnit_PREFIX cisstCppUnitExternal)
+      set (CISST_CPPUNIT_GIT_REPOSITORY https://github.com/jhu-cisst-external/cppunit.git)
+      set (CISST_CPPUNIT_GIT_TAG cppunit-1.13.3)
+
       ExternalProject_Add (cisstCppUnit
                            PREFIX ${cisstCppUnit_PREFIX}
-                           URL http://dev-www.libreoffice.org/src/cppunit-1.13.2.tar.gz
-                           URL_MD5 d1c6bdd5a76c66d2c38331e2d287bc01
+                           GIT_REPOSITORY    ${CISST_CPPUNIT_GIT_REPOSITORY}
+                           GIT_TAG           ${CISST_CPPUNUT_GIT_TAG}
                            CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                           PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                                         ${CMAKE_CURRENT_SOURCE_DIR}/cisstTestsDriver/cppunit-patch
-                                         "."
                            INSTALL_COMMAND ""
+                           UPDATE_COMMAND ""
                            )
       set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit/include")
       set (CPPUNIT_LIBRARIES "cppunit")
