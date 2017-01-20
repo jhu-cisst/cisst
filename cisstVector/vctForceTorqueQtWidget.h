@@ -41,7 +41,7 @@ class QVBoxLayout;
   \todo use a GL list to create the axes once and re-use later
   \todo remove reference frame?
 */
-class CISST_EXPORT vctForceTorqueQtWidgetOpenGL: public QGLWidget
+class CISST_EXPORT vctForceTorqueQtWidgetOpenGL: public vctQtOpenGLBaseWidget
 {
     Q_OBJECT;
 

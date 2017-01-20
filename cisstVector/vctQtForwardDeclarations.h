@@ -21,6 +21,16 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctQtForwardDeclarations_h
 #define _vctQtForwardDeclarations_h
 
+
+#include <QtGlobal>
+#if QT_VERSION >= 0x050400
+#include <QOpenGLWidget>
+typedef QOpenGLWidget vctQtOpenGLBaseWidget;
+#else
+#include <QGLWidget>
+typedef QGLWidget vctQtOpenGLBaseWidget;
+#endif
+
 template <class _elementType>
 class vctQtWidgetDynamicVectorReadFloating;
 template <class _elementType>
