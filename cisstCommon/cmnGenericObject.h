@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2004-08-18
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -37,6 +36,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 #include <iostream>
 
+#if CISST_HAS_JSON
+#include <json/json.h>
+#endif // CISST_HAS_JSON
 
 // Always include last
 #include <cisstCommon/cmnExport.h>
@@ -132,7 +134,7 @@ public:
       is used for arrays of object in order to optimize random access
       for a given scalar.  When defining an object with a fixed number
       of scalars, overloading this method to return true allows some
-      optimizations. */ 
+      optimizations. */
     virtual bool ScalarNumberIsFixed(void) const {
         return false;
     }
@@ -153,6 +155,12 @@ public:
         cmnThrow(std::out_of_range("cmnGenericObject::ScalarDescription base method called, no scalar"));
         return "index out of range";
     }
+
+#if CISST_HAS_JSON
+    virtual void SerializeTextJSON(Json::Value & CMN_UNUSED(jsonValue)) const {};
+    virtual void DeSerializeTextJSON(const Json::Value & CMN_UNUSED(jsonValue))
+        throw (std::runtime_error) {};
+#endif // CISST_HAS_JSON
 };
 
 
@@ -172,4 +180,3 @@ std::ostream & operator << (std::ostream & output,
 
 
 #endif // _cmnGenericObject_h
-
