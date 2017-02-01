@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Peter Kazanzides
-  Created on: 2007-01-16 
+  Created on: 2007-01-16
 
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,8 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Declaration of osaDynamicLoader
 */
 
@@ -69,11 +67,18 @@ public:
         \param file Name of shared library file to load (do not include extension)
         \param path Path to file (0 -> use default library load paths)
         \return true if file successfully loaded; false otherwise
-    */        
+    */
     bool Load(const char *file, const char *path = 0);
+    inline bool Load(const std::string & file,
+                     const std::string & path = "") {
+        if (path.empty()) {
+            return Load(file.c_str());
+        }
+        return Load(file.c_str(), path.c_str());
+    }
 
     /*! Unload the shared library file (if supported by operating system). */
-    void UnLoad();
+    void UnLoad(void);
 };
 
 #endif  // _osaDynamicLoader_h
