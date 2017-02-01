@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2017 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -30,6 +29,9 @@ void cmnDataJSON<double>::SerializeText(const DataType & data, Json::Value & jso
 }
 template <>
 void cmnDataJSON<double>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    if (jsonValue.empty()) {
+        cmnThrow("cmnDataJSON<double>::DeSerializeText: empty JSON value");
+    }
     data = jsonValue.asDouble();
 }
 
@@ -39,6 +41,9 @@ void cmnDataJSON<float>::SerializeText(const DataType & data, Json::Value & json
 }
 template <>
 void cmnDataJSON<float>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    if (jsonValue.empty()) {
+        cmnThrow("cmnDataJSON<float>::DeSerializeText: empty JSON value");
+    }
     data = jsonValue.asFloat();
 }
 
@@ -48,6 +53,9 @@ void cmnDataJSON<char>::SerializeText(const DataType & data, Json::Value & jsonV
 }
 template <>
 void cmnDataJSON<char>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    if (jsonValue.empty()) {
+        cmnThrow("cmnDataJSON<char>::DeSerializeText: empty JSON value");
+    }
     std::string temp = jsonValue.asString();
     if (temp.size() != 1) {
         cmnThrow("cmnDataJSON<char>::DeSerializeText: string with more than one character");
@@ -61,6 +69,9 @@ void cmnDataJSON<int>::SerializeText(const DataType & data, Json::Value & jsonVa
 }
 template <>
 void cmnDataJSON<int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    if (jsonValue.empty()) {
+        cmnThrow("cmnDataJSON<int>::DeSerializeText: empty JSON value");
+    }
     data = jsonValue.asInt();
 }
 
@@ -70,6 +81,9 @@ void cmnDataJSON<unsigned int>::SerializeText(const DataType & data, Json::Value
 }
 template <>
 void cmnDataJSON<unsigned int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    if (jsonValue.empty()) {
+        cmnThrow("cmnDataJSON<unsigned int>::DeSerializeText: empty JSON value");
+    }
     data = jsonValue.asUInt();
 }
 
@@ -79,6 +93,9 @@ void cmnDataJSON<unsigned long int>::SerializeText(const DataType & data, Json::
 }
 template <>
 void cmnDataJSON<unsigned long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    if (jsonValue.empty()) {
+        cmnThrow("cmnDataJSON<unsigned long int>::DeSerializeText: empty JSON value");
+    }
     data = jsonValue.asUInt64();
 }
 
@@ -88,6 +105,9 @@ void cmnDataJSON<unsigned long long int>::SerializeText(const DataType & data, J
 }
 template <>
 void cmnDataJSON<unsigned long long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    if (jsonValue.empty()) {
+        cmnThrow("cmnDataJSON<unsigned long long int>::DeSerializeText: empty JSON value");
+    }
     data = jsonValue.asUInt64();
 }
 
@@ -97,6 +117,9 @@ void cmnDataJSON<bool>::SerializeText(const DataType & data, Json::Value & jsonV
 }
 template <>
 void cmnDataJSON<bool>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    if (jsonValue.empty()) {
+        cmnThrow("cmnDataJSON<bool>::DeSerializeText: empty JSON value");
+    }
     data = jsonValue.asBool();
 }
 
@@ -106,6 +129,9 @@ void cmnDataJSON<std::string>::SerializeText(const DataType & data, Json::Value 
 }
 template <>
 void cmnDataJSON<std::string>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+    if (jsonValue.empty()) {
+        cmnThrow("cmnDataJSON<std::string>::DeSerializeText: empty JSON value");
+    }
     data = jsonValue.asString();
 }
 
