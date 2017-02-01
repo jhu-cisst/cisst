@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -184,6 +182,14 @@ public:
       relative or absolute, this function doesn't use any search
       path. */
     static bool Exists(const std::string & fullPath, short more = READ);
+
+    /*! Construct the shared library name based on OS prefix and
+      suffix.  For example, the return value for "MyLib" would be
+      "libMyLib.so" on most Unix systems and "MyLib.dll" on Windows.  Prefix
+      and suffix are based on CMake and saved in cisstConfig.h. */
+    inline static std::string SharedLibrary(const std::string & name) {
+        return CISST_SHARED_LIBRARY_PREFIX + name + CISST_SHARED_LIBRARY_SUFFIX;
+    }
 };
 
 
@@ -192,4 +198,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(cmnPath)
 
 
 #endif // _cmnPath_h
-
