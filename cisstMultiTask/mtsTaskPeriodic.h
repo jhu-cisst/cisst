@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,40 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
-class CISST_EXPORT mtsTaskPeriodicConstructorArg : public mtsGenericObject
-{
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-public:
-    enum { STATE_TABLE_DEFAULT_SIZE = 256 };
-    std::string Name;
-    double Period;
-    bool IsHardRealTime;
-    unsigned int StateTableSize;
-
-    mtsTaskPeriodicConstructorArg() : mtsGenericObject() {}
-    mtsTaskPeriodicConstructorArg(const std::string &name, double period, bool isHardRealTime = false,
-                                  unsigned int sizeStateTable = STATE_TABLE_DEFAULT_SIZE) : 
-        mtsGenericObject(), Name(name), Period(period), IsHardRealTime(isHardRealTime), StateTableSize(sizeStateTable) {}
-    mtsTaskPeriodicConstructorArg(const mtsTaskPeriodicConstructorArg &other) : mtsGenericObject(),
-        Name(other.Name), Period(other.Period), IsHardRealTime(other.IsHardRealTime), StateTableSize(other.StateTableSize) {}
-    ~mtsTaskPeriodicConstructorArg() {}
-
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
-
-    void ToStream(std::ostream & outputStream) const;
-
-    /*! Raw text output to stream */
-    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const;
-
-    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
-      Returns true if successful. */
-    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
-};
-
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskPeriodicConstructorArg);
 
 /*!
   \ingroup cisstMultiTask
@@ -96,7 +60,7 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
     /*! The period of the task, in seconds. */
     double Period;
     osaAbsoluteTime AbsoluteTimePeriod;
-   
+
 	/*! True if the task is hard real time. It is always false for non-real
 	  time systems. */
 	bool IsHardRealTime;
@@ -174,4 +138,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskPeriodic)
 
 
 #endif // _mtsTaskPeriodic_h
-
