@@ -28,13 +28,35 @@ http://www.cisst.org/cisst/license.txt.
 #include <QComboBox>
 #include <QLineEdit>
 
+/* From vctForceTorqueQtWidget.cpp */
+#include <cisstConfig.h>
+#include <cisstCommon/cmnPortability.h>
+
+#if (CISST_OS == CISST_WINDOWS)
+#include <windows.h>
+#endif
+
+#if (CISST_OS == CISST_DARWIN)
+#include <OpenGL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
+
+#include <cisstVector/vctForceTorqueQtWidget.h>
+
+// all these widgets should be replaced to use static vectors/matrices
+#include <cisstVector/vctQtWidgetDynamicVector.h>
+#include <cisstVector/vctDynamicVectorTypes.h>
+/*End vctFTQTWidget.cpp*/
+
 // cisst
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <sawOptoforceSensor/mtsForceTorqueQtWidget.h>
+//#include <sawOptoforceSensor/vctForceTorque2DWidget.h>
+#include<cisstVector/vctForceTorque2DWidget.h>
 
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsForceTorqueQtWidget, mtsComponent, std::string);
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(vctForceTorque2DWidget, mtsComponent, std::string);
 
-mtsForceTorqueQtWidget::mtsForceTorqueQtWidget(const std::string & componentName, double periodInSeconds):
+vctForceTorque2DWidget::vctForceTorque2DWidget(const std::string & componentName, double periodInSeconds):
     mtsComponent(componentName),
     PlotIndex(0),
     TimerPeriodInMilliseconds(periodInSeconds) // Qt timers are in milliseconds
@@ -47,44 +69,7 @@ mtsForceTorqueQtWidget::mtsForceTorqueQtWidget(const std::string & componentName
         interfaceRequired->AddFunction("GetPeriodStatistics", ForceSensor.GetPeriodStatistics);
    }
 
-    setupUi();
-    startTimer(TimerPeriodInMilliseconds);
-}
-
-void mtsForceTorqueQtWidget::Configure(const std::string &filename)
-{
-    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: " << filename << std::endl;
-}
-
-void mtsForceTorqueQtWidget::Startup(void)
-{
-    CMN_LOG_CLASS_INIT_VERBOSE << "Startup" << std::endl;
-    if (!parent()) {
-        show();
-    }
-}
-
-void mtsForceTorqueQtWidget::Cleanup(void)
-{
-    this->hide();
-    CMN_LOG_CLASS_INIT_VERBOSE << "Cleanup" << std::endl;
-}
-
-void mtsForceTorqueQtWidget::closeEvent(QCloseEvent * event)
-{
-    int answer = QMessageBox::warning(this, tr("mtsForceTorqueQtWidget"),
-                                      tr("Do you really want to quit this application?"),
-                                      QMessageBox::No | QMessageBox::Yes);
-    if (answer == QMessageBox::Yes) {
-        event->accept();
-        QCoreApplication::exit();
-    } else {
-        event->ignore();
-    }
-}
-
-void mtsForceTorqueQtWidget::setupUi()
-{
+   
     QFont font;
     font.setBold(true);
     font.setPointSize(12);
@@ -178,10 +163,45 @@ void mtsForceTorqueQtWidget::setupUi()
     connect(QPlotSelectItem, SIGNAL(currentIndexChanged(int)), this, SLOT(SlotPlotIndex(int)));
 
     QPlotSelectItem->setCurrentIndex(FNorm);
+
+    /*************/
+    startTimer(TimerPeriodInMilliseconds);
+}
+
+void vctForceTorque2DWidget::Configure(const std::string &filename)
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: " << filename << std::endl;
+}
+
+void vctForceTorque2DWidget::Startup(void)
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "Startup" << std::endl;
+    if (!parent()) {
+        show();
+    }
+}
+
+void vctForceTorque2DWidget::Cleanup(void)
+{
+    this->hide();
+    CMN_LOG_CLASS_INIT_VERBOSE << "Cleanup" << std::endl;
+}
+
+void vctForceTorque2DWidget::closeEvent(QCloseEvent * event)
+{
+    int answer = QMessageBox::warning(this, tr("vctForceTorque2DWidget"),
+                                      tr("Do you really want to quit this application?"),
+                                      QMessageBox::No | QMessageBox::Yes);
+    if (answer == QMessageBox::Yes) {
+        event->accept();
+        QCoreApplication::exit();
+    } else {
+        event->ignore();
+    }
 }
 
 
-void mtsForceTorqueQtWidget::SetupSensorPlot()
+void vctForceTorque2DWidget::SetupSensorPlot()
 {
     // Plot to show force/torque graph
     QFTPlot = new vctPlot2DOpenGLQtWidget();
@@ -213,7 +233,7 @@ void mtsForceTorqueQtWidget::SetupSensorPlot()
     FNormSignal->SetVisible(true);
 }
 
-void mtsForceTorqueQtWidget::setValue()
+void vctForceTorque2DWidget::setValue()
 {
     // make sure we should update the display
     if (this->isHidden()) {
@@ -275,7 +295,7 @@ void mtsForceTorqueQtWidget::setValue()
     QFTPlot->update();
 }
 
-void mtsForceTorqueQtWidget::SlotPlotIndex(int newAxis)
+void vctForceTorque2DWidget::SlotPlotIndex(int newAxis)
 {
     PlotIndex = newAxis;
 
