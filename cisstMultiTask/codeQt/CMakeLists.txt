@@ -1,8 +1,7 @@
 #
-#
 # CMakeLists for cisstMultiTaskQt
 #
-# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -25,6 +24,7 @@ if (CISST_HAS_QT4)
   qt4_wrap_cpp (QT_WRAPPED_CPP
                 ../mtsCollectorQtComponent.h
                 ../mtsCollectorQtWidget.h
+                ../mtsMessageQtWidget.h
                 ../mtsQtCommandSelector.h
                 ../mtsQtScaleAndSignalTool.h
                 ../mtsQtVisualizerShell.h
@@ -55,6 +55,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsCollectorQtComponent.cpp
                                 mtsCollectorQtWidget.cpp
                                 mtsCollectorQtFactory.cpp
+                                mtsMessageQtWidget.cpp
                                 mtsQtCommandSelector.cpp
                                 mtsQtScaleAndSignalTool.cpp
                                 mtsQtVisualizerShell.cpp
@@ -71,6 +72,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                    HEADER_FILES mtsCollectorQtComponent.h
                                 mtsCollectorQtWidget.h
                                 mtsCollectorQtFactory.h
+                                mtsMessageQtWidget.h
                                 mtsQtCommandSelector.h
                                 mtsQtScaleAndSignalTool.h
                                 mtsQtVisualizerShell.h

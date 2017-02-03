@@ -271,3 +271,37 @@ class {
         visibility public;
     }
 }
+
+class {
+    name mtsMessage;
+    attribute CISST_EXPORT;
+    mts-proxy declaration-only;
+    member {
+        name Message;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name Counter;
+        type size_t;
+        default 0;
+        visibility public;
+    }
+    member {
+        name Timestamp;
+        type double;
+        visibility public;
+    }
+    inline-header {
+        void SetMessage(const std::string & message);
+    }
+}
+
+inline-code {
+    #include <cisstMultiTask/mtsTaskManager.h>
+    void mtsMessage::SetMessage(const std::string & message) {
+        Timestamp = mtsComponentManager::GetInstance()->GetTimeServer().GetAbsoluteTimeInSeconds();
+        Counter++;
+        Message = message;
+    }
+}

@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1232,6 +1232,48 @@ void mtsInterfaceProvided::RemoveObserverList(const mtsEventHandlerList & argin,
         argout.WriteEvents[i].Result = argin.Provided->RemoveObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPointer);
     }
 }
+
+
+void mtsInterfaceProvided::AddMessageEvents(void)
+{
+    // first attempt to add all three events
+    if ((!AddEventWrite(mMessages.StatusEvent, "Status", mMessages.StatusMessage))
+        || (!AddEventWrite(mMessages.WarningEvent, "Warning", mMessages.WarningMessage))
+        || (!AddEventWrite(mMessages.ErrorEvent, "Error", mMessages.ErrorMessage))
+        ) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddMessageEvents for " << GetFullName()
+                                 << " failed, make sure there is no other write event named \"Status\", \"Warning\" or \"Error\"" << std::endl;
+        return;
+    }
+}
+
+
+void mtsInterfaceProvided::SendStatus(const std::string & message)
+{
+    mMessages.StatusMessage.SetMessage(message);
+    CMN_LOG_CLASS_INSTANCE(this->Component, CMN_LOG_LEVEL_RUN_VERBOSE) << ": " << GetFullName()
+                                                                       << ": " << mMessages.StatusMessage << std::endl;
+    mMessages.StatusEvent(mMessages.StatusMessage);
+}
+
+
+void mtsInterfaceProvided::SendWarning(const std::string & message)
+{
+    mMessages.WarningMessage.SetMessage(message);
+    CMN_LOG_CLASS_INSTANCE(this->Component, CMN_LOG_LEVEL_RUN_WARNING) << ": " << GetFullName()
+                                                                       << ": " << mMessages.WarningMessage << std::endl;
+    mMessages.WarningEvent(mMessages.WarningMessage);
+}
+
+
+void mtsInterfaceProvided::SendError(const std::string & message)
+{
+    mMessages.ErrorMessage.SetMessage(message);
+    CMN_LOG_CLASS_INSTANCE(this->Component, CMN_LOG_LEVEL_RUN_ERROR) << ": " << GetFullName()
+                                                                     << ": " << mMessages.ErrorMessage << std::endl;
+    mMessages.ErrorEvent(mMessages.ErrorMessage);
+}
+
 
 bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription)
 {

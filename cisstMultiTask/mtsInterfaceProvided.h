@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -517,6 +516,21 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     void RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     //@}
 
+    /*! Human readable messages.  This method adds 3 events to the
+      provided interface: Status, Warning and Error.  Each of them
+      uses the payload mtsMessage which contains a string, a timestamp
+      and a counter.  The event triggers are protected, users can only
+      call the methods SendStatus, SendWarning and SendError with a
+      user message.  These methods will maintain the event counter,
+      timestamp the messages, log using cmnLogger and finally emit the
+      message event. */
+    //@{
+    void AddMessageEvents(void);
+    void SendStatus(const std::string & message);
+    void SendWarning(const std::string & message);
+    void SendError(const std::string & message);
+    //@}
+
     /*! Get the original interface.  This allows to retrieve the original
       interface from a copy created using GetEndUserInterface. */
     mtsInterfaceProvided * GetOriginalInterface(void) const;
@@ -661,7 +675,15 @@ protected: // PK TEMP
     /*! Post command queued command */
     mtsCallableVoidBase * PostCommandQueuedCallable;
 
-protected:
+    struct {
+        mtsFunctionWrite StatusEvent;
+        mtsMessage StatusMessage;
+        mtsFunctionWrite WarningEvent;
+        mtsMessage WarningMessage;
+        mtsFunctionWrite ErrorEvent;
+        mtsMessage ErrorMessage;
+    } mMessages;
+
     mtsMailBox * GetMailBox(void);
 
     mtsCommandVoid * AddCommandVoid(mtsCallableVoidBase * callable,

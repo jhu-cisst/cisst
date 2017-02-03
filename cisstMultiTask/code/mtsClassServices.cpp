@@ -348,6 +348,8 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionLoadLibraryProxy);
 
 CMN_IMPLEMENT_SERVICES(mtsLogMessage);
 
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsMessageProxy);
+
 #include <cisstMultiTask/mtsComponentViewer.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)
 
