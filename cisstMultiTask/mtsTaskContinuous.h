@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2008-09-23
 
-  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,41 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
-
-class CISST_EXPORT mtsTaskContinuousConstructorArg : public mtsGenericObject
-{
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-public:
-    enum { STATE_TABLE_DEFAULT_SIZE = 256 };
-    std::string Name;
-    unsigned int StateTableSize;
-    bool NewThread;
-
-    mtsTaskContinuousConstructorArg() : mtsGenericObject() {}
-    mtsTaskContinuousConstructorArg(const std::string &name, 
-                                    unsigned int sizeStateTable = STATE_TABLE_DEFAULT_SIZE,
-                                    bool newThread = true) :
-        mtsGenericObject(), Name(name), StateTableSize(sizeStateTable), NewThread(newThread) {}
-    mtsTaskContinuousConstructorArg(const mtsTaskContinuousConstructorArg &other) : mtsGenericObject(),
-        Name(other.Name), StateTableSize(other.StateTableSize), NewThread(other.NewThread) {}
-    ~mtsTaskContinuousConstructorArg() {}
-
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
-
-    void ToStream(std::ostream & outputStream) const;
-
-    /*! Raw text output to stream */
-    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const;
-
-    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
-      Returns true if successful. */
-    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
-};
-
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskContinuousConstructorArg);
 
 /*!
   \ingroup cisstMultiTask
@@ -176,4 +140,3 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskMain)
 
 #endif // _mtsTaskContinuous_h
-

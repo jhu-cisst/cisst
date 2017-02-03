@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,83 +23,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-CMN_IMPLEMENT_SERVICES(mtsTaskPeriodicConstructorArg);
-
-void mtsTaskPeriodicConstructorArg::SerializeRaw(std::ostream & outputStream) const
-{
-    mtsGenericObject::SerializeRaw(outputStream);
-    cmnSerializeRaw(outputStream, Name);
-    cmnSerializeRaw(outputStream, Period);
-    cmnSerializeRaw(outputStream, IsHardRealTime);
-    cmnSerializeRaw(outputStream, StateTableSize);
-}
-
-void mtsTaskPeriodicConstructorArg::DeSerializeRaw(std::istream & inputStream)
-{
-    mtsGenericObject::DeSerializeRaw(inputStream);
-    cmnDeSerializeRaw(inputStream, Name);
-    cmnDeSerializeRaw(inputStream, Period);
-    cmnDeSerializeRaw(inputStream, IsHardRealTime);
-    cmnDeSerializeRaw(inputStream, StateTableSize);
-}
-
-void mtsTaskPeriodicConstructorArg::ToStream(std::ostream & outputStream) const
-{
-    outputStream << "Name: " << Name
-                 << ", Period: " << Period
-                 << ", IsHardRealTime: " << IsHardRealTime
-                 << ", StateTableSize: " << StateTableSize << std::endl;
-}
-
-void mtsTaskPeriodicConstructorArg::ToStreamRaw(std::ostream & outputStream, const char delimiter,
-                                                bool headerOnly, const std::string & headerPrefix) const
-{
-    mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
-    if (headerOnly) {
-        outputStream << headerPrefix << "-name" << delimiter
-                     << headerPrefix << "-period" << delimiter
-                     << headerPrefix << "-isHardRealTime" << delimiter
-                     << headerPrefix << "-stateTableSize";
-    } else {
-        outputStream << this->Name << delimiter
-                     << this->Period << delimiter
-                     << this->IsHardRealTime << delimiter
-                     << this->StateTableSize;
-    }
-}
-
-bool mtsTaskPeriodicConstructorArg::FromStreamRaw(std::istream & inputStream, const char delimiter)
-{
-    mtsGenericObject::FromStreamRaw(inputStream, delimiter);
-    if (inputStream.fail())
-        return false;
-    inputStream >> Name >> Period;
-    if (inputStream.fail())
-        return false;
-    if (inputStream.eof()) {
-        IsHardRealTime = false;
-        StateTableSize = STATE_TABLE_DEFAULT_SIZE;
-        return (typeid(*this) == typeid(mtsTaskPeriodicConstructorArg));
-    }
-    inputStream >> IsHardRealTime;
-    if (inputStream.fail())
-        return false;
-    if (inputStream.eof()) {
-        StateTableSize = STATE_TABLE_DEFAULT_SIZE;
-        return (typeid(*this) == typeid(mtsTaskPeriodicConstructorArg));
-    }
-    inputStream >> StateTableSize;
-    if (inputStream.fail())
-        return false;
-    return (typeid(*this) == typeid(mtsTaskPeriodicConstructorArg));
-}
-
-/********************* Methods that call user methods *****************/
 
 void * mtsTaskPeriodic::RunInternal(void *data)
 {
     if (ExecIn && ExecIn->GetConnectedInterface()) {
-        CMN_LOG_CLASS_RUN_ERROR << "RunInternal for " << this->GetName() 
+        CMN_LOG_CLASS_RUN_ERROR << "RunInternal for " << this->GetName()
                                 << " called, even though task receives thread from "
                                 << ExecIn->GetConnectedInterface()->GetComponent()->GetName() << std::endl;
         return 0;
@@ -188,9 +114,9 @@ mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInS
     CMN_ASSERT(GetPeriodicity() > 0);
 }
 
-mtsTaskPeriodic::mtsTaskPeriodic( const std::string & name, 
+mtsTaskPeriodic::mtsTaskPeriodic( const std::string & name,
                                   const osaAbsoluteTime & period,
-                                  bool isHardRealTime, 
+                                  bool isHardRealTime,
                                   unsigned int sizeStateTable,
                                   bool newThread ):
     mtsTaskContinuous(name, sizeStateTable, newThread),

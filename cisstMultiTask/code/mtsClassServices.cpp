@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -349,6 +348,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionLoadLibraryProxy);
 CMN_IMPLEMENT_SERVICES(mtsLogMessage);
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsMessageProxy);
+
+CMN_IMPLEMENT_SERVICES(mtsTaskContinuousConstructorArg);
+CMN_IMPLEMENT_SERVICES(mtsTaskPeriodicConstructorArg);
 
 #include <cisstMultiTask/mtsComponentViewer.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewer, mtsTaskFromSignal, std::string)

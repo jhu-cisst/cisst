@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2008-09-23
 
-  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,74 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstCommon/cmnUnits.h>
 
-
-CMN_IMPLEMENT_SERVICES(mtsTaskContinuousConstructorArg);
-
-void mtsTaskContinuousConstructorArg::SerializeRaw(std::ostream & outputStream) const
-{
-    mtsGenericObject::SerializeRaw(outputStream);
-    cmnSerializeRaw(outputStream, Name);
-    cmnSerializeRaw(outputStream, StateTableSize);
-    cmnSerializeRaw(outputStream, NewThread);
-}
-
-void mtsTaskContinuousConstructorArg::DeSerializeRaw(std::istream & inputStream)
-{
-    mtsGenericObject::DeSerializeRaw(inputStream);
-    cmnDeSerializeRaw(inputStream, Name);
-    cmnDeSerializeRaw(inputStream, StateTableSize);
-    cmnDeSerializeRaw(inputStream, NewThread);
-}
-
-void mtsTaskContinuousConstructorArg::ToStream(std::ostream & outputStream) const
-{
-    outputStream << "Name: " << Name
-                 << ", StateTableSize: " << StateTableSize
-                 << ", NewThread: " << NewThread;
-}
-
-void mtsTaskContinuousConstructorArg::ToStreamRaw(std::ostream & outputStream, const char delimiter,
-                                                bool headerOnly, const std::string & headerPrefix) const
-{
-    mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
-    if (headerOnly) {
-        outputStream << headerPrefix << "-name" << delimiter
-                     << headerPrefix << "-stateTableSize" << delimiter
-                     << headerPrefix << "-newThread";
-    } else {
-        outputStream << this->Name << delimiter
-                     << this->StateTableSize << delimiter
-                     << this->NewThread;
-    }
-}
-
-bool mtsTaskContinuousConstructorArg::FromStreamRaw(std::istream & inputStream, const char delimiter)
-{
-    mtsGenericObject::FromStreamRaw(inputStream, delimiter);
-    if (inputStream.fail())
-        return false;
-    inputStream >> Name;
-    if (inputStream.fail())
-        return false;
-    if (inputStream.eof()) {
-        StateTableSize = STATE_TABLE_DEFAULT_SIZE;
-        NewThread = true;
-        return (typeid(*this) == typeid(mtsTaskContinuousConstructorArg));
-    }
-    inputStream >> StateTableSize;
-    if (inputStream.fail())
-        return false;
-    if (inputStream.eof()) {
-        NewThread = true;
-        return (typeid(*this) == typeid(mtsTaskContinuousConstructorArg));
-    }
-    inputStream >> NewThread;
-    if (inputStream.fail())
-        return false;
-    return (typeid(*this) == typeid(mtsTaskContinuousConstructorArg));
-}
-
-/********************* Methods that call user methods *****************/
 
 void * mtsTaskContinuous::RunInternal(void *data)
 {

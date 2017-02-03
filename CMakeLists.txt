@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2016 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2017 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -170,13 +170,14 @@ if (CISST_CATKIN_BUILT)
   # Output directories
   set (CISST_PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
   set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
+  set (LIBRARY_OUTPUT_PATH    "${CATKIN_DEVEL_PREFIX}/lib")
   # Options defaults
-  set (CISST_HAS_JSON ON CACHE "" BOOL)
-  set (CISST_HAS_SWIG_PYTHON ON CACHE "" BOOL FORCE)
-  set (CISST_BUILD_SHARED_LIBS ON CACHE "" BOOL FORCE)
+  set (CISST_HAS_JSON          ON CACHE BOOL "")
+  set (CISST_HAS_SWIG_PYTHON   ON CACHE BOOL "" FORCE)
+  set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+  set (CISST_USE_SI_UNITS      ON CACHE BOOL "")
   set (IS_SHARED SHARED)
   set (BUILD_SHARED_LIBS SHARED)
-  set (CISST_USE_SI_UNITS ON CACHE "" BOOL)
 else ()
   # Output directories
   set (CISST_PACKAGE_CONFIG_DIRECTORY "${cisst_BINARY_DIR}")

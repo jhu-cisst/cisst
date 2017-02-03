@@ -272,6 +272,7 @@ class {
     }
 }
 
+
 class {
     name mtsMessage;
     attribute CISST_EXPORT;
@@ -296,7 +297,6 @@ class {
         void SetMessage(const std::string & message);
     }
 }
-
 inline-code {
     #include <cisstMultiTask/mtsTaskManager.h>
     void mtsMessage::SetMessage(const std::string & message) {
@@ -304,4 +304,75 @@ inline-code {
         Counter++;
         Message = message;
     }
+}
+
+
+class {
+    name mtsTaskContinuousConstructorArg;
+    base-class {
+        type mtsGenericObject;
+    }
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name StateTableSize;
+        type unsigned int;
+        default 256;
+        visibility public;
+    }
+    member {
+        name NewThread;
+        type bool;
+        default true;
+        visibility public;
+    }
+    inline-header {
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+inline-header {
+    CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskContinuousConstructorArg);
+}
+
+
+class {
+    name mtsTaskPeriodicConstructorArg;
+    base-class {
+        type mtsGenericObject;
+    }
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name Period;
+        type double;
+        visibility public;
+    }
+    member {
+        name IsHardRealTime;
+        type bool;
+        default false;
+        visibility public;
+    }
+    member {
+        name StateTableSize;
+        type unsigned int;
+        default 256;
+        visibility public;
+    }
+    inline-header {
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+inline-header {
+    CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskPeriodicConstructorArg);
 }
