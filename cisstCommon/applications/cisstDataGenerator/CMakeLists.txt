@@ -22,6 +22,10 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 # we intentionally don't link against cisstCommon to make sure we are
 # not hunting for a dll or shared library during the build process.
 # Instead we explicitely include the symbols we need.
+
+# to avoid JSON dependency in cmnGenericObject
+add_definitions (-DCISST_SKIP_JSON)
+
 set (SOURCE_FILES_FROM_cisstCommon
      ${cisstCommonLibs_SOURCE_DIR}/code/cmnClassRegister.cpp
      ${cisstCommonLibs_SOURCE_DIR}/code/cmnClassServicesBase.cpp
@@ -38,7 +42,7 @@ set (SOURCE_FILES_FROM_cisstCommon
 
 # make sure no cisst symbols is considered "imported" by declspec
 if (WIN32)
-  remove_definitions(-DCISST_DLL)
+  remove_definitions (-DCISST_DLL)
 endif (WIN32)
 
 # name the main executable and specifies with source files to use
