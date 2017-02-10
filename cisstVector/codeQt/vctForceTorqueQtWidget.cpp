@@ -162,6 +162,8 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
     ForceTorqueWidget = new QWidget();
     ForceTorqueWidget->setLayout(forceTorqueLayout);
 
+    Plot2DWidget = new vctForceTorque2DWidget();
+    
 #if 0 // Anton, for 2D and 3D widgets
     
     // Visualization Groupbox
@@ -216,7 +218,7 @@ void vctForceTorqueQtWidget::UpdateCurrentWidget(void)
         TorqueWidget->SetValue(this->Torque);
         break;
     case PLOT_2D_WIDGET:
-        std::cerr << CMN_LOG_DETAILS << " to be implemented " << std::endl;
+        Plot2DWidget->SetValue(this->Force, this->Torque);
         break;
     case PLOT_3D_WIDGET:
         std::cerr << CMN_LOG_DETAILS << " to be implemented " << std::endl;
@@ -253,7 +255,7 @@ void vctForceTorqueQtWidget::SetDisplayMode(const DisplayModeType displayMode)
         CurrentWidget = ForceTorqueWidget;
         break;
     case PLOT_2D_WIDGET:
-        std::cerr << CMN_LOG_DETAILS << " to be implemented " << std::endl;
+        CurrentWidget = Plot2DWidget;
         break;
     case PLOT_3D_WIDGET:
         std::cerr << CMN_LOG_DETAILS << " to be implemented " << std::endl;

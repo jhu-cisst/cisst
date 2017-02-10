@@ -1,4 +1,4 @@
-%/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
@@ -19,31 +19,20 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctForceTorque2DWidget_h
 #define _vctForceTorque2DWidget_h
 
-#include <cisstMultiTask/mtsComponent.h>
-#include <cisstMultiTask/mtsQtWidgetIntervalStatistics.h>
-#include <cisstMultiTask/mtsVector.h>
-#include <cisstParameterTypes/prmForceCartesianGet.h>
+#include <cisstVector/vctQtForwardDeclarations.h>
+#include <cisstVector/vctPlot2DBase.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
-#include <cisstVector/vctQtWidgetDynamicVector.h>
-#include <cisstVector/vctPlot2DOpenGLQtWidget.h>
-
 #include <QWidget>
-#include <QtGui>
-#include <QPushButton>
-#include <QDoubleSpinBox>
 
-class QWidget;
-class QVBoxLayout;
+class QLabel;
 
 // Always include last
-#include <sawOptoforceSensor/sawOptoforceSensorQtExport.h>
-/* #include <cisstVector/vctExportQt.h>*/
+#include <cisstVector/vctExportQt.h>
 
-class CISST_EXPORT vctForceTorque2DWidget: public QWidget, public mtsComponent
+class CISST_EXPORT vctForceTorque2DWidget: public QWidget
 {
     Q_OBJECT;
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_ALL);
 
 public:
     enum {
@@ -54,12 +43,8 @@ public:
         Fxyz = 4,
         Txyz = 5
     };
-    vctForceTorque2DWidget(const std::string & componentName, double periodInSeconds = 50.0 * cmn_ms);
+    vctForceTorque2DWidget(void);
     ~vctForceTorque2DWidget(){}
-
-    void Configure(const std::string & filename = "");
-    void Startup(void);
-    void Cleanup(void);
 
 protected:
     virtual void closeEvent(QCloseEvent * event);
@@ -68,18 +53,10 @@ private:
     void setupUi(void);
     void SetupSensorPlot(void);
 
-private:
-    struct {
-        mtsFunctionRead GetForceTorque;
-        mtsFunctionRead GetPeriodStatistics;
-        prmForceCartesianGet ForceTorque;
-    } ForceSensor;
+    vct3 Force;
+    vct3 Torque;
 
-//   mtsBool IsSaturated;
-    vctQtWidgetDynamicVectorDoubleRead * QFTSensorValues;
-
-//    QPushButton * RebiasButton;
-//    QLabel * ConnectionStatus;
+    // vctQtWidgetDynamicVectorDoubleRead * QFTSensorValues;
 
     QLabel * UpperLimit;
     QLabel * LowerLimit;
@@ -94,16 +71,18 @@ private:
     vctPlot2DBase::Scale * ForceScale;
     vctPlot2DBase::Scale * TorqueScale;
 
-    double Time;
+    double InternalTime;
     int PlotIndex;
-    int TimerPeriodInMilliseconds;
 
-    // Timing
-    mtsIntervalStatistics IntervalStatistics;
-    mtsQtWidgetIntervalStatistics * QMIntervalStatistics;
+ public:
+    inline void SetValue(const vct3 & force, const vct3 & torque) {
+        this->InternalTime += 0.001;
+        SetValue(InternalTime, force, torque);
+    }
+    void SetValue(const double & time, const vct3 & force, const vct3 & torque);
 
+                   
 private slots:
-    void timerEvent(QTimerEvent * event);
 //    void SlotRebiasFTSensor(void);
      void SlotPlotIndex(int newAxis);
 };

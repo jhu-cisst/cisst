@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2004-10-25
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-20017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -235,6 +233,7 @@ template <class _containerType> class vctFrame4x4ConstBase;
 template <class _containerType> class vctFrame4x4Base;
 template <class _elementType, bool _rowMajor = VCT_ROW_MAJOR> class vctFrame4x4;
 
+// plot
+class vctPlot2DBase;
 
 #endif  // _vctForwardDeclarations_h
-

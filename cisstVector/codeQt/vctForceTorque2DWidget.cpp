@@ -21,58 +21,30 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 
 // Qt includes
-#include <QString>
-#include <QtGui>
 #include <QMessageBox>
-#include <QHeaderView>
+#include <QCloseEvent>
+#include <QApplication>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFont>
+#include <QLabel>
+#include <QSpacerItem>
 #include <QComboBox>
-#include <QLineEdit>
 
-// cisst
-#include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <sawOptoforceSensor/mtsForceTorqueQtWidget.h>
+#include <cisstVector/vctForceTorque2DWidget.h>
+#include <cisstVector/vctQtWidgetDynamicVector.h>
+#include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsForceTorqueQtWidget, mtsComponent, std::string);
-
-mtsForceTorqueQtWidget::mtsForceTorqueQtWidget(const std::string & componentName, double periodInSeconds):
-    mtsComponent(componentName),
-    PlotIndex(0),
-    TimerPeriodInMilliseconds(periodInSeconds) // Qt timers are in milliseconds
+vctForceTorque2DWidget::vctForceTorque2DWidget(void):
+    InternalTime(0.0),
+    PlotIndex(0)
 {
-    // Setup CISST Interface
-    mtsInterfaceRequired * interfaceRequired;
-    interfaceRequired = AddInterfaceRequired("ForceSensor");
-    if (interfaceRequired) {
-        interfaceRequired->AddFunction("GetForceTorque", ForceSensor.GetForceTorque);
-        interfaceRequired->AddFunction("GetPeriodStatistics", ForceSensor.GetPeriodStatistics);
-   }
-
     setupUi();
-    startTimer(TimerPeriodInMilliseconds);
 }
 
-void mtsForceTorqueQtWidget::Configure(const std::string &filename)
+void vctForceTorque2DWidget::closeEvent(QCloseEvent * event)
 {
-    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: " << filename << std::endl;
-}
-
-void mtsForceTorqueQtWidget::Startup(void)
-{
-    CMN_LOG_CLASS_INIT_VERBOSE << "Startup" << std::endl;
-    if (!parent()) {
-        show();
-    }
-}
-
-void mtsForceTorqueQtWidget::Cleanup(void)
-{
-    this->hide();
-    CMN_LOG_CLASS_INIT_VERBOSE << "Cleanup" << std::endl;
-}
-
-void mtsForceTorqueQtWidget::closeEvent(QCloseEvent * event)
-{
-    int answer = QMessageBox::warning(this, tr("mtsForceTorqueQtWidget"),
+    int answer = QMessageBox::warning(this, tr("vctForceTorque2DWidget"),
                                       tr("Do you really want to quit this application?"),
                                       QMessageBox::No | QMessageBox::Yes);
     if (answer == QMessageBox::Yes) {
@@ -83,15 +55,12 @@ void mtsForceTorqueQtWidget::closeEvent(QCloseEvent * event)
     }
 }
 
-void mtsForceTorqueQtWidget::setupUi()
+void vctForceTorque2DWidget::setupUi()
 {
     QFont font;
     font.setBold(true);
     font.setPointSize(12);
 
-    QTabWidget * tabWidget = new QTabWidget;
-
-    //--- Tab 1
     QVBoxLayout * tab1Layout = new QVBoxLayout;
     QLabel * instructionsLabel = new QLabel("This widget displays the forces and torques values sensed by the optoForce Sensor.\nUnits - Force(N), Torque(N-mm) \nValue in the brackets of each header displays the max F/T(-value,+value).\n\tRed is Fx or Tx\n \tGreen is Fy or Ty\n\tBlue is Fz or Tz \n\tWhite is FNorm (Torques does not display a norm).");
 
@@ -99,16 +68,17 @@ void mtsForceTorqueQtWidget::setupUi()
     QSpacerItem * vSpacer = new QSpacerItem(40, 10, QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     // Force/Torque display widgets and layouts
-    QVBoxLayout * spinBoxLayout = new QVBoxLayout;
-    QHBoxLayout * ftValuesLayout = new QHBoxLayout;
-    QLabel * ftLabel = new QLabel("Values");
-    ftValuesLayout->addWidget(ftLabel);
+    // QVBoxLayout * spinBoxLayout = new QVBoxLayout;
+    // QHBoxLayout * ftValuesLayout = new QHBoxLayout;
 
-    QFTSensorValues = new vctQtWidgetDynamicVectorDoubleRead();
-    QFTSensorValues->SetPrecision(4);
+    // QLabel * ftLabel = new QLabel("Values");
+    // ftValuesLayout->addWidget(ftLabel);
 
-    ftValuesLayout->addWidget(QFTSensorValues);
-    spinBoxLayout->addLayout(ftValuesLayout);
+    // QFTSensorValues = new vctQtWidgetDynamicVectorDoubleRead();
+    // QFTSensorValues->SetPrecision(4);
+
+    // ftValuesLayout->addWidget(QFTSensorValues);
+    // spinBoxLayout->addLayout(ftValuesLayout);
 
     // Combo box to select the plot item
     QComboBox * QPlotSelectItem = new QComboBox;
@@ -144,32 +114,14 @@ void mtsForceTorqueQtWidget::setupUi()
 
     // Tab1 layout order
     tab1Layout->addWidget(instructionsLabel);
-    tab1Layout->addLayout(spinBoxLayout);
+    // tab1Layout->addLayout(spinBoxLayout);
     tab1Layout->addLayout(sensorPlotLayout);
     tab1Layout->addSpacerItem(vSpacer);
     tab1Layout->addLayout(errorLayout);
     tab1Layout->addLayout(buttonLayout);
     tab1Layout->addSpacerItem(vSpacer);
 
-    QWidget * tab1 = new QWidget;
-    tab1->setLayout(tab1Layout);
-
-    //--- Tab 2
-    QVBoxLayout * tab2Layout = new QVBoxLayout;
-    QMIntervalStatistics = new mtsQtWidgetIntervalStatistics();
-    tab2Layout->addWidget(QMIntervalStatistics);
-    tab2Layout->addStretch();
-
-    QWidget * tab2 = new QWidget;
-    tab2->setLayout(tab2Layout);
-
-    // Setuptab widget
-    tabWidget->addTab(tab1, "Sensor Stats");
-    tabWidget->addTab(tab2, "Interval Stats");
-
-    QHBoxLayout * mainLayout = new QHBoxLayout;
-    mainLayout->addWidget(tabWidget);
-    setLayout(mainLayout);
+    this->setLayout(tab1Layout);
 
     setWindowTitle("sawOptoForce Sensor(N, N-mm)");
     resize(sizeHint());
@@ -181,7 +133,7 @@ void mtsForceTorqueQtWidget::setupUi()
 }
 
 
-void mtsForceTorqueQtWidget::SetupSensorPlot()
+void vctForceTorque2DWidget::SetupSensorPlot()
 {
     // Plot to show force/torque graph
     QFTPlot = new vctPlot2DOpenGLQtWidget();
@@ -213,60 +165,50 @@ void mtsForceTorqueQtWidget::SetupSensorPlot()
     FNormSignal->SetVisible(true);
 }
 
-void mtsForceTorqueQtWidget::setValue()
+void vctForceTorque2DWidget::SetValue(const double & time, const vct3 & force, const vct3 & torque)
 {
     // make sure we should update the display
     if (this->isHidden()) {
         return;
     }
 
-    // force torque data
-    mtsExecutionResult executionResult;
-    executionResult = ForceSensor.GetForceTorque(ForceSensor.ForceTorque);
-    if (!executionResult) {
-        CMN_LOG_CLASS_RUN_ERROR << "ForceSensor.GetForceTorque failed, \""
-                                << executionResult << "\"" << std::endl;
-    }
-
     // text output
-    QFTSensorValues->SetValue(vctDoubleVec(ForceSensor.ForceTorque.Force()));
+    // QFTSensorValues->SetValue(vctDoubleVec(ForceSensor.ForceTorque.Force()));
 
     // missing all the code to plot, see old widget to do it
 
     vctDouble3 forceOnly(0.0), torqueOnly(0.0);
-    forceOnly.Assign(ForceSensor.ForceTorque.F());
-    torqueOnly.Assign(ForceSensor.ForceTorque.T());
-    ForceSensor.GetPeriodStatistics(IntervalStatistics);
-    QMIntervalStatistics->SetValue(IntervalStatistics);
+    forceOnly.Assign(force);
+    torqueOnly.Assign(torque);
     
     if(PlotIndex == 0){           // If Forces
-      ForceSignal[0]->AppendPoint(vctDouble2(ForceSensor.ForceTorque.Timestamp(),
-                                                                   forceOnly.Element(0)));
-      ForceSignal[1]->AppendPoint(vctDouble2(ForceSensor.ForceTorque.Timestamp(),
-                                                                   forceOnly.Element(1)));
-      ForceSignal[2]->AppendPoint(vctDouble2(ForceSensor.ForceTorque.Timestamp(),
-                                                              forceOnly.Element(2)));
-      FNormSignal->AppendPoint(vctDouble2(ForceSensor.ForceTorque.Timestamp(),
-                                          forceOnly.Norm()));
+        ForceSignal[0]->AppendPoint(vctDouble2(time,
+                                               forceOnly.Element(0)));
+        ForceSignal[1]->AppendPoint(vctDouble2(time,
+                                               forceOnly.Element(1)));
+        ForceSignal[2]->AppendPoint(vctDouble2(time,
+                                               forceOnly.Element(2)));
+        FNormSignal->AppendPoint(vctDouble2(time,
+                                            forceOnly.Norm()));
     }else if(PlotIndex == 1){           // If Torques
-      TorqueSignal[0]->AppendPoint(vctDouble2(ForceSensor.ForceTorque.Timestamp(),
-                                                                   torqueOnly.Element(0)));
-      TorqueSignal[1]->AppendPoint(vctDouble2(ForceSensor.ForceTorque.Timestamp(),
-                                                                   torqueOnly.Element(1)));
-      TorqueSignal[2]->AppendPoint(vctDouble2(ForceSensor.ForceTorque.Timestamp(),
-                                                                   torqueOnly.Element(2)));
- }
+        TorqueSignal[0]->AppendPoint(vctDouble2(time,
+                                                torqueOnly.Element(0)));
+        TorqueSignal[1]->AppendPoint(vctDouble2(time,
+                                                torqueOnly.Element(1)));
+        TorqueSignal[2]->AppendPoint(vctDouble2(time,
+                                                torqueOnly.Element(2)));
+    }
     // Update the lower/upper limits on the plot
-     vct2 range;
+    vct2 range;
 
-     if(PlotIndex==0){
-         range = ForceScale->GetViewingRangeY();
-     }else if(PlotIndex==1){
-         range = TorqueScale->GetViewingRangeY();
-     } else{ //default
-         range= vctDouble2(0.0, 0.0);
-     }
-     QString text;
+    if(PlotIndex==0){
+        range = ForceScale->GetViewingRangeY();
+    }else if(PlotIndex==1){
+        range = TorqueScale->GetViewingRangeY();
+    } else{ //default
+        range= vctDouble2(0.0, 0.0);
+    }
+    QString text;
     text.setNum(range[0], 'f', 2);
     LowerLimit->setText(text);
     text.setNum(range[1], 'f', 2);
@@ -275,7 +217,7 @@ void mtsForceTorqueQtWidget::setValue()
     QFTPlot->update();
 }
 
-void mtsForceTorqueQtWidget::SlotPlotIndex(int newAxis)
+void vctForceTorque2DWidget::SlotPlotIndex(int newAxis)
 {
     PlotIndex = newAxis;
 
@@ -293,10 +235,10 @@ void mtsForceTorqueQtWidget::SlotPlotIndex(int newAxis)
         TorqueSignal[1]->SetVisible(true);
         TorqueSignal[2]->SetVisible(true);
     } else{
-       for(int i=0; i <5; ++i){
-        ForceSignal[i]->SetVisible(false);
-        TorqueSignal[i]->SetVisible(false);
-       }
+        for(int i=0; i <5; ++i){
+            ForceSignal[i]->SetVisible(false);
+            TorqueSignal[i]->SetVisible(false);
+        }
     }
     QFTPlot->SetContinuousExpandYResetSlot();
 }
