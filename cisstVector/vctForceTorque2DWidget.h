@@ -35,14 +35,6 @@ class CISST_EXPORT vctForceTorque2DWidget: public QWidget
     Q_OBJECT;
 
 public:
-    enum {
-        Fx = 0,
-        Fy = 1,
-        Fz = 2,
-        FNorm = 3,
-        Fxyz = 4,
-        Txyz = 5
-    };
     vctForceTorque2DWidget(void);
     ~vctForceTorque2DWidget(){}
 
@@ -83,8 +75,7 @@ private:
 
                    
 private slots:
-//    void SlotRebiasFTSensor(void);
-     void SlotPlotIndex(int newAxis);
+    void SlotPlotIndex(int newAxis);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(vctForceTorque2DWidget);
