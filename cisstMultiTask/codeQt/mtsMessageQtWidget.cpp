@@ -30,7 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsMessageQtWidget::mtsMessageQtWidget(void)
 {
-    setupUi();
 }
 
 void mtsMessageQtWidget::SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired)
@@ -68,17 +67,23 @@ void mtsMessageQtWidget::setupUi(void)
 void mtsMessageQtWidget::ErrorEventHandler(const mtsMessage & message)
 {
     emit SignalSetColor(QColor("red"));
-    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Error: ") + QString(message.Message.c_str()));
+    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Error ")
+                             + QString::number(message.Counter) + QString(":")
+                             + QString(message.Message.c_str()));
 }
 
 void mtsMessageQtWidget::WarningEventHandler(const mtsMessage & message)
 {
     emit SignalSetColor(QColor("darkRed"));
-    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Warning: ") + QString(message.Message.c_str()));
+    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Warning ")
+                             + QString::number(message.Counter) + QString(":")
+                             + QString(message.Message.c_str()));
 }
 
 void mtsMessageQtWidget::StatusEventHandler(const mtsMessage & message)
 {
     emit SignalSetColor(QColor("black"));
-    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Status: ") + QString(message.Message.c_str()));
+    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Status ")
+                             + QString::number(message.Counter) + QString(":")
+                             + QString(message.Message.c_str()));
 }

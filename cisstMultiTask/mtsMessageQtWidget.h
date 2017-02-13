@@ -36,7 +36,8 @@ public:
     inline virtual ~mtsMessageQtWidget() {}
 
     void SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired);
-    
+    void setupUi(void);
+
 signals:
     void SignalAppendMessage(QString);
     void SignalSetColor(QColor);
@@ -45,9 +46,6 @@ private slots:
     void SlotTextChanged(void);
 
 protected:
-
-    void setupUi(void);
-
     void ErrorEventHandler(const mtsMessage & message);
     void WarningEventHandler(const mtsMessage & message);
     void StatusEventHandler(const mtsMessage & message);
