@@ -34,7 +34,11 @@ bool mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
         if (command->GetArgumentPrototype()) {
             CMN_ASSERT(this->GetArgumentPrototype());
             if (command->GetArgumentPrototype()->Services() != this->GetArgumentPrototype()->Services()) {
-                CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument types don't match" << std::endl;
+                CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument types don't match, this multicast command uses "
+                                   << this->GetArgumentPrototype()->Services()->GetName()
+                                   << " but the command added (event handler potentially) uses "
+                                   << command->GetArgumentPrototype()->Services()->GetName()
+                                   << std::endl;
                 return false;
             } else {
                 // copy the multicast command prototype to each added command using in place new
