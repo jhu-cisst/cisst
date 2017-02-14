@@ -171,8 +171,6 @@ if (CISST_CATKIN_BUILT)
   set (CISST_PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
   set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
   set (LIBRARY_OUTPUT_PATH    "${CATKIN_DEVEL_PREFIX}/lib")
-  # Libraries to build/not build
-  set (CISST_cisstStereoVision OFF CACHE BOOL "")
   # Options defaults
   set (CISST_HAS_JSON          ON  CACHE BOOL "")
   set (CISST_HAS_SWIG_PYTHON   ON  CACHE BOOL "" FORCE)
@@ -390,11 +388,11 @@ set (CISST_LIBRARIES_DEFAULT
      cisstMultiTask
      cisstParameterTypes
      cisstRobot
-     cisstStereoVision
      )
 
 set (CISST_LIBRARIES_OPTIONAL
      cisstInteractive
+     cisstStereoVision
      cisst3DUserInterface
      )
 
