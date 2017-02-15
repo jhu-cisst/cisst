@@ -1251,8 +1251,11 @@ void mtsInterfaceProvided::AddMessageEvents(void)
 void mtsInterfaceProvided::SendStatus(const std::string & message)
 {
     mMessages.StatusMessage.SetMessage(message);
-    CMN_LOG_CLASS_INSTANCE(this->Component, CMN_LOG_LEVEL_RUN_VERBOSE) << ": " << GetFullName()
-                                                                       << ": " << mMessages.StatusMessage << std::endl;
+    CMN_LOG_CLASS_INSTANCE(this->Component, CMN_LOG_LEVEL_RUN_VERBOSE) << GetFullName()
+                                                                       << ": " << mMessages.StatusMessage.Timestamp
+                                                                       << "s, #" << mMessages.StatusMessage.Counter
+                                                                       << ": " << mMessages.StatusMessage.Message
+                                                                       << std::endl;
     mMessages.StatusEvent(mMessages.StatusMessage);
 }
 
@@ -1260,8 +1263,11 @@ void mtsInterfaceProvided::SendStatus(const std::string & message)
 void mtsInterfaceProvided::SendWarning(const std::string & message)
 {
     mMessages.WarningMessage.SetMessage(message);
-    CMN_LOG_CLASS_INSTANCE(this->Component, CMN_LOG_LEVEL_RUN_WARNING) << ": " << GetFullName()
-                                                                       << ": " << mMessages.WarningMessage << std::endl;
+    CMN_LOG_CLASS_INSTANCE(this->Component, CMN_LOG_LEVEL_RUN_WARNING) << GetFullName()
+                                                                       << ": " << mMessages.WarningMessage.Timestamp
+                                                                       << "s, #" << mMessages.WarningMessage.Counter
+                                                                       << ": " << mMessages.WarningMessage.Message
+                                                                       << std::endl;
     mMessages.WarningEvent(mMessages.WarningMessage);
 }
 
@@ -1269,8 +1275,11 @@ void mtsInterfaceProvided::SendWarning(const std::string & message)
 void mtsInterfaceProvided::SendError(const std::string & message)
 {
     mMessages.ErrorMessage.SetMessage(message);
-    CMN_LOG_CLASS_INSTANCE(this->Component, CMN_LOG_LEVEL_RUN_ERROR) << ": " << GetFullName()
-                                                                     << ": " << mMessages.ErrorMessage << std::endl;
+    CMN_LOG_CLASS_INSTANCE(this->Component, CMN_LOG_LEVEL_RUN_ERROR) << GetFullName()
+                                                                     << ": " << mMessages.ErrorMessage.Timestamp
+                                                                     << "s, #" << mMessages.ErrorMessage.Counter
+                                                                     << ": " << mMessages.ErrorMessage.Message
+                                                                     << std::endl;
     mMessages.ErrorEvent(mMessages.ErrorMessage);
 }
 
