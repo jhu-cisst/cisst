@@ -364,6 +364,19 @@ public:
     mtsComponent * CreateComponentDynamically(const std::string & className, const std::string & componentName,
                                               const std::string & constructorArgSerialized);
 
+#if CISST_HAS_JSON
+    /*! Create with a constructor argument serialized in JSON.  If
+      sharedLibrary is an empty string, the method will not attempt to
+      load the dynamic library.  sharedLibrary can be a full file name
+      or just the library name (without OS prefixes (e.g. on Linux,
+      you should provide "MyLib" to load libMyLib.so).  If the library
+      is not found, the method will also search using
+      LD_LIBRARY_PATH. */
+    mtsComponent * CreateComponentDynamicallyJSON(const std::string & sharedLibrary,
+                                                  const std::string & className,
+                                                  const std::string & constructorArgSerialized);
+#endif
+
     /*! \brief Add a component to this local component manager.
         \param component Component instance to be added */
     bool AddComponent(mtsComponent * component);

@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,10 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 #include <cisstCommon/cmnThrow.h>
+#include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSocket.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
+#include <cisstOSAbstraction/osaDynamicLoader.h>
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -995,6 +997,99 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 
     return newComponent;
 }
+
+#if CISST_HAS_JSON
+mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string & sharedLibrary,
+                                                               const std::string & className,
+                                                               const std::string & constructorArgSerialized)
+{
+    // -1- try to dynamically load the library if specified
+    if (!sharedLibrary.empty()) {
+        // create load and path based on LD_LIBRARY_PATH
+        osaDynamicLoader loader;
+        std::string fullPath;
+        // check if the file already exists, i.e. use provided a full path
+        if (cmnPath::Exists(sharedLibrary)) {
+            fullPath = sharedLibrary;
+        } else {
+            cmnPath path;
+            path.AddFromEnvironment("LD_LIBRARY_PATH");
+            fullPath = path.Find(cmnPath::SharedLibrary(sharedLibrary));
+            if (fullPath.empty())  {
+                fullPath = sharedLibrary;
+                CMN_LOG_CLASS_INIT_WARNING << "CreateComponentDynamicallyJSON: using path: "
+                                           << path << ", couldn't find \""
+                                           << cmnPath::SharedLibrary(sharedLibrary)
+                                           << "\"" << std::endl;;
+            } else {
+                CMN_LOG_CLASS_INIT_VERBOSE << "CreateComponentDynamicallyJSON: using path: "
+                                           << path << ", found full path name \""
+                                           << fullPath << "\"" << std::endl;;
+            }
+        }
+        if (!loader.Load(fullPath)) {
+            CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: failed to load shared library "
+                                     << sharedLibrary << std::endl;
+            return 0;
+        }
+    }
+
+    // -2- try to dynamically create an instance of that class
+    cmnClassServicesBase * componentClassServices = cmnClassRegister::FindClassServices(className);
+    if (!componentClassServices) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: unable to find class services for type "
+                                 << className << std::endl;
+        return 0;
+    }
+
+    // -3- check if we need to also create an argument for the constructor
+    if (!componentClassServices->OneArgConstructorAvailable()) {
+        return 0;
+    }
+
+    const cmnClassServicesBase * argumentClassServices = componentClassServices->GetConstructorArgServices();
+    CMN_ASSERT(argumentClassServices); // this should not fail
+    cmnGenericObject * argument = argumentClassServices->Create();
+    // then deserialize from JSON value...
+    Json::Value jsonValue;
+    Json::Reader reader;
+    // parsing should work since the string has been generated after a previous parse
+    CMN_ASSERT(reader.parse(constructorArgSerialized, jsonValue));
+    try {
+        argument->DeSerializeTextJSON(jsonValue);
+    } catch (std::runtime_error e) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: unable to deserialize constructor for "
+                                 << className << " from JSON file, got exception: "
+                                 << e.what() << std::endl;
+        delete argument;
+        return 0;
+    }
+    // now, finally, construct the component!
+    cmnGenericObject * componentBase
+        = componentClassServices->CreateWithArg(*argument);
+    if (!componentBase) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: failed to create component of type "
+                                 << className << std::endl;
+        delete argument;
+        return 0;
+    }
+    // cleanup argument
+    delete argument;
+    
+    // make sure this is a component
+    mtsComponent * component = dynamic_cast<mtsComponent *>(componentBase);
+    if (!component) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: failed to cast newly created object of type "
+                                 << className << " to mtsComponent" << std::endl;
+        delete argument;
+        delete componentBase;
+        return 0;
+    }
+
+    // looks like it worked!
+    return component;
+}
+#endif
 
 bool mtsManagerLocal::AddComponent(mtsComponent * component)
 {
