@@ -1,9 +1,7 @@
 #
 #
-
-# (C) Copyright 2010-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
-
+# (C) Copyright 2010-2017 Johns Hopkins University (JHU), All Rights Reserved.
+#
 # --- begin cisst license - do not edit ---
 #
 # This software is provided "as is" under an open source license, with
@@ -55,12 +53,12 @@ if (CMAKE_CONFIGURATION_TYPES)
   foreach (config ${CMAKE_CONFIGURATION_TYPES})
     configure_file (${cisst_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
                     ${EXECUTABLE_OUTPUT_PATH}/${config}/cisstMultiTaskTests.py
-                    IMMEDIATE @ONLY@)
+                    IMMEDIATE @ONLY)
   endforeach (config)
 else (CMAKE_CONFIGURATION_TYPES)
   configure_file (${cisst_SOURCE_DIR}/cisstTestsDriver/cisstTestsDriver.py.in
                   ${EXECUTABLE_OUTPUT_PATH}/cisstMultiTaskTests.py
-                  IMMEDIATE @ONLY@)
+                  IMMEDIATE @ONLY)
 endif (CMAKE_CONFIGURATION_TYPES)
 
 # Run the script to generate the list of tests automatically
