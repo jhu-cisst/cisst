@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
 
+// Widget without the component, can be included in another widget
 class CISST_EXPORT mtsMessageQtWidget: public QTextEdit
 {
     Q_OBJECT;
@@ -50,5 +51,22 @@ protected:
     void WarningEventHandler(const mtsMessage & message);
     void StatusEventHandler(const mtsMessage & message);
 };
+
+// Widget with a component, can be used directly with cisstMultiTask component manager
+class CISST_EXPORT mtsMessageQtWidgetComponent: public mtsMessageQtWidget, public mtsComponent
+{
+    Q_OBJECT;
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    mtsMessageQtWidgetComponent(const std::string & componentName);
+    ~mtsMessageQtWidgetComponent() {}
+
+    inline void Configure(const std::string & CMN_UNUSED(filename) = "") {};
+    inline void Startup(void) {};
+    inline void Cleanup(void) {};
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMessageQtWidgetComponent);
 
 #endif // _mtsMessageQtWidget_h

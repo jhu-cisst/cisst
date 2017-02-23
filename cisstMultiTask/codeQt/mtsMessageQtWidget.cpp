@@ -87,3 +87,18 @@ void mtsMessageQtWidget::StatusEventHandler(const mtsMessage & message)
                              + QString::number(message.Counter) + QString(": ")
                              + QString(message.Message.c_str()));
 }
+
+
+
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsMessageQtWidgetComponent, mtsComponent, std::string);
+
+mtsMessageQtWidgetComponent::mtsMessageQtWidgetComponent(const std::string & componentName):
+    mtsComponent(componentName)
+{
+    // Setup CISST Interface
+    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
+    if (interfaceRequired) {
+        this->SetInterfaceRequired(interfaceRequired);
+    }
+    setupUi();
+}
