@@ -28,7 +28,7 @@ if (CISST_HAS_QT4)
                 ../mtsQtCommandSelector.h
                 ../mtsQtScaleAndSignalTool.h
                 ../mtsQtVisualizerShell.h
-                ../mtsQtWidgetIntervalStatistics.h
+                ../mtsIntervalStatisticsQtWidget.h
                 ../mtsQtWidgetGenericObject.h
                 ../mtsQtWidgetGenericObjectProxy.h
                 ../mtsQtWidgetVectorTypes.h
@@ -59,7 +59,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtCommandSelector.cpp
                                 mtsQtScaleAndSignalTool.cpp
                                 mtsQtVisualizerShell.cpp
-                                mtsQtWidgetIntervalStatistics.cpp
+                                mtsIntervalStatisticsQtWidget.cpp
                                 mtsQtWidgetFactory.cpp
                                 mtsQtWidgetGenericObject.cpp
                                 mtsQtWidgetGenericObjectProxy.cpp
@@ -76,7 +76,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtCommandSelector.h
                                 mtsQtScaleAndSignalTool.h
                                 mtsQtVisualizerShell.h
-                                mtsQtWidgetIntervalStatistics.h
+                                mtsIntervalStatisticsQtWidget.h
                                 mtsQtWidgetFactory.h
                                 mtsQtWidgetGenericObject.h
                                 mtsQtWidgetGenericObjectProxy.h

@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2013-07-13
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,12 +16,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsQtWidgetIntervalStatistics.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsIntervalStatisticsQtWidget.h>
 
 #include <QHeaderView>
 #include <QScrollBar>
 
-mtsQtWidgetIntervalStatistics::mtsQtWidgetIntervalStatistics(void):
+mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     QTableWidget()
 {
     this->setRowCount(4);
@@ -83,7 +83,7 @@ mtsQtWidgetIntervalStatistics::mtsQtWidgetIntervalStatistics(void):
     this->setItem(3, 2, QTWILoadMax);
 }
 
-void mtsQtWidgetIntervalStatistics::SetValue(const mtsIntervalStatistics & newValue)
+void mtsIntervalStatisticsQtWidget::SetValue(const mtsIntervalStatistics & newValue)
 {
     const double avg = newValue.GetAvg();
     QTWIAverage->setText(QString("%1 ms").arg(avg * 1000.0, -6, 'f', 3));
@@ -96,3 +96,35 @@ void mtsQtWidgetIntervalStatistics::SetValue(const mtsIntervalStatistics & newVa
     QTWILoadMin->setText(QString("%1\%").arg(minLoad, -4, 'f', 0));
     QTWILoadMax->setText(QString("%1\%").arg(maxLoad, -4, 'f', 0));
 }
+
+
+
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsIntervalStatisticsQtWidgetComponent, mtsComponent, std::string);
+
+mtsIntervalStatisticsQtWidgetComponent::mtsIntervalStatisticsQtWidgetComponent(const std::string & componentName, double periodInSeconds):
+    mtsComponent(componentName),
+    TimerPeriodInMilliseconds(periodInSeconds * 1000)
+{
+    // Setup CISST Interface
+    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
+    if (interfaceRequired) {
+        interfaceRequired->AddFunction("GetPeriodStatistics", GetPeriodStatistics);
+    }
+}
+
+void mtsIntervalStatisticsQtWidgetComponent::Startup(void)
+{
+    startTimer(TimerPeriodInMilliseconds); // ms
+}
+
+void mtsIntervalStatisticsQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
+{
+    // make sure we should update the display
+    if (this->isHidden()) {
+        return;
+    }
+
+    GetPeriodStatistics(IntervalStatistics);
+    mtsIntervalStatisticsQtWidget::SetValue(IntervalStatistics);
+}
+

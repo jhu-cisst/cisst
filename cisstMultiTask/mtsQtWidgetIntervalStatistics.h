@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2013-07-14
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,33 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsQtWidgetIntervalStatistics_h
 #define _mtsQtWidgetIntervalStatistics_h
 
-#include <cisstMultiTask/mtsIntervalStatistics.h>
+#include <cisstMultiTask/mtsIntervalStatisticsQtWidget.h>
 
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QTableWidget>
-
-// Always include last
-#include <cisstMultiTask/mtsExportQt.h>
-
-class CISST_EXPORT mtsQtWidgetIntervalStatistics: public QTableWidget
-{
-    Q_OBJECT;
-
-public:
-    mtsQtWidgetIntervalStatistics(void);
-    ~mtsQtWidgetIntervalStatistics(void) {};
-
-    void SetValue(const mtsIntervalStatistics & newValue);
-
-protected:
-    QTableWidgetItem * QTWIAverage;
-    QTableWidgetItem * QTWIAverageHz;
-    QTableWidgetItem * QTWIStdDev;
-    QTableWidgetItem * QTWIMin;
-    QTableWidgetItem * QTWIMax;
-    QTableWidgetItem * QTWILoadMin;
-    QTableWidgetItem * QTWILoadMax;
-};
+typedef mtsIntervalStatisticsQtWidget mtsQtWidgetIntervalStatistics;
 
 #endif  // _mtsQtWidgetIntervalStatistics_h
