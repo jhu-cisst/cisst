@@ -27,7 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 
 typedef enum JointType {
     PRM_PRISMATIC,
-    PRM_REVOLUTE
+    PRM_REVOLUTE,
+    PRM_INACTIVE
 } prmJointType;
 
 typedef vctDynamicVector<prmJointType> prmJointTypeVec;
@@ -42,6 +43,9 @@ inline std::string cmnDataHumanReadable(const prmJointType & data)
         break;
     case PRM_REVOLUTE:
         return "revolute";
+        break;
+    case PRM_INACTIVE:
+        return "inactive";
         break;
     default:
         return "unknown";
