@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -862,6 +862,24 @@ public:
         vctDynamicVectorLoopEngines::
             VioVi< typename vctStoreBackBinaryOperations<value_type>::Maximum >::
             Run(*this, otherVector);
+        return *this;
+    }
+
+    /* documented above */
+    template <class __vectorOwnerType>
+    inline ThisType & ElementwiseClipAbove(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & upperBoundVector) {
+        vctDynamicVectorLoopEngines::
+            VioVi< typename vctStoreBackBinaryOperations<value_type>::Minimum >::
+            Run(*this, upperBoundVector);
+        return *this;
+    }
+
+    /* documented above */
+    template <class __vectorOwnerType>
+    inline ThisType & ElementwiseClipBelow(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & lowerBoundVector) {
+        vctDynamicVectorLoopEngines::
+            VioVi< typename vctStoreBackBinaryOperations<value_type>::Maximum >::
+            Run(*this, lowerBoundVector);
         return *this;
     }
 
