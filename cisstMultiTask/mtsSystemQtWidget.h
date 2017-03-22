@@ -3,7 +3,7 @@
 
 /*
   Author(s):  Anton Deguet
-  Created on: 2013-07-14
+  Created on: 2013-05-17
 
   (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -16,49 +16,46 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _mtsIntervalStatisticsQtWidget_h
-#define _mtsIntervalStatisticsQtWidget_h
+
+#ifndef _mtsSystemQtWidget_h
+#define _mtsSystemQtWidget_h
 
 #include <cisstMultiTask/mtsComponent.h>
-#include <cisstMultiTask/mtsIntervalStatistics.h>
 
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QTableWidget>
+#include <QTextEdit>
+
+#include <cisstMultiTask/mtsMessageQtWidget.h>
+#include <cisstMultiTask/mtsIntervalStatisticsQtWidget.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
 
-class CISST_EXPORT mtsIntervalStatisticsQtWidget: public QTableWidget
+// Widget without the component, can be included in another widget
+class CISST_EXPORT mtsSystemQtWidget: public QWidget
 {
     Q_OBJECT;
 
 public:
-    mtsIntervalStatisticsQtWidget(void);
-    ~mtsIntervalStatisticsQtWidget(void) {};
+    mtsSystemQtWidget(void);
+    inline virtual ~mtsSystemQtWidget() {}
 
-    inline void setupUi(void) {};
-    void SetValue(const mtsIntervalStatistics & newValue);
+    void SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired);
+    void setupUi(void);
 
 protected:
-    QTableWidgetItem * QTWIAverage;
-    QTableWidgetItem * QTWIAverageHz;
-    QTableWidgetItem * QTWIStdDev;
-    QTableWidgetItem * QTWIMin;
-    QTableWidgetItem * QTWIMax;
-    QTableWidgetItem * QTWILoadMin;
-    QTableWidgetItem * QTWILoadMax;
+    mtsMessageQtWidget * QMMessage;
+    mtsIntervalStatisticsQtWidget * QMIntervalStatistics;
 };
 
 // Widget with a component, can be used directly with cisstMultiTask component manager
-class CISST_EXPORT mtsIntervalStatisticsQtWidgetComponent: public mtsIntervalStatisticsQtWidget, public mtsComponent
+class CISST_EXPORT mtsSystemQtWidgetComponent: public mtsSystemQtWidget, public mtsComponent
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    mtsIntervalStatisticsQtWidgetComponent(const std::string & componentName, double periodInSeconds = 50.0 * cmn_ms);
-    ~mtsIntervalStatisticsQtWidgetComponent() {}
+    mtsSystemQtWidgetComponent(const std::string & componentName, double periodInSeconds = 50.0 * cmn_ms);
+    ~mtsSystemQtWidgetComponent() {}
 
     inline void Configure(const std::string & CMN_UNUSED(filename) = "") {};
     void Startup(void);
@@ -73,7 +70,6 @@ private:
     mtsIntervalStatistics IntervalStatistics;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatisticsQtWidgetComponent);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsSystemQtWidgetComponent);
 
-
-#endif  // _mtsIntervalStatisticsQtWidget_h
+#endif // _mtsSystemQtWidget_h

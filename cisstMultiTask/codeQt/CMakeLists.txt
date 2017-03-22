@@ -25,6 +25,7 @@ if (CISST_HAS_QT4)
                 ../mtsCollectorQtComponent.h
                 ../mtsCollectorQtWidget.h
                 ../mtsMessageQtWidget.h
+                ../mtsSystemQtWidget.h
                 ../mtsQtCommandSelector.h
                 ../mtsQtScaleAndSignalTool.h
                 ../mtsQtVisualizerShell.h
@@ -56,6 +57,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsCollectorQtWidget.cpp
                                 mtsCollectorQtFactory.cpp
                                 mtsMessageQtWidget.cpp
+                                mtsSystemQtWidget.cpp
                                 mtsQtCommandSelector.cpp
                                 mtsQtScaleAndSignalTool.cpp
                                 mtsQtVisualizerShell.cpp
@@ -73,6 +75,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsCollectorQtWidget.h
                                 mtsCollectorQtFactory.h
                                 mtsMessageQtWidget.h
+                                mtsSystemQtWidget.h
                                 mtsQtCommandSelector.h
                                 mtsQtScaleAndSignalTool.h
                                 mtsQtVisualizerShell.h
