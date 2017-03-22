@@ -24,7 +24,7 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 if (CISST_HAS_QT4)
   qt4_wrap_cpp (QT_WRAPPED_CPP
-                ../prmQtWidgetEventButtonsComponent.h)
+                ../prmEventButtonQtWidget.h)
 else (CISST_HAS_QT4)
   # assumes Qt 5 Auto Moc
   set (CMAKE_AUTOMOC ON)
@@ -40,8 +40,8 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 cisstMultiTask
                                 cisstParameterTypes
                    SETTINGS     cisstQt
-                   SOURCE_FILES prmQtWidgetEventButtonsComponent.cpp
-                   HEADER_FILES prmQtWidgetEventButtonsComponent.h
+                   SOURCE_FILES prmEventButtonQtWidget.cpp
+                   HEADER_FILES prmEventButtonQtWidget.h
                                 prmExportQt.h
                    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 
