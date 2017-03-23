@@ -24,7 +24,9 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 if (CISST_HAS_QT4)
   qt4_wrap_cpp (QT_WRAPPED_CPP
-                ../prmEventButtonQtWidget.h)
+                  ../prmEventButtonQtWidget.h
+                  ../prmStateJointQtWidget.h
+                  ../prmStateRobotQtWidget.h)
 else (CISST_HAS_QT4)
   # assumes Qt 5 Auto Moc
   set (CMAKE_AUTOMOC ON)
@@ -41,7 +43,11 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 cisstParameterTypes
                    SETTINGS     cisstQt
                    SOURCE_FILES prmEventButtonQtWidget.cpp
+                                prmStateJointQtWidget.cpp
+                                prmStateRobotQtWidget.cpp
                    HEADER_FILES prmEventButtonQtWidget.h
+                                prmStateJointQtWidget.h
+                                prmStateRobotQtWidget.h
                                 prmExportQt.h
                    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 
