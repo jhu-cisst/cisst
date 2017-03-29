@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2016 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -116,7 +116,7 @@ if (CISST_HAS_CISSTNETLIB)
     set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
     set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
   else ()
-    cisst_unset_all_package_settings (cisstRobot Reflexxes)
+    cisst_unset_all_package_settings (cisstRobot cisstReflexxesTypeII)
   endif ()
 
   cisst_add_library (LIBRARY cisstRobot
