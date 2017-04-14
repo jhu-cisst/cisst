@@ -26,8 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 // Qt
 #include <QVBoxLayout>
 
-mtsSystemQtWidget::mtsSystemQtWidget(void)
+mtsSystemQtWidget::mtsSystemQtWidget(const std::string & name)
 {
+    this->setObjectName(name.c_str());
     QMMessage = new mtsMessageQtWidget();
     QMIntervalStatistics = new mtsIntervalStatisticsQtWidget();
 }
@@ -47,9 +48,14 @@ void mtsSystemQtWidget::setupUi(void)
     QMMessage->setupUi();
 }
 
+void mtsSystemQtWidget::SetValue(const mtsIntervalStatistics & value) {
+    QMIntervalStatistics->SetValue(value);
+}
+
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSystemQtWidgetComponent, mtsComponent, std::string);
 
 mtsSystemQtWidgetComponent::mtsSystemQtWidgetComponent(const std::string & componentName, double periodInSeconds):
+    mtsSystemQtWidget(componentName),
     mtsComponent(componentName),
     TimerPeriodInMilliseconds(periodInSeconds * 1000)
 {
@@ -59,7 +65,6 @@ mtsSystemQtWidgetComponent::mtsSystemQtWidgetComponent(const std::string & compo
         interfaceRequired->AddFunction("GetPeriodStatistics", GetPeriodStatistics);
         mtsSystemQtWidget::SetInterfaceRequired(interfaceRequired);
     }
-    setupUi();
 }
 
 void mtsSystemQtWidgetComponent::Startup(void)

@@ -36,11 +36,12 @@ class CISST_EXPORT mtsSystemQtWidget: public QWidget
     Q_OBJECT;
 
 public:
-    mtsSystemQtWidget(void);
+    mtsSystemQtWidget(const std::string & name = "");
     inline virtual ~mtsSystemQtWidget() {}
 
     void SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired);
     void setupUi(void);
+    void SetValue(const mtsIntervalStatistics & value);
 
 protected:
     mtsMessageQtWidget * QMMessage;
