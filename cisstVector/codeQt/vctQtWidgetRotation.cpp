@@ -77,6 +77,9 @@ void vctQtWidgetRotationOpenGL::initializeGL(void)
 
 void vctQtWidgetRotationOpenGL::paintGL(void)
 {
+    const int side = qMin(width(), height());
+    glViewport((width() - side) / 2, (height() - side) / 2, side, side);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
@@ -103,7 +106,7 @@ void vctQtWidgetRotationOpenGL::paintGL(void)
 
 void vctQtWidgetRotationOpenGL::resizeGL(int width, int height)
 {
-    int side = qMin(width, height);
+    const int side = qMin(width, height);
     glViewport((width - side) / 2, (height - side) / 2, side, side);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
