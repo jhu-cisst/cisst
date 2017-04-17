@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2009-12-10
 
-  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -39,7 +38,6 @@ mtsTaskFromSignal::mtsTaskFromSignal(const std::string & name,
 
 
 void mtsTaskFromSignal::PostCommandQueuedMethod(void) {
-    CMN_LOG_CLASS_RUN_DEBUG << "PostCommandQueuedMethod: about to wake up thread for task \"" << this->GetName() << "\"" << std::endl;
     this->Thread.Wakeup();
 }
 
@@ -47,7 +45,7 @@ void mtsTaskFromSignal::PostCommandQueuedMethod(void) {
 void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
 
     if (ExecIn && ExecIn->GetConnectedInterface()) {
-        CMN_LOG_CLASS_RUN_ERROR << "RunInternal for " << this->GetName() 
+        CMN_LOG_CLASS_RUN_ERROR << "RunInternal for " << this->GetName()
                                 << " called, even though task receives thread from "
                                 << ExecIn->GetConnectedInterface()->GetComponent()->GetName() << std::endl;
         return 0;
@@ -67,7 +65,6 @@ void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
         if (this->State == mtsComponentState::ACTIVE) {
             DoRunInternal();
             // put the task to sleep until next signal
-            CMN_LOG_CLASS_RUN_DEBUG << "RunInternal: about to put thread to sleep for task \"" << this->GetName() << "\"" << std::endl;
             Thread.WaitForWakeup();
         }
     }
