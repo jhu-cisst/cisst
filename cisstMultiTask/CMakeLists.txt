@@ -21,19 +21,9 @@ else (CMAKE_SIZEOF_VOID_P EQUAL 8)
   set (CISST_MTS_64BIT FALSE)
 endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
 
-# try to find ZeroC Ice
-if (CISST_HAS_IOS)
-  find_package (IceTouch)
-else (CISST_HAS_IOS)
-  find_package (Ice)
-endif (CISST_HAS_IOS)
-
-if (ICE_FOUND)
-  option (CISST_MTS_HAS_ICE "Enable inter-process communication (IPC) feature of cisstMultiTask, requires ICE from ZeroC" ON)
-  mark_as_advanced (CISST_MTS_HAS_ICE)
-else (ICE_FOUND)
-  option (CISST_MTS_HAS_ICE "Enable inter-process communication (IPC) feature of cisstMultiTask, requires ICE from ZeroC" OFF)
-endif (ICE_FOUND)
+# ZeroC ICE
+option (CISST_MTS_HAS_ICE "Enable inter-process communication (IPC) feature of cisstMultiTask, requires ICE from ZeroC" OFF)
+mark_as_advanced (CISST_MTS_HAS_ICE)
 
 if (CISST_MTS_HAS_ICE)
   if (CISST_HAS_IOS)
