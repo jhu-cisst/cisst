@@ -299,7 +299,7 @@ endif (LIBXML2_FOUND)
 
 
 # Support for JSON
-option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some examples and utilities won't be compiled" OFF)
+option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some examples and utilities won't be compiled" ON)
 
 if (CISST_HAS_JSON)
   include (ExternalProject)
