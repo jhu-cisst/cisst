@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -31,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 
+#include <string>
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -52,4 +51,32 @@ inline int cmn_snprintf(char * destination, size_t size, const char * format, ..
     return result;
 }
 
+/*! Replace all occurences of oldString by newString in userString. */
+inline void cmnStringReplaceAll(std::string & userString,
+                                const std::string & oldString, const std::string & newString)
+{
+    // from http://stackoverflow.com/questions/4643512/replace-substring-with-another-substring-c
+    const size_t oldSize = oldString.length();
+
+    // do nothing if line is shorter than the string to find
+    if (oldSize > userString.length()) return;
+
+    const size_t newSize = newString.length();
+    for (size_t pos = 0; ; pos += newSize) {
+        // Locate the substring to replace
+        pos = userString.find(oldString, pos);
+        if (pos == std::string::npos) {
+            return;
+        }
+        if (oldSize == newSize) {
+            // if they're same size, use std::string::replace
+            userString.replace(pos, oldSize, newString);
+        } else {
+            // if not same size, replace by erasing and inserting
+            userString.erase(pos, oldSize);
+            userString.insert(pos, newString);
+        }
+    }
+}
+                                
 #endif // _cmnStrings_h
