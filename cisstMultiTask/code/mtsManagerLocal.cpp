@@ -999,6 +999,68 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 }
 
 #if CISST_HAS_JSON
+bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfiguration, cmnPath & configPath)
+{
+    std::string sharedLibrary, className, constructorArgJSON;
+    Json::Value jsonValue;
+
+    // shared library is optional
+    jsonValue = componentConfiguration["shared-library"];
+    if (!jsonValue.empty()){
+        sharedLibrary = jsonValue.asString();
+    } else {
+        sharedLibrary = "";
+    }
+    // class name is required
+    jsonValue = componentConfiguration["class-name"];
+    if (!jsonValue.empty()) {
+        className = jsonValue.asString();
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: can't find \"class-name\"" << std::endl;
+        return false;
+    }
+    // constructor argument is required
+    jsonValue = componentConfiguration["constructor-arg"];
+    if (!jsonValue.empty()) {
+        Json::FastWriter fastWriter;
+        constructorArgJSON = fastWriter.write(jsonValue);
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: can't find \"constructor-arg\"" << std::endl;
+        return false;
+    }
+    // create (the method CreateComponentDynamicallyJSON should handle case w/o shared library
+    mtsComponent * component
+        = this->CreateComponentDynamicallyJSON(sharedLibrary,
+                                               className,
+                                               constructorArgJSON);
+    if (!component) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: failed to dynamically create component" << std::endl;
+        return false;
+    }
+    // configure as needed
+    Json::Value configureParameter = componentConfiguration["configure-parameter"];
+    if (configureParameter.empty()) {
+        component->Configure();
+    } else {
+        std::string configParam = configureParameter.asString();
+        // see if we can find a file corresponding to string
+        std::string configFile = configPath.Find(configParam);
+        if (configFile == "") {
+            // else pass the string as-is
+            component->Configure(configParam);
+        } else {
+            component->Configure(configFile);
+        }
+    }
+    // add
+    if (!this->AddComponent(component)) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: failed to add component to component manager" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+
 mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string & sharedLibrary,
                                                                const std::string & className,
                                                                const std::string & constructorArgSerialized)
@@ -1075,7 +1137,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
     }
     // cleanup argument
     delete argument;
-    
+
     // make sure this is a component
     mtsComponent * component = dynamic_cast<mtsComponent *>(componentBase);
     if (!component) {

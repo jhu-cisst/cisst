@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -57,6 +56,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstCommon/cmnUnits.h>
+#include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstOSAbstraction/osaThread.h>
@@ -365,6 +365,14 @@ public:
                                               const std::string & constructorArgSerialized);
 
 #if CISST_HAS_JSON
+    /*! Create, configure and add component based on Json::Value.
+      Fields used are "shared-library", "class-name",
+      "constructor-arg" (see cdg file for each type of constructor
+      arg) and "configure-parameter".  The method will test if the
+      configure-parameter corresponds to a file in the configPath.  If
+      it is, it will try to configure using the full path name. */
+    bool ConfigureComponentJSON(const Json::Value & componentConfiguration, cmnPath & configPath);
+
     /*! Create with a constructor argument serialized in JSON.  If
       sharedLibrary is an empty string, the method will not attempt to
       load the dynamic library.  sharedLibrary can be a full file name
@@ -653,4 +661,3 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerLocal)
 
 #endif // _mtsManagerLocal_h
-
