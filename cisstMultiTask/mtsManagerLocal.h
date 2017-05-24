@@ -365,13 +365,26 @@ public:
                                               const std::string & constructorArgSerialized);
 
 #if CISST_HAS_JSON
+    /*! Configure using a Json::Value.  This method will look for the
+      arrays "components" and "connections" and will then call the
+      methods ConfigureComponentJSON and ConfigureConnectionJSON for
+      each element found.  The path is used to locate extra
+      configuration files potentially used by Configure methods for
+      newly created components. */ 
+    bool ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath);
+
     /*! Create, configure and add component based on Json::Value.
       Fields used are "shared-library", "class-name",
       "constructor-arg" (see cdg file for each type of constructor
       arg) and "configure-parameter".  The method will test if the
       configure-parameter corresponds to a file in the configPath.  If
       it is, it will try to configure using the full path name. */
-    bool ConfigureComponentJSON(const Json::Value & componentConfiguration, cmnPath & configPath);
+    bool ConfigureComponentJSON(const Json::Value & componentConfiguration, const cmnPath & configPath);
+
+    /*! Connect two components based on Json::Value.  Fields used are
+      "required": { "component", interface" } and "provided": {
+      "component", "interface"}. */
+    bool ConfigureConnectionJSON(const Json::Value & connectionConfiguration);
 
     /*! Create with a constructor argument serialized in JSON.  If
       sharedLibrary is an empty string, the method will not attempt to

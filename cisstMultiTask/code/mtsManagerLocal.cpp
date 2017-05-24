@@ -999,7 +999,32 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 }
 
 #if CISST_HAS_JSON
-bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfiguration, cmnPath & configPath)
+bool mtsManagerLocal::ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath)
+{
+    const Json::Value components = configuration["components"];
+    for (unsigned int index = 0;
+         index < components.size();
+         ++index) {
+        if (!ConfigureComponentJSON(components[index], configPath)) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: failed to configure component ["
+                                     << index << "]" << std::endl;
+            return false;
+        }
+    }
+    const Json::Value connections = configuration["connections"];
+    for (unsigned int index = 0;
+         index < connections.size();
+         ++index) {
+        if (!ConfigureConnectionJSON(connections[index])) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: failed to configure connection ["
+                                     << index << "]" << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfiguration, const cmnPath & configPath)
 {
     std::string sharedLibrary, className, constructorArgJSON;
     Json::Value jsonValue;
@@ -1060,6 +1085,74 @@ bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfig
     return true;
 }
 
+
+bool mtsManagerLocal::ConfigureConnectionJSON(const Json::Value & connectionConfiguration)
+{
+    Json::Value provided, required, jsonValue;
+    // required
+    required = connectionConfiguration["required"];
+    if (required.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: failed to find \"required\"" << std::endl;
+        return false;
+    }
+    jsonValue = required["component"];
+    if (jsonValue.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: failed to find \"required\", \"component\""
+                                 << std::endl;
+        return false;
+    }
+    const std::string requiredComponent = jsonValue.asString();
+    if (requiredComponent.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: \"required\", \"component\" is not a valid string"
+                                 << std::endl;
+        return false;
+    }
+    jsonValue = required["interface"];
+    if (jsonValue.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: failed to find \"required\", \"interface\""
+                                 << std::endl;
+        return false;
+    }
+    const std::string requiredInterface = jsonValue.asString();
+    if (requiredInterface.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: \"required\", \"interface\" is not a valid string"
+                                 << std::endl;
+        return false;
+    }
+    // provided
+    provided = connectionConfiguration["provided"];
+    if (provided.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: failed to find \"provided\"" << std::endl;
+        return false;
+    }
+    jsonValue = provided["component"];
+    if (jsonValue.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: failed to find \"provided\", \"component\""
+                                 << std::endl;
+        return false;
+    }
+    const std::string providedComponent = jsonValue.asString();
+    if (providedComponent.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: \"provided\", \"component\" is not a valid string"
+                                 << std::endl;
+        return false;
+    }
+    jsonValue = provided["interface"];
+    if (jsonValue.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: failed to find \"provided\", \"interface\""
+                                 << std::endl;
+        return false;
+    }
+    const std::string providedInterface = jsonValue.asString();
+    if (providedInterface.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureConnectionJSON: \"provided\", \"interface\" is not a valid string"
+                                 << std::endl;
+        return false;
+    }
+    // finally, request connection
+    return this->Connect(requiredComponent, requiredInterface,
+                         providedComponent, providedInterface);
+}
 
 mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string & sharedLibrary,
                                                                const std::string & className,
