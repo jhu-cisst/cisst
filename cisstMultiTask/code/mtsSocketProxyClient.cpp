@@ -158,12 +158,14 @@ public:
             }
             mtsExecutionResult result(resultProxy.GetData());
             if (arg) {
-                if (result.Value() == mtsExecutionResult::COMMAND_SUCCEEDED)
+                if (result.Value() == mtsExecutionResult::COMMAND_SUCCEEDED) {
                     CMN_LOG_RUN_WARNING << "EventReceiverWriteProxy: got COMMAND_SUCCEEDED instead of arg of type "
                                         << arg->Services()->GetName() << std::endl;
+                }
                 arg->SetValid(false);
-                if (CallerEvent)
+                if (CallerEvent) {
                     CallerEvent->Execute(*arg, MTS_NOT_BLOCKING);
+                }
             }
             else {
                 if (result.Value() == mtsExecutionResult::COMMAND_QUEUED) {
