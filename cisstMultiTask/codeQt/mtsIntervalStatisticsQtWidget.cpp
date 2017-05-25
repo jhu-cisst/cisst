@@ -33,10 +33,10 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     this->horizontalScrollBar()->hide();
 #if CISST_HAS_QT4
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 #else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 #endif
     QLabel * label;
     int rowIndex = 0;
@@ -44,11 +44,11 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     label = new QLabel("Average");
     this->setCellWidget(rowIndex, 0, label);
     QTWIAverage = new QTableWidgetItem();
-    QTWIAverage->setTextAlignment(Qt::AlignRight);
+    QTWIAverage->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);  
     QTWIAverage->setFlags(QTWIAverage->flags() ^ Qt::ItemIsEditable);
     this->setItem(rowIndex, 1, QTWIAverage);
     QTWIAverageHz = new QTableWidgetItem();
-    QTWIAverageHz->setTextAlignment(Qt::AlignRight);
+    QTWIAverageHz->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     QTWIAverageHz->setFlags(QTWIAverageHz->flags() ^ Qt::ItemIsEditable);
     this->setItem(rowIndex, 2, QTWIAverageHz);
 
@@ -56,7 +56,7 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     label = new QLabel("Std dev");
     this->setCellWidget(rowIndex, 0, label);
     QTWIStdDev = new QTableWidgetItem();
-    QTWIStdDev->setTextAlignment(Qt::AlignRight);
+    QTWIStdDev->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     QTWIStdDev->setFlags(QTWIStdDev->flags() ^ Qt::ItemIsEditable);
     this->setItem(rowIndex, 1, QTWIStdDev);
 
@@ -64,11 +64,11 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     label = new QLabel("Range");
     this->setCellWidget(rowIndex, 0, label);
     QTWIMin = new QTableWidgetItem();
-    QTWIMin->setTextAlignment(Qt::AlignRight);
+    QTWIMin->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     QTWIMin->setFlags(QTWIMin->flags() ^ Qt::ItemIsEditable);
     this->setItem(rowIndex, 1, QTWIMin);
     QTWIMax = new QTableWidgetItem();
-    QTWIMax->setTextAlignment(Qt::AlignRight);
+    QTWIMax->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     QTWIMax->setFlags(QTWIMax->flags() ^ Qt::ItemIsEditable);
     this->setItem(rowIndex, 2, QTWIMax);
 
@@ -76,11 +76,11 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     label = new QLabel("Load");
     this->setCellWidget(rowIndex, 0, label);
     QTWILoadMin = new QTableWidgetItem();
-    QTWILoadMin->setTextAlignment(Qt::AlignRight);
+    QTWILoadMin->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     QTWILoadMin->setFlags(QTWILoadMin->flags() ^ Qt::ItemIsEditable);
     this->setItem(rowIndex, 1, QTWILoadMin);
     QTWILoadMax = new QTableWidgetItem();
-    QTWILoadMax->setTextAlignment(Qt::AlignRight);
+    QTWILoadMax->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     QTWILoadMax->setFlags(QTWILoadMax->flags() ^ Qt::ItemIsEditable);
     this->setItem(rowIndex, 2, QTWILoadMax);
 
