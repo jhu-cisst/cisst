@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -312,8 +312,13 @@ macro (cisst_add_library ...)
                )
 
   # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
-  set_target_properties (${LIBRARY}
-                         PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${LIBRARY}\"")
+  if (CMAKE_VERSION VERSION_GREATER "3.0.1")
+    target_compile_definitions (${LIBRARY} PRIVATE
+      LIBRARY_NAME_FOR_CISST_REGISTER="${LIBRARY}")
+  else ()
+    set_target_properties (${LIBRARY}
+      PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${LIBRARY}\"")
+  endif ()
 
   # Install the library
   install (TARGETS ${LIBRARY} COMPONENT ${LIBRARY}
@@ -464,8 +469,13 @@ macro (cisst_target_link_libraries TARGET ...)
     cisst_target_link_package_libraries (${_WHO_REQUIRES} ${_REQUIRED_CISST_LIBRARIES})
 
     # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
-    set_target_properties (${_WHO_REQUIRES}
-                           PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${_WHO_REQUIRES}\"")
+    if (CMAKE_VERSION VERSION_GREATER "3.0.1")
+      target_compile_definitions (${_WHO_REQUIRES} PRIVATE
+        LIBRARY_NAME_FOR_CISST_REGISTER="${_WHO_REQUIRES}")
+    else ()
+      set_target_properties (${_WHO_REQUIRES}
+        PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${_WHO_REQUIRES}\"")
+    endif ()
 
   endif (NOT CISST_LIBRARIES)
 
