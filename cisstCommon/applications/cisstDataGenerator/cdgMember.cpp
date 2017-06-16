@@ -64,6 +64,11 @@ cdgMember::cdgMember(size_t lineNumber):
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");
 
+    field = this->AddField("deprecated", "false", false, "indicates if the data member is deprecated, accessors will be marked as deprecated");
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("false");
+
     this->AddKnownScope(*this);
 }
 
@@ -150,6 +155,11 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
     const std::string type = this->GetFieldValue("type");
     const std::string name = this->GetFieldValue("name");
     const std::string accessors = this->GetFieldValue("accessors");
+    const std::string deprecated = this->GetFieldValue("deprecated");
+    std::string depr = " ";
+    if (deprecated == "true") {
+        depr = " CISST_DEPRECATED ";
+    }
     outputStream << " " << this->GetFieldValue("visibility") << ":" << std::endl;
     if (IsCArray) {
         outputStream << "    " << CArrayType << " " << MemberName << CArraySize << "; // " << this->GetFieldValue("description") << std::endl;
@@ -162,15 +172,15 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
     if ((accessors == "all")
         || (accessors == "set-get")) {
         outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
-                     << "    void Get" << name << "(" << type << " & placeHolder) const;" << std::endl
-                     << "    void Set" << name << "(const " << type << " & newValue);" << std::endl;
+                     << "    void" << depr << "Get" << name << "(" << type << " & placeHolder) const;" << std::endl
+                     << "    void" << depr << "Set" << name << "(const " << type << " & newValue);" << std::endl;
     }
     if ((accessors == "all")
         || (accessors == "references")) {
         std::string returnType = type + " & ";
         outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
-                     << "    const " << returnType << name << "(void) const;" << std::endl
-                     << "    " << returnType << name << "(void);" << std::endl;
+                     << "    const " << returnType << depr << name << "(void) const;" << std::endl
+                     << "    " << returnType << depr << name << "(void);" << std::endl;
     }
 }
 
