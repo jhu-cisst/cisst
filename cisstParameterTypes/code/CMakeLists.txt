@@ -18,6 +18,7 @@ cisst_data_generator (cisstParameterTypes
                       ../prmActuatorJointCoupling.cdg
                       ../prmPositionCartesianGet.cdg
                       ../prmPositionJointGet.cdg
+                      ../prmPositionJointSet.cdg
                       ../prmFixtureGainCartesianSet.cdg
                       ../prmIMUSensors.cdg
                       ../prmStateJoint.cdg
@@ -33,7 +34,6 @@ set (SOURCE_FILES
      prmEventButton.cpp
      prmMotionBase.cpp
 
-     prmPositionJointSet.cpp
      prmVelocityJointGet.cpp
      prmVelocityJointSet.cpp
      prmForceTorqueJointSet.cpp
@@ -64,7 +64,6 @@ set (HEADER_FILES
      prmMotionBase.h
      prmJointType.h
 
-     prmPositionJointSet.h
      prmVelocityJointGet.h
      prmVelocityJointSet.h
      prmForceTorqueJointSet.h

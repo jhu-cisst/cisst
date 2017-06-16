@@ -1,0 +1,103 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstParameterTypes/prmForwardDeclarations.h>
+// Always include last
+#include <cisstParameterTypes/prmExport.h>
+}
+
+class {
+    name prmPositionJointSet; // required
+
+    attribute CISST_EXPORT;
+
+    base-class {
+        type mtsGenericObject;
+        is-data true;
+    }
+
+    member {
+        name Goal;
+        type vctDynamicVector<double>;
+        description Desired position;
+    }
+
+    member {
+        name Velocity;
+        type vctDynamicVector<double>;
+        description Velocity that should be used for the trajectory generator.  If the vector size is 0, this will be ignored.;
+    }
+
+    member {
+        name Acceleration;
+        type vctDynamicVector<double>;
+        description Acceleration and deceleration that should be used for the trajectory generator.  If the vector size is 0, this will be ignored.;
+    }
+
+    member {
+        name TimeLimit;
+        type double;
+        description Time allowed or requested for the motion;
+    }
+
+    member {
+        name IsCoordinated;
+        type bool;
+        description Request all joints to move together, synchronizing either start and end or phases.  This might be ignored by the controller.;
+    }
+
+    // from original prmPositionJointSet
+    member {
+        name Deceleration;
+        type vctDynamicVector<double>;
+        deprecated true;
+    }
+    member {
+        name Mask;
+        type vctDynamicVector<bool>;
+        deprecated true;
+    }
+    // from original prmMotionBase
+    member {
+        name BlockingFlag;
+        type prmBlocking;
+        deprecated true;
+    }
+    member {
+        name BlendingFactor;
+        type bool;
+        deprecated true;
+    }
+    member {
+        name IsPreemptable;
+        type bool;
+        deprecated true;
+    }
+    member {
+        name IsGoalOnly;
+        type bool;
+        deprecated true;
+    }
+
+    inline-header {
+    public:
+        inline CISST_DEPRECATED prmPositionJointSet(const size_t size) {
+            mGoal.SetSize(size);
+            mGoal.SetAll(0.0);
+        }
+        void inline CISST_DEPRECATED SetSize(const size_t size) {
+            mGoal.SetSize(size);
+            mGoal.SetAll(0.0);
+        }
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+
+
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(prmPositionJointSet);
+}
