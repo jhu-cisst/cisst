@@ -104,3 +104,7 @@ CMN_IMPLEMENT_SERVICES(prmStateJoint);
 
 #include <cisstParameterTypes/prmInputData.h>
 CMN_IMPLEMENT_SERVICES(prmInputData);
+
+#if CISST_HAS_JSON
+CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(prmBlocking, int);
+#endif

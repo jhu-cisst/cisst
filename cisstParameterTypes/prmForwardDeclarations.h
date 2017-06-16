@@ -42,6 +42,12 @@ typedef enum Blocking {
 	WAIT_FINISH   /*! blocking type  */
 } prmBlocking;
 
+#include <cisstCommon/cmnDataFunctionsEnumMacros.h>
+CMN_DATA_SPECIALIZATION_FOR_ENUM(Blocking, int);
+#if CISST_HAS_JSON
+CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(Blocking);
+#endif
+
 // robot API types
 class prmPositionCartesianGet;
 class prmPositionCartesianSet;
