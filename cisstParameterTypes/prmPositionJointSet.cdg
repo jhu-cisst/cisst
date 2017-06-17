@@ -40,12 +40,14 @@ class {
     member {
         name TimeLimit;
         type double;
+        default 0.0;
         description Time allowed or requested for the motion;
     }
 
     member {
         name IsCoordinated;
         type bool;
+        default true;
         description Request all joints to move together, synchronizing either start and end or phases.  This might be ignored by the controller.;
     }
 
