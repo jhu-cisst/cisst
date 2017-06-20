@@ -316,6 +316,11 @@ public:
         this->Vector.SetSize(size);
     }
 
+    void SetSize(size_type size, const value_type newValue) {
+        this->Vector.SetSize(size);
+        this->SetAll(newValue);
+    }
+
     /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
       Returns true if successful. This particular implementation assumes that
       the correct vector size is already set. */
