@@ -42,14 +42,18 @@ public:
 signals:
     void SignalAppendMessage(QString);
     void SignalSetColor(QColor);
+    void SignalClear();
 
 private slots:
     void SlotTextChanged(void);
 
 protected:
+    virtual void keyPressEvent(QKeyEvent * event);
     void ErrorEventHandler(const mtsMessage & message);
     void WarningEventHandler(const mtsMessage & message);
     void StatusEventHandler(const mtsMessage & message);
+
+    int Tag;
 };
 
 // Widget with a component, can be used directly with cisstMultiTask component manager

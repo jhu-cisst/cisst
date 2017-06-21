@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Zihan Chen
   Created on: 2013-03-20
 
-  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -200,10 +199,11 @@ vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeTy
     // Set display mode
     SetDisplayMode(displayMode);
 
-    // myWidget is any QWidget-derived class
+    // Contextual menu
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(ShowContextMenu(const QPoint&)));
+    setToolTip(QString("right click for menu"));
 }
 
 void vctQtWidgetRotationDoubleRead::ShowContextMenu(const QPoint & pos)
