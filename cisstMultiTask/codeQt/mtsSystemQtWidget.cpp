@@ -65,6 +65,7 @@ mtsSystemQtWidgetComponent::mtsSystemQtWidgetComponent(const std::string & compo
         interfaceRequired->AddFunction("GetPeriodStatistics", GetPeriodStatistics);
         mtsSystemQtWidget::SetInterfaceRequired(interfaceRequired);
     }
+    setupUi();
 }
 
 void mtsSystemQtWidgetComponent::Startup(void)

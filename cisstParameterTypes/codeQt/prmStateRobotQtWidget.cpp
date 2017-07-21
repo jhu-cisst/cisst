@@ -63,7 +63,6 @@ void prmStateRobotQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
     if (this->isHidden()) {
         return;
     }
-
     GetStateJoint(StateJoint);
     QPStateJoint->SetValue(StateJoint);
 }
