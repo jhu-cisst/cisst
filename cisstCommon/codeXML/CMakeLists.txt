@@ -60,7 +60,6 @@ set_source_files_properties ("${CISST_CMN_XML_CONFIG_FILE}"
 
 # link against Qt libraries if needed
 if (${CISST_XML_LIB} STREQUAL "QtXML")
-  cisst_set_directories (cisstQt)
   set (cisstCommonXML_EXTRA_DEP cisstCommonQt)
 endif ()
 
