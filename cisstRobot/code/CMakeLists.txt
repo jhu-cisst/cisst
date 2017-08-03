@@ -90,7 +90,7 @@ if (CISST_HAS_CISSTNETLIB)
     include (ExternalProject)
 
     # download and build options
-    set (cisstReflexxesTypeII_PREFIX cisstReflexxesTypeIIExternal)
+    set (cisstReflexxesTypeII_PREFIX Reflexxes)
     set (cisstReflexxesTypeII_GIT_REPOSITORY https://github.com/jhu-cisst-external/ReflexxesTypeII.git)
     set (cisstReflexxesTypeII_GIT_TAG 1.2.6.p1)
 
