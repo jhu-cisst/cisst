@@ -32,7 +32,7 @@ void cmnRandomSequence::ExtractRandomPermutation(const size_t length, size_t * a
 {
     size_t i;
     for (i = 0; i < length; ++i) {
-        array[i] = ExtractRandomSizeT(0, length);
+        array[i] = i;
     }
 
     size_t next;
