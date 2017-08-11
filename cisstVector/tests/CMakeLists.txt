@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstVector tests
 #
-# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -121,6 +119,17 @@ set (HEADER_FILES
 
      vctPlot2DBaseTest.h
      )
+
+
+if (CISST_HAS_EIGEN3)
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       vctEigen3ConversionTest.h)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       vctEigen3ConversionTest.cpp)
+endif (CISST_HAS_EIGEN3)
+
 
 if (CISST_HAS_JSON)
   set (HEADER_FILES

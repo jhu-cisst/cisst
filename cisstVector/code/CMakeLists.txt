@@ -159,6 +159,14 @@ if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
   cisst_library_use_settings (cisstVector cisstOpenGL)
 endif (CISST_HAS_OPENGL OR CISST_HAS_VTK)
 
+# Eigen3 conversion methods
+if (CISST_HAS_EIGEN3)
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       vctEigen3Conversion.h)
+  cisst_library_use_settings (cisstVector cisstEigen3)
+endif (CISST_HAS_EIGEN3)
+
 # JSON specific header files
 if (CISST_HAS_JSON)
   set (HEADER_FILES
