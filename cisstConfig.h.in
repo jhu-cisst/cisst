@@ -80,6 +80,9 @@ http://www.cisst.org/cisst/license.txt.
 // Using OpenGL or not
 #cmakedefine01 CISST_HAS_OPENGL
 
+// Using Eigen or not
+#cmakedefine01 CISST_HAS_EIGEN3
+
 // Using IOS or not
 #cmakedefine01 CISST_HAS_IOS
 

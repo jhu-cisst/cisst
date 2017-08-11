@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2016 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2017 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -28,6 +28,23 @@ if (CISST_HAS_OPENGL)
 else (CISST_HAS_OPENGL)
   cisst_unset_all_package_settings (cisstOpenGL OpenGL)
 endif (CISST_HAS_OPENGL)
+
+
+# Support for Eigen
+find_package (Eigen3)
+if (EIGEN3_FOUND)
+  option (CISST_HAS_EIGEN3 "Build against Eigen3." ON)
+  mark_as_advanced (CISST_HAS_EIGEN3)
+else (EIGEN3_FOUND)
+  option (CISST_HAS_EIGEN3 "Build against Eigen3." OFF)
+endif (EIGEN3_FOUND)
+
+if (CISST_HAS_EIGEN3)
+  find_package (Eigen3 REQUIRED)
+  cisst_set_package_settings (cisstEigen3 Eigen3 INCLUDE_DIRECTORIES EIGEN3_INCLUDE_DIRS)
+else (CISST_HAS_EIGEN3)
+  cisst_unset_all_package_settings (cisstEigen Eigen)
+endif (CISST_HAS_EIGEN3)
 
 
 # Support for QT
