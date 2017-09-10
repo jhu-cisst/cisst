@@ -90,8 +90,8 @@ CMN_IMPLEMENT_SERVICES(prmVelocityJointGet);
 #include <cisstParameterTypes/prmVelocityJointSet.h>
 CMN_IMPLEMENT_SERVICES(prmVelocityJointSet);
 
-#include <cisstParameterTypes/prmFixtureGainCartesianSet.h>
-CMN_IMPLEMENT_SERVICES(prmFixtureGainCartesianSet);
+#include <cisstParameterTypes/prmCartesianImpedanceGains.h>
+CMN_IMPLEMENT_SERVICES(prmCartesianImpedanceGains);
 
 #include <cisstParameterTypes/prmJointType.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeProxy);

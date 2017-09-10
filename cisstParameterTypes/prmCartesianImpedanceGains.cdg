@@ -11,7 +11,7 @@ inline-header {
 }
 
 class {
-    name prmFixtureGainCartesianSet; // required
+    name prmCartesianImpedanceGains; // required
 
     attribute CISST_EXPORT;
 
@@ -117,5 +117,5 @@ class {
 }
 
 inline-header {
-CMN_DECLARE_SERVICES_INSTANTIATION(prmFixtureGainCartesianSet);
+CMN_DECLARE_SERVICES_INSTANTIATION(prmCartesianImpedanceGains);
 }
