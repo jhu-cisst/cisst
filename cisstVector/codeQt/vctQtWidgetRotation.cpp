@@ -168,7 +168,8 @@ vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeTy
     AngleWidget = new vctQtWidgetDynamicVectorDoubleRead();
 
     QGridLayout * axisAngleLayout = new QGridLayout;
-    axisAngleLayout->setSpacing(0);
+    axisAngleLayout->setSpacing(1);
+    axisAngleLayout->setContentsMargins(0, 0, 0, 0);
     axisAngleLayout->addWidget(new QLabel("Axis"), 0, 0, 1, 1);
     axisAngleLayout->addWidget(AxisWidget, 0, 1, 1, 1);
     axisAngleLayout->addWidget(new QLabel("Angle"), 1, 0, 1, 1);
@@ -191,9 +192,9 @@ vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeTy
     OpenGLWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     Layout = new QVBoxLayout;
-    Layout->setSpacing(0);
+    Layout->setSpacing(1);
+    Layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(Layout);
-    this->setContentsMargins(0, 0, 0, 0);
     this->setWindowTitle("vctQtWidgetRotationDoubleRead");
 
     // Set display mode

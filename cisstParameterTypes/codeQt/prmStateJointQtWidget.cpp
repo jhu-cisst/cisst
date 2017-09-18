@@ -27,10 +27,12 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
 {
     QVBoxLayout * layout = new QVBoxLayout();
     layout->setSpacing(1);
+    layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
     QWPosition = new QWidget();
     QHBoxLayout * positionLayout = new QHBoxLayout();
+    positionLayout->setContentsMargins(0, 0, 0, 0);
     QWPosition->setLayout(positionLayout);
     positionLayout->addWidget(new QLabel("Position"));
     QVRPosition = new vctQtWidgetDynamicVectorDoubleRead();
@@ -39,6 +41,7 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
 
     QWVelocity = new QWidget();
     QHBoxLayout * velocityLayout = new QHBoxLayout();
+    velocityLayout->setContentsMargins(0, 0, 0, 0);
     QWVelocity->setLayout(velocityLayout);
     velocityLayout->addWidget(new QLabel("Velocity"));
     QVRVelocity = new vctQtWidgetDynamicVectorDoubleRead();
@@ -47,6 +50,7 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
 
     QWEffort = new QWidget();
     QHBoxLayout * effortLayout = new QHBoxLayout();
+    effortLayout->setContentsMargins(0, 0, 0, 0);
     QWEffort->setLayout(effortLayout);
     effortLayout->addWidget(new QLabel("Effort"));
     QVREffort = new vctQtWidgetDynamicVectorDoubleRead();

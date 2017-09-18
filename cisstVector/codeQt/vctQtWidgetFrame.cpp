@@ -30,7 +30,8 @@ vctQtWidgetFrameDoubleRead::vctQtWidgetFrameDoubleRead(const DisplayModeType dis
     Layout = new QVBoxLayout;
     this->setLayout(Layout);
     this->setWindowTitle("vctQtWidgetFrameDoubleRead");
-    Layout->setSpacing(0);
+    Layout->setSpacing(1);
+    Layout->setContentsMargins(0, 0, 0, 0);
     Layout->addWidget(RotationWidget);
     Layout->addWidget(TranslationWidget);
 }
