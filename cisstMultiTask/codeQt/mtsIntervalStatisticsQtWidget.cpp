@@ -35,6 +35,8 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 #else
+    this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 #endif
