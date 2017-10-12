@@ -1002,14 +1002,21 @@ std::vector<std::string> mtsInterfaceProvided::GetNamesOfEventsWrite(void) const
 }
 
 
-mtsCommandVoid * mtsInterfaceProvided::GetCommandVoid(const std::string & commandName) const
+mtsCommandVoid * mtsInterfaceProvided::GetCommandVoid(const std::string & commandName,
+                                                      const mtsRequiredType required) const
 {
+    cmnLogLevel logLevel;
+    if (required == MTS_REQUIRED) {
+        logLevel = CMN_LOG_LEVEL_INIT_ERROR;
+    } else {
+        logLevel = CMN_LOG_LEVEL_INIT_VERBOSE;
+    }
     if (this->EndUserInterface) {
         if (this->MailBox) {
-            return this->CommandsVoid.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->CommandsVoid.GetItem(commandName, logLevel);
         } else {
             CMN_ASSERT(this->OriginalInterface);
-            return this->OriginalInterface->CommandsVoid.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->OriginalInterface->CommandsVoid.GetItem(commandName, logLevel);
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandVoid: cannot retrieve command " << commandName << " from \"factory\" interface \""
@@ -1020,14 +1027,21 @@ mtsCommandVoid * mtsInterfaceProvided::GetCommandVoid(const std::string & comman
 }
 
 
-mtsCommandVoidReturn * mtsInterfaceProvided::GetCommandVoidReturn(const std::string & commandName) const
+mtsCommandVoidReturn * mtsInterfaceProvided::GetCommandVoidReturn(const std::string & commandName,
+                                                                  const mtsRequiredType required) const
 {
+    cmnLogLevel logLevel;
+    if (required == MTS_REQUIRED) {
+        logLevel = CMN_LOG_LEVEL_INIT_ERROR;
+    } else {
+        logLevel = CMN_LOG_LEVEL_INIT_VERBOSE;
+    }
     if (this->EndUserInterface) {
         if (this->MailBox) {
-            return this->CommandsVoidReturn.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->CommandsVoidReturn.GetItem(commandName, logLevel);
         } else {
             CMN_ASSERT(this->OriginalInterface);
-            return this->OriginalInterface->CommandsVoidReturn.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->OriginalInterface->CommandsVoidReturn.GetItem(commandName, logLevel);
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandVoidReturn: cannot retrieve command " << commandName << " from \"factory\" interface \""
@@ -1038,14 +1052,21 @@ mtsCommandVoidReturn * mtsInterfaceProvided::GetCommandVoidReturn(const std::str
 }
 
 
-mtsCommandWriteBase * mtsInterfaceProvided::GetCommandWrite(const std::string & commandName) const
+mtsCommandWriteBase * mtsInterfaceProvided::GetCommandWrite(const std::string & commandName,
+                                                            const mtsRequiredType required) const
 {
+    cmnLogLevel logLevel;
+    if (required == MTS_REQUIRED) {
+        logLevel = CMN_LOG_LEVEL_INIT_ERROR;
+    } else {
+        logLevel = CMN_LOG_LEVEL_INIT_VERBOSE;
+    }
     if (this->EndUserInterface) {
         if (this->MailBox) {
-            return this->CommandsWrite.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->CommandsWrite.GetItem(commandName, logLevel);
         } else {
             CMN_ASSERT(this->OriginalInterface);
-            return this->OriginalInterface->CommandsWrite.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->OriginalInterface->CommandsWrite.GetItem(commandName, logLevel);
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandWrite: cannot retrieve command " << commandName << " from \"factory\" interface \""
@@ -1056,14 +1077,21 @@ mtsCommandWriteBase * mtsInterfaceProvided::GetCommandWrite(const std::string & 
 }
 
 
-mtsCommandWriteReturn * mtsInterfaceProvided::GetCommandWriteReturn(const std::string & commandName) const
+mtsCommandWriteReturn * mtsInterfaceProvided::GetCommandWriteReturn(const std::string & commandName,
+                                                                    const mtsRequiredType required) const
 {
+    cmnLogLevel logLevel;
+    if (required == MTS_REQUIRED) {
+        logLevel = CMN_LOG_LEVEL_INIT_ERROR;
+    } else {
+        logLevel = CMN_LOG_LEVEL_INIT_VERBOSE;
+    }
     if (this->EndUserInterface) {
         if (this->MailBox) {
-            return this->CommandsWriteReturn.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->CommandsWriteReturn.GetItem(commandName, logLevel);
         } else {
             CMN_ASSERT(this->OriginalInterface);
-            return this->OriginalInterface->CommandsWriteReturn.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->OriginalInterface->CommandsWriteReturn.GetItem(commandName, logLevel);
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandWriteReturn: cannot retrieve command " << commandName << " from \"factory\" interface \""
@@ -1074,14 +1102,21 @@ mtsCommandWriteReturn * mtsInterfaceProvided::GetCommandWriteReturn(const std::s
 }
 
 
-mtsCommandRead * mtsInterfaceProvided::GetCommandRead(const std::string & commandName) const
+mtsCommandRead * mtsInterfaceProvided::GetCommandRead(const std::string & commandName,
+                                                      const mtsRequiredType required) const
 {
+    cmnLogLevel logLevel;
+    if (required == MTS_REQUIRED) {
+        logLevel = CMN_LOG_LEVEL_INIT_ERROR;
+    } else {
+        logLevel = CMN_LOG_LEVEL_INIT_VERBOSE;
+    }
     if (this->EndUserInterface) {
         if (this->MailBox) {
-            return this->CommandsRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->CommandsRead.GetItem(commandName, logLevel);
         } else {
             CMN_ASSERT(this->OriginalInterface);
-            return this->OriginalInterface->CommandsRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->OriginalInterface->CommandsRead.GetItem(commandName, logLevel);
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandRead: cannot retrieve command " << commandName << " from \"factory\" interface \""
@@ -1092,14 +1127,21 @@ mtsCommandRead * mtsInterfaceProvided::GetCommandRead(const std::string & comman
 }
 
 
-mtsCommandQualifiedRead * mtsInterfaceProvided::GetCommandQualifiedRead(const std::string & commandName) const
+mtsCommandQualifiedRead * mtsInterfaceProvided::GetCommandQualifiedRead(const std::string & commandName,
+                                                                        const mtsRequiredType required) const
 {
+    cmnLogLevel logLevel;
+    if (required == MTS_REQUIRED) {
+        logLevel = CMN_LOG_LEVEL_INIT_ERROR;
+    } else {
+        logLevel = CMN_LOG_LEVEL_INIT_VERBOSE;
+    }
     if (this->EndUserInterface) {
         if (this->MailBox) {
-            return this->CommandsQualifiedRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->CommandsQualifiedRead.GetItem(commandName, logLevel);
         } else {
             CMN_ASSERT(this->OriginalInterface);
-            return this->OriginalInterface->CommandsQualifiedRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_ERROR);
+            return this->OriginalInterface->CommandsQualifiedRead.GetItem(commandName, logLevel);
         }
     }
     CMN_LOG_CLASS_INIT_ERROR << "GetCommandQualifiedRead: cannot retrieve command " << commandName << " from \"factory\" interface \""

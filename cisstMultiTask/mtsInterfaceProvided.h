@@ -225,12 +225,18 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
 
     /*! Find a command based on its name. */
     //@{
-    mtsCommandVoid * GetCommandVoid(const std::string & commandName) const;
-    mtsCommandVoidReturn * GetCommandVoidReturn(const std::string & commandName) const;
-    mtsCommandWriteBase * GetCommandWrite(const std::string & commandName) const;
-    mtsCommandWriteReturn * GetCommandWriteReturn(const std::string & commandName) const;
-    mtsCommandRead * GetCommandRead(const std::string & commandName) const;
-    mtsCommandQualifiedRead * GetCommandQualifiedRead(const std::string & commandName) const;
+    mtsCommandVoid * GetCommandVoid(const std::string & commandName,
+                                    const mtsRequiredType required = MTS_REQUIRED) const;
+    mtsCommandVoidReturn * GetCommandVoidReturn(const std::string & commandName,
+                                                const mtsRequiredType required = MTS_REQUIRED) const;
+    mtsCommandWriteBase * GetCommandWrite(const std::string & commandName,
+                                          const mtsRequiredType required = MTS_REQUIRED) const;
+    mtsCommandWriteReturn * GetCommandWriteReturn(const std::string & commandName,
+                                                  const mtsRequiredType required = MTS_REQUIRED) const;
+    mtsCommandRead * GetCommandRead(const std::string & commandName,
+                                    const mtsRequiredType required = MTS_REQUIRED) const;
+    mtsCommandQualifiedRead * GetCommandQualifiedRead(const std::string & commandName,
+                                                      const mtsRequiredType required = MTS_REQUIRED) const;
     //@}
 
     /*! Find an event based on its name. */
