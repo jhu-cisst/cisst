@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Anton Deguet, Ali Uneri
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -144,6 +142,9 @@ public:
     /*! For debugging. Print the attribute value as a string on stream */
     void PrintValue(std::ostream & out, const char * context, const char * XPath);
 
+    /*! Check if path exists */
+    bool Exists(const char * context, const char * XPath);
+
     /*! Get/Set the XPath result and cast it as bool */
     //@{
     bool GetXMLValue(const char * context, const char * XPath, bool & value);
@@ -178,6 +179,10 @@ public:
 
     /*! Templated helpers to define context and path using std::string */
     //@{
+    bool Exists(const std::string & context, const std::string & XPath) {
+        return this->Exists(context.c_str(), XPath.c_str());
+    }
+
     template <class __elementType>
     bool GetXMLValue(const std::string & context, const std::string & XPath, __elementType & value) {
         return this->GetXMLValue(context.c_str(), XPath.c_str(), value);
