@@ -185,6 +185,29 @@ public:
         return true;
     }
 
+    bool Exists(const char * context) const
+    {
+        std::string query = "data(";
+        query.append(context);
+        query.append(")");
+        QXmlQuery qquery;
+        QXmlResultItems results;
+        qquery.setFocus(this->Document->toString());
+        qquery.setQuery(query.c_str());
+        if (!qquery.isValid()) {
+            return false;
+        }
+        qquery.evaluateTo(&results);
+        if (results.hasError()) {
+            return false;
+        }
+        QXmlItem result = results.next();
+        if (result.isNull()) {
+            return false;
+        }
+        return true;
+    }
+
     // generic string get
     bool GetXMLValueStdString(const char * context, const char * XPath, std::string & storage)
     {
@@ -358,7 +381,7 @@ public:
     }
 
     // test if path exists
-    bool Exists(const char * context, const char * XPath)
+    bool Exists(const char * context)
     {
         /* Evaluate xpath expression */
         /* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
@@ -367,9 +390,7 @@ public:
         if (context[0] != '\0') {
             query += "/";
             query += context;
-            query += "/";
         }
-        query += XPath;
 
         /* Evaluate xpath expression */
         xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(reinterpret_cast<const xmlChar *>(query.c_str()),
@@ -617,9 +638,9 @@ bool cmnXMLPathConvertFromStdString(std::string & storage, bool & value)
 }
 
 
-bool cmnXMLPath::Exists(const char * context, const char * XPath)
+bool cmnXMLPath::Exists(const char * context)
 {
-    return this->Data->Exists(context, XPath);
+    return this->Data->Exists(context);
 }
 
 

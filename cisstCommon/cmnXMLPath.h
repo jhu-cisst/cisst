@@ -142,8 +142,8 @@ public:
     /*! For debugging. Print the attribute value as a string on stream */
     void PrintValue(std::ostream & out, const char * context, const char * XPath);
 
-    /*! Check if path exists */
-    bool Exists(const char * context, const char * XPath);
+    /*! Check if contest exists */
+    bool Exists(const char * context);
 
     /*! Get/Set the XPath result and cast it as bool */
     //@{
@@ -179,8 +179,8 @@ public:
 
     /*! Templated helpers to define context and path using std::string */
     //@{
-    bool Exists(const std::string & context, const std::string & XPath) {
-        return this->Exists(context.c_str(), XPath.c_str());
+    bool Exists(const std::string & context) {
+        return this->Exists(context.c_str());
     }
 
     template <class __elementType>
