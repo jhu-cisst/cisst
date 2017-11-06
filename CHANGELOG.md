@@ -16,9 +16,11 @@ Change log
 * Deprecated features:
   * None
 * New features:
+  * CMake: can now bypass the FindCisstNetlib provided with cisst.  Used to find local cisstNetlib config file.
   * cisstCommon:
     * cmnPath: added method SharedLibrary to generate dynamic library name based on OS
     * cmnStrings: added cmnStringsReplaceAll
+    * XML: added method Exists(path) and fix for compilation with Qt5/Windows
   * cisstVector:
     * added SetSize method with default value for all elements
   * cisstDataGenerator:
@@ -28,15 +30,18 @@ Change log
   * cisstMultiTask:
     * added methods to configure component manager using JSON values
     * use cisstDataGenerator for component constructor arguments (allows JSON)
+    * fixed incorrect error messages when optional interface/command was not found
     * added mtsMessage type and methods to emit status/warning/error events from provided interface
     * added mtsMessage, mtsIntervalStatistics and mtsSystem Qt Widget/Component
+    * updated Qt widget to save space
   * cisstRobot: added wrapper for Reflexxes RML, builds Reflexxes as CMake External project
   * cisstParameterTypes:
     * added type prmInputData for DAQ
     * added Qt widget for prmStateJoint
+    * actuator coupling message now only requires the actuator to joint position matrix
   * External projects: created https://github.com/jhu-cisst-external to host clones of Reflexxes, jsoncpp and cppunit
 * Bug fixes:
-  * cisstCommon: cmnRandomSequence, fixed ExtractRandomPermutation 
+  * cisstCommon: cmnRandomSequence, fixed ExtractRandomPermutation
   * Qt: updated OpenGL base widget when using Qt5 (now using QOpenGLWidget)
   * CMake: fixed search for QtXml when using Qt5
 
