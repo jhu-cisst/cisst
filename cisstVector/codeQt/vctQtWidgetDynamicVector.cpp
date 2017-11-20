@@ -65,7 +65,7 @@ void vctQtWidgetDynamicVectorReadFloating<_elementType>::SetFormat(const char fo
 }
 
 template <class _elementType>
-bool vctQtWidgetDynamicVectorReadFloating<_elementType>::SetValue(const vctDynamicVector<_elementType> & vector)
+bool vctQtWidgetDynamicVectorReadFloating<_elementType>::SetValue(const vctDynamicConstVectorRef<_elementType> & vector)
 {
     // Qt uses int, not size_t
     const int size = static_cast<int>(vector.size());
@@ -101,7 +101,7 @@ void vctQtWidgetDynamicVectorReadInteger<_elementType>::SetBase(const int base)
 
 
 template <class _elementType>
-bool vctQtWidgetDynamicVectorReadInteger<_elementType>::SetValue(const vctDynamicVector<_elementType> & vector)
+bool vctQtWidgetDynamicVectorReadInteger<_elementType>::SetValue(const vctDynamicConstVectorRef<_elementType> & vector)
 {
     // Qt uses int, not size_t
     const int size = static_cast<int>(vector.size());

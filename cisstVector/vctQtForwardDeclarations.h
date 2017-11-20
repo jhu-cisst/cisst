@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-04-16
 
-  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +19,17 @@ http://www.cisst.org/cisst/license.txt.
 #pragma once
 #ifndef _vctQtForwardDeclarations_h
 #define _vctQtForwardDeclarations_h
+
+#include <cisstVector/vctForwardDeclarations.h>
+
+#include <QtGlobal>
+#if QT_VERSION >= 0x050400
+#include <QOpenGLWidget>
+typedef QOpenGLWidget vctQtOpenGLBaseWidget;
+#else
+#include <QGLWidget>
+typedef QGLWidget vctQtOpenGLBaseWidget;
+#endif
 
 template <class _elementType>
 class vctQtWidgetDynamicVectorReadFloating;
@@ -47,5 +57,7 @@ class vctQtWidgetDynamicMatrixDoubleRead;
 
 class vctQtWidgetRotationDoubleRead;
 class vctQtWidgetFrameDoubleRead;
+
+class vctPlot2DOpenGLQtWidget;
 
 #endif  // _vctQtForwardDeclarations_h

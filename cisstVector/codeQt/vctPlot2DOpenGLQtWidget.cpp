@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QMenu>
 
 vctPlot2DOpenGLQtWidget::vctPlot2DOpenGLQtWidget(QWidget * parent):
-    OpenGLBaseWidget(parent),
+    vctQtOpenGLBaseWidget(parent),
     vctPlot2DOpenGL()
 {
     this->setFocusPolicy(Qt::StrongFocus);
@@ -46,7 +46,7 @@ void vctPlot2DOpenGLQtWidget::paintGL(void)
 
 void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
 {
-    if (event->button() == Qt::RightButton) {
+    if (event->button() == Qt::LeftButton) {
         // local QMenu will be deleted
         QMenu menu;
 
