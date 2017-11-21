@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2009-02-06
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -77,18 +75,26 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
 
 public:
 
+    /*! Reference (const) to the first 3 elements (force part) of the
+      "Force" vector. */
     inline ConstForceType F(void) const {
         return ConstForceType(ForceMember.Pointer(0));
     }
 
+    /*! Reference to the first 3 elements (force part) of the "Force"
+      vector. */
     inline ForceType F(void) {
         return ForceType(ForceMember.Pointer(0));
     }
 
+    /*! Reference (const) to the last 3 elements (torque part) of the
+      "Force" vector. */
     inline ConstTorqueType T(void) const {
         return ConstTorqueType(ForceMember.Pointer(3));
     }
 
+    /*! Reference to the last 3 elements (torque part) of the "Force"
+      vector. */
     inline TorqueType T(void) {
         return TorqueType(ForceMember.Pointer(3));
     }
