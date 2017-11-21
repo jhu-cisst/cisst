@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):  Anton Deguet
-  Created on: 2013-08-24
+  Author(s):  Anton Deguet, Dorothy Hu
+  Created on: 2017-01-20
 
-  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,37 +43,24 @@ protected:
 
 private:
     void setupUi(void);
-    void SetupSensorPlot(void);
 
-    vct3 Force;
-    vct3 Torque;
-
-    // vctQtWidgetDynamicVectorDoubleRead * QFTSensorValues;
-
-    QLabel * UpperLimit;
-    QLabel * LowerLimit;
-
-//    QLineEdit * ErrorMsg;
+    QLabel * QLUpperLimit;
+    QLabel * QLLowerLimit;
 
     vctPlot2DOpenGLQtWidget * QFTPlot;
-    vctPlot2DBase::Signal * ForceSignal[3];
-    vctPlot2DBase::Signal * FNormSignal;
-    vctPlot2DBase::Signal * TorqueSignal[3];
+    vctPlot2DBase::Signal * mForceSignal[3];
+    vctPlot2DBase::Signal * mFNormSignal;
+    vctPlot2DBase::Signal * mTorqueSignal[3];
 
-    vctPlot2DBase::Scale * ForceScale;
-    vctPlot2DBase::Scale * TorqueScale;
+    vctPlot2DBase::Scale * mForceScale;
+    vctPlot2DBase::Scale * mTorqueScale;
 
-    double InternalTime;
     int PlotIndex;
 
  public:
-    inline void SetValue(const vct3 & force, const vct3 & torque) {
-        this->InternalTime += 0.001;
-        SetValue(InternalTime, force, torque);
-    }
     void SetValue(const double & time, const vct3 & force, const vct3 & torque);
 
-                   
+
 private slots:
     void SlotPlotIndex(int newAxis);
 };

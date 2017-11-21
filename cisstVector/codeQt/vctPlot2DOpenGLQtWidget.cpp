@@ -46,7 +46,7 @@ void vctPlot2DOpenGLQtWidget::paintGL(void)
 
 void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (event->button() == Qt::RightButton) {
         // local QMenu will be deleted
         QMenu menu;
 

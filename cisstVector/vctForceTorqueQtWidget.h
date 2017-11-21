@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+  Author(s): Anton Deguet, Dorothy Hu
+  Created on: 2017-01-20
 
-  Author(s):
-  Created on: 2016-01-20
-
-  (C) Copyright 2016-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,32 +35,7 @@ class QVBoxLayout;
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
-/*!
-  Widget to visualize rotation using 3 axes in OpenGL
-  \todo use rotation matrix to rotate axis instead of euler angles
-  \todo use a GL list to create the axes once and re-use later
-  \todo remove reference frame?
-*/
-class CISST_EXPORT vctForceTorqueQtWidgetOpenGL: public vctQtOpenGLBaseWidget
-{
-    Q_OBJECT;
-
-public:
-    vctForceTorqueQtWidgetOpenGL(void);
-    inline ~vctForceTorqueQtWidgetOpenGL(void) {};
-
-    void SetValue(const vct3 & force, const vct3 & torque);
-
-protected:
-    void initializeGL(void) {};
-    void paintGL(void) {};
-    void resizeGL(int width, int height) {};
-    void draw3DAxis(const double scale) {};
-    vct3 orientation; // should be replaced by rotation matrix using column-first storage order, isn't OpenGL Fortran like?
-};
-
-
-/*! Qt Widget to display a rotation using cisstVector. */
+/*! Qt Widget to display force/torque using cisstVector. */
 class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
 {
     Q_OBJECT;
@@ -70,32 +44,32 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
     /*! Possible display modes.  See SetDisplayMode method.  Please
       note that UNDEFINED_WIDGET should never be used. */
     typedef enum {UNDEFINED_WIDGET,
-                  VECTOR_WIDGET, // text display using two vectors of 3 elements + norm
-                  PLOT_2D_WIDGET,   // 2D plot
+                  TEXT_WIDGET,  // text display
+                  PLOT_2D_WIDGET, // 2D plot
                   PLOT_3D_WIDGET  // 3D display
     } DisplayModeType;
 
-    /*! Constructor.  Default display mode is rotation matrix.  See
+    /*! Constructor.  Default display mode is 2D plot.  See
       also SetDisplayMode. */
-    vctForceTorqueQtWidget(const DisplayModeType displayMode = VECTOR_WIDGET);
+    vctForceTorqueQtWidget(const DisplayModeType displayMode = PLOT_2D_WIDGET);
 
     inline ~vctForceTorqueQtWidget(void) {};
 
-    /*! Set the rotation value to be displayed.  This method assumes
-      the rotation matrix is valid, i.e. normalized and will not
-      perform any check or normalization. */
+    /*! Set the force and torque.  For 2D plot, time is needed as
+      well. */
     void SetValue(const vct3 & force,
-                  const vct3 & torque) {
-        this->Force.Assign(force);
-        this->Torque.Assign(torque);
+                  const vct3 & torque,
+                  const double & time = 0.0) {
+        mForce.Assign(force);
+        mTorque.Assign(torque);
+        mTime = time;
         this->UpdateCurrentWidget();
     }
 
     /*! Set the display mode, i.e. the widget used to represent the
-      rotation.  Options are rotation matrix, axis and angle, quaternion
-      (displayed in order x, y, z, w), Euler angles (ZYZ or ZYX, in degrees),
-      and 3D OpenGL based using red, green and blue axes.
-      Please note that the display mode UNDEFINED_WIDGET will be silently ignored. */
+      wrench.  Options are TEXT_WIDGET (just numbers), PLOT_2D_WIDGET
+      (x, y, z plot over time).  Please note that the display mode
+      UNDEFINED_WIDGET will be silently ignored. */
     void SetDisplayMode(const DisplayModeType displayMode);
 
  protected slots:
@@ -109,21 +83,23 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
     DisplayModeType DisplayMode;
 
     /*! Update the content of the current widget.  This method is
-      called when the user provides a new rotation with SetValue or
-      when the widget used to display the rotation is changed using
+      called when the user provides a new wrench with SetValue or
+      when the widget used to display the wrench is changed using
       SetDisplayMode. */
     void UpdateCurrentWidget(void);
 
-    /*! Internal representation for the rotation to display. */
-    vct3 Force, Torque;
+    /*! Internal representation for the wrench/time to display. */
+    vct3 mForce, mTorque;
+    double mTime;
 
-    // Vector widget
+    // Text widgets
     vctQtWidgetDynamicVectorDoubleRead * ForceWidget;
     vctQtWidgetDynamicVectorDoubleRead * TorqueWidget;
+    vctQtWidgetDynamicVectorDoubleRead * NormWidget;
     QWidget * ForceTorqueWidget;
 
     vctForceTorque2DWidget * Plot2DWidget;
-    
+
 #if 0 // Anton
 
     // replace what is below by widgets for 2D plot and 3D
