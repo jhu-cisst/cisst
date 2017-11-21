@@ -80,7 +80,7 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
     // Set display mode
     SetDisplayMode(displayMode);
 
-    // myWidget is any QWidget-derived class
+    // Context menu
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(ShowContextMenu(const QPoint&)));
@@ -90,16 +90,23 @@ void vctForceTorqueQtWidget::ShowContextMenu(const QPoint & pos)
 {
     QPoint globalPos = this->mapToGlobal(pos);
     QMenu menu;
-    QAction * vector = new QAction("Text", this);
+    QAction * text = new QAction("Text", this);
     QAction * plot2D = new QAction("2D", this);
     QAction * plot3D = new QAction("3D", this);
-    menu.addAction(vector);
-    menu.addAction(plot2D);
-    menu.addAction(plot3D);
+
+    if (DisplayMode != TEXT_WIDGET) {
+        menu.addAction(text);
+    }
+    if (DisplayMode != PLOT_2D_WIDGET) {
+        menu.addAction(plot2D);
+    }
+    if (DisplayMode != PLOT_3D_WIDGET) {
+        menu.addAction(plot3D);
+    }
 
     QAction * selectedItem = menu.exec(globalPos);
     if (selectedItem) {
-        if (selectedItem == vector) {
+        if (selectedItem == text) {
             SetDisplayMode(TEXT_WIDGET);
         } else if (selectedItem == plot2D) {
             SetDisplayMode(PLOT_2D_WIDGET);
