@@ -100,7 +100,7 @@ void vctForceTorqueQtWidget::ShowContextMenu(const QPoint & pos)
     QAction * selectedItem = menu.exec(globalPos);
     if (selectedItem) {
         if (selectedItem == vector) {
-            SetDisplayMode(VECTOR_WIDGET);
+            SetDisplayMode(TEXT_WIDGET);
         } else if (selectedItem == plot2D) {
             SetDisplayMode(PLOT_2D_WIDGET);
         } else if (selectedItem == plot3D) {
@@ -113,7 +113,7 @@ void vctForceTorqueQtWidget::UpdateCurrentWidget(void)
 {
     // compute the value based on the internal values
     switch (DisplayMode) {
-    case VECTOR_WIDGET:
+    case TEXT_WIDGET:
         ForceWidget->SetValue(mForce);
         TorqueWidget->SetValue(mTorque);
         NormWidget->SetValue(vct1(mForce.Norm()));
@@ -152,7 +152,7 @@ void vctForceTorqueQtWidget::SetDisplayMode(const DisplayModeType displayMode)
 
     // set the new current widget, these have been created in the ctor
     switch (displayMode) {
-    case VECTOR_WIDGET:
+    case TEXT_WIDGET:
         CurrentWidget = ForceTorqueWidget;
         break;
     case PLOT_2D_WIDGET:
