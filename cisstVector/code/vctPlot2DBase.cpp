@@ -31,6 +31,7 @@ vctPlot2DBase::Scale::Scale(const std::string & name, size_t pointDimension):
     this->Translation.SetAll(0.0);
     this->ScaleValue.SetAll(1.0);
     this->Name = name;
+    AutoFitXY(vct2(1.0));
     SetContinuousFitX(true);
     SetContinuousExpandY(true);
 }
