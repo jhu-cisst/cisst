@@ -70,7 +70,8 @@ void vctQtWidgetRotationOpenGL::SetValue(const vctMatRot3 & rot)
 
 void vctQtWidgetRotationOpenGL::initializeGL(void)
 {
-    glClearColor(0.68, 0.67, 0.67, 1.0);
+    const double grey = 0.95;
+    glClearColor(grey, grey, grey, 1.0);
     glShadeModel(GL_SMOOTH);
 }
 
