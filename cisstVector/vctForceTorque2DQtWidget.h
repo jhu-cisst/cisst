@@ -16,8 +16,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _vctForceTorque2DWidget_h
-#define _vctForceTorque2DWidget_h
+#ifndef _vctForceTorque2DQtWidget_h
+#define _vctForceTorque2DQtWidget_h
 
 #include <cisstVector/vctQtForwardDeclarations.h>
 #include <cisstVector/vctPlot2DBase.h>
@@ -30,13 +30,13 @@ class QLabel;
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
-class CISST_EXPORT vctForceTorque2DWidget: public QWidget
+class CISST_EXPORT vctForceTorque2DQtWidget: public QWidget
 {
     Q_OBJECT;
 
 public:
-    vctForceTorque2DWidget(void);
-    ~vctForceTorque2DWidget(){}
+    vctForceTorque2DQtWidget(void);
+    ~vctForceTorque2DQtWidget(){}
 
 protected:
     virtual void closeEvent(QCloseEvent * event);
@@ -50,7 +50,9 @@ private:
     vctPlot2DOpenGLQtWidget * QFTPlot;
     vctPlot2DBase::Signal * mForceSignal[3];
     vctPlot2DBase::Signal * mFNormSignal;
+    vctPlot2DBase::Signal * mF0Signal;
     vctPlot2DBase::Signal * mTorqueSignal[3];
+    vctPlot2DBase::Signal * mT0Signal;
 
     vctPlot2DBase::Scale * mForceScale;
     vctPlot2DBase::Scale * mTorqueScale;
@@ -65,6 +67,6 @@ private slots:
     void SlotPlotIndex(int newAxis);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(vctForceTorque2DWidget);
+CMN_DECLARE_SERVICES_INSTANTIATION(vctForceTorque2DQtWidget);
 
-#endif // _vctForceTorque2DWidget_h
+#endif // _vctForceTorque2DQtWixdget_h

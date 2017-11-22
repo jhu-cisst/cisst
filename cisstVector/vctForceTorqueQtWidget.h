@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctQtForwardDeclarations.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctForceTorque2DWidget.h>
+#include <cisstVector/vctForceTorque2DQtWidget.h>
 
 #include <QWidget>
 #include <QtOpenGL>
@@ -98,7 +98,7 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
     vctQtWidgetDynamicVectorDoubleRead * NormWidget;
     QWidget * ForceTorqueWidget;
 
-    vctForceTorque2DWidget * Plot2DWidget;
+    vctForceTorque2DQtWidget * Plot2DWidget;
 
 #if 0 // Anton
 

@@ -62,7 +62,7 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
     ForceTorqueWidget = new QWidget();
     ForceTorqueWidget->setLayout(forceTorqueLayout);
 
-    Plot2DWidget = new vctForceTorque2DWidget();
+    Plot2DWidget = new vctForceTorque2DQtWidget();
 
 #if 0 // Anton, for 2D and 3D widgets
 

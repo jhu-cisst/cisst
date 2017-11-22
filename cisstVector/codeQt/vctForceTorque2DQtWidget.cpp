@@ -30,18 +30,18 @@ http://www.cisst.org/cisst/license.txt.
 #include <QSpacerItem>
 #include <QComboBox>
 
-#include <cisstVector/vctForceTorque2DWidget.h>
+#include <cisstVector/vctForceTorque2DQtWidget.h>
 #include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 
-vctForceTorque2DWidget::vctForceTorque2DWidget(void):
+vctForceTorque2DQtWidget::vctForceTorque2DQtWidget(void):
     PlotIndex(0)
 {
     setupUi();
 }
 
-void vctForceTorque2DWidget::closeEvent(QCloseEvent * event)
+void vctForceTorque2DQtWidget::closeEvent(QCloseEvent * event)
 {
-    int answer = QMessageBox::warning(this, tr("vctForceTorque2DWidget"),
+    int answer = QMessageBox::warning(this, tr("vctForceTorque2DQtWidget"),
                                       tr("Do you really want to quit this application?"),
                                       QMessageBox::No | QMessageBox::Yes);
     if (answer == QMessageBox::Yes) {
@@ -52,13 +52,15 @@ void vctForceTorque2DWidget::closeEvent(QCloseEvent * event)
     }
 }
 
-void vctForceTorque2DWidget::setupUi()
+void vctForceTorque2DQtWidget::setupUi(void)
 {
 
     QHBoxLayout * mainLayout = new QHBoxLayout;
+    mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // left side, upper/lower limit, selector and legend
     QVBoxLayout * leftLayout = new QVBoxLayout;
+    leftLayout->setContentsMargins(2, 2, 2, 2);
     mainLayout->addLayout(leftLayout);
 
     // upper limit
@@ -75,10 +77,12 @@ void vctForceTorque2DWidget::setupUi()
     QPlotSelectItem->setCurrentIndex(PlotIndex);
     leftLayout->addWidget(QPlotSelectItem);
 
+    const double grey = 0.95;
+
     // legend
     QLabel * label;
     QPalette palette;
-    palette.setColor(QPalette::Window, Qt::white);
+    palette.setColor(QPalette::Window, QColor(grey * 255, grey * 255, grey * 255));
     label = new QLabel("Axis X");
     label->setAutoFillBackground(true);
     palette.setColor(QPalette::WindowText, Qt::red);
@@ -109,7 +113,7 @@ void vctForceTorque2DWidget::setupUi()
 
     // plot area
     QFTPlot = new vctPlot2DOpenGLQtWidget();
-    QFTPlot->SetBackgroundColor(vct3(1.0, 1.0, 1.0));
+    QFTPlot->SetBackgroundColor(vct3(grey));
     QFTPlot->resize(QFTPlot->sizeHint());
     QFTPlot->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     mainLayout->addWidget(QFTPlot);
@@ -118,21 +122,26 @@ void vctForceTorque2DWidget::setupUi()
     // forces
     mForceScale = QFTPlot->AddScale("Forces");
     mForceSignal[0] = mForceScale->AddSignal("fx");
-    mForceSignal[0]->SetColor(vctDouble3(1.0, 0.0, 0.0));
+    mForceSignal[0]->SetColor(vct3(1.0, 0.0, 0.0));
     mForceSignal[1] = mForceScale->AddSignal("fy");
-    mForceSignal[1]->SetColor(vctDouble3(0.0, 1.0, 0.0));
+    mForceSignal[1]->SetColor(vct3(0.0, 1.0, 0.0));
     mForceSignal[2] = mForceScale->AddSignal("fz");
-    mForceSignal[2]->SetColor(vctDouble3(0.0, 0.0, 1.0));
+    mForceSignal[2]->SetColor(vct3(0.0, 0.0, 1.0));
     mFNormSignal = mForceScale->AddSignal("fnorm");
-    mFNormSignal->SetColor(vctDouble3(0.0, 0.0, 0.0));
+    mFNormSignal->SetColor(vct3(0.0, 0.0, 0.0));
+    mF0Signal = mForceScale->AddSignal("0");
+    mF0Signal->SetColor(vct3(0.5));
+
     // torques
     mTorqueScale = QFTPlot->AddScale("Torques");
     mTorqueSignal[0] = mTorqueScale->AddSignal("tx");
-    mTorqueSignal[0]->SetColor(vctDouble3(1.0, 0.0, 0.0));
+    mTorqueSignal[0]->SetColor(vct3(1.0, 0.0, 0.0));
     mTorqueSignal[1] = mTorqueScale->AddSignal("ty");
-    mTorqueSignal[1]->SetColor(vctDouble3(0.0, 1.0, 0.0));
+    mTorqueSignal[1]->SetColor(vct3(0.0, 1.0, 0.0));
     mTorqueSignal[2] = mTorqueScale->AddSignal("tz");
-    mTorqueSignal[2]->SetColor(vctDouble3(0.0, 0.0, 1.0));
+    mTorqueSignal[2]->SetColor(vct3(0.0, 0.0, 1.0));
+    mT0Signal = mTorqueScale->AddSignal("0");
+    mT0Signal->SetColor(vct3(0.5));
 
     this->setLayout(mainLayout);
 
@@ -145,7 +154,7 @@ void vctForceTorque2DWidget::setupUi()
     SlotPlotIndex(PlotIndex);
 }
 
-void vctForceTorque2DWidget::SetValue(const double & time, const vct3 & force, const vct3 & torque)
+void vctForceTorque2DQtWidget::SetValue(const double & time, const vct3 & force, const vct3 & torque)
 {
     // make sure we should update the display
     if (this->isHidden()) {
@@ -154,14 +163,16 @@ void vctForceTorque2DWidget::SetValue(const double & time, const vct3 & force, c
 
     // plot
     if (PlotIndex == 0) {
-        mForceSignal[0]->AppendPoint(vctDouble2(time, force.Element(0)));
-        mForceSignal[1]->AppendPoint(vctDouble2(time, force.Element(1)));
-        mForceSignal[2]->AppendPoint(vctDouble2(time, force.Element(2)));
+        for (size_t i = 0; i < 3; ++i){
+            mForceSignal[i]->AppendPoint(vctDouble2(time, force[i]));
+        }
         mFNormSignal->AppendPoint(vctDouble2(time, force.Norm()));
+        mF0Signal->AppendPoint(vctDouble2(time, 0.0));
     } else if (PlotIndex == 1) {
-        mTorqueSignal[0]->AppendPoint(vctDouble2(time, torque.Element(0)));
-        mTorqueSignal[1]->AppendPoint(vctDouble2(time, torque.Element(1)));
-        mTorqueSignal[2]->AppendPoint(vctDouble2(time, torque.Element(2)));
+        for (size_t i = 0; i < 3; ++i){
+            mTorqueSignal[i]->AppendPoint(vctDouble2(time, torque[i]));
+        }
+        mT0Signal->AppendPoint(vctDouble2(time, 0.0));
     }
 
     // update the lower/upper limits on the plot
@@ -184,18 +195,18 @@ void vctForceTorque2DWidget::SetValue(const double & time, const vct3 & force, c
 }
 
 
-void vctForceTorque2DWidget::SlotPlotIndex(int newAxis)
+void vctForceTorque2DQtWidget::SlotPlotIndex(int newAxis)
 {
     PlotIndex = newAxis;
 
     if (PlotIndex == 0) {
-        for (int i = 0; i < 3; ++i){
+        for (size_t i = 0; i < 3; ++i){
             mForceSignal[i]->SetVisible(true);
             mTorqueSignal[i]->SetVisible(false);
         }
         mFNormSignal->SetVisible(true);
     } else if (PlotIndex == 1) {
-        for (int i = 0; i < 3; ++i){
+        for (size_t i = 0; i < 3; ++i){
             mForceSignal[i]->SetVisible(false);
             mTorqueSignal[i]->SetVisible(true);
         }
