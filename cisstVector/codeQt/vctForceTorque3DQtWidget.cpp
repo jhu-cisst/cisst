@@ -2,8 +2,8 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):  Anton Deguet
-  Created on: 2017-11-30
+  Author(s):  Anton Deguet, Dorothy Hu
+  Created on: 2017-01-20
 
   (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -16,94 +16,133 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstConfig.h>
+
+// system include
+#include <iostream>
+
+// Qt includes
+#include <QMessageBox>
+#include <QCloseEvent>
+#include <QApplication>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QSpacerItem>
+#include <QComboBox>
 
 #include <cisstVector/vctForceTorque3DQtWidget.h>
 
 vctForceTorque3DQtWidget::vctForceTorque3DQtWidget(void):
-    mForce(0.0),
-    mTorque(0.0)
+    PlotIndex(0)
 {
-    setMinimumHeight(100);
-    setMinimumWidth(100);
-    setContentsMargins(0, 0, 0, 0);
+    setupUi();
+}
+
+void vctForceTorque3DQtWidget::closeEvent(QCloseEvent * event)
+{
+    int answer = QMessageBox::warning(this, tr("vctForceTorque3DQtWidget"),
+                                      tr("Do you really want to quit this application?"),
+                                      QMessageBox::No | QMessageBox::Yes);
+    if (answer == QMessageBox::Yes) {
+        event->accept();
+        QCoreApplication::exit();
+    } else {
+        event->ignore();
+    }
+}
+
+void vctForceTorque3DQtWidget::setupUi(void)
+{
+
+    QHBoxLayout * mainLayout = new QHBoxLayout;
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    // left side, upper/lower limit, selector and legend
+    QVBoxLayout * leftLayout = new QVBoxLayout;
+    leftLayout->setContentsMargins(2, 2, 2, 2);
+    mainLayout->addLayout(leftLayout);
+
+    // combo box to select the plot item
+    QComboBox * QPlotSelectItem = new QComboBox;
+    QPlotSelectItem->addItem("Forces");
+    QPlotSelectItem->addItem("Torques");
+    QPlotSelectItem->setCurrentIndex(PlotIndex);
+    leftLayout->addWidget(QPlotSelectItem);
+
+    const double grey = 0.95;
+
+    // legend
+    QLabel * label;
+    QPalette palette;
+    palette.setColor(QPalette::Window, QColor(grey * 255, grey * 255, grey * 255));
+    label = new QLabel("Axis X");
+    label->setAutoFillBackground(true);
+    palette.setColor(QPalette::WindowText, Qt::red);
+    label->setPalette(palette);
+    leftLayout->addWidget(label);
+    label = new QLabel("Axis Y");
+    label->setAutoFillBackground(true);
+    palette.setColor(QPalette::WindowText, Qt::green);
+    label->setPalette(palette);
+    leftLayout->addWidget(label);
+    label = new QLabel("Axis Z");
+    label->setAutoFillBackground(true);
+    palette.setColor(QPalette::WindowText, Qt::blue);
+    label->setPalette(palette);
+    leftLayout->addWidget(label);
+    label = new QLabel("Vector");
+    label->setAutoFillBackground(true);
+    palette.setColor(QPalette::WindowText, Qt::black);
+    label->setPalette(palette);
+    leftLayout->addWidget(label);
+
+    leftLayout->addStretch();
+
+    // Norm
+    QLScale = new QLabel("Scale");
+    QLScale->setAlignment(Qt::AlignBottom | Qt::AlignRight);
+    leftLayout->addWidget(QLScale);
+
+    // plot area
+    QVector = new vctVector3DQtWidget();
+    QVector->resize(QVector->sizeHint());
+    QVector->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+    mainLayout->addWidget(QVector);
+
+    this->setLayout(mainLayout);
+
+    setWindowTitle("");
+    resize(sizeHint());
+
+    // setup Qt Connection
+    connect(QPlotSelectItem, SIGNAL(currentIndexChanged(int)), this, SLOT(SlotPlotIndex(int)));
+
+    SlotPlotIndex(PlotIndex);
 }
 
 void vctForceTorque3DQtWidget::SetValue(const vct3 & force, const vct3 & torque)
 {
-    mForce = force;
-    mTorque = torque;
-    // update GL display
-    update();
+    // make sure we should update the display
+    if (this->isHidden()) {
+        return;
+    }
+
+    // plot
+    if (PlotIndex == 0) {
+        QVector->SetValue(force);
+    } else if (PlotIndex == 1) {
+        QVector->SetValue(torque);
+    }
+
+    // update scale
+    double scale = QVector->MaxNorm() * QVector->AxisLength();
+    QString text;
+    text.setNum(scale, 'f', 3);
+    QLScale->setText(text);
 }
 
-
-void vctForceTorque3DQtWidget::initializeGL(void)
+void vctForceTorque3DQtWidget::SlotPlotIndex(int newAxis)
 {
-    const double grey = 0.95;
-    glClearColor(grey, grey, grey, 1.0);
-    glShadeModel(GL_SMOOTH);
-}
-
-void vctForceTorque3DQtWidget::paintGL(void)
-{
-    const int side = qMin(width(), height());
-    glViewport((width() - side) / 2, (height() - side) / 2, side, side);
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-
-    // gl transformation here
-    // x+:left  y+:up   z+: point out screen
-    glTranslatef(0.0f, 0.0f, -10.0f);
-
-    draw3DAxis(0.4);
-
-    glFlush();
-}
-
-void vctForceTorque3DQtWidget::resizeGL(int width, int height)
-{
-    const int side = qMin(width, height);
-    glViewport((width - side) / 2, (height - side) / 2, side, side);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
-    glMatrixMode(GL_MODELVIEW);
-}
-
-void vctForceTorque3DQtWidget::draw3DAxis(const float scale)
-{
-    // draw
-    glPushMatrix();
-
-    // disable lighting
-    glDisable(GL_LIGHTING);
-
-    // set line width
-    glLineWidth(1.0);
-
-    // RGB 3d axes
-    // x axis: red
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glBegin(GL_LINES);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(scale, 0.0f, 0.0f);
-    glEnd();
-
-    // y axis: green
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glBegin(GL_LINES);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, scale, 0.0f);
-    glEnd();
-
-    // z axis: blue
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glBegin(GL_LINES);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, scale);
-    glEnd();
-
-    glPopMatrix();
+    PlotIndex = newAxis;
+    QVector->SetAutoResize(true);
 }

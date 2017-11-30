@@ -69,4 +69,4 @@ private slots:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(vctForceTorque2DQtWidget);
 
-#endif // _vctForceTorque2DQtWixdget_h
+#endif // _vctForceTorque2DQtWidget_h

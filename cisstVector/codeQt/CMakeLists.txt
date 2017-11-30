@@ -23,6 +23,7 @@ if (CISST_HAS_QT4)
                 ../vctQtWidgetRotation.h
                 ../vctQtWidgetFrame.h
                 ../vctQtWidgetFrame4x4.h
+                ../vctVector3DQtWidget.h
                 ../vctForceTorqueQtWidget.h
                 ../vctForceTorque2DQtWidget.h
                 ../vctForceTorque3DQtWidget.h
@@ -50,6 +51,7 @@ cisst_add_library (
                vctQtWidgetRotation.cpp
                vctQtWidgetFrame.cpp
                vctQtWidgetFrame4x4.cpp
+               vctVector3DQtWidget.cpp
                vctForceTorqueQtWidget.cpp
                vctForceTorque2DQtWidget.cpp
                vctForceTorque3DQtWidget.cpp
@@ -60,6 +62,7 @@ cisst_add_library (
                vctQtWidgetRotation.h
                vctQtWidgetFrame.h
                vctQtWidgetFrame4x4.h
+               vctVector3DQtWidget.h
                vctForceTorqueQtWidget.h
                vctForceTorque2DQtWidget.h
                vctForceTorque3DQtWidget.h

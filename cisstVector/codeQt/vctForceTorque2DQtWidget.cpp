@@ -186,9 +186,9 @@ void vctForceTorque2DQtWidget::SetValue(const double & time, const vct3 & force,
         range = vct2(-1.0, 1.0);
     }
     QString text;
-    text.setNum(range[0], 'f', 2);
+    text.setNum(range[0], 'f', 3);
     QLLowerLimit->setText(text);
-    text.setNum(range[1], 'f', 2);
+    text.setNum(range[1], 'f', 3);
     QLUpperLimit->setText(text);
 
     QFTPlot->update();

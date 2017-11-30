@@ -2,8 +2,8 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):  Anton Deguet
-  Created on: 2017-11-30
+  Author(s):  Anton Deguet, Dorothy Hu
+  Created on: 2017-01-20
 
   (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -19,36 +19,44 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctForceTorque3DQtWidget_h
 #define _vctForceTorque3DQtWidget_h
 
-// cisst include
-#include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctQtForwardDeclarations.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctVector3DQtWidget.h>
+#include <QWidget>
+
+class QLabel;
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
-
-/*!
-  Widget to visualize force axis using 3 axes in OpenGL
-*/
-class CISST_EXPORT vctForceTorque3DQtWidget: public vctQtOpenGLBaseWidget
+class CISST_EXPORT vctForceTorque3DQtWidget: public QWidget
 {
     Q_OBJECT;
 
 public:
     vctForceTorque3DQtWidget(void);
-    inline ~vctForceTorque3DQtWidget(void) {};
-
-    void SetValue(const vct3 & force, const vct3 & torque);
+    ~vctForceTorque3DQtWidget(){}
 
 protected:
-   void initializeGL(void);
-   void paintGL(void);
-   void resizeGL(int width, int height);
-   void draw3DAxis(const float scale);
+    virtual void closeEvent(QCloseEvent * event);
 
-   vct3 mForce;
-   vct3 mTorque;
+private:
+    void setupUi(void);
+
+    QLabel * QLScale;
+
+    vctVector3DQtWidget * QVector;
+
+    // force vs. torque
+    int PlotIndex;
+
+ public:
+    void SetValue(const vct3 & force, const vct3 & torque);
+
+
+private slots:
+    void SlotPlotIndex(int newAxis);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(vctForceTorque3DQtWidget);
 
 #endif // _vctForceTorque3DQtWidget_h

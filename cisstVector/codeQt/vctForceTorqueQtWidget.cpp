@@ -49,14 +49,17 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
 
     gridLayout->addWidget(new QLabel("Force"), 0, 0);
     ForceWidget = new vctQtWidgetDynamicVectorDoubleRead();
+    ForceWidget->SetPrecision(4);
     gridLayout->addWidget(ForceWidget, 0, 1);
 
     gridLayout->addWidget(new QLabel("Torque"), 1, 0);
     TorqueWidget = new vctQtWidgetDynamicVectorDoubleRead();
+    TorqueWidget->SetPrecision(4);
     gridLayout->addWidget(TorqueWidget, 1, 1);
 
     gridLayout->addWidget(new QLabel("Norm"), 2, 0);
     NormWidget = new vctQtWidgetDynamicVectorDoubleRead();
+    NormWidget->SetPrecision(4);
     gridLayout->addWidget(NormWidget, 2, 1);
 
     ForceTorqueWidget = new QWidget();
