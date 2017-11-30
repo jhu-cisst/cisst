@@ -40,7 +40,7 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
     CurrentWidget(0)
 {
     QVBoxLayout * forceTorqueLayout = new QVBoxLayout;
-    
+
     QGridLayout * gridLayout = new QGridLayout;
     gridLayout->setSpacing(0);
     gridLayout->setContentsMargins(1, 1, 1, 1);
@@ -63,13 +63,7 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
     ForceTorqueWidget->setLayout(forceTorqueLayout);
 
     Plot2DWidget = new vctForceTorque2DQtWidget();
-
-#if 0 // Anton, for 2D and 3D widgets
-
-    // Visualization Groupbox
-    OpenGLWidget = new vctQtWidgetRotationOpenGL();
-    OpenGLWidget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-#endif
+    Plot3DWidget = new vctForceTorque3DQtWidget();
 
     Layout = new QVBoxLayout;
     Layout->setSpacing(0);
@@ -129,7 +123,7 @@ void vctForceTorqueQtWidget::UpdateCurrentWidget(void)
         Plot2DWidget->SetValue(mTime, mForce, mTorque);
         break;
     case PLOT_3D_WIDGET:
-        std::cerr << CMN_LOG_DETAILS << " to be implemented " << std::endl;
+        Plot3DWidget->SetValue(mForce, mTorque);
         break;
     default:
         break;
@@ -166,7 +160,7 @@ void vctForceTorqueQtWidget::SetDisplayMode(const DisplayModeType displayMode)
         CurrentWidget = Plot2DWidget;
         break;
     case PLOT_3D_WIDGET:
-        std::cerr << CMN_LOG_DETAILS << " to be implemented " << std::endl;
+        CurrentWidget = Plot3DWidget;
         break;
     default:
         break;

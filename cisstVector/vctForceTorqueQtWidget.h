@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctQtForwardDeclarations.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctForceTorque2DQtWidget.h>
+#include <cisstVector/vctForceTorque3DQtWidget.h>
 
 #include <QWidget>
 #include <QtOpenGL>
@@ -51,7 +52,7 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
 
     /*! Constructor.  Default display mode is 2D plot.  See
       also SetDisplayMode. */
-    vctForceTorqueQtWidget(const DisplayModeType displayMode = PLOT_2D_WIDGET);
+    vctForceTorqueQtWidget(const DisplayModeType displayMode = PLOT_3D_WIDGET);
 
     inline ~vctForceTorqueQtWidget(void) {};
 
@@ -68,8 +69,9 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
 
     /*! Set the display mode, i.e. the widget used to represent the
       wrench.  Options are TEXT_WIDGET (just numbers), PLOT_2D_WIDGET
-      (x, y, z plot over time).  Please note that the display mode
-      UNDEFINED_WIDGET will be silently ignored. */
+      (x, y, z plot over time), PLOT_3D_WIDGET (3D lines representing
+      force/torque direction and amplitude).  Please note that the
+      display mode UNDEFINED_WIDGET will be silently ignored. */
     void SetDisplayMode(const DisplayModeType displayMode);
 
  protected slots:
@@ -98,22 +100,9 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
     vctQtWidgetDynamicVectorDoubleRead * NormWidget;
     QWidget * ForceTorqueWidget;
 
+    // 2D/3D widgets
     vctForceTorque2DQtWidget * Plot2DWidget;
-
-#if 0 // Anton
-
-    // replace what is below by widgets for 2D plot and 3D
-
-    // Quaternion
-    vctQtWidgetDynamicVectorDoubleRead * QuaternionWidget;
-
-    // Euler Angles (in degrees)
-    vctQtWidgetDynamicVectorDoubleRead * EulerZYZWidget;
-    vctQtWidgetDynamicVectorDoubleRead * EulerZYXWidget;
-
-    // Visualization
-    vctQtWidgetRotationOpenGL * OpenGLWidget;
-#endif
+    vctForceTorque3DQtWidget * Plot3DWidget;
 
     // current widget
     QWidget * CurrentWidget;
