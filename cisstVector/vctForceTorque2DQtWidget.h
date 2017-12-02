@@ -26,6 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 
 class QLabel;
+class QSignalMapper;
+class QCheckBox;
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -38,6 +40,8 @@ public:
     vctForceTorque2DQtWidget(void);
     ~vctForceTorque2DQtWidget(){}
 
+    void SetValue(const double & time, const vct3 & force, const vct3 & torque);
+
 protected:
     virtual void closeEvent(QCloseEvent * event);
 
@@ -48,23 +52,21 @@ private:
     QLabel * QLLowerLimit;
 
     vctPlot2DOpenGLQtWidget * QFTPlot;
-    vctPlot2DBase::Signal * mForceSignal[3];
-    vctPlot2DBase::Signal * mFNormSignal;
-    vctPlot2DBase::Signal * mF0Signal;
-    vctPlot2DBase::Signal * mTorqueSignal[3];
-    vctPlot2DBase::Signal * mT0Signal;
+    // signals 0, 1, 2 are for x, y, z.  3 is for norm and 4 for zero
+    vctPlot2DBase::Signal * mSignals[2][5];
+    bool mVisibleSignals[2][5];
 
-    vctPlot2DBase::Scale * mForceScale;
-    vctPlot2DBase::Scale * mTorqueScale;
+    // scale 0 is for forces, 1 is for torques
+    vctPlot2DBase::Scale * mScales[2];
 
-    int PlotIndex;
+    int mScaleIndex; // 0 for forces, 1 for torques
 
- public:
-    void SetValue(const double & time, const vct3 & force, const vct3 & torque);
-
+    QSignalMapper * mSignalMapper;
+    QCheckBox * mCheckBoxes[5];
 
 private slots:
-    void SlotPlotIndex(int newAxis);
+    void SlotScaleIndex(int newAxis);
+    void SlotVisibleSignal(int);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(vctForceTorque2DQtWidget);
