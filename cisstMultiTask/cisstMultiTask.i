@@ -2,8 +2,8 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Anton Deguet
-  Created on:   2008-01-17
+  Author(s):  Anton Deguet
+  Created on: 2008-01-17
 
   (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -490,19 +489,19 @@ http://www.cisst.org/cisst/license.txt.
                     attempt = 0
                     while (attempt < connectionAttempts):
                         attempt = attempt + 1
-                        print('Trying to connect: ' + interfaceRequired.GetName() + ' - attempt # ' + attempt)
+                        print('Trying to connect: ' + interfaceRequired.GetName() + ' - attempt # ' + str(attempt))
                         manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
                         # PK TEMP: need time.sleep until blocking commands supported over network
                         time.sleep(2.0)
                         interfaceRequired.UpdateFromC()
                         if interfaceRequired.GetConnectedInterface():
-                           print('Required interface ' + interfaceRequired.GetName() + ' connected.')
-                           return interfaceRequired
+                            print('Required interface ' + interfaceRequired.GetName() + ' connected.')
+                            return interfaceRequired
                     print('Unable to add required interface for ' + interfaceName)
                 else:
                     print('Parameter error: must specify (process, component, interface) or (component, interface)')
             except TypeError as e:
-                print('Parameter error: must specify (process, component, interface) or (component, interface)')
+                print('Parameter error: must specify (process, component, interface) or (component, interface), caught exception: ' + str(e))
     %}
 }
 
