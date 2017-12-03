@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
-
   Author(s):	Anton Deguet
   Created on:   2008-01-17
 
-  (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -109,8 +107,8 @@ http://www.cisst.org/cisst/license.txt.
             try:
                 tmpObject = self.GetResultPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
-            except Exception, e:
-                print 'VoidReturn command ', self.GetName(), ': ', e
+            except Exception as e:
+                print('VoidReturn command ' + self.GetName() + ': ' + str(e))
 
 
         def __call__(self):
@@ -137,8 +135,8 @@ http://www.cisst.org/cisst/license.txt.
             try:
                 tmpObject = self.GetArgumentClassServices().Create()
                 self.ArgumentType = tmpObject.__class__
-            except Exception, e:
-                print 'Write command ', self.GetName(), ': ', e
+            except Exception as e:
+                print('Write command ' + self.GetName() + ': ' + str(e))
 
         def __call__(self, argument):
             if isinstance(argument, self.ArgumentType):
@@ -158,8 +156,8 @@ http://www.cisst.org/cisst/license.txt.
                 self.ArgumentType = tmp1Object.__class__
                 tmp2Object = self.GetResultPrototype().Services().Create()
                 self.ResultType = tmp2Object.__class__
-            except Exception, e:
-                print 'WriteReturn command ', self.GetName(), ': ', e
+            except Exception as e:
+                print('WriteReturn command ' + self.GetName() + ': ' + str(e))
 
         def __call__(self, argument):
             result = self.ResultType(self.GetResultPrototype())
@@ -185,10 +183,10 @@ http://www.cisst.org/cisst/license.txt.
             try:
                 tmpObject = self.GetArgumentPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
-            except Exception, e:
-                print 'Read command ', self.GetName(), ': ', e
-            except AttributeError, e:
-                print 'Read command ', self.GetName(), ': ', e
+            except Exception as e:
+                print('Read command ' + self.GetName() + ': ' + str(e))
+            except AttributeError as e:
+                print('Read command ' + self.GetName() + ': ' + str(e))
 
 
         def __call__(self):
@@ -217,8 +215,8 @@ http://www.cisst.org/cisst/license.txt.
                 self.Argument1Type = tmp1Object.__class__
                 tmp2Object = self.GetArgument2Prototype().Services().Create()
                 self.Argument2Type = tmp2Object.__class__
-            except Exception, e:
-                print 'Qualified read command ', self.GetName(), ': ', e
+            except Exception as e:
+                print('Qualified read command ' + self.GetName() + ': ' + str(e))
 
         def __call__(self, argument1):
             argument2 = self.Argument2Type(self.GetArgument2Prototype())
@@ -263,10 +261,10 @@ http://www.cisst.org/cisst/license.txt.
                 try:
                     tmpObject = self.GetResultPrototype().Services().Create()
                     self.ArgumentType = tmpObject.__class__
-                except Exception, e:
-                    print 'VoidReturn function ', self.GetCommand().GetName(), ': ', e
+                except Exception as e:
+                    print('VoidReturn function ' + self.GetCommand().GetName() + ': ' + str(e))
             else:
-                print 'VoidReturn function not valid'
+                print('VoidReturn function not valid')
 
 
         def __call__(self):
@@ -294,10 +292,10 @@ http://www.cisst.org/cisst/license.txt.
                 try:
                     tmpObject = self.GetArgumentPrototype().Services().Create()
                     self.ArgumentType = tmpObject.__class__
-                except Exception, e:
-                    print 'Read function ', self.GetCommand().GetName(), ': ', e
+                except Exception as e:
+                    print('Read function ' + self.GetCommand().GetName() + ': ' + str(e))
             else:
-                print 'Read function not valid'
+                print('Read function not valid')
 
 
         def __call__(self):
@@ -325,10 +323,10 @@ http://www.cisst.org/cisst/license.txt.
                 try:
                     tmpObject = self.GetArgumentPrototype().Services().Create()
                     self.ArgumentType = tmpObject.__class__
-                except Exception, e:
-                    print 'Write function ', self.GetCommand().GetName(), ': ', e
+                except Exception as e:
+                    print('Write function ' + self.GetCommand().GetName() + ': ' + str(e))
             else:
-                print 'Write function not valid'
+                print('Write function not valid')
 
         def __call__(self, argument):
             if isinstance(argument, self.ArgumentType):
@@ -349,10 +347,10 @@ http://www.cisst.org/cisst/license.txt.
                     self.ArgumentType = tmp1Object.__class__
                     tmp2Object = self.GetResultPrototype().Services().Create()
                     self.ResultType = tmp2Object.__class__
-                except Exception, e:
-                    print 'WriteReturn function ', self.GetCommand().GetName(), ': ', e
+                except Exception as e:
+                    print('WriteReturn function ' + self.GetCommand().GetName() + ': ' + str(e))
             else:
-                print 'WriteReturn function not valid'
+                print('WriteReturn function not valid')
 
         def __call__(self, argument):
             result = self.ResultType(self.GetResultPrototype())
@@ -381,10 +379,10 @@ http://www.cisst.org/cisst/license.txt.
                     self.Argument1Type = tmp1Object.__class__
                     tmp2Object = self.GetArgument2Prototype().Services().Create()
                     self.Argument2Type = tmp2Object.__class__
-                except Exception, e:
-                    print 'Qualified read function ', self.GetCommand().GetName(), ': ', e
+                except Exception as e:
+                    print('Qualified read function ' + self.GetCommand().GetName() + ': ' + str(e))
             else:
-                print 'QualifiedRead function not valid'
+                print('QualifiedRead function not valid')
 
         def __call__(self, argument1):
             argument2 = self.Argument2Type(self.GetArgument2Prototype())
@@ -433,7 +431,7 @@ http://www.cisst.org/cisst/license.txt.
 
         def AddInterfaceRequiredFromProvided(self, interfaceProvided):
             if not isinstance(interfaceProvided, mtsInterfaceProvidedDescription):
-                print 'Parameter must be of type mtsInterfaceProvidedDescription'
+                print('Parameter must be of type mtsInterfaceProvidedDescription')
                 return
             interfaceProvidedNoSpace = interfaceProvided.InterfaceName.replace(' ', '')
             interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvidedNoSpace, MTS_OPTIONAL)
@@ -482,29 +480,29 @@ http://www.cisst.org/cisst/license.txt.
                     # Now do the work here
                     manager = self.GetManagerComponentServices()
                     if not manager:
-                        print 'Could not get manager component services'
+                        print('Could not get manager component services')
                         return
                     interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
                     if not interfaceDescription.InterfaceName:
-                        print 'No provided interface (empty string)'
+                        print('No provided interface (empty string)')
                         return
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
                     attempt = 0
                     while (attempt < connectionAttempts):
                         attempt = attempt + 1
-                        print 'Trying to connect:', interfaceRequired.GetName(), ' - attempt # ', attempt
+                        print('Trying to connect: ' + interfaceRequired.GetName() + ' - attempt # ' + attempt)
                         manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
                         # PK TEMP: need time.sleep until blocking commands supported over network
                         time.sleep(2.0)
                         interfaceRequired.UpdateFromC()
                         if interfaceRequired.GetConnectedInterface():
-                           print 'Required interface ', interfaceRequired.GetName(), ' connected.'
+                           print('Required interface ' + interfaceRequired.GetName() + ' connected.')
                            return interfaceRequired
-                    print 'Unable to add required interface for ', interfaceName
+                    print('Unable to add required interface for ' + interfaceName)
                 else:
-                    print 'Parameter error: must specify (process, component, interface) or (component, interface)'
-            except TypeError, e:
-                print 'Parameter error: must specify (process, component, interface) or (component, interface)'
+                    print('Parameter error: must specify (process, component, interface) or (component, interface)')
+            except TypeError as e:
+                print('Parameter error: must specify (process, component, interface) or (component, interface)')
     %}
 }
 
@@ -551,7 +549,7 @@ public:
     %pythoncode %{
         def UpdateFromC(self):
             if not self.GetConnectedInterface():
-                print 'Required interface ', self.GetName(), ' not yet connected.'
+                print('Required interface ' + self.GetName() + ' not yet connected.')
                 return
             functions = mtsInterfaceRequired.GetNamesOfFunctionsVoid(self)
             for function in functions:
