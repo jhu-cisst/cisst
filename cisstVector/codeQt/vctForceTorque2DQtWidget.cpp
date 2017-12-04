@@ -200,9 +200,14 @@ void vctForceTorque2DQtWidget::SlotScaleIndex(int newAxis)
     mScaleIndex = newAxis;
 
     for (size_t i = 0; i < 5; ++i) {
+        // hide other scale
+        mSignals[(mScaleIndex + 1) % 2][i]->SetVisible(false);
+        // show current scales and user preferences
         mSignals[mScaleIndex][i]->SetVisible(mVisibleSignals[mScaleIndex][i]);
         mCheckBoxes[i]->setChecked(mVisibleSignals[mScaleIndex][i]);
+        
     }
+    mScales[mScaleIndex]->AutoFitXY();
     QFTPlot->SetContinuousExpandYResetSlot();
 }
 
