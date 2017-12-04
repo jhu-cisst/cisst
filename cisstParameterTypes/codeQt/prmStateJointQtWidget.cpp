@@ -30,11 +30,17 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
     layout->setContentsMargins(2, 2, 2, 2);
     this->setLayout(layout);
 
+    int labelWidth;
+    QSize size;
+
     QWPosition = new QWidget();
     QHBoxLayout * positionLayout = new QHBoxLayout();
     positionLayout->setContentsMargins(2, 2, 2, 2);
     QWPosition->setLayout(positionLayout);
-    positionLayout->addWidget(new QLabel("Position"));
+    QLabel * positionLabel = new QLabel("Position");
+    size = positionLabel->sizeHint();
+    labelWidth = size.width();
+    positionLayout->addWidget(positionLabel);
     QVRPosition = new vctQtWidgetDynamicVectorDoubleRead();
     positionLayout->addWidget(QVRPosition);
     layout->addWidget(QWPosition);
@@ -43,7 +49,12 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
     QHBoxLayout * velocityLayout = new QHBoxLayout();
     velocityLayout->setContentsMargins(2, 2, 2, 2);
     QWVelocity->setLayout(velocityLayout);
-    velocityLayout->addWidget(new QLabel("Velocity"));
+    QLabel * velocityLabel = new QLabel("Velocity");
+    velocityLayout->addWidget(velocityLabel);
+    size = velocityLabel->sizeHint();
+    if (size.width() > labelWidth) {
+        labelWidth = size.width();
+    }
     QVRVelocity = new vctQtWidgetDynamicVectorDoubleRead();
     velocityLayout->addWidget(QVRVelocity);
     layout->addWidget(QWVelocity);
@@ -52,12 +63,21 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
     QHBoxLayout * effortLayout = new QHBoxLayout();
     effortLayout->setContentsMargins(2, 2, 2, 2);
     QWEffort->setLayout(effortLayout);
-    effortLayout->addWidget(new QLabel("Effort"));
+    QLabel * effortLabel = new QLabel("Effort");
+    effortLayout->addWidget(effortLabel);
+    size = effortLabel->sizeHint();
+    if (size.width() > labelWidth) {
+        labelWidth = size.width();
+    }
+
     QVREffort = new vctQtWidgetDynamicVectorDoubleRead();
     effortLayout->addWidget(QVREffort);
     layout->addWidget(QWEffort);
 
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+    positionLabel->setFixedWidth(labelWidth);
+    velocityLabel->setFixedWidth(labelWidth);
+    effortLabel->setFixedWidth(labelWidth);
 }
 
 void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
