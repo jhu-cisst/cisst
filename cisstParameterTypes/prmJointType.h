@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:   2013-05-14
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,10 +23,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctionsEnumMacros.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 
+// Always include last!
+#include <cisstParameterTypes/prmExport.h>
+
 typedef enum JointType {
-    PRM_PRISMATIC,
-    PRM_REVOLUTE,
-    PRM_INACTIVE
+    PRM_JOINT_UNDEFINED,
+    PRM_JOINT_PRISMATIC,
+    PRM_JOINT_REVOLUTE,
+    PRM_JOINT_INACTIVE
 } prmJointType;
 
 typedef vctDynamicVector<prmJointType> prmJointTypeVec;
@@ -38,13 +40,16 @@ CMN_DECLARE_SERVICES_INSTANTIATION(prmJointTypeProxy);
 inline std::string cmnDataHumanReadable(const prmJointType & data)
 {
     switch (data) {
-    case PRM_PRISMATIC:
+    case PRM_JOINT_UNDEFINED:
+        return "undefine";
+        break;
+    case PRM_JOINT_PRISMATIC:
         return "prismatic";
         break;
-    case PRM_REVOLUTE:
+    case PRM_JOINT_REVOLUTE:
         return "revolute";
         break;
-    case PRM_INACTIVE:
+    case PRM_JOINT_INACTIVE:
         return "inactive";
         break;
     default:
@@ -55,6 +60,13 @@ inline std::string cmnDataHumanReadable(const prmJointType & data)
 }
 
 CMN_DATA_SPECIALIZATION_FOR_ENUM(prmJointType, int);
+
+CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(prmJointType);
+
+void CISST_EXPORT prmJointTypeToFactor(const vctDynamicVector<prmJointType> & types,
+                                       const double prismaticFactor,
+                                       const double revoluteFactor,
+                                       vctDynamicVector<double> & factors);
 
 #endif // _prmJointType_h
 

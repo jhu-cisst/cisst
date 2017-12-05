@@ -23,7 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <QLabel>
 
 prmStateJointQtWidget::prmStateJointQtWidget(void):
-    QWidget()
+    QWidget(),
+    mPrismaticFactor(1.0),
+    mRevoluteFactor(1.0),
+    mNeedsConversion(false)
 {
     QVBoxLayout * layout = new QVBoxLayout();
     layout->setSpacing(0);
@@ -42,6 +45,7 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
     labelWidth = size.width();
     positionLayout->addWidget(positionLabel);
     QVRPosition = new vctQtWidgetDynamicVectorDoubleRead();
+    QVRPosition->SetPrecision(3);
     positionLayout->addWidget(QVRPosition);
     layout->addWidget(QWPosition);
 
@@ -56,6 +60,7 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
         labelWidth = size.width();
     }
     QVRVelocity = new vctQtWidgetDynamicVectorDoubleRead();
+    QVRVelocity->SetPrecision(3);
     velocityLayout->addWidget(QVRVelocity);
     layout->addWidget(QWVelocity);
 
@@ -69,8 +74,8 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
     if (size.width() > labelWidth) {
         labelWidth = size.width();
     }
-
     QVREffort = new vctQtWidgetDynamicVectorDoubleRead();
+    QVREffort->SetPrecision(3);
     effortLayout->addWidget(QVREffort);
     layout->addWidget(QWEffort);
 
@@ -82,18 +87,49 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
 
 void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
 {
+    // -- position
     if (newValue.Position().size() != 0) {
         QWPosition->show();
-        QVRPosition->SetValue(newValue.Position());
+        if (mNeedsConversion) {
+            // update scaling factors if needed based on vector size
+            if (newValue.Position().size() != mPositionFactors.size()) {
+                if (newValue.Type().size() != 0) {
+                    mPositionFactors.SetSize(newValue.Type().size());
+                    prmJointTypeToFactor(newValue.Type(), mPrismaticFactor, mRevoluteFactor, mPositionFactors);
+                }
+            }
+            mTempVector.SetSize(newValue.Position().size());
+            mTempVector.ElementwiseProductOf(mPositionFactors, newValue.Position());
+            QVRPosition->SetValue(mTempVector);
+        } else {
+            QVRPosition->SetValue(newValue.Position());
+        }
     } else {
         QWPosition->hide();
     }
+
+    // -- velocity
     if (newValue.Velocity().size() != 0) {
         QWVelocity->show();
-        QVRVelocity->SetValue(newValue.Velocity());
+        if (mNeedsConversion) {
+            // update scaling factors if needed based on vector size
+            if (newValue.Velocity().size() != mVelocityFactors.size()) {
+                if (newValue.Type().size() != 0) {
+                    mVelocityFactors.SetSize(newValue.Type().size());
+                    prmJointTypeToFactor(newValue.Type(), mPrismaticFactor, mRevoluteFactor, mVelocityFactors);
+                }
+            }
+            mTempVector.SetSize(newValue.Velocity().size());
+            mTempVector.ElementwiseProductOf(mVelocityFactors, newValue.Velocity());
+            QVRVelocity->SetValue(mTempVector);
+        } else {
+            QVRVelocity->SetValue(newValue.Velocity());
+        }
     } else {
         QWVelocity->hide();
     }
+
+    // -- effort
     if (newValue.Effort().size() != 0) {
         QWEffort->show();
         QVREffort->SetValue(newValue.Effort());

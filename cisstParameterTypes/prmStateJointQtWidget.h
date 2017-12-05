@@ -37,7 +37,20 @@ public:
     ~prmStateJointQtWidget(void) {};
 
     inline void setupUi(void) {};
+
+    /*! Set value, this method will update the values display in the
+      Qt Widget for position, velocity and effort. */
     void SetValue(const prmStateJoint & newValue);
+
+    inline void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute) {
+        mPrismaticFactor = prismatic;
+        mRevoluteFactor = revolute;
+        if ((prismatic == 1.0) && (revolute == 1.0)) {
+            mNeedsConversion = false;
+        } else {
+            mNeedsConversion = true;
+        }
+    }
 
 protected:
     vctQtWidgetDynamicVectorDoubleRead
@@ -48,6 +61,10 @@ protected:
         * QWPosition,
         * QWVelocity,
         * QWEffort;
+
+    double mPrismaticFactor, mRevoluteFactor;
+    bool mNeedsConversion;
+    vctDoubleVec mPositionFactors, mVelocityFactors, mTempVector;
 };
 
 #endif // _prmStateJointQtWidget_h

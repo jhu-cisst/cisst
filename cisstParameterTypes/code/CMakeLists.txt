@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -32,6 +32,7 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 set (SOURCE_FILES
      prmEventButton.cpp
      prmMotionBase.cpp
+     prmJointType.cpp
 
      prmPositionJointSet.cpp
      prmVelocityJointGet.cpp
