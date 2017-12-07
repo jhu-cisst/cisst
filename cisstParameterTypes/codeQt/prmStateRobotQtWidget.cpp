@@ -27,6 +27,11 @@ prmStateRobotQtWidget::prmStateRobotQtWidget(void):
     QPStateJoint = new prmStateJointQtWidget();
 }
 
+void prmStateRobotQtWidget::SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute)
+{
+    QPStateJoint->SetPrismaticRevoluteFactors(prismatic, revolute);
+}
+
 void prmStateRobotQtWidget::setupUi(void)
 {
     QVBoxLayout * layout = new QVBoxLayout;

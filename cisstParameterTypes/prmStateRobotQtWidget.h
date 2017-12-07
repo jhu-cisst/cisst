@@ -34,6 +34,8 @@ public:
     prmStateRobotQtWidget(void);
     inline virtual ~prmStateRobotQtWidget(void) {};
 
+    void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute);
+
     void setupUi(void);
 
 protected:
