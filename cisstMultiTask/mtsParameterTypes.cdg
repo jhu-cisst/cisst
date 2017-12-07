@@ -308,6 +308,33 @@ inline-code {
 
 
 class {
+    name mtsTaskConstructorArg;
+    base-class {
+        type mtsGenericObject;
+    }
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    member {
+        name StateTableSize;
+        type unsigned int;
+        default 256;
+        visibility public;
+    }
+    inline-header {
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+inline-header {
+    CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskConstructorArg);
+}
+
+
+class {
     name mtsTaskContinuousConstructorArg;
     base-class {
         type mtsGenericObject;
