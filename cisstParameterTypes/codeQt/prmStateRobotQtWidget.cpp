@@ -25,6 +25,7 @@ prmStateRobotQtWidget::prmStateRobotQtWidget(void):
     QWidget()
 {
     QPStateJoint = new prmStateJointQtWidget();
+    QFRPositionWidget = new vctQtWidgetFrameDoubleRead(vctQtWidgetRotationDoubleRead::OPENGL_WIDGET);
 }
 
 void prmStateRobotQtWidget::SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute)
@@ -37,6 +38,7 @@ void prmStateRobotQtWidget::setupUi(void)
     QVBoxLayout * layout = new QVBoxLayout;
     this->setLayout(layout);
     layout->addWidget(QPStateJoint);
+    layout->addWidget(QFRPositionWidget);
     layout->addStretch();
     QPStateJoint->setupUi();
 }
@@ -53,6 +55,7 @@ prmStateRobotQtWidgetComponent::prmStateRobotQtWidgetComponent(const std::string
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
     if (interfaceRequired) {
         interfaceRequired->AddFunction("GetStateJoint", GetStateJoint);
+        interfaceRequired->AddFunction("GetPositionCartesian", GetPositionCartesian);
     }
     setupUi();
 }
@@ -70,5 +73,6 @@ void prmStateRobotQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
     }
     GetStateJoint(StateJoint);
     QPStateJoint->SetValue(StateJoint);
+    GetPositionCartesian(Position);
+    QFRPositionWidget->SetValue(Position.Position());
 }
-
