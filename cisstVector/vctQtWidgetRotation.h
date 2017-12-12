@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Zihan Chen
   Created on: 2013-03-20
 
-  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -90,6 +89,11 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
       Please note that the display mode UNDEFINED_WIDGET will be silently ignored. */ 
     void SetDisplayMode(const DisplayModeType displayMode);
 
+    inline void SetPrismaticRevoluteFactors(const double & CMN_UNUSED(prismatic), const double & revolute) {
+        mRevoluteFactor = revolute;
+        this->UpdateCurrentWidget();
+    }
+
  protected slots:
     /*! Contextual menu showed when the user right clicks on the widget */
     void ShowContextMenu(const QPoint & position);
@@ -130,6 +134,9 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
     // current widget
     QWidget * CurrentWidget;
     QVBoxLayout * Layout;
+
+    // conversion factor
+    double mRevoluteFactor;
 };
 
 #endif // _vctQtWidgetRotation_h

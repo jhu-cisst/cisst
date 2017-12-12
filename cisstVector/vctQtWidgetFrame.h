@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2013-04-20
 
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -66,9 +64,7 @@ class CISST_EXPORT vctQtWidgetFrameDoubleRead: public QWidget
         this->RotationWidget->SetValue(rotationMatrix);
         // always display translations in mm
         vctDoubleVec translation(frame.Translation());
-#if CISST_USE_SI_UNITS
-        translation.Multiply(1000.0);
-#endif
+        translation.Multiply(mPrismaticFactor);
         this->TranslationWidget->SetValue(translation);
     }
 
@@ -78,12 +74,19 @@ class CISST_EXPORT vctQtWidgetFrameDoubleRead: public QWidget
         this->RotationWidget->SetDisplayMode(displayMode);
     }
 
+    inline void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute) {
+        mPrismaticFactor = prismatic;
+        RotationWidget->SetPrismaticRevoluteFactors(prismatic, revolute);
+    }
+
  protected:
     // widgets
     vctQtWidgetRotationDoubleRead * RotationWidget;
     vctQtWidgetDynamicVectorDoubleRead * TranslationWidget;
     // layout
     QVBoxLayout * Layout;
+    // conversion factors
+    double mPrismaticFactor;
 };
 
 #endif // _vctQtWidgetFrame_h

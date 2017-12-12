@@ -157,7 +157,8 @@ void vctQtWidgetRotationOpenGL::draw3DAxis(const double scale)
 // =============================================
 vctQtWidgetRotationDoubleRead::vctQtWidgetRotationDoubleRead(const DisplayModeType displayMode):
     DisplayMode(UNDEFINED_WIDGET),
-    CurrentWidget(0)
+    CurrentWidget(0),
+    mRevoluteFactor(cmn180_PI)
 {
     // Matrix Groupbox
     MatrixWidget = new vctQtWidgetDynamicMatrixDoubleRead();
@@ -218,12 +219,24 @@ void vctQtWidgetRotationDoubleRead::ShowContextMenu(const QPoint & pos)
     QAction * eulerZYZ = new QAction("Euler ZYZ", this);
     QAction * eulerZYX = new QAction("Euler ZYX", this);
     QAction * openGL = new QAction("3D", this);
-    menu.addAction(matrix);
-    menu.addAction(axisAngle);
-    menu.addAction(quaternion);
-    menu.addAction(eulerZYZ);
-    menu.addAction(eulerZYX);
-    menu.addAction(openGL);
+    if (DisplayMode != MATRIX_WIDGET) {
+        menu.addAction(matrix);
+    }
+    if (DisplayMode != AXIS_ANGLE_WIDGET) {
+        menu.addAction(axisAngle);
+    }
+    if (DisplayMode != QUATERNION_WIDGET) {
+        menu.addAction(quaternion);
+    }
+    if (DisplayMode != EULERZYZ_WIDGET) {
+        menu.addAction(eulerZYZ);
+    }
+    if (DisplayMode != EULERZYX_WIDGET) {
+        menu.addAction(eulerZYX);
+    }
+    if (DisplayMode != OPENGL_WIDGET) {
+        menu.addAction(openGL);
+    }
 
     QAction * selectedItem = menu.exec(globalPos);
     if (selectedItem) {
@@ -257,7 +270,7 @@ void vctQtWidgetRotationDoubleRead::UpdateCurrentWidget(void)
     case AXIS_ANGLE_WIDGET:
         rotAxAn.FromRaw(Rotation);
         AxisWidget->SetValue(vctDoubleVec(rotAxAn.Axis()));
-        AngleWidget->SetValue(vctDoubleVec(1, rotAxAn.Angle() * cmn180_PI));
+        AngleWidget->SetValue(vctDoubleVec(1, rotAxAn.Angle() * mRevoluteFactor));
         break;
     case QUATERNION_WIDGET:
         rotQuat.FromRaw(Rotation);
@@ -268,11 +281,11 @@ void vctQtWidgetRotationDoubleRead::UpdateCurrentWidget(void)
         break;
     case EULERZYZ_WIDGET:
         rotEulerZYZ.FromRaw(Rotation);
-        EulerZYZWidget->SetValue(vctDoubleVec(rotEulerZYZ.GetAnglesInDegrees()));
+        EulerZYZWidget->SetValue(vctDoubleVec(rotEulerZYZ.GetAngles() * mRevoluteFactor));
         break;
     case EULERZYX_WIDGET:
         rotEulerZYX.FromRaw(Rotation);
-        EulerZYXWidget->SetValue(vctDoubleVec(rotEulerZYX.GetAnglesInDegrees()));
+        EulerZYXWidget->SetValue(vctDoubleVec(rotEulerZYX.GetAngles() * mRevoluteFactor));
         break;
     default:
         break;
