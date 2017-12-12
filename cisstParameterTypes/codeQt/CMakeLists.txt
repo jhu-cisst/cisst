@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstParameterTypesQt
 #
-# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -25,6 +23,7 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 if (CISST_HAS_QT4)
   qt4_wrap_cpp (QT_WRAPPED_CPP
                   ../prmEventButtonQtWidget.h
+                  ../prmPositionCartesianGetQtWidget.h
                   ../prmStateJointQtWidget.h
                   ../prmStateRobotQtWidget.h)
 else (CISST_HAS_QT4)
@@ -43,9 +42,11 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 cisstParameterTypes
                    SETTINGS     cisstQt
                    SOURCE_FILES prmEventButtonQtWidget.cpp
+                                prmPositionCartesianGetQtWidget.cpp
                                 prmStateJointQtWidget.cpp
                                 prmStateRobotQtWidget.cpp
                    HEADER_FILES prmEventButtonQtWidget.h
+                                prmPositionCartesianGetQtWidget.h
                                 prmStateJointQtWidget.h
                                 prmStateRobotQtWidget.h
                                 prmExportQt.h

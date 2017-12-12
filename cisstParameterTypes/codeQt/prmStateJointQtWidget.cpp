@@ -30,7 +30,7 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
 {
     QVBoxLayout * layout = new QVBoxLayout();
     layout->setSpacing(0);
-    layout->setContentsMargins(2, 2, 2, 2);
+    layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
     int labelWidth;
