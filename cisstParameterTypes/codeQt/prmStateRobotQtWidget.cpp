@@ -24,23 +24,23 @@ http://www.cisst.org/cisst/license.txt.
 prmStateRobotQtWidget::prmStateRobotQtWidget(void):
     QWidget()
 {
-    QPStateJoint = new prmStateJointQtWidget();
-    QFRPositionWidget = new vctQtWidgetFrameDoubleRead(vctQtWidgetRotationDoubleRead::OPENGL_WIDGET);
+    QSJWidget = new prmStateJointQtWidget();
+    QPCGWidget = new prmPositionCartesianGetQtWidget();
 }
 
 void prmStateRobotQtWidget::SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute)
 {
-    QPStateJoint->SetPrismaticRevoluteFactors(prismatic, revolute);
+    QSJWidget->SetPrismaticRevoluteFactors(prismatic, revolute);
+    QPCGWidget->SetPrismaticRevoluteFactors(prismatic, revolute);
 }
 
 void prmStateRobotQtWidget::setupUi(void)
 {
     QVBoxLayout * layout = new QVBoxLayout;
     this->setLayout(layout);
-    layout->addWidget(QPStateJoint);
-    layout->addWidget(QFRPositionWidget);
-    layout->addStretch();
-    QPStateJoint->setupUi();
+    layout->addWidget(QSJWidget);
+    layout->addWidget(QPCGWidget);
+    QSJWidget->setupUi();
 }
 
 
@@ -72,7 +72,7 @@ void prmStateRobotQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
         return;
     }
     GetStateJoint(StateJoint);
-    QPStateJoint->SetValue(StateJoint);
+    QSJWidget->SetValue(StateJoint);
     GetPositionCartesian(Position);
-    QFRPositionWidget->SetValue(Position.Position());
+    QPCGWidget->SetValue(Position);
 }

@@ -20,9 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmStateRobotQtWidget_h
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstVector/vctQtWidgetFrame.h>
 #include <cisstMultiTask/mtsComponent.h>
-#include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstParameterTypes/prmPositionCartesianGetQtWidget.h>
 #include <cisstParameterTypes/prmStateJointQtWidget.h>
 
 // Always include last
@@ -41,8 +40,8 @@ public:
     void setupUi(void);
 
 protected:
-    prmStateJointQtWidget * QPStateJoint;
-    vctQtWidgetFrameDoubleRead * QFRPositionWidget;
+    prmStateJointQtWidget * QSJWidget;
+    prmPositionCartesianGetQtWidget * QPCGWidget;
 };
 
 // Widget with a component, can be used directly with cisstMultiTask component manager
@@ -71,6 +70,5 @@ private:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(prmStateRobotQtWidgetComponent);
-
 
 #endif  // _prmStateRobotQtWidget_h
