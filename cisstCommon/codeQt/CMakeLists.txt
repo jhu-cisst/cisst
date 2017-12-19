@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -25,5 +23,7 @@ cisst_add_library (
   SETTINGS     cisstQt
   SOURCE_FILES cmnClassServicesQt.cpp
                cmnLoggerQtWidget.cpp
+               cmnQt.cpp
   HEADER_FILES cmnExportQt.h
-               cmnLoggerQtWidget.h)
+               cmnLoggerQtWidget.h
+               cmnQt.h)
