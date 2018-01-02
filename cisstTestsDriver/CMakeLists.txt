@@ -34,3 +34,12 @@ target_link_libraries (cisstTestsDriver
 if (TARGET cisstCppUnit)
    add_dependencies (cisstTestsDriver cisstCppUnit)
 endif (TARGET cisstCppUnit)
+
+# Create batch file to set path and then run python test program
+# Syntax:  cisstTestsDriverPython <config> <python-file> <output-file>
+if (WIN32)
+  set (BATCH_TEST_FILE ${CMAKE_CURRENT_BINARY_DIR}/cisstTestsDriverPython.bat)
+  file (WRITE ${BATCH_TEST_FILE} "@ECHO OFF\n")
+  file (APPEND ${BATCH_TEST_FILE} "CALL ${cisst_BINARY_DIR}/cisstvars.bat %1\n")
+  file (APPEND ${BATCH_TEST_FILE} "${PYTHON_EXECUTABLE} %2 -d ${PYTHON_EXECUTABLE} > %3\n")
+endif (WIN32)
