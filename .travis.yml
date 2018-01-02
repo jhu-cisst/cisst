@@ -1,12 +1,5 @@
  language: cpp
 
- os:
-  - linux
-
- dist:
-  - trusty
-  - xenial
-
  compiler:
   - gcc
   - clang
