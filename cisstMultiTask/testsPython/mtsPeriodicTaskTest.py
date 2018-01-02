@@ -1,21 +1,17 @@
 # -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
-#
-#
-
 # Author: Anton Deguet
 # Date: 2010-01-20
 #
-# (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 import unittest
@@ -33,7 +29,7 @@ class PeriodicTaskTest(unittest.TestCase):
 
     def tearDown(self):
         """Call after every test case."""
-        
+
     def TestType(self):
         """Test constructor and types of mtsPeriodicTask"""
         periodicTask = cisstMultiTaskPythonTest.mtsPeriodicTaskTest(0.05)
@@ -49,28 +45,28 @@ class PeriodicTaskTest(unittest.TestCase):
         periodicTask = cisstMultiTaskPythonTest.mtsPeriodicTaskTest(0.05)
         periodicTask.UpdateFromC()
         # verify that both interfaces have been created
-        self.failUnless(periodicTask.__dict__.has_key("MainInterface"))
-        self.failUnless(periodicTask.__dict__.has_key("EmptyInterface")) # space should have been removed
+        self.failUnless("MainInterface" in periodicTask.__dict__)
+        self.failUnless("EmptyInterface" in periodicTask.__dict__) # space should have been removed
         # test that MainInterface has been populated properly
         # command AddDouble(mtsDouble)
-        self.failUnless(periodicTask.MainInterface.__dict__.has_key("AddDouble"))
+        self.failUnless("AddDouble" in periodicTask.MainInterface.__dict__)
         self.failUnless(isinstance(periodicTask.MainInterface.AddDouble, cisstMultiTask.mtsCommandWriteBase))
         proto = periodicTask.MainInterface.AddDouble.GetArgumentPrototype()
         self.failUnless(isinstance(proto, cisstMultiTask.mtsDouble))
         # command ZeroAll(void)
-        self.failUnless(periodicTask.MainInterface.__dict__.has_key("ZeroAll"))
+        self.failUnless("ZeroAll" in periodicTask.MainInterface.__dict__)
         self.failUnless(isinstance(periodicTask.MainInterface.ZeroAll, cisstMultiTask.mtsCommandVoid))
         # command GetDouble(mtsDouble)
-        self.failUnless(periodicTask.MainInterface.__dict__.has_key("GetDouble"))
+        self.failUnless("GetDouble" in periodicTask.MainInterface.__dict__)
         self.failUnless(isinstance(periodicTask.MainInterface.GetDouble, cisstMultiTask.mtsCommandRead))
         proto = periodicTask.MainInterface.GetDouble.GetArgumentPrototype()
         self.failUnless(isinstance(proto, cisstMultiTask.mtsDouble))
         # command GetVector(mtsDoubleVec)
-        self.failUnless(periodicTask.MainInterface.__dict__.has_key("GetVector"))
+        self.failUnless("GetVector" in periodicTask.MainInterface.__dict__)
         self.failUnless(isinstance(periodicTask.MainInterface.GetVector, cisstMultiTask.mtsCommandRead))
         proto = periodicTask.MainInterface.GetVector.GetArgumentPrototype()
         self.failUnless(isinstance(proto, cisstMultiTask.mtsDoubleVec))
-        
+
     def TestRun(self):
         """Test run mtsPeriodicTask"""
         # create the task
@@ -99,7 +95,7 @@ class PeriodicTaskTest(unittest.TestCase):
         size = data.size
         expected = numpy.zeros(size)
         self.failUnless((data == expected).all())
-        # -2- use the AddDouble to modify all and test 
+        # -2- use the AddDouble to modify all and test
         periodicTask.MainInterface.AddDouble(1.0)
         time.sleep(2 * period)
         result2 = cisstMultiTask.mtsDouble()

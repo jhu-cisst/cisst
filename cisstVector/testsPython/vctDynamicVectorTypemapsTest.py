@@ -2,12 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#
 # Author(s):  Daniel Li, Anton Deguet
 # Created on: 2009-05-20
 #
-# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2009-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -173,7 +171,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
         assert(self.CObject.size() == size)
         assert(vNew.size == size)
-        for i in xrange(size):
+        for i in range(size):
             # Test if the C object read the vector correctly
             assert(self.CObject[i] == vOld[i])
             # Test that the C object did not modify the vector
@@ -191,7 +189,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
         assert(self.CObject.size() == size)
         assert(vNew.size == size)
-        for i in xrange(size):
+        for i in range(size):
             # Test if the C object read the vector correctly
             assert(self.CObject[i] == vOld[i])
             # Test if the C object modified the vector correctly
@@ -210,13 +208,13 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
         assert(self.CObject.size() == size)
         assert(vNew.size == size * SIZE_FACTOR)
-        for i in xrange(size):
+        for i in range(size):
             # Test if the C object read the vector correctly
             assert(self.CObject[i] == vOld[i])
             # Test if the C object modified the vector correctly
             assert(vNew[i] == vOld[i] + 1)
             # Test if the C object resized the vector correctly
-            for j in xrange(SIZE_FACTOR):
+            for j in range(SIZE_FACTOR):
                 assert(vOld[i] + 1 == vNew[i + size*j])
 
 
@@ -226,7 +224,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
         v = function(SIZE)
 
         assert(v.size == SIZE)
-        for i in xrange(SIZE):
+        for i in range(SIZE):
             assert(self.CObject[i] == v[i])
 
 
@@ -236,7 +234,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
     ###########################################################################
 
     def Test_in_argout_vctDynamicVector_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -256,7 +254,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctDynamicVectorRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -273,7 +271,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctDynamicConstVectorRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -289,7 +287,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctDynamicConstVectorRef_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -305,7 +303,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctDynamicVectorRef_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -321,7 +319,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctDynamicVector(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -337,7 +335,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctDynamicVector_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -353,7 +351,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicVector(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -367,7 +365,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicVector_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -381,7 +379,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_out_const_vctDynamicVector_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -395,7 +393,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicVectorRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -409,7 +407,7 @@ class DynamicVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicConstVectorRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
