@@ -367,9 +367,9 @@ if (CISST_BUILD_TESTS)
     cisst_set_package_settings (cisstTestsDriver CppUnit INCLUDE_DIRECTORIES CPPUNIT_INCLUDE_DIR)
     # when using external package, we defined CPPUNIT_LINK_DIR.   If CppUnit is installed on the host
     # (e.g. debian package), CPPUNIT_INCLUDE_DIR is defined but not CPPUNIT_LINK_DIR
-    if (CISST_USE_EXTERNAL)
+    if (DEFINED CPPUNIT_LINK_DIR)
       cisst_set_package_settings (cisstTestsDriver CppUnit LINK_DIRECTORIES CPPUNIT_LINK_DIR)
-    endif (CISST_USE_EXTERNAL)
+    endif ()
   else (CPPUNIT_FOUND)
     message (SEND_ERROR "CppUnit is needed for CISST_BUILD_TESTS, you can either install it or turn ON the option CISST_USE_EXTERNAL")
   endif (CPPUNIT_FOUND)
