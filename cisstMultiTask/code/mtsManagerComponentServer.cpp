@@ -162,15 +162,16 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
         return true;
     }
 
-    // Create a new set of function objects
-    InterfaceGCMFunctionType * newFunctionSet = new InterfaceGCMFunctionType;
-
     const std::string interfaceName = mtsManagerComponentBase::GetNameOfInterfaceGCMRequiredFor(clientProcessName);
     mtsInterfaceRequired * required = AddInterfaceRequired(interfaceName);
     if (!required) {
         CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to create \"GCM\" required interface: " << interfaceName << std::endl;
         return false;
     }
+
+    // Create a new set of function objects
+    InterfaceGCMFunctionType * newFunctionSet = new InterfaceGCMFunctionType;
+
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate,
                           newFunctionSet->ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
