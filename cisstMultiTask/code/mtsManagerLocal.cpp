@@ -1236,7 +1236,6 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
     if (!component) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: failed to cast newly created object of type "
                                  << className << " to mtsComponent" << std::endl;
-        delete argument;
         delete componentBase;
         return 0;
     }
