@@ -5,7 +5,7 @@
   Author(s):  Marcin Balicki, Anton Deguet
   Created on: 2010-03-31
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,72 +53,103 @@ public:
     /*! Base type */
     typedef mtsGenericObject BaseType;
 
-    /*! The measured sample average. */
-    inline double GetAvg(void) const {
-        return Avg;
+    /*! The measured period average. */
+    inline const double & PeriodAvg(void) const {
+        return mPeriodAvg;
     }
+
+    /*! The measured standard deviation for period average. */
+    inline const double & PeriodStdDev(void) const {
+        return mPeriodStdDev;
+    }
+
     /*! The measured minimum period of the task */
-    inline double GetStdDev(void) const {
-        return StdDev;
+    inline const double & PeriodMin(void) const {
+        return mPeriodMin;
     }
 
     /*! The measured maximum period of the task */
-    inline double GetMax(void) const {
-        return Max;
+    inline const double & PeriodMax(void) const {
+        return mPeriodMax;
     }
 
-    /*! The measured task period (difference between current Tic and
-        previous Tic). */
-    inline double GetMin(void) const {
-        return Min;
+    /*! The measured compute time average. */
+    inline const double & ComputeTimeAvg(void) const {
+        return mComputeTimeAvg;
+    }
+
+    /*! The measured standard deviation for compute time average. */
+    inline const double & ComputeTimeStdDev(void) const {
+        return mComputeTimeStdDev;
     }
 
     /*! Get minimum compute time. */
-    inline double MinComputeTime(void) const {
-        return mMinComputeTime;
+    inline const double & ComputeTimeMin(void) const {
+        return mComputeTimeMin;
     }
 
     /*! Get maximum compute time. */
-    inline double MaxComputeTime(void) const {
-        return mMaxComputeTime;
+    inline const double & ComputeTimeMax(void) const {
+        return mComputeTimeMax;
+    }
+
+    /*! Get number of samples used for time window */
+    inline const unsigned int & NumberOfSamples(void) const {
+        return mNumberOfSamples;
+    }
+
+    /*! Get number of overruns, i.e. compute time greater than average
+      period in previous interval. */
+    inline const unsigned int & NumberOfOverruns(void) const {
+        return mNumberOfOverruns;
     }
 
     /*! Time period between period statistics calculations */
-    inline void SetStatisticsUpdatePeriod(const double & time) {
-        StatisticsUpdatePeriod = time;
+    inline void SetStatisticsInterval(const double & time) {
+        mStatisticsInterval = time;
     }
 
     /*! Get time period between period statistics calculations */
-    inline double GetStatisticsUpdatePeriod(void) const {
-        return StatisticsUpdatePeriod;
+    inline const double & StatisticsInterval(void) const {
+        return mStatisticsInterval;
     }
 
     /*! Add one sample to compute statistics */
-    void AddSample(const double sample);
-
-    void AddComputeTime(const double computeTime);
+    void Update(const double sample, const double computeTime);
 
 private:
 
-    /*! Internal variables for statistics calculations*/
-    double          Sum;   //name clash with original SumOfPeriods
-    double          SumOfSquares;
-    unsigned int    NumberOfSamples;
-    double          LastUpdateTime;
-    double          TempMax;
-    double          TempMin;
+    /*! Internal variables for statistics calculations */
+    double mPeriodSum;
+    double mPeriodSumSquares;
+    double mPeriodRunningMin;
+    double mPeriodRunningMax;
+    double mComputeTimeSum;
+    double mComputeTimeSumSquares;
+    double mComputeTimeRunningMin;
+    double mComputeTimeRunningMax;
+    unsigned int mRunningNumberOfSamples;
+    unsigned int mRunningNumberOfOverruns;
+    double mLastUpdateTime;
 
     /*! The time server used to provide absolute and relative times. */
-    const osaTimeServer * TimeServer;
+    const osaTimeServer * mTimeServer;
 
-    /*! time between period statistics calculations */
-    double         Avg;
-    double         StdDev;
-    double         Max;
-    double         Min;
-    double mMinComputeTime;
-    double mMaxComputeTime;
-    double         StatisticsUpdatePeriod;
+    /*! Members that can be access, actual stats */
+    double mPeriodAvg;
+    double mPeriodStdDev;
+    double mPeriodMin;
+    double mPeriodMax;
+    double mComputeTimeAvg;
+    double mComputeTimeStdDev;
+    double mComputeTimeMin;
+    double mComputeTimeMax;
+    unsigned int mNumberOfSamples;
+    unsigned int mNumberOfOverruns;
+
+    /*! configuration. */
+    double mStatisticsInterval;
+
 
 public:
 

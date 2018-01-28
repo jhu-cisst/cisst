@@ -96,14 +96,14 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
 
 void mtsIntervalStatisticsQtWidget::SetValue(const mtsIntervalStatistics & newValue)
 {
-    const double avg = newValue.GetAvg();
+    const double avg = newValue.PeriodAvg();
     QTWIAverage->setText(QString("%1 ms").arg(avg * 1000.0, -6, 'f', 3));
     QTWIAverageHz->setText(QString("%1 KHz").arg(0.001 / avg, -6, 'f', 3));
-    QTWIStdDev->setText(QString("%1 ms").arg(newValue.GetStdDev() * 1000.0, -6, 'f', 3));
-    QTWIMin->setText(QString("%1 ms").arg(newValue.GetMin() * 1000.0, -6, 'f', 3));
-    QTWIMax->setText(QString("%1 ms").arg(newValue.GetMax() * 1000.0, -6, 'f', 3));
-    const double minLoad = newValue.MinComputeTime() / avg * 100.0;
-    const double maxLoad = newValue.MaxComputeTime() / avg * 100.0;
+    QTWIStdDev->setText(QString("%1 ms").arg(newValue.PeriodStdDev() * 1000.0, -6, 'f', 3));
+    QTWIMin->setText(QString("%1 ms").arg(newValue.PeriodMin() * 1000.0, -6, 'f', 3));
+    QTWIMax->setText(QString("%1 ms").arg(newValue.PeriodMax() * 1000.0, -6, 'f', 3));
+    const double minLoad = newValue.ComputeTimeMin() / avg * 100.0;
+    const double maxLoad = newValue.ComputeTimeMax() / avg * 100.0;
     QTWILoadMin->setText(QString("%1\%").arg(minLoad, -4, 'f', 0));
     QTWILoadMax->setText(QString("%1\%").arg(maxLoad, -4, 'f', 0));
 }

@@ -5,7 +5,7 @@
  Author(s):  Ankur Kapoor, Min Yang Jung, Anton Deguet
  Created on: 2004-04-30
 
- (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+ (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -296,9 +296,8 @@ void mtsStateTable::Advance(void) {
         Toc = TimeServer->GetRelativeTime(); // in seconds
     }
 
-    // Update Period Statistics
-    PeriodStats.AddSample(Period.Data);
-    PeriodStats.AddComputeTime(this->Toc - this->Tic);
+    // Update Period Statistics (last time interval, current compute time)
+    PeriodStats.Update(Period.Data, this->Toc - this->Tic);
 
     Write(TocId, Toc);
     // now increment the IndexWriter and set its Tick value
