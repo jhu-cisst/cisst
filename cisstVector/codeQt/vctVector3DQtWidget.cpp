@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-11-30
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,6 +33,13 @@ vctVector3DQtWidget::vctVector3DQtWidget(QWidget * parent):
     setContentsMargins(0, 0, 0, 0);
     SetAutoResize(true);
     mAxisLength = 0.5;
+
+    // start with default Z up, x toward left, y towards right
+    mCurrentOrientation =
+        vctQuatRot3(vctRodRot3(0.1 * cmnPI, 0.0, 0.0)) *
+        vctQuatRot3(vctRodRot3(0.0, -0.75 * cmnPI, 0.0)) *
+        vctQuatRot3(vctRodRot3(-0.5 * cmnPI, 0.0, 0.0));
+    mStartMousePosition = 0;
 }
 
 
@@ -60,6 +67,32 @@ void vctVector3DQtWidget::SetValue(const vct3 & value)
 }
 
 
+void vctVector3DQtWidget::mouseMoveEvent(QMouseEvent * event)
+{
+    const double sensitivity = 0.01;
+    if (event->buttons() & Qt::LeftButton) {
+        const vctInt2 newMousePosition(event->x(), event->y());
+        if (mStartMousePosition != 0) {
+            const vct2 deltaMouse = sensitivity * vct2(newMousePosition - mStartMousePosition);
+            vctRodRot3 deltaRot(deltaMouse.Y(), deltaMouse.X(), 0.0);
+            mDeltaOrientation.From(deltaRot);
+            paintGL();
+        } else {
+            mStartMousePosition = newMousePosition;
+        }
+    }
+}
+
+
+void vctVector3DQtWidget::mouseReleaseEvent(QMouseEvent *)
+{
+    mStartMousePosition = 0;
+    // save current rotation
+    mCurrentOrientation = mDeltaOrientation * mCurrentOrientation;
+    mDeltaOrientation = vctQuatRot3::Identity();
+}
+
+
 void vctVector3DQtWidget::initializeGL(void)
 {
     const double grey = 0.95;
@@ -73,17 +106,17 @@ void vctVector3DQtWidget::paintGL(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    // gl transformation here
-    // x+:left  y+:up   z+: point out screen
-    glTranslatef(0.0f, 0.0f, -10.0f);
-    glRotatef(-70.0f, 1.0f, 0.0f, 0.0f);
-    glRotatef(-135.0f, 0.0f, 0.0f, 1.0f);
-
     // disable lighting
     glDisable(GL_LIGHTING);
 
     // set line width
     glLineWidth(2.0);
+
+    // gl transformation here
+    // x+:left  y+:up   z+: point out screen
+    glTranslatef(0.0f, 0.0f, -10.0f);
+    vctAxAnRot3 rot(mDeltaOrientation * mCurrentOrientation);
+    glRotated(rot.Angle() * cmn180_PI, rot.Axis().X(), rot.Axis().Y(), rot.Axis().Z());
 
     // draw X/Y/Z axis, using half
     glColor3f(1.0f, 0.0f, 0.0f);

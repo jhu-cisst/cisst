@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-11-30
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctQtForwardDeclarations.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctTransformationTypes.h>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -49,16 +50,20 @@ public:
     }
 
 protected:
-   void initializeGL(void);
-   void paintGL(void);
-   void resizeGL(int width, int height);
-   void keyPressEvent(QKeyEvent * event);
+    void mouseMoveEvent(QMouseEvent * event);
+    void mouseReleaseEvent(QMouseEvent * event);
+    void initializeGL(void);
+    void paintGL(void);
+    void resizeGL(int width, int height);
+    void keyPressEvent(QKeyEvent * event);
 
-   vct3 mVector;
-   bool mAutoResize;
-   double mMaxNorm;
-   float mScale; // = 1 / mMaxNorm
-   float mAxisLength; 
+    vct3 mVector;
+    vctQuatRot3 mCurrentOrientation, mDeltaOrientation;
+    vctInt2 mStartMousePosition;
+    bool mAutoResize;
+    double mMaxNorm;
+    float mScale; // = 1 / mMaxNorm
+    float mAxisLength;
 };
 
 #endif // _vctVector3DQtWidget_h

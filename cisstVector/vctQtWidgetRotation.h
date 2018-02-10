@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):  Zihan Chen
+  Author(s):  Zihan Chen, Anton Deguet
   Created on: 2013-03-20
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,11 +48,16 @@ public:
     void SetValue(const vctMatRot3 & rotation);
 
 protected:
-   void initializeGL(void);
-   void paintGL(void);
-   void resizeGL(int width, int height);
-   void draw3DAxis(const double scale);
-   vct3 orientation; // should be replaced by rotation matrix using column-first storage order, isn't OpenGL Fortran like?
+    void mouseMoveEvent(QMouseEvent * event);
+    void mouseReleaseEvent(QMouseEvent * event);
+
+    void initializeGL(void);
+    void paintGL(void);
+    void resizeGL(int width, int height);
+    
+    vct3 mRotation;
+    vctQuatRot3 mCurrentOrientation, mDeltaOrientation;
+    vctInt2 mStartMousePosition;
 };
 
 

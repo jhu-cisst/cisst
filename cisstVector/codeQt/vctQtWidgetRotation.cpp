@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):  Zihan Chen
+  Author(s):  Zihan Chen, Anton Deguet
   Created on: 2013-03-20
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QLabel>
 #include <QMenu>
 #include <QAction>
+#include <QMouseEvent>
 
 #include <cisstVector/vctQtWidgetRotation.h>
 
@@ -49,24 +50,55 @@ http://www.cisst.org/cisst/license.txt.
 
 vctQtWidgetRotationOpenGL::vctQtWidgetRotationOpenGL(void)
 {
-    orientation.SetAll(0.0);
+    mRotation.SetAll(0.0);
     setMinimumHeight(100);
     setMinimumWidth(100);
     setContentsMargins(0, 0, 0, 0);
+
+    // start with default Z up, x toward left, y towards right
+    mCurrentOrientation =
+        vctQuatRot3(vctRodRot3(0.1 * cmnPI, 0.0, 0.0)) *
+        vctQuatRot3(vctRodRot3(0.0, -0.75 * cmnPI, 0.0)) *
+        vctQuatRot3(vctRodRot3(-0.5 * cmnPI, 0.0, 0.0));
+    mStartMousePosition = 0;
 }
 
 void vctQtWidgetRotationOpenGL::SetValue(const vctMatRot3 & rot)
 {
     vctEulerZYXRotation3 rotEuler;
     rotEuler.From(rot);
-    orientation.X() = rotEuler.gamma() * 180.0 / cmnPI;  // x
-    orientation.Y() = rotEuler.beta() * 180.0 / cmnPI;   // y
-    orientation.Z() = rotEuler.alpha() * 180.0 / cmnPI;  // z
+    mRotation.X() = rotEuler.gamma() * cmn180_PI;  // x
+    mRotation.Y() = rotEuler.beta() * cmn180_PI;   // y
+    mRotation.Z() = rotEuler.alpha() * cmn180_PI;  // z
 
     // update GL display
     update();
 }
 
+void vctQtWidgetRotationOpenGL::mouseMoveEvent(QMouseEvent * event)
+{
+    const double sensitivity = 0.01;
+    if (event->buttons() & Qt::LeftButton) {
+        const vctInt2 newMousePosition(event->x(), event->y());
+        if (mStartMousePosition != 0) {
+            const vct2 deltaMouse = sensitivity * vct2(newMousePosition - mStartMousePosition);
+            vctRodRot3 deltaRot(deltaMouse.Y(), deltaMouse.X(), 0.0);
+            mDeltaOrientation.From(deltaRot);
+            paintGL();
+        } else {
+            mStartMousePosition = newMousePosition;
+        }
+    }
+}
+
+
+void vctQtWidgetRotationOpenGL::mouseReleaseEvent(QMouseEvent *)
+{
+    mStartMousePosition = 0;
+    // save current rotation
+    mCurrentOrientation = mDeltaOrientation * mCurrentOrientation;
+    mDeltaOrientation = vctQuatRot3::Identity();
+}
 
 void vctQtWidgetRotationOpenGL::initializeGL(void)
 {
@@ -77,79 +109,93 @@ void vctQtWidgetRotationOpenGL::initializeGL(void)
 
 void vctQtWidgetRotationOpenGL::paintGL(void)
 {
-    const int side = qMin(width(), height());
-    glViewport((width() - side) / 2, (height() - side) / 2, side, side);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    // draw reference coordinate frame here
-    glPushMatrix();
-    glTranslatef(0.4f, 0.4f, -5.0f);
-    glRotatef(-30.0, 0.0, 1.0, 0.0);
-    draw3DAxis(0.05);
-    glPopMatrix();
+    // disable lighting
+    glDisable(GL_LIGHTING);
 
-    // gl transformation here
-    // x+:left  y+:up   z+: point out screen
+    // set line width
+    glLineWidth(2.0);
+
+    // user orientation
     glTranslatef(0.0f, 0.0f, -10.0f);
+    vctAxAnRot3 rot(mDeltaOrientation * mCurrentOrientation);
+    glRotated(rot.Angle() * cmn180_PI, rot.Axis().X(), rot.Axis().Y(), rot.Axis().Z());
+
+    // draw reference coordinate frame here
+    glEnable(GL_LINE_STIPPLE);
+    glLineStipple(1, 0x00FF); // dashed
+
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(1.0f, 0.0f, 0.0f);
+    glEnd();
+
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 1.0f, 0.0f);
+    glEnd();
+
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, 1.0f);
+    glEnd();
+
+    glDisable(GL_LINE_STIPPLE);
 
     // orientation
-    glRotatef(orientation.Z(), 0.0, 0.0, 1.0);
-    glRotatef(orientation.Y(), 0.0, 1.0, 0.0);
-    glRotatef(orientation.X(), 1.0, 0.0, 0.0);
+    glRotatef(mRotation.Z(), 0.0, 0.0, 1.0);
+    glRotatef(mRotation.Y(), 0.0, 1.0, 0.0);
+    glRotatef(mRotation.X(), 1.0, 0.0, 0.0);
 
-    draw3DAxis(0.4);
+    // draw current frame
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(1.0f, 0.0f, 0.0f);
+    glEnd();
+
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 1.0f, 0.0f);
+    glEnd();
+
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glBegin(GL_LINES);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, 1.0f);
+    glEnd();
 
     glFlush();
 }
 
 void vctQtWidgetRotationOpenGL::resizeGL(int width, int height)
 {
-    const int side = qMin(width, height);
-    glViewport((width - side) / 2, (height - side) / 2, side, side);
+    glViewport(0, 0, width, height);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
+
+    GLdouble dWt;
+    GLdouble dHt;
+
+    if (width > height) {
+        dHt = 1.0;
+        dWt = static_cast<double>(width) / static_cast<double>(height);
+    } else {
+        dHt = static_cast<double>(height) / static_cast<double>(width);
+        dWt = 1.0;
+    }
+
+    glOrtho(-dWt, dWt, -dHt, dHt, 8.0, 12.0);
+
     glMatrixMode(GL_MODELVIEW);
 }
-
-void vctQtWidgetRotationOpenGL::draw3DAxis(const double scale)
-{
-    // draw
-    glPushMatrix();
-
-    // disable lighting
-    glDisable(GL_LIGHTING);
-
-    // set line width
-    glLineWidth(scale * 10.0);
-
-    // RGB 3d axes
-    // x axis: red
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glBegin(GL_LINES);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(scale, 0.0f, 0.0f);
-    glEnd();
-
-    // y axis: green
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glBegin(GL_LINES);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, scale, 0.0f);
-    glEnd();
-
-    // z axis: blue
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glBegin(GL_LINES);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, scale);
-    glEnd();
-
-    glPopMatrix();
-}
-
 
 
 // =============================================
