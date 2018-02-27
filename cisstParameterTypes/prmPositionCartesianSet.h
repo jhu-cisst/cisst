@@ -64,6 +64,10 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! two tuple, masks position/orientation parts of the Cartesian motion*/
     vctBool2 Mask;
 
+    // we really need to generate this data type using the cisst data generator
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, MovingFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, ReferenceFrame);
+
  public:
     /*! default constructor */
     prmPositionCartesianSet()
@@ -248,4 +252,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(prmPositionCartesianSet);
 
 
 #endif // _prmPositionCartesianSet_h
-

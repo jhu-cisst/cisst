@@ -32,7 +32,8 @@ void prmPositionCartesianSet::SerializeRaw(std::ostream & outputStream) const
     Acceleration.SerializeRaw(outputStream);
     AccelerationAngular.SerializeRaw(outputStream);
     Mask.SerializeRaw(outputStream);
-
+    cmnSerializeRaw(outputStream, MovingFrameMember);
+    cmnSerializeRaw(outputStream, ReferenceFrameMember);
 }
 
 void prmPositionCartesianSet::DeSerializeRaw(std::istream & inputStream)
@@ -44,6 +45,6 @@ void prmPositionCartesianSet::DeSerializeRaw(std::istream & inputStream)
     Acceleration.DeSerializeRaw(inputStream);
     AccelerationAngular.DeSerializeRaw(inputStream);
     Mask.DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, MovingFrameMember);
+    cmnDeSerializeRaw(inputStream, ReferenceFrameMember);
 }
-
-
