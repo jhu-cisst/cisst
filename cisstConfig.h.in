@@ -91,4 +91,10 @@ http://www.cisst.org/cisst/license.txt.
 // Using SI units (ie meters) or mm for distances
 #cmakedefine01 CISST_USE_SI_UNITS
 
+// include <cmath> header file instead of <math.h>
+#cmakedefine CISST_USE_CMATH
+// Using std::isnan
+#cmakedefine CISST_USE_STD_ISNAN
+// Using std::isfinite
+#cmakedefine CISST_USE_STD_ISFINITE
 #endif // _cisstConfig_h

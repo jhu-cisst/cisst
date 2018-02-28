@@ -56,7 +56,11 @@ const std::string cmnCompilersStrings[] = {"Undefined",
 bool cmnIsFinite(const float & value)
 {
 #if CISST_HAS_ISFINITE
-    return isfinite(value);
+    #ifndef CISST_USE_STD_ISFINITE
+        return isfinite(value);
+    #else
+        return std::isfinite(value);
+    #endif
 #else
 #ifdef CISST_COMPILER_IS_MSVC
     return _finite(value) == 1;
@@ -71,7 +75,11 @@ bool cmnIsFinite(const float & value)
 bool cmnIsFinite(const double & value)
 {
 #if CISST_HAS_ISFINITE
-    return isfinite(value);
+    #ifndef CISST_USE_STD_ISFINITE
+        return isfinite(value);
+    #else
+        return std::isfinite(value);
+    #endif
 #else
 #ifdef CISST_COMPILER_IS_MSVC
     return _finite(value) == 1;
