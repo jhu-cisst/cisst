@@ -39,6 +39,9 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
     DisplayMode(UNDEFINED_WIDGET),
     CurrentWidget(0)
 {
+    mForce.Zeros();
+    mTorque.Zeros();
+
     QVBoxLayout * forceTorqueLayout = new QVBoxLayout;
 
     QGridLayout * gridLayout = new QGridLayout;
