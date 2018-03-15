@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,10 +25,16 @@ CMN_IMPLEMENT_SERVICES(cdgEnumValue);
 cdgEnumValue::cdgEnumValue(size_t lineNumber):
     cdgScope("enum-value", lineNumber)
 {
-    CMN_ASSERT(this->AddField("name", "", true, "name of the enum value (e.g. enum {NAME, ...})"));
-    CMN_ASSERT(this->AddField("description", "", false, "description of the enum"));
-    CMN_ASSERT(this->AddField("value", "", false, "value of the enum (e.g. enum {NAME = 4})"));
-
+    cdgField * field;
+    field = this->AddField("name", "", true,
+                           "name of the enum value (e.g. enum {NAME, ...})");
+    CMN_ASSERT(field);
+    field = this->AddField("description", "", false,
+                           "description of the enum");
+    CMN_ASSERT(field);
+    field = this->AddField("value", "", false,
+                           "value of the enum (e.g. enum {NAME = 4})");
+    CMN_ASSERT(field);
     this->AddKnownScope(*this);
 }
 

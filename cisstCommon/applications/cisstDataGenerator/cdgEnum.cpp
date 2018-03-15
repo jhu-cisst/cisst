@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,8 +26,11 @@ CMN_IMPLEMENT_SERVICES(cdgEnum);
 cdgEnum::cdgEnum(size_t lineNumber):
     cdgScope("enum", lineNumber)
 {
-    CMN_ASSERT(this->AddField("name", "", true, "name of the enum, will be added to the scope"));
-    CMN_ASSERT(this->AddField("description", "", false, "description of the enum"));
+    cdgField * field;
+    field = this->AddField("name", "", true, "name of the enum, will be added to the scope");
+    CMN_ASSERT(field);
+    field = this->AddField("description", "", false, "description of the enum");
+    CMN_ASSERT(field);
 
     this->AddKnownScope(*this);
 
