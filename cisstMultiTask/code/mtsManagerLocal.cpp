@@ -1209,7 +1209,8 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
     Json::Value jsonValue;
     Json::Reader reader;
     // parsing should work since the string has been generated after a previous parse
-    CMN_ASSERT(reader.parse(constructorArgSerialized, jsonValue));
+    bool parsedOk = reader.parse(constructorArgSerialized, jsonValue);
+    CMN_ASSERT(parsedOk);
     try {
         argument->DeSerializeTextJSON(jsonValue);
     } catch (std::runtime_error e) {
