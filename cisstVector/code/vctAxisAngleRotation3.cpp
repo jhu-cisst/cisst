@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2004-01-13
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -98,29 +96,29 @@ vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<_elementType> & axisAngleRota
         }
         // since norm is already 0, we are in the other case, i.e., angle-PI, but we just want
         // to assert that trace = -1
-        CMN_ASSERT( (trace > (NormType(-1) - normTolerance)) && (trace < (NormType(-1) + normTolerance)) );
+        CMN_ASSERT( (trace > (NormType(-1.0) - normTolerance)) && (trace < (NormType(-1.0) + normTolerance)) );
         // the diagonal is [k_x*k_x*v + c ,  k_y*k_y*v + c,  k_z*k_z*v + c]
         // c = -1 ;  v = (1 - c) = 2
-        NormType xSquare = (matrixRotation.Element(0, 0) + 1) / 2;
-        NormType ySquare = (matrixRotation.Element(1, 1) + 1) / 2;
-        NormType zSquare = (matrixRotation.Element(2, 2) + 1) / 2;
+        NormType xSquare = (matrixRotation.Element(0, 0) + 1.0) / 2.0;
+        NormType ySquare = (matrixRotation.Element(1, 1) + 1.0) / 2.0;
+        NormType zSquare = (matrixRotation.Element(2, 2) + 1.0) / 2.0;
         if (xSquare < normTolerance)
-            xSquare = 0;
+            xSquare = 0.0;
         if (ySquare < normTolerance)
-            ySquare = 0;
+            ySquare = 0.0;
         if (zSquare < normTolerance)
-            zSquare = 0;
+            zSquare = 0.0;
         NormType x = sqrt(xSquare);
         NormType y = sqrt(ySquare);
         NormType z = sqrt(zSquare);
         // we arbitrarily decide the k_x is positive, if it's zero then k_y is positive, and if both are zero, then k_z is positive
-        if (x > 0) {
-            if (matrixRotation.Element(1, 0) < 0) // Element(1,0) = k_x*k_y*v , where v=2, so we just need to check its sign
+        if (x > 0.0) {
+            if (matrixRotation.Element(1, 0) < 0.0) // Element(1,0) = k_x*k_y*v , where v=2, so we just need to check its sign
                 y = -y;
-            if (matrixRotation.Element(2, 0) < 0) // Element(2,0) = k_x*k_z*v
+            if (matrixRotation.Element(2, 0) < 0.0) // Element(2,0) = k_x*k_z*v
                 z = -z;
-        } else if (y > 0) {
-            if (matrixRotation.Element(2, 1) < 0) // Element(2,1) = k_y*k_z*v
+        } else if (y > 0.0) {
+            if (matrixRotation.Element(2, 1) < 0.0) // Element(2,1) = k_y*k_z*v
                 z = -z;
         } else {
             z = 1.0; // x and y are zero, Z has to be one
@@ -130,7 +128,7 @@ vctAxisAngleRotation3FromRaw(vctAxisAngleRotation3<_elementType> & axisAngleRota
         return;
     }
 
-    const AngleType angle = atan2(norm / 2, (trace - 1) / 2);
+    const AngleType angle = atan2(norm / 2.0, (trace - 1.0) / 2.0);
     axisAngleRotation.Axis().Assign(_elementType(xSin), _elementType(ySin), _elementType(zSin));
     axisAngleRotation.Axis().NormalizedSelf();
     axisAngleRotation.Angle() = _elementType(angle);
