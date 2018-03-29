@@ -343,9 +343,11 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 #endif // DOXYGEN
 
 
-
+#ifndef CISST_USE_CMATH
 #include <math.h>
-
+#else
+#include <cmath>
+#endif
 /*!  Discard of the Windows.h definition of macros min and max
 */
 #if CISST_OS_IS_WINDOWS
@@ -389,7 +391,11 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
       extern "C" int isnan (double);
     #endif
   #endif
-  #define CMN_ISNAN(x) isnan(x)
+  #ifndef CISST_USE_STD_ISNAN
+    #define CMN_ISNAN(x) isnan(x)
+  #else
+    #define CMN_ISNAN(x) std::isnan(x)
+  #endif
 #endif
 
 

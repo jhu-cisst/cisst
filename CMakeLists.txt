@@ -292,13 +292,20 @@ check_size_t_native_type (CISST_SIZE_T_NATIVE)
 
 # Determine if we can use cast to void * for CMN_LOG
 include (CheckCXXSourceCompiles)
-check_cxx_source_compiles(
-"#include <iostream>
-int main(int argc, char ** argv) {
-    true ? (void *) 0 : std::cerr << \"true\";
-    false ? (void *) 0 : std::cerr << \"false\";
-    return 0;
-}" CISST_OSTREAM_CAN_CAST_TO_VOID_PTR)
+if( ("${CMAKE_CXX_STANDARD}" STREQUAL "14") OR ("${CMAKE_CXX_STANDARD}" STREQUAL "17"))
+    set(CISST_OSTREAM_CAN_CAST_TO_VOID_PTR 0)
+    set(CISST_USE_STD_ISNAN 1)
+    set(CISST_USE_STD_ISFINITE 1)
+    set(CISST_USE_CMATH 1)
+else()
+    check_cxx_source_compiles(
+    "#include <iostream>
+    int main(int argc, char ** argv) {
+        true ? (void *) 0 : std::cerr << \"true\";
+        false ? (void *) 0 : std::cerr << \"false\";
+        return 0;
+    }" CISST_OSTREAM_CAN_CAST_TO_VOID_PTR)
+endif()
 
 check_cxx_source_compiles(
 "#include <iostream>
