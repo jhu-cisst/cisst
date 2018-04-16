@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2017 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -288,32 +288,6 @@ mark_as_advanced (CISST_USE_SI_UNITS)
 # Determine if size_t is a native type
 include (CheckSizeTNativeType)
 check_size_t_native_type (CISST_SIZE_T_NATIVE)
-
-
-# Determine if we can use cast to void * for CMN_LOG
-include (CheckCXXSourceCompiles)
-if( ("${CMAKE_CXX_STANDARD}" STREQUAL "14") OR ("${CMAKE_CXX_STANDARD}" STREQUAL "17"))
-    set(CISST_OSTREAM_CAN_CAST_TO_VOID_PTR 0)
-    set(CISST_USE_STD_ISNAN 1)
-    set(CISST_USE_STD_ISFINITE 1)
-    set(CISST_USE_CMATH 1)
-else()
-    check_cxx_source_compiles(
-    "#include <iostream>
-    int main(int argc, char ** argv) {
-        true ? (void *) 0 : std::cerr << \"true\";
-        false ? (void *) 0 : std::cerr << \"false\";
-        return 0;
-    }" CISST_OSTREAM_CAN_CAST_TO_VOID_PTR)
-endif()
-
-check_cxx_source_compiles(
-"#include <iostream>
-int main(int argc, char ** argv) {
-    true ? 0 : std::cerr << \"true\";
-    false ? 0 : std::cerr << \"false\";
-    return 0;
-}" CISST_OSTREAM_CAN_CAST_TO_INT)
 
 
 # Look for isfinite function
