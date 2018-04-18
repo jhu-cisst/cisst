@@ -371,9 +371,10 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
   \brief Detect a NaN
 
   This macro is a wrapper for different compilers to simplify the use
-  of the NaN macro.  With gcc and icc, is uses isnan() and for
-  Microsoft compilers, _isnan().  In most cases, the test should look
-  like:
+  of the NaN macro.  When possible, it uses std::isnan from cmath.
+  Otherwise, with gcc and icc, it uses isnan() and for Microsoft
+  compilers, _isnan().  In most cases, the test should look like:
+
   \code
   if (CMN_ISNAN(myValue)) {
       ... deal with the problem, i.e. not a number;
@@ -382,19 +383,26 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 
   \param x The number to be tested.
 */
-#ifdef CISST_COMPILER_IS_MSVC
-  #include <float.h>
-  #define CMN_ISNAN(x) (_isnan(x) != 0)
+// we favor std::isnan
+#if CISST_HAS_STD_ISNAN
+  #include <cmath>
+  #define CMN_ISNAN(x) std::isnan(x)
 #else
-  #if (CISST_OS == CISST_DARWIN)
-    #ifndef isnan
-      extern "C" int isnan (double);
-    #endif
-  #endif
-  #ifndef CISST_USE_STD_ISNAN
-    #define CMN_ISNAN(x) isnan(x)
+// hopefully we can removed this when we stop supporting old compilers
+  #ifdef CISST_COMPILER_IS_MSVC
+    #include <float.h>
+    #define CMN_ISNAN(x) (_isnan(x) != 0)
   #else
-    #define CMN_ISNAN(x) std::isnan(x)
+    #if (CISST_OS == CISST_DARWIN)
+      #ifndef isnan
+        extern "C" int isnan (double);
+      #endif
+    #endif
+    #ifndef CISST_USE_STD_ISNAN
+      #define CMN_ISNAN(x) isnan(x)
+    #else
+      #define CMN_ISNAN(x) std::isnan(x)
+    #endif
   #endif
 #endif
 

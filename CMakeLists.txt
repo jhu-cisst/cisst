@@ -290,6 +290,14 @@ include (CheckSizeTNativeType)
 check_size_t_native_type (CISST_SIZE_T_NATIVE)
 
 
+# Determine if we can use std::isnan and std::isfinite
+include (CheckCXXSourceCompiles)
+check_cxx_source_compiles (
+  "#include <cmath>
+   int main(int argc, char ** argv) {
+       return std::isnan(1.0 / 0.0);
+   }" CISST_HAS_STD_ISNAN)
+
 # Look for isfinite function
 include (CheckSymbolExists)
 check_symbol_exists (isfinite "math.h" CISST_HAS_ISFINITE)

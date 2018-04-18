@@ -45,6 +45,9 @@ http://www.cisst.org/cisst/license.txt.
 // To allow overloading of functions for size_t
 #cmakedefine01 CISST_SIZE_T_NATIVE
 
+// Can we use cmath  std::isnan
+#cmakedefine01 CISST_HAS_STD_ISNAN
+
 // Do we have isfinite global function
 #cmakedefine01 CISST_HAS_ISFINITE
 
