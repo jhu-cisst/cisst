@@ -48,6 +48,9 @@ http://www.cisst.org/cisst/license.txt.
 // Can we use cmath  std::isnan
 #cmakedefine01 CISST_HAS_STD_ISNAN
 
+// Can we use cmath  std::isfinite
+#cmakedefine01 CISST_HAS_STD_ISFINITE
+
 // Do we have isfinite global function
 #cmakedefine01 CISST_HAS_ISFINITE
 
