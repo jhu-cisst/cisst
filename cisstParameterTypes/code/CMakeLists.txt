@@ -17,6 +17,7 @@ cisst_data_generator (cisstParameterTypes
                       "cisstParameterTypes/"        # sub directory for include
                       ../prmActuatorJointCoupling.cdg
                       ../prmPositionCartesianGet.cdg
+                      ../prmVelocityCartesianGet.cdg
                       ../prmPositionJointGet.cdg
                       ../prmPositionJointSet.cdg
                       ../prmCartesianImpedanceGains.cdg
@@ -40,7 +41,6 @@ set (SOURCE_FILES
      prmForceTorqueJointSet.cpp
 
      prmPositionCartesianSet.cpp
-     prmVelocityCartesianGet.cpp
      prmVelocityCartesianSet.cpp
      prmForceCartesianGet.cpp
      prmForceCartesianSet.cpp
@@ -70,7 +70,6 @@ set (HEADER_FILES
      prmForceTorqueJointSet.h
 
      prmPositionCartesianSet.h
-     prmVelocityCartesianGet.h
      prmVelocityCartesianSet.h
      prmForceCartesianGet.h
      prmForceCartesianSet.h

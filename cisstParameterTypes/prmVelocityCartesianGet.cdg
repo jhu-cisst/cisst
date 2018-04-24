@@ -1,0 +1,84 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+#include <cisstVector/vctTransformationTypes.h>
+
+// Always include last
+#include <cisstParameterTypes/prmExport.h>
+}
+
+class {
+    name prmVelocityCartesianGet;
+
+    attribute CISST_EXPORT;
+
+    base-class {
+        type mtsGenericObject;
+        is-data true;
+    }
+
+    member {
+        name VelocityLinear;
+        type vct3;
+        default vct3(0.0, 0.0, 0.0);
+        description Linear velocity;
+    }
+
+    member {
+        name VelocityAngular;
+        type vct3;
+        default vct3(0.0, 0.0, 0.0);
+        description Angular velocity;
+    }
+
+    member {
+        name MovingFrame;
+        type std::string;
+        default "";
+        description Name of moving frame;
+    }
+
+    member {
+        name ReferenceFrame;
+        type std::string;
+        default "";
+        description Name reference frame;
+    }
+
+
+    // For any type derived from cmnGenericObject we need to add some code in the header file
+    // Note that if you decided to use the 'proxy' approach for cisstMultiTask, you would have to
+    // replace this code by something like:
+    //     typedef mtsGenericObjectProxy<MyClass> mtsMyClassProxy;
+    //     CMN_DECLARE_SERVICES_INSTANTIATION(mtsMyClassProxy)
+    inline-header {
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+
+    public:
+        inline void SetVelocity(const vct6 & newValue) {
+            mVelocityLinear[0] = newValue[0];
+            mVelocityLinear[1] = newValue[1];
+            mVelocityLinear[2] = newValue[2];
+            mVelocityAngular[0] = newValue[3];
+            mVelocityAngular[1] = newValue[4];
+            mVelocityAngular[2] = newValue[5];
+        }
+
+        inline void GetVelocity(vct6 & placeHolder) const {
+            placeHolder[0] = mVelocityLinear[0];
+            placeHolder[1] = mVelocityLinear[1];
+            placeHolder[2] = mVelocityLinear[2];
+            placeHolder[3] = mVelocityAngular[0];
+            placeHolder[4] = mVelocityAngular[1];
+            placeHolder[5] = mVelocityAngular[2];
+        }
+    }
+}
+
+// inline code added outside the class's scope
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(prmVelocityCartesianGet);
+}
