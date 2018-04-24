@@ -1,5 +1,4 @@
 #
-#
 # (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
@@ -24,6 +23,10 @@ if (CISST_HAS_QT4)
                 ../vctQtWidgetRotation.h
                 ../vctQtWidgetFrame.h
                 ../vctQtWidgetFrame4x4.h
+                ../vctVector3DQtWidget.h
+                ../vctForceTorqueQtWidget.h
+                ../vctForceTorque2DQtWidget.h
+                ../vctForceTorque3DQtWidget.h
                 )
 else (CISST_HAS_QT4)
   # assumes Qt 5 Auto Moc
@@ -48,6 +51,10 @@ cisst_add_library (
                vctQtWidgetRotation.cpp
                vctQtWidgetFrame.cpp
                vctQtWidgetFrame4x4.cpp
+               vctVector3DQtWidget.cpp
+               vctForceTorqueQtWidget.cpp
+               vctForceTorque2DQtWidget.cpp
+               vctForceTorque3DQtWidget.cpp
   HEADER_FILES vctQtForwardDeclarations.h
                vctPlot2DOpenGLQtWidget.h
                vctQtWidgetDynamicVector.h
@@ -55,6 +62,10 @@ cisst_add_library (
                vctQtWidgetRotation.h
                vctQtWidgetFrame.h
                vctQtWidgetFrame4x4.h
+               vctVector3DQtWidget.h
+               vctForceTorqueQtWidget.h
+               vctForceTorque2DQtWidget.h
+               vctForceTorque3DQtWidget.h
                vctExportQt.h
   ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
 

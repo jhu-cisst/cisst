@@ -2,12 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#
 # Author(s):  Daniel Li, Anton Deguet
 # Created on: 2009-05-20
 #
-# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2009-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -165,7 +163,7 @@ class FixedSizeVectorTypemapsTest(unittest.TestCase):
 
         assert(self.CObject.size() == size)
         assert(vNew.size == size)
-        for i in xrange(size):
+        for i in range(size):
             # Test if the C object read the vector correctly
             assert(self.CObject[i] == vOld[i])
             # Test that the C object did not modify the vector
@@ -184,7 +182,7 @@ class FixedSizeVectorTypemapsTest(unittest.TestCase):
 
         assert(self.CObject.size() == size)
         assert(vNew.size == size)
-        for i in xrange(size):
+        for i in range(size):
             # Test if the C object read the vector correctly
             assert(self.CObject[i] == vOld[i])
             # Test if the C object modified the vector correctly
@@ -196,7 +194,7 @@ class FixedSizeVectorTypemapsTest(unittest.TestCase):
         v = function()
 
         size = self.CObject.size()
-        for i in xrange(size):
+        for i in range(size):
             assert(self.CObject[i] == v[i])
 
 
@@ -206,7 +204,7 @@ class FixedSizeVectorTypemapsTest(unittest.TestCase):
     ###########################################################################
 
     def Test_in_argout_vctFixedSizeVector_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -224,7 +222,7 @@ class FixedSizeVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctFixedSizeVector_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -238,7 +236,7 @@ class FixedSizeVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctFixedSizeVector(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -255,7 +253,7 @@ class FixedSizeVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctFixedSizeVector(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -269,7 +267,7 @@ class FixedSizeVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctFixedSizeVector_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -286,7 +284,7 @@ class FixedSizeVectorTypemapsTest(unittest.TestCase):
 
 
     def Test_out_const_vctFixedSizeVector_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 

@@ -394,7 +394,7 @@ macro (cisst_target_link_package_libraries target ...)
     if ("${lib}" STREQUAL "cisstQt")
       if (CISST_HAS_QT5)
         cisst_cmake_debug ("cisst_target_link_package_libraries: Qt5 needed for ${target}")
-        qt5_use_modules (${target} Core Widgets Gui OpenGL)
+        qt5_use_modules (${target} Core Widgets Gui OpenGL Xml XmlPatterns)
       endif (CISST_HAS_QT5)
     endif ("${lib}" STREQUAL "cisstQt")
 

@@ -29,6 +29,20 @@ mtsTaskFromSignal::mtsTaskFromSignal(const std::string & name,
     mtsTaskContinuous(name, sizeStateTable),
     PostCommandQueuedCallable(0)
 {
+    this->Init();
+}
+
+
+mtsTaskFromSignal::mtsTaskFromSignal(const mtsTaskConstructorArg & arg):
+    mtsTaskContinuous(arg.Name, arg.StateTableSize),
+    PostCommandQueuedCallable(0)
+{
+    this->Init();
+}
+
+
+void mtsTaskFromSignal::Init(void)
+{
     this->PostCommandQueuedCallable = new mtsCallableVoidMethod<mtsTaskFromSignal>(&mtsTaskFromSignal::PostCommandQueuedMethod,
                                                                                    this);
     if (!this->PostCommandQueuedCallable) {

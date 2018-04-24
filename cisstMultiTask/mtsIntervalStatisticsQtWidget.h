@@ -41,13 +41,15 @@ public:
     void SetValue(const mtsIntervalStatistics & newValue);
 
 protected:
-    QTableWidgetItem * QTWIAverage;
-    QTableWidgetItem * QTWIAverageHz;
-    QTableWidgetItem * QTWIStdDev;
-    QTableWidgetItem * QTWIMin;
-    QTableWidgetItem * QTWIMax;
-    QTableWidgetItem * QTWILoadMin;
-    QTableWidgetItem * QTWILoadMax;
+    QTableWidgetItem * QTWIPeriodAverage;
+    QTableWidgetItem * QTWIPeriodHz;
+    QTableWidgetItem * QTWIPeriodRange;
+    QTableWidgetItem * QTWILoadAverage;
+    QTableWidgetItem * QTWILoadPercent;
+    QTableWidgetItem * QTWILoadRange;
+    QTableWidgetItem * QTWIInterval;
+    QTableWidgetItem * QTWINumberOfSamples;
+    QTableWidgetItem * QTWINumberOfOverruns;
 };
 
 // Widget with a component, can be used directly with cisstMultiTask component manager

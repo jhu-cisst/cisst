@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2004-07-09
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -159,23 +157,23 @@ void vctDynamicVectorTest::TestConversionFromFixedSize(void)
 
     // Test simple creation of dynamic from fixed
     vctDynamicVector<_elementType> dynamic1(fixedVector);
-    CMN_ASSERT(dynamic1.size() == fixedVector.size());
-    CMN_ASSERT(dynamic1.Equal( vctDynamicConstVectorRef<_elementType>(fixedVector) ));
+    CPPUNIT_ASSERT(dynamic1.size() == fixedVector.size());
+    CPPUNIT_ASSERT(dynamic1.Equal( vctDynamicConstVectorRef<_elementType>(fixedVector) ));
 
     // Test creation of dynamic from non-const fixed overlay
     vctFixedSizeVectorRef<_elementType, SHORTSIZE, 1> fixedSlice1(fixedVector, 0);
     vctDynamicVector<_elementType>  dynamic2(fixedSlice1);
-    CMN_ASSERT(dynamic2.size() == fixedSlice1.size());
-    CMN_ASSERT(dynamic2.Equal( vctDynamicConstVectorRef<_elementType>(fixedSlice1) ));
+    CPPUNIT_ASSERT(dynamic2.size() == fixedSlice1.size());
+    CPPUNIT_ASSERT(dynamic2.Equal( vctDynamicConstVectorRef<_elementType>(fixedSlice1) ));
 
     // Test creation of dynamic from const fixed overlay
     vctFixedSizeConstVectorRef<_elementType, SHORTSIZE, 2> fixedSlice2(fixedVector.Pointer());
     vctDynamicVector<_elementType>  dynamic3(fixedSlice2);
-    CMN_ASSERT(dynamic3.size() == fixedSlice2.size());
-    CMN_ASSERT(dynamic3.Equal( vctDynamicConstVectorRef<_elementType>(fixedSlice2) ));
+    CPPUNIT_ASSERT(dynamic3.size() == fixedSlice2.size());
+    CPPUNIT_ASSERT(dynamic3.Equal( vctDynamicConstVectorRef<_elementType>(fixedSlice2) ));
     // Assert that dynamic3 and dynamic2 are NOT EQUAL because they contain different
     // subsequences of fixedVector
-    CMN_ASSERT(!dynamic3.Equal(dynamic2));
+    CPPUNIT_ASSERT(!dynamic3.Equal(dynamic2));
 }
 
 void vctDynamicVectorTest::TestConversionFromFixedSizeDouble(void)
@@ -859,4 +857,3 @@ void vctDynamicVectorTest::TestNormalizationFloat(void) {
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctDynamicVectorTest);
-

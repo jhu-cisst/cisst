@@ -70,7 +70,7 @@ endif (CISST_BUILD_SHARED_LIBS)
 # Set the version number
 set (CISST_VERSION_MAJOR "1")
 set (CISST_VERSION_MINOR "0")
-set (CISST_VERSION_PATCH "8")
+set (CISST_VERSION_PATCH "9")
 set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
 
 # To compile examples within this project
@@ -354,7 +354,8 @@ if (CISST_BUILD_TESTS)
       set (CPPUNIT_LIBRARIES "cppunit")
       set (CPPUNIT_DEBUG_LIBRARIES "cppunit")
       set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
-      link_directories ("${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
+      set (CPPUNIT_LINK_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
+      link_directories (${CPPUNIT_LINK_DIR})
       set (CPPUNIT_FOUND ON)
     endif (CISST_USE_EXTERNAL)
   endif (NOT CPPUNIT_FOUND)
@@ -364,6 +365,11 @@ if (CISST_BUILD_TESTS)
     set (CISST_cisstTestsDriver ON)
     # save settings for cisstTestsDriver
     cisst_set_package_settings (cisstTestsDriver CppUnit INCLUDE_DIRECTORIES CPPUNIT_INCLUDE_DIR)
+    # when using external package, we defined CPPUNIT_LINK_DIR.   If CppUnit is installed on the host
+    # (e.g. debian package), CPPUNIT_INCLUDE_DIR is defined but not CPPUNIT_LINK_DIR
+    if (DEFINED CPPUNIT_LINK_DIR)
+      cisst_set_package_settings (cisstTestsDriver CppUnit LINK_DIRECTORIES CPPUNIT_LINK_DIR)
+    endif ()
   else (CPPUNIT_FOUND)
     message (SEND_ERROR "CppUnit is needed for CISST_BUILD_TESTS, you can either install it or turn ON the option CISST_USE_EXTERNAL")
   endif (CPPUNIT_FOUND)

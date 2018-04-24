@@ -2,12 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#
 # Author(s):  Daniel Li, Anton Deguet
 # Created on: 2009-05-20
 #
-# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2009-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -62,9 +60,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
     # of that dimension
     def HelperRandSizes(self, ndim):
         # TODO: Limit sizes to be something other than [1, 10]; possibly [3, 7]
-        sizes = numpy.random.rand(ndim)
-        sizes = numpy.floor(sizes * 10) + 1  # `+ 1' to avoid 0-sized dimension
-        sizes = numpy.array(sizes, dtype=self.dtype)
+        sizes = numpy.random.randint(1, high = 10, size = ndim)
         sizes = tuple(sizes)
         return sizes
 
@@ -75,7 +71,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
         indexList = []
         for j in shape[::-1]:
             r = index % j
-            index /= j
+            index //= j
             indexList.append(r)
         indexList.reverse()
         indexTuple = tuple(indexList)
@@ -235,7 +231,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
         assert((cShape == vShape).all())
         assert((vNew.shape == vShape).all())
-        for i in xrange(vSize):
+        for i in range(vSize):
             indexTuple = self.HelperMetaIndexToTuple(i, vShape)
 
             # Test if the C object read the vector correctly
@@ -264,7 +260,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
         assert((cShape == vShape).all())
         assert((vNew.shape == vShape).all())
-        for i in xrange(vSize):
+        for i in range(vSize):
             indexTuple = self.HelperMetaIndexToTuple(i, vShape)
 
             # Test if the C object read the vector correctly
@@ -296,7 +292,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
         assert((cShape == vShape).all())
         vShapeNew = numpy.array(vNew.shape)
         assert((vShapeNew == vShape * SIZE_FACTOR).all())
-        for i in xrange(vNew.size):
+        for i in range(vNew.size):
             indexTuple = self.HelperMetaIndexToTuple(i, vShape)
 
             # Test if the C object resized the vector correctly
@@ -313,10 +309,10 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
         vShape = v.shape
         vSize = v.size
 
-        for i in xrange(ndim):
+        for i in range(ndim):
             assert(vShape[i] == sizes[i]);
 
-        for i in xrange(vSize):
+        for i in range(vSize):
             indexTuple = self.HelperMetaIndexToTuple(i, vShape)
             assert(self.CObject.GetItem(i) == v[indexTuple])
 
@@ -327,7 +323,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
     ###########################################################################
 
     def Test_in_argout_vctDynamicNArray_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -348,7 +344,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctDynamicNArrayRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -366,7 +362,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctDynamicConstNArrayRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -383,7 +379,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctDynamicConstNArrayRef_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -400,7 +396,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctDynamicNArrayRef_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -417,7 +413,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctDynamicNArray(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -434,7 +430,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctDynamicNArray_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -451,7 +447,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicNArray(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -466,7 +462,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicNArray_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -481,7 +477,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_out_const_vctDynamicNArray_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -496,7 +492,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicNArrayRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()
@@ -511,7 +507,7 @@ class DynamicNArrayTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicConstNArrayRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
             self.SetSizeType()

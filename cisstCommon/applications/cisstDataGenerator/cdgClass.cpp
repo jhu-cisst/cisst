@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -26,28 +26,38 @@ CMN_IMPLEMENT_SERVICES(cdgClass);
 cdgClass::cdgClass(size_t lineNumber):
     cdgScope("class", lineNumber)
 {
-    CMN_ASSERT(this->AddField("name", "", true, "name of the generated C++ class"));
-    CMN_ASSERT(this->AddField("attribute", "", false, "string placed between 'class' and the class name (e.g. CISST_EXPORT)"));
-
     cdgField * field;
-    field = this->AddField("ctor-all-members", "false", false, "adds a constructor requiring an initial value for each member");
+    field = this->AddField("name", "", true,
+                           "name of the generated C++ class");
+    CMN_ASSERT(field);
+    field = this->AddField("attribute", "", false,
+                           "string placed between 'class' and the class name (e.g. CISST_EXPORT)");
+    CMN_ASSERT(field);
+
+    field = this->AddField("ctor-all-members", "false", false,
+                           "adds a constructor requiring an initial value for each member");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");
 
-    field = this->AddField("virtual-dtor", "false", false, "make the destructor virtual");
+    field = this->AddField("virtual-dtor", "false", false,
+                           "make the destructor virtual");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");
 
-    field = this->AddField("generate-human-readable", "true", false, "generate the code for std::string _type.HumanReadable(void), set this to false to provide own implementation");
+    field = this->AddField("generate-human-readable", "true", false,
+                           "generate the code for std::string _type.HumanReadable(void), set this to false to provide own implementation");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");
 
-    CMN_ASSERT(this->AddField("namespace", "", false, "namespace for the class"));
+    field = this->AddField("namespace", "", false,
+                           "namespace for the class");
+    CMN_ASSERT(field);
 
-    field = this->AddField("mts-proxy", "true", false, "generate the code to create a cisstMultiTask proxy, set this to false to avoid proxy generation or \"declaration-only\" to manually instantiate the proxy in a different source file (.cpp)");
+    field = this->AddField("mts-proxy", "true", false,
+                           "generate the code to create a cisstMultiTask proxy, set this to false to avoid proxy generation or \"declaration-only\" to manually instantiate the proxy in a different source file (.cpp)");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("declaration-only");

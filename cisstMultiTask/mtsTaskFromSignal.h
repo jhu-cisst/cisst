@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2009-12-10
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -44,6 +43,9 @@ class CISST_EXPORT mtsTaskFromSignal: public mtsTaskContinuous
  protected:
     typedef mtsTaskContinuous BaseType;
 
+    /*! Shared code for constructors. */
+    void Init(void);
+
     /*! The member function that is passed as 'start routine' argument for
       thread creation. */
     void * RunInternal(void * argument);
@@ -68,6 +70,8 @@ class CISST_EXPORT mtsTaskFromSignal: public mtsTaskContinuous
     */
     mtsTaskFromSignal(const std::string & name,
                       unsigned int sizeStateTable = 256);
+
+    mtsTaskFromSignal(const mtsTaskConstructorArg & arg);
 
     /*! Default Destructor. */
     virtual ~mtsTaskFromSignal() {}

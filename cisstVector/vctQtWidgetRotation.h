@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
-  Author(s):  Zihan Chen
+  Author(s):  Zihan Chen, Anton Deguet
   Created on: 2013-03-20
 
-  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -26,17 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctQtForwardDeclarations.h>
 #include <cisstVector/vctTransformationTypes.h>
 
-#include <QtGlobal>
-#if QT_VERSION >= 0x050400
-#include <QOpenGLWidget>
-typedef QOpenGLWidget OpenGLBaseWidget;
-#else
-#include <QGLWidget>
-typedef QGLWidget OpenGLBaseWidget;
-#endif
-
 class QVBoxLayout;
-
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -48,7 +37,7 @@ class QVBoxLayout;
   \todo use a GL list to create the axes once and re-use later
   \todo remove reference frame?
 */
-class CISST_EXPORT vctQtWidgetRotationOpenGL: public OpenGLBaseWidget
+class CISST_EXPORT vctQtWidgetRotationOpenGL: public vctQtOpenGLBaseWidget
 {
     Q_OBJECT;
 
@@ -59,11 +48,16 @@ public:
     void SetValue(const vctMatRot3 & rotation);
 
 protected:
-   void initializeGL(void);
-   void paintGL(void);
-   void resizeGL(int width, int height);
-   void draw3DAxis(const double scale);
-   vct3 orientation; // should be replaced by rotation matrix using column-first storage order, isn't OpenGL Fortran like?
+    void mouseMoveEvent(QMouseEvent * event);
+    void mouseReleaseEvent(QMouseEvent * event);
+
+    void initializeGL(void);
+    void paintGL(void);
+    void resizeGL(int width, int height);
+    
+    vct3 mRotation;
+    vctQuatRot3 mCurrentOrientation, mDeltaOrientation;
+    vctInt2 mStartMousePosition;
 };
 
 
@@ -99,6 +93,11 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
       and 3D OpenGL based using red, green and blue axes.
       Please note that the display mode UNDEFINED_WIDGET will be silently ignored. */ 
     void SetDisplayMode(const DisplayModeType displayMode);
+
+    inline void SetPrismaticRevoluteFactors(const double & CMN_UNUSED(prismatic), const double & revolute) {
+        mRevoluteFactor = revolute;
+        this->UpdateCurrentWidget();
+    }
 
  protected slots:
     /*! Contextual menu showed when the user right clicks on the widget */
@@ -140,6 +139,9 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
     // current widget
     QWidget * CurrentWidget;
     QVBoxLayout * Layout;
+
+    // conversion factor
+    double mRevoluteFactor;
 };
 
 #endif // _vctQtWidgetRotation_h

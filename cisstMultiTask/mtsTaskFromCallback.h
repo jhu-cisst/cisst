@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2008-09-10
 
-  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -113,6 +112,9 @@ public:
                         unsigned int sizeStateTable = 256):
         mtsTask(name, sizeStateTable), inRunInternal(false) {}
 
+    mtsTaskFromCallback(const mtsTaskConstructorArg & arg):
+        mtsTask(arg.Name, arg.StateTableSize), inRunInternal(false) {}
+
     /*! Default Destructor. */
     virtual ~mtsTaskFromCallback() {}
 
@@ -169,10 +171,14 @@ protected:
 
 public:
 
-    mtsTaskFromCallbackAdapter(const std::string & name,
-                               unsigned int sizeStateTable = 256) :
-      mtsTaskFromCallback(name, sizeStateTable),
-      callbackData() { }
+    inline mtsTaskFromCallbackAdapter(const std::string & name,
+                                      unsigned int sizeStateTable = 256):
+        mtsTaskFromCallback(name, sizeStateTable),
+        callbackData() {}
+
+    inline mtsTaskFromCallbackAdapter(const mtsTaskConstructorArg &arg):
+        mtsTaskFromCallback(arg),
+        callbackData() {}
 
     ~mtsTaskFromCallbackAdapter() {}
 
@@ -221,4 +227,3 @@ _callbackReturnType MTS_TASK_CALLBACK_CONVENTION mtsTaskFromCallbackAdapter::Cal
 
 
 #endif // _mtsTaskFromCallback_h
-

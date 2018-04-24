@@ -104,7 +104,7 @@ http://www.cisst.org/cisst/license.txt.
 // (Another compiler may determine the OS differently).
 #ifdef __GNUC__  // see man gcc
   #define CISST_COMPILER CISST_GCC
-  #ifdef linux // see cpp -dM and ctrl+d
+  #if (defined(linux) || defined(__linux__)) // see cpp -dM and ctrl+d
     #define CISST_OS CISST_LINUX
   #endif // linux
   #if CISST_HAS_LINUX_RTAI // overwrite if RTAI

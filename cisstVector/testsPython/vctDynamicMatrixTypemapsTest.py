@@ -2,12 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#
 # Author(s):  Daniel Li, Anton Deguet
 # Created on: 2009-05-20
 #
-# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2009-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -182,8 +180,8 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
             assert(self.CObject.rows() == rows and self.CObject.cols() == cols)
             assert(vNew.shape[0] == rows and vNew.shape[1] == cols)
             assert(self.CObject.StorageOrder() == stord)
-            for r in xrange(rows):
-                for c in xrange(cols):
+            for r in range(rows):
+                for c in range(cols):
                     # Test if the C object read the vector correctly
                     assert(self.CObject.GetItem(r,c) == vOld[r,c])
                     # Test that the C object did not modify the vector
@@ -207,8 +205,8 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
             assert(self.CObject.rows() == rows and self.CObject.cols() == cols)
             assert(vNew.shape[0] == rows and vNew.shape[1] == cols)
             assert(self.CObject.StorageOrder() == stord)
-            for r in xrange(rows):
-                for c in xrange(cols):
+            for r in range(rows):
+                for c in range(cols):
                     # Test if the C object read the vector correctly
                     assert(self.CObject.GetItem(r,c) == vOld[r,c])
                     # Test if the C object modified the vector correctly
@@ -233,15 +231,15 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
             assert(self.CObject.rows() == rows and self.CObject.cols() == cols)
             assert(vNew.shape[0] == rows * SIZE_FACTOR and vNew.shape[1] == cols * SIZE_FACTOR)
             assert(self.CObject.StorageOrder() == stord)
-            for r in xrange(rows):
-                for c in xrange(cols):
+            for r in range(rows):
+                for c in range(cols):
                     # Test if the C object read the vector correctly
                     assert(self.CObject.GetItem(r,c) == vOld[r,c])
                     # Test if the C object modified the vector correctly
                     assert(vNew[r,c] == vOld[r,c] + 1)
                     # Test if the C object resized the vector correctly
-                    for r2 in xrange(SIZE_FACTOR):
-                        for c2 in xrange(SIZE_FACTOR):
+                    for r2 in range(SIZE_FACTOR):
+                        for c2 in range(SIZE_FACTOR):
                             assert(vOld[r,c] + 1 == vNew[r + rows*r2, c + cols*c2])
 
 
@@ -252,8 +250,8 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
         v = function(ROWS, COLS)
 
         assert(v.shape[0] == ROWS and v.shape[1] == COLS)
-        for r in xrange(ROWS):
-            for c in xrange(COLS):
+        for r in range(ROWS):
+            for c in range(COLS):
                 assert(self.CObject.GetItem(r,c) == v[r,c])
 
 
@@ -263,7 +261,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
     ###########################################################################
 
     def Test_in_argout_vctDynamicMatrix_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -283,7 +281,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctDynamicMatrixRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -300,7 +298,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctDynamicConstMatrixRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -316,7 +314,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctDynamicConstMatrixRef_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -332,7 +330,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctDynamicMatrixRef_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -348,7 +346,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_in_vctDynamicMatrix(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -364,7 +362,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctDynamicMatrix_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -380,7 +378,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicMatrix(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -394,7 +392,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicMatrix_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -408,7 +406,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_out_const_vctDynamicMatrix_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -422,7 +420,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicMatrixRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -436,7 +434,7 @@ class DynamicMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctDynamicConstMatrixRef(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 

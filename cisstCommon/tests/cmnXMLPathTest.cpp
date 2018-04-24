@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-05-26
 
-  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -154,11 +152,17 @@ void cmnXMLPathTest::TestExistingFile1(cmnXMLPath & xmlPath, const std::string &
     CPPUNIT_ASSERT(!dataFound);
     CPPUNIT_ASSERT_EQUAL(std::string("still-not-found"), stringValue);
 
+    // testing exists method on path and attribute
+    CPPUNIT_ASSERT(xmlPath.Exists("data-1"));
+    CPPUNIT_ASSERT(xmlPath.Exists("data-1/data-1-1"));
+    CPPUNIT_ASSERT(!xmlPath.Exists("does-not-exist"));
+    CPPUNIT_ASSERT(!xmlPath.Exists("data-1/does-not-exist"));
+
     // testing search with different context/path - also using std::string for path and context
     std::stringstream context, path;
     std::stringstream value;
 
-    // query to count number of tools
+    // query to count number of fields
     dataFound = xmlPath.Query("count(/data-1/data-1-2/data-1-2-x)", intValue);
     CPPUNIT_ASSERT(dataFound);
     CPPUNIT_ASSERT_EQUAL(3, intValue);

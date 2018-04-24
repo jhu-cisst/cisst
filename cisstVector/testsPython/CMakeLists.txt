@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2017 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -9,7 +9,7 @@
 #
 # --- end cisst license ---
 
-# CMakeLists.txt for cisstNumerical wrapping tests
+# CMakeLists.txt for cisstVector wrapping tests
 
 # Keep a list all tests for ctest
 set (CTEST_TEST_FILE ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-cisstVectorPython.txt)
@@ -47,9 +47,18 @@ else (CMAKE_CONFIGURATION_TYPES)
 endif (CMAKE_CONFIGURATION_TYPES)
 
 # Run the script to generate the list of tests automatically
-add_custom_target (cisstVector_CREATE_PYTHON_TESTS_LIST ALL
-                   COMMAND ${PYTHON_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstVectorTests.py -d ${PYTHON_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
-                   SOURCES ${TEST_PROGRAMS})
+if (WIN32)
+  add_custom_target (cisstVector_CREATE_PYTHON_TESTS_LIST ALL
+                     COMMAND ${cisstTestsDriver_BINARY_DIR}/cisstTestsDriverPython.bat ${CMAKE_CFG_INTDIR}
+                             ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstVectorTests.py ${CTEST_TEST_FILE_AUTO}
+                     SOURCES ${TEST_PROGRAMS})
+else (WIN32)
+  add_custom_target (cisstVector_CREATE_PYTHON_TESTS_LIST ALL
+                     COMMAND ${PYTHON_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstVectorTests.py
+                             -d ${PYTHON_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
+                     SOURCES ${TEST_PROGRAMS})
+endif (WIN32)
+
 set_property (TARGET cisstVector_CREATE_PYTHON_TESTS_LIST PROPERTY FOLDER "cisstVector/tests")
 
 add_dependencies (cisstVector_CREATE_PYTHON_TESTS_LIST

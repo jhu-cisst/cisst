@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -34,7 +32,7 @@ cdgInline::cdgInline(size_t lineNumber, InlineType type):
                            ? "code that will be placed as-is in the generated header file"
                            : "code that will be placed as-is in the generated source file");
     CMN_ASSERT(field);
-    
+
     this->AddKnownScope(*this);
 }
 

@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsComponent.h>
+#include <cisstParameterTypes/prmPositionCartesianGetQtWidget.h>
 #include <cisstParameterTypes/prmStateJointQtWidget.h>
 
 // Always include last
@@ -34,10 +35,13 @@ public:
     prmStateRobotQtWidget(void);
     inline virtual ~prmStateRobotQtWidget(void) {};
 
+    void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute);
+
     void setupUi(void);
 
 protected:
-    prmStateJointQtWidget * QPStateJoint;
+    prmStateJointQtWidget * QSJWidget;
+    prmPositionCartesianGetQtWidget * QPCGWidget;
 };
 
 // Widget with a component, can be used directly with cisstMultiTask component manager
@@ -61,9 +65,10 @@ private:
     int TimerPeriodInMilliseconds;
     mtsFunctionRead GetStateJoint;
     prmStateJoint StateJoint;
+    mtsFunctionRead GetPositionCartesian;
+    prmPositionCartesianGet Position;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(prmStateRobotQtWidgetComponent);
-
 
 #endif  // _prmStateRobotQtWidget_h

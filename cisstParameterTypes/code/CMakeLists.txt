@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -19,7 +19,7 @@ cisst_data_generator (cisstParameterTypes
                       ../prmPositionCartesianGet.cdg
                       ../prmPositionJointGet.cdg
                       ../prmPositionJointSet.cdg
-                      ../prmFixtureGainCartesianSet.cdg
+                      ../prmCartesianImpedanceGains.cdg
                       ../prmIMUSensors.cdg
                       ../prmStateJoint.cdg
                       ../prmInputData.cdg
@@ -33,6 +33,7 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 set (SOURCE_FILES
      prmEventButton.cpp
      prmMotionBase.cpp
+     prmJointType.cpp
 
      prmVelocityJointGet.cpp
      prmVelocityJointSet.cpp

@@ -2,12 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#
 # Author(s):  Daniel Li, Anton Deguet
 # Created on: 2009-05-20
 #
-# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2009-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -168,8 +166,8 @@ class FixedSizeMatrixTypemapsTest(unittest.TestCase):
 
         assert(self.CObject.rows() == rows and self.CObject.cols() == cols)
         assert(vNew.shape[0] == rows and vNew.shape[1] == cols)
-        for r in xrange(rows):
-            for c in xrange(cols):
+        for r in range(rows):
+            for c in range(cols):
                 # Test if the C object read the vector correctly
                 assert(self.CObject.GetItem(r,c) == vOld[r,c])
                 # Test that the C object did not modify the vector
@@ -190,8 +188,8 @@ class FixedSizeMatrixTypemapsTest(unittest.TestCase):
 
         assert(self.CObject.rows() == rows and self.CObject.cols() == cols)
         assert(vNew.shape[0] == rows and vNew.shape[1] == cols)
-        for r in xrange(rows):
-            for c in xrange(cols):
+        for r in range(rows):
+            for c in range(cols):
                 # Test if the C object read the vector correctly
                 assert(self.CObject.GetItem(r,c) == vOld[r,c])
                 # Test if the C object modified the vector correctly
@@ -205,8 +203,8 @@ class FixedSizeMatrixTypemapsTest(unittest.TestCase):
         rows = self.CObject.rows()
         cols = self.CObject.cols()
         assert(v.shape[0] == rows and v.shape[1] == cols)
-        for r in xrange(rows):
-            for c in xrange(cols):
+        for r in range(rows):
+            for c in range(cols):
                 assert(self.CObject.GetItem(r,c) == v[r,c])
 
 
@@ -216,7 +214,7 @@ class FixedSizeMatrixTypemapsTest(unittest.TestCase):
     ###########################################################################
 
     def Test_in_vctFixedSizeMatrix(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -233,7 +231,7 @@ class FixedSizeMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctFixedSizeMatrix(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -247,7 +245,7 @@ class FixedSizeMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_vctFixedSizeMatrix_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -265,7 +263,7 @@ class FixedSizeMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_out_vctFixedSizeMatrix_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -279,7 +277,7 @@ class FixedSizeMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_in_argout_const_vctFixedSizeMatrix_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 
@@ -296,7 +294,7 @@ class FixedSizeMatrixTypemapsTest(unittest.TestCase):
 
 
     def Test_out_const_vctFixedSizeMatrix_ref(self):
-        for (dtype, CObject) in self.types.iteritems():
+        for (dtype, CObject) in self.types.items():
             self.dtype = dtype
             self.CObject = CObject()
 

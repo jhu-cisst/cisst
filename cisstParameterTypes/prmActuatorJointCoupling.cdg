@@ -12,23 +12,26 @@ class {
     attribute CISST_EXPORT;
 
     member {
-      name ActuatorToJointPosition;
-      type vctDoubleMat;
+        name ActuatorToJointPosition;
+        type vctDoubleMat;
     }
 
     member {
-      name JointToActuatorPosition;
-      type vctDoubleMat;
+        name JointToActuatorPosition;
+        type vctDoubleMat;
+        default vctDoubleMat(0, 0);
     }
 
     member {
-      name ActuatorToJointEffort;
-      type vctDoubleMat;
+        name ActuatorToJointEffort;
+        type vctDoubleMat;
+        default vctDoubleMat(0, 0);
     }
 
     member {
-      name JointToActuatorEffort;
-      type vctDoubleMat;
+        name JointToActuatorEffort;
+        type vctDoubleMat;
+        default vctDoubleMat(0, 0);
     }
 
     inline-header {

@@ -349,6 +349,7 @@ CMN_IMPLEMENT_SERVICES(mtsLogMessage);
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsMessageProxy);
 
+CMN_IMPLEMENT_SERVICES(mtsTaskConstructorArg);
 CMN_IMPLEMENT_SERVICES(mtsTaskContinuousConstructorArg);
 CMN_IMPLEMENT_SERVICES(mtsTaskPeriodicConstructorArg);
 

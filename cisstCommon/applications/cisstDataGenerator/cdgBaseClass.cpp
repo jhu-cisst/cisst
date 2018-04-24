@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,16 +26,19 @@ cdgBaseClass::cdgBaseClass(size_t lineNumber):
     cdgScope("base-class", lineNumber)
 {
     cdgField * field;
-    field = this->AddField("type", "", true, "C++ type for the base class, e.g. cmnGenericObject");
+    field = this->AddField("type", "", true,
+                           "C++ type for the base class, e.g. cmnGenericObject");
     CMN_ASSERT(field);
 
-    field = this->AddField("visibility", "public", false, "determines if the base class should be public, ...");
+    field = this->AddField("visibility", "public", false,
+                           "determines if the base class should be public, ...");
     CMN_ASSERT(field);
     field->AddPossibleValue("public");
     field->AddPossibleValue("private");
     field->AddPossibleValue("protected");
 
-    field = this->AddField("is-data", "true", false, "indicates if the base class is a cisst data type itself");
+    field = this->AddField("is-data", "true", false,
+                           "indicates if the base class is a cisst data type itself");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");

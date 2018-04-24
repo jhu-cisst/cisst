@@ -20,20 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctPlot2DOpenGLQtWidget_h
 #define _vctPlot2DOpenGLQtWidget_h
 
-#include <QtGlobal>
-#if QT_VERSION >= 0x050400
-#include <QOpenGLWidget>
-typedef QOpenGLWidget OpenGLBaseWidget;
-#else
-#include <QGLWidget>
-typedef QGLWidget OpenGLBaseWidget;
-#endif
+#include <cisstVector/vctQtForwardDeclarations.h>
 #include <cisstVector/vctPlot2DOpenGL.h>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
-class CISST_EXPORT vctPlot2DOpenGLQtWidget: public OpenGLBaseWidget, public vctPlot2DOpenGL
+class CISST_EXPORT vctPlot2DOpenGLQtWidget: public vctQtOpenGLBaseWidget, public vctPlot2DOpenGL
 {
     Q_OBJECT;
 
@@ -48,11 +41,11 @@ protected:
     virtual void initializeGL(void);
     virtual void resizeGL(int w, int h);
     virtual void paintGL(void);
-    virtual void mouseReleaseEvent(QMouseEvent * event);
     virtual void keyPressEvent(QKeyEvent * event);
     //@}
 
 public slots:
+    void ShowContextMenu(const QPoint & pos);
     void FreezeSlot(bool);
     void FitXSlot(void);
     void FitYSlot(void);

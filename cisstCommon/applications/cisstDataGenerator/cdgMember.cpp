@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,37 +27,45 @@ cdgMember::cdgMember(size_t lineNumber):
     UsesClassTypedef(false)
 {
     cdgField * field;
-    field = this->AddField("name", "", true, "name of the data member, will also be used to generate accessors");
+    field = this->AddField("name", "", true,
+                           "name of the data member, will also be used to generate accessors");
     CMN_ASSERT(field);
 
-    field = this->AddField("type", "", true, "C++ type of the data member (e.g. double, std::string, ...)");
+    field = this->AddField("type", "", true,
+                           "C++ type of the data member (e.g. double, std::string, ...)");
     CMN_ASSERT(field);
 
-    field = this->AddField("description", "", false, "user provided description of the data member");
+    field = this->AddField("description", "", false,
+                           "user provided description of the data member");
     CMN_ASSERT(field);
 
-    field = this->AddField("default", "", false, "default value that should be assigned to the data member in the class constructor");
+    field = this->AddField("default", "", false,
+                           "default value that should be assigned to the data member in the class constructor");
     CMN_ASSERT(field);
 
-    field = this->AddField("accessors", "all/none", false, "indicates which types of accessors should be generated for the data member (default depends on \"visibility\")");
+    field = this->AddField("accessors", "all/none", false,
+                           "indicates which types of accessors should be generated for the data member (default depends on \"visibility\")");
     CMN_ASSERT(field);
     field->AddPossibleValue("none");
     field->AddPossibleValue("references");
     field->AddPossibleValue("set-get");
     field->AddPossibleValue("all");
 
-    field = this->AddField("visibility", "protected", false, "indicates if the data member should be public, ...");
+    field = this->AddField("visibility", "protected", false,
+                           "indicates if the data member should be public, ...");
     CMN_ASSERT(field);
     field->AddPossibleValue("public");
     field->AddPossibleValue("protected");
     field->AddPossibleValue("private");
 
-    field = this->AddField("is-data", "true", false, "indicates if the data member is a cisst data type itself");
+    field = this->AddField("is-data", "true", false,
+                           "indicates if the data member is a cisst data type itself");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");
 
-    field = this->AddField("is-size_t", "false", false, "indicates if the data member is a typedef of size_t or size_t");
+    field = this->AddField("is-size_t", "false", false,
+                           "indicates if the data member is a typedef of size_t or size_t");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");

@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,10 +22,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <QMenu>
 
 vctPlot2DOpenGLQtWidget::vctPlot2DOpenGLQtWidget(QWidget * parent):
-    OpenGLBaseWidget(parent),
+    vctQtOpenGLBaseWidget(parent),
     vctPlot2DOpenGL()
 {
     this->setFocusPolicy(Qt::StrongFocus);
+    this->setToolTip(QString("'space' to pause/restart, 'r' to reset\nright click for menu"));
+    // Context menu
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+            this, SLOT(ShowContextMenu(const QPoint &)));
 }
 
 void vctPlot2DOpenGLQtWidget::initializeGL(void)
@@ -44,52 +48,6 @@ void vctPlot2DOpenGLQtWidget::paintGL(void)
     vctPlot2DOpenGL::Render();
 }
 
-void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
-{
-    if (event->button() == Qt::RightButton) {
-        // local QMenu will be deleted
-        QMenu menu;
-
-        QAction * freeze = new QAction("Freeze", this);
-        freeze->setCheckable(true);
-        freeze->setChecked(this->GetFreeze());
-        menu.addAction(freeze);
-        connect(freeze, SIGNAL(toggled(bool)), this, SLOT(FreezeSlot(bool)));
-
-        menu.addSeparator();
-
-        QAction * fitXnow = new QAction("Fit X now", this);
-        QAction * fitXalways = new QAction("Fit X always", this);
-        fitXalways->setCheckable(true);
-        fitXalways->setChecked(this->GetContinuousFitX());
-        menu.addAction(fitXnow);
-        menu.addAction(fitXalways);
-        connect(fitXnow, SIGNAL(triggered()), this, SLOT(FitXSlot()));
-        connect(fitXalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousFitXSlot(bool)));
-
-        menu.addSeparator();
-
-        QAction * fitYnow = new QAction("Fit Y now", this);
-        QAction * fitYalways = new QAction("Fit Y always", this);
-        QAction * expandYalways = new QAction("Expand Y always", this);
-        QAction * expandYreset = new QAction("Expand Y reset", this);
-        fitYalways->setCheckable(true);
-        fitYalways->setChecked(this->GetContinuousFitY());
-        expandYalways->setCheckable(true);
-        expandYalways->setChecked(this->GetContinuousExpandY());
-        menu.addAction(fitYnow);
-        menu.addAction(fitYalways);
-        menu.addAction(expandYalways);
-        menu.addAction(expandYreset);
-        connect(fitYnow, SIGNAL(triggered()), this, SLOT(FitYSlot()));
-        connect(fitYalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousFitYSlot(bool)));
-        connect(expandYalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousExpandYSlot(bool)));
-        connect(expandYreset, SIGNAL(triggered()), this, SLOT(SetContinuousExpandYResetSlot()));
-
-        menu.exec(mapToGlobal(event->pos()));
-    }
-}
-
 void vctPlot2DOpenGLQtWidget::keyPressEvent(QKeyEvent * event)
 {
     switch(event->key()) {
@@ -103,6 +61,50 @@ void vctPlot2DOpenGLQtWidget::keyPressEvent(QKeyEvent * event)
     default:
         break;
     }
+}
+
+void vctPlot2DOpenGLQtWidget::ShowContextMenu(const QPoint & pos)
+{
+    QPoint globalPos = this->mapToGlobal(pos);
+    QMenu menu;
+
+    QAction * freeze = new QAction("Freeze", this);
+    freeze->setCheckable(true);
+    freeze->setChecked(this->GetFreeze());
+    menu.addAction(freeze);
+    connect(freeze, SIGNAL(toggled(bool)), this, SLOT(FreezeSlot(bool)));
+
+    menu.addSeparator();
+
+    QAction * fitXnow = new QAction("Fit X now", this);
+    QAction * fitXalways = new QAction("Fit X always", this);
+    fitXalways->setCheckable(true);
+    fitXalways->setChecked(this->GetContinuousFitX());
+    menu.addAction(fitXnow);
+    menu.addAction(fitXalways);
+    connect(fitXnow, SIGNAL(triggered()), this, SLOT(FitXSlot()));
+    connect(fitXalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousFitXSlot(bool)));
+
+    menu.addSeparator();
+
+    QAction * fitYnow = new QAction("Fit Y now", this);
+    QAction * fitYalways = new QAction("Fit Y always", this);
+    QAction * expandYalways = new QAction("Expand Y always", this);
+    QAction * expandYreset = new QAction("Expand Y reset", this);
+    fitYalways->setCheckable(true);
+    fitYalways->setChecked(this->GetContinuousFitY());
+    expandYalways->setCheckable(true);
+    expandYalways->setChecked(this->GetContinuousExpandY());
+    menu.addAction(fitYnow);
+    menu.addAction(fitYalways);
+    menu.addAction(expandYalways);
+    menu.addAction(expandYreset);
+    connect(fitYnow, SIGNAL(triggered()), this, SLOT(FitYSlot()));
+    connect(fitYalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousFitYSlot(bool)));
+    connect(expandYalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousExpandYSlot(bool)));
+    connect(expandYreset, SIGNAL(triggered()), this, SLOT(SetContinuousExpandYResetSlot()));
+
+    menu.exec(globalPos);
 }
 
 void vctPlot2DOpenGLQtWidget::FreezeSlot(bool checked)

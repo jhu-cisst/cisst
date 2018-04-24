@@ -27,9 +27,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <QScrollBar>
 #include <QTime>
 #include <QColor>
+#include <QKeyEvent>
 
 mtsMessageQtWidget::mtsMessageQtWidget(void)
 {
+    Tag = 0;
 }
 
 void mtsMessageQtWidget::SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired)
@@ -44,6 +46,23 @@ void mtsMessageQtWidget::SetInterfaceRequired(mtsInterfaceRequired * interfaceRe
     }
 }
 
+void mtsMessageQtWidget::keyPressEvent(QKeyEvent * event)
+{
+    switch(event->key()) {
+    case Qt::Key_C:
+        emit SignalClear();
+        break;
+    case Qt::Key_T:
+        Tag++;
+        emit SignalSetColor(QColor("green"));
+        emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" <----- Tag ")
+                                 + QString::number(Tag) + QString(" -----> "));
+        break;
+    default:
+        break;
+    }
+}
+
 void mtsMessageQtWidget::SlotTextChanged(void)
 {
     this->verticalScrollBar()->setSliderPosition(this->verticalScrollBar()->maximum());
@@ -54,12 +73,15 @@ void mtsMessageQtWidget::setupUi(void)
     this->setReadOnly(true);
     this->ensureCursorVisible();
     this->resize(this->width(), 600);
+    this->setToolTip(QString("'c' to clear, 't' to tag"));
 
     // messages
     connect(this, SIGNAL(SignalAppendMessage(QString)),
             this, SLOT(append(QString)));
     connect(this, SIGNAL(SignalSetColor(QColor)),
             this, SLOT(setTextColor(QColor)));
+    connect(this, SIGNAL(SignalClear()),
+            this, SLOT(clear()));
     connect(this, SIGNAL(textChanged()),
             this, SLOT(SlotTextChanged()));
 }

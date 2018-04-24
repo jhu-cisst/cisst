@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -449,12 +448,19 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionVoid->Bind(interfaceProvided->GetCommandVoid(iter->first));
+                result = functionVoid->Bind(interfaceProvided->GetCommandVoid(iter->first, iter->second->Required));
                 if (!result) {
-                    CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for void command \""
-                                               << iter->first << "\" (connecting \""
-                                               << this->GetFullName() << "\" to \""
-                                               << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    if (iter->second->Required == MTS_OPTIONAL) {
+                        CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional void command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    } else {
+                        CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for void command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for void command \""
                                              << iter->first << "\" (connecting \""
@@ -485,12 +491,19 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionVoidReturn->Bind(interfaceProvided->GetCommandVoidReturn(iter->first));
+                result = functionVoidReturn->Bind(interfaceProvided->GetCommandVoidReturn(iter->first, iter->second->Required));
                 if (!result) {
-                    CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for void with return command \""
-                                               << iter->first << "\" (connecting \""
-                                               << this->GetFullName() << "\" to \""
-                                               << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    if (iter->second->Required == MTS_OPTIONAL) {
+                        CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional void with return command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    } else {
+                        CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for void with return command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for void with return command \""
                                              << iter->first << "\" (connecting \""
@@ -521,12 +534,19 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionWrite->Bind(interfaceProvided->GetCommandWrite(iter->first));
+                result = functionWrite->Bind(interfaceProvided->GetCommandWrite(iter->first, iter->second->Required));
                 if (!result) {
-                    CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for write command \""
-                                               << iter->first << "\" (connecting \""
-                                               << this->GetFullName() << "\" to \""
-                                               << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    if (iter->second->Required == MTS_OPTIONAL) {
+                        CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional write command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    } else {
+                        CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for write command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for write command \""
                                              << iter->first << "\" (connecting \""
@@ -546,25 +566,32 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
          iter != FunctionsWriteReturn.end();
          iter++) {
         if (!iter->second->Pointer) {
-            CMN_LOG_CLASS_INIT_ERROR << "BindCommands: found null function pointer for write with result command \""
+            CMN_LOG_CLASS_INIT_ERROR << "BindCommands: found null function pointer for write with return command \""
                                      << iter->first << "\" in interface \"" << this->GetFullName() << "\"" << std::endl;
             result = false;
         } else {
             functionWriteReturn = dynamic_cast<mtsFunctionWriteReturn *>(iter->second->Pointer);
             if (!functionWriteReturn) {
-                CMN_LOG_CLASS_INIT_ERROR << "BindCommands: incorrect function pointer for write with result command \""
+                CMN_LOG_CLASS_INIT_ERROR << "BindCommands: incorrect function pointer for write with return command \""
                                          << iter->first << "\" in interface \"" << this->GetFullName() << "\" (got \""
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionWriteReturn->Bind(interfaceProvided->GetCommandWriteReturn(iter->first));
+                result = functionWriteReturn->Bind(interfaceProvided->GetCommandWriteReturn(iter->first, iter->second->Required));
                 if (!result) {
-                    CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for write with result command \""
-                                               << iter->first << "\" (connecting \""
-                                               << this->GetFullName() << "\" to \""
-                                               << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    if (iter->second->Required == MTS_OPTIONAL) {
+                        CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional write with return command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    } else {
+                        CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for write with return command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    }
                 } else {
-                    CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for write with result command \""
+                    CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for write with return command \""
                                              << iter->first << "\" (connecting \""
                                              << this->GetFullName() << "\" to \""
                                              << interfaceProvided->GetFullName() << "\")"<< std::endl;
@@ -593,12 +620,19 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionRead->Bind(interfaceProvided->GetCommandRead(iter->first));
+                result = functionRead->Bind(interfaceProvided->GetCommandRead(iter->first, iter->second->Required));
                 if (!result) {
-                    CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for read command \""
-                                               << iter->first << "\" (connecting \""
-                                               << this->GetFullName() << "\" to \""
-                                               << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    if (iter->second->Required == MTS_OPTIONAL) {
+                        CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional read command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    } else {
+                        CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for read command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for read command \""
                                              << iter->first  << "\" (connecting \""
@@ -629,12 +663,19 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionQualifiedRead->Bind(interfaceProvided->GetCommandQualifiedRead(iter->first));
+                result = functionQualifiedRead->Bind(interfaceProvided->GetCommandQualifiedRead(iter->first, iter->second->Required));
                 if (!result) {
-                    CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for qualified read command \""
-                                               << iter->first << "\" (connecting \""
-                                               << this->GetFullName() << "\" to \""
-                                               << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    if (iter->second->Required == MTS_OPTIONAL) {
+                        CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional qualified read command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    } else {
+                        CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for qualified read command \""
+                                                   << iter->first << "\" (connecting \""
+                                                   << this->GetFullName() << "\" to \""
+                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                    }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for qualified read command \""
                                              << iter->first << "\" (connecting \""

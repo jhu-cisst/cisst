@@ -68,9 +68,9 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa cmnThrow
 */
-#ifdef CISST_CMN_ASSERT_DISABLED
+#if defined(CISST_CMN_ASSERT_DISABLED) || defined(NDEBUG)
     #define CMN_ASSERT(expr)
-#else // CISST_CMN_ASSERT_DISABLED
+#else // CISST_CMN_ASSERT_DISABLED || NDEBUG
 
 #ifdef CISST_CMN_ASSERT_THROWS_EXCEPTION
 

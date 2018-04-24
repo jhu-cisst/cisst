@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
- Author(s): Marcin Balicki, Anton Deguet
- Created on: 2010-03-31
+  Author(s): Marcin Balicki, Anton Deguet
+  Created on: 2010-03-31
 
- (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,35 +23,48 @@ CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
 
 mtsIntervalStatistics::mtsIntervalStatistics():
     mtsGenericObject(),
-    Sum(0.0),
-    SumOfSquares(0.0),
-    NumberOfSamples(0),
-    LastUpdateTime(0.0),
-    TempMax(0.0),
-    TempMin(0.0),
-    Avg(0.0),
-    StdDev(0.0),
-    Max(0.0),
-    Min(0.0),
-    mMinComputeTime(cmnTypeTraits<double>::MaxPositiveValue()),
-    mMaxComputeTime(cmnTypeTraits<double>::MinPositiveValue()),
-    StatisticsUpdatePeriod(1.0)
+    mPeriodSum(0.0),
+    mPeriodSumSquares(0.0),
+    mPeriodRunningMin(cmnTypeTraits<double>::MaxPositiveValue()),
+    mPeriodRunningMax(cmnTypeTraits<double>::MinPositiveValue()),
+    mComputeTimeSum(0.0),
+    mComputeTimeSumSquares(0.0),
+    mComputeTimeRunningMin(cmnTypeTraits<double>::MaxPositiveValue()),
+    mComputeTimeRunningMax(cmnTypeTraits<double>::MinPositiveValue()),
+    mRunningNumberOfSamples(0),
+    mRunningNumberOfOverruns(0),
+    mLastUpdateTime(0.0),
+    mPeriodAvg(0.0),
+    mPeriodStdDev(0.0),
+    mPeriodMin(0.0),
+    mPeriodMax(0.0),
+    mComputeTimeAvg(0.0),
+    mComputeTimeStdDev(0.0),
+    mComputeTimeMin(0.0),
+    mComputeTimeMax(0.0),
+    mNumberOfSamples(0),
+    mNumberOfOverruns(0),
+    mStatisticsInterval(1.0)
 {
     // Get a pointer to the time server
-    TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
+    mTimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
 }
 
 
 void mtsIntervalStatistics::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "TimeStamp: " << TimestampMember
-                 << " Avg: " << Avg
-                 << " StdDev: " << StdDev
-                 << " Max: " << Max
-                 << " Min: " << Min
-                 << " MinComputeTime: " << mMinComputeTime
-                 << " MaxComputeTime: " << mMaxComputeTime
-                 << " Period: " << StatisticsUpdatePeriod;
+    outputStream << "TimeStamp: " << TimestampMember // 1
+                 << " PeriodAvg: " << mPeriodAvg
+                 << " PeriodStdDev: " << mPeriodStdDev
+                 << " PeriodMin: " << mPeriodMin
+                 << " PeriodMax: " << mPeriodMax // 5
+                 << " ComputeTimeAvg: " << mComputeTimeAvg
+                 << " ComputeTimeStdDev: " << mComputeTimeStdDev
+                 << " ComputeTimeMin: " << mComputeTimeMin
+                 << " ComputeTimeMax: " << mComputeTimeMax
+                 << " NumberOfSamples: " << mNumberOfSamples // 10
+                 << " NumberOfOverruns: " << mNumberOfOverruns
+                 << " StatisticsInterval: " << mStatisticsInterval;
 }
 
 
@@ -61,112 +74,139 @@ void mtsIntervalStatistics::ToStreamRaw(std::ostream & outputStream, const char 
     mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
     outputStream << delimiter;
     if (headerOnly) {
-        outputStream << headerPrefix << "-TimeStamp" << delimiter
-                     << headerPrefix << "-Avg" << delimiter
-                     << headerPrefix << "-StdDev" << delimiter
-                     << headerPrefix << "-Max" << delimiter
-                     << headerPrefix << "-Min" << delimiter
-                     << headerPrefix << "-MinComputeTime" << delimiter
-                     << headerPrefix << "-MaxComputeTime" << delimiter
-                     << headerPrefix << "-Period";
+        outputStream << headerPrefix << "-TimeStamp" << delimiter // 1
+                     << headerPrefix << "-PeriodAvg" << delimiter
+                     << headerPrefix << "-PeriodStdDev" << delimiter
+                     << headerPrefix << "-PeriodMin" << delimiter
+                     << headerPrefix << "-PeriodMax" << delimiter // 5
+                     << headerPrefix << "-ComputeTimeAvg" << delimiter
+                     << headerPrefix << "-ComputeTimeStdDev" << delimiter
+                     << headerPrefix << "-ComputeTimeMin" << delimiter
+                     << headerPrefix << "-ComputeTimeMax" << delimiter
+                     << headerPrefix << "-NumberOfSamples" << delimiter // 10
+                     << headerPrefix << "-NumberOfOverruns" << delimiter
+                     << headerPrefix << "-StatisticsInterval";
     } else {
-        outputStream << this->TimestampMember << delimiter
-                     << this->Avg << delimiter
-                     << this->StdDev << delimiter
-                     << this->Max << delimiter
-                     << this->Min << delimiter
-                     << this->mMinComputeTime << delimiter
-                     << this->mMaxComputeTime << delimiter
-                     << this->StatisticsUpdatePeriod;
+        outputStream << this->TimestampMember << delimiter // 1
+                     << this->mPeriodAvg << delimiter
+                     << this->mPeriodStdDev << delimiter
+                     << this->mPeriodMin << delimiter
+                     << this->mPeriodMax << delimiter // 5
+                     << this->mComputeTimeAvg << delimiter
+                     << this->mComputeTimeStdDev << delimiter
+                     << this->mComputeTimeMin << delimiter
+                     << this->mComputeTimeMax << delimiter
+                     << this->mNumberOfSamples << delimiter // 10
+                     << this->mNumberOfOverruns << delimiter
+                     << this->mStatisticsInterval;
     }
 }
 
 
 void mtsIntervalStatistics::SerializeRaw(std::ostream & outputStream) const
 {
-    cmnSerializeRaw(outputStream, TimestampMember);
-    cmnSerializeRaw(outputStream, StdDev);
-    cmnSerializeRaw(outputStream, Avg);
-    cmnSerializeRaw(outputStream, Max);
-    cmnSerializeRaw(outputStream, Min);
-    cmnSerializeRaw(outputStream, StatisticsUpdatePeriod);
-    cmnSerializeRaw(outputStream, Sum);
-    cmnSerializeRaw(outputStream, SumOfSquares);
-    cmnSerializeRaw(outputStream, NumberOfSamples);
-    cmnSerializeRaw(outputStream, TempMax);
-    cmnSerializeRaw(outputStream, TempMin);
-    cmnSerializeRaw(outputStream, mMinComputeTime);
-    cmnSerializeRaw(outputStream, mMaxComputeTime);
+    cmnSerializeRaw(outputStream, TimestampMember); // 1
+    cmnSerializeRaw(outputStream, mPeriodAvg);
+    cmnSerializeRaw(outputStream, mPeriodStdDev);
+    cmnSerializeRaw(outputStream, mPeriodMin);
+    cmnSerializeRaw(outputStream, mPeriodMax); // 5
+    cmnSerializeRaw(outputStream, mComputeTimeAvg);
+    cmnSerializeRaw(outputStream, mComputeTimeStdDev);
+    cmnSerializeRaw(outputStream, mComputeTimeMin);
+    cmnSerializeRaw(outputStream, mComputeTimeMax);
+    cmnSerializeRaw(outputStream, mNumberOfSamples); // 10
+    cmnSerializeRaw(outputStream, mNumberOfOverruns);
+    cmnSerializeRaw(outputStream, mStatisticsInterval);
 }
 
 void mtsIntervalStatistics::DeSerializeRaw(std::istream & inputStream)
 {
-    cmnDeSerializeRaw(inputStream, TimestampMember);
-    cmnDeSerializeRaw(inputStream, StdDev);
-    cmnDeSerializeRaw(inputStream, Avg);
-    cmnDeSerializeRaw(inputStream, Max);
-    cmnDeSerializeRaw(inputStream, Min);
-    cmnDeSerializeRaw(inputStream, StatisticsUpdatePeriod);
-    cmnDeSerializeRaw(inputStream, Sum);
-    cmnDeSerializeRaw(inputStream, SumOfSquares);
-    cmnDeSerializeRaw(inputStream, NumberOfSamples);
-    cmnDeSerializeRaw(inputStream, TempMax);
-    cmnDeSerializeRaw(inputStream, TempMin);
-    cmnDeSerializeRaw(inputStream, mMinComputeTime);
-    cmnDeSerializeRaw(inputStream, mMaxComputeTime);
-    //since we might be on a different computer the timing should be different
-    LastUpdateTime = TimeServer->GetRelativeTime();
+    cmnDeSerializeRaw(inputStream, TimestampMember); // 1
+    cmnDeSerializeRaw(inputStream, mPeriodAvg);
+    cmnDeSerializeRaw(inputStream, mPeriodStdDev);
+    cmnDeSerializeRaw(inputStream, mPeriodMin);
+    cmnDeSerializeRaw(inputStream, mPeriodMax); // 5
+    cmnDeSerializeRaw(inputStream, mComputeTimeAvg);
+    cmnDeSerializeRaw(inputStream, mComputeTimeStdDev);
+    cmnDeSerializeRaw(inputStream, mComputeTimeMin);
+    cmnDeSerializeRaw(inputStream, mComputeTimeMax);
+    cmnDeSerializeRaw(inputStream, mNumberOfSamples); // 10
+    cmnDeSerializeRaw(inputStream, mNumberOfOverruns);
+    cmnDeSerializeRaw(inputStream, mStatisticsInterval);
 }
 
-void mtsIntervalStatistics::AddSample(const double sample) {
-
-    //check for max
-    if (TempMax < sample){
-        TempMax = sample;
-    }
-    //check for min.
-    if (TempMin > sample){
-        TempMin = sample;
-    }
-
-    Sum += sample; 
-    SumOfSquares += sample * sample;
-    NumberOfSamples++;
-    //Check to see if the statistics need to be to be updated
-    //reset the counters and save the data
-    if (TimeServer->GetRelativeTime() > (LastUpdateTime + StatisticsUpdatePeriod)) {
-        //save the max/min
-        Min = TempMin;
-        Max = TempMax;
-        //calculate the avg.
-        Avg = Sum / (double)NumberOfSamples;
-
-        //std = sqrt(     sum(Xi^2) /N  - avg^2 )  : see std dev wiki
-        StdDev = sqrt((SumOfSquares / (double)NumberOfSamples) - (Avg*Avg) );
-        // CMN_LOG_CLASS_RUN_DEBUG << *this<<std::endl;
-
-        //reset
-        NumberOfSamples = 0;
-        Sum = 0.0;
-        SumOfSquares = 0.0;
-        //Should this should be the next period?
-        TempMax = sample;
-        TempMin = sample;
-        LastUpdateTime = TimeServer->GetRelativeTime();
-
-        mMaxComputeTime = cmnTypeTraits<double>::MinPositiveValue();
-        mMinComputeTime = cmnTypeTraits<double>::MaxPositiveValue();
-    }
-}
-
-void mtsIntervalStatistics::AddComputeTime(const double computeTime)
+void mtsIntervalStatistics::Update(const double period, const double computeTime)
 {
-    //check for max
-    if (mMaxComputeTime < computeTime){
-        mMaxComputeTime = computeTime;
+    // update number of samples
+    mRunningNumberOfSamples++;
+
+    // check for min period
+    if (period < mPeriodRunningMin) {
+        mPeriodRunningMin = period;
     }
-    //check for min.
-    if (mMinComputeTime > computeTime){
-        mMinComputeTime = computeTime;
+    // check for max period
+    if (period > mPeriodRunningMax) {
+        mPeriodRunningMax = period;
+    }
+    // for avg and std dev
+    mPeriodSum += period;
+    mPeriodSumSquares += period * period;
+
+    // check for min compute time
+    if (computeTime < mComputeTimeRunningMin) {
+        mComputeTimeRunningMin = computeTime;
+    }
+    // check for max compute time
+    if (computeTime > mComputeTimeRunningMax) {
+        mComputeTimeRunningMax = computeTime;
+    }
+    // for avg and std dev
+    mComputeTimeSum += computeTime;
+    mComputeTimeSumSquares += computeTime * computeTime;
+
+    // count overruns compared to previous average, use number of
+    // samples to see if an average has already be calculated
+    if ((mNumberOfSamples > 0)
+        && (computeTime > mPeriodAvg)) {
+        mRunningNumberOfOverruns++;
+    }
+
+    // check to see if the statistics need to be to be updated
+    // reset the counters and save the data
+    const double currentTime = mTimeServer->GetRelativeTime();
+    if (currentTime > (mLastUpdateTime + mStatisticsInterval)) {
+        // save counters
+        mNumberOfSamples = mRunningNumberOfSamples;
+        mNumberOfOverruns = mRunningNumberOfOverruns;
+
+        // calculate the avg
+        mPeriodAvg = mPeriodSum / static_cast<double>(mNumberOfSamples);
+        // std = sqrt(sum(Xi^2) / N - avg^2): see std dev wiki
+        mPeriodStdDev = sqrt((mPeriodSumSquares /
+                              static_cast<double>(mNumberOfSamples)) - (mPeriodAvg * mPeriodAvg));
+        // calculate the avg
+        mComputeTimeAvg = mComputeTimeSum / static_cast<double>(mNumberOfSamples);
+        // std = sqrt(sum(Xi^2) / N - avg^2): see std dev wiki
+        mComputeTimeStdDev = sqrt((mComputeTimeSumSquares /
+                                   static_cast<double>(mNumberOfSamples)) - (mComputeTimeAvg * mComputeTimeAvg));
+
+        // save min/max
+        mPeriodMin = mPeriodRunningMin;
+        mPeriodMax = mPeriodRunningMax;
+        mComputeTimeMin = mComputeTimeRunningMin;
+        mComputeTimeMax = mComputeTimeRunningMax;
+
+        // reset
+        mRunningNumberOfSamples = 0;
+        mRunningNumberOfOverruns = 0;
+        mPeriodSum = 0.0;
+        mPeriodSumSquares = 0.0;
+        mPeriodRunningMin = cmnTypeTraits<double>::MaxPositiveValue();
+        mPeriodRunningMax = cmnTypeTraits<double>::MinPositiveValue();
+        mComputeTimeSum = 0.0;
+        mComputeTimeSumSquares = 0.0;
+        mComputeTimeRunningMin = cmnTypeTraits<double>::MaxPositiveValue();
+        mComputeTimeRunningMax = cmnTypeTraits<double>::MinPositiveValue();
+        mLastUpdateTime = currentTime;
     }
 }

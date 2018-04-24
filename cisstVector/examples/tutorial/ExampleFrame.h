@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Ofri Sadowsky
   Created on: 2003-10-15
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,18 +46,29 @@ void ExampleFrame(void) {
     std::cout << "X: " << axisX << std::endl;
     // 2. Output vector component by index
     std::cout << "Y: " << axisY[0]
-	      << " " << axisY[1]
-	      << " " << axisY[2] << std::endl;
+              << " " << axisY[1]
+              << " " << axisY[2] << std::endl;
     // 3. Output vector component by ``name''
     std::cout << "Z: " << axisZ.X()
-	      << " " << axisZ.Y()
-	      << " " << axisZ.Z() << std::endl;
+              << " " << axisZ.Y()
+              << " " << axisZ.Z() << std::endl;
     /**/
 
     // create a rotation along axis "tmp"
     tmp.Assign(1.3, -0.3, 1.7);
     tmp.NormalizedSelf();
     vctMatRot3 rotation(vctAxAnRot3(tmp, 3.1415 / 2.0));
+
+    // Different ways to create a Rodriguez rotation:
+    // in first example the axis will be normalized, in second
+    // example the caller must make sure the norm of the vector
+    // is the rotation angle
+    std::cout << "Rodriguez 1/2 turn rotation along X:"
+              << std::endl << " - "
+              << vctRodRot3(vctAxAnRot3(vct3(0.5, 0.0, 0.0), cmnPI, VCT_NORMALIZE))
+              << std::endl << " - "
+              << vctRodRot3(vct3(1.0, 0.0, 0.0) * cmnPI)
+              << std::endl;
 
     /* two ways to apply the rotation
        to vectors: */
@@ -81,7 +90,7 @@ void ExampleFrame(void) {
     double dotZX = newAxisZ.DotProduct(newAxisX);
 
     std::cout << "Dot products: " << dotXY << " "
-	      << dotYZ << " " << dotZX << std::endl;
+              << dotYZ << " " << dotZX << std::endl;
     /**/
 
     // create a rigid transformation frame from
@@ -98,9 +107,9 @@ void ExampleFrame(void) {
     // The product of a frame and its inverse
     // should be the identity (eye for rotation,
     // zero for translation).
-    std::cout << "frame * inverse: " << std::endl << frame * inverse
-	      << std::endl;
+    std::cout << "frame * inverse: " << std::endl
+              << frame * inverse << std::endl;
     // Compare this with the actual identity frame
     std::cout << "Identity frame: " << std::endl
-	      << vctFrm3::Identity() << std::endl;
+              << vctFrm3::Identity() << std::endl;
 }

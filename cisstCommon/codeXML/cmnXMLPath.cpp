@@ -5,8 +5,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet, Ali Uneri
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -186,6 +185,29 @@ public:
         return true;
     }
 
+    bool Exists(const char * context) const
+    {
+        std::string query = "data(";
+        query.append(context);
+        query.append(")");
+        QXmlQuery qquery;
+        QXmlResultItems results;
+        qquery.setFocus(this->Document->toString());
+        qquery.setQuery(query.c_str());
+        if (!qquery.isValid()) {
+            return false;
+        }
+        qquery.evaluateTo(&results);
+        if (results.hasError()) {
+            return false;
+        }
+        QXmlItem result = results.next();
+        if (result.isNull()) {
+            return false;
+        }
+        return true;
+    }
+
     // generic string get
     bool GetXMLValueStdString(const char * context, const char * XPath, std::string & storage)
     {
@@ -356,6 +378,29 @@ public:
             return false;
         }
         return true;
+    }
+
+    // test if path exists
+    bool Exists(const char * context)
+    {
+        /* Evaluate xpath expression */
+        /* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
+           document root in libxml2 */
+        std::string query("");
+        if (context[0] != '\0') {
+            query += "/";
+            query += context;
+        }
+
+        /* Evaluate xpath expression */
+        xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(reinterpret_cast<const xmlChar *>(query.c_str()),
+                                                            this->XPathContext);
+        if (xpathObj != 0) {
+            xmlNodeSetPtr nodes = xpathObj->nodesetval;
+            unsigned int size = (nodes)? nodes->nodeNr: 0;
+            return (size > 0);
+        }
+        return false;
     }
 
     // generic string get
@@ -591,6 +636,13 @@ bool cmnXMLPathConvertFromStdString(std::string & storage, bool & value)
     }
     return false;
 }
+
+
+bool cmnXMLPath::Exists(const char * context)
+{
+    return this->Data->Exists(context);
+}
+
 
 bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool & value)
 {

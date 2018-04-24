@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     QTableWidget()
 {
-    this->setRowCount(4);
+    this->setRowCount(3);
     this->setColumnCount(3);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
@@ -35,58 +35,67 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 #else
+    this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 #endif
     QLabel * label;
-    int rowIndex = 0;
-    
-    label = new QLabel("Average");
-    this->setCellWidget(rowIndex, 0, label);
-    QTWIAverage = new QTableWidgetItem();
-    QTWIAverage->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);  
-    QTWIAverage->setFlags(QTWIAverage->flags() ^ Qt::ItemIsEditable);
-    this->setItem(rowIndex, 1, QTWIAverage);
-    QTWIAverageHz = new QTableWidgetItem();
-    QTWIAverageHz->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    QTWIAverageHz->setFlags(QTWIAverageHz->flags() ^ Qt::ItemIsEditable);
-    this->setItem(rowIndex, 2, QTWIAverageHz);
+    int colIndex = 0;
 
-    rowIndex++;
-    label = new QLabel("Std dev");
-    this->setCellWidget(rowIndex, 0, label);
-    QTWIStdDev = new QTableWidgetItem();
-    QTWIStdDev->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    QTWIStdDev->setFlags(QTWIStdDev->flags() ^ Qt::ItemIsEditable);
-    this->setItem(rowIndex, 1, QTWIStdDev);
+    QTWIPeriodAverage = new QTableWidgetItem();
+    QTWIPeriodAverage->setToolTip("Average period");
+    QTWIPeriodAverage->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTWIPeriodAverage->setFlags(QTWIPeriodAverage->flags() ^ Qt::ItemIsEditable);
+    this->setItem(0, colIndex, QTWIPeriodAverage);
+    QTWIPeriodHz = new QTableWidgetItem();
+    QTWIPeriodHz->setToolTip("Average frequency");
+    QTWIPeriodHz->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTWIPeriodHz->setFlags(QTWIPeriodHz->flags() ^ Qt::ItemIsEditable);
+    this->setItem(1, colIndex, QTWIPeriodHz);
+    QTWIPeriodRange = new QTableWidgetItem();
+    QTWIPeriodRange->setToolTip("Min/max period");
+    QTWIPeriodRange->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTWIPeriodRange->setFlags(QTWIPeriodRange->flags() ^ Qt::ItemIsEditable);
+    this->setItem(2, colIndex, QTWIPeriodRange);
 
-    rowIndex++;
-    label = new QLabel("Range");
-    this->setCellWidget(rowIndex, 0, label);
-    QTWIMin = new QTableWidgetItem();
-    QTWIMin->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    QTWIMin->setFlags(QTWIMin->flags() ^ Qt::ItemIsEditable);
-    this->setItem(rowIndex, 1, QTWIMin);
-    QTWIMax = new QTableWidgetItem();
-    QTWIMax->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    QTWIMax->setFlags(QTWIMax->flags() ^ Qt::ItemIsEditable);
-    this->setItem(rowIndex, 2, QTWIMax);
+    colIndex++;
+    QTWILoadAverage = new QTableWidgetItem();
+    QTWILoadAverage->setToolTip("Average computation time");
+    QTWILoadAverage->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTWILoadAverage->setFlags(QTWILoadAverage->flags() ^ Qt::ItemIsEditable);
+    this->setItem(0, colIndex, QTWILoadAverage);
+    QTWILoadPercent = new QTableWidgetItem();
+    QTWILoadPercent->setToolTip("Compute time vs period");
+    QTWILoadPercent->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTWILoadPercent->setFlags(QTWILoadPercent->flags() ^ Qt::ItemIsEditable);
+    this->setItem(1, colIndex, QTWILoadPercent);
+    QTWILoadRange = new QTableWidgetItem();
+    QTWILoadRange->setToolTip("Min/max compute time");
+    QTWILoadRange->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTWILoadRange->setFlags(QTWILoadRange->flags() ^ Qt::ItemIsEditable);
+    this->setItem(2, colIndex, QTWILoadRange);
 
-    rowIndex++;
-    label = new QLabel("Load");
-    this->setCellWidget(rowIndex, 0, label);
-    QTWILoadMin = new QTableWidgetItem();
-    QTWILoadMin->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    QTWILoadMin->setFlags(QTWILoadMin->flags() ^ Qt::ItemIsEditable);
-    this->setItem(rowIndex, 1, QTWILoadMin);
-    QTWILoadMax = new QTableWidgetItem();
-    QTWILoadMax->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    QTWILoadMax->setFlags(QTWILoadMax->flags() ^ Qt::ItemIsEditable);
-    this->setItem(rowIndex, 2, QTWILoadMax);
+    colIndex++;
+    QTWIInterval = new QTableWidgetItem();
+    QTWIInterval->setToolTip("Interval duration");
+    QTWIInterval->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTWIInterval->setFlags(QTWIInterval->flags() ^ Qt::ItemIsEditable);
+    this->setItem(0, colIndex, QTWIInterval);
+    QTWINumberOfSamples = new QTableWidgetItem();
+    QTWINumberOfSamples->setToolTip("Number of period samples");
+    QTWINumberOfSamples->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTWINumberOfSamples->setFlags(QTWINumberOfSamples->flags() ^ Qt::ItemIsEditable);
+    this->setItem(1, colIndex, QTWINumberOfSamples);
+    QTWINumberOfOverruns = new QTableWidgetItem();
+    QTWINumberOfOverruns->setToolTip("Number of times computation times execeeded average period"); 
+    QTWINumberOfOverruns->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTWINumberOfOverruns->setFlags(QTWINumberOfOverruns->flags() ^ Qt::ItemIsEditable);
+    this->setItem(2, colIndex, QTWINumberOfOverruns);
 
     // compute height
-    int height = 0; // this->verticalHeader()->sizeHint().height() * this->rowCount();
-    for (rowIndex = 0; rowIndex < this->model()->rowCount(); rowIndex++) {
+    int height = 0;
+    for (int rowIndex = 0; rowIndex < this->model()->rowCount(); rowIndex++) {
         height += this->rowHeight(rowIndex);
     }
     this->setFixedHeight(height);
@@ -94,16 +103,31 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
 
 void mtsIntervalStatisticsQtWidget::SetValue(const mtsIntervalStatistics & newValue)
 {
-    const double avg = newValue.GetAvg();
-    QTWIAverage->setText(QString("%1 ms").arg(avg * 1000.0, -6, 'f', 3));
-    QTWIAverageHz->setText(QString("%1 KHz").arg(0.001 / avg, -6, 'f', 3));
-    QTWIStdDev->setText(QString("%1 ms").arg(newValue.GetStdDev() * 1000.0, -6, 'f', 3));
-    QTWIMin->setText(QString("%1 ms").arg(newValue.GetMin() * 1000.0, -6, 'f', 3));
-    QTWIMax->setText(QString("%1 ms").arg(newValue.GetMax() * 1000.0, -6, 'f', 3));
-    const double minLoad = newValue.MinComputeTime() / avg * 100.0;
-    const double maxLoad = newValue.MaxComputeTime() / avg * 100.0;
-    QTWILoadMin->setText(QString("%1\%").arg(minLoad, -4, 'f', 0));
-    QTWILoadMax->setText(QString("%1\%").arg(maxLoad, -4, 'f', 0));
+    double periodAvg = newValue.PeriodAvg();
+    if (periodAvg == 0.0) {
+        periodAvg = 1.0;
+    }
+    QTWIPeriodAverage->setText(QString("%1±%2ms")
+                               .arg(periodAvg * 1000.0, -6, 'f', 3)
+                               .arg(newValue.PeriodStdDev() * 1000.0, -6, 'f', 3));
+    QTWIPeriodHz->setText(QString("%1 KHz").arg(0.001 / periodAvg, -6, 'f', 3));
+    QTWIPeriodRange->setText(QString("%1/%2ms")
+                             .arg(newValue.PeriodMin() * 1000.0, -6, 'f', 3)
+                             .arg(newValue.PeriodMax() * 1000.0, -6, 'f', 3));
+
+    const double loadAvg = newValue.ComputeTimeAvg();
+    const double periodPercent = 100.0 / periodAvg;
+    QTWILoadAverage->setText(QString("%1±%2ms")
+                             .arg(loadAvg * 1000.0, -6, 'f', 3)
+                             .arg(newValue.ComputeTimeStdDev() * 1000.0, -6, 'f', 3));
+    QTWILoadPercent->setText(QString("%1\%").arg(loadAvg * periodPercent , -5, 'f', 1));
+    QTWILoadRange->setText(QString("%1/%2\%")
+                           .arg(newValue.ComputeTimeMin() * periodPercent, -5, 'f', 1)
+                           .arg(newValue.ComputeTimeMax() * periodPercent, -5, 'f', 1));
+
+    QTWIInterval->setText(QString("%1s").arg(newValue.StatisticsInterval(), -6, 'f', 3));
+    QTWINumberOfSamples->setText(QString("%1 samples").arg(newValue.NumberOfSamples(), 0, 'g', -1, '0'));
+    QTWINumberOfOverruns->setText(QString("%1 > period").arg(newValue.NumberOfOverruns(), 0, 'g', -1, '0'));
 }
 
 
@@ -136,4 +160,3 @@ void mtsIntervalStatisticsQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED
     GetPeriodStatistics(IntervalStatistics);
     mtsIntervalStatisticsQtWidget::SetValue(IntervalStatistics);
 }
-
