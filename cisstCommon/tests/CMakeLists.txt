@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstCommon tests
 #
-# (C) Copyright 2003-2016 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -45,6 +45,7 @@ set (SOURCE_FILES
      cmnObjectRegisterTest.cpp
      cmnPathTest.cpp
      cmnPortabilityTest.cpp
+     cmnPrintfTest.cpp
      cmnRequiresDeepCopyTest.cpp
      cmnTypeTraitsTest.cpp
      )
@@ -61,6 +62,7 @@ set (HEADER_FILES
      cmnPathTest.h
      cmnPortabilityTest.h
      cmnPortabilityTestCMake.h.in
+     cmnPrintfTest.h
      cmnRequiresDeepCopyTest.h
      cmnTypeTraitsTest.h
     )

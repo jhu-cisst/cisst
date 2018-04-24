@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2017 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -290,26 +290,22 @@ include (CheckSizeTNativeType)
 check_size_t_native_type (CISST_SIZE_T_NATIVE)
 
 
-# Determine if we can use cast to void * for CMN_LOG
+# Determine if we can use std::isnan and std::isfinite
 include (CheckCXXSourceCompiles)
-check_cxx_source_compiles(
-"#include <iostream>
-int main(int argc, char ** argv) {
-    true ? (void *) 0 : std::cerr << \"true\";
-    false ? (void *) 0 : std::cerr << \"false\";
-    return 0;
-}" CISST_OSTREAM_CAN_CAST_TO_VOID_PTR)
+check_cxx_source_compiles (
+  "#include <cmath>
+   int main(int argc, char ** argv) {
+       return std::isnan(1.0 / 0.0);
+   }" CISST_HAS_STD_ISNAN)
+check_cxx_source_compiles (
+  "#include <cmath>
+   int main(int argc, char ** argv) {
+       float f = 1.0;
+       double d = 1.0;
+       return (std::isfinite(f) && std::isfinite(d));
+   }" CISST_HAS_STD_ISFINITE)
 
-check_cxx_source_compiles(
-"#include <iostream>
-int main(int argc, char ** argv) {
-    true ? 0 : std::cerr << \"true\";
-    false ? 0 : std::cerr << \"false\";
-    return 0;
-}" CISST_OSTREAM_CAN_CAST_TO_INT)
-
-
-# Look for isfinite function
+# Look for isfinite function, this will only be used if not CISST_HAS_STD_ISFINITE
 include (CheckSymbolExists)
 check_symbol_exists (isfinite "math.h" CISST_HAS_ISFINITE)
 

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-02-18
 
-  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -29,8 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_VERSION "${CISST_VERSION}"
 
 // Deprecated paths/macros
-#define CISST_SOURCE_ROOT                       CISST_SOURCE_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
-#define CISST_BUILD_ROOT                         CISST_BUILD_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
+#define CISST_SOURCE_ROOT CISST_SOURCE_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
+#define CISST_BUILD_ROOT CISST_BUILD_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
 #define CISST_BUILD_LINK_DIRECTORIES CISST_BUILD_LINK_DIRECTORIES_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
 
 // shared library prefix/suffix
@@ -46,9 +45,11 @@ http://www.cisst.org/cisst/license.txt.
 // To allow overloading of functions for size_t
 #cmakedefine01 CISST_SIZE_T_NATIVE
 
-// For CMN_LOG macro
-#cmakedefine01 CISST_OSTREAM_CAN_CAST_TO_VOID_PTR
-#cmakedefine01 CISST_OSTREAM_CAN_CAST_TO_INT
+// Can we use cmath  std::isnan
+#cmakedefine01 CISST_HAS_STD_ISNAN
+
+// Can we use cmath  std::isfinite
+#cmakedefine01 CISST_HAS_STD_ISFINITE
 
 // Do we have isfinite global function
 #cmakedefine01 CISST_HAS_ISFINITE

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
-  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,33 +53,58 @@ const std::string cmnCompilersStrings[] = {"Undefined",
 #include <ieeefp.h>
 #endif // CISST_SOLARIS
 
+
+#if CISST_HAS_STD_ISFINITE
+
+#include <cmath>
+bool cmnIsFinite(const float & value)
+{
+    return std::isfinite(value);
+}
+
+bool cmnIsFinite(const double & value)
+{
+    return std::isfinite(value);
+}
+
+#else // CISST_HAS_STD_ISFINITE
+
 bool cmnIsFinite(const float & value)
 {
 #if CISST_HAS_ISFINITE
+  #ifndef CISST_USE_STD_ISFINITE
     return isfinite(value);
+  #else
+    return std::isfinite(value);
+  #endif
 #else
-#ifdef CISST_COMPILER_IS_MSVC
+  #ifdef CISST_COMPILER_IS_MSVC
     return _finite(value) == 1;
-#elif (CISST_OS == CISST_QNX)
+  #elif (CISST_OS == CISST_QNX)
     return isfinite(value);
-#elif (CISST_OS == CISST_SOLARIS)
+  #elif (CISST_OS == CISST_SOLARIS)
     return finite(value);
-#endif
+  #endif
 #endif
 }
 
 bool cmnIsFinite(const double & value)
 {
 #if CISST_HAS_ISFINITE
+  #ifndef CISST_USE_STD_ISFINITE
     return isfinite(value);
+  #else
+    return std::isfinite(value);
+  #endif
 #else
-#ifdef CISST_COMPILER_IS_MSVC
+  #ifdef CISST_COMPILER_IS_MSVC
     return _finite(value) == 1;
-#elif (CISST_OS == CISST_QNX)
+  #elif (CISST_OS == CISST_QNX)
     return isfinite(value);
-#elif (CISST_OS == CISST_SOLARIS)
+  #elif (CISST_OS == CISST_SOLARIS)
     return finite(value);
-#endif
+  #endif
 #endif
 }
 
+#endif // CISST_USE_STD_ISFINITE

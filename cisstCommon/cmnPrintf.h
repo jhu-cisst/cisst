@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
-  Author(s):	Ofri Sadowsky
+  Author(s):  Ofri Sadowsky
   Created on: 2006-02-15
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,7 +16,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 
 */
-
 
 
 /*!
@@ -293,34 +290,6 @@ public:
         return *this;
     }
 
-    /*! Overload operator void * to allow similar evaluations of
-      "success" as are available for ostream.  E.g.,
-      \code
-      if (!std::cout) {
-      // do something
-      }
-      \endcode
-
-      A similar test can be performed for a cmnPrintfParser object,
-      and tests the status of the output channel.
-    */
-#if CISST_OSTREAM_CAN_CAST_TO_VOID_PTR       
-    inline operator void *(void)
-    {
-        return (void *)(OutputStream);
-    }
-#elif CISST_OSTREAM_CAN_CAST_TO_INT
-    inline operator bool (void)
-    {
-        return OutputStream;
-    }
-#else
-    inline operator bool(void)
-    {
-        return OutputStream.good();
-    }
-#endif
-
     /*! The size of buffer allocated for formatting each output
       element.  Exceeding this size will truncate the output for that
       element. */
@@ -363,7 +332,7 @@ private:
       between the current sequence and the next one, then stopping
       there and waiting for input.
     */
-    void AdvanceToNextFormat(void)
+    inline void AdvanceToNextFormat(void)
     {
         FormatSequence = 0;
         DumpUntilPercent();
@@ -448,7 +417,7 @@ public:
       returns true; but if the data is of type in the function returns
       false. */
     template<typename _outputType>
-        bool MatchOutputWithFormatChar(const _outputType & data)
+    bool MatchOutputWithFormatChar(const _outputType & data)
     {
         const char * formatCharsForData = TypeIdString(data);
         const bool result = this->NextTypeIdCharIsOneOf(formatCharsForData);
