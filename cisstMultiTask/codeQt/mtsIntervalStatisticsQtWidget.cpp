@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-07-13
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,15 +32,14 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     this->verticalScrollBar()->hide();
     this->horizontalScrollBar()->hide();
 #if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     this->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 #else
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 #endif
-    QLabel * label;
     int colIndex = 0;
 
     QTWIPeriodAverage = new QTableWidgetItem();
@@ -88,17 +87,25 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     QTWINumberOfSamples->setFlags(QTWINumberOfSamples->flags() ^ Qt::ItemIsEditable);
     this->setItem(1, colIndex, QTWINumberOfSamples);
     QTWINumberOfOverruns = new QTableWidgetItem();
-    QTWINumberOfOverruns->setToolTip("Number of times computation times execeeded average period"); 
+    QTWINumberOfOverruns->setToolTip("Number of times computation times execeeded average period");
     QTWINumberOfOverruns->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     QTWINumberOfOverruns->setFlags(QTWINumberOfOverruns->flags() ^ Qt::ItemIsEditable);
     this->setItem(2, colIndex, QTWINumberOfOverruns);
 
-    // compute height
+    // set value to initialize content size
+    this->SetValue(mtsIntervalStatistics());
+
+     // compute height and width, using ResizeToContents breaks auto resize, so we set a fixed size
     int height = 0;
     for (int rowIndex = 0; rowIndex < this->model()->rowCount(); rowIndex++) {
         height += this->rowHeight(rowIndex);
     }
     this->setFixedHeight(height);
+    int width = 0;
+    for (int colIndex = 0; colIndex < this->model()->columnCount(); colIndex++) {
+        width += this->columnWidth(colIndex);
+    }
+    this->setFixedWidth(width);
 }
 
 void mtsIntervalStatisticsQtWidget::SetValue(const mtsIntervalStatistics & newValue)
