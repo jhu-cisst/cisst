@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -175,7 +173,7 @@ public:
     */
     template <size_type __size, stride_type __stride, class __dataPtrType>
     void SetRef(const vctFixedSizeConstVectorBase<__size, __stride, _elementType, __dataPtrType> & otherVector,
-                size_type startPosition, size_type length) throw(std::out_of_range)
+                size_type startPosition, size_type length) CISST_THROW(std::out_of_range)
     {
         if (startPosition + length > otherVector.size()) {
             cmnThrow(std::out_of_range("vctDynamicConstVectorRef SetRef out of range"));
@@ -201,7 +199,7 @@ public:
     */
     template <class __vectorOwnerType>
     void SetRef(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector,
-                size_type startPosition, size_type length) throw(std::out_of_range)
+                size_type startPosition, size_type length) CISST_THROW(std::out_of_range)
     {
         if (startPosition + length > otherVector.size()) {
             cmnThrow(std::out_of_range("vctDynamicConstVectorRef SetRef out of range"));

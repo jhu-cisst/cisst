@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2005-08-19
 
-  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -75,7 +73,7 @@ public:
 
 protected:
     /*! Throw an exception unless this rotation is normalized. */
-    inline void ThrowUnlessIsNormalized(void) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(void) const CISST_THROW(std::runtime_error) {
         if (! IsNormalized()) {
             cmnThrow(std::runtime_error("vctMatrixRotation3ConstBase: This rotation is not normalized"));
         }
@@ -86,7 +84,7 @@ protected:
       \param input An object with \c IsNormalized method.
     */
     template <class _inputType>
-    inline void ThrowUnlessIsNormalized(const _inputType & input) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(const _inputType & input) const CISST_THROW(std::runtime_error) {
         if (! input.IsNormalized()) {
             cmnThrow(std::runtime_error("vctMatrixRotation3ConstBase: Input is not normalized"));
         }
@@ -210,7 +208,7 @@ public:
     inline void
     ApplyTo(const vctDynamicConstVectorBase<__vectorOwnerType1, value_type> & input,
             vctDynamicVectorBase<__vectorOwnerType2, value_type> & output) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         CMN_ASSERT(input.Pointer() != output.Pointer());
         CMN_ASSERT(input.size() == DIMENSION);
@@ -227,7 +225,7 @@ public:
     inline void
     ApplyTo(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & input,
             vctFixedSizeVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & output) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         CMN_ASSERT(input.Pointer() != output.Pointer());
         CMN_ASSERT(input.size() == DIMENSION);
@@ -463,4 +461,3 @@ public:
 
 
 #endif  // _vctMatrixRotation3ConstBase_h
-

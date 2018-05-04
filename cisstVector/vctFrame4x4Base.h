@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2007-09-13
 
-  (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -120,7 +118,7 @@ public:
     template <class __rotationType, class __translationType>
     ThisType & From(const __rotationType & rotation,
                     const __translationType & translation)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->RotationRef.From(rotation);
         this->TranslationRef.Assign(translation);
@@ -162,7 +160,7 @@ public:
     //@{
     template <class __rotationType>
     ThisType & From(const vctFrameBase<__rotationType> & frame)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(frame.Rotation(), frame.Translation());
         return *this;

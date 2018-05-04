@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -64,7 +61,7 @@ public:
 
     static void SerializeText(const_pointer data,
                               std::ostream & outputStream,
-                              const char delimiter) throw (std::runtime_error)
+                              const char delimiter) CISST_THROW(std::runtime_error)
     {
         const_pointer ptr = data;
         for (size_t index = 0; index < _size; ++index, ++ptr) {
@@ -77,7 +74,7 @@ public:
 
     static void DeSerializeText(pointer data,
                                 std::istream & inputStream,
-                                const char delimiter) throw (std::runtime_error)
+                                const char delimiter) CISST_THROW(std::runtime_error)
     {
         pointer ptr = data;
         for (size_t index = 0; index < _size; ++index, ++ptr) {
@@ -109,7 +106,7 @@ public:
     }
 
     static void SerializeBinary(const_pointer data, std::ostream & outputStream)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         const_pointer ptr = data;
         for (size_t index = 0; index < _size; ++index, ++ptr) {
@@ -121,7 +118,7 @@ public:
                                   std::istream & inputStream,
                                   const cmnDataFormat & localFormat,
                                   const cmnDataFormat & remoteFormat)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         pointer ptr = data;
         for (size_t index = 0; index < _size; ++index, ++ptr) {
@@ -149,7 +146,7 @@ public:
 
     static std::string ScalarDescription(const_pointer data, const size_t index,
                                          const std::string & userDescription = "v")
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         size_t elementIndex, inElementIndex;
         std::stringstream suffix;
@@ -164,7 +161,7 @@ public:
     }
 
     static double Scalar(const_pointer data, const size_t index)
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         size_t elementIndex, inElementIndex;
         const size_t scalarNumber = cmnData<_elementType[_size]>::ScalarNumber(data);

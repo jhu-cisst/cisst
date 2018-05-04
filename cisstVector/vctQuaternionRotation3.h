@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2004-01-15
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -74,34 +72,34 @@ class vctQuaternionRotation3: public vctQuaternionRotation3Base<vctFixedSizeVect
     template <class __containerType>
     inline
     vctQuaternionRotation3(const vctQuaternionRotation3Base<__containerType> & other)
-        throw(std::runtime_error):
+        CISST_THROW(std::runtime_error):
         BaseType(other)
     {}
 
     inline
     vctQuaternionRotation3(const value_type & x, const value_type & y, const value_type & z,
                            const value_type & r)
-        throw(std::runtime_error):
+        CISST_THROW(std::runtime_error):
         BaseType(x, y, z, r)
     {}
 
     template <class __containerType>
     explicit inline
     vctQuaternionRotation3(const vctMatrixRotation3Base<__containerType> & matrixRotation)
-        throw(std::runtime_error):
+        CISST_THROW(std::runtime_error):
         BaseType(matrixRotation)
     {}
 
     explicit inline
     vctQuaternionRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
-        throw(std::runtime_error):
+        CISST_THROW(std::runtime_error):
         BaseType(axisAngleRotation)
     {}
 
     template <class __containerType>
     explicit inline
     vctQuaternionRotation3(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation)
-        throw(std::runtime_error):
+        CISST_THROW(std::runtime_error):
         BaseType(rodriguezRotation)
     {}
 

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor
   Created on: 2004-10-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstNumerical/nmrLDPSolver.h>
 
 void nmrLDPSolver::Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     /* check that the size matches with Allocate() */
     if ((M != static_cast<CISSTNETLIB_INTEGER>( G.rows()))
@@ -90,4 +88,3 @@ void nmrLDPSolver::Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatr
         X(k,0) = -R(k,0) / R(N,0);
     }
 }
-

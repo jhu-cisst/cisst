@@ -5,14 +5,13 @@
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
 This software is provided "as is" under an open source license, with
 no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
-
 
 --- end cisst license ---
 */
@@ -416,7 +415,7 @@ void vctPlot2DBase::Signal::AppendPoint(const vctDouble2 & point)
 }
 
 vctDouble2 vctPlot2DBase::Signal::GetPointAt(size_t index)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     if (index >= Data.size()) {
         cmnThrow("vctPlot2DBase::Signal::GetPointAt: index bigger than bufferSize");
@@ -426,7 +425,7 @@ vctDouble2 vctPlot2DBase::Signal::GetPointAt(size_t index)
 }
 
 void vctPlot2DBase::Signal::SetPointAt(size_t index, const vctDouble2 & point)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     if (index >= Data.size()) {
         cmnThrow("vctPlot2DBase::Signal::SetPointAt: index bigger than bufferSize");
@@ -437,7 +436,7 @@ void vctPlot2DBase::Signal::SetPointAt(size_t index, const vctDouble2 & point)
 }
 
 void vctPlot2DBase::Signal::SetArrayAt(size_t index, const double * pointArray, size_t size, size_t pointDimension)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     if (((index + (size/this->PointSize) ) >= Data.size())
         && (pointDimension != this->PointSize)) {
@@ -450,7 +449,7 @@ void vctPlot2DBase::Signal::SetArrayAt(size_t index, const double * pointArray, 
 }
 
 bool vctPlot2DBase::Signal::AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     bool result = false;
 
@@ -522,7 +521,7 @@ bool vctPlot2DBase::Signal::AppendArray(const double * pointArray, size_t arrayS
 }
 
 bool vctPlot2DBase::Signal::PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // check if there is enough space for array we want to insert
     bool result = false;

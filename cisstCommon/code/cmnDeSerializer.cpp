@@ -71,7 +71,7 @@ cmnGenericObject * cmnDeSerializer::DeSerialize(const bool serializeObject) {
 }
 
 
-void cmnDeSerializer::DeSerializeServices(void) throw(std::runtime_error) {
+void cmnDeSerializer::DeSerializeServices(void) CISST_THROW(std::runtime_error) {
     std::string className;
     cmnDeSerializeRaw(this->InputStream, className);
     // look for local equivalent

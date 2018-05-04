@@ -35,7 +35,7 @@ const char * const cmnTokenizer::DefaultDelimiters = " \t\n\012";
 const char * const cmnTokenizer::DefaultEscapeMarkers = "\\";
 const char * const cmnTokenizer::DefaultQuoteMarkers = "\"'";
 
-void cmnTokenizer::Parse(const char * string) throw(std::runtime_error)
+void cmnTokenizer::Parse(const char * string) CISST_THROW(std::runtime_error)
 {
     const size_t stringLength = strlen(string);
     StringBuffer.clear();

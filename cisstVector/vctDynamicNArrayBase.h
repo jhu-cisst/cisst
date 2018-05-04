@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Daniel Li, Ofri Sadowsky, Anton Deguet
   Created on: 2006-07-10
 
-  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -184,7 +182,7 @@ public:
       operator overloading is unavailable or inconvenient.
       \return a const reference to the element at indices */
     reference at(size_type metaIndex)
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         this->ThrowUnlessValidIndex(metaIndex);
         return (begin())[metaIndex];
@@ -193,7 +191,7 @@ public:
 
     /* documented in base class */
     const_reference at(size_type metaIndex) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return BaseType::at(metaIndex);
     }
@@ -204,7 +202,7 @@ public:
       operator overloading is unavailable or inconvenient.
       \return a reference to the element at indices */
     reference at(const nsize_type & coordinates)
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         this->ThrowUnlessValidIndex(coordinates);
         return *(Pointer(coordinates));
@@ -212,7 +210,7 @@ public:
 
     /* documented in base class */
     const_reference at(const nsize_type & coordinates) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return BaseType::at(coordinates);
     }
@@ -220,14 +218,14 @@ public:
 
     /*! Overloaded operator () for simplified (non const) element access with bounds checking */
     reference operator () (const nsize_type & coordinates)
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return this->at(coordinates);
     }
 
     /*! documented in base class */
      const_reference operator () (const nsize_type & coordinates) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return BaseType::operator()(coordinates);
     }
@@ -303,7 +301,6 @@ public:
         \note The number of dimensions is reduced by one.
     */
     SliceRefType Slice(dimension_type dimension, size_type index)
-        throw(std::runtime_error, std::out_of_range)
     {
         return SlicesTypes::SliceOf(*this, dimension, index);
     }
@@ -311,7 +308,6 @@ public:
 
     /*! documented in base class */
     ConstSliceRefType Slice(dimension_type dimension, size_type index) const
-        throw(std::runtime_error, std::out_of_range)
     {
         return BaseType::Slice(dimension, index);
     }
@@ -546,7 +542,7 @@ public:
     template <class __nArrayOwnerType>
     inline bool FastCopyOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & source,
                            bool performSafetyChecks = true)
-        throw(std::runtime_error)
+        CISST_THROW(gstd::runtime_error)
     {
         return vctFastCopy::NArrayCopy(*this, source, performSafetyChecks);
     }
@@ -1115,4 +1111,3 @@ public:
 
 
 #endif // _vctDynamicNArrayBase_h
-

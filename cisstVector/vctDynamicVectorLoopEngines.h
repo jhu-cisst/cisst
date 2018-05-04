@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on:  2004-07-01
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -69,7 +67,7 @@ class vctDynamicVectorLoopEngines {
 
     /*! Helper function to throw an exception whenever sizes mismatch.
       This enforces that a standard message is sent. */
-    inline static void ThrowException(void) throw(std::runtime_error) {
+    inline static void ThrowException(void) CISST_THROW(std::runtime_error) {
         cmnThrow(std::runtime_error("vctDynamicVectorLoopEngines: Sizes of vectors don't match"));
     }
 

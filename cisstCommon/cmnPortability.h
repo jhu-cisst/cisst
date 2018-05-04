@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
-  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -536,6 +536,16 @@ bool CISST_EXPORT cmnIsFinite(const double & value);
 #endif
 
 
+#undef CISST_THROW
+#ifdef __cplusplus
+  #if (__cplusplus > 199711L)
+    #define CISST_THROW(exceptionParameter) 
+  #endif
+#endif
+
+#ifndef CISST_THROW
+  #define CISST_THROW(exceptionParameter) throw (exceptionParameter)
+#endif
 
 
 #ifndef DOXYGEN

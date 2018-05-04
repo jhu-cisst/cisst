@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -168,7 +166,7 @@ public:
       \note This constructor does not assert that the size is correct,
       as there is no way to know how many arguments were passed.
     */
-    vctDynamicVector(size_type size, value_type element0, value_type element1, ...) throw(std::runtime_error) {
+    vctDynamicVector(size_type size, value_type element0, value_type element1, ...) CISST_THROW(std::runtime_error) {
         if (size < 2) {
             cmnThrow(std::runtime_error("vctDynamicVector: Constructor from va_list requires size >= 2"));
         }
@@ -677,7 +675,7 @@ vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::Ceil(void) const {
 /* documented in class vctDynamicConstVectorBase */
 template <class _vectorOwnerType, class _elementType>
 inline typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::VectorReturnType
-vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::Normalized(void) const throw(std::runtime_error) {
+vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::Normalized(void) const CISST_THROW(std::runtime_error) {
     vctDynamicVector<value_type> resultStorage(*this);
     resultStorage.NormalizedSelf();
     return vctReturnDynamicVector<value_type>(resultStorage);

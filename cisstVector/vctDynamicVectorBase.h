@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -167,23 +167,23 @@ public:
       or inconvenient.
 
       \return a non-const reference to element[index] */
-    reference at(index_type index) throw(std::out_of_range) {
+    reference at(index_type index) CISST_THROW(std::out_of_range) {
         this->ThrowUnlessValidIndex(index);
         return *(Pointer(index));
     }
 
     /* documented in base class */
-    const_reference at(index_type index) const throw(std::out_of_range) {
+    const_reference at(index_type index) const CISST_THROW(std::out_of_range) {
         return BaseType::at(index);
     }
 
     /*! Overloaded operator () for simplified (non-const) element access with bounds checking */
-    inline reference operator() (index_type index) throw(std::out_of_range) {
+    inline reference operator() (index_type index) CISST_THROW(std::out_of_range) {
         return this->at(index);
     }
 
     /* documented in base class */
-    inline const_reference operator() (index_type index) const throw(std::out_of_range) {
+    inline const_reference operator() (index_type index) const CISST_THROW(std::out_of_range) {
         return BaseType::operator()(index);
     }
 
@@ -398,7 +398,7 @@ public:
     template <class __vectorOwnerType>
     inline bool FastCopyOf(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & source,
                            bool performSafetyChecks = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return vctFastCopy::VectorCopy(*this, source, performSafetyChecks);
     }
@@ -406,7 +406,7 @@ public:
     template <size_type __size, stride_type __stride, class __dataPtrType>
     inline bool FastCopyOf(const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType> & source,
                            bool performSafetyChecks = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return vctFastCopy::VectorCopy(*this, source, performSafetyChecks);
     }
@@ -447,7 +447,7 @@ public:
       as there is no way to know how many arguments were passed.
     */
 
-    inline ThisType & Assign(value_type element0, value_type element1, ...) throw(std::runtime_error) {
+    inline ThisType & Assign(value_type element0, value_type element1, ...) CISST_THROW(std::runtime_error) {
         const size_type size = this->size();
         if (size < 2) {
             cmnThrow(std::runtime_error("vctDynamicVector: Assign from va_list requires size >= 2"));
@@ -661,7 +661,7 @@ public:
     /*! Create a reference to a sub vector */
     //@{
     vctDynamicVectorRef<_elementType>
-    Ref(const size_type size, const size_type startPosition = 0) throw (std::out_of_range) {
+    Ref(const size_type size, const size_type startPosition = 0) CISST_THROW(std::out_of_range) {
         if ((startPosition + size) > this->size()) {
             cmnThrow(std::out_of_range("vctDynamicConstVectorBase::Ref: reference is out of range"));
         }
@@ -669,7 +669,7 @@ public:
     }
 
     vctDynamicConstVectorRef<_elementType>
-    Ref(const size_type size, const size_type startPosition = 0) const throw (std::out_of_range) {
+    Ref(const size_type size, const size_type startPosition = 0) const CISST_THROW(std::out_of_range) {
         return BaseType::Ref(size, startPosition);
     }
     //@}
@@ -1327,7 +1327,7 @@ public:
 
     /* documented above */
     template <class __vectorOwnerType>
-    inline ThisType & NormalizedOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) throw(std::runtime_error) {
+    inline ThisType & NormalizedOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) CISST_THROW(std::runtime_error) {
         *this = otherVector;
         this->NormalizedSelf();
         return *this;
@@ -1376,7 +1376,7 @@ public:
         return *this;
     }
 
-    inline ThisType & NormalizedSelf(void) throw(std::runtime_error) {
+    inline ThisType & NormalizedSelf(void) CISST_THROW(std::runtime_error) {
         value_type norm = value_type(this->Norm());
         if (norm >= TypeTraits::Tolerance()) {
             this->Divide(norm);

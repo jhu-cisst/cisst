@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):	Anton Deguet
   Created on:	2007-09-14
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -57,4 +54,3 @@ vctFrame4x4ConstBase<vctFixedSizeMatrix<float, 4, 4, VCT_COL_MAJOR> >::Identity(
     static const FrameValueType result(ThisType::Eye());
     return result;
 }
-

@@ -80,8 +80,8 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
         }
     }
     outputStream << " };" << std::endl
-                 << "    static std::string " << enumName << "ToString(const " << enumName << " & value) throw (std::runtime_error);" << std::endl
-                 << "    static " << enumName << " " << enumName << "FromString(const std::string & value) throw (std::runtime_error);" << std::endl
+                 << "    static std::string " << enumName << "ToString(const " << enumName << " & value) CISST_THROW(std::runtime_error);" << std::endl
+                 << "    static " << enumName << " " << enumName << "FromString(const std::string & value) CISST_THROW(std::runtime_error);" << std::endl
                  << "    static const std::vector<int> & " << enumName << "VectorInt(void);" << std::endl
                  << "    static const std::vector<std::string> & " << enumName << "VectorString(void);" << std::endl;
 }
@@ -125,7 +125,7 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
 
     // to string
     std::string methodName = cScope + "::" + name + "ToString";
-    outputStream << "std::string " << methodName << "(const " << cScope << "::" << name << " & data) throw (std::runtime_error) {" << std::endl
+    outputStream << "std::string " << methodName << "(const " << cScope << "::" << name << " & data) CISST_THROW(std::runtime_error) {" << std::endl
                  << "    switch (data) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
         outputStream << "        case " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ":" << std::endl
@@ -142,7 +142,7 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
 
     // from string
     methodName = cScope + "::" + name + "FromString";
-    outputStream << cScope << "::" << name << " " << methodName << "(const std::string & value) throw (std::runtime_error) {" << std::endl;
+    outputStream << cScope << "::" << name << " " << methodName << "(const std::string & value) CISST_THROW(std::runtime_error) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
         outputStream << "    if (value == \"" << Scopes[index]->GetFieldValue("name") << "\") {" << std::endl
                      << "        return " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ";" << std::endl

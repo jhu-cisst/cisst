@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,9 +14,7 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
-
 
 #pragma once
 #ifndef _cmnDataFunctionsString_h
@@ -37,20 +33,20 @@ size_t CISST_EXPORT cmnDataDeSerializeBinary(std::string & data, const char * bu
                                              const cmnDataFormat & remoteFormat);
 
 void CISST_EXPORT cmnDataSerializeBinary(const std::string & data,
-                                         std::ostream & outputStream) throw (std::runtime_error);
+                                         std::ostream & outputStream) CISST_THROW(std::runtime_error);
 
 void CISST_EXPORT cmnDataDeSerializeBinary(std::string & data,
                                            std::istream & inputStream,
                                            const cmnDataFormat & localFormat,
-                                           const cmnDataFormat & remoteFormat) throw (std::runtime_error);
+                                           const cmnDataFormat & remoteFormat) CISST_THROW(std::runtime_error);
 
 void CISST_EXPORT cmnDataSerializeText(const std::string & data,
                                        std::ostream & outputStream,
-                                       const char delimiter = ',') throw (std::runtime_error);
+                                       const char delimiter = ',') CISST_THROW(std::runtime_error);
 
 void CISST_EXPORT cmnDataDeSerializeText(std::string & data,
                                          std::istream & inputStream,
-                                         const char delimiter = ',') throw (std::runtime_error);
+                                         const char delimiter = ',') CISST_THROW(std::runtime_error);
 
 
 template <>
@@ -85,7 +81,7 @@ public:
 
     static void SerializeBinary(const DataType & data,
                                 std::ostream & outputStream)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataSerializeBinary(data, outputStream);
     }
@@ -94,7 +90,7 @@ public:
                                   std::istream & inputStream,
                                   const cmnDataFormat & localFormat,
                                   const cmnDataFormat & remoteFormat)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataDeSerializeBinary(data, inputStream, localFormat, remoteFormat);
     }
@@ -102,7 +98,7 @@ public:
     static void SerializeText(const DataType & data,
                               std::ostream & outputStream,
                               const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataSerializeText(data, outputStream, delimiter);
     }
@@ -110,7 +106,7 @@ public:
     static void DeSerializeText(DataType & data,
                                 std::istream & inputStream,
                                 const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataDeSerializeText(data, inputStream, delimiter);
     }
@@ -124,12 +120,12 @@ public:
     }
 
     static std::string ScalarDescription(const std::string & CMN_UNUSED(data), const size_t CMN_UNUSED(index),
-                                         const std::string & CMN_UNUSED(userDescription)) throw (std::out_of_range) {
+                                         const std::string & CMN_UNUSED(userDescription)) CISST_THROW(std::out_of_range) {
         cmnThrow(std::out_of_range("cmnDataScalarDescription: std::string has no scalar"));
         return "n/a";
     }
 
-    static double Scalar(const std::string & CMN_UNUSED(data), const size_t CMN_UNUSED(index)) throw (std::out_of_range) {
+    static double Scalar(const std::string & CMN_UNUSED(data), const size_t CMN_UNUSED(index)) CISST_THROW(std::out_of_range) {
         cmnThrow(std::out_of_range("cmnDataScalar: std::string has no scalar"));
         return 1.234;
     }

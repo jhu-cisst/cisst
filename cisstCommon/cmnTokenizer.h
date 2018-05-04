@@ -123,10 +123,10 @@ class CISST_EXPORT cmnTokenizer
       an exception.
       \param string the text to be parsed.
     */
-    void Parse(const char * string) throw(std::runtime_error);
+    void Parse(const char * string) CISST_THROW(std::runtime_error);
 
 
-    inline void Parse(const std::string & string) throw(std::runtime_error) {
+    inline void Parse(const std::string & string) CISST_THROW(std::runtime_error) {
         Parse(string.c_str());
     }
 

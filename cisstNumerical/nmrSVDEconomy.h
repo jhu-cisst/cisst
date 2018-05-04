@@ -5,8 +5,7 @@
   Author(s): Ankur Kapoor, Anton Deguet
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -219,7 +218,7 @@ protected:
     inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & inU,
                                                vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
                                                vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
          // check sizes and storage order
         const size_type minmn = (MMember < NMember) ? MMember : NMember;
@@ -260,7 +259,7 @@ protected:
     template <typename _vectorOwnerTypeWorkspace>
     inline void
     ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         const size_type lwork = nmrSVDEconomyDynamicData::WorkspaceSize(MMember, NMember);
         if (lwork > inWorkspace.size()) {
@@ -330,7 +329,7 @@ public:
     UpdateMatrixS(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
                   const vctDynamicConstVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & vectorS,
                   vctDynamicMatrixBase<_matrixOwnerTypeS, CISSTNETLIB_DOUBLE> & matrixS)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         const size_type minmn = (A.rows() < A.cols()) ? A.rows() : A.cols();
         if ((minmn != matrixS.rows()) || (minmn != matrixS.cols())) {
@@ -578,7 +577,7 @@ public:
                 vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
                 vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt,
                 vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->SetDimension(inU.rows(), inVt.rows(), inU.StorageOrder());
         this->AllocateOutputWorkspace(false, false);
@@ -605,7 +604,7 @@ public:
     void SetRefOutput(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & inU,
                       vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
                       vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->SetDimension(inU.rows(), inVt.rows(), inU.StorageOrder());
         this->ThrowUnlessOutputSizeIsCorrect(inU, inS, inVt);
@@ -800,7 +799,7 @@ public:
 template <class _matrixOwnerType>
 inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> & A,
                                          nmrSVDEconomyDynamicData & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typename nmrSVDEconomyDynamicData::Friend dataFriend(data);
     CISSTNETLIB_INTEGER Info;
@@ -936,4 +935,3 @@ inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA,
 
 
 #endif
-

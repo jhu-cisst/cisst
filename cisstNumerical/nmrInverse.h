@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2006-01-27
 
-  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -167,7 +165,7 @@ protected:
     */
     template <class _vectorOwnerTypePivotIndices>
     inline void ThrowUnlessPivotIndicesSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         // check sizes and compacity
         const size_type maxSize1 = (SizeMember > 1) ? SizeMember : 1;
@@ -188,7 +186,7 @@ protected:
     */
     template <class _vectorOwnerTypeWorkspace>
     inline void ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         // check sizes and compacity
         const size_type maxSize1 = (SizeMember > 1) ? SizeMember : 1;
@@ -373,7 +371,7 @@ public:
     void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
                 vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices,
                 vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->SetDimension(A.rows(), A.StorageOrder());
         this->AllocatePivotIndicesWorkspace(false, false);
@@ -573,7 +571,7 @@ public:
 template <class _matrixOwnerType>
 inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> & A,
                             nmrInverseDynamicData & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typename nmrInverseDynamicData::Friend dataFriend(data);
     CISSTNETLIB_INTEGER info;

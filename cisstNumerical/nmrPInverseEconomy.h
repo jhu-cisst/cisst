@@ -5,7 +5,7 @@
   Author(s): Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -253,7 +253,7 @@ protected:
     */
     template <typename _matrixOwnerTypePInverse>
     inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> & pInverse) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         // check sizes and storage order
         if ((MMember != pInverse.cols()) || (NMember != pInverse.rows())) {
@@ -274,7 +274,7 @@ protected:
     template <typename _vectorOwnerTypeWorkspace>
     inline void
     ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         const size_type lwork = nmrSVDEconomyDynamicData::WorkspaceSize(MMember, NMember);
         if (lwork > workspace.size()) {
@@ -588,7 +588,7 @@ public:
 */
 template <class _matrixOwnerType>
 inline CISSTNETLIB_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> &A,
-                                    nmrPInverseEconomyDynamicData &data) throw (std::runtime_error)
+                                    nmrPInverseEconomyDynamicData &data) CISST_THROW(std::runtime_error)
 {
     typedef unsigned int size_type;
 
@@ -676,4 +676,3 @@ inline CISSTNETLIB_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerT
 
 
 #endif
-

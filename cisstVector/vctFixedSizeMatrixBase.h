@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2003-11-04
 
-  (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -184,13 +184,13 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       This method can be a handy substitute for the overloaded operator () when
       operator overloading is unavailable or inconvenient.
       \return a reference to the index-th element (iterator order) */
-    reference at(size_type index) throw(std::out_of_range) {
+    reference at(size_type index) CISST_THROW(std::out_of_range) {
         this->ThrowUnlessValidIndex(index);
         return (begin())[index];
     }
 
     /* documented in base class */
-    const_reference at(size_type index) const throw(std::out_of_range) {
+    const_reference at(size_type index) const CISST_THROW(std::out_of_range) {
         return BaseType::at(index);
     }
 
@@ -199,25 +199,25 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       This method can be a handy substitute for the overloaded operator () when
       operator overloading is unavailable or inconvenient.
       \return a reference to the element at rowIndex, colIndex */
-    reference at(size_type rowIndex, size_type colIndex) throw(std::out_of_range) {
+    reference at(size_type rowIndex, size_type colIndex) CISST_THROW(std::out_of_range) {
         this->ThrowUnlessValidIndex(rowIndex, colIndex);
         return *(Pointer(rowIndex, colIndex));
     }
 
     /* documented in base class */
-    const_reference at(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    const_reference at(size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         return BaseType::at(rowIndex, colIndex);
     }
 
 #ifndef SWIG
     /*! Access an element by index.  See method at().
       \return a const reference to element[rowIndex, colIndex] */
-    reference operator()(size_type rowIndex, size_type colIndex) throw(std::out_of_range) {
+    reference operator()(size_type rowIndex, size_type colIndex) CISST_THROW(std::out_of_range) {
         return at(rowIndex, colIndex);
     }
 
     /* documented in base class */
-    const_reference operator()(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    const_reference operator()(size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         return BaseType::operator()(rowIndex, colIndex);
     }
 #endif
@@ -275,7 +275,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     //@{
     template <vct::size_type __subRows, vct::size_type __subCols>
     vctFixedSizeMatrixRef<_elementType, __subRows, __subCols, _rowStride, _colStride>
-    Ref(const size_type startRow = 0, const size_type startCol = 0) throw (std::out_of_range) {
+    Ref(const size_type startRow = 0, const size_type startCol = 0) CISST_THROW(std::out_of_range) {
         vctFixedSizeMatrixRef<_elementType, __subRows, __subCols, _rowStride, _colStride>
             result(*this, startRow, startCol);
         return result;
@@ -283,7 +283,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
     template <vct::size_type __subRows, vct::size_type __subCols>
     vctFixedSizeConstMatrixRef<_elementType, __subRows, __subCols, _rowStride, _colStride>
-    Ref(const size_type startRow = 0, const size_type startCol = 0) const throw (std::out_of_range) {
+    Ref(const size_type startRow = 0, const size_type startCol = 0) const CISST_THROW(std::out_of_range) {
         return BaseType::Ref(startRow, startCol);
     }
     //@}
@@ -668,7 +668,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     template <class __matrixOwnerType>
     inline bool FastCopyOf(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & source,
                            bool performSafetyChecks = vctFastCopy::PerformChecks)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return vctFastCopy::MatrixCopy(*this, source, performSafetyChecks);
     }
@@ -676,7 +676,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     template <class __dataPtrType>
     inline bool FastCopyOf(const vctFixedSizeConstMatrixBase<ROWS, COLS, ROWSTRIDE, COLSTRIDE, value_type, __dataPtrType> & source,
                            bool performSafetyChecks = vctFastCopy::PerformChecks)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return vctFastCopy::MatrixCopy(*this, source, performSafetyChecks);
     }

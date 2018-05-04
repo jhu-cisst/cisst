@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -168,7 +168,7 @@ protected:
 
 
     /*! Check the validity of an index. */
-    inline void ThrowUnlessValidIndex(size_type index) const throw(std::out_of_range) {
+    inline void ThrowUnlessValidIndex(size_type index) const CISST_THROW(std::out_of_range) {
         if (! ValidIndex(index)) {
             cmnThrow(std::out_of_range("vctDynamicMatrix: Invalid index"));
         }
@@ -176,7 +176,7 @@ protected:
 
 
     /*! Check the validity of the row and column indices. */
-    inline void ThrowUnlessValidIndex(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    inline void ThrowUnlessValidIndex(size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         if (! ValidIndex(rowIndex, colIndex)) {
             cmnThrow(std::out_of_range("vctDynamicMatrix: Invalid indices"));
         }
@@ -184,14 +184,14 @@ protected:
 
 
     /*! Throw an exception unless the row index is valid */
-    inline void ThrowUnlessValidRowIndex(size_type index) const throw(std::out_of_range) {
+    inline void ThrowUnlessValidRowIndex(size_type index) const CISST_THROW(std::out_of_range) {
         if (! ValidRowIndex(index)) {
             cmnThrow(std::out_of_range("vctDynamicMatrix: Invalid row index"));
         }
     }
 
     /*! Throw an exception unless the column index is valid */
-    inline void ThrowUnlessValidColIndex(size_type index) const throw(std::out_of_range) {
+    inline void ThrowUnlessValidColIndex(size_type index) const CISST_THROW(std::out_of_range) {
         if (! ValidColIndex(index)) {
             cmnThrow(std::out_of_range("vctDynamicMatrix: Invalid column index"));
         }
@@ -286,7 +286,7 @@ public:
       the overloaded operator [] when operator overloading is
       unavailable or inconvenient.  \return a const reference to
       element[index] */
-    const_reference at(size_type index) const throw(std::out_of_range) {
+    const_reference at(size_type index) const CISST_THROW(std::out_of_range) {
         ThrowUnlessValidIndex(index);
         return (begin())[index];
     }
@@ -343,13 +343,13 @@ public:
       This method can be a handy substitute for the overloaded operator () when
       operator overloading is unavailable or inconvenient.
       \return a const reference to the element at rowIndex, colIndex */
-    const_reference at(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    const_reference at(size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         ThrowUnlessValidIndex(rowIndex, colIndex);
         return *(Pointer(rowIndex, colIndex));
     }
 
     /*! Overloaded operator () for simplified (const) element access with bounds checking */
-    const_reference operator () (size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    const_reference operator () (size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         return this->at(rowIndex, colIndex);
     }
 
@@ -364,12 +364,12 @@ public:
     }
 
 
-    ConstRowRefType Row(size_type index) const throw(std::out_of_range) {
+    ConstRowRefType Row(size_type index) const CISST_THROW(std::out_of_range) {
         ThrowUnlessValidRowIndex(index);
         return ConstRowRefType(cols(), Pointer(index, 0), col_stride());
     }
 
-    ConstColumnRefType Column(size_type index) const throw(std::out_of_range) {
+    ConstColumnRefType Column(size_type index) const CISST_THROW(std::out_of_range) {
         ThrowUnlessValidColIndex(index);
         return ConstColumnRefType(rows(), Pointer(0, index), row_stride());
     }
@@ -396,7 +396,7 @@ public:
       \note This method will throw an exception if the rows are not
       compact, i.e. if the column stride is not equal to 1.
     */
-    ConstVectorPointerType & RowPointers(ConstVectorPointerType & rowPointers) const throw(std::runtime_error) {
+    ConstVectorPointerType & RowPointers(ConstVectorPointerType & rowPointers) const CISST_THROW(std::runtime_error) {
         if (! (this->col_stride() == 1)) {
             cmnThrow(std::runtime_error("vctDynamicMatrix: RowPointers requires compact rows"));
         }
@@ -413,7 +413,7 @@ public:
     /*! Create a const reference to a sub matrix */
     vctDynamicConstMatrixRef<_elementType>
     Ref(const size_type rows, const size_type cols,
-        const size_type startRow = 0, const size_type startCol = 0) const throw (std::out_of_range) {
+        const size_type startRow = 0, const size_type startCol = 0) const CISST_THROW(std::out_of_range) {
         if (((startRow + rows) > this->rows())
             || ((startCol + cols) > this->cols())) {
             cmnThrow(std::out_of_range("vctDynamicConstMatrixBase::Ref: reference is out of range"));

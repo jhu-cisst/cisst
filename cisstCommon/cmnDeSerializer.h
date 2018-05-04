@@ -48,7 +48,7 @@ template <class _elementType, bool>
 class cmnDeSerializeRawImpl
 {
 public:
-    static void DeSerializeRaw(std::istream & inputStream, _elementType & data) throw (std::runtime_error)
+    static void DeSerializeRaw(std::istream & inputStream, _elementType & data) CISST_THROW(std::runtime_error)
     {
         inputStream.read(reinterpret_cast<char *>(&data), sizeof(_elementType));
         if (inputStream.fail()) {
@@ -64,7 +64,7 @@ template <class _elementType>
 class cmnDeSerializeRawImpl<_elementType, true>
 {
 public:
-    static void DeSerializeRaw(std::istream & inputStream, _elementType & data) throw (std::runtime_error)
+    static void DeSerializeRaw(std::istream & inputStream, _elementType & data) CISST_THROW(std::runtime_error)
     {
         data.DeSerializeRaw(inputStream);
     }
@@ -80,7 +80,7 @@ public:
 
 template <class _elementType>
 inline void cmnDeSerializeRaw(std::istream & inputStream, _elementType & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typedef cmnDeSerializeRawImpl<_elementType, cmnIsDerivedFrom<_elementType, cmnGenericObject>::IS_DERIVED> impl;
     impl::DeSerializeRaw(inputStream, data);
@@ -94,7 +94,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, _elementType & data)
   This function should be use to implement the DeSerializeRaw method of
   classes derived from cmnGenericObject. */
 inline void cmnDeSerializeSizeRaw(std::istream & inputStream, size_t & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     unsigned long long int dataToRead;
     cmnDeSerializeRaw(inputStream, dataToRead);
@@ -112,7 +112,7 @@ inline void cmnDeSerializeSizeRaw(std::istream & inputStream, size_t & data)
   input stream.  If the read operation fails, an exception is thrown
   (<code>std::runtime_error</code>). */
 inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     std::string::size_type size = 0;
     cmnDeSerializeSizeRaw(inputStream, size);
@@ -143,7 +143,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
   (<code>std::runtime_error</code>). */
 template <class _elementType>
 inline void cmnDeSerializeRaw(std::istream & inputStream, std::vector<_elementType> & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typename std::vector<_elementType>::size_type size = 0;
     cmnDeSerializeSizeRaw(inputStream, size);
@@ -276,7 +276,7 @@ public:
         remote identifier, a warning message is sent using
         #CMN_LOG_CLASS.
      */
-    void DeSerializeServices(void) throw(std::runtime_error);
+    void DeSerializeServices(void) CISST_THROW(std::runtime_error);
 
     std::istream & InputStream;
 

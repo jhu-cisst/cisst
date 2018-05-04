@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet, Daniel Li, Ofri Sadowsky
   Created on: 2006-06-23
 
-  (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -228,7 +227,7 @@ protected:
 
     /*! Check the validity of the given dimension index */
     inline void ThrowUnlessValidDimensionIndex(dimension_type dimensionIndex) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         if (! ValidDimensionIndex(dimensionIndex))
         {
@@ -238,7 +237,7 @@ protected:
 
     /*! Check the validity of an index */
     inline void ThrowUnlessValidIndex(size_type index) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         if (! ValidIndex(index))
         {
@@ -248,7 +247,7 @@ protected:
 
     /*! Check the validity of the nArray indices */
     inline void ThrowUnlessValidIndex(const nsize_type & indices) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         if (! ValidIndex(indices))
         {
@@ -258,7 +257,7 @@ protected:
 
     /*! Check the validity of the given index in the (dimension)th-dimension */
     inline void ThrowUnlessValidIndex(dimension_type dimension, size_type index) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         if (! ValidIndex(dimension, index))
         {
@@ -397,7 +396,7 @@ public:
 
       \return a const reference to element[index] */
     const_reference at(size_type metaIndex) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         ThrowUnlessValidIndex(metaIndex);
         return (begin())[metaIndex];
@@ -408,7 +407,7 @@ public:
       operator overloading is unavailable or inconvenient.
       \return a const reference to the element at indices */
     const_reference at(const nsize_type & coordinates) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         ThrowUnlessValidIndex(coordinates);
         return *(Pointer(coordinates));
@@ -416,7 +415,7 @@ public:
 
     /*! Overloaded operator () for simplified (const) element access with bounds checking */
     const_reference operator () (const nsize_type & coordinates) const
-        throw(std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return this->at(coordinates);
     }
@@ -496,7 +495,6 @@ public:
         \note The number of dimensions is reduced by one.
     */
     ConstSliceRefType Slice(dimension_type dimension, size_type index) const
-        throw(std::runtime_error, std::out_of_range)
     {
         return SlicesTypes::ConstSliceOf(*this, dimension, index);
     }
@@ -1159,4 +1157,3 @@ std::ostream & operator << (std::ostream & output,
 
 
 #endif // _vctDynamicConstNArrayBase_h
-

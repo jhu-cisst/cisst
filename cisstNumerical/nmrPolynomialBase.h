@@ -144,7 +144,7 @@ public:
     // only terms of degree greater than or equal to the input, by looking at the
     // degree of the first term, which is presumably the lowest.  Note that terms
     // already contained in this polynomial aren't modified.
-    virtual void SetMinDegree(PowerType newMin) throw(std::runtime_error) = 0;
+    virtual void SetMinDegree(PowerType newMin) CISST_THROW(std::runtime_error) = 0;
 
 
     //: Update the maximum allowable degree of this polynomial to the given
@@ -152,7 +152,7 @@ public:
     // only terms of degree lower than or equal to the input by looking at the
     // degree of the last term, which is presumably the highest.  Note that terms
     // already contained in this polynomial aren't modified.
-    virtual void SetMaxDegree(PowerType newMax) throw(std::runtime_error) = 0;
+    virtual void SetMaxDegree(PowerType newMax) CISST_THROW(std::runtime_error) = 0;
 
 	//: Generate all possible terms for this polynomial, and store them for later
 	// use.

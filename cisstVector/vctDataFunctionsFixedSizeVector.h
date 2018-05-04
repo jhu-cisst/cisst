@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-201 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -50,7 +48,7 @@ public:
     }
 
     static void SerializeBinary(const DataType & data, std::ostream & outputStream)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataVectorSerializeBinary(data, outputStream);
     }
@@ -58,14 +56,14 @@ public:
     static void DeSerializeBinary(DataType & data, std::istream & inputStream,
                                   const cmnDataFormat & localFormat,
                                   const cmnDataFormat & remoteFormat)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataVectorDeSerializeBinary(data, inputStream, localFormat, remoteFormat);
     }
 
     static void SerializeText(const DataType & data, std::ostream & outputStream,
                               const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataVectorSerializeText(data, outputStream, delimiter);
     }
@@ -78,7 +76,7 @@ public:
 
     static void DeSerializeText(DataType & data, std::istream & inputStream,
                                 const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataVectorDeSerializeText(data, inputStream, delimiter);
     }
@@ -95,13 +93,13 @@ public:
 
     static std::string ScalarDescription(const DataType & data, const size_t & index,
                                          const std::string & userDescription = "v")
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return cmnDataVectorScalarDescription(data, index, userDescription);
     }
 
     static double Scalar(const DataType & data, const size_t & index)
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return cmnDataVectorScalar(data, index);
     }
@@ -111,7 +109,7 @@ public:
 template <typename _elementType, vct::size_type _size>
 inline void cmnDeSerializeRaw(std::istream & inputStream,
                               vctFixedSizeVector<_elementType, _size> & vector)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     vector.DeSerializeRaw(inputStream);
 }
@@ -119,7 +117,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream,
 template <typename _elementType, vct::size_type _size, vct::stride_type _stride>
 inline void cmnDeSerializeRaw(std::istream & inputStream,
                               vctFixedSizeVectorRef<_elementType, _size, _stride> & vector)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     vector.DeSerializeRaw(inputStream);
 }
@@ -127,7 +125,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream,
 template <typename _elementType, vct::size_type _size>
 inline void cmnSerializeRaw(std::ostream & outputStream,
                             const vctFixedSizeVector<_elementType, _size> & vector)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     vector.SerializeRaw(outputStream);
 }
@@ -135,7 +133,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
 template <typename _elementType, vct::size_type _size, vct::stride_type _stride>
 inline void cmnSerializeRaw(std::ostream & outputStream,
                             const vctFixedSizeVectorRef<_elementType, _size, _stride> & vector)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     vector.SerializeRaw(outputStream);
 }
@@ -143,7 +141,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
 template <typename _elementType, vct::size_type _size, vct::stride_type _stride>
 inline void cmnSerializeRaw(std::ostream & outputStream,
                             const vctFixedSizeConstVectorRef<_elementType, _size, _stride> & vector)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     vector.SerializeRaw(outputStream);
 }

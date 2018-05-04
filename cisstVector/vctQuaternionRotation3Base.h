@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2005-08-24
 
-  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -84,7 +82,7 @@ public:
 
 protected:
     /*! Throw an exception unless this rotation is normalized. */
-    inline void ThrowUnlessIsNormalized(void) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(void) const CISST_THROW(std::runtime_error) {
         if (! this->IsNormalized()) {
             cmnThrow(std::runtime_error("vctQuaternionRotation3Base: This rotation is not normalized"));
         }
@@ -95,7 +93,7 @@ protected:
       \param input An object with \c IsNormalized method.
     */
     template <class _inputType>
-    inline void ThrowUnlessIsNormalized(const _inputType & input) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(const _inputType & input) const CISST_THROW(std::runtime_error) {
         if (! input.IsNormalized()) {
             cmnThrow(std::runtime_error("vctQuaternionRotation3Base: Input is not normalized"));
         }
@@ -152,7 +150,7 @@ public:
     */
     inline
     vctQuaternionRotation3Base(const value_type & x, const value_type & y, const value_type & z,
-                               const value_type & r) throw(std::runtime_error)
+                               const value_type & r) CISST_THROW(std::runtime_error)
     {
         this->Allocate();
         this->From(x, y, z, r);
@@ -164,7 +162,7 @@ public:
     */
     template <class __containerType>
     inline explicit
-    vctQuaternionRotation3Base(const vctMatrixRotation3Base<__containerType> & matrixRotation) throw(std::runtime_error)
+    vctQuaternionRotation3Base(const vctMatrixRotation3Base<__containerType> & matrixRotation) CISST_THROW(std::runtime_error)
     {
         this->Allocate();
         this->From(matrixRotation);
@@ -175,7 +173,7 @@ public:
       \param axisAngleRotation An axis/angle rotation.
      */
     inline
-    vctQuaternionRotation3Base(const vctAxisAngleRotation3<value_type> & axisAngleRotation) throw(std::runtime_error)
+    vctQuaternionRotation3Base(const vctAxisAngleRotation3<value_type> & axisAngleRotation) CISST_THROW(std::runtime_error)
     {
         this->Allocate();
         this->From(axisAngleRotation);
@@ -187,7 +185,7 @@ public:
     */
     template <class __containerType>
     inline
-    vctQuaternionRotation3Base(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation) throw(std::runtime_error)
+    vctQuaternionRotation3Base(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation) CISST_THROW(std::runtime_error)
     {
         this->Allocate();
         this->From(rodriguezRotation);
@@ -336,7 +334,7 @@ public:
     /*! Conversion from 4 numbers.  This method actually performs an
       assignement and then check that the result is normalized. */
     inline ThisType &
-    From(value_type x, value_type y, value_type z, value_type r) throw(std::runtime_error) {
+    From(value_type x, value_type y, value_type z, value_type r) CISST_THROW(std::runtime_error) {
         this->Assign(x, y, z, r);
         this->ThrowUnlessIsNormalized(*this);
         return *this;
@@ -344,7 +342,7 @@ public:
 
     /*! Conversion from axis/angle. */
     inline ThisType &
-    From(const vctAxisAngleRotation3<value_type> axisAngleRotation) throw(std::runtime_error) {
+    From(const vctAxisAngleRotation3<value_type> axisAngleRotation) CISST_THROW(std::runtime_error) {
         this->ThrowUnlessIsNormalized(axisAngleRotation);
         return FromRaw(axisAngleRotation);
     }
@@ -352,7 +350,7 @@ public:
     /*! Conversion from a Rodriguez rotation. */
     template <class __containerType>
     inline ThisType &
-    From(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation) throw(std::runtime_error) {
+    From(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation) CISST_THROW(std::runtime_error) {
         this->ThrowUnlessIsNormalized(rodriguezRotation);
         return this->FromRaw(rodriguezRotation);
     }
@@ -360,7 +358,7 @@ public:
     /*! Conversion from a rotation matrix. */
     template <class __containerType>
     inline ThisType &
-    From(const vctMatrixRotation3Base<__containerType> & matrixRotation) throw(std::runtime_error) {
+    From(const vctMatrixRotation3Base<__containerType> & matrixRotation) CISST_THROW(std::runtime_error) {
         this->ThrowUnlessIsNormalized(matrixRotation);
         return FromRaw(matrixRotation);
     }

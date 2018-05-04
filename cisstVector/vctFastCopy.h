@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2006-11-10
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -97,7 +95,7 @@ protected:
     template <class _vector1Type, class _vector2Type>
     inline static void ThrowUnlessValidVectorSizes(const _vector1Type & vector1,
                                                    const _vector2Type & vector2)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         if (!VectorSizeCompatible(vector1, vector2)) {
             cmnThrow(std::runtime_error("vctFastCopy: Vector sizes mismatch"));
@@ -107,7 +105,7 @@ protected:
     template <class _container1Type, class _container2Type>
     inline static void ThrowUnlessValidContainerSizes(const _container1Type & container1,
                                                       const _container2Type & container2)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         if (!ContainerSizesCompatible(container1, container2)) {
             cmnThrow(std::runtime_error("vctFastCopy: Container sizes mismatch"));
@@ -308,4 +306,3 @@ public:
 
 
 #endif  // _vctFastCopy_h
-

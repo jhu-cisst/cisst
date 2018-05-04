@@ -2,10 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
+  Created on: 2011-05-18
 
-  Created on:	2011-05-18
-
-  (C) Copyright 2011-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -39,7 +38,7 @@ http://www.cisst.org/cisst/license.txt.
   (i.e., about the body's coordinate frame) or extrinsic (i.e., about the world
   coordinate frame).
 
-  We use the common convention of three letters to define the order of 
+  We use the common convention of three letters to define the order of
   (intrinsic) rotations.  For example, ZYZ refers to a rotation of \f$\phi\f$
   (or \f$\alpha\f$) about Z, followed by a rotation of \f$\theta\f$ (or \f$\beta\f$) about
   Y', followed by a rotation of \f$\psi\f$ (or \f$\gamma\f$) about Z''.  Here, the Y' and Z''
@@ -94,7 +93,7 @@ protected:
     vct3 Angles;
 
     /*! Throw an exception unless this rotation is normalized. */
-    inline void ThrowUnlessIsNormalized(void) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(void) const CISST_THROW(std::runtime_error) {
         if (! IsNormalized()) {
             cmnThrow(std::runtime_error("vctEulerRotation3Base: This rotation is not normalized"));
         }
@@ -105,7 +104,7 @@ protected:
       \param input An object with \c IsNormalized method.
     */
     template <class _inputType>
-    inline void ThrowUnlessIsNormalized(const _inputType & input) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(const _inputType & input) const CISST_THROW(std::runtime_error) {
         if (! input.IsNormalized()) {
             cmnThrow(std::runtime_error("vctEulerRotation3Base: Input is not normalized"));
         }
@@ -165,7 +164,7 @@ public:
     /*! Constructor from a vctMatrixRotation3. */
     template <class __containerType>
     inline vctEulerRotation3(const vctMatrixRotation3Base<__containerType> & matrixRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         From(matrixRotation);
     }
@@ -186,7 +185,7 @@ public:
 
     /*! Conversion from a vctMatrixRotation3. */
     template <class _matrixType>
-    ThisType & From(const vctMatrixRotation3Base<_matrixType> & matrixRot) throw(std::runtime_error) {
+    ThisType & From(const vctMatrixRotation3Base<_matrixType> & matrixRot) CISST_THROW(std::runtime_error) {
         ThrowUnlessIsNormalized(matrixRot);
         return FromRaw(matrixRot);
     }

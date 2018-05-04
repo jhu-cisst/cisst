@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2003-09-30
 
-  (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -182,25 +182,25 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       or inconvenient.
 
       \return a non-const reference to element[index] */
-    reference at(size_type index) throw(std::out_of_range) {
+    reference at(size_type index) CISST_THROW(std::out_of_range) {
         this->ThrowUnlessValidIndex(index);
         return *(Pointer(index));
     }
 
     /* documented in base class */
-    const_reference at(size_type index) const throw(std::out_of_range) {
+    const_reference at(size_type index) const CISST_THROW(std::out_of_range) {
         return BaseType::at(index);
     }
 
 #ifndef SWIG
     /*! Access an element by index (non-const).  See method at().
       \return a non-const reference to element[index] */
-    reference operator()(size_type index) throw(std::out_of_range) {
+    reference operator()(size_type index) CISST_THROW(std::out_of_range) {
         return at(index);
     }
 
     /* documented in base class */
-    const_reference operator()(size_type index) const throw(std::out_of_range) {
+    const_reference operator()(size_type index) const CISST_THROW(std::out_of_range) {
         return BaseType::operator()(index);
     }
 #endif
@@ -296,7 +296,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       if there is a size mismatch.
     */
     //@{
-    inline ThisType & Assign(const value_type element0) throw(std::runtime_error)
+    inline ThisType & Assign(const value_type element0) CISST_THROW(std::runtime_error)
     {
         if (this->size() != 1) {
             cmnThrow(std::runtime_error("Mismatch between number of arguments assigned (1) and vector size"));
@@ -305,7 +305,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         return *this;
     }
 
-    inline ThisType & Assign(const value_type element0, const value_type element1) throw(std::runtime_error)
+    inline ThisType & Assign(const value_type element0, const value_type element1) CISST_THROW(std::runtime_error)
     {
         if (this->size() != 2) {
             cmnThrow(std::runtime_error("Mismatch between number of arguments assigned (2) and vector size"));
@@ -316,7 +316,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     inline ThisType & Assign(const value_type element0, const value_type element1,
-                             const value_type element2) throw(std::runtime_error)
+                             const value_type element2) CISST_THROW(std::runtime_error)
     {
         if (this->size() != 3) {
             cmnThrow(std::runtime_error("Mismatch between number of arguments assigned (3) and vector size"));
@@ -328,7 +328,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     inline ThisType & Assign(const value_type element0, const value_type element1,
-                             const value_type element2, const value_type element3) throw(std::runtime_error)
+                             const value_type element2, const value_type element3) CISST_THROW(std::runtime_error)
     {
         if (this->size() != 4) {
             cmnThrow(std::runtime_error("Mismatch between number of arguments assigned (4) and vector size"));
@@ -503,7 +503,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     template <class __vectorOwnerType>
     inline bool FastCopyOf(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & source,
                            bool performSafetyChecks = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return vctFastCopy::VectorCopy(*this, source, performSafetyChecks);
     }
@@ -511,7 +511,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     template <class __dataPtrType>
     inline bool FastCopyOf(const vctFixedSizeConstVectorBase<SIZE, STRIDE, value_type, __dataPtrType> & source,
                            bool performSafetyChecks = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return vctFastCopy::VectorCopy(*this, source, performSafetyChecks);
     }
@@ -748,13 +748,13 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     //@{
     template <vct::size_type __subSize>
     vctFixedSizeConstVectorRef<_elementType, __subSize, _stride>
-    Ref(const size_type startPosition = 0) const throw (std::out_of_range) {
+    Ref(const size_type startPosition = 0) const CISST_THROW(std::out_of_range) {
         return BaseType::Ref(startPosition);
     }
 
     template <vct::size_type __subSize>
     vctFixedSizeVectorRef<_elementType, __subSize, _stride>
-    Ref(const size_type startPosition = 0) throw (std::out_of_range) {
+    Ref(const size_type startPosition = 0) CISST_THROW(std::out_of_range) {
         vctFixedSizeVectorRef<_elementType, __subSize, _stride> result(*this, startPosition);
         return result;
     }
@@ -1310,7 +1310,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
-    inline ThisType & NormalizedOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) throw(std::runtime_error) {
+    inline ThisType & NormalizedOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) CISST_THROW(std::runtime_error) {
         *this = otherVector;
         this->NormalizedSelf();
         return *this;
@@ -1360,7 +1360,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    inline ThisType & NormalizedSelf(void) throw(std::runtime_error) {
+    inline ThisType & NormalizedSelf(void) CISST_THROW(std::runtime_error) {
         value_type norm = value_type(this->Norm());
         if (norm >= TypeTraits::Tolerance()) {
             this->Divide(norm);

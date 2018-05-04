@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -47,7 +45,7 @@ public:
     }
 
     static void SerializeBinary(const DataType & data, std::ostream & outputStream)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<TranslationType>::SerializeBinary(data.Translation(), outputStream);
         cmnData<RotationType>::SerializeBinary(data.Rotation(), outputStream);
@@ -55,7 +53,7 @@ public:
 
     static void DeSerializeBinary(DataType & data, std::istream & inputStream,
                                   const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<TranslationType>::DeSerializeBinary(data.Translation(), inputStream, localFormat, remoteFormat);
         cmnData<RotationType>::DeSerializeBinary(data.Rotation(), inputStream, localFormat, remoteFormat);
@@ -63,7 +61,7 @@ public:
 
     static void SerializeText(const DataType & data, std::ostream & outputStream,
                               const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<TranslationType>::SerializeText(data.Translation(), outputStream, delimiter);
         outputStream << delimiter;
@@ -88,7 +86,7 @@ public:
 
     static void DeSerializeText(DataType & data, std::istream & inputStream,
                                 const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<TranslationType>::DeSerializeText(data.Translation(), inputStream, delimiter);
         cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "vctFrameBase");
@@ -109,7 +107,7 @@ public:
 
     static std::string ScalarDescription(const DataType & data, const size_t & index,
                                          const std::string & userDescription = "frm3")
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         std::string prefix = (userDescription == "") ? "" : (userDescription + ".");
         const size_t scalarNumberTranslation = cmnData<TranslationType>::ScalarNumber(data.Translation());
@@ -120,7 +118,7 @@ public:
     }
 
     static double Scalar(const DataType & data, const size_t & index)
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         const size_t scalarNumberTranslation = cmnData<TranslationType>::ScalarNumber(data.Translation());
         if (index < scalarNumberTranslation) {
@@ -145,21 +143,21 @@ public:
     }
 
     static void SerializeBinary(const DataType & data, std::ostream & outputStream)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<ContainerType>::SerializeBinary(data, outputStream);
     }
 
     static void DeSerializeBinary(DataType & data, std::istream & inputStream,
                                   const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<ContainerType>::DeSerializeBinary(data, inputStream, localFormat, remoteFormat);
     }
 
     static void SerializeText(const DataType & data, std::ostream & outputStream,
                               const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<ContainerType>::SerializeText(data, outputStream, delimiter);
     }
@@ -177,7 +175,7 @@ public:
 
     static void DeSerializeText(DataType & data, std::istream & inputStream,
                                 const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return cmnData<ContainerType>::DeSerializeText(data, inputStream, delimiter);
     }
@@ -194,13 +192,13 @@ public:
 
     static std::string ScalarDescription(const DataType & data, const size_t & index,
                                          const std::string & userDescription = "mr3")
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
        return  cmnData<ContainerType>::ScalarDescription(data, index, userDescription);
     }
 
     static double Scalar(const DataType & data, const size_t & index)
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return cmnData<ContainerType>::Scalar(data, index);
     }
@@ -222,21 +220,21 @@ public:
     }
 
     static void SerializeBinary(const DataType & data, std::ostream & outputStream)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<ContainerType>::SerializeBinary(data, outputStream);
     }
 
     static void DeSerializeBinary(DataType & data, std::istream & inputStream,
                                   const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<ContainerType>::DeSerializeBinary(data, inputStream, localFormat, remoteFormat);
     }
 
     static void SerializeText(const DataType & data, std::ostream & outputStream,
                               const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnData<ContainerType>::SerializeText(data, outputStream, delimiter);
     }
@@ -254,7 +252,7 @@ public:
 
     static void DeSerializeText(DataType & data, std::istream & inputStream,
                                 const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return cmnData<ContainerType>::DeSerializeText(data, inputStream, delimiter);
     }
@@ -271,13 +269,13 @@ public:
 
     static std::string ScalarDescription(const DataType & data, const size_t & index,
                                          const std::string & userDescription = "mr3")
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
        return  cmnData<ContainerType>::ScalarDescription(data, index, userDescription);
     }
 
     static double Scalar(const DataType & data, const size_t & index)
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return cmnData<ContainerType>::Scalar(data, index);
     }

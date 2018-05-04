@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Anton Deguet
   Created on: 2006-01-10
 
-  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -152,7 +150,7 @@ protected:
     */
     template <class _vectorOwnerTypePivotIndices>
     inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
          // check sizes and compacity
         const size_type minmn = (MMember < NMember) ? MMember : NMember;
@@ -229,7 +227,7 @@ public:
     UpdateMatrixP(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
                   const vctDynamicConstVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices,
                   vctDynamicMatrixBase<_matrixOwnerTypeP, CISSTNETLIB_DOUBLE> & P)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         const size_type minmn = (A.rows() < A.cols()) ? A.rows() : A.cols();
         // check sizes 
@@ -269,7 +267,7 @@ public:
     void UpdateMatrixLU(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
                         vctDynamicMatrixBase<_matrixOwnerTypeL, CISSTNETLIB_DOUBLE> & L,
                         vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & U)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         const size_type rows = A.rows();
         const size_type cols = A.cols();
@@ -423,7 +421,7 @@ public:
               class _vectorOwnerTypePivotIndices>
     void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
                 vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->SetDimension(A.rows(), A.cols());
         this->AllocateOutput(false);
@@ -537,7 +535,7 @@ public:
     inline static MatrixTypeP &
     UpdateMatrixP(const VectorTypePivotIndices & pivotIndices,
                   MatrixTypeP & P)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         // update permutation matrix
         P.SetAll(0.0);
@@ -569,7 +567,7 @@ public:
     void UpdateMatrixLU(const MatrixTypeA & A,
                         MatrixTypeL & L,
                         MatrixTypeU & U)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         vct::size_type rowIndex, colIndex;
         L.SetAll(0.0);
@@ -719,7 +717,7 @@ public:
 template <class _matrixOwnerType>
 inline CISSTNETLIB_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> & A,
                        nmrLUDynamicData & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typename nmrLUDynamicData::Friend dataFriend(data);
     CISSTNETLIB_INTEGER info;

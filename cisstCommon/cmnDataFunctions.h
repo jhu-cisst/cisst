@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -95,7 +92,7 @@ public:
     static
     void
     SerializeText(const DataType & data, std::ostream & outputStream,
-                  const char delimiter = ',') throw (std::runtime_error);
+                  const char delimiter = ',') CISST_THROW(std::runtime_error);
 
     /*! Set the value of the data object by deserializing each element
       from the input stream.  The function will look for the user
@@ -109,14 +106,14 @@ public:
     static
     void
     DeSerializeText(DataType & data, std::istream & inputStream,
-                    const char delimiter = ',') throw (std::runtime_error);
+                    const char delimiter = ',') CISST_THROW(std::runtime_error);
 
     /*! Serializes each element of the data object in binary format.
      */
     static
     void
     SerializeBinary(const DataType & data, std::ostream & outputStream)
-        throw (std::runtime_error);
+        CISST_THROW(std::runtime_error);
 
     /*!
     */
@@ -124,7 +121,7 @@ public:
     void
     DeSerializeBinary(DataType & data, std::istream & inputStream,
                       const cmnDataFormat & localFormat,
-                      const cmnDataFormat & remoteFormat) throw (std::runtime_error);
+                      const cmnDataFormat & remoteFormat) CISST_THROW(std::runtime_error);
 
     /*! Returns the numbers of bytes required to stored the content of
       the data object.  This function can be used to allocate a char
@@ -154,12 +151,12 @@ public:
     static
     std::string
     ScalarDescription(const DataType & data, const size_t index, const std::string & userDescription = "")
-        throw (std::out_of_range);
+        CISST_THROW(std::out_of_range);
 
     static
     double
     Scalar(const DataType & data, const size_t index)
-        throw (std::out_of_range);
+        CISST_THROW(std::out_of_range);
 
     static
     size_t ScalarNumber(const DataType & data);
@@ -206,11 +203,11 @@ size_t CISST_EXPORT cmnDataDeSerializeBinary_size_t(size_t & data, const char * 
 void CISST_EXPORT cmnDataDeSerializeBinary_size_t(size_t & data,
                                                   std::istream & inputStream,
                                                   const cmnDataFormat & localFormat,
-                                                  const cmnDataFormat & remoteFormat) throw (std::runtime_error);
+                                                  const cmnDataFormat & remoteFormat) CISST_THROW(std::runtime_error);
 //@}
 
 /*! Utility used to extract delimiter for functions cmnDataDeSerializeText */
 void CISST_EXPORT cmnDataDeSerializeTextDelimiter(std::istream & inputStream, const char delimiter, const char * className)
-    throw (std::runtime_error);
+    CISST_THROW(std::runtime_error);
 
 #endif // _cmnDataFunctions_h

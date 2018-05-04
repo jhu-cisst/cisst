@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2004-02-11
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -131,7 +129,7 @@ public:
     //@{
     template <class __rotationType>
     inline ThisType & From(const vctFrameBase<__rotationType> & other)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->Rotation().From(other.Rotation());
         this->Translation().Assign(other.Translation());
@@ -162,7 +160,7 @@ public:
     //@{
     template <class __containerType>
     inline ThisType & From(const vctFrame4x4ConstBase<__containerType> & other)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->Rotation().From(other.Rotation());
         this->Translation().Assign(other.Translation());
@@ -337,7 +335,7 @@ public:
     {
         if (output.size() < DIMENSION) {
             cmnThrow("vctFrameBase::ApplyTo: size of output is too small");
-        } 
+        }
         // Implementation note: we think that computing output first to a local variable,
         // then copying the result to the dynamic vector output, is more efficient than
         // computing directly to the output vector, because there is less pointer
@@ -365,7 +363,7 @@ public:
     {
         if (input.size() < DIMENSION) {
             cmnThrow("vctFrameBase::ApplyTo: size of input is too small");
-        } 
+        }
         TranslationType result;
         // See implementation notes for rotation class
         RotationMember.ApplyTo(input, result);
@@ -733,4 +731,3 @@ std::ostream & operator << (std::ostream & output,
 }
 
 #endif  // _vctFrameBase_h
-

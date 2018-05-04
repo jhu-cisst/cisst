@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -51,7 +49,7 @@ public:
     }
 
     static void SerializeBinary(const DataType & data, std::ostream & outputStream)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         const vct::size_type myRows = data.rows();
         const vct::size_type myCols = data.cols();
@@ -62,13 +60,13 @@ public:
 
     static void DeSerializeBinary(DataType & data, std::istream & inputStream,
                                   const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataMatrixDeSerializeBinaryResize(data, inputStream, localFormat, remoteFormat);
     }
 
     static void SerializeText(const DataType & data, std::ostream & outputStream, const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         const vct::size_type myRows = data.rows();
         const vct::size_type myCols = data.cols();
@@ -88,7 +86,7 @@ public:
     }
 
     static void DeSerializeText(DataType & data, std::istream & inputStream, const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataMatrixDeSerializeTextResize(data, inputStream, delimiter);
     }
@@ -104,13 +102,13 @@ public:
     }
 
     static std::string ScalarDescription(const DataType & data, const size_t index, const std::string & userDescription = "m")
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return cmnDataMatrixScalarDescription(data, index, userDescription, true /* treat size as a scalar */);
     }
 
     static double Scalar(const DataType & data, const size_t index)
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return cmnDataMatrixScalar(data, index, true /* treat size as a scalar */);
     }
@@ -120,7 +118,7 @@ public:
 template <typename _elementType>
 inline void cmnDeSerializeRaw(std::istream & inputStream,
                               vctDynamicMatrix<_elementType> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.DeSerializeRaw(inputStream);
 }
@@ -128,7 +126,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream,
 template <typename _elementType>
 inline void cmnDeSerializeRaw(std::istream & inputStream,
                               vctDynamicMatrixRef<_elementType> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.DeSerializeRaw(inputStream);
 }
@@ -136,7 +134,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream,
 template <typename _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream,
                             const vctDynamicMatrix<_elementType> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.SerializeRaw(outputStream);
 }
@@ -144,7 +142,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
 template <typename _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream,
                             const vctDynamicMatrixRef<_elementType> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.SerializeRaw(outputStream);
 }
@@ -152,7 +150,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream,
 template <typename _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream,
                             const vctDynamicConstMatrixRef<_elementType> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.SerializeRaw(outputStream);
 }

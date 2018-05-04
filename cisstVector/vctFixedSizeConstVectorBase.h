@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2003-09-30
 
-  (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -165,7 +165,7 @@ class vctFixedSizeConstVectorBase
 
 
     /*! Check the validity of an index. */
-    inline void ThrowUnlessValidIndex(size_type index) const throw(std::out_of_range) {
+    inline void ThrowUnlessValidIndex(size_type index) const CISST_THROW(std::out_of_range) {
         if (! ValidIndex(index)) {
             cmnThrow(std::out_of_range("vctFixedSizeVector: Invalid index"));
         }
@@ -238,7 +238,7 @@ class vctFixedSizeConstVectorBase
       the overloaded operator [] when operator overloading is
       unavailable or inconvenient.  \return a const reference to
       element[index] */
-    const_reference at(size_type index) const throw(std::out_of_range) {
+    const_reference at(size_type index) const CISST_THROW(std::out_of_range) {
         ThrowUnlessValidIndex(index);
         return *(Pointer(index));
     }
@@ -247,7 +247,7 @@ class vctFixedSizeConstVectorBase
 #ifndef SWIG
     /*! Access an element by index (const).  See method at().
       \return a const reference to element[index] */
-    const_reference operator()(size_type index) const throw(std::out_of_range) {
+    const_reference operator()(size_type index) const CISST_THROW(std::out_of_range) {
         return at(index);
     }
 #endif
@@ -410,7 +410,7 @@ class vctFixedSizeConstVectorBase
     /*! Create a const reference to a sub vector */
     template <vct::size_type __subSize>
     vctFixedSizeConstVectorRef<_elementType, __subSize, _stride>
-    Ref(const size_type startPosition = 0) const throw (std::out_of_range) {
+    Ref(const size_type startPosition = 0) const CISST_THROW(std::out_of_range) {
         vctFixedSizeConstVectorRef<_elementType, __subSize, _stride> result(*this, startPosition);
         return result;
     }
@@ -989,7 +989,7 @@ class vctFixedSizeConstVectorBase
     inline VectorValueType Ceil(void) const;
 
     /* documented above */
-    inline VectorValueType Normalized(void) const throw(std::runtime_error);
+    inline VectorValueType Normalized(void) const CISST_THROW(std::runtime_error);
     //@}
 
 

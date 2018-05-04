@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2005-01-13
 
-  (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -94,7 +92,7 @@ public:
     template <stride_type __stride, class __dataPtrType>
     explicit inline
     vctRodriguezRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(axis);
     }
@@ -103,7 +101,7 @@ public:
       \param x, y, z  A vector of size 3, its norm represents the angle.
     */
     inline vctRodriguezRotation3(value_type x, value_type y, value_type z)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(x, y, z);
     }
@@ -112,7 +110,7 @@ public:
     template <class __containerType>
     explicit inline
     vctRodriguezRotation3(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(quaternionRotation);
     }
@@ -121,7 +119,7 @@ public:
     template <class __containerType>
     explicit inline
     vctRodriguezRotation3(const vctMatrixRotation3Base<__containerType> & matrixRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(matrixRotation);
     }
@@ -129,7 +127,7 @@ public:
     /*! Constructor from a vctAxisAngleRotation3. */
     explicit inline
     vctRodriguezRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(axisAngleRotation);
     }

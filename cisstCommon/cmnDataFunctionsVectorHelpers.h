@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -63,7 +60,7 @@ template <class _vectorType>
 void cmnDataVectorSerializeText(const _vectorType & data,
                                 std::ostream & outputStream,
                                 const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typedef typename _vectorType::const_iterator const_iterator;
     const const_iterator begin = data.begin();
@@ -97,7 +94,7 @@ template <class _vectorType>
 void cmnDataVectorDeSerializeTextResize(_vectorType & data,
                                         std::istream & inputStream,
                                         const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize size
     size_t size;
@@ -113,7 +110,7 @@ template <class _vectorType>
 void cmnDataVectorDeSerializeTextCheckSize(_vectorType & data,
                                            std::istream & inputStream,
                                            const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize size
     size_t size;
@@ -157,7 +154,7 @@ std::string cmnDataVectorSerializeDescription(const _vectorType & data,
 template <class _vectorType>
 void cmnDataVectorSerializeBinary(const _vectorType & data,
                                   std::ostream & outputStream)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typedef typename _vectorType::const_iterator const_iterator;
     const const_iterator end = data.end();
@@ -172,7 +169,7 @@ void cmnDataVectorDeSerializeBinary(_vectorType & data,
                                     std::istream & inputStream,
                                     const cmnDataFormat & localFormat,
                                     const cmnDataFormat & remoteFormat)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize data
     typedef typename _vectorType::iterator iterator;
@@ -188,7 +185,7 @@ void cmnDataVectorDeSerializeBinaryResize(_vectorType & data,
                                           std::istream & inputStream,
                                           const cmnDataFormat & localFormat,
                                           const cmnDataFormat & remoteFormat)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize size and resize
     size_t size;
@@ -202,7 +199,7 @@ void cmnDataVectorDeSerializeBinaryCheckSize(_vectorType & data,
                                              std::istream & inputStream,
                                              const cmnDataFormat & localFormat,
                                              const cmnDataFormat & remoteFormat)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize size and check
     size_t size;
@@ -278,7 +275,7 @@ template <class _vectorType>
 std::string cmnDataVectorScalarDescription(const _vectorType & data,
                                            const size_t index,
                                            const std::string & userDescription)
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     size_t elementIndex, inElementIndex;
     std::stringstream suffix;
@@ -294,7 +291,7 @@ std::string cmnDataVectorScalarDescription(const _vectorType & data,
 
 template <class _vectorType>
 double cmnDataVectorScalar(const _vectorType & data, const size_t index)
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     size_t elementIndex, inElementIndex;
     const size_t scalarNumber = cmnData<_vectorType>::ScalarNumber(data);

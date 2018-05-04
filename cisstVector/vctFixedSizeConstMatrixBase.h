@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2003-11-04
 
-  (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -217,7 +217,7 @@ class vctFixedSizeConstMatrixBase
 
 
     /*! Check the validity of an index. */
-    inline void ThrowUnlessValidIndex(size_type index) const throw(std::out_of_range) {
+    inline void ThrowUnlessValidIndex(size_type index) const CISST_THROW(std::out_of_range) {
         if (! ValidIndex(index)) {
             cmnThrow(std::out_of_range("vctFixedSizeMatrix: Invalid index"));
         }
@@ -225,7 +225,7 @@ class vctFixedSizeConstMatrixBase
 
 
     /*! Check the validity of the row and column indices. */
-    inline void ThrowUnlessValidIndex(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    inline void ThrowUnlessValidIndex(size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         if (! ValidIndex(rowIndex, colIndex)) {
             cmnThrow(std::out_of_range("vctFixedSizeMatrix: Invalid indices"));
         }
@@ -365,7 +365,7 @@ class vctFixedSizeConstMatrixBase
       This method can be a handy substitute for the overloaded operator () when
       operator overloading is unavailable or inconvenient.
       \return a const reference to the index-th element (iterator order) */
-    const_reference at(size_type index) const throw(std::out_of_range) {
+    const_reference at(size_type index) const CISST_THROW(std::out_of_range) {
         ThrowUnlessValidIndex(index);
         return (begin())[index];
     }
@@ -375,7 +375,7 @@ class vctFixedSizeConstMatrixBase
       This method can be a handy substitute for the overloaded operator () when
       operator overloading is unavailable or inconvenient.
       \return a const reference to the element at rowIndex, colIndex */
-    const_reference at(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    const_reference at(size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         ThrowUnlessValidIndex(rowIndex, colIndex);
         return *(Pointer(rowIndex, colIndex));
     }
@@ -383,7 +383,7 @@ class vctFixedSizeConstMatrixBase
 #ifndef SWIG
     /*! Access an element by index (const).  See method at().
       \return a const reference to element[rowIndex, colIndex] */
-    const_reference operator()(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    const_reference operator()(size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         return at(rowIndex, colIndex);
     }
 #endif
@@ -415,7 +415,7 @@ class vctFixedSizeConstMatrixBase
     /*! Create a const reference to a sub matrix */
     template <vct::size_type __subRows, vct::size_type __subCols>
     vctFixedSizeConstMatrixRef<_elementType, __subRows, __subCols, _rowStride, _colStride>
-    Ref(const size_type startRow = 0, const size_type startCol = 0) const throw (std::out_of_range) {
+    Ref(const size_type startRow = 0, const size_type startCol = 0) const CISST_THROW(std::out_of_range) {
         vctFixedSizeConstMatrixRef<_elementType, __subRows, __subCols, _rowStride, _colStride>
             result(*this, startRow, startCol);
         return result;

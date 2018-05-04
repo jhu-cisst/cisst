@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -464,7 +463,7 @@ public:
     {
         this->Allocate(A.rows(), 0, 0, A.cols(), inWork);
     }
-    /*! Constructor where user provides the size of the input matrix, along with the 
+    /*! Constructor where user provides the size of the input matrix, along with the
       output vector X and workspace.
       The solution object now acts as a composite container to hold, pass and
       manipulate a convenient storage for the LSqLin algorithm. Checks are made on the
@@ -1243,7 +1242,7 @@ public:
 template <typename _matrixOwnerType, typename _vectorOwnerType>
 inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> &A,
                           vctDynamicVectorBase<_vectorOwnerType, CISSTNETLIB_DOUBLE> &b,
-                          nmrLSqLinSolutionDynamic &solution) throw (std::runtime_error)
+                          nmrLSqLinSolutionDynamic &solution) CISST_THROW(std::runtime_error)
 {
     typename nmrLSqLinSolutionDynamic::Friend solutionFriend(solution);
     CISSTNETLIB_INTEGER ret_value;
@@ -1326,7 +1325,7 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
                           vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b,
                           vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
                           vctDynamicVectorBase<_vectorOwnerTypeh, CISSTNETLIB_DOUBLE> &h,
-                          nmrLSqLinSolutionDynamic &solution) throw (std::runtime_error)
+                          nmrLSqLinSolutionDynamic &solution) CISST_THROW(std::runtime_error)
 {
     typename nmrLSqLinSolutionDynamic::Friend solutionFriend(solution);
     /* check that the size and storage order matches with Allocate() */
@@ -1405,7 +1404,7 @@ inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CIS
                           vctDynamicVectorBase<_vectorOwnerTypef, CISSTNETLIB_DOUBLE> &f,
                           vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
                           vctDynamicVectorBase<_vectorOwnerTypeh, CISSTNETLIB_DOUBLE> &h,
-                          nmrLSqLinSolutionDynamic &solution) throw (std::runtime_error)
+                          nmrLSqLinSolutionDynamic &solution) CISST_THROW(std::runtime_error)
 {
     typename nmrLSqLinSolutionDynamic::Friend solutionFriend(solution);
     /* check that the size and storage order matches with Allocate() */

@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -183,7 +183,7 @@ public:
     */
     template <size_type __size, stride_type __stride, class __dataPtrType>
     void SetRef(vctFixedSizeVectorBase<__size, __stride, _elementType, __dataPtrType> & otherVector,
-                size_type startPosition, size_type length) throw(std::out_of_range)
+                size_type startPosition, size_type length) CISST_THROW(std::out_of_range)
     {
         if (startPosition + length > otherVector.size()) {
             cmnThrow(std::out_of_range("vctDynamicVectorRef SetRef out of range"));
@@ -209,7 +209,7 @@ public:
     */
     template <class __vectorOwnerType>
     void SetRef(vctDynamicVectorBase<__vectorOwnerType, _elementType> & otherVector,
-                size_type startPosition, size_type length) throw(std::out_of_range)
+                size_type startPosition, size_type length) CISST_THROW(std::out_of_range)
     {
         if (startPosition + length > otherVector.size()) {
             cmnThrow(std::out_of_range("vctDynamicVectorRef SetRef out of range"));
@@ -261,7 +261,7 @@ public:
     /*! Binary deserialization.  This method can not resize the
       existing block of memory and will throw an exception is the
       sizes don't match. */
-    void DeSerializeRaw(std::istream & inputStream) throw(std::runtime_error)
+    void DeSerializeRaw(std::istream & inputStream) CISST_THROW(std::runtime_error)
     {
         // get and set size
         size_type mySize;

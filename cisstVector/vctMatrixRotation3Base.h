@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2005-08-19
 
-  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -106,7 +104,7 @@ public:
     template <class __containerType>
     inline ThisType &
     From(const vctMatrixRotation3Base<__containerType> & other)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(other);
         this->ThrowUnlessIsNormalized();
@@ -119,7 +117,7 @@ public:
     From(const value_type & element00, const value_type & element01, const value_type & element02,
          const value_type & element10, const value_type & element11, const value_type & element12,
          const value_type & element20, const value_type & element21, const value_type & element22)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(element00, element01, element02,
                       element10, element11, element12,
@@ -142,7 +140,7 @@ public:
          const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
          const vctFixedSizeConstVectorBase<DIMENSION, __stride3, value_type, __dataPtrType3>& v3,
          bool vectorsAreColumns = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(v1, v2, v3, vectorsAreColumns);
         this->ThrowUnlessIsNormalized();
@@ -164,7 +162,7 @@ public:
          const vctDynamicConstVectorBase<__vectorOwnerType2, value_type>& v2,
          const vctDynamicConstVectorBase<__vectorOwnerType3, value_type>& v3,
          bool vectorsAreColumns = true)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(v1, v2, v3, vectorsAreColumns);
         this->ThrowUnlessIsNormalized();
@@ -174,7 +172,7 @@ public:
     /*! Conversion from an axis/angle rotation. */
     inline ThisType &
     From(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->ThrowUnlessIsNormalized(axisAngleRotation);
         return this->FromRaw(axisAngleRotation);
@@ -184,7 +182,7 @@ public:
     template <class __containerType>
     inline ThisType &
     From(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->ThrowUnlessIsNormalized(quaternionRotation);
         return this->FromRaw(quaternionRotation);
@@ -195,7 +193,7 @@ public:
     template <class __containerType>
     inline ThisType &
     From(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->ThrowUnlessIsNormalized(rodriguezRotation);
         return this->FromRaw(rodriguezRotation);
@@ -205,7 +203,7 @@ public:
     template <vctEulerRotation3Order::OrderType __order>
     inline ThisType &
     From(const vctEulerRotation3<__order> & eulerRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->ThrowUnlessIsNormalized(eulerRotation);
         return this->FromRaw(eulerRotation);
@@ -232,7 +230,7 @@ public:
     template <class __containerType>
     inline ThisType &
     FromNormalized(const vctMatrixRotation3Base<__containerType> & other)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(other);
         this->NormalizedSelf();
@@ -267,7 +265,7 @@ public:
                    const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                    const vctFixedSizeConstVectorBase<DIMENSION, __stride3, value_type, __dataPtrType3>& v3,
                    bool vectorsAreColumns = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(v1, v2, v3, vectorsAreColumns);
         this->NormalizedSelf();
@@ -352,7 +350,7 @@ public:
     template <class __containerType>
     inline ThisType &
     FromRaw(const vctMatrixRotation3Base<__containerType> & other)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->Assign(other);
         return *this;
@@ -414,7 +412,7 @@ public:
             const vctDynamicConstVectorBase<__vectorOwnerType2, value_type>& v2,
             const vctDynamicConstVectorBase<__vectorOwnerType3, value_type>& v3,
             bool vectorsAreColumns = true)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         CMN_ASSERT(v1.size() == DIMENSION);
         CMN_ASSERT(v2.size() == DIMENSION);

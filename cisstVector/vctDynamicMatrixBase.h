@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -168,14 +168,14 @@ public:
       or inconvenient.
 
       \return a non-const reference to element[index] */
-    reference at(size_type index) throw(std::out_of_range) {
+    reference at(size_type index) CISST_THROW(std::out_of_range) {
         this->ThrowUnlessValidIndex(index);
         return (begin())[index];
     }
 
 
     /* documented in base class */
-    const_reference at(size_type index) const throw(std::out_of_range) {
+    const_reference at(size_type index) const CISST_THROW(std::out_of_range) {
         return BaseType::at(index);
     }
 
@@ -184,24 +184,24 @@ public:
       This method can be a handy substitute for the overloaded operator () when
       operator overloading is unavailable or inconvenient.
       \return a reference to the element at rowIndex, colIndex */
-    reference at(size_type rowIndex, size_type colIndex) throw(std::out_of_range) {
+    reference at(size_type rowIndex, size_type colIndex) CISST_THROW(std::out_of_range) {
         this->ThrowUnlessValidIndex(rowIndex, colIndex);
         return *(Pointer(rowIndex, colIndex));
     }
 
     /* documented in base class */
-    const_reference at(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    const_reference at(size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         return BaseType::at(rowIndex, colIndex);
     }
 
 
     /*! Overloaded operator () for simplified (non const) element access with bounds checking */
-    reference operator () (size_type rowIndex, size_type colIndex) throw(std::out_of_range) {
+    reference operator () (size_type rowIndex, size_type colIndex) CISST_THROW(std::out_of_range) {
         return this->at(rowIndex, colIndex);
     }
 
     /* documented in base class */
-    const_reference operator () (size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
+    const_reference operator () (size_type rowIndex, size_type colIndex) const CISST_THROW(std::out_of_range) {
         return BaseType::operator()(rowIndex, colIndex);
     }
 
@@ -224,13 +224,13 @@ public:
     /*! \name Row and column references. */
     //@{
     /*! Create a row reference. */
-    RowRefType Row(size_type index) throw(std::out_of_range) {
+    RowRefType Row(size_type index) CISST_THROW(std::out_of_range) {
         this->ThrowUnlessValidRowIndex(index);
         return RowRefType(this->cols(), Pointer(index, 0), this->col_stride());
     }
 
     /*! Create a column reference. */
-    ColumnRefType Column(size_type index) throw(std::out_of_range) {
+    ColumnRefType Column(size_type index) CISST_THROW(std::out_of_range) {
         this->ThrowUnlessValidColIndex(index);
         return ColumnRefType(this->rows(), Pointer(0, index), this->row_stride());
     }
@@ -258,7 +258,7 @@ public:
       \note This method will throw an exception if the rows are not
       compact, i.e. if the column stride is not equal to 1.
     */
-    VectorPointerType & RowPointers(VectorPointerType & rowPointers) throw(std::runtime_error) {
+    VectorPointerType & RowPointers(VectorPointerType & rowPointers) CISST_THROW(std::runtime_error) {
         if (! (this->col_stride() == 1)) {
             cmnThrow(std::runtime_error("vctDynamicMatrix: RowPointers requires compact rows"));
         }
@@ -274,12 +274,12 @@ public:
 
 
     /* documented in base class */
-    ConstRowRefType Row(size_type index) const throw(std::out_of_range) {
+    ConstRowRefType Row(size_type index) const CISST_THROW(std::out_of_range) {
         return BaseType::Row(index);
     }
 
     /* documented in base class */
-    ConstColumnRefType Column(size_type index) const throw(std::out_of_range) {
+    ConstColumnRefType Column(size_type index) const CISST_THROW(std::out_of_range) {
         return BaseType::Column(index);
     }
 
@@ -289,7 +289,7 @@ public:
     }
 
     /* documented in base class */
-    ConstVectorPointerType RowPointers(ConstVectorPointerType & rowPointers) const throw(std::runtime_error) {
+    ConstVectorPointerType RowPointers(ConstVectorPointerType & rowPointers) const CISST_THROW(std::runtime_error) {
         return BaseType::RowPointers(rowPointers);
     }
 
@@ -299,7 +299,7 @@ public:
     //@{
     vctDynamicMatrixRef<_elementType>
     Ref(const size_type rows, const size_type cols,
-        const size_type startRow = 0, const size_type startCol = 0) throw (std::out_of_range) {
+        const size_type startRow = 0, const size_type startCol = 0) CISST_THROW(std::out_of_range) {
         if (((startRow + rows) > this->rows())
             || ((startCol + cols) > this->cols())) {
             cmnThrow(std::out_of_range("vctDynamicMatrixBase::Ref: reference is out of range"));
@@ -311,7 +311,7 @@ public:
 
     vctDynamicConstMatrixRef<_elementType>
     Ref(const size_type rows, const size_type cols,
-        const size_type startRow = 0, const size_type startCol = 0) const throw (std::out_of_range) {
+        const size_type startRow = 0, const size_type startCol = 0) const CISST_THROW(std::out_of_range) {
         return BaseType::Ref(rows, cols, startRow, startCol);
     }
 //@}
@@ -677,7 +677,7 @@ public:
     template <class __matrixOwnerType>
     inline bool FastCopyOf(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & source,
                            bool performSafetyChecks = vctFastCopy::PerformChecks)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return vctFastCopy::MatrixCopy(*this, source, performSafetyChecks);
     }
@@ -685,7 +685,7 @@ public:
     template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline bool FastCopyOf(const vctFixedSizeConstMatrixBase<__rows, __cols, __rowStride, __colStride, value_type, __dataPtrType> & source,
                            bool performSafetyChecks = vctFastCopy::PerformChecks)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return vctFastCopy::MatrixCopy(*this, source, performSafetyChecks);
     }

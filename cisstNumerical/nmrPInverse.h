@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -171,7 +171,7 @@ protected:
     */
     template <typename _matrixOwnerTypePInverse>
     inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> & pInverse) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         // check sizes and storage order
         if ((MMember != pInverse.cols()) || (NMember != pInverse.rows())) {
@@ -192,7 +192,7 @@ protected:
     template <typename _vectorOwnerTypeWorkspace>
     inline void
     ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         const size_type lwork = nmrSVDDynamicData::WorkspaceSize(MMember, NMember);
         if (lwork > workspace.size()) {
@@ -781,7 +781,7 @@ public:
         nmrPInverseTest::TestDynamicRowMajorUserAlloc
 */
 template <class _matrixOwnerType>
-inline CISSTNETLIB_INTEGER nmrPInverse(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> &A, nmrPInverseDynamicData &data) throw (std::runtime_error)
+inline CISSTNETLIB_INTEGER nmrPInverse(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> &A, nmrPInverseDynamicData &data) CISST_THROW(std::runtime_error)
 {
     typedef vct::size_type size_type;
 
@@ -1005,4 +1005,3 @@ inline CISSTNETLIB_INTEGER nmrPInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _r
 
 
 #endif
-

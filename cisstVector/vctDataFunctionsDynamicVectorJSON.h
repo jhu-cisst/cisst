@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -48,7 +46,7 @@ public:
 
     static void DeSerializeText(DataType & vector,
                                 const Json::Value & jsonValue)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         // get the vector size from JSON and resize
         vector.SetSize(jsonValue.size());

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2005-12-01
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -73,7 +71,7 @@ public:
 
 protected:
     /*! Throw an exception unless this rotation is normalized. */
-    inline void ThrowUnlessIsNormalized(void) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(void) const CISST_THROW(std::runtime_error) {
         if (! this->IsNormalized()) {
             cmnThrow(std::runtime_error("vctMatrixRotation2Base: This rotation is not normalized"));
         }
@@ -84,7 +82,7 @@ protected:
       \param input An object with \c IsNormalized method.
     */
     template <class _inputType>
-    inline void ThrowUnlessIsNormalized(const _inputType & input) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(const _inputType & input) const CISST_THROW(std::runtime_error) {
         if (! input.IsNormalized()) {
             cmnThrow(std::runtime_error("vctMatrixRotation2Base: Input is not normalized"));
         }
@@ -163,7 +161,7 @@ public:
     */
     inline vctMatrixRotation2Base(const value_type & element00, const value_type & element01,
                                   const value_type & element10, const value_type & element11)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->Allocate();
         this->From(element00, element01,
@@ -183,7 +181,7 @@ public:
     inline vctMatrixRotation2Base(const vctFixedSizeConstVectorBase<2, __stride1, value_type, __dataPtrType1>& v1,
                                   const vctFixedSizeConstVectorBase<2, __stride2, value_type, __dataPtrType2>& v2,
                                   bool vectorsAreColumns = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->Allocate();
         this->From(v1, v2, vectorsAreColumns);
@@ -200,7 +198,7 @@ public:
     inline vctMatrixRotation2Base(const vctDynamicConstVectorBase<__vectorOwnerType1, value_type>& v1,
                                   const vctDynamicConstVectorBase<__vectorOwnerType2, value_type>& v2,
                                   bool vectorsAreColumns = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->Allocate();
         this->From(v1, v2, vectorsAreColumns);
@@ -208,7 +206,7 @@ public:
 
     /*! Construction from a vctAngleRotation2. */
     inline vctMatrixRotation2Base(const vctAngleRotation2 & angleRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->Allocate();
         this->From(angleRotation);
@@ -366,7 +364,7 @@ public:
     inline ThisType &
     From(const value_type & element00, const value_type & element01,
          const value_type & element10, const value_type & element11)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(element00, element01,
                       element10, element11);
@@ -386,7 +384,7 @@ public:
     From(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
          const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
          bool vectorsAreColumns = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(v1, v2, vectorsAreColumns);
         this->ThrowUnlessIsNormalized();
@@ -405,7 +403,7 @@ public:
     From(const vctDynamicConstVectorBase<__vectorOwnerType1, value_type>& v1,
          const vctDynamicConstVectorBase<__vectorOwnerType2, value_type>& v2,
          bool vectorsAreColumns = true)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(v1, v2, vectorsAreColumns);
         this->ThrowUnlessIsNormalized();
@@ -415,7 +413,7 @@ public:
     /*! Conversion from an angle rotation. */
     inline ThisType &
     From(const vctAngleRotation2 & angleRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->ThrowUnlessIsNormalized(angleRotation);
         return this->FromRaw(angleRotation);
@@ -460,7 +458,7 @@ public:
     FromNormalized(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
                    const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                    bool vectorsAreColumns = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->FromRaw(v1, v2, vectorsAreColumns);
         this->NormalizedSelf();
@@ -555,7 +553,7 @@ public:
     FromRaw(const vctDynamicConstVectorBase<__vectorOwnerType1, value_type>& v1,
             const vctDynamicConstVectorBase<__vectorOwnerType2, value_type>& v2,
             bool vectorsAreColumns = true)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         CMN_ASSERT(v1.size() == DIMENSION);
         CMN_ASSERT(v2.size() == DIMENSION);
@@ -868,4 +866,3 @@ public:
 
 
 #endif  // _vctMatrixRotation2Base_h
-

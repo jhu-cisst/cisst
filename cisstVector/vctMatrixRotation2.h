@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2005-02-23
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -95,7 +93,7 @@ public:
     /* documented in base class */
     inline vctMatrixRotation2(const value_type & element00, const value_type & element01,
                               const value_type & element10, const value_type & element11)
-        throw(std::runtime_error):
+        CISST_THROW(std::runtime_error):
         BaseType(element00, element01,
                  element10, element11)
     {}
@@ -105,7 +103,7 @@ public:
     inline vctMatrixRotation2(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                               bool vectorsAreColumns = true)
-        throw(std::runtime_error):
+        CISST_THROW(std::runtime_error):
         BaseType(v1, v2, vectorsAreColumns)
     {}
 
@@ -114,12 +112,12 @@ public:
     inline vctMatrixRotation2(const vctDynamicConstVectorBase<__vectorOwnerType1, value_type>& v1,
                               const vctDynamicConstVectorBase<__vectorOwnerType2, value_type>& v2,
                               bool vectorsAreColumns = true)
-        throw(std::runtime_error):
+        CISST_THROW(std::runtime_error):
         BaseType(v1, v2, vectorsAreColumns)
     {}
 
     inline vctMatrixRotation2(const vctAngleRotation2 & angleRotation)
-        throw(std::runtime_error):
+        CISST_THROW(std::runtime_error):
         BaseType(angleRotation)
     {}
 
@@ -173,4 +171,3 @@ public:
 
 
 #endif  // _vctMatrixRotation2_h
-

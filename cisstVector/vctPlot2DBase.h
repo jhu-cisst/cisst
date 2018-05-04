@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-05-05
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -73,33 +72,33 @@ class CISST_EXPORT vctPlot2DBase
         /*! Get point value in the buffer relative to first element.
           This method will throw an std::runtime_error if the index is
           invalid, i.e. greater than the buffer size. */
-        vctDouble2 GetPointAt(size_t index) throw (std::runtime_error);
+        vctDouble2 GetPointAt(size_t index) CISST_THROW(std::runtime_error);
 
         /*! Set point value at a given position, relative to first
           element.  This method will throw an std::runtime_error if
           the index is invalid, i.e. greater than the buffer size. */
-        void SetPointAt(size_t index, const vctDouble2 & point) throw (std::runtime_error);
+        void SetPointAt(size_t index, const vctDouble2 & point) CISST_THROW(std::runtime_error);
 
         /*! Replaces "size" points data starting at "index".  This
           methods assumes that the point size of the user provided
           buffer matches the internal buffer.  If either the point
           size, index or size of user provided data is incorrect, an
           exception is thrown. */
-        void SetArrayAt(size_t index, const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
+        void SetArrayAt(size_t index, const double * pointArray, size_t arraySize, size_t pointDimension = 2) CISST_THROW(std::runtime_error);
 
         /*! Prepend user provided data at the beginning of the
           circular buffer.  If the buffer is full or doesn't have
           enough free space, data will be overwritten at the end of
           buffer.  This method will throw an exception if either the
           array size or index is invalid. */
-        bool PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
+        bool PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) CISST_THROW(std::runtime_error);
 
         /*! Append user provided data at the end of the circular
           buffer.  If the buffer is full or doesn't have enough free
           space, data will be overwritten at the beginning of buffer.
           This method will throw an exception if either the array size
           or index is invalid. */
-        bool AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) throw (std::runtime_error);
+        bool AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) CISST_THROW(std::runtime_error);
 
         void Freeze(bool freeze);
         bool GetFreeze(void) const;

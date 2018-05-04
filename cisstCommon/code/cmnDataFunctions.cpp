@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #include <cisstCommon/cmnDataFunctions.h>
@@ -95,7 +92,7 @@ size_t cmnDataDeSerializeBinary_size_t(size_t & data, const char * buffer, size_
 
 void cmnDataSerializeBinary_size_t(const size_t & data,
                                    std::ostream & outputStream)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     outputStream.write(reinterpret_cast<const char *>(&data),
                        sizeof(size_t));
@@ -108,7 +105,7 @@ void cmnDataDeSerializeBinary_size_t(size_t & data,
                                      std::istream & inputStream,
                                      const cmnDataFormat & localFormat,
                                      const cmnDataFormat & remoteFormat)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // first case, both use same size
     if (remoteFormat.GetSizeTSize() == localFormat.GetSizeTSize()) {
@@ -150,7 +147,7 @@ void cmnDataDeSerializeBinary_size_t(size_t & data,
 void cmnDataSerializeText_size_t(const size_t & data,
                                  std::ostream & outputStream,
                                  const char CMN_UNUSED(delimiter))
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     outputStream << data;
     if (outputStream.fail()) {
@@ -160,7 +157,7 @@ void cmnDataSerializeText_size_t(const size_t & data,
 
 void cmnDataDeSerializeText_size_t(size_t & data,
                                    std::istream & inputStream,
-                                   const char CMN_UNUSED(delimiter)) throw (std::runtime_error)
+                                   const char CMN_UNUSED(delimiter)) CISST_THROW(std::runtime_error)
 {
     inputStream >> data;
     if (inputStream.fail()) {
@@ -176,13 +173,13 @@ std::string cmnDataHumanReadable_size_t(const size_t & data)
 }
 
 std::string cmnDataScalarDescription_size_t(const size_t & CMN_UNUSED(data), const size_t CMN_UNUSED(index), const std::string & userDescription)
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     return (userDescription == "" ? "{s_t}" : (userDescription + ":{s_t}"));
 }
 
 double cmnDataScalar_size_t(const size_t & data, const size_t CMN_UNUSED(index))
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     return static_cast<double>(data);
 }
@@ -198,7 +195,7 @@ bool cmnDataScalarNumberIsFixed_size_t(const size_t & CMN_UNUSED(data))
 }
 
 void cmnDataDeSerializeTextDelimiter(std::istream & inputStream, const char delimiter, const char * className)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     char delimiterRead;
     // look for the delimiter

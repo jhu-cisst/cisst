@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2017 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,7 +27,7 @@ void cmnDataJSON<double>::SerializeText(const DataType & data, Json::Value & jso
     jsonValue = data;
 }
 template <>
-void cmnDataJSON<double>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<double>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<double>::DeSerializeText: empty JSON value");
     }
@@ -40,7 +39,7 @@ void cmnDataJSON<float>::SerializeText(const DataType & data, Json::Value & json
     jsonValue = data;
 }
 template <>
-void cmnDataJSON<float>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<float>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<float>::DeSerializeText: empty JSON value");
     }
@@ -52,7 +51,7 @@ void cmnDataJSON<char>::SerializeText(const DataType & data, Json::Value & jsonV
     jsonValue = data;
 }
 template <>
-void cmnDataJSON<char>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<char>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<char>::DeSerializeText: empty JSON value");
     }
@@ -68,7 +67,7 @@ void cmnDataJSON<int>::SerializeText(const DataType & data, Json::Value & jsonVa
     jsonValue = data;
 }
 template <>
-void cmnDataJSON<int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<int>::DeSerializeText: empty JSON value");
     }
@@ -80,7 +79,7 @@ void cmnDataJSON<unsigned int>::SerializeText(const DataType & data, Json::Value
     jsonValue = data;
 }
 template <>
-void cmnDataJSON<unsigned int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<unsigned int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<unsigned int>::DeSerializeText: empty JSON value");
     }
@@ -92,7 +91,7 @@ void cmnDataJSON<unsigned long int>::SerializeText(const DataType & data, Json::
     jsonValue = Json::UInt64(data);
 }
 template <>
-void cmnDataJSON<unsigned long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<unsigned long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<unsigned long int>::DeSerializeText: empty JSON value");
     }
@@ -104,7 +103,7 @@ void cmnDataJSON<unsigned long long int>::SerializeText(const DataType & data, J
     jsonValue = Json::UInt64(data);
 }
 template <>
-void cmnDataJSON<unsigned long long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<unsigned long long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<unsigned long long int>::DeSerializeText: empty JSON value");
     }
@@ -116,7 +115,7 @@ void cmnDataJSON<bool>::SerializeText(const DataType & data, Json::Value & jsonV
     jsonValue = data;
 }
 template <>
-void cmnDataJSON<bool>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<bool>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<bool>::DeSerializeText: empty JSON value");
     }
@@ -128,7 +127,7 @@ void cmnDataJSON<std::string>::SerializeText(const DataType & data, Json::Value 
     jsonValue = data;
 }
 template <>
-void cmnDataJSON<std::string>::DeSerializeText(DataType & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<std::string>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<std::string>::DeSerializeText: empty JSON value");
     }

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2005-01-13
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -56,7 +54,7 @@ protected:
 
 
     /*! Throw an exception unless this rotation is normalized. */
-    inline void ThrowUnlessIsNormalized(void) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(void) const CISST_THROW(std::runtime_error) {
         if (! IsNormalized()) {
             cmnThrow(std::runtime_error("vctAngleRotation2: This rotation is not normalized"));
         }
@@ -67,7 +65,7 @@ protected:
       \param input An object with \c IsNormalized method.
     */
     template <class _inputType>
-    inline void ThrowUnlessIsNormalized(const _inputType & input) const throw(std::runtime_error) {
+    inline void ThrowUnlessIsNormalized(const _inputType & input) const CISST_THROW(std::runtime_error) {
         if (! input.IsNormalized()) {
             cmnThrow(std::runtime_error("vctAngleRotation2: Input is not normalized"));
         }
@@ -98,7 +96,7 @@ protected:
     /*! Constructor from an angle (in radians). */
     inline explicit
     vctAngleRotation2(const AngleType angle)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         From(angle);
     }
@@ -106,7 +104,7 @@ protected:
     /*! Constructor from a rotation matrix. */
     template <class _containerType>
     inline vctAngleRotation2(const vctMatrixRotation2Base<_containerType> & matrixRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         From(matrixRotation);
     }
@@ -190,7 +188,7 @@ protected:
     /*! Conversion from an angle (in radians). */
     inline ThisType &
     From(const AngleType angle)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->AngleMember = angle;
         // this->ThrowUnlessIsNormalized();
@@ -201,7 +199,7 @@ protected:
     template <class _containerType>
     inline ThisType &
     From(const vctMatrixRotation2Base<_containerType> & matrixRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->ThrowUnlessIsNormalized(matrixRotation);
         this->AngleMember = atan2(matrixRotation.Element(0, 1), matrixRotation.Element(0, 0));
@@ -383,4 +381,3 @@ std::ostream & operator << (std::ostream & output,
 
 
 #endif  // _vctAngleRotation2_h
-

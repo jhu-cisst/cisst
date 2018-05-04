@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -50,7 +48,7 @@ public:
     }
 
     static void SerializeBinary(const DataType & data, std::ostream & outputStream)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataMatrixSerializeBinary(data, outputStream);
     }
@@ -59,7 +57,7 @@ public:
                                   std::istream & inputStream,
                                   const cmnDataFormat & localFormat,
                                   const cmnDataFormat & remoteFormat)
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataMatrixDeSerializeBinary(data, inputStream, localFormat, remoteFormat);
     }
@@ -67,7 +65,7 @@ public:
     static void SerializeText(const DataType & data,
                               std::ostream & outputStream,
                               const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataMatrixSerializeText(data, outputStream, delimiter);
     }
@@ -82,7 +80,7 @@ public:
     static void DeSerializeText(DataType & data,
                                 std::istream & inputStream,
                                 const char delimiter = ',')
-        throw (std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         cmnDataMatrixDeSerializeText(data, inputStream, delimiter);
     }
@@ -100,13 +98,13 @@ public:
     static std::string ScalarDescription(const DataType & data,
                                          const size_t & index,
                                          const std::string & userDescription = "m")
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return cmnDataMatrixScalarDescription(data, index, userDescription, false /* do not treat size as a scalar */);
     }
 
     static double Scalar(const DataType & data, const size_t & index)
-        throw (std::out_of_range)
+        CISST_THROW(std::out_of_range)
     {
         return cmnDataMatrixScalar(data, index, false /* do not treat size as a scalar */);
     }
@@ -116,7 +114,7 @@ public:
 template <typename _elementType, vct::size_type _rows, vct::size_type _cols>
 inline void cmnDeSerializeRaw(std::istream & inputStream,
                               vctFixedSizeMatrix<_elementType, _rows, _cols> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.DeSerializeRaw(inputStream);
 }
@@ -125,7 +123,7 @@ template <typename _elementType, vct::size_type _rows, vct::size_type _cols,
           vct::stride_type _rowStride, vct::stride_type _colStride>
 inline void cmnDeSerializeRaw(std::istream & inputStream,
                               vctFixedSizeMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.DeSerializeRaw(inputStream);
 }
@@ -133,7 +131,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream,
 template <typename _elementType, vct::size_type _rows, vct::size_type _cols>
 inline void cmnSerializeRaw(std::ostream & outputStream,
                             const vctFixedSizeMatrix<_elementType, _rows, _cols> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.SerializeRaw(outputStream);
 }
@@ -142,7 +140,7 @@ template <typename _elementType, vct::size_type _rows, vct::size_type _cols,
           vct::stride_type _rowStride, vct::stride_type _colStride>
 inline void cmnSerializeRaw(std::ostream & outputStream,
                             const vctFixedSizeMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.SerializeRaw(outputStream);
 }
@@ -151,7 +149,7 @@ template <typename _elementType, vct::size_type _rows, vct::size_type _cols,
           vct::stride_type _rowStride, vct::stride_type _colStride>
 inline void cmnSerializeRaw(std::ostream & outputStream,
                             const vctFixedSizeConstMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride> & matrix)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     matrix.SerializeRaw(outputStream);
 }

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2003-08-18
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -566,7 +564,7 @@ vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Ceil(vo
 /* documented in class vctFixedSizeConstVectorBase */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType
-vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Normalized(void) const throw(std::runtime_error) {
+vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Normalized(void) const CISST_THROW(std::runtime_error) {
     vctFixedSizeVector<_elementType, _size> result(*this);
     result.NormalizedSelf();
     return result;
@@ -604,4 +602,3 @@ vctFixedSizeVectorElementwiseCompareScalar(const vctFixedSizeConstVectorBase<_si
 #endif // DOXYGEN
 
 #endif // _vctFixedSizeVector_h
-

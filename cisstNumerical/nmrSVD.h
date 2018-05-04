@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -231,7 +229,7 @@ protected:
     void ThrowUnlessOutputSizeIsCorrect(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE>& inU,
                                         vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE>& inS,
                                         vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE>& inVt) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
 
         // check sizes and storage order
@@ -273,7 +271,7 @@ protected:
     template <typename _vectorOwnerTypeWorkspace>
     inline void
     ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE>& inWorkspace) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
 
         const size_type lwork =
@@ -347,7 +345,7 @@ public:
     UpdateMatrixS(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
                   const vctDynamicConstVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & vectorS,
                   vctDynamicMatrixBase<_matrixOwnerTypeS, CISSTNETLIB_DOUBLE> & matrixS)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         if ((A.rows() != matrixS.rows()) || (A.cols() != matrixS.cols())) {
             cmnThrow(std::runtime_error("nmrSVDDynamicData::UpdateMatrixS: Size of matrix S is incorrect."));
@@ -596,7 +594,7 @@ public:
                 vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
                 vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt,
                 vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->SetDimension(inU.rows(),inVt.rows(),inU.StorageOrder());
         this->AllocateOutputWorkspace(false, false);
@@ -624,7 +622,7 @@ public:
     void SetRefOutput(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & inU,
                       vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
                       vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->SetDimension(inU.rows(), inVt.rows(), inU.StorageOrder());
         this->ThrowUnlessOutputSizeIsCorrect(inU, inS, inVt);
@@ -999,7 +997,7 @@ template <class _matrixOwnerType>
 inline
 CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> & A,
                            nmrSVDDynamicData & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typename nmrSVDDynamicData::Friend dataFriend(data);
     CISSTNETLIB_INTEGER Info;
@@ -1299,4 +1297,3 @@ CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, 
 //@}
 
 #endif
-

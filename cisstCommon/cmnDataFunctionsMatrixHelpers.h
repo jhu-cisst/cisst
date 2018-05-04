@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -71,7 +68,7 @@ template <class _matrixType>
 void cmnDataMatrixSerializeText(const _matrixType & data,
                                 std::ostream & outputStream,
                                 const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typedef typename _matrixType::const_iterator const_iterator;
     const const_iterator begin = data.begin();
@@ -105,7 +102,7 @@ template <class _matrixType>
 void cmnDataMatrixDeSerializeTextResize(_matrixType & data,
                                         std::istream & inputStream,
                                         const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize size
     size_t rows, cols;
@@ -123,7 +120,7 @@ template <class _matrixType>
 void cmnDataMatrixDeSerializeTextCheckSize(_matrixType & data,
                                            std::istream & inputStream,
                                            const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize size
     size_t rows, cols;
@@ -174,7 +171,7 @@ std::string cmnDataMatrixSerializeDescription(const _matrixType & data,
 template <class _matrixType>
 void cmnDataMatrixSerializeBinary(const _matrixType & data,
                                   std::ostream & outputStream)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typedef typename _matrixType::const_iterator const_iterator;
     const const_iterator end = data.end();
@@ -189,7 +186,7 @@ void cmnDataMatrixDeSerializeBinary(_matrixType & data,
                                     std::istream & inputStream,
                                     const cmnDataFormat & localFormat,
                                     const cmnDataFormat & remoteFormat)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize data
     typedef typename _matrixType::iterator iterator;
@@ -205,7 +202,7 @@ void cmnDataMatrixDeSerializeBinaryResize(_matrixType & data,
                                           std::istream & inputStream,
                                           const cmnDataFormat & localFormat,
                                           const cmnDataFormat & remoteFormat)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize size and resize
     size_t rows, cols;
@@ -220,7 +217,7 @@ void cmnDataMatrixDeSerializeBinaryCheckSize(_matrixType & data,
                                              std::istream & inputStream,
                                              const cmnDataFormat & localFormat,
                                              const cmnDataFormat & remoteFormat)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // deserialize size and check
     size_t rows, cols;
@@ -303,7 +300,7 @@ std::string cmnDataMatrixScalarDescription(const _matrixType & data,
                                            const size_t index,
                                            const std::string & userDescription,
                                            const bool includeSize)
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     size_t elementRow, elementCol, inElementIndex;
     size_t realIndex = index;
@@ -327,7 +324,7 @@ std::string cmnDataMatrixScalarDescription(const _matrixType & data,
 
 template <class _matrixType>
 double cmnDataMatrixScalar(const _matrixType & data, const size_t index, const bool includeSize)
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     size_t elementRow, elementCol, inElementIndex;
     size_t realIndex = index;

@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -47,7 +45,7 @@ template <class _elementType, bool>
 class cmnSerializeRawImpl
 {
 public:
-    static void SerializeRaw(std::ostream & outputStream, const _elementType & data) throw (std::runtime_error)
+    static void SerializeRaw(std::ostream & outputStream, const _elementType & data) CISST_THROW(std::runtime_error)
     {
         outputStream.write(reinterpret_cast<const char *>(&data), sizeof(_elementType));
         if (outputStream.fail()) {
@@ -61,7 +59,7 @@ template <class _elementType>
 class cmnSerializeRawImpl<_elementType, true>
 {
 public:
-    static void SerializeRaw(std::ostream & outputStream, const _elementType & data) throw (std::runtime_error)
+    static void SerializeRaw(std::ostream & outputStream, const _elementType & data) CISST_THROW(std::runtime_error)
     {
         data.SerializeRaw(outputStream);
     }
@@ -76,7 +74,7 @@ public:
 
 template <class _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typedef cmnSerializeRawImpl<_elementType, cmnIsDerivedFrom<_elementType, cmnGenericObject>::IS_DERIVED> impl;
     impl::SerializeRaw(outputStream, data);
@@ -91,7 +89,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & da
   This function should be use to implement the SerializeRaw method of
   classes derived from cmnGenericObject. */
 inline void cmnSerializeSizeRaw(std::ostream & outputStream, const size_t & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     unsigned long long int dataToSend = data;
     cmnSerializeRaw(outputStream, dataToSend);
@@ -104,7 +102,7 @@ inline void cmnSerializeSizeRaw(std::ostream & outputStream, const size_t & data
   operation fails, an exception is thrown
   (<code>std::runtime_error</code>). */
 inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     const std::string::size_type size = data.size();
     cmnSerializeSizeRaw(outputStream, size);
@@ -123,7 +121,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
   (<code>std::runtime_error</code>). */
 template <class _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream, const std::vector<_elementType> & data)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     const typename std::vector<_elementType>::size_type size = data.size();
     cmnSerializeSizeRaw(outputStream, size);
@@ -253,4 +251,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(cmnSerializer)
 
 
 #endif // _cmnSerialize_h
-

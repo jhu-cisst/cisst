@@ -133,7 +133,7 @@ public:
 		return MinDegree;
 	}
 
-    void SetMaxDegree(PowerType newMax) throw(std::runtime_error)
+    void SetMaxDegree(PowerType newMax) CISST_THROW(std::runtime_error)
     {
         if (newMax < this->Degree) {
             throw std::runtime_error("nmrPolynomialTermPowerIndex: Attempt to set max degree below current degree");
@@ -144,7 +144,7 @@ public:
         MaxDegree = newMax;
     }
 
-    void SetMinDegree(PowerType newMin) throw(std::runtime_error)
+    void SetMinDegree(PowerType newMin) CISST_THROW(std::runtime_error)
     {
         if (newMin > this->Degree) {
             throw std::runtime_error("nmrPolynomialTermPowerIndex: Attempt to set min degree above current degree");

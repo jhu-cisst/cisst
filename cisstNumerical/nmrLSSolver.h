@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor
   Created on: 2004-10-26
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -190,7 +188,7 @@ public:
 
     //@{
     template <class _matrixOwnerType>
-    inline void Solve(vctDynamicMatrixBase<_matrixOwnerType, double> &A, vctDynamicMatrixBase<_matrixOwnerType, double> &B) throw (std::runtime_error) {
+    inline void Solve(vctDynamicMatrixBase<_matrixOwnerType, double> &A, vctDynamicMatrixBase<_matrixOwnerType, double> &B) CISST_THROW(std::runtime_error) {
         /* check that the size and storage order matches with Allocate() */
         if (A.IsRowMajor() != StorageOrder) {
             cmnThrow(std::runtime_error("nmrLSSolver Solve: Storage order used for Allocate was different"));
@@ -242,4 +240,3 @@ public:
 
 
 #endif // _nmrLSSolver_h
-

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2004-01-12
 
-  (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -86,7 +84,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     {
         this->Assign(other);
     }
-                                       
+
     /*! The assignment from BaseType (i.e. a 3 by 3 fixed size matrix)
       has to be redefined for this class (C++ restriction).  This
       operator uses the Assign() method inherited from the BaseType.
@@ -135,7 +133,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     inline vctMatrixRotation3(const value_type & element00, const value_type & element01, const value_type & element02,
                               const value_type & element10, const value_type & element11, const value_type & element12,
                               const value_type & element20, const value_type & element21, const value_type & element22)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(element00, element01, element02,
                    element10, element11, element12,
@@ -155,7 +153,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride3, value_type, __dataPtrType3>& v3,
                               bool vectorsAreColumns = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(v1, v2, v3, vectorsAreColumns);
     }
@@ -173,14 +171,14 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
                               const vctDynamicConstVectorBase<__vectorOwnerType2, value_type>& v2,
                               const vctDynamicConstVectorBase<__vectorOwnerType3, value_type>& v3,
                               bool vectorsAreColumns = true)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(v1, v2, v3, vectorsAreColumns);
     }
 
     /*! Construction from a vctAxisAngleRotation3. */
     explicit inline vctMatrixRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(axisAngleRotation);
     }
@@ -194,7 +192,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     */
     template <class __containerType>
     explicit inline vctMatrixRotation3(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(quaternionRotation);
     }
@@ -202,7 +200,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     /*! Constructor from a vctRodriguezRotation3. */
     template <class __containerType>
     explicit inline vctMatrixRotation3(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(rodriguezRotation);
     }
@@ -210,7 +208,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     /*! Constructor from a vctEulerRotation3. */
     template <vctEulerRotation3Order::OrderType __order>
     explicit inline vctMatrixRotation3(const vctEulerRotation3<__order> & eulerRotation)
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         this->From(eulerRotation);
     }

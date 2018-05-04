@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #include <cisstCommon/cmnDataFunctionsString.h>
@@ -68,7 +65,7 @@ size_t cmnDataDeSerializeBinary(std::string & data, const char * buffer, size_t 
 
 void cmnDataSerializeBinary(const std::string & data,
                             std::ostream & outputStream)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     cmnData<size_t>::SerializeBinary(data.size(), outputStream);
     outputStream.write(data.data(), data.size());
@@ -81,7 +78,7 @@ void cmnDataDeSerializeBinary(std::string & data,
                               std::istream & inputStream,
                               const cmnDataFormat & localFormat,
                               const cmnDataFormat & remoteFormat)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     size_t size;
     // retrieve size of string
@@ -96,7 +93,7 @@ void cmnDataDeSerializeBinary(std::string & data,
 void cmnDataSerializeText(const std::string & data,
                           std::ostream & outputStream,
                           const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     const std::string::const_iterator end = data.end();
     std::string::const_iterator iter = data.begin();
@@ -112,19 +109,19 @@ void cmnDataSerializeText(const std::string & data,
 void cmnDataDeSerializeText(std::string & data,
                             std::istream & inputStream,
                             const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     // reset string content
     data = "";
     bool lastCharWasEscape = false;
     char newChar;
-    
+
     // seek around to figure how many characters are left in input stream
     std::streampos currentPosition = inputStream.tellg();
     inputStream.seekg(0, inputStream.end);
     std::streamoff charactersLeft = inputStream.tellg() - currentPosition;
     inputStream.seekg(currentPosition);
-    
+
     // keep reading as long as we don't run into comma
     while (charactersLeft > 0                     // there is still something to read
            && ((inputStream.peek() != delimiter)  // we are not finding the delimiter

@@ -5,8 +5,7 @@
   Author(s):  Ankur Kapoor
   Created on: 2004-10-30
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -182,7 +181,7 @@ public:
       If the parameters don't meet all the requirements, an exception
       is thrown (std::runtime_error).
      */
-    inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B) throw (std::runtime_error) {
+    inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B) CISST_THROW(std::runtime_error) {
         /* check that the size matches with Allocate() */
         if ((M != static_cast<CISSTNETLIB_INTEGER>(A.rows()))
             || (N != static_cast<CISSTNETLIB_INTEGER>(A.cols()))

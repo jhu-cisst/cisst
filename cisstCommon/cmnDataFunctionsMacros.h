@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -112,7 +110,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CMN_DATA_SERIALIZE_BINARY_STREAM_USING_CAST_TO_CHAR(_type)      \
     static void SerializeBinary(const _type & data,                     \
                                 std::ostream & outputStream)            \
-        throw (std::runtime_error)                                      \
+        CISST_THROW(std::runtime_error)                                 \
     {                                                                   \
         outputStream.write(reinterpret_cast<const char *>(&data),       \
                            sizeof(_type));                              \
@@ -127,7 +125,7 @@ http://www.cisst.org/cisst/license.txt.
                                   std::istream & inputStream,           \
                                   const cmnDataFormat & CMN_UNUSED(localFormat), \
                                   const cmnDataFormat & CMN_UNUSED(remoteFormat)) \
-        throw (std::runtime_error)                                      \
+        CISST_THROW(std::runtime_error)                                 \
     {                                                                   \
         inputStream.read(reinterpret_cast<char *>(&data),               \
                          sizeof(_type));                                \
@@ -142,7 +140,7 @@ http://www.cisst.org/cisst/license.txt.
                                   std::istream & inputStream,           \
                                   const cmnDataFormat & localFormat,    \
                                   const cmnDataFormat & remoteFormat)   \
-        throw (std::runtime_error)                                      \
+        CISST_THROW(std::runtime_error)                                 \
     {                                                                   \
         inputStream.read(reinterpret_cast<char *>(&data),               \
                          sizeof(_type));                                \
@@ -161,7 +159,7 @@ http://www.cisst.org/cisst/license.txt.
     static void SerializeText(const _type & data,                       \
                               std::ostream & outputStream,              \
                               const char CMN_UNUSED(delimiter) = ',')   \
-        throw (std::runtime_error)                                      \
+        CISST_THROW(std::runtime_error)                                 \
     {                                                                   \
         outputStream << data;                                           \
         if (outputStream.fail()) {                                      \
@@ -176,7 +174,7 @@ http://www.cisst.org/cisst/license.txt.
     static void DeSerializeText(_type & data,                           \
                                 std::istream & inputStream,             \
                                 const char CMN_UNUSED(delimiter) = ',') \
-        throw (std::runtime_error)                                      \
+        CISST_THROW(std::runtime_error)                                 \
     {                                                                   \
         inputStream >> data;                                            \
         if (inputStream.fail()) {                                       \
@@ -203,14 +201,14 @@ http://www.cisst.org/cisst/license.txt.
     static std::string ScalarDescription(const _type & CMN_UNUSED(data), \
                                          const size_t CMN_UNUSED(index), \
                                          const std::string & userDescription = "") \
-        throw (std::out_of_range) {                                     \
+        CISST_THROW(std::out_of_range) {                                \
         return (userDescription == "" ? "{"#_description"}" : (userDescription + ":{"#_description"}")); \
     }
 
 /*! Macro to overload the function cmnDataScalar using a static_cast. */
 #define CMN_DATA_SCALAR_USING_STATIC_CAST(_type)                        \
     static double Scalar(const _type & data, const size_t CMN_UNUSED(index)) \
-        throw (std::out_of_range) {                                     \
+        CISST_THROW(std::out_of_range) {                                \
         return static_cast<double>(data);                               \
     }
 

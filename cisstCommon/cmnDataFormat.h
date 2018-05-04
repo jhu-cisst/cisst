@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -68,7 +65,7 @@ class cmnDataByteSwapClass
 {
     // this method is private to make sure a compilation error will
     // happen if ones try to swap bytes on unsupported sizes
-    inline static void Execute(_elementType & CMN_UNUSED(data)) throw (std::runtime_error) {
+    inline static void Execute(_elementType & CMN_UNUSED(data)) CISST_THROW(std::runtime_error) {
         cmnThrow("cmnDataByteSwap: a partial specialization should be called!");
     }
 };
@@ -78,7 +75,7 @@ class cmnDataByteSwapClass<_elementType, 1>
 {
     // this method is private to make sure a compilation error will
     // happen if ones try to swap bytes on a one byte object
-    inline static void Execute(_elementType & CMN_UNUSED(data)) throw (std::runtime_error) {
+    inline static void Execute(_elementType & CMN_UNUSED(data)) CISST_THROW(std::runtime_error) {
     }
 };
 
@@ -86,7 +83,7 @@ template <class _elementType>
 class cmnDataByteSwapClass<_elementType, 2>
 {
 public:
-    inline static void Execute(_elementType & data) throw (std::runtime_error) {
+    inline static void Execute(_elementType & data) CISST_THROW(std::runtime_error) {
         *(unsigned short *)&(data) = ( ((*(unsigned short *)&(data) & 0xff) << 8) |
                                        (*(unsigned short *)&(data) >> 8) );
     }
@@ -96,7 +93,7 @@ template <class _elementType>
 class cmnDataByteSwapClass<_elementType, 4>
 {
 public:
-    inline static void Execute(_elementType & data) throw (std::runtime_error) {
+    inline static void Execute(_elementType & data) CISST_THROW(std::runtime_error) {
         *(unsigned int *)&(data) = ( ((*(unsigned int *)&(data) & 0xff000000) >> 24) |
                                      ((*(unsigned int *)&(data) & 0x00ff0000) >>  8) |
                                      ((*(unsigned int *)&(data) & 0x0000ff00) <<  8) |
@@ -108,7 +105,7 @@ template <class _elementType>
 class cmnDataByteSwapClass<_elementType, 8>
 {
 public:
-    inline static void Execute(_elementType & data) throw (std::runtime_error) {
+    inline static void Execute(_elementType & data) CISST_THROW(std::runtime_error) {
         *(unsigned long long int *)&(data) = ( ((*(unsigned long long int *)&(data) & 0xff00000000000000ULL) >> 56) |
                                                ((*(unsigned long long int *)&(data) & 0x00ff000000000000ULL) >> 40) |
                                                ((*(unsigned long long int *)&(data) & 0x0000ff0000000000ULL) >> 24) |

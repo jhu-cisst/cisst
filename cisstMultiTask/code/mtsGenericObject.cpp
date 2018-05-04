@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-04-13
 
-  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #include <cisstMultiTask/mtsGenericObject.h>
@@ -116,14 +114,14 @@ bool mtsGenericObject::ScalarNumberIsFixed(void) const
 
 
 double mtsGenericObject::Scalar(const size_t index) const
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     return cmnData<mtsGenericObject>::Scalar(*this, index);
 }
 
 
 std::string mtsGenericObject::ScalarDescription(const size_t index, const std::string & userDescription) const
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     return cmnData<mtsGenericObject>::ScalarDescription(*this, index, userDescription);
 }
@@ -140,7 +138,7 @@ void cmnData<mtsGenericObject>::Copy(mtsGenericObject & data, const mtsGenericOb
 
 template <>
 void cmnData<mtsGenericObject>::SerializeBinary(const mtsGenericObject & data, std::ostream & outputStream)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     cmnData<double>::SerializeBinary(data.Timestamp(), outputStream);
     cmnData<bool>::SerializeBinary(data.AutomaticTimestamp(), outputStream);
@@ -153,7 +151,7 @@ void cmnData<mtsGenericObject>::DeSerializeBinary(mtsGenericObject & data,
                                                   std::istream & inputStream,
                                                   const cmnDataFormat & localFormat,
                                                   const cmnDataFormat & remoteFormat)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     cmnData<double>::DeSerializeBinary(data.Timestamp(), inputStream, localFormat, remoteFormat);
     cmnData<bool>::DeSerializeBinary(data.AutomaticTimestamp(), inputStream, localFormat, remoteFormat);
@@ -163,7 +161,7 @@ void cmnData<mtsGenericObject>::DeSerializeBinary(mtsGenericObject & data,
 
 template <>
 void cmnData<mtsGenericObject>::SerializeText(const mtsGenericObject & data, std::ostream & outputStream, const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     cmnData<double>::SerializeText(data.Timestamp(), outputStream, delimiter);
     outputStream << delimiter;
@@ -189,7 +187,7 @@ std::string cmnData<mtsGenericObject>::SerializeDescription(const mtsGenericObje
 
 template <>
 void cmnData<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, std::istream & inputStream, const char delimiter)
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     cmnData<double>::DeSerializeText(data.Timestamp(), inputStream, delimiter);
     cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "mtsGenericObject");
@@ -242,7 +240,7 @@ size_t cmnData<mtsGenericObject>::ScalarNumber(const mtsGenericObject & CMN_UNUS
 
 template <>
 double cmnData<mtsGenericObject>::Scalar(const mtsGenericObject & data, const size_t index)
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     if (index >= data.ScalarNumber()) {
         cmnThrow(std::out_of_range("cmnDataScalar: mtsGenericObject index out of range"));
@@ -261,7 +259,7 @@ double cmnData<mtsGenericObject>::Scalar(const mtsGenericObject & data, const si
 
 template <>
 std::string cmnData<mtsGenericObject>::ScalarDescription(const mtsGenericObject & data, const size_t index, const std::string & userDescription)
-    throw (std::out_of_range)
+    CISST_THROW(std::out_of_range)
 {
     if (index >= data.ScalarNumber()) {
         return "index out of range";
@@ -285,7 +283,7 @@ void cmnDataJSON<mtsGenericObject>::SerializeText(const mtsGenericObject & data,
 }
 
 template <>
-void cmnDataJSON<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, const Json::Value & jsonValue) throw (std::runtime_error) {
+void cmnDataJSON<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     Json::Value field;
     field = jsonValue["Timestamp"];
     if (!field.empty()) {

@@ -140,7 +140,7 @@ public:
     }
 
     //: Implemented from nmrPolynomialBase
-    virtual void SetMinDegree(PowerType newMin) throw(std::runtime_error)
+    virtual void SetMinDegree(PowerType newMin) CISST_THROW(std::runtime_error)
     {
         if (newMin > this->MaxDegree) {
             throw std::runtime_error("nmrPolynomialContainer: Attempt to set the min degree higher than max");
@@ -159,7 +159,7 @@ public:
     }
 
     //: Implemented from nmrPolynomialBase
-    virtual void SetMaxDegree(PowerType newMax) throw(std::runtime_error)
+    virtual void SetMaxDegree(PowerType newMax) CISST_THROW(std::runtime_error)
     {
         if (newMax < this->MinDegree) {
             throw std::runtime_error("nmrPolynomialContainer: Attempt to set the max degree lower than min");
@@ -183,7 +183,7 @@ public:
 	{
 		nmrPolynomialTermPowerIndex termIndex( *this );
 		termIndex.GoBegin();
-		
+
 		while (termIndex.IsValid()) {
 			TermIteratorType termIterator = FindTerm(termIndex);
 			if (termIterator == EndTermIterator())
@@ -191,13 +191,13 @@ public:
 			termIndex.Increment();
 		}
 	}
-	
+
 	// Find a term by its index. Return true is the term is found.
 	// return 'false' otherwise.
 	virtual bool IncludesIndex(const nmrPolynomialTermPowerIndex& target) const
-	{ 
+	{
 #if (CONTAINER_TYPE == MAP_CONTAINER)
-        return Terms.find(target) != Terms.end(); 
+        return Terms.find(target) != Terms.end();
 #elif (CONTAINER_TYPE == LIST_CONTAINER)
         return std::find_if(Terms.begin(), Terms.end(), EqualityTester(target)) != Terms.end();
 #endif
@@ -205,7 +205,7 @@ public:
 
     // Find a term by its coefficients.  If the term is found, return the sequential
     // position (zero-based) of the term in the sequence of terms for this polynomial.
-    // If the term is not found, return a number greater than or equal to the current number 
+    // If the term is not found, return a number greater than or equal to the current number
     // of terms in the sequence.
     virtual TermCounterType GetIndexPosition(const nmrPolynomialTermPowerIndex & term) const
     {
@@ -254,17 +254,17 @@ public:
 	// Returns an iterator that refers to the term of the given power index. If this
 	// polynomial does not contain a term with the given index, returns EndTermIterator().
 	TermIteratorType FindTerm(const nmrPolynomialTermPowerIndex& target)
-	{ 
+	{
 #if (CONTAINER_TYPE == MAP_CONTAINER)
-        return Terms.find(target); 
+        return Terms.find(target);
 #elif (CONTAINER_TYPE == LIST_CONTAINER)
         return std::find_if(Terms.begin(), Terms.end(), EqualityTester(target));
 #endif
     }
 	TermConstIteratorType FindTerm(const nmrPolynomialTermPowerIndex& target) const
-	{ 
+	{
 #if (CONTAINER_TYPE == MAP_CONTAINER)
-        return Terms.find(target); 
+        return Terms.find(target);
 #elif (CONTAINER_TYPE == LIST_CONTAINER)
         return std::find_if(Terms.begin(), Terms.end(), EqualityTester(target));
 #endif
@@ -299,7 +299,7 @@ public:
 	// Set a coefficient for a term given by iterator.
 	// Implemented for each concrete polynomial class.
 	virtual InsertStatus SetCoefficient(TermIteratorType & where, CoefficientType coefficient) = 0;
-	
+
 	// Retrieve the value of the user defined coefficient for a term given by iterator.
 	virtual CoefficientType GetCoefficient(const TermConstIteratorType & where) const = 0;
 	virtual CoefficientType GetCoefficient(const TermIteratorType & where) const = 0;
@@ -314,7 +314,7 @@ public:
         }
     }
 
-    // Restore all the coefficients from an array. 
+    // Restore all the coefficients from an array.
     // Re-implemented from nmrPolynomialBase
     virtual void RestoreCoefficients(const CoefficientType source[])
     {
@@ -351,8 +351,8 @@ public:
 
 	// Evaluate a single term referenced by iterator.
 	ValueType EvaluateTerm(const TermConstIteratorType & where) const
-	{ 
-        return GetCoefficient(where) * EvaluateBasis(where); 
+	{
+        return GetCoefficient(where) * EvaluateBasis(where);
     }
 	ValueType EvaluateTerm(const TermIteratorType & where) const
 	{
@@ -360,27 +360,27 @@ public:
     }
 	ValueType EvaluateTerm(const TermConstIteratorType & where,
         const nmrMultiVariablePowerBasis & variables) const
-	{ 
-        return GetCoefficient(where) * EvaluateBasis(where, variables); 
+	{
+        return GetCoefficient(where) * EvaluateBasis(where, variables);
     }
 	ValueType EvaluateTerm(const TermIteratorType & where,
         const nmrMultiVariablePowerBasis & variables) const
 	{
         return GetCoefficient(where) * EvaluateBasis(where, variables);
     }
-	
+
 	// Evaluate the polynomial at the currently point (specified by the values of the variables).
 	virtual ValueType Evaluate(const nmrMultiVariablePowerBasis & variables) const
 	{
         ValueType polyVal = 0;
-        
+
         TermConstIteratorType termIt = FirstTermIterator();
         TermConstIteratorType endIt = EndTermIterator();
         while (termIt != endIt) {
             polyVal += EvaluateTerm(termIt, variables);
             ++termIt;
         }
-        
+
         return polyVal;
 	}
 
@@ -404,14 +404,14 @@ public:
         ValueType polyVal = 0;
 
         CoefficientType const * coefficientIndex = coefficients;
-        
+
         TermConstIteratorType termIt = FirstTermIterator();
         TermConstIteratorType endIt = EndTermIterator();
         for (; termIt != endIt; ++termIt, ++coefficientIndex) {
-            polyVal += BaseType::EvaluateTerm(termIt->first, 
+            polyVal += BaseType::EvaluateTerm(termIt->first,
                 variables, *coefficientIndex);
         }
-        
+
         return polyVal;
     }
 
@@ -479,7 +479,7 @@ public:
 
     /*! nmrPolynomialBase::SerializeRaw() plus serialize for each term
      the power index in nmrPolynomialTermPowerIndex::SerializeIndexRaw()
-     format, and the specific term information by calling the abstract 
+     format, and the specific term information by calling the abstract
      SerializeTermInfo for that term.
     */
     virtual void SerializeRaw(std::ostream & output) const
@@ -538,4 +538,3 @@ protected:
 
 
 #endif // _nmrPolynomialContainer_h
-

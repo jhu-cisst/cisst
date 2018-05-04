@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):	Ankur Kapoor
   Created on:	2004-10-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,8 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Declaration of nmrLDPSolver
  */
 
@@ -72,7 +70,7 @@ http://www.cisst.org/cisst/license.txt.
   turned ON during the configuration with CMake.
 */
 class nmrLDPSolver {
-    
+
 protected:
     CISSTNETLIB_INTEGER M;
     CISSTNETLIB_INTEGER N;
@@ -103,7 +101,7 @@ public:
       allocates the memory based on M and N.  It relies on the method
       Allocate().  The next call to the Solve() method will check that
       the parameters match the dimension.
-      
+
       \param m Number of rows of G
       \param n Number of columns of G
     */
@@ -125,7 +123,7 @@ public:
     /*! This method allocates the memory based on Ma, Na and Mg.  The
       next call to the Solve() method will check that the parameters
       match the dimension.
-      
+
       \param m Number of rows of G
       \param n Number of columns of G
     */
@@ -151,12 +149,12 @@ public:
     inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> & CMN_UNUSED(h)) {
         Allocate(G.rows(), G.cols());
     }
-    
+
 
     /*! Given a \f$ M \times N \f$ matrix G and a \f$ M \times 1 \f$
       vector h, compute a \f$ N \times 1 \f$ vector X, that solves the
       linear distance problem:
-      
+
       \f$ \mbox{min} \; \| X \| \; \mbox{subject to} \; GX \geq h \f$
 
       \note This method verifies that the input parameters are using a
@@ -165,7 +163,7 @@ public:
       the parameters don't meet all the requirements, an exception is
       thrown (std::runtime_error).
     */
-    CISST_EXPORT void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h) throw (std::runtime_error);
+    CISST_EXPORT void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h) CISST_THROW(std::runtime_error);
 
 
     /*! Get X.  This method must be used after Solve(). */
@@ -176,4 +174,3 @@ public:
 
 
 #endif // _nmrLDPSolver_h
-

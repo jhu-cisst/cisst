@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):	Anton Deguet
   Created on: 2005-07-27
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -70,7 +68,7 @@ public:
 protected:
     /*! Memory allocated for Workspace matrices if needed. */
     vctDynamicVector<_elementType> WorkspaceMemory;
-    
+
     /*! Private method to set the data member Size.  This method must
       be called before AllocateWorkspace or
       ThrowUnlessWorkspaceSizeIsCorrect. */
@@ -119,7 +117,7 @@ protected:
     template <typename __vectorOwnerTypeWorkspace>
     inline void
     ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<__vectorOwnerTypeWorkspace, _elementType> & inWorkspace) const
-        throw(std::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         if (Size > inWorkspace.size()) {
             cmnThrow(std::runtime_error("nmrIsOrthonormalDynamicData: Workspace is too small."));
@@ -214,7 +212,7 @@ public:
     {
         this->Allocate(m);
     }
-    
+
     /*! Constructor where the user provides the input matrix to
       specify the size.  Memory allocation is performed for the
       workspace. This should be used when the user doesn't need to
@@ -229,7 +227,7 @@ public:
     {
         this->Allocate(A);
     }
-    
+
     /*! Constructor where the user provides the input matrix to
       specify the size and storage order.  There is no memory
       allocation performed in this case.  This constructor should be
@@ -237,7 +235,7 @@ public:
       workspaces for different numerical routines.  Please note that
       since multiple routines can share the workspace, these routines
       must be called in a thread safe manner.
-      
+
       \param A input matrix
       \param inWorkspace workspace
 
@@ -249,7 +247,7 @@ public:
     {
         this->SetRef(A, inWorkspace);
     }
-    
+
 
     /*! This method allocates memory for the workspace.  The input matrix is used only
       to determine the size of the problem.
@@ -264,7 +262,7 @@ public:
     {
         this->Allocate(A.rows());
     }
-    
+
     /*! This method uses the memory provided by user for workspace.  The
       input matrix A is used to determine the size of the problem.
 
@@ -279,15 +277,15 @@ public:
                        vctDynamicVectorBase<__vectorOwnerTypeWorkspace, _elementType> & inWorkspace)
     {
         this->SetDimension(A.rows());
-        
+
         // allocate output and set references
         this->AllocateWorkspace(false);
-        
+
         // set reference on user provided workspace
         this->ThrowUnlessWorkspaceSizeIsCorrect(inWorkspace);
         this->WorkspaceReference.SetRef(inWorkspace);
     }
-    
+
     /*! This method allocates the memory for the workspace.  This
       method is not meant to be a top-level user API, but is used by
       other overloaded Allocate methods.
@@ -303,7 +301,7 @@ public:
 
 
 
-/*! 
+/*!
   \ingroup cisstNumerical
 
   \brief Data for ::nmrIsOrthonormal (Fixed size).
@@ -316,7 +314,7 @@ public:
   \code
   nmrIsOrthonormalFixedSizeData<4> data;
   \endcode
-  
+
   \note An object of type nmrIsOrthonormalFixedSizeData contains the memory
   required for the output and the workspace, i.e. its actual size will
   be equal to the memory required to store the workspace.
@@ -406,7 +404,7 @@ public:
   (vctDynamicVector) large enough to store the product of the matrix
   with its transpose:
   \code
-  vctDynamicMatrix<double> A(12, 12); 
+  vctDynamicMatrix<double> A(12, 12);
   vctRandom(A, -10.0, 10.0);
   vctDynamicVector<double> workspace(500); // we need at least 12x12
   bool result = nmrIsOrthonormal(A, workspace);
@@ -464,7 +462,7 @@ template <vct::size_type _size, vct::stride_type _rowStride, vct::stride_type _c
 bool nmrIsOrthonormal(const vctFixedSizeConstMatrixBase<_size, _size, _rowStride, _colStride, _elementType, _dataPtrType> & A,
                       _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance()) {
     typedef vctFixedSizeConstMatrixBase<_size, _size, _rowStride, _colStride, _elementType, _dataPtrType> InputType;
-    typedef typename InputType::MatrixValueType MatrixValueType;   
+    typedef typename InputType::MatrixValueType MatrixValueType;
     MatrixValueType product;
     product.ProductOf(A, A.TransposeRef());
     product.Diagonal().Subtract(_elementType(1));
@@ -483,7 +481,7 @@ template <class _matrixOwnerTypeA, class _elementType>
 bool nmrIsOrthonormal(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, _elementType> & A,
                       nmrIsOrthonormalDynamicData<_elementType> & data,
                       _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance())
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     typename nmrIsOrthonormalDynamicData<_elementType>::Friend dataFriend(data);
 
@@ -512,7 +510,7 @@ bool nmrIsOrthonormal(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, _elemen
 template <class _matrixOwnerTypeA, typename _elementType>
 bool nmrIsOrthonormal(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, _elementType> & A,
                       _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance())
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     nmrIsOrthonormalDynamicData<_elementType> data;
     data.Allocate(A);
@@ -531,7 +529,7 @@ template <class _matrixOwnerTypeA, class _vectorOwnerTypeWorkspace, typename _el
 bool nmrIsOrthonormal(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, _elementType> & A,
                       vctDynamicVectorBase<_vectorOwnerTypeWorkspace, _elementType> & workspace,
                       _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance())
-    throw (std::runtime_error)
+    CISST_THROW(std::runtime_error)
 {
     nmrIsOrthonormalDynamicData<_elementType> data;
     data.SetRef(A, workspace);
@@ -539,6 +537,4 @@ bool nmrIsOrthonormal(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, _elemen
 }
 //@}
 
-
 #endif // _nmrIsOrthonormal_h
-

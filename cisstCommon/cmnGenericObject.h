@@ -142,7 +142,7 @@ public:
     /*! Return the index-th (zero-based) value of data typecasted to
       double.  Note that this method will throw an exception of type
       std::outputStream if the index exceeds the number of scalars. */
-    virtual double Scalar(const size_t CMN_UNUSED(index)) const throw (std::out_of_range) {
+    virtual double Scalar(const size_t CMN_UNUSED(index)) const CISST_THROW(std::out_of_range) {
         cmnThrow(std::out_of_range("cmnGenericObject::Scalar base method called, no scalar"));
         return 0.0;
     }
@@ -159,7 +159,7 @@ public:
 #if CISST_HAS_JSON
     virtual void SerializeTextJSON(Json::Value & CMN_UNUSED(jsonValue)) const {};
     virtual void DeSerializeTextJSON(const Json::Value & CMN_UNUSED(jsonValue))
-        throw (std::runtime_error) {};
+        CISST_THROW(std::runtime_error) {};
 #endif // CISST_HAS_JSON
 };
 

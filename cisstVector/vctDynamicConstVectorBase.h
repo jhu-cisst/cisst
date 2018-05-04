@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -127,7 +127,7 @@ protected:
 
 
     /*! Check the validity of an index. */
-    inline void ThrowUnlessValidIndex(size_type index) const throw(std::out_of_range) {
+    inline void ThrowUnlessValidIndex(size_type index) const CISST_THROW(std::out_of_range) {
         if (! ValidIndex(index)) {
             cmnThrow(std::out_of_range("vctDynamicVector: Invalid index"));
         }
@@ -187,13 +187,13 @@ public:
       the overloaded operator [] when operator overloading is
       unavailable or inconvenient.  \return a const reference to
       element[index] */
-    const_reference at(size_type index) const throw(std::out_of_range) {
+    const_reference at(size_type index) const CISST_THROW(std::out_of_range) {
         ThrowUnlessValidIndex(index);
         return *(Pointer(index));
     }
 
     /*! Overloaded operator () for simplified (const) element access with bounds checking */
-    inline const_reference operator() (size_type index) const throw(std::out_of_range) {
+    inline const_reference operator() (size_type index) const CISST_THROW(std::out_of_range) {
         return this->at(index);
     }
 
@@ -343,7 +343,7 @@ public:
 
     /*! Create a const reference to a sub vector */
     vctDynamicConstVectorRef<_elementType>
-    Ref(const size_type size, const size_type startPosition = 0) const throw (std::out_of_range) {
+    Ref(const size_type size, const size_type startPosition = 0) const CISST_THROW(std::out_of_range) {
         if ((startPosition + size) > this->size()) {
             cmnThrow(std::out_of_range("vctDynamicConstVectorBase::Ref: reference is out of range"));
         }
@@ -937,7 +937,7 @@ public:
     inline VectorReturnType Ceil(void) const;
 
     /* documented above */
-    inline VectorReturnType Normalized(void) const throw(std::runtime_error);
+    inline VectorReturnType Normalized(void) const CISST_THROW(std::runtime_error);
     //@}
 
 

@@ -73,7 +73,7 @@ http://www.cisst.org/cisst/license.txt.
   std::exception but this is not a requirement.
  */
 template <class _exceptionType>
-inline void cmnThrow(const _exceptionType & except, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_ERROR) throw(_exceptionType) {
+inline void cmnThrow(const _exceptionType & except, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_ERROR) {
     // try to create an std::exception pointer
     const std::exception * stdExcept = dynamic_cast<const std::exception *>(&except);
     if (stdExcept) {
@@ -108,11 +108,11 @@ inline void cmnThrow(const _exceptionType & except, cmnLogLevel lod = CMN_LOG_LE
     \sa cmnThrow and #CMN_ASSERT
  */
 //@{
-inline void cmnThrow(const std::string & message, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_ERROR) throw(std::runtime_error) {
+inline void cmnThrow(const std::string & message, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_ERROR) CISST_THROW(std::runtime_error) {
     cmnThrow(std::runtime_error(message), lod);
 }
 
-inline void cmnThrow(const char * message, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_ERROR) throw(std::runtime_error) {
+inline void cmnThrow(const char * message, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_ERROR) CISST_THROW(std::runtime_error) {
     cmnThrow(std::runtime_error(std::string(message)), lod);
 }
 //@}
