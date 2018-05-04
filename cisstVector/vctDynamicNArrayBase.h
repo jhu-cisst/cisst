@@ -542,7 +542,7 @@ public:
     template <class __nArrayOwnerType>
     inline bool FastCopyOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & source,
                            bool performSafetyChecks = true)
-        CISST_THROW(gstd::runtime_error)
+        CISST_THROW(std::runtime_error)
     {
         return vctFastCopy::NArrayCopy(*this, source, performSafetyChecks);
     }
