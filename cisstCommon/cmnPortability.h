@@ -536,10 +536,18 @@ bool CISST_EXPORT cmnIsFinite(const double & value);
 #endif
 
 
+/*!  Macro to used for dynamic exception specification.  Dynamic
+  exception specification is actually deprecated in C++ 11 so this
+  macro expends as nothing on most recent C++ compilers.  When using
+  SWIG, we still specify the exception so SWIG can add some custom
+  exception handling if the user specifies them.
+ */
 #undef CISST_THROW
-#ifdef __cplusplus
-  #if (__cplusplus > 199711L)
-    #define CISST_THROW(exceptionParameter) 
+#ifndef SWIG
+  #ifdef __cplusplus
+    #if (__cplusplus > 199711L)
+      #define CISST_THROW(exceptionParameter)
+    #endif
   #endif
 #endif
 
@@ -591,4 +599,3 @@ bool CISST_EXPORT cmnIsFinite(const double & value);
 
 
 #endif // _cmnPortability_h
-
