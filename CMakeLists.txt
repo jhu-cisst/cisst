@@ -361,6 +361,7 @@ if (CISST_BUILD_TESTS)
     set (CISST_cisstTestsDriver ON)
     # save settings for cisstTestsDriver
     cisst_set_package_settings (cisstTestsDriver CppUnit INCLUDE_DIRECTORIES CPPUNIT_INCLUDE_DIR)
+    cisst_set_package_settings (cisstTestsDriver CppUnit LIBRARIES CPPUNIT_LIBRARIES)
     # when using external package, we defined CPPUNIT_LINK_DIR.   If CppUnit is installed on the host
     # (e.g. debian package), CPPUNIT_INCLUDE_DIR is defined but not CPPUNIT_LINK_DIR
     if (DEFINED CPPUNIT_LINK_DIR)
