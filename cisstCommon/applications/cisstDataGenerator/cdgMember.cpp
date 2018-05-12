@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#include <cisstCommon/cmnPortability.h>
 #include "cdgMember.h"
 
 CMN_IMPLEMENT_SERVICES(cdgMember);
@@ -184,9 +185,15 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
     if ((accessors == "all")
         || (accessors == "references")) {
         std::string returnType = type + " & ";
+#if (CISST_OS == CISST_WINDOWS)
+        outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
+                     << "    " << depr << "const " << returnType << name << "(void) const;" << std::endl
+                     << "    " << depr << returnType << name << "(void);" << std::endl;
+#else
         outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
                      << "    const " << returnType << depr << name << "(void) const;" << std::endl
                      << "    " << returnType << depr << name << "(void);" << std::endl;
+#endif
     }
 }
 
