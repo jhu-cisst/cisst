@@ -179,21 +179,15 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
     if ((accessors == "all")
         || (accessors == "set-get")) {
         outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
-                     << "    void" << depr << "Get" << name << "(" << type << " & placeHolder) const;" << std::endl
-                     << "    void" << depr << "Set" << name << "(const " << type << " & newValue);" << std::endl;
+                     << "    " << depr << "void Get" << name << "(" << type << " & placeHolder) const;" << std::endl
+                     << "    " << depr << "void Set" << name << "(const " << type << " & newValue);" << std::endl;
     }
     if ((accessors == "all")
         || (accessors == "references")) {
         std::string returnType = type + " & ";
-#if (CISST_OS == CISST_WINDOWS)
         outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
                      << "    " << depr << "const " << returnType << name << "(void) const;" << std::endl
                      << "    " << depr << returnType << name << "(void);" << std::endl;
-#else
-        outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
-                     << "    const " << returnType << depr << name << "(void) const;" << std::endl
-                     << "    " << returnType << depr << name << "(void);" << std::endl;
-#endif
     }
 }
 
