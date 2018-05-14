@@ -17,7 +17,6 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon/cmnPortability.h>
 #include "cdgMember.h"
 
 CMN_IMPLEMENT_SERVICES(cdgMember);
