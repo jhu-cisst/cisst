@@ -6,8 +6,7 @@
   Author(s): Martin Kelly
   Created on: 2010-09-23
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -72,19 +71,23 @@ class CISST_EXPORT osaPipeExec {
     /*! Open a pipe using an existing executable and specifying
       read/write mode.  Mode can be "r", "w", or "rw" specifying which
       direction(s) the pipe should go. Returns true if the Open
-      succeeded, false otherwise */
-    bool Open(const std::string & executable, const std::string & mode);
+      succeeded, false otherwise. On Microsoft Windows, the optional parameter
+      noWindow prevents a new console window from being displayed. */
+    bool Open(const std::string & executable, const std::string & mode,
+              bool noWindow = false);
 
     /*! Open a pipe using an existing executable with a vector of
       arguments and specifying read/write mode.  Mode can be "r", "w",
       or "rw" specifying which direction(s) the pipe should
-      go. Returns true if the Open succeeded, false otherwise */
+      go. Returns true if the Open succeeded, false otherwise.
+      On Microsoft Windows, the optional parameter noWindow prevents a new console
+      window from being displayed. */
+
     bool Open(const std::string & executable,
               const std::vector<std::string> & parameters,
-              const std::string & mode);
+              const std::string & mode, bool noWindow = false);
 
-    /*! Close the pipe. Returns true if the Close succeeded, false
-      otherwise. */
+    /*! Close the pipe. Returns true if the Close succeeded, false otherwise. */
     bool Close(bool killProcess = true);
 
     /*! Read at most maxLength characters from the pipe into

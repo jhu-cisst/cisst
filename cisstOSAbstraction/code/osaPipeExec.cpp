@@ -6,8 +6,7 @@
   Author(s): Martin Kelly
   Created on: 2010-09-23
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -90,9 +89,9 @@ char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vec
     typedef char * charPointer;
     charPointer * command = new charPointer[arguments.size() + 2]; // executable name, arguments, 0
 #if (CISST_OS == CISST_WINDOWS)
-	/* Needed because Windows parses spaces strangely unless the whole string
-	is quoted */
-	std::string quotedString = '"' + executable + '"';
+    /* Needed because Windows parses spaces strangely unless the whole string
+    is quoted */
+    std::string quotedString = '"' + executable + '"';
     command[0] = strdup(quotedString.c_str());
 #else
     command[0] = const_cast<char *>(executable.c_str());
@@ -126,15 +125,16 @@ void osaPipeExec::RestoreIO(int newStdin, int newStdout)
 }
 #endif
 
-bool osaPipeExec::Open(const std::string & executable, const std::string & mode)
+bool osaPipeExec::Open(const std::string & executable, const std::string & mode, bool noWindow)
 {
     std::vector<std::string> arguments;
-    return Open(executable, arguments, mode);
+    return Open(executable, arguments, mode, noWindow);
 }
 
 bool osaPipeExec::Open(const std::string & executable,
                        const std::vector<std::string> & arguments,
-                       const std::string & mode)
+                       const std::string & mode,
+                       bool noWindow)
 {
     if (Connected) {
         return false;
@@ -239,12 +239,12 @@ bool osaPipeExec::Open(const std::string & executable,
 
     /* Replace stdin and stdout to receive from and write to the pipe */
     if (_dup2(ToProgram[READ_END], _fileno(stdin)) == -1) {
-		RestoreIO(stdinCopy, stdoutCopy);
+        RestoreIO(stdinCopy, stdoutCopy);
         CloseAllPipes();
         return false;
     }
     if (_dup2(FromProgram[WRITE_END], _fileno(stdout)) == -1) {
-		RestoreIO(stdinCopy, stdoutCopy);
+        RestoreIO(stdinCopy, stdoutCopy);
         CloseAllPipes();
         return false;
     }
@@ -252,44 +252,84 @@ bool osaPipeExec::Open(const std::string & executable,
     /* We want input to come from parent to the program and output the other
        direction. Thus we don't need these ends of the pipe */
     if (_close(FromProgram[WRITE_END]) == -1) {
-		RestoreIO(stdinCopy, stdoutCopy);
+        RestoreIO(stdinCopy, stdoutCopy);
         CloseAllPipes();
         return false;
     }
 
     if (_close(ToProgram[READ_END]) == -1) {
-		RestoreIO(stdinCopy, stdoutCopy);
+        RestoreIO(stdinCopy, stdoutCopy);
         CloseAllPipes();
         return false;
     }
 
     if (!WriteFlag && _close(ToProgram[WRITE_END]) == -1) {
-		RestoreIO(stdinCopy, stdoutCopy);
+        RestoreIO(stdinCopy, stdoutCopy);
         CloseAllPipes();
         return false;
     }
     if (!ReadFlag && _close(FromProgram[READ_END]) == -1) {
-		RestoreIO(stdinCopy, stdoutCopy);
+        RestoreIO(stdinCopy, stdoutCopy);
         CloseAllPipes();
         return false;
     }
 
-    Command = ParseCommand(executable, arguments);
-    if (Command != 0 && Command[0] != 0) {
-		/* We need to quote the arguments but not the file name. Evidently, Windows
-		parses the two differently. Therefore we use executable.c_str() instead
-		of Command[0]*/
-        INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, executable.c_str(), Command);
-    } else {
-        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
-                           << "\" because the program name is empty" << std::endl;
-		RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes();
-        return false;
+    if (!noWindow) {
+        // Original implementation, which calls _spawnvp
+        Command = ParseCommand(executable, arguments);
+        if (Command != 0 && Command[0] != 0) {
+            /* We need to quote the arguments but not the file name. Evidently, Windows
+               parses the two differently. Therefore we use executable.c_str() instead
+               of Command[0]*/
+            INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, executable.c_str(), Command);
+        }
+        else {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
+                               << "\" because the program name is empty" << std::endl;
+            RestoreIO(stdinCopy, stdoutCopy);
+            CloseAllPipes();
+            return false;
+        }
+    }
+    else {
+        // This implementation calls CreateProcess, specifying CREATE_NO_WINDOW, to prevent console
+        // window from being displayed (e.g., when a console program is called from a GUI program).
+        std::string commandLine;
+        // If the executable has a space, quote the string
+        size_t pos = executable.find_first_of(' ');
+        if (pos == std::string::npos)
+            commandLine = executable;   // no space, so quotes not needed
+        else
+            commandLine = '"' + executable + '"';
+        for (size_t i = 0; i < arguments.size(); i++) {
+            commandLine.push_back(' ');
+            commandLine.append(arguments[i]);
+        }
+        STARTUPINFO si;
+        PROCESS_INFORMATION pi;
+        ZeroMemory(&si, sizeof(si));
+        si.cb = sizeof(si);
+        si.dwFlags = STARTF_USESTDHANDLES;
+        si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+        si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+        si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+        ZeroMemory(&pi, sizeof(pi));
+        char *cmdLine = strdup(commandLine.c_str());
+        if (!CreateProcessA(NULL, cmdLine, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+            CMN_LOG_INIT_ERROR << "osaPipeExec: failed to create child process " << executable
+                               << ", error = " << GetLastError() << std::endl;
+            CMN_LOG_INIT_ERROR << "commandLine: " << commandLine << std::endl;
+            free(cmdLine);
+            RestoreIO(stdinCopy, stdoutCopy);
+            CloseAllPipes();
+            return false;
+        }
+        free(cmdLine);
+        INTERNALS(hProcess) = pi.hProcess;
     }
     if (!INTERNALS(hProcess)) {
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
-		RestoreIO(stdinCopy, stdoutCopy);
+        RestoreIO(stdinCopy, stdoutCopy);
         CloseAllPipes();
         return false;
     }
@@ -333,10 +373,10 @@ bool osaPipeExec::Close(bool killProcess)
             if (kill(INTERNALS(pid), SIGKILL) == -1)
                 return false;
 #elif (CISST_OS == CISST_WINDOWS)
-			/* It would be better to check the return value of TerminateProcess, but it
+            /* It would be better to check the return value of TerminateProcess, but it
                randomly fails with error code 5 ("access is denied"), causing failures
                even though the process actually does terminate */
-			TerminateProcess(INTERNALS(hProcess), ERROR_SUCCESS);
+            TerminateProcess(INTERNALS(hProcess), ERROR_SUCCESS);
             if (CloseHandle(INTERNALS(hProcess)) == 0)
                 return false;
 #endif
@@ -366,7 +406,7 @@ int osaPipeExec::Read(char *buffer, int maxLength) const
 #endif
     }
 
-	if (bytesRead == -1) {
+    if (bytesRead == -1) {
         return -1;
     } else {
         return static_cast<int>(bytesRead / sizeof(char));
