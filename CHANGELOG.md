@@ -38,6 +38,7 @@ Change log
     * prmPositionCartesianGetQtWidget: displays frame using cisstVector frame widget, timestamp, valid flag and moving/reference frame names.  Added `SetPrismaticRevoluteFactors` to display in mm/degrees.
 * Bug fixes:
   * Re-ordered function declaration in CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL for clang 9.0/MacOS
+  * Fixed some variable initialization based on valgrind warnings
   
 1.0.9 (2017-11-07)
 ==================
