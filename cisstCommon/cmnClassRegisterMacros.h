@@ -276,6 +276,13 @@ static cmnClassServicesBase * className##ClassServicesPointer = className::Class
 #endif
 #define CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL(className, parentServices, argType) \
 template<> \
+cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
+{ \
+    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType> \
+        classServices(#className, &typeid(className), parentServices, LIBRARY_NAME_FOR_CISST_REGISTER, className::InitialLoD); \
+    return static_cast<cmnClassServicesBase *>(&classServices); \
+} \
+template<> \
 cmnClassServicesBase * className::ClassServices(void) \
 { \
     static cmnClassServicesBase * classServices = cmnClassServicesInstantiate<className>(); \
@@ -287,13 +294,6 @@ template<> \
 const cmnClassServicesBase * className::Services(void) const \
 { \
    return this->ClassServices(); \
-} \
-template<> \
-cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
-{ \
-    static cmnClassServices<className::HAS_DYNAMIC_CREATION, className, argType> \
-        classServices(#className, &typeid(className), parentServices, LIBRARY_NAME_FOR_CISST_REGISTER, className::InitialLoD); \
-    return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
 
