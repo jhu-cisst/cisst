@@ -1,6 +1,44 @@
 Change log
 ==========
 
+1.0.10 (2018-xx-xx)
+==================
+
+* API changes:
+  * cisstCommon:
+    * cmnPrintf: removed downcast to boolean for cmnPrintfParser, this was not used and required different implementations for different compilers
+    * cmnAssert: from now on, CMN_ASSERT is not defined when NDEBUG is defined.  This behavior mimics assert().
+  * cisstMultiTask: mtsIntervalStatistics, renamed accessors and added statistics for computing time
+* Deprecated features:
+  * None
+* New features:
+  * cisstCommon:
+    * cmnPortability: added CISST_THROW to dynamically specify exception or skip since this is being deprecated in newer C++ standards.  Added unit test for python wrappers to make sure CISST_THROW specify exception for swig.
+    * cmnPortability: use std::isnan and std::isfinite when available (see also cisstConfig.h)
+    * cmnPrintf: added unit test, removed downcast to boolean for cmnPrintfParser
+    * cmnAssert: CMN_ASSERT not defined when NDEBUG is defined, fixed usage accross cisst libraries
+    * cmnQt::QApplicationExistOnCtrlC helper function to quit QApplication on ctrl+c
+  * cisstVector:
+    * vctVector3DQtWidget: widget to display a single 3D vector (used for 3D force/torque)
+    * vctForceTorqueQtWidget: widget to display 3D force/torque as text, 2D graph or 3D vector
+    * Fixed Qt widgets to display frame/3D vector to display reference frame, user can change orientation using mouse.  Added `SetPrismaticRevoluteFactors` to display in mm/degrees
+  * cisstDataGenerator:
+    * Added "deprecated" keyword for data members
+  * cisstOSAbstraction
+    * osaPipeExec: added `noWindow` parameter to `Open` method. The default setting is `false`, which is backward-compatible. On Microsoft Windows, setting it to `true` prevents the display of a console window.  This parameter is ignored on other operating systems
+  * cisstMultiTask:
+    * mtsIntervalStatistics: added statistics re. average computation time and overruns wrt previous time window, updated Qt widget and added conversion method to ROS messages (cisst-ros)
+    * Fixed SWIG code for Python 3
+  * cisstRobot:
+  * cisstParameterTypes:
+    * prmPositionJointSet: use data generator
+    * prmVelocityCartesianGet: use data generator, added moving/reference frame
+    * Added prmJointType, prismatic or revolute
+    * prmStateJoint: added vector of joint types.  In Qt widget, added `SetPrismaticRevoluteFactors` used to display in mm/degrees
+    * prmPositionCartesianGetQtWidget: displays frame using cisstVector frame widget, timestamp, valid flag and moving/reference frame names.  Added `SetPrismaticRevoluteFactors` to display in mm/degrees.
+* Bug fixes:
+  * Re-ordered function declaration in CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL for clang 9.0/MacOS
+  
 1.0.9 (2017-11-07)
 ==================
 
