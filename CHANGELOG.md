@@ -1,8 +1,8 @@
 Change log
 ==========
 
-1.0.10 (2018-xx-xx)
-==================
+1.0.10 (2018-05-16)
+===================
 
 * API changes:
   * cisstCommon:
@@ -39,7 +39,7 @@ Change log
 * Bug fixes:
   * Re-ordered function declaration in CMN_IMPLEMENT_SERVICES_TEMPLATED_INTERNAL for clang 9.0/MacOS
   * Fixed some variable initialization based on valgrind warnings
-  
+
 1.0.9 (2017-11-07)
 ==================
 
