@@ -2,10 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -49,10 +48,9 @@ bool mtsFunctionQualifiedRead::IsValid(void) const {
 
 bool mtsFunctionQualifiedRead::Bind(CommandType * command) {
     Command = command;
-#if !CISST_MTS_HAS_ICE
-    if (this->Command)
+    if (this->Command) {
         InitCompletionCommand(this->Command->GetName() + "Result");
-#endif
+    }
     return (command != 0);
 }
 
@@ -60,21 +58,15 @@ bool mtsFunctionQualifiedRead::Bind(CommandType * command) {
 mtsExecutionResult mtsFunctionQualifiedRead::ExecuteGeneric(const mtsGenericObject & qualifier,
                                                             mtsGenericObject & argument) const
 {
-    if (!Command)
+    if (!Command) {
         return mtsExecutionResult::FUNCTION_NOT_BOUND;
-#if CISST_MTS_HAS_ICE
-    mtsExecutionResult executionResult = Command->Execute(qualifier, argument);
-    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-        this->ThreadSignalWait();
-        executionResult = mtsExecutionResult::COMMAND_SUCCEEDED;
     }
-#else
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
     mtsExecutionResult executionResult = Command->Execute(qualifier, argument, CompletionCommand->GetCommand());
-    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
         executionResult = WaitForResult(argument);
-#endif
+    }
     return executionResult;
 }
 

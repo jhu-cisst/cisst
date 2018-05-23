@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -218,18 +217,6 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
     const std::string serverComponentName = mtsManagerComponentBase::GetNameOfManagerComponentClientFor(clientProcessName);
     const std::string serverInterfaceName = mtsManagerComponentBase::GetNameOfInterfaceLCMProvided();
-#if CISST_MTS_HAS_ICE
-    if (!LCM->Connect(LCM->GetProcessName(), this->GetName(), interfaceName,
-                      clientProcessName, serverComponentName, serverInterfaceName))
-    {
-        CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to connect: "
-            << mtsManagerGlobal::GetInterfaceUID(LCM->GetProcessName(), this->GetName(), interfaceName)
-            << " - "
-            << mtsManagerGlobal::GetInterfaceUID(clientProcessName, serverComponentName, serverInterfaceName)
-            << std::endl;
-        return false;
-    }
-#else
     if (!LCM->Connect(this->GetName(), interfaceName, serverComponentName, serverInterfaceName)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddNewClientProcess: failed to connect: "
             << this->GetName() << ":" << interfaceName
@@ -238,7 +225,6 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
             << std::endl;
         return false;
     }
-#endif
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddNewClientProcess: creation and connection success" << std::endl;
 
