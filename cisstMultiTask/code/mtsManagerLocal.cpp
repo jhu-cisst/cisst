@@ -319,6 +319,9 @@ void mtsManagerLocal::Cleanup(void)
         SystemLogMultiplexer = 0;
     }
 
+    delete Instance;
+    Instance = 0;
+
     __os_exit();
 }
 
