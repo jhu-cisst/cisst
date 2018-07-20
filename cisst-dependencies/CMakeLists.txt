@@ -306,7 +306,7 @@ if (CISST_HAS_JSON)
 
   set (cisstJSON_PREFIX cisstJSONExternal)
   set (CISST_JSON_GIT_REPOSITORY https://github.com/jhu-cisst-external/jsoncpp.git)
-  set (CISST_JSON_GIT_TAG 1.7.4.1)
+  set (CISST_JSON_GIT_TAG 1.7.4.2)
 
   # add fPIC if possible
   include (CheckCXXCompilerFlag)
