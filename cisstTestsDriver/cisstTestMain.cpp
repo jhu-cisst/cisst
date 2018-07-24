@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2003-07-28
 
-  (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -127,12 +125,16 @@ int GenerateCTestFile(CppUnit::Test * tests, const std::string & programName,
     } else {
         // it's a test, add it to the list
         count++;
-        std::cout << "ADD_TEST(\"C++: "
+        std::cout << "add_test (\"C++: "
                   << tests->getName() << "-i" << iterations << "-o" << instances
                   << "\" " << programName
                   << " -r -i " << iterations << " -o " << instances
                   << " -t " << tests->getName()
-                  << ")" << std::endl;
+                  << ")" << std::endl
+                  << "set_tests_properties (\"C++: "
+                  << tests->getName() << "-i" << iterations << "-o" << instances
+                  << "\" PROPERTIES TIMEOUT " << 300 << ")"
+                  << std::endl; 
     }
     return count;
 }
@@ -194,4 +196,3 @@ int main(int argc, const char *argv[])
 
     return cisstTestParameters::PrintHelp(argv[0]);
 }
-
