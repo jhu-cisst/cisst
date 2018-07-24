@@ -92,7 +92,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestSoNiOperations(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
 
     typename ArrayType::nsize_type sizes;
@@ -150,7 +150,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestNioNiOperations(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -179,7 +179,7 @@ void vctDynamicNArrayTest::TestNioNiOperationsInt(void) {
 template <class _elementType>
 void vctDynamicNArrayTest::TestNioSiNiOperations(void) {
    typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -213,7 +213,7 @@ void vctDynamicNArrayTest::TestNioSiNiOperationsInt(void) {
 template <class _elementType>
 void vctDynamicNArrayTest::TestNioNiNiOperations(void) {
    typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -245,7 +245,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestNoNiNiOperations(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -275,7 +275,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestNoNiOperations(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -302,7 +302,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestNoNiSiOperations(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -337,7 +337,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestNoSiNiOperations(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -369,7 +369,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestNioSiOperations(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 2};
+    enum {DIMENSION = 3};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -461,7 +461,7 @@ template<class _elementType>
 void vctDynamicNArrayTest::TestMinAndMax(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 6};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -488,7 +488,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestIterators(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -513,7 +513,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestSTLFunctions(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typename ArrayType::nsize_type sizes;
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
@@ -540,7 +540,7 @@ template <class _elementType>
 void vctDynamicNArrayTest::TestIsCompact(void)
 {
     typedef _elementType value_type;
-    enum {DIMENSION = 5};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typedef vctDynamicNArrayRef<value_type, DIMENSION> ArrayRefType;
     typedef vctDynamicConstNArrayRef<value_type, DIMENSION> ConstArrayRefType;
