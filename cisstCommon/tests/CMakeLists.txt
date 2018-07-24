@@ -96,6 +96,9 @@ cisst_target_link_libraries (cisstCommonTests cisstCommon cisstTestsDriver)
 add_library (cmnClassRegisterTestStatic
              STATIC
              cmnClassRegisterTestStatic.cpp cmnClassRegisterTestStatic.h)
+if (CISST_HAS_JSON)
+  add_dependencies (cmnClassRegisterTestStatic cisstJSONExternal)
+endif ()
 set_property (TARGET cmnClassRegisterTestStatic PROPERTY FOLDER "cisstCommon/tests")
 target_link_libraries (cisstCommonTests cmnClassRegisterTestStatic)
 
