@@ -36,6 +36,9 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_SHARED_LIBRARY_PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
 #define CISST_SHARED_LIBRARY_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}"
 
+// executable suffix
+#define CISST_EXECUTABLE_SUFFIX "${CMAKE_EXECUTABLE_SUFFIX}"
+
 // Was cisst compiled as shared libraries or static
 #cmakedefine01 CISST_BUILD_SHARED_LIBS
 

@@ -36,7 +36,7 @@ void osaPipeExecTest::TestPipe(void)
     cmnPath path;
     path.AddFromEnvironment("PATH", cmnPath::TAIL);
     path.Add(std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES, cmnPath::HEAD);
-    std::string command = path.Find("cisstOSAbstractionTestsPipeExecUtility");
+    std::string command = path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX, cmnPath::EXECUTE);
     bool utilityFound = (command != "");
     CPPUNIT_ASSERT(utilityFound);
 
