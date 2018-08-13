@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -310,6 +310,21 @@ robManipulator::Errno robManipulator::LoadRobot(std::vector<robKinematics *> Kin
 //////////////////////////////////////
 //         KINEMATICS
 //////////////////////////////////////
+
+bool
+robManipulator::SetJointLimits(const vctDynamicMatrix<double> & lowerLimits,
+                               const vctDynamicMatrix<double> & upperLimits)
+{
+  if ((lowerLimits.size() != links.size())
+      || (upperLimits.size() != links.size())) {
+    return false;
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    links[i].GetKinematics()->PositionMin() = lowerLimits.at(i);
+    links[i].GetKinematics()->PositionMax() = upperLimits.at(i);
+  }
+  return true;
+}
 
 vctFrame4x4<double>
 robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,

@@ -75,9 +75,21 @@ double robJoint::PositionOffset() const { return qoffset; }
 
 void robJoint::SetPositionOffset(const double offset) { qoffset = offset; }
 
-double robJoint::PositionMin()    const { return qmin; }
+const double & robJoint::PositionMin(void) const {
+  return qmin;
+}
 
-double robJoint::PositionMax()    const { return qmax; }
+double & robJoint::PositionMin(void) {
+  return qmin;
+}
+
+const double & robJoint::PositionMax(void) const {
+  return qmax;
+}
+
+double & robJoint::PositionMax(void) {
+  return qmax;
+}
 
 double robJoint::ForceTorqueMax() const { return ftmax; }
 
@@ -221,4 +233,3 @@ robJoint::Errno robJoint::Write( std::ostream& os ) const {
   return robJoint::ESUCCESS;
 
 }
-
