@@ -312,8 +312,8 @@ robManipulator::Errno robManipulator::LoadRobot(std::vector<robKinematics *> Kin
 //////////////////////////////////////
 
 bool
-robManipulator::SetJointLimits(const vctDynamicMatrix<double> & lowerLimits,
-                               const vctDynamicMatrix<double> & upperLimits)
+robManipulator::SetJointLimits(const vctDynamicVector<double> & lowerLimits,
+                               const vctDynamicVector<double> & upperLimits)
 {
   if ((lowerLimits.size() != links.size())
       || (upperLimits.size() != links.size())) {

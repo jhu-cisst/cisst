@@ -201,8 +201,8 @@ public:
   virtual ~robManipulator();
 
   /*! Set joint limits */
-  bool SetJointLimits(const vctDynamicMatrix<double> & lowerLimits,
-                      const vctDynamicMatrix<double> & upperLimits);
+  bool SetJointLimits(const vctDynamicVector<double> & lowerLimits,
+                      const vctDynamicVector<double> & upperLimits);
 
   //! Evaluate the forward kinematics
   /**
