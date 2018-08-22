@@ -326,6 +326,21 @@ robManipulator::SetJointLimits(const vctDynamicVector<double> & lowerLimits,
   return true;
 }
 
+bool
+robManipulator::GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
+                               vctDynamicVectorRef<double> upperLimits)
+{
+  if ((lowerLimits.size() != links.size())
+      || (upperLimits.size() != links.size())) {
+    return false;
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    lowerLimits.at(i) = links[i].GetKinematics()->PositionMin();
+    upperLimits.at(i) = links[i].GetKinematics()->PositionMax();
+  }
+  return true;
+}
+
 vctFrame4x4<double>
 robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
                                    int N ) const {

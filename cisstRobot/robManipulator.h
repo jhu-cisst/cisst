@@ -204,6 +204,10 @@ public:
   bool SetJointLimits(const vctDynamicVector<double> & lowerLimits,
                       const vctDynamicVector<double> & upperLimits);
 
+  /*! Get joint limits */
+  bool GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
+                      vctDynamicVectorRef<double> upperLimits);
+
   //! Evaluate the forward kinematics
   /**
      Compute the position and orientation of each link wrt to the world frame
