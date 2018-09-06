@@ -806,7 +806,8 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
                      const vctDynamicVector<double>& qd,
                      const vctDynamicVector<double>& qdd,
                      const vctFixedSizeVector<double,6>& fext,
-                     double g ) const {
+                     const double g,
+                     const vctFixedSizeVector<double, 3>& z0) const {
 
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
@@ -824,7 +825,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   vctDynamicVector<double> tau(links.size(), 0.0);
 
   // The axis pointing "up"
-  vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
+  // vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
 
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
@@ -889,8 +890,10 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
 
 vctDynamicVector<double>
 robManipulator::CCG( const vctDynamicVector<double>& q,
-                     const vctDynamicVector<double>& qd ) const {
-
+                     const vctDynamicVector<double>& qd,
+                     double g,
+                     const vctFixedSizeVector<double,3>& z0) const
+{
   if( q.size() != qd.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": Size of q and qd do not match."
@@ -898,12 +901,12 @@ robManipulator::CCG( const vctDynamicVector<double>& q,
     return vctDynamicVector<double>();
   }
 
-
-
   return RNE( q,           // call Newton-Euler with only the joints positions
-          qd,          // and the joints velocities
-              vctDynamicVector<double>( q.size(), 0.0 ),
-              vctFixedSizeVector<double,6>(0.0) );
+              qd,          // and the joints velocities
+              vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
+              vctFixedSizeVector<double,6>(0.0), // no external forces
+              g,
+              z0);
 }
 
 vctFixedSizeVector<double,6>
