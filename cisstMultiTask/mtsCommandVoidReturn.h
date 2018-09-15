@@ -91,7 +91,7 @@ public:
       This is intended for derived classes (e.g., mtsCommandQueuedVoidReturn). */
     virtual mtsExecutionResult Execute(mtsGenericObject & result,
                                        mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
-    { return Execute(result, 0); }
+    { return Execute(result); }
 
     /*! Get a direct pointer to the callable object.  This method is
       used for queued commands.  The caller should still use the
