@@ -49,6 +49,7 @@ public:
     /*! Set and Get methods for the reference frame for current
         force, mask, movinf and reference frames.  This is
         defined by a node in the transformation tree. */
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, MovingFrame);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(ForceType, Force);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(MaskType, Mask);
 
