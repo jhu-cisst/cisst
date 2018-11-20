@@ -116,11 +116,15 @@ char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vec
 #if (CISST_OS == CISST_WINDOWS)
 void osaPipeExec::RestoreIO(int newStdin, int newStdout)
 {
-    if (_dup2(newStdin, _fileno(stdin)) == -1) {
-        CloseAllPipes();
+    if (newStdin >= 0) {
+        if (_dup2(newStdin, _fileno(stdin)) == -1)
+            CloseAllPipes();
+        _close(newStdin);
     }
-    if (_dup2(newStdout, _fileno(stdout)) == -1) {
-        CloseAllPipes();
+    if (newStdout >= 0) {
+        if (_dup2(newStdout, _fileno(stdout)) == -1)
+            CloseAllPipes();
+        _close(newStdout);
     }
 }
 #endif
@@ -235,8 +239,12 @@ bool osaPipeExec::Open(const std::string & executable,
 #elif (CISST_OS == CISST_WINDOWS)
     /* Copy stdin and stdout before we close them so we can restore them after the spawn */
     int stdinCopy = _dup(_fileno(stdin));
+    if (stdinCopy < 0)
+        CMN_LOG_INIT_WARNING << "Class osaPipeExec: Open: failed to copy stdin" << std::endl;
     int stdoutCopy = _dup(_fileno(stdout));
-
+    if (stdoutCopy < 0)
+        CMN_LOG_INIT_WARNING << "Class osaPipeExec: Open: failed to copy stdout" << std::endl;
+    
     /* Replace stdin and stdout to receive from and write to the pipe */
     if (_dup2(ToProgram[READ_END], _fileno(stdin)) == -1) {
         RestoreIO(stdinCopy, stdoutCopy);
