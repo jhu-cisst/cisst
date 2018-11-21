@@ -49,6 +49,9 @@ class CISST_EXPORT osaPipeExec {
       pointer */
     void CloseAllPipes(void);
 
+    /*! Free unused handles. */
+    bool CloseUnusedHandles(void);
+
     /*! Parse out the command and arguments and return an array in the
       form that execvp/_spawnvp accept */
     char ** ParseCommand(const std::string & executable,

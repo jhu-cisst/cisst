@@ -44,6 +44,7 @@ struct osaPipeExecInternals {
     int pid;
 #elif (CISST_OS == CISST_WINDOWS)
     HANDLE hProcess;
+    // Starting with Windows XP, can call GetExitCodeProcess to determine whether process still active
 #endif
 };
 
@@ -82,6 +83,38 @@ void osaPipeExec::CloseAllPipes(void)
     _close(FromProgram[READ_END]);
     _close(FromProgram[WRITE_END]);
 #endif
+}
+
+bool osaPipeExec::CloseUnusedHandles(void)
+{
+    /* We want input to come from parent to the program and output the other
+       direction. Thus we don't need these ends of the pipe */
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    if (close(ToProgram[READ_END]) == -1)
+        return false;
+
+    if (close(FromProgram[WRITE_END]) == -1)
+        return false;
+
+    if (!WriteFlag && close(ToProgram[WRITE_END]) == -1)
+        return false;
+
+    if (!ReadFlag && close(FromProgram[READ_END]) == -1)
+        return false;
+#elif (CISST_OS == CISST_WINDOWS)
+    if (_close(FromProgram[WRITE_END]) == -1)
+        return false;
+
+    if (_close(ToProgram[READ_END]) == -1)
+        return false;
+
+    if (!WriteFlag && _close(ToProgram[WRITE_END]) == -1)
+        return false;
+
+    if (!ReadFlag && _close(FromProgram[READ_END]) == -1)
+        return false;
+#endif
+    return true;
 }
 
 char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vector<std::string> & arguments)
@@ -144,30 +177,6 @@ bool osaPipeExec::Open(const std::string & executable,
         return false;
     }
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-    if (pipe(ToProgram) == -1) {
-        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\" ("
-                           << strerror(errno) << ")" << std::endl;
-        return false;
-    }
-    if (pipe(FromProgram) == -1) {
-        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\" ("
-                           << strerror(errno) << ")" << std::endl;
-        CloseAllPipes();
-        return false;
-    }
-#elif (CISST_OS == CISST_WINDOWS)
-    if (_pipe(ToProgram, 4096, O_BINARY | O_NOINHERIT) == -1) {
-        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\"" << std::endl;
-        return false;
-    }
-    if (_pipe(FromProgram, 4096, O_BINARY | O_NOINHERIT) == -1) {
-        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\"" << std::endl;
-        CloseAllPipes();
-        return false;
-    }
-#endif
-
     ReadFlag = WriteFlag = false;
     std::string::const_iterator it;
     for (it = mode.begin(); it != mode.end(); it++) {
@@ -182,31 +191,28 @@ bool osaPipeExec::Open(const std::string & executable,
     }
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    if (pipe(ToProgram) == -1) {
+        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\" ("
+                           << strerror(errno) << ")" << std::endl;
+        return false;
+    }
+    if (pipe(FromProgram) == -1) {
+        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\" ("
+                           << strerror(errno) << ")" << std::endl;
+        CloseAllPipes();
+        return false;
+    }
+
     /* Spawn a child and parent process for communication */
     INTERNALS(pid) = fork();
 
     /* Parent process to send and receive output */
     if (INTERNALS(pid) > 0) {
-        /* We want input to come from parent to the program and output the other
-           direction. Thus we don't need these ends of the pipe */
-        if (close(ToProgram[READ_END]) == -1) {
+        if (!CloseUnusedHandles()) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to close unused handles" << std::endl;
             CloseAllPipes();
             return false;
         }
-        if (close(FromProgram[WRITE_END]) == -1) {
-            CloseAllPipes();
-            return false;
-        }
-
-        if (!WriteFlag && close(ToProgram[WRITE_END]) == -1) {
-            CloseAllPipes();
-            return false;
-        }
-        if (!ReadFlag && close(FromProgram[READ_END]) == -1) {
-            CloseAllPipes();
-            return false;
-        }
-
         Connected = true;
         return true;
     }
@@ -236,70 +242,50 @@ bool osaPipeExec::Open(const std::string & executable,
         CloseAllPipes();
         return false;
     }
-#elif (CISST_OS == CISST_WINDOWS)
-    /* Copy stdin and stdout before we close them so we can restore them after the spawn */
-    int stdinCopy = _dup(_fileno(stdin));
-    if (stdinCopy < 0)
-        CMN_LOG_INIT_WARNING << "Class osaPipeExec: Open: failed to copy stdin" << std::endl;
-    int stdoutCopy = _dup(_fileno(stdout));
-    if (stdoutCopy < 0)
-        CMN_LOG_INIT_WARNING << "Class osaPipeExec: Open: failed to copy stdout" << std::endl;
     
-    /* Replace stdin and stdout to receive from and write to the pipe */
-    if (_dup2(ToProgram[READ_END], _fileno(stdin)) == -1) {
-        RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes();
-        return false;
-    }
-    if (_dup2(FromProgram[WRITE_END], _fileno(stdout)) == -1) {
-        RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes();
-        return false;
-    }
+#elif (CISST_OS == CISST_WINDOWS)
+    // On Windows, there are two implementations.
+    //   noWindow:  This is a newer implementation that calls CreatePipe and CreateProcess, passing the
+    //              CREATE_NO_WINDOW parameter to avoid creating an extra window for the child process.
+    //   !noWindow: This is the original implementation that calls _pipe and _spawnvp. Although this could
+    //              be replaced by the noWindow implementation (not specifying the CREATE_NO_WINDOW parameter),
+    //              it is kept to avoid any possible issues with the new implementation.
 
-    /* We want input to come from parent to the program and output the other
-       direction. Thus we don't need these ends of the pipe */
-    if (_close(FromProgram[WRITE_END]) == -1) {
-        RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes();
-        return false;
-    }
+    if (noWindow) {
+        HANDLE childStdin_Read = NULL;
+        HANDLE childStdin_Write = NULL;
+        HANDLE childStdout_Read = NULL;
+        HANDLE childStdout_Write = NULL;
+        SECURITY_ATTRIBUTES saAttr;
 
-    if (_close(ToProgram[READ_END]) == -1) {
-        RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes();
-        return false;
-    }
+        // Set the bInheritHandle flag so pipe handles are inherited.
+        saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+        saAttr.bInheritHandle = TRUE;
+        saAttr.lpSecurityDescriptor = NULL;
 
-    if (!WriteFlag && _close(ToProgram[WRITE_END]) == -1) {
-        RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes();
-        return false;
-    }
-    if (!ReadFlag && _close(FromProgram[READ_END]) == -1) {
-        RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes();
-        return false;
-    }
-
-    if (!noWindow) {
-        // Original implementation, which calls _spawnvp
-        Command = ParseCommand(executable, arguments);
-        if (Command != 0 && Command[0] != 0) {
-            /* We need to quote the arguments but not the file name. Evidently, Windows
-               parses the two differently. Therefore we use executable.c_str() instead
-               of Command[0]*/
-            INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, executable.c_str(), Command);
+        // Create a pipe for the child process stdout.
+        if (!CreatePipe(&childStdout_Read, &childStdout_Write, &saAttr, 0)) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to create stdout pipe" << std::endl;
+            return false;
         }
-        else {
-            CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
-                               << "\" because the program name is empty" << std::endl;
-            RestoreIO(stdinCopy, stdoutCopy);
+        // Ensure the read handle to the pipe for stdout is not inherited.
+        if (!SetHandleInformation(childStdout_Read, HANDLE_FLAG_INHERIT, 0))
+            CMN_LOG_INIT_WARNING << "Class osaPipeExec: failed to set stdout handle info" << std::endl;
+        FromProgram[READ_END] = _open_osfhandle((intptr_t) childStdout_Read, _O_RDONLY|_O_BINARY);
+        FromProgram[WRITE_END] = _open_osfhandle((intptr_t) childStdout_Write, _O_WRONLY|_O_BINARY);
+
+        // Create a pipe for the child process stdin.
+        if (!CreatePipe(&childStdin_Read, &childStdin_Write, &saAttr, 0)) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to create stdin pipe" << std::endl;
             CloseAllPipes();
             return false;
         }
-    }
-    else {
+        // Ensure the write handle to the pipe for STDIN is not inherited.
+        if (!SetHandleInformation(childStdin_Write, HANDLE_FLAG_INHERIT, 0))
+            CMN_LOG_INIT_WARNING << "Class osaPipeExec: failed to set stdin handle info" << std::endl;
+        ToProgram[WRITE_END] = _open_osfhandle((intptr_t) childStdin_Write, _O_WRONLY|_O_BINARY);
+        ToProgram[READ_END] = _open_osfhandle((intptr_t) childStdin_Read, _O_RDONLY|_O_BINARY);
+
         // This implementation calls CreateProcess, specifying CREATE_NO_WINDOW, to prevent console
         // window from being displayed (e.g., when a console program is called from a GUI program).
         std::string commandLine;
@@ -318,9 +304,9 @@ bool osaPipeExec::Open(const std::string & executable,
         ZeroMemory(&si, sizeof(si));
         si.cb = sizeof(si);
         si.dwFlags = STARTF_USESTDHANDLES;
-        si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-        si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-        si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+        si.hStdInput = childStdin_Read;
+        si.hStdOutput = childStdout_Write;
+        si.hStdError = childStdout_Write;
         ZeroMemory(&pi, sizeof(pi));
         char *cmdLine = strdup(commandLine.c_str());
         if (!CreateProcessA(NULL, cmdLine, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
@@ -328,21 +314,77 @@ bool osaPipeExec::Open(const std::string & executable,
                                << ", error = " << GetLastError() << std::endl;
             CMN_LOG_INIT_ERROR << "commandLine: " << commandLine << std::endl;
             free(cmdLine);
-            RestoreIO(stdinCopy, stdoutCopy);
             CloseAllPipes();
             return false;
         }
         free(cmdLine);
         INTERNALS(hProcess) = pi.hProcess;
-    }
-    if (!INTERNALS(hProcess)) {
-        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
-        RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes();
-        return false;
-    }
 
-    RestoreIO(stdinCopy, stdoutCopy);
+        if (!CloseUnusedHandles())
+            CMN_LOG_INIT_WARNING << "Class osaPipeExec: failed to close unused handles" << std::endl;
+    }
+    else {
+        // Original implementation, which calls _pipe and _spawnvp
+        if (_pipe(ToProgram, 4096, O_BINARY | O_NOINHERIT) == -1) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\"" << std::endl;
+            return false;
+        }
+        if (_pipe(FromProgram, 4096, O_BINARY | O_NOINHERIT) == -1) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\"" << std::endl;
+            CloseAllPipes();
+            return false;
+        }
+
+        /* Copy stdin and stdout before we close them so we can restore them after the spawn */
+        int stdinCopy = _dup(_fileno(stdin));
+        if (stdinCopy < 0)
+            CMN_LOG_INIT_WARNING << "Class osaPipeExec: Open: failed to copy stdin" << std::endl;
+        int stdoutCopy = _dup(_fileno(stdout));
+        if (stdoutCopy < 0)
+            CMN_LOG_INIT_WARNING << "Class osaPipeExec: Open: failed to copy stdout" << std::endl;
+
+        /* Replace stdin and stdout to receive from and write to the pipe */
+        if (_dup2(ToProgram[READ_END], _fileno(stdin)) == -1) {
+            RestoreIO(stdinCopy, stdoutCopy);
+            CloseAllPipes();
+            return false;
+        }
+        if (_dup2(FromProgram[WRITE_END], _fileno(stdout)) == -1) {
+            RestoreIO(stdinCopy, stdoutCopy);
+            CloseAllPipes();
+            return false;
+        }
+
+        if (!CloseUnusedHandles()) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to close unused handles" << std::endl;
+            RestoreIO(stdinCopy, stdoutCopy);
+            CloseAllPipes();
+        }
+
+        Command = ParseCommand(executable, arguments);
+        if (Command != 0 && Command[0] != 0) {
+            /* We need to quote the arguments but not the file name. Evidently, Windows
+               parses the two differently. Therefore we use executable.c_str() instead
+               of Command[0]*/
+            INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, executable.c_str(), Command);
+        }
+        else {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
+                               << "\" because the program name is empty" << std::endl;
+            RestoreIO(stdinCopy, stdoutCopy);
+            CloseAllPipes();
+            return false;
+        }
+
+        if (!INTERNALS(hProcess)) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
+            RestoreIO(stdinCopy, stdoutCopy);
+            CloseAllPipes();
+            return false;
+        }
+
+        RestoreIO(stdinCopy, stdoutCopy);
+    }
 #endif
 
     delete[] Command;
