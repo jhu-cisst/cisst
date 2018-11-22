@@ -28,7 +28,7 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
     CPPUNIT_ASSERT(osaPipeExec::INTERNALS_SIZE >= osaPipeExec::SizeOfInternals());
 }
 
-void osaPipeExecTest::TestPipe(void)
+void osaPipeExecTest::TestPipe(bool noWindow)
 {
     osaPipeExec pipe1, pipe2;
 
@@ -41,12 +41,12 @@ void osaPipeExecTest::TestPipe(void)
     CPPUNIT_ASSERT(utilityFound);
 
     /* Test opening twice, make sure it fails the second time */
-    bool opened = pipe1.Open(command, "rw");
+    bool opened = pipe1.Open(command, "rw", noWindow);
     CPPUNIT_ASSERT_EQUAL(true, opened);
-    opened = pipe1.Open(command, "rw");
+    opened = pipe1.Open(command, "rw", noWindow);
     CPPUNIT_ASSERT_EQUAL(false, opened);
 
-    opened = pipe2.Open(command, "rw");
+    opened = pipe2.Open(command, "rw", noWindow);
     CPPUNIT_ASSERT_EQUAL(true, opened);
 
     /* Generate random test string between 10 and 100 characters */
@@ -108,14 +108,14 @@ void osaPipeExecTest::TestPipe(void)
 
     /* Test other Open modes. We don't test "r" because we don't have a good
     test utility for that */
-    pipe1.Open(command, "");
+    pipe1.Open(command, "", noWindow);
     charsWrittenInt = pipe1.Write(testString);
     CPPUNIT_ASSERT_EQUAL(-1, charsWrittenInt);
     std::string returnString = pipe1.Read(length);
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
     pipe1.Close();
 
-    pipe1.Open(command, "w");
+    pipe1.Open(command, "w", noWindow);
     charsWrittenInt = pipe1.Write(testString);
     CPPUNIT_ASSERT(charsWrittenInt >= 0);
     charsWritten = charsWrittenInt;
@@ -129,27 +129,53 @@ void osaPipeExecTest::TestPipe(void)
     arguments.push_back("a a");
     arguments.push_back("b ");
     arguments.push_back(" c");
-    pipe1.Open(command, arguments, "rw");
+    pipe1.Open(command, arguments, "rw", noWindow);
     resultString = pipe1.ReadString(length);
     CPPUNIT_ASSERT_EQUAL(std::string("a a;b ; c;"), resultString);
     pipe1.Close();
 
-#if 0
-    /* Currently, there's no way for the pipe to tell if the command actually
-    executed successfully. Once there is, uncomment this */
+#if (CISST_OS == CISST_WINDOWS)    
     /* Test opening a command that doesn't exist */
-    opened = pipe1.Open("abcdefghijklmnopqrstuvwxyz", "rw");
-    CPPUNIT_ASSERT_EQUAL(true, opened);
-    charsWritten = pipe1.Write(testString);
-    CPPUNIT_ASSERT_EQUAL(-1, charsWritten);
+    opened = pipe1.Open("abcdefghijklmnopqrstuvwxyz", "rw", noWindow);
+    CPPUNIT_ASSERT_EQUAL(false, opened);
+    charsWrittenInt = pipe1.Write(testString);
+    CPPUNIT_ASSERT_EQUAL(-1, charsWrittenInt);
     returnString = pipe1.Read(length);
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
     closed = pipe1.Close();
-    CPPUNIT_ASSERT_EQUAL(true, closed);
+    CPPUNIT_ASSERT_EQUAL(false, closed);
 #endif
 
-	delete[] buffer;
-	delete[] testString;
+    /* Test IsProcessRunning */
+    opened = pipe1.Open(command, "rw", noWindow);
+    CPPUNIT_ASSERT_EQUAL(true, opened);
+    bool isRunning = pipe1.IsProcessRunning();
+    CPPUNIT_ASSERT_EQUAL(true, isRunning);
+    /* Close pipe, but do not kill process */
+    closed = pipe1.Close(false);
+    CPPUNIT_ASSERT_EQUAL(true, closed);
+    isRunning = pipe1.IsProcessRunning();
+    CPPUNIT_ASSERT_EQUAL(true, isRunning);
+    /* Now, kill process */
+    closed = pipe1.Close();
+    CPPUNIT_ASSERT_EQUAL(true, closed);
+    isRunning = pipe1.IsProcessRunning();
+    CPPUNIT_ASSERT_EQUAL(false, isRunning);
+
+    delete[] buffer;
+    delete[] testString;
 }
+
+void osaPipeExecTest::TestPipeWindow(void)
+{
+    TestPipe(false);
+}
+
+#if (CISST_OS == CISST_WINDOWS)
+void osaPipeExecTest::TestPipeNoWindow(void)
+{
+    TestPipe(true);
+}
+#endif
 
 CPPUNIT_TEST_SUITE_REGISTRATION(osaPipeExecTest);

@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnPortability.h>
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -24,7 +25,10 @@ class osaPipeExecTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(osaPipeExecTest);
     {
-        CPPUNIT_TEST(TestPipe);
+        CPPUNIT_TEST(TestPipeWindow);
+#if (CISST_OS == CISST_WINDOWS)
+        CPPUNIT_TEST(TestPipeNoWindow);
+#endif
 		CPPUNIT_TEST(TestPipeInternalsSize);
 	}
 
@@ -40,5 +44,7 @@ public:
     void TestPipeInternalsSize(void);
 
     /*! Test communication with cisstOSAbstractionTestsPipeUtility */
-    void TestPipe(void);
+    void TestPipe(bool noWindow);
+    void TestPipeWindow(void);
+    void TestPipeNoWindow(void);
 };

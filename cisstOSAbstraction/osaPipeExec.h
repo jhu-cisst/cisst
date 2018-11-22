@@ -45,12 +45,15 @@ class CISST_EXPORT osaPipeExec {
     bool WriteFlag;
     std::string Name;
 
+    /*! Internal function to close resources. */
+    int DoClose(int &n);
+
     /*! Free resources before returning an error. Also free the command
       pointer */
     void CloseAllPipes(void);
 
     /*! Free unused handles. */
-    bool CloseUnusedHandles(void);
+    void CloseUnusedHandles(void);
 
     /*! Parse out the command and arguments and return an array in the
       form that execvp/_spawnvp accept */
@@ -90,7 +93,12 @@ class CISST_EXPORT osaPipeExec {
               const std::vector<std::string> & parameters,
               const std::string & mode, bool noWindow = false);
 
-    /*! Close the pipe. Returns true if the Close succeeded, false otherwise. */
+    /*! Close the pipe and optionally kill the child process.
+        Returns:
+            true  if killProcess is false and pipe successfully closed OR
+                  if killProcess is true and process successfully terminated
+                  (even if pipe not successfully closed);
+            false otherwise */
     bool Close(bool killProcess = true);
 
     /*! Read at most maxLength characters from the pipe into
@@ -103,15 +111,16 @@ class CISST_EXPORT osaPipeExec {
     std::string Read(int maxLength) const;
 
     /*! Read at most maxLength characters from the pipe, but stop reading if
-    stopChar is read. Return the number of characters read */
-    int ReadUntil(char * buffer, int maxLength, char stopChar) const;
+    stopChar is read or if timeout expires (timeoutSec <= 0 means no timeout).
+    Return the number of characters read. */
+    int ReadUntil(char * buffer, int maxLength, char stopChar, double timeoutSec = 0.0) const;
 
-    /*! std::string version of ReadUntil
-    stopChar is read. Return the number of characters read */
-    std::string ReadUntil(int maxLength, char stopChar) const;
+    /*! std::string version of ReadUntil.
+    Return the number of characters read */
+    std::string ReadUntil(int maxLength, char stopChar, double timeoutSec = 0.0) const;
 
-    /*! Equivalent to ReadUntil(maxLength, '\0') */
-    std::string ReadString(int maxLength) const;
+    /*! Equivalent to ReadUntil(maxLength, '\0', timeoutSec) */
+    std::string ReadString(int maxLength, double timeoutSec = 0.0) const;
 
     /*! Write the null-terminated buffer to the pipe. Return the
       number of characters written or -1 for an error */
@@ -132,6 +141,9 @@ class CISST_EXPORT osaPipeExec {
     /*! Indicate if the pipe is opened (or at least supposed to be
       opened) */
     bool IsConnected(void) const;
+
+    /*! Returns true if the child process is still running. */
+    bool IsProcessRunning(void) const;
 
     /*! Get name provided in constructor. */
     const std::string & GetName(void) const;

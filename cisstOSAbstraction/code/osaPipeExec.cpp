@@ -20,6 +20,7 @@
 
 #include <cisstCommon/cmnAssert.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
+#include <cisstOSAbstraction/osaGetTime.h>
 #include <string.h>
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 #if (CISST_OS == CISST_QNX)
@@ -29,6 +30,7 @@
 #endif
 #include <signal.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #elif (CISST_OS == CISST_WINDOWS)
 #include <fcntl.h>
 #include <io.h>
@@ -49,6 +51,7 @@ struct osaPipeExecInternals {
 };
 
 #define INTERNALS(A) (reinterpret_cast<osaPipeExecInternals*>(Internals)->A)
+#define INTERNALS_CONST(A) (reinterpret_cast<const osaPipeExecInternals*>(Internals)->A)
 
 unsigned int osaPipeExec::SizeOfInternals(void)
 {
@@ -61,6 +64,14 @@ osaPipeExec::osaPipeExec(const std::string & name):
     Name(name)
 {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
+    // Initialize to invalid values
+    ToProgram[READ_END] = ToProgram[WRITE_END] = -1;
+    FromProgram[READ_END] = FromProgram[WRITE_END] = -1;
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    INTERNALS(pid) = -1;
+#elif (CISST_OS == CISST_WINDOWS)
+    INTERNALS(hProcess) = 0;
+#endif
 }
 
 osaPipeExec::~osaPipeExec(void)
@@ -68,53 +79,42 @@ osaPipeExec::~osaPipeExec(void)
     Close();
 }
 
-void osaPipeExec::CloseAllPipes(void)
+int osaPipeExec::DoClose(int &n)
 {
-    CMN_LOG_INIT_ERROR << "Class osaPipeExec: CloseAllPipes: called for pipe \"" << this->Name << "\"" << std::endl;
-    delete[] Command;
+    int ret = 0;
+    if (n >= 0) {
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-    close(ToProgram[READ_END]);
-    close(ToProgram[WRITE_END]);
-    close(FromProgram[READ_END]);
-    close(FromProgram[WRITE_END]);
+        int ret = close(n);
 #elif (CISST_OS == CISST_WINDOWS)
-    _close(ToProgram[READ_END]);
-    _close(ToProgram[WRITE_END]);
-    _close(FromProgram[READ_END]);
-    _close(FromProgram[WRITE_END]);
+        int ret = _close(n);
+#else
+        int ret = -1;
 #endif
+        if (ret == -1)
+            CMN_LOG_RUN_WARNING << "osaPipeExec: failed to close handle" << std::endl;
+        n = -1;
+    }
+    return ret;
 }
 
-bool osaPipeExec::CloseUnusedHandles(void)
+void osaPipeExec::CloseAllPipes(void)
+{
+    delete[] Command;
+    Command = 0;
+    DoClose(ToProgram[READ_END]);
+    DoClose(ToProgram[WRITE_END]);
+    DoClose(FromProgram[READ_END]);
+    DoClose(FromProgram[WRITE_END]);
+}
+
+void osaPipeExec::CloseUnusedHandles(void)
 {
     /* We want input to come from parent to the program and output the other
        direction. Thus we don't need these ends of the pipe */
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-    if (close(ToProgram[READ_END]) == -1)
-        return false;
-
-    if (close(FromProgram[WRITE_END]) == -1)
-        return false;
-
-    if (!WriteFlag && close(ToProgram[WRITE_END]) == -1)
-        return false;
-
-    if (!ReadFlag && close(FromProgram[READ_END]) == -1)
-        return false;
-#elif (CISST_OS == CISST_WINDOWS)
-    if (_close(FromProgram[WRITE_END]) == -1)
-        return false;
-
-    if (_close(ToProgram[READ_END]) == -1)
-        return false;
-
-    if (!WriteFlag && _close(ToProgram[WRITE_END]) == -1)
-        return false;
-
-    if (!ReadFlag && _close(FromProgram[READ_END]) == -1)
-        return false;
-#endif
-    return true;
+    DoClose(ToProgram[READ_END]);
+    DoClose(FromProgram[WRITE_END]);
+    if (!WriteFlag) DoClose(ToProgram[WRITE_END]);
+    if (!ReadFlag)  DoClose(FromProgram[READ_END]);
 }
 
 char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vector<std::string> & arguments)
@@ -150,13 +150,17 @@ char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vec
 void osaPipeExec::RestoreIO(int newStdin, int newStdout)
 {
     if (newStdin >= 0) {
-        if (_dup2(newStdin, _fileno(stdin)) == -1)
+        if (_dup2(newStdin, _fileno(stdin)) == -1) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to restore stdin" << std::endl;
             CloseAllPipes();
+        }
         _close(newStdin);
     }
     if (newStdout >= 0) {
-        if (_dup2(newStdout, _fileno(stdout)) == -1)
+        if (_dup2(newStdout, _fileno(stdout)) == -1) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to restore stdout" << std::endl;
             CloseAllPipes();
+        }
         _close(newStdout);
     }
 }
@@ -206,13 +210,16 @@ bool osaPipeExec::Open(const std::string & executable,
     /* Spawn a child and parent process for communication */
     INTERNALS(pid) = fork();
 
+    /* If an error occurred */
+    if (INTERNALS(pid) < 0) {
+        CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to fork process" << std::endl;
+        CloseAllPipes();
+        return false;
+    }
+
     /* Parent process to send and receive output */
-    if (INTERNALS(pid) > 0) {
-        if (!CloseUnusedHandles()) {
-            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to close unused handles" << std::endl;
-            CloseAllPipes();
-            return false;
-        }
+    else if (INTERNALS(pid) > 0) {
+        CloseUnusedHandles();
         Connected = true;
         return true;
     }
@@ -221,10 +228,12 @@ bool osaPipeExec::Open(const std::string & executable,
     else if (INTERNALS(pid) == 0) {
         /* Replace stdin and stdout to receive from and write to the pipe */
         if (dup2(ToProgram[READ_END], STDIN_FILENO) == -1) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to dup stdin" << std::endl;
             CloseAllPipes();
             return false;
         }
         if (dup2(FromProgram[WRITE_END], STDOUT_FILENO) == -1) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to dup stdout" << std::endl;
             CloseAllPipes();
             return false;
         }
@@ -297,7 +306,11 @@ bool osaPipeExec::Open(const std::string & executable,
             commandLine = '"' + executable + '"';
         for (size_t i = 0; i < arguments.size(); i++) {
             commandLine.push_back(' ');
+            // Quote arguments if necessary
+            pos = arguments[i].find_first_of(' ');
+            if (pos != std::string::npos) commandLine.push_back('"');
             commandLine.append(arguments[i]);
+            if (pos != std::string::npos) commandLine.push_back('"');
         }
         STARTUPINFO si;
         PROCESS_INFORMATION pi;
@@ -320,8 +333,13 @@ bool osaPipeExec::Open(const std::string & executable,
         free(cmdLine);
         INTERNALS(hProcess) = pi.hProcess;
 
-        if (!CloseUnusedHandles())
-            CMN_LOG_INIT_WARNING << "Class osaPipeExec: failed to close unused handles" << std::endl;
+        if (!INTERNALS(hProcess)) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
+            CloseAllPipes();
+            return false;
+        }
+
+        CloseUnusedHandles();
     }
     else {
         // Original implementation, which calls _pipe and _spawnvp
@@ -345,28 +363,30 @@ bool osaPipeExec::Open(const std::string & executable,
 
         /* Replace stdin and stdout to receive from and write to the pipe */
         if (_dup2(ToProgram[READ_END], _fileno(stdin)) == -1) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to dup stdin" << std::endl;
             RestoreIO(stdinCopy, stdoutCopy);
             CloseAllPipes();
             return false;
         }
         if (_dup2(FromProgram[WRITE_END], _fileno(stdout)) == -1) {
+            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to dup stdout" << std::endl;
             RestoreIO(stdinCopy, stdoutCopy);
             CloseAllPipes();
             return false;
         }
 
-        if (!CloseUnusedHandles()) {
-            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to close unused handles" << std::endl;
-            RestoreIO(stdinCopy, stdoutCopy);
-            CloseAllPipes();
-        }
-
+        CloseUnusedHandles();
         Command = ParseCommand(executable, arguments);
         if (Command != 0 && Command[0] != 0) {
             /* We need to quote the arguments but not the file name. Evidently, Windows
                parses the two differently. Therefore we use executable.c_str() instead
                of Command[0]*/
-            INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, executable.c_str(), Command);
+            intptr_t ret = _spawnvp(P_NOWAIT, executable.c_str(), Command);
+            if (ret == -1)
+                CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to spawn executable: " << executable
+                                   << ", " << strerror(errno) << std::endl;
+            else
+                INTERNALS(hProcess) = (HANDLE) ret;
         }
         else {
             CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
@@ -388,6 +408,7 @@ bool osaPipeExec::Open(const std::string & executable,
 #endif
 
     delete[] Command;
+    Command = 0;
     Connected = true;
     return true;
 }
@@ -395,46 +416,40 @@ bool osaPipeExec::Open(const std::string & executable,
 
 bool osaPipeExec::Close(bool killProcess)
 {
-    if (!Connected) {
-        return false;
-    } else {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-        if (WriteFlag && close(ToProgram[WRITE_END]) == -1) {
-            return false;
-        }
-#elif (CISST_OS == CISST_WINDOWS)
-        if (WriteFlag && _close(ToProgram[WRITE_END]) == -1) {
-            return false;
-        }
-#endif
+    bool ret = Connected;
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-        if (ReadFlag && close(FromProgram[READ_END]) == -1)
-            return false;
-#elif (CISST_OS == CISST_WINDOWS)
-        if (ReadFlag && _close(FromProgram[READ_END]) == -1)
-            return false;
-#endif
+    if (WriteFlag && DoClose(ToProgram[WRITE_END]) == -1)
+        ret = false;
+    if (ReadFlag && DoClose(FromProgram[READ_END]) == -1)
+        ret = false;
+    ReadFlag = WriteFlag = false;
 
-        ReadFlag = WriteFlag = false;
-
-        if (killProcess) {
+    if (killProcess) {
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+        if (INTERNALS(pid) > 0) {
+            ret = true;
             if (kill(INTERNALS(pid), SIGKILL) == -1)
-                return false;
-#elif (CISST_OS == CISST_WINDOWS)
-            /* It would be better to check the return value of TerminateProcess, but it
-               randomly fails with error code 5 ("access is denied"), causing failures
-               even though the process actually does terminate */
-            TerminateProcess(INTERNALS(hProcess), ERROR_SUCCESS);
-            if (CloseHandle(INTERNALS(hProcess)) == 0)
-                return false;
-#endif
+                ret = false;
+            INTERNALS(pid) = -1;
         }
-
-        Connected = false;
-        return true;
+#elif (CISST_OS == CISST_WINDOWS)
+        if (INTERNALS(hProcess)) {
+            ret = true;
+            if (IsProcessRunning()) {
+                /* It would be better to check the return value of TerminateProcess, but it
+                   randomly fails with error code 5 ("access is denied"), causing failures
+                   even though the process actually does terminate */
+                TerminateProcess(INTERNALS(hProcess), ERROR_SUCCESS);
+            }
+            if (CloseHandle(INTERNALS(hProcess)) == 0)
+                ret = false;
+            INTERNALS(hProcess) = 0;
+        }
+#endif
     }
+
+    Connected = false;
+    return ret;
 }
 
 
@@ -479,12 +494,13 @@ std::string osaPipeExec::Read(int maxLength) const
 }
 
 
-int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar) const
+int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double timeoutSec) const
 {
     char * s = buffer;
     int charsRead = 0;
     int result;
     char lastChar = stopChar+1; // dummy value that's not stopChar
+    double endTime = (timeoutSec > 0.0) ? (osaGetTime() + timeoutSec) : 0.0;
     while (charsRead < length && lastChar != stopChar) {
         result = Read(s, 1);
         if (result == -1)
@@ -492,15 +508,17 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar) const
         charsRead += result;
         s += result;
         lastChar = *(s-1);
+        if ((endTime > 0.0) && (osaGetTime() > endTime))
+            break;  // timeout
     }
     return charsRead;
 }
 
 
-std::string osaPipeExec::ReadUntil(int length, char stopChar) const
+std::string osaPipeExec::ReadUntil(int length, char stopChar, double timeoutSec) const
 {
     char * buffer = new char[length+1];
-    int charsRead = ReadUntil(buffer, length, stopChar);
+    int charsRead = ReadUntil(buffer, length, stopChar, timeoutSec);
     std::string result;
     if (charsRead > 0 && buffer[charsRead-1] == stopChar) {
         buffer[charsRead] = '\0';
@@ -511,9 +529,9 @@ std::string osaPipeExec::ReadUntil(int length, char stopChar) const
 }
 
 
-std::string osaPipeExec::ReadString(int length) const
+std::string osaPipeExec::ReadString(int length, double timeoutSec) const
 {
-    return ReadUntil(length, '\0');
+    return ReadUntil(length, '\0', timeoutSec);
 }
 
 
@@ -564,6 +582,20 @@ bool osaPipeExec::IsConnected(void) const
     return this->Connected;
 }
 
+bool osaPipeExec::IsProcessRunning(void) const
+{
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    if (INTERNALS_CONST(pid) < 0)
+        return false;
+    return (waitpid(INTERNALS_CONST(pid), 0, WNOHANG) == 0);
+#elif (CISST_OS == CISST_WINDOWS)
+    if (!INTERNALS_CONST(hProcess))
+        return false;
+    return (WaitForSingleObject(INTERNALS_CONST(hProcess), 0) == WAIT_TIMEOUT);
+#else
+    return true;
+#endif
+}
 
 const std::string & osaPipeExec::GetName(void) const
 {
