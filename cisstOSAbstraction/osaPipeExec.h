@@ -37,7 +37,6 @@ class CISST_EXPORT osaPipeExec {
     static unsigned int SizeOfInternals(void);
     friend class osaPipeExecTest;
 
-    char ** Command;
     int ToProgram[2];
     int FromProgram[2];
     bool Connected;
@@ -59,6 +58,9 @@ class CISST_EXPORT osaPipeExec {
       form that execvp/_spawnvp accept */
     char ** ParseCommand(const std::string & executable,
                          const std::vector<std::string> & arguments);
+
+    /*! Free memory allocated by ParseCommand. */
+    void FreeCommand(char **command);
 
 #if (CISST_OS == CISST_WINDOWS)
 	/*! Restore I/O to their original values before returning

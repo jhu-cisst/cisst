@@ -6,7 +6,7 @@
   Author(s): Martin Kelly
   Created on: 2010-09-27
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -35,6 +35,8 @@ int main(int argc, char ** argv) {
     }
 
     while ((c = getchar()) != EOF) {
+        if (c == '0') break;   // '0' means exit
         putchar(c);
     }
+    fflush(stdout);
 }

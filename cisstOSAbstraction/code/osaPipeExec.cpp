@@ -59,7 +59,6 @@ unsigned int osaPipeExec::SizeOfInternals(void)
 }
 
 osaPipeExec::osaPipeExec(const std::string & name):
-    Command(0),
     Connected(false),
     Name(name)
 {
@@ -99,8 +98,6 @@ int osaPipeExec::DoClose(int &n)
 
 void osaPipeExec::CloseAllPipes(void)
 {
-    delete[] Command;
-    Command = 0;
     DoClose(ToProgram[READ_END]);
     DoClose(ToProgram[WRITE_END]);
     DoClose(FromProgram[READ_END]);
@@ -144,6 +141,16 @@ char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vec
     command[arguments.size() + 1] = 0; // null terminated list
 
     return command;
+}
+
+void osaPipeExec::FreeCommand(char **command)
+{
+#if (CISST_OS == CISST_WINDOWS)
+    /* Free memory allocated by strdup */
+    for (int i = 0; command[i] != 0; i++)
+        free(command[i]);
+#endif
+    delete[] command;
 }
 
 #if (CISST_OS == CISST_WINDOWS)
@@ -227,29 +234,15 @@ bool osaPipeExec::Open(const std::string & executable,
     /* Child thread to run the program */
     else if (INTERNALS(pid) == 0) {
         /* Replace stdin and stdout to receive from and write to the pipe */
-        if (dup2(ToProgram[READ_END], STDIN_FILENO) == -1) {
-            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to dup stdin" << std::endl;
-            CloseAllPipes();
-            return false;
+        if ((dup2(ToProgram[READ_END], STDIN_FILENO) != -1) &&
+            (dup2(FromProgram[WRITE_END], STDOUT_FILENO) != -1)) {
+            char **cmd = ParseCommand(executable, arguments);
+            execvp(cmd[0], cmd);
+            /* If we get here then exec failed */
+            FreeCommand(cmd);
         }
-        if (dup2(FromProgram[WRITE_END], STDOUT_FILENO) == -1) {
-            CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to dup stdout" << std::endl;
-            CloseAllPipes();
-            return false;
-        }
-
-        Command = ParseCommand(executable, arguments);
-        if (Command != 0 && Command[0] != 0) {
-            execvp(Command[0], Command);
-        } else {
-            CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
-                               << "\" because the program name is empty" << std::endl;
-        }
-
-        /* If we get here then exec failed */
-        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
         CloseAllPipes();
-        return false;
+        exit(-1);  // terminate the child program
     }
     
 #elif (CISST_OS == CISST_WINDOWS)
@@ -376,25 +369,17 @@ bool osaPipeExec::Open(const std::string & executable,
         }
 
         CloseUnusedHandles();
-        Command = ParseCommand(executable, arguments);
-        if (Command != 0 && Command[0] != 0) {
-            /* We need to quote the arguments but not the file name. Evidently, Windows
-               parses the two differently. Therefore we use executable.c_str() instead
-               of Command[0]*/
-            intptr_t ret = _spawnvp(P_NOWAIT, executable.c_str(), Command);
-            if (ret == -1)
-                CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to spawn executable: " << executable
-                                   << ", " << strerror(errno) << std::endl;
-            else
-                INTERNALS(hProcess) = (HANDLE) ret;
-        }
-        else {
-            CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
-                               << "\" because the program name is empty" << std::endl;
-            RestoreIO(stdinCopy, stdoutCopy);
-            CloseAllPipes();
-            return false;
-        }
+        char **cmd = ParseCommand(executable, arguments);
+        /* We need to quote the arguments but not the file name. Evidently, Windows
+           parses the two differently. Therefore we use executable.c_str() instead
+           of Command[0]*/
+        intptr_t ret = _spawnvp(P_NOWAIT, executable.c_str(), cmd);
+        FreeCommand(cmd);
+        if (ret == -1)
+           CMN_LOG_INIT_ERROR << "Class osaPipeExec: failed to spawn executable: " << executable
+                              << ", " << strerror(errno) << std::endl;
+        else
+           INTERNALS(hProcess) = (HANDLE) ret;
 
         if (!INTERNALS(hProcess)) {
             CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
@@ -407,8 +392,6 @@ bool osaPipeExec::Open(const std::string & executable,
     }
 #endif
 
-    delete[] Command;
-    Command = 0;
     Connected = true;
     return true;
 }
@@ -428,8 +411,10 @@ bool osaPipeExec::Close(bool killProcess)
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
         if (INTERNALS(pid) > 0) {
             ret = true;
-            if (kill(INTERNALS(pid), SIGKILL) == -1)
-                ret = false;
+            if (IsProcessRunning()) {
+                if (kill(INTERNALS(pid), SIGKILL) == -1)
+                    ret = false;
+            }
             INTERNALS(pid) = -1;
         }
 #elif (CISST_OS == CISST_WINDOWS)
@@ -501,13 +486,15 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
     int result;
     char lastChar = stopChar+1; // dummy value that's not stopChar
     double endTime = (timeoutSec > 0.0) ? (osaGetTime() + timeoutSec) : 0.0;
-    while (charsRead < length && lastChar != stopChar) {
+    while ((charsRead < length) && (lastChar != stopChar)) {
         result = Read(s, 1);
         if (result == -1)
             return -1;
-        charsRead += result;
-        s += result;
-        lastChar = *(s-1);
+        else if (result == 1) {
+            lastChar = *s;
+            charsRead++;
+            s++;
+        }
         if ((endTime > 0.0) && (osaGetTime() > endTime))
             break;  // timeout
     }
@@ -520,7 +507,7 @@ std::string osaPipeExec::ReadUntil(int length, char stopChar, double timeoutSec)
     char * buffer = new char[length+1];
     int charsRead = ReadUntil(buffer, length, stopChar, timeoutSec);
     std::string result;
-    if (charsRead > 0 && buffer[charsRead-1] == stopChar) {
+    if ((charsRead > 0) && (buffer[charsRead-1] == stopChar)) {
         buffer[charsRead] = '\0';
         result = std::string(buffer);
     }
