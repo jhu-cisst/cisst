@@ -303,18 +303,24 @@ option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some
 
 if (CISST_HAS_JSON)
 
-  # try to find an installed version 
-  find_package (PkgConfig REQUIRED)
-  pkg_check_modules(JSONCPP jsoncpp)
+  if (WIN32)
+    # On Windows, no need to use PkgConfig
+    set(JSONCPP_FOUND OFF)
+  else (WIN32)
+    # try to find an installed version
+    find_package (PkgConfig REQUIRED)
+    pkg_check_modules(JSONCPP jsoncpp)
 
-  if (JSONCPP_FOUND)
-    set (JSON_INCLUDE_DIR "${JSONCPP_INCLUDE_DIRS}")
-    set (JSON_LIBRARY_DIRS "${JSONCPP_LIBDIR}")
-    set (JSON_LIBRARIES "${JSONCPP_LIBRARIES}")
-    set (JSON_FOUND ON PARENT_SCOPE)
-    set (JSON_USE_SYSTEM_VERSION ON PARENT_SCOPE)
+    if (JSONCPP_FOUND)
+      set (JSON_INCLUDE_DIR "${JSONCPP_INCLUDE_DIRS}")
+      set (JSON_LIBRARY_DIRS "${JSONCPP_LIBDIR}")
+      set (JSON_LIBRARIES "${JSONCPP_LIBRARIES}")
+      set (JSON_FOUND ON PARENT_SCOPE)
+      set (JSON_USE_SYSTEM_VERSION ON PARENT_SCOPE)
+    endif (JSONCPP_FOUND)
+  endif (WIN32)
 
-  else (JSONCPP_FOUND)
+  if (NOT JSONCPP_FOUND)
 
     # otherwise, build as external project
     include (ExternalProject)
@@ -353,7 +359,7 @@ if (CISST_HAS_JSON)
     set (JSON_FOUND ON PARENT_SCOPE)
     set (JSON_USE_SYSTEM_VERSION OFF PARENT_SCOPE)
 
-  endif (JSONCPP_FOUND)
+  endif (NOT JSONCPP_FOUND)
 
   # propagate to parent directory
   set (JSON_INCLUDE_DIR ${JSON_INCLUDE_DIR} PARENT_SCOPE)
