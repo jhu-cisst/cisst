@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-31
 
-  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,11 +30,28 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnUnits.h>
 
+// Whether cmnLogger instance has been created. Since this is a built-in type,
+// it should be initialized early.
+bool cmnLogger::InstanceCreated = false;
+
+// Default log file name is "cisstLog.txt" (in current directory)
+std::string cmnLogger::DefaultLogFileName("cisstLog.txt");
+
+bool cmnLogger::SetDefaultLogFileName(const std::string & defaultLogFileName)
+{
+    if (!IsCreated()) {
+        DefaultLogFileName = defaultLogFileName;
+        return true;
+    }
+    return false;
+}
+
 cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     Mask(CMN_LOG_ALLOW_ALL),
     FunctionMask(CMN_LOG_ALLOW_ERRORS),
     LoDMultiplexerStreambuf()
 {
+    cmnLogger::InstanceCreated = true;
     LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), CMN_LOG_ALLOW_DEFAULT);
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " " << CISST_FULL_REVISION << std::endl;
     std::string result = "undefined";

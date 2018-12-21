@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-31
 
-  (C) Copyright 2004-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -276,6 +276,13 @@ class CISST_EXPORT cmnLogger {
     /*! Single multiplexer used to stream the log out */
     StreamBufType LoDMultiplexerStreambuf;
 
+    /*! Default filename (possibly including path) for default log.
+        Normally, cisstLog.txt in current directory. */
+    static std::string DefaultLogFileName;
+
+    /*! Whether cmnLogger instance has been created. */
+    static bool InstanceCreated;
+
     /*! Instance specific implementation of SetMask.
       \sa SetMask */
     void SetMaskInstance(cmnLogMask mask);
@@ -297,7 +304,7 @@ class CISST_EXPORT cmnLogger {
     StreamBufType * GetMultiplexerInstance(void);
 
     /*! Create and get a pointer on the default log file. */
-    std::ofstream * DefaultLogFile(const std::string & defaultLogFileName = "cisstLog.txt");
+    std::ofstream * DefaultLogFile(const std::string & defaultLogFileName = DefaultLogFileName);
 
     /*! Instance specific implementation of HaltDefaultLog. */
     void HaltDefaultLogInstance(void);
@@ -317,7 +324,7 @@ class CISST_EXPORT cmnLogger {
  protected:
     /*! Constructor.  The only constructor must be private in order to
       ensure that the class register is a singleton. */
-    cmnLogger(const std::string & defaultLogFileName = "cisstLog.txt");
+    cmnLogger(const std::string & defaultLogFileName = DefaultLogFileName);
 
  public:
     /*! The log is instantiated as a singleton.  To access the unique
@@ -475,6 +482,16 @@ class CISST_EXPORT cmnLogger {
         Instance()->KillInstance();
     }
 
+    /*! Set the name of the default log file. This function must be called before the cmnLogger instance is created.
+        \returns true if the default log file name can be set (i.e., cmnLogger instance not yet created); false otherwise.
+    */
+    static bool SetDefaultLogFileName(const std::string &defaultLogFileName);
+
+    /*! Returns name of default log file. */
+    static std::string GetDefaultLogFileName(void) { return DefaultLogFileName; }
+
+    /*! Returns true if cmnLogger instance has been created (i.e., constructor called). */
+    static bool IsCreated() { return InstanceCreated; }
 };
 
 

@@ -41,6 +41,7 @@ set (SOURCE_FILES
      cmnDataFunctionsTest.cpp
      cmnDataFunctionsVectorTest.cpp
      cmnDataGeneratorTest.cpp
+     cmnLoggerTest.cpp
      cmnLogLoDTest.cpp
      cmnObjectRegisterTest.cpp
      cmnPathTest.cpp
@@ -57,6 +58,7 @@ set (HEADER_FILES
      cmnDataFunctionsTest.h
      cmnDataFunctionsVectorTest.h
      cmnDataGeneratorTest.h
+     cmnLoggerTest.h
      cmnLogLoDTest.h
      cmnObjectRegisterTest.h
      cmnPathTest.h
