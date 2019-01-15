@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-11-30
 
-  (C) Copyright 2017-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -50,12 +50,13 @@ public:
     }
 
 protected:
+    void ResetOrientation(void);
     void mouseMoveEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
+    void keyPressEvent(QKeyEvent * event);
     void initializeGL(void);
     void paintGL(void);
     void resizeGL(int width, int height);
-    void keyPressEvent(QKeyEvent * event);
 
     vct3 mVector;
     vctQuatRot3 mCurrentOrientation, mDeltaOrientation;
