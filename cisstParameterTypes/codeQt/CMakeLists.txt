@@ -24,6 +24,7 @@ if (CISST_HAS_QT4)
   qt4_wrap_cpp (QT_WRAPPED_CPP
                   ../prmEventButtonQtWidget.h
                   ../prmInputDataQtWidget.h
+                  ../prmOperatingStateQtWidget.h
                   ../prmPositionCartesianGetQtWidget.h
                   ../prmStateJointQtWidget.h
                   ../prmStateRobotQtWidget.h)
@@ -44,11 +45,13 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                    SETTINGS     cisstQt
                    SOURCE_FILES prmEventButtonQtWidget.cpp
                                 prmInputDataQtWidget.cpp
+                                prmOperatingStateQtWidget.cpp
                                 prmPositionCartesianGetQtWidget.cpp
                                 prmStateJointQtWidget.cpp
                                 prmStateRobotQtWidget.cpp
                    HEADER_FILES prmEventButtonQtWidget.h
                                 prmInputDataQtWidget.h
+                                prmOperatingStateQtWidget.h
                                 prmPositionCartesianGetQtWidget.h
                                 prmStateJointQtWidget.h
                                 prmStateRobotQtWidget.h
