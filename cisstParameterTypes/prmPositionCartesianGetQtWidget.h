@@ -20,13 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmPositionCartesianGetQtWidget_h
 
 #include <QWidget>
-#include <QLabel>
 #include <cisstVector/vctQtWidgetFrame.h>
-#include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExportQt.h>
+
+class QLabel;
 
 class CISST_EXPORT prmPositionCartesianGetQtWidget: public QWidget
 {
