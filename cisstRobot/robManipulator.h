@@ -119,6 +119,14 @@ class CISST_EXPORT robManipulator{
        const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
        double g = 9.81 ) const;
 
+  vctDynamicVector<double>
+  RNE_MDH( const vctDynamicVector<double>& q,
+       const vctDynamicVector<double>& qd,
+       const vctDynamicVector<double>& qdd,
+       const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
+       double g = 9.81 ) const;
+
+  
   //! Coriolis/centrifugal and gravity
   /**
      Evaluate the coriolis/centrifugal and gravitational forces acting on the
