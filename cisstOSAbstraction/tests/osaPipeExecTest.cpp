@@ -5,7 +5,7 @@
   Author(s): Martin Kelly, Anton Deguet
   Created on: 2010-09-23
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,6 +33,7 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
 void osaPipeExecTest::TestPipeCommon(bool noWindow)
 {
     osaPipeExec pipe1, pipe2;
+    double startTime, measuredTime;
 
     /* Build search path to find the test utility */
     cmnPath path;
@@ -117,6 +118,23 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     CPPUNIT_ASSERT_EQUAL(std::string("abcd"), resultString);
     resultString = pipe1.Read(6);
     CPPUNIT_ASSERT_EQUAL(std::string("ef"), resultString);
+
+    /* Test ReadUntil with timeout */
+    startTime = osaGetTime();
+    // No characters written, should time out
+    resultString = pipe1.ReadUntil(6, 'a', 2.0);
+    measuredTime = osaGetTime()-startTime;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, measuredTime, 0.1);
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(resultString.length()));
+    charsWrittenInt = pipe1.Write("12345", 5);
+    CPPUNIT_ASSERT_EQUAL(5, charsWrittenInt);
+    startTime = osaGetTime();
+    resultString = pipe1.ReadUntil(5, '3');
+    measuredTime = osaGetTime()-startTime;
+    // No timeout, so should be significantly less than 0.5 seconds
+    CPPUNIT_ASSERT(measuredTime < 0.5);
+    CPPUNIT_ASSERT_EQUAL(std::string("123"), resultString);
+
     pipe1.Close();
 
     /* Test other Open modes. We don't test "r" because we don't have a good
@@ -193,10 +211,10 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     charsWrittenInt = pipe1.Write("abc0d", 5);
     CPPUNIT_ASSERT_EQUAL(5, charsWrittenInt);
     /* Try to read 5 characters, specifying a 2 second timeout. */
-    double startTime = osaGetTime();
+    startTime = osaGetTime();
     returnString = pipe1.ReadUntil(5, 'd', 2.0);
-    double measuredTime = osaGetTime()-startTime;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, measuredTime, 0.1);
+    measuredTime = osaGetTime()-startTime;
+    CPPUNIT_ASSERT(measuredTime < 2.1);
 
     isRunning = pipe1.IsProcessRunning();
     CPPUNIT_ASSERT_EQUAL(false, isRunning);

@@ -32,11 +32,12 @@ int main(int argc, char ** argv) {
             printf("%s;", argv[i]);
         }
         putchar('\0');
+        fflush(stdout);
     }
 
     while ((c = getchar()) != EOF) {
         if (c == '0') break;   // '0' means exit
         putchar(c);
+        fflush(stdout);
     }
-    fflush(stdout);
 }

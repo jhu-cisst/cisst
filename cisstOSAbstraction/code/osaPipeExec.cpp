@@ -6,7 +6,7 @@
   Author(s): Martin Kelly
   Created on: 2010-09-23
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -27,6 +27,7 @@
 #include <errno.h>
 #else
 #include <sys/errno.h>
+#include <sys/select.h>
 #endif
 #include <signal.h>
 #include <unistd.h>
@@ -46,7 +47,7 @@ struct osaPipeExecInternals {
     int pid;
 #elif (CISST_OS == CISST_WINDOWS)
     HANDLE hProcess;
-    // Starting with Windows XP, can call GetExitCodeProcess to determine whether process still active
+    HANDLE readHandle;
 #endif
 };
 
@@ -273,6 +274,10 @@ bool osaPipeExec::Open(const std::string & executable,
         // Ensure the read handle to the pipe for stdout is not inherited.
         if (!SetHandleInformation(childStdout_Read, HANDLE_FLAG_INHERIT, 0))
             CMN_LOG_INIT_WARNING << "Class osaPipeExec: failed to set stdout handle info" << std::endl;
+
+        // Save the read handle for use later
+        INTERNALS(readHandle) = childStdout_Read;
+
         FromProgram[READ_END] = _open_osfhandle((intptr_t) childStdout_Read, _O_RDONLY|_O_BINARY);
         FromProgram[WRITE_END] = _open_osfhandle((intptr_t) childStdout_Write, _O_WRONLY|_O_BINARY);
 
@@ -345,6 +350,9 @@ bool osaPipeExec::Open(const std::string & executable,
             CloseAllPipes();
             return false;
         }
+
+        // Save the pipe read handle for later use
+        INTERNALS(readHandle) = (HANDLE)_get_osfhandle(FromProgram[READ_END]);
 
         /* Copy stdin and stdout before we close them so we can restore them after the spawn */
         int stdinCopy = _dup(_fileno(stdin));
@@ -486,18 +494,134 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
     int result;
     char lastChar = stopChar+1; // dummy value that's not stopChar
     double endTime = (timeoutSec > 0.0) ? (osaGetTime() + timeoutSec) : 0.0;
+    // Normally, the Read method is blocking, which makes it difficult to support a timeout
+    // (i.e., a call to Read can block well beyond the timeout period).
+
+#if (CISST_OS == CISST_WINDOWS)
+    // On Windows, it is difficult to check if the pipe has waiting bytes.
+    // The PeekNamedPipe method would be perfect, except that it does not work when using Qt.
+    //     DWORD dw_bytes;
+    //     PeekNamedPipe(readHandle, NULL, 0, NULL, &dw_bytes, NULL);
+    // The recommended alternative is to use asynchronous (overlapped) I/O, but
+    // the approach used here is to temporarily change the pipe to non-blocking mode and
+    // then read from the pipe while characters are available. When the Read method returns -1
+    // or 0 (no chars available) we use MsgWaitForMultipleObjects to poll for any Windows messages
+    // while waiting for a short time. This allows Windows GUI programs to be responsive (e.g.,
+    // to mouse clicks) while waiting on the pipe. Note that we also check the (child) process
+    // handle so that we can detect whether the child process has exited.
+    bool nonblocking = false;
+    DWORD saved_pipe_mode;
+    if (endTime > 0.0) {
+        if (GetNamedPipeHandleState(INTERNALS_CONST(readHandle), &saved_pipe_mode, NULL, NULL, NULL, NULL, 0)) {
+            if (saved_pipe_mode == PIPE_NOWAIT) {
+                nonblocking = true;
+            }
+            else {
+                // Change pipe to non-blocking
+                DWORD pipe_mode = PIPE_NOWAIT;
+                if (SetNamedPipeHandleState(INTERNALS_CONST(readHandle), &pipe_mode, NULL, NULL))
+                    nonblocking = true;
+                else
+                    CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil failed to set PIPE_NOWAIT, error = " << GetLastError() << std::endl;
+            }
+        }
+        else
+            CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil failed to query pipe mode, error = " << GetLastError() << std::endl;
+    }
+    bool processEnded = false;  // Whether child process has ended
+    HANDLE handles[1] = { INTERNALS_CONST(hProcess) };
+#endif
+
     while ((charsRead < length) && (lastChar != stopChar)) {
+
+#if (CISST_OS == CISST_WINDOWS)
+        // On Windows, we first try to read from the (non-blocking) pipe, then poll for messages.
+        // See comment above for further details.
+        if (nonblocking && (osaGetTime() > endTime))
+            break;  // timeout
         result = Read(s, 1);
-        if (result == -1)
-            return -1;
+        if (nonblocking && (result <= 0)) {
+            // No bytes read; sleep a little and poll for events
+            if (processEnded) {
+                // If we have already detected that the child process has ended and we just
+                // read 0 bytes, then we are finished.
+                CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil returning " << charsRead
+                                    << " bytes after child process ended" << std::endl;
+                break;
+            }
+            double timeLeft = endTime-osaGetTime();
+            DWORD timeout_msec = static_cast<DWORD>(1000.0*timeLeft/100.0 + 0.5);
+            DWORD ret = MsgWaitForMultipleObjects(1, handles, FALSE, timeout_msec, QS_ALLEVENTS);
+            if (ret == WAIT_OBJECT_0) {
+                CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil detected that child process has ended" << std::endl;
+                // We do not exit right away because there may still be some bytes in the pipe.
+                processEnded = true;
+            }
+            else if (ret == WAIT_OBJECT_0+1) {
+                MSG msg;
+                // Read all the messages in this next loop, removing each message as we read it.
+                while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+                    // If it is a quit message, exit.
+                    if (msg.message == WM_QUIT) {
+                        CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil got quit message" << std::endl;
+                        endTime = osaGetTime();  // force a timeout
+                    }
+                    else {
+                        // Otherwise, dispatch the message.
+                        TranslateMessage(&msg);
+                        DispatchMessage(&msg);
+                    }
+                } // End of PeekMessage while loop.
+            }
+            continue;
+        }
+#else
+        // On Linux (and other platforms), it is much easier because the select call can be used to
+        // check whether any characters are available in the (blocking) pipe.
+        if (endTime > 0.0) {
+            fd_set readfds;
+            FD_ZERO(&readfds);
+            FD_SET(FromProgram[READ_END], &readfds);
+            int nfds = FromProgram[READ_END]+1;
+            double timeLeft = endTime-osaGetTime();
+            time_t sec = static_cast<time_t>(floor(timeLeft));
+            suseconds_t usec = static_cast<suseconds_t>((timeLeft - sec) * 1e6);
+            timeval timeout = { sec , usec };
+            int retval = select(nfds, &readfds, NULL, NULL, &timeout);
+            if (retval == -1) {
+                CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil select failed after " << charsRead
+                                    << " bytes, " << strerror(errno) << std::endl;
+                charsRead = -1;
+                break;
+            }
+            else if (retval == 0) {
+                break;  // timeout
+            }
+        }
+        result = Read(s, 1);
+#endif
+        if (result == -1) {
+            if (charsRead > 0) {
+                CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil discarding " << charsRead << " characters." << std::endl;
+            }
+            charsRead = -1;
+            break;
+        }
         else if (result == 1) {
             lastChar = *s;
             charsRead++;
             s++;
         }
-        if ((endTime > 0.0) && (osaGetTime() > endTime))
-            break;  // timeout
     }
+
+#if (CISST_OS == CISST_WINDOWS)
+    if (nonblocking) {
+        // Restore pipe mode (probably blocking)
+        if (!SetNamedPipeHandleState(INTERNALS_CONST(readHandle), &saved_pipe_mode, NULL, NULL))
+            CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil failed to set PIPE_WAIT, error = " << GetLastError() << std::endl;
+    }
+#endif
+
     return charsRead;
 }
 
@@ -576,6 +700,7 @@ bool osaPipeExec::IsProcessRunning(void) const
         return false;
     return (waitpid(INTERNALS_CONST(pid), 0, WNOHANG) == 0);
 #elif (CISST_OS == CISST_WINDOWS)
+    // Starting with Windows XP, can call GetExitCodeProcess to determine whether process still active
     if (!INTERNALS_CONST(hProcess))
         return false;
     return (WaitForSingleObject(INTERNALS_CONST(hProcess), 0) == WAIT_TIMEOUT);

@@ -6,7 +6,7 @@
   Author(s): Martin Kelly
   Created on: 2010-09-23
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -24,12 +24,14 @@
 #include <vector>
 #include <string>
 
+#include <cisstCommon/cmnPortability.h>
+
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
 class CISST_EXPORT osaPipeExec {
     /*! Internals that are OS-dependent */
-    enum {INTERNALS_SIZE = 32};
+    enum {INTERNALS_SIZE = 64};
     char Internals[INTERNALS_SIZE];
 
     /*! Return the size of the actual object used by the OS.  This is
