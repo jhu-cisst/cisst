@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -310,6 +310,36 @@ robManipulator::Errno robManipulator::LoadRobot(std::vector<robKinematics *> Kin
 //////////////////////////////////////
 //         KINEMATICS
 //////////////////////////////////////
+
+bool
+robManipulator::SetJointLimits(const vctDynamicVector<double> & lowerLimits,
+                               const vctDynamicVector<double> & upperLimits)
+{
+  if ((lowerLimits.size() != links.size())
+      || (upperLimits.size() != links.size())) {
+    return false;
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    links[i].GetKinematics()->PositionMin() = lowerLimits.at(i);
+    links[i].GetKinematics()->PositionMax() = upperLimits.at(i);
+  }
+  return true;
+}
+
+bool
+robManipulator::GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
+                               vctDynamicVectorRef<double> upperLimits)
+{
+  if ((lowerLimits.size() != links.size())
+      || (upperLimits.size() != links.size())) {
+    return false;
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    lowerLimits.at(i) = links[i].GetKinematics()->PositionMin();
+    upperLimits.at(i) = links[i].GetKinematics()->PositionMax();
+  }
+  return true;
+}
 
 vctFrame4x4<double>
 robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
@@ -776,7 +806,8 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
                      const vctDynamicVector<double>& qd,
                      const vctDynamicVector<double>& qdd,
                      const vctFixedSizeVector<double,6>& fext,
-                     double g ) const {
+                     const double g,
+                     const vctFixedSizeVector<double, 3>& z0) const {
 
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
@@ -794,7 +825,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   vctDynamicVector<double> tau(links.size(), 0.0);
 
   // The axis pointing "up"
-  vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
+  // vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
 
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
@@ -946,8 +977,10 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
 
 vctDynamicVector<double>
 robManipulator::CCG( const vctDynamicVector<double>& q,
-                     const vctDynamicVector<double>& qd ) const {
-
+                     const vctDynamicVector<double>& qd,
+                     double g,
+                     const vctFixedSizeVector<double,3>& z0) const
+{
   if( q.size() != qd.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": Size of q and qd do not match."
@@ -955,12 +988,12 @@ robManipulator::CCG( const vctDynamicVector<double>& q,
     return vctDynamicVector<double>();
   }
 
-
-
   return RNE( q,           // call Newton-Euler with only the joints positions
-          qd,          // and the joints velocities
-              vctDynamicVector<double>( q.size(), 0.0 ),
-              vctFixedSizeVector<double,6>(0.0) );
+              qd,          // and the joints velocities
+              vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
+              vctFixedSizeVector<double,6>(0.0), // no external forces
+              g,
+              z0);
 }
 
 vctFixedSizeVector<double,6>

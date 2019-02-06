@@ -1,10 +1,8 @@
 /*
-
   Author(s): Simon Leonard
   Created on: November 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -95,6 +93,8 @@ public:
 	    double max,
 	    double ftmax );
 
+  // class with virtual methods should have a virtual destructor
+  inline virtual ~robJoint() {};
 
   //! Return the type of the joint
   /**
@@ -164,13 +164,15 @@ public:
   /**
      \return The minimum position of the joint. This value has no unit.
   */
-  double PositionMin() const;
+  const double & PositionMin(void) const;
+  double & PositionMin(void);
 
   //! Return the maximum position
   /**
      \return The maximum position of the joint. This value has no unit.
   */
-  double PositionMax() const;
+  const double & PositionMax(void) const;
+  double & PositionMax(void);
 
   //! Return the maximum force/torque
   /**

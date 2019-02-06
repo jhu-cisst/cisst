@@ -56,6 +56,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     enum {DIMENSION = 3};
     typedef vctFixedSizeMatrix<value_type, ROWS, COLS, _rowMajor> ContainerType;
     typedef vctMatrixRotation3Base<ContainerType> BaseType;
+    typedef vctMatrixRotation3ConstBase<ContainerType> ConstBaseType;
     typedef vctMatrixRotation3<value_type, _rowMajor> ThisType;
     /*! Traits used for all useful types and values related to the element type. */
     typedef cmnTypeTraits<value_type> TypeTraits;
@@ -73,7 +74,13 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
         this->Assign(other);
     }
 
-    explicit inline vctMatrixRotation3(const BaseType & other):
+    inline vctMatrixRotation3(const BaseType & other):
+        BaseType()
+    {
+        this->Assign(other);
+    }
+
+    inline vctMatrixRotation3(const ConstBaseType & other):
         BaseType()
     {
         this->Assign(other);

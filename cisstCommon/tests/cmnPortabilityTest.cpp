@@ -60,7 +60,9 @@ void cmnPortabilityTest::TestWithCMake(void) {
                                           "cl", /* CISST_DOTNET2005 */
                                           "cl", /* CISST_DOTNET2008 */
                                           "cl", /* CISST_DOTNET2010 */
-                                          "clang++"};
+                                          "cl", /* CISST_DOTNET2012 */ 
+                                          "cl", /* CISST_DOTNET2013 */
+                                          "clang++" };
 
     CPPUNIT_ASSERT_EQUAL(cmnOperatingSystemsStrings[CISST_OS], std::string(CISST_CMAKE_SYSTEM_NAME));
     if (CISST_COMPILER == CISST_GCC) {
@@ -80,7 +82,8 @@ void cmnPortabilityTest::TestWithCMake(void) {
         CPPUNIT_ASSERT((std::string(CISST_CMAKE_CXX_COMPILER) == std::string("c++"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang++")));
     } else {
-        CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_CXX_COMPILER), CMakeCompilerStrings[CISST_COMPILER]);
+        CPPUNIT_ASSERT((std::string(CISST_CMAKE_CXX_COMPILER) == CMakeCompilerStrings[CISST_COMPILER])
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == CMakeCompilerStrings[CISST_COMPILER] + ".exe"));
     }
 
     // to avoid the confusion with c++ and g++

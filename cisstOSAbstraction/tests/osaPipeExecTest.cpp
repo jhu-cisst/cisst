@@ -5,7 +5,7 @@
   Author(s): Martin Kelly, Anton Deguet
   Created on: 2010-09-23
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnAssert.h>
+#include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
 
@@ -30,9 +31,14 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
 void osaPipeExecTest::TestPipe(void)
 {
     osaPipeExec pipe1, pipe2;
-    std::string command =
-        std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES
-        + std::string("/cisstOSAbstractionTestsPipeExecUtility");
+
+    /* Build search path to find the test utility */
+    cmnPath path;
+    path.AddFromEnvironment("PATH", cmnPath::TAIL);
+    path.Add(std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES, cmnPath::HEAD);
+    std::string command = path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX, cmnPath::EXECUTE);
+    bool utilityFound = (command != "");
+    CPPUNIT_ASSERT(utilityFound);
 
     /* Test opening twice, make sure it fails the second time */
     bool opened = pipe1.Open(command, "rw");
