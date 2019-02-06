@@ -107,5 +107,7 @@ cisst_add_library (
 add_dependencies (cisstCommon cisstRevision cisstBuildType)
 
 if (CISST_HAS_JSON)
-  add_dependencies (cisstCommon cisstJSONExternal)
-endif (CISST_HAS_JSON)
+  if (NOT JSON_USE_SYSTEM_VERSION)
+    add_dependencies (cisstCommon cisstJSONExternal)
+  endif ()
+endif ()

@@ -5,7 +5,7 @@
   Author(s):  Zihan Chen, Anton Deguet
   Created on: 2013-03-20
 
-  (C) Copyright 2013-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,13 +48,15 @@ public:
     void SetValue(const vctMatRot3 & rotation);
 
 protected:
+    void ResetOrientation(void);
     void mouseMoveEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
+    void keyPressEvent(QKeyEvent * event);
 
     void initializeGL(void);
     void paintGL(void);
     void resizeGL(int width, int height);
-    
+
     vct3 mRotation;
     vctQuatRot3 mCurrentOrientation, mDeltaOrientation;
     vctInt2 mStartMousePosition;
@@ -91,7 +93,7 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
       rotation.  Options are rotation matrix, axis and angle, quaternion
       (displayed in order x, y, z, w), Euler angles (ZYZ or ZYX, in degrees),
       and 3D OpenGL based using red, green and blue axes.
-      Please note that the display mode UNDEFINED_WIDGET will be silently ignored. */ 
+      Please note that the display mode UNDEFINED_WIDGET will be silently ignored. */
     void SetDisplayMode(const DisplayModeType displayMode);
 
     inline void SetPrismaticRevoluteFactors(const double & CMN_UNUSED(prismatic), const double & revolute) {
@@ -114,7 +116,7 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
       when the widget used to display the rotation is changed using
       SetDisplayMode. */
     void UpdateCurrentWidget(void);
-    
+
     /*! Internal representation for the rotation to display. */
     vctMatRot3 Rotation;
 

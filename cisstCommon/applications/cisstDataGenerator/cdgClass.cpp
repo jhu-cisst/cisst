@@ -734,7 +734,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         for (index = 0; index < Members.size(); index++) {
             if (Members[index]->GetFieldValue("is-data") == "true") {
                 type = Members[index]->GetFieldValue("type");
-                outputStream << "    description__cdg << \"  " << Members[index]->GetFieldValue("description")
+                outputStream << "    description__cdg << \"  " << Members[index]->GetFieldValue("name")
                              << ":\" << cmnData<" << type << " >::HumanReadable(this->"
                              << Members[index]->MemberName << ");" << std::endl;
             }

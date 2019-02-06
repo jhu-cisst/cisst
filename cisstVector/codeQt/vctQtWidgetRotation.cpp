@@ -5,7 +5,7 @@
   Author(s):  Zihan Chen, Anton Deguet
   Created on: 2013-03-20
 
-  (C) Copyright 2013-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -51,16 +51,23 @@ http://www.cisst.org/cisst/license.txt.
 vctQtWidgetRotationOpenGL::vctQtWidgetRotationOpenGL(void)
 {
     mRotation.SetAll(0.0);
+    setFocusPolicy(Qt::StrongFocus);
+    setToolTip(QString("'z' to reset orientation"));
     setMinimumHeight(100);
     setMinimumWidth(100);
     setContentsMargins(0, 0, 0, 0);
+    ResetOrientation();
+}
 
+void vctQtWidgetRotationOpenGL::ResetOrientation(void)
+{
     // start with default Z up, x toward left, y towards right
     mCurrentOrientation =
         vctQuatRot3(vctRodRot3(0.1 * cmnPI, 0.0, 0.0)) *
         vctQuatRot3(vctRodRot3(0.0, -0.75 * cmnPI, 0.0)) *
         vctQuatRot3(vctRodRot3(-0.5 * cmnPI, 0.0, 0.0));
     mStartMousePosition = 0;
+    mDeltaOrientation = vctQuatRot3::Identity();
 }
 
 void vctQtWidgetRotationOpenGL::SetValue(const vctMatRot3 & rot)
@@ -91,13 +98,23 @@ void vctQtWidgetRotationOpenGL::mouseMoveEvent(QMouseEvent * event)
     }
 }
 
-
 void vctQtWidgetRotationOpenGL::mouseReleaseEvent(QMouseEvent *)
 {
     mStartMousePosition = 0;
     // save current rotation
     mCurrentOrientation = mDeltaOrientation * mCurrentOrientation;
     mDeltaOrientation = vctQuatRot3::Identity();
+}
+
+void vctQtWidgetRotationOpenGL::keyPressEvent(QKeyEvent * event)
+{
+    switch (event->key()) {
+    case Qt::Key_Z:
+        ResetOrientation();
+        break;
+    default:
+        break;
+    }
 }
 
 void vctQtWidgetRotationOpenGL::initializeGL(void)

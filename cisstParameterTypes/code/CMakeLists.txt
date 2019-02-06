@@ -25,6 +25,7 @@ cisst_data_generator (cisstParameterTypes
                       ../prmStateJoint.cdg
                       ../prmInputData.cdg
                       ../prmKeyValue.cdg
+                      ../prmOperatingState.cdg
                       )
 
 # to compile cisst generated code, need to find header file

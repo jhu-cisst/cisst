@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-10-20
 
-  (C) Copyright 2010-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -104,6 +104,9 @@ CMN_IMPLEMENT_SERVICES(prmStateJoint);
 
 #include <cisstParameterTypes/prmInputData.h>
 CMN_IMPLEMENT_SERVICES(prmInputData);
+
+#include <cisstParameterTypes/prmOperatingState.h>
+CMN_IMPLEMENT_SERVICES(prmOperatingState);
 
 #if CISST_HAS_JSON
 CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(prmBlocking, int);

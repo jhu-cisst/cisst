@@ -6,8 +6,7 @@
   Author(s):  Alvin Liem, Anton Deguet
   Created on: 2002-08-01
 
-  (C) Copyright 2002-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2002-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -24,7 +23,6 @@
 
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnClassServices.h>
-
 
 cmnClassRegister* cmnClassRegister::Instance(void) {
     // create a static variable
@@ -47,8 +45,10 @@ const std::string * cmnClassRegister::RegisterInstance(cmnClassServicesBase* cla
         EntryType newEntry(className, classServicesPointer);
         insertionResult = ServicesContainer.insert(newEntry);
         if (insertionResult.second) {
-            CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: Register: class \"" << className
-                                 << "\" has been registered with Log LoD \"" << cmnLogMaskToString(classServicesPointer->GetLoD()) << "\"" << std::endl;
+            if (cmnLogger::IsCreated()) {
+                CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: Register: class \"" << className
+                                     << "\" has been registered with Log LoD \"" << cmnLogMaskToString(classServicesPointer->GetLoD()) << "\"" << std::endl;
+            }
             return &((*insertionResult.first).first);
         } else {
             CMN_LOG_INIT_ERROR << "Class cmnClassRegister: Register: class \"" << className
@@ -150,11 +150,6 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::st
     iterator = ServicesContainer.find(className);
     if (iterator != end) {
         result = iterator->second;
-        CMN_LOG_RUN_DEBUG << "Class cmnClassRegister: FindClassServices: found class info for \""
-                          << className << "\"" << std::endl;
-    } else {
-        CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServices: couldn't find class info for \""
-                            << className << "\"" << std::endl;
     }
     return result;
 }
@@ -169,8 +164,6 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::ty
     while ((iterator != end) && (result == NULL)) {
         if (*((iterator->second)->TypeInfoPointer()) == typeInfo) {
             result = iterator->second;
-            CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServicesInstance: found class info for the given type_info"
-                                << std::endl;
         }
         iterator++;
     }
