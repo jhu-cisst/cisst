@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -824,9 +824,6 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // torques
   vctDynamicVector<double> tau(links.size(), 0.0);
 
-  // The axis pointing "up"
-  // vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
-
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
   // coordinate frame
@@ -893,8 +890,10 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
                          const vctDynamicVector<double>& qd,
                          const vctDynamicVector<double>& qdd,
                          const vctFixedSizeVector<double,6>& fext,
-                         double g ) const {
+                         double g,
+                         const vctFixedSizeVector<double, 3>& z0) const {
 
+  std::cerr << ".";
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
   vctFixedSizeVector<double,3> v    (0.0); // linear velocity
@@ -909,9 +908,6 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
                                                vctFixedSizeVector<double,3>(0));
   // torques
   vctDynamicVector<double> tau(links.size(), 0.0);
-
-  // The axis pointing "up"
-  vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
 
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
@@ -961,10 +957,10 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
       A = links[i+1].Orientation( q[i+1] );    //
       ps = links[i+1].PStar();
     }
-    
+
     n = A*n + (s%F[i]) + (ps%(A*f)) + N[i];    // moment externed on i by i-1
     f = A*f + F[i];                            // force exterted on i by i-1
-    
+
     if (links[i].GetType() == robJoint::HINGE )
       tau[i] = n*(z0);                       //
     if( links[i].GetType() == robJoint::SLIDER )
@@ -994,6 +990,27 @@ robManipulator::CCG( const vctDynamicVector<double>& q,
               vctFixedSizeVector<double,6>(0.0), // no external forces
               g,
               z0);
+}
+
+vctDynamicVector<double>
+robManipulator::CCG_MDH( const vctDynamicVector<double>& q,
+                         const vctDynamicVector<double>& qd,
+                         double g,
+                         const vctFixedSizeVector<double,3>& z0) const
+{
+  if( q.size() != qd.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                      << ": Size of q and qd do not match."
+                      << std::endl;
+    return vctDynamicVector<double>();
+  }
+
+  return RNE_MDH( q,           // call Newton-Euler with only the joints positions
+                  qd,          // and the joints velocities
+                  vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
+                  vctFixedSizeVector<double,6>(0.0), // no external forces
+                  g,
+                  z0);
 }
 
 vctFixedSizeVector<double,6>

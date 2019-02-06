@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -122,12 +122,13 @@ class CISST_EXPORT robManipulator{
 
   vctDynamicVector<double>
   RNE_MDH( const vctDynamicVector<double>& q,
-       const vctDynamicVector<double>& qd,
-       const vctDynamicVector<double>& qdd,
-       const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
-       double g = 9.81 ) const;
+           const vctDynamicVector<double>& qd,
+           const vctDynamicVector<double>& qdd,
+           const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
+           double g = 9.81,
+           const vctFixedSizeVector<double,3>& z0 = vctFixedSizeVector<double, 3>(0.0, 0.0, 1.0)) const;
 
-  
+
   //! Coriolis/centrifugal and gravity
   /**
      Evaluate the coriolis/centrifugal and gravitational forces acting on the
@@ -141,6 +142,12 @@ class CISST_EXPORT robManipulator{
        const vctDynamicVector<double>& qd,
        double g = 9.81,
        const vctFixedSizeVector<double,3>& z0 = vctFixedSizeVector<double, 3>(0.0, 0.0, 1.0)) const;
+
+  vctDynamicVector<double>
+  CCG_MDH( const vctDynamicVector<double>& q,
+           const vctDynamicVector<double>& qd,
+           double g = 9.81,
+           const vctFixedSizeVector<double,3>& z0 = vctFixedSizeVector<double, 3>(0.0, 0.0, 1.0)) const;
 
   //! End-effector accelerations
   /**
