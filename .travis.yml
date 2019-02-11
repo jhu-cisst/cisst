@@ -1,14 +1,17 @@
  language: cpp
 
- os:
-  - linux
-    dist: trusty
-  - linux
-    dist: xenial
- 
- compiler:
-  - gcc
-  - clang
+ matrix:
+  include:
+    - os: linux
+      dist: trusty
+      compiler:
+       - gcc
+       - clang
+    - os: linux
+      dist: xenial
+      compiler:
+       - gcc
+       - clang
 
  before_install:
   - sudo apt-get update -qq
