@@ -1,5 +1,13 @@
  language: cpp
 
+ matrix:
+  include:
+    - os: linux
+      dist: trusty
+    - os: linux
+      dist: xenial
+      python: 2.7
+ 
  compiler:
   - gcc
   - clang
