@@ -6,12 +6,14 @@
       dist: trusty
       compiler:
        - gcc
-       - clang
     - os: linux
       dist: xenial
       compiler:
-       - gcc
-       - clang
+        -clang
+    - os: linux
+      dist: xenial
+      compiler:
+        -gcc
 
  before_install:
   - sudo apt-get update -qq
