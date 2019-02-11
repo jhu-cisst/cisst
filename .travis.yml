@@ -9,11 +9,11 @@
     - os: linux
       dist: xenial
       compiler:
-        -clang
+        - clang
     - os: linux
       dist: xenial
       compiler:
-        -gcc
+        - gcc
 
  before_install:
   - sudo apt-get update -qq
