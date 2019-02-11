@@ -4,16 +4,13 @@
   include:
     - os: linux
       dist: trusty
-      compiler:
-       - gcc
+      compiler: gcc
     - os: linux
       dist: xenial
-      compiler:
-        - clang
+      compiler: clang
     - os: linux
       dist: xenial
-      compiler:
-        - gcc
+      compiler: gcc
 
  before_install:
   - sudo apt-get update -qq
