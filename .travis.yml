@@ -6,7 +6,6 @@
       dist: trusty
     - os: linux
       dist: xenial
-      python: 2.7
  
  compiler:
   - gcc
