@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -41,6 +41,7 @@ protected:
         mtsFunctionWriteReturn Create;
         mtsFunctionWrite Configure;
         mtsFunctionWrite Connect;
+        mtsFunctionWriteReturn ConnectNew;   // used for CISST_MTS_NEW
         mtsFunctionWrite Disconnect;
         mtsFunctionWrite Start;
         mtsFunctionWrite Stop;

@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -97,8 +97,13 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
+#if CISST_MTS_NEW
+    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+#else
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+#endif
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart,
@@ -176,8 +181,13 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
                           newFunctionSet->ComponentConfigure);
+#if CISST_MTS_NEW
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
+                          newFunctionSet->ComponentConnectNew);
+#else
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           newFunctionSet->ComponentConnect);
+#endif
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                           newFunctionSet->ComponentDisconnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
@@ -317,7 +327,6 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
         // result = false;
         return;
     }
-
     mtsExecutionResult executionResult =  functionSet->ComponentConnect(connectionDescription /*, result*/);
     if (!executionResult.IsOK()) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"ComponentConnect\": " << connectionDescription << std::endl
@@ -326,6 +335,29 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
     }
 }
 
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result)
+{
+    // We don't check argument validity with the GCM at this stage and rely on
+    // the current normal connection procedure (GCM allows connection at the
+    // request of LCM) because the GCM guarantees that arguments are valid.
+    // The Connect request is then passed to the manager component client which
+    // calls local component manager's Connect() method.
+
+    // Get a set of function objects that are bound to the InterfaceLCM's provided
+    // interface.
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(connectionDescription.Client.ProcessName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << connectionDescription << std::endl;
+        result = false;
+        return;
+    }
+    mtsExecutionResult executionResult =  functionSet->ComponentConnectNew(connectionDescription, result);
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"ComponentConnect\": " << connectionDescription << std::endl
+                                << " error \"" << executionResult << "\"" << std::endl;
+        result = false;
+    }
+}
 
 // MJ: Another method that does the same thing but accepts a single parameter
 // as connection id should be added.

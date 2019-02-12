@@ -469,8 +469,13 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
+#if CISST_MTS_NEW
+    provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnectNew,
+                              this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+#else
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+#endif
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart,
@@ -537,8 +542,13 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
 #else
     mtsInterfaceProvided *interfaceProvidedToSelf = provided->GetEndUserInterface("Self");
     if (interfaceProvidedToSelf) {
+#if CISST_MTS_NEW
+        GeneralInterface.ComponentConnectNew.Bind(interfaceProvidedToSelf->GetCommandWriteReturn(
+                                                  mtsManagerComponentBase::CommandNames::ComponentConnect));
+#else
         GeneralInterface.ComponentConnect.Bind(interfaceProvidedToSelf->GetCommandWrite(
                                                mtsManagerComponentBase::CommandNames::ComponentConnect));
+#endif
     }
 #endif
 
@@ -559,8 +569,13 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
                           InterfaceLCMFunction.ComponentConfigure);
+#if CISST_MTS_NEW
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
+                          InterfaceLCMFunction.ComponentConnectNew);
+#else
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           InterfaceLCMFunction.ComponentConnect);
+#endif
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                           InterfaceLCMFunction.ComponentDisconnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
@@ -621,8 +636,13 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure,
                              this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
+#if CISST_MTS_NEW
+    provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnectNew,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+#else
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+#endif
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect,
                              this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentStart,
@@ -733,8 +753,22 @@ bool mtsManagerComponentClient::Connect(const std::string & clientComponentName,
                                                    processName, serverComponentName, serverInterfaceProvidedName);
     bool result = true;
     if (!IsRunning()) {
+#if CISST_MTS_NEW
+        InterfaceComponentCommands_ComponentConnectNew(connectionDescription, result);
+#else
         InterfaceComponentCommands_ComponentConnect(connectionDescription /*, result*/);
+#endif
     } else {
+#if CISST_MTS_NEW
+        if (!GeneralInterface.ComponentConnectNew.IsValid()) {
+            CMN_LOG_CLASS_INIT_WARNING << "Connect: GeneralInterface not yet valid, initializing." << std::endl;
+            AddInterfaceComponent();
+            if (!GeneralInterface.ComponentConnectNew.IsValid()) {
+                CMN_LOG_CLASS_INIT_ERROR << "Connect: Failed to initialize ComponentConnectNew." << std::endl;
+                return false;
+            }
+        }
+#else
         if (!GeneralInterface.ComponentConnect.IsValid()) {
             CMN_LOG_CLASS_INIT_WARNING << "Connect: GeneralInterface not yet valid, initializing." << std::endl;
             AddInterfaceComponent();
@@ -743,11 +777,16 @@ bool mtsManagerComponentClient::Connect(const std::string & clientComponentName,
                 return false;
             }
         }
+#endif
         // note that we have a mutex around a blocking command, ...
         GeneralInterface.Mutex.Lock();
         CMN_LOG_CLASS_INIT_DEBUG << "Connect: Calling ComponentConnect for " << connectionDescription << std::endl;
         //if (!byPassInterface) {
+#if CISST_MTS_NEW
+        GeneralInterface.ComponentConnectNew(connectionDescription, result);
+#else
         GeneralInterface.ComponentConnect(connectionDescription /*, result*/);
+#endif
         //} else {
         //std::cerr << "------------------------- bypass for " << connectionDescription << std::endl;
         //InterfaceComponentCommands_ComponentConnect(connectionDescription, result);
@@ -807,6 +846,25 @@ void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect(cons
     mtsExecutionResult executionResult = InterfaceLCMFunction.ComponentConnect(connectionDescription /*, result*/);
     if (!executionResult.IsOK()) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentConnect: failed to execute \"Component Component\" command ("
+                                << executionResult << ")" << std::endl;
+    }
+}
+
+
+void mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result)
+{
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    const std::string nameOfThisLCM = LCM->GetProcessName();
+    if (LCM->GetConfiguration() == mtsManagerLocal::LCM_CONFIG_STANDALONE ||
+        (nameOfThisLCM == connectionDescription.Client.ProcessName &&
+         nameOfThisLCM == connectionDescription.Server.ProcessName))
+    {
+        InterfaceLCMCommands_ComponentConnectNew(connectionDescription, result);
+        return;
+    }
+    mtsExecutionResult executionResult = InterfaceLCMFunction.ComponentConnectNew(connectionDescription, result);
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_ComponentConnectNew: failed to execute \"Component Component\" command ("
                                 << executionResult << ")" << std::endl;
     }
 }
@@ -1176,6 +1234,57 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
     // result = true;
 }
 
+void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result)
+{
+    // Try to connect interfaces as requested
+    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+
+    // this is a remote connection
+    if (connectionDescription.Client.ProcessName != connectionDescription.Server.ProcessName) {
+#if CISST_MTS_HAS_ICE
+        // PK TODO: Need to fix this to be thread-safe
+        if (!LCM->Connect(connectionDescription.Client.ProcessName,
+                          connectionDescription.Client.ComponentName,
+                          connectionDescription.Client.InterfaceName,
+                          connectionDescription.Server.ProcessName,
+                          connectionDescription.Server.ComponentName,
+                          connectionDescription.Server.InterfaceName)) {
+            CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnectNew: failed to execute \"Component Connect\": "
+                                    << connectionDescription << std::endl;
+            result = false;
+        } else {
+            CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnectNew: successfully connected: " << connectionDescription << std::endl;
+            result = true;
+        }
+#else
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnectNew: Cannot connect to external process without CISST_MTS_HAS_ICE, connection = "
+                                << connectionDescription << std::endl;
+        result = false;
+#endif
+        return;
+    }
+
+    // local connection
+    int connectionId = LCM->ConnectSetup(connectionDescription.Client.ComponentName, connectionDescription.Client.InterfaceName,
+                                         connectionDescription.Server.ComponentName, connectionDescription.Server.InterfaceName);
+    if (connectionId < 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnectNew: failed to execute \"Connect Setup\": "
+                                << connectionDescription << std::endl;
+        result = false;
+        return;
+    }
+
+    ConnectLocally(connectionDescription.Client.ComponentName, connectionDescription.Client.InterfaceName,
+                   connectionDescription.Server.ComponentName, connectionDescription.Server.InterfaceName,
+                   connectionDescription.Client.ProcessName);
+
+    LCM->ConnectNotify(connectionId,
+                       connectionDescription.Client.ComponentName, connectionDescription.Client.InterfaceName,
+                       connectionDescription.Server.ComponentName, connectionDescription.Server.InterfaceName);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnectNew: successfully connected: " << connectionDescription << std::endl;
+    result = true;
+}
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
 {

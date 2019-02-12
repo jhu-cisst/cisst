@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -239,9 +239,13 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
     mtsDescriptionConnection conn(connectionDescription);
     conn.ConnectionID = InvalidConnectionID;
 
+#if CISST_MTS_NEW
     // call blocking command
-    // bool result;
+    bool result;
+    mtsExecutionResult executionResult = ServiceComponentManagement.ConnectNew(conn, result);
+#else
     mtsExecutionResult executionResult = ServiceComponentManagement.Connect(conn /*, result*/);
+#endif
 
     // check is command was sent properly
     if (!executionResult.IsOK()) {
@@ -249,12 +253,12 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
                                 << executionResult << ")" << std::endl;
         return false;
     }
-    /*
+#if CISST_MTS_NEW
     if (result == false) {
         CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to connect: " << connectionDescription << std::endl;
         return false;
     }
-    */
+#endif
     CMN_LOG_CLASS_RUN_VERBOSE << "Connect: successfully connected: " << connectionDescription << std::endl;
     return true;
 }
