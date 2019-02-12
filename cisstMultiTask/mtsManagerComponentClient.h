@@ -78,6 +78,7 @@ protected:
         mtsFunctionWrite ComponentConnect;
         mtsFunctionWriteReturn ComponentConnectNew;  // for CISST_MTS_NEW
         mtsFunctionWrite ComponentDisconnect;
+        mtsFunctionWriteReturn ComponentDisconnectNew;  // for CISST_MTS_NEW
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
@@ -167,6 +168,7 @@ protected:
     void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
     void InterfaceLCMCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result);
     void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
+    void InterfaceLCMCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
@@ -192,6 +194,7 @@ protected:
     void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
     void InterfaceComponentCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result);
     void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
+    void InterfaceComponentCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentResume(const mtsComponentStatusControl & arg);

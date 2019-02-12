@@ -100,12 +100,14 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
 #if CISST_MTS_NEW
     provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew,
                                     this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnectNew,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
 #else
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
-#endif
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
+#endif
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart,
                               this, mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop,
@@ -184,12 +186,14 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
 #if CISST_MTS_NEW
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           newFunctionSet->ComponentConnectNew);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
+                          newFunctionSet->ComponentDisconnectNew);
 #else
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           newFunctionSet->ComponentConnect);
-#endif
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                           newFunctionSet->ComponentDisconnect);
+#endif
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                           newFunctionSet->ComponentStart);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
@@ -411,6 +415,17 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const m
     //functionSet->ComponentDisconnect.ExecuteBlocking(arg);
     functionSet->ComponentDisconnect(arg);
 #endif
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result)
+{
+    // PK: the GCM Disconnect method queue the disconnect request, so we cannot really know if it
+    //     has succeeded.
+    result = GCM->Disconnect(arg);
+    if (!result) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnectNew: failed to execute \"Component Disconnect\" for: " << arg << std::endl;
+        return;
+    }
 }
 
 void mtsManagerComponentServer::ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg)

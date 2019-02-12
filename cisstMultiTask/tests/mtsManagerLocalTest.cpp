@@ -6,8 +6,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -107,134 +106,120 @@ void mtsManagerLocalTest::TestGetInstance(void)
 
 void mtsManagerLocalTest::TestAddComponent(void)
 {
-    mtsManagerLocal localManager1;
-
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager1.CreateManagerComponents());
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     // Test with mtsComponent type components
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
 
     // Invalid argument test
-    CPPUNIT_ASSERT(!localManager1.AddComponent(NULL));
+    CPPUNIT_ASSERT(!localManager->AddComponent(NULL));
 
     // Check with the global component manager.
     // Should fail if a component has already been registered before
-    CPPUNIT_ASSERT(localManager1.ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, device2->GetName()));
-    CPPUNIT_ASSERT(!localManager1.AddComponent(device2));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, device2->GetName()));
+    CPPUNIT_ASSERT(!localManager->AddComponent(device2));
 
     // Should succeed if a component is new
-    CPPUNIT_ASSERT(localManager1.ManagerGlobal->RemoveComponent(DEFAULT_PROCESS_NAME, device2->GetName()));
-    CPPUNIT_ASSERT(localManager1.AddComponent(device2));
-    CPPUNIT_ASSERT(localManager1.ComponentMap.FindItem(device2->GetName()));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->RemoveComponent(DEFAULT_PROCESS_NAME, device2->GetName()));
+    CPPUNIT_ASSERT(localManager->AddComponent(device2));
+    CPPUNIT_ASSERT(localManager->ComponentMap.FindItem(device2->GetName()));
 
     // Check if all the existing required interfaces and provided interfaces are
     // added to the global component manager.
-    CPPUNIT_ASSERT(localManager1.ManagerGlobal->FindInterfaceRequiredOrInput(DEFAULT_PROCESS_NAME, device2->GetName(), "r1"));
-    CPPUNIT_ASSERT(localManager1.ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p1"));
-    CPPUNIT_ASSERT(localManager1.ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceRequiredOrInput(DEFAULT_PROCESS_NAME, device2->GetName(), "r1"));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p1"));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p2"));
 
-    mtsManagerLocal localManager2;
-
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager2.CreateManagerComponents());
+    // Not really necessary, but start with a clean slate.
+    localManager->RemoveAllUserComponents();
 
     // Test with mtsTask type components
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
 
     // Invalid argument test
-    CPPUNIT_ASSERT(!localManager2.AddComponent(NULL));
+    CPPUNIT_ASSERT(!localManager->AddComponent(NULL));
 
     // Check with the global component manager.
     // Should fail if a component to be added has already been registered before
-    CPPUNIT_ASSERT(localManager2.ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, continuous1->GetName()));
-    CPPUNIT_ASSERT(!localManager2.AddComponent(continuous1));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, continuous1->GetName()));
+    CPPUNIT_ASSERT(!localManager->AddComponent(continuous1));
 
     // Should succeed if a component is new
-    CPPUNIT_ASSERT(localManager2.ManagerGlobal->RemoveComponent(DEFAULT_PROCESS_NAME, continuous1->GetName()));
-    CPPUNIT_ASSERT(localManager2.AddComponent(continuous1));
-    CPPUNIT_ASSERT(localManager2.ComponentMap.FindItem(continuous1->GetName()));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->RemoveComponent(DEFAULT_PROCESS_NAME, continuous1->GetName()));
+    CPPUNIT_ASSERT(localManager->AddComponent(continuous1));
+    CPPUNIT_ASSERT(localManager->ComponentMap.FindItem(continuous1->GetName()));
 
     // Check if all the existing required interfaces and provided interfaces are
     // added to the global component manager.
-    CPPUNIT_ASSERT(localManager2.ManagerGlobal->FindInterfaceRequiredOrInput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "r1"));
-    CPPUNIT_ASSERT(localManager2.ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p1"));
-    CPPUNIT_ASSERT(localManager2.ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceRequiredOrInput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "r1"));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p1"));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p2"));
 }
 
 void mtsManagerLocalTest::TestFindComponent(void)
 {
-    mtsManagerLocal localManager1;
-
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager1.CreateManagerComponents());
+    mtsManagerLocal *localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     const std::string componentName = device1->GetName();
 
-    CPPUNIT_ASSERT(!localManager1.FindComponent(componentName));
-    CPPUNIT_ASSERT(localManager1.AddComponent(device1));
-    CPPUNIT_ASSERT(localManager1.FindComponent(componentName));
+    CPPUNIT_ASSERT(!localManager->FindComponent(componentName));
+    CPPUNIT_ASSERT(localManager->AddComponent(device1));
+    CPPUNIT_ASSERT(localManager->FindComponent(componentName));
 
-    CPPUNIT_ASSERT(localManager1.RemoveComponent(componentName));
-    CPPUNIT_ASSERT(!localManager1.FindComponent(componentName));
+    CPPUNIT_ASSERT(localManager->RemoveComponent(componentName));
+    CPPUNIT_ASSERT(!localManager->FindComponent(componentName));
 }
 
 void mtsManagerLocalTest::TestRemoveComponent(void)
 {
-    // Test with mtsComponent type components
-    mtsManagerLocal localManager1;
-
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager1.CreateManagerComponents());
+    mtsManagerLocal *localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     const std::string componentName1 = device1->GetName();
 
     // Invalid argument test
-    CPPUNIT_ASSERT(!localManager1.RemoveComponent(NULL));
-    CPPUNIT_ASSERT(!localManager1.RemoveComponent("dummy"));
+    CPPUNIT_ASSERT(!localManager->RemoveComponent(NULL));
+    CPPUNIT_ASSERT(!localManager->RemoveComponent("dummy"));
 
-    CPPUNIT_ASSERT(localManager1.AddComponent(device1));
-    CPPUNIT_ASSERT(localManager1.FindComponent(componentName1));
-    CPPUNIT_ASSERT(localManager1.RemoveComponent(componentName1));
-    CPPUNIT_ASSERT(!localManager1.FindComponent(componentName1));
+    CPPUNIT_ASSERT(localManager->AddComponent(device1));
+    CPPUNIT_ASSERT(localManager->FindComponent(componentName1));
+    CPPUNIT_ASSERT(localManager->RemoveComponent(componentName1));
+    CPPUNIT_ASSERT(!localManager->FindComponent(componentName1));
 
     device1 = new mtsTestDevice1<mtsInt>;
-    CPPUNIT_ASSERT(localManager1.AddComponent(device1));
-    CPPUNIT_ASSERT(localManager1.FindComponent(componentName1));
-    CPPUNIT_ASSERT(localManager1.RemoveComponent(device1));
-    CPPUNIT_ASSERT(!localManager1.FindComponent(componentName1));
+    CPPUNIT_ASSERT(localManager->AddComponent(device1));
+    CPPUNIT_ASSERT(localManager->FindComponent(componentName1));
+    CPPUNIT_ASSERT(localManager->RemoveComponent(device1));
+    CPPUNIT_ASSERT(!localManager->FindComponent(componentName1));
 
-    // Test with mtsComponent type components
-    mtsManagerLocal localManager2;
-
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager2.CreateManagerComponents());
+    // Not really necessary, but start with a clean slate.
+    localManager->RemoveAllUserComponents();
 
     mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
     const std::string componentName2 = periodic1->GetName();
 
-    CPPUNIT_ASSERT(localManager2.AddComponent(periodic1));
-    CPPUNIT_ASSERT(localManager2.FindComponent(componentName2));
-    CPPUNIT_ASSERT(localManager2.RemoveComponent(componentName2));
-    CPPUNIT_ASSERT(!localManager2.FindComponent(componentName2));
+    CPPUNIT_ASSERT(localManager->AddComponent(periodic1));
+    CPPUNIT_ASSERT(localManager->FindComponent(componentName2));
+    CPPUNIT_ASSERT(localManager->RemoveComponent(componentName2));
+    CPPUNIT_ASSERT(!localManager->FindComponent(componentName2));
 
     periodic1 = new mtsTestPeriodic1<mtsInt>;
-    CPPUNIT_ASSERT(localManager2.AddComponent(periodic1));
-    CPPUNIT_ASSERT(localManager2.FindComponent(componentName2));
-    CPPUNIT_ASSERT(localManager2.RemoveComponent(periodic1));
-    CPPUNIT_ASSERT(!localManager2.FindComponent(componentName2));
+    CPPUNIT_ASSERT(localManager->AddComponent(periodic1));
+    CPPUNIT_ASSERT(localManager->FindComponent(componentName2));
+    CPPUNIT_ASSERT(localManager->RemoveComponent(periodic1));
+    CPPUNIT_ASSERT(!localManager->FindComponent(componentName2));
 }
 
 void mtsManagerLocalTest::TestRegisterInterfaces(void)
 {
-    mtsManagerLocal localManager;
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager.CreateManagerComponents());
-
-    mtsManagerGlobal * globalManager = dynamic_cast<mtsManagerGlobal *>(localManager.ManagerGlobal);
+    mtsManagerGlobal * globalManager = dynamic_cast<mtsManagerGlobal *>(localManager->ManagerGlobal);
     CPPUNIT_ASSERT(globalManager);
 
     mtsTestDevice2<mtsInt> * component = new mtsTestDevice2<mtsInt>;
@@ -245,10 +230,10 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
     CPPUNIT_ASSERT(!globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p1"));
     CPPUNIT_ASSERT(!globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p2"));
     // This should fail because no component is registered yet
-    CPPUNIT_ASSERT(!localManager.RegisterInterfaces(component));
+    CPPUNIT_ASSERT(!localManager->RegisterInterfaces(component));
 
     // Add the component. This includes registration of interfaces that have been added so far.
-    CPPUNIT_ASSERT(localManager.AddComponent(component));
+    CPPUNIT_ASSERT(localManager->AddComponent(component));
 
     // Check updated values of GCM
     CPPUNIT_ASSERT(globalManager->FindInterfaceRequiredOrInput("LCM", componentName, "r1"));
@@ -266,7 +251,7 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
     CPPUNIT_ASSERT(!globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, providedInterface->GetName()));
 
     // Register the new interfaces
-    CPPUNIT_ASSERT(localManager.RegisterInterfaces(component));
+    CPPUNIT_ASSERT(localManager->RegisterInterfaces(component));
 
     // Check updated values of GCM
     CPPUNIT_ASSERT(globalManager->FindInterfaceRequiredOrInput("LCM", componentName, requiredInterface->GetName()));
@@ -276,47 +261,43 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
 
 void mtsManagerLocalTest::TestGetComponent(void)
 {
-    mtsManagerLocal localManager;
-
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager.CreateManagerComponents());
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
     mtsTestDevice3<mtsInt> * device3 = new mtsTestDevice3<mtsInt>;
     mtsComponent * nullComponent = 0;
 
-    CPPUNIT_ASSERT_EQUAL(nullComponent, localManager.GetComponent(device1->GetName()));
-    CPPUNIT_ASSERT_EQUAL(nullComponent, localManager.GetComponent(device2->GetName()));
-    CPPUNIT_ASSERT_EQUAL(nullComponent, localManager.GetComponent(device3->GetName()));
+    CPPUNIT_ASSERT_EQUAL(nullComponent, localManager->GetComponent(device1->GetName()));
+    CPPUNIT_ASSERT_EQUAL(nullComponent, localManager->GetComponent(device2->GetName()));
+    CPPUNIT_ASSERT_EQUAL(nullComponent, localManager->GetComponent(device3->GetName()));
 
-    CPPUNIT_ASSERT(localManager.AddComponent(device1));
-    CPPUNIT_ASSERT(localManager.AddComponent(device2));
-    CPPUNIT_ASSERT(localManager.AddComponent(device3));
+    CPPUNIT_ASSERT(localManager->AddComponent(device1));
+    CPPUNIT_ASSERT(localManager->AddComponent(device2));
+    CPPUNIT_ASSERT(localManager->AddComponent(device3));
 
-    CPPUNIT_ASSERT(device1 == localManager.GetComponent(device1->GetName()));
-    CPPUNIT_ASSERT(device2 == localManager.GetComponent(device2->GetName()));
-    CPPUNIT_ASSERT(device3 == localManager.GetComponent(device3->GetName()));
+    CPPUNIT_ASSERT(device1 == localManager->GetComponent(device1->GetName()));
+    CPPUNIT_ASSERT(device2 == localManager->GetComponent(device2->GetName()));
+    CPPUNIT_ASSERT(device3 == localManager->GetComponent(device3->GetName()));
 }
 
 
 void mtsManagerLocalTest::TestGetNamesOfComponents(void)
 {
-    mtsManagerLocal localManager;
-
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager.CreateManagerComponents());
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
     mtsTestDevice3<mtsInt> * device3 = new mtsTestDevice3<mtsInt>;
 
-    CPPUNIT_ASSERT(localManager.AddComponent(device1));
-    CPPUNIT_ASSERT(localManager.AddComponent(device2));
-    CPPUNIT_ASSERT(localManager.AddComponent(device3));
+    CPPUNIT_ASSERT(localManager->AddComponent(device1));
+    CPPUNIT_ASSERT(localManager->AddComponent(device2));
+    CPPUNIT_ASSERT(localManager->AddComponent(device3));
 
     // return value
-    std::vector<std::string> namesOfComponents1 = localManager.GetNamesOfComponents();
+    std::vector<std::string> namesOfComponents1 = localManager->GetNamesOfComponents();
     bool found1 = false;
     bool found2 = false;
     bool found3 = false;
@@ -338,7 +319,7 @@ void mtsManagerLocalTest::TestGetNamesOfComponents(void)
 
     // using placeholder
     std::vector<std::string> namesOfComponents2;
-    localManager.GetNamesOfComponents(namesOfComponents2);
+    localManager->GetNamesOfComponents(namesOfComponents2);
     found1 = false;
     found2 = false;
     found3 = false;
@@ -370,52 +351,52 @@ void mtsManagerLocalTest::TestGetProcessName(void)
 void mtsManagerLocalTest::TestConnectDisconnect(void)
 {
     // Local connection test
-    mtsManagerLocal localManager;
-
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager.CreateManagerComponents());
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
     mtsTestFromCallback1<mtsInt> * fromCallback1 = new mtsTestFromCallback1<mtsInt>;
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
 
-    CPPUNIT_ASSERT(localManager.AddComponent(periodic1));
-    CPPUNIT_ASSERT(localManager.AddComponent(continuous1));
-    CPPUNIT_ASSERT(localManager.AddComponent(fromCallback1));
-    CPPUNIT_ASSERT(localManager.AddComponent(device2));
+    CPPUNIT_ASSERT(localManager->AddComponent(periodic1));
+    CPPUNIT_ASSERT(localManager->AddComponent(continuous1));
+    CPPUNIT_ASSERT(localManager->AddComponent(fromCallback1));
+    CPPUNIT_ASSERT(localManager->AddComponent(device2));
 
     // Establish connections between the three components of mtsTask type
-    CPPUNIT_ASSERT(localManager.Connect(periodic1->GetName(), "r1", continuous1->GetName(), "p1"));
-    CPPUNIT_ASSERT(localManager.Connect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
-    CPPUNIT_ASSERT(localManager.Connect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
-    CPPUNIT_ASSERT(localManager.Connect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->Connect(periodic1->GetName(), "r1", continuous1->GetName(), "p1"));
+    CPPUNIT_ASSERT(localManager->Connect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->Connect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->Connect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
 
     // Should fail: already established connections
-    CPPUNIT_ASSERT(!localManager.Connect(periodic1->GetName(), "r1", continuous1->GetName(), "p1"));
-    CPPUNIT_ASSERT(!localManager.Connect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
-    CPPUNIT_ASSERT(!localManager.Connect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
-    CPPUNIT_ASSERT(!localManager.Connect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(!localManager->Connect(periodic1->GetName(), "r1", continuous1->GetName(), "p1"));
+    CPPUNIT_ASSERT(!localManager->Connect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(!localManager->Connect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(!localManager->Connect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
 
     // Disconnect all current connections
-    CPPUNIT_ASSERT(localManager.Disconnect(periodic1->GetName(), "r1", continuous1->GetName(), "p1"));
-    CPPUNIT_ASSERT(localManager.Disconnect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
-    CPPUNIT_ASSERT(localManager.Disconnect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
-    CPPUNIT_ASSERT(localManager.Disconnect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->Disconnect(periodic1->GetName(), "r1", continuous1->GetName(), "p1"));
+    CPPUNIT_ASSERT(localManager->Disconnect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->Disconnect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->Disconnect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
+    CMN_LOG_RUN_ERROR << "FINISHING" << std::endl;
 
-    // Should success: new connections
-    CPPUNIT_ASSERT(localManager.Connect(periodic1->GetName(), "r1", continuous1->GetName(), "p1"));
-    CPPUNIT_ASSERT(localManager.Connect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
-    CPPUNIT_ASSERT(localManager.Connect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
-    CPPUNIT_ASSERT(localManager.Connect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
+    // PK HACK: Disconnect currently does not wait for completion, so we need a rather long wait
+    osaSleep(4.0);
+
+    // Should succeed: new connections
+    CPPUNIT_ASSERT(localManager->Connect(periodic1->GetName(), "r1", continuous1->GetName(), "p1"));
+    CPPUNIT_ASSERT(localManager->Connect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->Connect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->Connect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
 }
 
 void mtsManagerLocalTest::TestConnectLocally(void)
 {
-    mtsManagerLocal localManager;
-
-    // Call this explicitly since we bypass GetInstance for this test:
-    CPPUNIT_ASSERT(localManager.CreateManagerComponents());
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * client = new mtsTestDevice1<mtsInt>;
     mtsTestDevice2<mtsInt> * server = new mtsTestDevice2<mtsInt>;
@@ -423,19 +404,28 @@ void mtsManagerLocalTest::TestConnectLocally(void)
 #define FAIL    false
 #define SUCCESS true
     // test with invalid arguments
-    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.Connect("", "", "", ""));
+    CPPUNIT_ASSERT_EQUAL(FAIL, localManager->Connect("", "", "", ""));
 
-    CPPUNIT_ASSERT(localManager.AddComponent(client));
-    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.Connect(client->GetName(), "", "", ""));
+    CPPUNIT_ASSERT(localManager->AddComponent(client));
+    CPPUNIT_ASSERT_EQUAL(FAIL, localManager->Connect(client->GetName(), "", "", ""));
 
-    CPPUNIT_ASSERT(localManager.AddComponent(server));
-    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.Connect(client->GetName(), "", server->GetName(), ""));
+    CPPUNIT_ASSERT(localManager->AddComponent(server));
+    CPPUNIT_ASSERT_EQUAL(FAIL, localManager->Connect(client->GetName(), "", server->GetName(), ""));
 
-    CPPUNIT_ASSERT_EQUAL(FAIL, localManager.Connect(client->GetName(), "", server->GetName(), "p1"));
+    CPPUNIT_ASSERT_EQUAL(FAIL, localManager->Connect(client->GetName(), "", server->GetName(), "p1"));
 
     CPPUNIT_ASSERT(client->GetInterfaceRequired("r1")->GetConnectedInterface() == 0);
-    CPPUNIT_ASSERT_EQUAL(SUCCESS, localManager.Connect(client->GetName(), "r1", server->GetName(), "p1"));
-    CPPUNIT_ASSERT(client->GetInterfaceRequired("r1")->GetConnectedInterface() == server->GetInterfaceProvided("p1"));
+    CPPUNIT_ASSERT_EQUAL(SUCCESS, localManager->Connect(client->GetName(), "r1", server->GetName(), "p1"));
+
+    // Following CPPUNIT_ASSERT is not correct, since the provided interface name is specialized based on
+    // the connected required interface; for example, it is called "p1[r1]" rather than just "p1".
+    // CPPUNIT_ASSERT(client->GetInterfaceRequired("r1")->GetConnectedInterface() == server->GetInterfaceProvided("p1"));
+    // Following is the correct implementation.
+    const mtsInterfaceProvided *clientPtr = client->GetInterfaceRequired("r1")->GetConnectedInterface();
+    CPPUNIT_ASSERT(clientPtr);
+    const mtsInterfaceProvided *serverPtr = server->GetInterfaceProvided("p1");
+    CPPUNIT_ASSERT(serverPtr);
+    CPPUNIT_ASSERT_EQUAL(clientPtr->GetName(), mtsInterfaceProvided::GenerateEndUserInterfaceName(serverPtr, "r1"));
 }
 
 #if CISST_MTS_HAS_ICE

@@ -41,12 +41,14 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
 #if CISST_MTS_NEW
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                                ServiceComponentManagement.ConnectNew);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
+                                               ServiceComponentManagement.DisconnectNew);
 #else
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                                ServiceComponentManagement.Connect);
-#endif
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                                                ServiceComponentManagement.Disconnect);
+#endif
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                                                ServiceComponentManagement.Start);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
@@ -284,7 +286,11 @@ bool mtsManagerComponentServices::Disconnect(
     const std::string & serverProcessName,
     const std::string & serverComponentName, const std::string & serverInterfaceName) const
 {
+#if CISST_MTS_NEW
+    if (!ServiceComponentManagement.DisconnectNew.IsValid()) {
+#else
     if (!ServiceComponentManagement.Disconnect.IsValid()) {
+#endif
         CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: invalid function - has not been bound to command" << std::endl;
         return false;
     }
@@ -303,12 +309,16 @@ bool mtsManagerComponentServices::Disconnect(
 
 bool mtsManagerComponentServices::Disconnect(const mtsDescriptionConnection & connection) const
 {
-    // MJ: TODO: change this with blocking command
+    bool result = true;
+#if CISST_MTS_NEW
+    ServiceComponentManagement.DisconnectNew(connection, result);
+#else
     ServiceComponentManagement.Disconnect(connection);
+#endif
 
     CMN_LOG_CLASS_RUN_VERBOSE << "ComponentDisconnect: requested component disconnection: " << connection << std::endl;
 
-    return true;
+    return result;
 }
 
 bool mtsManagerComponentServices::Disconnect(ConnectionIDType connectionID) const
