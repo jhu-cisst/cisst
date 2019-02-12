@@ -6,8 +6,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -44,7 +43,9 @@ void mtsComponentStateTest::TestOrder(void)
 void mtsComponentStateTest::TestTransitions(void)
 {
     const double maxTimeToChangeState = 3.0 * cmn_s; // this is an upper limit across OSs, raise it if needed
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
+    mtsManagerLocal * manager = mtsManagerLocal::GetInstance();
+    manager->RemoveAllUserComponents();
+
     mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
     mtsTestFromCallback1<mtsInt> * fromCallback1 = new mtsTestFromCallback1<mtsInt>;
@@ -115,6 +116,12 @@ void mtsComponentStateTest::TestTransitions(void)
     CPPUNIT_ASSERT(continuous1->GetState() == mtsComponentState::FINISHED);
     CPPUNIT_ASSERT(fromCallback1->GetState() == mtsComponentState::FINISHED);
     CPPUNIT_ASSERT(fromSignal1->GetState() == mtsComponentState::FINISHED);
+
+    CPPUNIT_ASSERT(manager->RemoveComponent(periodic1));
+    CPPUNIT_ASSERT(manager->RemoveComponent(continuous1));
+    CPPUNIT_ASSERT(manager->RemoveComponent(fromCallback1));
+    CPPUNIT_ASSERT(manager->RemoveComponent(fromSignal1));
+    CPPUNIT_ASSERT(manager->RemoveComponent(device2));
 
     delete periodic1;
     delete continuous1;
