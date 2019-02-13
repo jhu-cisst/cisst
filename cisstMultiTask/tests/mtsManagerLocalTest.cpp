@@ -381,7 +381,6 @@ void mtsManagerLocalTest::TestConnectDisconnect(void)
     CPPUNIT_ASSERT(localManager->Disconnect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
     CPPUNIT_ASSERT(localManager->Disconnect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
     CPPUNIT_ASSERT(localManager->Disconnect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
-    CMN_LOG_RUN_ERROR << "FINISHING" << std::endl;
 
     // PK HACK: Disconnect currently does not wait for completion, so we need a rather long wait
     osaSleep(4.0);

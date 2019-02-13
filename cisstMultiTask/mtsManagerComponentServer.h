@@ -152,7 +152,7 @@ public:
     bool DisconnectCleanup(const std::string & processName);
 
     // Calls LCM::DisconnectLocally()
-    void ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg);
+    bool ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentServer);

@@ -6,8 +6,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-11-12
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 

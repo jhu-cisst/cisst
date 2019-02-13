@@ -469,17 +469,14 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
-#if CISST_MTS_NEW
     provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnectNew,
                                     this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnectNew,
                                     this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
-#else
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentDisconnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
-#endif
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentStart,
                               this, mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceComponentCommands_ComponentStop,
@@ -544,13 +541,10 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
 #else
     mtsInterfaceProvided *interfaceProvidedToSelf = provided->GetEndUserInterface("Self");
     if (interfaceProvidedToSelf) {
-#if CISST_MTS_NEW
         GeneralInterface.ComponentConnectNew.Bind(interfaceProvidedToSelf->GetCommandWriteReturn(
                                                   mtsManagerComponentBase::CommandNames::ComponentConnect));
-#else
         GeneralInterface.ComponentConnect.Bind(interfaceProvidedToSelf->GetCommandWrite(
                                                mtsManagerComponentBase::CommandNames::ComponentConnect));
-#endif
     }
 #endif
 
@@ -571,17 +565,14 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
                           InterfaceLCMFunction.ComponentConfigure);
-#if CISST_MTS_NEW
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           InterfaceLCMFunction.ComponentConnectNew);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                           InterfaceLCMFunction.ComponentDisconnectNew);
-#else
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           InterfaceLCMFunction.ComponentConnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                           InterfaceLCMFunction.ComponentDisconnect);
-#endif
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                           InterfaceLCMFunction.ComponentStart);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
@@ -640,17 +631,14 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConfigure,
                              this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
-#if CISST_MTS_NEW
     provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnectNew,
                                     this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWriteReturn(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnectNew,
                                     this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
-#else
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect,
                              this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
-#endif
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentStart,
                              this, mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddCommandWrite(&mtsManagerComponentClient::InterfaceLCMCommands_ComponentStop,
@@ -1356,14 +1344,27 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnect(const m
 
 void mtsManagerComponentClient::InterfaceLCMCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result)
 {
-    result = false;
+    result = true;
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    if (LCM->FindComponent(arg.Client.ComponentName) && LCM->FindComponent(arg.Server.ComponentName)) {
+    if (!LCM->FindComponent(arg.Client.ComponentName)) {
+        result = false;
+        CMN_LOG_CLASS_RUN_WARNING << "InterfaceLCMCommands_ComponentDisconnectNew: did not find client component: "
+                                  << arg.Client.ComponentName << std::endl;
+    }
+    if (!LCM->FindComponent(arg.Server.ComponentName)) {
+        result = false;
+        CMN_LOG_CLASS_RUN_WARNING << "InterfaceLCMCommands_ComponentDisconnectNew: did not find server component: "
+                                  << arg.Server.ComponentName << std::endl;
+    }
+    if (result) {
         if (DisconnectLocally(arg.Client.ComponentName, arg.Client.InterfaceName,
                               arg.Server.ComponentName, arg.Server.InterfaceName))
         {
-            result = true;
             CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentDisconnectNew: successfully disconnected: " << arg << std::endl;
+        }
+        else {
+            result = false;
+            CMN_LOG_CLASS_RUN_WARNING << "InterfaceLCMCommands_ComponentDisconnectNew: failed to disconnect: " << arg << std::endl;
         }
     }
 }
