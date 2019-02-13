@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -189,6 +189,14 @@ public:
       and suffix are based on CMake and saved in cisstConfig.h. */
     inline static std::string SharedLibrary(const std::string & name) {
         return CISST_SHARED_LIBRARY_PREFIX + name + CISST_SHARED_LIBRARY_SUFFIX;
+    }
+
+    /*! Construct the executable name based on OS suffix.  For example,
+      the return value for "MyProgram" would be "MyProgram" on most Unix
+      systems and "MyProgram.exe" on Windows.  Suffix is based on CMake
+      and saved in cisstConfig.h. */
+    inline static std::string Executable(const std::string & name) {
+        return name + CISST_EXECUTABLE_SUFFIX;
     }
 };
 

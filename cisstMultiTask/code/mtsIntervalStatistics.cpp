@@ -5,7 +5,7 @@
   Author(s): Marcin Balicki, Anton Deguet
   Created on: 2010-03-31
 
-  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -195,6 +195,10 @@ void mtsIntervalStatistics::Update(const double period, const double computeTime
         mPeriodMax = mPeriodRunningMax;
         mComputeTimeMin = mComputeTimeRunningMin;
         mComputeTimeMax = mComputeTimeRunningMax;
+
+        // timestamp this data
+        this->Valid() = true;
+        this->Timestamp() = currentTime;
 
         // reset
         mRunningNumberOfSamples = 0;

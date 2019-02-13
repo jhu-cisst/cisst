@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-11-11
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2013-2018 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -46,10 +46,21 @@ void prmEventButtonQtWidgetComponent_ButtonData::EventHandler(const prmEventButt
     QString counterString;
     counterString.setNum(Counter);
     QString payloadString;
-    if (payload.Type() == prmEventButton::PRESSED) {
+    switch (payload.Type()) {
+    case prmEventButton::PRESSED:
         payloadString = "pressed";
-    } else {
+        break;
+    case prmEventButton::RELEASED:
         payloadString = "released";
+        break;
+    case prmEventButton::CLICKED:
+        payloadString = "clicked";
+        break;
+    case prmEventButton::DOUBLE_CLICKED:
+        payloadString = "double-clicked";
+        break;
+    default:
+        break;
     }
     // see default format in ctor
     emit SetValueSignal(QString("%1: %2 [%3][%4]").arg(Name.c_str(), payloadString, counterString, QTime::currentTime().toString("hh:mm:ss")));

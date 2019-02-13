@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstVector tests
 #
-# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -50,7 +48,6 @@ set (SOURCE_FILES
      vctFrameBaseTest.cpp
      vctFrame4x4Test.cpp
      vctMatrixRotation2Test.cpp
-#    vctMatrixRotation2BaseTest.cpp
      vctMatrixRotation3Test.cpp
      vctQuaternionTest.cpp
      vctQuaternionBaseTest.cpp
@@ -61,8 +58,6 @@ set (SOURCE_FILES
      vctVarStrideMatrixIteratorTest.cpp
      vctVarStrideNArrayIteratorTest.cpp
      vctVarStrideVectorIteratorTest.cpp
-
-     vctPlot2DBaseTest.cpp
     )
 
 # all header files
@@ -107,7 +102,6 @@ set (HEADER_FILES
      vctGenericVectorTest.h
 
      vctMatrixRotation2Test.h
-#    vctMatrixRotation2BaseTest.h
      vctMatrixRotation3Test.h
      vctQuaternionTest.h
      vctQuaternionBaseTest.h
@@ -118,9 +112,16 @@ set (HEADER_FILES
      vctVarStrideMatrixIteratorTest.h
      vctVarStrideNArrayIteratorTest.h
      vctVarStrideVectorIteratorTest.h
-
-     vctPlot2DBaseTest.h
      )
+
+if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       vctPlot2DBaseTest.h)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       vctPlot2DBaseTest.cpp)
+endif (CISST_HAS_OPENGL OR CISST_HAS_VTK)
 
 if (CISST_HAS_JSON)
   set (HEADER_FILES

@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-01-06
 
-  (C) Copyright 2011-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsCollectorStateTest.h"
 
-#include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorState.h>
 
@@ -50,7 +48,8 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     mtsExecutionResult executionResult;
 
     // we assume both server and servers use the same type
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
+    mtsManagerLocal * manager = mtsManagerLocal::GetInstance();
+    manager->RemoveAllUserComponents();
 
     // add to manager and start all
     CPPUNIT_ASSERT(manager->AddComponent(server));
@@ -200,10 +199,6 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT(manager->RemoveComponent(stateCollectorTestDevice));
     delete stateCollector;
     delete stateCollectorTestDevice;
-    // the manager singleton needs to be cleaned up, adeguet1
-    std::cerr << "temporary hack " << CMN_LOG_DETAILS << std::endl;
-    manager->RemoveComponent("LCM_MCC");
-    manager->RemoveComponent("MCS");
 }
 
 

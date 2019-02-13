@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-11-30
 
-  (C) Copyright 2017-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,20 +28,24 @@ vctVector3DQtWidget::vctVector3DQtWidget(QWidget * parent):
     mVector(0.0)
 {
     this->setFocusPolicy(Qt::StrongFocus);
-    this->setToolTip(QString("'a' to turn on/off autoresize\n'r' to reset autoresize if already in autoresize mode"));
+    this->setToolTip(QString("'a' to turn on/off autoresize\n'r' to reset autoresize if already in autoresize mode\n'z' to reset orientation"));
 
     setContentsMargins(0, 0, 0, 0);
     SetAutoResize(true);
     mAxisLength = 0.5;
+    ResetOrientation();
+}
 
+void vctVector3DQtWidget::ResetOrientation(void)
+{
     // start with default Z up, x toward left, y towards right
     mCurrentOrientation =
         vctQuatRot3(vctRodRot3(0.1 * cmnPI, 0.0, 0.0)) *
         vctQuatRot3(vctRodRot3(0.0, -0.75 * cmnPI, 0.0)) *
         vctQuatRot3(vctRodRot3(-0.5 * cmnPI, 0.0, 0.0));
     mStartMousePosition = 0;
+    mDeltaOrientation = vctQuatRot3::Identity();
 }
-
 
 void vctVector3DQtWidget::SetAutoResize(const bool autoResize)
 {
@@ -52,7 +56,6 @@ void vctVector3DQtWidget::SetAutoResize(const bool autoResize)
     }
     mAutoResize = autoResize;
 }
-
 
 void vctVector3DQtWidget::SetValue(const vct3 & value)
 {
@@ -65,7 +68,6 @@ void vctVector3DQtWidget::SetValue(const vct3 & value)
     // update GL display
     update();
 }
-
 
 void vctVector3DQtWidget::mouseMoveEvent(QMouseEvent * event)
 {
@@ -83,7 +85,6 @@ void vctVector3DQtWidget::mouseMoveEvent(QMouseEvent * event)
     }
 }
 
-
 void vctVector3DQtWidget::mouseReleaseEvent(QMouseEvent *)
 {
     mStartMousePosition = 0;
@@ -92,6 +93,26 @@ void vctVector3DQtWidget::mouseReleaseEvent(QMouseEvent *)
     mDeltaOrientation = vctQuatRot3::Identity();
 }
 
+void vctVector3DQtWidget::keyPressEvent(QKeyEvent * event)
+{
+    switch(event->key()) {
+    case Qt::Key_A:
+        // toggle autoresize
+        SetAutoResize(!mAutoResize);
+        break;
+    case Qt::Key_R:
+        // reset autoresize if already in autoresize mode
+        if (mAutoResize) {
+            SetAutoResize(true);
+        }
+        break;
+    case Qt::Key_Z:
+        ResetOrientation();
+        break;
+    default:
+        break;
+    }
+}
 
 void vctVector3DQtWidget::initializeGL(void)
 {
@@ -99,7 +120,6 @@ void vctVector3DQtWidget::initializeGL(void)
     glClearColor(grey, grey, grey, 1.0);
     glShadeModel(GL_SMOOTH);
 }
-
 
 void vctVector3DQtWidget::paintGL(void)
 {
@@ -222,22 +242,4 @@ void vctVector3DQtWidget::resizeGL(int width, int height)
     glOrtho(-dWt, dWt, -dHt, dHt, 8.0, 12.0);
 
     glMatrixMode(GL_MODELVIEW);
-}
-
-void vctVector3DQtWidget::keyPressEvent(QKeyEvent * event)
-{
-    switch(event->key()) {
-    case Qt::Key_A:
-        // toggle autoresize
-        SetAutoResize(!mAutoResize);
-        break;
-    case Qt::Key_R:
-        // reset autoresize if already in autoresize mode
-        if (mAutoResize) {
-            SetAutoResize(true);
-        }
-        break;
-    default:
-        break;
-    }
 }

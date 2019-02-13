@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1148,6 +1148,30 @@ bool mtsManagerLocal::RemoveComponent(const std::string & componentName, const b
     }
 
     return true;
+}
+
+size_t mtsManagerLocal::RemoveAllUserComponents(void)
+{
+    std::vector<std::string> componentNames = ComponentMap.GetNames();
+    size_t numRemoved = 0;
+    for (size_t i = 0; i < componentNames.size(); i++) {
+        const bool isManagerComponent = (mtsManagerComponentBase::IsManagerComponentServer(componentNames[i]) ||
+                                         mtsManagerComponentBase::IsManagerComponentClient(componentNames[i]));
+        if (!isManagerComponent) {
+            if (!RemoveComponent(componentNames[i])) {
+                CMN_LOG_CLASS_RUN_WARNING << "RemoveAllUserComponents: failed to remove "
+                                          << componentNames[i] << std::endl;
+            }
+            else {
+                numRemoved++;
+            }
+        }
+    }
+    if (numRemoved > 0) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RemoveAllUserComponents: removed " << numRemoved << " user components, leaving "
+                                  << componentNames.size() << " system components" << std::endl;
+    }
+    return numRemoved;
 }
 
 std::vector<std::string> mtsManagerLocal::GetNamesOfComponents(void) const

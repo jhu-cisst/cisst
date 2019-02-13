@@ -195,7 +195,7 @@ void vctDynamicNArrayRefTest::TestPermutationRef(void)
 {
     typedef _elementType value_type;
 
-    enum {DIMENSION = 6};
+    enum {DIMENSION = 4};
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typedef vctDynamicNArrayRef<value_type, DIMENSION> ArrayRefType;
     typedef vctDynamicConstNArrayRef<value_type, DIMENSION> ConstArrayRefType;
@@ -242,48 +242,36 @@ void vctDynamicNArrayRefTest::TestPermutationRef(void)
         CPPUNIT_ASSERT(permutedConstNArray1.size(index) == nArray1.size(permutation[index]));
     }
 
-    index_type i, j, k, l, m, n;
+    index_type i, j, k, l;
     IndicesType indicesPermuted, indices;
     
     for (i = 0; i < nArray1.size(0); i++) {
         for (j = 0; j < nArray1.size(1); j++) {
             for (k = 0; k < nArray1.size(2); k++) {
                 for (l = 0; l < nArray1.size(3); l++) {
-                    for (m = 0; m < nArray1.size(4); m++) {
-                        for (n = 0; n < nArray1.size(5); n++) {
-                            indices.Assign(i, j, k, l, m, n);
-                            indicesPermuted.Assign(indices[permutation[0]],
-                                                   indices[permutation[1]],
-                                                   indices[permutation[2]],
-                                                   indices[permutation[3]],
-                                                   indices[permutation[4]],
-                                                   indices[permutation[5]]);
-
-                            CPPUNIT_ASSERT(nArray1(indices)         == permutedNArray1(indicesPermuted));
-                            CPPUNIT_ASSERT(nArray1.at(indices)      == permutedNArray1.at(indicesPermuted));
-                            CPPUNIT_ASSERT(nArray1.Element(indices) == permutedNArray1.Element(indicesPermuted));
-                            CPPUNIT_ASSERT(nArray1.Pointer(indices) == permutedNArray1.Pointer(indicesPermuted));
-                            CPPUNIT_ASSERT(nArray1[i][j][k][l][m][n] == permutedNArray1
+                    indices.Assign(i, j, k, l);
+                    indicesPermuted.Assign(indices[permutation[0]],
+                        indices[permutation[1]],
+                        indices[permutation[2]],
+                        indices[permutation[3]]);
+                    CPPUNIT_ASSERT(nArray1(indices)         == permutedNArray1(indicesPermuted));
+                    CPPUNIT_ASSERT(nArray1.at(indices)      == permutedNArray1.at(indicesPermuted));
+                    CPPUNIT_ASSERT(nArray1.Element(indices) == permutedNArray1.Element(indicesPermuted));
+                    CPPUNIT_ASSERT(nArray1.Pointer(indices) == permutedNArray1.Pointer(indicesPermuted));
+                    CPPUNIT_ASSERT(nArray1[i][j][k][l] == permutedNArray1
                                            [indices[permutation[0]]]
                                            [indices[permutation[1]]]
                                            [indices[permutation[2]]]
-                                           [indices[permutation[3]]]
-                                           [indices[permutation[4]]]
-                                           [indices[permutation[5]]]);
-                            
-                            CPPUNIT_ASSERT(nArray1(indices)         == permutedConstNArray1(indicesPermuted));
-                            CPPUNIT_ASSERT(nArray1.at(indices)      == permutedConstNArray1.at(indicesPermuted));
-                            CPPUNIT_ASSERT(nArray1.Element(indices) == permutedConstNArray1.Element(indicesPermuted));
-                            CPPUNIT_ASSERT(nArray1.Pointer(indices) == permutedConstNArray1.Pointer(indicesPermuted));
-                            CPPUNIT_ASSERT(nArray1[i][j][k][l][m][n] == permutedConstNArray1
+                                           [indices[permutation[3]]]);
+                    CPPUNIT_ASSERT(nArray1(indices)         == permutedConstNArray1(indicesPermuted));
+                    CPPUNIT_ASSERT(nArray1.at(indices)      == permutedConstNArray1.at(indicesPermuted));
+                    CPPUNIT_ASSERT(nArray1.Element(indices) == permutedConstNArray1.Element(indicesPermuted));
+                    CPPUNIT_ASSERT(nArray1.Pointer(indices) == permutedConstNArray1.Pointer(indicesPermuted));
+                    CPPUNIT_ASSERT(nArray1[i][j][k][l] == permutedConstNArray1
                                            [indices[permutation[0]]]
                                            [indices[permutation[1]]]
                                            [indices[permutation[2]]]
-                                           [indices[permutation[3]]]
-                                           [indices[permutation[4]]]
-                                           [indices[permutation[5]]]);
-                        }
-                    }
+                                           [indices[permutation[3]]]);
                 }
             }
         }

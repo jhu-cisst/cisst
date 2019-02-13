@@ -302,46 +302,69 @@ endif (LIBXML2_FOUND)
 option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some examples and utilities won't be compiled" ON)
 
 if (CISST_HAS_JSON)
-  include (ExternalProject)
 
-  set (cisstJSON_PREFIX cisstJSONExternal)
-  set (CISST_JSON_GIT_REPOSITORY https://github.com/jhu-cisst-external/jsoncpp.git)
-  set (CISST_JSON_GIT_TAG 1.7.4.1)
+  if (WIN32)
+    # On Windows, no need to use PkgConfig
+    set(JSONCPP_FOUND OFF)
+  else (WIN32)
+    # try to find an installed version
+    find_package (PkgConfig REQUIRED)
+    pkg_check_modules(JSONCPP jsoncpp)
 
-  # add fPIC if possible
-  include (CheckCXXCompilerFlag)
-  check_cxx_compiler_flag ("-fPIC" CXX_SUPPORTS_FPIC)
-  if (CXX_SUPPORTS_FPIC)
-    set (JSON_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-  endif (CXX_SUPPORTS_FPIC)
+    if (JSONCPP_FOUND)
+      set (JSON_INCLUDE_DIR "${JSONCPP_INCLUDE_DIRS}")
+      set (JSON_LIBRARY_DIRS "${JSONCPP_LIBDIR}")
+      set (JSON_LIBRARIES "${JSONCPP_LIBRARIES}")
+      set (JSON_FOUND ON PARENT_SCOPE)
+      set (JSON_USE_SYSTEM_VERSION ON PARENT_SCOPE)
+    endif (JSONCPP_FOUND)
+  endif (WIN32)
 
-  ExternalProject_Add (cisstJSONExternal
-                       PREFIX ${cisstJSON_PREFIX}
-                       GIT_REPOSITORY    ${CISST_JSON_GIT_REPOSITORY}
-                       GIT_TAG           ${CISST_JSON_GIT_TAG}
-                       CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
-                                        -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                                        -DCMAKE_CXX_FLAGS:STRING=${JSON_CMAKE_CXX_FLAGS}
-                                        -DOPTION_BUILD_EXAMPLES:BOOL=OFF
-                                        -DJSONCPP_WITH_TESTS:BOOL=OFF
-                                        -DJSONCPP_WITH_POST_BUILD_UNITTEST:BOOL=OFF
-                                        -DJSONCPP_WITH_STRICT_ISO:BOOL=OFF
-                                        -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstJSON
-                       INSTALL_DIR ${cisst_BINARY_DIR}/cisstJSON
-                       UPDATE_COMMAND ""
-                       )
+  if (NOT JSONCPP_FOUND)
 
-  # Set all JSON variables based on install directory
-  set (JSON_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstJSON/include")
+    # otherwise, build as external project
+    include (ExternalProject)
+
+    set (cisstJSON_PREFIX cisstJSONExternal)
+    set (CISST_JSON_GIT_REPOSITORY https://github.com/jhu-cisst-external/jsoncpp.git)
+    set (CISST_JSON_GIT_TAG 1.7.4.2)
+
+    # add fPIC if possible
+    include (CheckCXXCompilerFlag)
+    check_cxx_compiler_flag ("-fPIC" CXX_SUPPORTS_FPIC)
+    if (CXX_SUPPORTS_FPIC)
+      set (JSON_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    endif (CXX_SUPPORTS_FPIC)
+
+    ExternalProject_Add (cisstJSONExternal
+                         PREFIX ${cisstJSON_PREFIX}
+                         GIT_REPOSITORY    ${CISST_JSON_GIT_REPOSITORY}
+                         GIT_TAG           ${CISST_JSON_GIT_TAG}
+                         CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                          -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                          -DCMAKE_CXX_FLAGS:STRING=${JSON_CMAKE_CXX_FLAGS}
+                                          -DOPTION_BUILD_EXAMPLES:BOOL=OFF
+                                          -DJSONCPP_WITH_TESTS:BOOL=OFF
+                                          -DJSONCPP_WITH_POST_BUILD_UNITTEST:BOOL=OFF
+                                          -DJSONCPP_WITH_STRICT_ISO:BOOL=OFF
+                                          -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstJSON
+                         INSTALL_DIR ${cisst_BINARY_DIR}/cisstJSON
+                         UPDATE_COMMAND ""
+                         )
+
+    # Set all JSON variables based on install directory
+    set (JSON_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstJSON/include")
+    set (JSON_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstJSON/lib")
+    set (JSON_LIBRARIES jsoncpp)
+    set (JSON_FOUND ON PARENT_SCOPE)
+    set (JSON_USE_SYSTEM_VERSION OFF PARENT_SCOPE)
+
+  endif (NOT JSONCPP_FOUND)
+
+  # propagate to parent directory
   set (JSON_INCLUDE_DIR ${JSON_INCLUDE_DIR} PARENT_SCOPE)
-
-  set (JSON_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstJSON/lib")
   set (JSON_LIBRARY_DIRS ${JSON_LIBRARY_DIRS} PARENT_SCOPE)
-  set (JSON_LIBRARIES jsoncpp)
   set (JSON_LIBRARIES ${JSON_LIBRARIES} PARENT_SCOPE)
-
-  set (JSON_FOUND ON)
-  set (JSON_FOUND ON PARENT_SCOPE)
 
   cisst_set_package_settings (cisstCommon JSON INCLUDE_DIRECTORIES JSON_INCLUDE_DIR)
   cisst_set_package_settings (cisstCommon JSON LIBRARIES           JSON_LIBRARIES)

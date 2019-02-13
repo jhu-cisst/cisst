@@ -72,6 +72,7 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
     //@{
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBool6, Mask);
     //@}
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, MovingFrame);
 
 public:
 

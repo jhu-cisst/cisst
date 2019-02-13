@@ -5,7 +5,7 @@
   Author(s): Martin Kelly, Anton Deguet
   Created on: 2010-09-23
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,8 +17,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnAssert.h>
+#include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
+#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include "osaPipeExecTest.h"
 
@@ -27,20 +30,26 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
     CPPUNIT_ASSERT(osaPipeExec::INTERNALS_SIZE >= osaPipeExec::SizeOfInternals());
 }
 
-void osaPipeExecTest::TestPipe(void)
+void osaPipeExecTest::TestPipeCommon(bool noWindow)
 {
     osaPipeExec pipe1, pipe2;
-    std::string command =
-        std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES
-        + std::string("/cisstOSAbstractionTestsPipeExecUtility");
+    double startTime, measuredTime;
+
+    /* Build search path to find the test utility */
+    cmnPath path;
+    path.AddFromEnvironment("PATH", cmnPath::TAIL);
+    path.Add(std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES, cmnPath::HEAD);
+    std::string command = path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX, cmnPath::EXECUTE);
+    bool utilityFound = (command != "");
+    CPPUNIT_ASSERT(utilityFound);
 
     /* Test opening twice, make sure it fails the second time */
-    bool opened = pipe1.Open(command, "rw");
+    bool opened = pipe1.Open(command, "rw", noWindow);
     CPPUNIT_ASSERT_EQUAL(true, opened);
-    opened = pipe1.Open(command, "rw");
+    opened = pipe1.Open(command, "rw", noWindow);
     CPPUNIT_ASSERT_EQUAL(false, opened);
 
-    opened = pipe2.Open(command, "rw");
+    opened = pipe2.Open(command, "rw", noWindow);
     CPPUNIT_ASSERT_EQUAL(true, opened);
 
     /* Generate random test string between 10 and 100 characters */
@@ -57,13 +66,13 @@ void osaPipeExecTest::TestPipe(void)
 
     /* If this gives problems, wrap this in a loop similar to the read loop */
     int charsWrittenInt = pipe1.Write(testString);
-
     CPPUNIT_ASSERT(charsWrittenInt >= 0);
     size_t charsWritten = charsWrittenInt;
-
     CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
-    charsWritten = pipe2.Write(testString);
+    charsWrittenInt = pipe2.Write(testString);
+    CPPUNIT_ASSERT(charsWrittenInt >= 0);
+    charsWritten = charsWrittenInt;
     CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
     /* Keep reading while there is still data to be read */
@@ -100,16 +109,44 @@ void osaPipeExecTest::TestPipe(void)
     closed = pipe2.Close();
     CPPUNIT_ASSERT_EQUAL(true, closed);
 
+    /* Test the ReadUntil method */
+    opened = pipe1.Open(command, "rw", noWindow);
+    CPPUNIT_ASSERT_EQUAL(true, opened);
+    charsWrittenInt = pipe1.Write("abcdef", 6);
+    CPPUNIT_ASSERT_EQUAL(6, charsWrittenInt);
+    resultString = pipe1.ReadUntil(6, 'd');
+    CPPUNIT_ASSERT_EQUAL(std::string("abcd"), resultString);
+    resultString = pipe1.Read(6);
+    CPPUNIT_ASSERT_EQUAL(std::string("ef"), resultString);
+
+    /* Test ReadUntil with timeout */
+    startTime = osaGetTime();
+    // No characters written, should time out
+    resultString = pipe1.ReadUntil(6, 'a', 2.0);
+    measuredTime = osaGetTime()-startTime;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, measuredTime, 0.1);
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(resultString.length()));
+    charsWrittenInt = pipe1.Write("12345", 5);
+    CPPUNIT_ASSERT_EQUAL(5, charsWrittenInt);
+    startTime = osaGetTime();
+    resultString = pipe1.ReadUntil(5, '3');
+    measuredTime = osaGetTime()-startTime;
+    // No timeout, so should be significantly less than 0.5 seconds
+    CPPUNIT_ASSERT(measuredTime < 0.5);
+    CPPUNIT_ASSERT_EQUAL(std::string("123"), resultString);
+
+    pipe1.Close();
+
     /* Test other Open modes. We don't test "r" because we don't have a good
     test utility for that */
-    pipe1.Open(command, "");
+    pipe1.Open(command, "", noWindow);
     charsWrittenInt = pipe1.Write(testString);
     CPPUNIT_ASSERT_EQUAL(-1, charsWrittenInt);
     std::string returnString = pipe1.Read(length);
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
     pipe1.Close();
 
-    pipe1.Open(command, "w");
+    pipe1.Open(command, "w", noWindow);
     charsWrittenInt = pipe1.Write(testString);
     CPPUNIT_ASSERT(charsWrittenInt >= 0);
     charsWritten = charsWrittenInt;
@@ -123,27 +160,88 @@ void osaPipeExecTest::TestPipe(void)
     arguments.push_back("a a");
     arguments.push_back("b ");
     arguments.push_back(" c");
-    pipe1.Open(command, arguments, "rw");
+    pipe1.Open(command, arguments, "rw", noWindow);
     resultString = pipe1.ReadString(length);
     CPPUNIT_ASSERT_EQUAL(std::string("a a;b ; c;"), resultString);
     pipe1.Close();
 
-#if 0
-    /* Currently, there's no way for the pipe to tell if the command actually
-    executed successfully. Once there is, uncomment this */
-    /* Test opening a command that doesn't exist */
-    opened = pipe1.Open("abcdefghijklmnopqrstuvwxyz", "rw");
-    CPPUNIT_ASSERT_EQUAL(true, opened);
-    charsWritten = pipe1.Write(testString);
-    CPPUNIT_ASSERT_EQUAL(-1, charsWritten);
+    /* Test opening a command that doesn't exist. */
+    opened = pipe1.Open("abcdefghijklmnopqrstuvwxyz", "rw", noWindow);
+#if (CISST_OS == CISST_WINDOWS)
+    /* The open failure is detected on Windows only. */
+    CPPUNIT_ASSERT_EQUAL(false, opened);
+    charsWrittenInt = pipe1.Write(testString);
+    CPPUNIT_ASSERT_EQUAL(-1, charsWrittenInt);
     returnString = pipe1.Read(length);
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
+#else
+    /* On other platforms, wait a little for forked child process to exit. */
+    osaSleep(0.1);
+#endif
+    bool isRunning = pipe1.IsProcessRunning();
+    CPPUNIT_ASSERT_EQUAL(false, isRunning);
     closed = pipe1.Close();
-    CPPUNIT_ASSERT_EQUAL(true, closed);
+#if (CISST_OS == CISST_WINDOWS)
+    CPPUNIT_ASSERT_EQUAL(false, closed);
 #endif
 
-	delete[] buffer;
-	delete[] testString;
+    /* Test IsProcessRunning (before and after kill process) */
+    opened = pipe1.Open(command, "rw", noWindow);
+    CPPUNIT_ASSERT_EQUAL(true, opened);
+    isRunning = pipe1.IsProcessRunning();
+    CPPUNIT_ASSERT_EQUAL(true, isRunning);
+    /* Close pipe, but do not kill process */
+    closed = pipe1.Close(false);
+    CPPUNIT_ASSERT_EQUAL(true, closed);
+    isRunning = pipe1.IsProcessRunning();
+    CPPUNIT_ASSERT_EQUAL(true, isRunning);
+    /* Now, kill process */
+    closed = pipe1.Close();
+    CPPUNIT_ASSERT_EQUAL(true, closed);
+    isRunning = pipe1.IsProcessRunning();
+    CPPUNIT_ASSERT_EQUAL(false, isRunning);
+
+    /* Test IsProcessRunning (before and after process exits normally) */
+    opened = pipe1.Open(command, "rw", noWindow);
+    CPPUNIT_ASSERT_EQUAL(true, opened);
+    isRunning = pipe1.IsProcessRunning();
+    CPPUNIT_ASSERT_EQUAL(true, isRunning);
+    /* Send "abc0d". The "abc" should be echoed, but the '0' will
+       will cause the child process to exit. */
+    charsWrittenInt = pipe1.Write("abc0d", 5);
+    CPPUNIT_ASSERT_EQUAL(5, charsWrittenInt);
+    /* Try to read 5 characters, specifying a 2 second timeout. */
+    startTime = osaGetTime();
+    returnString = pipe1.ReadUntil(5, 'd', 2.0);
+    measuredTime = osaGetTime()-startTime;
+    CPPUNIT_ASSERT(measuredTime < 2.1);
+
+    isRunning = pipe1.IsProcessRunning();
+    CPPUNIT_ASSERT_EQUAL(false, isRunning);
+    /* Close pipe. Even though "killprocess" option is the default,
+       and process has already ended, the Close should still succeed. */
+    closed = pipe1.Close();
+    CPPUNIT_ASSERT_EQUAL(true, closed);
+
+    delete[] buffer;
+    delete[] testString;
 }
+
+#if (CISST_OS == CISST_WINDOWS)
+void osaPipeExecTest::TestPipeWindow(void)
+{
+    TestPipeCommon(false);
+}
+
+void osaPipeExecTest::TestPipeNoWindow(void)
+{
+    TestPipeCommon(true);
+}
+#else
+void osaPipeExecTest::TestPipe(void)
+{
+    TestPipeCommon(false);
+}
+#endif
 
 CPPUNIT_TEST_SUITE_REGISTRATION(osaPipeExecTest);

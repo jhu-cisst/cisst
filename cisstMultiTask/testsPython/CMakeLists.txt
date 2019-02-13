@@ -40,7 +40,7 @@ cisst_add_swig_module (MODULE cisstMultiTaskPythonTest
                        MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstMultiTaskPythonTest)
 
 # Copy the .py file generated to wherever the libraries are
-add_custom_command (TARGET _cisstMultiTaskPythonTest
+add_custom_command (TARGET _cisstMultiTaskPythonTestPython
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND}
                     ARGS -E copy

@@ -86,6 +86,8 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_DOTNET2012 11
 #define CISST_DOTNET2013 12
 #define CISST_CLANG      13
+#define CISST_DOTNET2015 14
+#define CISST_DOTNET2017 15
 //@}
 
 
@@ -185,6 +187,10 @@ http://www.cisst.org/cisst/license.txt.
       #define CISST_COMPILER CISST_DOTNET2012
     #elif (_MSC_VER >= 1800)
       #define CISST_COMPILER CISST_DOTNET2013
+    #elif (_MSC_VER >= 1900)
+      #define CISST_COMPILER CISST_DOTNET2015
+    #elif (_MSC_VER >= 1910)
+      #define CISST_COMPILER CISST_DOTNET2017
     #endif
   #endif
 

@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -199,6 +199,14 @@ public:
 
   //! Manipulator destructor
   virtual ~robManipulator();
+
+  /*! Set joint limits */
+  bool SetJointLimits(const vctDynamicVector<double> & lowerLimits,
+                      const vctDynamicVector<double> & upperLimits);
+
+  /*! Get joint limits */
+  bool GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
+                      vctDynamicVectorRef<double> upperLimits);
 
   //! Evaluate the forward kinematics
   /**

@@ -6,7 +6,7 @@
   Author(s): Martin Kelly
   Created on: 2010-09-23
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -24,12 +24,14 @@
 #include <vector>
 #include <string>
 
+#include <cisstCommon/cmnPortability.h>
+
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
 class CISST_EXPORT osaPipeExec {
     /*! Internals that are OS-dependent */
-    enum {INTERNALS_SIZE = 32};
+    enum {INTERNALS_SIZE = 64};
     char Internals[INTERNALS_SIZE];
 
     /*! Return the size of the actual object used by the OS.  This is
@@ -37,7 +39,6 @@ class CISST_EXPORT osaPipeExec {
     static unsigned int SizeOfInternals(void);
     friend class osaPipeExecTest;
 
-    char ** Command;
     int ToProgram[2];
     int FromProgram[2];
     bool Connected;
@@ -45,14 +46,23 @@ class CISST_EXPORT osaPipeExec {
     bool WriteFlag;
     std::string Name;
 
+    /*! Internal function to close resources. */
+    int DoClose(int &n);
+
     /*! Free resources before returning an error. Also free the command
       pointer */
     void CloseAllPipes(void);
+
+    /*! Free unused handles. */
+    void CloseUnusedHandles(void);
 
     /*! Parse out the command and arguments and return an array in the
       form that execvp/_spawnvp accept */
     char ** ParseCommand(const std::string & executable,
                          const std::vector<std::string> & arguments);
+
+    /*! Free memory allocated by ParseCommand. */
+    void FreeCommand(char **command);
 
 #if (CISST_OS == CISST_WINDOWS)
 	/*! Restore I/O to their original values before returning
@@ -87,7 +97,12 @@ class CISST_EXPORT osaPipeExec {
               const std::vector<std::string> & parameters,
               const std::string & mode, bool noWindow = false);
 
-    /*! Close the pipe. Returns true if the Close succeeded, false otherwise. */
+    /*! Close the pipe and optionally kill the child process.
+        Returns:
+            true  if killProcess is false and pipe successfully closed OR
+                  if killProcess is true and process successfully terminated
+                  (even if pipe not successfully closed);
+            false otherwise */
     bool Close(bool killProcess = true);
 
     /*! Read at most maxLength characters from the pipe into
@@ -100,15 +115,16 @@ class CISST_EXPORT osaPipeExec {
     std::string Read(int maxLength) const;
 
     /*! Read at most maxLength characters from the pipe, but stop reading if
-    stopChar is read. Return the number of characters read */
-    int ReadUntil(char * buffer, int maxLength, char stopChar) const;
+    stopChar is read or if timeout expires (timeoutSec <= 0 means no timeout).
+    Return the number of characters read. */
+    int ReadUntil(char * buffer, int maxLength, char stopChar, double timeoutSec = 0.0) const;
 
-    /*! std::string version of ReadUntil
-    stopChar is read. Return the number of characters read */
-    std::string ReadUntil(int maxLength, char stopChar) const;
+    /*! std::string version of ReadUntil.
+    Return the number of characters read */
+    std::string ReadUntil(int maxLength, char stopChar, double timeoutSec = 0.0) const;
 
-    /*! Equivalent to ReadUntil(maxLength, '\0') */
-    std::string ReadString(int maxLength) const;
+    /*! Equivalent to ReadUntil(maxLength, '\0', timeoutSec) */
+    std::string ReadString(int maxLength, double timeoutSec = 0.0) const;
 
     /*! Write the null-terminated buffer to the pipe. Return the
       number of characters written or -1 for an error */
@@ -129,6 +145,9 @@ class CISST_EXPORT osaPipeExec {
     /*! Indicate if the pipe is opened (or at least supposed to be
       opened) */
     bool IsConnected(void) const;
+
+    /*! Returns true if the child process is still running. */
+    bool IsProcessRunning(void) const;
 
     /*! Get name provided in constructor. */
     const std::string & GetName(void) const;

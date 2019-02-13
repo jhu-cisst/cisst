@@ -6,7 +6,7 @@
 Author(s):  Mark Finkelstein, Ali Uneri, Peter Kazanzides
 Created on: 2009-08-17
 
-(C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+(C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,8 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSocketServer.h>
 
-
 #if (CISST_OS == CISST_WINDOWS)
+#include <cisstOSAbstraction/osaSleep.h>
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -118,7 +118,32 @@ osaSocket * osaSocketServer::Accept(void)
 {
     struct sockaddr_in serverAddr;
     socklen_t s = sizeof(serverAddr);
+#if (CISST_OS == CISST_WINDOWS)
+    int newSocketFD = INVALID_SOCKET;
+    for (int numTrials = 0; numTrials < 10; numTrials++) {
+        newSocketFD = accept(ServerSocketFD, (struct sockaddr *)&serverAddr, &s);
+        if (newSocketFD == INVALID_SOCKET) {
+            int err = WSAGetLastError();
+            if (err == WSAEWOULDBLOCK) {
+                // Resource temporarily unavailable. Try again.
+                osaSleep(10.0 * cmn_ms);
+            }
+            else {
+                CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer::Accept failed, error = "
+                                        << err << std::endl;
+                break;
+            }
+        }
+        else {
+            if (numTrials > 0)
+                CMN_LOG_CLASS_RUN_VERBOSE << "osaSocketServer::Accept succeeded after "
+                                          << numTrials << " retries" << std::endl;
+            break;
+        }
+    }
+#else
     int newSocketFD = accept(ServerSocketFD, (struct sockaddr *)&serverAddr, &s);
+#endif
     if (newSocketFD == INVALID_SOCKET) {
         return 0;
     }

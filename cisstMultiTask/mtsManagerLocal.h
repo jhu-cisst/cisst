@@ -5,8 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -345,6 +344,10 @@ public:
     /*! \brief Remove component from this local component manager. */
     bool RemoveComponent(mtsComponent * component);
     bool RemoveComponent(const std::string & componentName);
+
+    /*! \brief Remove all user components from this local component manager.
+        \returns the number of user components removed. */
+    size_t RemoveAllUserComponents(void);
 
     /*! \brief Retrieve a component by name. */
     mtsComponent * GetComponent(const std::string & componentName) const;
