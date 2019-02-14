@@ -39,6 +39,18 @@ class {
     }
 
     member {
+        name PositionDeadbandPos;
+        type vct3;
+        description Positive deadband position vector;
+    }
+
+    member {
+        name PositionDeadbandNeg;
+        type vct3;
+        description Negative deadband position vector;
+    }
+
+    member {
         name PositionStiffnessPos;
         type vct3;
         description Positive position stiffness vector;
@@ -72,6 +84,18 @@ class {
         name ForceBiasNeg;
         type vct3;
         description Negative force bias vector;
+    }
+
+    member {
+        name OrientationDeadbandPos;
+        type vct3;
+        description Positive deadband orientation vector;
+    }
+
+    member {
+        name OrientationDeadbandNeg;
+        type vct3;
+        description Negative deadband orientation vector;
     }
 
     member {
