@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmOperatingStateQtWidget_h
 
 #include <QWidget>
+#include <QMetaType>
+
 #include <cisstParameterTypes/prmOperatingState.h>
 
 // Always include last

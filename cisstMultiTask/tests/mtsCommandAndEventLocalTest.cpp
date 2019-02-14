@@ -6,8 +6,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsCommandAndEventLocalTest.h"
 
-#include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 #include "mtsTestComponents.h"
@@ -103,7 +101,8 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     executionResult = client->InterfaceRequired1.FunctionStateTableAdvance();
     CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
 
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
+    mtsManagerLocal * manager = mtsManagerLocal::GetInstance();
+    manager->RemoveAllUserComponents();
 
     // add to manager and start all
     CPPUNIT_ASSERT(manager->AddComponent(client));
@@ -176,7 +175,7 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
-            // no significant delay but result should be garanteed without sleep
+            // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionVoid.ExecuteBlocking();
             CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
@@ -193,7 +192,7 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
-            // no significant delay but result should be garanteed without sleep
+            // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionWrite.ExecuteBlocking(valueWrite);
             CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
@@ -210,7 +209,7 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
-            // no significant delay but result should be garanteed without sleep
+            // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionFilteredWrite.ExecuteBlocking(valueWrite);
             CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
@@ -227,7 +226,7 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
-            // no significant delay but result should be garanteed without sleep
+            // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionVoidReturn(valueRead);
             CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
@@ -246,7 +245,7 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
             CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
         } else {
-            // no significant delay but result should be garanteed without sleep
+            // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionWriteReturn(valueWritePlusOne, valueRead);
             CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
         }
@@ -296,10 +295,6 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     CPPUNIT_ASSERT(manager->Disconnect(client->GetName(), "r1", server->GetName(), "p1"));
     CPPUNIT_ASSERT(manager->RemoveComponent(client));
     CPPUNIT_ASSERT(manager->RemoveComponent(server));
-    // the manager singleton needs to be cleaned up, adeguet1
-    std::cerr << "temporary hack " << CMN_LOG_DETAILS << std::endl;
-    manager->RemoveComponent("LCM_MCC");
-    manager->RemoveComponent("MCS");
 }
 
 
@@ -504,7 +499,8 @@ void mtsCommandAndEventLocalTest::TestArgumentPrototypes(void)
     mtsTestContinuous1<value_type> * client = new mtsTestContinuous1<value_type>("mtsTestContinuous1Client");
     mtsTestContinuous1<value_type> * server = new mtsTestContinuous1<value_type>("mtsTestContinuous1Server");
 
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
+    mtsManagerLocal * manager = mtsManagerLocal::GetInstance();
+    manager->RemoveAllUserComponents();
 
     // add to manager and start all
     CPPUNIT_ASSERT(manager->AddComponent(client));
@@ -572,11 +568,6 @@ void mtsCommandAndEventLocalTest::TestArgumentPrototypes(void)
     CPPUNIT_ASSERT(manager->RemoveComponent(server));
     delete client;
     delete server;
-
-    // the manager singleton needs to be cleaned up, adeguet1
-    std::cerr << "temporary hack " << CMN_LOG_DETAILS << std::endl;
-    manager->RemoveComponent("LCM_MCC");
-    manager->RemoveComponent("MCS");
 }
 void mtsCommandAndEventLocalTest::TestArgumentPrototypes_mtsInt(void) {
     mtsCommandAndEventLocalTest::TestArgumentPrototypes<mtsInt>();

@@ -94,7 +94,7 @@ public:
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
                                        mtsGenericObject & result,
                                        mtsCommandWriteBase * CMN_UNUSED(finishedEventHandler))
-    { return Execute(argument, result, 0); }
+    { return Execute(argument, result); }
 
     /*! Get a direct pointer to the callable object.  This method is
       used for queued commands.  The caller should still use the
