@@ -97,17 +97,14 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
-#if CISST_MTS_NEW
     provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew,
                                     this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnectNew,
                                     this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
-#else
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
-#endif
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart,
                               this, mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop,
@@ -183,17 +180,14 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
                           newFunctionSet->ComponentConfigure);
-#if CISST_MTS_NEW
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           newFunctionSet->ComponentConnectNew);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                           newFunctionSet->ComponentDisconnectNew);
-#else
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           newFunctionSet->ComponentConnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                           newFunctionSet->ComponentDisconnect);
-#endif
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                           newFunctionSet->ComponentStart);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
@@ -428,18 +422,25 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnectNew(cons
     }
 }
 
-void mtsManagerComponentServer::ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg)
+bool mtsManagerComponentServer::ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg)
 {
     // Get a set of function objects that are bound to the InterfaceLCM's provided interface.
     InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processName);
     if (!functionSet) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to get function set for process \""
             << processName << "\": " << arg << std::endl;
-        return;
+        return false;
     }
 
+    bool result = true;
+#if CISST_MTS_NEW
+    //functionSet->ComponentDisconnectNew(arg, result);
+    result = false;   // PK HACK: actually works better if we don't call ComponentDisconnect or ComponentDisconnectNew
+#else
     //functionSet->ComponentDisconnect.ExecuteBlocking(arg);
     functionSet->ComponentDisconnect(arg);
+#endif
+    return result;
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg)

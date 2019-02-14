@@ -38,17 +38,14 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceComponentManagement.Create);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
                                                ServiceComponentManagement.Configure);
-#if CISST_MTS_NEW
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                                ServiceComponentManagement.ConnectNew);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                                                ServiceComponentManagement.DisconnectNew);
-#else
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                                ServiceComponentManagement.Connect);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                                                ServiceComponentManagement.Disconnect);
-#endif
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
                                                ServiceComponentManagement.Start);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
