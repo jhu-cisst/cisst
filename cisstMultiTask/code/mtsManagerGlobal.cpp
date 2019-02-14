@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-11-12
 
-  (C) Copyright 2009-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1405,7 +1405,7 @@ bool mtsManagerGlobal::Disconnect(const ConnectionIDType connectionID)
     QueueDisconnectWaiting.insert(std::make_pair(connectionID, connectionID));
     QueueDisconnectWaitingChange.Unlock();
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: queueud connection id [ " << connectionID
+    CMN_LOG_CLASS_INIT_VERBOSE << "Disconnect: queued connection id [ " << connectionID
         << " ] to disconnect waiting queue" << std::endl;
 
     return true;

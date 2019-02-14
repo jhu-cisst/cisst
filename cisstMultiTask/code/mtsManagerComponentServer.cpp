@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -96,6 +96,10 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
+    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentConnect);
+    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnectNew,
+                                    this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
                               this, mtsManagerComponentBase::CommandNames::ComponentConnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
@@ -175,6 +179,10 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
                           newFunctionSet->ComponentConfigure);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
+                          newFunctionSet->ComponentConnectNew);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
+                          newFunctionSet->ComponentDisconnectNew);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           newFunctionSet->ComponentConnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
@@ -303,7 +311,6 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
         // result = false;
         return;
     }
-
     mtsExecutionResult executionResult =  functionSet->ComponentConnect(connectionDescription /*, result*/);
     if (!executionResult.IsOK()) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"ComponentConnect\": " << connectionDescription << std::endl
@@ -312,6 +319,29 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsD
     }
 }
 
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result)
+{
+    // We don't check argument validity with the GCM at this stage and rely on
+    // the current normal connection procedure (GCM allows connection at the
+    // request of LCM) because the GCM guarantees that arguments are valid.
+    // The Connect request is then passed to the manager component client which
+    // calls local component manager's Connect() method.
+
+    // Get a set of function objects that are bound to the InterfaceLCM's provided
+    // interface.
+    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(connectionDescription.Client.ProcessName);
+    if (!functionSet) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << connectionDescription << std::endl;
+        result = false;
+        return;
+    }
+    mtsExecutionResult executionResult =  functionSet->ComponentConnectNew(connectionDescription, result);
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"ComponentConnect\": " << connectionDescription << std::endl
+                                << " error \"" << executionResult << "\"" << std::endl;
+        result = false;
+    }
+}
 
 // MJ: Another method that does the same thing but accepts a single parameter
 // as connection id should be added.
@@ -367,18 +397,36 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const m
 #endif
 }
 
-void mtsManagerComponentServer::ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg)
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result)
+{
+    // PK: the GCM Disconnect method queue the disconnect request, so we cannot really know if it
+    //     has succeeded.
+    result = GCM->Disconnect(arg);
+    if (!result) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnectNew: failed to execute \"Component Disconnect\" for: " << arg << std::endl;
+        return;
+    }
+}
+
+bool mtsManagerComponentServer::ComponentDisconnect(const std::string & processName, const mtsDescriptionConnection & arg)
 {
     // Get a set of function objects that are bound to the InterfaceLCM's provided interface.
     InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(processName);
     if (!functionSet) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to get function set for process \""
             << processName << "\": " << arg << std::endl;
-        return;
+        return false;
     }
 
+    bool result = true;
+#if CISST_MTS_NEW
+    //functionSet->ComponentDisconnectNew(arg, result);
+    result = false;   // PK HACK: actually works better if we don't call ComponentDisconnect or ComponentDisconnectNew
+#else
     //functionSet->ComponentDisconnect.ExecuteBlocking(arg);
     functionSet->ComponentDisconnect(arg);
+#endif
+    return result;
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg)

@@ -19,6 +19,10 @@ else (CMAKE_SIZEOF_VOID_P EQUAL 8)
   set (CISST_MTS_64BIT FALSE)
 endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
 
+# New features (use with caution)
+option (CISST_MTS_NEW "Enable new cisstMultiTask features" OFF)
+mark_as_advanced (CISST_MTS_NEW)
+
 add_subdirectory (code)
 
 # Applications

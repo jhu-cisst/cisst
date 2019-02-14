@@ -1876,7 +1876,7 @@ ConnectionIDType mtsManagerLocal::ConnectSetup(const std::string & clientCompone
         }
         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to register interfaces for component \""
                                  << clientComponentName << "\", " << allOptions.str() << std::endl;
-        return -1;
+        return InvalidConnectionID;
     }
     if (!RegisterInterfaces(serverComponentName)) {
         GetNamesOfComponents(options);
@@ -1888,7 +1888,7 @@ ConnectionIDType mtsManagerLocal::ConnectSetup(const std::string & clientCompone
         }
         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to register interfaces for component \""
                                  << serverComponentName << "\", " << allOptions.str() << std::endl;
-        return -1;
+        return InvalidConnectionID;
     }
 
     const ConnectionIDType connectionID =
