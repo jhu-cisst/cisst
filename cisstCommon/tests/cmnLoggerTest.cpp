@@ -28,16 +28,16 @@ void cmnLoggerTest::TestLoggerFileName(void)
     // Depending on order that tests are run, logger may already be created. This means that we
     // have to trust that cmnLogger::IsCreated is working. To run "Case 2" (logger not yet created),
     // try running just a single test
-    CPPUNIT_ASSERT_EQUAL(std::string("cisstLog.txt"), cmnLogger::GetDefaultLogFileName());
     if (cmnLogger::IsCreated()) {
         std::cout << std::endl << "TestLoggerFileName: Case 1: log file created before test" << std::endl;
+        CPPUNIT_ASSERT_EQUAL(std::string("testLog.txt"), cmnLogger::GetDefaultLogFileName());
         CPPUNIT_ASSERT_EQUAL(false, cmnLogger::SetDefaultLogFileName("testLog.txt"));
-        CPPUNIT_ASSERT_EQUAL(std::string("cisstLog.txt"), cmnLogger::GetDefaultLogFileName());
     }
     else {
         std::cout << std::endl << "TestLoggerFileName: Case 2: log file not created before test" << std::endl;
         if (cmnPath::Exists("testLog.txt"))
             std::cout << "  testLog.txt already exists -- please delete and run test again" << std::endl;
+        CPPUNIT_ASSERT_EQUAL(std::string("cisstLog.txt"), cmnLogger::GetDefaultLogFileName());
         CPPUNIT_ASSERT_EQUAL(true, cmnLogger::SetDefaultLogFileName("testLog.txt"));
         CPPUNIT_ASSERT_EQUAL(std::string("testLog.txt"), cmnLogger::GetDefaultLogFileName());
         // Following call will create log file
