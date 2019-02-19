@@ -65,43 +65,45 @@ void mtsManagerLocalTest::TestInitialize(void)
 
 void mtsManagerLocalTest::TestConstructor(void)
 {
-    mtsManagerLocal localManager;
-    CPPUNIT_ASSERT_EQUAL(localManager.ProcessName, string(DEFAULT_PROCESS_NAME));
-    CPPUNIT_ASSERT(localManager.ManagerGlobal);
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
-    mtsManagerGlobal * GCM = dynamic_cast<mtsManagerGlobal*>(localManager.ManagerGlobal);
+    CPPUNIT_ASSERT_EQUAL(localManager->ProcessName, string(DEFAULT_PROCESS_NAME));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal);
+
+    mtsManagerGlobal * GCM = dynamic_cast<mtsManagerGlobal*>(localManager->ManagerGlobal);
     CPPUNIT_ASSERT(GCM);
 
-    CPPUNIT_ASSERT(GCM->FindProcess(localManager.ProcessName));
-    CPPUNIT_ASSERT(GCM->GetProcessObject(localManager.ProcessName) == &localManager);
+    CPPUNIT_ASSERT(GCM->FindProcess(localManager->ProcessName));
+    CPPUNIT_ASSERT(GCM->GetProcessObject(localManager->ProcessName) == localManager);
 }
 
 void mtsManagerLocalTest::TestCleanup(void)
 {
-    mtsManagerLocal managerLocal;
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
-    CPPUNIT_ASSERT(managerLocal.ManagerGlobal);
+    CPPUNIT_ASSERT(localManager->ManagerGlobal);
     mtsTestDevice1<mtsInt> * dummy = new mtsTestDevice1<mtsInt>;
-    CPPUNIT_ASSERT(managerLocal.ComponentMap.AddItem("dummy", dummy));
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), managerLocal.ComponentMap.size());
+    CPPUNIT_ASSERT(localManager->ComponentMap.AddItem("dummy", dummy));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), localManager->ComponentMap.size());
 
-    managerLocal.Cleanup();
-
-    CPPUNIT_ASSERT(managerLocal.ManagerGlobal == 0);
-    // Changed to 1 because size()==1, Cleanup does not remove items from ComponentMap...
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), managerLocal.ComponentMap.size());
+    localManager->Cleanup();
+    localManager = nullptr;
+      // Cleanup now deletes the singleton (which is == localManager here),
+      // cannot reference localManager after the Cleanup call.
 
     // Add __os_exit() test if needed.
 }
 
 void mtsManagerLocalTest::TestGetInstance(void)
 {
-    mtsManagerLocal * managerLocal = mtsManagerLocal::GetInstance();
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
-    CPPUNIT_ASSERT(managerLocal);
-    CPPUNIT_ASSERT(managerLocal->ManagerGlobal);
-    CPPUNIT_ASSERT_EQUAL(managerLocal, mtsManagerLocal::Instance);
-    CPPUNIT_ASSERT(managerLocal->ManagerGlobal->FindProcess(DEFAULT_PROCESS_NAME));
+    CPPUNIT_ASSERT(localManager);
+    CPPUNIT_ASSERT(localManager->ManagerGlobal);
+    CPPUNIT_ASSERT_EQUAL(localManager, mtsManagerLocal::Instance);
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindProcess(DEFAULT_PROCESS_NAME));
 }
 
 void mtsManagerLocalTest::TestAddComponent(void)
