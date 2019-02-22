@@ -999,6 +999,35 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 }
 
 #if CISST_HAS_JSON
+bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
+{
+    // extract path of main json config file to search other files relative to it
+    cmnPath configPath(cmnPath::GetWorkingDirectory());
+    std::string fullname = configPath.Find(filename);
+    std::string configDir = fullname.substr(0, fullname.find_last_of('/'));
+    configPath.Add(configDir, cmnPath::TAIL);
+    // open json file
+    std::ifstream jsonStream;
+    jsonStream.open(filename.c_str());
+    Json::Value jsonConfig;
+    Json::Reader jsonReader;
+    if (!jsonReader.parse(jsonStream, jsonConfig)) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: failed to parse configuration" << std::endl
+                                 << "File: " << filename << std::endl
+                                 << "Error(s):" << std::endl
+                                 << jsonReader.getFormattedErrorMessages();
+        return false;
+    }
+
+    if (jsonConfig.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: failed to configure component-manager, the file "
+                                 << filename << " seems to be empty" << std::endl;
+        return false;
+    }
+
+    return this->ConfigureJSON(jsonConfig, configPath);
+}
+
 bool mtsManagerLocal::ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath)
 {
     const Json::Value components = configuration["components"];
