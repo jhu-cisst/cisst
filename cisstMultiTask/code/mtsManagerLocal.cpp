@@ -1205,6 +1205,13 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
     const cmnClassServicesBase * argumentClassServices = componentClassServices->GetConstructorArgServices();
     CMN_ASSERT(argumentClassServices); // this should not fail
     cmnGenericObject * argument = argumentClassServices->Create();
+    if (!argument) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: unable to create a constructor argument for "
+                                 << className
+                                 << ".  Make sure the macro CMN_IMPLEMENT_SERVICE_xx is correct for this class."
+                                 << std::endl;
+        return 0;
+    }
     // then deserialize from JSON value...
     Json::Value jsonValue;
     Json::Reader reader;
