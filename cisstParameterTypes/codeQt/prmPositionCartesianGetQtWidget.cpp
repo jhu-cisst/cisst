@@ -42,7 +42,7 @@ prmPositionCartesianGetQtWidget::prmPositionCartesianGetQtWidget(void):
     topLayout->addStretch();
 
     QLTime = new QLabel("Time");
-    QLTime->setStyleSheet("QLabel { background-color: red }");
+    QLTime->setStyleSheet("QLabel { background-color: rgb(255, 100, 100) }");
     topLayout->addWidget(QLTime);
 
     QFPosition = new vctQtWidgetFrameDoubleRead(vctQtWidgetRotationDoubleRead::OPENGL_WIDGET);
@@ -69,7 +69,7 @@ void prmPositionCartesianGetQtWidget::SetValue(const prmPositionCartesianGet & n
     QTime time(0, 0);
     QLTime->setText(time.addSecs(static_cast<int>(newValue.Timestamp())).toString("hh:mm:ss"));
     if (newValue.Valid()) {
-        QLTime->setStyleSheet("QLabel { background-color: rgb(100, 255, 100) }");
+        QLTime->setStyleSheet("QLabel { background-color: rgb(50, 255, 50) }");
     } else {
         QLTime->setStyleSheet("QLabel { background-color: rgb(255, 100, 100) }");
     }
