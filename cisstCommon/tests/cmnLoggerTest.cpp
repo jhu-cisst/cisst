@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):  Peter Kazanzides
   Created on: 2018-12-16
-  
-  (C) Copyright 2018 Johns Hopkins University (JHU), All Rights Reserved.
+
+  (C) Copyright 2018-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,12 +35,12 @@ void cmnLoggerTest::TestLoggerFileName(void)
     else {
         std::cout << std::endl << "TestLoggerFileName: Case 2: log file not created before test" << std::endl;
         if (cmnPath::Exists("testLog.txt")) {
-            std::cout << "  testLog.txt already exists -- please delete and run test again" << std::endl;
+            cmnPath::DeleteFile("testLog.txt");
+            CPPUNIT_ASSERT(!cmnPath::Exists("testLog.txt"));
         }
-        if (!setDefaultLogFileName) {
-            CPPUNIT_ASSERT_EQUAL(true, cmnLogger::SetDefaultLogFileName("testLog.txt"));
-            setDefaultLogFileName = true;
-        }
+        CPPUNIT_ASSERT_EQUAL(true, cmnLogger::SetDefaultLogFileName("testLog.txt"));
+        setDefaultLogFileName = true;
+
         CPPUNIT_ASSERT_EQUAL(std::string("testLog.txt"), cmnLogger::GetDefaultLogFileName());
         // Following call will create log file
         CMN_LOG_RUN_VERBOSE << "TestLoggerFileName: Creating log file" << std::endl;
