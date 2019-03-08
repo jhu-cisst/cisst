@@ -65,49 +65,55 @@ void mtsManagerLocalTest::TestInitialize(void)
 
 void mtsManagerLocalTest::TestConstructor(void)
 {
-    mtsManagerLocal localManager;
-    CPPUNIT_ASSERT_EQUAL(localManager.ProcessName, string(DEFAULT_PROCESS_NAME));
-    CPPUNIT_ASSERT(localManager.ManagerGlobal);
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
-    mtsManagerGlobal * GCM = dynamic_cast<mtsManagerGlobal*>(localManager.ManagerGlobal);
+    CPPUNIT_ASSERT_EQUAL(localManager->ProcessName, string(DEFAULT_PROCESS_NAME));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal);
+
+    mtsManagerGlobal * GCM = dynamic_cast<mtsManagerGlobal*>(localManager->ManagerGlobal);
     CPPUNIT_ASSERT(GCM);
 
-    CPPUNIT_ASSERT(GCM->FindProcess(localManager.ProcessName));
-    CPPUNIT_ASSERT(GCM->GetProcessObject(localManager.ProcessName) == &localManager);
+    CPPUNIT_ASSERT(GCM->FindProcess(localManager->ProcessName));
+    CPPUNIT_ASSERT(GCM->GetProcessObject(localManager->ProcessName) == localManager);
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 void mtsManagerLocalTest::TestCleanup(void)
 {
-    mtsManagerLocal managerLocal;
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
-    CPPUNIT_ASSERT(managerLocal.ManagerGlobal);
+    CPPUNIT_ASSERT(localManager->ManagerGlobal);
     mtsTestDevice1<mtsInt> * dummy = new mtsTestDevice1<mtsInt>;
-    CPPUNIT_ASSERT(managerLocal.ComponentMap.AddItem("dummy", dummy));
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), managerLocal.ComponentMap.size());
+    CPPUNIT_ASSERT(localManager->ComponentMap.AddItem("dummy", dummy));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), localManager->ComponentMap.size());
 
-    managerLocal.Cleanup();
+    localManager->Cleanup();
 
-    CPPUNIT_ASSERT(managerLocal.ManagerGlobal == 0);
+    CPPUNIT_ASSERT(localManager->ManagerGlobal == 0);
     // Changed to 1 because size()==1, Cleanup does not remove items from ComponentMap...
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), managerLocal.ComponentMap.size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), localManager->ComponentMap.size());
 
     // Add __os_exit() test if needed.
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 void mtsManagerLocalTest::TestGetInstance(void)
 {
-    mtsManagerLocal * managerLocal = mtsManagerLocal::GetInstance();
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
-    CPPUNIT_ASSERT(managerLocal);
-    CPPUNIT_ASSERT(managerLocal->ManagerGlobal);
-    CPPUNIT_ASSERT_EQUAL(managerLocal, mtsManagerLocal::Instance);
-    CPPUNIT_ASSERT(managerLocal->ManagerGlobal->FindProcess(DEFAULT_PROCESS_NAME));
+    CPPUNIT_ASSERT(localManager);
+    CPPUNIT_ASSERT(localManager->ManagerGlobal);
+    CPPUNIT_ASSERT_EQUAL(localManager, mtsManagerLocal::Instance);
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindProcess(DEFAULT_PROCESS_NAME));
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 void mtsManagerLocalTest::TestAddComponent(void)
 {
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     // Test with mtsComponent type components
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
@@ -131,9 +137,6 @@ void mtsManagerLocalTest::TestAddComponent(void)
     CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p1"));
     CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p2"));
 
-    // Not really necessary, but start with a clean slate.
-    localManager->RemoveAllUserComponents();
-
     // Test with mtsTask type components
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
 
@@ -155,12 +158,13 @@ void mtsManagerLocalTest::TestAddComponent(void)
     CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceRequiredOrInput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "r1"));
     CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p1"));
     CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p2"));
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 void mtsManagerLocalTest::TestFindComponent(void)
 {
     mtsManagerLocal *localManager = mtsManagerLocal::GetInstance();
-    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     const std::string componentName = device1->GetName();
@@ -171,12 +175,13 @@ void mtsManagerLocalTest::TestFindComponent(void)
 
     CPPUNIT_ASSERT(localManager->RemoveComponent(componentName));
     CPPUNIT_ASSERT(!localManager->FindComponent(componentName));
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 void mtsManagerLocalTest::TestRemoveComponent(void)
 {
     mtsManagerLocal *localManager = mtsManagerLocal::GetInstance();
-    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     const std::string componentName1 = device1->GetName();
@@ -196,9 +201,6 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
     CPPUNIT_ASSERT(localManager->RemoveComponent(device1));
     CPPUNIT_ASSERT(!localManager->FindComponent(componentName1));
 
-    // Not really necessary, but start with a clean slate.
-    localManager->RemoveAllUserComponents();
-
     mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
     const std::string componentName2 = periodic1->GetName();
 
@@ -212,12 +214,13 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
     CPPUNIT_ASSERT(localManager->FindComponent(componentName2));
     CPPUNIT_ASSERT(localManager->RemoveComponent(periodic1));
     CPPUNIT_ASSERT(!localManager->FindComponent(componentName2));
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 void mtsManagerLocalTest::TestRegisterInterfaces(void)
 {
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsManagerGlobal * globalManager = dynamic_cast<mtsManagerGlobal *>(localManager->ManagerGlobal);
     CPPUNIT_ASSERT(globalManager);
@@ -256,13 +259,14 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
     // Check updated values of GCM
     CPPUNIT_ASSERT(globalManager->FindInterfaceRequiredOrInput("LCM", componentName, requiredInterface->GetName()));
     CPPUNIT_ASSERT(globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, providedInterface->GetName()));
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 
 void mtsManagerLocalTest::TestGetComponent(void)
 {
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
@@ -280,13 +284,14 @@ void mtsManagerLocalTest::TestGetComponent(void)
     CPPUNIT_ASSERT(device1 == localManager->GetComponent(device1->GetName()));
     CPPUNIT_ASSERT(device2 == localManager->GetComponent(device2->GetName()));
     CPPUNIT_ASSERT(device3 == localManager->GetComponent(device3->GetName()));
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 
 void mtsManagerLocalTest::TestGetNamesOfComponents(void)
 {
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
     mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
@@ -338,13 +343,18 @@ void mtsManagerLocalTest::TestGetNamesOfComponents(void)
     CPPUNIT_ASSERT(found1);
     CPPUNIT_ASSERT(found2);
     CPPUNIT_ASSERT(found3);
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 
 void mtsManagerLocalTest::TestGetProcessName(void)
 {
-    mtsManagerLocal localManager;
-    CPPUNIT_ASSERT_EQUAL(localManager.GetProcessName(), std::string(DEFAULT_PROCESS_NAME));
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+
+    CPPUNIT_ASSERT_EQUAL(localManager->GetProcessName(), std::string(DEFAULT_PROCESS_NAME));
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 
@@ -352,7 +362,6 @@ void mtsManagerLocalTest::TestConnectDisconnect(void)
 {
     // Local connection test
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
@@ -390,12 +399,13 @@ void mtsManagerLocalTest::TestConnectDisconnect(void)
     CPPUNIT_ASSERT(localManager->Connect(periodic1->GetName(), "r2", continuous1->GetName(), "p2"));
     CPPUNIT_ASSERT(localManager->Connect(device2->GetName(), "r1", continuous1->GetName(), "p2"));
     CPPUNIT_ASSERT(localManager->Connect(fromCallback1->GetName(), "r1", continuous1->GetName(), "p2"));
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 void mtsManagerLocalTest::TestConnectLocally(void)
 {
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-    localManager->RemoveAllUserComponents();  // Clean up from previous tests
 
     mtsTestDevice1<mtsInt> * client = new mtsTestDevice1<mtsInt>;
     mtsTestDevice2<mtsInt> * server = new mtsTestDevice2<mtsInt>;
@@ -425,6 +435,8 @@ void mtsManagerLocalTest::TestConnectLocally(void)
     const mtsInterfaceProvided *serverPtr = server->GetInterfaceProvided("p1");
     CPPUNIT_ASSERT(serverPtr);
     CPPUNIT_ASSERT_EQUAL(clientPtr->GetName(), mtsInterfaceProvided::GenerateEndUserInterfaceName(serverPtr, "r1"));
+
+    mtsManagerLocal::DeleteInstance();
 }
 
 #if CISST_MTS_HAS_ICE
