@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -267,6 +267,15 @@ bool cmnPath::GetCisstShare(std::string & result)
 bool cmnPath::Exists(const std::string & fullPath, short mode)
 {
     if (access(fullPath.c_str(), mode) == 0) {
+        return true;
+    }
+    return false;
+}
+
+
+bool cmnPath::DeleteFile(const std::string & fullPath)
+{
+    if (remove(fullPath.c_str()) == 0) {
         return true;
     }
     return false;

@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2003-12-16
 
-  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,8 +40,13 @@ public:
 
     /*! Helper function to throw an exception whenever sizes mismatch.
       This enforces that a standard message is sent. */
-    inline static void ThrowSizeMismatchException(void) CISST_THROW(std::runtime_error) {
-        cmnThrow(std::runtime_error("vctDynamicMatrixLoopEngines: Sizes of matrices don't match"));
+    template <typename _nsize_type>
+    inline static void ThrowSizeMismatchException(const _nsize_type & expected,
+                                                  const _nsize_type & received) CISST_THROW(std::runtime_error) {
+        std::stringstream message;
+        message << "vctDynamicMatrixLoopEngines: Sizes of matrices don't match, expected: [" << expected
+                << "], received: [" << received << "]";
+        cmnThrow(std::runtime_error(message.str()));
     }
 
     /*! Helper function to throw an exception whenever the output has
@@ -115,11 +120,13 @@ public:
 
             // check sizes
             if ((rows != input1Owner.rows())
-                || (cols != input1Owner.cols())
-                || (rows != input2Owner.rows())
-                || (cols != input2Owner.cols()))
-            {
-                ThrowSizeMismatchException();
+                || (cols != input1Owner.cols())) {
+                ThrowSizeMismatchException(outputOwner.sizes(),
+                                           input1Owner.sizes());
+            } else if ((rows != input2Owner.rows())
+                       || (cols != input2Owner.cols())) {
+                ThrowSizeMismatchException(outputOwner.sizes(),
+                                           input2Owner.sizes());
             }
 
             // if compact and same strides
@@ -188,7 +195,7 @@ public:
 
             // check sizes
             if ((rows != inputOwner.rows()) || (cols != inputOwner.cols())) {
-                ThrowSizeMismatchException();
+                ThrowSizeMismatchException(outputOwner.sizes(), inputOwner.sizes());
             }
 
             // if compact and same strides
@@ -295,9 +302,8 @@ public:
             const size_type cols = inputOutputOwner.cols();
 
             // check sizes
-            if ((rows != inputOwner.rows()) || (cols != inputOwner.cols()))
-            {
-                ThrowSizeMismatchException();
+            if ((rows != inputOwner.rows()) || (cols != inputOwner.cols())) {
+                ThrowSizeMismatchException(inputOutputOwner.sizes(), inputOwner.sizes());
             }
 
             // if compact and same strides
@@ -360,9 +366,8 @@ public:
             const size_type cols = outputOwner.cols();
 
             // check sizes
-            if ((rows != inputOwner.rows()) || (cols != inputOwner.cols()))
-            {
-                ThrowSizeMismatchException();
+            if ((rows != inputOwner.rows()) || (cols != inputOwner.cols())) {
+                ThrowSizeMismatchException(outputOwner.sizes(), inputOwner.sizes());
             }
 
             // if compact and same strides
@@ -426,9 +431,8 @@ public:
             const size_type cols = outputOwner.cols();
 
             // check sizes
-            if ((rows != inputOwner.rows()) || (cols != inputOwner.cols()))
-            {
-                ThrowSizeMismatchException();
+            if ((rows != inputOwner.rows()) || (cols != inputOwner.cols())) {
+                ThrowSizeMismatchException(outputOwner.sizes(), inputOwner.sizes());
             }
 
             // if compact and same strides
@@ -586,7 +590,7 @@ public:
 
             // check sizes
             if ((rows != input2Owner.rows()) || (cols != input2Owner.cols())) {
-                ThrowSizeMismatchException();
+                ThrowSizeMismatchException(input1Owner.sizes(), input2Owner.sizes());
             }
 
             // if compact and same strides
@@ -681,7 +685,7 @@ public:
 
             // check sizes
             if ((rows != inputOwner.rows()) || (cols != inputOwner.cols())) {
-                ThrowSizeMismatchException();
+                ThrowSizeMismatchException(ioOwner.sizes(), inputOwner.sizes());
             }
 
             // if compact and same strides
@@ -776,10 +780,14 @@ public:
             const size_type cols = ioOwner.cols();
 
             // check sizes
-            if ((rows != input1Owner.rows()) || (cols != input1Owner.cols())
-                || (rows != input2Owner.rows()) || (cols != input2Owner.cols())
-                ) {
-                ThrowSizeMismatchException();
+            if ((rows != input1Owner.rows())
+                || (cols != input1Owner.cols())) {
+                ThrowSizeMismatchException(ioOwner.sizes(),
+                                           input1Owner.sizes());
+            } else if ((rows != input2Owner.rows())
+                       || (cols != input2Owner.cols())) {
+                ThrowSizeMismatchException(ioOwner.sizes(),
+                                           input2Owner.sizes());
             }
 
             // if compact and same strides
@@ -901,11 +909,17 @@ public:
             const size_type cols = outputMatrix.cols();
             const size_type input1Cols = input1Matrix.cols();
             // check sizes
-            if ((rows != input1Matrix.rows())
-                || (cols != input2Matrix.cols())
-                || (input1Cols != input2Matrix.rows()))
-            {
-                ThrowSizeMismatchException();
+            if (rows != input1Matrix.rows()) {
+                std::stringstream message;
+                message << "vctDynamicMatrixLoopEngines::Product: Sizes of matrices don't match, expected rows: " << rows
+                        << ", received: " << input1Matrix.rows();
+                cmnThrow(std::runtime_error(message.str()));
+            } else if ((cols != input2Matrix.cols())
+                       || (input1Cols != input2Matrix.rows())) {
+                std::stringstream message;
+                message << "vctDynamicMatrixLoopEngines: Sizes of matrices don't match, expected: ["
+                        << input1Cols << " " << cols << "], received: " << input2Matrix.sizes();
+                cmnThrow(std::runtime_error(message.str()));
             }
 
             // Otherwise
@@ -1036,10 +1050,16 @@ public:
 
             const size_type rows = outputMatrix.rows();
             const size_type cols = outputMatrix.cols();
-            if ((cols != inputMatrix.cols())
-                || (rows != indexVector.size()))
-            {
-                ThrowSizeMismatchException();
+            if (cols != inputMatrix.cols()) {
+                std::stringstream message;
+                message << "vctDynamicMatrixLoopEngines::SelectRowsByIndex: Sizes of matrices don't match, expected cols: "
+                        << cols << ", received: " << inputMatrix.cols();
+                cmnThrow(std::runtime_error(message.str()));
+            } else if (rows != indexVector.size()) {
+                std::stringstream message;
+                message << "vctDynamicMatrixLoopEngines::SelectRowsByIndex: Sizes of matrices don't match, expected rows: "
+                        << rows << ", received: " << indexVector.size();
+                cmnThrow(std::runtime_error(message.str()));
             }
 
             // otherwise

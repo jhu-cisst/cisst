@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -182,6 +182,9 @@ public:
       relative or absolute, this function doesn't use any search
       path. */
     static bool Exists(const std::string & fullPath, short more = READ);
+
+    /*! Delete file.  This function doesn't use any search path. */
+    static bool DeleteFile(const std::string & fullPath);
 
     /*! Construct the shared library name based on OS prefix and
       suffix.  For example, the return value for "MyLib" would be

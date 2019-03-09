@@ -364,12 +364,19 @@ public:
                                               const std::string & constructorArgSerialized);
 
 #if CISST_HAS_JSON
+    /*! Configure using a JSON file.  This method will automatically
+      generate a search path using the current working directory and
+      the directory containing the configuration file (filename).  The
+      search path will be used to locate files that might be used to
+      configure the components dynamically created. */
+    bool ConfigureJSON(const std::string & filename);
+
     /*! Configure using a Json::Value.  This method will look for the
       arrays "components" and "connections" and will then call the
       methods ConfigureComponentJSON and ConfigureConnectionJSON for
       each element found.  The path is used to locate extra
       configuration files potentially used by Configure methods for
-      newly created components. */ 
+      newly created components. */
     bool ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath);
 
     /*! Create, configure and add component based on Json::Value.

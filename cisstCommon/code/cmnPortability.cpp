@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
-  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,7 +45,9 @@ const std::string cmnCompilersStrings[] = {"Undefined",
                                            ".NET 2010",
                                            ".NET 2012",
                                            ".NET 2013",
-                                           "clang"
+                                           "clang",
+                                           ".NET 2015",
+                                           ".NET 2017"
 };
 
 
