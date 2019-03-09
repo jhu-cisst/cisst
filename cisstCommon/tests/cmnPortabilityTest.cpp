@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-08-09
 
-  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -62,7 +61,10 @@ void cmnPortabilityTest::TestWithCMake(void) {
                                           "cl", /* CISST_DOTNET2010 */
                                           "cl", /* CISST_DOTNET2012 */ 
                                           "cl", /* CISST_DOTNET2013 */
-                                          "clang++" };
+                                          "clang++",
+                                          "cl", /* CISST_DOTNET2015 */
+                                          "cl"  /* CISST_DOTNET2017 */
+    };
 
     CPPUNIT_ASSERT_EQUAL(cmnOperatingSystemsStrings[CISST_OS], std::string(CISST_CMAKE_SYSTEM_NAME));
     if (CISST_COMPILER == CISST_GCC) {
@@ -113,6 +115,7 @@ void cmnPortabilityTest::TestWithCMake(void) {
         if (CISST_COMPILER == CISST_DOTNET2010) {
             CPPUNIT_ASSERT_EQUAL(std::string(CISST_CMAKE_GENERATOR), std::string("Visual Studio 10 2010"));
         }
+        // Not bothering to check later versions of Visual Studio
     }
 }
 
