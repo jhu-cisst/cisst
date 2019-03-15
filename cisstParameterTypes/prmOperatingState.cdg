@@ -16,10 +16,34 @@ class {
         is-data true;
     }
 
+    enum {
+        name Enum;
+        enum-value {
+            name VOID;
+            description void;
+        }
+        enum-value {
+            name DISABLED;
+            description disabled;
+        }
+        enum-value {
+            name ENABLED;
+            description enabled;
+        }
+        enum-value {
+            name PAUSED;
+            description paused;
+        }
+        enum-value {
+            name FAULT;
+            description fault;
+        }
+    }
+
     member {
         name State;
-        type std::string;
-        default "UNITIALIZED";
+        type prmOperatingState::Enum;
+        default prmOperatingState::VOID;
         description Operating state, standard states include DISABLED, ENABLED, PAUSED and FAULT;
     }
 

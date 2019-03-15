@@ -71,7 +71,13 @@ void prmOperatingStateQtWidget::SetValue(const prmOperatingState & newValue)
     }
 
     // state
-    QLState->setText(QString(newValue.State().c_str()));
+    std::string state;
+    try {
+        state = prmOperatingState::EnumToString(newValue.State());
+    } catch (...) {
+        state = "VOID";
+    }
+    QLState->setText(QString(state.c_str()));
     if (newValue.IsHomed()) {
         QLIsHomed->setStyleSheet("QLabel { background-color: rgb(100, 255, 100) }");
     } else {
