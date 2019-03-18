@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstParameterTypes Tests
 #
-# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -25,6 +23,7 @@ set (SOURCE_FILES
      prmVelocityJointGetTest.cpp
      prmForceCartesianGetTest.cpp
      prmTransformationManagerTests.cpp
+     prmOperatingStateTest.cpp
      )
 
 # all header files
@@ -38,6 +37,7 @@ set (HEADER_FILES
      prmVelocityJointGetTest.h
      prmForceCartesianGetTest.h
      prmTransformationManagerTests.h
+     prmOperatingStateTest.h
      )
 
 # CppUnit include directories
