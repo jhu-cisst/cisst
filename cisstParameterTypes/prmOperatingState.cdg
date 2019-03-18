@@ -19,8 +19,8 @@ class {
     enum {
         name Enum;
         enum-value {
-            name VOID;
-            description void;
+            name UNDEFINED;
+            description undefined;
         }
         enum-value {
             name DISABLED;
@@ -43,7 +43,7 @@ class {
     member {
         name State;
         type prmOperatingState::Enum;
-        default prmOperatingState::VOID;
+        default prmOperatingState::UNDEFINED;
         description Operating state, standard states include DISABLED, ENABLED, PAUSED and FAULT;
     }
 
