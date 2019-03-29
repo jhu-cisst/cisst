@@ -999,6 +999,35 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 }
 
 #if CISST_HAS_JSON
+bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
+{
+    // extract path of main json config file to search other files relative to it
+    cmnPath configPath(cmnPath::GetWorkingDirectory());
+    std::string fullname = configPath.Find(filename);
+    std::string configDir = fullname.substr(0, fullname.find_last_of('/'));
+    configPath.Add(configDir, cmnPath::TAIL);
+    // open json file
+    std::ifstream jsonStream;
+    jsonStream.open(filename.c_str());
+    Json::Value jsonConfig;
+    Json::Reader jsonReader;
+    if (!jsonReader.parse(jsonStream, jsonConfig)) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: failed to parse configuration" << std::endl
+                                 << "File: " << filename << std::endl
+                                 << "Error(s):" << std::endl
+                                 << jsonReader.getFormattedErrorMessages();
+        return false;
+    }
+
+    if (jsonConfig.empty()) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: failed to configure component-manager, the file "
+                                 << filename << " seems to be empty" << std::endl;
+        return false;
+    }
+
+    return this->ConfigureJSON(jsonConfig, configPath);
+}
+
 bool mtsManagerLocal::ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath)
 {
     const Json::Value components = configuration["components"];
@@ -1205,6 +1234,13 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
     const cmnClassServicesBase * argumentClassServices = componentClassServices->GetConstructorArgServices();
     CMN_ASSERT(argumentClassServices); // this should not fail
     cmnGenericObject * argument = argumentClassServices->Create();
+    if (!argument) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: unable to create a constructor argument for "
+                                 << className
+                                 << ".  Make sure the macro CMN_IMPLEMENT_SERVICE_xx is correct for this class."
+                                 << std::endl;
+        return 0;
+    }
     // then deserialize from JSON value...
     Json::Value jsonValue;
     Json::Reader reader;

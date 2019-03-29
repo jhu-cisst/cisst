@@ -157,6 +157,8 @@ void mtsTask::StartupInternal(void) {
         CMN_LOG_CLASS_INIT_ERROR << "StartupInternal: task \"" << this->GetName() << "\" cannot be started." << std::endl;
     }
     CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
+    // advance all state tables (if automatic)
+    StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
     RunEvent();
 }
 

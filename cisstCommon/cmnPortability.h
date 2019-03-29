@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
-  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -171,26 +170,26 @@ http://www.cisst.org/cisst/license.txt.
       #define CISST_COMPILER_IS_MSVC_64
     #endif
 
-    #if (_MSC_VER == 1200)
-      #define CISST_COMPILER CISST_VCPP6
-    #elif (_MSC_VER == 1300)
-      #define CISST_COMPILER CISST_DOTNET7
-    #elif (_MSC_VER == 1310)
-      #define CISST_COMPILER CISST_DOTNET2003
-    #elif (_MSC_VER == 1400)
-      #define CISST_COMPILER CISST_DOTNET2005
-    #elif (_MSC_VER == 1500)
-      #define CISST_COMPILER CISST_DOTNET2008
-    #elif (_MSC_VER == 1600)
-      #define CISST_COMPILER CISST_DOTNET2010
-    #elif (_MSC_VER == 1700)
-      #define CISST_COMPILER CISST_DOTNET2012
-    #elif (_MSC_VER >= 1800)
-      #define CISST_COMPILER CISST_DOTNET2013
+    #if (_MSC_VER >= 1910)
+      #define CISST_COMPILER CISST_DOTNET2017
     #elif (_MSC_VER >= 1900)
       #define CISST_COMPILER CISST_DOTNET2015
-    #elif (_MSC_VER >= 1910)
-      #define CISST_COMPILER CISST_DOTNET2017
+    #elif (_MSC_VER >= 1800)
+      #define CISST_COMPILER CISST_DOTNET2013
+    #elif (_MSC_VER >= 1700)
+      #define CISST_COMPILER CISST_DOTNET2012
+    #elif (_MSC_VER >= 1600)
+      #define CISST_COMPILER CISST_DOTNET2010
+    #elif (_MSC_VER >= 1500)
+      #define CISST_COMPILER CISST_DOTNET2008
+    #elif (_MSC_VER >= 1400)
+      #define CISST_COMPILER CISST_DOTNET2005
+    #elif (_MSC_VER >= 1310)
+      #define CISST_COMPILER CISST_DOTNET2003
+    #elif (_MSC_VER >= 1300)
+      #define CISST_COMPILER CISST_DOTNET7
+    #elif (_MSC_VER >= 1200)
+      #define CISST_COMPILER CISST_VCPP6
     #endif
   #endif
 

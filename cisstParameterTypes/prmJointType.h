@@ -42,7 +42,7 @@ inline std::string cmnDataHumanReadable(const prmJointType & data)
 {
     switch (data) {
     case PRM_JOINT_UNDEFINED:
-        return "undefine";
+        return "undefined";
         break;
     case PRM_JOINT_PRISMATIC:
         return "prismatic";
