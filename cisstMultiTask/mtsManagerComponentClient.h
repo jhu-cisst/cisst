@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -76,7 +76,9 @@ protected:
         mtsFunctionWriteReturn ComponentCreate;
         mtsFunctionWrite ComponentConfigure;
         mtsFunctionWrite ComponentConnect;
+        mtsFunctionWriteReturn ComponentConnectNew;  // for CISST_MTS_NEW
         mtsFunctionWrite ComponentDisconnect;
+        mtsFunctionWriteReturn ComponentDisconnectNew;  // for CISST_MTS_NEW
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
@@ -115,6 +117,7 @@ protected:
     struct GeneralInterfaceStruct {
         osaMutex Mutex;
         mtsFunctionWrite ComponentConnect;
+        mtsFunctionWriteReturn ComponentConnectNew;  // for CISST_MTS_NEW
     } GeneralInterface;
 
     /*! \brief Connect two local interfaces.
@@ -163,7 +166,9 @@ protected:
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
     void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
+    void InterfaceLCMCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result);
     void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
+    void InterfaceLCMCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
@@ -187,7 +192,9 @@ protected:
     void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
     void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
+    void InterfaceComponentCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result);
     void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
+    void InterfaceComponentCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentResume(const mtsComponentStatusControl & arg);
