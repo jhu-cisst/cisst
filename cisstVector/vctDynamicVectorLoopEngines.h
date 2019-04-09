@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on:  2004-07-01
 
-  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -67,8 +67,11 @@ class vctDynamicVectorLoopEngines {
 
     /*! Helper function to throw an exception whenever sizes mismatch.
       This enforces that a standard message is sent. */
-    inline static void ThrowException(void) CISST_THROW(std::runtime_error) {
-        cmnThrow(std::runtime_error("vctDynamicVectorLoopEngines: Sizes of vectors don't match"));
+    inline static void ThrowException(const size_t expected, const size_t received) CISST_THROW(std::runtime_error) {
+        std::stringstream message;
+        message << "vctDynamicVectorLoopEngines: Sizes of vectors don't match, expected: " << expected
+                << ", received: " << received;
+        cmnThrow(std::runtime_error(message.str()));
     }
 
 
@@ -124,9 +127,10 @@ class vctDynamicVectorLoopEngines {
             OutputOwnerType & outputOwner = outputVector.Owner();
 
             const size_type size = outputOwner.size();
-            if ((size != input1Owner.size())
-                || (size != input2Owner.size())) {
-                ThrowException();
+            if (size != input1Owner.size()) {
+                ThrowException(size, input1Owner.size());
+            } else if (size != input2Owner.size()) {
+                ThrowException(size, input2Owner.size());
             }
 
             // if all are compact
@@ -203,7 +207,7 @@ class vctDynamicVectorLoopEngines {
 
             const size_type size = inputOutputOwner.size();
             if (size != inputOwner.size()) {
-                ThrowException();
+                ThrowException(size, inputOwner.size());
             }
 
             const stride_type inputOutputStride = inputOutputOwner.stride();
@@ -277,7 +281,7 @@ class vctDynamicVectorLoopEngines {
 
             const size_type size = inputOutput1Owner.size();
             if (size != inputOutput2Owner.size()) {
-                ThrowException();
+                ThrowException(size, inputOutput2Owner.size());
             }
 
             const stride_type inputOutput1Stride = inputOutput1Owner.stride();
@@ -352,7 +356,7 @@ class vctDynamicVectorLoopEngines {
 
             const size_type size = outputOwner.size();
             if (size != inputOwner.size()) {
-                ThrowException();
+                ThrowException(size, inputOwner.size());
             }
 
             const stride_type outputStride = outputOwner.stride();
@@ -427,7 +431,7 @@ class vctDynamicVectorLoopEngines {
 
             const size_type size = outputOwner.size();
             if (size != inputOwner.size()) {
-                ThrowException();
+                ThrowException(size, inputOwner.size());
             }
 
             const stride_type outputStride = outputOwner.stride();
@@ -557,7 +561,7 @@ class vctDynamicVectorLoopEngines {
 
             const size_type size = outputOwner.size();
             if (size != inputOwner.size()) {
-                ThrowException();
+                ThrowException(size, inputOwner.size());
             }
 
             // if both are compact
@@ -758,7 +762,7 @@ class vctDynamicVectorLoopEngines {
 
             const size_type size = input1Owner.size();
             if (size != input2Owner.size()) {
-                ThrowException();
+                ThrowException(size, input2Owner.size());
             }
 
             const stride_type input1Stride = input1Owner.stride();
@@ -838,7 +842,7 @@ class vctDynamicVectorLoopEngines {
 
             const size_type size = ioOwner.size();
             if (size != inputOwner.size()) {
-                ThrowException();
+                ThrowException(size, inputOwner.size());
             }
 
             const stride_type ioStride = ioOwner.stride();
@@ -917,9 +921,10 @@ class vctDynamicVectorLoopEngines {
             const Input2OwnerType & input2Owner = input2Vector.Owner();
 
             const size_type size = ioOwner.size();
-            if ((size != input1Owner.size())
-                || (size != input2Owner.size())) {
-                ThrowException();
+            if (size != input1Owner.size()) {
+                ThrowException(size, input1Owner.size());
+            } else if (size != input2Owner.size()) {
+                ThrowException(size, input2Owner.size());
             }
 
             const stride_type ioStride = ioOwner.stride();
@@ -1099,7 +1104,7 @@ class vctDynamicVectorLoopEngines {
 
             const size_type size = output.size();
             if (size != index.size()) {
-                ThrowException();
+                ThrowException(size, index.size());
             }
 
             const stride_type outputStride = output.stride();
@@ -1126,4 +1131,3 @@ class vctDynamicVectorLoopEngines {
 
 
 #endif  // _vctDynamicVectorLoopEngines_h
-

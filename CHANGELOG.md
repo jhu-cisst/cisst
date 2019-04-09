@@ -1,6 +1,55 @@
 Change log
 ==========
 
+1.0.11 (2019-04-09)
+===================
+
+* API changes:
+  * None
+* Deprecated features:
+  * None
+* New features:
+  * General:
+    * Updated jsoncpp version when using external project
+    * By default, look for jsoncpp installed with OS on Linux
+    * Added Ubuntu 16.04 for travis
+  * cisstCommon:
+    * cisstConfig: added CISST_EXECUTABLE_SUFFIX
+    * cmnPath::Executable to create OS dependent executable name
+    * cmnPath: added DeleteFile static method
+    * cmnLogger: added method to set/get default log file name
+  * cisstVector:
+    * vctMatrixRotation3: constructor from BaseType is now implicit
+    * Rotation and vector widgets: added ket press to reset orientation
+    * Dynamic vector and matrices: exception message for size mismatch now includes expected and received sizes
+  * cisstMultiTask:
+    * mtsManagerLocal: added RemoveAllUserComponents
+    * mtsManagerLocal: added ConfigureJSON(filename)
+    * mtsManagerLocal: better error messages if dynamic creation fails
+    * mtsTask: State tables now advance once in Startup method (if automatic)
+  * cisstRobot:
+    * robManipulator: added methods Set/GetJointLimits using vectors
+  * cisstParameterTypes:
+    * prmForceCartesianGet: added MovingFrame string member
+    * prmOperatingState: added type and widget for crtk compatibility
+    * prmInputDataQtWidget: new widget
+* Bug fixes:
+  * cisstCommon:
+    * Tests: fixed CMake dependency on JSON libraries
+    * Tests: fixed strings for newer Windows compilers and OSs
+    * cisstDataGenerator: fixed human readable output
+  * cisstOSAbstraction:
+    * Tests: use PATH variable to locate osaPipeExec test program
+    * osaPipeExec: new Windows implementation for noWindow case
+    * osaPipeExec: fixed resource leak
+    * osaSocketServer: fix for Windows (based on feedback from dlrdave)
+  * cisstMultiTask:
+    * mtsCommand: fixed infinite recursion in Execute methods
+    * mtsIntervalStatistics: set as valid
+    * Tests: multiple fixes to better control creation of component manager and clear component manager
+  * cisstParameterTypes:
+    * prmEventTypeQtWidget: use switch statement to handle all possible event types
+
 1.0.10 (2018-05-16)
 ===================
 
