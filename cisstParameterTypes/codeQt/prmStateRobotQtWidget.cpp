@@ -54,8 +54,8 @@ prmStateRobotQtWidgetComponent::prmStateRobotQtWidgetComponent(const std::string
     // Setup CISST Interface
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
     if (interfaceRequired) {
-        interfaceRequired->AddFunction("GetStateJoint", GetStateJoint);
-        interfaceRequired->AddFunction("GetPositionCartesian", GetPositionCartesian);
+        interfaceRequired->AddFunction("measured_js", GetStateJoint);
+        interfaceRequired->AddFunction("measured_cp", GetPositionCartesian);
     }
     setupUi();
 }
