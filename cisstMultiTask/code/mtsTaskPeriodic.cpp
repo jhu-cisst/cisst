@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -52,7 +52,7 @@ void * mtsTaskPeriodic::RunInternal(void *data)
         ThreadBuddy.WaitForRemainingPeriod();
     }
 
-    CMN_LOG_CLASS_RUN_WARNING << "End of task " << Name << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "RunInternal: End of task " << Name << std::endl;
     CleanupInternal();
     return this->ReturnValue;
 }
