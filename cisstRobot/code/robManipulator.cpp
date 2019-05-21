@@ -892,8 +892,6 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
                          const vctFixedSizeVector<double,6>& fext,
                          double g,
                          const vctFixedSizeVector<double, 3>& z0) const {
-
-  std::cerr << ".";
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
   vctFixedSizeVector<double,3> v    (0.0); // linear velocity
@@ -909,13 +907,16 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
   // torques
   vctDynamicVector<double> tau(links.size(), 0.0);
 
+  // The axis pointing "up"
+  //vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
+
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
   // coordinate frame
   vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1],Rtw0[0][2],
                                 Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
                                 Rtw0[2][0], Rtw0[2][1],Rtw0[2][2] );
-  vd = R.Transpose() * z0 * g;
+  vd = z0 * g;
 
   // Forward recursion
   for(size_t i=0; i<links.size(); i++){
@@ -930,13 +931,25 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
     s  = links[i].CenterOfMass();
     I  = links[i].MomentOfInertia();
 
-    A  = links[i].Orientation( q[i] ).InverseSelf();
+    if( i==0 ){
+      A  = R*links[i].Orientation( q[i] );
+      A = A.InverseSelf();
+    }
+    else
+      A  = links[i].Orientation( q[i] ).InverseSelf();
+
     ps = links[i].PStar();
 
-    w  = A*w  + (z0*qd[i]) ;                      // angular velocity
-    wd = A*wd + (z0*qdd[i]) + ((A*w)%(z0*qd[i])); // angular acceleration wrt i
-    vd = A*((wd%ps) + (w%(w%ps)) + vd);           // linear acceleration
-
+    if (links[i].GetType() == robJoint::HINGE ){
+      w  = A*w  + (z0*qd[i]) ;                      // angular velocity
+      wd = A*wd + (z0*qdd[i]) + ((A*w)%(z0*qd[i])); // angular acceleration wrt i
+      vd = A*((wd%ps) + (w%(w%ps)) + vd);           // linear acceleration
+    }
+    if( links[i].GetType() == robJoint::SLIDER ){
+      vd = A*( (wd%ps) + (w%(w%ps)) + vd ) + 2.0*((A*w)%(z0*qd(i))) + z0*qdd(i);
+      w = A*w;
+      wd = A*wd;
+    }
     vdhat = (wd%s) + (w%(w%s)) + vd;              //
     F[i] = m*vdhat;                               // total force
     N[i] = (I*wd) + (w%(I*w));                    // total moment
@@ -967,7 +980,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
       tau[i] = f*(z0);                       //
 
   }
-
+    
   return tau;
 }
 
