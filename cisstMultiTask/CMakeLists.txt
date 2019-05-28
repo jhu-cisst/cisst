@@ -21,6 +21,10 @@ else (CMAKE_SIZEOF_VOID_P EQUAL 8)
   set (CISST_MTS_64BIT FALSE)
 endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
 
+# New features (use with caution)
+option (CISST_MTS_NEW "Enable new cisstMultiTask features" OFF)
+mark_as_advanced (CISST_MTS_NEW)
+
 # ZeroC ICE
 option (CISST_MTS_HAS_ICE "Enable inter-process communication (IPC) feature of cisstMultiTask, requires ICE from ZeroC" OFF)
 mark_as_advanced (CISST_MTS_HAS_ICE)

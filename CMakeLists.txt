@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -70,7 +70,7 @@ endif (CISST_BUILD_SHARED_LIBS)
 # Set the version number
 set (CISST_VERSION_MAJOR "1")
 set (CISST_VERSION_MINOR "0")
-set (CISST_VERSION_PATCH "10")
+set (CISST_VERSION_PATCH "11")
 set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
 
 # To compile examples within this project

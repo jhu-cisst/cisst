@@ -1,7 +1,7 @@
 Change log
 ==========
 
-1.0.11 (2019-03-xx)
+1.0.11 (2019-04-09)
 ===================
 
 * API changes:
@@ -21,7 +21,7 @@ Change log
   * cisstVector:
     * vctMatrixRotation3: constructor from BaseType is now implicit
     * Rotation and vector widgets: added ket press to reset orientation
-    * Dynamic vector and matrices: exception message for size mismatch now includes expected and received sizes   
+    * Dynamic vector and matrices: exception message for size mismatch now includes expected and received sizes
   * cisstMultiTask:
     * mtsManagerLocal: added RemoveAllUserComponents
     * mtsManagerLocal: added ConfigureJSON(filename)
@@ -42,7 +42,7 @@ Change log
     * Tests: use PATH variable to locate osaPipeExec test program
     * osaPipeExec: new Windows implementation for noWindow case
     * osaPipeExec: fixed resource leak
-    * osaSocketServer: fix for Windows (based on feedback from dlrdave) 
+    * osaSocketServer: fix for Windows (based on feedback from dlrdave)
   * cisstMultiTask:
     * mtsCommand: fixed infinite recursion in Execute methods
     * mtsIntervalStatistics: set as valid

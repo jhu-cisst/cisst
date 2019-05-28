@@ -107,6 +107,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     friend class mtsComponentAddLatency;
     friend class mtsSocketProxyClient;
     friend class mtsSocketProxyServer;
+    // for unit-testing
+    friend class mtsManagerLocalTest;
 
  public:
     /*! This type */
