@@ -806,8 +806,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
                      const vctDynamicVector<double>& qd,
                      const vctDynamicVector<double>& qdd,
                      const vctFixedSizeVector<double,6>& fext,
-                     const double g,
-                     const vctFixedSizeVector<double, 3>& z0) const {
+                     const double g) const {
 
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
@@ -824,12 +823,15 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // torques
   vctDynamicVector<double> tau(links.size(), 0.0);
 
+  // The axis pointing "up"
+  vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
+
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
   // coordinate frame
-  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1],Rtw0[0][2],
-                                Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
-                                Rtw0[2][0], Rtw0[2][1],Rtw0[2][2] );
+  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1], Rtw0[0][2],
+                                Rtw0[1][0], Rtw0[1][1], Rtw0[1][2],
+                                Rtw0[2][0], Rtw0[2][1], Rtw0[2][2] );
   vd = R.Transpose() * z0 * g;
 
   // Forward recursion
@@ -890,8 +892,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
                          const vctDynamicVector<double>& qd,
                          const vctDynamicVector<double>& qdd,
                          const vctFixedSizeVector<double,6>& fext,
-                         double g,
-                         const vctFixedSizeVector<double, 3>& z0) const {
+                         double g) const {
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
   vctFixedSizeVector<double,3> v    (0.0); // linear velocity
@@ -908,14 +909,14 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
   vctDynamicVector<double> tau(links.size(), 0.0);
 
   // The axis pointing "up"
-  //vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
+  vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
 
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
   // coordinate frame
-  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1],Rtw0[0][2],
-                                Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
-                                Rtw0[2][0], Rtw0[2][1],Rtw0[2][2] );
+  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1], Rtw0[0][2],
+                                Rtw0[1][0], Rtw0[1][1], Rtw0[1][2],
+                                Rtw0[2][0], Rtw0[2][1], Rtw0[2][2] );
   vd = z0 * g;
 
   // Forward recursion
@@ -980,15 +981,14 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
       tau[i] = f*(z0);                       //
 
   }
-    
+
   return tau;
 }
 
 vctDynamicVector<double>
 robManipulator::CCG( const vctDynamicVector<double>& q,
                      const vctDynamicVector<double>& qd,
-                     double g,
-                     const vctFixedSizeVector<double,3>& z0) const
+                     double g ) const
 {
   if( q.size() != qd.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -1001,15 +1001,13 @@ robManipulator::CCG( const vctDynamicVector<double>& q,
               qd,          // and the joints velocities
               vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
               vctFixedSizeVector<double,6>(0.0), // no external forces
-              g,
-              z0);
+              g );
 }
 
 vctDynamicVector<double>
 robManipulator::CCG_MDH( const vctDynamicVector<double>& q,
                          const vctDynamicVector<double>& qd,
-                         double g,
-                         const vctFixedSizeVector<double,3>& z0) const
+                         double g ) const
 {
   if( q.size() != qd.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -1022,8 +1020,7 @@ robManipulator::CCG_MDH( const vctDynamicVector<double>& q,
                   qd,          // and the joints velocities
                   vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
                   vctFixedSizeVector<double,6>(0.0), // no external forces
-                  g,
-                  z0);
+                  g );
 }
 
 vctFixedSizeVector<double,6>

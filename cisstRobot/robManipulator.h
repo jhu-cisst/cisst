@@ -117,17 +117,14 @@ class CISST_EXPORT robManipulator{
        const vctDynamicVector<double>& qd,
        const vctDynamicVector<double>& qdd,
        const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
-       double g = 9.81,
-       const vctFixedSizeVector<double,3>& z0 = vctFixedSizeVector<double, 3>(0.0, 0.0, 1.0)) const;
+       double g = 9.81) const;
 
   vctDynamicVector<double>
   RNE_MDH( const vctDynamicVector<double>& q,
            const vctDynamicVector<double>& qd,
            const vctDynamicVector<double>& qdd,
            const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
-           double g = 9.81,
-           const vctFixedSizeVector<double,3>& z0 = vctFixedSizeVector<double, 3>(0.0, 0.0, 1.0)) const;
-
+           double g = 9.81) const;
 
   //! Coriolis/centrifugal and gravity
   /**
@@ -140,14 +137,12 @@ class CISST_EXPORT robManipulator{
   vctDynamicVector<double>
   CCG( const vctDynamicVector<double>& q,
        const vctDynamicVector<double>& qd,
-       double g = 9.81,
-       const vctFixedSizeVector<double,3>& z0 = vctFixedSizeVector<double, 3>(0.0, 0.0, 1.0)) const;
+       double g = 9.81 ) const;
 
   vctDynamicVector<double>
   CCG_MDH( const vctDynamicVector<double>& q,
            const vctDynamicVector<double>& qd,
-           double g = 9.81,
-           const vctFixedSizeVector<double,3>& z0 = vctFixedSizeVector<double, 3>(0.0, 0.0, 1.0)) const;
+           double g = 9.81 ) const;
 
   //! End-effector accelerations
   /**
