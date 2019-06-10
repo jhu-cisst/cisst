@@ -17,7 +17,7 @@ class {
     }
 
     enum {
-        name Enum;
+        name StateType;
         enum-value {
             name UNDEFINED;
             description undefined;
@@ -40,9 +40,31 @@ class {
         }
     }
 
+    enum {
+        name CommandType;
+        enum-value {
+            name enable;
+        }
+        enum-value {
+            name disable;
+        }
+        enum-value {
+            name pause;
+        }
+        enum-value {
+            name resume;
+        }
+        enum-value {
+            name home;
+        }
+        enum-value {
+            name unhome;
+        }
+    }
+
     member {
         name State;
-        type prmOperatingState::Enum;
+        type prmOperatingState::StateType;
         default prmOperatingState::UNDEFINED;
         description Operating state, standard states include DISABLED, ENABLED, PAUSED and FAULT;
     }
@@ -60,6 +82,10 @@ class {
     inline-header {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    public:
+        bool ValidCommand(const CommandType & command,
+                          StateType & newOperatingState,
+                          std::string & humanReadableMessage);
     }
 }
 

@@ -98,7 +98,7 @@ void prmOperatingStateQtWidget::SetValue(const prmOperatingState & newValue)
     // state
     std::string state;
     try {
-        state = prmOperatingState::EnumToString(newValue.State());
+        state = prmOperatingState::StateTypeToString(newValue.State());
     } catch (...) {
         state = "VOID";
     }

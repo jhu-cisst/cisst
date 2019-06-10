@@ -56,6 +56,8 @@ set (SOURCE_FILES
      prmRobotState.cpp
      prmActuatorParameters.cpp
 
+     prmOperatingState.cpp
+
      prmClassServices.cpp
      )
 
