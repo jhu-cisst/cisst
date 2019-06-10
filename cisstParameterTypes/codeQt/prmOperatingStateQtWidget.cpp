@@ -16,15 +16,21 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstParameterTypes/prmOperatingStateQtWidget.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QTime>
+#include <QMenu>
 
 prmOperatingStateQtWidget::prmOperatingStateQtWidget(void):
     QWidget()
+{
+}
+
+void prmOperatingStateQtWidget::setupUi(void)
 {
     // to be able to signal/slot prmOperatingState
     qRegisterMetaType<prmOperatingState>();
@@ -57,6 +63,25 @@ prmOperatingStateQtWidget::prmOperatingStateQtWidget(void):
 
     QLIsBusy = new QLabel("Busy");
     bottomLayout->addWidget(QLIsBusy);
+
+    // events
+    connect(this, SIGNAL(SignalOperatingState(prmOperatingState)),
+            this, SLOT(SlotOperatingStateEventHandler(prmOperatingState)));
+
+    // context menu
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+            this, SLOT(ShowContextMenu(const QPoint&)));
+
+}
+
+void prmOperatingStateQtWidget::SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired)
+{
+    if (interfaceRequired) {
+        interfaceRequired->AddEventHandlerWrite(&prmOperatingStateQtWidget::OperatingStateEventHandler,
+                                                this, "OperatingState");
+        interfaceRequired->AddFunction("OperatingStateCommand", mStateCommand);
+    }
 }
 
 void prmOperatingStateQtWidget::SetValue(const prmOperatingState & newValue)
@@ -88,4 +113,50 @@ void prmOperatingStateQtWidget::SetValue(const prmOperatingState & newValue)
     } else {
         QLIsBusy->setText("Available");
     }
+}
+
+void prmOperatingStateQtWidget::ShowContextMenu(const QPoint & pos)
+{
+    QPoint globalPos = this->mapToGlobal(pos);
+    QMenu menu;
+    QAction * enable = new QAction("Enable", this);
+    menu.addAction(enable);
+    QAction * disable = new QAction("Disable", this);
+    menu.addAction(disable);
+    QAction * pause = new QAction("Pause", this);
+    menu.addAction(pause);
+    QAction * resume = new QAction("Resume", this);
+    menu.addAction(resume);
+    QAction * home = new QAction("Home", this);
+    menu.addAction(home);
+    QAction * unhome = new QAction("Unhome", this);
+    menu.addAction(unhome);
+
+    QAction * selectedItem = menu.exec(globalPos);
+    
+    if (selectedItem) {
+        if (selectedItem == enable) {
+            mStateCommand(std::string("enable"));
+        } else if (selectedItem == disable) {
+            mStateCommand(std::string("disable"));
+        } else if (selectedItem == pause) {
+            mStateCommand(std::string("pause"));
+        } else if (selectedItem == resume) {
+            mStateCommand(std::string("resume"));
+        } else if (selectedItem == home) {
+            mStateCommand(std::string("home"));
+        } else if (selectedItem == unhome) {
+            mStateCommand(std::string("unhome"));
+        }
+    }
+}
+
+void prmOperatingStateQtWidget::OperatingStateEventHandler(const prmOperatingState & state)
+{
+    emit SignalOperatingState(state);
+}
+
+void prmOperatingStateQtWidget::SlotOperatingStateEventHandler(const prmOperatingState & state)
+{
+    this->SetValue(state);
 }
