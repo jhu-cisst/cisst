@@ -79,8 +79,8 @@ void prmOperatingStateQtWidget::SetInterfaceRequired(mtsInterfaceRequired * inte
 {
     if (interfaceRequired) {
         interfaceRequired->AddEventHandlerWrite(&prmOperatingStateQtWidget::OperatingStateEventHandler,
-                                                this, "OperatingState");
-        interfaceRequired->AddFunction("OperatingStateCommand", mStateCommand);
+                                                this, "operating_state");
+        interfaceRequired->AddFunction("state_command", mStateCommand);
     }
 }
 
