@@ -32,6 +32,7 @@ set (SOURCE_FILES
      cmnRandomSequence.cpp
      cmnSerializer.cpp
      cmnStreamRawParser.cpp
+     cmnStrings.cpp
      cmnPath.cpp
      cmnPrintf.cpp
      cmnTokenizer.cpp
