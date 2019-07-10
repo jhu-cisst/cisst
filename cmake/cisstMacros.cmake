@@ -550,8 +550,10 @@ function (cisst_add_swig_module ...)
                                  PROPERTIES SWIG_FLAGS "-v;-modern;-fvirtual")
     # finally create the swig project using CMake command
     set (MODULE_NAME ${MODULE}Python)
-    cisst_cmake_debug ("cisst_add_swig_module: swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})")
-    swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})
+    cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
+    swig_add_library (${MODULE_NAME}
+                      LANGUAGE python
+                      SOURCES ${SWIG_INTERFACE_FILE})
     if (WIN32)
       set_target_properties (_${MODULE_NAME} PROPERTIES SUFFIX .pyd)
       set_target_properties (_${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
