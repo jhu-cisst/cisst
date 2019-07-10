@@ -548,6 +548,8 @@ function (cisst_add_swig_module ...)
     # make sure the runtime code is not included
     set_source_files_properties (${SWIG_INTERFACE_FILE}
                                  PROPERTIES SWIG_FLAGS "-v;-modern;-fvirtual")
+    # make sure source file is not used before libraries are build
+    set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES DEPENDS "${MODULE_LINK_LIBRARIES}")                               
     # finally create the swig project using CMake command
     set (MODULE_NAME ${MODULE}Python)
     cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
