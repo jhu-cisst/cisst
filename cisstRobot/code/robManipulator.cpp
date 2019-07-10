@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -806,7 +806,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
                      const vctDynamicVector<double>& qd,
                      const vctDynamicVector<double>& qdd,
                      const vctFixedSizeVector<double,6>& fext,
-                     double g ) const {
+                     const double g) const {
 
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
@@ -829,9 +829,9 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
   // coordinate frame
-  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1],Rtw0[0][2],
-                                Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
-                                Rtw0[2][0], Rtw0[2][1],Rtw0[2][2] );
+  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1], Rtw0[0][2],
+                                Rtw0[1][0], Rtw0[1][1], Rtw0[1][2],
+                                Rtw0[2][0], Rtw0[2][1], Rtw0[2][2] );
   vd = R.Transpose() * z0 * g;
 
   // Forward recursion
@@ -888,9 +888,108 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
 }
 
 vctDynamicVector<double>
-robManipulator::CCG( const vctDynamicVector<double>& q,
-                     const vctDynamicVector<double>& qd ) const {
+robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
+                         const vctDynamicVector<double>& qd,
+                         const vctDynamicVector<double>& qdd,
+                         const vctFixedSizeVector<double,6>& fext,
+                         double g) const {
+  vctFixedSizeVector<double,3> w    (0.0); // angular velocity
+  vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
+  vctFixedSizeVector<double,3> v    (0.0); // linear velocity
+  vctFixedSizeVector<double,3> vd   (0.0); // linear acceleration
+  vctFixedSizeVector<double,3> vdhat(0.0);
 
+  //total moment exerted on each link
+  std::vector<vctFixedSizeVector<double,3> > N(links.size(),
+                                               vctFixedSizeVector<double,3>(0));
+  //total force exerted on each link
+  std::vector<vctFixedSizeVector<double,3> > F(links.size(),
+                                               vctFixedSizeVector<double,3>(0));
+  // torques
+  vctDynamicVector<double> tau(links.size(), 0.0);
+
+  // The axis pointing "up"
+  vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
+
+  // acceleration of link 0
+  // extract the rotation of the base and map the vector [0 0 1] in the robot
+  // coordinate frame
+  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1], Rtw0[0][2],
+                                Rtw0[1][0], Rtw0[1][1], Rtw0[1][2],
+                                Rtw0[2][0], Rtw0[2][1], Rtw0[2][2] );
+  vd = z0 * g;
+
+  // Forward recursion
+  for(size_t i=0; i<links.size(); i++){
+
+    double                          m; // mass
+    vctFixedSizeVector<double,3>    s; // center of mass
+    vctFixedSizeMatrix<double,3,3>  I; // moment of inertia
+    vctMatrixRotation3<double>      A; // iA(i-1)
+    vctFixedSizeVector<double,3>   ps; // distal link
+
+    m  = links[i].Mass();
+    s  = links[i].CenterOfMass();
+    I  = links[i].MomentOfInertia();
+
+    if( i==0 ){
+      A  = R*links[i].Orientation( q[i] );
+      A = A.InverseSelf();
+    }
+    else
+      A  = links[i].Orientation( q[i] ).InverseSelf();
+
+    ps = links[i].PStar();
+
+    if (links[i].GetType() == robJoint::HINGE ){
+      w  = A*w  + (z0*qd[i]) ;                      // angular velocity
+      wd = A*wd + (z0*qdd[i]) + ((A*w)%(z0*qd[i])); // angular acceleration wrt i
+      vd = A*((wd%ps) + (w%(w%ps)) + vd);           // linear acceleration
+    }
+    if( links[i].GetType() == robJoint::SLIDER ){
+      vd = A*( (wd%ps) + (w%(w%ps)) + vd ) + 2.0*((A*w)%(z0*qd(i))) + z0*qdd(i);
+      w = A*w;
+      wd = A*wd;
+    }
+    vdhat = (wd%s) + (w%(w%s)) + vd;              //
+    F[i] = m*vdhat;                               // total force
+    N[i] = (I*wd) + (w%(I*w));                    // total moment
+  }
+
+  // external force applied on the TCP
+  vctFixedSizeVector<double,3> f( fext[0], fext[1], fext[2] );
+  // external moment applied on the TCP
+  vctFixedSizeVector<double,3> n( fext[3], fext[4], fext[5] );
+
+  // Backward recursion
+  for(int i=(int)links.size()-1; 0<=i; i--){
+    vctMatrixRotation3<double>   A;
+    vctFixedSizeVector<double,3> ps(0.0, 0.0, 0.0);
+    vctFixedSizeVector<double,3> s  = links[i].CenterOfMass();
+
+    if(i != (int)links.size()-1){              //
+      A = links[i+1].Orientation( q[i+1] );    //
+      ps = links[i+1].PStar();
+    }
+
+    n = A*n + (s%F[i]) + (ps%(A*f)) + N[i];    // moment externed on i by i-1
+    f = A*f + F[i];                            // force exterted on i by i-1
+
+    if (links[i].GetType() == robJoint::HINGE )
+      tau[i] = n*(z0);                       //
+    if( links[i].GetType() == robJoint::SLIDER )
+      tau[i] = f*(z0);                       //
+
+  }
+
+  return tau;
+}
+
+vctDynamicVector<double>
+robManipulator::CCG( const vctDynamicVector<double>& q,
+                     const vctDynamicVector<double>& qd,
+                     double g ) const
+{
   if( q.size() != qd.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                       << ": Size of q and qd do not match."
@@ -898,12 +997,30 @@ robManipulator::CCG( const vctDynamicVector<double>& q,
     return vctDynamicVector<double>();
   }
 
-
-
   return RNE( q,           // call Newton-Euler with only the joints positions
-          qd,          // and the joints velocities
-              vctDynamicVector<double>( q.size(), 0.0 ),
-              vctFixedSizeVector<double,6>(0.0) );
+              qd,          // and the joints velocities
+              vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
+              vctFixedSizeVector<double,6>(0.0), // no external forces
+              g );
+}
+
+vctDynamicVector<double>
+robManipulator::CCG_MDH( const vctDynamicVector<double>& q,
+                         const vctDynamicVector<double>& qd,
+                         double g ) const
+{
+  if( q.size() != qd.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                      << ": Size of q and qd do not match."
+                      << std::endl;
+    return vctDynamicVector<double>();
+  }
+
+  return RNE_MDH( q,           // call Newton-Euler with only the joints positions
+                  qd,          // and the joints velocities
+                  vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
+                  vctFixedSizeVector<double,6>(0.0), // no external forces
+                  g );
 }
 
 vctFixedSizeVector<double,6>

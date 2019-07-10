@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -117,7 +117,14 @@ class CISST_EXPORT robManipulator{
        const vctDynamicVector<double>& qd,
        const vctDynamicVector<double>& qdd,
        const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
-       double g = 9.81 ) const;
+       double g = 9.81) const;
+
+  vctDynamicVector<double>
+  RNE_MDH( const vctDynamicVector<double>& q,
+           const vctDynamicVector<double>& qd,
+           const vctDynamicVector<double>& qdd,
+           const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
+           double g = 9.81) const;
 
   //! Coriolis/centrifugal and gravity
   /**
@@ -129,7 +136,13 @@ class CISST_EXPORT robManipulator{
   */
   vctDynamicVector<double>
   CCG( const vctDynamicVector<double>& q,
-       const vctDynamicVector<double>& qd ) const;
+       const vctDynamicVector<double>& qd,
+       double g = 9.81 ) const;
+
+  vctDynamicVector<double>
+  CCG_MDH( const vctDynamicVector<double>& q,
+           const vctDynamicVector<double>& qd,
+           double g = 9.81 ) const;
 
   //! End-effector accelerations
   /**
@@ -192,7 +205,7 @@ public:
      \param Rtw0 The offset transformation of the robot base
   */
   robManipulator( const std::string& robotfilename,
-		  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
+                  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
 
   robManipulator( const std::vector<robKinematics *> linkParms,
                   const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
@@ -283,8 +296,8 @@ public:
   virtual
     vctDynamicVector<double>
     InverseDynamics( const vctDynamicVector<double>& q,
-		     const vctDynamicVector<double>& qd,
-		     const vctFixedSizeVector<double,6>& vdwd ) const;
+                     const vctDynamicVector<double>& qd,
+                     const vctFixedSizeVector<double,6>& vdwd ) const;
 
 
   //! Compute Jacobian for kinematics identification

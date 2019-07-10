@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -94,6 +93,10 @@ public:
 
     /*! Returns true if mailbox is full. */
     bool IsFull(void) const;
+
+    /*! Returns number of elements available in mailbox, i.e. the number
+      of slots used. */
+    size_t GetAvailable(void) const;
 
     /*! Set the command to be called after a blocking command is
       de-queued and executed.  This can be used to call a trigger for

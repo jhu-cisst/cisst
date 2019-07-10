@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-12-08
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -85,8 +83,8 @@ protected:
     DisplayModeType DisplayMode;
 protected slots:
     void SliderValueChangedSlot(int value);
-    void DoubleSpinBoxValueChangedSlot(double value);
-    void SpinBoxValueChangedSlot(int value);
+    void DoubleSpinBoxEditingFinishedSlot(void);
+    void SpinBoxEditingFinishedSlot(void);
     void ItemChangedSlot(QTableWidgetItem * item);
 };
 

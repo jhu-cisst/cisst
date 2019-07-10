@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-12-08
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -154,12 +152,12 @@ void vctQtWidgetDynamicVectorWriteBase::SliderValueChangedSlot(int CMN_UNUSED(va
     emit this->valueChanged();
 }
 
-void vctQtWidgetDynamicVectorWriteBase::DoubleSpinBoxValueChangedSlot(double CMN_UNUSED(value))
+void vctQtWidgetDynamicVectorWriteBase::DoubleSpinBoxEditingFinishedSlot(void)
 {
     emit this->valueChanged();
 }
 
-void vctQtWidgetDynamicVectorWriteBase::SpinBoxValueChangedSlot(int CMN_UNUSED(value))
+void vctQtWidgetDynamicVectorWriteBase::SpinBoxEditingFinishedSlot(void)
 {
     emit this->valueChanged();
 }
@@ -326,7 +324,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const vctDyna
                 spinBox->setRange(Minimum, Maximum);
                 spinBox->setDecimals(this->Precision);
                 spinBox->setSingleStep(Step);
-                connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(DoubleSpinBoxValueChangedSlot(double)));
+                connect(spinBox, SIGNAL(editingFinished()), this, SLOT(DoubleSpinBoxEditingFinishedSlot()));
                 this->setCellWidget(0, index, spinBox);
             }
             spinBox->setValue(vector.at(index));
@@ -463,7 +461,7 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const vctDynam
                 spinBox = new QSpinBox();
                 spinBox->setRange(Minimum, Maximum);
                 spinBox->setSingleStep(Step);
-                connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(SpinBoxValueChangedSlot(int)));
+                connect(spinBox, SIGNAL(editingFinished()), this, SLOT(SpinBoxEditingFinishedSlot()));
                 this->setCellWidget(0, index, spinBox);
             }
             spinBox->setValue(vector.at(index));

@@ -42,7 +42,7 @@ robKinematics* robModifiedDH::Clone() const
 { return (robKinematics*) new robModifiedDH( *this ); }
 
 vctFixedSizeVector<double,3> robModifiedDH::PStar() const
-{ return vctFixedSizeVector<double,3>( a, d*sin(alpha), d*cos(alpha) ); }
+{ return vctFixedSizeVector<double,3>( a, -d*sin(alpha), d*cos(alpha) ); }
   
 vctFrame4x4<double> robModifiedDH::ForwardKinematics( double q ) const { 
 

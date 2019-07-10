@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -252,8 +252,18 @@ size_t mtsInterfaceProvided::ProcessMailBoxes(void)
              ++iterator) {
             mailBox = iterator->second->GetMailBox();
             if (mailBox) {
-                while (mailBox->ExecuteNext()) {
+                // process everything that is available now
+                size_t commandsInMailbox = mailBox->GetAvailable();
+                while (commandsInMailbox && mailBox->ExecuteNext()) {
                     numberOfCommands++;
+                    commandsInMailbox--;
+                }
+                // process whatever arrived while queue was being
+                // processed to reduce latency on client side
+                commandsInMailbox = mailBox->GetAvailable();
+                while (commandsInMailbox && mailBox->ExecuteNext()) {
+                    numberOfCommands++;
+                    commandsInMailbox--;
                 }
             }
         }
