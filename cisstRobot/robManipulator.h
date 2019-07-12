@@ -319,6 +319,13 @@ public:
   //! Attach a tool
   virtual void Attach( robManipulator* tool );
 
+  //! Remove all links expect n first ones
+  /**
+      This method also resizes internal data members as needed
+      (jacobian matrices).  Returns EFAILURE if the current
+      manipulator doesn't have at least n links.
+  */
+  virtual robManipulator::Errno Truncate(const size_t linksToKeep);
 };
 
-#endif
+#endif // _robManipulator_h

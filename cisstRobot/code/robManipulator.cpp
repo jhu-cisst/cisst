@@ -1625,11 +1625,36 @@ void robManipulator::PrintKinematics( std::ostream& os ) const {
 }
 
 
+robManipulator::Errno robManipulator::Truncate(const size_t linksToKeep)
+{
+  // not enough links
+  if (linksToKeep > links.size()) {
+    CMN_LOG_INIT_ERROR << "robManipulator::Truncate: can't truncate to "
+                       << linksToKeep << " since the manipulator has only "
+                       << links.size() << " links" << std::endl;
+    return robManipulator::EFAILURE;
+  }
 
+  // no change
+  if (linksToKeep == links.size()) {
+    return robManipulator::ESUCCESS;
+  }
 
+  // remove links
+  links.resize(linksToKeep);
 
+  // free existing jacobians
+  if( Jn != NULL ){ free_rmatrix(Jn, 0, 0); }
+  if( Js != NULL ){ free_rmatrix(Js, 0, 0); }
 
+  // allocate new memory for jacobians
+  if (linksToKeep != 0) {
+    Js = rmatrix(0, links.size()-1, 0, 5);
+    Jn = rmatrix(0, links.size()-1, 0, 5);
+  } else {
+    Js = NULL;
+    Jn = NULL;
+  }
 
-/*
-
-*/
+  return robManipulator::ESUCCESS;
+}
