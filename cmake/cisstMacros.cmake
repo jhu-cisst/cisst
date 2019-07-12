@@ -549,13 +549,18 @@ function (cisst_add_swig_module ...)
     set_source_files_properties (${SWIG_INTERFACE_FILE}
                                  PROPERTIES SWIG_FLAGS "-v;-modern;-fvirtual")
     # make sure source file is not used before libraries are build
-    set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES DEPENDS "${MODULE_LINK_LIBRARIES}")                               
+    set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES DEPENDS "${MODULE_LINK_LIBRARIES}")
     # finally create the swig project using CMake command
     set (MODULE_NAME ${MODULE}Python)
-    cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
-    swig_add_library (${MODULE_NAME}
-                      LANGUAGE python
-                      SOURCES ${SWIG_INTERFACE_FILE})
+    if (COMMAND swig_add_library)
+      cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
+      swig_add_library (${MODULE_NAME}
+                        LANGUAGE python
+                        SOURCES ${SWIG_INTERFACE_FILE})
+    else ()
+      cisst_cmake_debug ("cisst_add_swig_module: swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})")
+      swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})
+    endif ()
     if (WIN32)
       set_target_properties (_${MODULE_NAME} PROPERTIES SUFFIX .pyd)
       set_target_properties (_${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
