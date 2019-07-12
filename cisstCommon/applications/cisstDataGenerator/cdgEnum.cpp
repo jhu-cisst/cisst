@@ -148,7 +148,10 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
                      << "        return " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ";" << std::endl
                      << "    };" << std::endl;
     }
-    outputStream << "    cmnThrow(\"" << methodName << " can't find matching enum for \" + value);" << std::endl
+    outputStream << "    std::string message = \"" + methodName + " can't find matching enum for \" + value + \".  Options are: \"\;" << std::endl
+                 << "    std::vector<std::string> options = " << name << "VectorString();" << std::endl
+                 << "    for (std::vector<std::string>::const_iterator i = options.begin(); i != options.end(); ++i) message += *i + \" \";" << std::endl
+                 << "    cmnThrow(message);" << std::endl
                  << "    return static_cast<" << cScope << "::" << name << " >(0);" << std::endl
                  << "}" << std::endl
                  << std::endl;
