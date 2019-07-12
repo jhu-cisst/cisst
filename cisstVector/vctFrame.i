@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-01-10
 
-  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -72,5 +72,39 @@ typedef vctFrameBase<vctRot3 > vctFrm3;
 %apply vctDynamicMatrix &       {vctFrame4x4<double, VCT_ROW_MAJOR > &};
 %apply const vctDynamicMatrix & {const vctFrame4x4<double, VCT_ROW_MAJOR > &};
 
+// ------------- Euler angle rotations -------------------
+%include "cisstVector/vctEulerRotation3.h"
+
+// Extend the class to add From(vctDynamicMatrix<double>), which due to the typemaps
+// will accept numpy arrays.
+%extend vctEulerRotation3 {
+    ThisType & From(const vctDynamicMatrix<double> &matrixRot) throw(std::runtime_error) {
+        vctMatRot3 temp;
+        // Should be a better way to do this
+        temp.From(matrixRot[0][0], matrixRot[0][1], matrixRot[0][2],
+                  matrixRot[1][0], matrixRot[1][1], matrixRot[1][2],
+                  matrixRot[2][0], matrixRot[2][1], matrixRot[2][2]);
+        return $self->From(temp);
+    }
+    ThisType & FromNormalized(const vctDynamicMatrix<double> &matrixRot) {
+        vctMatRot3 temp;
+        // Should be a better way to do this
+        temp.FromNormalized(matrixRot[0][0], matrixRot[0][1], matrixRot[0][2],
+                            matrixRot[1][0], matrixRot[1][1], matrixRot[1][2],
+                            matrixRot[2][0], matrixRot[2][1], matrixRot[2][2]);
+        return $self->FromNormalized(temp);
+    }
+    ThisType & FromRaw(const vctDynamicMatrix<double> &matrixRot) {
+        vctMatRot3 temp;
+        // Should be a better way to do this
+        temp.FromRaw(matrixRot[0][0], matrixRot[0][1], matrixRot[0][2],
+                     matrixRot[1][0], matrixRot[1][1], matrixRot[1][2],
+                     matrixRot[2][0], matrixRot[2][1], matrixRot[2][2]);
+        return $self->FromRaw(temp);
+    }
+}
+
+%template(vctEulerZYZRotation3) vctEulerRotation3<vctEulerRotation3Order::ZYZ >;
+%template(vctEulerZYXRotation3) vctEulerRotation3<vctEulerRotation3Order::ZYX >;
 
 #endif // _vctFrame_i
