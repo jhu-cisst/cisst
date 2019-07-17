@@ -219,7 +219,10 @@ public:
 
   /*! Get joint limits */
   bool GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
-                      vctDynamicVectorRef<double> upperLimits);
+                      vctDynamicVectorRef<double> upperLimits) const;
+
+  /*! Get force/torque max */
+  bool GetFTMaximums(vctDynamicVectorRef<double> ftMaximums) const;
 
   //! Evaluate the forward kinematics
   /**
