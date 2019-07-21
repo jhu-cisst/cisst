@@ -51,6 +51,8 @@ http://www.cisst.org/cisst/license.txt.
 // an array (e.g., by calling PyArray_SimpleNew).
 #define cast_array(A) reinterpret_cast<PyArrayObject *>(A)
 
+#include <typeinfo>
+#include <cisstConfig.h>
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstVector/vctFixedSizeConstVectorBase.h>
@@ -74,7 +76,7 @@ bool vctThrowUnlessIsPyArray(PyObject * input)
 template <class _elementType>
 bool vctThrowUnlessIsSameTypeArray(PyObject * CMN_UNUSED(input))
 {
-    PyErr_SetString(PyExc_ValueError, "Unsupported data type");
+    PyErr_Format(PyExc_ValueError, "Unsupported data type: %s", typeid(_elementType).name());
     return false;
 }
 
@@ -171,10 +173,17 @@ bool vctThrowUnlessIsSameTypeArray<unsigned int>(PyObject * input)
 template <>
 bool vctThrowUnlessIsSameTypeArray<long int>(PyObject * input)
 {
-    if (PyArray_ObjectType(input, 0) != NPY_INT64) {
-        PyErr_SetString(PyExc_ValueError, "Array must be of type long int (int64)");
+#if (CISST_DATA_MODEL == CISST_ILP32) || (CISST_DATA_MODEL == CISST_LLP64)
+    if (PyArray_ObjectType(input, 0) != NPY_INT32) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type long int (int32 on this platform)");
         return false;
     }
+#else
+    if (PyArray_ObjectType(input, 0) != NPY_INT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type long int (int64 on this platform)");
+        return false;
+    }
+#endif
     return true;
 }
 
@@ -182,13 +191,54 @@ bool vctThrowUnlessIsSameTypeArray<long int>(PyObject * input)
 template <>
 bool vctThrowUnlessIsSameTypeArray<unsigned long int>(PyObject * input)
 {
+#if (CISST_DATA_MODEL == CISST_ILP32) || (CISST_DATA_MODEL == CISST_LLP64)
+    if (PyArray_ObjectType(input, 0) != NPY_UINT32) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned long int (uint32 on this platform)");
+        return false;
+    }
+#else
     if (PyArray_ObjectType(input, 0) != NPY_UINT64) {
-        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned long int (uint64)");
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned long int (uint64 on this platform)");
+        return false;
+    }
+#endif
+    return true;
+}
+
+
+#if (CISST_DATA_MODEL == CISST_ILP32) || (CISST_DATA_MODEL == CISST_LLP64)
+template <>
+bool vctThrowUnlessIsSameTypeArray<long long int>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_INT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type long long int (int64)");
         return false;
     }
     return true;
 }
 
+template <>
+bool vctThrowUnlessIsSameTypeArray<unsigned long long int>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_UINT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned long long int (uint64)");
+        return false;
+    }
+    return true;
+}
+#endif
+
+#if CISST_SIZE_T_NATIVE
+template <>
+bool vctThrowUnlessIsSameTypeArray<size_t>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_UINT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type size_t (uint64)");
+        return false;
+    }
+    return true;
+}
+#endif
 
 template <>
 bool vctThrowUnlessIsSameTypeArray<float>(PyObject * input)
@@ -268,6 +318,36 @@ int vctPythonType<unsigned int>(void)
 }
 
 
+#if (CISST_DATA_MODEL == CISST_ILP32) || (CISST_DATA_MODEL == CISST_LLP64)
+
+template <>
+int vctPythonType<long int>(void)
+{
+    return NPY_INT32;
+}
+
+
+template <>
+int vctPythonType<unsigned long int>(void)
+{
+    return NPY_UINT32;
+}
+
+template <>
+int vctPythonType<long long int>(void)
+{
+    return NPY_INT64;
+}
+
+
+template <>
+int vctPythonType<unsigned long long int>(void)
+{
+    return NPY_UINT64;
+}
+
+#else
+
 template <>
 int vctPythonType<long int>(void)
 {
@@ -281,6 +361,17 @@ int vctPythonType<unsigned long int>(void)
     return NPY_UINT64;
 }
 
+#endif
+
+#if CISST_SIZE_T_NATIVE
+
+template <>
+int vctPythonType<size_t>(void)
+{
+    return NPY_UINT64;
+}
+
+#endif
 
 template <>
 int vctPythonType<double>(void)
