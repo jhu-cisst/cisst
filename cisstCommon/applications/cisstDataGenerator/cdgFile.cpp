@@ -94,6 +94,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
             break;
         case ' ':
         case '\t':
+        case '\r':
             wordFinished = true;
             break;
         case ';':

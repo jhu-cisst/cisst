@@ -206,6 +206,7 @@ bool vctThrowUnlessIsSameTypeArray<unsigned long int>(PyObject * input)
 }
 
 
+#if CISST_LONG_LONG_NATIVE
 template <>
 bool vctThrowUnlessIsSameTypeArray<long long int>(PyObject * input)
 {
@@ -225,6 +226,7 @@ bool vctThrowUnlessIsSameTypeArray<unsigned long long int>(PyObject * input)
     }
     return true;
 }
+#endif
 
 #if CISST_SIZE_T_NATIVE
 template <>
@@ -348,6 +350,7 @@ int vctPythonType<unsigned long int>(void)
 
 #endif
 
+#if CISST_LONG_LONG_NATIVE
 template <>
 int vctPythonType<long long int>(void)
 {
@@ -360,6 +363,7 @@ int vctPythonType<unsigned long long int>(void)
 {
     return NPY_UINT64;
 }
+#endif
 
 #if CISST_SIZE_T_NATIVE
 
