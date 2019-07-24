@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung
   Created on: 2009-11-12
 
@@ -1335,8 +1334,8 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
         // Thus, a required interface proxy is created whenever a new connection is
         // established while a provided interface proxy is created only once when
         // a client component does not have it.
-        // 
-        // MJ (3/30/11): DESIGN CHANGE: For each connection, create a new provided interface 
+        //
+        // MJ (3/30/11): DESIGN CHANGE: For each connection, create a new provided interface
         // proxy "instance" to fix the thread-safety issue (i.e., shared
         // serializer/deserializer of command proxy objects) and to potentially support
         // blocking commands and uni-cast events.  This also resolves the duplicate broadcast
@@ -1634,7 +1633,7 @@ bool mtsManagerGlobal::ConnectConfirm(const ConnectionIDType connectionID)
 
     CMN_LOG_CLASS_INIT_VERBOSE << "ConnectConfirm: confirmed connection id [ " << connectionID << " ]" << std::endl;
 
-    // MJ: for testing and debugging 
+    // MJ: for testing and debugging
     //ShowInternalStructure();
 
     return true;
@@ -1724,7 +1723,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
 #if CISST_MTS_HAS_ICE
         if (!localConfiguration) {
-            serverInterfaceName = 
+            serverInterfaceName =
                 mtsComponentProxy::GetNameOfProvidedInterfaceInstance(serverInterfaceName, connectionID);
         }
 #else
@@ -1884,7 +1883,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
             // Naming rule for provided interface instances does not apply to the MCS in the GCM
             if (serverProcessName == mtsManagerLocal::ProcessNameOfLCMWithGCM &&
-                serverComponentName == mtsManagerComponentBase::ComponentNames::ManagerComponentServer) 
+                serverComponentName == mtsManagerComponentBase::ComponentNames::ManagerComponentServer)
             {
                 serverInterfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceGCMProvided;
             }
@@ -2016,7 +2015,10 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
         // enqueue id to disconnected queue
         // MJ: this is redundant check but intentionally added to make sure things work correctly
-        DisconnectQueueType::const_iterator itDisconnected = QueueDisconnected.find(connectionID);
+#if CMN_ASSERT_IS_DEFINED
+        DisconnectQueueType::const_iterator itDisconnected =
+#endif
+            QueueDisconnected.find(connectionID);
         CMN_ASSERT(itDisconnected == QueueDisconnected.end());
         QueueDisconnected.insert(std::make_pair(connectionID, connectionID));
 
@@ -2029,7 +2031,7 @@ void mtsManagerGlobal::DisconnectInternal(void)
                                 << clientComponentName << ":" << clientInterfaceName << "\"" << std::endl;
     }
 
-    // MJ: for testing and debugging 
+    // MJ: for testing and debugging
     //ShowInternalStructure();
 }
 

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@
   http://www.cisst.org/cisst/license.txt.
 
   --- end cisst license ---
-
 */
 
 #include "cdgInline.h"
@@ -26,11 +25,14 @@ cdgInline::cdgInline(size_t lineNumber, InlineType type):
     cdgScope(((type == CDG_INLINE_HEADER) ? "inline-header" : "inline-code"), lineNumber),
     Type(type)
 {
+#if CMN_ASSERT_IS_DEFINED
     cdgField * field;
-    field = this->AddField("", "", false,
-                           (type == CDG_INLINE_HEADER)
-                           ? "code that will be placed as-is in the generated header file"
-                           : "code that will be placed as-is in the generated source file");
+    field =
+#endif
+        this->AddField("", "", false,
+                       (type == CDG_INLINE_HEADER)
+                       ? "code that will be placed as-is in the generated header file"
+                       : "code that will be placed as-is in the generated source file");
     CMN_ASSERT(field);
 
     this->AddKnownScope(*this);
