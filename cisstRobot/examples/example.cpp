@@ -42,10 +42,11 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 #if CISST_HAS_JSON
 
     // open *.rob.json config file
-    std::string fileName("irb6600.rob.json");
+    std::string fileName("/home/sleonard/puma560.rob");
     std::ifstream robotConfigFile(fileName.c_str());
 
     // load config file with JSON parser
+    /*
     Json::Reader jreader;
     Json::Value  robotConfig;
     bool rc = jreader.parse(robotConfigFile, robotConfig);
@@ -53,20 +54,23 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         std::cerr << jreader.getFormattedErrorMessages() << std::endl;
         return -1;
     }
-
+    */
+    
     // robManipulator with .rob file
-    robManipulator robotRob;
-    robotRob.LoadRobot(robotConfig);
+    robManipulator robot;
+    robot.LoadRobot(fileName);
 
     // robManipulator with .rob.json file
-    robManipulator robotJson;
-    robotJson.LoadRobot(robotConfig);
+    //robManipulator robotJson;
+    //robotJson.LoadRobot(robotConfig);
 
     // joint position all zero
-    vctDoubleVec q(robotRob.links.size(), 0.0);
-
-    std::cout << "JSON: " << robotJson.ForwardKinematics(q) << std::endl
-              << "Rob:  " << robotRob.ForwardKinematics(q) << std::endl;
-
+    vctDoubleVec q(robot.links.size(), 0.0);
+    vctDoubleVec qd(robot.links.size(), 0.0);
+    vctDoubleVec qdd(robot.links.size(), 0.0);
+    vctFixedSizeVector<double,6> f(0.0);
+    //q[1] = 1;
+    std::cout << robot.RNE_MDH(q, qd, qdd, f ) << std::endl;
+    
 #endif
 }

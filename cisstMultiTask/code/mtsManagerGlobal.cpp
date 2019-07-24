@@ -1340,7 +1340,10 @@ void mtsManagerGlobal::DisconnectInternal(void)
 
         // enqueue id to disconnected queue
         // MJ: this is redundant check but intentionally added to make sure things work correctly
-        DisconnectQueueType::const_iterator itDisconnected = QueueDisconnected.find(connectionID);
+#if CMN_ASSERT_IS_DEFINED
+        DisconnectQueueType::const_iterator itDisconnected =
+#endif
+            QueueDisconnected.find(connectionID);
         CMN_ASSERT(itDisconnected == QueueDisconnected.end());
         QueueDisconnected.insert(std::make_pair(connectionID, connectionID));
 

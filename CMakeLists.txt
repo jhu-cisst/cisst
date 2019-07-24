@@ -289,6 +289,10 @@ mark_as_advanced (CISST_USE_SI_UNITS)
 include (CheckSizeTNativeType)
 check_size_t_native_type (CISST_SIZE_T_NATIVE)
 
+# Determine if "long" and "long long" are different types (assume same is true
+# for "unsigned long" and "unsigned long long")
+include (CheckIfDifferentTypes)
+check_if_different_types (CISST_LONG_LONG_NATIVE "long long" "long")
 
 # Determine if we can use std::isnan and std::isfinite
 include (CheckCXXSourceCompiles)

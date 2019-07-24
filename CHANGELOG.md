@@ -20,7 +20,7 @@ Change log
     * cmnLogger: added method to set/get default log file name
   * cisstVector:
     * vctMatrixRotation3: constructor from BaseType is now implicit
-    * Rotation and vector widgets: added ket press to reset orientation
+    * Rotation and vector widgets: added key press to reset orientation
     * Dynamic vector and matrices: exception message for size mismatch now includes expected and received sizes
   * cisstMultiTask:
     * mtsManagerLocal: added RemoveAllUserComponents

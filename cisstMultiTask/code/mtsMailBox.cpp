@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -256,6 +256,10 @@ bool mtsMailBox::IsFull(void) const
     return CommandQueue.IsFull();
 }
 
+size_t mtsMailBox::GetAvailable(void) const
+{
+    return CommandQueue.GetAvailable();
+}
 
 void mtsMailBox::SetPostCommandDequeuedCommand(mtsCommandVoid * command)
 {

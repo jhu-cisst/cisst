@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Martin Kelly
   Created on: 2010-09-23
 
@@ -15,7 +14,6 @@
   http://www.cisst.org/cisst/license.txt.
 
   --- end cisst license ---
-
 */
 
 #include <cisstCommon/cmnAssert.h>
@@ -90,8 +88,10 @@ int osaPipeExec::DoClose(int &n)
 #else
         int ret = -1;
 #endif
-        if (ret == -1)
-            CMN_LOG_RUN_WARNING << "osaPipeExec: failed to close handle" << std::endl;
+        if (ret == -1) {
+            CMN_LOG_RUN_WARNING << "osaPipeExec: failed to close handle for \""
+                                << this->Name << "\"" << std::endl;
+        }
         n = -1;
     }
     return ret;
@@ -245,7 +245,7 @@ bool osaPipeExec::Open(const std::string & executable,
         CloseAllPipes();
         exit(-1);  // terminate the child program
     }
-    
+
 #elif (CISST_OS == CISST_WINDOWS)
     // On Windows, there are two implementations.
     //   noWindow:  This is a newer implementation that calls CreatePipe and CreateProcess, passing the

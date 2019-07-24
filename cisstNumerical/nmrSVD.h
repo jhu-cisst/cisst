@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1174,8 +1174,10 @@ CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, 
                            vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _cols, _cols, _storageOrder> & Vt,
                            vctFixedSizeVector<CISSTNETLIB_DOUBLE, _work> & workspace)
 {
+#if CMN_ASSERT_IS_DEFINED
     const CISSTNETLIB_INTEGER minmn =
         static_cast<CISSTNETLIB_INTEGER>(nmrSVDFixedSizeData<_rows, _cols, _storageOrder>::MIN_MN);
+#endif
     //Assert if requirement is greater than size provided!
     CMN_ASSERT(minmn <= static_cast<CISSTNETLIB_INTEGER>(_minmn));
     CISSTNETLIB_INTEGER ldu = (_storageOrder == VCT_COL_MAJOR) ? _rows : _cols;
