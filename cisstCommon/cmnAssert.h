@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor
   Created on: 2003-06-25
 
-  (C) Copyright 2003-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -66,11 +65,19 @@ http://www.cisst.org/cisst/license.txt.
   API with OK button for release builds and message box API with
   "Abort, Ignore, Retry" for debug builds.
 
+  \note To determine if CMN_ASSERT is defined, CMN_ASSERT_IS_DEFINED
+  is define as 1, 0 otherwise.  This can be used to conditionally
+  declare variables that are only used by CMN_ASSERT and avoid
+  compiler warnings regarding unused variables.
+
   \sa cmnThrow
 */
 #if defined(CISST_CMN_ASSERT_DISABLED) || defined(NDEBUG)
-    #define CMN_ASSERT(expr)
+  #define CMN_ASSERT_IS_DEFINED 0
+  #define CMN_ASSERT(expr)
 #else // CISST_CMN_ASSERT_DISABLED || NDEBUG
+
+  #define CMN_ASSERT_IS_DEFINED 1
 
 #ifdef CISST_CMN_ASSERT_THROWS_EXCEPTION
 

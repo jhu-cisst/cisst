@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #include "cdgEnum.h"
@@ -26,10 +25,18 @@ CMN_IMPLEMENT_SERVICES(cdgEnum);
 cdgEnum::cdgEnum(size_t lineNumber):
     cdgScope("enum", lineNumber)
 {
+#if CMN_ASSERT_IS_DEFINED
     cdgField * field;
-    field = this->AddField("name", "", true, "name of the enum, will be added to the scope");
+    field =
+#endif
+        this->AddField("name", "", true, "name of the enum, will be added to the scope");
+
     CMN_ASSERT(field);
-    field = this->AddField("description", "", false, "description of the enum");
+
+#if CMN_ASSERT_IS_DEFINED
+    field =
+#endif
+        this->AddField("description", "", false, "description of the enum");
     CMN_ASSERT(field);
 
     this->AddKnownScope(*this);
@@ -148,7 +155,7 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
                      << "        return " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ";" << std::endl
                      << "    };" << std::endl;
     }
-    outputStream << "    std::string message = \"" + methodName + " can't find matching enum for \" + value + \".  Options are: \"\;" << std::endl
+    outputStream << "    std::string message = \"" << methodName << " can't find matching enum for \" + value + \".  Options are: \";" << std::endl
                  << "    std::vector<std::string> options = " << name << "VectorString();" << std::endl
                  << "    for (std::vector<std::string>::const_iterator i = options.begin(); i != options.end(); ++i) message += *i + \" \";" << std::endl
                  << "    cmnThrow(message);" << std::endl
