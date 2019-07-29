@@ -91,7 +91,13 @@ double & robJoint::PositionMax(void) {
   return qmax;
 }
 
-double robJoint::ForceTorqueMax() const { return ftmax; }
+const double & robJoint::ForceTorqueMax(void) const {
+  return ftmax;
+}
+
+double & robJoint::ForceTorqueMax(void) {
+  return ftmax;
+}
 
 robJoint::Errno robJoint::Read( std::istream& is ){
 
@@ -156,7 +162,7 @@ robJoint::Errno robJoint::Read(const Json::Value &config)
     this->qoffset = config.get("offset", 0.0).asDouble();
     this->qmin = config.get("qmin", 0.0).asDouble();
     this->qmax = config.get("qmax", 0.0).asDouble();
-    this->ftmax = config.get("tmax", 0.0).asDouble();
+    this->ftmax = config.get("ftmax", 0.0).asDouble();
 
     // convert the strings to upper cases
     std::transform( type.begin(), type.end(), type.begin(), ::toupper );
