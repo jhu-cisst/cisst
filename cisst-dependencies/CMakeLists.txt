@@ -332,10 +332,16 @@ if (CISST_HAS_JSON)
     # add fPIC if possible
     include (CheckCXXCompilerFlag)
     check_cxx_compiler_flag ("-fPIC" CXX_SUPPORTS_FPIC)
+    check_cxx_compiler_flag("-fexceptions" CXX_SUPPORTS_EXCEPTIONS)
+    set(JSON_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     if (CXX_SUPPORTS_FPIC)
-      set (JSON_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+      list(APPEND JSON_CMAKE_CXX_FLAGS "-fPIC")
     endif (CXX_SUPPORTS_FPIC)
 
+    if(CXX_SUPPORTS_EXCEPTIONS)
+      list(APPEND JSON_CMAKE_CXX_FLAGS "-fexceptions")
+    endif(CXX_SUPPORTS_EXCEPTIONS)
+    
     ExternalProject_Add (cisstJSONExternal
                          PREFIX ${cisstJSON_PREFIX}
                          GIT_REPOSITORY    ${CISST_JSON_GIT_REPOSITORY}
