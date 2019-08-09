@@ -39,6 +39,12 @@ cdgEnum::cdgEnum(size_t lineNumber):
         this->AddField("description", "", false, "description of the enum");
     CMN_ASSERT(field);
 
+#if CMN_ASSERT_IS_DEFINED
+    field =
+#endif
+        this->AddField("prefix", "", false, "prefix used for c enum values (e.g. _ to allow values starting with a number)");
+    CMN_ASSERT(field);
+
     this->AddKnownScope(*this);
 
     cdgEnumValue newEnumValue(0);
@@ -75,10 +81,11 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
     GenerateLineComment(outputStream);
     size_t index;
     const std::string enumName = this->GetFieldValue("name");
+    const std::string prefix = this->GetFieldValue("prefix");
     outputStream << "public:" << std::endl
                  << "    enum " << enumName << " {";
     for (index = 0; index < Scopes.size(); index++) {
-        outputStream << Scopes[index]->GetFieldValue("name");
+        outputStream << prefix << Scopes[index]->GetFieldValue("name");
         if (Scopes[index]->GetFieldValue("value") != "") {
             outputStream << " = " << Scopes[index]->GetFieldValue("value");
         }
@@ -115,12 +122,13 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
 {
     size_t index;
     const std::string name = this->GetFieldValue("name");
+    const std::string prefix = this->GetFieldValue("prefix");
 
     // human readable
     outputStream << "std::string cmnDataHumanReadable_" << cScope << "_" << name << "(const " << cScope << "::" << name << " & data) {" << std::endl
                  << "    switch (data) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
-        outputStream << "        case " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ":" << std::endl
+        outputStream << "        case " << cScope << "::" << prefix << Scopes[index]->GetFieldValue("name") << ":" << std::endl
                      << "            return \"" << Scopes[index]->GetFieldValue("description") << "\";" << std::endl
                      << "            break;" << std::endl;
     }
@@ -135,8 +143,8 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
     outputStream << "std::string " << methodName << "(const " << cScope << "::" << name << " & data) CISST_THROW(std::runtime_error) {" << std::endl
                  << "    switch (data) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
-        outputStream << "        case " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ":" << std::endl
-                     << "            return \"" << Scopes[index]->GetFieldValue("name") << "\";" << std::endl
+        outputStream << "        case " << cScope << "::" << prefix << Scopes[index]->GetFieldValue("name") << ":" << std::endl
+                     << "            return \"" << prefix << Scopes[index]->GetFieldValue("name") << "\";" << std::endl
                      << "            break;" << std::endl;
     }
     outputStream << "        default:" << std::endl
@@ -151,8 +159,8 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
     methodName = cScope + "::" + name + "FromString";
     outputStream << cScope << "::" << name << " " << methodName << "(const std::string & value) CISST_THROW(std::runtime_error) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
-        outputStream << "    if (value == \"" << Scopes[index]->GetFieldValue("name") << "\") {" << std::endl
-                     << "        return " << cScope << "::" << Scopes[index]->GetFieldValue("name") << ";" << std::endl
+        outputStream << "    if (value == \"" << prefix << Scopes[index]->GetFieldValue("name") << "\") {" << std::endl
+                     << "        return " << cScope << "::" << prefix << Scopes[index]->GetFieldValue("name") << ";" << std::endl
                      << "    };" << std::endl;
     }
     outputStream << "    std::string message = \"" << methodName << " can't find matching enum for \" + value + \".  Options are: \";" << std::endl
@@ -170,7 +178,7 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
                  << "    if (vectorInt.empty()) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
         outputStream << "        vectorInt.push_back(static_cast<int>("
-                     << Scopes[index]->GetFieldValue("name") << "));" << std::endl;
+                     << prefix << Scopes[index]->GetFieldValue("name") << "));" << std::endl;
     }
     outputStream << "    }" << std::endl
                  << "    return vectorInt;" << std::endl
