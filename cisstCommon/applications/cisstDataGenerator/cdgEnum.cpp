@@ -144,7 +144,7 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
                  << "    switch (data) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
         outputStream << "        case " << cScope << "::" << prefix << Scopes[index]->GetFieldValue("name") << ":" << std::endl
-                     << "            return \"" << prefix << Scopes[index]->GetFieldValue("name") << "\";" << std::endl
+                     << "            return \"" << Scopes[index]->GetFieldValue("name") << "\";" << std::endl
                      << "            break;" << std::endl;
     }
     outputStream << "        default:" << std::endl
@@ -159,7 +159,7 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
     methodName = cScope + "::" + name + "FromString";
     outputStream << cScope << "::" << name << " " << methodName << "(const std::string & value) CISST_THROW(std::runtime_error) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
-        outputStream << "    if (value == \"" << prefix << Scopes[index]->GetFieldValue("name") << "\") {" << std::endl
+        outputStream << "    if (value == \"" << Scopes[index]->GetFieldValue("name") << "\") {" << std::endl
                      << "        return " << cScope << "::" << prefix << Scopes[index]->GetFieldValue("name") << ";" << std::endl
                      << "    };" << std::endl;
     }
