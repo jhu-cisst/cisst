@@ -36,7 +36,8 @@ class CISST_EXPORT robManipulator{
  protected:
 
   //! A vector of tools
-  std::vector<robManipulator*> tools;
+  typedef std::vector<robManipulator*> ToolsType;
+  ToolsType tools;
 
  public:
 
@@ -321,6 +322,8 @@ public:
 
   //! Attach a tool
   virtual void Attach( robManipulator* tool );
+
+  void DeleteTools(void);
 
   //! Remove all links expect n first ones
   /**
