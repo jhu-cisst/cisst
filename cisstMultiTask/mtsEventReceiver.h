@@ -6,7 +6,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-24
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -72,14 +72,15 @@ http://www.cisst.org/cisst/license.txt.
 
   The implementation of the event receiver class requires an osaThreadSignal to block the
   component when the Wait method is called. This design uses the ThreadSignal member of
-  the required interface mailbox, which is present for any component derived from mtsTask.
-  If the required interface does not have a mailbox, the event receiver will create its own
-  instance of osaThreadSignal. This is done to support use of event receivers by low-level
-  components that do not have their own thread of execution (e.g., mtsComponent), as long
-  as the Wait method is only called from a single thread. Note that the Wait method returns
-  a bool; a false return indicates that the Wait failed for some reason (such as being called
-  from more than one thread). An alternate implementation would be to introduce an osaThreadSignal
-  member to mtsComponent and use that instead of the one in the required interface mailbox.
+  the required interface mailbox, which is present for any component derived from mtsTask,
+  or the ThreadSignalForBlockingCommands member of the required interface for blocking commands.
+  Otherwise, the event receiver will create its own instance of osaThreadSignal. This is done
+  to support use of event receivers by low-level components that do not have their own thread of
+  execution (e.g., mtsComponent), as long as the Wait method is only called from a single thread.
+  Note that the Wait method returns a bool; a false return indicates that the Wait failed for some
+  reason (such as being called from more than one thread). An alternate implementation would be to
+  introduce an osaThreadSignal member to mtsComponent and use that instead of the one in the required
+  interface mailbox.
 */
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>

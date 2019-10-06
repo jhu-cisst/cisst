@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-24
 
-  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -77,7 +77,6 @@ bool mtsEventReceiverBase::Wait()
         Waiting = true;
         EventSignal->Wait();
         Waiting = false;
-        ret = true;
     }
     return ret;
 }
@@ -167,8 +166,8 @@ mtsCommandWriteBase *mtsEventReceiverWrite::GetCommand()
 
 void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
 {
-    if (Waiting)
-        EventSignal->Raise();
+    // Copy from arg to *ArgPtr. In many cases (e.g., for VoidReturn and WriteReturn commands)
+    // &arg == ArgPtr (point to same memory), but this is handled in cmnClassServices::Create.
     if (ArgPtr && !ArgPtr->Services()->Create(ArgPtr, arg)) {
         CMN_LOG_RUN_ERROR << "mtsEventReceiverWrite: could not copy from " << arg.Services()->GetName()
                           << " to " << ArgPtr->Services()->GetName() << std::endl;
@@ -176,6 +175,8 @@ void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
     }
     if (UserHandler)
         UserHandler->Execute(arg, MTS_NOT_BLOCKING);
+    if (Waiting)
+        EventSignal->Raise();
 }
 
 void mtsEventReceiverWrite::SetHandlerCommand(mtsCommandWriteBase *cmdHandler)
