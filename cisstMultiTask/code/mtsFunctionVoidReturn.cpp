@@ -6,7 +6,7 @@
   Author(s): Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -77,6 +77,7 @@ mtsExecutionResult mtsFunctionVoidReturn::ExecuteGeneric(mtsGenericObject & resu
 #else
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
+    CompletionCommand->PrepareToWait();
     mtsExecutionResult executionResult = Command->Execute(result, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
         executionResult = WaitForResult(result);
