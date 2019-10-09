@@ -1015,7 +1015,7 @@ endfunction (cisst_add_config_version)
 #
 function (cisst_is_catkin_build RESULT)
   set (${RESULT} FALSE PARENT_SCOPE)
-  if (DEFINED ENV{ROS_ROOT})
+  if (DEFINED ENV{ROS_ROOT} OR DEFINED ENV{ROS_VERSION})
     message (STATUS "Assuming cisst is built using ROS/catkin since ROS_ROOT is defined in environment")
     if (DEFINED CATKIN_DEVEL_PREFIX)
       set (${RESULT} TRUE PARENT_SCOPE)

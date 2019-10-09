@@ -5,7 +5,7 @@
   Author(s): Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -68,10 +68,11 @@ mtsExecutionResult mtsFunctionWriteReturn::ExecuteGeneric(const mtsGenericObject
     }
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
+    CompletionCommand->PrepareToWait();
     mtsExecutionResult executionResult = Command->Execute(argument, result, CompletionCommand->GetCommand());
-    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
         executionResult = WaitForResult(result);
-    }
+    CompletionCommand->ClearWait();
     return executionResult;
 }
 

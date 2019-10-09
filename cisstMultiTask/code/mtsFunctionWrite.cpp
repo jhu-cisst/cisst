@@ -4,7 +4,7 @@
 /*
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -67,10 +67,11 @@ mtsExecutionResult mtsFunctionWrite::ExecuteBlockingGeneric(const mtsGenericObje
     }
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
+    CompletionCommand->PrepareToWait();
     mtsExecutionResult executionResult = Command->Execute(argument, MTS_BLOCKING, CompletionCommand->GetCommand());
-    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
         executionResult = WaitForResult();
-    }
+    CompletionCommand->ClearWait();
     return executionResult;
 }
 

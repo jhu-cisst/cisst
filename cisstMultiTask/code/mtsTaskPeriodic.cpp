@@ -41,8 +41,12 @@ void * mtsTaskPeriodic::RunInternal(void *data)
         }
     }
 
-    while ((this->State == mtsComponentState::ACTIVE) || (this->State == mtsComponentState::READY)) {
-        if (this->State == mtsComponentState::ACTIVE) {
+    // Use a local variable, currentState, because otherwise we can have a problem when this->State is
+    // changed by another thread. Specifically, if the state is changed from READY to ACTIVE in between
+    // these conditions, then both will evaluate to false.
+    mtsComponentState currentState = this->State;
+    while ((currentState == mtsComponentState::ACTIVE) || (currentState == mtsComponentState::READY)) {
+        if (currentState == mtsComponentState::ACTIVE) {
             DoRunInternal();
             if (StateTable.GetToc() - StateTable.GetTic() > Period) {
                 OverranPeriod = true;
@@ -50,6 +54,7 @@ void * mtsTaskPeriodic::RunInternal(void *data)
         }
         // Wait for remaining period also handles thread suspension
         ThreadBuddy.WaitForRemainingPeriod();
+        currentState = this->State;
     }
 
     CMN_LOG_CLASS_RUN_VERBOSE << "RunInternal: End of task " << Name << std::endl;

@@ -172,7 +172,20 @@ robManipulator::~robManipulator()
 }
 
 void robManipulator::Attach( robManipulator* tool )
-{ tools.push_back( tool ); }
+{
+  tools.push_back( tool );
+}
+
+void robManipulator::DeleteTools()
+{
+  const ToolsType::iterator end = tools.end();
+  ToolsType::iterator tool;
+  for (tool = tools.begin(); tool != end; ++tool) {
+    delete *tool;
+    *tool = NULL;
+  }
+  tools.clear();
+}
 
 robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
 
