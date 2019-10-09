@@ -80,6 +80,7 @@ mtsExecutionResult mtsFunctionWrite::ExecuteBlockingGeneric(const mtsGenericObje
     mtsExecutionResult executionResult = Command->Execute(argument, MTS_BLOCKING, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
         executionResult = WaitForResult();
+    CompletionCommand->ClearWait();
 #endif
     return executionResult;
 }

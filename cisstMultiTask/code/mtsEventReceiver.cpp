@@ -75,6 +75,11 @@ bool mtsEventReceiverBase::WaitCommon()
     return true;
 }
 
+void mtsEventReceiverBase::ClearWait()
+{
+    WaitState = EVENT_RECEIVER_IDLE;
+}
+
 bool mtsEventReceiverBase::PrepareToWait()
 {
     CheckEventSignal();

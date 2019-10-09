@@ -86,6 +86,7 @@ mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
     mtsExecutionResult executionResult = Command->Execute(MTS_BLOCKING, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
         executionResult = WaitForResult();
+    CompletionCommand->ClearWait();
 #endif
     return executionResult;
 }

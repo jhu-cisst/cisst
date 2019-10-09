@@ -146,6 +146,9 @@ public:
 
     virtual void SetThreadSignal(osaThreadSignal *signal);
 
+    /*! Clear the WaitState (set to EVENT_RECEIVER_IDLE) */
+    void ClearWait();
+
     /*! Indicate that the waiting thread is preparing to wait on an event, but that there may be some
         time before Wait or WaitWithTimeout will be called. Calling this command ensures that if the event
         if raised after the call to PrepareToWait, but before the call to Wait or WaitWithTimeout,

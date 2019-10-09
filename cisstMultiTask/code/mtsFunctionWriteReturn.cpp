@@ -81,6 +81,7 @@ mtsExecutionResult mtsFunctionWriteReturn::ExecuteGeneric(const mtsGenericObject
     mtsExecutionResult executionResult = Command->Execute(argument, result, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
         executionResult = WaitForResult(result);
+    CompletionCommand->ClearWait();
 #endif
     return executionResult;
 }
