@@ -119,8 +119,13 @@ bool mtsEventReceiverBase::WaitWithTimeout(double timeoutInSec)
         if (WaitState != EVENT_RECEIVER_SIGNALED)
             WaitState = EVENT_RECEIVER_WAITING;
         WaitMutex.Unlock();
-        if (WaitState == EVENT_RECEIVER_WAITING)
+        if (WaitState == EVENT_RECEIVER_WAITING) {
             ret = EventSignal->Wait(timeoutInSec);
+            // If timed out, can check if event may have been raised (and missed)
+            // either just before or just after the call to Wait.
+            if (!ret && (WaitState == EVENT_RECEIVER_SIGNALED))
+                ret = true;
+        }
         WaitState = EVENT_RECEIVER_IDLE;
     }
     return ret;
@@ -155,10 +160,11 @@ void mtsEventReceiverVoid::EventHandler(void)
         UserHandler->Execute(MTS_NOT_BLOCKING);
     }
     WaitMutex.Lock();
-    if (WaitState == EVENT_RECEIVER_PREPARING)
+    WaitStates oldWaitState = WaitState;
+    if ((WaitState == EVENT_RECEIVER_PREPARING) || (WaitState == EVENT_RECEIVER_WAITING))
         WaitState = EVENT_RECEIVER_SIGNALED;
     WaitMutex.Unlock();
-    if (WaitState == EVENT_RECEIVER_WAITING)
+    if (oldWaitState == EVENT_RECEIVER_WAITING)
         EventSignal->Raise();
 }
 
@@ -213,10 +219,11 @@ void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
     if (UserHandler)
         UserHandler->Execute(arg, MTS_NOT_BLOCKING);
     WaitMutex.Lock();
-    if (WaitState == EVENT_RECEIVER_PREPARING)
+    WaitStates oldWaitState = WaitState;
+    if ((WaitState == EVENT_RECEIVER_PREPARING) || (WaitState == EVENT_RECEIVER_WAITING))
         WaitState = EVENT_RECEIVER_SIGNALED;
     WaitMutex.Unlock();
-    if (WaitState == EVENT_RECEIVER_WAITING)
+    if (oldWaitState == EVENT_RECEIVER_WAITING)
         EventSignal->Raise();
 }
 
