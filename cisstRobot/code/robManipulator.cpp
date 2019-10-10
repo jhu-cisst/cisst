@@ -172,7 +172,20 @@ robManipulator::~robManipulator()
 }
 
 void robManipulator::Attach( robManipulator* tool )
-{ tools.push_back( tool ); }
+{
+  tools.push_back( tool );
+}
+
+void robManipulator::DeleteTools()
+{
+  const ToolsType::iterator end = tools.end();
+  ToolsType::iterator tool;
+  for (tool = tools.begin(); tool != end; ++tool) {
+    delete *tool;
+    *tool = NULL;
+  }
+  tools.clear();
+}
 
 robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
 
@@ -328,7 +341,7 @@ robManipulator::SetJointLimits(const vctDynamicVector<double> & lowerLimits,
 
 bool
 robManipulator::GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
-                               vctDynamicVectorRef<double> upperLimits)
+                               vctDynamicVectorRef<double> upperLimits) const
 {
   if ((lowerLimits.size() != links.size())
       || (upperLimits.size() != links.size())) {
@@ -337,6 +350,18 @@ robManipulator::GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
   for (size_t i = 0; i < links.size(); i++ ) {
     lowerLimits.at(i) = links[i].GetKinematics()->PositionMin();
     upperLimits.at(i) = links[i].GetKinematics()->PositionMax();
+  }
+  return true;
+}
+
+bool
+robManipulator::GetFTMaximums(vctDynamicVectorRef<double> ftMaximums) const
+{
+  if (ftMaximums.size() != links.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    ftMaximums.at(i) = links[i].GetKinematics()->ForceTorqueMax();
   }
   return true;
 }
@@ -1625,11 +1650,36 @@ void robManipulator::PrintKinematics( std::ostream& os ) const {
 }
 
 
+robManipulator::Errno robManipulator::Truncate(const size_t linksToKeep)
+{
+  // not enough links
+  if (linksToKeep > links.size()) {
+    CMN_LOG_INIT_ERROR << "robManipulator::Truncate: can't truncate to "
+                       << linksToKeep << " since the manipulator has only "
+                       << links.size() << " links" << std::endl;
+    return robManipulator::EFAILURE;
+  }
 
+  // no change
+  if (linksToKeep == links.size()) {
+    return robManipulator::ESUCCESS;
+  }
 
+  // remove links
+  links.resize(linksToKeep);
 
+  // free existing jacobians
+  if( Jn != NULL ){ free_rmatrix(Jn, 0, 0); }
+  if( Js != NULL ){ free_rmatrix(Js, 0, 0); }
 
+  // allocate new memory for jacobians
+  if (linksToKeep != 0) {
+    Js = rmatrix(0, links.size()-1, 0, 5);
+    Jn = rmatrix(0, links.size()-1, 0, 5);
+  } else {
+    Js = NULL;
+    Jn = NULL;
+  }
 
-/*
-
-*/
+  return robManipulator::ESUCCESS;
+}

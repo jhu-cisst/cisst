@@ -36,7 +36,8 @@ class CISST_EXPORT robManipulator{
  protected:
 
   //! A vector of tools
-  std::vector<robManipulator*> tools;
+  typedef std::vector<robManipulator*> ToolsType;
+  ToolsType tools;
 
  public:
 
@@ -219,7 +220,10 @@ public:
 
   /*! Get joint limits */
   bool GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
-                      vctDynamicVectorRef<double> upperLimits);
+                      vctDynamicVectorRef<double> upperLimits) const;
+
+  /*! Get force/torque max */
+  bool GetFTMaximums(vctDynamicVectorRef<double> ftMaximums) const;
 
   //! Evaluate the forward kinematics
   /**
@@ -319,6 +323,15 @@ public:
   //! Attach a tool
   virtual void Attach( robManipulator* tool );
 
+  void DeleteTools(void);
+
+  //! Remove all links expect n first ones
+  /**
+      This method also resizes internal data members as needed
+      (jacobian matrices).  Returns EFAILURE if the current
+      manipulator doesn't have at least n links.
+  */
+  virtual robManipulator::Errno Truncate(const size_t linksToKeep);
 };
 
-#endif
+#endif // _robManipulator_h

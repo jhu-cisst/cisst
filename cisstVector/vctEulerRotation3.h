@@ -4,7 +4,7 @@
 /*
   Created on: 2011-05-18
 
-  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -150,10 +150,10 @@ public:
 
 template <vctEulerRotation3Order::OrderType _order>
 class vctEulerRotation3 : public vctEulerRotation3Base {
+public:
     typedef vctEulerRotation3<_order> ThisType;
     typedef vctEulerRotation3Base BaseType;
 
-public:
 
     inline vctEulerRotation3() : BaseType() {}
     inline vctEulerRotation3(const ThisType & other) : BaseType(other) {}
