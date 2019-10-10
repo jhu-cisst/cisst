@@ -255,16 +255,25 @@ robManipulator::Errno robManipulator::LoadRobot(const Json::Value &config)
         return robManipulator::EFAILURE;
     }
 
-    const Json::Value jsonLinks = config["links"];
+    Json::Value jsonLinks = config["links"];
     if (jsonLinks.isNull()) {
-        CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): need array \"links\"" << std::endl;
-        return robManipulator::EFAILURE;
+        jsonLinks = config["joints"];
+        if (jsonLinks.isNull()) {
+           CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): need array \"links\" or \"joints\"" << std::endl;
+           return robManipulator::EFAILURE;
+        }
     }
 
     const unsigned int numLinks = jsonLinks.size();
     if (numLinks == 0) {
         CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): empty array of links" << std::endl;
         return robManipulator::EFAILURE;
+    }
+
+    // Try to get convention for the whole chain first
+    std::string convention;
+    if (!(config["convention"].isNull())) {
+        convention = config["convention"].asString();
     }
 
     // load each link
@@ -275,12 +284,17 @@ robManipulator::Errno robManipulator::LoadRobot(const Json::Value &config)
             return robManipulator::EFAILURE;
         }
 
-        // Find the type of kinematics convention
-        std::string convention;
-        convention = jlink.get("convention", "standard").asString();
+        // Convention is defined per link
+        if (convention == "") {
+            if (jlink["convention"].isNull()) {
+                CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): can't find convention for link " << i + 1 << std::endl;
+                return robManipulator::EFAILURE;
+            }
+            convention = jlink["convention"].asString();
+        }
         robKinematics * kinematics = NULL;
         try {
-            kinematics = robKinematics::Instantiate( convention );
+            kinematics = robKinematics::Instantiate(convention);
         }
         catch( std::bad_alloc& ){
             CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): failed to allocate a kinematics of type: "
