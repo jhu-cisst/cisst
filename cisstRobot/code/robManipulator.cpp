@@ -882,9 +882,10 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     vctMatrixRotation3<double>      A; // iA(i-1)
     vctFixedSizeVector<double,3>   ps; // distal link
 
-    m  = links[i].Mass();
-    s  = links[i].CenterOfMass();
-    I  = links[i].MomentOfInertia();
+    const robMass & massData = links[i].MassData();
+    m  = massData.Mass();
+    s  = massData.CenterOfMass();
+    I  = massData.MomentOfInertia();
 
     A  = links[i].Orientation( q[i] ).InverseSelf();
     ps = links[i].PStar();
@@ -907,7 +908,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   for(int i=(int)links.size()-1; 0<=i; i--){
     vctMatrixRotation3<double>   A;
     vctFixedSizeVector<double,3> ps = links[i].PStar();
-    vctFixedSizeVector<double,3> s  = links[i].CenterOfMass();
+    vctFixedSizeVector<double,3> s  = links[i].MassData().CenterOfMass();
 
     if(i != (int)links.size()-1)              //
       A = links[i+1].Orientation( q[i+1] );    //
@@ -967,9 +968,10 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
     vctMatrixRotation3<double>      A; // iA(i-1)
     vctFixedSizeVector<double,3>   ps; // distal link
 
-    m  = links[i].Mass();
-    s  = links[i].CenterOfMass();
-    I  = links[i].MomentOfInertia();
+    const robMass & massData = links[i].MassData();
+    m  = massData.Mass();
+    s  = massData.CenterOfMass();
+    I  = massData.MomentOfInertia();
 
     if( i==0 ){
       A  = R*links[i].Orientation( q[i] );
@@ -1004,7 +1006,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
   for(int i=(int)links.size()-1; 0<=i; i--){
     vctMatrixRotation3<double>   A;
     vctFixedSizeVector<double,3> ps(0.0, 0.0, 0.0);
-    vctFixedSizeVector<double,3> s  = links[i].CenterOfMass();
+    vctFixedSizeVector<double,3> s  = links[i].MassData().CenterOfMass();
 
     if(i != (int)links.size()-1){              //
       A = links[i+1].Orientation( q[i+1] );    //
