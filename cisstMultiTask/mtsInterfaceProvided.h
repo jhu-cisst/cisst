@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsInterfaceProvided_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnNamedMap.h>
 
 #include <cisstMultiTask/mtsMailBox.h>
 #include <cisstMultiTask/mtsStateTable.h>
@@ -41,6 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandWrite.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsInterface.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last

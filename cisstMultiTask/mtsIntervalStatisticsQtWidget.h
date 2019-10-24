@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-07-14
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsIntervalStatisticsQtWidget_h
 #define _mtsIntervalStatisticsQtWidget_h
 
+#include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 

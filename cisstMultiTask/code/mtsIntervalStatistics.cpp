@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsIntervalStatistics.h>
+#include <cisstMultiTask/mtsTaskManager.h>
 
 CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
 
@@ -44,7 +45,8 @@ mtsIntervalStatistics::mtsIntervalStatistics():
     mComputeTimeMax(0.0),
     mNumberOfSamples(0),
     mNumberOfOverruns(0),
-    mStatisticsInterval(1.0)
+    mStatisticsInterval(1.0),
+    mCallback(0)
 {
     // Get a pointer to the time server
     mTimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
@@ -212,5 +214,10 @@ void mtsIntervalStatistics::Update(const double period, const double computeTime
         mComputeTimeRunningMin = cmnTypeTraits<double>::MaxPositiveValue();
         mComputeTimeRunningMax = cmnTypeTraits<double>::MinPositiveValue();
         mLastUpdateTime = currentTime;
+
+        // finally call user code to act on updated data
+        if (mCallback) {
+            mCallback->Execute();
+        }
     }
 }

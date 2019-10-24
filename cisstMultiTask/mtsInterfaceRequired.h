@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,8 +39,6 @@ http://www.cisst.org/cisst/license.txt.
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
-class mtsEventHandlerList;
 
 /*!
   \file
