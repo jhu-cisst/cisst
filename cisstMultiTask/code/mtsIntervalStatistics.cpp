@@ -24,17 +24,6 @@ CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
 
 mtsIntervalStatistics::mtsIntervalStatistics():
     mtsGenericObject(),
-    mPeriodSum(0.0),
-    mPeriodSumSquares(0.0),
-    mPeriodRunningMin(cmnTypeTraits<double>::MaxPositiveValue()),
-    mPeriodRunningMax(cmnTypeTraits<double>::MinPositiveValue()),
-    mComputeTimeSum(0.0),
-    mComputeTimeSumSquares(0.0),
-    mComputeTimeRunningMin(cmnTypeTraits<double>::MaxPositiveValue()),
-    mComputeTimeRunningMax(cmnTypeTraits<double>::MinPositiveValue()),
-    mRunningNumberOfSamples(0),
-    mRunningNumberOfOverruns(0),
-    mLastUpdateTime(0.0),
     mPeriodAvg(0.0),
     mPeriodStdDev(0.0),
     mPeriodMin(0.0),
@@ -50,6 +39,8 @@ mtsIntervalStatistics::mtsIntervalStatistics():
 {
     // Get a pointer to the time server
     mTimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
+    // then reset (order is important, Reset need the time server)
+    Reset();
 }
 
 
@@ -202,22 +193,27 @@ void mtsIntervalStatistics::Update(const double period, const double computeTime
         this->Valid() = true;
         this->Timestamp() = currentTime;
 
-        // reset
-        mRunningNumberOfSamples = 0;
-        mRunningNumberOfOverruns = 0;
-        mPeriodSum = 0.0;
-        mPeriodSumSquares = 0.0;
-        mPeriodRunningMin = cmnTypeTraits<double>::MaxPositiveValue();
-        mPeriodRunningMax = cmnTypeTraits<double>::MinPositiveValue();
-        mComputeTimeSum = 0.0;
-        mComputeTimeSumSquares = 0.0;
-        mComputeTimeRunningMin = cmnTypeTraits<double>::MaxPositiveValue();
-        mComputeTimeRunningMax = cmnTypeTraits<double>::MinPositiveValue();
-        mLastUpdateTime = currentTime;
-
         // finally call user code to act on updated data
         if (mCallback) {
             mCallback->Execute();
         }
+
+        // reset
+        Reset();
     }
+}
+
+void mtsIntervalStatistics::Reset(void)
+{
+    mRunningNumberOfSamples = 0;
+    mRunningNumberOfOverruns = 0;
+    mPeriodSum = 0.0;
+    mPeriodSumSquares = 0.0;
+    mPeriodRunningMin = cmnTypeTraits<double>::MaxPositiveValue();
+    mPeriodRunningMax = cmnTypeTraits<double>::MinPositiveValue();
+    mComputeTimeSum = 0.0;
+    mComputeTimeSumSquares = 0.0;
+    mComputeTimeRunningMin = cmnTypeTraits<double>::MaxPositiveValue();
+    mComputeTimeRunningMax = cmnTypeTraits<double>::MinPositiveValue();
+    mLastUpdateTime = mTimeServer->GetRelativeTime();
 }

@@ -128,6 +128,8 @@ public:
         this->SetCallback(new mtsCallableVoidMethod<__classType>(method, classInstantiation));
     }
 
+    void Reset(void);
+
 private:
 
     /*! Internal variables for statistics calculations */
