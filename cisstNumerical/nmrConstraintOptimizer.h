@@ -55,6 +55,7 @@ private:
     //!number of variables for incremental joint optimization (can be inferred from objective function).
     size_t NumVars;
 
+    // TODO: change name to NumSlacks
     //!Number of slacks
     size_t Slacks;
     //!Objective Index
@@ -125,21 +126,22 @@ public:
       \param CRows Number of rows needed for the objective data
       \param ARows Number of rows needed for the inequality constraint data
       \param ERows Number of rows needed for the equality constraint data
-      \param num_slacks The number of slacks
+      \param SlackRows The number of slacks
       \param CData A reference to the data portion of the objective matrix
       \param CSlacks A reference to the slack portion of the objective matrix
-      \param d A reference to the objective vector
+      \param dData A reference to the objective vector
       \param AData A reference to the data portion of the inequality constraint matrix
-      \param ASlacks A reference to the slack portion of the inequality constraint matrix
-      \param b A reference to the inequality constraint vector
+      \param bData A reference to the inequality constraint vector
+      \param bSlacks A reference to the inequality constraint vector for slack portion (slack limit)
       \param EData A reference to the data portion of the equality constraint matrix
-      \param ESlacks A reference to the slack portion of the equality constraint matrix
-      \param f A reference to the equality constraint vector
+      \param fData A reference to the equality constraint vector
     */
-    void SetRefs(const size_t CRows, const size_t ARows, const size_t ERows, const size_t num_slacks, const vctDoubleVec & limits,
-                 vctDynamicMatrixRef<double> & CData, vctDynamicMatrixRef<double> & CSlacks, vctDynamicVectorRef<double> & dData,
-                 vctDynamicMatrixRef<double> & AData, vctDynamicMatrixRef<double> & ASlacks, vctDynamicVectorRef<double> & bData,
-                 vctDynamicMatrixRef<double> & EData, vctDynamicMatrixRef<double> & ESlacks, vctDynamicVectorRef<double> & fData);
+    void SetRefs(const size_t CRows, const size_t ARows, const size_t ERows, const size_t NumSlacks,
+                  vctDynamicMatrixRef<double> & CData, vctDynamicMatrixRef<double> & CSlacks, 
+                  vctDynamicVectorRef<double> & dData,
+                  vctDynamicMatrixRef<double> & AData, vctDynamicMatrixRef<double> & ASlacks,  
+                  vctDynamicVectorRef<double> & bData, vctDynamicVectorRef<double> & bSlacks, 
+                  vctDynamicMatrixRef<double> & EData, vctDynamicVectorRef<double> & fData);
 
     //! Returns the number of variables.
     /*! GetNumVars

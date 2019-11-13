@@ -229,72 +229,84 @@ void nmrConstraintOptimizer::Allocate(const size_t CRows, const size_t CCols, co
 */
 void nmrConstraintOptimizer::ReserveSpace(const size_t CRows_in, const size_t ARows_in, const size_t ERows_in, const size_t num_slacks_in)
 {
-    CIndex += CRows_in;
+    CIndex += CRows_in+num_slacks_in;
     AIndex += ARows_in+num_slacks_in; // We're going to use the extra space to set slack limits
     EIndex += ERows_in;
     Slacks += num_slacks_in;
+    std::cout << "CIndex" << CIndex << std::endl;
+    std::cout << "AIndex" << AIndex << std::endl;
+    std::cout << "EIndex" << EIndex << std::endl;
+    std::cout << "Slacks" << Slacks << std::endl;
 }
 
 //! Returns references to spaces in the tableau.
 /*! GetObjectiveSpace
-  \param CRows Number of rows needed for the objective data
-  \param ARows Number of rows needed for the inequality constraint data
-  \param ERows Number of rows needed for the equality constraint data
-  \param SlackIndex_in The assigned slack index
-  \param num_slacks The number of slacks
+  \param CRows Number of rows needed for the objective data (=CRows_in)
+  \param ARows Number of rows needed for the inequality constraint data (=ARows_in)
+  \param ERows Number of rows needed for the equality constraint data (=ERows_in)
+  \param NumSlacks Number of slacks needed for current pass (=num_slacks_in)
   \param CData A reference to the data portion of the objective matrix
-  \param CSlacks A reference to the slack portion of the objective matrix
-  \param d A reference to the objective vector
+  \param CSlacks A reference to the slack portion of the objective matrix (relative importance to data objective)
+  \param dData A reference to the objective vector
   \param AData A reference to the data portion of the inequality constraint matrix
-  \param ASlacks A reference to the slack portion of the inequality constraint matrix
-  \param b A reference to the inequality constraint vector
+  \param bData A reference to the inequality constraint vector
+  \param bSlacks A reference to the inequality constraint vector for slack portion (slack limit)
   \param EData A reference to the data portion of the equality constraint matrix
-  \param ESlacks A reference to the slack portion of the equality constraint matrix
-  \param f A reference to the equality constraint vector
+  \param fData A reference to the equality constraint vector
 */
-void nmrConstraintOptimizer::SetRefs(const size_t CRows, const size_t ARows, const size_t ERows, const size_t num_slacks,
-                                     const vctDoubleVec & limits, vctDynamicMatrixRef<double> & CData,
-                                     vctDynamicMatrixRef<double> & CSlacks, vctDynamicVectorRef<double> & dData,
-                                     vctDynamicMatrixRef<double> & AData, vctDynamicMatrixRef<double> & ASlacks,
-                                     vctDynamicVectorRef<double> & bData, vctDynamicMatrixRef<double> & EData,
-                                     vctDynamicMatrixRef<double> & ESlacks, vctDynamicVectorRef<double> & fData)
+void nmrConstraintOptimizer::SetRefs(const size_t CRows, const size_t ARows, const size_t ERows, const size_t NumSlacks,
+                                     vctDynamicMatrixRef<double> & CData, vctDynamicMatrixRef<double> & CSlacks, 
+                                     vctDynamicVectorRef<double> & dData,
+                                     vctDynamicMatrixRef<double> & AData, vctDynamicMatrixRef<double> & ASlacks,  
+                                     vctDynamicVectorRef<double> & bData, vctDynamicVectorRef<double> & bSlacks, 
+                                     vctDynamicMatrixRef<double> & EData, vctDynamicVectorRef<double> & fData)
 {
     //Objectives
+    /*
+    |   C ... 0         |   | x |   | d |
+    |                   | * |   | - |   |
+    |   0 ... CSlacks   |   | s |   | 0 |
+    */
     CData.SetRef(C, CIndex, 0, CRows, NumVars);
-    if (num_slacks > 0) {
-        CSlacks.SetRef(C, CIndex, NumVars+SlackIndex, CRows, num_slacks);
-    }
     dData.SetRef(d, CIndex, CRows);
     CIndex += CRows;
+    // TODO: for now, assume CSlacks is a diagnol square matrix, i.e., no interaction between slack variables
+    if (NumSlacks > 0) {
+        CSlacks.SetRef(C, CIndex, NumVars+SlackIndex, NumSlacks, NumSlacks);
+        vctDynamicVectorRef<double> dSlacks;
+        dSlacks.SetRef(d, CIndex, NumSlacks);
+        dSlacks.SetAll(0.0);
+        CIndex += NumSlacks;
+    }
 
     //Inequality Constraints
+    /*
+    |   A ... 1         |   | x |   | b       |
+    |                   | * |   | - |         |
+    |   0 ... ASlacks   |   | s |   | bSlacks |
+    */
     AData.SetRef(A, AIndex, 0, ARows, NumVars);
-    if (num_slacks > 0) {
-        ASlacks.SetRef(A, AIndex, NumVars+SlackIndex, ARows, num_slacks);
-    }
     bData.SetRef(b, AIndex, ARows);
+    // TODO: for now, assume 1 slack per constraint
+    if (NumSlacks > 0) {
+        vctDynamicMatrixRef<double> Identity;
+        Identity.SetRef(A, AIndex, NumVars+SlackIndex, ARows, NumSlacks);
+        Identity.Diagonal().SetAll(1.0);
+    }
     AIndex += ARows;
-
-    //Add slack limits constraint
-    vctDynamicMatrixRef<double> Identity;
-    Identity.SetRef(A,AIndex,NumVars+SlackIndex,num_slacks,num_slacks);
-    vctDynamicVectorRef<double> LimitRef;
-    LimitRef.SetRef(b,AIndex,num_slacks);
-    for (size_t i = 0; i < num_slacks; i++) {
-        Identity[i][i] = 1;
-        LimitRef[i] = -limits[i];
+    // TODO: for now, assume ASlacks is a square matrix, i.e. 1 limit per slack
+    if (NumSlacks > 0) {
+        ASlacks.SetRef(A, AIndex, NumVars+SlackIndex, NumSlacks, NumSlacks);
+        bSlacks.SetRef(b, AIndex, NumSlacks);
     }
 
     //Equality Constraints
     EData.SetRef(E, EIndex, 0, ERows, NumVars);
-    if (num_slacks > 0) {
-        ESlacks.SetRef(E, EIndex, NumVars+SlackIndex, ERows, num_slacks);
-    }
     fData.SetRef(f, EIndex, ERows);
     EIndex += ERows;
 
     //Slacks
-    SlackIndex += num_slacks;
+    SlackIndex += NumSlacks;
 }
 
 //! Gets the number of rows for the objective expression.
