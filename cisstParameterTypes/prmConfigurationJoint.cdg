@@ -10,7 +10,7 @@ inline-header {
 }
 
 class {
-    name prmStateJoint;
+    name prmConfigurationJoint;
 
     attribute CISST_EXPORT;
 
@@ -25,28 +25,47 @@ class {
     }
 
     member {
-        name Position;
+        name Type;
+        type vctDynamicVector<prmJointType>;
+    }
+
+    member {
+        name PositionMin;
+        type vctDynamicVector<double>;
+    }
+    member {
+        name PositionMax;
         type vctDynamicVector<double>;
     }
 
     member {
-        name Velocity;
+        name VelocityMin;
+        type vctDynamicVector<double>;
+    }
+    member {
+        name VelocityMax;
         type vctDynamicVector<double>;
     }
 
     member {
-        name Effort;
+        name AccelerationMin;
+        type vctDynamicVector<double>;
+    }
+    member {
+        name AccelerationMax;
+        type vctDynamicVector<double>;
+    }
+
+    member {
+        name EffortMin;
+        type vctDynamicVector<double>;
+    }
+    member {
+        name EffortMax;
         type vctDynamicVector<double>;
     }
 
     inline-header {
-    public:
-        inline void SetSize(const size_t & size) {
-            Name().SetSize(size);
-            Position().SetSize(size);
-            Velocity().SetSize(size);
-            Effort().SetSize(size);
-        }
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     }
@@ -54,5 +73,5 @@ class {
 
 
 inline-header {
-CMN_DECLARE_SERVICES_INSTANTIATION(prmStateJoint);
+CMN_DECLARE_SERVICES_INSTANTIATION(prmConfigurationJoint);
 }
