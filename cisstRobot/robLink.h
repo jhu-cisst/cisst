@@ -2,8 +2,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -95,7 +94,9 @@ class CISST_EXPORT robLink {
   vctMatrixRotation3<double> Orientation( double q ) const;
 
   robKinematics* GetKinematics() const;
-  robMass        GetMass() const;
+
+  const robMass & MassData(void) const;
+  robMass & MassData(void);
 
   robKinematics::Convention GetConvention() const;
 

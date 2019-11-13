@@ -255,16 +255,25 @@ robManipulator::Errno robManipulator::LoadRobot(const Json::Value &config)
         return robManipulator::EFAILURE;
     }
 
-    const Json::Value jsonLinks = config["links"];
+    Json::Value jsonLinks = config["links"];
     if (jsonLinks.isNull()) {
-        CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): need array \"links\"" << std::endl;
-        return robManipulator::EFAILURE;
+        jsonLinks = config["joints"];
+        if (jsonLinks.isNull()) {
+           CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): need array \"links\" or \"joints\"" << std::endl;
+           return robManipulator::EFAILURE;
+        }
     }
 
     const unsigned int numLinks = jsonLinks.size();
     if (numLinks == 0) {
         CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): empty array of links" << std::endl;
         return robManipulator::EFAILURE;
+    }
+
+    // Try to get convention for the whole chain first
+    std::string convention;
+    if (!(config["convention"].isNull())) {
+        convention = config["convention"].asString();
     }
 
     // load each link
@@ -275,12 +284,17 @@ robManipulator::Errno robManipulator::LoadRobot(const Json::Value &config)
             return robManipulator::EFAILURE;
         }
 
-        // Find the type of kinematics convention
-        std::string convention;
-        convention = jlink.get("convention", "standard").asString();
+        // Convention is defined per link
+        if (convention == "") {
+            if (jlink["convention"].isNull()) {
+                CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): can't find convention for link " << i + 1 << std::endl;
+                return robManipulator::EFAILURE;
+            }
+            convention = jlink["convention"].asString();
+        }
         robKinematics * kinematics = NULL;
         try {
-            kinematics = robKinematics::Instantiate( convention );
+            kinematics = robKinematics::Instantiate(convention);
         }
         catch( std::bad_alloc& ){
             CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): failed to allocate a kinematics of type: "
@@ -868,9 +882,10 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     vctMatrixRotation3<double>      A; // iA(i-1)
     vctFixedSizeVector<double,3>   ps; // distal link
 
-    m  = links[i].Mass();
-    s  = links[i].CenterOfMass();
-    I  = links[i].MomentOfInertia();
+    const robMass & massData = links[i].MassData();
+    m  = massData.Mass();
+    s  = massData.CenterOfMass();
+    I  = massData.MomentOfInertia();
 
     A  = links[i].Orientation( q[i] ).InverseSelf();
     ps = links[i].PStar();
@@ -893,7 +908,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   for(int i=(int)links.size()-1; 0<=i; i--){
     vctMatrixRotation3<double>   A;
     vctFixedSizeVector<double,3> ps = links[i].PStar();
-    vctFixedSizeVector<double,3> s  = links[i].CenterOfMass();
+    vctFixedSizeVector<double,3> s  = links[i].MassData().CenterOfMass();
 
     if(i != (int)links.size()-1)              //
       A = links[i+1].Orientation( q[i+1] );    //
@@ -953,9 +968,10 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
     vctMatrixRotation3<double>      A; // iA(i-1)
     vctFixedSizeVector<double,3>   ps; // distal link
 
-    m  = links[i].Mass();
-    s  = links[i].CenterOfMass();
-    I  = links[i].MomentOfInertia();
+    const robMass & massData = links[i].MassData();
+    m  = massData.Mass();
+    s  = massData.CenterOfMass();
+    I  = massData.MomentOfInertia();
 
     if( i==0 ){
       A  = R*links[i].Orientation( q[i] );
@@ -990,7 +1006,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
   for(int i=(int)links.size()-1; 0<=i; i--){
     vctMatrixRotation3<double>   A;
     vctFixedSizeVector<double,3> ps(0.0, 0.0, 0.0);
-    vctFixedSizeVector<double,3> s  = links[i].CenterOfMass();
+    vctFixedSizeVector<double,3> s  = links[i].MassData().CenterOfMass();
 
     if(i != (int)links.size()-1){              //
       A = links[i+1].Orientation( q[i+1] );    //

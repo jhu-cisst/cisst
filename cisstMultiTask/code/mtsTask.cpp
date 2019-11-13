@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -27,6 +26,7 @@
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 #include <iostream>
 

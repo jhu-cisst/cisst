@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-08-10
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnConstants.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 #include "serverTask.h"
 
@@ -49,7 +50,7 @@ serverTask::serverTask(const std::string & taskName, double period):
     }
 
     // Get a pointer to the time server
-    this->TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
+    this->TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
 
     // Make sure we timestamp ourselves
     this->ReadValue.SetAutomaticTimestamp(false);

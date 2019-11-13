@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-24
 
-  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 //************************************* mtsEventReceiverBase ***************************************************
 
-mtsEventReceiverBase::mtsEventReceiverBase() : Name("UnknownEventReceiver"), Required(0), EventSignal(0), Waiting(false), OwnEventSignal(false)
+mtsEventReceiverBase::mtsEventReceiverBase() : Name("UnknownEventReceiver"), Required(0), EventSignal(0), OwnEventSignal(false), WaitState(EVENT_RECEIVER_IDLE)
 {}
 
 mtsEventReceiverBase::~mtsEventReceiverBase()
@@ -55,16 +55,43 @@ bool mtsEventReceiverBase::CheckRequired() const
     return (Required != 0);
 }
 
-bool mtsEventReceiverBase::WaitCommon()
+void mtsEventReceiverBase::CheckEventSignal()
 {
     if (!EventSignal) {
         CMN_LOG_RUN_WARNING << "mtsEventReceiverBase: Creating local thread signal for event " << Name << std::endl;
         EventSignal = new osaThreadSignal;
         OwnEventSignal = true;
     }
-    if (Waiting) {
-         // This can only happen if we are called from multiple threads, which is a problem (not thread-safe).
+}
+
+bool mtsEventReceiverBase::WaitCommon()
+{
+    CheckEventSignal();
+    if (WaitState == EVENT_RECEIVER_WAITING) {
+        // Cannot call from multiple threads (not thread-safe).
         CMN_LOG_RUN_WARNING << "mtsEventReceiverBase: already waiting on event " << Name << std::endl;
+        return false;
+    }
+    return true;
+}
+
+void mtsEventReceiverBase::ClearWait()
+{
+    WaitState = EVENT_RECEIVER_IDLE;
+}
+
+bool mtsEventReceiverBase::PrepareToWait()
+{
+    CheckEventSignal();
+    // Not locking mutex because other thread should not yet be involved
+    if (WaitState == EVENT_RECEIVER_IDLE)
+        WaitState = EVENT_RECEIVER_PREPARING;
+    else {
+        // Cannot call from multiple threads (not thread-safe). Of course, we do not know if
+        // this has been called from multiple threads (programmer could have accidentally called
+        // PrepareToWait twice from same thread), but anyway that should be discouraged.
+        CMN_LOG_RUN_WARNING << "mtsEventReceiverBase: already waiting on event " << Name
+                            << ", state = " << WaitState << std::endl;
         return false;
     }
     return true;
@@ -74,10 +101,15 @@ bool mtsEventReceiverBase::Wait()
 {
     bool ret = WaitCommon();
     if (ret) {
-        Waiting = true;
-        EventSignal->Wait();
-        Waiting = false;
-        ret = true;
+        WaitMutex.Lock();
+        // WaitCommon already checked if WaitState is equal to EVENT_RECEIVER_WAITING, so following is
+        // equivalent to checking whether WaitState is EVENT_RECEIVER_IDLE or EVENT_RECEIVER_PREPARING
+        if (WaitState != EVENT_RECEIVER_SIGNALED)
+            WaitState = EVENT_RECEIVER_WAITING;
+        WaitMutex.Unlock();
+        if (WaitState == EVENT_RECEIVER_WAITING)
+            EventSignal->Wait();
+        WaitState = EVENT_RECEIVER_IDLE;
     }
     return ret;
 }
@@ -86,9 +118,20 @@ bool mtsEventReceiverBase::WaitWithTimeout(double timeoutInSec)
 {
     bool ret = WaitCommon();
     if (ret) {
-        Waiting = true;
-        ret = EventSignal->Wait(timeoutInSec);
-        Waiting = false;
+        WaitMutex.Lock();
+        // WaitCommon already checked if WaitState is equal to EVENT_RECEIVER_WAITING, so following is
+        // equivalent to checking whether WaitState is EVENT_RECEIVER_IDLE or EVENT_RECEIVER_PREPARING
+        if (WaitState != EVENT_RECEIVER_SIGNALED)
+            WaitState = EVENT_RECEIVER_WAITING;
+        WaitMutex.Unlock();
+        if (WaitState == EVENT_RECEIVER_WAITING) {
+            ret = EventSignal->Wait(timeoutInSec);
+            // If timed out, can check if event may have been raised (and missed)
+            // either just before or just after the call to Wait.
+            if (!ret && (WaitState == EVENT_RECEIVER_SIGNALED))
+                ret = true;
+        }
+        WaitState = EVENT_RECEIVER_IDLE;
     }
     return ret;
 }
@@ -118,12 +161,16 @@ mtsCommandVoid * mtsEventReceiverVoid::GetCommand(void)
 
 void mtsEventReceiverVoid::EventHandler(void)
 {
-    if (Waiting) {
-        EventSignal->Raise();
-    }
     if (UserHandler) {
         UserHandler->Execute(MTS_NOT_BLOCKING);
     }
+    WaitMutex.Lock();
+    WaitStates oldWaitState = WaitState;
+    if ((WaitState == EVENT_RECEIVER_PREPARING) || (WaitState == EVENT_RECEIVER_WAITING))
+        WaitState = EVENT_RECEIVER_SIGNALED;
+    WaitMutex.Unlock();
+    if (oldWaitState == EVENT_RECEIVER_WAITING)
+        EventSignal->Raise();
 }
 
 void mtsEventReceiverVoid::SetHandlerCommand(mtsCommandVoid * commandHandler)
@@ -167,8 +214,8 @@ mtsCommandWriteBase *mtsEventReceiverWrite::GetCommand()
 
 void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
 {
-    if (Waiting)
-        EventSignal->Raise();
+    // Copy from arg to *ArgPtr. In many cases (e.g., for VoidReturn and WriteReturn commands)
+    // &arg == ArgPtr (point to same memory), but this is handled in cmnClassServices::Create.
     if (ArgPtr && !ArgPtr->Services()->Create(ArgPtr, arg)) {
         CMN_LOG_RUN_ERROR << "mtsEventReceiverWrite: could not copy from " << arg.Services()->GetName()
                           << " to " << ArgPtr->Services()->GetName() << std::endl;
@@ -176,6 +223,13 @@ void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
     }
     if (UserHandler)
         UserHandler->Execute(arg, MTS_NOT_BLOCKING);
+    WaitMutex.Lock();
+    WaitStates oldWaitState = WaitState;
+    if ((WaitState == EVENT_RECEIVER_PREPARING) || (WaitState == EVENT_RECEIVER_WAITING))
+        WaitState = EVENT_RECEIVER_SIGNALED;
+    WaitMutex.Unlock();
+    if (oldWaitState == EVENT_RECEIVER_WAITING)
+        EventSignal->Raise();
 }
 
 void mtsEventReceiverWrite::SetHandlerCommand(mtsCommandWriteBase *cmdHandler)

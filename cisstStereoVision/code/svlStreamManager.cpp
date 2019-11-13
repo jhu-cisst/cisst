@@ -6,8 +6,7 @@
   Author(s):  Balazs Vagvolgyi
   Created on: 2006
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaCriticalSection.h>
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 /*************************************/
 /*** svlStreamManager class **********/
@@ -749,7 +749,7 @@ void svlStreamManager::InitializeCommand(void)
 void svlStreamManager::SetSourceFilterCommand(const mtsStdString & source)
 {
     // look for the source in the component manager
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
     std::string sourceName = source; // remove timestamp 
     mtsComponent * component = taskManager->GetComponent(sourceName);
     if (!component) {

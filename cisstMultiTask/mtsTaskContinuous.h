@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2008-09-23
 
-  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -42,7 +42,7 @@ class CISST_EXPORT mtsTaskContinuous: public mtsTask
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-    friend class mtsTaskManager;
+    friend class mtsComponentManager;
 
 public:
     typedef mtsTask BaseType;
