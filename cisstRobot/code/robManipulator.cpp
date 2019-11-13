@@ -380,6 +380,31 @@ robManipulator::GetFTMaximums(vctDynamicVectorRef<double> ftMaximums) const
   return true;
 }
 
+bool
+robManipulator::GetJointNames(std::vector<std::string> & names) const
+{
+  if (names.size() != links.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    names.at(i) = links[i].Name();
+  }
+  return true;
+}
+
+bool
+robManipulator::GetJointTypes(std::vector<robJoint::Type> & types) const
+{
+  if (types.size() != links.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    types.at(i) = links[i].GetKinematics()->GetType();
+
+  }
+  return true;
+}
+
 vctFrame4x4<double>
 robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
                                    int N ) const {
