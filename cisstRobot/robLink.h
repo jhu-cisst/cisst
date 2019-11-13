@@ -39,7 +39,8 @@ class CISST_EXPORT robLink {
  protected:
 
   robKinematics* kinematics;
-  robMass       mass;
+  robMass        mass;
+  std::string    name;
 
  public:
 
@@ -103,6 +104,13 @@ class CISST_EXPORT robLink {
   robJoint::Type GetType() const;
 
   double Mass() const { return mass.Mass(); }
+
+  inline const std::string & Name(void) const {
+    return name;
+  }
+  inline std::string & Name(void) {
+    return name;
+  }
 
   vctFixedSizeVector<double,3> CenterOfMass() const
   { return mass.CenterOfMass(); }
