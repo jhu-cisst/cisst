@@ -91,7 +91,7 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
     if (newValue.Position().size() != 0) {
         QWPosition->show();
         if (mNeedsConversion
-            && (mConfiguration.Name().size() == newValue.Name().size())) {
+            && (mConfiguration.Type().size() == newValue.Position().size())) {
             // update scaling factors if needed based on vector size
             if (newValue.Position().size() != mPositionFactors.size()) {
                 if (mConfiguration.Type().size() != 0) {
@@ -113,7 +113,7 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
     if (newValue.Velocity().size() != 0) {
         QWVelocity->show();
         if (mNeedsConversion
-            && (mConfiguration.Name().size() == newValue.Name().size())) {
+            && (mConfiguration.Type().size() == newValue.Velocity().size())) {
             // update scaling factors if needed based on vector size
             if (newValue.Velocity().size() != mVelocityFactors.size()) {
                 if (mConfiguration.Type().size() != 0) {

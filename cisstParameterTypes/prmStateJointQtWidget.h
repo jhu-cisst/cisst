@@ -43,7 +43,9 @@ public:
       Qt Widget for position, velocity and effort. */
     void SetValue(const prmStateJoint & newValue);
 
-    void SetConfiguration(const prmConfigurationJoint & newConfiguration);
+    inline void SetConfiguration(const prmConfigurationJoint & newConfiguration) {
+        mConfiguration = newConfiguration;
+    }
 
     inline void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute) {
         mPrismaticFactor = prismatic;
