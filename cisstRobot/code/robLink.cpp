@@ -52,10 +52,6 @@ robLink::Errno robLink::Read(const Json::Value &linkConfig)
 {
     if (kinematics != NULL) { kinematics->Read(linkConfig); }
     mass.ReadMass(linkConfig);
-    const Json::Value jsonName = linkConfig["name"];
-    if (!jsonName.isNull()) {
-      name = jsonName.asString();
-    }
     return robLink::ESUCCESS;
 }
 #endif

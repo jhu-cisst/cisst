@@ -387,7 +387,7 @@ robManipulator::GetJointNames(std::vector<std::string> & names) const
     return false;
   }
   for (size_t i = 0; i < links.size(); i++ ) {
-    names.at(i) = links[i].Name();
+    names.at(i) = links[i].GetKinematics()->Name();
   }
   return true;
 }
