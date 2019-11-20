@@ -39,7 +39,7 @@ class CISST_EXPORT robLink {
  protected:
 
   robKinematics* kinematics;
-  robMass       mass;
+  robMass        mass;
 
  public:
 
