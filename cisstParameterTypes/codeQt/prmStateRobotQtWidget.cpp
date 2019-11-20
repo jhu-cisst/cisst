@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-03-22
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -54,6 +54,7 @@ prmStateRobotQtWidgetComponent::prmStateRobotQtWidgetComponent(const std::string
     // Setup CISST Interface
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
     if (interfaceRequired) {
+        interfaceRequired->AddFunction("GetConfigurationJoint", GetConfigurationJoint);
         interfaceRequired->AddFunction("GetStateJoint", GetStateJoint);
         interfaceRequired->AddFunction("GetPositionCartesian", GetPositionCartesian);
     }
@@ -70,6 +71,13 @@ void prmStateRobotQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
     // make sure we should update the display
     if (this->isHidden()) {
         return;
+    }
+
+    // see if we should try to get configuration
+    if ((ConfigurationJoint.Name().size() != StateJoint.Name().size())
+        && (GetConfigurationJoint.IsValid())) {
+        GetConfigurationJoint(ConfigurationJoint);
+        QSJWidget->SetConfiguration(ConfigurationJoint);
     }
     GetStateJoint(StateJoint);
     QSJWidget->SetValue(StateJoint);
