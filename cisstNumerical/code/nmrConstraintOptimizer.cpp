@@ -36,7 +36,6 @@
 */
 nmrConstraintOptimizer::nmrConstraintOptimizer(const size_t n)
 {
-    Slacks = 0;
     NumVars = n;
     ResetIndices();
 }
@@ -51,7 +50,7 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
     CISSTNETLIB_INTEGER res;
 
     // make sure input is the correct size
-    dq.SetSize(NumVars+Slacks);
+    dq.SetSize(NumVars+SlackIndex);
 
     // if we don't see an objective
     if (C.rows() == 0 || d.size() == 0) {
@@ -60,13 +59,13 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
     }
 
     // if the sizes don't match for C,d
-    if (C.rows() != d.size() || dq.size() != NumVars+Slacks) {
+    if (C.rows() != d.size() || dq.size() != NumVars+SlackIndex) {
         return NMR_MALFORMED;
     }
 
     // if we don't have any constraints, solve
     if (A.size() == 0 && E.size() == 0) {
-        if (C.cols() != dq.size() + Slacks) {
+        if (C.cols() != dq.size() + SlackIndex) {
             return NMR_MALFORMED;
         }
         lsiSolution.Allocate(C);
@@ -163,24 +162,24 @@ void nmrConstraintOptimizer::ResetIndices(void)
  */
 void nmrConstraintOptimizer::Allocate(void)
 {
-    if (C.rows() != CIndex || C.cols() != NumVars+Slacks) {
-        C.SetSize(CIndex,NumVars+Slacks,VCT_COL_MAJOR);
+    if (C.rows() != CIndex || C.cols() != NumVars+SlackIndex) {
+        C.SetSize(CIndex,NumVars+SlackIndex,VCT_COL_MAJOR);
         C.SetAll(0);
     }
     if (d.size() != CIndex) {
         d.SetSize(CIndex);
         d.SetAll(0);
     }
-    if (A.rows() != AIndex || A.cols() != NumVars+Slacks) {
-        A.SetSize(AIndex,NumVars+Slacks,VCT_COL_MAJOR);
+    if (A.rows() != AIndex || A.cols() != NumVars+SlackIndex) {
+        A.SetSize(AIndex,NumVars+SlackIndex,VCT_COL_MAJOR);
         A.SetAll(0);
     }
     if (b.size() != AIndex) {
         b.SetSize(AIndex);
         b.SetAll(0);
     }
-    if (E.rows() != EIndex || E.cols() != NumVars+Slacks) {
-        E.SetSize(EIndex,NumVars+Slacks,VCT_COL_MAJOR);
+    if (E.rows() != EIndex || E.cols() != NumVars+SlackIndex) {
+        E.SetSize(EIndex,NumVars+SlackIndex,VCT_COL_MAJOR);
         E.SetAll(0);
     }
     if (f.size() != EIndex) {
@@ -222,21 +221,17 @@ void nmrConstraintOptimizer::Allocate(const size_t CRows, const size_t CCols, co
 
 //! Reserves space in the tableau
 /*! ReserveSpace
-  \param CRows Number of rows needed for the objective
-  \param ARows Number of rows needed for the inequality constraint
-  \param ERows Number of rows needed for the equality constraint
-  \param num_slacks The number of slacks needed
+  \param CRows_in Number of rows needed for the objective
+  \param ARows_in Number of rows needed for the inequality constraint
+  \param ERows_in Number of rows needed for the equality constraint
+  \param Slacks_in The number of slacks needed
 */
-void nmrConstraintOptimizer::ReserveSpace(const size_t CRows_in, const size_t ARows_in, const size_t ERows_in, const size_t num_slacks_in)
+void nmrConstraintOptimizer::ReserveSpace(const size_t CRows_in, const size_t ARows_in, const size_t ERows_in, const size_t Slacks_in)
 {
-    CIndex += CRows_in+num_slacks_in;
-    AIndex += ARows_in+num_slacks_in; // We're going to use the extra space to set slack limits
+    CIndex += CRows_in+Slacks_in;
+    AIndex += ARows_in+Slacks_in; // We're going to use the extra space to set slack limits
     EIndex += ERows_in;
-    Slacks += num_slacks_in;
-    std::cout << "CIndex" << CIndex << std::endl;
-    std::cout << "AIndex" << AIndex << std::endl;
-    std::cout << "EIndex" << EIndex << std::endl;
-    std::cout << "Slacks" << Slacks << std::endl;
+    SlackIndex += Slacks_in;
 }
 
 //! Returns references to spaces in the tableau.
