@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -23,6 +23,7 @@ cisst_data_generator (cisstParameterTypes
                       ../prmCartesianImpedanceGains.cdg
                       ../prmIMUSensors.cdg
                       ../prmStateJoint.cdg
+                      ../prmConfigurationJoint.cdg
                       ../prmInputData.cdg
                       ../prmKeyValue.cdg
                       ../prmOperatingState.cdg

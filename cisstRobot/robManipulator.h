@@ -225,6 +225,12 @@ public:
   /*! Get force/torque max */
   bool GetFTMaximums(vctDynamicVectorRef<double> ftMaximums) const;
 
+  /*! Get joint names */
+  bool GetJointNames(std::vector<std::string> & names) const;
+
+  /*! Get joint types */
+  bool GetJointTypes(std::vector<robJoint::Type> & types) const;
+
   //! Evaluate the forward kinematics
   /**
      Compute the position and orientation of each link wrt to the world frame

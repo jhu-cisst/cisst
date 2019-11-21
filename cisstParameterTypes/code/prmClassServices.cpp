@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-10-20
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -98,6 +98,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeProxy);
 
 #include <cisstParameterTypes/prmIMUSensors.h>
 CMN_IMPLEMENT_SERVICES(prmIMUSensors);
+
+#include <cisstParameterTypes/prmConfigurationJoint.h>
+CMN_IMPLEMENT_SERVICES(prmConfigurationJoint);
 
 #include <cisstParameterTypes/prmStateJoint.h>
 CMN_IMPLEMENT_SERVICES(prmStateJoint);
