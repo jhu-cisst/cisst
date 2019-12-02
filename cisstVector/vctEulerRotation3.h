@@ -76,6 +76,7 @@ http://www.cisst.org/cisst/license.txt.
 
 VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYZ)
 VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYX)
+VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZXZ)
 #endif
 
 
@@ -204,7 +205,8 @@ public:
     }
 
     /*! Returns the Euler angles in radians */
-    vct3 GetAngles(void) const { return Angles; }
+    const vct3 & GetAngles(void) const { return Angles; }
+    vct3 & GetAngles(void) { return Angles; }
 
     /*! Returns the Euler angles in degrees */
     vct3 GetAnglesInDegrees(void) const { return (180.0/cmnPI)*Angles; }
@@ -328,6 +330,9 @@ typedef vctEulerRotation3<vctEulerRotation3Order::ZYZ> vctEulerZYZRotation3;
 /*! Define an Euler angle rotation in dimension 3 using ZYX (yaw-pitch-roll) order. */
 typedef vctEulerRotation3<vctEulerRotation3Order::ZYX> vctEulerZYXRotation3;
 
+/*! Define an Euler angle rotation in dimension 3 using ZXZ order. */
+typedef vctEulerRotation3<vctEulerRotation3Order::ZXZ> vctEulerZXZRotation3;
+
 #ifndef SWIG
 #ifdef CISST_COMPILER_IS_MSVC
 // declare instances of helper functions
@@ -383,6 +388,7 @@ typedef vctEulerRotation3<vctEulerRotation3Order::ZYX> vctEulerZYXRotation3;
 
 VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYZ)
 VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYX)
+VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZXZ)
 #endif // CISST_COMPILER_IS_MSVC
 #endif // !SWIG
 

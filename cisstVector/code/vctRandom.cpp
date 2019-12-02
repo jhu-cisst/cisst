@@ -1,13 +1,11 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
-/*
-  
+/* 
   Author(s):	Anton Deguet
   Created on:	2005-01-31
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -86,6 +84,17 @@ void vctRandom(vctRodriguezRotation3Base<_containerType> & rodriguezRotation) {
 
 template void vctRandom(vctRodriguezRotation3Base<vctFixedSizeVector<double, 3> > &);
 template void vctRandom(vctRodriguezRotation3Base<vctFixedSizeVector<float, 3> > &);
+
+
+
+template <vctEulerRotation3Order::OrderType _order>
+void vctRandom(vctEulerRotation3<_order> & eulerRotation) {
+    vctRandom(eulerRotation.GetAngles(), -cmnPI, cmnPI);
+}
+
+template void vctRandom(vctEulerRotation3<vctEulerRotation3Order::ZYZ> &);
+template void vctRandom(vctEulerRotation3<vctEulerRotation3Order::ZYX> &);
+template void vctRandom(vctEulerRotation3<vctEulerRotation3Order::ZXZ> &);
 
 
 
