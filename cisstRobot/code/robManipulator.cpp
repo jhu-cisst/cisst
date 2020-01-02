@@ -1736,19 +1736,33 @@ robManipulator::Errno robManipulator::Truncate(const size_t linksToKeep)
 }
 
 bool robManipulator::ClampJointValueAndUpdateError(const size_t link,
-                                                   double & value)
+                                                   double & value,
+                                                   const double & tolerance)
 {
   const double qMax = links[link].GetKinematics()->PositionMax();
   const double qMin = links[link].GetKinematics()->PositionMin();
   if (value > qMax) {
+    // only set error if not within tolerance
+    if (value > (qMax + tolerance)) {
+      value = qMax;
+      stringstream ss;
+      ss << link;
+      mLastError = "robManipulator: position clamped to upper joint limit " + ss.str();
+      return true;
+    }
+    // clamp anyway
     value = qMax;
-    mLastError = "robManipulator: joint value clamped to upper joint limit";
-    return true;
+    return false;
   } else if (value < qMin) {
+    if (value < (qMin - tolerance)) {
+      value = qMin;
+      stringstream ss;
+      ss << link;
+      mLastError = "robManipulator: position clamped to lower joint limit " + ss.str();
+      return true;
+    }
     value = qMin;
-    mLastError = "robManipulator: joint value clamped to lower joint limit";
-    return true;
+    return false;
   }
   return false;
 }
-

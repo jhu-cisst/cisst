@@ -357,7 +357,8 @@ public:
     message if the value provided is outside joint limits.  Return
     true if clamping was necessary. */ 
   bool ClampJointValueAndUpdateError(const size_t jointIndex,
-                                     double & value);
+                                     double & value,
+                                     const double & tolerance = 1e-6);
 };
 
 #endif // _robManipulator_h
