@@ -443,7 +443,7 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
   for(int i=1; i<N; i++)
     Rtwi = Rtwi * links[i].ForwardKinematics( q[i] );
 
-  if( tools.size() == 1 ){
+  if( (tools.size() == 1) && (N == (int)links.size()) ){
     if( tools[0] != NULL )
       { return Rtwi * tools[0]->ForwardKinematics( q, 0 ); }
   }
