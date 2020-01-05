@@ -5,7 +5,7 @@
   Author(s):  Marcin Balicki, Anton Deguet
   Created on: 2010-03-31
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,13 +25,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsIntervalStatistics_h
 #define _mtsIntervalStatistics_h
 
-#include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+#include <cisstMultiTask/mtsCallableVoidMethod.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -117,6 +117,19 @@ public:
     /*! Add one sample to compute statistics */
     void Update(const double sample, const double computeTime);
 
+    /*! Set callback to act on updated statistics */
+    inline void SetCallback(mtsCallableVoidBase * callback) {
+        mCallback = callback;
+    }
+
+    template <class __classType>
+    inline void SetCallback(void (__classType::*method)(void),
+                            __classType * classInstantiation) {
+        this->SetCallback(new mtsCallableVoidMethod<__classType>(method, classInstantiation));
+    }
+
+    void Reset(void);
+
 private:
 
     /*! Internal variables for statistics calculations */
@@ -150,6 +163,8 @@ private:
     /*! configuration. */
     double mStatisticsInterval;
 
+    /*! optional callback */
+    mtsCallableVoidBase * mCallback;
 
 public:
 

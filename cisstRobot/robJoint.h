@@ -58,6 +58,8 @@ class CISST_EXPORT robJoint {
 
 private:
 
+  std::string name;
+  
   //! The type of the joint
   /**
      Determine if the joint is a hinge, slider, universal, ball and socket, etc.
@@ -96,6 +98,13 @@ public:
   // class with virtual methods should have a virtual destructor
   inline virtual ~robJoint() {};
 
+  inline const std::string & Name(void) const {
+    return name;
+  }
+  inline std::string & Name(void) {
+    return name;
+  }
+  
   //! Return the type of the joint
   /**
      \return The type of the joint (hinge, slider, universal, ball and socket)

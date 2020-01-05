@@ -43,6 +43,8 @@ class CISST_EXPORT robManipulator{
 
   enum Errno{ ESUCCESS, EFAILURE };
 
+  std::string mLastError;
+
   //! Position and orientation of the first link
   /**
      Simply put, this is the position and orientation of the base of the first
@@ -215,15 +217,26 @@ public:
   virtual ~robManipulator();
 
   /*! Set joint limits */
-  bool SetJointLimits(const vctDynamicVector<double> & lowerLimits,
-                      const vctDynamicVector<double> & upperLimits);
+  virtual void
+    SetJointLimits(const vctDynamicVector<double> & lowerLimits,
+                   const vctDynamicVector<double> & upperLimits);
 
   /*! Get joint limits */
-  bool GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
-                      vctDynamicVectorRef<double> upperLimits) const;
+  virtual void
+    GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
+                   vctDynamicVectorRef<double> upperLimits) const;
 
   /*! Get force/torque max */
-  bool GetFTMaximums(vctDynamicVectorRef<double> ftMaximums) const;
+  virtual void
+    GetFTMaximums(vctDynamicVectorRef<double> ftMaximums) const;
+
+  /*! Get joint names */
+  virtual void
+    GetJointNames(std::vector<std::string> & names) const;
+
+  /*! Get joint types */
+  virtual void
+    GetJointTypes(std::vector<robJoint::Type> & types) const;
 
   //! Evaluate the forward kinematics
   /**
@@ -331,7 +344,21 @@ public:
       (jacobian matrices).  Returns EFAILURE if the current
       manipulator doesn't have at least n links.
   */
-  virtual robManipulator::Errno Truncate(const size_t linksToKeep);
+  virtual
+    robManipulator::Errno
+    Truncate(const size_t linksToKeep);
+
+  /*! Get last error message */
+  inline const std::string & LastError(void) const {
+    return mLastError;
+  }
+
+  /*! Clamp joint value between joint limits and update the last error
+    message if the value provided is outside joint limits.  Return
+    true if clamping was necessary. */ 
+  bool ClampJointValueAndUpdateError(const size_t jointIndex,
+                                     double & value,
+                                     const double & tolerance = 1e-6);
 };
 
 #endif // _robManipulator_h

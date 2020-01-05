@@ -90,12 +90,13 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
     // -- position
     if (newValue.Position().size() != 0) {
         QWPosition->show();
-        if (mNeedsConversion) {
+        if (mNeedsConversion
+            && (mConfiguration.Type().size() == newValue.Position().size())) {
             // update scaling factors if needed based on vector size
             if (newValue.Position().size() != mPositionFactors.size()) {
-                if (newValue.Type().size() != 0) {
-                    mPositionFactors.SetSize(newValue.Type().size());
-                    prmJointTypeToFactor(newValue.Type(), mPrismaticFactor, mRevoluteFactor, mPositionFactors);
+                if (mConfiguration.Type().size() != 0) {
+                    mPositionFactors.SetSize(mConfiguration.Type().size());
+                    prmJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mPositionFactors);
                 }
             }
             mTempVector.SetSize(newValue.Position().size());
@@ -111,12 +112,13 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
     // -- velocity
     if (newValue.Velocity().size() != 0) {
         QWVelocity->show();
-        if (mNeedsConversion) {
+        if (mNeedsConversion
+            && (mConfiguration.Type().size() == newValue.Velocity().size())) {
             // update scaling factors if needed based on vector size
             if (newValue.Velocity().size() != mVelocityFactors.size()) {
-                if (newValue.Type().size() != 0) {
-                    mVelocityFactors.SetSize(newValue.Type().size());
-                    prmJointTypeToFactor(newValue.Type(), mPrismaticFactor, mRevoluteFactor, mVelocityFactors);
+                if (mConfiguration.Type().size() != 0) {
+                    mVelocityFactors.SetSize(mConfiguration.Type().size());
+                    prmJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mVelocityFactors);
                 }
             }
             mTempVector.SetSize(newValue.Velocity().size());

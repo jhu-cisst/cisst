@@ -298,7 +298,7 @@ class {
     }
 }
 inline-code {
-    #include <cisstMultiTask/mtsTaskManager.h>
+    #include <cisstMultiTask/mtsManagerLocal.h>
     void mtsMessage::SetMessage(const std::string & message) {
         Timestamp = mtsComponentManager::GetInstance()->GetTimeServer().GetAbsoluteTimeInSeconds();
         Counter++;

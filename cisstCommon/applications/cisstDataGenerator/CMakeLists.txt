@@ -74,6 +74,7 @@ add_executable (cisstDataGenerator
                 )
 
 set_property (TARGET cisstDataGenerator PROPERTY FOLDER "cisstCommon/applications")
+add_dependencies (cisstDataGenerator cisstRevision)
 
 install (TARGETS cisstDataGenerator
          COMPONENT cisstCommon

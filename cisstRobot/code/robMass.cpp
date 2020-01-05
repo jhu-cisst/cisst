@@ -24,7 +24,9 @@ robMass::robMass( double m,
   D( D ),
   V( V ) {}
 
-double robMass::Mass() const 
+const double & robMass::Mass(void) const 
+{ return mass; }
+double & robMass::Mass(void)
 { return mass; }
 
 vctFixedSizeVector<double,3> robMass::CenterOfMass() const 

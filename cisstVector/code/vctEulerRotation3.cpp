@@ -2,10 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Created on:	2011-05-18
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,6 +29,9 @@ namespace vctEulerRotation3Order {
             break;
         case vctEulerRotation3Order::ZYX:
             str = "ZYX";
+            break;
+        case vctEulerRotation3Order::ZXZ:
+            str = "ZXZ";
             break;
         default:
             str = "UNDEFINED";
@@ -222,6 +224,80 @@ void vctEulerFromMatrixRotation3(vctEulerZYXRotation3 & eulerRot,
 }
 
 
+/*****************************************************************************
+
+  ZXZ Euler Angles. This is an intrinsic rotation, where phi
+  (angle[0]) is rotation about the Z axis, theta (angle[1]) is
+  rotation about the X' axis, and psi (angle[2]) is rotation about the
+  Z'' axis.  See
+  https://www.geometrictools.com/Documentation/EulerAngles.pdf
+
+*****************************************************************************/
+#include <cisstVector/vctTransformationTypes.h>
+
+template <class _matrixType>
+void vctEulerToMatrixRotation3(const vctEulerZXZRotation3 & eulerRot,
+                               vctMatrixRotation3Base<_matrixType> & matrixRot)
+{
+    typedef typename _matrixType::value_type value_type;
+
+    double cphi = cos(eulerRot.phi());      // 0
+    double sphi = sin(eulerRot.phi());
+    double ctheta = cos(eulerRot.theta());  // 1
+    double stheta = sin(eulerRot.theta());
+    double cpsi = cos(eulerRot.psi());      // 2
+    double spsi = sin(eulerRot.psi());
+
+    matrixRot.Element(0, 0) = static_cast<value_type>(cphi * cpsi - ctheta * sphi * spsi);
+    matrixRot.Element(0, 1) = static_cast<value_type>(-ctheta * cpsi * sphi - cphi * spsi);
+    matrixRot.Element(0, 2) = static_cast<value_type>(stheta * sphi);
+
+    matrixRot.Element(1, 0) = static_cast<value_type>(cpsi * sphi + ctheta * cphi * spsi);
+    matrixRot.Element(1, 1) = static_cast<value_type>(ctheta * cphi * cpsi - sphi * spsi);
+    matrixRot.Element(1, 2) = static_cast<value_type>(-stheta * cphi);
+
+    matrixRot.Element(2, 0) = static_cast<value_type>(stheta * spsi);
+    matrixRot.Element(2, 1) = static_cast<value_type>(stheta * cpsi);
+    matrixRot.Element(2, 2) = static_cast<value_type>(ctheta);
+}
+
+
+template <class _matrixType>
+void vctEulerFromMatrixRotation3(vctEulerZXZRotation3 & eulerRot,
+                                 const vctMatrixRotation3Base<_matrixType> & matrixRot)
+{
+    typedef typename _matrixType::value_type value_type;
+
+    // Initialize to the current Euler Angles -- these are used to resolve the singularity (gimbal lock)
+    double phi = eulerRot.phi();
+    double theta = eulerRot.theta();
+    double psi = eulerRot.psi();
+
+    if (matrixRot.Element(2, 2) < 1.0) {
+        if (matrixRot.Element(2, 2) > -1.0) {
+            theta = acos(matrixRot.Element(2, 2));
+            phi = atan2(matrixRot.Element(0, 2), -matrixRot.Element(1, 2));
+            psi = atan2(matrixRot.Element(2, 0), matrixRot.Element(2, 1));
+        } else {
+            // r22 = -1, not a  unique  solution: psi − phi = atan2(-r01 , r00 )
+            theta = cmnPI;
+            value_type diff = atan2(-matrixRot.Element(0, 1), matrixRot.Element(0, 0));
+            double correction = ((psi - phi) - diff) / 2.0;
+            phi += correction;
+            psi -= correction;
+        }
+    } else {
+        // r22 = +1, not a unique solution: psi + phi = atan2(-r01 , r00 )
+        theta = 0.0;
+        value_type sum = atan2(-matrixRot.Element(0, 1), matrixRot.Element(0,0));
+        double correction = ((phi + psi) - sum) / 2.0;
+        psi -= correction;
+        phi -= correction;
+    }
+    eulerRot.Assign(phi, theta, psi);
+}
+
+
 // force instantiation of helper functions
 #define INSTANTIATE_EULER_TEMPLATES(ORDER)                              \
     template void                                                       \
@@ -276,5 +352,5 @@ void vctEulerFromMatrixRotation3(vctEulerZYXRotation3 & eulerRot,
 // Instantiate templates for each supported Euler angle convention (e.g., ZYZ)
 INSTANTIATE_EULER_TEMPLATES(vctEulerRotation3Order::ZYZ)
 INSTANTIATE_EULER_TEMPLATES(vctEulerRotation3Order::ZYX)
-
+INSTANTIATE_EULER_TEMPLATES(vctEulerRotation3Order::ZXZ)
 

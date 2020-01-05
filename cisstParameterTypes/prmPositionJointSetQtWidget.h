@@ -3,9 +3,9 @@
 
 /*
   Author(s):  Anton Deguet
-  Created on: 2017-03-22
+  Created on: 2019-12-09
 
-  (C) Copyright 2017-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,36 +16,27 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _prmStateJointQtWidget_h
-#define _prmStateJointQtWidget_h
+#ifndef _prmPositionJointSetQtWidget_h
+#define _prmPositionJointSetQtWidget_h
 
-#include <QWidget>
+#include <QPushButton>
 
 #include <cisstVector/vctQtWidgetDynamicVector.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmStateJoint.h>
-#include <cisstParameterTypes/prmConfigurationJoint.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExportQt.h>
 
-class CISST_EXPORT prmStateJointQtWidget: public QWidget
+class CISST_EXPORT prmPositionJointSetQtWidget: public QWidget
 {
     Q_OBJECT;
 
 public:
-    prmStateJointQtWidget(void);
-    ~prmStateJointQtWidget(void) {};
+    prmPositionJointSetQtWidget(void);
+    ~prmPositionJointSetQtWidget(void) {};
 
-    inline void setupUi(void) {};
-
-    /*! Set value, this method will update the values display in the
-      Qt Widget for position, velocity and effort. */
-    void SetValue(const prmStateJoint & newValue);
-
-    inline void SetConfiguration(const prmConfigurationJoint & newConfiguration) {
-        mConfiguration = newConfiguration;
-    }
+    void setupUi(void);
 
     inline void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute) {
         mPrismaticFactor = prismatic;
@@ -57,20 +48,26 @@ public:
         }
     }
 
-protected:
-    vctQtWidgetDynamicVectorDoubleRead
-        * QVRPosition,
-        * QVRVelocity,
-        * QVREffort;
-    QWidget
-        * QWPosition,
-        * QWVelocity,
-        * QWEffort;
+    inline void Reset(void) {
+        SlotReset();
+    }
 
-    prmConfigurationJoint mConfiguration;
+    mtsFunctionRead * GetStateJoint;
+    mtsFunctionRead * GetConfigurationJoint;
+    mtsFunctionWrite * SetPositionGoalJoint;
+
+protected:
+    vctQtWidgetDynamicVectorDoubleWrite * QVWPosition;
+    QPushButton * QPBReset;
+    QPushButton * QPBMove;
+
     double mPrismaticFactor, mRevoluteFactor;
     bool mNeedsConversion;
-    vctDoubleVec mPositionFactors, mVelocityFactors, mTempVector;
+    vctDoubleVec mFactors, mTemp1, mTemp2;
+
+ private slots:
+    void SlotReset(void);
+    void SlotSetPositionGoalJoint(void);
 };
 
-#endif // _prmStateJointQtWidget_h
+#endif // _prmPositionJointSetQtWidget_h
