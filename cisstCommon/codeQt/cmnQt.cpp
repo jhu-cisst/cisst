@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnQt.h>
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnLogger.h>
 
 #include <QApplication>
 
@@ -28,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 void cmnQtQApplicationExitsOnCtrlC_SignalHandler(int)
 {
+    CMN_LOG_INIT_WARNING << "cmnQtQApplicationExitsOnCtrlC_SignalHandler: exiting Qt Core Application" << std::endl;
     QCoreApplication::exit(0);
 }
 #endif // CISST_OS
