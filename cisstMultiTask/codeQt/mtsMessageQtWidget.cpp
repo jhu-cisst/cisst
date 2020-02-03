@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-05-17
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -104,7 +104,7 @@ void mtsMessageQtWidget::WarningEventHandler(const mtsMessage & message)
 
 void mtsMessageQtWidget::StatusEventHandler(const mtsMessage & message)
 {
-    emit SignalSetColor(QColor("black"));
+    emit SignalSetColor(palette().color(QPalette::Text));
     emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Status #")
                              + QString::number(message.Counter) + QString(": ")
                              + QString(message.Message.c_str()));
