@@ -164,7 +164,8 @@ void vctVector3DQtWidget::paintGL(void)
     }
 
     // draw line for force
-    glColor3f(0.0f, 0.0f, 0.0f);
+    const QColor textColor = palette().color(QPalette::Text);
+    glColor3f(textColor.redF(), textColor.greenF(), textColor.blueF());
     glBegin(GL_LINES);
     glVertex3f(0.0f, 0.0f, 0.0f);
     glVertex3f(mVector.X(), mVector.Y(), mVector.Z());
@@ -173,11 +174,10 @@ void vctVector3DQtWidget::paintGL(void)
     // draw X/Y/Z projections
     glEnable(GL_LINE_STIPPLE);
 
+    glColor3f(1.0f, 0.0f, 0.0f);
     if (mVector.X() > 0.0) {
-        glColor3f(1.0f, 0.0f, 0.0f);
         glLineStipple(1, 0x00FF); // dashed
     } else {
-        glColor3f(0.8f, 0.0f, 0.0f);
         glLineStipple(1, 0x0101); // dotted
     }
     glBegin(GL_LINE_STRIP);
@@ -186,24 +186,24 @@ void vctVector3DQtWidget::paintGL(void)
     glVertex3f(mVector.X(), mVector.Y(), 0.0f);
     glEnd();
 
+    glColor3f(0.0f, 1.0f, 0.0f);
     if (mVector.Y() > 0.0) {
-        glColor3f(0.0f, 1.0f, 0.0f);
         glLineStipple(1, 0x00FF); // dashed
     } else {
-        glColor3f(0.0f, 0.8f, 0.0f);
         glLineStipple(1, 0x0101); // dotted
     }
+    
     glBegin(GL_LINE_STRIP);
     glVertex3f(0.0f, 0.0f, 0.0f);
     glVertex3f(0.0f, mVector.Y(), 0.0f);
     glVertex3f(mVector.X(), mVector.Y(), 0.0f);
     glEnd();
 
+
+    glColor3f(0.0f, 0.0f, 1.0f);
     if (mVector.Z() > 0.0) {
-        glColor3f(0.0f, 0.0f, 1.0f);
         glLineStipple(1, 0x00FF); // dashed
     } else {
-        glColor3f(0.0f, 0.0f, 0.8f);
         glLineStipple(1, 0x0101); // dotted
     }
     glBegin(GL_LINE_LOOP);
