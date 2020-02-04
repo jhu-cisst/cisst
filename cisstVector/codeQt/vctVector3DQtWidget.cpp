@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-11-30
 
-  (C) Copyright 2017-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -116,8 +116,8 @@ void vctVector3DQtWidget::keyPressEvent(QKeyEvent * event)
 
 void vctVector3DQtWidget::initializeGL(void)
 {
-    const double grey = 0.95;
-    glClearColor(grey, grey, grey, 1.0);
+    const QColor bgColor = palette().color(QPalette::Base);
+    glClearColor(bgColor.redF(), bgColor.greenF(), bgColor.blueF(), 1.0);
     glShadeModel(GL_SMOOTH);
 }
 
