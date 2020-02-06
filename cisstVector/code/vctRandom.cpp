@@ -95,6 +95,7 @@ void vctRandom(vctEulerRotation3<_order> & eulerRotation) {
 template void vctRandom(vctEulerRotation3<vctEulerRotation3Order::ZYZ> &);
 template void vctRandom(vctEulerRotation3<vctEulerRotation3Order::ZYX> &);
 template void vctRandom(vctEulerRotation3<vctEulerRotation3Order::ZXZ> &);
+template void vctRandom(vctEulerRotation3<vctEulerRotation3Order::YZX> &);
 
 
 
