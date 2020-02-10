@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2019-12-09
 
-  (C) Copyright 2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2019-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,6 +48,7 @@ void prmPositionJointSetQtWidget::setupUi(void)
 
     QVWPosition = new vctQtWidgetDynamicVectorDoubleWrite(vctQtWidgetDynamicVectorWriteBase::SPINBOX_WIDGET);
     QVWPosition->SetPrecision(3);
+    QVWPosition->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed)); 
     layout->addWidget(QVWPosition);
 
     // connect buttons

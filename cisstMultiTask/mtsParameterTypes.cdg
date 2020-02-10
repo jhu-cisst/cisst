@@ -292,6 +292,7 @@ class {
         name Timestamp;
         type double;
         visibility public;
+        accessors set-get;
     }
     inline-header {
         void SetMessage(const std::string & message);
