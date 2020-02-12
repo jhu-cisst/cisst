@@ -96,7 +96,7 @@ void mtsMessageQtWidget::ErrorEventHandler(const mtsMessage & message)
 
 void mtsMessageQtWidget::WarningEventHandler(const mtsMessage & message)
 {
-    emit SignalSetColor(QColor("darkRed"));
+    emit SignalSetColor(QColor("orange"));
     emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Warning #")
                              + QString::number(message.Counter) + QString(": ")
                              + QString(message.Message.c_str()));
