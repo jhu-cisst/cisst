@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-01-09
 
-  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -237,6 +237,14 @@ void vctMatrixRotation3Test::TestConversionEulerZXZDouble(void) {
 
 void vctMatrixRotation3Test::TestConversionEulerZXZFloat(void) {
     TestConversionEuler<float, vctEulerRotation3Order::ZXZ>();
+}
+
+void vctMatrixRotation3Test::TestConversionEulerYZXDouble(void) {
+    TestConversionEuler<double, vctEulerRotation3Order::YZX>();
+}
+
+void vctMatrixRotation3Test::TestConversionEulerYZXFloat(void) {
+    TestConversionEuler<float, vctEulerRotation3Order::YZX>();
 }
 
 template <class _elementType>

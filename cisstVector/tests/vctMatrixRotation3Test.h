@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-01-12
 
-  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,6 +53,9 @@ class vctMatrixRotation3Test : public CppUnit::TestFixture
 
     CPPUNIT_TEST(TestConversionEulerZXZDouble);
     CPPUNIT_TEST(TestConversionEulerZXZFloat);
+
+    CPPUNIT_TEST(TestConversionEulerYZXDouble);
+    CPPUNIT_TEST(TestConversionEulerYZXFloat);
 
     CPPUNIT_TEST(TestFromSignaturesQuaternionDouble);
     CPPUNIT_TEST(TestFromSignaturesQuaternionFloat);
@@ -144,6 +147,8 @@ class vctMatrixRotation3Test : public CppUnit::TestFixture
     void TestConversionEulerZYXFloat(void);
     void TestConversionEulerZXZDouble(void);
     void TestConversionEulerZXZFloat(void);
+    void TestConversionEulerYZXDouble(void);
+    void TestConversionEulerYZXFloat(void);
 
     /*! Test signatures for From(quaternion) */
     template<class _elementType>

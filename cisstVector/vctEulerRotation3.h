@@ -77,6 +77,7 @@ http://www.cisst.org/cisst/license.txt.
 VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYZ)
 VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYX)
 VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZXZ)
+VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::YZX)
 #endif
 
 
@@ -333,6 +334,9 @@ typedef vctEulerRotation3<vctEulerRotation3Order::ZYX> vctEulerZYXRotation3;
 /*! Define an Euler angle rotation in dimension 3 using ZXZ order. */
 typedef vctEulerRotation3<vctEulerRotation3Order::ZXZ> vctEulerZXZRotation3;
 
+/*! Define an Euler angle rotation in dimension 3 using YZX order. */
+typedef vctEulerRotation3<vctEulerRotation3Order::YZX> vctEulerYZXRotation3;
+
 #ifndef SWIG
 #ifdef CISST_COMPILER_IS_MSVC
 // declare instances of helper functions
@@ -389,6 +393,7 @@ typedef vctEulerRotation3<vctEulerRotation3Order::ZXZ> vctEulerZXZRotation3;
 VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYZ)
 VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYX)
 VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZXZ)
+VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::YZX)
 #endif // CISST_COMPILER_IS_MSVC
 #endif // !SWIG
 
