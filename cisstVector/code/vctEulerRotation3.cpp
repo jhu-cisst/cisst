@@ -4,7 +4,7 @@
 /*
   Created on:	2011-05-18
 
-  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -108,12 +108,12 @@ void vctEulerToMatrixRotation3(const vctEulerZYZRotation3 & eulerRot,
 {
     typedef typename _matrixType::value_type value_type;
 
-    double cphi = cos(eulerRot.phi());      // 0
-    double sphi = sin(eulerRot.phi());
-    double ctheta = cos(eulerRot.theta());  // 1
-    double stheta = sin(eulerRot.theta());
-    double cpsi = cos(eulerRot.psi());      // 2
-    double spsi = sin(eulerRot.psi());
+    const double cphi = cos(eulerRot.phi());      // 0
+    const double sphi = sin(eulerRot.phi());
+    const double ctheta = cos(eulerRot.theta());  // 1
+    const double stheta = sin(eulerRot.theta());
+    const double cpsi = cos(eulerRot.psi());      // 2
+    const double spsi = sin(eulerRot.psi());
 
     matrixRot.Element(0, 0) = static_cast<value_type>(cphi * ctheta * cpsi - sphi * spsi);
     matrixRot.Element(0, 1) = static_cast<value_type>(-cphi * ctheta * spsi - sphi * cpsi);
@@ -140,11 +140,11 @@ void vctEulerFromMatrixRotation3(vctEulerZYZRotation3 & eulerRot,
     double theta = eulerRot.theta();
     double psi = eulerRot.psi();
 
-    if((matrixRot.Element(0,2) * matrixRot.Element(0,2) + matrixRot.Element(1,2) * matrixRot.Element(1,2))  < 0.0001) {
+    if ((matrixRot.Element(0,2) * matrixRot.Element(0,2) + matrixRot.Element(1,2) * matrixRot.Element(1,2))  < 0.0001) {
         if (matrixRot.Element(2,2) > 0){
             theta = 0.0;
             value_type ftmp = atan2(matrixRot.Element(1,0), matrixRot.Element(0,0));
-            double  ftmp2 = (ftmp - ( phi + psi )) / 2.0;
+            double  ftmp2 = (ftmp - (phi + psi)) / 2.0;
             phi += ftmp2;
             psi += ftmp2;
         }
@@ -184,55 +184,30 @@ void vctEulerToMatrixRotation3(const vctEulerZYXRotation3 & eulerRot,
 {
     typedef typename _matrixType::value_type value_type;
 
-//    double  yaw = eulerRot.alpha();
-//    double  pitch = eulerRot.beta();
-//    double  roll = eulerRot.gamma();
+    const double  z = eulerRot.alpha();
+    const double  y = eulerRot.beta();
+    const double  x = eulerRot.gamma();
 
-//    double cosYaw = cos(yaw);
-//    double sinYaw = sin(yaw);
+    const double cz = cos(z);
+    const double sz = sin(z);
 
-//    double cosPitch = cos(pitch);
-//    double sinPitch = sin(pitch);
+    const double cy = cos(y);
+    const double sy = sin(y);
 
-//    double cosRoll = cos(roll);
-//    double sinRoll = sin(roll);
+    const double cx = cos(x);
+    const double sx = sin(x);
 
-//    matrixRot.Element(0,0) = static_cast<value_type>(cosYaw * cosPitch);
-//    matrixRot.Element(0,1) = static_cast<value_type>(cosYaw * sinPitch * sinRoll - sinYaw * cosRoll);
-//    matrixRot.Element(0,2) = static_cast<value_type>(cosYaw * sinPitch * cosRoll + sinYaw * sinRoll);
+    matrixRot.Element(0, 0) = static_cast<value_type>(cy * cz);
+    matrixRot.Element(0, 1) = static_cast<value_type>(cz * sx * sy - cx * sz);
+    matrixRot.Element(0, 2) = static_cast<value_type>(cx * cz * sy + sx * sz);
 
-//    matrixRot.Element(1,0) = static_cast<value_type>(sinYaw * cosPitch);
-//    matrixRot.Element(1,1) = static_cast<value_type>(cosYaw * cosRoll + sinYaw * sinPitch * sinRoll);
-//    matrixRot.Element(1,2) = static_cast<value_type>(sinYaw * sinPitch * cosRoll - cosYaw * sinRoll);
+    matrixRot.Element(1, 0) = static_cast<value_type>(cy * sz);
+    matrixRot.Element(1, 1) = static_cast<value_type>(cx * cz + sx * sy * sz);
+    matrixRot.Element(1, 2) = static_cast<value_type>(-cz * sx + cx * sy * sz);
 
-//    matrixRot.Element(2,0) = static_cast<value_type>(-sinPitch);
-//    matrixRot.Element(2,1) = static_cast<value_type>(cosPitch * sinRoll);
-//    matrixRot.Element(2,2) = static_cast<value_type>(cosPitch * cosRoll);    double  yaw = eulerRot.alpha();
-
-    double  z = eulerRot.alpha();
-    double  y = eulerRot.beta();
-    double  x = eulerRot.gamma();
-
-    double cz = cos(z);
-    double sz = sin(z);
-
-    double cy = cos(y);
-    double sy = sin(y);
-
-    double cx = cos(x);
-    double sx = sin(x);
-
-    matrixRot.Element(0,0) = static_cast<value_type>(cy * cz);
-    matrixRot.Element(0,1) = static_cast<value_type>(cz * sx * sy - cx * sz);
-    matrixRot.Element(0,2) = static_cast<value_type>(cx * cz * sy + sx * sz);
-
-    matrixRot.Element(1,0) = static_cast<value_type>(cy * sz);
-    matrixRot.Element(1,1) = static_cast<value_type>(cx * cz + sx * sy * sz);
-    matrixRot.Element(1,2) = static_cast<value_type>(-cz * sx + cx * sy * sz);
-
-    matrixRot.Element(2,0) = static_cast<value_type>(-sy);
-    matrixRot.Element(2,1) = static_cast<value_type>(cy * sx);
-    matrixRot.Element(2,2) = static_cast<value_type>(cx * cy);
+    matrixRot.Element(2, 0) = static_cast<value_type>(-sy);
+    matrixRot.Element(2, 1) = static_cast<value_type>(cy * sx);
+    matrixRot.Element(2, 2) = static_cast<value_type>(cx * cy);
 }
 
 
@@ -240,29 +215,21 @@ template <class _matrixType>
 void vctEulerFromMatrixRotation3(vctEulerZYXRotation3 & eulerRot,
                                  const vctMatrixRotation3Base<_matrixType> & matrixRot)
 {
-    // Implementation currently does not handle "gimble lock" (singularity)
-//    double yaw = atan2((double) matrixRot.Element(1,0), (double) matrixRot.Element(0,0));
-//    double cosYaw = cos(yaw);
-//    double sinYaw = sin(yaw);
-//    double pitch = atan2((double) -matrixRot.Element(2,0),
-//                         cosYaw*matrixRot.Element(0,0) + sinYaw*matrixRot(1,0));
-//    double roll = atan2( sinYaw*matrixRot.Element(0,2) - cosYaw*matrixRot.Element(1,2),
-//                         -sinYaw*matrixRot.Element(0,1) + cosYaw*matrixRot.Element(1,1));
-    double z,y,x;
+    double z, y, x;
 
-    if(matrixRot.Element(2, 0) < 1.0){
-        if(matrixRot.Element(2, 0) > -1.0){
+    if (matrixRot.Element(2, 0) < 1.0) {
+        if (matrixRot.Element(2, 0) > -1.0) {
             y = asin(-matrixRot.Element(2, 0));
             z = atan2(matrixRot.Element(1, 0), matrixRot.Element(0, 0));
             x = atan2(matrixRot.Element(2, 1), matrixRot.Element(2, 2));
         }
-        else{
+        else {
             y = cmnPI_2;
             z = -atan2(-matrixRot.Element(1, 2), matrixRot.Element(1, 1));
             x = 0;
         }
     }
-    else{
+    else {
         y = -cmnPI_2;
         z = atan2(-matrixRot.Element(1, 2), matrixRot.Element(1, 1));
         x = 0;
@@ -289,12 +256,12 @@ void vctEulerToMatrixRotation3(const vctEulerZXZRotation3 & eulerRot,
 {
     typedef typename _matrixType::value_type value_type;
 
-    double cphi = cos(eulerRot.phi());      // 0
-    double sphi = sin(eulerRot.phi());
-    double ctheta = cos(eulerRot.theta());  // 1
-    double stheta = sin(eulerRot.theta());
-    double cpsi = cos(eulerRot.psi());      // 2
-    double spsi = sin(eulerRot.psi());
+    const double cphi = cos(eulerRot.phi());      // 0
+    const double sphi = sin(eulerRot.phi());
+    const double ctheta = cos(eulerRot.theta());  // 1
+    const double stheta = sin(eulerRot.theta());
+    const double cpsi = cos(eulerRot.psi());      // 2
+    const double spsi = sin(eulerRot.psi());
 
     matrixRot.Element(0, 0) = static_cast<value_type>(cphi * cpsi - ctheta * sphi * spsi);
     matrixRot.Element(0, 1) = static_cast<value_type>(-ctheta * cpsi * sphi - cphi * spsi);
@@ -327,7 +294,7 @@ void vctEulerFromMatrixRotation3(vctEulerZXZRotation3 & eulerRot,
             phi = atan2(matrixRot.Element(0, 2), -matrixRot.Element(1, 2));
             psi = atan2(matrixRot.Element(2, 0), matrixRot.Element(2, 1));
         } else {
-            // r22 = -1, not a  unique  solution: psi − phi = atan2(-r01 , r00 )
+            // r22 = -1, not a  unique  solution: psi − phi = atan2(-r01 , r00)
             theta = cmnPI;
             value_type diff = atan2(-matrixRot.Element(0, 1), matrixRot.Element(0, 0));
             double correction = ((psi - phi) - diff) / 2.0;
@@ -335,7 +302,7 @@ void vctEulerFromMatrixRotation3(vctEulerZXZRotation3 & eulerRot,
             psi -= correction;
         }
     } else {
-        // r22 = +1, not a unique solution: psi + phi = atan2(-r01 , r00 )
+        // r22 = +1, not a unique solution: psi + phi = atan2(-r01 , r00)
         theta = 0.0;
         value_type sum = atan2(-matrixRot.Element(0, 1), matrixRot.Element(0,0));
         double correction = ((phi + psi) - sum) / 2.0;
@@ -362,35 +329,25 @@ void vctEulerToMatrixRotation3(const vctEulerYZXRotation3 & eulerRot,
 {
     typedef typename _matrixType::value_type value_type;
 
-    double cphi = cos(eulerRot.phi());      // 0 // Y
-    double sphi = sin(eulerRot.phi());
-    double ctheta = cos(eulerRot.theta());  // 1 // Z
-    double stheta = sin(eulerRot.theta());
-    double cpsi = cos(eulerRot.psi());      // 2 // X
-    double spsi = sin(eulerRot.psi());
-
     // Rename to avoid confusion
-    double cy, cz, cx, sy, sz, sx;
-    cy = cphi;
-    sy = sphi;
+    const double cy = cos(eulerRot.phi());      // 0 // Y
+    const double sy = sin(eulerRot.phi());
+    const double cz = cos(eulerRot.theta());  // 1 // Z
+    const double sz = sin(eulerRot.theta());
+    const double cx = cos(eulerRot.psi());      // 2 // X
+    const double sx = sin(eulerRot.psi());
 
-    cz = ctheta;
-    sz = stheta;
+    matrixRot.Element(0, 0) = static_cast<value_type>(cy * cz);
+    matrixRot.Element(0, 1) = static_cast<value_type>(sx * sy - cx * cy * sz);
+    matrixRot.Element(0, 2) = static_cast<value_type>(cx * sy + cy * sx * sz);
 
-    cx = cpsi;
-    sx = spsi;
+    matrixRot.Element(1, 0) = static_cast<value_type>(sz);
+    matrixRot.Element(1, 1) = static_cast<value_type>(cx * cz);
+    matrixRot.Element(1, 2) = static_cast<value_type>(-cz * sx);
 
-    matrixRot.Element(0, 0) = static_cast<value_type>( cy * cz );
-    matrixRot.Element(0, 1) = static_cast<value_type>( sx * sy - cx * cy * sz );
-    matrixRot.Element(0, 2) = static_cast<value_type>( cx * sy + cy * sx * sz );
-
-    matrixRot.Element(1, 0) = static_cast<value_type>( sz );
-    matrixRot.Element(1, 1) = static_cast<value_type>( cx * cz );
-    matrixRot.Element(1, 2) = static_cast<value_type>( -cz * sx );
-
-    matrixRot.Element(2, 0) = static_cast<value_type>( -cz * sy );
-    matrixRot.Element(2, 1) = static_cast<value_type>( cy * sx + cx * sy * sz );
-    matrixRot.Element(2, 2) = static_cast<value_type>( cx * cy - sx * sy * sz );
+    matrixRot.Element(2, 0) = static_cast<value_type>(-cz * sy);
+    matrixRot.Element(2, 1) = static_cast<value_type>(cy * sx + cx * sy * sz);
+    matrixRot.Element(2, 2) = static_cast<value_type>(cx * cy - sx * sy * sz);
 }
 
 
@@ -398,35 +355,26 @@ template <class _matrixType>
 void vctEulerFromMatrixRotation3(vctEulerYZXRotation3 & eulerRot,
                                  const vctMatrixRotation3Base<_matrixType> & matrixRot)
 {
-    typedef typename _matrixType::value_type value_type;
-
     // Initialize to the current Euler Angles -- these are used to resolve the singularity (gimbal lock)
-    double phi = eulerRot.phi();
-    double theta = eulerRot.theta();
-    double psi = eulerRot.psi();
 
     // Rename to avoid confusion
-    double x, y, z;
+    double y = eulerRot.phi();
+    double z = eulerRot.theta();
+    double x = eulerRot.psi();
 
-    y = phi;
-    z = theta;
-    x = psi;
-
-    if(matrixRot.Element(1, 0) < 1.0){
-        if(matrixRot.Element(1, 0) > -1.0){
-            z = asin( matrixRot.Element(1, 0) );
-            y = atan2( -matrixRot.Element(2, 0), matrixRot.Element(0, 0) );
-            x = atan2( -matrixRot.Element(1, 2), matrixRot.Element(1, 1) );
-        }
-        else{
+    if (matrixRot.Element(1, 0) < 1.0) {
+        if (matrixRot.Element(1, 0) > -1.0) {
+            z = asin(matrixRot.Element(1, 0));
+            y = atan2(-matrixRot.Element(2, 0), matrixRot.Element(0, 0));
+            x = atan2(-matrixRot.Element(1, 2), matrixRot.Element(1, 1));
+        } else {
             z = -cmnPI_2;
-            y = -atan2( matrixRot.Element(2, 1), matrixRot.Element(2, 2));
+            y = -atan2(matrixRot.Element(2, 1), matrixRot.Element(2, 2));
             x = 0;
         }
-    }
-    else{
+    } else {
         z = cmnPI_2;
-        y = atan2( matrixRot.Element(2, 1), matrixRot.Element(2, 2));
+        y = atan2(matrixRot.Element(2, 1), matrixRot.Element(2, 2));
         x = 0;
 
     }
@@ -490,4 +438,3 @@ INSTANTIATE_EULER_TEMPLATES(vctEulerRotation3Order::ZYZ)
 INSTANTIATE_EULER_TEMPLATES(vctEulerRotation3Order::ZYX)
 INSTANTIATE_EULER_TEMPLATES(vctEulerRotation3Order::ZXZ)
 INSTANTIATE_EULER_TEMPLATES(vctEulerRotation3Order::YZX)
-
