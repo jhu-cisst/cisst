@@ -305,9 +305,9 @@ void nmrConstraintOptimizer::SetRefs(const size_t CRows, const size_t ARows, con
 
     //Inequality Constraints
     /*
-    |   A ... 1         |   | x |   | b       |
-    |                   | * |   | - |         |
-    |   0 ... ASlacks   |   | s |   | bSlacks |
+    |   A ... 1         |   | x |    | b       |
+    |                   | * |   | >= |         |
+    |   0 ... ASlacks   |   | s |    | bSlacks |
     */
     AData.SetRef(A, AIndex, 0, ARows, NumVars);
     bData.SetRef(b, AIndex, ARows);
@@ -324,12 +324,13 @@ void nmrConstraintOptimizer::SetRefs(const size_t CRows, const size_t ARows, con
     {
         ASlacks.SetRef(A, AIndex, NumVars + SlackIndex, NumSlacks, NumSlacks);
         bSlacks.SetRef(b, AIndex, NumSlacks);
+        AIndex += NumSlacks;
     }
 
     //Equality Constraints
     /*
     |   E ... 0         |   | x |   | b |
-                          * |   | - 
+                          * |   | =
                             | s |   
     */
     EData.SetRef(E, EIndex, 0, ERows, NumVars);
