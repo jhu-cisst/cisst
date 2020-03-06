@@ -69,11 +69,11 @@ class CISST_EXPORT robManipulator{
 
 
   //! Load the kinematics and the dynamics of the robot
-  robManipulator::Errno LoadRobot( const std::string& linkfile );
+  virtual robManipulator::Errno LoadRobot( const std::string& linkfile );
 
 #if CISST_HAS_JSON
   //! Load the kinematics and the dynamtics of the robot from a JSON file
-  robManipulator::Errno LoadRobot(const Json::Value & config);
+  virtual robManipulator::Errno LoadRobot(const Json::Value & config);
 #endif
 
   robManipulator::Errno LoadRobot(std::vector<robKinematics *> KinParms);
@@ -331,7 +331,7 @@ public:
                                       double epsilon = 1e-6 ) const;
 
   //! Print the kinematics parameters to the specified output stream
-  void PrintKinematics( std::ostream& os ) const;
+  virtual void PrintKinematics( std::ostream& os ) const;
 
   //! Attach a tool
   virtual void Attach( robManipulator* tool );
@@ -355,7 +355,7 @@ public:
 
   /*! Clamp joint value between joint limits and update the last error
     message if the value provided is outside joint limits.  Return
-    true if clamping was necessary. */ 
+    true if clamping was necessary. */
   bool ClampJointValueAndUpdateError(const size_t jointIndex,
                                      double & value,
                                      const double & tolerance = 1e-6);
