@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-12-19
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,11 +21,17 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnQt_h
 #define _cmnQt_h
 
+#include <string>
+
 // Always include last
 #include <cisstCommon/cmnExportQt.h>
 
 namespace cmnQt {
     void CISST_EXPORT QApplicationExitsOnCtrlC(void);
+
+    void CISST_EXPORT SetDarkMode(void);
+
+    std::string CISST_EXPORT SetStyle(const std::string & qtStyle);
 }
 
 #endif // _cmnQt_h

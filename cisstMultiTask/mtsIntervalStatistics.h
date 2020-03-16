@@ -130,6 +130,30 @@ public:
 
     void Reset(void);
 
+    inline void SetFromExisting(const double periodAvg,
+                                const double periodStdDev,
+                                const double periodMin,
+                                const double periodMax,
+                                const double computeTimeAvg,
+                                const double computeTimeStdDev,
+                                const double computeTimeMin,
+                                const double computeTimeMax,
+                                const unsigned int numberOfSamples,
+                                const unsigned int numberOfOverruns,
+                                const double statisticsInterval) {
+        mPeriodAvg = periodAvg;
+        mPeriodStdDev = periodStdDev;
+        mPeriodMin = periodMin;
+        mPeriodMax = periodMax;
+        mComputeTimeAvg = computeTimeAvg;
+        mComputeTimeStdDev = computeTimeStdDev;
+        mComputeTimeMin = computeTimeMin;
+        mComputeTimeMax = computeTimeMax;
+        mNumberOfSamples = numberOfSamples;
+        mNumberOfOverruns = numberOfOverruns;
+        mStatisticsInterval = statisticsInterval;
+    }
+    
 private:
 
     /*! Internal variables for statistics calculations */
@@ -148,7 +172,7 @@ private:
     /*! The time server used to provide absolute and relative times. */
     const osaTimeServer * mTimeServer;
 
-    /*! Members that can be access, actual stats */
+    /*! Members that can be accessed after computation, actual stats */
     double mPeriodAvg;
     double mPeriodStdDev;
     double mPeriodMin;

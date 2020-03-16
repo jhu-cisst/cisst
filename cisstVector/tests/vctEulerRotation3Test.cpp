@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2019-12-02
 
-  (C) Copyright 2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2019-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +20,19 @@ http://www.cisst.org/cisst/license.txt.
 #include "vctEulerRotation3Test.h"
 #include <cisstVector/vctRandomTransformations.h>
 
+void vctEulerRotationTest::TestOrderZYX(void)
+{
+    vctEulerZYXRotation3 eulerRotation;
+    vctRandom(eulerRotation);
+    vctMatRot3 matrixBruteForce =
+        vctMatRot3(vctAxAnRot3(vct3(0.0, 0.0, 1.0), eulerRotation.phi()))
+        * vctMatRot3(vctAxAnRot3(vct3(0.0, 1.0, 0.0), eulerRotation.theta()))
+        * vctMatRot3(vctAxAnRot3(vct3(1.0, 0.0, 0.0), eulerRotation.psi()));
+    vctMatRot3 matrixComputed;
+    vctEulerToMatrixRotation3(eulerRotation, matrixComputed);
+    CPPUNIT_ASSERT(matrixComputed.AlmostEqual(matrixBruteForce));
+}
+
 void vctEulerRotationTest::TestOrderZXZ(void)
 {
     vctEulerZXZRotation3 eulerRotation;
@@ -33,6 +46,18 @@ void vctEulerRotationTest::TestOrderZXZ(void)
     CPPUNIT_ASSERT(matrixComputed.AlmostEqual(matrixBruteForce));
 }
 
+void vctEulerRotationTest::TestOrderYZX(void)
+{
+    vctEulerYZXRotation3 eulerRotation;
+    vctRandom(eulerRotation);
+    vctMatRot3 matrixBruteForce =
+        vctMatRot3(vctAxAnRot3(vct3(0.0, 1.0, 0.0), eulerRotation.phi()))
+        * vctMatRot3(vctAxAnRot3(vct3(0.0, 0.0, 1.0), eulerRotation.theta()))
+        * vctMatRot3(vctAxAnRot3(vct3(1.0, 0.0, 0.0), eulerRotation.psi()));
+    vctMatRot3 matrixComputed;
+    vctEulerToMatrixRotation3(eulerRotation, matrixComputed);
+    CPPUNIT_ASSERT(matrixComputed.AlmostEqual(matrixBruteForce));
+}
 
 void vctEulerRotationTest::TestSingularitiesZXZ(void)
 {
@@ -40,7 +65,7 @@ void vctEulerRotationTest::TestSingularitiesZXZ(void)
     vctMatRot3 matrix1, matrix2;
 
     double angle = cmnRandomSequence::GetInstance().ExtractRandomDouble(-cmnPI, cmnPI);
-    
+
     // find euler back providing initial value as guess
     euler1.Assign(0.0, 0.0, angle);
     vctEulerToMatrixRotation3(euler1, matrix1);
