@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -291,6 +291,10 @@ macro (cisst_add_library ...)
 
   set (FILE_CONTENT ${FILE_CONTENT} "\n${CISST_STRING_POUND}endif // _${LIBRARY}_h\n")
   file (WRITE ${LIBRARY_MAIN_HEADER} ${FILE_CONTENT})
+  get_directory_property (existing_files_to_clean ADDITIONAL_MAKE_CLEAN_FILES)
+  set_directory_properties (PROPERTIES
+    ADDITIONAL_MAKE_CLEAN_FILES
+    "${existing_files_to_clean};${LIBRARY_MAIN_HEADER}")
 
   # Set paths
   cisst_set_directories (${LIBRARY} ${DEPENDENCIES})
@@ -310,6 +314,11 @@ macro (cisst_add_library ...)
                ${HEADERS}
                ${ADDITIONAL_HEADER_FILES}
                )
+
+  # set version number
+  set_target_properties (${LIBRARY} PROPERTIES
+                         VERSION ${CISST_VERSION}
+                         SOVERSION ${CISST_VERSION})
 
   # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
   if (CMAKE_VERSION VERSION_GREATER "3.0.1")
