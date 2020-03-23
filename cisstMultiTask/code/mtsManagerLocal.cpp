@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1001,11 +1001,19 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 #if CISST_HAS_JSON
 bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
 {
-    // extract path of main json config file to search other files relative to it
     cmnPath configPath(cmnPath::GetWorkingDirectory());
+    // make sure the file exists
     std::string fullname = configPath.Find(filename);
+    if (fullname == "") {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: file \"" << filename
+                                 << "\" not found in path: "<< std::endl
+                                 << configPath << std::endl;
+        return false;
+    }
+    // extract path of main json config file to search other files relative to it
     std::string configDir = fullname.substr(0, fullname.find_last_of('/'));
-    configPath.Add(configDir, cmnPath::TAIL);
+    configPath.Add(configDir, cmnPath::HEAD);
+
     // open json file
     std::ifstream jsonStream;
     jsonStream.open(filename.c_str());
@@ -1026,6 +1034,19 @@ bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
     }
 
     return this->ConfigureJSON(jsonConfig, configPath);
+}
+
+bool mtsManagerLocal::ConfigureJSON(const std::list<std::string> & filenames)
+{
+    bool result = true;
+    typedef std::list<std::string> listType;
+    const listType::const_iterator endFile = filenames.end();
+    for (listType::const_iterator iterFile = filenames.begin();
+         iterFile != endFile;
+         ++iterFile) {
+        result = result && ConfigureJSON(*iterFile);
+    }
+    return result;
 }
 
 bool mtsManagerLocal::ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath)
