@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on: 2006-05-05
 
-  (C) Copyright 2006-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,6 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnDataFunctionsString.h>
 #include <cisstCommon/cmnDataFunctionsVector.h>
+#include <cisstCommon/cmnDataFunctionsList.h>
+
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsGenericObject.h>
@@ -38,6 +42,9 @@ http://www.cisst.org/cisst/license.txt.
 typedef std::vector<std::string> stdStringVec;
 typedef std::vector<double> stdDoubleVec;
 typedef std::vector<char> stdCharVec;
+typedef std::vector<vct3> stdVct3Vec;
+
+typedef std::list<std::string> stdStringList;
 
 // Forward declarations
 template <class _elementType> class mtsGenericObjectProxyBase;
@@ -779,11 +786,15 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDoubleVecProxy);
 typedef mtsGenericObjectProxy<stdCharVec> mtsStdCharVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdCharVecProxy);
 
+typedef mtsGenericObjectProxy<stdVct3Vec> mtsStdVct3VecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdVct3VecProxy);
+
+typedef mtsGenericObjectProxy<stdStringList> mtsStdStringListProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringListProxy);
+
 // Now, define proxies for cisstVector classes (see also
 // mtsFixedSizeVectorTypes.h, which uses multiple inheritance,
 // rather than proxies).
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 typedef mtsGenericObjectProxy<vct1> mtsVct1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct1)
 typedef mtsGenericObjectProxy<vct2> mtsVct2;
@@ -802,11 +813,6 @@ typedef mtsGenericObjectProxy<vct8> mtsVct8;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct8)
 typedef mtsGenericObjectProxy<vct9> mtsVct9;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct9)
-
-// Define proxy for std::vector<vct3>
-typedef std::vector<vct3> stdVct3Vec;
-typedef mtsGenericObjectProxy<stdVct3Vec> mtsStdVct3VecProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdVct3VecProxy);
 
 typedef mtsGenericObjectProxy<vctFloat1> mtsVctFloat1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat1)
