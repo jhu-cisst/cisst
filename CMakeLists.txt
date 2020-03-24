@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2020 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -115,7 +115,7 @@ set_property (TARGET cisstRevision PROPERTY FOLDER "cisstCommon")
 
 # Install cisstRevision.h
 set_source_files_properties ("${CISST_REVISION_HEADER}" GENERATED)
-install (FILES "${cisst_BINARY_DIR}/include/cisstRevision.h"
+install (FILES "${CISST_REVISION_HEADER}"
          DESTINATION include
          COMPONENT cisstCommon)
 
@@ -140,7 +140,7 @@ set_property (TARGET cisstBuildType PROPERTY FOLDER "cisstCommon")
 
 # Install cisstBuildType.h
 set_source_files_properties ("${CISST_BUILDTYPE_HEADER}" GENERATED)
-install (FILES "${cisst_BINARY_DIR}/include/cisstBuildType.h"
+install (FILES "${CISST_BUILDTYPE_HEADER}"
          DESTINATION include
          COMPONENT cisstCommon)
 
@@ -573,6 +573,10 @@ install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
          DESTINATION include
          COMPONENT cisstCommon)
 
+# Clean files
+set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+  "${CISST_REVISION_HEADER};${CISST_BUILDTYPE_HEADER};${cisst_BINARY_DIR}/include/cisstConfig.h")
+
 # Install auxiliary Find*.cmake files
 install (DIRECTORY ${CISST_CMAKE_SOURCE_DIR}/
          DESTINATION ${CISST_CMAKE_MODULES_INSTALL_SUFFIX}
@@ -590,6 +594,12 @@ if (NOT UNIX)
   set (CPACK_PACKAGE_NAME "cisst")
   set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "cisst libraries")
 endif (NOT UNIX)
+
+if (UNIX)
+  set (CPACK_GENERATOR "STGZ;TGZ;DEB")
+  set (CPACK_DEBIAN_PACKAGE_MAINTAINER "anton.deguet@jhu.edu")
+endif ()
+
 # For now, enable all default libraries (even if not compiled)
 set (CPACK_COMPONENTS_ALL ${CISST_LIBRARIES_DEFAULT})
 if (CISST_cisstCommonXML) # we can only test CISST_XML_LIB if cisstCommonXML is activated
