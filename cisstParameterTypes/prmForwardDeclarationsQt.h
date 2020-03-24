@@ -2,8 +2,8 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):  Anton Deguet
-  Created on: 2020-03-24
+  Author(s):	Anton Deguet
+  Created on:   2020-03-24
 
   (C) Copyright 2020 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -16,12 +16,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#pragma once
-#ifndef _vctQtForwardDeclarations_h
-#define _vctQtForwardDeclarations_h
+#ifndef _prmForwardDeclarationsQt_h
+#define _prmForwardDeclarationsQt_h
 
-#warning "this file is now deprecated, include vctForwardDeclarationsQt.h instead"
+class prmEventButtonQtWidgetComponent;
+class prmOperatingStateQtWidget;
+class prmPositionCartesianGetQtWidget;
+class prmStateJointQtWidget;
 
-#include <cisstVector/vctForwardDeclarationsQt.h>
+#endif // _prmForwardDeclarationsQt_h
 
-#endif  // _vctQtForwardDeclarations_h

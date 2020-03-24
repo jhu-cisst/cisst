@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-12-08
 
-  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QTableWidget>
 
 #include <cisstVector/vctDynamicVector.h>
-#include <cisstVector/vctQtForwardDeclarations.h>
+#include <cisstVector/vctForwardDeclarationsQt.h>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
