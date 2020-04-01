@@ -25,9 +25,9 @@ http://www.cisst.org/cisst/license.txt.
 
 prmPositionJointSetQtWidget::prmPositionJointSetQtWidget(void):
     QWidget(),
-    GetStateJoint(0),
-    GetConfigurationJoint(0),
-    SetPositionGoalJoint(0),
+    measured_js(0),
+    configuration_js(0),
+    move_jp(0),
     mPrismaticFactor(1.0),
     mRevoluteFactor(1.0),
     mNeedsConversion(false)
@@ -61,21 +61,21 @@ void prmPositionJointSetQtWidget::setupUi(void)
 void prmPositionJointSetQtWidget::SlotReset(void)
 {
     QPBMove->setEnabled(false);
-    if (!GetStateJoint) {
+    if (!measured_js) {
         return;
     }
-    if (!GetConfigurationJoint) {
+    if (!configuration_js) {
         return;
     }
     prmStateJoint state;
-    mtsExecutionResult executionResult = (*GetStateJoint)(state);
+    mtsExecutionResult executionResult = (*measured_js)(state);
     if (!executionResult) {
         return;
     }
 
     if (mNeedsConversion) {
         prmConfigurationJoint configuration;
-        executionResult = (*GetConfigurationJoint)(configuration);
+        executionResult = (*configuration_js)(configuration);
         if (!executionResult) {
             return;
         }
@@ -99,7 +99,7 @@ void prmPositionJointSetQtWidget::SlotReset(void)
 
 void prmPositionJointSetQtWidget::SlotSetPositionGoalJoint(void)
 {
-    if (!SetPositionGoalJoint) {
+    if (!move_jp) {
         return;
     }
     // get the values from the widget
@@ -113,5 +113,5 @@ void prmPositionJointSetQtWidget::SlotSetPositionGoalJoint(void)
     } else {
         goal.Goal().Assign(mTemp1);
     }
-    (*SetPositionGoalJoint)(goal);
+    (*move_jp)(goal);
 }

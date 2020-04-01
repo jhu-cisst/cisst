@@ -54,9 +54,9 @@ prmStateRobotQtWidgetComponent::prmStateRobotQtWidgetComponent(const std::string
     // Setup CISST Interface
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
     if (interfaceRequired) {
-        interfaceRequired->AddFunction("GetConfigurationJoint", GetConfigurationJoint);
-        interfaceRequired->AddFunction("measured_js", GetStateJoint);
-        interfaceRequired->AddFunction("measured_cp", GetPositionCartesian);
+        interfaceRequired->AddFunction("configuration_js", configuration_js);
+        interfaceRequired->AddFunction("measured_js", measured_js);
+        interfaceRequired->AddFunction("measured_cp", measured_cp);
     }
     setupUi();
 }
@@ -75,12 +75,12 @@ void prmStateRobotQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
 
     // see if we should try to get configuration
     if ((ConfigurationJoint.Name().size() != StateJoint.Name().size())
-        && (GetConfigurationJoint.IsValid())) {
-        GetConfigurationJoint(ConfigurationJoint);
+        && (configuration_js.IsValid())) {
+        configuration_js(ConfigurationJoint);
         QSJWidget->SetConfiguration(ConfigurationJoint);
     }
-    GetStateJoint(StateJoint);
+    measured_js(StateJoint);
     QSJWidget->SetValue(StateJoint);
-    GetPositionCartesian(Position);
+    measured_cp(Position);
     QPCGWidget->SetValue(Position);
 }

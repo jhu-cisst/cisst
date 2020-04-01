@@ -80,7 +80,7 @@ bool ui3MasterArm::SetInput(const std::string & positionDevice, const std::strin
     requiredInterface = this->Manager->AddInterfaceRequired(this->Name);
     if (requiredInterface) {
         // bound the mtsFunction to the command provided by the interface
-        requiredInterface->AddFunction("GetPositionCartesian", this->GetCartesianPosition, MTS_REQUIRED);
+        requiredInterface->AddFunction("measured_cp", this->GetCartesianPosition, MTS_REQUIRED);
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "SetInput: failed to add \""
                                  << this->Name
