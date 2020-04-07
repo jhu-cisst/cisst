@@ -24,3 +24,4 @@ GetConfigurationJoint = configuration_js
 SetConfigurationJoint = configure_js
 
 GetPeriodStatistics = period_statistics
+GetOperatingState = operating_state
