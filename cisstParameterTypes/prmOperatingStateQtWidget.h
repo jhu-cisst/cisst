@@ -43,6 +43,8 @@ public:
 
     void setupUi(void);
 
+    void setEnabled(bool enable);
+
     void SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired);
 
     /*! Set value, this method will update the values display in the
@@ -65,6 +67,7 @@ protected:
     QLabel * QLIsBusy;
 
     mtsFunctionWrite mStateCommand;
+    bool mEnabled = true;
 };
 
 #endif // _prmOperatingStateQtWidget_h

@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:   2019-06-10
 
-  (C) Copyright 2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2019-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,6 +32,9 @@ bool prmOperatingState::ValidCommand(const prmOperatingState::CommandType & comm
         case disable:
             newOperatingState = DISABLED;
             return true;
+        case unhome:
+            newOperatingState = State();
+            return true;
         default:
             break;
         }
@@ -46,6 +49,12 @@ bool prmOperatingState::ValidCommand(const prmOperatingState::CommandType & comm
         case pause:
             newOperatingState = PAUSED;
             return true;
+        case unhome:
+            newOperatingState = State();
+            return true;
+        case home:
+            newOperatingState = State();
+            return true;
         default:
             break;
         }
@@ -58,6 +67,9 @@ bool prmOperatingState::ValidCommand(const prmOperatingState::CommandType & comm
         case resume:
             newOperatingState = ENABLED;
             return true;
+        case unhome:
+            newOperatingState = State();
+            return true;
         default:
             break;
         }
@@ -67,7 +79,9 @@ bool prmOperatingState::ValidCommand(const prmOperatingState::CommandType & comm
         case disable:
             newOperatingState = DISABLED;
             return true;
-            break;
+        case unhome:
+            newOperatingState = State();
+            return true;
         default:
             break;
         }
@@ -77,6 +91,7 @@ bool prmOperatingState::ValidCommand(const prmOperatingState::CommandType & comm
     // invalid transitions
     newOperatingState = State();
     humanReadableMessage = "command \"" + CommandTypeToString(command)
-        + "\" is not supported in state \"" + StateTypeToString(State()) + "\"";
+        + "\" is not supported in state \"" + StateTypeToString(State())
+        + (SubState().empty() ? "\"" : (" (" + SubState() + ")\"")) ;
     return false;
 }

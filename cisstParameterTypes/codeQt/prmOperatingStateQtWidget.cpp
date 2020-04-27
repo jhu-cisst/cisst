@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2019-01-15
 
-  (C) Copyright 2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2019-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -75,6 +75,11 @@ void prmOperatingStateQtWidget::setupUi(void)
 
 }
 
+void prmOperatingStateQtWidget::setEnabled(bool enabled)
+{
+    mEnabled = enabled;
+}
+
 void prmOperatingStateQtWidget::SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired)
 {
     if (interfaceRequired) {
@@ -102,7 +107,12 @@ void prmOperatingStateQtWidget::SetValue(const prmOperatingState & newValue)
     } catch (...) {
         state = "VOID";
     }
+    if (!newValue.SubState().empty()) {
+        state += " (" + newValue.SubState() + ")";
+    }
     QLState->setText(QString(state.c_str()));
+
+    // home/busy
     if (newValue.IsHomed()) {
         QLIsHomed->setStyleSheet("QLabel { background-color: rgb(100, 255, 100) }");
     } else {
@@ -132,8 +142,9 @@ void prmOperatingStateQtWidget::ShowContextMenu(const QPoint & pos)
     QAction * unhome = new QAction("Unhome", this);
     menu.addAction(unhome);
 
+    menu.setEnabled(mEnabled);
     QAction * selectedItem = menu.exec(globalPos);
-    
+
     if (selectedItem) {
         if (selectedItem == enable) {
             mStateCommand(std::string("enable"));

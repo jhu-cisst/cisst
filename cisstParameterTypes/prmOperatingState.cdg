@@ -70,6 +70,12 @@ class {
     }
 
     member {
+        name SubState;
+        type std::string;
+        description Sub state, application dependent;
+    }
+
+    member {
         name IsHomed;
         type bool;
     }
@@ -83,9 +89,17 @@ class {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     public:
-        bool ValidCommand(const CommandType & command,
-                          StateType & newOperatingState,
-                          std::string & humanReadableMessage);
+        inline bool IsEnabledHomedAndNotBusy(void) const {
+            return ((State() == prmOperatingState::ENABLED)
+                    && IsHomed() && !IsBusy());
+        }
+        inline bool IsEnabledAndHomed(void) const {
+            return ((State() == prmOperatingState::ENABLED)
+                    && IsHomed());
+        }
+        virtual bool ValidCommand(const CommandType & command,
+                                  StateType & newOperatingState,
+                                  std::string & humanReadableMessage);
     }
 }
 
