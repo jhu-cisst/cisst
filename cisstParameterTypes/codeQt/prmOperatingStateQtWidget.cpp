@@ -45,10 +45,12 @@ void prmOperatingStateQtWidget::setupUi(void)
     topLayout->setContentsMargins(1, 1, 1, 1);
     layout->addLayout(topLayout);
 
-    QLState = new QLabel("State");
+    QLState = new QLabel("      ");
+    QLState->setAlignment(Qt::AlignCenter);
     topLayout->addWidget(QLState);
 
-    QLTime = new QLabel("Time");
+    QLTime = new QLabel("--:--:--");
+    QLTime->setAlignment(Qt::AlignCenter);
     QLTime->setStyleSheet("QLabel { background-color: rgb(255, 100, 100) }");
     topLayout->addWidget(QLTime);
 
@@ -58,10 +60,12 @@ void prmOperatingStateQtWidget::setupUi(void)
     layout->addLayout(bottomLayout);
 
     QLIsHomed = new QLabel("Homed");
+    QLIsHomed->setAlignment(Qt::AlignCenter);
     QLIsHomed->setStyleSheet("QLabel { background-color: rgb(255, 100, 100) }");
     bottomLayout->addWidget(QLIsHomed);
 
     QLIsBusy = new QLabel("Busy");
+    QLIsBusy->setAlignment(Qt::AlignCenter);
     bottomLayout->addWidget(QLIsBusy);
 
     // events
