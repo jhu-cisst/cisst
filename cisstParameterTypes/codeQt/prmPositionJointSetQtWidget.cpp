@@ -82,11 +82,17 @@ void prmPositionJointSetQtWidget::SlotReset(void)
         if (configuration.Type().size() == state.Position().size()) {
             mFactors.SetSize(configuration.Type().size());
             prmJointTypeToFactor(configuration.Type(), mPrismaticFactor, mRevoluteFactor, mFactors);
+            // temp vectors
             mTemp1.SetSize(state.Position().size());
             mTemp2.SetSize(state.Position().size());
+            // set position first to resize vector widget
+            mTemp1.SetAll(0.0);
+            QVWPosition->SetValue(mTemp1);
+            // set range
             mTemp1.ElementwiseProductOf(mFactors, configuration.PositionMin());
             mTemp2.ElementwiseProductOf(mFactors, configuration.PositionMax());
             QVWPosition->SetRange(mTemp1, mTemp2);
+            // set position again but this time with actual values
             mTemp1.ElementwiseProductOf(mFactors, state.Position());
             QVWPosition->SetValue(mTemp1);
             QPBMove->setEnabled(true);
