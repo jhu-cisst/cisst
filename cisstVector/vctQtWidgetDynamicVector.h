@@ -75,7 +75,6 @@ class CISST_EXPORT vctQtWidgetDynamicVectorWriteBase: public QTableWidget
 public:
     typedef enum {TEXT_WIDGET, SPINBOX_WIDGET, SLIDER_WIDGET} DisplayModeType;
     vctQtWidgetDynamicVectorWriteBase(const DisplayModeType displayMode);
-    void SetDisplayMode(const DisplayModeType displayMode);
 signals:
     void valueChanged(void);
 protected:
