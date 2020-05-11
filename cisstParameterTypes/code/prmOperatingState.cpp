@@ -61,6 +61,9 @@ bool prmOperatingState::ValidCommand(const prmOperatingState::CommandType & comm
         break;
     case PAUSED:
         switch (command) {
+        case disable:
+            newOperatingState = DISABLED;
+            return true;
         case pause:
             newOperatingState = PAUSED;
             return true;
@@ -85,6 +88,8 @@ bool prmOperatingState::ValidCommand(const prmOperatingState::CommandType & comm
         default:
             break;
         }
+        break;
+    case UNDEFINED:
         break;
     }
 
