@@ -50,6 +50,7 @@ set (SOURCE_FILES
      mtsComponentViewer.cpp
      mtsConnection.cpp
 
+     mtsDelayedConnections.cpp
      mtsEventReceiver.cpp
      mtsExecutionResult.cpp  # see mtsExecutionResult.cdg
 
@@ -146,6 +147,7 @@ set (HEADER_FILES
      mtsComponentViewer.h
      mtsConnection.h
 
+     mtsDelayedConnections.h
      mtsEventReceiver.h
      mtsExport.h
 
