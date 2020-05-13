@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,9 +17,10 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-
 #include <cisstCommon/cmnStrings.h>
 #include <algorithm>
+#include <sstream>
+#include <iterator>
 
 void cmnStringReplaceAll(std::string & userString,
                          const std::string & oldString, const std::string & newString)
@@ -69,4 +70,13 @@ std::string cmnStringToUnderscoreLower(const std::string & input)
     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
 
     return result;
+}
+
+std::string cmnStringFromVectorOfStrings(const std::vector<std::string> & input,
+                                         const std::string & separator)
+{
+    std::stringstream tempStream;
+    std::ostream_iterator<std::string> streamIterator(tempStream, separator.c_str());
+    std::copy(input.begin(), input.end(), streamIterator);
+    return tempStream.str();
 }
