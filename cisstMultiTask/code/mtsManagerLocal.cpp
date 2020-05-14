@@ -2243,7 +2243,7 @@ ConnectionIDType mtsManagerLocal::ConnectSetup(const std::string & clientCompone
 {
     std::vector<std::string> options;
     std::stringstream allOptions;
-    std::ostream_iterator< std::string > output(allOptions, " ");
+    std::ostream_iterator< std::string > output(allOptions, ", ");
 
     // Make sure all interfaces created so far are registered to the GCM.
     if (!RegisterInterfaces(clientComponentName)) {
