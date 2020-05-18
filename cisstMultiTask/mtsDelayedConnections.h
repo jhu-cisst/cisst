@@ -30,9 +30,8 @@ class CISST_EXPORT mtsDelayedConnections {
              const std::string & clientInterfaceName,
              const std::string & serverComponentName,
              const std::string & serverInterfaceName);
-    void Connect(void);
+    void Connect(const bool purge = true);
 
- protected:
     class ConnectionType {
     public:
         inline ConnectionType(const std::string & clientComponentName,
@@ -44,15 +43,24 @@ class CISST_EXPORT mtsDelayedConnections {
             ServerComponentName(serverComponentName),
             ServerInterfaceName(serverInterfaceName)
         {}
-
         std::string ClientComponentName;
         std::string ClientInterfaceName;
         std::string ServerComponentName;
         std::string ServerInterfaceName;
     };
 
-    typedef std::list<ConnectionType *> ConnectionsType;
+ protected:
+    typedef std::list<ConnectionType> ConnectionsType;
     ConnectionsType Connections;
 };
+
+inline bool operator==(const mtsDelayedConnections::ConnectionType & left,
+                       const mtsDelayedConnections::ConnectionType & right)
+{
+    return (left.ClientComponentName == right.ClientComponentName)
+        && (left.ClientInterfaceName == right.ClientInterfaceName)
+        && (left.ServerComponentName == right.ServerComponentName)
+        && (left.ServerInterfaceName == right.ServerInterfaceName);
+}
 
 #endif // _mtsDelayedConnections_h

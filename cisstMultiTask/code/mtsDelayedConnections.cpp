@@ -24,25 +24,32 @@ void mtsDelayedConnections::Add(const std::string & clientComponentName,
                                 const std::string & serverComponentName,
                                 const std::string & serverInterfaceName)
 {
-    Connections.push_back(new ConnectionType(clientComponentName,
-                                             clientInterfaceName,
-                                             serverComponentName,
-                                             serverInterfaceName));
+    ConnectionType newConnection(clientComponentName,
+                                 clientInterfaceName,
+                                 serverComponentName,
+                                 serverInterfaceName);
+    auto found = std::find(Connections.begin(),
+                           Connections.end(),
+                           newConnection);
+    if (found == Connections.end()) {
+        Connections.push_back(newConnection);
+    }
 }
 
-void mtsDelayedConnections::Connect(void)
+void mtsDelayedConnections::Connect(const bool purge)
 {
     mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
-
     const ConnectionsType::const_iterator end = Connections.end();
-    ConnectionsType::const_iterator connectIter;
-    for (connectIter = Connections.begin();
-         connectIter != end;
-         ++connectIter) {
-        ConnectionType * connection = *connectIter;
+    ConnectionsType::const_iterator connection;
+    for (connection = Connections.begin();
+         connection != end;
+         ++connection) {
         componentManager->Connect(connection->ClientComponentName,
                                   connection->ClientInterfaceName,
                                   connection->ServerComponentName,
                                   connection->ServerInterfaceName);
+    }
+    if (purge) {
+        Connections.clear();
     }
 }
