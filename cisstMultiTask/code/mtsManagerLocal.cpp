@@ -1127,7 +1127,11 @@ bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfig
             component->Configure(configFile);
         }
     }
-    // add
+    // add if need, it is possible ctor or Configure already added the component itself to manager
+    mtsComponent * existing = this->GetComponent(component->GetName());
+    if (existing == component) {
+        return true;
+    }
     if (!this->AddComponent(component)) {
         CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: failed to add component to component manager" << std::endl;
         return false;
