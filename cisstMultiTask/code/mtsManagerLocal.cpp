@@ -1109,7 +1109,8 @@ bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfig
                                                className,
                                                constructorArgJSON);
     if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: failed to dynamically create component" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: failed to dynamically create component of type \""
+                                 << className << "\"" << std::endl;
         return false;
     }
     // configure as needed
