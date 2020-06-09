@@ -28,9 +28,9 @@ void mtsDelayedConnections::Add(const std::string & clientComponentName,
                                  clientInterfaceName,
                                  serverComponentName,
                                  serverInterfaceName);
-    auto found = std::find(Connections.begin(),
-                           Connections.end(),
-                           newConnection);
+    ConnectionsType::const_iterator found = std::find(Connections.begin(),
+                                                      Connections.end(),
+                                                      newConnection);
     if (found == Connections.end()) {
         Connections.push_back(newConnection);
     }
