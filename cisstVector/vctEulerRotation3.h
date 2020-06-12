@@ -156,12 +156,16 @@ public:
     typedef vctEulerRotation3<_order> ThisType;
     typedef vctEulerRotation3Base BaseType;
 
-
     inline vctEulerRotation3() : BaseType() {}
     inline vctEulerRotation3(const ThisType & other) : BaseType(other) {}
     inline vctEulerRotation3(double phi, double theta, double psi) : BaseType(phi, theta, psi) {}
     inline vctEulerRotation3(double * angles) : BaseType(angles) {}
     inline vctEulerRotation3(const vct3 & angles) : BaseType(angles) {}
+
+    inline ThisType & operator = (const ThisType & other) {
+        Angles.Assign(other.Angles);
+        return *this;
+    }
 
     /*! Constructor from a vctMatrixRotation3. */
     template <class __containerType>
