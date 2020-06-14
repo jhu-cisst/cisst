@@ -407,6 +407,13 @@ public:
 
     inline ~mtsGenericObjectProxy(void) {}
 
+    /*! Assignment operator */
+    inline ThisType & operator = (const ThisType & other) {
+        BaseType::operator = (other);
+        Data = other.Data;
+        return *this;
+    }
+
     /*! Return pointer to data */
     value_type& GetData(void) { return Data; }
     const value_type& GetData(void) const { return Data; }

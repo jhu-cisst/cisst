@@ -1278,7 +1278,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
     CMN_ASSERT(parsedOk);
     try {
         argument->DeSerializeTextJSON(jsonValue);
-    } catch (std::runtime_error e) {
+    } catch (std::runtime_error & e) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: unable to deserialize constructor for "
                                  << className << " from JSON file, got exception: "
                                  << e.what() << std::endl;

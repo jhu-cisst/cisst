@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-04-13
 
-  (C) Copyright 2009-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -99,6 +99,15 @@ public:
     /*! Destructor.  Does nothing specific. */
     inline virtual ~mtsGenericObject(void)
     {}
+
+    /*! Assignment operator */
+    inline mtsGenericObject & operator = (const mtsGenericObject & other) {
+        BaseType::operator = (other);
+        TimestampMember = other.TimestampMember;
+        AutomaticTimestampMember = other.AutomaticTimestampMember;
+        ValidMember = other.ValidMember;
+        return *this;
+    }
 
     /*! Set timestamp if AutomaticTimeStamp is set to true. This is
       only meaningful if the derived class contains a timestamp and

@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -63,7 +62,7 @@ void vctDataFunctionsTransformationsTest::TestFrm3Scalar(void)
     // exception expected if index too high
     try {
         description = cmnData<vctFrm3>::ScalarDescription(f, cmnData<vctFrm3>::ScalarNumber(f) + 1);
-    } catch (std::out_of_range) {
+    } catch (std::out_of_range &) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);
@@ -126,7 +125,7 @@ void vctDataFunctionsTransformationsTest::TestFrm4x4Scalar(void)
     // exception expected if index too high
     try {
         description = cmnData<vctFrm4x4>::ScalarDescription(f, cmnData<vctFrm4x4>::ScalarNumber(f) + 1);
-    } catch (std::out_of_range) {
+    } catch (std::out_of_range &) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);

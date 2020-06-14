@@ -91,10 +91,10 @@ void mtsQtCommandSelector::Refresh(void) {
     BuildTree(GlobalManager);
 }
 
-void mtsQtCommandSelector::CurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous) {
-
+void mtsQtCommandSelector::CurrentItemChanged(QTreeWidgetItem* CMN_UNUSED(current),
+                                              QTreeWidgetItem* CMN_UNUSED(previous)) {
 }
 
-void mtsQtCommandSelector::ItemActivated(QTreeWidgetItem* item, int column) {
+void mtsQtCommandSelector::ItemActivated(QTreeWidgetItem* item, int CMN_UNUSED(column)) {
     emit CommandSelected(item->text(0));
 }
