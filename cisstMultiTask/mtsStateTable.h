@@ -383,22 +383,46 @@ public:
     }
 
     /*! Return pointer to accessor functions for the state data element.
-        \param element Pointer to state data element (i.e., working copy)
-        \returns Pointer to accessor class (0 if not found)
-        \note This method is overloaded to accept the element pointer or string name.
+      \param element Pointer to state data element (i.e., working copy)
+      \returns Pointer to accessor class (0 if not found)
     */
     template<class _elementType>
-    mtsStateTable::AccessorBase * GetAccessor(const _elementType & element) const;
+    mtsStateTable::AccessorBase * GetAccessorByInstance(const _elementType & element) const;
 
     /*! Return pointer to accessor functions for the state data element.
-        \param name Name of state data element
-        \returns Pointer to accessor class (0 if not found)
-        \note This method is overloaded to accept the element pointer or string name.
+      \param name Name of state data element
+      \returns Pointer to accessor class (0 if not found)
     */
+    //@{
     mtsStateTable::AccessorBase * GetAccessorByName(const std::string & name) const;
     mtsStateTable::AccessorBase * GetAccessorByName(const char * name) const;
+    //@}
+
+    /*! Return pointer to accessor functions for the state data element.
+      \param id Id of state data element
+      \returns Pointer to accessor class (0 if not found)
+    */
     mtsStateTable::AccessorBase * GetAccessorById(const size_t id) const;
 
+#ifndef SWIG
+    template<class _elementType>
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const _elementType & element) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorByInstance(element);
+    }
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const std::string & name) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorByName(name);
+    }
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const char * name) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorByName(name);
+    }
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const size_t id) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorById(id);
+    }
+#endif
 
     /*! Get a handle for data to be used by a writer */
     mtsStateIndex GetIndexWriter(void) const;
@@ -421,7 +445,7 @@ public:
 
     /*! Advance for replay mode, be very careful this should only be
       used in replay mode as this method only increments the reader
-      index. */ 
+      index. */
     bool ReplayAdvance(void);
 
     /*! Cleanup called when the task is being stopped. */
@@ -515,7 +539,7 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
 }
 
 template <class _elementType>
-mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType & element) const
+mtsStateTable::AccessorBase *mtsStateTable::GetAccessorByInstance(const _elementType & element) const
 {
     for (size_t i = 0; i < StateVectorElements.size(); i++) {
         if (mtsGenericTypes<_elementType>::IsEqual(element, *StateVectorElements[i]))
@@ -525,4 +549,3 @@ mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType & ele
 }
 
 #endif // _mtsStateTable_h
-
