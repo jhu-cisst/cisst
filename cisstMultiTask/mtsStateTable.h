@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -395,9 +395,9 @@ public:
         \returns Pointer to accessor class (0 if not found)
         \note This method is overloaded to accept the element pointer or string name.
     */
-    mtsStateTable::AccessorBase * GetAccessor(const std::string & name) const;
-    mtsStateTable::AccessorBase * GetAccessor(const char * name) const;
-    mtsStateTable::AccessorBase * GetAccessor(const size_t id) const;
+    mtsStateTable::AccessorBase * GetAccessorByName(const std::string & name) const;
+    mtsStateTable::AccessorBase * GetAccessorByName(const char * name) const;
+    mtsStateTable::AccessorBase * GetAccessorById(const size_t id) const;
 
 
     /*! Get a handle for data to be used by a writer */
