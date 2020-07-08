@@ -812,6 +812,43 @@ void mtsComponent::KillSeparateLogFile(void)
 }
 
 
+bool mtsComponent::AreAllInterfacesRequiredConnected(const bool log)
+{
+    // loop through the required interfaces and make sure they are all
+    // connected. The method doesn't end if it finds an interface that
+    // is not connected so it can log all un-connected interfaces.
+    bool allConnected = true;
+    InterfacesRequiredMapType::const_iterator requiredIterator = InterfacesRequired.begin();
+    const mtsInterfaceProvided * connectedInterface;
+    for (;
+         requiredIterator != InterfacesRequired.end();
+         requiredIterator++) {
+        connectedInterface = requiredIterator->second->GetConnectedInterface();
+        if (!connectedInterface) {
+            if (requiredIterator->second->IsRequired() == MTS_REQUIRED) {
+                if (log) {
+                    CMN_LOG_CLASS_INIT_ERROR << "AreAllInterfacesRequiredConnected: component \"" << this->GetName()
+                                             << "\", void pointer to required/input interface \""
+                                             << requiredIterator->first
+                                             << "\" (required/input not connected to provided/output)" << std::endl;
+                    allConnected = false;
+                } else {
+                    // no log, we can just abort
+                    return false;
+                }
+            }
+            else if (log) {
+                CMN_LOG_CLASS_INIT_VERBOSE << "AreAllInterfacesRequiredConnected: component \"" << this->GetName()
+                                           << "\", void pointer to optional required/input interface \""
+                                           << requiredIterator->first
+                                           << "\" (required/input not connected to provided/output)" << std::endl;
+            }
+        }
+    }
+    return allConnected;
+}
+
+
 bool mtsComponent::IsRunning(void) const
 {
     return (this->State == mtsComponentState::ACTIVE);
