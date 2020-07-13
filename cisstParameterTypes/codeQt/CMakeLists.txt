@@ -26,6 +26,7 @@ if (CISST_HAS_QT4)
                   ../prmInputDataQtWidget.h
                   ../prmOperatingStateQtWidget.h
                   ../prmPositionCartesianGetQtWidget.h
+                  ../prmPositionCartesianGetQtWidgetFactory.h
                   ../prmPositionJointSetQtWidget.h
                   ../prmStateJointQtWidget.h
                   ../prmStateRobotQtWidget.h)
@@ -48,6 +49,7 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 prmInputDataQtWidget.cpp
                                 prmOperatingStateQtWidget.cpp
                                 prmPositionCartesianGetQtWidget.cpp
+                                prmPositionCartesianGetQtWidgetFactory.cpp
                                 prmPositionJointSetQtWidget.cpp
                                 prmStateJointQtWidget.cpp
                                 prmStateRobotQtWidget.cpp
@@ -56,6 +58,7 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 prmInputDataQtWidget.h
                                 prmOperatingStateQtWidget.h
                                 prmPositionCartesianGetQtWidget.h
+                                prmPositionCartesianGetQtWidgetFactory.h
                                 prmPositionJointSetQtWidget.h
                                 prmStateJointQtWidget.h
                                 prmStateRobotQtWidget.h
