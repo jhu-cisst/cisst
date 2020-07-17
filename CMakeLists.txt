@@ -395,6 +395,7 @@ set (CISST_LIBRARIES_DEFAULT
      cisstMultiTask
      cisstParameterTypes
      cisstRobot
+     cisstMesh
      )
 
 set (CISST_LIBRARIES_OPTIONAL
