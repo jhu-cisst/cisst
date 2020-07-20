@@ -9,15 +9,15 @@
 #
 # --- end cisst license ---
 
-set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstMesh)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
-#  add_executable (osaExSerialPortServer server.cpp)
-#  set_property (TARGET osaExSerialPortServer PROPERTY FOLDER "cisstOSAbstraction/examples")
-#  cisst_target_link_libraries (osaExSerialPortServer ${REQUIRED_CISST_LIBRARIES})
+add_executable (mshExMesh mesh.cpp)
+set_property (TARGET mshExMesh PROPERTY FOLDER "cisstMesh/examples")
+cisst_target_link_libraries (mshExMesh ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

@@ -18,11 +18,29 @@ option (CISST_MSH_HAS_RPLY "Build RPLY as external project for cisstMesh" OFF)
 
 # all source files
 set (SOURCE_FILES
-     )
+  BoundingBox.cpp
+  mshMesh.cpp
+  utilities.cpp
+  TriangleClosestPointSolver.cpp
+  PDTreeNode.cpp
+  PDTree_Mesh.cpp
+  algPDTree.cpp
+  algPDTree_CP.cpp
+  algPDTree_CP_Mesh.cpp
+  )
 
 # all header files
 set (HEADER_FILES
-     )
+  BoundingBox.h
+  mshMesh.h
+  utilities.h
+  TriangleClosestPointSolver.h
+  PDTreeNode.h
+  PDTree_Mesh.h
+  algPDTree.h
+  algPDTree_CP.h
+  algPDTree_CP_Mesh.h
+  )
 
 # Create the config file
 set (CISST_MSH_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstMesh/mshConfig.h)
@@ -43,7 +61,7 @@ set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_MSH_CONFIG_FILE}
 cisst_add_library (
   LIBRARY cisstMesh
   FOLDER cisstMesh
-  DEPENDENCIES cisstCommon
+  DEPENDENCIES cisstCommon cisstVector cisstNumerical
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES}
   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
