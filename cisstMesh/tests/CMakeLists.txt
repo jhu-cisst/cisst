@@ -17,11 +17,13 @@ cisst_set_directories (cisstCommon cisstVector cisstNumerical cisstMesh cisstTes
 
 # all source files
 set (SOURCE_FILES
-     )
+  mshAlgPDTreeCPMeshTest.cpp
+  )
 
 # all header files
 set (HEADER_FILES
-     )
+  mshAlgPDTreeCPMeshTest.h
+  )
 
 add_executable (cisstMeshTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstMeshTests PROPERTY FOLDER "cisstMesh/tests")
