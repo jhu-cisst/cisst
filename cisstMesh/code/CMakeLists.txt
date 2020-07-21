@@ -20,26 +20,42 @@ option (CISST_MSH_HAS_RPLY "Build RPLY as external project for cisstMesh" OFF)
 set (SOURCE_FILES
   BoundingBox.cpp
   mshMesh.cpp
+  mshPointCloud.cpp
   utilities.cpp
   TriangleClosestPointSolver.cpp
+  Ellipsoid_OBB_Intersection_Solver.cpp
   PDTreeNode.cpp
+  PDTreeBase.cpp
   PDTree_Mesh.cpp
+  PDTree_PointCloud.cpp
   algPDTree.cpp
   algPDTree_CP.cpp
   algPDTree_CP_Mesh.cpp
+  algPDTree_CP_PointCloud.cpp
+  algPDTree_MLP.cpp
+  algPDTree_MLP_Mesh.cpp
+  algPDTree_MLP_PointCloud.cpp
   )
 
 # all header files
 set (HEADER_FILES
   BoundingBox.h
   mshMesh.h
+  mshPointCloud.h
   utilities.h
   TriangleClosestPointSolver.h
+  Ellipsoid_OBB_Intersection_Solver.h
   PDTreeNode.h
+  PDTreeBase.h
   PDTree_Mesh.h
+  PDTree_PointCloud.h
   algPDTree.h
   algPDTree_CP.h
   algPDTree_CP_Mesh.h
+  algPDTree_CP_PointCloud.h
+  algPDTree_MLP.h
+  algPDTree_MLP_Mesh.h
+  algPDTree_MLP_PointCloud.h
   )
 
 # Create the config file

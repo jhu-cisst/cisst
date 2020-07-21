@@ -46,9 +46,9 @@ PDTreeNode::PDTreeNode(
   PDTreeNode* pParent) 
   : pMyTree(pTree),
   pParent(pParent),
-  pDataIndices(pDataIndexArray),
   pLEq(NULL),
   pMore(NULL),
+  pDataIndices(pDataIndexArray),
   NData(numIndexes)
 #ifdef ENABLE_PDTREE_NOISE_MODEL
   ,pEigMax(NULL),

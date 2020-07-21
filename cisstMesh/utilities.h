@@ -237,6 +237,6 @@ vctDoubleVec linspace(const double &min, const double &max, const int &n);
 
 vctDoubleVec ComputeInverseTrilinearInterp(const vct3 &p, const vctDynamicVector<vct3> &points);
 
-static double m_to_mm=1000.0;
+const double m_to_mm=1000.0;
 
 #endif

@@ -990,7 +990,8 @@ int cisstMesh::LoadMeshFromSTLFile(const std::string &stlFilePath)
 void cisstMesh::ReadMeshFile(const char *fn)
 {
   char ext[10];
-  unsigned int i, j;
+  int i;
+  unsigned int j;
 
   ResetMesh();
 
@@ -1023,7 +1024,8 @@ void cisstMesh::ReadMeshFile(const char *fn)
 void cisstMesh::WriteMeshFile(const char *fn)
 {
   char ext[10];
-  unsigned int i, j;
+  int i;
+  unsigned int j;
 
   i = strlen(fn) - 1;
   while (i >= 0 && fn[i] != '.') i--;
