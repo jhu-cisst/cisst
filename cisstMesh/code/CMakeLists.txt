@@ -24,6 +24,7 @@ set (SOURCE_FILES
   utilities.cpp
   TriangleClosestPointSolver.cpp
   Ellipsoid_OBB_Intersection_Solver.cpp
+
   PDTreeNode.cpp
   PDTreeBase.cpp
   PDTree_Mesh.cpp
@@ -35,6 +36,17 @@ set (SOURCE_FILES
   algPDTree_MLP.cpp
   algPDTree_MLP_Mesh.cpp
   algPDTree_MLP_PointCloud.cpp
+
+  DirPDTreeNode.cpp
+  DirPDTreeBase.cpp
+  DirPDTree_Mesh.cpp
+  DirPDTree_PointCloud.cpp
+  algDirPDTree_BoundedAngle.cpp
+  algDirPDTree.cpp
+  algDirPDTree_BoundedAngle_Mesh.cpp
+  algDirPDTree_vonMisesPrj.cpp
+  algDirPDTree_BoundedAngle_PointCloud.cpp
+  algDirPDTree_vonMisesPrj_Mesh.cpp
   )
 
 # all header files
@@ -45,6 +57,7 @@ set (HEADER_FILES
   utilities.h
   TriangleClosestPointSolver.h
   Ellipsoid_OBB_Intersection_Solver.h
+
   PDTreeNode.h
   PDTreeBase.h
   PDTree_Mesh.h
@@ -56,6 +69,17 @@ set (HEADER_FILES
   algPDTree_MLP.h
   algPDTree_MLP_Mesh.h
   algPDTree_MLP_PointCloud.h
+
+  DirPDTreeNode.h
+  DirPDTreeBase.h
+  DirPDTree_Mesh.h
+  DirPDTree_PointCloud.h
+  algDirPDTree_BoundedAngle.h
+  algDirPDTree.h
+  algDirPDTree_BoundedAngle_Mesh.h
+  algDirPDTree_vonMisesPrj.h
+  algDirPDTree_BoundedAngle_PointCloud.h
+  algDirPDTree_vonMisesPrj_Mesh.h
   )
 
 # Create the config file
