@@ -18,6 +18,24 @@ option (CISST_MSH_HAS_RPLY "Build RPLY as external project for cisstMesh" OFF)
 
 # all source files
 set (SOURCE_FILES
+  utilities2D.cpp
+  BoundingBox2D.cpp
+  cisstEdgeList2D.cpp
+  cisstPointCloud2D.cpp
+  PointProjectionRoutines.cpp
+
+  DirPDTree2DBase.cpp
+  DirPDTree2D_Edges.cpp
+  DirPDTree2DNode.cpp
+  DirPDTree2D_PointCloud.cpp
+  alg2D_DirPDTree_CP.cpp
+  alg2D_DirPDTree_CP_Edges.cpp
+  alg2D_DirPDTree.cpp
+  alg2D_DirPDTree_CP_PointCloud.cpp
+  alg2D_DirPDTree_vonMises.cpp
+  alg2D_DirPDTree_vonMises_Edges.cpp
+  alg2D_DirPDTree_vonMises_PointCloud.cpp
+
   BoundingBox.cpp
   mshMesh.cpp
   mshPointCloud.cpp
@@ -51,6 +69,26 @@ set (SOURCE_FILES
 
 # all header files
 set (HEADER_FILES
+  utilities2D.h
+  BoundingBox2D.h
+  cisstEdge2D.h
+  cisstEdgeList2D.h
+  cisstPointCloud2D.h
+  PointProjectionRoutines.h
+
+  DirPDTree2DBase.h
+  DirPDTree2D_Edges.h
+  DirPDTree2DNode.h
+  DirPDTree2D_PointCloud.h
+
+  alg2D_DirPDTree_CP_Edges.h
+  alg2D_DirPDTree_CP.h
+  alg2D_DirPDTree_CP_PointCloud.h
+  alg2D_DirPDTree.h
+  alg2D_DirPDTree_vonMises_Edges.h
+  alg2D_DirPDTree_vonMises.h
+  alg2D_DirPDTree_vonMises_PointCloud.h
+
   BoundingBox.h
   mshMesh.h
   mshPointCloud.h
