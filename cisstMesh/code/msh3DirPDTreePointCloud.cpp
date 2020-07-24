@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,7 +31,7 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
 #include <cisstMesh/msh3DirPDTreePointCloud.h>
@@ -37,44 +39,42 @@
 // Build tree from point cloud input
 //  this constructor does not define the noise model for the point cloud;
 //  the user must do this manually by calling the noise model methods of this class
-msh3DirPDTreePointCloud::msh3DirPDTreePointCloud( 
-  msh3PointCloud &pointCloud,
-  int nThresh, 
-  double diagThresh ) :
-pointCloud(pointCloud)
-{ 
-  NData = pointCloud.points.size();
-  DataIndices = new int[NData];
-  for (int i=0;i<NData;i++) 
-  { 
-    DataIndices[i]=i;
-  }
-  Top = new msh3DirPDTreeNode(DataIndices,NData,this,NULL);
-  NNodes = 0; NNodes++;
-  treeDepth = Top->ConstructSubtree(nThresh,diagThresh);
+msh3DirPDTreePointCloud::msh3DirPDTreePointCloud(msh3PointCloud &pointCloud,
+                                                 int nThresh,
+                                                 double diagThresh ) :
+    pointCloud(pointCloud)
+{
+    NData = pointCloud.points.size();
+    DataIndices = new int[NData];
+    for (int i=0;i<NData;i++) {
+        DataIndices[i]=i;
+    }
+    Top = new msh3DirPDTreeNode(DataIndices,NData,this,NULL);
+    NNodes = 0; NNodes++;
+    treeDepth = Top->ConstructSubtree(nThresh,diagThresh);
 
 #ifdef DebugDirPDTree
-  fprintf(debugFile, "Directional Point Cloud Cov Tree built: NNodes=%d  NData=%d  TreeDepth=%d\n", NumNodes(), NumData(), TreeDepth());
+    fprintf(debugFile, "Directional Point Cloud Cov Tree built: NNodes=%d  NData=%d  TreeDepth=%d\n", NumNodes(), NumData(), TreeDepth());
 #endif
 }
 
 msh3DirPDTreePointCloud::~msh3DirPDTreePointCloud()
 {
-  if (Top) delete Top;
-  if (DataIndices) delete DataIndices;
+    if (Top) delete Top;
+    if (DataIndices) delete DataIndices;
 }
 
 vct3 msh3DirPDTreePointCloud::DatumSortPoint(int datum)
 { // the sort point is the point itself
-  return pointCloud.points.Element(datum);
+    return pointCloud.points.Element(datum);
 }
 
 vct3 msh3DirPDTreePointCloud::DatumNorm(int datum)
 {
-  return pointCloud.pointOrientations.Element(datum);
+    return pointCloud.pointOrientations.Element(datum);
 }
 
 void msh3DirPDTreePointCloud::EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB)
-{ 
-  BB.Include(F*pointCloud.points.Element(datum));
+{
+    BB.Include(F*pointCloud.points.Element(datum));
 }

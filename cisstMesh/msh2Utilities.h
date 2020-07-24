@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,13 +31,17 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _utilities_H
-#define _utilities_H
+
+#ifndef _msh2Utilities_h
+#define _msh2Utilities_h
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctFixedSizeMatrixTypes.h>
+
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
 // Decompositions for covariance matrices
 
@@ -44,6 +50,6 @@
 // outputs:
 //   eigVal ~ eigenvalues ordered largest to smallest
 //   eigVct ~ matrix of eigenvectors (by column) arranged wrt eigVal
-void ComputeCovEigenDecomposition_SVD( const vct2x2 &C, vct2 &eigVal, vct2x2 &eigVct);
+void CISST_EXPORT ComputeCovEigenDecomposition_SVD(const vct2x2 &C, vct2 &eigVal, vct2x2 &eigVct);
 
 #endif

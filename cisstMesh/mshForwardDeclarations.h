@@ -24,4 +24,11 @@ http://www.cisst.org/cisst/license.txt.
   \brief Forward declarations and \#define for cisstMesh
 */
 
+class msh2DirPDTreeBase;
+
+class msh3PDTreeBase;
+class msh3DirPDTreeBase;
+
+class msh3AlgPDTree;
+
 #endif  // _mshForwardDeclarations_h

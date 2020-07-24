@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,59 +31,58 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _algDirPDTree_BoundedAngle_h
-#define _algDirPDTree_BoundedAngle_h
+
+#ifndef _msh3AlgDirPDTreeBA_h
+#define _msh3AlgDirPDTreeBA_h
 
 #include <cisstMesh/msh3AlgDirPDTree.h>
 
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
-class msh3AlgDirPDTreeBA : public msh3AlgDirPDTree
+class CISST_EXPORT msh3AlgDirPDTreeBA : public msh3AlgDirPDTree
 {
-  //
-  // This algorithm implements a closest-point search with bounded
-  //  orientation error
-  //
+    //
+    // This algorithm implements a closest-point search with bounded
+    //  orientation error
+    //
 
-  //--- Algorithm Parameters ---//
+    //--- Algorithm Parameters ---//
 
-protected:
+ protected:
 
-  double maxMatchAngle;       // threshold on match orientation error (radians)
-  double cos_maxMatchAngle;   // pre-computed cosine of the match orientation error
+    double maxMatchAngle;       // threshold on match orientation error (radians)
+    double cos_maxMatchAngle;   // pre-computed cosine of the match orientation error
 
+    //--- Algorithm Methods ---//
 
-  //--- Algorithm Methods ---//
+ public:
 
-public:
+    // constructor
+    msh3AlgDirPDTreeBA(msh3DirPDTreeBase *pDirTree, double maxMatchAngle_ = 2.0*cmnPI) :
+        msh3AlgDirPDTree(pDirTree),
+        maxMatchAngle(maxMatchAngle_),
+        cos_maxMatchAngle(cos(maxMatchAngle_))
+            {}
 
-  // constructor
-  msh3AlgDirPDTreeBA(msh3DirPDTreeBase *pDirTree, double maxMatchAngle_ = 2.0*cmnPI) :
-    msh3AlgDirPDTree(pDirTree),
-    maxMatchAngle(maxMatchAngle_),
-    cos_maxMatchAngle(cos(maxMatchAngle_))
-  {}
+    // destructor
+    virtual ~msh3AlgDirPDTreeBA() {}
 
-  // destructor
-  virtual ~msh3AlgDirPDTreeBA() {}
+    //--- PD Tree Interface Methods ---//
 
+    int NodeMightBeCloser(const vct3 &Xp, const vct3 &Xn,
+                          msh3DirPDTreeNode const *node,
+                          double ErrorBound);
 
-  //--- PD Tree Interface Methods ---//
+    virtual double FindClosestPointOnDatum(const vct3 &Xp, const vct3 &Xn,
+                                           vct3 &closest, vct3 &closestNorm,
+                                           int datum) = 0;
 
-  int  NodeMightBeCloser(
-    const vct3 &Xp, const vct3 &Xn,
-    msh3DirPDTreeNode const *node,
-    double ErrorBound);
-
-  virtual double FindClosestPointOnDatum(
-    const vct3 &Xp, const vct3 &Xn,
-    vct3 &closest, vct3 &closestNorm,
-    int datum) = 0;
-
-  virtual int DatumMightBeCloser(
-    const vct3 &Xp, const vct3 &Xn,
-    int datum,
-    double ErrorBound) = 0;
+    virtual int DatumMightBeCloser(const vct3 &Xp, const vct3 &Xn,
+                                   int datum,
+                                   double ErrorBound) = 0;
 };
+
 #endif

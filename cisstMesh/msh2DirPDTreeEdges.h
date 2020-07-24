@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,50 +31,47 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _DirPDTree2D_Edges_h
-#define _DirPDTree2D_Edges_h
 
+#ifndef _msh2DirPDTreeEdges_h
+#define _msh2DirPDTreeEdges_h
 
 #include <cisstMesh/msh2DirPDTreeBase.h>
 #include <cisstMesh/msh2Edges.h>
 
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
-class msh2DirPDTreeEdges : public msh2DirPDTreeBase
+class CISST_EXPORT msh2DirPDTreeEdges : public msh2DirPDTreeBase
 {
     // NOTE: for function overrides, be sure "const" type is same as the base class otherwise,
     //       the base class function will be treated as a different function and not actually
     //       be overridden!
 
-public:
+ public:
 
     msh2Edges EdgeList;
-
 
     //-- Methods --//
 
     // constructor
     //  nThresh   - min number of datums in subdivided node
     //  diagThresh - min physical size of subdivided node
-    msh2DirPDTreeEdges(
-        const vctDynamicVector<vct2> &edgesV1,
-        const vctDynamicVector<vct2> &edgesV2,
-        const vctDynamicVector<vct2> &edgesNorm,
-        int nThresh, double diagThresh, bool bUseOBB = true);
+    msh2DirPDTreeEdges(const vctDynamicVector<vct2> &edgesV1,
+                       const vctDynamicVector<vct2> &edgesV2,
+                       const vctDynamicVector<vct2> &edgesNorm,
+                       int nThresh, double diagThresh, bool bUseOBB = true);
 
     // destructor
     virtual ~msh2DirPDTreeEdges();
 
-
     //-- Base Class Method Overrides --//
-
     virtual vct2 DatumSortPoint(int datum) const;  // return sort point of this datum
     virtual vct2 DatumNorm(int datum) const;       // return normal orientation of this datum
 
     virtual void EnlargeBounds(const vctFrm2& F, int datum, msh2BoundingBox& BB) const;
     virtual void EnlargeBounds(int datum, msh2BoundingBox& BB) const;
-
 
     //-- Edge Methods --//
 

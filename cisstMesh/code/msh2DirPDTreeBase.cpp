@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,8 +31,9 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
+
 #include <cisstMesh/msh2DirPDTreeBase.h>
 
 #include <stdio.h>
@@ -40,15 +43,14 @@
 // quickly find an approximate initial match by dropping straight down the
 //   tree to the node containing the sample point and picking a datum from there
 int msh2DirPDTreeBase::FastInitializeProximalDatum(
-    const vct2 &v, const vct2 &n, 
-    vct2 &proxPoint, vct2 &proxNorm)
+                                                   const vct2 &v, const vct2 &n,
+                                                   vct2 &proxPoint, vct2 &proxNorm)
 {
     // find proximal leaf node
     msh2DirPDTreeNode *pNode;
     pNode = Top;
 
-    while (!pNode->IsTerminalNode())
-    {
+    while (!pNode->IsTerminalNode()) {
         pNode = pNode->GetChildSplitNode(v);
     }
 
@@ -63,12 +65,11 @@ int msh2DirPDTreeBase::FastInitializeProximalDatum(
 
 // Return the index for the datum in the tree that is closest to the given point
 //  in terms of the complete error (orientation + distance) and set the closest point
-int msh2DirPDTreeBase::FindClosestDatum(
-    const vct2 &v, const vct2 &n,
-    vct2 &closestPoint, vct2 &closestPointNorm,
-    int prevDatum,
-    double &matchError,
-    unsigned int &numNodesSearched)
+int msh2DirPDTreeBase::FindClosestDatum(const vct2 &v, const vct2 &n,
+                                        vct2 &closestPoint, vct2 &closestPointNorm,
+                                        int prevDatum,
+                                        double &matchError,
+                                        unsigned int &numNodesSearched)
 {
     // SDB: by specifying a good starting datum (such as previous closest datum)
     //      the search for new closest datum is more efficient because
@@ -83,32 +84,29 @@ int msh2DirPDTreeBase::FindClosestDatum(
     //int datum = Top->FindClosestDatum( v, n, closestPoint, closestPointNorm, matchError, numNodesVisited, numNodesSearched );
 
     int datum;
-    if (treeDepth > 0)
-    {
-      // As an optimization, we can directly search the children of the root, in order
-      //  to save a node bounds check, since all datums must lie within the root node
-      // 1st call to LEq updates both distance bound and closest point
-      //  before 2nd call to More. If More returns (-1), then More had
-      //  nothing better than LEq and the resulting datum should be
-      //  the return value of LEq (whether that is -1 or a closer datum index)
-      int ClosestLEq = -1;
-      int ClosestMore = -1;
-      ClosestLEq = Top->LEq->FindClosestDatum(v, n, closestPoint, closestPointNorm, matchError, numNodesVisited, numNodesSearched);
-      ClosestMore = Top->More->FindClosestDatum(v, n, closestPoint, closestPointNorm, matchError, numNodesVisited, numNodesSearched);
-      datum = (ClosestMore < 0) ? ClosestLEq : ClosestMore;
+    if (treeDepth > 0) {
+        // As an optimization, we can directly search the children of the root, in order
+        //  to save a node bounds check, since all datums must lie within the root node
+        // 1st call to LEq updates both distance bound and closest point
+        //  before 2nd call to More. If More returns (-1), then More had
+        //  nothing better than LEq and the resulting datum should be
+        //  the return value of LEq (whether that is -1 or a closer datum index)
+        int ClosestLEq = -1;
+        int ClosestMore = -1;
+        ClosestLEq = Top->LEq->FindClosestDatum(v, n, closestPoint, closestPointNorm, matchError, numNodesVisited, numNodesSearched);
+        ClosestMore = Top->More->FindClosestDatum(v, n, closestPoint, closestPointNorm, matchError, numNodesVisited, numNodesSearched);
+        datum = (ClosestMore < 0) ? ClosestLEq : ClosestMore;
     }
-    else
-    {
-      datum = Top->FindClosestDatum(v, n, closestPoint, closestPointNorm, matchError, numNodesVisited, numNodesSearched);
+    else {
+        datum = Top->FindClosestDatum(v, n, closestPoint, closestPointNorm, matchError, numNodesVisited, numNodesSearched);
     }
-    if (datum < 0)
-    {
-      datum = prevDatum;  // no datum found closer than previous
+    if (datum < 0) {
+        datum = prevDatum;  // no datum found closer than previous
     }
 
     //if (numNodesSearched==0)
     //{
-    //  //FILE *debugPrint = fopen("../ICP_TestData/LastRun/debugPDTreePrint.txt","w"); 
+    //  //FILE *debugPrint = fopen("../ICP_TestData/LastRun/debugPDTreePrint.txt","w");
     //  //Print( debugPrint, 0 );
     //  //fclose( debugPrint );
 
@@ -116,7 +114,7 @@ int msh2DirPDTreeBase::FindClosestDatum(
     //  PrintTerminalNodes( fs );
     //  fs.close();
 
-    //  std::cout << "No nodes searched!" << std::endl 
+    //  std::cout << "No nodes searched!" << std::endl
     //    << " v: " << v << std::endl
     //    << " n: " << n << std::endl
     //    << " c: " << closestPoint << std::endl
@@ -136,7 +134,7 @@ int msh2DirPDTreeBase::FindClosestDatum(
     //    std::cout << "covGamma: " << std::endl << alg->covGamma << std::endl;
     //    std::cout << "invCovGamma: " << std::endl << alg->covGammaInv << std::endl;
     //    std::cout << "ErrorBound = " << errorBound << std::endl;
-    //    std::cout << "ClosestPointError = " 
+    //    std::cout << "ClosestPointError = "
     //      << algorithm->FindClosestPointOnDatum( v, n, closestPoint, closestPointNorm, prevDatum ) << std::endl;
     //    algorithm->NodeMightBeCloser( v, n, &termNode, errorBound );
     //  }
@@ -147,20 +145,17 @@ int msh2DirPDTreeBase::FindClosestDatum(
 }
 
 // Exhaustive linear search of all datums in the tree for validation of closest datum
-int msh2DirPDTreeBase::ValidateClosestDatum(
-    const vct2 &v, const vct2 &n,
-    vct2 &closestPoint, vct2 &closestPointNorm)
+int msh2DirPDTreeBase::ValidateClosestDatum(const vct2 &v, const vct2 &n,
+                                            vct2 &closestPoint, vct2 &closestPointNorm)
 {
     double bestError = std::numeric_limits<double>::max();
     int    bestDatum = -1;
     double error;
     vct2 datumPoint;
     vct2 datumNorm;
-    for (int datum = 0; datum < NData; datum++)
-    {
+    for (int datum = 0; datum < NData; datum++) {
         error = algorithm->FindClosestPointOnDatum(v, n, datumPoint, datumNorm, datum);
-        if (error < bestError)
-        {
+        if (error < bestError) {
             bestError = error;
             bestDatum = datum;
             closestPoint = datumPoint;
@@ -187,7 +182,7 @@ void msh2DirPDTreeBase::PrintTerminalNodes(std::ofstream &fs)
 //    //fprintf(chan,"%5d:",datum);
 //    // // SDB
 //    ////{ fprintf(stdout," ["); fprintfVct3(stdout,DatumSortPoint(datum)); fprintf(stdout,"] ");};
-//    ////// fprintf(stdout," [ ...]"); 
+//    ////// fprintf(stdout," [ ...]");
 //    ////fprintf(stdout,"\n");
 //    //{ fprintf(chan," ["); fprintfVct3(chan,DatumSortPoint(datum)); fprintf(chan,"] ");};
 //    //fprintf(chan,"\n");

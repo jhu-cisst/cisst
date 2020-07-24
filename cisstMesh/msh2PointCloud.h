@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,66 +31,70 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _cisstPointCloud2D_h_
-#define _cisstPointCloud2D_h_
+
+#ifndef _msh2PointCloud_h
+#define _msh2PointCloud_h
 
 #include <stdio.h>
 
 #include <cisstMesh/mshConfig.h>
 
 #if CISST_MSH_HAS_RPLY
-  #include "ply_io.h"
+#include "ply_io.h"
 #endif
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctDynamicVectorTypes.h>
 
-class msh2PointCloud
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh2PointCloud
 {
 
-private:
+ private:
 
 #if CISST_MSH_HAS_RPLY
-  ply_io ply_obj;
+    ply_io ply_obj;
 #endif
 
-public:
+ public:
 
-  vctDynamicVector<vct2> points;
-  vctDynamicVector<vct2> pointOrientations;
+    vctDynamicVector<vct2> points;
+    vctDynamicVector<vct2> pointOrientations;
 
-  msh2PointCloud( vctDynamicVector<vct2> &points) :
-    points(points)
-  {};
+    msh2PointCloud( vctDynamicVector<vct2> &points) :
+        points(points)
+        {};
 
-  msh2PointCloud(vctDynamicVector<vct2> &points, vctDynamicVector<vct2> &pointOrientations) :
-    points(points),
-    pointOrientations(pointOrientations)
-  {};
+    msh2PointCloud(vctDynamicVector<vct2> &points, vctDynamicVector<vct2> &pointOrientations) :
+        points(points),
+        pointOrientations(pointOrientations)
+        {};
 
-  // Point Set I/O
-  void LoadPLY(const std::string &input_file);
-  void SavePLY(const std::string &output_file);
-  static int WritePointCloudToFile(vctDynamicVector<vct2> &points, std::string &filePath);
-  static int ReadPointCloudFromFile(vctDynamicVector<vct2> &points, std::string &filePath);
-  static int AppendPointCloudFromFile(vctDynamicVector<vct2> &points, std::string &filePath);
+    // Point Set I/O
+    void LoadPLY(const std::string &input_file);
+    void SavePLY(const std::string &output_file);
+    static int WritePointCloudToFile(vctDynamicVector<vct2> &points, std::string &filePath);
+    static int ReadPointCloudFromFile(vctDynamicVector<vct2> &points, std::string &filePath);
+    static int AppendPointCloudFromFile(vctDynamicVector<vct2> &points, std::string &filePath);
 
-  int WritePointCloudToFile(std::string &filePath)
-  {
-    return WritePointCloudToFile(points, filePath);
-  }
+    int WritePointCloudToFile(std::string &filePath)
+    {
+        return WritePointCloudToFile(points, filePath);
+    }
 
-  int ReadPointCloudFromFile(std::string &filePath)
-  {
-    return ReadPointCloudFromFile(points, filePath);
-  }
+    int ReadPointCloudFromFile(std::string &filePath)
+    {
+        return ReadPointCloudFromFile(points, filePath);
+    }
 
-  int AppendPointCloudFromFile(std::string &filePath)
-  {
-    return AppendPointCloudFromFile(points, filePath);
-  }
+    int AppendPointCloudFromFile(std::string &filePath)
+    {
+        return AppendPointCloudFromFile(points, filePath);
+    }
 
 };
 

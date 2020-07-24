@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,47 +31,48 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _algPDTree_CP_PointCloud_h
-#define _algPDTree_CP_PointCloud_h
+
+#ifndef _msh3AlgPDTreeCPPointCloud_h
+#define _msh3AlgPDTreeCPPointCloud_h
 
 #include <cisstMesh/msh3AlgPDTreeCP.h>
 #include <cisstMesh/msh3PDTreePointCloud.h>
 
-class msh3AlgPDTreeCPPointCloud : public msh3AlgPDTreeCP
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh3AlgPDTreeCPPointCloud : public msh3AlgPDTreeCP
 {
-  //
-  // Implements closest point search algorithm for a point cloud shape
-  //  (i.e. point datum type)
-  //
+    //
+    // Implements closest point search algorithm for a point cloud shape
+    //  (i.e. point datum type)
+    //
 
-  msh3PDTreePointCloud *pTree;
+    msh3PDTreePointCloud *pTree;
 
-public:
+ public:
 
-  // constructor
-  msh3AlgPDTreeCPPointCloud(msh3PDTreePointCloud *pTree) :
-    msh3AlgPDTreeCP(pTree),
-    pTree(pTree)
-  {};
+    // constructor
+    msh3AlgPDTreeCPPointCloud(msh3PDTreePointCloud *pTree) :
+        msh3AlgPDTreeCP(pTree),
+        pTree(pTree)
+        {};
 
-  // destructor
-  virtual ~msh3AlgPDTreeCPPointCloud() {}
+    // destructor
+    virtual ~msh3AlgPDTreeCPPointCloud() {}
 
+    // finds the point on this datum with lowest match error
+    //  and returns the match error and closest point
+    double FindClosestPointOnDatum(const vct3 &v,
+                                   vct3 &closest,
+                                   int datum);
 
-  // finds the point on this datum with lowest match error
-  //  and returns the match error and closest point
-  double FindClosestPointOnDatum(
-    const vct3 &v,
-    vct3 &closest,
-    int datum);
-
-  // fast check if a datum might have smaller match error than error bound
-  int  DatumMightBeCloser(
-    const vct3 &v,
-    int datum,
-    double ErrorBound);
+    // fast check if a datum might have smaller match error than error bound
+    int  DatumMightBeCloser(const vct3 &v,
+                            int datum,
+                            double ErrorBound);
 };
 
 #endif

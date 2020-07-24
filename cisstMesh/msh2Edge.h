@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,19 +31,20 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
-#ifndef cisstEdge2D_h
-#define cisstEdge2D_h
+#ifndef _msh2Edge_h
+#define _msh2Edge_h
 
 #include <cisstMesh/PointProjectionRoutines.h>
 
-class msh2Edge
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh2Edge
 {
-
-public:
-
+ public:
     vct2 V1;
     vct2 V2;
     vct2 Norm;
@@ -51,7 +54,6 @@ public:
     msh2Edge(vct2 &argV1, vct2 &argV2, vct2 &argNorm)
         : V1(argV1), V2(argV2), Norm(argNorm)
     {};
-
 
     // destructor
     ~msh2Edge() {};
@@ -68,9 +70,6 @@ public:
     {
         return ProjectOnLineSegment(x, V1, V2, pLambda);
     }
-
-private:
-
 };
 
 #endif

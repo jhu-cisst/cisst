@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,59 +31,56 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
 #include <cisstMesh/msh3AlgDirPDTreeBAMesh.h>
 
-
 // PD Tree Methods
 
-double msh3AlgDirPDTreeBAMesh::FindClosestPointOnDatum(
-  const vct3 &Xp, const vct3 &Xn,
-  vct3 &closest, vct3 &closestNorm,
-  int datum)
+double msh3AlgDirPDTreeBAMesh::FindClosestPointOnDatum(const vct3 &Xp, const vct3 &Xn,
+                                                       vct3 &closest, vct3 &closestNorm,
+                                                       int datum)
 {
-  // This routine ignores the 3d orientation Xn and computes the
-  //  closest point by Euclidean distance
+    // This routine ignores the 3d orientation Xn and computes the
+    //  closest point by Euclidean distance
 
-  // compute closest point on triangle
-  TCPS.FindClosestPointOnTriangle(Xp, datum, closest);
+    // compute closest point on triangle
+    TCPS.FindClosestPointOnTriangle(Xp, datum, closest);
 
-  // norm has same value everywhere on the triangle
-  closestNorm = pDirTree->mesh.faceNormals(datum);
+    // norm has same value everywhere on the triangle
+    closestNorm = pDirTree->Mesh.faceNormals(datum);
 
-  // return the match distance
-  //  NOTE: distance is more convenient than square distance
-  //        since the distance is required for doing the
-  //        bounding box proximity tests.
-  return (Xp - closest).Norm();
+    // return the match distance
+    //  NOTE: distance is more convenient than square distance
+    //        since the distance is required for doing the
+    //        bounding box proximity tests.
+    return (Xp - closest).Norm();
 }
 
 
-int msh3AlgDirPDTreeBAMesh::DatumMightBeCloser(
-  const vct3 &Xp, const vct3 &Xn,
-  int datum,
-  double ErrorBound)
+int msh3AlgDirPDTreeBAMesh::DatumMightBeCloser(const vct3 &Xp, const vct3 &Xn,
+                                               int datum,
+                                               double ErrorBound)
 {
-  // check if orientation error is past threshold
-  //  for efficiency, use the dot product directly for comparison
-  //  rather than using the actual angle computed from the inverse
-  //  cosine of the dot product
-  double dotProd = Xn.DotProduct(pDirTree->mesh.faceNormals(datum));
-  if (dotProd < cos_maxMatchAngle)
-    return 0;
-  //double matchAngle = acos(Xn.DotProduct(pDirTree->TriangleNorm(datum)));
-  //if (matchAngle > maxMatchAngle)
-  //  return 0;
+    // check if orientation error is past threshold
+    //  for efficiency, use the dot product directly for comparison
+    //  rather than using the actual angle computed from the inverse
+    //  cosine of the dot product
+    double dotProd = Xn.DotProduct(pDirTree->Mesh.faceNormals(datum));
+    if (dotProd < cos_maxMatchAngle) {
+        return 0;
+    }
+    //double matchAngle = acos(Xn.DotProduct(pDirTree->TriangleNorm(datum)));
+    //if (matchAngle > maxMatchAngle)
+    //  return 0;
 
-  // create bounding box around triangle
-  msh3BoundingBox BB;
-  for (int vx = 0; vx < 3; vx++)
-  {
-      BB.Include(pDirTree->mesh.FaceCoord(datum, vx));
-  }
+    // create bounding box around triangle
+    msh3BoundingBox BB;
+    for (int vx = 0; vx < 3; vx++) {
+        BB.Include(pDirTree->Mesh.FaceCoord(datum, vx));
+    }
 
-  // check distance to datum bounding box to attempt quick escape
-  return BB.Includes(Xp, ErrorBound);
+    // check distance to datum bounding box to attempt quick escape
+    return BB.Includes(Xp, ErrorBound);
 }

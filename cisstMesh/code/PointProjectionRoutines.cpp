@@ -1,4 +1,5 @@
-
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -30,8 +31,9 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
+
 #include <cisstMesh/PointProjectionRoutines.h>
 
 vct2 ProjectOnLineSegment(const vct2 &x, const vct2 &a, const vct2 &b, double *pLambda)
@@ -39,17 +41,21 @@ vct2 ProjectOnLineSegment(const vct2 &x, const vct2 &a, const vct2 &b, double *p
     vct2 ax = x - a;
     vct2 ab = b - a;
     double lambda = (ax*ab) / (ab*ab);
-    if (lambda <= 0.0)
-    {
-        if (pLambda) *pLambda = 0.0;
+    if (lambda <= 0.0) {
+        if (pLambda) {
+            *pLambda = 0.0;
+        }
         return a;
     };
-    if (lambda > 1.0)
-    {
-        if (pLambda) *pLambda = 1.0;
+    if (lambda > 1.0) {
+        if (pLambda) {
+            *pLambda = 1.0;
+        }
         return b;
     };
-    if (pLambda) *pLambda = lambda;
+    if (pLambda) {
+        *pLambda = lambda;
+    }
     return a + ab*lambda;
 };
 

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,14 +31,14 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
 #include <cisstMesh/msh3AlgPDTree.h>
 #include <cisstMesh/msh3PDTreeBase.h>
 
 msh3AlgPDTree::msh3AlgPDTree(msh3PDTreeBase *pTree)
-  : pTree(pTree)
+    : pTree(pTree)
 {
-  pTree->SetSearchAlgorithm(this);
+    pTree->SetSearchAlgorithm(this);
 }

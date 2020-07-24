@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,17 +31,16 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
 #include <cisstMesh/msh3AlgPDTreeCPMesh.h>
 
 // finds the point on this datum with lowest match error
 //  and returns the match error and closest point
-double msh3AlgPDTreeCPMesh::FindClosestPointOnDatum(
-    const vct3 &v,
-    vct3 &closest,
-    int datum)
+double msh3AlgPDTreeCPMesh::FindClosestPointOnDatum(const vct3 &v,
+                                                    vct3 &closest,
+                                                    int datum)
 {
     // set closest point
     TCPS.FindClosestPointOnTriangle(v, datum, closest);
@@ -65,18 +66,17 @@ double msh3AlgPDTreeCPMesh::FindClosestPointOnDatumWithEdgeDetection(const vct3 
 
 // fast check if a datum might have smaller match error than error bound
 int msh3AlgPDTreeCPMesh::DatumMightBeCloser(
-    const vct3 &v,
-    int datum,
-    double ErrorBound)
+                                            const vct3 &v,
+                                            int datum,
+                                            double ErrorBound)
 {
     // create bounding box around triangle
     msh3BoundingBox BB;
-    for (int vx = 0; vx < 3; vx++)
-    {
+    for (int vx = 0; vx < 3; vx++) {
         BB.Include(pTree->Mesh->FaceCoord(datum, vx));
     }
 
-    // We want to know if this point can produce a cost less than the 
+    // We want to know if this point can produce a cost less than the
     //  error bound. Error bound is the best cost we have so far.
     return BB.Includes(v, ErrorBound);
 

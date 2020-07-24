@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,53 +31,57 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _algPDTree_MLP_Mesh_h
-#define _algPDTree_MLP_Mesh_h
+
+#ifndef _msh3AlgPDTreeMLPMesh_h
+#define _msh3AlgPDTreeMLPMesh_h
 
 #include <cisstMesh/msh3AlgPDTreeMLP.h>
 #include <cisstMesh/msh3PDTreeMesh.h>
 #include <cisstMesh/TriangleClosestPointSolver.h>
 
-class msh3AlgPDTreeMLPMesh : public msh3AlgPDTreeMLP
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh3AlgPDTreeMLPMesh : public msh3AlgPDTreeMLP
 {
-  //
-  // Implements most-likely point search algorithms for a mesh shape
-  //  (i.e. triangle datum type)
-  //
+    //
+    // Implements most-likely point search algorithms for a mesh shape
+    //  (i.e. triangle datum type)
+    //
 
-  //--- Algorithm Parameters ---//
+    //--- Algorithm Parameters ---//
 
-protected:
+ protected:
 
-  msh3PDTreeMesh *pTree;
-  TriangleClosestPointSolver TCPS;
+    msh3PDTreeMesh *pTree;
+    TriangleClosestPointSolver TCPS;
 
-  //--- Algorithm Methods ---//
+    //--- Algorithm Methods ---//
 
-public:
+ public:
 
-  // constructor
-  msh3AlgPDTreeMLPMesh(msh3PDTreeMesh *pTree) :
-    msh3AlgPDTreeMLP(pTree),
-    pTree(pTree),
-	TCPS(*(pTree->Mesh))
-  {}
+    // constructor
+    msh3AlgPDTreeMLPMesh(msh3PDTreeMesh *pTree) :
+        msh3AlgPDTreeMLP(pTree),
+        pTree(pTree),
+        TCPS(*(pTree->Mesh))
+            {}
 
-  // destructor
-  virtual ~msh3AlgPDTreeMLPMesh() {}
+    // destructor
+    virtual ~msh3AlgPDTreeMLPMesh() {}
 
 
-  //--- PD Tree Interface Methods ---//
+    //--- PD Tree Interface Methods ---//
 
-  double FindClosestPointOnDatum(const vct3 &v,
-    vct3 &closest,
-    int datum);
+    double FindClosestPointOnDatum(const vct3 &v,
+                                   vct3 &closest,
+                                   int datum);
 
-  int  DatumMightBeCloser(const vct3 &v,
-    int datum,
-    double ErrorBound);
+    int DatumMightBeCloser(const vct3 &v,
+                           int datum,
+                           double ErrorBound);
 };
 
 #endif

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2015, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -31,8 +33,9 @@
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  
 // ****************************************************************************
-#ifndef _cisstMesh_h_
-#define _cisstMesh_h_
+
+#ifndef _msh3Mesh_h_
+#define _msh3Mesh_h_
 
 #include <cisstMesh/mshConfig.h>
 
@@ -46,15 +49,14 @@
 #endif
 
 #include <unordered_map>
-// #include <utilities.h>
 
-class cisstMesh 
+// Always include last! 
+class CISST_EXPORT msh3Mesh
 {
 
 public:
 
     //--- Variables ---//
-
     vctDynamicVector<vct3>      vertices;       // the coordinates for each vertex in the mesh
     vctDynamicVector<vctInt3>   faces;          // the vertex indices for each triangle in the mesh
     vctDynamicVector<vct3>      faceNormals;    // the face normal for each triangle in the mesh
@@ -79,13 +81,13 @@ public:
     //--- Methods ---//
 
     // constructor
-    cisstMesh(double robotResolution, bool convertMMtoM); //robot resolution in mm
-    cisstMesh(bool convertMMtoM);
-    cisstMesh(double robotResolution);
-    cisstMesh();
+    msh3Mesh(double robotResolution, bool convertMMtoM); //robot resolution in mm
+    msh3Mesh(bool convertMMtoM);
+    msh3Mesh(double robotResolution);
+    msh3Mesh();
 
     // destructor
-    ~cisstMesh() {}
+    ~msh3Mesh() {}
 
     // initializes all mesh properties to empty (default initializer);
     //  this is a useful routine to use while building a mesh,
@@ -104,27 +106,28 @@ public:
     // computes noise model covariances for each triangle in the mesh
     //  such that the in-plane and perpendicular-plane directions have
     //  the specified variance
-    void InitializeNoiseModel( double noiseInPlaneVar, double noisePerpPlaneVar);
+    void InitializeNoiseModel(double noiseInPlaneVar, double noisePerpPlaneVar);
 
     void SaveTriangleCovariances(std::string &filePath);
 
     // get coordinates of all three vertices for a given face index
     inline void FaceCoords(int ti, vct3 &v0, vct3 &v1, vct3 &v2) const
-    { v0 = vertices[faces[ti][0]];
+    {
+        v0 = vertices[faces[ti][0]];
         v1 = vertices[faces[ti][1]];
         v2 = vertices[faces[ti][2]];
     }
     // get vertex coordinate for a given face/vertex index
     inline vct3& FaceCoord(int ti, int vi)
-    { return vertices[faces[ti][vi]];
+    {
+        return vertices[faces[ti][vi]];
     }
 
     // Mesh I/O
 public:
 
     // Build mesh from data arrays
-    int  LoadMesh(
-      const vctDynamicVector<vct3> *vertices,
+    int LoadMesh(const vctDynamicVector<vct3> *vertices,
       const vctDynamicVector<vctInt3> *faces,
       const vctDynamicVector<vct3> *face_normals = NULL, 
       const vctDynamicVector<vctInt3> *face_neighbors = NULL,
@@ -138,23 +141,22 @@ public:
     void SavePLY(const std::string &output_file);
 
     // Build mesh from an array of vertices, faces, and face normals
-    int  LoadMesh(
-            const vctDynamicVector<vct3> &V,
+    int LoadMesh(const vctDynamicVector<vct3> &V,
             const vctDynamicVector<vctInt3> &T,
             const vctDynamicVector<vct3> &N);
 
     // Build new mesh from a single .mesh file
-    int  LoadMeshFile( const std::string &meshFilePath );
+    int LoadMeshFile(const std::string &meshFilePath);
 
     // Build new mesh from multiple .mesh files
-    int  LoadMeshFileMultiple( const std::vector<std::string> &meshFilePaths );
+    int LoadMeshFileMultiple(const std::vector<std::string> &meshFilePaths);
 
     // Save mesh to .mesh file
-    int  SaveMeshFile( const std::string &filePath );
+    int SaveMeshFile(const std::string &filePath);
 
     // Build new mesh from .stl file
     // Assumes model have unit of mm
-    int  LoadMeshFromSTLFile(const std::string &stlFilePath);
+    int LoadMeshFromSTLFile(const std::string &stlFilePath);
 
     enum VertexIndex { V1 = 1, V2 = 2, V3 = 3, V1V2 = 4, V1V3 = 5, V2V3 = 6, IN = -1, VOID=0}; // avoid 0
     int edgeOffset = 4;
@@ -170,7 +172,7 @@ private:
 
     // Load .mesh file, adding it to the current mesh while preserving all
     //  data currently existing in the mesh
-    int  AddMeshFile(const std::string &meshFilePath);
+    int AddMeshFile(const std::string &meshFilePath);
 
     // helper function for finding neighboring triangle when loading STL file
     void FindFaceNeighbor(int faceIdx, std::unordered_multimap<std::string, int>& map);
@@ -184,7 +186,7 @@ private:
     // 1. vector pointing from the common edge to the other vertex
     // 2. normal of neighbor plane
     // is positive, then local shape is convex
-    inline bool CheckConvexity(int idx, int idxNeighbor){
+    inline bool CheckConvexity(int idx, int idxNeighbor) {
         vct3 vec1,vec2;
         switch (cpLocation.at(idx)){
             case V1V2:
@@ -220,11 +222,11 @@ private:
         }
     }
 
-    inline bool CheckConcavity(int idx, int idxNeighbor){
+    inline bool CheckConcavity(int idx, int idxNeighbor) {
         return !CheckConvexity(idx, idxNeighbor);
     }
     // check side of normal
-    inline bool CheckNormal(const vct3 & target, const int idx, double tolerance){
+    inline bool CheckNormal(const vct3 & target, const int idx, double tolerance) {
         if ((target-closestPoint.at(idx)).DotProduct(faceNormals.at(idx)) >= -tolerance){
             return true;
         }

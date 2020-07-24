@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,65 +31,63 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
+
 #include <cisstMesh/msh3DirPDTreeMesh.h>
 
+msh3DirPDTreeMesh::msh3DirPDTreeMesh(msh3Mesh mesh, int countThresh, double diagThresh )
+{
+    this->Mesh = mesh;
 
-msh3DirPDTreeMesh::msh3DirPDTreeMesh( cisstMesh mesh, int countThresh, double diagThresh )
-{ 
-  this->mesh = mesh;
-
-  NData = mesh.NumTriangles();
-  DataIndices = new int[NData];
-  for (int i=0;i<NData;i++) 
-  { 
-    DataIndices[i]=i;
-  }
-  Top = new msh3DirPDTreeNode(DataIndices,NData,this,NULL);
-  NNodes = 0; NNodes++;
-  treeDepth = Top->ConstructSubtree(countThresh,diagThresh);
+    NData = mesh.NumTriangles();
+    DataIndices = new int[NData];
+    for (int i=0;i<NData;i++) {
+        DataIndices[i]=i;
+        }
+    Top = new msh3DirPDTreeNode(DataIndices,NData,this,NULL);
+    NNodes = 0; NNodes++;
+    treeDepth = Top->ConstructSubtree(countThresh,diagThresh);
 
 #ifdef DebugDirPDTree
-  fprintf(debugFile, "Directional Mesh Cov Tree built: NNodes=%d  NData=%d  TreeDepth=%d\n", NumNodes(), NumData(), TreeDepth());
+    fprintf(debugFile, "Directional Mesh Cov Tree built: NNodes=%d  NData=%d  TreeDepth=%d\n", NumNodes(), NumData(), TreeDepth());
 #endif
 }
 
 msh3DirPDTreeMesh::~msh3DirPDTreeMesh()
 {
-  if (Top) delete Top;
-  if (DataIndices) delete DataIndices;
+    if (Top) delete Top;
+    if (DataIndices) delete DataIndices;
 }
 
 vct3 msh3DirPDTreeMesh::DatumSortPoint(int datum)
-{ 
-  //// use vertex 0 as the sort point
-  //return mesh.FaceCoord(datum, 0);
+{
+    //// use vertex 0 as the sort point
+    //return mesh.FaceCoord(datum, 0);
 
-  // use triangle center as the sort point
-  return (mesh.FaceCoord(datum, 0) +
-    mesh.FaceCoord(datum, 1) +
-    mesh.FaceCoord(datum, 2)) / 3.0;
+    // use triangle center as the sort point
+    return (Mesh.FaceCoord(datum, 0) +
+            Mesh.FaceCoord(datum, 1) +
+            Mesh.FaceCoord(datum, 2)) / 3.0;
 }
 
 vct3 msh3DirPDTreeMesh::DatumNorm(int datum)
 {
-  return mesh.faceNormals(datum);
+    return Mesh.faceNormals(datum);
 }
 
 void msh3DirPDTreeMesh::EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB) const
 {
-  vct3 v1, v2, v3;
-  mesh.FaceCoords(datum, v1, v2, v3);
-  BB.Include(F*v1);
-  BB.Include(F*v2);
-  BB.Include(F*v3);
+    vct3 v1, v2, v3;
+    Mesh.FaceCoords(datum, v1, v2, v3);
+    BB.Include(F*v1);
+    BB.Include(F*v2);
+    BB.Include(F*v3);
 }
 
 void msh3DirPDTreeMesh::EnlargeBounds(const vctFrm3& F, msh3DirPDTreeNode *pNode) const
 {
-    if (!pNode->IsTerminalNode())
-    {
+    if (!pNode->IsTerminalNode()) {
         EnlargeBounds(F, pNode->pLEq);
         msh3BoundingBox LparentBounds = pNode->pLEq->pParent->Bounds;
         msh3BoundingBox LchildBounds = pNode->pLEq->Bounds;
@@ -98,8 +98,7 @@ void msh3DirPDTreeMesh::EnlargeBounds(const vctFrm3& F, msh3DirPDTreeNode *pNode
         msh3BoundingBox RchildBounds = pNode->pMore->Bounds;
         RparentBounds.Include(RchildBounds);
     }
-    else if (pNode->IsTerminalNode())
-    {
+    else if (pNode->IsTerminalNode()) {
         for (int i = 0; i < pNode->NumData(); i++)
             EnlargeBounds(F, pNode->Datum(i), pNode->Bounds);
     }
@@ -109,6 +108,5 @@ void msh3DirPDTreeMesh::EnlargeBounds(const vctFrm3& F) const
 {
     msh3DirPDTreeNode *pNode;
     pNode = Top;
-
     EnlargeBounds(F, pNode);
 }

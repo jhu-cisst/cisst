@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,45 +31,44 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
 #include <cisstMesh/msh3AlgDirPDTreeBAPointCloud.h>
 
-
 // PD Tree Methods
 
-double msh3AlgDirPDTreeBAPointCloud::FindClosestPointOnDatum(
-  const vct3 &Xp, const vct3 &Xn,
-  vct3 &closest, vct3 &closestNorm,
-  int datum)
+double msh3AlgDirPDTreeBAPointCloud::FindClosestPointOnDatum(const vct3 &Xp, const vct3 &Xn,
+                                                             vct3 &closest, vct3 &closestNorm,
+                                                             int datum)
 {
-  // set datum point and norm
-  closest = pDirTree->pointCloud.points[datum];
-  closestNorm = pDirTree->pointCloud.pointOrientations[datum];
+    // set datum point and norm
+    closest = pDirTree->pointCloud.points[datum];
+    closestNorm = pDirTree->pointCloud.pointOrientations[datum];
 
-  // return distance to the datum point
-  return (Xp - closest).Norm();
+    // return distance to the datum point
+    return (Xp - closest).Norm();
 }
 
 
-int msh3AlgDirPDTreeBAPointCloud::DatumMightBeCloser(
-  const vct3 &Xp, const vct3 &Xn,
-  int datum,
-  double ErrorBound)
+int msh3AlgDirPDTreeBAPointCloud::DatumMightBeCloser(const vct3 &Xp, const vct3 &Xn,
+                                                     int datum,
+                                                     double ErrorBound)
 {
-  // check if orientation error is past threshold
-  //  for efficiency, use the dot product directly for comparison
-  //  rather than using the actual angle computed from the inverse
-  //  cosine of the dot product
-  double dotProd = Xn.DotProduct(pDirTree->pointCloud.pointOrientations[datum]);
-  if (dotProd < cos_maxMatchAngle)
-    return 0;
-  else
-    return 1;
-  //double matchAngle = acos(Xn.DotProduct(pDirTree->pointNorms[datum]));
-  //if (matchAngle > maxMatchAngle)
-  //  return 0;
-  //else
-  //  return 1;
+    // check if orientation error is past threshold
+    //  for efficiency, use the dot product directly for comparison
+    //  rather than using the actual angle computed from the inverse
+    //  cosine of the dot product
+    double dotProd = Xn.DotProduct(pDirTree->pointCloud.pointOrientations[datum]);
+    if (dotProd < cos_maxMatchAngle) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+    //double matchAngle = acos(Xn.DotProduct(pDirTree->pointNorms[datum]));
+    //if (matchAngle > maxMatchAngle)
+    //  return 0;
+    //else
+    //  return 1;
 }

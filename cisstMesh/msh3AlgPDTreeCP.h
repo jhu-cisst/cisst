@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,47 +31,48 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _algPDTree_CP_h
-#define _algPDTree_CP_h
+
+#ifndef _msh3AlgPDTreeCP_h
+#define _msh3AlgPDTreeCP_h
 
 #include <cisstMesh/msh3AlgPDTree.h>
 #include <cisstMesh/msh3PDTreeBase.h>
 
-class msh3AlgPDTreeCP : public msh3AlgPDTree
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh3AlgPDTreeCP : public msh3AlgPDTree
 {
-  //
-  // Implements the closest point algorithm for PD tree search
-  //
+    //
+    // Implements the closest point algorithm for PD tree search
+    //
 
-protected:
+ protected:
 
-  // constructor
-  msh3AlgPDTreeCP(msh3PDTreeBase *pTree)
-    : msh3AlgPDTree(pTree)
-  {}
+    // constructor
+    msh3AlgPDTreeCP(msh3PDTreeBase *pTree)
+        : msh3AlgPDTree(pTree)
+        {}
 
-  // destructor
-  virtual ~msh3AlgPDTreeCP() {}
+    // destructor
+    virtual ~msh3AlgPDTreeCP() {}
 
+    //--- PD Tree Interface Methods ---//
 
-  //--- PD Tree Interface Methods ---//
+    int NodeMightBeCloser(const vct3 &v,
+                          msh3PDTreeNode *node,
+                          double ErrorBound);
 
-  int  NodeMightBeCloser(
-    const vct3 &v,
-    msh3PDTreeNode *node,
-    double ErrorBound);
+    // the routines below require a known datum type
+    virtual double FindClosestPointOnDatum(const vct3 &v,
+                                           vct3 &closest,
+                                           int datum) = 0;
 
-  // the routines below require a known datum type
-  virtual double FindClosestPointOnDatum(
-    const vct3 &v,
-    vct3 &closest,
-    int datum) = 0;
-
-  virtual int DatumMightBeCloser(
-    const vct3 &v,
-    int datum,
-    double ErrorBound) = 0;
+    virtual int DatumMightBeCloser(const vct3 &v,
+                                   int datum,
+                                   double ErrorBound) = 0;
 };
+
 #endif

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,56 +31,55 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _algDirPDTree_vonMisesPrj_Mesh_h
-#define _algDirPDTree_vonMisesPrj_Mesh_h
+
+#ifndef _msh3AlgDirPDTreevonMisesProjMesh_h
+#define _msh3AlgDirPDTreevonMisesProjMesh_h
 
 #include <cisstMesh/msh3DirPDTreeMesh.h>
 #include <cisstMesh/msh3AlgDirPDTreevonMisesProj.h>
 #include <cisstMesh/TriangleClosestPointSolver.h>
 
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
-class msh3AlgDirPDTreevonMisesProjMesh : public msh3AlgDirPDTreevonMisesProj
+class CISST_EXPORT msh3AlgDirPDTreevonMisesProjMesh : public msh3AlgDirPDTreevonMisesProj
 {
-  //
-  // This class implements the base algorithm for a mesh target shape
-  //
+    //
+    // This class implements the base algorithm for a mesh target shape
+    //
 
+    //--- Algorithm Parameters ---//
 
-  //--- Algorithm Parameters ---//
+ protected:
 
-protected:
+    msh3DirPDTreeMesh *pDirTree;
+    TriangleClosestPointSolver TCPS;
 
-  msh3DirPDTreeMesh *pDirTree;
-  TriangleClosestPointSolver TCPS;
+    //--- Algorithm Methods ---//
 
-  //--- Algorithm Methods ---//
+ public:
 
-public:
+    // constructor
+    msh3AlgDirPDTreevonMisesProjMesh(msh3DirPDTreeMesh *pDirTree)
+        : msh3AlgDirPDTreevonMisesProj(pDirTree),
+        pDirTree(pDirTree),
+        TCPS(pDirTree->Mesh)
+            {}
 
-  // constructor
-  msh3AlgDirPDTreevonMisesProjMesh(msh3DirPDTreeMesh *pDirTree)
-    : msh3AlgDirPDTreevonMisesProj(pDirTree),
-    pDirTree(pDirTree),
-	TCPS(pDirTree->mesh)
-  {}
+    // destructor
+    virtual ~msh3AlgDirPDTreevonMisesProjMesh() {}
 
-  // destructor
-  virtual ~msh3AlgDirPDTreevonMisesProjMesh() {}
+    //--- PD Tree Interface Methods ---//
 
+    double FindClosestPointOnDatum(const vct3 &Xp, const vct3 &Xn,
+                                   vct3 &closest, vct3 &closestNorm,
+                                   int datum);
 
-  //--- PD Tree Interface Methods ---//
-
-  double FindClosestPointOnDatum(
-    const vct3 &Xp, const vct3 &Xn,
-    vct3 &closest, vct3 &closestNorm,
-    int datum);
-
-  int  DatumMightBeCloser(
-    const vct3 &Xp, const vct3 &Xn,
-    int datum,
-    double ErrorBound);
+    int DatumMightBeCloser(const vct3 &Xp, const vct3 &Xn,
+                           int datum,
+                           double ErrorBound);
 
 };
 

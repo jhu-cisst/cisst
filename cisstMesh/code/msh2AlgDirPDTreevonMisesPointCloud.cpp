@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,63 +31,60 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
+
 #include <cisstMesh/msh2AlgDirPDTreevonMisesPointCloud.h>
 
 #include <limits>
 
-double msh2AlgDirPDTreevonMisesPointCloud::FindClosestPointOnDatum(
-  const vct2 &v, const vct2 &n,
-  vct2 &closest, vct2 &closestNorm,
-  int datum)
+double msh2AlgDirPDTreevonMisesPointCloud::FindClosestPointOnDatum(const vct2 &v, const vct2 &n,
+                                                                   vct2 &closest, vct2 &closestNorm,
+                                                                   int datum)
 {
-  //  cost:  k*(1-N'*Nclosest) + ||v - closest||^2 / (2*sigma2)
+    //  cost:  k*(1-N'*Nclosest) + ||v - closest||^2 / (2*sigma2)
 
-  closest = pDirTree->pointCloud.points[datum];
-  closestNorm = pDirTree->pointCloud.pointOrientations[datum];
+    closest = pDirTree->pointCloud.points[datum];
+    closestNorm = pDirTree->pointCloud.pointOrientations[datum];
 
-  // Is this a permitted match?
-  double dTheta = acos(vctDotProduct(n, closestNorm));
-  if (dTheta > dThetaMax)
-  {
-    return std::numeric_limits<double>::max();
-  }
-  else
-  {
-    bPermittedMatchFound = true;
-    return k*(1.0 - n*closestNorm) + (v - closest).NormSquare() / (2.0*sigma2);
-  }
+    // Is this a permitted match?
+    double dTheta = acos(vctDotProduct(n, closestNorm));
+    if (dTheta > dThetaMax) {
+        return std::numeric_limits<double>::max();
+    }
+    else {
+        bPermittedMatchFound = true;
+        return k*(1.0 - n*closestNorm) + (v - closest).NormSquare() / (2.0*sigma2);
+    }
 
-  // This doesn't work, i.e. we can't keep returning the best match among the non-permitted
-  //  matches because then when a permitted match finally comes along, then it may have
-  //  higher error, which would prevent it from being chosen. The only way to accomplish the
-  //  above is to modify the core PD tree search routine, which I don't want to do right now.
-  //  => only return match errors for permitted matches.
-  //// is this a permitted match?
-  //double matchError = k*(1.0 - n*closestNorm) + (v - closest).NormSquare() / (2.0*sigma2);
-  //double dTheta = acos(vctDotProduct(n, closestNorm));
-  //if (dTheta > dThetaMax)
-  //{
-  //  if (bPermittedMatchFound)
-  //  { // skip this match as long as some other permitted match has been already been found
-  //    // do this by returning an astronomical match error
-  //    matchError = std::numeric_limits<double>::max();
-  //  }
-  //}
-  //else
-  //{
-  //  bPermittedMatchFound = true;
-  //}
-  //return matchError;
+    // This doesn't work, i.e. we can't keep returning the best match among the non-permitted
+    //  matches because then when a permitted match finally comes along, then it may have
+    //  higher error, which would prevent it from being chosen. The only way to accomplish the
+    //  above is to modify the core PD tree search routine, which I don't want to do right now.
+    //  => only return match errors for permitted matches.
+    //// is this a permitted match?
+    //double matchError = k*(1.0 - n*closestNorm) + (v - closest).NormSquare() / (2.0*sigma2);
+    //double dTheta = acos(vctDotProduct(n, closestNorm));
+    //if (dTheta > dThetaMax)
+    //{
+    //  if (bPermittedMatchFound)
+    //  { // skip this match as long as some other permitted match has been already been found
+    //    // do this by returning an astronomical match error
+    //    matchError = std::numeric_limits<double>::max();
+    //  }
+    //}
+    //else
+    //{
+    //  bPermittedMatchFound = true;
+    //}
+    //return matchError;
 }
 
-int msh2AlgDirPDTreevonMisesPointCloud::DatumMightBeCloser(
-  const vct2 &v, const vct2 &n,
-  int datum,
-  double ErrorBound)
+int msh2AlgDirPDTreevonMisesPointCloud::DatumMightBeCloser(const vct2 &v, const vct2 &n,
+                                                           int datum,
+                                                           double ErrorBound)
 {
-  // doing a decent proximity check is complicated enough that it is
-  //  better to just compute the full error directly
-  return 1;
+    // doing a decent proximity check is complicated enough that it is
+    //  better to just compute the full error directly
+    return 1;
 }

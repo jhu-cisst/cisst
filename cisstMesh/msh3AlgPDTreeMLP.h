@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,80 +31,79 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _algPDTree_MLP_h
-#define _algPDTree_MLP_h
+
+#ifndef _msh3AlgPDTreeMLP_h
+#define _msh3AlgPDTreeMLP_h
 
 #include <cisstMesh/msh3AlgPDTree.h>
 #include <cisstMesh/msh3PDTreeBase.h>
 #include <cisstMesh/EllipsoidOBBIntersectionSolver.h>
 
-class msh3AlgPDTreeMLP : public msh3AlgPDTree
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh3AlgPDTreeMLP : public msh3AlgPDTree
 {
-  //
-  // Implements the most-likely point algorithm for PD tree search under anisotropic noise
-  //
+    //
+    // Implements the most-likely point algorithm for PD tree search under anisotropic noise
+    //
 
-  //--- Algorithm Parameters ---//
+    //--- Algorithm Parameters ---//
 
-protected:
+ protected:
 
-  EllipsoidOBBIntersectionSolver IntersectionSolver;
+    EllipsoidOBBIntersectionSolver IntersectionSolver;
 
+    // must set these before doing the search using the
+    //  method for initializing a sample search
+    vct3x3 sampleXfm_M;   // covariance of transformed sample point
+    vct3   sample_M_Eig;  // eigenvalues of sample covariance in order of decreasing magnitude
 
-  // must set these before doing the search using the 
-  //  method for initializing a sample search
-  vct3x3 sampleXfm_M;   // covariance of transformed sample point
-  vct3   sample_M_Eig;  // eigenvalues of sample covariance in order of decreasing magnitude
+    // these are computed automatically
+    vct3x3 M;       // effective measurement error covariance for a node & sample pair
+    vct3x3 N;       // decomposition of inv(M) = N'N
+    double Dmin;    // inverse sqrt of largest eigenvalue of M
+    //  (or the sqrt of the smallest eigenvalue of inv(M))
+    double MinLogM; // lower bound on the log component of error for this node
 
-  // these are computed automatically
-  vct3x3 M;       // effective measurement error covariance for a node & sample pair
-  vct3x3 N;       // decomposition of inv(M) = N'N
-  double Dmin;    // inverse sqrt of largest eigenvalue of M
-                  //  (or the sqrt of the smallest eigenvalue of inv(M))
-  double MinLogM; // lower bound on the log component of error for this node
+    //--- Algorithm Methods ---//
 
+ public:
 
-  //--- Algorithm Methods ---//
+    // constructor
+    msh3AlgPDTreeMLP(msh3PDTreeBase *pTree)
+        : msh3AlgPDTree(pTree)
+        {}
 
-public:
+    // destructor
+    virtual ~msh3AlgPDTreeMLP() {}
 
-  // constructor
-  msh3AlgPDTreeMLP(msh3PDTreeBase *pTree)
-    : msh3AlgPDTree(pTree)
-  {}
+    // must call this prior to beginning search for each sample
+    //   sampleXfm_M   ~ noise covariance of the transformed sample point
+    //   sample_M_Eig  ~ eigenvalues of the sample covariance (in order of decreasing magnitude)
+    void InitializeSampleSearch(vct3x3 sampleXfm_M, vct3 sample_M_Eig);
 
-  // destructor
-  virtual ~msh3AlgPDTreeMLP() {}
+ protected:
 
-  // must call this prior to beginning search for each sample
-  //   sampleXfm_M   ~ noise covariance of the transformed sample point
-  //   sample_M_Eig  ~ eigenvalues of the sample covariance (in order of decreasing magnitude)
-  void InitializeSampleSearch(vct3x3 sampleXfm_M, vct3 sample_M_Eig);
+    void ComputeNodeMatchCov(msh3PDTreeNode *node);
+    void ComputeCovDecomposition_NonIter(const vct3x3 &M, vct3x3 &Minv, vct3x3 &N, vct3x3 &Ninv, double &det_M);
+    void ComputeCovDecomposition_NonIter(const vct3x3 &M, vct3x3 &Minv, double &det_M);
 
-protected:
+    //--- PD Tree Interface Methods ---//
 
-  void ComputeNodeMatchCov(msh3PDTreeNode *node);
-  void ComputeCovDecomposition_NonIter(const vct3x3 &M, vct3x3 &Minv, vct3x3 &N, vct3x3 &Ninv, double &det_M);
-  void ComputeCovDecomposition_NonIter(const vct3x3 &M, vct3x3 &Minv, double &det_M);
+    int NodeMightBeCloser(const vct3 &v,
+                          msh3PDTreeNode *node,
+                          double ErrorBound);
 
+    virtual double FindClosestPointOnDatum(const vct3 &v,
+                                           vct3 &closest,
+                                           int datum) = 0;
 
-  //--- PD Tree Interface Methods ---//
-
-  int  NodeMightBeCloser(
-    const vct3 &v,
-    msh3PDTreeNode *node,
-    double ErrorBound);
-
-  virtual double FindClosestPointOnDatum(
-    const vct3 &v,
-    vct3 &closest,
-    int datum) = 0;
-
-  virtual int DatumMightBeCloser(
-    const vct3 &v,
-    int datum,
-    double ErrorBound) = 0;
+    virtual int DatumMightBeCloser(const vct3 &v,
+                                   int datum,
+                                   double ErrorBound) = 0;
 };
+
 #endif

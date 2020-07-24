@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,66 +31,70 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _alg2D_DirPDTree_CP_Edges_h
-#define _alg2D_DirPDTree_CP_Edges_h
+
+#ifndef _msh2AlgDirPDTreeCPEdges_h
+#define _msh2AlgDirPDTreeCPEdges_h
 
 #include <cisstMesh/msh2AlgDirPDTreeCP.h>
 #include <cisstMesh/msh2DirPDTreeEdges.h>
 
-class msh2AlgDirPDTreeCPEdges : public msh2AlgDirPDTreeCP
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh2AlgDirPDTreeCPEdges : public msh2AlgDirPDTreeCP
 {
-  //
-  // Implements closest point search algorithms for a 2D edge shape
-  //  (i.e. edge datum type)
-  //
+    //
+    // Implements closest point search algorithms for a 2D edge shape
+    //  (i.e. edge datum type)
+    //
 
-  //--- Algorithm Parameters ---//
+    //--- Algorithm Parameters ---//
 
-protected:
+ protected:
 
-  msh2DirPDTreeEdges *pDirTree;
+    msh2DirPDTreeEdges *pDirTree;
 
-public:
+ public:
 
-  // temporary buffer storage used to help determine matchLambdas
-  //  (since current architecture cannot store the matchLambdas directly)
-  //  matchPt = (edgeV2-edgeV1)*matchLambda + edgeV1
-  //
-  //  (stores matchLambda for each datum searched)
-  vctDoubleVec    searchLambdas;
+    // temporary buffer storage used to help determine matchLambdas
+    //  (since current architecture cannot store the matchLambdas directly)
+    //  matchPt = (edgeV2-edgeV1)*matchLambda + edgeV1
+    //
+    //  (stores matchLambda for each datum searched)
+    vctDoubleVec    searchLambdas;
 
 
-  //--- Algorithm Methods ---//
+    //--- Algorithm Methods ---//
 
-public:
+ public:
 
-  // constructor
-  msh2AlgDirPDTreeCPEdges(msh2DirPDTreeEdges *pDirTree) :
-    msh2AlgDirPDTreeCP(pDirTree),
-    pDirTree(pDirTree)
-  {
-    searchLambdas.SetSize(pDirTree->EdgeList.numEdges);
-  }
+    // constructor
+    msh2AlgDirPDTreeCPEdges(msh2DirPDTreeEdges *pDirTree) :
+        msh2AlgDirPDTreeCP(pDirTree),
+        pDirTree(pDirTree)
+        {
+            searchLambdas.SetSize(pDirTree->EdgeList.numEdges);
+        }
 
-  // destructor
-  virtual ~msh2AlgDirPDTreeCPEdges() {}
+    // destructor
+    virtual ~msh2AlgDirPDTreeCPEdges() {}
 
-  //--- PD Tree Interface Methods ---//
+    //--- PD Tree Interface Methods ---//
 
-  // fast check if a datum might have smaller match error than error bound
-  virtual int  DatumMightBeCloser(
-    const vct2 &sample, const vct2 &sampleNorm,
-    int datum,
-    double ErrorBound);
+    // fast check if a datum might have smaller match error than error bound
+    virtual int  DatumMightBeCloser(
+                                    const vct2 &sample, const vct2 &sampleNorm,
+                                    int datum,
+                                    double ErrorBound);
 
-  // finds the point on this datum with lowest match error
-  //  and returns the match error and closest point
-  virtual double FindClosestPointOnDatum(
-    const vct2 &sample, const vct2 &sampleNorm,
-    vct2 &closest, vct2 &closestNorm,
-    int datum);
+    // finds the point on this datum with lowest match error
+    //  and returns the match error and closest point
+    virtual double FindClosestPointOnDatum(
+                                           const vct2 &sample, const vct2 &sampleNorm,
+                                           vct2 &closest, vct2 &closestNorm,
+                                           int datum);
 };
 
 #endif

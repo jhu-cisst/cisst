@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -31,13 +33,17 @@
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  
 // ****************************************************************************
-#ifndef _alg2D_DirPDTree_CP_h
-#define _alg2D_DirPDTree_CP_h
+
+#ifndef _msh2AlgDirPDTreeCP_h
+#define _msh2AlgDirPDTreeCP_h
 
 #include <cisstMesh/msh2AlgDirPDTree.h>
 #include <cisstMesh/msh2DirPDTreeBase.h>
 
-class msh2AlgDirPDTreeCP : public msh2AlgDirPDTree
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh2AlgDirPDTreeCP : public msh2AlgDirPDTree
 {
   //
   // Implements the closest point algorithm for PD tree search

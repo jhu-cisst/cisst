@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -37,30 +39,29 @@
 
 // PD Tree Methods
 
-int msh3AlgDirPDTreeBA::NodeMightBeCloser(
-  const vct3 &Xp, const vct3 &Xn,
-  msh3DirPDTreeNode const *node,
-  double ErrorBound)
+int msh3AlgDirPDTreeBA::NodeMightBeCloser(const vct3 &Xp, const vct3 &Xn,
+                                          msh3DirPDTreeNode const *node,
+                                          double ErrorBound)
 {
-  //
-  // Match Error:
-  //
-  //  cost:  ||Xp - Yp||^2  such that angle between Xn & Yn < maxMatchAngle
-  //
+    //
+    // Match Error:
+    //
+    //  cost:  ||Xp - Yp||^2  such that angle between Xn & Yn < maxMatchAngle
+    //
 
-  // --- Compute Lower Bound on Orientation Error --- //
+    // --- Compute Lower Bound on Orientation Error --- //
 
-  double cos_dThetaAvg = Xn.DotProduct(node->Navg);
-  if (cos_dThetaAvg < cos(node->dThetaMax + maxMatchAngle))
-  { // all orientations in this node exceed the maximum angular match error
-    return 0;
-  }
+    double cos_dThetaAvg = Xn.DotProduct(node->Navg);
+    if (cos_dThetaAvg < cos(node->dThetaMax + maxMatchAngle)) {
+        // all orientations in this node exceed the maximum angular match error
+        return 0;
+    }
 
-  // --- Positional Node Distance Test --- //
+    // --- Positional Node Distance Test --- //
 
-  // transform point into local coordinate system of node
-  vct3 Xp_node = node->F*Xp;
+    // transform point into local coordinate system of node
+    vct3 Xp_node = node->F*Xp;
 
-  // check if node lies within the closest match distance found so far
-  return node->Bounds.Includes(Xp_node, ErrorBound);
+    // check if node lies within the closest match distance found so far
+    return node->Bounds.Includes(Xp_node, ErrorBound);
 }

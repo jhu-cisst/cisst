@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,74 +31,75 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _alg2D_DirPDTree_vonMises_h
-#define _alg2D_DirPDTree_vonMises_h
+
+#ifndef _msh2AlgDirPDTreevonMises_h
+#define _msh2AlgDirPDTreevonMises_h
 
 #include <cisstMesh/msh2AlgDirPDTree.h>
 #include <cisstMesh/msh2DirPDTreeBase.h>
 
-class msh2AlgDirPDTreevonMises : public msh2AlgDirPDTree
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh2AlgDirPDTreevonMises : public msh2AlgDirPDTree
 {
-  //
-  // Implements the isotropic oriented point algorithm for 2D PD tree search
-  //   using the isotropic vonMises and isotropic Gaussian distributions
-  //
+    //
+    // Implements the isotropic oriented point algorithm for 2D PD tree search
+    //   using the isotropic vonMises and isotropic Gaussian distributions
+    //
 
-public:
+ public:
 
-  // Noise Parameters
-  double k;       // concentration of orientation
-  double sigma2;  // variance of position
-  
-  double dThetaMax;               // maximum orientation error permitted for a match
-  bool   bPermittedMatchFound;    // true if a permitted match found (i.e. w/in dThetaMax)
-                                  //  this is used to search all matches until a permitted match is found
-                                  //  if no permitted match is found, then the best match from the
-                                  //  set of non-permitted matches is returned
-  //bool  bPermittedMatchOverride;  // override to return errors of non-permitted matches
-  
-protected:
+    // Noise Parameters
+    double k;       // concentration of orientation
+    double sigma2;  // variance of position
 
-  // constructor
-  msh2AlgDirPDTreevonMises(
-    msh2DirPDTreeBase *pDirTree, 
-    double k = 1.0, double sigma2 = 1.0, double thetaMax = cmnPI)
-    : msh2AlgDirPDTree(pDirTree),
-    k(k), sigma2(sigma2), dThetaMax(thetaMax), bPermittedMatchFound(false)
-  {}
+    double dThetaMax;               // maximum orientation error permitted for a match
+    bool   bPermittedMatchFound;    // true if a permitted match found (i.e. w/in dThetaMax)
+    //  this is used to search all matches until a permitted match is found
+    //  if no permitted match is found, then the best match from the
+    //  set of non-permitted matches is returned
+    //bool  bPermittedMatchOverride;  // override to return errors of non-permitted matches
 
-  // destructor
-  virtual ~msh2AlgDirPDTreevonMises() {}
+ protected:
 
-  //// Helper Methods
-  //int FastInitializeProximalDatum(
-  //  const vct2 &v, const vct2 &n,
-  //  vct2 &proxPoint, vct2 &proxNorm);
+    // constructor
+    msh2AlgDirPDTreevonMises(
+                             msh2DirPDTreeBase *pDirTree,
+                             double k = 1.0, double sigma2 = 1.0, double thetaMax = cmnPI)
+        : msh2AlgDirPDTree(pDirTree),
+        k(k), sigma2(sigma2), dThetaMax(thetaMax), bPermittedMatchFound(false)
+        {}
+
+    // destructor
+    virtual ~msh2AlgDirPDTreevonMises() {}
+
+    //// Helper Methods
+    //int FastInitializeProximalDatum(
+    //  const vct2 &v, const vct2 &n,
+    //  vct2 &proxPoint, vct2 &proxNorm);
 
 
-  //--- PD Tree Interface Methods ---//
+    //--- PD Tree Interface Methods ---//
 
-  // fast check if a node might contain a datum having smaller match error
-  //  than the error bound
-  virtual int  NodeMightBeCloser(
-    const vct2 &sample, const vct2 &sampleNorm,
-    msh2DirPDTreeNode const *node,
-    double ErrorBound);
+    // fast check if a node might contain a datum having smaller match error
+    //  than the error bound
+    virtual int NodeMightBeCloser(const vct2 &sample, const vct2 &sampleNorm,
+                                  msh2DirPDTreeNode const *node,
+                                  double ErrorBound);
 
-  // fast check if a datum might have smaller match error than error bound
-  virtual int  DatumMightBeCloser(
-    const vct2 &sample, const vct2 &sampleNorm,
-    int datum,
-    double ErrorBound) = 0;
+    // fast check if a datum might have smaller match error than error bound
+    virtual int DatumMightBeCloser(const vct2 &sample, const vct2 &sampleNorm,
+                                   int datum,
+                                   double ErrorBound) = 0;
 
-  // finds the point on this datum with lowest match error
-  //  and returns the match error and closest point
-  virtual double FindClosestPointOnDatum(
-    const vct2 &sample, const vct2 &sampleNorm,
-    vct2 &closest, vct2 &closestNorm,
-    int datum) = 0;
+    // finds the point on this datum with lowest match error
+    //  and returns the match error and closest point
+    virtual double FindClosestPointOnDatum(const vct2 &sample, const vct2 &sampleNorm,
+                                           vct2 &closest, vct2 &closestNorm,
+                                           int datum) = 0;
 };
 
 #endif

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,10 +31,11 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _Ellipsoid_OBB_Intersection_Solver_h
-#define _Ellipsoid_OBB_Intersection_Solver_h
+
+#ifndef _EllipsoidOBBIntersectionSolver_h
+#define _EllipsoidOBBIntersectionSolver_h
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctFixedSizeMatrixTypes.h>
@@ -40,38 +43,41 @@
 
 #include <cisstMesh/msh3BoundingBox.h>
 
-class EllipsoidOBBIntersectionSolver
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT EllipsoidOBBIntersectionSolver
 {
-public:
+ public:
 
-  int TestEllipsoidOBBIntersection( const vct3 &v, 
-                                       const msh3BoundingBox &OBB, const vctFrm3 &Fobb,
-                                       double NodeErrorBound,
-                                       const  vct3x3 &N,
-                                       double Dmin );
+    int TestEllipsoidOBBIntersection(const vct3 &v,
+                                     const msh3BoundingBox &OBB, const vctFrm3 &Fobb,
+                                     double NodeErrorBound,
+                                     const  vct3x3 &N,
+                                     double Dmin);
 
-private:
+ private:
 
-  bool IntersectionSphereFace( const vct3 &n,
-                               const vct3 &v0, const vct3 &v1, 
-                               const vct3 &v2, const vct3 &v3,
-                               double radius, double sqrRadius );
+    bool IntersectionSphereFace(const vct3 &n,
+                                const vct3 &v0, const vct3 &v1,
+                                const vct3 &v2, const vct3 &v3,
+                                double radius, double sqrRadius);
 
-  int FindVisibleEdges(  double q0, double q1,
+    int FindVisibleEdges(double q0, double q1,
                          double v00, double v01,
                          double v10, double v11,
                          double v20, double v21,
                          double v30, double v31,
                          int *vsblEdges,
-                         bool ccwSequence );
+                         bool ccwSequence);
 
-  inline
-  bool EdgeIsVisible( double q0, double q1,
-                      double v0, double v1,
-                      double n0, double n1 );
+    inline
+        bool EdgeIsVisible(double q0, double q1,
+                           double v0, double v1,
+                           double n0, double n1);
 
-  inline
-  double SquareDistanceToEdge( const vct3 &p, const vct3 &r );
+    inline
+        double SquareDistanceToEdge(const vct3 &p, const vct3 &r);
 
 };
 

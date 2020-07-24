@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,33 +31,32 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
+
 #include <cisstMesh/msh2AlgDirPDTreeCPEdges.h>
 
-double msh2AlgDirPDTreeCPEdges::FindClosestPointOnDatum(
-  const vct2 &v, const vct2 &n,
-  vct2 &closest, vct2 &closestNorm,
-  int datum)
+double msh2AlgDirPDTreeCPEdges::FindClosestPointOnDatum(const vct2 &v, const vct2 &n,
+                                                        vct2 &closest, vct2 &closestNorm,
+                                                        int datum)
 {
-  // Project point onto the edge
-  //  (storing lambda value in temp buffer)
-  closest = pDirTree->GetEdge(datum).ProjectOnEdge(v, &searchLambdas.Element(datum));
-  closestNorm = pDirTree->GetEdge(datum).Norm;
+    // Project point onto the edge
+    //  (storing lambda value in temp buffer)
+    closest = pDirTree->GetEdge(datum).ProjectOnEdge(v, &searchLambdas.Element(datum));
+    closestNorm = pDirTree->GetEdge(datum).Norm;
 
-  // return distance as match error
-  //  NOTE: distance is more convenient than square distance
-  //        since the distance is required for doing the
-  //        bounding box proximity tests.
-  return (v - closest).Norm();
+    // return distance as match error
+    //  NOTE: distance is more convenient than square distance
+    //        since the distance is required for doing the
+    //        bounding box proximity tests.
+    return (v - closest).Norm();
 }
 
-int msh2AlgDirPDTreeCPEdges::DatumMightBeCloser(
-  const vct2 &v, const vct2 &n,
-  int datum,
-  double ErrorBound)
+int msh2AlgDirPDTreeCPEdges::DatumMightBeCloser(const vct2 &v, const vct2 &n,
+                                                int datum,
+                                                double ErrorBound)
 {
-  // doing a decent proximity check is complicated enough that it is
-  //  better to just compute the full error directly
-  return 1;
+    // doing a decent proximity check is complicated enough that it is
+    //  better to just compute the full error directly
+    return 1;
 }

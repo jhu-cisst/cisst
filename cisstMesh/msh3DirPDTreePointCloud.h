@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,49 +31,48 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _DirPDTree_PointCloud_h
-#define _DirPDTree_PointCloud_h
 
+#ifndef _msh3DirPDTreePointCloud_h
+#define _msh3DirPDTreePointCloud_h
 
 #include <cisstMesh/msh3DirPDTreeBase.h>
 #include <cisstMesh/msh3PointCloud.h>
 
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
-class  msh3DirPDTreePointCloud : public msh3DirPDTreeBase
-{ 
-  // Here we define the datum type of the PD tree
-  //  to be a point and we represent the underlying 
-  //  datum data using a point cloud.
+class CISST_EXPORT msh3DirPDTreePointCloud : public msh3DirPDTreeBase
+{
+    // Here we define the datum type of the PD tree
+    //  to be a point and we represent the underlying
+    //  datum data using a point cloud.
 
-  // NOTE: for function overrides, be sure "const" type is same as the base class otherwise,
-  //       the base class function will be treated as a different function and not actually
-  //       be overridden!
+    // NOTE: for function overrides, be sure "const" type is same as the base class otherwise,
+    //       the base class function will be treated as a different function and not actually
+    //       be overridden!
 
-public:
+ public:
 
-  msh3PointCloud pointCloud;
+    msh3PointCloud pointCloud;
 
+    //-- Methods --//
 
-  //-- Methods --//
+    // constructor
+    //  nThresh   - min number of datums in subdivided node
+    //  diagThreh - min physical size of subdivided node
+    msh3DirPDTreePointCloud(msh3PointCloud &pointCloud,
+                            int nThresh,
+                            double diagThresh);
 
-  // constructor
-  //  nThresh   - min number of datums in subdivided node
-  //  diagThreh - min physical size of subdivided node
-   msh3DirPDTreePointCloud(
-    msh3PointCloud &pointCloud,
-    int nThresh, 
-    double diagThresh);
+    // destructor
+    virtual ~ msh3DirPDTreePointCloud();
 
-  // destructor
-  virtual ~ msh3DirPDTreePointCloud();
-
-
-  //-- Base Class Method Overrides --//
+    //-- Base Class Method Overrides --//
 
 	virtual vct3 DatumSortPoint(int datum);  // return sort point of this datum
-  virtual vct3 DatumNorm(int datum);       // return normal orientation of this datum
+    virtual vct3 DatumNorm(int datum);       // return normal orientation of this datum
 
 	virtual void EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB);
 };

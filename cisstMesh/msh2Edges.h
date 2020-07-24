@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,49 +31,53 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef cisstEdgeList2D_h
-#define cisstEdgeList2D_h
+
+#ifndef _msh2Edges_h
+#define _msh2Edges_h
 
 #include <cisstMesh/msh2Edge.h>
 #include <cisstVector/vctDynamicVectorTypes.h>
 
-class msh2Edges 
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh2Edges
 {
 
-public:
+ public:
 
 	vctDynamicVector<msh2Edge>  Edges;
-  unsigned int numEdges;
+    unsigned int numEdges;
 
-  // constructors
-  msh2Edges() {};
-  //msh2Edges(const char *fn) { ReadEdgeFile(fn); }
+    // constructors
+    msh2Edges() {};
+    //msh2Edges(const char *fn) { ReadEdgeFile(fn); }
 
-  // destructor
-  ~msh2Edges() {};
+    // destructor
+    ~msh2Edges() {};
 
-  void SetEdges( const vctDynamicVector<vct2> &V1,
-                 const vctDynamicVector<vct2> &V2,
-                 const vctDynamicVector<vct2> &Norm );
+    void SetEdges(const vctDynamicVector<vct2> &V1,
+                  const vctDynamicVector<vct2> &V2,
+                  const vctDynamicVector<vct2> &Norm);
 
 	// get mesh vertex indexes for the given triangle index
-	inline void GetEdgeVertices( unsigned int edgeIndex, vct2 &v1, vct2 &v2 ) const
-	{ v1=Edges[edgeIndex].V1;
-		v2=Edges[edgeIndex].V2;
+	inline void GetEdgeVertices(unsigned int edgeIndex, vct2 &v1, vct2 &v2) const {
+        v1 = Edges[edgeIndex].V1;
+		v2 = Edges[edgeIndex].V2;
 	}
 
-  // get triangle normal for the given triangle index
-  inline vct2 GetEdgeNorm(unsigned int edgeIndex) const
-  { return Edges[edgeIndex].Norm;
-  }
+    // get triangle normal for the given triangle index
+    inline vct2 GetEdgeNorm(unsigned int edgeIndex) const {
+        return Edges[edgeIndex].Norm;
+    }
 
-  //inline vct2 ProjectOnEdge( vct2 &x, unsigned int edgeIndex )
-  //{ return Edges[edgeIndex].ProjectOnEdge( x );
-  //}
+    //inline vct2 ProjectOnEdge( vct2 &x, unsigned int edgeIndex )
+    //{ return Edges[edgeIndex].ProjectOnEdge( x );
+    //}
 
-private:
+ private:
 
 };
 

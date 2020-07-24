@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,62 +31,59 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _alg2D_DirPDTree_h
-#define _alg2D_DirPDTree_h
 
+#ifndef _msh2AlgDirPDTree_h
+#define _msh2AlgDirPDTree_h
+
+#include <cisstMesh/mshForwardDeclarations.h>
 #include <cisstMesh/msh2DirPDTreeNode.h>
 
-class msh2DirPDTreeBase;     // forward decleration for mutual dependency
+// Alwasy include last!
+#include <cisstMesh/mshExport.h>
 
-
-class msh2AlgDirPDTree
+class CISST_EXPORT msh2AlgDirPDTree
 {
-  //
-  // This is the base class for a family of Directional PD Tree search algorithms
-  //
+    //
+    // This is the base class for a family of Directional PD Tree search algorithms
+    //
+
+    //--- Algorithm Parameters ---//
+
+ public:
+
+    msh2DirPDTreeBase  *pDirTree;   // the PD tree
+
+    //--- Algorithm Methods ---//
+
+ public:
+
+    // constructor
+    msh2AlgDirPDTree(msh2DirPDTreeBase *pDirTree);
+
+    // destructor
+    virtual ~msh2AlgDirPDTree() {}
 
 
-  //--- Algorithm Parameters ---//
+    //--- PD Tree Interface Methods ---//
 
-public:
+    // fast check if a node might contain a datum having smaller match error
+    //  than the error bound
+    virtual int NodeMightBeCloser(const vct2 &sample, const vct2 &sampleNorm,
+                                  msh2DirPDTreeNode const *node,
+                                  double ErrorBound) = 0;
 
-  msh2DirPDTreeBase  *pDirTree;   // the PD tree
+    // fast check if a datum might have smaller match error than error bound
+    virtual int DatumMightBeCloser(const vct2 &sample, const vct2 &sampleNorm,
+                                   int datum,
+                                   double ErrorBound) = 0;
 
-
-  //--- Algorithm Methods ---//
-
-public:
-
-  // constructor
-  msh2AlgDirPDTree(msh2DirPDTreeBase *pDirTree);
-
-  // destructor
-  virtual ~msh2AlgDirPDTree() {}
-
-
-  //--- PD Tree Interface Methods ---//
-
-  // fast check if a node might contain a datum having smaller match error
-  //  than the error bound
-  virtual int  NodeMightBeCloser(
-    const vct2 &sample, const vct2 &sampleNorm,
-    msh2DirPDTreeNode const *node,
-    double ErrorBound) = 0;
-
-  // fast check if a datum might have smaller match error than error bound
-  virtual int  DatumMightBeCloser(
-    const vct2 &sample, const vct2 &sampleNorm,
-    int datum,
-    double ErrorBound) = 0;
-
-  // finds the point on this datum with lowest match error
-  //  and returns the match error and closest point
-  virtual double FindClosestPointOnDatum(
-    const vct2 &sample, const vct2 &sampleNorm,
-    vct2 &closest, vct2 &closestNorm,
-    int datum) = 0;
+    // finds the point on this datum with lowest match error
+    //  and returns the match error and closest point
+    virtual double FindClosestPointOnDatum(const vct2 &sample, const vct2 &sampleNorm,
+                                           vct2 &closest, vct2 &closestNorm,
+                                           int datum) = 0;
 
 };
 

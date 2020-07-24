@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,79 +31,78 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _PDTree_PointCloud_h
-#define _PDTree_PointCloud_h
+
+#ifndef _msh3PDTreePointCloud_h
+#define _msh3PDTreePointCloud_h
 
 #include <limits>
 
 #include <cisstMesh/msh3PDTreeBase.h>
 #include <cisstMesh/msh3PointCloud.h>
 
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
-class msh3PDTreePointCloud : public msh3PDTreeBase
-{ 
-  //
-  // This class implements a PD tree for a point cloud shape
-  //
+class CISST_EXPORT msh3PDTreePointCloud : public msh3PDTreeBase
+{
+    //
+    // This class implements a PD tree for a point cloud shape
+    //
 
+    //--- Variables ---//
 
-  //--- Variables ---//
+ public:
 
-public:
+    msh3PointCloud pointCloud;
 
-  msh3PointCloud pointCloud;
+    //--- Methods ---//
 
+    // constructors
+    //  pointCloud - target shape from which to construct the tree
+    //                (each point of the cloud becomes a datum in the tree)
+    //  nThresh    - min number of datums to subdivide a node
+    //  diagThresh - min physical size to subdivide a node
+    msh3PDTreePointCloud(msh3PointCloud &pointCloud,
+                         int nThresh,
+                         double diagThresh);
 
-  //--- Methods ---//
+    // destructor
+    virtual ~msh3PDTreePointCloud();
 
-  // constructors
-  //  pointCloud - target shape from which to construct the tree
-  //                (each point of the cloud becomes a datum in the tree)
-  //  nThresh    - min number of datums to subdivide a node
-  //  diagThresh - min physical size to subdivide a node
-	msh3PDTreePointCloud( 
-    msh3PointCloud &pointCloud,                      
-    int nThresh, 
-    double diagThresh);
+    void SavePointCloud(std::string &file)
+    {
+        pointCloud.WritePointCloudToFile(file);
+        pointCloud.SavePLY(file);
+    }
 
-  // destructor
-  virtual ~msh3PDTreePointCloud();
-
-  void SavePointCloud(std::string &file) 
-  { 
-    pointCloud.WritePointCloudToFile(file); 
-    pointCloud.SavePLY(file); 
-  }
-
-  //--- Base Class Virtual Methods ---//
-
-  virtual vct3 DatumSortPoint(int datum) const;  // return sort point of this datum
-  virtual void EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB) const;
+    //--- Base Class Virtual Methods ---//
+    virtual vct3 DatumSortPoint(int datum) const;  // return sort point of this datum
+    virtual void EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB) const;
 
 
 #ifdef ENABLE_PDTREE_NOISE_MODEL
 
-  //--- Noise Model Methods ---//
+    //--- Noise Model Methods ---//
 
-  vct3x3& DatumCov(int datum)         // return measurement noise model for this datum
-  {
-    return pointCloud.pointCov.Element(datum);
-  }
-  vct3x3* DatumCovPtr(int datum)      // return measurement noise model for this datum
-  {
-    return &(pointCloud.pointCov.Element(datum));
-  }
+    inline vct3x3& DatumCov(int datum)         // return measurement noise model for this datum
+    {
+        return pointCloud.pointCov.Element(datum);
+    }
+    inline vct3x3* DatumCovPtr(int datum)      // return measurement noise model for this datum
+    {
+        return &(pointCloud.pointCov.Element(datum));
+    }
 
-  vct3& DatumCovEig(int datum)         // return measurement noise model for this datum
-  {
-    return pointCloud.pointCovEig.Element(datum);
-  }
-  vct3* DatumCovEigPtr(int datum)      // return measurement noise model for this datum
-  {
-    return &(pointCloud.pointCovEig.Element(datum));
-  }
+    inline vct3& DatumCovEig(int datum)         // return measurement noise model for this datum
+    {
+        return pointCloud.pointCovEig.Element(datum);
+    }
+    inline vct3* DatumCovEigPtr(int datum)      // return measurement noise model for this datum
+    {
+        return &(pointCloud.pointCovEig.Element(datum));
+    }
 
 #endif // ENABLE_PDTREE_NOISE_MODEL
 

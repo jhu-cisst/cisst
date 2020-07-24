@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,68 +31,63 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _algPDTree_h
-#define _algPDTree_h
 
+#ifndef _msh3AlgPDTree_h
+#define _msh3AlgPDTree_h
+
+#include <cisstMesh/mshForwardDeclarations.h>
 #include <cisstMesh/msh3PDTreeNode.h>
 
-class msh3PDTreeBase;     // forward decleration for mutual dependency
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
-
-class msh3AlgPDTree
+class CISST_EXPORT msh3AlgPDTree
 {
-  //
-  // This is the base class for a family of PD Tree search algorithms
-  //
+    //
+    // This is the base class for a family of PD Tree search algorithms
+    //
 
+    //--- Algorithm Parameters ---//
 
-  //--- Algorithm Parameters ---//
+ public:
 
-public:
+    msh3PDTreeBase  *pTree;   // the PD tree
 
-  msh3PDTreeBase  *pTree;   // the PD tree
+    //--- Algorithm Methods ---//
 
+ public:
 
-  //--- Algorithm Methods ---//
+    // constructor
+    msh3AlgPDTree(msh3PDTreeBase *pTree);
 
-public:
+    // destructor
+    virtual ~msh3AlgPDTree() {}
 
-  // constructor
-  msh3AlgPDTree(msh3PDTreeBase *pTree);
+    //--- PD Tree Interface Methods ---//
 
-  // destructor
-  virtual ~msh3AlgPDTree() {}
+    // finds the point on this datum with lowest match error
+    //  and returns the match error and closest point
+    virtual double FindClosestPointOnDatum(const vct3 &sample,
+                                           vct3 &closest,
+                                           int datum) = 0;
 
+    virtual double FindClosestPointOnDatumWithEdgeDetection(const vct3 &sample,
+                                                            vct3 &closest,
+                                                            int &closestPointLocation,
+                                                            int datum) = 0;
 
-  //--- PD Tree Interface Methods ---//
+    // fast check if a datum might have smaller match error than the error bound
+    virtual int DatumMightBeCloser(const vct3 &sample,
+                                   int datum,
+                                   double ErrorBound) = 0;
 
-  // finds the point on this datum with lowest match error
-  //  and returns the match error and closest point
-  virtual double FindClosestPointOnDatum(
-    const vct3 &sample,
-    vct3 &closest,
-    int datum) = 0;
-
-  virtual double FindClosestPointOnDatumWithEdgeDetection(
-    const vct3 &sample,
-    vct3 &closest,
-    int &closestPointLocation,
-    int datum) = 0;
-
-  // fast check if a datum might have smaller match error than the error bound
-  virtual int  DatumMightBeCloser(
-    const vct3 &sample,
-    int datum,
-    double ErrorBound) = 0;
-
-  // fast check if a node might contain a datum having smaller match error
-  //  than the error bound
-  virtual int  NodeMightBeCloser(
-    const vct3 &sample,
-    msh3PDTreeNode *node,
-    double ErrorBound) = 0;
+    // fast check if a node might contain a datum having smaller match error
+    //  than the error bound
+    virtual int  NodeMightBeCloser(const vct3 &sample,
+                                   msh3PDTreeNode *node,
+                                   double ErrorBound) = 0;
 };
 
 #endif

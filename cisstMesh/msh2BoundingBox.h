@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,72 +31,76 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef H_BoundingBox2D
-#define H_BoundingBox2D
+
+#ifndef _msh2BoundingBox_h
+#define _msh2BoundingBox_h
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
-class msh2BoundingBox
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
+class CISST_EXPORT msh2BoundingBox
 {
- public: 
-  vct2 MinCorner;
-  vct2 MaxCorner;
-  //vct2 HalfExtents;  // SDB
+ public:
+    vct2 MinCorner;
+    vct2 MaxCorner;
+    //vct2 HalfExtents;  // SDB
  public:
 
-  //void ComputeHalfExtents();
+    //void ComputeHalfExtents();
 
-  vct2 Diagonal() const {return MaxCorner-MinCorner;};
-  double DiagonalLength() const {return Diagonal().Norm();};
+    vct2 Diagonal() const {return MaxCorner-MinCorner;};
+    double DiagonalLength() const {return Diagonal().Norm();};
 
-  vct2 MidPoint() const { return (MinCorner+MaxCorner)*0.5;};
+    vct2 MidPoint() const { return (MinCorner+MaxCorner)*0.5;};
 
-  msh2BoundingBox(const vct2& MinC, const vct2& MaxC )
-    : MinCorner(MinC), MaxCorner(MaxC)
+    msh2BoundingBox(const vct2& MinC, const vct2& MaxC )
+        : MinCorner(MinC), MaxCorner(MaxC)
     {}; //{ ComputeHalfExtents(); };
 
-  msh2BoundingBox()
-    : MinCorner(HUGE_VAL,HUGE_VAL), MaxCorner(-HUGE_VAL,-HUGE_VAL)
-    {}; //{ ComputeHalfExtents(); };
-  
-  msh2BoundingBox(const msh2BoundingBox& S)
-    : MinCorner(S.MinCorner), MaxCorner(S.MaxCorner)
-    {}; //{ ComputeHalfExtents(); };
-  
-  msh2BoundingBox& operator=(const msh2BoundingBox& S)
-    { MinCorner=S.MinCorner; MaxCorner=S.MaxCorner; 
-      //HalfExtents=S.HalfExtents; 
-      return *this; };
+    msh2BoundingBox()
+        : MinCorner(HUGE_VAL,HUGE_VAL), MaxCorner(-HUGE_VAL,-HUGE_VAL)
+        {}; //{ ComputeHalfExtents(); };
 
-  msh2BoundingBox& operator=(const vct2& V)
-	{ MinCorner=MaxCorner=V;
-    //HalfExtents.Assign(0.0,0.0,0.0);
-    return *this;};
+    msh2BoundingBox(const msh2BoundingBox& S)
+        : MinCorner(S.MinCorner), MaxCorner(S.MaxCorner)
+        {}; //{ ComputeHalfExtents(); };
 
-  msh2BoundingBox& Include(const msh2BoundingBox& him);
-  msh2BoundingBox& Include(const vct2& V);
- 
-  msh2BoundingBox& EnlargeBy(double dist)
-  { MinCorner -= dist; MaxCorner+= dist;
-    return *this;
-  };
+    msh2BoundingBox& operator=(const msh2BoundingBox& S)
+        { MinCorner=S.MinCorner; MaxCorner=S.MaxCorner;
+            //HalfExtents=S.HalfExtents;
+            return *this; };
+
+    msh2BoundingBox& operator=(const vct2& V)
+        { MinCorner=MaxCorner=V;
+            //HalfExtents.Assign(0.0,0.0,0.0);
+            return *this;};
+
+    msh2BoundingBox& Include(const msh2BoundingBox& him);
+    msh2BoundingBox& Include(const vct2& V);
+
+    msh2BoundingBox& EnlargeBy(double dist)
+    { MinCorner -= dist; MaxCorner+= dist;
+        return *this;
+    };
     //ComputeHalfExtents(); };
 
-  int Includes(const vct2& p,double dist=0.0) const
-  { if (p[0] +dist < MinCorner[0]) return 0;
-    if (p[1] +dist < MinCorner[1]) return 0;
-    //if (p[2] +dist < MinCorner[2]) return 0;
-    if (p[0] -dist > MaxCorner[0]) return 0;
-    if (p[1] -dist > MaxCorner[1]) return 0;
-    //if (p[2] -dist > MaxCorner[2]) return 0;
-	  return 1; // point is within distance "dist" of this bounding box
-  };
-  
-  int Includes(const msh2BoundingBox& B,double dist=0.0) const
-  { return Includes(B.MinCorner,dist)&&Includes(B.MaxCorner,dist);
-  };
+    int Includes(const vct2& p, double dist=0.0) const
+    { if (p[0] +dist < MinCorner[0]) return 0;
+        if (p[1] +dist < MinCorner[1]) return 0;
+        //if (p[2] +dist < MinCorner[2]) return 0;
+        if (p[0] -dist > MaxCorner[0]) return 0;
+        if (p[1] -dist > MaxCorner[1]) return 0;
+        //if (p[2] -dist > MaxCorner[2]) return 0;
+        return 1; // point is within distance "dist" of this bounding box
+    };
+
+    int Includes(const msh2BoundingBox& B, double dist=0.0) const
+    { return Includes(B.MinCorner,dist)&&Includes(B.MaxCorner,dist);
+    };
 };
 
 #endif

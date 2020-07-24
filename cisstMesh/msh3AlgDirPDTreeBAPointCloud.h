@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,54 +31,52 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _algDirPDTree_BoundedAngle_PointCloud_h
-#define _algDirPDTree_BoundedAngle_PointCloud_h
+
+#ifndef _msh3AlgDirPDTreeBAPointCloud_h
+#define _msh3AlgDirPDTreeBAPointCloud_h
 
 #include <cisstMesh/msh3DirPDTreePointCloud.h>
 #include <cisstMesh/msh3AlgDirPDTreeBA.h>
 
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
-class msh3AlgDirPDTreeBAPointCloud : public msh3AlgDirPDTreeBA
+class CISST_EXPORT msh3AlgDirPDTreeBAPointCloud : public msh3AlgDirPDTreeBA
 {
-  //
-  // This class implements the base algorithm for a mesh target shape
-  //
+    //
+    // This class implements the base algorithm for a mesh target shape
+    //
 
+    //--- Algorithm Parameters ---//
 
-  //--- Algorithm Parameters ---//
+ protected:
 
-protected:
+    msh3DirPDTreePointCloud *pDirTree;
 
-   msh3DirPDTreePointCloud *pDirTree;
+    //--- Algorithm Methods ---//
 
+ public:
 
-  //--- Algorithm Methods ---//
+    // constructor
+    msh3AlgDirPDTreeBAPointCloud( msh3DirPDTreePointCloud *pDirTree, double maxMatchAngle_ = 2.0*cmnPI)
+        : msh3AlgDirPDTreeBA(pDirTree, maxMatchAngle_),
+        pDirTree(pDirTree)
+        {}
 
-public:
+    // destructor
+    virtual ~msh3AlgDirPDTreeBAPointCloud() {}
 
-  // constructor
-  msh3AlgDirPDTreeBAPointCloud( msh3DirPDTreePointCloud *pDirTree, double maxMatchAngle_ = 2.0*cmnPI)
-    : msh3AlgDirPDTreeBA(pDirTree, maxMatchAngle_),
-    pDirTree(pDirTree)
-  {}
+    //--- PD Tree Interface Methods ---//
+    
+    double FindClosestPointOnDatum(const vct3 &Xp, const vct3 &Xn,
+                                   vct3 &closest, vct3 &closestNorm,
+                                   int datum);
 
-  // destructor
-  virtual ~msh3AlgDirPDTreeBAPointCloud() {}
-
-
-  //--- PD Tree Interface Methods ---//
-
-  double FindClosestPointOnDatum(
-    const vct3 &Xp, const vct3 &Xn,
-    vct3 &closest, vct3 &closestNorm,
-    int datum);
-
-  int  DatumMightBeCloser(
-    const vct3 &Xp, const vct3 &Xn,
-    int datum,
-    double ErrorBound);
+    int DatumMightBeCloser(const vct3 &Xp, const vct3 &Xn,
+                           int datum,
+                           double ErrorBound);
 
 };
 

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,79 +31,77 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _PDTree_Mesh_h
-#define _PDTree_Mesh_h
+
+#ifndef _msh3PDTreeMesh_h
+#define _msh3PDTreeMesh_h
 
 #include <cisstMesh/msh3PDTreeBase.h>
 #include <cisstMesh/msh3Mesh.h>
 #include <limits>
 
-class msh3PDTreeMesh : public msh3PDTreeBase
-{ 
-  //
-  // This class implements a PD tree for a mesh shape
-  //
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
+class CISST_EXPORT msh3PDTreeMesh : public msh3PDTreeBase
+{
+    //
+    // This class implements a PD tree for a mesh shape
+    //
 
-  //--- Variables ---//
+    //--- Variables ---//
 
-public:
+ public:
 
-    cisstMesh *Mesh;
+    msh3Mesh *Mesh;
     msh3BoundingBox Bounds;
 
+    //--- Methods ---//
 
-  //--- Methods ---//
+ public:
 
-public:
+    // constructor
+    //  mesh       - target shape from which to construct the tree
+    //               (each triangle of the mesh becomes a datum in the tree)
+    //  nThresh    - min number of datums to subdivide a node
+    //  diagThresh - min physical size to subdivide a node
+    msh3PDTreeMesh(msh3Mesh &mesh, int nThresh, double diagThresh);
 
-  // constructor
-  //  mesh       - target shape from which to construct the tree
-  //               (each triangle of the mesh becomes a datum in the tree)
-  //  nThresh    - min number of datums to subdivide a node
-  //  diagThresh - min physical size to subdivide a node
-    msh3PDTreeMesh(cisstMesh &Mesh, int nThresh, double diagThresh);
+    // destructor
+    virtual ~msh3PDTreeMesh();
 
-  // destructor
-  virtual ~msh3PDTreeMesh();
-
-
-  //--- Base Class Virtual Methods ---//
-
-  virtual vct3 DatumSortPoint(int datum) const;
-
+    //--- Base Class Virtual Methods ---//
+    virtual vct3 DatumSortPoint(int datum) const;
     virtual void EnlargeBounds(const vctFrm3& F) const;
     virtual void EnlargeBounds(const vctFrm3& F, msh3PDTreeNode *pNode) const;
     virtual void EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB) const;
 
 
-  //--- Noise Model Methods ---//
+    //--- Noise Model Methods ---//
 
-  vct3x3& DatumCov(int datum)       // return measurement noise model for this datum
-  {
-    return Mesh->TriangleCov[datum];
-  }
-  vct3x3* DatumCovPtr(int datum)    // return measurement noise model for this datum
-  {
-    return &(Mesh->TriangleCov[datum]);
-  }
+    inline vct3x3& DatumCov(int datum)       // return measurement noise model for this datum
+    {
+        return Mesh->TriangleCov[datum];
+    }
+    inline vct3x3* DatumCovPtr(int datum)    // return measurement noise model for this datum
+    {
+        return &(Mesh->TriangleCov[datum]);
+    }
 
-  vct3& DatumCovEig(int datum)         // return measurement noise model for this datum
-  {
-    return Mesh->TriangleCovEig[datum];
-  }
-  vct3* DatumCovEigPtr(int datum)      // return measurement noise model for this datum
-  {
-    return &(Mesh->TriangleCovEig[datum]);
-  }
+    inline vct3& DatumCovEig(int datum)         // return measurement noise model for this datum
+    {
+        return Mesh->TriangleCovEig[datum];
+    }
+    inline vct3* DatumCovEigPtr(int datum)      // return measurement noise model for this datum
+    {
+        return &(Mesh->TriangleCovEig[datum]);
+    }
 
-  // Finds the intersected points of a PDTree given a bounding distance
-  int FindIntersectedPoints(
-          const vct3 &v,
-          const double boundingDistance,
-          std::vector<int> &faceIdx);
+    // Finds the intersected points of a PDTree given a bounding distance
+    int FindIntersectedPoints(const vct3 &v,
+                              const double boundingDistance,
+                              std::vector<int> &faceIdx);
 
 };
 

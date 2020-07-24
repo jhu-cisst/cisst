@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,34 +31,32 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
 #include <cisstMesh/msh3AlgPDTreeCPPointCloud.h>
 
-
 // finds the point on this datum with lowest match error
 //  and returns the match error and closest point
-double msh3AlgPDTreeCPPointCloud::FindClosestPointOnDatum(
-  const vct3 &v,
-  vct3 &closest,
-  int datum)
+double msh3AlgPDTreeCPPointCloud::FindClosestPointOnDatum(const vct3 &v,
+                                                          vct3 &closest,
+                                                          int datum)
 {
-  // Return distance to the datum point as match error
-  //  NOTE: distance is more convenient than square distance
-  //        since the distance is required for doing the
-  //        bounding box proximity tests.
-  closest = pTree->pointCloud.points.Element(datum);
-  return (v - closest).Norm();
+    // Return distance to the datum point as match error
+    //  NOTE: distance is more convenient than square distance
+    //        since the distance is required for doing the
+    //        bounding box proximity tests.
+    closest = pTree->pointCloud.points.Element(datum);
+    return (v - closest).Norm();
 }
 
 
 // fast check if a datum might have smaller match error than error bound
 int msh3AlgPDTreeCPPointCloud::DatumMightBeCloser(const vct3 & CMN_UNUSED(v),
-						int CMN_UNUSED(datum),
-						double CMN_UNUSED(errorBound))
+                                                  int CMN_UNUSED(datum),
+                                                  double CMN_UNUSED(errorBound))
 {
-  // Since the datum is only a single point, just
-  //  compute the match error directly
-  return true;
+    // Since the datum is only a single point, just
+    //  compute the match error directly
+    return true;
 }

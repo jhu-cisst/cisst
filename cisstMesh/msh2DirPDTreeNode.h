@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,174 +31,147 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
-// ****************************************************************************
-// ****************************************************************************
 //
-//  $Id: msh2DirPDTreeNode.h, v0.1 Exp $
-//
-//  Description:
-//	        
-//
-//  Usage:
-//	        
-//
-//  See Also:
-//	        
-//
-//  Author(s):	Seth Billings
-//
-//  Created on:	
-//
-//
-//              Developed by the Engineering Research Center for
-//          Computer-Integrated Surgical Systems & Technology (cisstST)
-//
-//               Copyright(c) 2001, The Johns Hopkins University
-//                          All Rights Reserved.
-//
-//  Experimental Software - Not certified for clinical use.
-//  For use only by cisstST sponsored research projects.  For use outside of
-//  cisstST, please contact Dr. Russell Taylor, cisstST Director, at rht@cs.jhu.edu
-//  
 // ****************************************************************************
 
-#ifndef _DirPDTree2DNode_h
-#define _DirPDTree2DNode_h
+#ifndef _msh2DirPDTreeNode_h
+#define _msh2DirPDTreeNode_h
 
 #include <stdio.h>
 #include <assert.h>
 
-#include <cisstMesh/msh2BoundingBox.h>
+#include <cisstMesh/mshForwardDeclarations.h>
+
 #include <cisstVector/vctTransformationTypes.h>
+#include <cisstMesh/msh2BoundingBox.h>
 
 //#define DebugDirPDTree2D
 //#define DEBUG_DirPDTree2dNode
 
-class msh2DirPDTreeBase;    // forward declerations for mutual dependency
-class msh2AlgDirPDTree;    //  ''
+// Always include last!
+#include <cisstMesh/mshExport.h>
 
-class msh2DirPDTreeNode
+class CISST_EXPORT msh2DirPDTreeNode
 {
-  // This class represents a node in a directed PD tree (a PD tree
-  //  for oriented points); there are no derived versions of this class.
+    // This class represents a node in a directed PD tree (a PD tree
+    //  for oriented points); there are no derived versions of this class.
 
-  //friend class msh2DirPDTreeBase;
-
-
-  //--- Variables ---//
-
-public:
-
-  msh2DirPDTreeBase*	MyTree;
-  msh2DirPDTreeNode*  Parent;
-  int* DataIndices;
-  int NData;
-  int myDepth;
-  msh2DirPDTreeNode *LEq, *More;
-
-  vctFrm2 F;                  // transforms world -> local node coords
-  msh2BoundingBox Bounds;  // bounding box for this node
-
-  bool bUsingOBB;
-  unsigned int splitDim;  // X: 0, y: 1 -- only applies when not using OBB
-
-  vct2    posAvg;
-  vct2x2  posCov;
-  vct2    Navg;         // avg orientation of the datums in this node  
-  double  dThetaMax;    // max deviation (in radians) from the avg orientation
-
-  // efficiency variables to speed-up building the tree
-  vct2    posSum;       // summation of positions in this node
-  vct2x2  covSum;       // summation of outer products of positions
-  vct2    Nsum;         // summation of the orientations in this node
+    //friend class msh2DirPDTreeBase;
 
 
+    //--- Variables ---//
 
-  //--- Methods ---//
+ public:
 
-public:
+    msh2DirPDTreeBase*	MyTree;
+    msh2DirPDTreeNode*  Parent;
+    int* DataIndices;
+    int NData;
+    int myDepth;
+    msh2DirPDTreeNode *LEq, *More;
 
-  // constructor
-  msh2DirPDTreeNode(
-    int *pDataIndexArray, int numIndexes,
-    msh2DirPDTreeBase* pTree, msh2DirPDTreeNode* pParent,
-    bool bComputeOBB = true, unsigned int splitDimension = 0);
+    vctFrm2 F;                  // transforms world -> local node coords
+    msh2BoundingBox Bounds;  // bounding box for this node
 
-  // debug constructor
-  msh2DirPDTreeNode(double) :
-    MyTree(NULL),
-    Parent(NULL),
-    DataIndices(NULL),
-    NData(0),
-    LEq(NULL),
-    More(NULL)
-  {};
+    bool bUsingOBB;
+    unsigned int splitDim;  // X: 0, y: 1 -- only applies when not using OBB
 
-  // destructor
-  ~msh2DirPDTreeNode();
+    vct2    posAvg;
+    vct2x2  posCov;
+    vct2    Navg;         // avg orientation of the datums in this node
+    double  dThetaMax;    // max deviation (in radians) from the avg orientation
 
-  // Check if a datum in this node has a lower match error than the error bound
-  //  If a lower match error is found, set the new closest point, update error
-  //  bound, and return the global datum index of the closest datum.
-  //  Otherwise, return -1.
-  int FindClosestDatum(const vct2 &v, const vct2 &n,
-    vct2 &closestPoint, vct2 &closestPointNorm,
-    double &ErrorBound,
-    unsigned int &numNodesVisited,
-    unsigned int &numNodesSearched);
+    // efficiency variables to speed-up building the tree
+    vct2    posSum;       // summation of positions in this node
+    vct2x2  covSum;       // summation of outer products of positions
+    vct2    Nsum;         // summation of the orientations in this node
 
-  inline int   NumData() const { return NData; };
-  inline int   IsTerminalNode() const { return LEq == NULL; };
 
-  int   ConstructTree(int CountThresh, double DiagThresh);
 
-  msh2DirPDTreeNode* GetChildSplitNode(const vct2 &datumPos);
+    //--- Methods ---//
 
-  //virtual void Print(FILE* chan, int indent);
+ public:
 
-  // Return the global datum index of the ith datum in this node
-  inline int Datum(int i) const
-  {
-#ifdef DEBUG_DirPDTree2dNode
-    assert(i >= 0 && i < NData);
-#endif
-    return DataIndices[i];
-  }
+    // constructor
+    msh2DirPDTreeNode(
+                      int *pDataIndexArray, int numIndexes,
+                      msh2DirPDTreeBase* pTree, msh2DirPDTreeNode* pParent,
+                      bool bComputeOBB = true, unsigned int splitDimension = 0);
 
-  int& Datum(int i)
-  {
-#ifdef DEBUG_DirPDTree2dNode
-    assert(i >= 0 && i < NData);
-#endif
-    return DataIndices[i];
-  }
+    // debug constructor
+    msh2DirPDTreeNode(double) :
+        MyTree(NULL),
+        Parent(NULL),
+        DataIndices(NULL),
+        NData(0),
+        LEq(NULL),
+        More(NULL)
+            {};
 
-protected:
+    // destructor
+    ~msh2DirPDTreeNode();
 
-  int   SortNodeForSplit();
-  void  ConstructLeaf();
+    // Check if a datum in this node has a lower match error than the error bound
+    //  If a lower match error is found, set the new closest point, update error
+    //  bound, and return the global datum index of the closest datum.
+    //  Otherwise, return -1.
+    int FindClosestDatum(const vct2 &v, const vct2 &n,
+                         vct2 &closestPoint, vct2 &closestPointNorm,
+                         double &ErrorBound,
+                         unsigned int &numNodesVisited,
+                         unsigned int &numNodesSearched);
 
-  //vct2    ComputePositionSum();
-  //vct2x2  ComputeCovarianceSum();
-  vct2    ComputeOrientationSum();
-  vct2    ComputeOrientationAverage(vct2 &Nsum);
-  double  ComputeOrientationThetaMax(vct2 Navg);
-  vctFrm2 ComputeCovFrame(vct2x2 posCov, vct2 posMean);
+    inline int   NumData() const { return NData; };
+    inline int   IsTerminalNode() const { return LEq == NULL; };
 
-public:
+    int   ConstructTree(int CountThresh, double DiagThresh);
 
-  // debug routines
-  int   FindTerminalNode(int datum, msh2DirPDTreeNode **termNode);
-  void  PrintTerminalNodes(std::ofstream &fs);
-  bool  NodeContainsDatum(int datum)
-  {
-    for (int i = 0; i < NData; i++)
+    msh2DirPDTreeNode* GetChildSplitNode(const vct2 &datumPos);
+
+    //virtual void Print(FILE* chan, int indent);
+
+    // Return the global datum index of the ith datum in this node
+    inline int Datum(int i) const
     {
-      if (datum == DataIndices[i]) return true;
+#ifdef DEBUG_DirPDTree2dNode
+        assert(i >= 0 && i < NData);
+#endif
+        return DataIndices[i];
     }
-    return false;
-  }
+
+    int& Datum(int i)
+    {
+#ifdef DEBUG_DirPDTree2dNode
+        assert(i >= 0 && i < NData);
+#endif
+        return DataIndices[i];
+    }
+
+ protected:
+
+    int   SortNodeForSplit();
+    void  ConstructLeaf();
+
+    //vct2    ComputePositionSum();
+    //vct2x2  ComputeCovarianceSum();
+    vct2    ComputeOrientationSum();
+    vct2    ComputeOrientationAverage(vct2 &Nsum);
+    double  ComputeOrientationThetaMax(vct2 Navg);
+    vctFrm2 ComputeCovFrame(vct2x2 posCov, vct2 posMean);
+
+ public:
+
+    // debug routines
+    int   FindTerminalNode(int datum, msh2DirPDTreeNode **termNode);
+    void  PrintTerminalNodes(std::ofstream &fs);
+    bool  NodeContainsDatum(int datum)
+    {
+        for (int i = 0; i < NData; i++)
+            {
+                if (datum == DataIndices[i]) return true;
+            }
+        return false;
+    }
 
 };
 

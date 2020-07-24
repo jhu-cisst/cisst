@@ -1,3 +1,5 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 // ****************************************************************************
 //
 //    Copyright (c) 2014, Seth Billings, Russell Taylor, Johns Hopkins University
@@ -29,7 +31,7 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
 #include <cisstMesh/msh2Edges.h>
@@ -38,23 +40,20 @@
 #include <assert.h>
 #undef NDEBUG       // enable assert in release mode
 
-
 // Build mesh from a list of vertices and normals
-void msh2Edges::SetEdges( const vctDynamicVector<vct2> &V1,
-                                const vctDynamicVector<vct2> &V2,
-                                const vctDynamicVector<vct2> &Norm )
+void msh2Edges::SetEdges(const vctDynamicVector<vct2> &V1,
+                         const vctDynamicVector<vct2> &V2,
+                         const vctDynamicVector<vct2> &Norm)
 {
-  numEdges = V1.size();
-  if ( V2.size() != numEdges || Norm.size() != numEdges )
-  {
-    cmnThrow("Invalid Input");
-  }
+    numEdges = V1.size();
+    if (V2.size() != numEdges || Norm.size() != numEdges) {
+        cmnThrow("Invalid Input");
+    }
 
-  Edges.SetSize(numEdges);
-  for (unsigned int i=0; i<numEdges; i++)
-  {
-    Edges[i].SetEdge( V1[i], V2[i], Norm[i] );
-  }
+    Edges.SetSize(numEdges);
+    for (unsigned int i = 0; i < numEdges; i++) {
+        Edges[i].SetEdge(V1[i], V2[i], Norm[i]);
+    }
 
-  //std::cout << " 2D Edge Set Loaded (Edges: " << numEdges << ")" << std::endl;
+    //std::cout << " 2D Edge Set Loaded (Edges: " << numEdges << ")" << std::endl;
 }
