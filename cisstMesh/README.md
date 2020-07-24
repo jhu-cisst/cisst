@@ -23,6 +23,7 @@ registration method (e.g. Iterative Closest Points `ICP`).
 * `BA`: bounded angle
 * `Dir`: directed
 * `DPDTree`: directed PD tree
+* `Proj`: projection
 
 # Origin of the code
 

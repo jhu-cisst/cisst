@@ -34,8 +34,8 @@
 #ifndef H_TriangleClosestPointSolver
 #define H_TriangleClosestPointSolver
 
-#include <cisstMesh/utilities.h>
-#include <cisstMesh/mshMesh.h>
+#include <cisstMesh/msh3Utilities.h>
+#include <cisstMesh/msh3Mesh.h>
 
 class TriangleClosestPointSolver
 {

@@ -18,106 +18,106 @@ option (CISST_MSH_HAS_RPLY "Build RPLY as external project for cisstMesh" OFF)
 
 # all source files
 set (SOURCE_FILES
-  utilities2D.cpp
-  BoundingBox2D.cpp
-  cisstEdgeList2D.cpp
-  cisstPointCloud2D.cpp
+  msh2Utilities.cpp
+  msh2BoundingBox.cpp
+  msh2Edges.cpp
+  msh2PointCloud.cpp
   PointProjectionRoutines.cpp
 
-  DirPDTree2DBase.cpp
-  DirPDTree2D_Edges.cpp
-  DirPDTree2DNode.cpp
-  DirPDTree2D_PointCloud.cpp
-  alg2D_DirPDTree_CP.cpp
-  alg2D_DirPDTree_CP_Edges.cpp
-  alg2D_DirPDTree.cpp
-  alg2D_DirPDTree_CP_PointCloud.cpp
-  alg2D_DirPDTree_vonMises.cpp
-  alg2D_DirPDTree_vonMises_Edges.cpp
-  alg2D_DirPDTree_vonMises_PointCloud.cpp
+  msh2DirPDTreeBase.cpp
+  msh2DirPDTreeEdges.cpp
+  msh2DirPDTreeNode.cpp
+  msh2DirPDTreePointCloud.cpp
+  msh2AlgDirPDTreeCP.cpp
+  msh2AlgDirPDTreeCPEdges.cpp
+  msh2AlgDirPDTree.cpp
+  msh2AlgDirPDTreeCPPointCloud.cpp
+  msh2AlgDirPDTreevonMises.cpp
+  msh2AlgDirPDTreevonMisesEdges.cpp
+  msh2AlgDirPDTreevonMisesPointCloud.cpp
 
-  BoundingBox.cpp
-  mshMesh.cpp
-  mshPointCloud.cpp
-  utilities.cpp
+  msh3BoundingBox.cpp
+  msh3Mesh.cpp
+  msh3PointCloud.cpp
+  msh3Utilities.cpp
   TriangleClosestPointSolver.cpp
-  Ellipsoid_OBB_Intersection_Solver.cpp
+  EllipsoidOBBIntersectionSolver.cpp
 
-  PDTreeNode.cpp
-  PDTreeBase.cpp
-  PDTree_Mesh.cpp
-  PDTree_PointCloud.cpp
-  algPDTree.cpp
-  algPDTree_CP.cpp
-  algPDTree_CP_Mesh.cpp
-  algPDTree_CP_PointCloud.cpp
-  algPDTree_MLP.cpp
-  algPDTree_MLP_Mesh.cpp
-  algPDTree_MLP_PointCloud.cpp
+  msh3PDTreeNode.cpp
+  msh3PDTreeBase.cpp
+  msh3PDTreeMesh.cpp
+  msh3PDTreePointCloud.cpp
+  msh3AlgPDTree.cpp
+  msh3AlgPDTreeCP.cpp
+  msh3AlgPDTreeCPMesh.cpp
+  msh3AlgPDTreeCPPointCloud.cpp
+  msh3AlgPDTreeMLP.cpp
+  msh3AlgPDTreeMLPMesh.cpp
+  msh3AlgPDTreeMLPPointCloud.cpp
 
-  DirPDTreeNode.cpp
-  DirPDTreeBase.cpp
-  DirPDTree_Mesh.cpp
-  DirPDTree_PointCloud.cpp
-  algDirPDTree_BoundedAngle.cpp
-  algDirPDTree.cpp
-  algDirPDTree_BoundedAngle_Mesh.cpp
-  algDirPDTree_vonMisesPrj.cpp
-  algDirPDTree_BoundedAngle_PointCloud.cpp
-  algDirPDTree_vonMisesPrj_Mesh.cpp
+  msh3DirPDTreeNode.cpp
+  msh3DirPDTreeBase.cpp
+  msh3DirPDTreeMesh.cpp
+  msh3DirPDTreePointCloud.cpp
+  msh3AlgDirPDTreeBA.cpp
+  msh3AlgDirPDTree.cpp
+  msh3AlgDirPDTreeBAMesh.cpp
+  msh3AlgDirPDTreevonMisesProj.cpp
+  msh3AlgDirPDTreeBAPointCloud.cpp
+  msh3AlgDirPDTreevonMisesProjMesh.cpp
   )
 
 # all header files
 set (HEADER_FILES
-  utilities2D.h
-  BoundingBox2D.h
-  cisstEdge2D.h
-  cisstEdgeList2D.h
-  cisstPointCloud2D.h
+  msh2Utilities.h
+  msh2BoundingBox.h
+  msh2Edge.h
+  msh2Edges.h
+  msh2PointCloud.h
   PointProjectionRoutines.h
 
-  DirPDTree2DBase.h
-  DirPDTree2D_Edges.h
-  DirPDTree2DNode.h
-  DirPDTree2D_PointCloud.h
+  msh2DirPDTreeBase.h
+  msh2DirPDTreeEdges.h
+  msh2DirPDTreeNode.h
+  msh2DirPDTreePointCloud.h
 
-  alg2D_DirPDTree_CP_Edges.h
-  alg2D_DirPDTree_CP.h
-  alg2D_DirPDTree_CP_PointCloud.h
-  alg2D_DirPDTree.h
-  alg2D_DirPDTree_vonMises_Edges.h
-  alg2D_DirPDTree_vonMises.h
-  alg2D_DirPDTree_vonMises_PointCloud.h
+  msh2AlgDirPDTreeCPEdges.h
+  msh2AlgDirPDTreeCP.h
+  msh2AlgDirPDTreeCPPointCloud.h
+  msh2AlgDirPDTree.h
+  msh2AlgDirPDTreevonMisesEdges.h
+  msh2AlgDirPDTreevonMises.h
+  msh2AlgDirPDTreevonMisesPointCloud.h
 
-  BoundingBox.h
-  mshMesh.h
-  mshPointCloud.h
-  utilities.h
+  msh3BoundingBox.h
+  msh3Mesh.h
+  msh3PointCloud.h
+  msh3Utilities.h
   TriangleClosestPointSolver.h
-  Ellipsoid_OBB_Intersection_Solver.h
+  EllipsoidOBBIntersectionSolver.h
 
-  PDTreeNode.h
-  PDTreeBase.h
-  PDTree_Mesh.h
-  PDTree_PointCloud.h
-  algPDTree.h
-  algPDTree_CP.h
-  algPDTree_CP_Mesh.h
-  algPDTree_CP_PointCloud.h
-  algPDTree_MLP.h
-  algPDTree_MLP_Mesh.h
-  algPDTree_MLP_PointCloud.h
+  msh3PDTreeNode.h
+  msh3PDTreeBase.h
+  msh3PDTreeMesh.h
+  msh3PDTreePointCloud.h
+  msh3AlgPDTree.h
+  msh3AlgPDTreeCP.h
+  msh3AlgPDTreeCPMesh.h
+  msh3AlgPDTreeCPPointCloud.h
+  msh3AlgPDTreeMLP.h
+  msh3AlgPDTreeMLPMesh.h
+  msh3AlgPDTreeMLPPointCloud.h
 
-  DirPDTreeNode.h
-  DirPDTreeBase.h
-  DirPDTree_Mesh.h
-  DirPDTree_PointCloud.h
-  algDirPDTree_BoundedAngle.h
-  algDirPDTree.h
-  algDirPDTree_BoundedAngle_Mesh.h
-  algDirPDTree_vonMisesPrj.h
-  algDirPDTree_BoundedAngle_PointCloud.h
-  algDirPDTree_vonMisesPrj_Mesh.h
+  msh3DirPDTreeNode.h
+  msh3DirPDTreeBase.h
+  msh3DirPDTreeMesh.h
+  msh3DirPDTreePointCloud.h
+  msh3AlgDirPDTreeBA.h
+  msh3AlgDirPDTree.h
+  msh3AlgDirPDTreeBAMesh.h
+  msh3AlgDirPDTreevonMisesProj.h
+  msh3AlgDirPDTreeBAPointCloud.h
+  msh3AlgDirPDTreevonMisesProjMesh.h
   )
 
 # Create the config file

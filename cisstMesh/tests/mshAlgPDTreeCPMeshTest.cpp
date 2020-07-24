@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mshAlgPDTreeCPMeshTest.h"
 
-#include <cisstMesh/algPDTree_CP_Mesh.h>
+#include <cisstMesh/msh3AlgPDTreeCPMesh.h>
 
 void mshAlgPDTreeCPMeshTest::setUp(void)
 {
@@ -34,11 +34,11 @@ void mshAlgPDTreeCPMeshTest::setUp(void)
 void mshAlgPDTreeCPMeshTest::CubeCorner(void)
 {
     cisstMesh cube;
-    PDTree_Mesh* pTreeCube;
+    msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
-    pTreeCube = new PDTree_Mesh(cube, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgCube = new algPDTree_CP_Mesh(pTreeCube);
+    pTreeCube = new msh3PDTreeMesh(cube, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgCube = new msh3AlgPDTreeCPMesh(pTreeCube);
     pTreeCube->SetSearchAlgorithm(pAlgCube);
 
     // corner
@@ -58,11 +58,11 @@ void mshAlgPDTreeCPMeshTest::CubeCorner(void)
 void mshAlgPDTreeCPMeshTest::CubeSide(void)
 {
     cisstMesh cube;
-    PDTree_Mesh* pTreeCube;
+    msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
-    pTreeCube = new PDTree_Mesh(cube, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgCube = new algPDTree_CP_Mesh(pTreeCube);
+    pTreeCube = new msh3PDTreeMesh(cube, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgCube = new msh3AlgPDTreeCPMesh(pTreeCube);
     pTreeCube->SetSearchAlgorithm(pAlgCube);
 
     // side
@@ -87,11 +87,11 @@ void mshAlgPDTreeCPMeshTest::CubeSide(void)
 void mshAlgPDTreeCPMeshTest::CubeEdge(void)
 {
     cisstMesh cube;
-    PDTree_Mesh* pTreeCube;
+    msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
-    pTreeCube = new PDTree_Mesh(cube, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgCube = new algPDTree_CP_Mesh(pTreeCube);
+    pTreeCube = new msh3PDTreeMesh(cube, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgCube = new msh3AlgPDTreeCPMesh(pTreeCube);
     pTreeCube->SetSearchAlgorithm(pAlgCube);
 
     // edge
@@ -111,11 +111,11 @@ void mshAlgPDTreeCPMeshTest::CubeEdge(void)
 void mshAlgPDTreeCPMeshTest::CubeOnEdge(void)
 {
     cisstMesh cube;
-    PDTree_Mesh* pTreeCube;
+    msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
-    pTreeCube = new PDTree_Mesh(cube, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgCube = new algPDTree_CP_Mesh(pTreeCube);
+    pTreeCube = new msh3PDTreeMesh(cube, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgCube = new msh3AlgPDTreeCPMesh(pTreeCube);
     pTreeCube->SetSearchAlgorithm(pAlgCube);
 
     // edge
@@ -150,11 +150,11 @@ void mshAlgPDTreeCPMeshTest::CubeOnEdge(void)
 void mshAlgPDTreeCPMeshTest::CubeOnSide(void)
 {
     cisstMesh cube;
-    PDTree_Mesh* pTreeCube;
+    msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
-    pTreeCube = new PDTree_Mesh(cube, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgCube = new algPDTree_CP_Mesh(pTreeCube);
+    pTreeCube = new msh3PDTreeMesh(cube, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgCube = new msh3AlgPDTreeCPMesh(pTreeCube);
     pTreeCube->SetSearchAlgorithm(pAlgCube);
 
     // side
@@ -183,11 +183,11 @@ void mshAlgPDTreeCPMeshTest::CubeOnSide(void)
 void mshAlgPDTreeCPMeshTest::CylinderTop(void)
 {
     cisstMesh cylinder;
-    PDTree_Mesh* pTreeCylinder;
+    msh3PDTreeMesh* pTreeCylinder;
     cylinder.LoadMeshFromSTLFile(workingDir + "Cylinder.STL");
     // construct PD-Tree
-    pTreeCylinder = new PDTree_Mesh(cylinder, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgCylinder= new algPDTree_CP_Mesh(pTreeCylinder);
+    pTreeCylinder = new msh3PDTreeMesh(cylinder, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgCylinder= new msh3AlgPDTreeCPMesh(pTreeCylinder);
     pTreeCylinder->SetSearchAlgorithm(pAlgCylinder);
 
     // top
@@ -216,11 +216,11 @@ void mshAlgPDTreeCPMeshTest::CylinderTop(void)
 void mshAlgPDTreeCPMeshTest::CylinderSide(void)
 {
     cisstMesh cylinder;
-    PDTree_Mesh* pTreeCylinder;
+    msh3PDTreeMesh* pTreeCylinder;
     cylinder.LoadMeshFromSTLFile(workingDir + "Cylinder.STL");
     // construct PD-Tree
-    pTreeCylinder = new PDTree_Mesh(cylinder, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgCylinder= new algPDTree_CP_Mesh(pTreeCylinder);
+    pTreeCylinder = new msh3PDTreeMesh(cylinder, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgCylinder= new msh3AlgPDTreeCPMesh(pTreeCylinder);
     pTreeCylinder->SetSearchAlgorithm(pAlgCylinder);
 
     // side
@@ -245,11 +245,11 @@ void mshAlgPDTreeCPMeshTest::CylinderSide(void)
 void mshAlgPDTreeCPMeshTest::Sphere(void)
 {
     cisstMesh sphere;
-    PDTree_Mesh* pTreeSphere;
+    msh3PDTreeMesh* pTreeSphere;
     sphere.LoadMeshFromSTLFile(workingDir + "Sphere.STL");
     // construct PD-Tree
-    pTreeSphere = new PDTree_Mesh(sphere, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgSphere= new algPDTree_CP_Mesh(pTreeSphere);
+    pTreeSphere = new msh3PDTreeMesh(sphere, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgSphere= new msh3AlgPDTreeCPMesh(pTreeSphere);
     pTreeSphere->SetSearchAlgorithm(pAlgSphere);
 
 
@@ -273,11 +273,11 @@ void mshAlgPDTreeCPMeshTest::Sphere(void)
 void mshAlgPDTreeCPMeshTest::PyramidTop(void)
 {
     cisstMesh pyramid;
-    PDTree_Mesh* pTreePyramid;
+    msh3PDTreeMesh* pTreePyramid;
     pyramid.LoadMeshFromSTLFile(workingDir + "Pyramid.STL");
     // construct PD-Tree
-    pTreePyramid= new PDTree_Mesh(pyramid, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgPyramid= new algPDTree_CP_Mesh(pTreePyramid);
+    pTreePyramid= new msh3PDTreeMesh(pyramid, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgPyramid= new msh3AlgPDTreeCPMesh(pTreePyramid);
     pTreePyramid->SetSearchAlgorithm(pAlgPyramid);
 
 
@@ -302,11 +302,11 @@ void mshAlgPDTreeCPMeshTest::PyramidTop(void)
 void mshAlgPDTreeCPMeshTest::PyramidSide(void)
 {
     cisstMesh pyramid;
-    PDTree_Mesh* pTreePyramid;
+    msh3PDTreeMesh* pTreePyramid;
     pyramid.LoadMeshFromSTLFile(workingDir + "Pyramid.STL");
     // construct PD-Tree
-    pTreePyramid= new PDTree_Mesh(pyramid, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgPyramid= new algPDTree_CP_Mesh(pTreePyramid);
+    pTreePyramid= new msh3PDTreeMesh(pyramid, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgPyramid= new msh3AlgPDTreeCPMesh(pTreePyramid);
     pTreePyramid->SetSearchAlgorithm(pAlgPyramid);
 
 
@@ -330,11 +330,11 @@ void mshAlgPDTreeCPMeshTest::PyramidSide(void)
 void mshAlgPDTreeCPMeshTest::PyramidBottom(void)
 {
     cisstMesh pyramid;
-    PDTree_Mesh* pTreePyramid;
+    msh3PDTreeMesh* pTreePyramid;
     pyramid.LoadMeshFromSTLFile(workingDir + "Pyramid.STL");
     // construct PD-Tree
-    pTreePyramid= new PDTree_Mesh(pyramid, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgPyramid= new algPDTree_CP_Mesh(pTreePyramid);
+    pTreePyramid= new msh3PDTreeMesh(pyramid, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgPyramid= new msh3AlgPDTreeCPMesh(pTreePyramid);
     pTreePyramid->SetSearchAlgorithm(pAlgPyramid);
 
     // bottom
@@ -358,11 +358,11 @@ void mshAlgPDTreeCPMeshTest::PyramidBottom(void)
 void mshAlgPDTreeCPMeshTest::CylindricalTunnel(void)
 {
     cisstMesh tunnel;
-    PDTree_Mesh* pTreeTunnel;
+    msh3PDTreeMesh* pTreeTunnel;
     tunnel.LoadMeshFromSTLFile(workingDir + "CylindricalTunnel.STL");
     // construct PD-Tree
-    pTreeTunnel = new PDTree_Mesh(tunnel, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgTunnel= new algPDTree_CP_Mesh(pTreeTunnel);
+    pTreeTunnel = new msh3PDTreeMesh(tunnel, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgTunnel= new msh3AlgPDTreeCPMesh(pTreeTunnel);
     pTreeTunnel->SetSearchAlgorithm(pAlgTunnel);
 
     tip.Assign(3.0, 5.0, 3.0);
@@ -385,11 +385,11 @@ void mshAlgPDTreeCPMeshTest::CylindricalTunnel(void)
 void mshAlgPDTreeCPMeshTest::CrownValley(void)
 {
     cisstMesh crown;
-    PDTree_Mesh* pTreecrown;
+    msh3PDTreeMesh* pTreecrown;
     crown.LoadMeshFromSTLFile(workingDir + "Crown.STL");
     // construct PD-Tree
-    pTreecrown = new PDTree_Mesh(crown, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgcrown= new algPDTree_CP_Mesh(pTreecrown);
+    pTreecrown = new msh3PDTreeMesh(crown, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgcrown= new msh3AlgPDTreeCPMesh(pTreecrown);
     pTreecrown->SetSearchAlgorithm(pAlgcrown);
 
     tip.Assign(2.5, 5.0, 0.0);
@@ -417,11 +417,11 @@ void mshAlgPDTreeCPMeshTest::CrownValley(void)
 void mshAlgPDTreeCPMeshTest::CrownPeak(void)
 {
     cisstMesh crown;
-    PDTree_Mesh* pTreecrown;
+    msh3PDTreeMesh* pTreecrown;
     crown.LoadMeshFromSTLFile(workingDir + "Crown.STL");
     // construct PD-Tree
-    pTreecrown = new PDTree_Mesh(crown, nThresh, diagThresh);
-    algPDTree_CP_Mesh* pAlgcrown= new algPDTree_CP_Mesh(pTreecrown);
+    pTreecrown = new msh3PDTreeMesh(crown, nThresh, diagThresh);
+    msh3AlgPDTreeCPMesh* pAlgcrown= new msh3AlgPDTreeCPMesh(pTreecrown);
     pTreecrown->SetSearchAlgorithm(pAlgcrown);
 
     tip.Assign(5.0, 5.0, -0.5);

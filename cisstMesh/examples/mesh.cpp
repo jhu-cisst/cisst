@@ -2,9 +2,9 @@
 #include <iostream>
 #include <vector>
 
-#include <cisstMesh/mshMesh.h>
-#include <cisstMesh/PDTree_Mesh.h>
-#include <cisstMesh/algPDTree_CP_Mesh.h>
+#include <cisstMesh/msh3Mesh.h>
+#include <cisstMesh/msh3PDTreeMesh.h>
+#include <cisstMesh/msh3AlgPDTreeCPMesh.h>
 
 int main(void)
 {	
@@ -33,8 +33,8 @@ int main(void)
   // build PD tree on the mesh directly
   std::cout << "Building mesh PD tree .... " << std::endl;
   int nThresh = 5; double diagThresh = 5.0;
-  PDTree_Mesh* pTreeMesh = new PDTree_Mesh(mesh, nThresh, diagThresh);
-  algPDTree_CP_Mesh* pAlg = new algPDTree_CP_Mesh(pTreeMesh);
+  msh3PDTreeMesh* pTreeMesh = new msh3PDTreeMesh(mesh, nThresh, diagThresh);
+  msh3AlgPDTreeCPMesh* pAlg = new msh3AlgPDTreeCPMesh(pTreeMesh);
   pTreeMesh->SetSearchAlgorithm(pAlg);
 
   std::vector<int> faceIdx;
