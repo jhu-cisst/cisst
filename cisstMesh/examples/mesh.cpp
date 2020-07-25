@@ -11,7 +11,7 @@ int main(void)
   std::string workingDir = "/home/max/galen_ws/src/pdtree/examples/";
   std::string loadMeshPath = workingDir + "mesh/cube_ascii.stl";
 
-  cisstMesh mesh;
+  msh3Mesh mesh;
   mesh.LoadMeshFromSTLFile(loadMeshPath);
 
   std::cout << mesh.NumTriangles() << std::endl;

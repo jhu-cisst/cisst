@@ -18,22 +18,28 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mshAlgPDTreeCPMeshTest.h"
 
+#include <cisstCommon/cmnPath.h>
 #include <cisstMesh/msh3AlgPDTreeCPMesh.h>
 
 void mshAlgPDTreeCPMeshTest::setUp(void)
 {
-    workingDir = __FILE__;
-    workingDir.erase(workingDir.end() - 8, workingDir.end());
-    std::cerr << "---------------- "
-              << workingDir << std::endl;
-    workingDir.append("mesh/");
-    workingDir = "/home/test/cisstICP/tests/mesh/";
+    cmnPath path;
+    path.AddRelativeToCisstShare("/models/meshes");
+    std::string testFile = "Cube.STL";
+    std::string fullPath = path.Find(testFile);
+    if (cmnPath::Exists(fullPath)) {
+        workingDir = fullPath;
+        workingDir.erase(workingDir.end() - testFile.size(),
+                         workingDir.end());
+    } else {
+        std::cerr << "mshAlgPDTreeCPMeshTest::setUp: can't find meshes used for testing.  Make sure CISST_ROOT is set" << std::endl;
+    }
     faceIdx.clear();
 }
 
 void mshAlgPDTreeCPMeshTest::CubeCorner(void)
 {
-    cisstMesh cube;
+    msh3Mesh cube;
     msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
@@ -57,7 +63,7 @@ void mshAlgPDTreeCPMeshTest::CubeCorner(void)
 
 void mshAlgPDTreeCPMeshTest::CubeSide(void)
 {
-    cisstMesh cube;
+    msh3Mesh cube;
     msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
@@ -86,7 +92,7 @@ void mshAlgPDTreeCPMeshTest::CubeSide(void)
 
 void mshAlgPDTreeCPMeshTest::CubeEdge(void)
 {
-    cisstMesh cube;
+    msh3Mesh cube;
     msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
@@ -110,7 +116,7 @@ void mshAlgPDTreeCPMeshTest::CubeEdge(void)
 
 void mshAlgPDTreeCPMeshTest::CubeOnEdge(void)
 {
-    cisstMesh cube;
+    msh3Mesh cube;
     msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
@@ -149,7 +155,7 @@ void mshAlgPDTreeCPMeshTest::CubeOnEdge(void)
 
 void mshAlgPDTreeCPMeshTest::CubeOnSide(void)
 {
-    cisstMesh cube;
+    msh3Mesh cube;
     msh3PDTreeMesh* pTreeCube;
     cube.LoadMeshFromSTLFile(workingDir + "Cube.STL");
     // construct PD-Tree
@@ -182,7 +188,7 @@ void mshAlgPDTreeCPMeshTest::CubeOnSide(void)
 // concave - cylinder
 void mshAlgPDTreeCPMeshTest::CylinderTop(void)
 {
-    cisstMesh cylinder;
+    msh3Mesh cylinder;
     msh3PDTreeMesh* pTreeCylinder;
     cylinder.LoadMeshFromSTLFile(workingDir + "Cylinder.STL");
     // construct PD-Tree
@@ -215,7 +221,7 @@ void mshAlgPDTreeCPMeshTest::CylinderTop(void)
 
 void mshAlgPDTreeCPMeshTest::CylinderSide(void)
 {
-    cisstMesh cylinder;
+    msh3Mesh cylinder;
     msh3PDTreeMesh* pTreeCylinder;
     cylinder.LoadMeshFromSTLFile(workingDir + "Cylinder.STL");
     // construct PD-Tree
@@ -244,7 +250,7 @@ void mshAlgPDTreeCPMeshTest::CylinderSide(void)
 // TODO: this needs to be validated again due to large number of normals
 void mshAlgPDTreeCPMeshTest::Sphere(void)
 {
-    cisstMesh sphere;
+    msh3Mesh sphere;
     msh3PDTreeMesh* pTreeSphere;
     sphere.LoadMeshFromSTLFile(workingDir + "Sphere.STL");
     // construct PD-Tree
@@ -272,7 +278,7 @@ void mshAlgPDTreeCPMeshTest::Sphere(void)
 // concave - pyramid
 void mshAlgPDTreeCPMeshTest::PyramidTop(void)
 {
-    cisstMesh pyramid;
+    msh3Mesh pyramid;
     msh3PDTreeMesh* pTreePyramid;
     pyramid.LoadMeshFromSTLFile(workingDir + "Pyramid.STL");
     // construct PD-Tree
@@ -301,7 +307,7 @@ void mshAlgPDTreeCPMeshTest::PyramidTop(void)
 
 void mshAlgPDTreeCPMeshTest::PyramidSide(void)
 {
-    cisstMesh pyramid;
+    msh3Mesh pyramid;
     msh3PDTreeMesh* pTreePyramid;
     pyramid.LoadMeshFromSTLFile(workingDir + "Pyramid.STL");
     // construct PD-Tree
@@ -329,7 +335,7 @@ void mshAlgPDTreeCPMeshTest::PyramidSide(void)
 
 void mshAlgPDTreeCPMeshTest::PyramidBottom(void)
 {
-    cisstMesh pyramid;
+    msh3Mesh pyramid;
     msh3PDTreeMesh* pTreePyramid;
     pyramid.LoadMeshFromSTLFile(workingDir + "Pyramid.STL");
     // construct PD-Tree
@@ -357,7 +363,7 @@ void mshAlgPDTreeCPMeshTest::PyramidBottom(void)
 // convex - Cylindricaltunnel
 void mshAlgPDTreeCPMeshTest::CylindricalTunnel(void)
 {
-    cisstMesh tunnel;
+    msh3Mesh tunnel;
     msh3PDTreeMesh* pTreeTunnel;
     tunnel.LoadMeshFromSTLFile(workingDir + "CylindricalTunnel.STL");
     // construct PD-Tree
@@ -384,7 +390,7 @@ void mshAlgPDTreeCPMeshTest::CylindricalTunnel(void)
 // concave and convex - Crown
 void mshAlgPDTreeCPMeshTest::CrownValley(void)
 {
-    cisstMesh crown;
+    msh3Mesh crown;
     msh3PDTreeMesh* pTreecrown;
     crown.LoadMeshFromSTLFile(workingDir + "Crown.STL");
     // construct PD-Tree
@@ -416,7 +422,7 @@ void mshAlgPDTreeCPMeshTest::CrownValley(void)
 
 void mshAlgPDTreeCPMeshTest::CrownPeak(void)
 {
-    cisstMesh crown;
+    msh3Mesh crown;
     msh3PDTreeMesh* pTreecrown;
     crown.LoadMeshFromSTLFile(workingDir + "Crown.STL");
     // construct PD-Tree
@@ -452,7 +458,7 @@ void mshAlgPDTreeCPMeshTest::CrownPeak(void)
 
 void mshAlgPDTreeCPMeshTest::ResetMeshConstraintValues(void)
 {
-    cisstMesh mesh;
+    msh3Mesh mesh;
     std::string loadMeshPath = workingDir + "Cube.STL";
     mesh.LoadMeshFromSTLFile(loadMeshPath);
 
@@ -473,11 +479,11 @@ void mshAlgPDTreeCPMeshTest::ResetMeshConstraintValues(void)
 
 void mshAlgPDTreeCPMeshTest::ConvertUnit(void)
 {
-    cisstMesh meshInM(true);
+    msh3Mesh meshInM(true);
     std::string loadMeshPath = workingDir + "Cube.STL";
     meshInM.LoadMeshFromSTLFile(loadMeshPath);
 
-    cisstMesh meshInMM(false);
+    msh3Mesh meshInMM(false);
     meshInMM.LoadMeshFromSTLFile(loadMeshPath);
 
     for (size_t i = 0; i < meshInM.vertices.size(); i ++) {
@@ -497,11 +503,11 @@ void mshAlgPDTreeCPMeshTest::ConvertUnit(void)
 
 void mshAlgPDTreeCPMeshTest::TransformModel(void)
 {
-    cisstMesh mesh;
+    msh3Mesh mesh;
     std::string loadMeshPath = workingDir + "Cube.STL";
     mesh.LoadMeshFromSTLFile(loadMeshPath);
 
-    cisstMesh meshTransformed;
+    msh3Mesh meshTransformed;
     meshTransformed.LoadMeshFromSTLFile(loadMeshPath);
 
     // identity
@@ -524,7 +530,7 @@ void mshAlgPDTreeCPMeshTest::TransformModel(void)
     // translation + rotation
     vctFrm4x4 transformation;
     vct3 translation(-1.0, 2.0, 3.0);
-    cisstMesh meshTransformed2;
+    msh3Mesh meshTransformed2;
     meshTransformed2.LoadMeshFromSTLFile(loadMeshPath);
     transformation.Assign(identity);
     transformation.Rotation().From(vctAxAnRot3(vct3(1.0, 0.0, 0.0), cmnPI)); // rotate around x by 180, y -> -y, z -> -z

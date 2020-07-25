@@ -34,3 +34,14 @@ This code comes from different public git repositories:
 The main differences are:
 * This repository only contains the mesh related code, no registration yet (should create `cisstRegistration` library for this but we need some volunteers).
 * Classes and files have been renamed to match `cisst` naming convention.  One can use the `cisst/utils/crtk-port/replace-symbols.sh` script to port existing code, along with the disctionary `refactor.dict`
+
+# Running tests
+
+To run the unit tests, make sure:
+* The `share` folder in `cisst` is populated.   We use a git submodule to include the shared data so you need to do `git submodule init; git submodule update` in the cisst repository.  Alternatively, you can use the `--recursive` option when you initially `git clone` the `cisst` repository.
+* You set your `cisst` environment variables properly.  The test program uses `CISST_ROOT` to find the meshes.  The script `cisstvars.sh` can be "sourced" to set `CISST_ROOT` automatically.   When using ROS/catkin build tools, you can do `source ~/catkin_ws/devel/cisstvars.sh`
+
+Then you can run the tests with:
+```sh
+cisstMeshTests -r
+```
