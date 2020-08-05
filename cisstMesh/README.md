@@ -22,7 +22,7 @@ registration method (e.g. Iterative Closest Points `ICP`).
 * `MLP`: most likely point
 * `BA`: bounded angle
 * `Dir`: directed
-* `DPDTree`: directed PD tree
+* `DirPDTree`: directed PD tree
 * `Proj`: projection
 
 # Origin of the code
