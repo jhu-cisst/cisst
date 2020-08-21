@@ -1,6 +1,6 @@
 # Introduction
 
-Mesh and point cloud classes for 2D and 3D datasets.  Code was mostly
+Mesh and point cloud classes for 2D and 3D datasets.  This code was mostly
 developped by Seth Billings during his PhD (see
 https://jscholarship.library.jhu.edu/handle/1774.2/40219.  His PhD
 dissertation contains a chapter related to software architecture.
@@ -22,20 +22,20 @@ registration method (e.g. Iterative Closest Points `ICP`).
 * `MLP`: most likely point
 * `BA`: bounded angle
 * `Dir`: directed
-* `DPDTree`: directed PD tree
+* `DirPDTree`: directed PD tree
 * `Proj`: projection
 
 # Origin of the code
 
-This code comes from different public git repositories:
+The code in cisstMesh comes from different public git repositories:
 * https://github.com/sbillin/IMLP
 * https://github.com/AyushiSinha/cisstICP
 
 The main differences are:
-* This repository only contains the mesh related code, no registration yet (should create `cisstRegistration` library for this but we need some volunteers).
-* Classes and files have been renamed to match `cisst` naming convention.  One can use the `cisst/utils/crtk-port/replace-symbols.sh` script to port existing code, along with the disctionary `refactor.dict`
+* This repository only contains the mesh related code, no registration yet (one should create the `cisstRegistration` library for this but we need some volunteers).
+* Classes and files have been renamed to match `cisst` naming convention.  One can use the `cisst/utils/crtk-port/replace-symbols.sh` script to port existing code, along with the dictionary `refactor.dict`
 
-# Running tests
+# Tests
 
 To run the unit tests, make sure:
 * The `share` folder in `cisst` is populated.   We use a git submodule to include the shared data so you need to do `git submodule init; git submodule update` in the cisst repository.  Alternatively, you can use the `--recursive` option when you initially `git clone` the `cisst` repository.
