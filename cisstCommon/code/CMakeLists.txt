@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -56,6 +56,7 @@ set (HEADER_FILES
      cmnDataFunctionsString.h
      cmnDataFunctionsVector.h
      cmnDataFunctionsArray.h
+     cmnDataFunctionsList.h
      cmnDataFunctionsVectorHelpers.h
      cmnDataFunctionsMatrixHelpers.h
      cmnDataFormat.h

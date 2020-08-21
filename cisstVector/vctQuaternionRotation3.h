@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2004-01-15
 
-  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -68,6 +68,12 @@ class vctQuaternionRotation3: public vctQuaternionRotation3Base<vctFixedSizeVect
     inline vctQuaternionRotation3(const ThisType & quaternionRotation):
         BaseType(quaternionRotation)
     {}
+
+    ThisType & operator = (const ThisType & quaternionRotation)
+    {
+        BaseType::operator = (quaternionRotation);
+        return *this;
+    }
 
     template <class __containerType>
     inline

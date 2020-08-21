@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-09-01
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -100,7 +99,7 @@ public:
     mtsLogMessage(const char * log, size_t len);
     /*! Destructor */
     ~mtsLogMessage() {}
-
+    mtsLogMessage & operator = (const mtsLogMessage & other);
     void ToStream(std::ostream & outputStream) const;
     void SerializeRaw(std::ostream & outputStream) const;
     void DeSerializeRaw(std::istream & inputStream);

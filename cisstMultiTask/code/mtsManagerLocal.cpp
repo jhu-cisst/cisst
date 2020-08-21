@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1001,11 +1001,19 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 #if CISST_HAS_JSON
 bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
 {
-    // extract path of main json config file to search other files relative to it
     cmnPath configPath(cmnPath::GetWorkingDirectory());
+    // make sure the file exists
     std::string fullname = configPath.Find(filename);
+    if (fullname == "") {
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: file \"" << filename
+                                 << "\" not found in path: "<< std::endl
+                                 << configPath << std::endl;
+        return false;
+    }
+    // extract path of main json config file to search other files relative to it
     std::string configDir = fullname.substr(0, fullname.find_last_of('/'));
-    configPath.Add(configDir, cmnPath::TAIL);
+    configPath.Add(configDir, cmnPath::HEAD);
+
     // open json file
     std::ifstream jsonStream;
     jsonStream.open(filename.c_str());
@@ -1026,6 +1034,19 @@ bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
     }
 
     return this->ConfigureJSON(jsonConfig, configPath);
+}
+
+bool mtsManagerLocal::ConfigureJSON(const std::list<std::string> & filenames)
+{
+    bool result = true;
+    typedef std::list<std::string> listType;
+    const listType::const_iterator endFile = filenames.end();
+    for (listType::const_iterator iterFile = filenames.begin();
+         iterFile != endFile;
+         ++iterFile) {
+        result = result && ConfigureJSON(*iterFile);
+    }
+    return result;
 }
 
 bool mtsManagerLocal::ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath)
@@ -1088,7 +1109,8 @@ bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfig
                                                className,
                                                constructorArgJSON);
     if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: failed to dynamically create component" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: failed to dynamically create component of type \""
+                                 << className << "\"" << std::endl;
         return false;
     }
     // configure as needed
@@ -1106,7 +1128,11 @@ bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfig
             component->Configure(configFile);
         }
     }
-    // add
+    // add if need, it is possible ctor or Configure already added the component itself to manager
+    mtsComponent * existing = this->GetComponent(component->GetName());
+    if (existing == component) {
+        return true;
+    }
     if (!this->AddComponent(component)) {
         CMN_LOG_CLASS_INIT_ERROR << "ConfigureComponentJSON: failed to add component to component manager" << std::endl;
         return false;
@@ -1252,7 +1278,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
     CMN_ASSERT(parsedOk);
     try {
         argument->DeSerializeTextJSON(jsonValue);
-    } catch (std::runtime_error e) {
+    } catch (std::runtime_error & e) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: unable to deserialize constructor for "
                                  << className << " from JSON file, got exception: "
                                  << e.what() << std::endl;
@@ -2222,7 +2248,7 @@ ConnectionIDType mtsManagerLocal::ConnectSetup(const std::string & clientCompone
 {
     std::vector<std::string> options;
     std::stringstream allOptions;
-    std::ostream_iterator< std::string > output(allOptions, " ");
+    std::ostream_iterator< std::string > output(allOptions, ", ");
 
     // Make sure all interfaces created so far are registered to the GCM.
     if (!RegisterInterfaces(clientComponentName)) {

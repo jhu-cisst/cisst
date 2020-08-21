@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -423,6 +421,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /********************* Methods to query the task state ****************/
 
+    /*! Return true if all required interfaces are connected.  This
+      method will not log the results in cisstLog unless the flag
+      'log' is set to true. */
+    bool AreAllInterfacesRequiredConnected(const bool log = false);
+    
     /*! Return true if task is active. */
     bool IsRunning(void) const;
     inline bool CISST_DEPRECATED Running(void) const {
@@ -442,10 +445,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     const mtsComponentState & GetState(void) const;
     void GetState(mtsComponentState &state) const;
 
- protected:
-
     /*! Helper function to wait on a state change, with specified timeout in seconds. */
     virtual bool WaitForState(mtsComponentState desiredState, double timeout);
+
+ protected:
 
     /*! Flag to keep track of separate log file use */
     bool UseSeparateLogFileFlag;
@@ -558,4 +561,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponent)
 
 
 #endif // _mtsComponent_h
-

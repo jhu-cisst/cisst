@@ -52,9 +52,9 @@ public:
         SlotReset();
     }
 
-    mtsFunctionRead * GetStateJoint;
-    mtsFunctionRead * GetConfigurationJoint;
-    mtsFunctionWrite * SetPositionGoalJoint;
+    mtsFunctionRead * measured_js;
+    mtsFunctionRead * configuration_js;
+    mtsFunctionWrite * move_jp;
 
 protected:
     vctQtWidgetDynamicVectorDoubleWrite * QVWPosition;

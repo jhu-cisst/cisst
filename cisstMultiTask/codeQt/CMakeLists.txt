@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstMultiTaskQt
 #
-# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -71,7 +71,8 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFunction.cpp
                                 mtsQtWidgetEvent.cpp
                                 mtsQtApplication.cpp
-                   HEADER_FILES mtsCollectorQtComponent.h
+                   HEADER_FILES mtsForwardDeclarationsQt.h
+                                mtsCollectorQtComponent.h
                                 mtsCollectorQtWidget.h
                                 mtsCollectorQtFactory.h
                                 mtsMessageQtWidget.h

@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -55,7 +55,7 @@ cisst_add_library (
                vctForceTorqueQtWidget.cpp
                vctForceTorque2DQtWidget.cpp
                vctForceTorque3DQtWidget.cpp
-  HEADER_FILES vctQtForwardDeclarations.h
+  HEADER_FILES vctForwardDeclarationsQt.h
                vctPlot2DOpenGLQtWidget.h
                vctQtWidgetDynamicVector.h
                vctQtWidgetDynamicMatrix.h

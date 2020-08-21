@@ -760,7 +760,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable &
     typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
     typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
 
-    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessorByInstance(stateData));
     if (!stateAccessor) {
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
         return 0;
@@ -780,7 +780,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateDelayed(const mtsState
     typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
     typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
 
-    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessorByInstance(stateData));
     if (!stateAccessor) {
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
         return 0;
@@ -798,7 +798,7 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWriteState(const mtsStateT
 {
     typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
     typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
-    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessorByInstance(stateData));
     if (!stateAccessor) {
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteState: invalid accessor for command " << commandName << std::endl;
         return 0;

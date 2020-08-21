@@ -1289,12 +1289,12 @@ void mtsInterfaceProvided::RemoveObserverList(const mtsEventHandlerList & argin,
 void mtsInterfaceProvided::AddMessageEvents(void)
 {
     // first attempt to add all three events
-    if ((!AddEventWrite(mMessages.StatusEvent, "Status", mMessages.StatusMessage))
-        || (!AddEventWrite(mMessages.WarningEvent, "Warning", mMessages.WarningMessage))
-        || (!AddEventWrite(mMessages.ErrorEvent, "Error", mMessages.ErrorMessage))
+    if ((!AddEventWrite(mMessages.StatusEvent, "status", mMessages.StatusMessage))
+        || (!AddEventWrite(mMessages.WarningEvent, "warning", mMessages.WarningMessage))
+        || (!AddEventWrite(mMessages.ErrorEvent, "error", mMessages.ErrorMessage))
         ) {
         CMN_LOG_CLASS_INIT_ERROR << "AddMessageEvents for " << GetFullName()
-                                 << " failed, make sure there is no other write event named \"Status\", \"Warning\" or \"Error\"" << std::endl;
+                                 << " failed, make sure there is no other write event named \"status\", \"warning\" or \"error\"" << std::endl;
         return;
     }
 }

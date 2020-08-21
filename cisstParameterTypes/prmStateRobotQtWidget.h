@@ -63,11 +63,11 @@ private slots:
 
 private:
     int TimerPeriodInMilliseconds;
-    mtsFunctionRead GetConfigurationJoint;
+    mtsFunctionRead configuration_js;
     prmConfigurationJoint ConfigurationJoint;
-    mtsFunctionRead GetStateJoint;
+    mtsFunctionRead measured_js;
     prmStateJoint StateJoint;
-    mtsFunctionRead GetPositionCartesian;
+    mtsFunctionRead measured_cp;
     prmPositionCartesianGet Position;
 };
 

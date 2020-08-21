@@ -194,7 +194,7 @@ void MapBehavior::Startup(void)
     mtsCommandRead * command = interfaceProvided->GetCommandRead("GetPositionJoint");
     CMN_ASSERT(command);
     GetJointPositionSlave.Bind(command);
-    command = interfaceProvided->GetCommandRead("GetPositionCartesian");
+    command = interfaceProvided->GetCommandRead("measured_cp");
     CMN_ASSERT(command);
     GetCartesianPositionSlave.Bind(command);
     

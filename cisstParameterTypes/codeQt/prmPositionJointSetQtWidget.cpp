@@ -25,9 +25,9 @@ http://www.cisst.org/cisst/license.txt.
 
 prmPositionJointSetQtWidget::prmPositionJointSetQtWidget(void):
     QWidget(),
-    GetStateJoint(0),
-    GetConfigurationJoint(0),
-    SetPositionGoalJoint(0),
+    measured_js(0),
+    configuration_js(0),
+    move_jp(0),
     mPrismaticFactor(1.0),
     mRevoluteFactor(1.0),
     mNeedsConversion(false)
@@ -61,32 +61,38 @@ void prmPositionJointSetQtWidget::setupUi(void)
 void prmPositionJointSetQtWidget::SlotReset(void)
 {
     QPBMove->setEnabled(false);
-    if (!GetStateJoint) {
+    if (!measured_js) {
         return;
     }
-    if (!GetConfigurationJoint) {
+    if (!configuration_js) {
         return;
     }
     prmStateJoint state;
-    mtsExecutionResult executionResult = (*GetStateJoint)(state);
+    mtsExecutionResult executionResult = (*measured_js)(state);
     if (!executionResult) {
         return;
     }
 
     if (mNeedsConversion) {
         prmConfigurationJoint configuration;
-        executionResult = (*GetConfigurationJoint)(configuration);
+        executionResult = (*configuration_js)(configuration);
         if (!executionResult) {
             return;
         }
         if (configuration.Type().size() == state.Position().size()) {
             mFactors.SetSize(configuration.Type().size());
             prmJointTypeToFactor(configuration.Type(), mPrismaticFactor, mRevoluteFactor, mFactors);
+            // temp vectors
             mTemp1.SetSize(state.Position().size());
             mTemp2.SetSize(state.Position().size());
+            // set position first to resize vector widget
+            mTemp1.SetAll(0.0);
+            QVWPosition->SetValue(mTemp1);
+            // set range
             mTemp1.ElementwiseProductOf(mFactors, configuration.PositionMin());
             mTemp2.ElementwiseProductOf(mFactors, configuration.PositionMax());
             QVWPosition->SetRange(mTemp1, mTemp2);
+            // set position again but this time with actual values
             mTemp1.ElementwiseProductOf(mFactors, state.Position());
             QVWPosition->SetValue(mTemp1);
             QPBMove->setEnabled(true);
@@ -99,7 +105,7 @@ void prmPositionJointSetQtWidget::SlotReset(void)
 
 void prmPositionJointSetQtWidget::SlotSetPositionGoalJoint(void)
 {
-    if (!SetPositionGoalJoint) {
+    if (!move_jp) {
         return;
     }
     // get the values from the widget
@@ -113,5 +119,5 @@ void prmPositionJointSetQtWidget::SlotSetPositionGoalJoint(void)
     } else {
         goal.Goal().Assign(mTemp1);
     }
-    (*SetPositionGoalJoint)(goal);
+    (*move_jp)(goal);
 }

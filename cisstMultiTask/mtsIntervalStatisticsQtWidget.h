@@ -72,7 +72,7 @@ private slots:
 
 private:
     int TimerPeriodInMilliseconds;
-    mtsFunctionRead GetPeriodStatistics;
+    mtsFunctionRead period_statistics;
     mtsIntervalStatistics IntervalStatistics;
 };
 
