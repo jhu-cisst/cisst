@@ -26,7 +26,7 @@
    - make -j install
    - mkdir -p ~/cisst-build
    - cd ~/cisst-build
-   - cmake -C ../.travis.cache.cmake ~/build/jhu-cisst/cisst
+   - cmake -C ~/build/jhu-cisst/cisst/.travis.cache.cmake ~/build/jhu-cisst/cisst
 
  script:
    - make -j
