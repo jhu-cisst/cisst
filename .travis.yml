@@ -17,10 +17,12 @@
   - sudo apt-get install -qq cmake libxml2-dev libcppunit-dev libopencv-dev gfortran
 
  before_script:
+   - cd ~/
    - git clone https://github.com/jhu-cisst/cisstNetlib
    - mkdir ~/cisstNetlib-build
+   - mkdir ~/cisstNetlib-install
    - cd ~/cisstNetlib-build
-   - cmake ../cisstNetlib
+   - cmake ~/cisstNetlib -DCMAKE_INSTALL_PREFIX=~/cisstNetlib-install
    - make
    - mkdir ~/build
    - cd ~/build
