@@ -19,17 +19,17 @@
  before_script:
    - cd ~/
    - git clone https://github.com/jhu-cisst/cisstNetlib
-   - mkdir ~/cisstNetlib-build
-   - mkdir ~/cisstNetlib-install
+   - mkdir -p ~/cisstNetlib-build
+   - mkdir -p ~/cisstNetlib-install
    - cd ~/cisstNetlib-build
    - cmake ~/cisstNetlib -DCMAKE_INSTALL_PREFIX=~/cisstNetlib-install
-   - make
-   - mkdir ~/build
+   - make -j install
+   - mkdir -p ~/build
    - cd ~/build
    - cmake -C ../.travis.cache.cmake ..
 
  script:
-   - make
+   - make -j
    - cd bin
    - ls -lR
    - ./cisstCommonTests -r
