@@ -23,13 +23,13 @@
    - mkdir -p ~/cisstNetlib-install
    - cd ~/cisstNetlib-build
    - cmake ~/cisstNetlib -DCMAKE_INSTALL_PREFIX=~/cisstNetlib-install
-   - make -j install
+   - make install
    - mkdir -p ~/cisst-build
    - cd ~/cisst-build
    - cmake -C ~/build/jhu-cisst/cisst/.travis.cache.cmake ~/build/jhu-cisst/cisst
 
  script:
-   - make -j
+   - make
    - cd bin
    - ls -lR
    - ./cisstCommonTests -r
