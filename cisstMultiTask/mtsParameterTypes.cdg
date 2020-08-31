@@ -130,17 +130,18 @@ typedef mtsGenericObjectProxy<mtsDescriptionInterfaceFullNameVec> mtsDescription
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionInterfaceFullNameVecProxy);
 
 /* to use description in std::maps */
-template <>
-struct std::less<mtsDescriptionInterfaceFullName>  {
-    bool operator()(const mtsDescriptionInterfaceFullName & a,
-                    const mtsDescriptionInterfaceFullName & b) const
-    {
-        return ((a.ProcessName < b.ProcessName)
-                || (a.ComponentName < b.ComponentName)
-                || (a.InterfaceName < b.InterfaceName));
-    }
-};
-
+namespace std {
+    template <>
+    struct less<mtsDescriptionInterfaceFullName>  {
+        bool operator()(const mtsDescriptionInterfaceFullName & a,
+                        const mtsDescriptionInterfaceFullName & b) const
+        {
+            return ((a.ProcessName < b.ProcessName)
+                    || (a.ComponentName < b.ComponentName)
+                    || (a.InterfaceName < b.InterfaceName));
+        }
+    };
+}
 }
 
 
