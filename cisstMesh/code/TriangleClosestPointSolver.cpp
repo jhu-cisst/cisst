@@ -59,7 +59,7 @@ void TriangleClosestPointSolver::init(const vctDynamicVector<vct3> &vertices_,
     triangles = triangles_;
 
     // precompute properties for each triangle
-    int numTriangles = triangles.size();
+    size_t numTriangles = triangles.size();
     triXfm.SetSize(numTriangles);
     triXfmInv.SetSize(numTriangles);
     P2.SetSize(numTriangles);

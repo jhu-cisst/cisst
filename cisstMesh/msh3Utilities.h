@@ -203,9 +203,9 @@ inline void skew(const vct3 &v, vctDynamicMatrixRef<double> &sk)
     );
 }
 
-inline int sub2ind(const vct3 &size, const int &i, const int &j, const int &k)
+inline size_t sub2ind(const vctFixedSizeVector<size_t, 3> & size, const size_t i, const size_t j, const size_t k)
 {
-    return i + size(0)*j + size(0)*size(1)*k;
+    return i + size(0) * j + size(0) * size(1) * k;
 }
 
 inline double round6(double d){

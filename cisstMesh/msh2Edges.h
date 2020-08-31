@@ -49,7 +49,7 @@ class CISST_EXPORT msh2Edges
  public:
 
 	vctDynamicVector<msh2Edge>  Edges;
-    unsigned int numEdges;
+    size_t numEdges;
 
     // constructors
     msh2Edges() {};

@@ -42,7 +42,7 @@
 #include <cisstMesh/msh2Utilities.h>
 
 msh2DirPDTreeNode::msh2DirPDTreeNode(int* pDataIndexArray,
-                                     int numIndexes,
+                                     size_t numIndexes,
                                      msh2DirPDTreeBase* pTree,
                                      msh2DirPDTreeNode* pParent,
                                      bool bUseOBB, unsigned int splitDimension
@@ -66,7 +66,7 @@ msh2DirPDTreeNode::msh2DirPDTreeNode(int* pDataIndexArray,
 if (bUsingOBB) {
 vct2    p;
 vct2x2  M;
-for (int i = 0; i < NData; i++) {
+for (size_t i = 0; i < NData; i++) {
 p = MyTree->DatumSortPoint(Datum(i));
 // accumulate positions
 posSum += p;
@@ -85,7 +85,7 @@ posCov = covSum.Divide(NData) + M;
 F = ComputeCovFrame(posCov, posAvg);
 
 // Construct node bounding box
-for (int i = 0; i < NData; i++) {
+for (size_t i = 0; i < NData; i++) {
 // since we don't know what type of datum we're dealing with
 //  (and since we want the bounds to completely hold all of this datum)
 //  we must place the enlarge bounds function at the tree level where

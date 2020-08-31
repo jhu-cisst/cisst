@@ -174,9 +174,9 @@ void msh3Mesh::SaveTriangleCovariances(std::string &filePath)
         std::cout << "ERROR: failed to open file for saving cov: " << filePath << std::endl;
         assert(0);
     }
-    unsigned int numCov = this->TriangleCov.size();
+    size_t numCov = this->TriangleCov.size();
     //fs << "NUMCOV " << numCov << "\n";
-    for (unsigned int i = 0; i < numCov; i++) {
+    for (size_t i = 0; i < numCov; i++) {
         fs << this->TriangleCov.at(i).Row(0) << " "
            << this->TriangleCov.at(i).Row(1) << " "
            << this->TriangleCov.at(i).Row(2) << "\n";
@@ -334,8 +334,8 @@ int msh3Mesh::AddMeshFile(const std::string &meshFilePath)
     unsigned int itemsRead;
     std::string line;
 
-    unsigned int vOffset = vertices.size();
-    unsigned int tOffset = faces.size();
+    size_t vOffset = vertices.size();
+    size_t tOffset = faces.size();
 
     // open file
     std::ifstream meshFile;

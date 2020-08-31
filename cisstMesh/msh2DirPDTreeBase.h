@@ -79,8 +79,8 @@ class CISST_EXPORT msh2DirPDTreeBase
 
     msh2DirPDTreeNode *Top;
     int* DataIndices;
-    int NData;
-    int NNodes;
+    size_t NData;
+    size_t NNodes;
     int treeDepth;
 
     //--- Methods ---//
@@ -131,8 +131,8 @@ class CISST_EXPORT msh2DirPDTreeBase
     int FastInitializeProximalDatum(const vct2 &v, const vct2 &n,
                                     vct2 &proxPoint, vct2 &proxNorm);
 
-    int NumData() const { return NData; };
-    int NumNodes() const { return NNodes; };
+    size_t NumData() const { return NData; };
+    size_t NumNodes() const { return NNodes; };
     int TreeDepth() const { return treeDepth; };
 
     // debug routines

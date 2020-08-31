@@ -66,8 +66,8 @@ class CISST_EXPORT msh2DirPDTreeNode
     msh2DirPDTreeBase*	MyTree;
     msh2DirPDTreeNode*  Parent;
     int* DataIndices;
-    int NData;
-    int myDepth;
+    size_t NData;
+    size_t myDepth;
     msh2DirPDTreeNode *LEq, *More;
 
     vctFrm2 F;                  // transforms world -> local node coords
@@ -94,7 +94,7 @@ class CISST_EXPORT msh2DirPDTreeNode
 
     // constructor
     msh2DirPDTreeNode(
-                      int *pDataIndexArray, int numIndexes,
+                      int *pDataIndexArray, size_t numIndexes,
                       msh2DirPDTreeBase* pTree, msh2DirPDTreeNode* pParent,
                       bool bComputeOBB = true, unsigned int splitDimension = 0);
 
@@ -121,7 +121,7 @@ class CISST_EXPORT msh2DirPDTreeNode
                          unsigned int &numNodesVisited,
                          unsigned int &numNodesSearched);
 
-    inline int   NumData() const { return NData; };
+    inline size_t NumData() const { return NData; };
     inline int   IsTerminalNode() const { return LEq == NULL; };
 
     int   ConstructTree(int CountThresh, double DiagThresh);

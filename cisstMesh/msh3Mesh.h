@@ -50,7 +50,9 @@
 
 #include <unordered_map>
 
-// Always include last! 
+// Always include last!
+#include <cisstMesh/mshExport.h>
+
 class CISST_EXPORT msh3Mesh
 {
 
@@ -97,8 +99,8 @@ public:
     //  possibly invalid values
     void ResetMesh();
 
-    inline int NumVertices() const { return vertices.size(); }
-    inline int NumTriangles() const { return faces.size(); }
+    inline size_t NumVertices(void) const { return vertices.size(); }
+    inline size_t NumTriangles(void) const { return faces.size(); }
 
     // initializes triangle noise models to zero (default initializer)
     void InitializeNoiseModel();
@@ -220,6 +222,7 @@ private:
         if (vec1.DotProduct(faceNormals.at(idxNeighbor)) < 0.0 || vec2.DotProduct(faceNormals.at(idxNeighbor)) < 0.0){
             return false;
         }
+        return true;
     }
 
     inline bool CheckConcavity(int idx, int idxNeighbor) {

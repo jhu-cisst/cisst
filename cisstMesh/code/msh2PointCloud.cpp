@@ -76,7 +76,7 @@ int msh2PointCloud::AppendPointCloudFromFile(vctDynamicVector<vct2> &pts,
     std::string line;
     float f1, f2;
 
-    unsigned int pOffset;
+    size_t pOffset;
     pOffset = pts.size();
 
     std::cout << "Reading pts from file: " << filePath << std::endl;
