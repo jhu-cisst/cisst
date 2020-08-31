@@ -14,9 +14,9 @@
 # paths for headers/libraries
 cisst_set_directories (cisstCommon cisstTestsDriver)
 
-if (CISST_HAS_XML AND NOT (${CISST_XML_LIB} STREQUAL "QtXML"))
+if (CISST_HAS_XML AND NOT ("${CISST_XML_LIB}" STREQUAL "QtXML"))
   set (INCLUDE_XML_TEST TRUE)
-endif (CISST_HAS_XML AND NOT (${CISST_XML_LIB} STREQUAL "QtXML"))
+endif (CISST_HAS_XML AND NOT ("${CISST_XML_LIB}" STREQUAL "QtXML"))
 
 # set path for XML if needed
 if (INCLUDE_XML_TEST)
