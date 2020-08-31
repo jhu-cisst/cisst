@@ -12,6 +12,10 @@
 # All cisstMesh libraries
 project (cisstMeshLibs)
 
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+set (CMAKE_CXX_EXTENSIONS OFF)
+
 add_subdirectory (code)
 
 cisst_offer_python (cisstMesh)

@@ -18,8 +18,9 @@ if (NOT CISST_HAS_CISSTNETLIB)
   message (SEND_ERROR "cisstMesh requires cisstNumerical compiled with cisstNetlib")
 endif ()
 
-# do we need external project for RPLY
+# do we need external project for RPLY -- this is not implemented
 option (CISST_MSH_HAS_RPLY "Build RPLY as external project for cisstMesh" OFF)
+mark_as_advanced (CISST_MSH_HAS_RPLY)
 
 # all source files
 set (SOURCE_FILES
