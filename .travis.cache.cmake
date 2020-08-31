@@ -1,9 +1,12 @@
 # initial CMake cache values for travis.ci builds
 
+# Force compilation for cisstMesh
+set (CISST_cisstMesh ON CACHE BOOL "")
+
 # XML parsing
 set (CISST_cisstCommonXML ON CACHE BOOL "")
 
-# JSON 
+# JSON
 set (CISST_HAS_JSON ON CACHE BOOL "")
 
 # Unit tests
