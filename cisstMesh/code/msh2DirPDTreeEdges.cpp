@@ -45,7 +45,7 @@ msh2DirPDTreeEdges::msh2DirPDTreeEdges(const vctDynamicVector<vct2> &edgesV1,
     NData = EdgeList.numEdges;
 
     DataIndices = new int[NData];
-    for (int i=0;i<NData;i++) {
+    for (size_t i=0; i<NData; i++) {
         DataIndices[i]=i;
     }
 

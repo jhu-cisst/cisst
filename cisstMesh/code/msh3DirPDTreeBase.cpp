@@ -42,7 +42,8 @@
 
 // quickly find an approximate initial match by dropping straight down the
 //   tree to the node containing the sample point and picking a datum from there
-int msh3DirPDTreeBase::FastInitializeProximalDatum(const vct3 &v, const vct3 &n, vct3 &proxPoint, vct3 &proxNorm)
+int msh3DirPDTreeBase::FastInitializeProximalDatum(const vct3 &v, const vct3 & CMN_UNUSED(n),
+                                                   vct3 &proxPoint, vct3 &proxNorm)
 {
     // find proximal leaf node
     msh3DirPDTreeNode *pNode;

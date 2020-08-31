@@ -39,7 +39,7 @@
 
 // fast check if a node might contain a datum having smaller match error
 //  than the error bound
-int msh2AlgDirPDTreeCP::NodeMightBeCloser(const vct2 &v, const vct2 &n,
+int msh2AlgDirPDTreeCP::NodeMightBeCloser(const vct2 &v, const vct2 & CMN_UNUSED(n),
                                           msh2DirPDTreeNode const *node,
                                           double ErrorBound)
 {

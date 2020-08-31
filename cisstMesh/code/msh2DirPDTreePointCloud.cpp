@@ -42,7 +42,7 @@ msh2DirPDTreePointCloud::msh2DirPDTreePointCloud(msh2PointCloud &pointCloud,
 {
     NData = pointCloud.points.size();
     DataIndices = new int[NData];
-    for (int i=0;i<NData;i++) {
+    for (size_t i=0; i<NData; i++) {
         DataIndices[i]=i;
     }
 

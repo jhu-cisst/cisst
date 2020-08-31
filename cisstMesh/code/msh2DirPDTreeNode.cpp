@@ -62,129 +62,129 @@ msh2DirPDTreeNode::msh2DirPDTreeNode(int* pDataIndexArray,
     posSum(0.0), covSum(0.0),
     Nsum(0.0)
 {
-// compute bounding box of node
-if (bUsingOBB) {
-vct2    p;
-vct2x2  M;
-for (size_t i = 0; i < NData; i++) {
-p = MyTree->DatumSortPoint(Datum(i));
-// accumulate positions
-posSum += p;
-// accumulate covariances
-M.OuterProductOf(p, p);
-covSum += M;
+    // compute bounding box of node
+    if (bUsingOBB) {
+        vct2    p;
+        vct2x2  M;
+        for (size_t i = 0; i < NData; i++) {
+            p = MyTree->DatumSortPoint(Datum(i));
+            // accumulate positions
+            posSum += p;
+            // accumulate covariances
+            M.OuterProductOf(p, p);
+            covSum += M;
+        }
+
+        // compute covariance and average of node positions
+        posAvg = posSum.Divide(NData);
+        M.OuterProductOf(posAvg, posAvg);
+        posCov = covSum.Divide(NData) + M;
+
+        // Compute local coordinate frame for this node
+        //  (transformation from world -> node coords)
+        F = ComputeCovFrame(posCov, posAvg);
+
+        // Construct node bounding box
+        for (size_t i = 0; i < NData; i++) {
+            // since we don't know what type of datum we're dealing with
+            //  (and since we want the bounds to completely hold all of this datum)
+            //  we must place the enlarge bounds function at the tree level where
+            //  the datum type is known.
+            MyTree->EnlargeBounds(F, Datum(i), Bounds);
+        }
+    }
+    else {
+        // Add all datums in the node to the bounding box
+        for (size_t i = 0; i < NData; i++) {
+            // accumulate positions
+            posSum += MyTree->DatumSortPoint(Datum(i));;
+
+            // add datum to node
+            MyTree->EnlargeBounds(Datum(i), Bounds);
+        }
+
+        // compute the average of node positions
+        posAvg = posSum.Divide(NData);
+
+        // Define split direction to be the bounding box axis of greatest extent
+        vct2 dimSize = Bounds.MaxCorner - Bounds.MinCorner;
+        dimSize[0] > dimSize[1] ? splitDim = 0 : splitDim = 1;
+    }
 }
 
-// compute covariance and average of node positions
-posAvg = posSum.Divide(NData);
-M.OuterProductOf(posAvg, posAvg);
-posCov = covSum.Divide(NData) + M;
-
-// Compute local coordinate frame for this node
-//  (transformation from world -> node coords)
-F = ComputeCovFrame(posCov, posAvg);
-
-// Construct node bounding box
-for (size_t i = 0; i < NData; i++) {
-// since we don't know what type of datum we're dealing with
-//  (and since we want the bounds to completely hold all of this datum)
-//  we must place the enlarge bounds function at the tree level where
-//  the datum type is known.
-MyTree->EnlargeBounds(F, Datum(i), Bounds);
-}
-}
- else {
-// Add all datums in the node to the bounding box
-for (int i = 0; i < NData; i++) {
-// accumulate positions
-posSum += MyTree->DatumSortPoint(Datum(i));;
-
-// add datum to node
-MyTree->EnlargeBounds(Datum(i), Bounds);
-}
-
-// compute the average of node positions
-posAvg = posSum.Divide(NData);
-
-// Define split direction to be the bounding box axis of greatest extent
-vct2 dimSize = Bounds.MaxCorner - Bounds.MinCorner;
-dimSize[0] > dimSize[1] ? splitDim = 0 : splitDim = 1;
-}
-}
-
-    msh2DirPDTreeNode::~msh2DirPDTreeNode()
-    {
-if (LEq != NULL) delete LEq;
-if (More != NULL) delete More;
+msh2DirPDTreeNode::~msh2DirPDTreeNode()
+{
+    if (LEq != NULL) delete LEq;
+    if (More != NULL) delete More;
 }
 
 
-        // returns tree depth
-        int msh2DirPDTreeNode::ConstructTree(int CountThresh, double DiagThresh)
-        {
-// Check leaf node condition
-if (NumData() <= CountThresh || Bounds.DiagonalLength() < DiagThresh) {
-// leaf node
-ConstructLeaf();
-myDepth = 0;
-return myDepth;
-}
+// returns tree depth
+int msh2DirPDTreeNode::ConstructTree(const size_t CountThresh, double DiagThresh)
+{
+    // Check leaf node condition
+    if (NumData() <= CountThresh || Bounds.DiagonalLength() < DiagThresh) {
+        // leaf node
+        ConstructLeaf();
+        myDepth = 0;
+        return myDepth;
+    }
 
-// Not a leaf => sort node for splitting
-int topLEq = SortNodeForSplit();
+    // Not a leaf => sort node for splitting
+    size_t topLEq = SortNodeForSplit();
 
-// Since this PD tree depends on averaging,
-//  ensure that at least 2 datums exist in each node
-//   NOTE: topLEq == NumData() means all data allocated to left node
-//         topLEq == 0 means all data allocated to right node
-if (topLEq < 2 || topLEq > NumData()-2) {
-ConstructLeaf();
-myDepth = 0;  // we decide to stop here and not split any further
-return myDepth;
- }
-//  // Double check that data split into two nodes
-//  if (topLEq == NumData() || topLEq == 0)
-//  { // all data allocated to only one node
-//    // need this in case count threshold = 1
-//    // TODO: avoid this case by NumData()<=CountThresh above
-//    // BUG: this sometimes occurs when multiple data exists in the node
-//#ifdef DebugDirPDTree2D
-//    fprintf(MyTree->debugFile, "ERROR! all data splits to one node; topLEq=%d\tNdata=%d\tDiagLen=%f\n",
-//      topLEq, NumData(), Bounds.DiagonalLength());
-//#endif
-//    ConstructLeaf();
-//    myDepth = 0;  // we decide to stop here and not split any further
-//    return myDepth;
-//  }
+    // Since this PD tree depends on averaging,
+    //  ensure that at least 2 datums exist in each node
+    //   NOTE: topLEq == NumData() means all data allocated to left node
+    //         topLEq == 0 means all data allocated to right node
+    if (topLEq < 2 || topLEq > NumData()-2) {
+        ConstructLeaf();
+        myDepth = 0;  // we decide to stop here and not split any further
+        return myDepth;
+    }
+    //  // Double check that data split into two nodes
+    //  if (topLEq == NumData() || topLEq == 0)
+    //  { // all data allocated to only one node
+    //    // need this in case count threshold = 1
+    //    // TODO: avoid this case by NumData()<=CountThresh above
+    //    // BUG: this sometimes occurs when multiple data exists in the node
+    //#ifdef DebugDirPDTree2D
+    //    fprintf(MyTree->debugFile, "ERROR! all data splits to one node; topLEq=%d\tNdata=%d\tDiagLen=%f\n",
+    //      topLEq, NumData(), Bounds.DiagonalLength());
+    //#endif
+    //    ConstructLeaf();
+    //    myDepth = 0;  // we decide to stop here and not split any further
+    //    return myDepth;
+    //  }
 
 #ifdef DebugDirPDTree2D
- fprintf(MyTree->debugFile2, "NNodeL=%d\tNNodeR=%d\n", topLEq, NumData() - topLEq);
+    fprintf(MyTree->debugFile2, "NNodeL=%d\tNNodeR=%d\n", topLEq, NumData() - topLEq);
 #endif
 #ifdef DEBUG_DirPDTree2dNode
- assert(topLEq > 0 && topLEq<NumData());
+    assert(topLEq > 0 && topLEq<NumData());
 #endif
 
- // create child nodes
- int depthL, depthR;
+    // create child nodes
+    int depthL, depthR;
 
- LEq = new msh2DirPDTreeNode(DataIndices, topLEq, MyTree, this, bUsingOBB, (splitDim + 1) % 2);
- MyTree->NNodes++;
- depthL = LEq->ConstructTree(CountThresh, DiagThresh);
+    LEq = new msh2DirPDTreeNode(DataIndices, topLEq, MyTree, this, bUsingOBB, (splitDim + 1) % 2);
+    MyTree->NNodes++;
+    depthL = LEq->ConstructTree(CountThresh, DiagThresh);
 
- More = new msh2DirPDTreeNode(&DataIndices[topLEq], NumData() - topLEq, MyTree, this, bUsingOBB, (splitDim + 1) % 2);
- MyTree->NNodes++;
- depthR = More->ConstructTree(CountThresh, DiagThresh);
+    More = new msh2DirPDTreeNode(&DataIndices[topLEq], NumData() - topLEq, MyTree, this, bUsingOBB, (splitDim + 1) % 2);
+    MyTree->NNodes++;
+    depthR = More->ConstructTree(CountThresh, DiagThresh);
 
- // finish construction of this node
- myDepth = (depthL > depthR ? depthL : depthR) + 1;
+    // finish construction of this node
+    myDepth = (depthL > depthR ? depthL : depthR) + 1;
 
- // compute orientation statistics
- Nsum = LEq->Nsum + More->Nsum;
- Navg = ComputeOrientationAverage(Nsum);
- dThetaMax = ComputeOrientationThetaMax(Navg);
+    // compute orientation statistics
+    Nsum = LEq->Nsum + More->Nsum;
+    Navg = ComputeOrientationAverage(Nsum);
+    dThetaMax = ComputeOrientationThetaMax(Navg);
 
- return myDepth;
-        }
+    return myDepth;
+}
 
 
 void msh2DirPDTreeNode::ConstructLeaf()
@@ -204,31 +204,30 @@ void msh2DirPDTreeNode::ConstructLeaf()
 // returns a value "top", for which a datum should be on the More side if t>=top
 int msh2DirPDTreeNode::SortNodeForSplit()
 {
-    if (bUsingOBB)
-        {
-            int top = NData;
-            vct2 Ck; vct2 Ct;
-            vct2 r = F.Rotation().Row(0);
-            double px = F.Translation()[0];
-            for (int k = 0; k < top; k++) {
-                Ck = MyTree->DatumSortPoint(Datum(k)); // 3D coordinate in global coord system
-                double kx = r*Ck + px;  // compute the x coordinate in local coord system
-                if (kx > 0) {
-                    // this one needs to go to the end of the line
-                    while ((--top) > k) {
-                        Ct = MyTree->DatumSortPoint(Datum(top));
-                        double tx = r*Ct + px;
-                        if (tx <= 0) {
-                            int Temp = Datum(k);
-                            Datum(k) = Datum(top);
-                            Datum(top) = Temp;
-                            break; // from the "top" loop
-                        };
-                    };	// end of the "t" loop
-                };	// end of the kx>0 case; at this point F*datum(i).x-coord <= 0 for i=0,...,k
-            };	// end of k loop
-            return top;
-        }
+    if (bUsingOBB) {
+        int top = NData;
+        vct2 Ck; vct2 Ct;
+        vct2 r = F.Rotation().Row(0);
+        double px = F.Translation()[0];
+        for (int k = 0; k < top; k++) {
+            Ck = MyTree->DatumSortPoint(Datum(k)); // 3D coordinate in global coord system
+            double kx = r*Ck + px;  // compute the x coordinate in local coord system
+            if (kx > 0) {
+                // this one needs to go to the end of the line
+                while ((--top) > k) {
+                    Ct = MyTree->DatumSortPoint(Datum(top));
+                    double tx = r*Ct + px;
+                    if (tx <= 0) {
+                        int Temp = Datum(k);
+                        Datum(k) = Datum(top);
+                        Datum(top) = Temp;
+                        break; // from the "top" loop
+                    };
+                };	// end of the "t" loop
+            };	// end of the kx>0 case; at this point F*datum(i).x-coord <= 0 for i=0,...,k
+        };	// end of k loop
+        return top;
+    }
     else {
         // split node at centroid of positional data
         int top = NData;
@@ -321,7 +320,7 @@ vct2 msh2DirPDTreeNode::ComputeOrientationAverage(vct2 &Nsum)
 vct2 msh2DirPDTreeNode::ComputeOrientationSum()
 {
     vct2 Nsum(0.0);
-    for (int i = 0; i < NumData(); i++) {
+    for (size_t i = 0; i < NumData(); i++) {
         Nsum += MyTree->DatumNorm(Datum(i));
         //int datum = Datum(i);
         //vct2 datumNorm = MyTree->DatumNorm(datum);
@@ -336,7 +335,7 @@ double msh2DirPDTreeNode::ComputeOrientationThetaMax(vct2 Navg)
     //  cos(theta) = n'*Navg   (note n & Navg are unit vectors)
     double dThetaMax = 0.0;
     double Theta;
-    for (int i = 0; i < NumData(); i++) {
+    for (size_t i = 0; i < NumData(); i++) {
         Theta = acos(MyTree->DatumNorm(Datum(i)).DotProduct(Navg));
         if (Theta > dThetaMax) { dThetaMax = Theta; }
     }
@@ -401,7 +400,7 @@ int msh2DirPDTreeNode::FindClosestDatum(const vct2 &v, const vct2 &n,
     int ClosestDatum = -1;
     if (IsTerminalNode()) {
         // look at each datum in the node
-        for (int i = 0; i < NData; i++) {
+        for (size_t i = 0; i < NData; i++) {
             // for each datum in this node
             int datum = Datum(i);
 
@@ -449,7 +448,7 @@ int msh2DirPDTreeNode::FindTerminalNode(int datum, msh2DirPDTreeNode **termNode)
         return 0;
     }
 
-    for (int i = 0; i < NData; i++) {
+    for (size_t i = 0; i < NData; i++) {
         if (Datum(i) == datum) {
             *termNode = this;
             return 1;
@@ -467,7 +466,7 @@ void msh2DirPDTreeNode::PrintTerminalNodes(std::ofstream &fs)
            << "  Bounds Min: " << Bounds.MinCorner << std::endl
            << "  Bounds Max: " << Bounds.MaxCorner << std::endl
            << "  Datum Indices: " << std::endl;
-        for (int i = 0; i < NData; i++) {
+        for (size_t i = 0; i < NData; i++) {
             fs << "    " << Datum(i) << std::endl;
         }
     }

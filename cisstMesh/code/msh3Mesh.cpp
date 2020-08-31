@@ -183,29 +183,31 @@ void msh3Mesh::SaveTriangleCovariances(std::string &filePath)
     }
 }
 
-void msh3Mesh::LoadPLY(const std::string &input_file)
-{
 #if CISST_MSH_HAS_RPLY
+void msh3Mesh::LoadPLY(const std::string & input_file) {
     ply_obj.read_ply_mesh(input_file,
                           &vertices, &faces,
                           &faceNormals, &faceNeighbors,
                           &vertexNormals);
-#else
-    std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
-#endif
 }
+#else
+void msh3Mesh::LoadPLY(const std::string &) {
+    std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
+}
+#endif
 
-void msh3Mesh::SavePLY(const std::string &output_file)
-{
 #if CISST_MSH_HAS_RPLY
+void msh3Mesh::SavePLY(const std::string &output_file) {
     ply_obj.write_ply_mesh(output_file,
                            &vertices, &faces,
                            &faceNormals, &faceNeighbors,
                            &vertexNormals);
-#else
-    std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
-#endif
 }
+#else
+void msh3Mesh::SavePLY(const std::string &output_file) {
+    std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
+}
+#endif
 
 int msh3Mesh::LoadMesh(const vctDynamicVector<vct3> *vertices,
                        const vctDynamicVector<vctInt3> *faces,

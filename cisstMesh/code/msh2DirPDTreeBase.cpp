@@ -42,8 +42,7 @@
 
 // quickly find an approximate initial match by dropping straight down the
 //   tree to the node containing the sample point and picking a datum from there
-int msh2DirPDTreeBase::FastInitializeProximalDatum(
-                                                   const vct2 &v, const vct2 &n,
+int msh2DirPDTreeBase::FastInitializeProximalDatum(const vct2 &v, const vct2 & CMN_UNUSED(n),
                                                    vct2 &proxPoint, vct2 &proxNorm)
 {
     // find proximal leaf node
@@ -153,7 +152,7 @@ int msh2DirPDTreeBase::ValidateClosestDatum(const vct2 &v, const vct2 &n,
     double error;
     vct2 datumPoint;
     vct2 datumNorm;
-    for (int datum = 0; datum < NData; datum++) {
+    for (size_t datum = 0; datum < NData; datum++) {
         error = algorithm->FindClosestPointOnDatum(v, n, datumPoint, datumNorm, datum);
         if (error < bestError) {
             bestError = error;

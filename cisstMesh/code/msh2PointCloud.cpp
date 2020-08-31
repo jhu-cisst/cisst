@@ -36,21 +36,25 @@
 
 #include <cisstMesh/msh2PointCloud.h>
 
+#if CISST_MSH_HAS_RPLY
 void msh2PointCloud::LoadPLY(const std::string &input_file) {
-#if CISST_MSH_HAS_RPLY
     ply_obj.read_ply_pointcloud(input_file, &points, &pointOrientations);
-#else
-    std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
-#endif
 }
+#else
+void msh2PointCloud::LoadPLY(const std::string &) {
+    std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
+}
+#endif
 
-void msh2PointCloud::SavePLY(const std::string &output_file) {
 #if CISST_MSH_HAS_RPLY
+void msh2PointCloud::SavePLY(const std::string &output_file) {
     ply_obj.write_ply_pointcloud(output_file, &points, &pointOrientations);
-#else
-    std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
-#endif
 }
+#else
+void msh2PointCloud::SavePLY(const std::string &) {
+    std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
+}
+#endif
 
 // Load points from file
 int msh2PointCloud::ReadPointCloudFromFile(vctDynamicVector<vct2> &pts,

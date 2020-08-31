@@ -124,7 +124,7 @@ class CISST_EXPORT msh2DirPDTreeNode
     inline size_t NumData() const { return NData; };
     inline int   IsTerminalNode() const { return LEq == NULL; };
 
-    int   ConstructTree(int CountThresh, double DiagThresh);
+    int ConstructTree(const size_t CountThresh, double DiagThresh);
 
     msh2DirPDTreeNode* GetChildSplitNode(const vct2 &datumPos);
 
@@ -164,12 +164,10 @@ class CISST_EXPORT msh2DirPDTreeNode
     // debug routines
     int   FindTerminalNode(int datum, msh2DirPDTreeNode **termNode);
     void  PrintTerminalNodes(std::ofstream &fs);
-    bool  NodeContainsDatum(int datum)
-    {
-        for (int i = 0; i < NData; i++)
-            {
-                if (datum == DataIndices[i]) return true;
-            }
+    inline bool NodeContainsDatum(int datum) {
+        for (size_t i = 0; i < NData; i++) {
+            if (datum == DataIndices[i]) return true;
+        }
         return false;
     }
 

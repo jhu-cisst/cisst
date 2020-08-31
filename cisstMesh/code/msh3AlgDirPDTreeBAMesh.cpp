@@ -38,7 +38,7 @@
 
 // PD Tree Methods
 
-double msh3AlgDirPDTreeBAMesh::FindClosestPointOnDatum(const vct3 &Xp, const vct3 &Xn,
+double msh3AlgDirPDTreeBAMesh::FindClosestPointOnDatum(const vct3 &Xp, const vct3 & CMN_UNUSED(Xn),
                                                        vct3 &closest, vct3 &closestNorm,
                                                        int datum)
 {

@@ -38,7 +38,7 @@
 
 // PD Tree Methods
 
-double msh3AlgDirPDTreeBAPointCloud::FindClosestPointOnDatum(const vct3 &Xp, const vct3 &Xn,
+double msh3AlgDirPDTreeBAPointCloud::FindClosestPointOnDatum(const vct3 &Xp, const vct3 & CMN_UNUSED(Xn),
                                                              vct3 &closest, vct3 &closestNorm,
                                                              int datum)
 {
@@ -51,9 +51,9 @@ double msh3AlgDirPDTreeBAPointCloud::FindClosestPointOnDatum(const vct3 &Xp, con
 }
 
 
-int msh3AlgDirPDTreeBAPointCloud::DatumMightBeCloser(const vct3 &Xp, const vct3 &Xn,
+int msh3AlgDirPDTreeBAPointCloud::DatumMightBeCloser(const vct3 & CMN_UNUSED(Xp), const vct3 &Xn,
                                                      int datum,
-                                                     double ErrorBound)
+                                                     double CMN_UNUSED(ErrorBound))
 {
     // check if orientation error is past threshold
     //  for efficiency, use the dot product directly for comparison

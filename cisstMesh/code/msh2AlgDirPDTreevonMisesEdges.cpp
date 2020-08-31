@@ -83,9 +83,9 @@ double msh2AlgDirPDTreevonMisesEdges::FindClosestPointOnDatum(
     //return matchError;
 }
 
-int msh2AlgDirPDTreevonMisesEdges::DatumMightBeCloser(const vct2 &v, const vct2 &n,
-                                                      int datum,
-                                                      double ErrorBound)
+int msh2AlgDirPDTreevonMisesEdges::DatumMightBeCloser(const vct2 & CMN_UNUSED(v), const vct2 & CMN_UNUSED(n),
+                                                      int CMN_UNUSED(datum),
+                                                      double CMN_UNUSED(ErrorBound))
 {
     // doing a decent proximity check is complicated enough that it is
     //  better to just compute the full error directly

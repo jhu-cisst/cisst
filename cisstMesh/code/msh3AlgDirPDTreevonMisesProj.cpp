@@ -42,7 +42,7 @@
 
 // PD Tree Methods
 
-int msh3AlgDirPDTreevonMisesProj::NodeMightBeCloser(const vct3 &Xp, const vct3 &Xn_unused,
+int msh3AlgDirPDTreevonMisesProj::NodeMightBeCloser(const vct3 &Xp, const vct3 & CMN_UNUSED(Xn),
                                                     msh3DirPDTreeNode const *node,
                                                     double ErrorBound)
 {

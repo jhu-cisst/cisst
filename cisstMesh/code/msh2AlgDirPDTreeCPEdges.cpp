@@ -36,7 +36,7 @@
 
 #include <cisstMesh/msh2AlgDirPDTreeCPEdges.h>
 
-double msh2AlgDirPDTreeCPEdges::FindClosestPointOnDatum(const vct2 &v, const vct2 &n,
+double msh2AlgDirPDTreeCPEdges::FindClosestPointOnDatum(const vct2 &v, const vct2 & CMN_UNUSED(n),
                                                         vct2 &closest, vct2 &closestNorm,
                                                         int datum)
 {
@@ -52,9 +52,9 @@ double msh2AlgDirPDTreeCPEdges::FindClosestPointOnDatum(const vct2 &v, const vct
     return (v - closest).Norm();
 }
 
-int msh2AlgDirPDTreeCPEdges::DatumMightBeCloser(const vct2 &v, const vct2 &n,
-                                                int datum,
-                                                double ErrorBound)
+int msh2AlgDirPDTreeCPEdges::DatumMightBeCloser(const vct2 & CMN_UNUSED(v), const vct2 & CMN_UNUSED(n),
+                                                int CMN_UNUSED(datum),
+                                                double CMN_UNUSED(ErrorBound))
 {
     // doing a decent proximity check is complicated enough that it is
     //  better to just compute the full error directly
