@@ -49,6 +49,7 @@ public:
     }
 
     void SetAutoResize(const bool autoResize);
+    void ResetSize(void);
 
     void Clear(void) {
         mPoses.clear();
@@ -70,6 +71,9 @@ protected:
         vct3 MaxCorner;
     } mBB;
     bool mAutoResize;
+
+    // dimensions to plot
+    size_t mX, mY;
 
     // viewport
     vctDouble2 mViewportTranslation, mViewport;

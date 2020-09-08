@@ -62,7 +62,6 @@ class CISST_EXPORT vctQtWidgetFrameDoubleRead: public QWidget
         vctMatRot3 rotationMatrix;
         rotationMatrix.FromNormalized(frame.Rotation());
         this->RotationWidget->SetValue(rotationMatrix);
-        // always display translations in mm
         vctDoubleVec translation(frame.Translation());
         translation.Multiply(mPrismaticFactor);
         this->TranslationWidget->SetValue(translation);

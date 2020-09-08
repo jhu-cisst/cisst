@@ -21,14 +21,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctPose3DQtWidget.h>
 #include <QKeyEvent>
 
-const double vctPose3DQtWidgetDefaultMax = 0.0001;
-
 vctPose3DQtWidget::vctPose3DQtWidget(QWidget * parent):
     vctQtOpenGLBaseWidget(parent)
 {
     this->setFocusPolicy(Qt::StrongFocus);
-    this->setToolTip(QString("'a' to turn on/off autoresize\n'r' to reset autoresize if already in autoresize mode\n'z' to reset orientation"));
+    this->setToolTip(QString("'a' to turn on/off autoresize\n'r' to reset autoresize if already in autoresize mode\n'1' to plot XY\n'2' to plot XZ\n'3' to plot YZ"));
     setContentsMargins(0, 0, 0, 0);
+    mX = 0;
+    mY = 1;
     SetBackgroundColor(vct3(1.0));
     SetAutoResize(true);
 }
@@ -40,11 +40,15 @@ void vctPose3DQtWidget::SetAutoResize(const bool autoResize)
     mAutoResize = autoResize;
 }
 
+void vctPose3DQtWidget::ResetSize(void)
+{
+    mBB.Empty = true;
+}
+
 void vctPose3DQtWidget::SetValue(const vct3 & value)
 {
     // update bounding box
     if (mBB.Empty) {
-        std::cerr << "---------------- reset " << std::endl;
         mBB.MinCorner = value;
         mBB.MaxCorner = value;
         mBB.Empty = false;
@@ -71,9 +75,26 @@ void vctPose3DQtWidget::SetBackgroundColor(const vctDouble3 & colorInRange0To1)
 void vctPose3DQtWidget::keyPressEvent(QKeyEvent * event)
 {
     switch(event->key()) {
+    case Qt::Key_1:
+        mX = 0;
+        mY = 1;
+        mBB.Empty = true;
+        break;
+    case Qt::Key_2:
+        mX = 0;
+        mY = 2;
+        mBB.Empty = true;
+        break;
+    case Qt::Key_3:
+        mX = 1;
+        mY = 2;
+        mBB.Empty = true;
+        break;
     case Qt::Key_A:
-        // toggle autoresize
         SetAutoResize(!mAutoResize);
+        break;
+    case Qt::Key_R:
+        ResetSize();
         break;
     default:
         break;
@@ -97,24 +118,26 @@ void vctPose3DQtWidget::paintGL(void)
 {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
     // update translation and scale based on viewport and bounding box
     if (mAutoResize && !mBB.Empty) {
-        // take center of BB for display
-        vct3 centerBB;
-        centerBB.SumOf(mBB.MinCorner, mBB.MaxCorner);
-        centerBB.Divide(2.0);
-        vct2 centerVP(mViewport);
-        centerVP.Divide(2.0);
-        std::cerr << "Min: " << mBB.MinCorner << " Max: " << mBB.MaxCorner << std::endl;
-        std::cerr << "VP: " << centerVP << " BB: " << centerBB.XY() << std::endl;
-        mViewportTranslation.DifferenceOf(centerVP, centerBB.XY());
         // scale to fit viewport without changing ratio
         vct3 sizeBB;
         sizeBB.DifferenceOf(mBB.MaxCorner, mBB.MinCorner);
-        const double ratioX = mViewport.X() / sizeBB.X();
-        const double ratioY = mViewport.Y() / sizeBB.Y();
-        mViewportScale = (ratioY > ratioX ? ratioX : ratioY) * 0.9; // add some padding
-        std::cerr << "scale: " << mViewportScale << " trans " << mViewportTranslation << std::endl;
+        if ((sizeBB[mX] > 0.0) && (sizeBB[mY] > 0.0)) {
+            const double ratioX = mViewport.X() / sizeBB[mX];
+            const double ratioY = mViewport.Y() / sizeBB[mY];
+            mViewportScale = (ratioY > ratioX ? ratioX : ratioY) * 0.98; // add some padding
+        } else {
+            mViewportScale = 1.0;
+        }
+        // take center of BB for display
+        vct3 centerBB;
+        centerBB.SumOf(mBB.MinCorner, mBB.MaxCorner);
+        centerBB.Multiply(mViewportScale * 0.5); // middle and scale to viewport
+        vct2 centerVP(mViewport);
+        centerVP.Divide(2.0);
+        mViewportTranslation.DifferenceOf(centerVP, vctDouble2(centerBB[mX], centerBB[mY]));
     }
     glTranslated(mViewportTranslation.X(), mViewportTranslation.Y(), 0.0);
     glScaled(mViewportScale, mViewportScale, 1.0);
@@ -126,26 +149,30 @@ void vctPose3DQtWidget::paintGL(void)
         for (PosesType::const_iterator pose = mPoses.begin();
              pose != end;
              ++pose) {
-            glVertex2d(pose->X(), pose->Y());
+            glVertex2d(pose->Element(mX), pose->Element(mY));
         }
     } glEnd();
     // bounding box
     glBegin(GL_LINE_STRIP); {
-        glVertex2d(mBB.MinCorner.X(), mBB.MinCorner.Y());
-        glVertex2d(mBB.MaxCorner.X(), mBB.MinCorner.Y());
-        glVertex2d(mBB.MaxCorner.X(), mBB.MaxCorner.Y());
-        glVertex2d(mBB.MinCorner.X(), mBB.MaxCorner.Y());
-        glVertex2d(mBB.MinCorner.X(), mBB.MinCorner.Y());
+        glVertex2d(mBB.MinCorner[mX], mBB.MinCorner[mY]);
+        glVertex2d(mBB.MaxCorner[mX], mBB.MinCorner[mY]);
+        glVertex2d(mBB.MaxCorner[mX], mBB.MaxCorner[mY]);
+        glVertex2d(mBB.MinCorner[mX], mBB.MaxCorner[mY]);
+        glVertex2d(mBB.MinCorner[mX], mBB.MinCorner[mY]);
     } glEnd();
     // zero values
-    glBegin(GL_LINE_STRIP); {
-        glVertex2d(mBB.MinCorner.X(), 0.0);
-        glVertex2d(mBB.MaxCorner.X(), 0.0);
-    } glEnd();
-    glBegin(GL_LINE_STRIP); {
-        glVertex2d(0.0, mBB.MinCorner.Y());
-        glVertex2d(0.0, mBB.MaxCorner.Y());
-    } glEnd();
+    if (mBB.MinCorner[mY] * mBB.MaxCorner[mY] < 0.0) {
+        glBegin(GL_LINE_STRIP); {
+            glVertex2d(mBB.MinCorner[mX], 0.0);
+            glVertex2d(mBB.MaxCorner[mX], 0.0);
+        } glEnd();
+    }
+    if (mBB.MinCorner[mX] * mBB.MaxCorner[mX] < 0.0) {
+        glBegin(GL_LINE_STRIP); {
+            glVertex2d(0.0, mBB.MinCorner[mY]);
+            glVertex2d(0.0, mBB.MaxCorner[mY]);
+        } glEnd();
+    }
 
 }
 
@@ -158,5 +185,5 @@ void vctPose3DQtWidget::resizeGL(int width, int height)
     glViewport(0 , 0, w , h); // set up viewport
     glMatrixMode(GL_PROJECTION); // set the projection matrix
     glLoadIdentity();
-    glOrtho(0.0, w, 0.0, h, 0.0, 1.0);
+    glOrtho(0.0, w, 0.0, h, -1.0, 1.0);
 }
