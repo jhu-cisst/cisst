@@ -60,6 +60,8 @@ class vctQtWidgetFrameDoubleRead;
 
 class vctPlot2DOpenGLQtWidget;
 
+class vctPose3DQtWidget;
+class vctVector3DQtWidget;
 class vctForceTorqueQtWidget;
 
 #endif  // _vctForwardDeclarationsQt_h
