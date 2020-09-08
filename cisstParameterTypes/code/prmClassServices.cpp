@@ -54,6 +54,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(prmMaskedBoolVec);
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 CMN_IMPLEMENT_SERVICES(prmPositionCartesianGet);
 
+#include <cisstParameterTypes/prmPositionCartesianArrayGet.h>
+CMN_IMPLEMENT_SERVICES(prmPositionCartesianArrayGet);
+
 #include <cisstParameterTypes/prmPositionCartesianSet.h>
 CMN_IMPLEMENT_SERVICES(prmPositionCartesianSet);
 

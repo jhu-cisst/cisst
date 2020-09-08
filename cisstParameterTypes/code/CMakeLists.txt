@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -17,6 +17,7 @@ cisst_data_generator (cisstParameterTypes
                       "cisstParameterTypes/"        # sub directory for include
                       ../prmActuatorJointCoupling.cdg
                       ../prmPositionCartesianGet.cdg
+                      ../prmPositionCartesianArrayGet.cdg
                       ../prmVelocityCartesianGet.cdg
                       ../prmPositionJointGet.cdg
                       ../prmPositionJointSet.cdg
