@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctPose3DQtWidget_h
 #define _vctPose3DQtWidget_h
 
+#include <QGridLayout>
+
 // cisst include
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctForwardDeclarationsQt.h>
@@ -29,16 +31,20 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctExportQt.h>
 
 
+class vctPose3DQtWidgetView;
+
 /*!  Widget to visualize a 3D position by projecting along x, y or z
   axis.
 */
-class CISST_EXPORT vctPose3DQtWidget: public vctQtOpenGLBaseWidget
+class CISST_EXPORT vctPose3DQtWidget: public QWidget
 {
     Q_OBJECT;
 
 public:
     vctPose3DQtWidget(QWidget * parent = 0);
     inline ~vctPose3DQtWidget(void) {};
+
+    void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute);
 
     /*! Add a pose to plot using x, y and z coordinates. */
     void SetValue(const vct3 & value);
@@ -48,15 +54,44 @@ public:
         SetValue(value.Translation());
     }
 
-    void SetAutoResize(const bool autoResize);
-    void ResetSize(void);
-
     void Clear(void) {
         mPoses.clear();
     }
 
-    /*! Set background color, defined as RGB between 0 and 1. */
-    void SetBackgroundColor(const vctDouble3 & colorInRange0To1);
+    typedef struct {
+        bool Empty;
+        vct3 MinCorner;
+        vct3 MaxCorner;
+    } BoundingBoxType;
+
+    typedef std::list<vct3> PosesType;
+
+    typedef std::list<vctPose3DQtWidgetView *> ViewsType;
+protected:
+    QGridLayout * mLayout;
+    void keyPressEvent(QKeyEvent * event);
+
+    ViewsType mViews;
+    PosesType mPoses;
+    BoundingBoxType mBB;
+
+    double mPrismaticFactor;
+};
+
+class vctPose3DQtWidgetView: public vctQtOpenGLBaseWidget
+{
+    Q_OBJECT;
+public:
+    typedef vctPose3DQtWidget::PosesType PosesType;
+    typedef vctPose3DQtWidget::BoundingBoxType BoundingBoxType;
+
+    vctPose3DQtWidgetView(QWidget * parent, PosesType * poses, BoundingBoxType * bb);
+    inline ~vctPose3DQtWidgetView(void) {};
+
+    void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute);
+    void SetAutoResize(const bool autoResize);
+    void ResetSize(void);
+    void SetDimensions(const size_t x, const size_t y);
 
 protected:
     void keyPressEvent(QKeyEvent * event);
@@ -64,12 +99,11 @@ protected:
     void paintGL(void);
     void resizeGL(int width, int height);
 
-    std::list<vct3> mPoses;
-    struct {
-        bool Empty;
-        vct3 MinCorner;
-        vct3 MaxCorner;
-    } mBB;
+    double mPrismaticFactor;
+
+    // pointers to shared data
+    PosesType * mPoses;
+    BoundingBoxType * mBB;
     bool mAutoResize;
 
     // dimensions to plot
@@ -78,9 +112,7 @@ protected:
     // viewport
     vctDouble2 mViewportTranslation, mViewport;
     double mViewportScale;
-
-    // background color
-    vctDouble3 mBackgroundColor;
 };
+
 
 #endif // _vctPose3DQtWidget_h
