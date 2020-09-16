@@ -222,7 +222,7 @@ private:
         if (vec1.DotProduct(faceNormals.at(idxNeighbor)) < 0.0 || vec2.DotProduct(faceNormals.at(idxNeighbor)) < 0.0){
             return false;
         }
-        return true;
+        return false;
     }
 
     inline bool CheckConcavity(int idx, int idxNeighbor) {
