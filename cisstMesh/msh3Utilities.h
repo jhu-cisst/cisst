@@ -31,10 +31,11 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
-#ifndef _utilities_H
-#define _utilities_H
+
+#ifndef _msh3Utilities_h
+#define _msh3Utilities_h
 
 #include <string>
 #include <regex>
@@ -48,7 +49,7 @@
 std::string getcwd_str();
 
 // compute a noise covariance matrix having different noise
-//  magnitude parallel vs. perpendicular to a given point 
+//  magnitude parallel vs. perpendicular to a given point
 //  normal orientation
 vct3x3 ComputePointCovariance( const vct3 &norm, double normPerpVar, double normPrllVar);
 
@@ -95,18 +96,18 @@ void ComputeCovInverse_Nmr(const vct3x3 &M, vct3x3 &Minv);
 //          time: 0.000265216
 inline vct3x3& Calc_RMRt(vct3x3 &R, vct3x3 &M)
 {
-  static vct3x3 RMRt, MRt;
-  MRt.ProductOf(M, R.Transpose());
-  RMRt.Element(0, 0) = vctDotProduct(R.Row(0), MRt.Column(0));
-  RMRt.Element(0, 1) = vctDotProduct(R.Row(0), MRt.Column(1));
-  RMRt.Element(1, 0) = RMRt.Element(0, 1);
-  RMRt.Element(0, 2) = vctDotProduct(R.Row(0), MRt.Column(2));
-  RMRt.Element(2, 0) = RMRt.Element(0, 2);
-  RMRt.Element(1, 1) = vctDotProduct(R.Row(1), MRt.Column(1));
-  RMRt.Element(1, 2) = vctDotProduct(R.Row(1), MRt.Column(2));
-  RMRt.Element(2, 1) = RMRt.Element(1, 2);
-  RMRt.Element(2, 2) = vctDotProduct(R.Row(2), MRt.Column(2));
-  return RMRt;
+    static vct3x3 RMRt, MRt;
+    MRt.ProductOf(M, R.Transpose());
+    RMRt.Element(0, 0) = vctDotProduct(R.Row(0), MRt.Column(0));
+    RMRt.Element(0, 1) = vctDotProduct(R.Row(0), MRt.Column(1));
+    RMRt.Element(1, 0) = RMRt.Element(0, 1);
+    RMRt.Element(0, 2) = vctDotProduct(R.Row(0), MRt.Column(2));
+    RMRt.Element(2, 0) = RMRt.Element(0, 2);
+    RMRt.Element(1, 1) = vctDotProduct(R.Row(1), MRt.Column(1));
+    RMRt.Element(1, 2) = vctDotProduct(R.Row(1), MRt.Column(2));
+    RMRt.Element(2, 1) = RMRt.Element(1, 2);
+    RMRt.Element(2, 2) = vctDotProduct(R.Row(2), MRt.Column(2));
+    return RMRt;
 }
 
 
@@ -114,57 +115,57 @@ inline vct3x3& Calc_RMRt(vct3x3 &R, vct3x3 &M)
 //  approximation in case of small offset angles
 inline vct3 ApproxRodriguesRotationBetweenUnitVectors(double DotProd, const vct3 &XProd)
 {
-  // Computing magnitude if the angle (alpha) between two vectors
-  //   |XProd| = sin(alpha)
-  //   DotProd = cos(alpha)   
-  //
-  //   rodriguez vector = XProd.Normalized()*alpha
-  //    ~ cannot apply this equation indiscriminantly, however, since the
-  //      norm of XProd blows up for approximately parrallel vectors
-  //
-  //   alpha ~= sin(alpha) for alpha up to 30deg (at 30deg error is approx 5%)
-  //     => for alpha <= 30*pi/180, |Xprod| may be used for angle magnitude
-  //        and rodriguez vector is simply = XProd vector.
-  //     Otherwise, acos(DotProd) should be used for alpha. It is important
-  //       to use acos(DotProd) rather than asin(|XProd|) because asin(alpha)
-  //       cannot discrimiate between "alpha" and "180deg-alpha", i.e. it cannot
-  //       discriminate vectors greater and smaller than 90 degrees, whereas
-  //       acos(DotProd) can.    range of asin(|XProd|) = (-90deg,+90deg)
-  //                             range of acos(DotProd) = (0deg,+180deg)
-  //
-  //   In any event, XProd should never be used for the rodriguez vector when
-  //     the angle between vectors is more than 90deg, as this will produce
-  //     a rodriguez vector for an angle less than 90deg.
-  //
-  //   Note: For alpha = 30deg, DotProd = cos(alpha*pi/180) = 0.8660
-  //
-  if (DotProd >= 0.8660)
-  { // small angle approximation alpha ~= sin(alpha)
-    return XProd;
-  }
-  else
-  { // large angle calculation (XProd.Normalized() won't blow up)
-    return XProd.Normalized()*acos(DotProd);
-  }
+    // Computing magnitude if the angle (alpha) between two vectors
+    //   |XProd| = sin(alpha)
+    //   DotProd = cos(alpha)
+    //
+    //   rodriguez vector = XProd.Normalized()*alpha
+    //    ~ cannot apply this equation indiscriminantly, however, since the
+    //      norm of XProd blows up for approximately parrallel vectors
+    //
+    //   alpha ~= sin(alpha) for alpha up to 30deg (at 30deg error is approx 5%)
+    //     => for alpha <= 30*pi/180, |Xprod| may be used for angle magnitude
+    //        and rodriguez vector is simply = XProd vector.
+    //     Otherwise, acos(DotProd) should be used for alpha. It is important
+    //       to use acos(DotProd) rather than asin(|XProd|) because asin(alpha)
+    //       cannot discrimiate between "alpha" and "180deg-alpha", i.e. it cannot
+    //       discriminate vectors greater and smaller than 90 degrees, whereas
+    //       acos(DotProd) can.    range of asin(|XProd|) = (-90deg,+90deg)
+    //                             range of acos(DotProd) = (0deg,+180deg)
+    //
+    //   In any event, XProd should never be used for the rodriguez vector when
+    //     the angle between vectors is more than 90deg, as this will produce
+    //     a rodriguez vector for an angle less than 90deg.
+    //
+    //   Note: For alpha = 30deg, DotProd = cos(alpha*pi/180) = 0.8660
+    //
+    if (DotProd >= 0.8660) {
+        // small angle approximation alpha ~= sin(alpha)
+        return XProd;
+    }
+    else {
+        // large angle calculation (XProd.Normalized() won't blow up)
+        return XProd.Normalized()*acos(DotProd);
+    }
 }
 
 // Compute rodrigues vector of rotation between two vectors
 inline vct3 RodriguesRotationBetweenUnitVectors(double DotProd, const vct3 &XProd)
 {
-  // Computing magnitude if the angle (alpha) between two vectors
-  //
-  //  At alpha = 5deg; error in alpha ~= sin(alpha) approx is about 0.1%
-  //
-  //   Note: For alpha = 5deg, DotProd = cos(alpha*pi/180) = 0.9962
-  //
-  if (DotProd >= 0.9962)
-  { // small angle approximation alpha ~= sin(alpha)
-    return XProd;
-  }
-  else
-  { // large angle calculation (XProd.Normalized() won't blow up)
-    return XProd.Normalized()*acos(DotProd);
-  }
+    // Computing magnitude if the angle (alpha) between two vectors
+    //
+    //  At alpha = 5deg; error in alpha ~= sin(alpha) approx is about 0.1%
+    //
+    //   Note: For alpha = 5deg, DotProd = cos(alpha*pi/180) = 0.9962
+    //
+    if (DotProd >= 0.9962) {
+        // small angle approximation alpha ~= sin(alpha)
+        return XProd;
+    }
+    else {
+        // large angle calculation (XProd.Normalized() won't blow up)
+        return XProd.Normalized()*acos(DotProd);
+    }
 }
 
 // compute the Jacobian matrices of rotation wrt each element of a Rodrigues vector
@@ -179,28 +180,28 @@ vctRot3 euler2rot(double yaw, double pitch, double roll);
 
 inline vct3x3 skew(const vct3 &v)
 {
-  return vct3x3(
-    0.0, -v[2], v[1],
-    v[2], 0.0, -v[0],
-    -v[1], v[0], 0.0
-    );
+    return vct3x3(
+                  0.0, -v[2], v[1],
+                  v[2], 0.0, -v[0],
+                  -v[1], v[0], 0.0
+                  );
 }
 inline void skew(const vct3 &v, vct3x3 &sk)
 {
-  sk.Assign(
-    0.0, -v[2], v[1],
-    v[2], 0.0, -v[0],
-    -v[1], v[0], 0.0
-    );
+    sk.Assign(
+              0.0, -v[2], v[1],
+              v[2], 0.0, -v[0],
+              -v[1], v[0], 0.0
+              );
 }
 inline void skew(const vct3 &v, vctDynamicMatrixRef<double> &sk)
 {
-  assert(sk.rows() == 3 && sk.cols() == 3);
-  sk.Assign(
-    0.0, -v[2], v[1],
-    v[2], 0.0, -v[0],
-    -v[1], v[0], 0.0
-    );
+    assert(sk.rows() == 3 && sk.cols() == 3);
+    sk.Assign(
+              0.0, -v[2], v[1],
+              v[2], 0.0, -v[0],
+              -v[1], v[0], 0.0
+              );
 }
 
 inline size_t sub2ind(const vctFixedSizeVector<size_t, 3> & size, const size_t i, const size_t j, const size_t k)
@@ -241,4 +242,4 @@ vctDoubleVec ComputeInverseTrilinearInterp(const vct3 &p, const vctDynamicVector
 
 const double m_to_mm=1000.0;
 
-#endif
+#endif // _msh3Utilities_h
