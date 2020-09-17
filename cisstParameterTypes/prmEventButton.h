@@ -38,7 +38,7 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
 
  public:
     typedef mtsGenericObject BaseType;
-    typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED} EventType;
+    typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED, ERROR} EventType;
 
  public:
     /*! Default constructor */
