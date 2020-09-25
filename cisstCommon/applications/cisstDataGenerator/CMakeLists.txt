@@ -73,6 +73,8 @@ add_executable (cisstDataGenerator
                 ${SOURCE_FILES_FROM_cisstCommon}
                 )
 
+add_dependencies (cisstDataGenerator cisstRevision cisstBuildType)
+
 set_property (TARGET cisstDataGenerator PROPERTY FOLDER "cisstCommon/applications")
 
 install (TARGETS cisstDataGenerator
