@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctForwardDeclarationsQt.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctTransformationTypes.h>
+#include <cisstVector/vctBoundingBox3.h>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -58,14 +59,7 @@ public:
         mPoses.clear();
     }
 
-    typedef struct {
-        bool Empty;
-        vct3 MinCorner;
-        vct3 MaxCorner;
-    } BoundingBoxType;
-
     typedef std::list<vct3> PosesType;
-
     typedef std::list<vctPose3DQtWidgetView *> ViewsType;
 protected:
     QGridLayout * mLayout;
@@ -73,7 +67,7 @@ protected:
 
     ViewsType mViews;
     PosesType mPoses;
-    BoundingBoxType mBB;
+    vctBoundingBox3 mBB;
 
     double mPrismaticFactor;
 };
@@ -83,9 +77,8 @@ class vctPose3DQtWidgetView: public vctQtOpenGLBaseWidget
     Q_OBJECT;
 public:
     typedef vctPose3DQtWidget::PosesType PosesType;
-    typedef vctPose3DQtWidget::BoundingBoxType BoundingBoxType;
 
-    vctPose3DQtWidgetView(QWidget * parent, PosesType * poses, BoundingBoxType * bb);
+    vctPose3DQtWidgetView(QWidget * parent, PosesType * poses, vctBoundingBox3 * bb);
     inline ~vctPose3DQtWidgetView(void) {};
 
     void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute);
@@ -103,7 +96,7 @@ protected:
 
     // pointers to shared data
     PosesType * mPoses;
-    BoundingBoxType * mBB;
+    vctBoundingBox3 * mBB;
     bool mAutoResize;
 
     // dimensions to plot

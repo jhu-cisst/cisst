@@ -67,14 +67,7 @@ void vctPose3DQtWidget::SetPrismaticRevoluteFactors(const double & prismatic,
 void vctPose3DQtWidget::SetValue(const vct3 & value)
 {
     // update bounding box
-    if (mBB.Empty) {
-        mBB.MinCorner = value;
-        mBB.MaxCorner = value;
-        mBB.Empty = false;
-    } else {
-        mBB.MinCorner.ElementwiseMinOf(mBB.MinCorner, value);
-        mBB.MaxCorner.ElementwiseMaxOf(mBB.MaxCorner, value);
-    }
+    mBB.Expand(value);
 
     // save all values for display
     mPoses.push_back(value);
@@ -99,7 +92,7 @@ void vctPose3DQtWidget::keyPressEvent(QKeyEvent * event)
 }
 
 
-vctPose3DQtWidgetView::vctPose3DQtWidgetView(QWidget * parent, PosesType * poses, BoundingBoxType * bb):
+vctPose3DQtWidgetView::vctPose3DQtWidgetView(QWidget * parent, PosesType * poses, vctBoundingBox3 * bb):
     vctQtOpenGLBaseWidget(parent),
     mPoses(poses),
     mBB(bb)
@@ -121,13 +114,13 @@ void vctPose3DQtWidgetView::SetPrismaticRevoluteFactors(const double & prismatic
 void vctPose3DQtWidgetView::SetAutoResize(const bool autoResize)
 {
     // reset BB used to auto-center
-    mBB->Empty = true;
+    mBB->Reset();
     mAutoResize = autoResize;
 }
 
 void vctPose3DQtWidgetView::ResetSize(void)
 {
-    mBB->Empty = true;
+    mBB->Reset();
 }
 
 void vctPose3DQtWidgetView::SetDimensions(const size_t x, const size_t y)
@@ -149,17 +142,17 @@ void vctPose3DQtWidgetView::keyPressEvent(QKeyEvent * event)
     case Qt::Key_1:
         mX = 0;
         mY = 1;
-        mBB->Empty = true;
+        mBB->Reset();
         break;
     case Qt::Key_2:
         mX = 0;
         mY = 2;
-        mBB->Empty = true;
+        mBB->Reset();
         break;
     case Qt::Key_3:
         mX = 1;
         mY = 2;
-        mBB->Empty = true;
+        mBB->Reset();
         break;
     case Qt::Key_A:
         SetAutoResize(!mAutoResize);
@@ -189,10 +182,9 @@ void vctPose3DQtWidgetView::paintGL(void)
     glLoadIdentity();
 
     // update translation and scale based on viewport and bounding box
-    if (mAutoResize && !mBB->Empty) {
+    if (mAutoResize && (mBB->Counter() != 0)) {
         // scale to fit viewport without changing ratio
-        vct3 sizeBB;
-        sizeBB.DifferenceOf(mBB->MaxCorner, mBB->MinCorner);
+        vct3 sizeBB = mBB->Diagonal();
         if ((sizeBB[mX] > 0.0) && (sizeBB[mY] > 0.0)) {
             const double ratioX = mViewport.X() / sizeBB[mX];
             const double ratioY = mViewport.Y() / sizeBB[mY];
@@ -201,9 +193,8 @@ void vctPose3DQtWidgetView::paintGL(void)
             mViewportScale = 1.0;
         }
         // take center of BB for display
-        vct3 centerBB;
-        centerBB.SumOf(mBB->MinCorner, mBB->MaxCorner);
-        centerBB.Multiply(mViewportScale * 0.5); // middle and scale to viewport
+        vct3 centerBB = mBB->MidPoint();
+        centerBB.Multiply(mViewportScale); // scale to viewport
         vct2 centerVP(mViewport);
         centerVP.Divide(2.0);
         mViewportTranslation.DifferenceOf(centerVP, vctDouble2(centerBB[mX], centerBB[mY]));
@@ -224,23 +215,23 @@ void vctPose3DQtWidgetView::paintGL(void)
     // bounding box
     glColor3d(0.7, 0.7, 0.7);
     glBegin(GL_LINE_STRIP); {
-        glVertex2d(mBB->MinCorner[mX], mBB->MinCorner[mY]);
-        glVertex2d(mBB->MaxCorner[mX], mBB->MinCorner[mY]);
-        glVertex2d(mBB->MaxCorner[mX], mBB->MaxCorner[mY]);
-        glVertex2d(mBB->MinCorner[mX], mBB->MaxCorner[mY]);
-        glVertex2d(mBB->MinCorner[mX], mBB->MinCorner[mY]);
+        glVertex2d(mBB->MinCorner()[mX], mBB->MinCorner()[mY]);
+        glVertex2d(mBB->MaxCorner()[mX], mBB->MinCorner()[mY]);
+        glVertex2d(mBB->MaxCorner()[mX], mBB->MaxCorner()[mY]);
+        glVertex2d(mBB->MinCorner()[mX], mBB->MaxCorner()[mY]);
+        glVertex2d(mBB->MinCorner()[mX], mBB->MinCorner()[mY]);
     } glEnd();
     // zero values
-    if (mBB->MinCorner[mY] * mBB->MaxCorner[mY] < 0.0) {
+    if (mBB->MinCorner()[mY] * mBB->MaxCorner()[mY] < 0.0) {
         glBegin(GL_LINE_STRIP); {
-            glVertex2d(mBB->MinCorner[mX], 0.0);
-            glVertex2d(mBB->MaxCorner[mX], 0.0);
+            glVertex2d(mBB->MinCorner()[mX], 0.0);
+            glVertex2d(mBB->MaxCorner()[mX], 0.0);
         } glEnd();
     }
-    if (mBB->MinCorner[mX] * mBB->MaxCorner[mX] < 0.0) {
+    if (mBB->MinCorner()[mX] * mBB->MaxCorner()[mX] < 0.0) {
         glBegin(GL_LINE_STRIP); {
-            glVertex2d(0.0, mBB->MinCorner[mY]);
-            glVertex2d(0.0, mBB->MaxCorner[mY]);
+            glVertex2d(0.0, mBB->MinCorner()[mY]);
+            glVertex2d(0.0, mBB->MaxCorner()[mY]);
         } glEnd();
     }
 
@@ -254,15 +245,15 @@ void vctPose3DQtWidgetView::paintGL(void)
     painter.drawText(1, 1 + font_size,
                      QString().sprintf("%c: %0.2f",
                                        legend[mY],
-                                       mBB->MaxCorner[mY] * mPrismaticFactor));
+                                       mBB->MaxCorner()[mY] * mPrismaticFactor));
     painter.drawText(1, mViewport.Y() - font_size,
                      QString().sprintf("%0.2f/%0.2f",
-                                       mBB->MinCorner[mY] * mPrismaticFactor,
-                                       mBB->MinCorner[mX] * mPrismaticFactor));
+                                       mBB->MinCorner()[mY] * mPrismaticFactor,
+                                       mBB->MinCorner()[mX] * mPrismaticFactor));
     painter.drawText(mViewport.X() - font_size * 10, mViewport.Y() - font_size,
                      QString().sprintf("%c: %0.2f",
                                        legend[mX],
-                                       mBB->MaxCorner[mX] * mPrismaticFactor));
+                                       mBB->MaxCorner()[mX] * mPrismaticFactor));
     painter.end();
 }
 

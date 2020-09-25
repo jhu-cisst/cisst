@@ -153,49 +153,49 @@ int EllipsoidOBBIntersectionSolver::TestEllipsoidOBBIntersection(const vct3 &v,
     //S2 = Ns.Column(2).Norm();
 #endif
 
-    if (Fv[0] >= OBB.MaxCorner[0]) {
+    if (Fv[0] >= OBB.MaxCorner()[0]) {
         // Face Fx+ is visible from sample point
-        if (Fv[0] > OBB.MaxCorner[0] + S0) {
+        if (Fv[0] > OBB.MaxCorner()[0] + S0) {
             // visible face is out-of-range
             return 0;
         }
         vsblFaces[numVsblFaces++] = 1;
     }
-    else if (Fv[0] <= OBB.MinCorner[0]) {
+    else if (Fv[0] <= OBB.MinCorner()[0]) {
         // Face Fx- is visible
-        if (Fv[0] < OBB.MinCorner[0] - S0) {
+        if (Fv[0] < OBB.MinCorner()[0] - S0) {
             // visible face out-of-range
             return 0;
         }
         vsblFaces[numVsblFaces++] = 2;
     }
-    if (Fv[1] >= OBB.MaxCorner[1]) {
+    if (Fv[1] >= OBB.MaxCorner()[1]) {
         // Face Fy+ is visible
-        if (Fv[1] > OBB.MaxCorner[1] + S1) {
+        if (Fv[1] > OBB.MaxCorner()[1] + S1) {
             // visible face out-of-range
             return 0;
         }
         vsblFaces[numVsblFaces++] = 3;
     }
-    else if (Fv[1] <= OBB.MinCorner[1]) {
+    else if (Fv[1] <= OBB.MinCorner()[1]) {
         // Face Fy- is visible
-        if (Fv[1] < OBB.MinCorner[1] - S1) {
+        if (Fv[1] < OBB.MinCorner()[1] - S1) {
             // visible face out-of-range
             return 0;
         }
         vsblFaces[numVsblFaces++] = 4;
     }
-    if (Fv[2] >= OBB.MaxCorner[2]) {
+    if (Fv[2] >= OBB.MaxCorner()[2]) {
         // Face Fz+ is visible
-        if (Fv[2] > OBB.MaxCorner[2] + S2) {
+        if (Fv[2] > OBB.MaxCorner()[2] + S2) {
             // visible face out-of-range
             return 0;
         }
         vsblFaces[numVsblFaces++] = 5;
     }
-    else if (Fv[2] <= OBB.MinCorner[2]) {
+    else if (Fv[2] <= OBB.MinCorner()[2]) {
         // Face Fz- is visible
-        if (Fv[2] < OBB.MinCorner[2] - S2) {
+        if (Fv[2] < OBB.MinCorner()[2] - S2) {
             // visible face out-of-range
             return 0;
         }
@@ -235,12 +235,12 @@ int EllipsoidOBBIntersectionSolver::TestEllipsoidOBBIntersection(const vct3 &v,
     //        on statistics of a single vertex from each triangle.
     //        We may, however, assume that the extents are positive along each
     //        axis direction, i.e. that the origin lies within the node.
-    Vxpos = OBB.MaxCorner[0]*Vx_;  // parallelpiped extents along each axis
-    Vypos = OBB.MaxCorner[1]*Vy_;  //  ''
-    Vzpos = OBB.MaxCorner[2]*Vz_;  //  ''
-    Vxneg = OBB.MinCorner[0]*Vx_;  //  ''
-    Vyneg = OBB.MinCorner[1]*Vy_;  //  ''
-    Vzneg = OBB.MinCorner[2]*Vz_;  //  ''
+    Vxpos = OBB.MaxCorner()[0]*Vx_;  // parallelpiped extents along each axis
+    Vypos = OBB.MaxCorner()[1]*Vy_;  //  ''
+    Vzpos = OBB.MaxCorner()[2]*Vz_;  //  ''
+    Vxneg = OBB.MinCorner()[0]*Vx_;  //  ''
+    Vyneg = OBB.MinCorner()[1]*Vy_;  //  ''
+    Vzneg = OBB.MinCorner()[2]*Vz_;  //  ''
     m_Vxp = m + Vxpos;              // precompute these for efficiency
     m_Vxn = m + Vxneg;              //  ''
     Vyp_Vzp = Vypos + Vzpos;        //  ''
@@ -581,7 +581,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
     switch(FaceNumber) {
     case 1:   // X+ face
         {
-            if (qnode[2] > OBB.MaxCorner[2])  // upper edge
+            if (qnode[2] > OBB.MaxCorner()[2])  // upper edge
                 { // edge 0 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v0, v1) < sqrRadius)
@@ -590,7 +590,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[2] < OBB.MinCorner[2])  // lower edge
+            else if (qnode[2] < OBB.MinCorner()[2])  // lower edge
                 { // edge 2 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v2, v3) < sqrRadius)
@@ -599,7 +599,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            if (qnode[1] < OBB.MinCorner[1])  // left edge
+            if (qnode[1] < OBB.MinCorner()[1])  // left edge
                 { // edge 1 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v1, v2) < sqrRadius)
@@ -608,7 +608,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[1] > OBB.MaxCorner[1])  // right edge
+            else if (qnode[1] > OBB.MaxCorner()[1])  // right edge
                 { // edge 3 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v3, v0) < sqrRadius)
@@ -621,7 +621,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
         }
     case 2:   // X- face
         {
-            if (qnode[2] > OBB.MaxCorner[2])  // upper edge
+            if (qnode[2] > OBB.MaxCorner()[2])  // upper edge
                 { // edge 0 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v0, v1) < sqrRadius)
@@ -630,7 +630,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[2] < OBB.MinCorner[2])  // lower edge
+            else if (qnode[2] < OBB.MinCorner()[2])  // lower edge
                 { // edge 2 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v2, v3) < sqrRadius)
@@ -639,7 +639,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            if (qnode[1] > OBB.MaxCorner[1])  // left edge
+            if (qnode[1] > OBB.MaxCorner()[1])  // left edge
                 { // edge 1 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v1, v2) < sqrRadius)
@@ -648,7 +648,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[1] < OBB.MinCorner[1])  // right edge
+            else if (qnode[1] < OBB.MinCorner()[1])  // right edge
                 { // edge 3 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v3, v0) < sqrRadius)
@@ -661,7 +661,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
         }
     case 3:   // Y+ face
         {
-            if (qnode[2] > OBB.MaxCorner[2])  // upper edge
+            if (qnode[2] > OBB.MaxCorner()[2])  // upper edge
                 { // edge 0 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v0, v1) < sqrRadius)
@@ -670,7 +670,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[2] < OBB.MinCorner[2])  // lower edge
+            else if (qnode[2] < OBB.MinCorner()[2])  // lower edge
                 { // edge 2 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v2, v3) < sqrRadius)
@@ -679,7 +679,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            if (qnode[0] > OBB.MaxCorner[0])  // left edge
+            if (qnode[0] > OBB.MaxCorner()[0])  // left edge
                 { // edge 1 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v1, v2) < sqrRadius)
@@ -688,7 +688,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[0] < OBB.MinCorner[0])  // right edge
+            else if (qnode[0] < OBB.MinCorner()[0])  // right edge
                 { // edge 3 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v3, v0) < sqrRadius)
@@ -701,7 +701,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
         }
     case 4:   // Y- face
         {
-            if (qnode[2] > OBB.MaxCorner[2])  // upper edge
+            if (qnode[2] > OBB.MaxCorner()[2])  // upper edge
                 { // edge 0 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v0, v1) < sqrRadius)
@@ -710,7 +710,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[2] < OBB.MinCorner[2])  // lower edge
+            else if (qnode[2] < OBB.MinCorner()[2])  // lower edge
                 { // edge 2 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v2, v3) < sqrRadius)
@@ -719,7 +719,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            if (qnode[0] < OBB.MinCorner[0])  // left edge
+            if (qnode[0] < OBB.MinCorner()[0])  // left edge
                 { // edge 1 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v1, v2) < sqrRadius)
@@ -728,7 +728,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[0] > OBB.MaxCorner[0])  // right edge
+            else if (qnode[0] > OBB.MaxCorner()[0])  // right edge
                 { // edge 3 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v3, v0) < sqrRadius)
@@ -741,7 +741,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
         }
     case 5:   // Z+ face
         {
-            if (qnode[0] < OBB.MinCorner[0])  // upper edge
+            if (qnode[0] < OBB.MinCorner()[0])  // upper edge
                 { // edge 0 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v0, v1) < sqrRadius)
@@ -750,7 +750,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[0] > OBB.MaxCorner[0])  // lower edge
+            else if (qnode[0] > OBB.MaxCorner()[0])  // lower edge
                 { // edge 2 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v2, v3) < sqrRadius)
@@ -759,7 +759,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            if (qnode[1] < OBB.MinCorner[1])  // left edge
+            if (qnode[1] < OBB.MinCorner()[1])  // left edge
                 { // edge 1 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v1, v2) < sqrRadius)
@@ -768,7 +768,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[1] > OBB.MaxCorner[1])  // right edge
+            else if (qnode[1] > OBB.MaxCorner()[1])  // right edge
                 { // edge 3 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v3, v0) < sqrRadius)
@@ -781,7 +781,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
         }
     case 6:   // Z- face
         {
-            if (qnode[0] > OBB.MaxCorner[0])  // upper edge
+            if (qnode[0] > OBB.MaxCorner()[0])  // upper edge
                 { // edge 0 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v0, v1) < sqrRadius)
@@ -790,7 +790,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[0] < OBB.MinCorner[0])  // lower edge
+            else if (qnode[0] < OBB.MinCorner()[0])  // lower edge
                 { // edge 2 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v2, v3) < sqrRadius)
@@ -799,7 +799,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            if (qnode[1] < OBB.MinCorner[1])  // left edge
+            if (qnode[1] < OBB.MinCorner()[1])  // left edge
                 { // edge 1 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v1, v2) < sqrRadius)
@@ -808,7 +808,7 @@ bool EllipsoidOBBIntersectionSolver::IntersectionSphereFace(const vct3 &n,
                         }
                     numVsblEdges++;
                 }
-            else if (qnode[1] > OBB.MaxCorner[1])  // right edge
+            else if (qnode[1] > OBB.MaxCorner()[1])  // right edge
                 { // edge 3 visible
                     // compute distance to edge
                     if (SquareDistanceToEdge(v3, v0) < sqrRadius)

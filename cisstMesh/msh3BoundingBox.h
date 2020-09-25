@@ -37,71 +37,8 @@
 #ifndef _msh3BoundingBox_h
 #define _msh3BoundingBox_h
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+// for (some) backward compatibility
+#include <cisstVector/vctBoundingBox3.h>
+typedef vctBoundingBox3 msh3BoundingBox;
 
-// Always include last!
-#include <cisstMesh/mshExport.h>
-
-class CISST_EXPORT msh3BoundingBox
-{
- public:
-    vct3 MinCorner;
-    vct3 MaxCorner;
-    //vct3 HalfExtents;  // SDB
- public:
-
-    void ComputeHalfExtents();
-
-    vct3 Diagonal() const {return MaxCorner-MinCorner;};
-    double DiagonalLength() const {return Diagonal().Norm();};
-
-    vct3 MidPoint() const { return (MinCorner+MaxCorner)*0.5;};
-
-    msh3BoundingBox(const vct3& MinC, const vct3& MaxC )
-        : MinCorner(MinC), MaxCorner(MaxC)
-    {}; //{ ComputeHalfExtents(); };
-
-    msh3BoundingBox()
-        : MinCorner(HUGE_VAL,HUGE_VAL,HUGE_VAL), MaxCorner(-HUGE_VAL,-HUGE_VAL,-HUGE_VAL)
-        {}; //{ ComputeHalfExtents(); };
-
-    msh3BoundingBox(const msh3BoundingBox& S)
-        : MinCorner(S.MinCorner), MaxCorner(S.MaxCorner)
-        {}; //{ ComputeHalfExtents(); };
-
-    msh3BoundingBox& operator=(const msh3BoundingBox& S)
-        { MinCorner=S.MinCorner; MaxCorner=S.MaxCorner;
-            //HalfExtents=S.HalfExtents;
-            return *this; };
-
-    msh3BoundingBox& operator=(const vct3& V)
-        { MinCorner=MaxCorner=V;
-            //HalfExtents.Assign(0.0,0.0,0.0);
-            return *this;};
-
-    msh3BoundingBox& Include(const msh3BoundingBox& him);  //
-    msh3BoundingBox& Include(const vct3& V);
-
-    bool Intersect(const msh3BoundingBox& target);
-
-    void EnlargeBy(double dist)
-    { MinCorner -= dist; MaxCorner+= dist; };
-    //ComputeHalfExtents(); };
-
-    int Includes(const vct3& p,double dist=0.0) const
-    { if (p[0] +dist < MinCorner[0]) return 0;
-        if (p[1] +dist < MinCorner[1]) return 0;
-        if (p[2] +dist < MinCorner[2]) return 0;
-        if (p[0] -dist > MaxCorner[0]) return 0;
-        if (p[1] -dist > MaxCorner[1]) return 0;
-        if (p[2] -dist > MaxCorner[2]) return 0;
-        return 1; // point is within distance "dist" of this bounding box
-    };
-
-    int Includes(const msh3BoundingBox& B,double dist=0.0) const
-    { return Includes(B.MinCorner,dist)&&Includes(B.MaxCorner,dist);
-    };
-
-};
-
-#endif
+#endif // _msh3BoundingBox_h

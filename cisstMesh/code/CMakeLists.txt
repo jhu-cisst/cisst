@@ -42,7 +42,6 @@ set (SOURCE_FILES
   msh2AlgDirPDTreevonMisesEdges.cpp
   msh2AlgDirPDTreevonMisesPointCloud.cpp
 
-  msh3BoundingBox.cpp
   msh3Mesh.cpp
   msh3PointCloud.cpp
   msh3Utilities.cpp

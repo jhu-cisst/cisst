@@ -352,8 +352,8 @@ void msh3DirPDTreeNode::PrintTerminalNodes(std::ofstream &fs)
         fs << "Terminal Node:" << std::endl
            << "  NData = " << NData << std::endl
            << F << std::endl
-           << "  Bounds Min: " << Bounds.MinCorner << std::endl
-           << "  Bounds Max: " << Bounds.MaxCorner << std::endl
+           << "  Bounds Min: " << Bounds.MinCorner() << std::endl
+           << "  Bounds Max: " << Bounds.MaxCorner() << std::endl
            << "  Datum Indices: " << std::endl;
         for (int i = 0; i < NData; i++) {
             fs << "    " << Datum(i) << std::endl;
