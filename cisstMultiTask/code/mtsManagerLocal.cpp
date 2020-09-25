@@ -1245,7 +1245,10 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
     Json::Value jsonValue;
     Json::Reader reader;
     // parsing should work since the string has been generated after a previous parse
-    bool parsedOk = reader.parse(constructorArgSerialized, jsonValue);
+#if CMN_ASSERT_IS_DEFINED
+    bool parsedOk =
+#endif
+        reader.parse(constructorArgSerialized, jsonValue);
     CMN_ASSERT(parsedOk);
     try {
         argument->DeSerializeTextJSON(jsonValue);
@@ -2026,7 +2029,6 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
 {
     // wait for all components to be started if timeout is positive
     bool allAtState = true;
-    mtsManagerComponentBase * isManager;
     if (timeout > 0.0) {
         // will iterate on all components
         ComponentMapType::const_iterator iterator = ComponentMap.begin();
@@ -2037,8 +2039,15 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
             // compute how much time do we have left based on when we started
             double timeLeft = timeEnd - TimeServer.GetRelativeTime();
-            isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
-            if (!isManager) {
+            // skip in 2 cases, manager components and tasks with ExecIn
+            mtsManagerComponentBase * isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
+            bool isIndependent = true;
+            mtsTask * task = dynamic_cast<mtsTask *>(iterator->second);
+            if (task && task->ExecIn && task->ExecIn->GetConnectedInterface()) {
+                isIndependent = false;
+            }
+            // wait if needed
+            if (!isManager && isIndependent) {
                 allAtState = iterator->second->WaitForState(desiredState, timeLeft);
                 if (!allAtState) {
                     CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: component \"" << iterator->first << "\" failed to reach state \""

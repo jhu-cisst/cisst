@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-18
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -153,15 +153,15 @@ public:
       not modified.
      */
     inline static bool Create(cmnGenericObject * existing, const cmnGenericObject & other) {
+        // If they already point to the same memory, just return
+        if (existing == &other)
+            return true;
         if (existing->Services() != other.Services()) {
             CMN_LOG_RUN_WARNING << "cmnClassServices::Create with in-place new called for different classes, existing = "
                                 << existing->Services()->GetName()
                                 << ", other = " << other.Services()->GetName() << std::endl;
             return false;
         }
-        // If they already point to the same memory, just return
-        if (existing == &other)
-            return true;
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         if (otherPointer) {
             existing->Services()->Delete(existing);

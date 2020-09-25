@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-02-11
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -91,6 +91,19 @@ CISST_EXPORT void vctRandom(vctRodriguezRotation3Base<_containerType> & rodrigue
 #ifdef CISST_COMPILER_IS_MSVC
 template CISST_EXPORT void vctRandom(vctRodriguezRotation3Base<vctFixedSizeVector<double, 3> > &);
 template CISST_EXPORT void vctRandom(vctRodriguezRotation3Base<vctFixedSizeVector<float, 3> > &);
+#endif
+#endif // DOXYGEN
+
+
+template <vctEulerRotation3Order::OrderType _order>
+CISST_EXPORT void vctRandom(vctEulerRotation3<_order> & eulerRotation);
+
+#ifndef DOXYGEN
+#ifdef CISST_COMPILER_IS_MSVC
+template CISST_EXPORT void vctRandom(vctEulerRotation3<vctEulerRotation3Order::ZYZ> &);
+template CISST_EXPORT void vctRandom(vctEulerRotation3<vctEulerRotation3Order::ZYX> &);
+template CISST_EXPORT void vctRandom(vctEulerRotation3<vctEulerRotation3Order::ZXZ> &);
+template CISST_EXPORT void vctRandom(vctEulerRotation3<vctEulerRotation3Order::YZX> &);
 #endif
 #endif // DOXYGEN
 

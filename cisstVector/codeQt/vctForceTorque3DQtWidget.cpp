@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Dorothy Hu
   Created on: 2017-01-20
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -69,12 +69,9 @@ void vctForceTorque3DQtWidget::setupUi(void)
     QPlotSelectItem->setCurrentIndex(PlotIndex);
     leftLayout->addWidget(QPlotSelectItem);
 
-    const double grey = 0.95;
-
     // legend
     QLabel * label;
     QPalette palette;
-    palette.setColor(QPalette::Window, QColor(grey * 255, grey * 255, grey * 255));
     label = new QLabel("Axis X");
     label->setAutoFillBackground(true);
     palette.setColor(QPalette::WindowText, Qt::red);
@@ -92,7 +89,7 @@ void vctForceTorque3DQtWidget::setupUi(void)
     leftLayout->addWidget(label);
     label = new QLabel("Vector");
     label->setAutoFillBackground(true);
-    palette.setColor(QPalette::WindowText, Qt::black);
+    palette.setColor(QPalette::WindowText, this->palette().color(QPalette::WindowText));
     label->setPalette(palette);
     leftLayout->addWidget(label);
 

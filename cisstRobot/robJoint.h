@@ -2,7 +2,7 @@
   Author(s): Simon Leonard
   Created on: November 11 2009
 
-  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -58,6 +58,8 @@ class CISST_EXPORT robJoint {
 
 private:
 
+  std::string name;
+  
   //! The type of the joint
   /**
      Determine if the joint is a hinge, slider, universal, ball and socket, etc.
@@ -96,6 +98,13 @@ public:
   // class with virtual methods should have a virtual destructor
   inline virtual ~robJoint() {};
 
+  inline const std::string & Name(void) const {
+    return name;
+  }
+  inline std::string & Name(void) {
+    return name;
+  }
+  
   //! Return the type of the joint
   /**
      \return The type of the joint (hinge, slider, universal, ball and socket)
@@ -179,7 +188,8 @@ public:
      \return The absolute value for the maximum force or torque that can be
              applied by the joint.
   */
-  double ForceTorqueMax() const;
+  const double & ForceTorqueMax(void) const;
+  double & ForceTorqueMax(void);
 
   //! Read from an input stream
   /**

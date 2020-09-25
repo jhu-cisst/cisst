@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -291,6 +291,10 @@ macro (cisst_add_library ...)
 
   set (FILE_CONTENT ${FILE_CONTENT} "\n${CISST_STRING_POUND}endif // _${LIBRARY}_h\n")
   file (WRITE ${LIBRARY_MAIN_HEADER} ${FILE_CONTENT})
+  get_directory_property (existing_files_to_clean ADDITIONAL_MAKE_CLEAN_FILES)
+  set_directory_properties (PROPERTIES
+    ADDITIONAL_MAKE_CLEAN_FILES
+    "${existing_files_to_clean};${LIBRARY_MAIN_HEADER}")
 
   # Set paths
   cisst_set_directories (${LIBRARY} ${DEPENDENCIES})
@@ -310,6 +314,11 @@ macro (cisst_add_library ...)
                ${HEADERS}
                ${ADDITIONAL_HEADER_FILES}
                )
+
+  # set version number
+  set_target_properties (${LIBRARY} PROPERTIES
+                         VERSION ${CISST_VERSION}
+                         SOVERSION ${CISST_VERSION})
 
   # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
   if (CMAKE_VERSION VERSION_GREATER "3.0.1")
@@ -548,10 +557,19 @@ function (cisst_add_swig_module ...)
     # make sure the runtime code is not included
     set_source_files_properties (${SWIG_INTERFACE_FILE}
                                  PROPERTIES SWIG_FLAGS "-v;-modern;-fvirtual")
+    # make sure source file is not used before libraries are build
+    set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES DEPENDS "${MODULE_LINK_LIBRARIES}")
     # finally create the swig project using CMake command
     set (MODULE_NAME ${MODULE}Python)
-    cisst_cmake_debug ("cisst_add_swig_module: swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})")
-    swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})
+    if (COMMAND swig_add_library)
+      cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
+      swig_add_library (${MODULE_NAME}
+                        LANGUAGE python
+                        SOURCES ${SWIG_INTERFACE_FILE})
+    else ()
+      cisst_cmake_debug ("cisst_add_swig_module: swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})")
+      swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})
+    endif ()
     if (WIN32)
       set_target_properties (_${MODULE_NAME} PROPERTIES SUFFIX .pyd)
       set_target_properties (_${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
@@ -817,11 +835,25 @@ function (cisst_add_test ...)
   endforeach (keyword)
 
   # Once the test program is compiled, run it to create a list of available tests
-  add_custom_command (TARGET ${TEST_PROGRAM}
-                      POST_BUILD
-                      COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${TEST_PROGRAM}
-                      ARGS -d -i ${ITERATIONS} -o ${INSTANCES} > ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-${TEST_PROGRAM}.txt
-                      COMMENT "Generating ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-${TEST_PROGRAM}.txt")
+  if (WIN32)
+    # On Windows, create batch file to set path and then call test program
+    set (BATCH_TEST_FILE "${CMAKE_CURRENT_BINARY_DIR}/Run-${TEST_PROGRAM}.bat")
+    file (WRITE  ${BATCH_TEST_FILE} "@ECHO OFF\n")
+    file (APPEND ${BATCH_TEST_FILE} "CALL ${cisst_BINARY_DIR}/cisstvars.bat %6\n")
+    file (APPEND ${BATCH_TEST_FILE} "${EXECUTABLE_OUTPUT_PATH}/%6/${TEST_PROGRAM} %1 %2 %3 %4 %5 > "
+                                    "${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-${TEST_PROGRAM}.txt\n")
+    add_custom_command (TARGET ${TEST_PROGRAM}
+                        POST_BUILD
+                        COMMAND ${BATCH_TEST_FILE}
+                        ARGS -d -i ${ITERATIONS} -o ${INSTANCES} ${CMAKE_CFG_INTDIR}
+                        COMMENT "Generating ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-${TEST_PROGRAM}.txt")
+  else (WIN32)
+    add_custom_command (TARGET ${TEST_PROGRAM}
+                        POST_BUILD
+                        COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${TEST_PROGRAM}
+                        ARGS -d -i ${ITERATIONS} -o ${INSTANCES} > ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-${TEST_PROGRAM}.txt
+                        COMMENT "Generating ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-${TEST_PROGRAM}.txt")
+  endif (WIN32)
 
   # Add the custom build list
   set_directory_properties (PROPERTIES TEST_INCLUDE_FILE
@@ -992,7 +1024,7 @@ endfunction (cisst_add_config_version)
 #
 function (cisst_is_catkin_build RESULT)
   set (${RESULT} FALSE PARENT_SCOPE)
-  if (DEFINED ENV{ROS_ROOT})
+  if (DEFINED ENV{ROS_ROOT} OR DEFINED ENV{ROS_VERSION})
     message (STATUS "Assuming cisst is built using ROS/catkin since ROS_ROOT is defined in environment")
     if (DEFINED CATKIN_DEVEL_PREFIX)
       set (${RESULT} TRUE PARENT_SCOPE)

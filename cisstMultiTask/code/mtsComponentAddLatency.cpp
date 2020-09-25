@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Anton Deguet
   Created on: 2011-12-14
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsCommandWrite.h>
 #include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 typedef std::list<std::pair<double, mtsGenericObject *> > mtsComponentAddLatencyWriteHistoryType;
 typedef std::list<double> mtsComponentAddLatencyVoidHistoryType;

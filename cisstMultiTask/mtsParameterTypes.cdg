@@ -292,13 +292,14 @@ class {
         name Timestamp;
         type double;
         visibility public;
+        accessors set-get;
     }
     inline-header {
         void SetMessage(const std::string & message);
     }
 }
 inline-code {
-    #include <cisstMultiTask/mtsTaskManager.h>
+    #include <cisstMultiTask/mtsManagerLocal.h>
     void mtsMessage::SetMessage(const std::string & message) {
         Timestamp = mtsComponentManager::GetInstance()->GetTimeServer().GetAbsoluteTimeInSeconds();
         Counter++;

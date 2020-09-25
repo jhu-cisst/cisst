@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Daniel Li, Anton Deguet
   Created on: 2009-05-20
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -126,12 +123,12 @@ public:
     }
 
     inline _elementType GetItem(size_type rowIndex, size_type colIndex) const
-    throw(std::out_of_range) {
+    CISST_THROW (std::out_of_range) {
         return copy.at(rowIndex, colIndex);
     }
 
     inline void SetItem(size_type rowIndex, size_type colIndex, _elementType value)
-    throw(std::out_of_range) {
+    CISST_THROW (std::out_of_range) {
         copy.at(rowIndex, colIndex) = value;
     }
 
