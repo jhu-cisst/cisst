@@ -1,0 +1,42 @@
+state_joint_current = measured_js
+state_jaw_current = jaw\/measured_js
+state_gripper_current = gripper\/measured_js
+
+state_joint_desired = setpoint_js
+state_jaw_desired = jaw\/setpoint_js
+state_gripper_desired = gripper\/setpoint_js
+
+position_cartesian_current = measured_cp
+position_cartesian_local_current = local\/measured_cp
+
+position_cartesian_desired = setpoint_cp
+position_cartesian_local_desired = local\/setpoint_cp
+
+twist_body_current = body\/measured_cv
+wrench_body_current = body\/measured_cf
+
+twist_spatial_current = spatial\/measured_cv
+wrench_spatial_current = spatial\/measured_cf
+
+jacobian_body = body\/jacobian
+jacobian_spatial = spatial\/jacobian
+
+set_position_joint = servo_jp
+set_effort_joint = servo_jf
+set_position_goal_joint = move_jp
+
+set_position_cartesian = servo_cp
+set_wrench_body = body\/servo_cf
+set_wrench_spatial = spatial\/servo_cf
+set_position_goal_cartesian = move_cp
+
+set_position_jaw = jaw\/servo_jp
+set_effort_jaw = jaw\/servo_jf
+set_position_goal_jaw = jaw\/move_jp
+
+set_position_gripper = gripper\/servo_jp
+set_effort_gripper = gripper\/servo_jf
+set_position_goal_gripper = gripper\/move_jp
+
+gripper_pinch_event = gripper\/pinch
+gripper_closed_Event = gripper\/closed
