@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnStrings.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -1204,7 +1205,11 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommand
         if (this->OriginalInterface) {
             return this->OriginalInterface->AddObserver(eventName, handler);
         }
-        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void): cannot find event named \"" << eventName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void) for \"" << GetFullName()
+                                 << "\": cannot find event named \"" << eventName
+                                 << "\", the following events are available: "
+                                 << cmnStringFromVectorOfStrings(GetNamesOfEventsVoid())
+                                 << std::endl;
         return false;
     }
 }
@@ -1219,7 +1224,11 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommand
     if (multicastCommand) {
         return multicastCommand->AddCommand(handler);
     } else {
-        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write) for \"" << GetFullName()
+                                 << "\": cannot find event named \"" << eventName
+                                 << "\", the following events are available: "
+                                 << cmnStringFromVectorOfStrings(GetNamesOfEventsWrite())
+                                 << std::endl;
         return false;
     }
 }
