@@ -53,7 +53,6 @@ void vctForceTorque3DQtWidget::closeEvent(QCloseEvent * event)
 
 void vctForceTorque3DQtWidget::setupUi(void)
 {
-
     QHBoxLayout * mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
@@ -95,11 +94,6 @@ void vctForceTorque3DQtWidget::setupUi(void)
 
     leftLayout->addStretch();
 
-    // Norm
-    QLScale = new QLabel("Scale");
-    QLScale->setAlignment(Qt::AlignBottom | Qt::AlignRight);
-    leftLayout->addWidget(QLScale);
-
     // plot area
     QVector = new vctVector3DQtWidget();
     QVector->resize(QVector->sizeHint());
@@ -130,12 +124,6 @@ void vctForceTorque3DQtWidget::SetValue(const vct3 & force, const vct3 & torque)
     } else if (PlotIndex == 1) {
         QVector->SetValue(torque);
     }
-
-    // update scale
-    double scale = QVector->MaxNorm() * QVector->AxisLength();
-    QString text;
-    text.setNum(scale, 'f', 3);
-    QLScale->setText(text);
 }
 
 void vctForceTorque3DQtWidget::SlotPlotIndex(int newAxis)

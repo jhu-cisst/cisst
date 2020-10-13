@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctVector3DQtWidget.h>
 #include <QKeyEvent>
+#include <QPainter>
 
 const double vctVector3DQtWidgetDefaultMax = 0.0001;
 
@@ -60,9 +61,9 @@ void vctVector3DQtWidget::SetAutoResize(const bool autoResize)
 void vctVector3DQtWidget::SetValue(const vct3 & value)
 {
     mVector = value;
-    const double norm = mVector.Norm();
-    if (mAutoResize && (norm > mMaxNorm)) {
-        mMaxNorm = norm;
+    mVectorNorm = mVector.Norm();
+    if (mAutoResize && (mVectorNorm > mMaxNorm)) {
+        mMaxNorm = mVectorNorm;
         mScale = 1.0f / mMaxNorm;
     }
     // update GL display
@@ -192,7 +193,7 @@ void vctVector3DQtWidget::paintGL(void)
     } else {
         glLineStipple(1, 0x0101); // dotted
     }
-    
+
     glBegin(GL_LINE_STRIP);
     glVertex3f(0.0f, 0.0f, 0.0f);
     glVertex3f(0.0f, mVector.Y(), 0.0f);
@@ -216,6 +217,16 @@ void vctVector3DQtWidget::paintGL(void)
     glDisable(GL_LINE_STIPPLE);
 
     glPopMatrix();
+
+    const int font_size = 8;
+    QPainter painter(this);
+    const QColor txtColor = palette().color(QPalette::Text);
+    painter.setPen(txtColor);
+    painter.setFont(QFont("Helvetica", font_size));
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    painter.drawText(1, 1 + font_size,
+                     QString().sprintf("%0.2f/%0.2f", mVectorNorm, mMaxNorm));
+    painter.end();
 
     glFlush();
 }

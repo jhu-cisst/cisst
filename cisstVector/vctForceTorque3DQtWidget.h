@@ -41,9 +41,6 @@ protected:
 
 private:
     void setupUi(void);
-
-    QLabel * QLScale;
-
     vctVector3DQtWidget * QVector;
 
     // force vs. torque

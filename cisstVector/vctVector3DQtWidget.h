@@ -62,7 +62,7 @@ protected:
     vctQuatRot3 mCurrentOrientation, mDeltaOrientation;
     vctInt2 mStartMousePosition;
     bool mAutoResize;
-    double mMaxNorm;
+    double mVectorNorm, mMaxNorm;
     float mScale; // = 1 / mMaxNorm
     float mAxisLength;
 };
