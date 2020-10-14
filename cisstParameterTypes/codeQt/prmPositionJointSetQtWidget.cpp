@@ -40,8 +40,8 @@ void prmPositionJointSetQtWidget::setupUi(void)
     layout->setContentsMargins(2, 2, 2, 2);
     this->setLayout(layout);
 
-    QPBReset = new QPushButton("Reset");
-    layout->addWidget(QPBReset);
+    QPBRead = new QPushButton("Read");
+    layout->addWidget(QPBRead);
     QPBMove = new QPushButton("Move");
     QPBMove->setEnabled(false);
     layout->addWidget(QPBMove);
@@ -52,13 +52,13 @@ void prmPositionJointSetQtWidget::setupUi(void)
     layout->addWidget(QVWPosition);
 
     // connect buttons
-    connect(QPBReset, SIGNAL(clicked()),
-            this, SLOT(SlotReset()));
+    connect(QPBRead, SIGNAL(clicked()),
+            this, SLOT(SlotRead()));
     connect(QPBMove, SIGNAL(clicked()),
             this, SLOT(SlotSetPositionGoalJoint()));
 }
 
-void prmPositionJointSetQtWidget::SlotReset(void)
+void prmPositionJointSetQtWidget::SlotRead(void)
 {
     QPBMove->setEnabled(false);
     if (!measured_js) {

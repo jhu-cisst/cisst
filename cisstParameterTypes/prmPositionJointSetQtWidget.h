@@ -48,8 +48,8 @@ public:
         }
     }
 
-    inline void Reset(void) {
-        SlotReset();
+    inline void Read(void) {
+        SlotRead();
     }
 
     mtsFunctionRead * measured_js;
@@ -58,7 +58,7 @@ public:
 
 protected:
     vctQtWidgetDynamicVectorDoubleWrite * QVWPosition;
-    QPushButton * QPBReset;
+    QPushButton * QPBRead;
     QPushButton * QPBMove;
 
     double mPrismaticFactor, mRevoluteFactor;
@@ -66,7 +66,7 @@ protected:
     vctDoubleVec mFactors, mTemp1, mTemp2;
 
  private slots:
-    void SlotReset(void);
+    void SlotRead(void);
     void SlotSetPositionGoalJoint(void);
 };
 
