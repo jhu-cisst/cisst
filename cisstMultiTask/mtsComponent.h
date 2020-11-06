@@ -217,6 +217,32 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Default destructor. Does nothing. */
     virtual ~mtsComponent();
 
+#if CISST_HAS_JSON
+    /*! Configure using JSON.  This method can be used to configure
+      the logs for the component.  This method looks for:
+
+      "log": {
+           "allow": "none", // other valid options are errors, errors-and-warnings, verbose, debug, all
+           "separate-file": true
+       }
+
+       The "allow" setting will apply to all instances of the object's
+       class.  For example, if you have two objects a and b of type T,
+       changing the "allow" for a will apply to all instances of type
+       T, i.e. a and b.  The "allow" values are based on the log masks
+       defined cmnLogLoD.h.  The default is "errors-and-warnings".
+
+       For "separate-file", one can also provide a string,
+       i.e. filename for the separate log file for this component.  If
+       one just uses the boolean True, the separate log file name is
+       based on the component's name and time.  The separate file is
+       specific to each instance.
+
+       All fields are optional.
+    */
+    virtual void ConfigureJSON(const Json::Value & configuration);
+#endif
+
     /*! Returns the name of the component. */
     const std::string & GetName(void) const;
     void GetName(std::string & placeHolder) const;
@@ -425,7 +451,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       method will not log the results in cisstLog unless the flag
       'log' is set to true. */
     bool AreAllInterfacesRequiredConnected(const bool log = false);
-    
+
     /*! Return true if task is active. */
     bool IsRunning(void) const;
     inline bool CISST_DEPRECATED Running(void) const {

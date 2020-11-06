@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -87,6 +87,51 @@ mtsComponent::~mtsComponent()
         delete ManagerComponentServices;
     }
 }
+
+
+#if CISST_HAS_JSON
+void mtsComponent::ConfigureJSON(const Json::Value & configuration)
+{
+    const Json::Value jsonLog = configuration["log"];
+    if (!jsonLog.empty()) {
+        const Json::Value jsonAllow = jsonLog["allow"];
+        if (!jsonAllow.empty()) {
+            const std::string allow = jsonAllow.asString();
+            const std::string className = Services()->GetName();
+            if (allow == "none") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_NONE);
+            } else if (allow == "errors") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_ERRORS);
+            } else if (allow == "errors-and-warnings") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+            } else if (allow == "verbose") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_VERBOSE);
+            } else if (allow == "debug") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_DEBUG);
+            } else if (allow == "all") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_ALL);
+            } else {
+                CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: failed to configure \""
+                                         << this->GetName()
+                                         << "\", the \"log\":\"allow\" value must be one of: "
+                                         << "none, errors, errors-and-warnings, verbose, debug, all.  We found: \""
+                                         << allow << "\"" << std::endl;
+            }
+
+        }
+        const Json::Value jsonSeparateFile = jsonLog["separate-file"];
+        if (!jsonSeparateFile.empty()) {
+            if (jsonSeparateFile.isBool()) {
+                if (jsonSeparateFile.asBool()) {
+                    UseSeparateLogFileDefaultWithDate();
+                }
+            } else if (jsonSeparateFile.isString()) {
+                UseSeparateLogFile(jsonSeparateFile.asString());
+            }
+        }
+    }
+}
+#endif
 
 
 const std::string & mtsComponent::GetName(void) const
