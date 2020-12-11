@@ -303,10 +303,10 @@ option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some
 
 if (CISST_HAS_JSON)
 
-  if (WIN32)
+  if (WIN32 OR APPLE)
     # On Windows, no need to use PkgConfig
     set(JSONCPP_FOUND OFF)
-  else (WIN32)
+  else (WIN32 OR APPLE)
     # try to find an installed version
     find_package (PkgConfig REQUIRED)
     pkg_check_modules(JSONCPP jsoncpp)
