@@ -41,14 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 %}
 
 %header %{
-#ifdef _MSC_VER   // Windows
-#undef ERROR      // Avoid conflict with prmEventButton.h
-#include <cisstParameterTypes/prmEventButton.h>
-#endif
 #include <cisstParameterTypes/prmPython.h>
-#ifdef _MSC_VER   // Windows
-#undef ERROR
-#endif
 %}
 
 // Generate parameter documentation for IRE
