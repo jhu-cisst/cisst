@@ -20,7 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctQtForwardDeclarations_h
 #define _vctQtForwardDeclarations_h
 
+#ifdef _MSC_VER   // Windows
+#pragma message("this file is now deprecated, include vctForwardDeclarationsQt.h instead")
+#else
 #warning "this file is now deprecated, include vctForwardDeclarationsQt.h instead"
+#endif
 
 #include <cisstVector/vctForwardDeclarationsQt.h>
 
