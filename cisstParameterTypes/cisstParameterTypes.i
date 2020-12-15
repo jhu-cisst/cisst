@@ -2,13 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
-
   Author(s):	Anton Deguet
   Created on:   2009-01-26
 
-  (C) Copyright 2006-2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -44,7 +41,14 @@ http://www.cisst.org/cisst/license.txt.
 %}
 
 %header %{
+#ifdef _MSC_VER   // Windows
+#undef ERROR      // Avoid conflict with prmEventButton.h
+#include <cisstParameterTypes/prmEventButton.h>
+#endif
 #include <cisstParameterTypes/prmPython.h>
+#ifdef _MSC_VER   // Windows
+#undef ERROR
+#endif
 %}
 
 // Generate parameter documentation for IRE
