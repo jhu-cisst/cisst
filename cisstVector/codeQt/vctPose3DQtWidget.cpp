@@ -19,8 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstConfig.h>
 
 #include <cisstVector/vctPose3DQtWidget.h>
+#include <QTableWidget>
+#include <QHeaderView>
 #include <QKeyEvent>
 #include <QPainter>
+
+#define VCT_POSE_3D_MAX_ROWS 10
 
 vctPose3DQtWidget::vctPose3DQtWidget(QWidget * parent):
     QWidget(parent)
@@ -32,6 +36,37 @@ vctPose3DQtWidget::vctPose3DQtWidget(QWidget * parent):
     // set grid layout to display multiple views
     mLayout = new QGridLayout();
     setLayout(mLayout);
+
+    // table of values
+    mTable = new QTableWidget();
+    mTable->setContentsMargins(0, 0, 0, 0);
+    mTable->verticalHeader()->hide();
+    mTable->horizontalHeader()->hide();
+    mTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    mTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    QSizePolicy policy;
+    policy.setHorizontalPolicy(QSizePolicy::Minimum);
+    policy.setVerticalPolicy(QSizePolicy::Minimum);
+    mTable->setSizePolicy(policy);
+    mTable->setRowCount(VCT_POSE_3D_MAX_ROWS);
+    mTable->setColumnCount(3);
+    for (int row = 0; row < VCT_POSE_3D_MAX_ROWS; ++row) {
+        for (int column = 0; column < 3; ++column) {
+            QTableWidgetItem * tableItem = mTable->item(row, column);
+            if (tableItem == 0) {
+                tableItem = new QTableWidgetItem();
+                tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+                tableItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+                tableItem->setText("");
+                mTable->setItem(row, column, tableItem);
+            }
+        }
+    }
+    mTable->resize(mTable->sizeHint());
+    mTableRow = 0;
+    mLayout->addWidget(mTable, 0, 0);
 
     // create 3 views
     vctPose3DQtWidgetView * view;
@@ -66,6 +101,15 @@ void vctPose3DQtWidget::SetPrismaticRevoluteFactors(const double & prismatic,
 
 void vctPose3DQtWidget::SetValue(const vct3 & value)
 {
+    // update table if there's room
+    if (mTableRow < VCT_POSE_3D_MAX_ROWS) {
+        QString itemValue;
+        for (int column = 0; column < 3; ++column) {
+            mTable->item(mTableRow, column)->setText(QString::number(value.Element(column) * mPrismaticFactor, 'f', 2));
+        }
+        mTableRow++;
+    }
+
     // update bounding box
     mBB.Expand(value);
 
@@ -79,6 +123,18 @@ void vctPose3DQtWidget::SetValue(const vct3 & value)
         (*view)->update();
     }
 }
+
+void vctPose3DQtWidget::Clear(void)
+{
+    mTableRow = 0;
+    for (int row = 0; row < VCT_POSE_3D_MAX_ROWS; ++row) {
+        for (int column = 0; column < 3; ++column) {
+            mTable->item(row, column)->setText("");
+        }
+    }
+    mPoses.clear();
+}
+
 
 void vctPose3DQtWidget::keyPressEvent(QKeyEvent * event)
 {

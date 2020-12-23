@@ -31,8 +31,8 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstVector/vctExportQt.h>
 
-
 class vctPose3DQtWidgetView;
+class QTableWidget;
 
 /*!  Widget to visualize a 3D position by projecting along x, y or z
   axis.
@@ -55,9 +55,7 @@ public:
         SetValue(value.Translation());
     }
 
-    void Clear(void) {
-        mPoses.clear();
-    }
+    void Clear(void);
 
     typedef std::list<vct3> PosesType;
     typedef std::list<vctPose3DQtWidgetView *> ViewsType;
@@ -65,6 +63,8 @@ protected:
     QGridLayout * mLayout;
     void keyPressEvent(QKeyEvent * event);
 
+    QTableWidget * mTable;
+    int mTableRow;
     ViewsType mViews;
     PosesType mPoses;
     vctBoundingBox3 mBB;
