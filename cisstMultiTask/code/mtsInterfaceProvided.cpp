@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1194,43 +1194,49 @@ mtsMulticastCommandWriteBase * mtsInterfaceProvided::GetEventWrite(const std::st
 }
 
 
-bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommandVoid * handler)
+bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
+                                       mtsCommandVoid * handler,
+                                       const mtsRequiredType required)
 {
     mtsMulticastCommandVoid * multicastCommand = GetEventVoid(eventName); // EventVoidGenerators.GetItem(eventName);
     if (multicastCommand) {
         return multicastCommand->AddCommand(handler);
-    } else {
-        // maybe the event is not defined at the end-user level but in
-        // the original interface?
-        if (this->OriginalInterface) {
-            return this->OriginalInterface->AddObserver(eventName, handler);
-        }
+    }
+    // maybe the event is not defined at the end-user level but in
+    // the original interface?
+    if (this->OriginalInterface) {
+        return this->OriginalInterface->AddObserver(eventName, handler, required);
+    }
+    if (required == MTS_REQUIRED) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void) for \"" << GetFullName()
                                  << "\": cannot find event named \"" << eventName
                                  << "\", the following events are available: "
                                  << cmnStringFromVectorOfStrings(GetNamesOfEventsVoid())
                                  << std::endl;
-        return false;
     }
+    return false;
 }
 
 
-bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommandWriteBase * handler)
+bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
+                                       mtsCommandWriteBase * handler,
+                                       const mtsRequiredType required)
 {
     if (this->OriginalInterface) {
-        return this->OriginalInterface->AddObserver(eventName, handler);
+        return this->OriginalInterface->AddObserver(eventName, handler, required);
     }
     mtsMulticastCommandWriteBase * multicastCommand = EventWriteGenerators.GetItem(eventName);
     if (multicastCommand) {
         return multicastCommand->AddCommand(handler);
-    } else {
+    }
+    if (required == MTS_REQUIRED) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write) for \"" << GetFullName()
                                  << "\": cannot find event named \"" << eventName
                                  << "\", the following events are available: "
                                  << cmnStringFromVectorOfStrings(GetNamesOfEventsWrite())
                                  << std::endl;
-        return false;
     }
+    return false;
 }
 
 
@@ -1239,10 +1245,14 @@ void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mt
     argout = argin;
     size_t i;
     for (i = 0; i < argin.VoidEvents.size(); i++) {
-        argout.VoidEvents[i].Result = argin.Provided->AddObserver(argin.VoidEvents[i].EventName, argin.VoidEvents[i].HandlerPointer);
+        argout.VoidEvents[i].Result = argin.Provided->AddObserver(argin.VoidEvents[i].EventName,
+                                                                  argin.VoidEvents[i].HandlerPointer,
+                                                                  argin.VoidEvents[i].Required);
     }
     for (i = 0; i < argin.WriteEvents.size(); i++) {
-        argout.WriteEvents[i].Result = argin.Provided->AddObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPointer);
+        argout.WriteEvents[i].Result = argin.Provided->AddObserver(argin.WriteEvents[i].EventName,
+                                                                   argin.WriteEvents[i].HandlerPointer,
+                                                                   argin.WriteEvents[i].Required);
     }
 }
 

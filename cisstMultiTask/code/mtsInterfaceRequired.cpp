@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -798,10 +798,10 @@ bool mtsInterfaceRequired::CheckEventList(mtsEventHandlerList & eventList) const
     size_t i;
     for (i = 0; i < eventList.VoidEvents.size(); i++) {
         if (!eventList.VoidEvents[i].Result) {
-            CMN_LOG_CLASS_INIT_WARNING << "CheckEventList: failed to add observer for void event \""
-                                       << eventList.VoidEvents[i].EventName << "\" (connecting \""
-                                       << this->GetFullName() << "\" to \""
-                                       << eventList.Provided->GetFullName() << "\")"<< std::endl;
+            CMN_LOG_CLASS_INIT_DEBUG << "CheckEventList: failed to add observer for void event \""
+                                     << eventList.VoidEvents[i].EventName << "\" (connecting \""
+                                     << this->GetFullName() << "\" to \""
+                                     << eventList.Provided->GetFullName() << "\")"<< std::endl;
             if (eventList.VoidEvents[i].Required == MTS_REQUIRED) {
                 success = false;
             }
@@ -815,10 +815,10 @@ bool mtsInterfaceRequired::CheckEventList(mtsEventHandlerList & eventList) const
 
     for (i = 0; i < eventList.WriteEvents.size(); i++) {
         if (!eventList.WriteEvents[i].Result) {
-            CMN_LOG_CLASS_INIT_WARNING << "CheckEventList: failed to add observer for write event \""
-                                       << eventList.WriteEvents[i].EventName << "\" (connecting \""
-                                       << this->GetFullName() << "\" to \""
-                                       << eventList.Provided->GetFullName() << "\")"<< std::endl;
+            CMN_LOG_CLASS_INIT_DEBUG << "CheckEventList: failed to add observer for write event \""
+                                     << eventList.WriteEvents[i].EventName << "\" (connecting \""
+                                     << this->GetFullName() << "\" to \""
+                                     << eventList.Provided->GetFullName() << "\")"<< std::endl;
             if (eventList.WriteEvents[i].Required == MTS_REQUIRED) {
                 success = false;
             }

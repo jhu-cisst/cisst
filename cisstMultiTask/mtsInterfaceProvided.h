@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -509,8 +509,10 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
       \returns true if successful; false otherwise
     */
     //@{
-    bool AddObserver(const std::string & eventName, mtsCommandVoid * handler);
-    bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler);
+    bool AddObserver(const std::string & eventName, mtsCommandVoid * handler,
+                     const mtsRequiredType required = MTS_REQUIRED);
+    bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler,
+                     const mtsRequiredType required = MTS_REQUIRED);
     void AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     //@}
 
