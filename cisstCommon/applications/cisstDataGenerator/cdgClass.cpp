@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@
   http://www.cisst.org/cisst/license.txt.
 
   --- end cisst license ---
-
 */
 
 #include "cdgClass.h"
@@ -133,22 +132,6 @@ bool cdgClass::Validate(std::string & CMN_UNUSED(errorMessage))
     }
 
     return true;
-}
-
-
-void cdgClass::GenerateIncludes(std::ostream & outputStream) const
-{
-    GenerateLineComment(outputStream);
-    const std::string mtsProxy = this->GetFieldValue("mts-proxy");
-    // includes for mts proxy
-    if (mtsProxy != "false") {
-        outputStream << std::endl
-                     << "// mts-proxy set to " << mtsProxy << std::endl
-                     << "#include <cisstCommon/cmnClassServices.h>" << std::endl
-                     << "#include <cisstCommon/cmnClassRegisterMacros.h>" << std::endl
-                     << "#include <cisstMultiTask/mtsGenericObjectProxy.h>" << std::endl
-                     << std::endl;
-    }
 }
 
 
