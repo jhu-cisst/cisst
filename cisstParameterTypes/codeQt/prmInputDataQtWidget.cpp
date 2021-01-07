@@ -23,9 +23,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <QHBoxLayout>
 #include <QLabel>
 
-prmInputDataQtWidget::prmInputDataQtWidget(void):
+#include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+
+prmInputDataQtWidget::prmInputDataQtWidget(const std::string & name):
     QWidget()
 {
+    this->setObjectName(name.c_str());
+
     QVBoxLayout * dataLayout = new QVBoxLayout;
     this->setLayout(dataLayout);
 
@@ -87,4 +92,49 @@ void prmInputDataQtWidget::SlotPlotIndex(int newAxis)
 {
     PlotIndex = newAxis;
     QVPlot->SetContinuousExpandYResetSlot();
+}
+
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(prmInputDataQtWidgetComponent, mtsComponent, std::string);
+
+prmInputDataQtWidgetComponent::prmInputDataQtWidgetComponent(const std::string & componentName, double periodInSeconds):
+    prmInputDataQtWidget(componentName),
+    mtsComponent(componentName),
+    TimerPeriodInMilliseconds(periodInSeconds * 1000)
+{
+    // Setup CISST Interface
+    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
+    if (interfaceRequired) {
+        interfaceRequired->AddEventHandlerWrite(&prmInputDataQtWidgetComponent::InputDataEventHandler,
+                                                this, "input_data");
+    }
+    setupUi();
+    qRegisterMetaType<prmInputData>();
+    connect(this, SIGNAL(SignalInputDataEvent(prmInputData)),
+            this, SLOT(SlotInputDataEvent(prmInputData)));
+}
+
+void prmInputDataQtWidgetComponent::Startup(void)
+{
+    startTimer(TimerPeriodInMilliseconds); // ms
+}
+
+void prmInputDataQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
+{
+    // make sure we should update the display
+    if (this->isHidden()) {
+        return;
+    }
+    // use local timestamp to prevent strange plotting in past if older data show up
+    mInputData.Timestamp() = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime();
+    SetValue(mInputData);
+}
+
+void prmInputDataQtWidgetComponent::SlotInputDataEvent(prmInputData inputData)
+{
+    mInputData = inputData;
+}
+
+void prmInputDataQtWidgetComponent::InputDataEventHandler(const prmInputData & inputData)
+{
+    emit SignalInputDataEvent(inputData);
 }
