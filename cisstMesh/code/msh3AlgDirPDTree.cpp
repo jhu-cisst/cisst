@@ -37,8 +37,8 @@
 #include <cisstMesh/msh3AlgDirPDTree.h>
 #include <cisstMesh/msh3DirPDTreeBase.h>
 
-msh3AlgDirPDTree::msh3AlgDirPDTree(msh3DirPDTreeBase *pTree)
-  : pTree(pTree)
+msh3AlgDirPDTree::msh3AlgDirPDTree(msh3DirPDTreeBase *_pTree)
+  : pTree(_pTree)
 {
   if (pTree) {
     pTree->SetSearchAlgorithm(this);

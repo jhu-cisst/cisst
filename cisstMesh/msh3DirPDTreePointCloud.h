@@ -74,7 +74,7 @@ class CISST_EXPORT msh3DirPDTreePointCloud : public msh3DirPDTreeBase
 	virtual vct3 DatumSortPoint(int datum);  // return sort point of this datum
     virtual vct3 DatumNorm(int datum);       // return normal orientation of this datum
 
-	virtual void EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB);
+	virtual void EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB) const;
 };
 
 #endif

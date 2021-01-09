@@ -204,7 +204,7 @@ void msh3Mesh::SavePLY(const std::string &output_file) {
                            &vertexNormals);
 }
 #else
-void msh3Mesh::SavePLY(const std::string &output_file) {
+void msh3Mesh::SavePLY(const std::string & CMN_UNUSED(output_file)) {
     std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
 }
 #endif

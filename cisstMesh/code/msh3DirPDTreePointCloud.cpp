@@ -74,7 +74,7 @@ vct3 msh3DirPDTreePointCloud::DatumNorm(int datum)
     return pointCloud.pointOrientations.Element(datum);
 }
 
-void msh3DirPDTreePointCloud::EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB)
+void msh3DirPDTreePointCloud::EnlargeBounds(const vctFrm3& F, int datum, msh3BoundingBox& BB) const
 {
     BB.Include(F*pointCloud.points.Element(datum));
 }

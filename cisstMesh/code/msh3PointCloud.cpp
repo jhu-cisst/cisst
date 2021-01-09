@@ -190,7 +190,7 @@ void msh3PointCloud::SavePLY(const std::string &output_file) {
     ply_obj.write_ply_pointcloud(output_file, &points, &pointOrientations);
 }
 #else
-void msh3PointCloud::SavePLY(const std::string &output_file) {
+void msh3PointCloud::SavePLY(const std::string & CMN_UNUSED(output_file)) {
     std::cerr << "ERROR: cisstMesh has been compiled without RPLY support" << std::endl;
 }
 #endif
