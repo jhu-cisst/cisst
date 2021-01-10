@@ -1,6 +1,61 @@
 Change log
 ==========
 
+1.1.0 (2021-01-xx)
+==================
+
+* API changes:
+  * Names of some commands and events in cisstMultiTask changed to match CRTK convention.  See directory "utils/crtk-port"
+* Deprecated features:
+  * None
+* New features:
+  * General:
+    * Added cisstMesh library (see README.md in cisstMesh directory)
+    * OS/compiler support: Mac OS Clang 12, Ubuntu 20.04 gcc 9, Visual Studio 2019
+    * Travis build for Ubuntu 16, 18, 20.04
+    * Using Numpy 1.7 for SWIG wrappers
+    * Qt: support for "dark mode" for non Qt window managers
+    * Support build against OS installed JsonCpp vs CMake external project
+  * cisstVector:
+    * Added more Euler rotations: ZXZ, YZX, ZYX... and unit tests
+    * Added vctPose3DQtWidget
+  * cisstMultiTask:
+    * Added callback to interval statistics
+    * Added suggestions for missing interfaces/commands/events when trying to connect non-existing interfaces/command/event
+    * Added mtsDelayedConnections class
+    * Added virtual method mtsComponent::ConfigureJSON to adjust log level per component
+  * cisstRobot:
+    * Added support for gravity compensation for robManipulator with under actuated robot (e.g. dVRK ECM)
+    * Added methods to set/get maximum force/torque, names, type using vectors for robManipulator
+    * Added method to remove tool and truncate kinematic chain (robManipulator)
+    * Added robManipulator::LastError to get human readable message
+  * cisstParameterTypes:
+    * Added prmConfigurationJoint, prmPositionCartesianArrayGet{QtWidget}
+    * Added prmPositionJointSetQtWidget, prmPositionCartesianGetQtWidgetFactory
+* Bug fixes:
+  * CMake:
+    * Added some missing files for "clean" target
+    * Added .so version, can now generate debian packages
+  * cisstCommon:
+    * Fixed CMake dependency for data generator, would occasionally fail to build in parallel
+    * Fixed data generator to avoid multiple #include for cisstMultiTask proxies
+  * cisstOSAbstraction:
+  * cisstNumerical:
+    * Fixed slack implementation in nmrConstraintOptimizer
+    * Added missing CISST_EXPORT for nmrSymmetricEigenProblem
+  * cisstMultiTask:
+    * Limit number of commands processed in mailbox for one call to avoid dequeing as long as other component queues
+    * Fixed race condition in mtsEventReceiverWrite::EventHandler
+    * Fixed old bug that prevented to use std::string or size_t in state table with accessors
+    * Fixed support for MTS_OPTIONAL when adding event observer for required interfaces
+    * Fixed mtsManagerLocal::WaitForStateAll to not wait for tasks with ExecIn
+  * cisstParameterTypes:
+    * Fixed cisstParameterTypes.i
+  * cisstRobot:
+    * Fixed name of field "ftmax" in Json loading
+    * Marked more methods as virtual
+    * Fixed bug applying tool transform even if only part of forward kinematic was evaluated
+
 1.0.11 (2019-04-09)
 ===================
 
