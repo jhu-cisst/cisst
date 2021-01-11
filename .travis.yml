@@ -1,23 +1,36 @@
- language: cpp
-
- matrix:
+jobs:
   include:
     - os: linux
       dist: focal
       compiler: gcc
+      env:
+        - UBUNTU_DISTRO=focal
+        - DISTRO_PACKAGES="libqt5xmlpatterns5-dev"
     - os: linux
       dist: focal
       compiler: clang
+      env:
+        - UBUNTU_DISTRO=focal
+        - DISTRO_PACKAGES="libqt5xmlpatterns5-dev"
     - os: linux
       dist: bionic
       compiler: gcc
+      env:
+        - UBUNTU_DISTRO=bionic
+        - DISTRO_PACKAGES="libqt5xmlpatterns5-dev"
     - os: linux
       dist: xenial
       compiler: gcc
+      env:
+        - UBUNTU_DISTRO=xenial
+        - DISTRO_PACKAGES="qt5-default"
+
+cache:
+  - apt
 
  before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq cmake libxml2-dev libjsoncpp-dev gfortran
+  - sudo apt-get install -qq cmake libxml2-dev libjsoncpp-dev gfortran $DISTRO_PACKAGES
 
  before_script:
    - cd ~/
