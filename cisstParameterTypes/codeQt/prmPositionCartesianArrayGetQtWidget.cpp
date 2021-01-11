@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2014-07-21
 
-  (C) Copyright 2014-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2014-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -87,8 +87,11 @@ void prmPositionCartesianArrayGetQtWidget::timerEvent(QTimerEvent * CMN_UNUSED(e
     prmPositionCartesianArrayGet poses;
     Controller.measured_cp_array(poses);
     QVPoses->Clear();
-    for (const auto & pose : poses.Positions()) {
-        QVPoses->SetValue(pose);
+    typedef prmPositionCartesianArrayGet::Type Type;
+    const Type::const_iterator end = poses.Positions().end();
+    Type::const_iterator iter = poses.Positions().begin();
+    for (; iter != end; ++iter) {
+        QVPoses->SetValue(*iter);
     }
 }
 

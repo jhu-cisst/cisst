@@ -18,6 +18,11 @@ class {
         is-data true;
     }
 
+    typedef {
+        name Type;
+        type std::vector<vctFrm3>;
+    }
+
     member {
         name ReferenceFrame;
         type std::string;
