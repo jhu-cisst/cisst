@@ -18,3 +18,6 @@ set (CISST_BUILD_TESTS ON CACHE BOOL "")
 # cisstNetlib
 set (CISST_HAS_CISSTNETLIB ON CACHE BOOL "")
 set (CISSTNETLIB_DIR "/home/travis/cisstNetlib-install" CACHE PATH "")
+
+# Qt
+set (CISST_HAS_QT5 ON CACHE BOOL "")
