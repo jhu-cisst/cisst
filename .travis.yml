@@ -46,11 +46,13 @@ cache:
 
  script:
    - make
+   - ls -lR lib
    - cd bin
    - ls -lR
    - ./cisstCommonTests -r
    - ./cisstVectorTests -r
    - ./cisstOSAbstractionTests -r
+   - ./cisstParameterTypesTests -r
    - ./cisstNumericalTests -r
 
  notifications:
