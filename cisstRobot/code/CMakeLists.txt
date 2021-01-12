@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -124,6 +124,10 @@ if (CISST_HAS_CISSTNETLIB)
                      DEPENDENCIES ${DEPENDENCIES}
                      SOURCE_FILES ${SOURCE_FILES}
                      HEADER_FILES ${HEADER_FILES})
+
+  if (CISST_ROB_HAS_REFLEXXES_TYPEII)
+    add_dependencies (cisstRobot cisstReflexxesTypeIIExternal)
+  endif ()
 
 else (CISST_HAS_CISSTNETLIB)
   message ("cisstRobot requires cisstNumerical to be compiled with the option CISST_HAS_CISSTNETLIB")
