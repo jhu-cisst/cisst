@@ -30,24 +30,21 @@ jobs:
       run: |
         cmake ${{github.workspace}}/cisstNetlib-source
         cmake --build . --config $BUILD_TYPE
-        sudo cmake --build . --target install
+        cmake --build . --target install
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
-      shell: bash
       working-directory: ${{github.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -C ${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}/build
-      shell: bash
       run: cmake --build . --config $BUILD_TYPE
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      shell: bash
       run: |
         ./bin/cisstCommonTests -r
         ./bin/cisstVectorTests -r
