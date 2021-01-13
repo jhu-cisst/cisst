@@ -55,6 +55,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: |
+        source cisstvars.sh
         ./bin/cisstCommonTests -r
         ./bin/cisstVectorTests -r
         ./bin/cisstNumericalTests -r
