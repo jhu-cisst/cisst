@@ -1,0 +1,56 @@
+name: macOS 11.0
+
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master, devel ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+
+    runs-on: macos-11.0
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Download cisstNetlib
+      run: |
+        cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
+        git clone https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+
+    - name: Build cisstNetlib
+      working-directory: ${{github.workspace}}/cisstNetlib-build
+      run: |
+        cmake ${{github.workspace}}/cisstNetlib-source
+        cmake --build . --config $BUILD_TYPE
+        sudo cmake --build . --target install
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: |
+        ./bin/cisstCommonTests -r
+        ./bin/cisstVectorTests -r
+        ./bin/cisstNumericalTests -r
+        ./bin/cisstOSAbstractionTests -r
+        ./bin/cisstParameterTypesTests -r
