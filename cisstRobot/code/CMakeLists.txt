@@ -101,6 +101,7 @@ if (CISST_HAS_CISSTNETLIB)
                          CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                                           -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstReflexxesTypeII
+                                          -DLIBRARY_OUTPUT_PATH:FILEPATH=${LIBRARY_OUTPUT_PATH}
                          INSTALL_DIR ${cisst_BINARY_DIR}/cisstReflexxesTypeII
                          UPDATE_COMMAND ""
                          )
