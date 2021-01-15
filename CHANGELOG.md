@@ -12,7 +12,7 @@ Change log
   * General:
     * Added cisstMesh library (see README.md in cisstMesh directory)
     * OS/compiler support: Mac OS Clang 12, Ubuntu 20.04 gcc 9, Visual Studio 2019
-    * Travis build for Ubuntu 16, 18, 20.04
+    * Github CI with workflows for Ubuntu 16.04, 18.04 and 20.04, Windows Server 2016 and 2019, macOS 11
     * Using Numpy 1.7 for SWIG wrappers
     * Qt: support for "dark mode" for non Qt window managers
     * Support build against OS installed JsonCpp vs CMake external project
