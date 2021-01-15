@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:   2013-05-14
 
-  (C) Copyright 2013-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -63,7 +63,7 @@ inline std::string cmnDataHumanReadable(const prmJointType & data)
 CMN_DATA_SPECIALIZATION_FOR_ENUM(prmJointType, int);
 
 #if CISST_HAS_JSON
-CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(prmJointType);
+CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM_EXPORT(prmJointType);
 #endif
 
 void CISST_EXPORT prmJointTypeToFactor(const vctDynamicVector<prmJointType> & types,
