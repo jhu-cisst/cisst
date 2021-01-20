@@ -8,10 +8,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-
 jobs:
   build:
 
@@ -32,7 +28,7 @@ jobs:
       working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
         cmake ${{github.workspace}}/cisstNetlib-source -DCMAKE_Fortran_COMPILER=gfortran-9
-        cmake --build . --config $BUILD_TYPE
+        cmake --build . --config Release
         sudo cmake --build . --target install
 
     - name: Create Build Environment
@@ -41,22 +37,22 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
+      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: |
         source cisstvars.sh
-        cmake --build . --config $BUILD_TYPE
+        cmake --build . --config Release
 
     - name: Test
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: |
         source cisstvars.sh
-        ./bin/cisstCommonTests -r
-        ./bin/cisstVectorTests -r
-        ./bin/cisstNumericalTests -r
-        ./bin/cisstOSAbstractionTests -r
-        ./bin/cisstParameterTypesTests -r
+        cisstCommonTests -r
+        cisstVectorTests -r
+        cisstNumericalTests -r
+        cisstOSAbstractionTests -r
+        cisstParameterTypesTests -r
