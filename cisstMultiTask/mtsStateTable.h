@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -228,6 +228,10 @@ public:
 
  protected:
 
+    /*! Flag to indicate if the table has started.  True between
+      Start() and Advance() calls, false otherwise. */
+    bool mStarted;
+
 	/*! The number of rows of the state data table. */
 	size_t HistoryLength;
 
@@ -432,6 +436,11 @@ public:
 
     /*! Start if automatic advance is set and does nothing otherwise. */
     void StartIfAutomatic(void);
+
+    /*! Check if state table is "started", i.e. between Start() and Advance() calls. */
+    inline bool Started(void) const {
+        return mStarted;
+    }
 
     /*! Advance the pointers of the circular buffer. Note that since
       there is only a single writer, it is not necessary to use mutual

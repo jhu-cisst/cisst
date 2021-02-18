@@ -5,7 +5,7 @@
  Author(s):  Ankur Kapoor, Min Yang Jung, Anton Deguet
  Created on: 2004-04-30
 
- (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+ (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -177,6 +177,8 @@ void mtsStateTable::Start(void) {
         StateVector[TicId]->Get(IndexReader, oldTic);
         Period = Tic - oldTic;  // in seconds
     }
+    // update "started" status
+    mStarted = true;
 }
 
 
@@ -310,6 +312,9 @@ void mtsStateTable::Advance(void) {
     if (IndexReader > Delay) {
         IndexDelayed = IndexReader - Delay;
     }
+
+    // update "started" status
+    mStarted = false;
 }
 
 
@@ -322,7 +327,6 @@ void mtsStateTable::AdvanceIfAutomatic(void) {
 
 bool mtsStateTable::ReplayAdvance(void)
 {
-    std::cerr << "index: " << IndexReader << " of " << HistoryLength << std::endl;
     IndexReader++;
     if (IndexReader > HistoryLength) {
         IndexReader = 0;
