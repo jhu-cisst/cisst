@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -58,6 +58,7 @@ set (SOURCE_FILES
      prmRobotState.cpp
      prmActuatorParameters.cpp
 
+     prmInputDataConverter.cpp
      prmOperatingState.cpp
 
      prmClassServices.cpp
@@ -90,6 +91,8 @@ set (HEADER_FILES
      prmRobotState.h
      prmActuatorParameters.h
      prmGainParameters.h
+
+     prmInputDataConverter.h
      )
 
 cisst_add_library (LIBRARY cisstParameterTypes
