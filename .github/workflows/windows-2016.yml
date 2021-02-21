@@ -18,8 +18,6 @@ jobs:
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
-      with:
-        mirror: http://mirrors.ocf.berkeley.edu/qt/
 
     - name: Download cisstNetlib
       run: |
@@ -46,6 +44,7 @@ jobs:
         dir
         ./cisstvars.bat Release
         cmake --build . --config Release
+        dir
 
     - name: Test
       working-directory: ${{github.workspace}}/build
@@ -57,3 +56,4 @@ jobs:
         cisstNumericalTests -r
         cisstOSAbstractionTests -r
         cisstParameterTypesTests -r
+        dir
