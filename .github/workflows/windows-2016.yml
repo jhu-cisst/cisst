@@ -41,17 +41,12 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/build
       run: |
-        dir
         ./cisstvars.bat Release
         cmake --build . --config Release
-        dir
 
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: |
         ./cisstvars.bat Release
         ./bin/Release/cisstCommonTests -r
-        ./bin/Release/cisstVectorTests -r
-        ./bin/Release/cisstNumericalTests -r
-        ./bin/Release/cisstOSAbstractionTests -r
-        ./bin/Release/cisstParameterTypesTests -r
+
