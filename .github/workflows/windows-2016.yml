@@ -49,11 +49,10 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: |
-        dir
+        dir bin/Release
         ./cisstvars.bat Release
-        cisstCommonTests -r
-        cisstVectorTests -r
+        bin/Release/cisstCommonTests -r
+        bin/cisstVectorTests -r
         cisstNumericalTests -r
         cisstOSAbstractionTests -r
         cisstParameterTypesTests -r
-        dir
