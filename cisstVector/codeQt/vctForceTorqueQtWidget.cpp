@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Dorothy Hu
   Created on: 2017-01-20
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,10 +43,11 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
     mTorque.Zeros();
 
     QVBoxLayout * forceTorqueLayout = new QVBoxLayout;
+    forceTorqueLayout->setContentsMargins(0, 0, 0, 0);
 
     QGridLayout * gridLayout = new QGridLayout;
     gridLayout->setSpacing(0);
-    gridLayout->setContentsMargins(1, 1, 1, 1);
+    gridLayout->setContentsMargins(0, 0, 0, 0);
     forceTorqueLayout->addLayout(gridLayout);
     forceTorqueLayout->addStretch();
 
@@ -73,8 +74,8 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
 
     Layout = new QVBoxLayout;
     Layout->setSpacing(0);
+    Layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(Layout);
-    this->setContentsMargins(0, 0, 0, 0);
     this->setWindowTitle("vctForceTorqueQtWidget");
 
     // Set display mode

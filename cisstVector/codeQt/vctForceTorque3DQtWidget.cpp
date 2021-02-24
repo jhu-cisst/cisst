@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Dorothy Hu
   Created on: 2017-01-20
 
-  (C) Copyright 2017-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -58,7 +58,7 @@ void vctForceTorque3DQtWidget::setupUi(void)
 
     // left side, upper/lower limit, selector and legend
     QVBoxLayout * leftLayout = new QVBoxLayout;
-    leftLayout->setContentsMargins(2, 2, 2, 2);
+    leftLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addLayout(leftLayout);
 
     // combo box to select the plot item

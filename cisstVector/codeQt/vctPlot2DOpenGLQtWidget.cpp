@@ -20,10 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QMouseEvent>
 #include <QMenu>
+#include <QPainter>
+#include <QColor>
 
 vctPlot2DOpenGLQtWidget::vctPlot2DOpenGLQtWidget(QWidget * parent):
     vctQtOpenGLBaseWidget(parent),
-    vctPlot2DOpenGL()
+    vctPlot2DOpenGL(),
+    DisplayYRangeScale(0)
 {
     this->setFocusPolicy(Qt::StrongFocus);
     this->setToolTip(QString("'space' to pause/restart, 'r' to reset\nright click for menu"));
@@ -46,6 +49,20 @@ void vctPlot2DOpenGLQtWidget::resizeGL(int width, int height)
 void vctPlot2DOpenGLQtWidget::paintGL(void)
 {
     vctPlot2DOpenGL::Render();
+    if (DisplayYRangeScale) {
+        const int font_size = 8;
+        QPainter painter(this);
+        const QColor txtColor = palette().color(QPalette::Text);
+        painter.setPen(txtColor);
+        painter.setFont(QFont("Helvetica", font_size));
+        painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+        vct2 range = DisplayYRangeScale->GetViewingRangeY();
+        painter.drawText(1, 1 + font_size,
+                         QString().sprintf("%0.2f", range.at(1)));
+        painter.drawText(1, this->Viewport.Y() - font_size,
+                         QString().sprintf("%0.2f", range.at(0)));
+        painter.end();
+    }
 }
 
 void vctPlot2DOpenGLQtWidget::keyPressEvent(QKeyEvent * event)
