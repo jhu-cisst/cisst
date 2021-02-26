@@ -48,5 +48,5 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         ./cisstvars.bat Release
-        ./bin/Release/cisstCommonTests -r
+        ctest --build-config Release --exclude-regex "osa|mts|msh|rob"
 
