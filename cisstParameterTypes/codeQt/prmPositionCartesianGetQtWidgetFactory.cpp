@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2020-07-10
 
-  (C) Copyright 2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2020-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,10 +34,6 @@ prmPositionCartesianGetQtWidgetFactory::prmPositionCartesianGetQtWidgetFactory(c
     mRevoluteFactor = cmnPI_180;
 
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
-    if (required) {
-        ManagerComponentServices->AddConnectionEventHandler(&prmPositionCartesianGetQtWidgetFactory
-                                                            ::AddConnectionEventHandler, this);
-    }
 
     setupUi();
     startTimer(50); // ms
@@ -50,8 +46,6 @@ void prmPositionCartesianGetQtWidgetFactory::setupUi(void)
     setLayout(mLayout);
 
     // connect event
-    connect(this, SIGNAL(SignalAddConnectionEvent()),
-            this, SLOT(SlotAddConnectionEvent()));
     connect(this, SIGNAL(SignalCRTKInterfacesProvidedUpdated()),
             this, SLOT(SlotCRTKInterfacesProvidedUpdated()));
 }
@@ -66,12 +60,9 @@ void prmPositionCartesianGetQtWidgetFactory::timerEvent(QTimerEvent * CMN_UNUSED
     SourcesType::iterator source = mSources.begin();
     const SourcesType::iterator end = mSources.end();
     for (; source != end; ++source) {
-        // only update connected sources
-        if (source->second->mWidget != 0) {
-            // get position
-            source->second->mFunction(position);
-            source->second->mWidget->SetValue(position);
-        }
+        // get position
+        source->second->mFunction(position);
+        source->second->mWidget->SetValue(position);
     }
 }
 
@@ -111,35 +102,6 @@ void prmPositionCartesianGetQtWidgetFactory::AddFactorySource(const std::string 
     }
 }
 
-void prmPositionCartesianGetQtWidgetFactory::AddConnectionEventHandler(const mtsDescriptionConnection & CMN_UNUSED(connection))
-{
-    emit SignalAddConnectionEvent();
-}
-
-void prmPositionCartesianGetQtWidgetFactory::SlotAddConnectionEvent(void)
-{
-    // iterate through all connections to see if one is newly connected
-    SourcesType::iterator source = mSources.begin();
-    const SourcesType::iterator end = mSources.end();
-    for (; source != end; ++source) {
-        // when connected, we create a widget so we can use widget to see if connected
-        if (source->second->mWidget == 0) {
-            if (source->second->mInterface->GetConnectedInterface() != 0) {
-                // now we know it's connected so it makes sense to create the widget
-                source->second->mWidget = new prmPositionCartesianGetQtWidget;
-                source->second->mWidget->SetPrismaticRevoluteFactors(mPrismaticFactor, mRevoluteFactor);
-                // grid position
-                const int NB_COLS = 2;
-                int position = static_cast<int>(mNumberOfWidgets);
-                int row = position / NB_COLS;
-                int col = position % NB_COLS;
-                mLayout->addWidget(source->second->mWidget, row, col);
-                mNumberOfWidgets++;
-            }
-        }
-    }
-}
-
 void prmPositionCartesianGetQtWidgetFactory::Factory::CRTKInterfacesProvidedUpdatedHandler(void)
 {
     // event handlers are not thread safe, emit so Qt can manage thread safety
@@ -175,7 +137,17 @@ void prmPositionCartesianGetQtWidgetFactory::SlotCRTKInterfacesProvidedUpdated(v
                         // create interface
                         Source * newSource = new Source;
                         newSource->mInterface = newInterface;
-                        newSource->mWidget = 0;
+                        // create the widget
+                        newSource->mWidget = new prmPositionCartesianGetQtWidget;
+                        newSource->mWidget->SetPrismaticRevoluteFactors(mPrismaticFactor, mRevoluteFactor);
+                        // grid position
+                        const int NB_COLS = 2;
+                        int position = static_cast<int>(mNumberOfWidgets);
+                        int row = position / NB_COLS;
+                        int col = position % NB_COLS;
+                        mLayout->addWidget(newSource->mWidget, row, col);
+                        mNumberOfWidgets++;
+                        // add function to the interface
                         newInterface->AddFunction("measured_cp", newSource->mFunction);
                         mSources[*source] = newSource;
                         // request connection

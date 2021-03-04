@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2020-07-10
 
-  (C) Copyright 2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2020-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -54,8 +54,6 @@ protected:
     void setupUi(void);
     void timerEvent(QTimerEvent * event);
 
-    void AddConnectionEventHandler(const mtsDescriptionConnection & connection);
-
     double mPrismaticFactor, mRevoluteFactor;
 
     mtsDelayedConnections mConnections;
@@ -85,13 +83,10 @@ protected:
     QGridLayout * mLayout;
 
 signals:
-    void SignalAddConnectionEvent(void);
     void SignalCRTKInterfacesProvidedUpdated(void);
 
 protected slots:
-    void SlotAddConnectionEvent(void);
     void SlotCRTKInterfacesProvidedUpdated(void);
-
 
 };
 
