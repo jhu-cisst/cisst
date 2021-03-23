@@ -1,11 +1,8 @@
 #
-# $Id$
-#
 # Author(s):  Anton Deguet
 # Created on: 2005-11-20
 #
-# (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -73,7 +70,7 @@ if (NOT CISSTNETLIB_DIR)
     # download files once prefix is set
     if (NOT CISSTNETLIB_DOWNLOAD_PREFIX STREQUAL "")
       # download tgz file
-      message ("Downloading: http://unittest.lcsr.jhu.edu/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz")
+      message ("Downloading: https://dvrk.lcsr.jhu.edu/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz")
       file (DOWNLOAD
             http://unittest.lcsr.jhu.edu/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz
             "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz"
