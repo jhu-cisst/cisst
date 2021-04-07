@@ -1,7 +1,7 @@
 Change log
 ==========
 
-1.1.0 (2021-01-xx)
+1.1.0 (2021-04-04)
 ==================
 
 * API changes:
@@ -12,13 +12,15 @@ Change log
   * General:
     * Added cisstMesh library (see README.md in cisstMesh directory)
     * OS/compiler support: Mac OS Clang 12, Ubuntu 20.04 gcc 9, Visual Studio 2019
-    * Github CI with workflows for Ubuntu 16.04, 18.04 and 20.04, Windows Server 2016 and 2019, macOS 11
+    * Github CI with workflows for Ubuntu 16.04, 18.04 and 20.04, Windows and macOS
     * Using Numpy 1.7 for SWIG wrappers
     * Qt: support for "dark mode" for non Qt window managers
     * Support build against OS installed JsonCpp vs CMake external project
+    * cisstNetlib DOWNLOAD_NOW uses new URL (https://dvrk.lcsr.jhu.edu)
   * cisstVector:
     * Added more Euler rotations: ZXZ, YZX, ZYX... and unit tests
     * Added vctPose3DQtWidget
+    * vctPlot2D Qt widget displays range in window
   * cisstMultiTask:
     * Added callback to interval statistics
     * Added suggestions for missing interfaces/commands/events when trying to connect non-existing interfaces/command/event
@@ -32,6 +34,7 @@ Change log
   * cisstParameterTypes:
     * Added prmConfigurationJoint, prmPositionCartesianArrayGet{QtWidget}
     * Added prmPositionJointSetQtWidget, prmPositionCartesianGetQtWidgetFactory
+    * Added prmInputDataConverter
 * Bug fixes:
   * CMake:
     * Added some missing files for "clean" target
