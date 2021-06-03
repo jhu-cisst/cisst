@@ -600,6 +600,7 @@ endif (NOT UNIX)
 if (UNIX)
   set (CPACK_GENERATOR "STGZ;TGZ;DEB")
   set (CPACK_DEBIAN_PACKAGE_MAINTAINER "anton.deguet@jhu.edu")
+  set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 endif ()
 
 # For now, enable all default libraries (even if not compiled)
