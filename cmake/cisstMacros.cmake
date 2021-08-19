@@ -380,10 +380,10 @@ macro (cisst_add_library ...)
   # Install all header files
   install (FILES ${HEADERS}
            DESTINATION include/${LIBRARY_DIR}
-           COMPONENT ${LIBRARY})
+           COMPONENT ${LIBRARY}-dev)
   install (FILES ${LIBRARY_MAIN_HEADER}
            DESTINATION include
-           COMPONENT ${LIBRARY})
+           COMPONENT ${LIBRARY}-dev)
 
   # if a folder has been provided
   if (FOLDER)
