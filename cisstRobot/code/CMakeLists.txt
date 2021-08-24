@@ -119,7 +119,7 @@ if (CISST_HAS_CISSTNETLIB)
     # install for CPack
     install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
              COMPONENT cisstRobot
-             TYPE LIB)
+             DESTINATION lib)
   else ()
     cisst_unset_all_package_settings (cisstRobot cisstReflexxesTypeII)
   endif ()
