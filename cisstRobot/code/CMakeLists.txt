@@ -116,6 +116,10 @@ if (CISST_HAS_CISSTNETLIB)
     # add wrappers to cisstRobot
     set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
     set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
+    # install for CPack
+    install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
+             COMPONENT cisstRobot
+             DESTINATION lib)
   else ()
     cisst_unset_all_package_settings (cisstRobot cisstReflexxesTypeII)
   endif ()

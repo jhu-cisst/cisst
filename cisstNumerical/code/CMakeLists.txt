@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstNumerical
 #
-# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -80,6 +80,7 @@ if (CISST_HAS_CISSTNETLIB)
        nmrLDPSolver.h
        nmrLSSolver.h
        # deprecated nmrLSISolver.h
+       nmrLSEISolver.h
        nmrLSqLin.h
        nmrHFTISolver.h
        nmrNNLSSolver.h
