@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,6 +14,8 @@
 #
 # --- end cisst license ---
 
+# Needed to get the LOCATION with get_target_property
+cmake_policy(SET CMP0026 OLD)
 
 # set virtual library to CMake option name equivalence
 set (cisstFLTK_OPTION_NAME "CISST_HAS_FLTK" CACHE STRING "Name of option to use to compile cisstFLTK")
