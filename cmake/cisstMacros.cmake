@@ -14,8 +14,6 @@
 #
 # --- end cisst license ---
 
-# Needed to get the LOCATION with get_target_property
-cmake_policy(SET CMP0026 OLD)
 
 # set virtual library to CMake option name equivalence
 set (cisstFLTK_OPTION_NAME "CISST_HAS_FLTK" CACHE STRING "Name of option to use to compile cisstFLTK")
@@ -644,10 +642,11 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
   # make sure cisstComponentGenerator is being build and find it
   # try to figure out if this is build along with cisst
   if (TARGET cisstCommon)
-    # make sure the target existsOUTPUT_NAME
+    # make sure the target exists
     if (TARGET cisstComponentGenerator)
       # if the target exists, use its destination
-      get_target_property (CISST_CG_EXECUTABLE cisstComponentGenerator LOCATION)
+      #get_target_property (CISST_CG_EXECUTABLE cisstComponentGenerator LOCATION)
+      set(CISST_CG_EXECUTABLE $<TARGET_FILE:cisstComponentGenerator>)
     else (TARGET cisstComponentGenerator)
       message (SEND_ERROR "To use the cisst_component_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstComponentGenerator")
     endif (TARGET cisstComponentGenerator)
@@ -710,7 +709,8 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
       if (TARGET cisstDataGenerator)
         # if the target exists, use its destination
         cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
-        get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
+        #get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
+        set(CISST_DG_EXECUTABLE $<TARGET_FILE:cisstDataGenerator>)
       endif (TARGET cisstDataGenerator)
     else (TARGET cisstCommon)
       cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
