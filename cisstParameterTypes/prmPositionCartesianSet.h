@@ -5,8 +5,7 @@
   Author(s):  Rajesh Kumar, Anton Deguet
   Created on: 2008-03-12
 
-  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -58,7 +57,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! desired time derivative of linear velocity */
     vctDouble3 Acceleration;
 
-    /*! desired time derivative of angualr velocity */
+    /*! desired time derivative of angular velocity */
     vctDouble3 AccelerationAngular;
 
     /*! two tuple, masks position/orientation parts of the Cartesian motion*/
@@ -70,7 +69,12 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
 
  public:
     /*! default constructor */
-    prmPositionCartesianSet()
+    prmPositionCartesianSet():
+        Velocity(0.0),
+        VelocityAngular(0.0),
+        Acceleration(0.0),
+        AccelerationAngular(0.0),
+        Mask(false)
     {}
 
     /*!constructor with all parameters */
@@ -125,6 +129,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     void SetGoal(const vctDoubleFrm3 & goal)
     {
         this->GoalMember = goal;
+        this->Mask.SetAll(true);
     }
 
     /*! Set Target position only
@@ -134,6 +139,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     void SetGoal(const vctDouble3 & position)
     {
         GoalMember.Translation().Assign(position);
+        this->Mask[0] = true;
     }
 
     /*! Set Target orientation only
@@ -143,6 +149,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     void SetGoal(const vctDoubleRot3 & orientation)
     {
        this->GoalMember.Rotation().Assign(orientation);
+       this->Mask[1] = true;
     }
 
     /*! Get current goal parameter
