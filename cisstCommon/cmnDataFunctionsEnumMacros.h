@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -97,6 +97,10 @@ public:                                                                 \
 #define CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(_enum) \
     template <> void cmnDataJSON<_enum>::SerializeText(const _enum & data, Json::Value & jsonValue); \
     template <> void cmnDataJSON<_enum>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+
+#define CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM_EXPORT(_enum) \
+    template <> void CISST_EXPORT cmnDataJSON<_enum>::SerializeText(const _enum & data, Json::Value & jsonValue); \
+    template <> void CISST_EXPORT cmnDataJSON<_enum>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 #define CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(_enum, _promotedType) \
     template <> void cmnDataJSON<_enum>::SerializeText(const _enum & data, Json::Value & jsonValue) { \

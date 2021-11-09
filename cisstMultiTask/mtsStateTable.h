@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -228,6 +228,10 @@ public:
 
  protected:
 
+    /*! Flag to indicate if the table has started.  True between
+      Start() and Advance() calls, false otherwise. */
+    bool mStarted;
+
 	/*! The number of rows of the state data table. */
 	size_t HistoryLength;
 
@@ -383,22 +387,46 @@ public:
     }
 
     /*! Return pointer to accessor functions for the state data element.
-        \param element Pointer to state data element (i.e., working copy)
-        \returns Pointer to accessor class (0 if not found)
-        \note This method is overloaded to accept the element pointer or string name.
+      \param element Pointer to state data element (i.e., working copy)
+      \returns Pointer to accessor class (0 if not found)
     */
     template<class _elementType>
-    mtsStateTable::AccessorBase * GetAccessor(const _elementType & element) const;
+    mtsStateTable::AccessorBase * GetAccessorByInstance(const _elementType & element) const;
 
     /*! Return pointer to accessor functions for the state data element.
-        \param name Name of state data element
-        \returns Pointer to accessor class (0 if not found)
-        \note This method is overloaded to accept the element pointer or string name.
+      \param name Name of state data element
+      \returns Pointer to accessor class (0 if not found)
     */
-    mtsStateTable::AccessorBase * GetAccessor(const std::string & name) const;
-    mtsStateTable::AccessorBase * GetAccessor(const char * name) const;
-    mtsStateTable::AccessorBase * GetAccessor(const size_t id) const;
+    //@{
+    mtsStateTable::AccessorBase * GetAccessorByName(const std::string & name) const;
+    mtsStateTable::AccessorBase * GetAccessorByName(const char * name) const;
+    //@}
 
+    /*! Return pointer to accessor functions for the state data element.
+      \param id Id of state data element
+      \returns Pointer to accessor class (0 if not found)
+    */
+    mtsStateTable::AccessorBase * GetAccessorById(const size_t id) const;
+
+#ifndef SWIG
+    template<class _elementType>
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const _elementType & element) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorByInstance(element);
+    }
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const std::string & name) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorByName(name);
+    }
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const char * name) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorByName(name);
+    }
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const size_t id) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorById(id);
+    }
+#endif
 
     /*! Get a handle for data to be used by a writer */
     mtsStateIndex GetIndexWriter(void) const;
@@ -408,6 +436,11 @@ public:
 
     /*! Start if automatic advance is set and does nothing otherwise. */
     void StartIfAutomatic(void);
+
+    /*! Check if state table is "started", i.e. between Start() and Advance() calls. */
+    inline bool Started(void) const {
+        return mStarted;
+    }
 
     /*! Advance the pointers of the circular buffer. Note that since
       there is only a single writer, it is not necessary to use mutual
@@ -421,7 +454,7 @@ public:
 
     /*! Advance for replay mode, be very careful this should only be
       used in replay mode as this method only increments the reader
-      index. */ 
+      index. */
     bool ReplayAdvance(void);
 
     /*! Cleanup called when the task is being stopped. */
@@ -515,7 +548,7 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
 }
 
 template <class _elementType>
-mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType & element) const
+mtsStateTable::AccessorBase *mtsStateTable::GetAccessorByInstance(const _elementType & element) const
 {
     for (size_t i = 0; i < StateVectorElements.size(); i++) {
         if (mtsGenericTypes<_elementType>::IsEqual(element, *StateVectorElements[i]))
@@ -525,4 +558,3 @@ mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType & ele
 }
 
 #endif // _mtsStateTable_h
-

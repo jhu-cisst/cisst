@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2006-11-10
 
-  (C) Copyright 2006-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,8 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstCommon/cmnRequiresDeepCopy.h>
-
-#include <string.h> // for memcpy
 
 /*! \brief Container class for fast copy related methods.
 
@@ -176,7 +174,7 @@ public:
                 return false;
             }
         }
-        memcpy(destination.Pointer(), source.Pointer(), source.size() * sizeof(value_type));
+        cmnMemcpy(destination.Pointer(), source.Pointer(), source.size() * sizeof(value_type));
         return true;
     }
 
@@ -225,7 +223,7 @@ public:
         }
         // at that point we know the matrices are compatible.  We need to know if we memcpy all or by rows or column
         if (destination.IsCompact() && source.IsCompact()) {
-            memcpy(destination.Pointer(), source.Pointer(), source.size() * sizeof(value_type));
+            cmnMemcpy(destination.Pointer(), source.Pointer(), source.size() * sizeof(value_type));
             return true;
         } else {
             typedef _destinationMatrixType DestinationMatrixType;
@@ -258,7 +256,7 @@ public:
                 for (;
                      destinationPointer != destinationRowEnd;
                      destinationPointer += destinationRowStride, sourcePointer += sourceRowStride) {
-                    memcpy(destinationPointer, sourcePointer, sizeOfRow);
+                    cmnMemcpy(destinationPointer, sourcePointer, sizeOfRow);
                 }
                 return true;
             } else {
@@ -269,7 +267,7 @@ public:
                 for (;
                      destinationPointer != destinationColEnd;
                      destinationPointer += destinationColStride, sourcePointer += sourceColStride) {
-                    memcpy(destinationPointer, sourcePointer, sizeOfCol);
+                    cmnMemcpy(destinationPointer, sourcePointer, sizeOfCol);
                 }
                 return true;
             }
@@ -299,7 +297,7 @@ public:
                 return false;
             }
         }
-        memcpy(destination.Pointer(), source.Pointer(), source.size() * sizeof(value_type));
+        cmnMemcpy(destination.Pointer(), source.Pointer(), source.size() * sizeof(value_type));
         return true;
     }
 };

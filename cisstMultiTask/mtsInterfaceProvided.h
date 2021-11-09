@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsInterfaceProvided_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnNamedMap.h>
 
 #include <cisstMultiTask/mtsMailBox.h>
 #include <cisstMultiTask/mtsStateTable.h>
@@ -41,6 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandWrite.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsInterface.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last
@@ -507,8 +509,10 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
       \returns true if successful; false otherwise
     */
     //@{
-    bool AddObserver(const std::string & eventName, mtsCommandVoid * handler);
-    bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler);
+    bool AddObserver(const std::string & eventName, mtsCommandVoid * handler,
+                     const mtsRequiredType required = MTS_REQUIRED);
+    bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler,
+                     const mtsRequiredType required = MTS_REQUIRED);
     void AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     //@}
 
@@ -758,7 +762,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable &
     typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
     typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
 
-    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessorByInstance(stateData));
     if (!stateAccessor) {
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
         return 0;
@@ -778,7 +782,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateDelayed(const mtsState
     typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
     typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
 
-    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessorByInstance(stateData));
     if (!stateAccessor) {
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
         return 0;
@@ -796,7 +800,7 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWriteState(const mtsStateT
 {
     typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
     typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
-    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessorByInstance(stateData));
     if (!stateAccessor) {
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteState: invalid accessor for command " << commandName << std::endl;
         return 0;

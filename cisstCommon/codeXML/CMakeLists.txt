@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -53,6 +51,7 @@ configure_file (${cisstCommonLibs_SOURCE_DIR}/cmnConfigXML.h.in
 install (FILES ${CISST_CMN_XML_CONFIG_FILE}
          DESTINATION include/cisstCommon
          COMPONENT cisstCommonXML)
+set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CISST_CMN_XML_CONFIG_FILE}")
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_CMN_XML_CONFIG_FILE}"

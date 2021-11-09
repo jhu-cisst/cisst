@@ -119,7 +119,7 @@ void cmnXMLPathTest::TestExistingFile1(cmnXMLPath & xmlPath, const std::string &
     CPPUNIT_ASSERT_EQUAL(false, boolValue);
 
     // slightly different way (!= context/path)
-    dataFound = xmlPath.GetXMLValue("", "data-1/data-1-1/@doubleAttribute", doubleValue);
+    dataFound = xmlPath.GetXMLValue("/", "data-1/data-1-1/@doubleAttribute", doubleValue);
     CPPUNIT_ASSERT(dataFound);
     CPPUNIT_ASSERT_EQUAL(1.234, doubleValue);
 
@@ -278,7 +278,7 @@ void cmnXMLPathTest::TestModifiedFile1(cmnXMLPath & xmlPath, const std::string &
     CPPUNIT_ASSERT_EQUAL(true, boolValue);
 
     // slightly different way (!= context/path)
-    dataFound = xmlPath.GetXMLValue("", "data-1/data-1-1/@doubleAttribute", doubleValue);
+    dataFound = xmlPath.GetXMLValue("/", "data-1/data-1-1/@doubleAttribute", doubleValue);
     CPPUNIT_ASSERT(dataFound);
     CPPUNIT_ASSERT_EQUAL(3.14, doubleValue);
 

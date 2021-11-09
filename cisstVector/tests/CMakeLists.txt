@@ -36,6 +36,8 @@ set (SOURCE_FILES
      vctDynamicVectorTest.cpp
      vctDynamicVectorRefTest.cpp
 
+     vctEulerRotation3Test.cpp
+
      vctFixedSizeVectorTest.cpp
      vctFixedSizeVectorRefTest.cpp
 
@@ -81,6 +83,8 @@ set (HEADER_FILES
 
      vctDynamicVectorTest.h
      vctDynamicVectorRefTest.h
+
+     vctEulerRotation3Test.cpp
 
      vctFixedSizeVectorTest.h
      vctFixedSizeVectorRefTest.h

@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -308,6 +308,7 @@ public:
       search path will be used to locate files that might be used to
       configure the components dynamically created. */
     bool ConfigureJSON(const std::string & filename);
+    bool ConfigureJSON(const std::list<std::string> & filenames);
 
     /*! Configure using a Json::Value.  This method will look for the
       arrays "components" and "connections" and will then call the

@@ -8,8 +8,6 @@
 // code follows the order of declaration in the data file.
 inline-header {
 #include <cisstVector/vctTransformationTypes.h>
-#include <cisstParameterTypes/prmTransformationBase.h>
-#include <cisstParameterTypes/prmTransformationManager.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>

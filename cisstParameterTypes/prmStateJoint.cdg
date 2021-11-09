@@ -25,11 +25,6 @@ class {
     }
 
     member {
-        name Type;
-        type vctDynamicVector<prmJointType>;
-    }
-
-    member {
         name Position;
         type vctDynamicVector<double>;
     }

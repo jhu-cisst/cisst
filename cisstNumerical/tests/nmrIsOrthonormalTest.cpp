@@ -69,7 +69,7 @@ void nmrIsOrthonormalTest::TestFunctionWithReferenceDynamic(void) {
     bool gotException = false;
     try {
         nmrIsOrthonormal(UDynamic, workspace);
-    } catch (std::runtime_error exception) {
+    } catch (std::runtime_error & exception) {
         gotException = true;            
     }
     CPPUNIT_ASSERT(gotException);
@@ -102,7 +102,7 @@ void nmrIsOrthonormalTest::TestDynamicDataWithReferenceDynamic(void) {
     try {
         data.SetRef(UDynamic, workspace);
         nmrIsOrthonormal(UDynamic, data);
-    } catch (std::runtime_error exception) {
+    } catch (std::runtime_error & exception) {
         gotException = true;            
     }
     CPPUNIT_ASSERT(gotException);

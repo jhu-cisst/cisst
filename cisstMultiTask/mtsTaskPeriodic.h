@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,7 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsTaskPeriodic_h
 #define _mtsTaskPeriodic_h
 
-#include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
@@ -45,7 +44,7 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-    friend class mtsTaskManager;
+    friend class mtsComponentManager;
 
  public:
     typedef mtsTaskContinuous BaseType;

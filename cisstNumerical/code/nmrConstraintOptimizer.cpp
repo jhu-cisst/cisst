@@ -36,7 +36,6 @@
 */
 nmrConstraintOptimizer::nmrConstraintOptimizer(const size_t n)
 {
-    Slacks = 0;
     NumVars = n;
     ResetIndices();
 }
@@ -51,60 +50,75 @@ nmrConstraintOptimizer::STATUS nmrConstraintOptimizer::Solve(vctDoubleVec &dq)
     CISSTNETLIB_INTEGER res;
 
     // make sure input is the correct size
-    dq.SetSize(NumVars+Slacks);
+    dq.SetSize(NumVars + SlackIndex);
 
     // if we don't see an objective
-    if (C.rows() == 0 || d.size() == 0) {
+    if (C.rows() == 0 || d.size() == 0)
+    {
         dq.SetAll(0);
         return NMR_EMPTY;
     }
 
     // if the sizes don't match for C,d
-    if (C.rows() != d.size() || dq.size() != NumVars+Slacks) {
+    if (C.rows() != d.size() || dq.size() != NumVars + SlackIndex)
+    {
         return NMR_MALFORMED;
     }
 
     // if we don't have any constraints, solve
-    if (A.size() == 0 && E.size() == 0) {
-        if (C.cols() != dq.size() + Slacks) {
+    if (A.size() == 0 && E.size() == 0)
+    {
+        if (C.cols() != dq.size() + SlackIndex)
+        {
             return NMR_MALFORMED;
         }
         lsiSolution.Allocate(C);
         res = nmrLSqLin(C, d, lsiSolution);
-        for (size_t i = 0; i < dq.size(); i++) {
+        for (size_t i = 0; i < dq.size(); i++)
+        {
             dq[i] = lsiSolution.GetX().Element(i);
         }
     }
     // if we have an inequality constraint, solve
-    else if (A.size() > 0 && b.size() > 0 && E.size() == 0 && f.size() == 0) {
-        if (A.cols() != dq.size() || A.rows() != b.size()) {
+    else if (A.size() > 0 && b.size() > 0 && E.size() == 0 && f.size() == 0)
+    {
+        if (A.cols() != dq.size() || A.rows() != b.size())
+        {
             return NMR_INEQ_CONTRADICTION;
         }
         lsiSolution.Allocate(C, A);
         res = nmrLSqLin(C, d, A, b, lsiSolution);
-        for (size_t i = 0; i < dq.size(); i++) {
+        for (size_t i = 0; i < dq.size(); i++)
+        {
             dq[i] = lsiSolution.GetX().Element(i);
         }
     }
-    else if (E.size() > 0 && f.size() > 0) {
-        if (A.cols() != dq.size() || A.rows() != b.size()) {
-            if (E.cols() != dq.size() || E.rows() != f.size()) {
+    else if (E.size() > 0 && f.size() > 0)
+    {
+        if (A.cols() != dq.size() || A.rows() != b.size())
+        {
+            if (E.cols() != dq.size() || E.rows() != f.size())
+            {
                 return NMR_BOTH_CONTRADICTION;
             }
-            else {
+            else
+            {
                 return NMR_INEQ_CONTRADICTION;
             }
-        } else if (E.cols() != dq.size() || E.rows() != f.size()) {
+        }
+        else if (E.cols() != dq.size() || E.rows() != f.size())
+        {
             return NMR_EQ_CONTRADICTION;
         }
         lsiSolution.Allocate(C, E, A);
         res = nmrLSqLin(C, d, E, f, A, b, lsiSolution);
-        dq.resize(NumVars);
-        for (size_t i = 0; i < dq.size(); i++) {
+        for (size_t i = 0; i < dq.size(); i++)
+        {
             dq[i] = lsiSolution.GetX().Element(i);
         }
     }
-    else {
+    else
+    {
         res = NMR_MALFORMED;
     }
 
@@ -128,7 +142,8 @@ size_t nmrConstraintOptimizer::GetNumVars(void) const
 */
 const std::string nmrConstraintOptimizer::GetStatusString(STATUS status) const
 {
-    switch(status) {
+    switch (status)
+    {
     case NMR_OK:
         return "OK";
         break;
@@ -163,27 +178,33 @@ void nmrConstraintOptimizer::ResetIndices(void)
  */
 void nmrConstraintOptimizer::Allocate(void)
 {
-    if (C.rows() != CIndex || C.cols() != NumVars+Slacks) {
-        C.SetSize(CIndex,NumVars+Slacks,VCT_COL_MAJOR);
+    if (C.rows() != CIndex || C.cols() != NumVars + SlackIndex)
+    {
+        C.SetSize(CIndex, NumVars + SlackIndex, VCT_COL_MAJOR);
         C.SetAll(0);
     }
-    if (d.size() != CIndex) {
+    if (d.size() != CIndex)
+    {
         d.SetSize(CIndex);
         d.SetAll(0);
     }
-    if (A.rows() != AIndex || A.cols() != NumVars+Slacks) {
-        A.SetSize(AIndex,NumVars+Slacks,VCT_COL_MAJOR);
+    if (A.rows() != AIndex || A.cols() != NumVars + SlackIndex)
+    {
+        A.SetSize(AIndex, NumVars + SlackIndex, VCT_COL_MAJOR);
         A.SetAll(0);
     }
-    if (b.size() != AIndex) {
+    if (b.size() != AIndex)
+    {
         b.SetSize(AIndex);
         b.SetAll(0);
     }
-    if (E.rows() != EIndex || E.cols() != NumVars+Slacks) {
-        E.SetSize(EIndex,NumVars+Slacks,VCT_COL_MAJOR);
+    if (E.rows() != EIndex || E.cols() != NumVars + SlackIndex)
+    {
+        E.SetSize(EIndex, NumVars + SlackIndex, VCT_COL_MAJOR);
         E.SetAll(0);
     }
-    if (f.size() != EIndex) {
+    if (f.size() != EIndex)
+    {
         f.SetSize(EIndex);
         f.SetAll(0);
     }
@@ -194,27 +215,33 @@ void nmrConstraintOptimizer::Allocate(void)
  */
 void nmrConstraintOptimizer::Allocate(const size_t CRows, const size_t CCols, const size_t ARows = 0, const size_t ACols = 0, const size_t ERows = 0, const size_t ECols = 0)
 {
-    if (C.rows() != CRows || C.cols() != CCols) {
-        C.SetSize(CRows,CCols,VCT_COL_MAJOR);
+    if (C.rows() != CRows || C.cols() != CCols)
+    {
+        C.SetSize(CRows, CCols, VCT_COL_MAJOR);
         C.SetAll(0);
     }
-    if (d.size() != CRows) {
+    if (d.size() != CRows)
+    {
         d.SetSize(CRows);
         d.SetAll(0);
     }
-    if (A.rows() != ARows || A.cols() != ACols) {
-        A.SetSize(ARows,ACols,VCT_COL_MAJOR);
+    if (A.rows() != ARows || A.cols() != ACols)
+    {
+        A.SetSize(ARows, ACols, VCT_COL_MAJOR);
         A.SetAll(0);
     }
-    if (b.size() != ARows) {
+    if (b.size() != ARows)
+    {
         b.SetSize(ARows);
         b.SetAll(0);
     }
-    if (E.rows() != ERows || E.cols() != ECols) {
-        E.SetSize(ERows,ECols,VCT_COL_MAJOR);
+    if (E.rows() != ERows || E.cols() != ECols)
+    {
+        E.SetSize(ERows, ECols, VCT_COL_MAJOR);
         E.SetAll(0);
     }
-    if (f.size() != ERows) {
+    if (f.size() != ERows)
+    {
         f.SetSize(ERows);
         f.SetAll(0);
     }
@@ -222,79 +249,96 @@ void nmrConstraintOptimizer::Allocate(const size_t CRows, const size_t CCols, co
 
 //! Reserves space in the tableau
 /*! ReserveSpace
-  \param CRows Number of rows needed for the objective
-  \param ARows Number of rows needed for the inequality constraint
-  \param ERows Number of rows needed for the equality constraint
-  \param num_slacks The number of slacks needed
+  \param CRows_in Number of rows needed for the objective
+  \param ARows_in Number of rows needed for the inequality constraint
+  \param ERows_in Number of rows needed for the equality constraint
+  \param Slacks_in The number of slacks needed
 */
-void nmrConstraintOptimizer::ReserveSpace(const size_t CRows_in, const size_t ARows_in, const size_t ERows_in, const size_t num_slacks_in)
+void nmrConstraintOptimizer::ReserveSpace(const size_t CRows_in, const size_t ARows_in, const size_t ERows_in, const size_t Slacks_in)
 {
-    CIndex += CRows_in;
-    AIndex += ARows_in+num_slacks_in; // We're going to use the extra space to set slack limits
+    CIndex += CRows_in + Slacks_in;
+    AIndex += ARows_in + Slacks_in; // We're going to use the extra space to set slack limits
     EIndex += ERows_in;
-    Slacks += num_slacks_in;
+    SlackIndex += Slacks_in;
 }
 
 //! Returns references to spaces in the tableau.
 /*! GetObjectiveSpace
-  \param CRows Number of rows needed for the objective data
-  \param ARows Number of rows needed for the inequality constraint data
-  \param ERows Number of rows needed for the equality constraint data
-  \param SlackIndex_in The assigned slack index
-  \param num_slacks The number of slacks
+  \param CRows Number of rows needed for the objective data (=CRows_in)
+  \param ARows Number of rows needed for the inequality constraint data (=ARows_in)
+  \param ERows Number of rows needed for the equality constraint data (=ERows_in)
+  \param NumSlacks Number of slacks needed for current pass (=num_slacks_in)
   \param CData A reference to the data portion of the objective matrix
-  \param CSlacks A reference to the slack portion of the objective matrix
-  \param d A reference to the objective vector
+  \param CSlacks A reference to the slack portion of the objective matrix (relative importance to data objective)
+  \param dData A reference to the objective vector
   \param AData A reference to the data portion of the inequality constraint matrix
-  \param ASlacks A reference to the slack portion of the inequality constraint matrix
-  \param b A reference to the inequality constraint vector
+  \param bData A reference to the inequality constraint vector
+  \param bSlacks A reference to the inequality constraint vector for slack portion (slack limit)
   \param EData A reference to the data portion of the equality constraint matrix
-  \param ESlacks A reference to the slack portion of the equality constraint matrix
-  \param f A reference to the equality constraint vector
+  \param fData A reference to the equality constraint vector
 */
-void nmrConstraintOptimizer::SetRefs(const size_t CRows, const size_t ARows, const size_t ERows, const size_t num_slacks,
-                                     const vctDoubleVec & limits, vctDynamicMatrixRef<double> & CData,
-                                     vctDynamicMatrixRef<double> & CSlacks, vctDynamicVectorRef<double> & dData,
-                                     vctDynamicMatrixRef<double> & AData, vctDynamicMatrixRef<double> & ASlacks,
-                                     vctDynamicVectorRef<double> & bData, vctDynamicMatrixRef<double> & EData,
-                                     vctDynamicMatrixRef<double> & ESlacks, vctDynamicVectorRef<double> & fData)
+void nmrConstraintOptimizer::SetRefs(const size_t CRows, const size_t ARows, const size_t ERows, const size_t NumSlacks,
+                                     vctDynamicMatrixRef<double> &CData, vctDynamicMatrixRef<double> &CSlacks,
+                                     vctDynamicVectorRef<double> &dData,
+                                     vctDynamicMatrixRef<double> &AData, vctDynamicMatrixRef<double> &ASlacks,
+                                     vctDynamicVectorRef<double> &bData, vctDynamicVectorRef<double> &bSlacks,
+                                     vctDynamicMatrixRef<double> &EData, vctDynamicVectorRef<double> &fData)
 {
     //Objectives
+    /*
+    |   C ... 0         |   | x |   | d |
+    |                   | * |   | - |   |
+    |   0 ... CSlacks   |   | s |   | 0 |
+    */
     CData.SetRef(C, CIndex, 0, CRows, NumVars);
-    if (num_slacks > 0) {
-        CSlacks.SetRef(C, CIndex, NumVars+SlackIndex, CRows, num_slacks);
-    }
     dData.SetRef(d, CIndex, CRows);
     CIndex += CRows;
+    // CSlacks is a diagnol square matrix, i.e., no interaction between slack variables
+    if (NumSlacks > 0)
+    {
+        CSlacks.SetRef(C, CIndex, NumVars + SlackIndex, NumSlacks, NumSlacks);
+        vctDynamicVectorRef<double> dSlacks;
+        dSlacks.SetRef(d, CIndex, NumSlacks);
+        dSlacks.SetAll(0.0);
+        CIndex += NumSlacks;
+    }
 
     //Inequality Constraints
+    /*
+    |   A ... 1         |   | x |    | b       |
+    |                   | * |   | >= |         |
+    |   0 ... ASlacks   |   | s |    | bSlacks |
+    */
     AData.SetRef(A, AIndex, 0, ARows, NumVars);
-    if (num_slacks > 0) {
-        ASlacks.SetRef(A, AIndex, NumVars+SlackIndex, ARows, num_slacks);
-    }
     bData.SetRef(b, AIndex, ARows);
+    // 1 slack per constraint
+    if (NumSlacks > 0)
+    {
+        vctDynamicMatrixRef<double> Identity;
+        Identity.SetRef(A, AIndex, NumVars + SlackIndex, ARows, NumSlacks);
+        Identity.Diagonal().SetAll(1.0);
+    }
     AIndex += ARows;
-
-    //Add slack limits constraint
-    vctDynamicMatrixRef<double> Identity;
-    Identity.SetRef(A,AIndex,NumVars+SlackIndex,num_slacks,num_slacks);
-    vctDynamicVectorRef<double> LimitRef;
-    LimitRef.SetRef(b,AIndex,num_slacks);
-    for (size_t i = 0; i < num_slacks; i++) {
-        Identity[i][i] = 1;
-        LimitRef[i] = -limits[i];
+    // ASlacks is a square matrix, i.e. 1 limit per slack
+    if (NumSlacks > 0)
+    {
+        ASlacks.SetRef(A, AIndex, NumVars + SlackIndex, NumSlacks, NumSlacks);
+        bSlacks.SetRef(b, AIndex, NumSlacks);
+        AIndex += NumSlacks;
     }
 
     //Equality Constraints
+    /*
+    |   E ... 0         |   | x |   | b |
+                          * |   | =
+                            | s |   
+    */
     EData.SetRef(E, EIndex, 0, ERows, NumVars);
-    if (num_slacks > 0) {
-        ESlacks.SetRef(E, EIndex, NumVars+SlackIndex, ERows, num_slacks);
-    }
     fData.SetRef(f, EIndex, ERows);
     EIndex += ERows;
 
     //Slacks
-    SlackIndex += num_slacks;
+    SlackIndex += NumSlacks;
 }
 
 //! Gets the number of rows for the objective expression.
@@ -369,7 +413,7 @@ size_t nmrConstraintOptimizer::GetSlacks(void) const
 /*! GetObjectiveMatrix
   \return vctDoubleMat The objective matrix
 */
-const vctDoubleMat & nmrConstraintOptimizer::GetObjectiveMatrix(void) const
+const vctDoubleMat &nmrConstraintOptimizer::GetObjectiveMatrix(void) const
 {
     return C;
 }
@@ -378,7 +422,7 @@ const vctDoubleMat & nmrConstraintOptimizer::GetObjectiveMatrix(void) const
 /*! GetObjectiveVector
   \return vctDoubleVec The objective vector
 */
-const vctDoubleVec & nmrConstraintOptimizer::GetObjectiveVector(void) const
+const vctDoubleVec &nmrConstraintOptimizer::GetObjectiveVector(void) const
 {
     return d;
 }
@@ -387,7 +431,7 @@ const vctDoubleVec & nmrConstraintOptimizer::GetObjectiveVector(void) const
 /*! GetIneqConstraintMatrix
   \return vctDoubleMat The inequality constraint matrix
 */
-const vctDoubleMat & nmrConstraintOptimizer::GetIneqConstraintMatrix(void) const
+const vctDoubleMat &nmrConstraintOptimizer::GetIneqConstraintMatrix(void) const
 {
     return A;
 }
@@ -396,7 +440,7 @@ const vctDoubleMat & nmrConstraintOptimizer::GetIneqConstraintMatrix(void) const
 /*! GetIneqConstraintVector
   \return vctDoubleVec The inequality constraint vector
 */
-const vctDoubleVec & nmrConstraintOptimizer::GetIneqConstraintVector(void) const
+const vctDoubleVec &nmrConstraintOptimizer::GetIneqConstraintVector(void) const
 {
     return b;
 }
@@ -405,7 +449,7 @@ const vctDoubleVec & nmrConstraintOptimizer::GetIneqConstraintVector(void) const
 /*! GetEqConstraintMatrix
   \return vctDoubleMat The equality constraint matrix
 */
-const vctDoubleMat & nmrConstraintOptimizer::GetEqConstraintMatrix(void) const
+const vctDoubleMat &nmrConstraintOptimizer::GetEqConstraintMatrix(void) const
 {
     return E;
 }
@@ -414,7 +458,7 @@ const vctDoubleMat & nmrConstraintOptimizer::GetEqConstraintMatrix(void) const
 /*! GetEqConstraintVector
   \return vctDoubleVec The equality constraint vector
 */
-const vctDoubleVec & nmrConstraintOptimizer::GetEqConstraintVector(void) const
+const vctDoubleVec &nmrConstraintOptimizer::GetEqConstraintVector(void) const
 {
     return f;
 }

@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-09-01
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -88,6 +87,16 @@ mtsLogMessage::mtsLogMessage(const mtsLogMessage & other)
     memcpy(this->Message, other.Message, this->Length);
 }
 
+mtsLogMessage & mtsLogMessage::operator = (const mtsLogMessage & other)
+{
+    mtsGenericObject::operator = (other);
+    Length = other.Length;
+    ProcessName = other.ProcessName;
+    memset(this->Message, 0, MAX_LOG_SIZE);
+    memcpy(this->Message, other.Message, this->Length);
+    return *this;
+}
+
 mtsLogMessage::mtsLogMessage(const char * log, size_t len)
     : mtsGenericObject(),
       Length(len), ProcessName("")
@@ -121,4 +130,3 @@ void mtsLogMessage::DeSerializeRaw(std::istream & inputStream)
     cmnDeSerializeRaw(inputStream, this->Message);
     cmnDeSerializeRaw(inputStream, this->ProcessName);
 }
-

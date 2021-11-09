@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceCommon.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentServer, mtsManagerComponentBase);

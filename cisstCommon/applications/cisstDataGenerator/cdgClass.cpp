@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@
   http://www.cisst.org/cisst/license.txt.
 
   --- end cisst license ---
-
 */
 
 #include "cdgClass.h"
@@ -136,22 +135,6 @@ bool cdgClass::Validate(std::string & CMN_UNUSED(errorMessage))
 }
 
 
-void cdgClass::GenerateIncludes(std::ostream & outputStream) const
-{
-    GenerateLineComment(outputStream);
-    const std::string mtsProxy = this->GetFieldValue("mts-proxy");
-    // includes for mts proxy
-    if (mtsProxy != "false") {
-        outputStream << std::endl
-                     << "// mts-proxy set to " << mtsProxy << std::endl
-                     << "#include <cisstCommon/cmnClassServices.h>" << std::endl
-                     << "#include <cisstCommon/cmnClassRegisterMacros.h>" << std::endl
-                     << "#include <cisstMultiTask/mtsGenericObjectProxy.h>" << std::endl
-                     << std::endl;
-    }
-}
-
-
 void cdgClass::GenerateHeader(std::ostream & outputStream) const
 {
     GenerateLineComment(outputStream);
@@ -183,7 +166,8 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     outputStream << " /* default constructors and destructors. */" << std::endl
                  << " public:" << std::endl
                  << "    " << className << "(void);" << std::endl
-                 << "    " << className << "(const " << this->GetFieldValue("name") << " & other);" << std::endl;
+                 << "    " << className << "(const " << this->GetFieldValue("name") << " & other);" << std::endl
+                 << "    " << className << " & operator = (const " << className << " & other);" << std::endl;
     if (this->GetFieldValue("virtual-dtor") == "true") {
         outputStream << "    virtual ~";
     } else {
@@ -331,6 +315,7 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
 
     std::stringstream defaultConstructor;
     std::stringstream copyConstructor;
+    std::stringstream assignOperator;
     std::stringstream membersConstructor;
 
     // default and copy constructors
@@ -339,7 +324,12 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
     bool commaNeeded = false;
 
     defaultConstructor << classWithNamespace << "::" << name << "(void)";
-    copyConstructor    << classWithNamespace << "::" << name << "(const " << name << " & " << CMN_UNUSED_wrapped("other") << ")";
+    copyConstructor    << classWithNamespace << "::" << name << "(const "
+                       << name << " & " << CMN_UNUSED_wrapped("other") << ")";
+    assignOperator     << classWithNamespace << " & " << classWithNamespace
+                       << "::operator = (const "
+                       << name << " & " << CMN_UNUSED_wrapped("other") << ")" << std::endl
+                       << "{" << std::endl;
     membersConstructor << classWithNamespace << "::" << name << "(";
     std::string memberName, memberType;
     for (index = 0; index < Members.size(); index++) {
@@ -368,12 +358,14 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
             copyConstructor    << "    , ";
             membersConstructor << "    , ";
         } else {
-            defaultConstructor << "      ";
-            copyConstructor    << "      ";
-            membersConstructor << "      ";
+            defaultConstructor << "    ";
+            copyConstructor    << "    ";
+            membersConstructor << "    ";
         }
         defaultConstructor << BaseClasses[index]->GetFieldValue("type") << "()" << std::endl;
         copyConstructor    << BaseClasses[index]->GetFieldValue("type") << "(other)" << std::endl;
+        assignOperator     << "    "
+                           << BaseClasses[index]->GetFieldValue("type") << "::operator = (other);" << std::endl;
         membersConstructor << BaseClasses[index]->GetFieldValue("type") << "()" << std::endl;
         commaNeeded = true;
     }
@@ -385,13 +377,15 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
                 copyConstructor    << "    , ";
                 membersConstructor << "    , ";
             } else {
-                defaultConstructor << "      ";
-                copyConstructor    << "      ";
-                membersConstructor << "      ";
+                defaultConstructor << "    ";
+                copyConstructor    << "    ";
+                membersConstructor << "    ";
             }
             memberName = Members[index]->MemberName;
             defaultConstructor << memberName << "(" << Members[index]->GetFieldValue("default") << ")" << std::endl;
             copyConstructor    << memberName << "(other." << memberName << ")" << std::endl;
+            assignOperator     << "    "
+                               << memberName << " = other." << memberName << ";" << std::endl;
             membersConstructor << memberName << "(new" << Members[index]->GetFieldValue("name") << ")" << std::endl;
             commaNeeded = true;
         }
@@ -399,10 +393,13 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
 
     defaultConstructor << "{}" << std::endl << std::endl;
     copyConstructor    << "{}" << std::endl << std::endl;
+    assignOperator     << "    return *this;" << std::endl
+                       << "}"  << std::endl << std::endl;
     membersConstructor << "{}" << std::endl << std::endl;
 
     outputStream << defaultConstructor.str();
     outputStream << copyConstructor.str();
+    outputStream << assignOperator.str();
     if (this->GetFieldValue("ctor-all-members") == "true") {
         outputStream << membersConstructor.str();
     }

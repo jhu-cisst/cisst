@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstMultiTask tests
 #
-# (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2008-2020 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -35,6 +33,7 @@ set (SOURCE_FILES
      mtsQueueTest.cpp
      mtsStateTableTest.cpp
      mtsTaskTest.cpp
+     mtsTypesTest.cpp
      mtsVectorTest.cpp
      mtsFixedSizeVectorTest.cpp
      mtsMacrosTest.cpp
@@ -53,6 +52,7 @@ set (HEADER_FILES
      mtsQueueTest.h
      mtsStateTableTest.h
      mtsTaskTest.h
+     mtsTypesTest.h
      mtsVectorTest.h
      mtsFixedSizeVectorTest.h
      mtsMacrosTest.h

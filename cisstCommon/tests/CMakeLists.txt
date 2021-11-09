@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstCommon tests
 #
-# (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,10 +14,14 @@
 # paths for headers/libraries
 cisst_set_directories (cisstCommon cisstTestsDriver)
 
+if (CISST_HAS_XML AND NOT ("${CISST_XML_LIB}" STREQUAL "QtXML"))
+  set (INCLUDE_XML_TEST TRUE)
+endif (CISST_HAS_XML AND NOT ("${CISST_XML_LIB}" STREQUAL "QtXML"))
+
 # set path for XML if needed
-if (CISST_HAS_XML)
+if (INCLUDE_XML_TEST)
   cisst_set_directories (cisstCommonXML)
-endif (CISST_HAS_XML)
+endif (INCLUDE_XML_TEST)
 
 # Configure the OS test program
 get_filename_component (CMAKE_C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
@@ -70,14 +74,14 @@ set (HEADER_FILES
     )
 
 # tests that depends on external packages
-if (CISST_HAS_XML)
+if (INCLUDE_XML_TEST)
   set (SOURCE_FILES
        ${SOURCE_FILES}
        cmnXMLPathTest.cpp)
   set (HEADER_FILES
        ${HEADER_FILES}
        cmnXMLPathTest.h)
-endif (CISST_HAS_XML)
+endif (INCLUDE_XML_TEST)
 
 # JSON tests
 if (CISST_HAS_JSON)
@@ -98,7 +102,7 @@ cisst_target_link_libraries (cisstCommonTests cisstCommon cisstTestsDriver)
 add_library (cmnClassRegisterTestStatic
              STATIC
              cmnClassRegisterTestStatic.cpp cmnClassRegisterTestStatic.h)
-if (CISST_HAS_JSON)
+if (CISST_HAS_JSON AND NOT JSON_USE_SYSTEM_VERSION)
   add_dependencies (cmnClassRegisterTestStatic cisstJSONExternal)
 endif ()
 set_property (TARGET cmnClassRegisterTestStatic PROPERTY FOLDER "cisstCommon/tests")
@@ -119,9 +123,9 @@ endif (NOT CISST_BUILD_SHARED_LIBS)
 # To generate a CTest list of tests
 cisst_add_test (cisstCommonTests ITERATIONS 2 INSTANCES 2)
 
-if (CISST_HAS_XML)
+if (INCLUDE_XML_TEST)
   target_link_libraries (cisstCommonTests cisstCommonXML)
-endif (CISST_HAS_XML)
+endif (INCLUDE_XML_TEST)
 
 set_target_properties (cisstCommonTests
                        PROPERTIES COMPILE_DEFINITIONS "CISST_SOURCE_DIR=\"${cisst_SOURCE_DIR}/\"")

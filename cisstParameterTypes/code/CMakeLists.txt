@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -17,12 +17,14 @@ cisst_data_generator (cisstParameterTypes
                       "cisstParameterTypes/"        # sub directory for include
                       ../prmActuatorJointCoupling.cdg
                       ../prmPositionCartesianGet.cdg
+                      ../prmPositionCartesianArrayGet.cdg
                       ../prmVelocityCartesianGet.cdg
                       ../prmPositionJointGet.cdg
                       ../prmPositionJointSet.cdg
                       ../prmCartesianImpedanceGains.cdg
                       ../prmIMUSensors.cdg
                       ../prmStateJoint.cdg
+                      ../prmConfigurationJoint.cdg
                       ../prmInputData.cdg
                       ../prmKeyValue.cdg
                       ../prmOperatingState.cdg
@@ -56,6 +58,9 @@ set (SOURCE_FILES
      prmRobotState.cpp
      prmActuatorParameters.cpp
 
+     prmInputDataConverter.cpp
+     prmOperatingState.cpp
+
      prmClassServices.cpp
      )
 
@@ -86,6 +91,8 @@ set (HEADER_FILES
      prmRobotState.h
      prmActuatorParameters.h
      prmGainParameters.h
+
+     prmInputDataConverter.h
      )
 
 cisst_add_library (LIBRARY cisstParameterTypes

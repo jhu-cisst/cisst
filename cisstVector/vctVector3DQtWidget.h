@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-11-30
 
-  (C) Copyright 2017-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // cisst include
 #include <cisstVector/vctForwardDeclarations.h>
-#include <cisstVector/vctQtForwardDeclarations.h>
+#include <cisstVector/vctForwardDeclarationsQt.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctTransformationTypes.h>
 
@@ -62,7 +62,7 @@ protected:
     vctQuatRot3 mCurrentOrientation, mDeltaOrientation;
     vctInt2 mStartMousePosition;
     bool mAutoResize;
-    double mMaxNorm;
+    double mVectorNorm, mMaxNorm;
     float mScale; // = 1 / mMaxNorm
     float mAxisLength;
 };

@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -24,6 +24,7 @@ if (CISST_HAS_QT4)
                 ../vctQtWidgetFrame.h
                 ../vctQtWidgetFrame4x4.h
                 ../vctVector3DQtWidget.h
+                ../vctPose3DQtWidget.h
                 ../vctForceTorqueQtWidget.h
                 ../vctForceTorque2DQtWidget.h
                 ../vctForceTorque3DQtWidget.h
@@ -52,10 +53,11 @@ cisst_add_library (
                vctQtWidgetFrame.cpp
                vctQtWidgetFrame4x4.cpp
                vctVector3DQtWidget.cpp
+               vctPose3DQtWidget.cpp
                vctForceTorqueQtWidget.cpp
                vctForceTorque2DQtWidget.cpp
                vctForceTorque3DQtWidget.cpp
-  HEADER_FILES vctQtForwardDeclarations.h
+  HEADER_FILES vctForwardDeclarationsQt.h
                vctPlot2DOpenGLQtWidget.h
                vctQtWidgetDynamicVector.h
                vctQtWidgetDynamicMatrix.h
@@ -63,6 +65,7 @@ cisst_add_library (
                vctQtWidgetFrame.h
                vctQtWidgetFrame4x4.h
                vctVector3DQtWidget.h
+               vctPose3DQtWidget.h
                vctForceTorqueQtWidget.h
                vctForceTorque2DQtWidget.h
                vctForceTorque3DQtWidget.h

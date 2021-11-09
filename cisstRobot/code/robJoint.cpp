@@ -19,6 +19,7 @@ robJoint::robJoint( robJoint::Type type,
 		    double min,
 		    double max,
 		    double ftmax ) :
+  name( "" ),
   type( type ),
   mode( mode ),
   qoffset( offset ),
@@ -157,6 +158,7 @@ robJoint::Errno robJoint::Read(const Json::Value &config)
     std::string type, mode;
 
     // read values from JSON config file
+    this->name = config.get("name", "").asString();
     type = config.get("type", "revolute").asString();
     mode = config.get("mode", "active").asString();
     this->qoffset = config.get("offset", 0.0).asDouble();

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-03-22
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -63,9 +63,11 @@ private slots:
 
 private:
     int TimerPeriodInMilliseconds;
-    mtsFunctionRead GetStateJoint;
+    mtsFunctionRead configuration_js;
+    prmConfigurationJoint ConfigurationJoint;
+    mtsFunctionRead measured_js;
     prmStateJoint StateJoint;
-    mtsFunctionRead GetPositionCartesian;
+    mtsFunctionRead measured_cp;
     prmPositionCartesianGet Position;
 };
 

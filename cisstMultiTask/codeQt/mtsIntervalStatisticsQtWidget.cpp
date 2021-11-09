@@ -148,7 +148,7 @@ mtsIntervalStatisticsQtWidgetComponent::mtsIntervalStatisticsQtWidgetComponent(c
     // Setup CISST Interface
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
     if (interfaceRequired) {
-        interfaceRequired->AddFunction("GetPeriodStatistics", GetPeriodStatistics);
+        interfaceRequired->AddFunction("period_statistics", period_statistics);
     }
 }
 
@@ -164,6 +164,6 @@ void mtsIntervalStatisticsQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED
         return;
     }
 
-    GetPeriodStatistics(IntervalStatistics);
+    period_statistics(IntervalStatistics);
     mtsIntervalStatisticsQtWidget::SetValue(IntervalStatistics);
 }

@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -50,6 +50,7 @@ set (SOURCE_FILES
      mtsComponentViewer.cpp
      mtsConnection.cpp
 
+     mtsDelayedConnections.cpp
      mtsEventReceiver.cpp
      mtsExecutionResult.cpp  # see mtsExecutionResult.cdg
 
@@ -146,6 +147,7 @@ set (HEADER_FILES
      mtsComponentViewer.h
      mtsConnection.h
 
+     mtsDelayedConnections.h
      mtsEventReceiver.h
      mtsExport.h
 
@@ -243,6 +245,7 @@ configure_file (${cisstMultiTaskLibs_SOURCE_DIR}/mtsConfig.h.in
 install (FILES ${CISST_MTS_CONFIG_FILE}
          DESTINATION include/cisstMultiTask
          COMPONENT cisstMultiTask)
+set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CISST_MTS_CONFIG_FILE}")
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_MTS_CONFIG_FILE}"

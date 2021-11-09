@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-09-09
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "configuration.h"
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 CMN_IMPLEMENT_SERVICES(clientTask);
 
@@ -38,7 +39,7 @@ clientTask::clientTask(const std::string & taskName, double period):
     }
 
 	// Get a pointer to the time server
-    TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
+    TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
 
 	// Reserve memory space for results
     Results.SetSize(confNumberOfSamples);

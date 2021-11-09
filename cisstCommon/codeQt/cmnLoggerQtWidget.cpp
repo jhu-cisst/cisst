@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-03-20
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -130,7 +129,7 @@ QVariant cmnLoggerQtWidgetClassServicesModel::data(const QModelIndex & index, in
 Qt::ItemFlags cmnLoggerQtWidgetClassServicesModel::flags(const QModelIndex & index) const
 {
     if (!index.isValid()) {
-        return 0;
+        return QFlags<Qt::ItemFlag>();
     }
     // only the second column can be edited
     if (index.column() == 0) {

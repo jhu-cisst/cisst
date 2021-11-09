@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsConnection.h>
 
 #include <iostream>
@@ -1049,7 +1050,7 @@ ConnectionIDType mtsManagerGlobal::Connect(const std::string & requestProcessNam
 {
     std::vector<std::string> options;
     std::stringstream allOptions;
-    std::ostream_iterator< std::string > output(allOptions, " ");
+    std::ostream_iterator< std::string > output(allOptions, ", ");
     bool interfacesSwapped = false;
 
     // MJ: commented out the following check to allow the 3rd process (not client

@@ -1,8 +1,7 @@
 #
 # CMakeLists for cisstNumerical
 #
-# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -81,6 +80,7 @@ if (CISST_HAS_CISSTNETLIB)
        nmrLDPSolver.h
        nmrLSSolver.h
        # deprecated nmrLSISolver.h
+       nmrLSEISolver.h
        nmrLSqLin.h
        nmrHFTISolver.h
        nmrNNLSSolver.h
@@ -99,6 +99,7 @@ configure_file (${cisstNumericalLibs_SOURCE_DIR}/nmrConfig.h.in
 install (FILES ${CISST_NMR_CONFIG_FILE}
          DESTINATION include/cisstNumerical
          COMPONENT cisstNumerical)
+set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CISST_NMR_CONFIG_FILE}")
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_NMR_CONFIG_FILE}"

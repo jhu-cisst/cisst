@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Dorothy Hu
   Created on: 2017-01-20
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctForceTorque2DQtWidget_h
 #define _vctForceTorque2DQtWidget_h
 
-#include <cisstVector/vctQtForwardDeclarations.h>
+#include <cisstVector/vctForwardDeclarationsQt.h>
 #include <cisstVector/vctPlot2DBase.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
@@ -47,9 +47,6 @@ protected:
 
 private:
     void setupUi(void);
-
-    QLabel * QLUpperLimit;
-    QLabel * QLLowerLimit;
 
     vctPlot2DOpenGLQtWidget * QFTPlot;
     // signals 0, 1, 2 are for x, y, z.  3 is for norm and 4 for zero

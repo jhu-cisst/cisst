@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Ofri Sadowsky
   Created on:	2003-11-04
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -76,8 +75,12 @@ class vctFixedSizeMatrix : public vctFixedSizeMatrixBase
     typedef typename TypeTraits::VaArgPromotion ElementVaArgPromotion;
 
     /*! Default constructor.  Do nothing. */
-    vctFixedSizeMatrix()
-    {}
+    inline vctFixedSizeMatrix() {}
+
+    /*! Copy constructor */
+    inline vctFixedSizeMatrix(const ThisType & other) {
+        this->Assign(other);
+    }
 
     /*! Initialize all the elements to the given value.
       \param value the value used to set all the elements of the matrix

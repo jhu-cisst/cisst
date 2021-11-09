@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2007-08-02
   
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -31,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 using namespace std;
 
 /* test "parameters" */
-const unsigned int size = 60;
+const unsigned int test_size = 60;
 typedef double value_type;
 const unsigned int numIterations = 10;
 
@@ -53,9 +52,9 @@ typedef vctDynamicNArrayRef<value_type, 4> NArray4RefType;
 int main()
 {
     /* allocate two large blocks used for all tests. */
-    NArray4Type::nsize_type size4(size);
-    NArray3Type::nsize_type size3(size);
-    NArray2Type::nsize_type size2(size);
+    NArray4Type::nsize_type size4(test_size);
+    NArray3Type::nsize_type size3(test_size);
+    NArray2Type::nsize_type size2(test_size);
     
     /* create parent containers */
     NArray4Type sourceNArray;
@@ -69,7 +68,7 @@ int main()
     VectorRefType destinationVector(totalSize, destinationNArray.Pointer());
 
     /* create parent container matrix */
-    const unsigned int matrixSize = size * size;
+    const unsigned int matrixSize = test_size * test_size;
     MatrixRefType sourceMatrix(matrixSize, matrixSize, sourceNArray.Pointer());
     MatrixRefType destinationMatrix(matrixSize, matrixSize, destinationNArray.Pointer());
 
@@ -151,7 +150,7 @@ int main()
               << "fast copy";
 
     /* size and stride that would fit in source */
-    const unsigned int vectorSize = size * size * size * size / 2;
+    const unsigned int vectorSize = test_size * test_size * test_size * test_size / 2;
     const int vectorStride = 2;
     /* create all required references */
     compactVectorSource.SetRef(vectorSize, sourceNArray.Pointer(), 1); 
@@ -246,8 +245,8 @@ int main()
               << "fast copy";
 
     /* size and stride that would fit in source */
-    const unsigned int rows = size * size;
-    const unsigned int cols = size * size / 2;
+    const unsigned int rows = test_size * test_size;
+    const unsigned int cols = test_size * test_size / 2;
     const int rowStride = cols * 2;
     const int colStride = 2;
 

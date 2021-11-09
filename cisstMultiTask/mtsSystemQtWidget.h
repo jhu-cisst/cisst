@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-05-17
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,7 +36,7 @@ class CISST_EXPORT mtsSystemQtWidget: public QWidget
     Q_OBJECT;
 
 public:
-    mtsSystemQtWidget(const std::string & name = "");
+    mtsSystemQtWidget(const std::string & name = "mtsSystemQtWidget");
     inline virtual ~mtsSystemQtWidget() {}
 
     void SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired);
@@ -67,7 +67,7 @@ private slots:
 
 private:
     int TimerPeriodInMilliseconds;
-    mtsFunctionRead GetPeriodStatistics;
+    mtsFunctionRead period_statistics;
     mtsIntervalStatistics IntervalStatistics;
 };
 
