@@ -22,7 +22,7 @@ else (CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
 
 # New features (use with caution)
-option (CISST_MTS_NEW "Enable new cisstMultiTask features" OFF)
+option (CISST_MTS_NEW "Enable new cisstMultiTask features" ON)
 mark_as_advanced (CISST_MTS_NEW)
 
 # ZeroC ICE
