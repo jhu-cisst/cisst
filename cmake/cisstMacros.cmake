@@ -1035,3 +1035,47 @@ function (cisst_is_catkin_build RESULT)
     endif ()
   endif ()
 endfunction (cisst_is_catkin_build)
+
+
+# macro to set default cpack settings
+macro (cisst_cpack_settings ...)
+  # debug
+  cisst_cmake_debug ("cisst_cpack_settings called with: ${ARGV}")
+
+  # set all keywords and their values to ""
+  set (FUNCTION_KEYWORDS
+       VENDOR
+       MAINTAINER)
+
+  # reset local variables
+  foreach (keyword ${FUNCTION_KEYWORDS})
+    set (${keyword} "")
+  endforeach (keyword)
+
+  # parse input
+  foreach (arg ${ALL_ARGS})
+    list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
+    if (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (CURRENT_PARAMETER ${arg})
+      set (${CURRENT_PARAMETER} "")
+    else (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (${CURRENT_PARAMETER} ${${CURRENT_PARAMETER}} ${arg})
+    endif (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+  endforeach (arg)
+
+  # debug
+  foreach (keyword ${FUNCTION_KEYWORDS})
+    cisst_cmake_debug ("cisst_cpack_settings: ${keyword}: ${${keyword}}")
+  endforeach (keyword)
+
+  if (UNIX)
+    set (CPACK_PACKAGE_VENDOR ${VENDOR})
+    set (CPACK_DEBIAN_PACKAGE_MAINTAINER ${MAINTAINER})
+    set (CPACK_GENERATOR "DEB")
+    set (CPACK_DEB_PACKAGE_COMPONENT ON)
+    set (CPACK_DEB_COMPONENT_INSTALL ON)
+    set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    set (CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS ON)
+  endif (UNIX)
+
+endmacro (cisst_cpack_settings)
