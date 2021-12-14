@@ -1094,7 +1094,7 @@ function (cisst_add_config_files _cacf_component_name)
 
   cisst_is_catkin_build (_cacf_is_catkin_build)
   if (_cacf_is_catkin_build)
-    set (_cacf_config_file_dir "${CATKIN_DEVEL_PREFIX}/share/${_saw_component_name}/cmake")
+    set (_cacf_config_file_dir "${CATKIN_DEVEL_PREFIX}/share/${_cacf_component_name}/cmake")
   else ()
     set (_cacf_config_file_dir "${${_cacf_component_name}_BINARY_DIR}")
   endif ()
