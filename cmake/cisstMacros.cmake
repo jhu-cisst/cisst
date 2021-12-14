@@ -1079,3 +1079,78 @@ macro (cisst_cpack_settings ...)
   endif (UNIX)
 
 endmacro (cisst_cpack_settings)
+
+# Macro to set output paths based on build type, i.e. ROS 1/catkin or not
+macro (cisst_set_output_path)
+  cisst_is_catkin_build (_is_catkin_build)
+  if (_is_catkin_build)
+    set (LIBRARY_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/lib")
+  endif ()
+endmacro (cisst_set_output_path)
+
+# Add standard configuration files for SAW component, assumes all
+# settings are already defined
+function (cisst_add_config_files _cacf_component_name)
+
+  cisst_is_catkin_build (_cacf_is_catkin_build)
+  if (_cacf_is_catkin_build)
+    set (_cacf_config_file_dir "${CATKIN_DEVEL_PREFIX}/share/${_saw_component_name}/cmake")
+  else ()
+    set (_cacf_config_file_dir "${${_cacf_component_name}_BINARY_DIR}")
+  endif ()
+
+  set (_cacf_version_major ${${_cacf_component_name}_VERSION_MAJOR})
+  set (_cacf_version_minor ${${_cacf_component_name}_VERSION_MINOR})
+  set (_cacf_version_patch ${${_cacf_component_name}_VERSION_PATCH})
+  set (_cacf_version       ${${_cacf_component_name}_VERSION})
+  set (_cacf_include_dir   ${${_cacf_component_name}_INCLUDE_DIR})
+  set (_cacf_library_dir   ${${_cacf_component_name}_LIBRARY_DIR})
+  set (_cacf_libraries     ${${_cacf_component_name}_LIBRARIES})
+
+  # generate componentRevision.h
+  set (
+    _cacf_revision_h
+    "${${_cacf_component_name}_BINARY_DIR}/include/${_cacf_component_name}/${_cacf_component_name}Revision.h")
+  find_file (
+    _cacf_revision_h_in
+    NAMES sawRevision.h.in
+    PATHS ${CISST_CMAKE_DIRS}
+    NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  configure_file (
+    ${_cacf_revision_h_in}
+    ${_cacf_revision_h}
+    @ONLY)
+
+  # generate componentConfig.cmake
+  set (_cacf_config_cmake
+    "${_cacf_config_file_dir}/${_cacf_component_name}Config.cmake")
+  find_file (
+    _cacf_config_cmake_in
+    NAMES sawConfig.cmake.in
+    PATHS ${CISST_CMAKE_DIRS}
+    NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  configure_file (
+    ${_cacf_config_cmake_in}
+    ${_cacf_config_cmake}
+    @ONLY)
+
+  # generate componentConfigVersion.cmake
+  set (_cacf_config_version_cmake
+    "${_cacf_config_file_dir}/${_cacf_component_name}ConfigVersion.cmake")
+  find_file (
+    _cacf_config_version_cmake_in
+    NAMES sawConfigVersion.cmake.in
+    PATHS ${CISST_CMAKE_DIRS}
+    NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  configure_file (
+    ${_cacf_config_version_cmake_in}
+    ${_cacf_config_version_cmake}
+    @ONLY)
+
+  # install cmake config files
+  install (
+    FILES ${_cacf_config_cmake} ${_cacf_config_version_cmake}
+    DESTINATION "share/${_cacf_component_name}"
+    COMPONENT ${_cacf_component_name})
+
+endfunction (cisst_add_config_files)

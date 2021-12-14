@@ -1,0 +1,33 @@
+#
+# (C) Copyright 2011-2021 Johns Hopkins University (JHU), All Rights Reserved.
+#
+
+set (@_cacf_component_name@_VERSION_MAJOR "@_cacf_version_major@")
+set (@_cacf_component_name@_VERSION_MINOR "@_cacf_version_minor@")
+set (@_cacf_component_name@_VERSION_PATCH "@_cacf_version_patch@")
+set (@_cacf_component_name@_VERSION "@_cacf_version@")
+
+
+# figure out if this file is where it was configured (build tree) or
+# not (installed tree)
+set (@_cacf_component_name@_CMAKE_CONFIG_FILE "@_cacf_config_cmake@")
+get_filename_component (THIS_FILE_PATH
+                        ${CMAKE_CURRENT_LIST_FILE}
+                        REALPATH)
+
+if ("${@_cacf_component_name@_CMAKE_CONFIG_FILE}" STREQUAL "${THIS_FILE_PATH}")
+  # we're using the build directories
+  set (@_cacf_component_name@_INCLUDE_DIR "@_cacf_include_dir@")
+  set (@_cacf_component_name@_LIBRARY_DIR "@_cacf_library_dir@")
+else ()
+  # try to find the install dir, we know the install is using
+  # share/sawControllers so we can go ../.. or ../../..
+  # find include path first
+  find_path (@_cacf_component_name@_INCLUDE_DIR
+    NAMES @_cacf_component_name@/@_cacf_component_name@Export.h
+    HINTS ${THIS_FILE_PATH}/../.. ${THIS_FILE_PATH}/../../..)
+  # set library path relative to include
+  set (@_cacf_component_name@_LIBRARY_DIR "${@_cacf_component_name@_INCLUDE_DIR}/../lib")
+endif ()
+
+set (@_cacf_component_name@_LIBRARIES "@_cacf_libraries@")
