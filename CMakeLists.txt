@@ -19,7 +19,7 @@ cmake_minimum_required (VERSION 3.0)
 project (cisst)
 
 # cisst compiler settings
-include (cisstSettings.cmake)
+include (cmake/cisstSettings.cmake)
 
 # To organize targets in folders
 option (CISST_USE_FOLDERS "Use folders to organize cisst in IDE (Visual Studio, ...)" OFF)
@@ -547,25 +547,19 @@ install (FILES "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
          COMPONENT cisstCommon)
 
 # CMake use cisst file
-configure_file ("${CISST_CMAKE_SOURCE_DIR}/Usecisst.cmake"
-                "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
-                COPYONLY)
-configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/cisstSettings.cmake"
-                "${CISST_CMAKE_BINARY_DIR}/cisstSettings.cmake"
-                COPYONLY)
-configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstMacros.cmake"
-                "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
-                COPYONLY)
-configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstConfigVersion.cmake.in"
-                "${CISST_CMAKE_BINARY_DIR}/cisstConfigVersion.cmake.in"
-                COPYONLY)
-
-install (FILES "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
-               "${CISST_CMAKE_BINARY_DIR}/cisstSettings.cmake"
-               "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
-               "${CISST_CMAKE_BINARY_DIR}/cisstConfigVersion.cmake.in"
-         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-         COMPONENT cisstCommon)
+set (CISST_CMAKE_FILES_TO_COPY
+     Usecisst.cmake cisstSettings.cmake cisstMacros.cmake cisstConfigVersion.cmake.in
+     sawRevision.h.in sawConfig.cmake.in sawConfigVersion.cmake.in)
+foreach (cmake_file_to_copy ${CISST_CMAKE_FILES_TO_COPY})
+  # copy to build for users not installing
+  configure_file ("${CISST_CMAKE_SOURCE_DIR}/${cmake_file_to_copy}"
+                  "${CISST_CMAKE_BINARY_DIR}/${cmake_file_to_copy}"
+                  COPYONLY)
+  # and install
+  install (FILES "${CISST_CMAKE_BINARY_DIR}/${cmake_file_to_copy}"
+           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+           COMPONENT cisstCommon)
+endforeach ()
 
 # Configuration file
 set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
