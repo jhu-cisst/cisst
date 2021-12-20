@@ -1085,6 +1085,7 @@ macro (cisst_set_output_path)
   cisst_is_catkin_build (_is_catkin_build)
   if (_is_catkin_build)
     set (LIBRARY_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/lib")
+    set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
   endif ()
 endmacro (cisst_set_output_path)
 
