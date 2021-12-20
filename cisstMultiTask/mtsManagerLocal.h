@@ -68,23 +68,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-// Helper macro (useful to connect interfaces in main.cpp)
-#define CONNECT_LOCAL(_clientComp, _reqInt, _serverComp, _prvInt)\
-    if (!mtsManagerLocal::GetInstance()->Connect(_clientComp, _reqInt, _serverComp, _prvInt)) {\
-        CMN_LOG_INIT_ERROR << "Failed to connect: "\
-                           << _clientComp << ":" << _reqInt << " - "\
-                           << _serverComp << ":" << _prvInt << std::endl;\
-        exit(1);\
-    }
-
-#define CONNECT_REMOTE(_clientProc, _clientComp, _reqInt, _serverProc, _serverComp, _prvInt)\
-    if (!mtsManagerLocal::GetInstance()->Connect(_clientProc, _clientComp, _reqInt, _serverProc, _serverComp, _prvInt)) {\
-        CMN_LOG_INIT_ERROR << "Failed to connect: "\
-                           << _clientProc << ":" << _clientComp << ":" << _reqInt << " - "\
-                           << _serverProc << ":" << _serverComp << ":" << _prvInt << std::endl;\
-        exit(1);\
-    }
-
 class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
 {
     // for unit-testing
@@ -291,51 +274,6 @@ protected:
     /*! Remove required interface */
     // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
     bool RemoveInterfaceRequired(const std::string & componentName, const std::string & interfaceRequiredName);
-
-    //-------------------------------------------------------------------------
-    //  Methods required by mtsManagerLocalInterface
-    //
-    //  See mtsManagerLocalInterface.h for detailed documentation.
-    //-------------------------------------------------------------------------
-    /*! \brief Create component proxy
-        \param componentProxyName Name of component proxy
-        \param listenerID Not used
-        \note This should be called before an interface proxy is created. */
-    bool CreateComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
-
-    /*! \brief Remove component proxy
-        \param componentProxyName Name of component proxy
-        \param listenerID Not used
-        \note Note that all the interface proxies that the proxy manages is
-              automatically removed when removing a component proxy. */
-    bool RemoveComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
-
-    /*! \brief Create provided interface proxy
-        \param serverComponentProxyName Name of server component proxy
-        \param providedInterfaceDescription Description of provided interface */
-    bool CreateInterfaceProvidedProxy(
-        const std::string & serverComponentProxyName,
-        const mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
-
-    /*! \brief Create required interface proxy
-        \param clientComponentProxyName Name of component proxy that has */
-    bool CreateInterfaceRequiredProxy(
-        const std::string & clientComponentProxyName,
-        const mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
-
-    /*! Remove provided interface proxy */
-    bool RemoveInterfaceProvidedProxy(
-        const std::string & componentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "");
-
-    /*! Remove required interface proxy */
-    bool RemoveInterfaceRequiredProxy(
-        const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
-
-    /*! Connect two local interfaces at the server side */
-    bool ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
-
-    /*! \brief Connect two local interfaces at the client side */
-    bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
 
     /*! Get information about provided interface */
     bool GetInterfaceProvidedDescription(

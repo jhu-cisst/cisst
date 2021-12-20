@@ -1195,26 +1195,9 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentConnect(const mtsD
 
     // this is a remote connection
     if (connectionDescription.Client.ProcessName != connectionDescription.Server.ProcessName) {
-#if CISST_MTS_HAS_ICE
-        // PK TODO: Need to fix this to be thread-safe
-        if (!LCM->Connect(connectionDescription.Client.ProcessName,
-                          connectionDescription.Client.ComponentName,
-                          connectionDescription.Client.InterfaceName,
-                          connectionDescription.Server.ProcessName,
-                          connectionDescription.Server.ComponentName,
-                          connectionDescription.Server.InterfaceName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnect: failed to execute \"Component Connect\": "
-                                    << connectionDescription << std::endl;
-            // result = false;
-        } else {
-            CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceLCMCommands_ComponentConnect: successfully connected: " << connectionDescription << std::endl;
-            // result = true;
-        }
-#else
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentConnect: Cannot connect to external process without CISST_MTS_HAS_ICE, connection = "
                                 << connectionDescription << std::endl;
         // result = false;
-#endif
         return;
     }
 

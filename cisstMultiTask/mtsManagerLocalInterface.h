@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung
   Created on: 2009-12-08
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2018 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -56,63 +54,6 @@ class CISST_EXPORT mtsManagerLocalInterface : public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    //-------------------------------------------------------------------------
-    //  Proxy Object Control (Creation, Removal)
-    //-------------------------------------------------------------------------
-    /*! Create a component proxy. This should be called before an interface
-        proxy is created. */
-    virtual bool CreateComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "") = 0;
-
-    /*! Remove a component proxy. All the interface proxies that the proxy
-        manages should be automatically removed when removing a component proxy. */
-    virtual bool RemoveComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "") = 0;
-
-    /*! Create a provided interface proxy using InterfaceProvidedDescription */
-    virtual bool CreateInterfaceProvidedProxy(
-        const std::string & serverComponentProxyName,
-        const mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "") = 0;
-
-    /*! Create a required interface proxy using InterfaceRequiredDescription */
-    virtual bool CreateInterfaceRequiredProxy(
-        const std::string & clientComponentProxyName,
-        const mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
-
-    /*! Remove a provided interface proxy.  Because a provided interface can
-        have multiple connections with more than one required interface, this
-        method removes a provided interface proxy only when a provided interface
-        user counter (mtsInterfaceProvidedOrOutput::UserCounter) becomes zero. */
-    virtual bool RemoveInterfaceProvidedProxy(
-        const std::string & componentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "") = 0;
-
-    /*! Remove a required interface proxy */
-    virtual bool RemoveInterfaceRequiredProxy(
-        const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "") = 0;
-
-    //-------------------------------------------------------------------------
-    //  Connection Management
-    //-------------------------------------------------------------------------
-    /*! \brief Connect interfaces at server side
-        \param description Description of connection
-        \param listenerID Id of local component manager (set as process name)
-               that this method should call. Valid only in networked configuration
-        \return True if success, false otherwise
-        \note This method is called by the global component manager and is
-              always executed inside ConnectClientSideInterface(). */
-    virtual bool ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "") = 0;
-
-    /*! \brief Connect interfaces at client side
-        \param description Description of connection
-        \param listenerID Id of local component manager (set as process name)
-               that this method should call. Valid only in networked configuration
-        \return True if success, false otherwise
-        \note If the local component manager with the client process establishes
-              a connection successfully, the manager should inform the global
-              component manager (GCM) of its successful connection establishment
-              so that it registers this connection. Otherwise, the GCM cleans up
-              the connection after timeout.  This method is always executed
-              ahead of ConnectServerSideInterface(). */
-    virtual bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "") = 0;
-
     //-------------------------------------------------------------------------
     //  Getters
     //-------------------------------------------------------------------------

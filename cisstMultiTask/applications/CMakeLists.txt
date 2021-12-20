@@ -19,21 +19,6 @@ cisst_offer_application (cisstMultiTask ComponentGenerator OFF)
 cisst_offer_application (cisstMultiTask ComponentManager ON)
 cisst_offer_application (cisstMultiTask Logger ON)
 
-# ICE dependent applications
-if (CISST_MTS_HAS_ICE)
-  cisst_offer_application (cisstMultiTask GlobalComponentManager ON)
-  cisst_offer_application (cisstMultiTask ComponentViewer ON)
-  # FLTK dependent applications
-  if (CISST_HAS_FLTK)
-    cisst_offer_application (cisstMultiTask GlobalComponentManagerFLTK ON)
-  else (CISST_HAS_FLTK)
-    cisst_do_not_offer_application (cisstMultiTask GlobalComponentManagerFLTK)
-  endif (CISST_HAS_FLTK)
-else (CISST_MTS_HAS_ICE)
-  cisst_do_not_offer_application (cisstMultiTask GlobalComponentManager)
-  cisst_do_not_offer_application (cisstMultiTask GlobalComponentManagerFLTK)
-endif (CISST_MTS_HAS_ICE)
-
 # Python dependent applications
 if (CISST_HAS_SWIG_PYTHON)
   cisst_offer_application (cisstMultiTask IREComponent ON)

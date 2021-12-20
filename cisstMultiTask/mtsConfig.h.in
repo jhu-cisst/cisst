@@ -15,16 +15,12 @@ no warranty. The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #ifndef _mtsConfig_h
 #define _mtsConfig_h
 
 #include <cisstConfig.h>
-
-// Using ICE
-#cmakedefine01 CISST_MTS_HAS_ICE
 
 #cmakedefine01 CISST_MTS_64BIT
 

@@ -34,7 +34,6 @@ mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     mtsTaskFromSignal(name),
     UDrawPipeConnected(false),
     UDrawResponse(""),
-    ShowProxies(false),
     ConnectionStarted(false),
     WaitingForResponse(false)
 {
@@ -98,10 +97,6 @@ void mtsComponentViewer::Cleanup(void)
 void mtsComponentViewer::AddComponentHandler(const mtsDescriptionComponent &componentInfo)
 {
     if (UDrawPipeConnected) {
-#if CISST_MTS_HAS_ICE
-        // Ignore proxy components, unless ShowProxies is true
-        if (ShowProxies || !mtsManagerGlobal::IsProxyComponent(componentInfo.ComponentName))
-#endif
         {
             mtsComponentState componentState = ManagerComponentServices->ComponentGetState(componentInfo);
             std::string buffer = GetComponentInUDrawGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName, componentState);
@@ -127,10 +122,6 @@ void mtsComponentViewer::ChangeStateHandler(const mtsComponentStateChange &compo
 void mtsComponentViewer::AddConnectionHandler(const mtsDescriptionConnection &connection)
 {
     if (UDrawPipeConnected) {
-#if CISST_MTS_HAS_ICE
-        if (ShowProxies || (!mtsManagerGlobal::IsProxyComponent(connection.Client.ComponentName) &&
-                            !mtsManagerGlobal::IsProxyComponent(connection.Server.ComponentName)))
-#endif
         {
             if (connection.Server.InterfaceName != mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided) {
                 std::string buffer = GetConnectionInUDrawGraphFormat(connection);
@@ -179,10 +170,6 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
         /// Now initialize the system
         WriteString(UDrawPipe, "window(title(\"CISST Component Viewer\"))\n");
         WriteString(UDrawPipe, "app_menu(create_menus([menu_entry(\"redraw\", \"Redraw graph\"), "
-#if CISST_MTS_HAS_ICE
-                                                      "menu_entry(\"showproxies\", \"Show proxies\"), "
-                                                      "menu_entry(\"hideproxies\", \"Hide proxies\"), "
-#endif
                                                       "blank, "
                                                       "menu_entry(\"connectStart\", \"Connect Start...\"), "
                                                       "menu_entry(\"connectFinish\", \"Connect Finish\"), "
@@ -206,12 +193,6 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
 void mtsComponentViewer::ActivateMenuItems(void)
 {
     std::string buffer("app_menu(activate_menus([\"redraw\", ");
-#if CISST_MTS_HAS_ICE
-    if (ShowProxies)
-        buffer.append("\"hideproxies\", ");
-    else
-        buffer.append("\"showproxies\", ");
-#endif
     if (ConnectionStarted) {
         if ((ConnectionRequest.Client.ProcessName != "") && (ConnectionRequest.Server.ProcessName != ""))
             buffer.append("\"connectFinish\", ");
@@ -316,20 +297,6 @@ void mtsComponentViewer::ProcessResponse(void)
                 CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph" << std::endl;
                 SendAllInfo();
             }
-#if CISST_MTS_HAS_ICE
-            else if (args == "showproxies") {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph, showing proxies" << std::endl;
-                ShowProxies = true;
-                SendAllInfo();
-                ActivateMenuItems();
-            }
-            else if (args == "hideproxies") {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Redrawing graph, hiding proxies" << std::endl;
-                ShowProxies = false;
-                SendAllInfo();
-                ActivateMenuItems();
-            }
-#endif
             else if (args == "connectStart") {
                 ConnectionRequest.Init();
                 ConnectionStarted = true;
@@ -462,10 +429,6 @@ void mtsComponentViewer::SendAllInfo(void)
     for (i = 0; i < processList.size(); i++) {
         componentList = ManagerComponentServices->GetNamesOfComponents(processList[i]);
         for (j = 0; j < componentList.size(); j++) {
-#if CISST_MTS_HAS_ICE
-            // Ignore proxy components, unless ShowProxies is true
-            if (ShowProxies || !mtsManagerGlobal::IsProxyComponent(componentList[j]))
-#endif
             {
                 mtsDescriptionComponent arg;
                 arg.ProcessName = processList[i];
@@ -521,10 +484,6 @@ std::string mtsComponentViewer::GetComponentInUDrawGraphFormat(const std::string
     if (mtsManagerComponentBase::IsManagerComponentServer(componentName) ||
         mtsManagerComponentBase::IsManagerComponentClient(componentName))
         componentType = "SYSTEM";
-#if CISST_MTS_HAS_ICE
-    else if (ShowProxies && mtsManagerGlobal::IsProxyComponent(componentName))
-        componentType = "PROXY";
-#endif
     buffer.append(componentType);
     buffer.append("\",[a(\"OBJECT\",\""); 
     buffer.append(componentName);

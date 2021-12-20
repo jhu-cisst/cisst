@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #include <cisstCommon/cmnPortability.h>
@@ -366,26 +365,5 @@ CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyClient, mtsTaskContinuous, m
 
 #include <cisstMultiTask/mtsSocketProxyServer.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyServer, mtsTaskContinuous, mtsSocketProxyServerConstructorArg)
-
-/* ICE dependent classes */
-#include <cisstMultiTask/mtsConfig.h>
-#if CISST_MTS_HAS_ICE
-
-#include "mtsComponentInterfaceProxyClient.h"
-CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyClient)
-
-#include "mtsComponentInterfaceProxyServer.h"
-CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyServer)
-
-#include "mtsComponentProxy.h"
-CMN_IMPLEMENT_SERVICES_DERIVED(mtsComponentProxy, mtsComponent)
-
-#include "mtsManagerProxyClient.h"
-CMN_IMPLEMENT_SERVICES(mtsManagerProxyClient)
-
-#include "mtsManagerProxyServer.h"
-CMN_IMPLEMENT_SERVICES(mtsManagerProxyServer)
-
-#endif // CISST_MTS_HAS_ICE
 
 #endif  // MTS_CLASS_SERVICES_PART1
