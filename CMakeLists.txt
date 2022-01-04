@@ -22,8 +22,9 @@ project (cisst)
 include (cmake/cisstSettings.cmake)
 
 # Check if an ARM build (e.g., UWP for HoloLens)
-if (WIN32 AND CMAKE_GENERATOR_PLATFORM STREQUAL "ARM")
-   message("Building for ARM (UWP)")
+if (WIN32 AND (CMAKE_GENERATOR_PLATFORM STREQUAL "ARM" OR
+               CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64"))
+   message("Building for ${CMAKE_GENERATOR_PLATFORM} (UWP)")
    set (CISST_ARM_UWP ON)
    add_definitions (-DCISST_ARM_UWP)
 else ()
