@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2022 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -20,6 +20,15 @@ project (cisst)
 
 # cisst compiler settings
 include (cmake/cisstSettings.cmake)
+
+# Check if an ARM build (e.g., UWP for HoloLens)
+if (WIN32 AND CMAKE_GENERATOR_PLATFORM STREQUAL "ARM")
+   message("Building for ARM (UWP)")
+   set (CISST_ARM_UWP ON)
+   add_definitions (-DCISST_ARM_UWP)
+else ()
+   set (CISST_ARM_UWP OFF)
+endif ()
 
 # To organize targets in folders
 option (CISST_USE_FOLDERS "Use folders to organize cisst in IDE (Visual Studio, ...)" OFF)

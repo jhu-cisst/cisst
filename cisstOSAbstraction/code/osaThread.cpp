@@ -306,7 +306,9 @@ void osaThread::Delete(void)
         }                                                                                                                                     
         */
 #elif (CISST_OS == CISST_WINDOWS)
+#ifndef CISST_ARM_UWP
         TerminateThread(INTERNALS(Thread), 0);
+#endif
 #endif // CISST_WINDOWS
 
         Valid = false;

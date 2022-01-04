@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstOSAbstraction
 #
-# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -58,6 +58,16 @@ set (HEADER_FILES
      osaTimeServer.h
      osaTripleBuffer.h
      )
+
+if (CISST_ARM_UWP)
+  # Following needed for osaSocket
+  add_definitions (-D_WINSOCK_DEPRECATED_NO_WARNINGS)
+  # Following files not yet ported to ARM UWP
+  list (REMOVE_ITEM SOURCE_FILES osaDynamicLoader.cpp osaDynamicLoaderAndFactory.cpp
+                                 osaPipeExec.cpp osaSerialPort.cpp)
+  list (REMOVE_ITEM HEADER_FILES osaDynamicLoader.h    osaDynamicLoaderAndFactory.h
+                                 osaPipeExec.h   osaSerialPort.h)
+endif (CISST_ARM_UWP)
 
 # Create the config file
 set (CISST_OSA_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstOSAbstraction/osaConfig.h)

@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -90,6 +90,12 @@ set (HEADER_FILES
      cmnTypeTraits.h
      cmnUnits.h
      )
+
+if (CISST_ARM_UWP)
+  # Following files not yet ported to ARM UWP
+  list (REMOVE_ITEM SOURCE_FILES cmnGetChar.cpp cmnKbHit.cpp)
+  list (REMOVE_ITEM HEADER_FILES cmnGetChar.h   cmnKbHit.h)
+endif (CISST_ARM_UWP)
 
 if (CISST_HAS_JSON)
   set (SOURCE_FILES

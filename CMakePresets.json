@@ -1,0 +1,53 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+    {
+        // Notes:
+        //  (1) Check CMAKE_CXX_FLAGS and CMAKE_C_FLAGS for UNICODE
+        //  (2) Decide whether to build shared libraries (CISST_BUILD_SHARED_LIBS)
+        //  (3) Only cisstVector examples can be compiled
+        "name": "UWP-ARM",
+        "displayName": "UWP for ARM (HoloLens) - Check CMAKE_C(XX)_FLAGS",
+        "description": "Compile UWP for ARM",
+        "generator": "Visual Studio 15 2017",
+        "architecture": {
+            "strategy": "set",
+            "value": "ARM"
+        },
+        "cacheVariables": {
+            // Not sure if next three are necessary
+            "CMAKE_SYSTEM_NAME": "WindowsStore",
+            "CMAKE_SYSTEM_VERSION": "10.0",
+            "CMAKE_BUILD_TYPE": "Release",
+            // Cannot build cisstMultiTask without osaDynamicLoader
+            // and osaPipeExec
+            "CISST_cisstMultiTask": {
+                "type": "BOOL",
+                "value": "OFF"
+            },
+            "CISST_cisstNumerical": {
+                "type": "BOOL",
+                "value": "OFF"
+            },
+            "CISST_cisstParameterTypes": {
+                "type": "BOOL",
+                "value": "OFF"
+            },
+            "CISST_cisstRobot": {
+                "type": "BOOL",
+                "value": "OFF"
+            },
+            // Avoids compilation problem in cisstVector
+            "CISST_HAS_OPENGL": {
+                "type": "BOOL",
+                "value": "OFF"
+            }
+        }
+    }
+    ]
+}    

@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,8 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#ifndef CISST_ARM_UWP
 #include <cisstOSAbstraction/osaSerialPort.h>
 CMN_IMPLEMENT_SERVICES(osaSerialPort);
+#endif
 
 #include <cisstOSAbstraction/osaSocket.h>
 CMN_IMPLEMENT_SERVICES(osaSocket);
@@ -31,5 +32,4 @@ CMN_IMPLEMENT_SERVICES(osaSocketServer);
 
 #include <cisstOSAbstraction/osaTimeServer.h>
 CMN_IMPLEMENT_SERVICES(osaTimeServer);
-
 
