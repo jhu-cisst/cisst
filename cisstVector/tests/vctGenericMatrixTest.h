@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-07-09
 
-  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -160,7 +160,7 @@ public:
         bool gotException = false;
         try {
             matrix1.at(size);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -168,7 +168,7 @@ public:
         gotException = false;
         try {
             matrix2.at(size);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -177,7 +177,7 @@ public:
         gotException = false;
         try {
             matrix1.at(rows, 0);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -185,7 +185,7 @@ public:
         gotException = false;
         try {
             matrix2.at(rows, 0);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -193,7 +193,7 @@ public:
         gotException = false;
         try {
             matrix1(rows, 0);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -201,7 +201,7 @@ public:
         gotException = false;
         try {
             matrix2(rows, 0);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -210,7 +210,7 @@ public:
         gotException = false;
         try {
             matrix1.at(0, cols);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -218,7 +218,7 @@ public:
         gotException = false;
         try {
             matrix2.at(0, cols);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -226,7 +226,7 @@ public:
         gotException = false;
         try {
             matrix1(0, cols);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -234,7 +234,7 @@ public:
         gotException = false;
         try {
             matrix2(0, cols);
-        } catch (std::out_of_range & exception) {
+        } catch (std::out_of_range &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -392,7 +392,7 @@ public:
         bool gotException = false;
         try {
             matrix2.ProductOf(matrix1, matrix2);
-        } catch (std::runtime_error & exception) {
+        } catch (std::runtime_error &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -400,7 +400,7 @@ public:
         gotException = false;
         try {
             matrix2.ProductOf(matrix2, matrix1);
-        } catch (std::runtime_error & exception) {
+        } catch (std::runtime_error &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
