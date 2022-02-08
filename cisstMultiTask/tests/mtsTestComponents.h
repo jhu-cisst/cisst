@@ -61,7 +61,7 @@ const double StateTransitionMaximumDelay = 5.0 * cmn_s;
    artificially slow and test blocking commands.
 */
 
-// mtsTestClassGeneric for testing AddFilteredReadCommandState
+// mtsTestClassGeneric for testing AddCommandFilteredReadState
 
 template <class _elementType>
 class mtsTestClassGeneric : public mtsGenericObject {

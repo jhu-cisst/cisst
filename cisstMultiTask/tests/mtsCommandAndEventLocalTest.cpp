@@ -109,6 +109,16 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     executionResult = client->InterfaceRequired1.FunctionStateTableFilteredReadGenericCF(valueRead);
     CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
 
+#if 0
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableFilteredReadV3VR.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionStateTableFilteredReadV3VR(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+#endif
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableFilteredReadV3CF.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionStateTableFilteredReadV3CF(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
     CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableAdvance.IsValid());
     executionResult = client->InterfaceRequired1.FunctionStateTableAdvance();
     CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
