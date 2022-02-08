@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -95,6 +95,18 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
 
     CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableRead.IsValid());
     executionResult = client->InterfaceRequired1.FunctionStateTableRead(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableFilteredReadGenericR.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionStateTableFilteredReadGenericR(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableFilteredReadGenericVR.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionStateTableFilteredReadGenericVR(valueRead);
+    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
+
+    CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableFilteredReadGenericCF.IsValid());
+    executionResult = client->InterfaceRequired1.FunctionStateTableFilteredReadGenericCF(valueRead);
     CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::FUNCTION_NOT_BOUND, executionResult.GetResult());
 
     CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionStateTableAdvance.IsValid());
@@ -257,6 +269,24 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
         client->InterfaceRequired1.FunctionStateTableAdvance.ExecuteBlocking();
         client->InterfaceRequired1.FunctionStateTableRead(valueRead);
         CPPUNIT_ASSERT(valueRead == static_cast<int>(index + 1));
+        valueRead = 0;
+        client->InterfaceRequired1.FunctionStateTableFilteredReadGenericR(valueRead);
+        CPPUNIT_ASSERT(valueRead == static_cast<int>(index + 1));
+        valueRead = 0;
+        client->InterfaceRequired1.FunctionStateTableFilteredReadGenericVR(valueRead);
+        CPPUNIT_ASSERT(valueRead == static_cast<int>(index + 1));
+        valueRead = 0;
+        client->InterfaceRequired1.FunctionStateTableFilteredReadGenericCF(valueRead);
+        CPPUNIT_ASSERT(valueRead == static_cast<int>(index + 1));
+#if 0
+        // Not currently supported
+        valueRead = 0;
+        client->InterfaceRequired1.FunctionStateTableFilteredReadV3VR(valueRead);
+        CPPUNIT_ASSERT(valueRead == static_cast<int>(3*(index + 1)));
+#endif
+        valueRead = 0;
+        client->InterfaceRequired1.FunctionStateTableFilteredReadV3CF(valueRead);
+        CPPUNIT_ASSERT(valueRead == static_cast<int>(3*(index + 1)));
     }
 
     // test read command
