@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -181,6 +181,12 @@ mtsInterfaceProvided::~mtsInterfaceProvided()
 
 void mtsInterfaceProvided::Cleanup(void)
 {
+#if 0
+    // Free memory for state filters (added by AddCommandFilteredReadStateInternal)
+    for (size_t i = 0; i < StateTableFilters.size(); i++)
+        delete StateTableFilters[i];
+    StateTableFilters.clear();
+#endif
 #if 0 // adeguet1, adv
     InterfacesProvidedCreatedType::iterator op;
     for (op = QueuedCommands.begin(); op != QueuedCommands.end(); op++) {

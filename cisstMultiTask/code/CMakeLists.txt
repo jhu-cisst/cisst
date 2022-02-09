@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -202,6 +202,7 @@ set (HEADER_FILES
      mtsStateData.h
      mtsStateIndex.h
      mtsStateTable.h
+     mtsStateTableFilter.h
 
      mtsTask.h
      mtsTaskContinuous.h
