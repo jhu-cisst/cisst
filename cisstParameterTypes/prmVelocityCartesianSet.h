@@ -5,8 +5,7 @@
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:	2008-03-12
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -47,28 +46,35 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
 
     typedef prmMotionBase BaseType;
 
-    /*! Linear goal (time derivative of magnitude of the vector to
-      goal. */
+    /*! Linear goal (time derivative of magnitude of the vector to goal). */
     vctDouble3 Velocity;
 
     /*! Vector of rate of orientation change */
     vctDouble3 VelocityAngular;
     
-    /*! desired time derivative of linear velocity - six vectors*/
+    /*! desired time derivative of linear velocity */
     vctDouble3 Acceleration;
 
-    /*! desired time derivative of angualr velocity - six vectors*/
+    /*! desired time derivative of angular velocity */
     vctDouble3 AccelerationAngular;
-    
-    /*!  probably also a 6-vector -- do we really need this or just set vel to 0? */
+
+    /*! masks indicating whether velocity is valid
+       (probably not necessary, since 0 velocity can be specified) */
     vctBool6 Mask;
 
  public:
 	/*! default constructor */
     inline prmVelocityCartesianSet()
-    {}
+    {
+        Velocity.SetAll(0.0);
+        VelocityAngular.SetAll(0.0);
+        Acceleration.SetAll(0.0);
+        AccelerationAngular.SetAll(0.0);
+        Mask.SetAll(false);
+    }
+
+    /*! constructor with all parameters. */
     
-    /*! constructor with all parameters */
     prmVelocityCartesianSet(const vctDouble3 & velocity,
                             const vctDouble3 & velocityAngular,
                             const vctDouble3 & acceleration,
@@ -96,6 +102,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
         this->VelocityAngular[0] = velocities[3];
         this->VelocityAngular[1] = velocities[4];
         this->VelocityAngular[2] = velocities[5];
+        Mask.SetAll(true);
     }
 
     /*Set Translational Velocities only
@@ -105,6 +112,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     inline void SetTranslationGoal(const vctDouble3 & velocity)
     {
         this->Velocity.Assign(velocity);
+        Mask[0] = Mask[1] = Mask[2] = true;
     }
 	
     /*! Set angular velocity only
@@ -114,6 +122,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     inline void SetRotationGoal(const vctDouble3 & velocityAngular)
     {
         this->VelocityAngular.Assign(velocityAngular);
+        Mask[3] = Mask[4] = Mask[5] = true;
     } 
 	
     /*! Get current goal 
@@ -131,6 +140,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     inline void SetVelocity(const vctDouble3 & velocity)
     {
         this->Velocity = velocity;
+        Mask[0] = Mask[1] = Mask[2] = true;
     } 
     
     /*! Get the velocity parameter
@@ -148,6 +158,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     inline void SetAngularVelocity(const vctDouble3 & velocityAngular)
     {
         this->VelocityAngular = velocityAngular;
+        Mask[3] = Mask[4] = Mask[5] = true;
     } 
     
     /*! Get the angular velocity parameter
@@ -224,4 +235,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(prmVelocityCartesianSet);
 
 
 #endif
-
