@@ -2,7 +2,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2005-11-20
 #
-# (C) Copyright 2005-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2022 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -19,8 +19,6 @@
 #
 # CISSTNETLIB_INCLUDE_DIR     - include directories to use CISSTNETLIB
 # CISSTNETLIB_LIBRARIES       - link against these to use CISSTNETLIB (fullpath)
-#
-# $Id$
 #
 
 # try to find automatically
@@ -72,10 +70,10 @@ if (NOT CISSTNETLIB_DIR)
       # download tgz file
       message ("Downloading: https://dvrk.lcsr.jhu.edu/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz")
       file (DOWNLOAD
-            http://unittest.lcsr.jhu.edu/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz
+            http://dvrk.lcsr.jhu.edu/cisst/downloads/cisstNetlib/uncompressed/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz
             "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz"
             LOG log
-            SHOWPROGRESS)
+            SHOW_PROGRESS)
       message ("Downloading cisstNetlib result:" ${log})
       # uncompress using cmake -E tar
       execute_process (COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_CURRENT_BINARY_DIR}/${CISSTNETLIB_DOWNLOAD_PREFIX}.tgz"
