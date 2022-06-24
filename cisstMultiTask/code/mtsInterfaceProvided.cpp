@@ -1169,6 +1169,24 @@ mtsCommandQualifiedRead * mtsInterfaceProvided::GetCommandQualifiedRead(const st
 }
 
 
+const cmnClassServicesBase * mtsInterfaceProvided::GetCommandWriteArgumentServices(const std::string & commandName) const
+{
+    const mtsCommandWriteBase * command = this->CommandsWrite.GetItem(commandName, CMN_LOG_LEVEL_INIT_VERBOSE);
+    if (command) {
+        return command->GetArgumentClassServices();
+    }
+    return 0;
+}
+
+const cmnClassServicesBase * mtsInterfaceProvided::GetCommandReadArgumentServices(const std::string & commandName) const
+{
+    const mtsCommandRead * command = this->CommandsRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_VERBOSE);
+    if (command) {
+        return command->GetArgumentPrototype()->Services();
+    }
+    return 0;
+}
+
 mtsMulticastCommandVoid * mtsInterfaceProvided::GetEventVoid(const std::string & eventName) const
 {
     // this event might be owned by the end user provided interface, e.g. event for end of blocking command

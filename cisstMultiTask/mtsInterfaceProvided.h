@@ -244,6 +244,12 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                       const mtsRequiredType required = MTS_REQUIRED) const;
     //@}
 
+    /*! Get argument class services for a command */
+    //@{
+    const cmnClassServicesBase * GetCommandWriteArgumentServices(const std::string & commandName) const;
+    const cmnClassServicesBase * GetCommandReadArgumentServices(const std::string & commandName) const;
+    //@}
+
     /*! Find an event based on its name. */
     //@{
     mtsMulticastCommandVoid * GetEventVoid(const std::string & eventName) const;
