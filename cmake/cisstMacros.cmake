@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -403,7 +403,10 @@ macro (cisst_target_link_package_libraries target ...)
     if ("${lib}" STREQUAL "cisstQt")
       if (CISST_HAS_QT5)
         cisst_cmake_debug ("cisst_target_link_package_libraries: Qt5 needed for ${target}")
-        qt5_use_modules (${target} Core Widgets Gui OpenGL Xml XmlPatterns)
+        set (_qt5_librairies Core Widgets Gui OpenGL XmlPatterns)
+        foreach (_qt5_lib ${_qt5_librairies})
+          target_link_libraries (${target} Qt5::${_qt5_lib})
+        endforeach ()
       endif (CISST_HAS_QT5)
     endif ("${lib}" STREQUAL "cisstQt")
 
