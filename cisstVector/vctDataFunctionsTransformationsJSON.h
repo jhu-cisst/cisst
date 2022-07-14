@@ -44,6 +44,7 @@ public:
     {
         cmnDataJSON<TranslationType>::DeSerializeText(data.Translation(), jsonValue["Translation"]);
         cmnDataJSON<RotationType>::DeSerializeText(data.Rotation(), jsonValue["Rotation"]);
+        data.Rotation().NormalizedSelf();
     }
 };
 
@@ -63,6 +64,7 @@ class cmnDataJSON<vctMatrixRotation3<_elementType, _rowMajor> >
     static void DeSerializeText(DataType & data, const Json::Value & jsonValue)
     {
         cmnDataJSON<ContainerType>::DeSerializeText(data, jsonValue);
+        data.NormalizedSelf();
     }
 };
 
@@ -82,6 +84,7 @@ class cmnDataJSON<vctFrame4x4<_elementType, _rowMajor> >
     static void DeSerializeText(DataType & data, const Json::Value & jsonValue)
     {
         cmnDataJSON<ContainerType>::DeSerializeText(data, jsonValue);
+        data.Rotation().NormalizedSelf();
     }
 };
 
