@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
-  (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -495,7 +495,7 @@ bool CISST_EXPORT cmnIsFinite(const double & value);
 #if (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_CLANG)
 #define CMN_UNUSED(argument) MARKED_AS_UNUSED ## argument __attribute__((unused))
 #else
-#define CMN_UNUSED(argument) MARKED_AS_UNUSED ## argument
+#define CMN_UNUSED(argument)
 #endif
 
 
