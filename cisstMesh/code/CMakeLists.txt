@@ -123,6 +123,9 @@ set (HEADER_FILES
   msh3AlgDirPDTreevonMisesProj.h
   msh3AlgDirPDTreeBAPointCloud.h
   msh3AlgDirPDTreevonMisesProjMesh.h
+
+  mshExport.h
+  mshForwardDeclarations.h
   )
 
 # Create the config file
