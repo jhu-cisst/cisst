@@ -53,7 +53,7 @@ if ("${CISST_BINARY_DIR}" STREQUAL "")
              NAMES cisstConfig.h
              PATHS ${CISST_INCLUDE_DIR})
   if (CISST_HEADER_FILE_FOUND)
-    message ("Information: cisst has been found in \"${CISST_BINARY_DIR}\", headers are in \"${CISST_INCLUDE_DIR}\"")
+    message (STATUS "Information: cisst has been found in \"${CISST_BINARY_DIR}\", headers are in \"${CISST_INCLUDE_DIR}\"")
   else (CISST_HEADER_FILE_FOUND)
     message (WARNING "cisst-config was found in \"${CISST_CONFIG_PATH}\", the cisst install root is assumed to be \"${CISST_BINARY_DIR}\" but we can't find \"cisstConfig.h\" in \"${CISST_INCLUDE_DIR}\".  This is alarming!")
   endif (CISST_HEADER_FILE_FOUND)
