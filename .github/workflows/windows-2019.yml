@@ -22,7 +22,7 @@ jobs:
         git clone https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
 
     - name: Build cisstNetlib
-      working-directory: ${{github.workspace}}/cisstNetlib-build -A x64
+      working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
         cmake ${{github.workspace}}/cisstNetlib-source
         cmake --build . --config Release
