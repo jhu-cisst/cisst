@@ -16,6 +16,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+
     - name: Download cisstNetlib
       run: |
         cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
