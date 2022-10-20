@@ -44,9 +44,9 @@ jobs:
         ./cisstvars.bat Release
         cmake --build . --config Release
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: |
-        ./cisstvars.bat Release
-        ctest --build-config Release --exclude-regex "osa|mts|msh|rob"
+#    - name: Test
+#      working-directory: ${{github.workspace}}/build
+#      run: |
+#        ./cisstvars.bat Release
+#        ctest --build-config Release --exclude-regex "osa|mts|msh|rob"
 
