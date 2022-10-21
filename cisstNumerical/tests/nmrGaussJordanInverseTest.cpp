@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctRandomFixedSizeMatrix.h>
 
 
-const double nmrGaussJordanInverseTest::ToleranceScale = 20;
+const double nmrGaussJordanInverseTest::ToleranceScale = 50;
 const double nmrGaussJordanInverseTest::RandomElementRange = 10;
 
 template <class _elementType, vct::size_type _size, bool _rowMajor1, bool _rowMajor2>
