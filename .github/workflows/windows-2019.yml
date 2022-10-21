@@ -16,6 +16,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+
     - name: Download cisstNetlib
       run: |
         cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
@@ -37,14 +40,16 @@ jobs:
 
     - name: Build
       working-directory: ${{github.workspace}}/build
-      run: cmake --build . --config Release
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
       run: |
-        dir
-        ./bin/cisstCommonTests -r
-        ./bin/cisstVectorTests -r
-        ./bin/cisstNumericalTests -r
-        ./bin/cisstOSAbstractionTests -r
-        ./bin/cisstParameterTypesTests -r
+        ./cisstvars.bat Release
+        cmake --build . --config Release
+
+#    - name: Test
+#      working-directory: ${{github.workspace}}/build
+#      run: |
+#        dir
+#        ./bin/cisstCommonTests -r
+#        ./bin/cisstVectorTests -r
+#        ./bin/cisstNumericalTests -r
+#        ./bin/cisstOSAbstractionTests -r
+#        ./bin/cisstParameterTypesTests -r
