@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -113,6 +113,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsUShort)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsChar)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsUChar)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsBool)
+#if (CISST_OS == CISST_WINDOWS)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsUInt64);
+#endif
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdString)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdStringVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdDoubleVecProxy)
