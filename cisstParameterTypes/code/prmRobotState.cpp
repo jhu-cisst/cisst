@@ -5,7 +5,7 @@
 Author(s):	Marcin Balicki
 Created on:   2008-09-14
 
-(C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+(C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights
 Reserved.
 
 --- begin cisst license - do not edit ---
@@ -38,12 +38,15 @@ prmRobotState::prmRobotState(size_type size)
 void prmRobotState::ToStream(std::ostream & outputStream) const
 {
 
-    outputStream << "JointPosition: "               << this->JointPositionMember
+    outputStream << "JointName: "                   << this->JointNameMember
+                 << "\nJointPosition: "             << this->JointPositionMember
                  << "\nJointVelocity : "		    << this->JointVelocityMember
                  << "\nJointPositionGoal: "		    << this->JointPositionGoalMember
                  << "\nJointVelocityGoal: "         << this->JointVelocityGoalMember
                  << "\nJointPositionError: "	    << this->JointPositionErrorMember
                  << "\nJointVelocityError: "	    << this->JointVelocityErrorMember
+                 << "\nReferenceFrame: "            << this->ReferenceFrameMember
+                 << "\nMovingFrame: "               << this->MovingFrameMember
                  << "\nCartesianPosition: "         << this->CartesianPositionMember
                  << "\nCartesianVelocity : "		<< this->CartesianVelocityMember
                  << "\nCartesianPositionGoal: "		<< this->CartesianPositionGoalMember
@@ -53,8 +56,9 @@ void prmRobotState::ToStream(std::ostream & outputStream) const
                  << "\nEndEffectorFrame: "          << this->EndEffectorFrameMember;
 }
 
-void prmRobotState::SetSize(size_type size){
-
+void prmRobotState::SetSize(size_type size)
+{
+    JointNameMember.SetSize(size);
     JointPositionMember.SetSize(size);
     JointVelocityMember.SetSize(size);
     JointPositionGoalMember.SetSize(size);
@@ -76,6 +80,7 @@ void prmRobotState::SerializeRaw(std::ostream & outputStream) const
 {
     BaseType::SerializeRaw(outputStream);
 
+    this->JointNameMember.SerializeRaw(outputStream);
     this->JointPositionMember.SerializeRaw(outputStream);
     this->JointVelocityMember.SerializeRaw(outputStream);
     this->JointPositionGoalMember.SerializeRaw(outputStream);
@@ -96,6 +101,7 @@ void prmRobotState::DeSerializeRaw(std::istream & inputStream)
 {
     BaseType::DeSerializeRaw(inputStream);
 
+    this->JointNameMember.DeSerializeRaw(inputStream);
     this->JointPositionMember.DeSerializeRaw(inputStream);
     this->JointVelocityMember.DeSerializeRaw(inputStream);
     this->JointPositionGoalMember.DeSerializeRaw(inputStream);
@@ -112,6 +118,58 @@ void prmRobotState::DeSerializeRaw(std::istream & inputStream)
 
 }
 
+bool prmRobotStateToStateJointMeasured(const prmRobotState & input, prmStateJoint & output)
+{
+    output.Valid() = input.Valid();
+    output.Timestamp() = input.Timestamp();
+    output.Name().ForceAssign(input.JointName());
+    output.Position().ForceAssign(input.JointPosition());
+    output.Velocity().ForceAssign(input.JointVelocity());
+    return true;
+}
 
+bool prmRobotStateToStateJointSetpoint(const prmRobotState & input, prmStateJoint & output)
+{
+    output.Valid() = input.Valid();
+    output.Timestamp() = input.Timestamp();
+    output.Name().ForceAssign(input.JointName());
+    output.Position().ForceAssign(input.JointPositionGoal());
+    output.Velocity().ForceAssign(input.JointVelocityGoal());
+    return true;
+}
 
-//  $Log 
+bool prmRobotStateToCartesianPositionRxRyMeasured(const prmRobotState & input, prmPositionCartesianGet & output)
+{
+    if (input.CartesianPosition().size() != 5) {
+        return false;
+    }
+    output.Valid() = true;
+    output.Timestamp() = input.Timestamp();
+    output.ReferenceFrame() = input.ReferenceFrame();
+    output.MovingFrame() = input.MovingFrame();
+    output.Position().Translation().Assign(input.CartesianPosition().Ref(3));
+    vctMatRot3 rotation =
+        vctMatRot3(vctAxAnRot3(vct3(0.0, 1.0, 0.0), input.CartesianPosition().at(4)))
+        * vctMatRot3(vctAxAnRot3(vct3(1.0, 0.0, 0.0), input.CartesianPosition().at(3)));
+    output.Position().Rotation().From(rotation);
+    return true;
+}
+
+bool prmRobotStateToCartesianPositionRxRySetpoint(const prmRobotState & input, prmPositionCartesianGet & output)
+{
+    if (input.CartesianPositionGoal().size() != 5) {
+        return false;
+    }
+    output.Valid() = input.Valid();
+    output.Timestamp() = input.Timestamp();
+    output.ReferenceFrame() = input.ReferenceFrame();
+    output.MovingFrame() = input.MovingFrame();
+    output.Position().Translation().Assign(input.CartesianPositionGoal().Ref(3));
+    vctMatRot3 rotation =
+        vctMatRot3(vctAxAnRot3(vct3(0.0, 1.0, 0.0), input.CartesianPositionGoal().at(4)))
+        * vctMatRot3(vctAxAnRot3(vct3(1.0, 0.0, 0.0), input.CartesianPositionGoal().at(3)));
+    output.Position().Rotation().From(rotation);
+    return true;
+}
+
+//  $Log
