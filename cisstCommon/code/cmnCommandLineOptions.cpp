@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
-  (C) Copyright 2012-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -189,11 +189,39 @@ bool cmnCommandLineOptions::Parse(int argc, char * argv[], std::string & errorMe
 }
 
 
+bool cmnCommandLineOptions::Parse(const std::vector<std::string> & arguments, std::string & errorMessage)
+{
+    int index;
+    typedef const char * constCharPtr;
+    int argc = arguments.size();
+    constCharPtr * argv_const = new constCharPtr[argc];
+    for (index = 0; index < argc;  index++) {
+        argv_const[index] = arguments[index].c_str();
+    }
+    bool result = Parse(argc, argv_const, errorMessage);
+    delete[] argv_const;
+    return result;
+}
+
+
 bool cmnCommandLineOptions::Parse(int argc, char * argv[],
                                   std::ostream & outputStream)
 {
     std::string errorMessage;
     if (!Parse(argc, argv, errorMessage)) {
+        outputStream << "Error: " << errorMessage << std::endl;
+        PrintUsage(outputStream);
+        return false;
+    }
+    return true;
+}
+
+
+bool cmnCommandLineOptions::Parse(const std::vector<std::string> & arguments,
+                                  std::ostream & outputStream)
+{
+    std::string errorMessage;
+    if (!Parse(arguments, errorMessage)) {
         outputStream << "Error: " << errorMessage << std::endl;
         PrintUsage(outputStream);
         return false;

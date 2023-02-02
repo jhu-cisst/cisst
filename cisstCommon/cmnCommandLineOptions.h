@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-08-27
 
-  (C) Copyright 2012-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -283,10 +283,12 @@ class CISST_EXPORT cmnCommandLineOptions: public cmnGenericObject
       Internally it created an array of const char * pointing to the
       existing arrays and then call the other Parse method. */
     bool Parse(int argc, char * argv[], std::string & errorMessage);
+    bool Parse(const std::vector<std::string> & arguments, std::string & errorMessage);
 
     /*! Parse and display error messages as well as usage if an error
       is found. */
     bool Parse(int argc, char * argv[], std::ostream & outputStream);
+    bool Parse(const std::vector<std::string> & arguments, std::ostream & outputStream);
 
     /*! Print list of options with description to any C++ ostream.
       For example, `options.PrintUsage(std::cout)`. */
