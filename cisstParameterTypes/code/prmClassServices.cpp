@@ -114,6 +114,9 @@ CMN_IMPLEMENT_SERVICES(prmInputData);
 #include <cisstParameterTypes/prmOperatingState.h>
 CMN_IMPLEMENT_SERVICES(prmOperatingState);
 
+#include <cisstParameterTypes/prmInverseKinematicsQuery.h>
+CMN_IMPLEMENT_SERVICES(prmInverseKinematicsQuery);
+
 #if CISST_HAS_JSON
 CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(prmBlocking, int);
 #endif

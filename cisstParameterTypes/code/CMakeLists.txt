@@ -29,6 +29,7 @@ cisst_data_generator (cisstParameterTypes
                       ../prmInputData.cdg
                       ../prmKeyValue.cdg
                       ../prmOperatingState.cdg
+                      ../prmInverseKinematicsQuery.cdg
                       )
 
 # to compile cisst generated code, need to find header file
