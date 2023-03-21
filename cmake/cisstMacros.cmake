@@ -1040,6 +1040,18 @@ function (cisst_is_catkin_build RESULT)
 endfunction (cisst_is_catkin_build)
 
 
+#
+# Test if this build using ROS2/colcon
+#
+function (cisst_is_colcon_build RESULT)
+  set (${RESULT} FALSE PARENT_SCOPE)
+  if ($ENV{ROS_VERSION} STREQUAL "2")
+    message (STATUS "Assuming cisst is built using ROS2/colcon since ROS_VERSION is 2")
+    set (${RESULT} TRUE PARENT_SCOPE)
+  endif ()
+endfunction (cisst_is_colcon_build)
+
+
 # macro to set default cpack settings
 macro (cisst_cpack_settings ...)
   # debug
@@ -1089,6 +1101,11 @@ macro (cisst_set_output_path)
   if (_is_catkin_build)
     set (LIBRARY_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/lib")
     set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
+  endif ()
+  cisst_is_colcon_build (_is_colcon_build)
+  if (_is_colcon_build)
+    set (LIBRARY_OUTPUT_PATH "${CISST_BINARY_DIR}/lib")
+    set (EXECUTABLE_OUTPUT_PATH "${CISST_BINARY_DIR}/bin")
   endif ()
 endmacro (cisst_set_output_path)
 
