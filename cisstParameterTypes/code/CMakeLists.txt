@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2023 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -22,6 +22,7 @@ cisst_data_generator (cisstParameterTypes
                       ../prmVelocityCartesianGet.cdg
                       ../prmPositionJointGet.cdg
                       ../prmPositionJointSet.cdg
+                      ../prmForceTorqueJointSet.cdg
                       ../prmCartesianImpedanceGains.cdg
                       ../prmIMUSensors.cdg
                       ../prmStateJoint.cdg
@@ -44,7 +45,6 @@ set (SOURCE_FILES
 
      prmVelocityJointGet.cpp
      prmVelocityJointSet.cpp
-     prmForceTorqueJointSet.cpp
 
      prmVelocityCartesianSet.cpp
      prmForceCartesianGet.cpp
@@ -75,7 +75,6 @@ set (HEADER_FILES
 
      prmVelocityJointGet.h
      prmVelocityJointSet.h
-     prmForceTorqueJointSet.h
 
      prmVelocityCartesianSet.h
      prmForceCartesianGet.h
