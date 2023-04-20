@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -1045,9 +1045,11 @@ endfunction (cisst_is_catkin_build)
 #
 function (cisst_is_colcon_build RESULT)
   set (${RESULT} FALSE PARENT_SCOPE)
-  if (DEFINED ENV{ROS_VERSION} AND $ENV{ROS_VERSION} STREQUAL "2")
-    message (STATUS "Assuming cisst is built using ROS2/colcon since ROS_VERSION is 2")
-    set (${RESULT} TRUE PARENT_SCOPE)
+  if (DEFINED ENV{ROS_VERSION})
+    if ($ENV{ROS_VERSION} STREQUAL "2")
+      message (STATUS "Assuming cisst is built using ROS2/colcon since ROS_VERSION is 2")
+      set (${RESULT} TRUE PARENT_SCOPE)
+    endif ()
   endif ()
 endfunction (cisst_is_colcon_build)
 
