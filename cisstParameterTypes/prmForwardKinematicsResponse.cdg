@@ -10,7 +10,7 @@ inline-header {
 }
 
 class {
-    name prmInverseKinematicsQuery; // required
+    name prmForwardKinematicsResponse; // required
 
     attribute CISST_EXPORT;
 
@@ -20,25 +20,29 @@ class {
     }
 
     member {
-        name measured_jp;
-        type vctDynamicVector<double>;
-        description Initial joint position, usually the current robot position;
+        name cp;
+        type vctFrm4x4;
+        description Cartesian pose;
     }
 
     member {
-        name goal_cp;
-        type vctFrm4x4;
-        description Cartesian position goal;
+        name result;
+        type bool;
+        default false;
+    }
+
+    member {
+        name message;
+        type std::string;
+        description Error message;
     }
 
     inline-header {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     }
-
 }
 
-
 inline-header {
-CMN_DECLARE_SERVICES_INSTANTIATION(prmInverseKinematicsQuery);
+CMN_DECLARE_SERVICES_INSTANTIATION(prmForwardKinematicsResponse);
 }
