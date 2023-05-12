@@ -57,6 +57,14 @@ public:
     /*! Type used to define the baud rate.
       \sa SetBaudRate */
 #if (CISST_OS == CISST_WINDOWS)
+    // Windows defines standard baud rates in WinBase.h, which does not include
+    // CBR_230400 or CBR_460800.
+    #ifndef CBR_230400
+    #define CBR_230400 230400
+    #endif
+    #ifndef CBR_460800
+    #define CBR_460800 460800
+    #endif
     enum BaudRateType {BaudRate300 = CBR_300,
                        BaudRate1200 = CBR_1200,
                        BaudRate9600 = CBR_9600,

@@ -170,9 +170,9 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(prmRobotState);
 
 // declare some conversion functions
-bool prmRobotStateToStateJointMeasured(const prmRobotState & input, prmStateJoint & output);
-bool prmRobotStateToStateJointSetpoint(const prmRobotState & input, prmStateJoint & output);
-bool prmRobotStateToCartesianPositionRxRyMeasured(const prmRobotState & input, prmPositionCartesianGet & output);
-bool prmRobotStateToCartesianPositionRxRySetpoint(const prmRobotState & input, prmPositionCartesianGet & output);
+bool CISST_EXPORT prmRobotStateToStateJointMeasured(const prmRobotState & input, prmStateJoint & output);
+bool CISST_EXPORT prmRobotStateToStateJointSetpoint(const prmRobotState & input, prmStateJoint & output);
+bool CISST_EXPORT prmRobotStateToCartesianPositionRxRyMeasured(const prmRobotState & input, prmPositionCartesianGet & output);
+bool CISST_EXPORT prmRobotStateToCartesianPositionRxRySetpoint(const prmRobotState & input, prmPositionCartesianGet & output);
 
 #endif
