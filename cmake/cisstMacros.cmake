@@ -402,7 +402,7 @@ macro (cisst_target_link_package_libraries target ...)
       if (CISST_HAS_QT5)
         cisst_cmake_debug ("cisst_target_link_package_libraries: Qt5 needed for ${target}")
         set (_qt5_libraries Core Widgets Gui OpenGL XmlPatterns)
-        if (WIN32 AND ${CISST_XML_LIB} STREQUAL "QtXML")
+        if (WIN32 AND CISST_XML_LIB STREQUAL "QtXML")
           # 5/12/23: added Xml on Windows, if CISST_XML_LIB is QtXml
           #          (not sure if this is the best place).
           set (_qt5_libraries ${_qt5_libraries} Xml)
