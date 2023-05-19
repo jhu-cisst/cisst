@@ -57,7 +57,7 @@ class {
     member {
         name Mask;
         type vctBool2;
-        default false;
+        default true;
         description Two tuple, masks position/orientation parts of the Cartesian motion;
     }
 
@@ -72,7 +72,7 @@ class {
         name ReferenceFrame;
         type std::string;
         default std::string();
-        description Name reference frame;
+        description Name of reference frame;
     }
 
     // from original prmMotionBase
