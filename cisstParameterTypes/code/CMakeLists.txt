@@ -23,7 +23,7 @@ cisst_data_generator (cisstParameterTypes
                       ../prmPositionJointGet.cdg
                       ../prmPositionJointSet.cdg
                       ../prmForceTorqueJointSet.cdg
-                      ../prmCartesianImpedanceGains.cdg
+                      ../prmCartesianImpedance.cdg
                       ../prmIMUSensors.cdg
                       ../prmStateJoint.cdg
                       ../prmConfigurationJoint.cdg

@@ -1,0 +1,113 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+
+// Always include last
+#include <cisstParameterTypes/prmExport.h>
+}
+
+class {
+    name prmCartesianImpedanceHalfPlaneGains;
+    attribute CISST_EXPORT;
+    member {
+        name P;
+        type vct3;
+        default 0.0;
+        visibility public;
+        description P gain, aka stiffness, applied to difference in position;
+    }
+    member {
+        name D;
+        type vct3;
+        default 0.0;
+        visibility public;
+        description D gain, aka dumping, applied velocity;
+    }
+    member {
+        name Bias;
+        type vct3;
+        default 0.0;
+        visibility public;
+        description Constant force added in this half-plane;
+    }
+    member {
+        name Deadband;
+        type vct3;
+        default 0.0;
+        visibility public;
+        description Deadband on position error, subtracted from difference on position;
+    }
+}
+
+class {
+    name prmCartesianImpedance; // required
+
+    attribute CISST_EXPORT;
+
+    base-class {
+        type mtsGenericObject;
+        is-data true;
+    }
+
+    member {
+        name ForceOrientation;
+        type vctMatRot3;
+        visibility public;
+        description Force orientation matrix;
+    }
+
+    member {
+        name ForcePosition;
+        type vct3;
+        visibility public;
+        description Force position vector;
+    }
+
+    member {
+        name TorqueOrientation;
+        type vctMatRot3;
+        visibility public;
+        description Torque orientation matrix;
+    }
+
+    member {
+        name PositionPositive;
+        type prmCartesianImpedanceHalfPlaneGains;
+        visibility public;
+        description Gains used to compute effort for position in positive half-plane;
+    }
+
+    member {
+        name PositionNegative;
+        type prmCartesianImpedanceHalfPlaneGains;
+        visibility public;
+        description Gains used to compute effort for position in negative half-plane;
+    }
+
+    member {
+        name OrientationPositive;
+        type prmCartesianImpedanceHalfPlaneGains;
+        visibility public;
+        description Gains used to compute effort for orientation in positive half-plane;
+    }
+
+    member {
+        name OrientationNegative;
+        type prmCartesianImpedanceHalfPlaneGains;
+        visibility public;
+        description Gains used to compute effort for orientation in negative half-plane;
+    }
+
+    inline-header {
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(prmCartesianImpedance);
+}
