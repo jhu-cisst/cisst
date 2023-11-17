@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2003-07-31
 #
-# (C) Copyright 2003-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2023 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -15,10 +15,10 @@
 # --- end cisst license ---
 
 # Version
-set (CISST_VERSION_MAJOR "@CISST_VERSION_MAJOR@")
-set (CISST_VERSION_MINOR "@CISST_VERSION_MINOR@")
-set (CISST_VERSION_PATCH "@CISST_VERSION_PATCH@")
-set (CISST_VERSION "@CISST_VERSION@")
+set (cisst_VERSION_MAJOR "@cisst_VERSION_MAJOR@")
+set (cisst_VERSION_MINOR "@cisst_VERSION_MINOR@")
+set (cisst_VERSION_PATCH "@cisst_VERSION_PATCH@")
+set (cisst_VERSION "@cisst_VERSION@")
 
 # Paths
 set (CISST_BINARY_DIR "@CISST_BINARY_DIR_FOR_CONFIG@")

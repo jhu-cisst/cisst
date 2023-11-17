@@ -317,8 +317,8 @@ macro (cisst_add_library ...)
 
   # set version number
   set_target_properties (${LIBRARY} PROPERTIES
-                         VERSION ${CISST_VERSION}
-                         SOVERSION ${CISST_VERSION})
+                         VERSION ${cisst_VERSION}
+                         SOVERSION ${cisst_VERSION})
 
   # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
   if (CMAKE_VERSION VERSION_GREATER "3.0.1")

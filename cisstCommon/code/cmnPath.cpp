@@ -113,7 +113,7 @@ bool cmnPath::AddRelativeToCisstRoot(const std::string & relativePath, bool head
 
 bool cmnPath::AddRelativeToCisstShare(const std::string & relativePath, bool head) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
-                               << relativePath << "\" relative to CISST_ROOT/share/cisst-" << CISST_VERSION_MAJOR << "." << CISST_VERSION_MINOR << "/ at the "
+                               << relativePath << "\" relative to CISST_ROOT/share/cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR << "/ at the "
                                << (head ? "beginning" : "end") << std::endl;
     std::string path;
     if (cmnPath::GetCisstShare(path)) {
@@ -256,7 +256,7 @@ bool cmnPath::GetCisstShare(std::string & result)
 {
     if (cmnPath::GetCisstRoot(result)) {
         std::stringstream tmp;
-        tmp << result << "/share/cisst-" << CISST_VERSION_MAJOR << "." << CISST_VERSION_MINOR;
+        tmp << result << "/share/cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR;
         result = tmp.str();
         return true;
     }

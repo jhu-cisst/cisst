@@ -16,7 +16,7 @@
 cmake_minimum_required (VERSION 3.0)
 
 # cisst (Computer Integrated Surgical Systems and Technology)
-project (cisst)
+project (cisst VERSION 1.2.0)
 
 # cisst compiler settings
 include (cmake/cisstSettings.cmake)
@@ -68,10 +68,7 @@ else (CISST_BUILD_SHARED_LIBS)
 endif (CISST_BUILD_SHARED_LIBS)
 
 # Set the version number
-set (CISST_VERSION_MAJOR "1")
-set (CISST_VERSION_MINOR "1")
-set (CISST_VERSION_PATCH "0")
-set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
+set (cisst_VERSION "${cisst_VERSION_MAJOR}.${cisst_VERSION_MINOR}.${cisst_VERSION_PATCH}")
 
 # To compile examples within this project
 set (CURRENT_PROJECT_IS_CISST ON)
@@ -79,7 +76,7 @@ set (CURRENT_PROJECT_IS_CISST ON)
 # The upper case variables have been used in the past and need to be preserved
 set (CISST_BINARY_DIR "${cisst_BINARY_DIR}")
 set (CISST_SOURCE_DIR "${cisst_SOURCE_DIR}")
-set (CISST_SHARE_INSTALL_SUFFIX "share/cisst-${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}")
+set (CISST_SHARE_INSTALL_SUFFIX "share/cisst-${cisst_VERSION_MAJOR}.${cisst_VERSION_MINOR}")
 set (CISST_SHARE_DIR  "${CISST_BINARY_DIR}/${CISST_SHARE_INSTALL_SUFFIX}")
 set (CISST_CMAKE_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake")
 set (CISST_CMAKE_MODULES_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake/Modules")
@@ -530,7 +527,7 @@ configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
 
 # Version file
 cisst_add_config_version ("${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config-version.cmake"
-                          VERSION ${CISST_VERSION}
+                          VERSION ${cisst_VERSION}
                           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
                           COMPONENT cisstCommon)
 
@@ -605,10 +602,10 @@ if (CISST_cisstCommonXML) # we can only test CISST_XML_LIB if cisstCommonXML is 
   endif (${CISST_XML_LIB} STREQUAL "LibXml2")
 endif (CISST_cisstCommonXML)
 set (CPACK_PACKAGE_VENDOR "JHU")
-set (CPACK_PACKAGE_VERSION "${CISST_VERSION}")
-set (CPACK_PACKAGE_VERSION_MAJOR ${CISST_VERSION_MAJOR})
-set (CPACK_PACKAGE_VERSION_MINOR ${CISST_VERSION_MINOR})
-set (CPACK_PACKAGE_VERSION_PATCH ${CISST_VERSION_PATCH})
+set (CPACK_PACKAGE_VERSION "${cisst_VERSION}")
+set (CPACK_PACKAGE_VERSION_MAJOR ${cisst_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${cisst_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${cisst_VERSION_PATCH})
 set (CPACK_RESOURCE_FILE_LICENSE "${cisst_SOURCE_DIR}/license.txt")
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "cisst")
 set (CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)
