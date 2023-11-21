@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2023 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -18,16 +18,22 @@ cisst_data_generator (cisstParameterTypes
                       ../prmActuatorJointCoupling.cdg
                       ../prmPositionCartesianGet.cdg
                       ../prmPositionCartesianArrayGet.cdg
+                      ../prmPositionCartesianSet.cdg
                       ../prmVelocityCartesianGet.cdg
                       ../prmPositionJointGet.cdg
                       ../prmPositionJointSet.cdg
-                      ../prmCartesianImpedanceGains.cdg
+                      ../prmForceTorqueJointSet.cdg
+                      ../prmCartesianImpedance.cdg
                       ../prmIMUSensors.cdg
                       ../prmStateJoint.cdg
                       ../prmConfigurationJoint.cdg
                       ../prmInputData.cdg
                       ../prmKeyValue.cdg
                       ../prmOperatingState.cdg
+                      ../prmForwardKinematicsRequest.cdg
+                      ../prmForwardKinematicsResponse.cdg
+                      ../prmInverseKinematicsRequest.cdg
+                      ../prmInverseKinematicsResponse.cdg
                       )
 
 # to compile cisst generated code, need to find header file
@@ -42,9 +48,7 @@ set (SOURCE_FILES
 
      prmVelocityJointGet.cpp
      prmVelocityJointSet.cpp
-     prmForceTorqueJointSet.cpp
 
-     prmPositionCartesianSet.cpp
      prmVelocityCartesianSet.cpp
      prmForceCartesianGet.cpp
      prmForceCartesianSet.cpp
@@ -74,9 +78,7 @@ set (HEADER_FILES
 
      prmVelocityJointGet.h
      prmVelocityJointSet.h
-     prmForceTorqueJointSet.h
 
-     prmPositionCartesianSet.h
      prmVelocityCartesianSet.h
      prmForceCartesianGet.h
      prmForceCartesianSet.h

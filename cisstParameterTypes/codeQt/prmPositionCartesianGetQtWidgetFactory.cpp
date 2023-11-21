@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2020-07-10
 
-  (C) Copyright 2020-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2020-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,9 +32,7 @@ prmPositionCartesianGetQtWidgetFactory::prmPositionCartesianGetQtWidgetFactory(c
 {
     mPrismaticFactor = cmn_mm;
     mRevoluteFactor = cmnPI_180;
-
-    mtsInterfaceRequired * required = EnableDynamicComponentManagement();
-
+    EnableDynamicComponentManagement();
     setupUi();
     startTimer(50); // ms
 }

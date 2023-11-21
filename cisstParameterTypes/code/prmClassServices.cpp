@@ -93,8 +93,8 @@ CMN_IMPLEMENT_SERVICES(prmVelocityJointGet);
 #include <cisstParameterTypes/prmVelocityJointSet.h>
 CMN_IMPLEMENT_SERVICES(prmVelocityJointSet);
 
-#include <cisstParameterTypes/prmCartesianImpedanceGains.h>
-CMN_IMPLEMENT_SERVICES(prmCartesianImpedanceGains);
+#include <cisstParameterTypes/prmCartesianImpedance.h>
+CMN_IMPLEMENT_SERVICES(prmCartesianImpedance);
 
 #include <cisstParameterTypes/prmJointType.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeProxy);
@@ -113,6 +113,18 @@ CMN_IMPLEMENT_SERVICES(prmInputData);
 
 #include <cisstParameterTypes/prmOperatingState.h>
 CMN_IMPLEMENT_SERVICES(prmOperatingState);
+
+#include <cisstParameterTypes/prmForwardKinematicsRequest.h>
+CMN_IMPLEMENT_SERVICES(prmForwardKinematicsRequest);
+
+#include <cisstParameterTypes/prmForwardKinematicsResponse.h>
+CMN_IMPLEMENT_SERVICES(prmForwardKinematicsResponse);
+
+#include <cisstParameterTypes/prmInverseKinematicsRequest.h>
+CMN_IMPLEMENT_SERVICES(prmInverseKinematicsRequest);
+
+#include <cisstParameterTypes/prmInverseKinematicsResponse.h>
+CMN_IMPLEMENT_SERVICES(prmInverseKinematicsResponse);
 
 #if CISST_HAS_JSON
 CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(prmBlocking, int);

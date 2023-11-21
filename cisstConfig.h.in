@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-02-18
 
-  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,10 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 #define _cisstConfig_h
 
 // cisst version
-#define CISST_VERSION_MAJOR ${CISST_VERSION_MAJOR}
-#define CISST_VERSION_MINOR ${CISST_VERSION_MINOR}
-#define CISST_VERSION_PATCH ${CISST_VERSION_PATCH}
-#define CISST_VERSION "${CISST_VERSION}"
+#define cisst_VERSION_MAJOR ${cisst_VERSION_MAJOR}
+#define cisst_VERSION_MINOR ${cisst_VERSION_MINOR}
+#define cisst_VERSION_PATCH ${cisst_VERSION_PATCH}
+#define cisst_VERSION "${cisst_VERSION}"
 
 // Deprecated paths/macros
 #define CISST_SOURCE_ROOT CISST_SOURCE_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake

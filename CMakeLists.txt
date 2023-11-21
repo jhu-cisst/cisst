@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -13,13 +13,13 @@
 
 
 # Backward compatibility
-cmake_minimum_required (VERSION 2.6.2)
+cmake_minimum_required (VERSION 3.0)
 
-# cisst (Computer Integrated Surgical Systems and Technology): www.cisst.org/cisst
-project (cisst)
+# cisst (Computer Integrated Surgical Systems and Technology)
+project (cisst VERSION 1.2.0)
 
 # cisst compiler settings
-include (cisstSettings.cmake)
+include (cmake/cisstSettings.cmake)
 
 # To organize targets in folders
 option (CISST_USE_FOLDERS "Use folders to organize cisst in IDE (Visual Studio, ...)" OFF)
@@ -68,10 +68,7 @@ else (CISST_BUILD_SHARED_LIBS)
 endif (CISST_BUILD_SHARED_LIBS)
 
 # Set the version number
-set (CISST_VERSION_MAJOR "1")
-set (CISST_VERSION_MINOR "1")
-set (CISST_VERSION_PATCH "0")
-set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
+set (cisst_VERSION "${cisst_VERSION_MAJOR}.${cisst_VERSION_MINOR}.${cisst_VERSION_PATCH}")
 
 # To compile examples within this project
 set (CURRENT_PROJECT_IS_CISST ON)
@@ -79,7 +76,7 @@ set (CURRENT_PROJECT_IS_CISST ON)
 # The upper case variables have been used in the past and need to be preserved
 set (CISST_BINARY_DIR "${cisst_BINARY_DIR}")
 set (CISST_SOURCE_DIR "${cisst_SOURCE_DIR}")
-set (CISST_SHARE_INSTALL_SUFFIX "share/cisst-${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}")
+set (CISST_SHARE_INSTALL_SUFFIX "share/cisst-${cisst_VERSION_MAJOR}.${cisst_VERSION_MINOR}")
 set (CISST_SHARE_DIR  "${CISST_BINARY_DIR}/${CISST_SHARE_INSTALL_SUFFIX}")
 set (CISST_CMAKE_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake")
 set (CISST_CMAKE_MODULES_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake/Modules")
@@ -530,7 +527,7 @@ configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
 
 # Version file
 cisst_add_config_version ("${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config-version.cmake"
-                          VERSION ${CISST_VERSION}
+                          VERSION ${cisst_VERSION}
                           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
                           COMPONENT cisstCommon)
 
@@ -547,25 +544,19 @@ install (FILES "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
          COMPONENT cisstCommon)
 
 # CMake use cisst file
-configure_file ("${CISST_CMAKE_SOURCE_DIR}/Usecisst.cmake"
-                "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
-                COPYONLY)
-configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/cisstSettings.cmake"
-                "${CISST_CMAKE_BINARY_DIR}/cisstSettings.cmake"
-                COPYONLY)
-configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstMacros.cmake"
-                "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
-                COPYONLY)
-configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisstConfigVersion.cmake.in"
-                "${CISST_CMAKE_BINARY_DIR}/cisstConfigVersion.cmake.in"
-                COPYONLY)
-
-install (FILES "${CISST_CMAKE_BINARY_DIR}/Usecisst.cmake"
-               "${CISST_CMAKE_BINARY_DIR}/cisstSettings.cmake"
-               "${CISST_CMAKE_BINARY_DIR}/cisstMacros.cmake"
-               "${CISST_CMAKE_BINARY_DIR}/cisstConfigVersion.cmake.in"
-         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-         COMPONENT cisstCommon)
+set (CISST_CMAKE_FILES_TO_COPY
+     Usecisst.cmake cisstSettings.cmake cisstMacros.cmake cisstConfigVersion.cmake.in
+     sawRevision.h.in sawConfig.cmake.in sawConfigVersion.cmake.in)
+foreach (cmake_file_to_copy ${CISST_CMAKE_FILES_TO_COPY})
+  # copy to build for users not installing
+  configure_file ("${CISST_CMAKE_SOURCE_DIR}/${cmake_file_to_copy}"
+                  "${CISST_CMAKE_BINARY_DIR}/${cmake_file_to_copy}"
+                  COPYONLY)
+  # and install
+  install (FILES "${CISST_CMAKE_BINARY_DIR}/${cmake_file_to_copy}"
+           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+           COMPONENT cisstCommon)
+endforeach ()
 
 # Configuration file
 set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
@@ -600,6 +591,7 @@ endif (NOT UNIX)
 if (UNIX)
   set (CPACK_GENERATOR "STGZ;TGZ;DEB")
   set (CPACK_DEBIAN_PACKAGE_MAINTAINER "anton.deguet@jhu.edu")
+  set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 endif ()
 
 # For now, enable all default libraries (even if not compiled)
@@ -610,10 +602,10 @@ if (CISST_cisstCommonXML) # we can only test CISST_XML_LIB if cisstCommonXML is 
   endif (${CISST_XML_LIB} STREQUAL "LibXml2")
 endif (CISST_cisstCommonXML)
 set (CPACK_PACKAGE_VENDOR "JHU")
-set (CPACK_PACKAGE_VERSION "${CISST_VERSION}")
-set (CPACK_PACKAGE_VERSION_MAJOR ${CISST_VERSION_MAJOR})
-set (CPACK_PACKAGE_VERSION_MINOR ${CISST_VERSION_MINOR})
-set (CPACK_PACKAGE_VERSION_PATCH ${CISST_VERSION_PATCH})
+set (CPACK_PACKAGE_VERSION "${cisst_VERSION}")
+set (CPACK_PACKAGE_VERSION_MAJOR ${cisst_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${cisst_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${cisst_VERSION_PATCH})
 set (CPACK_RESOURCE_FILE_LICENSE "${cisst_SOURCE_DIR}/license.txt")
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "cisst")
 set (CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)

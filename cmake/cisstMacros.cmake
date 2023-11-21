@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -317,8 +317,8 @@ macro (cisst_add_library ...)
 
   # set version number
   set_target_properties (${LIBRARY} PROPERTIES
-                         VERSION ${CISST_VERSION}
-                         SOVERSION ${CISST_VERSION})
+                         VERSION ${cisst_VERSION}
+                         SOVERSION ${cisst_VERSION})
 
   # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
   if (CMAKE_VERSION VERSION_GREATER "3.0.1")
@@ -380,10 +380,10 @@ macro (cisst_add_library ...)
   # Install all header files
   install (FILES ${HEADERS}
            DESTINATION include/${LIBRARY_DIR}
-           COMPONENT ${LIBRARY})
+           COMPONENT ${LIBRARY}-dev)
   install (FILES ${LIBRARY_MAIN_HEADER}
            DESTINATION include
-           COMPONENT ${LIBRARY})
+           COMPONENT ${LIBRARY}-dev)
 
   # if a folder has been provided
   if (FOLDER)
@@ -391,8 +391,6 @@ macro (cisst_add_library ...)
   endif (FOLDER)
 
 endmacro (cisst_add_library)
-
-
 
 macro (cisst_target_link_package_libraries target ...)
   # create list of all but target
@@ -403,7 +401,15 @@ macro (cisst_target_link_package_libraries target ...)
     if ("${lib}" STREQUAL "cisstQt")
       if (CISST_HAS_QT5)
         cisst_cmake_debug ("cisst_target_link_package_libraries: Qt5 needed for ${target}")
-        qt5_use_modules (${target} Core Widgets Gui OpenGL Xml XmlPatterns)
+        set (_qt5_libraries Core Widgets Gui OpenGL XmlPatterns)
+        if (WIN32 AND CISST_XML_LIB STREQUAL "QtXML")
+          # 5/12/23: added Xml on Windows, if CISST_XML_LIB is QtXml
+          #          (not sure if this is the best place).
+          set (_qt5_libraries ${_qt5_libraries} Xml)
+        endif ()
+        foreach (_qt5_lib ${_qt5_libraries})
+          target_link_libraries (${target} Qt5::${_qt5_lib})
+        endforeach ()
       endif (CISST_HAS_QT5)
     endif ("${lib}" STREQUAL "cisstQt")
 
@@ -642,10 +648,11 @@ function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
   # make sure cisstComponentGenerator is being build and find it
   # try to figure out if this is build along with cisst
   if (TARGET cisstCommon)
-    # make sure the target existsOUTPUT_NAME
+    # make sure the target exists
     if (TARGET cisstComponentGenerator)
       # if the target exists, use its destination
-      get_target_property (CISST_CG_EXECUTABLE cisstComponentGenerator LOCATION)
+      #get_target_property (CISST_CG_EXECUTABLE cisstComponentGenerator LOCATION)
+      set(CISST_CG_EXECUTABLE $<TARGET_FILE:cisstComponentGenerator>)
     else (TARGET cisstComponentGenerator)
       message (SEND_ERROR "To use the cisst_component_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstComponentGenerator")
     endif (TARGET cisstComponentGenerator)
@@ -708,7 +715,8 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
       if (TARGET cisstDataGenerator)
         # if the target exists, use its destination
         cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
-        get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
+        #get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
+        set(CISST_DG_EXECUTABLE $<TARGET_FILE:cisstDataGenerator>)
       endif (TARGET cisstDataGenerator)
     else (TARGET cisstCommon)
       cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
@@ -1033,3 +1041,142 @@ function (cisst_is_catkin_build RESULT)
     endif ()
   endif ()
 endfunction (cisst_is_catkin_build)
+
+
+#
+# Test if this build using ROS2/colcon
+#
+function (cisst_is_colcon_build RESULT)
+  set (${RESULT} FALSE PARENT_SCOPE)
+  if (DEFINED ENV{ROS_VERSION})
+    if ($ENV{ROS_VERSION} STREQUAL "2")
+      message (STATUS "Assuming cisst is built using ROS2/colcon since ROS_VERSION is 2")
+      set (${RESULT} TRUE PARENT_SCOPE)
+    endif ()
+  endif ()
+endfunction (cisst_is_colcon_build)
+
+
+# macro to set default cpack settings
+macro (cisst_cpack_settings ...)
+  # debug
+  cisst_cmake_debug ("cisst_cpack_settings called with: ${ARGV}")
+
+  # set all keywords and their values to ""
+  set (FUNCTION_KEYWORDS
+       VENDOR
+       MAINTAINER)
+
+  # reset local variables
+  foreach (keyword ${FUNCTION_KEYWORDS})
+    set (${keyword} "")
+  endforeach (keyword)
+
+  # parse input
+  foreach (arg ${ARGV})
+    list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
+    if (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (CURRENT_PARAMETER ${arg})
+      set (${CURRENT_PARAMETER} "")
+    else (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (${CURRENT_PARAMETER} ${${CURRENT_PARAMETER}} ${arg})
+    endif (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+  endforeach (arg)
+
+  # debug
+  foreach (keyword ${FUNCTION_KEYWORDS})
+    cisst_cmake_debug ("cisst_cpack_settings: ${keyword}: ${${keyword}}")
+  endforeach (keyword)
+
+  if (UNIX)
+    set (CPACK_PACKAGE_VENDOR "${VENDOR}")
+    set (CPACK_DEBIAN_PACKAGE_MAINTAINER "${MAINTAINER}")
+    set (CPACK_GENERATOR "DEB")
+    set (CPACK_DEB_PACKAGE_COMPONENT ON)
+    set (CPACK_DEB_COMPONENT_INSTALL ON)
+    set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    set (CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS ON)
+  endif (UNIX)
+
+endmacro (cisst_cpack_settings)
+
+# Macro to set output paths based on build type, i.e. ROS 1/catkin or not
+macro (cisst_set_output_path)
+  cisst_is_catkin_build (_is_catkin_build)
+  if (_is_catkin_build)
+    set (LIBRARY_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/lib")
+    set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
+  endif ()
+  cisst_is_colcon_build (_is_colcon_build)
+  if (_is_colcon_build)
+    set (LIBRARY_OUTPUT_PATH "${CISST_BINARY_DIR}/lib")
+    set (EXECUTABLE_OUTPUT_PATH "${CISST_BINARY_DIR}/bin")
+  endif ()
+endmacro (cisst_set_output_path)
+
+# Add standard configuration files for SAW component, assumes all
+# settings are already defined
+function (cisst_add_config_files _cacf_component_name)
+
+  cisst_is_catkin_build (_cacf_is_catkin_build)
+  if (_cacf_is_catkin_build)
+    set (_cacf_config_file_dir "${CATKIN_DEVEL_PREFIX}/share/${_cacf_component_name}/cmake")
+  else ()
+    set (_cacf_config_file_dir "${${_cacf_component_name}_BINARY_DIR}")
+  endif ()
+
+  set (_cacf_version_major ${${_cacf_component_name}_VERSION_MAJOR})
+  set (_cacf_version_minor ${${_cacf_component_name}_VERSION_MINOR})
+  set (_cacf_version_patch ${${_cacf_component_name}_VERSION_PATCH})
+  set (_cacf_version       ${${_cacf_component_name}_VERSION})
+  set (_cacf_include_dir   ${${_cacf_component_name}_INCLUDE_DIR})
+  set (_cacf_library_dir   ${${_cacf_component_name}_LIBRARY_DIR})
+  set (_cacf_libraries     ${${_cacf_component_name}_LIBRARIES})
+
+  # generate componentRevision.h
+  set (
+    _cacf_revision_h
+    "${${_cacf_component_name}_BINARY_DIR}/include/${_cacf_component_name}/${_cacf_component_name}Revision.h")
+  find_file (
+    _cacf_revision_h_in
+    NAMES sawRevision.h.in
+    PATHS ${CISST_CMAKE_DIRS}
+    NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  configure_file (
+    ${_cacf_revision_h_in}
+    ${_cacf_revision_h}
+    @ONLY)
+
+  # generate componentConfig.cmake
+  set (_cacf_config_cmake
+    "${_cacf_config_file_dir}/${_cacf_component_name}Config.cmake")
+  find_file (
+    _cacf_config_cmake_in
+    NAMES sawConfig.cmake.in
+    PATHS ${CISST_CMAKE_DIRS}
+    NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  configure_file (
+    ${_cacf_config_cmake_in}
+    ${_cacf_config_cmake}
+    @ONLY)
+
+  # generate componentConfigVersion.cmake
+  set (_cacf_config_version_cmake
+    "${_cacf_config_file_dir}/${_cacf_component_name}ConfigVersion.cmake")
+  find_file (
+    _cacf_config_version_cmake_in
+    NAMES sawConfigVersion.cmake.in
+    PATHS ${CISST_CMAKE_DIRS}
+    NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  configure_file (
+    ${_cacf_config_version_cmake_in}
+    ${_cacf_config_version_cmake}
+    @ONLY)
+
+  # install cmake config files
+  install (
+    FILES ${_cacf_config_cmake} ${_cacf_config_version_cmake}
+    DESTINATION "share/${_cacf_component_name}"
+    COMPONENT ${_cacf_component_name})
+
+endfunction (cisst_add_config_files)

@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstParameterTypesQt
 #
-# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -25,6 +25,7 @@ if (CISST_HAS_QT4)
                   ../prmEventButtonQtWidget.h
                   ../prmInputDataQtWidget.h
                   ../prmOperatingStateQtWidget.h
+                  ../prmForceCartesianGetQtWidget.h
                   ../prmPositionCartesianGetQtWidget.h
                   ../prmPositionCartesianGetQtWidgetFactory.h
                   ../prmPositionCartesianArrayGetQtWidget.h
@@ -49,6 +50,7 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                    SOURCE_FILES prmEventButtonQtWidget.cpp
                                 prmInputDataQtWidget.cpp
                                 prmOperatingStateQtWidget.cpp
+                                prmForceCartesianGetQtWidget.cpp
                                 prmPositionCartesianGetQtWidget.cpp
                                 prmPositionCartesianGetQtWidgetFactory.cpp
                                 prmPositionCartesianArrayGetQtWidget.cpp
@@ -59,6 +61,7 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 prmEventButtonQtWidget.h
                                 prmInputDataQtWidget.h
                                 prmOperatingStateQtWidget.h
+                                prmForceCartesianGetQtWidget.h
                                 prmPositionCartesianGetQtWidget.h
                                 prmPositionCartesianGetQtWidgetFactory.h
                                 prmPositionCartesianArrayGetQtWidget.h

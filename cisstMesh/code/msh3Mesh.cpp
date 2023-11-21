@@ -1008,23 +1008,38 @@ void msh3Mesh::ReadSURMeshFile(const char *fn)
     FILE *fp;
 
     if ((fp = fopen(fn, "r")) == NULL) {
-        std::cout << "SUR mesh file not found" << std::endl;
+        std::cerr << "SUR mesh file not found" << std::endl;
         return;
     }
 
     int vert_n, face_n;
     float f1, f2, f3;
-
-    fscanf(fp, "%d\n", &vert_n);	// off file
+    int nb_found;
+    nb_found = fscanf(fp, "%d\n", &vert_n);	// off file
+    if (nb_found != 1) {
+        std::cerr << "ReadSURMeshFile for " << fn
+                  << " failed to parse number of vertices" << std::endl;
+        return;
+    }
     vertices.SetSize(vert_n);
 
     int i;
     for (i = 0; i < vert_n; i++) {
-        fscanf(fp, "%f %f %f\n", &f1, &f2, &f3);
+        nb_found = fscanf(fp, "%f %f %f\n", &f1, &f2, &f3);
+        if (nb_found != 3) {
+            std::cerr << "ReadSURMeshFile for " << fn
+                      << " failed to parse vertex " << i << std::endl;
+            return;
+        }
         vertices[i] = vct3(f1, f2, f3);
     }
 
-    fscanf(fp, "%d\n", &face_n);	// sur file
+    nb_found = fscanf(fp, "%d\n", &face_n);	// sur file
+    if (nb_found != 1) {
+        std::cerr << "ReadSURMeshFile for " << fn
+                  << " failed to parse number of faces" << std::endl;
+        return;
+    }
     faces.SetSize(face_n);
     faceNeighbors.SetSize(face_n);
 
@@ -1054,17 +1069,33 @@ void msh3Mesh::ReadSFCMeshFile(const char *fn)
 
     int vert_n, face_n;
     float f1, f2, f3;
+    int nb_found;
 
-    fscanf(fp, "%d\n", &vert_n);	// off file
+    nb_found = fscanf(fp, "%d\n", &vert_n);	// off file
+    if (nb_found != 1) {
+        std::cerr << "ReadSFCMeshFile for " << fn
+                  << " failed to parse number of vertices" << std::endl;
+        return;
+    }
     vertices.SetSize(vert_n);
 
     int i;
     for (i = 0; i < vert_n; i++) {
-        fscanf(fp, "%f %f %f\n", &f1, &f2, &f3);
+        nb_found = fscanf(fp, "%f %f %f\n", &f1, &f2, &f3);
+        if (nb_found != 3) {
+            std::cerr << "ReadSFCMeshFile for " << fn
+                      << " failed to parse vertex " << i << std::endl;
+            return;
+        }
         vertices[i] = vct3(f1, f2, f3);
     }
 
-    fscanf(fp, "%d\n", &face_n);	// sur file
+    nb_found = fscanf(fp, "%d\n", &face_n);	// sur file
+    if (nb_found != 1) {
+        std::cerr << "ReadSFCMeshFile for " << fn
+                  << " failed to parse number of faces" << std::endl;
+        return;
+    }
     faces.SetSize(face_n);
     faceNormals.SetSize(face_n);
 
@@ -1073,7 +1104,12 @@ void msh3Mesh::ReadSFCMeshFile(const char *fn)
         int a, b, c; int d = 1, e = 1, f = 1;
         //JA have to fix this, probably should be using streams...
 
-        fscanf(fp, "%d %d %d\n", &a, &b, &c); d = e = f = -1;  // rht hack to get around not having neighbors
+        nb_found = fscanf(fp, "%d %d %d\n", &a, &b, &c); d = e = f = -1;  // rht hack to get around not having neighbors
+        if (nb_found != 3) {
+            std::cerr << "ReadSFCMeshFile for " << fn
+                      << " failed to parse face " << i << std::endl;
+            return;
+        }
         //fscanf(fp,"%d %d %d %f %f %f\n",&a,&b,&c,&d,&e,&f);
         //cout<<a<<" "<<b<<" "<<c<<" "<<d<<" "<<e<<" "<<f<<endl;
         faces[i].Assign(a, b, c);

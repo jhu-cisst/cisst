@@ -1,6 +1,54 @@
 Change log
 ==========
 
+1.2.0 (2022-11-21)
+==================
+
+* API changes:
+  * None
+* Deprecated features:
+  * cisstNetlib DOWNLOAD_NOW has been removed, cisstNetlib has to be compiled by the user.  The process is automatic with ROS1/catkin and ROS2/colcon
+  * ICE support has been removed
+  * `CISST_VERSION` is now `cisst_VERSION`
+* New features:
+  * CMake:
+    * Updated install targets and debian packages generation
+    * Works with ROS2/colcon
+    * New CMake macros to simplify CMakeLists.txt for SAW components
+  * cisstCommon:
+    * cmnCommandLineOptions:
+      * Overloaded Parse method to display the error message and usage if needed
+      * Overloaded Parse methods to support std::vector<std::string>
+    * cmnPath: added static method RenameFile
+  * cisstOSAbstraction: added definition for baud rates 230400 and 460800 for osaSerialPort
+  * cisstVector:
+    * vctDataFunctionsTransformationsJSON: normalize rotation matrices after de-serialization
+    * Added c{,r}{begin,end} for dynamic vectors
+  * cisstMultiTask:
+    * Uses "new" features by default
+    * Added mtsStateTableFilter and mtsInterfaceProvided::AddCommandFilteredReadState
+    * mtsInterfaceProvided: added method to get class services for argument types
+  * cisstParameterTypes:
+    * Added prmForceCartesianGetQtWidget
+    * Ported prmForceTorqueJointSet to use cisstDataGenerator
+    * Added data typed for kinematics queries
+* Bug fixes:
+  * General: fixes for new compilers warnings
+  * CMake:
+    * Improved DirectShow Find Module for Windows 10 SDKs (#85)
+    * cisstMacros.cmake:
+      * Added missing executable output path in cisst_set_output_path
+      * Set CMake policy CMP0026 to OLD
+      * Fixed CMake for Qt5 using `Qt5::`
+  * cisstDataGenerator:
+    * Fixed enum defined under namespace
+  * cisstMultiTask:
+    * Added missing mtsComponentConstructorArg
+  * cisstParameterTypes:
+    * Fixed data member initialization in `.cdg` files (`prmPositionCartesianSet`, `prmVelocityCartesianSet`, `prmCartesianImpedanceGains`, `prmPositionJointSet`, `prmStateJoint`...)
+  * cisstMesh:
+    * Added missing CISST_EXPORT
+
 1.1.0 (2021-04-04)
 ==================
 

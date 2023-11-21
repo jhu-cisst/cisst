@@ -31,7 +31,7 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
 #ifndef _msh3Mesh_h_
@@ -131,7 +131,7 @@ public:
     // Build mesh from data arrays
     int LoadMesh(const vctDynamicVector<vct3> *vertices,
       const vctDynamicVector<vctInt3> *faces,
-      const vctDynamicVector<vct3> *face_normals = NULL, 
+      const vctDynamicVector<vct3> *face_normals = NULL,
       const vctDynamicVector<vctInt3> *face_neighbors = NULL,
       const vctDynamicVector<vct3> *vertex_normals = NULL
       );
@@ -189,7 +189,7 @@ private:
     // 2. normal of neighbor plane
     // is positive, then local shape is convex
     inline bool CheckConvexity(int idx, int idxNeighbor) {
-        vct3 vec1,vec2;
+        vct3 vec1 = {0.0, 0.0, 0.0}, vec2 = {0.0, 0.0, 0.0};
         switch (cpLocation.at(idx)){
             case V1V2:
                 vec1 = vertices.at(faces.at(idx)[V3-vertexOffset])-vertices.at(faces.at(idx)[V1-vertexOffset]);

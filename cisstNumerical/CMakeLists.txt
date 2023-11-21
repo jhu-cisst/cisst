@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2022 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -20,22 +20,11 @@ else ()
 endif ()
 
 if (CISST_HAS_CISSTNETLIB)
-  option (CISSTNETLIB_USE_LOCAL_INSTALL "Use a locally installed version of cisstNetlib" OFF)
-  if (CISSTNETLIB_USE_LOCAL_INSTALL)
-    set (FORCE_CISSTNETLIB_CONFIG ON)
-  endif ()
-  if (FORCE_CISSTNETLIB_CONFIG)
-    find_package (CisstNetlib REQUIRED CONFIG)
-  else ()
-    find_package (CisstNetlib REQUIRED)
-  endif ()
-  
+  find_package (CisstNetlib REQUIRED)
   cisst_set_package_settings (cisstNumerical cisstNetlib INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
   cisst_set_package_settings (cisstNumerical cisstNetlib LIBRARIES           CISSTNETLIB_LIBRARIES)
-  set (CISST_HAS_CISSTNETLIB_CONFIG ON)
 else (CISST_HAS_CISSTNETLIB)
   cisst_unset_all_package_settings (cisstNumerical cisstNetlib)
-  set (CISST_HAS_CISSTNETLIB_CONFIG OFF)
 endif (CISST_HAS_CISSTNETLIB)
 
 add_subdirectory (code)

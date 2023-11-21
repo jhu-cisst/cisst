@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1024,16 +1024,18 @@ CISSTNETLIB_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DO
     CISSTNETLIB_DOUBLE *UPtr, *VtPtr;
     CISSTNETLIB_INTEGER m_Lda, m_Ldu, m_Ldvt;
 
+    CISSTNETLIB_INTEGER dfM = static_cast<CISSTNETLIB_INTEGER>(dataFriend.M());
+    CISSTNETLIB_INTEGER dfN = static_cast<CISSTNETLIB_INTEGER>(dataFriend.N());
     if (A.IsColMajor()) {
-        m_Lda = (1 > dataFriend.M()) ? 1 : dataFriend.M();
-        m_Ldu = dataFriend.M();
-        m_Ldvt = dataFriend.N();
+        m_Lda = (1 > dfM) ? 1 : dfM;
+        m_Ldu = dfM;
+        m_Ldvt = dfN;
         UPtr = dataFriend.U().Pointer();
         VtPtr = dataFriend.Vt().Pointer();
     } else {
-        m_Lda = (1 > dataFriend.N()) ? 1 : dataFriend.N();
-        m_Ldu = dataFriend.N();
-        m_Ldvt = dataFriend.M();
+        m_Lda = (1 > dfN) ? 1 : dfN;
+        m_Ldu = dfN;
+        m_Ldvt = dfM;
         UPtr = dataFriend.Vt().Pointer();
         VtPtr = dataFriend.U().Pointer();
     }

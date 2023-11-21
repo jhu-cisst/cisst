@@ -28,12 +28,14 @@ class {
     member {
         name Velocity;
         type vctDynamicVector<double>;
+        default vctDynamicVector<double>();
         description Velocity that should be used for the trajectory generator.  If the vector size is 0, this will be ignored.;
     }
 
     member {
         name Acceleration;
         type vctDynamicVector<double>;
+        default vctDynamicVector<double>();
         description Acceleration and deceleration that should be used for the trajectory generator.  If the vector size is 0, this will be ignored.;
     }
 
@@ -55,32 +57,38 @@ class {
     member {
         name Deceleration;
         type vctDynamicVector<double>;
+        default vctDynamicVector<double>();
         deprecated true;
     }
     member {
         name Mask;
         type vctDynamicVector<bool>;
+        default vctDynamicVector<bool>();
         deprecated true;
     }
     // from original prmMotionBase
     member {
         name BlockingFlag;
         type prmBlocking;
+        default prmBlocking::NO_WAIT;
         deprecated true;
     }
     member {
         name BlendingFactor;
         type bool;
+        default false;
         deprecated true;
     }
     member {
         name IsPreemptable;
         type bool;
+        default true;
         deprecated true;
     }
     member {
         name IsGoalOnly;
         type bool;
+        default true;
         deprecated true;
     }
 

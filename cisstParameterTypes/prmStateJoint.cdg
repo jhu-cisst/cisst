@@ -22,21 +22,25 @@ class {
     member {
         name Name;
         type vctDynamicVector<std::string>;
+        default vctDynamicVector<std::string>();
     }
 
     member {
         name Position;
         type vctDynamicVector<double>;
+        default vctDynamicVector<double>();
     }
 
     member {
         name Velocity;
         type vctDynamicVector<double>;
+        default vctDynamicVector<double>();
     }
 
     member {
         name Effort;
         type vctDynamicVector<double>;
+        default vctDynamicVector<double>();
     }
 
     inline-header {

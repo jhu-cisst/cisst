@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Anton Deguet
   Created on: 2005-05-02
 
@@ -55,26 +54,18 @@ bool mtsFunctionVoidReturn::Bind(CommandType * command)
         CMN_LOG_INIT_WARNING << "Class mtsFunctionVoidReturn: Bind called on already bound function: " << this << std::endl;
     }
     this->Command = command;
-#if !CISST_MTS_HAS_ICE
-    if (this->Command)
+    if (this->Command) {
         InitCompletionCommand(this->Command->GetName() + "Result");
-#endif
+    }
     return (command != 0);
 }
 
 
 mtsExecutionResult mtsFunctionVoidReturn::ExecuteGeneric(mtsGenericObject & result) const
 {
-    if (!Command)
+    if (!Command) {
         return mtsExecutionResult::FUNCTION_NOT_BOUND;
-#if CISST_MTS_HAS_ICE
-    mtsExecutionResult executionResult = Command->Execute(result);
-    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED
-        && !this->IsProxy) {
-        this->ThreadSignalWait();
-        executionResult = mtsExecutionResult::COMMAND_SUCCEEDED;
     }
-#else
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
     CompletionCommand->PrepareToWait();
@@ -82,7 +73,6 @@ mtsExecutionResult mtsFunctionVoidReturn::ExecuteGeneric(mtsGenericObject & resu
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
         executionResult = WaitForResult(result);
     CompletionCommand->ClearWait();
-#endif
     return executionResult;
 }
 

@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-02-06
 
-  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,12 +16,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
 /*!
   \file
   \brief Cartesian force get parameters.
 */
-
 
 #ifndef _prmForceCartesianGet_h
 #define _prmForceCartesianGet_h
@@ -72,6 +70,7 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
     //@{
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBool6, Mask);
     //@}
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, ReferenceFrame);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, MovingFrame);
 
 public:

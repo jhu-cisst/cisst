@@ -31,7 +31,7 @@
 //    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
+//
 // ****************************************************************************
 
 #include <cisstMesh/msh3Utilities.h>
@@ -168,7 +168,7 @@ vct3x3 ComputePointCovariance(const vct3 &norm, double normPrllVar, double normP
     double an = acos(vctDotProduct(norm, z));
     //double an = asin(t.Norm());
     vctAxAnRot3 R_AxAn(ax, an);
-    R = vctRot3(R_AxAn);  
+    R = vctRot3(R_AxAn);
   }
 
   // compute noise covariance M of this sample and its decomposition:
@@ -188,7 +188,7 @@ void ComputeCovEigenDecomposition_NonIter(const vct3x3 &M, vct3 &eigenValues, vc
 
 #else
   // Calls the non-iterative eigen solver of the WildMagic5 library
-  // 
+  //
   // eigen values in descending order
   // eigen vectors listed by column   (has determinant = 1)
   //
@@ -209,7 +209,7 @@ void ComputeCovEigenDecomposition_NonIter(const vct3x3 &M, vct3 &eigenValues, vc
 
   // check that eigen vector matrix is a proper rotation matrix
   //  NOTE: this is probably not important, but a nice property to have
-  double det = 
+  double det =
     solver.GetEigenvector(2).Dot(solver.GetEigenvector(1).Cross(
     solver.GetEigenvector(0)));
   if (det < 0.0)
@@ -222,7 +222,7 @@ void ComputeCovEigenDecomposition_NonIter(const vct3x3 &M, vct3 &eigenValues, vc
 
 void ComputeCovEigenDecomposition_SVD(const vct3x3 &M, vct3 &eigenValues, vct3x3 &eigenVectors)
 {
-  // NOTE: for a covariance (positive-definite) matrix, the singular values are 
+  // NOTE: for a covariance (positive-definite) matrix, the singular values are
   //       synonymous with the eigenvalues since all eigenvalues must be positive
 
   //
@@ -266,7 +266,7 @@ void ComputeCovEigenDecomposition_SVD(const vct3x3 &M, vct3 &eigenValues, vct3x3
 void ComputeCovEigenDecomposition_SEP(const vct3x3 &M, vct3 &eigenValues, vct3x3 &eigenVectors)
 {
   //
-  // Symmetric Eigenproblems (SEP) 
+  // Symmetric Eigenproblems (SEP)
   //
   // Computes all the eigen values and eigen vectors of a symmetric matrix
   //   A = V D V^T. The eigen values are sorted in ascending order. This
@@ -293,7 +293,7 @@ void ComputeCovEigenDecomposition_SEP(const vct3x3 &M, vct3 &eigenValues, vct3x3
   }
 
   // assign to fixed size containers
-  //  change order from ascending to descending 
+  //  change order from ascending to descending
   eigenValues.Assign(eigVal[2],eigVal[1],eigVal[0]);
   eigenVectors.Column(0).Assign(eigVct.Column(2));
   eigenVectors.Column(1).Assign(eigVct.Column(1));
@@ -304,11 +304,11 @@ void ComputeCovInverse_NonIter(const vct3x3 &M, vct3x3 &Minv)
 {
   vct3    eigenValues;
   vct3x3  eigenVectors;
-  
+
   // Compute Minv
   //   M = U*diag(S)*V'   where U = V
   //   Minv = V*diag(1/S)*V'
-  
+
   ComputeCovEigenDecomposition_NonIter(M, eigenValues, eigenVectors);
 
   static vctFixedSizeMatrix<double, 3, 3, VCT_COL_MAJOR> V_Sinv;
@@ -365,7 +365,7 @@ void ComputeCovInverse_Nmr(const vct3x3 &M, vct3x3 &Minv)
 
 void ComputeCovEigenValues_SVD(const vct3x3 &M, vct3 &eigenValues)
 {
-  // NOTE: for a covariance (positive-definite) matrix, the singular values are 
+  // NOTE: for a covariance (positive-definite) matrix, the singular values are
   //       synonymous with the eigenvalues since all eigenvalues must be positive
 
   // Compute SVD of M
@@ -394,10 +394,10 @@ void ComputeCovEigenValues_SVD(const vct3x3 &M, vct3 &eigenValues)
 void ComputeCovEigenValues_Trig(const vct3x3 &M, vct3 &eigenValues)
 {
   //
-  // Code derived from an algorithm posted on Wikipedia for computing 
+  // Code derived from an algorithm posted on Wikipedia for computing
   //  eigenvalues of a 3x3 real symmetric matrix based on the article:
   //
-  //  Oliver Smith, "Eigenvalues of a symmetric 3x3 matrix", 
+  //  Oliver Smith, "Eigenvalues of a symmetric 3x3 matrix",
   //   J. Comm. of ACS Vol. 4, Issue 4, pg. 168, 1961
   //
   //  NOTE: eigen values are in descending order
@@ -526,7 +526,7 @@ void ComputeRodriguesJacobians(const vct3 &a, vctFixedSizeVector<vctRot3, 3> &dR
     else
     {
       dTheta = gTheta[i];  // dTheta = InnerProduct(gTheta,da[i]) = gTheta[i] = alpha[i]
-      theta_daat_adat.SetAll(0.0);            // daat_adat = da*a' + a*da'; 
+      theta_daat_adat.SetAll(0.0);            // daat_adat = da*a' + a*da';
       theta_daat_adat.Row(i) = theta_a;       //  ''
       theta_daat_adat.Column(i) += theta_a;   //  ''
       dRa[i] = (cTheta*dTheta)*sk_alpha
@@ -592,7 +592,7 @@ vctDoubleVec ComputeInverseTrilinearInterp(const vct3 &p, const vctDynamicVector
 
     vctDoubleVec weights(8,0.0);
     weights(0) = 1 - result.Column(0).SumOfElements();
-    for (int i = 1; i < weights.size(); ++i) {
+    for (size_t i = 1; i < weights.size(); ++i) {
         weights(i) = result.Column(0).at(i-1);
     }
 

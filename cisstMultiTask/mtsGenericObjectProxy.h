@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on: 2006-05-05
 
-  (C) Copyright 2006-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -779,6 +779,11 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsUChar);
 
 typedef mtsGenericObjectProxy<bool> mtsBool;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsBool);
+
+#if (CISST_OS == CISST_WINDOWS)
+typedef mtsGenericObjectProxy<unsigned __int64> mtsUInt64;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsUInt64);
+#endif
 
 typedef mtsGenericObjectProxy<std::string> mtsStdString;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdString);

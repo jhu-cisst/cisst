@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides, Anton Deguet
 
   (C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
@@ -48,26 +47,19 @@ bool mtsFunctionRead::IsValid(void) const {
 
 bool mtsFunctionRead::Bind(CommandType * command) {
     Command = command;
-#if !CISST_MTS_HAS_ICE
-    if (Command)
+    if (Command) {
         InitCompletionCommand(Command->GetName() + "Blocking");
-#endif
+    }
     return (command != 0);
 }
 
 
 mtsExecutionResult mtsFunctionRead::ExecuteGeneric(mtsGenericObject & argument) const
 {
-    if (!Command)
+    if (!Command) {
         return mtsExecutionResult::FUNCTION_NOT_BOUND;
-    mtsExecutionResult executionResult;
-#if CISST_MTS_HAS_ICE
-    executionResult = Command->Execute(argument);
-    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-        this->ThreadSignalWait();
-        return mtsExecutionResult::COMMAND_SUCCEEDED;
     }
-#else
+    mtsExecutionResult executionResult;
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
     CompletionCommand->PrepareToWait();
@@ -75,7 +67,6 @@ mtsExecutionResult mtsFunctionRead::ExecuteGeneric(mtsGenericObject & argument) 
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
         executionResult = WaitForResult(argument);
     CompletionCommand->ClearWait();
-#endif
     return executionResult;
 }
 

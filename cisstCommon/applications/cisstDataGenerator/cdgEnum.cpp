@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -109,9 +109,11 @@ void cdgEnum::GenerateCode(std::ostream & CMN_UNUSED(outputStream)) const
 void cdgEnum::GenerateDataFunctionsHeader(std::ostream & outputStream, const std::string & cScope, const std::string & attribute) const
 {
     const std::string name = this->GetFieldValue("name");
+    std::string scopeUnderscore = cScope;
+    std::replace(scopeUnderscore.begin(), scopeUnderscore.end(), ':', '_');
 
-    outputStream << "std::string " << attribute << " cmnDataHumanReadable_" << cScope << "_" << name << "(const " << cScope << "::" << name << " & data);" << std::endl
-                 << "CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(" << cScope << "::" << name << ", int, cmnDataHumanReadable_" << cScope << "_" << name << ");" << std::endl
+    outputStream << "std::string " << attribute << " cmnDataHumanReadable_" << scopeUnderscore << "_" << name << "(const " << cScope << "::" << name << " & data);" << std::endl
+                 << "CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(" << cScope << "::" << name << ", int, cmnDataHumanReadable_" << scopeUnderscore << "_" << name << ");" << std::endl
                  << "#if CISST_HAS_JSON" << std::endl
                  << "  CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(" << cScope << "::" << name << ");" << std::endl
                  << "#endif // CISST_HAS_JSON" << std::endl;
@@ -123,9 +125,11 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream, const std::
     size_t index;
     const std::string name = this->GetFieldValue("name");
     const std::string prefix = this->GetFieldValue("prefix");
+    std::string scopeUnderscore = cScope;
+    std::replace(scopeUnderscore.begin(), scopeUnderscore.end(), ':', '_');
 
     // human readable
-    outputStream << "std::string cmnDataHumanReadable_" << cScope << "_" << name << "(const " << cScope << "::" << name << " & data) {" << std::endl
+    outputStream << "std::string cmnDataHumanReadable_" << scopeUnderscore << "_" << name << "(const " << cScope << "::" << name << " & data) {" << std::endl
                  << "    switch (data) {" << std::endl;
     for (index = 0; index < Scopes.size(); index++) {
         outputStream << "        case " << cScope << "::" << prefix << Scopes[index]->GetFieldValue("name") << ":" << std::endl

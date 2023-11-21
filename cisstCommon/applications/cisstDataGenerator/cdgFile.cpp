@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -314,7 +314,7 @@ void cdgFile::RemoveTrailingSpaces(std::string & value)
 void cdgFile::GenerateMessage(std::ostream & outputStream) const
 {
     outputStream << "// file automatically generated, do not modify" << std::endl
-                 << "// cisst version: " << CISST_VERSION << std::endl
+                 << "// cisst version: " << cisst_VERSION << std::endl
                  << "// source file: " << Filename << std::endl << std::endl;
 }
 

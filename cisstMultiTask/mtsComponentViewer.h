@@ -51,7 +51,6 @@ protected:
     osaPipeExec UDrawPipe;
     bool UDrawPipeConnected;
     std::string UDrawResponse;
-    bool ShowProxies;
 
     bool ConnectionStarted;
     mtsDescriptionConnection ConnectionRequest;

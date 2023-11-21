@@ -30,15 +30,20 @@ SET(DIRECTSHOW_FOUND "NO")
 # DirectShow is only available on Windows platforms
 IF(WIN32)
     SET(SVL_WIN64 FALSE)
-    IF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 10 Win64"     OR
-       ${CMAKE_GENERATOR} STREQUAL "Visual Studio 11 Win64"     OR
-       ${CMAKE_GENERATOR} STREQUAL "Visual Studio 8 2005 Win64" OR
-       ${CMAKE_GENERATOR} STREQUAL "Visual Studio 9 2008 Win64")
-       SET(SVL_WIN64 TRUE)
-    ENDIF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 10 Win64"     OR
-          ${CMAKE_GENERATOR} STREQUAL "Visual Studio 11 Win64"     OR
-          ${CMAKE_GENERATOR} STREQUAL "Visual Studio 8 2005 Win64" OR
-          ${CMAKE_GENERATOR} STREQUAL "Visual Studio 9 2008 Win64")
+
+    # Note that newer versions of MSVC generators as well as newer versions of CMake do not include the "bitness" of the generator.
+    IF("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+        SET(SVL_WIN64 TRUE)
+    ENDIF("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+
+    # One more check for bitness
+    # In CMake 3.1 and up we can use CMAKE_GENERATOR_PLATFORM. For now assume that systems that are still building
+    # with older versions of CMake are not using the latest build tools. 
+    IF(NOT SVL_WIN64 AND ${CMAKE_MAJOR_VERSION} GREATER_EQUAL 3 AND ${CMAKE_MINOR_VERSION} GREATER_EQUAL 1) 
+        IF("${CMAKE_GENERATOR_PLATFORM}" MATCHES "(Win64|IA64|x64)")
+            set(SVL_WIN64 TRUE)
+        ENDIF("${CMAKE_GENERATOR_PLATFORM}" MATCHES "(Win64|IA64|x64)")
+    ENDIF(NOT SVL_WIN64 AND ${CMAKE_MAJOR_VERSION} GREATER_EQUAL 3 AND ${CMAKE_MINOR_VERSION} GREATER_EQUAL 1)
 
     SET(PROGRAMFILES_DIR "$ENV{SystemDrive}/Program Files")
     SET(PROGRAMFILES_X86_DIR "$ENV{SystemDrive}/Program Files (x86)")
@@ -87,6 +92,21 @@ IF(WIN32)
            "$ENV{SystemDrive}/DXSDK/Include/Lib"
            )
     ENDIF(SVL_WIN64)
+
+    # Need CMake version 3.4 to use CMAKE_VS_WINDOWS_TARGET_PLATFORM
+    IF(${CMAKE_MAJOR_VERSION} GREATER_EQUAL 3 AND ${CMAKE_MINOR_VERSION} GREATER_EQUAL 4)
+        message(STATUS "Appending paths")
+        LIST(APPEND DIRECTSHOW_INCLUDE_DIRS "${PROGRAMFILES_X86_DIR}/Windows Kits/10/Include/${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}/um")
+        
+        # Figure out which lib folder to use.
+        SET(LIB_APPEND_PATH "${PROGRAMFILES_X86_DIR}/Windows Kits/10/Lib/${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}/um")
+        IF(SVL_WIN64)
+            SET(LIB_APPEND_PATH "${LIB_APPEND_PATH}/x64")
+        ELSE()
+            SET(LIB_APPEND_PATH "${LIB_APPEND_PATH}/x86")
+        endif(SVL_WIN64)
+        LIST(APPEND DIRECTSHOW_LIBRARY_DIRS ${LIB_APPEND_PATH})
+    ENDIF(${CMAKE_MAJOR_VERSION} GREATER_EQUAL 3 AND ${CMAKE_MINOR_VERSION} GREATER_EQUAL 4)
 
     # Find DirectX Include Directory
     FIND_PATH(DIRECTX_INCLUDE_DIR

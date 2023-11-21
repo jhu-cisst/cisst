@@ -14,8 +14,4 @@
 # 
 # --- end cisst license ---
 
-
-# Which flags have been set and include path/libs
-set(CISST_MTS_HAS_ICE @CISST_MTS_HAS_ICE@)
-
 set(CISST_MTS_NEW @CISST_MTS_NEW@)

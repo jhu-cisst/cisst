@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-11-12
 
-  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -1166,7 +1166,7 @@ class vctGenericContainerTest
         bool gotException = false;
         try {
             container2.FastCopyOf(container1);
-        } catch(std::runtime_error & e) {
+        } catch(std::runtime_error &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);

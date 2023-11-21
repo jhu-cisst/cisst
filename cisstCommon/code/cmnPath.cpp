@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnPath.h>
-
+#include <cstdio>
 
 cmnPath::cmnPath() {
     ConfigureTokenizer();
@@ -113,7 +113,7 @@ bool cmnPath::AddRelativeToCisstRoot(const std::string & relativePath, bool head
 
 bool cmnPath::AddRelativeToCisstShare(const std::string & relativePath, bool head) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
-                               << relativePath << "\" relative to CISST_ROOT/share/cisst-" << CISST_VERSION_MAJOR << "." << CISST_VERSION_MINOR << "/ at the "
+                               << relativePath << "\" relative to CISST_ROOT/share/cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR << "/ at the "
                                << (head ? "beginning" : "end") << std::endl;
     std::string path;
     if (cmnPath::GetCisstShare(path)) {
@@ -256,7 +256,7 @@ bool cmnPath::GetCisstShare(std::string & result)
 {
     if (cmnPath::GetCisstRoot(result)) {
         std::stringstream tmp;
-        tmp << result << "/share/cisst-" << CISST_VERSION_MAJOR << "." << CISST_VERSION_MINOR;
+        tmp << result << "/share/cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR;
         result = tmp.str();
         return true;
     }
@@ -276,6 +276,16 @@ bool cmnPath::Exists(const std::string & fullPath, short mode)
 bool cmnPath::DeleteFile(const std::string & fullPath)
 {
     if (remove(fullPath.c_str()) == 0) {
+        return true;
+    }
+    return false;
+}
+
+
+bool cmnPath::RenameFile(const std::string & fullPathOld,
+                         const std::string & fullPathNew)
+{
+    if (rename(fullPathOld.c_str(), fullPathNew.c_str()) == 0) {
         return true;
     }
     return false;

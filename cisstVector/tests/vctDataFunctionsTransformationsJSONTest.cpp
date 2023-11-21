@@ -35,7 +35,7 @@ void vctDataFunctionsTransformationsJSONTest::TestFrm3(void)
     Json::Value jsonValue;
     cmnDataJSON<DataType>::SerializeText(source, jsonValue["object"]);
     cmnDataJSON<DataType>::DeSerializeText(destination, jsonValue["object"]);
-    CPPUNIT_ASSERT(source.Equal(destination));
+    CPPUNIT_ASSERT(source.AlmostEquivalent(destination));
 }
 
 void vctDataFunctionsTransformationsJSONTest::TestFrm4x4(void)
@@ -51,7 +51,7 @@ void vctDataFunctionsTransformationsJSONTest::TestFrm4x4(void)
     Json::Value jsonValue;
     cmnDataJSON<DataType>::SerializeText(source, jsonValue["object"]);
     cmnDataJSON<DataType>::DeSerializeText(destination, jsonValue["object"]);
-    CPPUNIT_ASSERT(source.Equal(destination));
+    CPPUNIT_ASSERT(source.AlmostEquivalent(destination));
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctDataFunctionsTransformationsJSONTest);
