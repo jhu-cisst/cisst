@@ -94,10 +94,10 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
         }
     }
     outputStream << " };" << std::endl
-                 << "    CISST_EXPORT static std::string " << enumName << "ToString(const " << enumName << " & value) CISST_THROW(std::runtime_error);" << std::endl
-                 << "    CISST_EXPORT static " << enumName << " " << enumName << "FromString(const std::string & value) CISST_THROW(std::runtime_error);" << std::endl
-                 << "    CISST_EXPORT static const std::vector<int> & " << enumName << "VectorInt(void);" << std::endl
-                 << "    CISST_EXPORT static const std::vector<std::string> & " << enumName << "VectorString(void);" << std::endl;
+                 << "    static std::string " << enumName << "ToString(const " << enumName << " & value) CISST_THROW(std::runtime_error);" << std::endl
+                 << "    static " << enumName << " " << enumName << "FromString(const std::string & value) CISST_THROW(std::runtime_error);" << std::endl
+                 << "    static const std::vector<int> & " << enumName << "VectorInt(void);" << std::endl
+                 << "    static const std::vector<std::string> & " << enumName << "VectorString(void);" << std::endl;
 }
 
 
