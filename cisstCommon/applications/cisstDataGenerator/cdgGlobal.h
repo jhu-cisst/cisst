@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #ifndef _cdgGlobal_h
@@ -27,10 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "cdgClass.h"
 #include "cdgInline.h"
-
-/*
-
- */
 
 class cdgGlobal: public cdgScope
 {
@@ -46,14 +39,14 @@ class cdgGlobal: public cdgScope
 
 public:
     cdgGlobal(size_t lineNumber);
-    cdgScope::Type GetScope(void) const;
-    cdgScope * Create(size_t lineNumber) const;
+    cdgScope::Type GetScope(void) const override;
+    cdgScope * Create(size_t lineNumber) const override;
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
-    bool Validate(std::string & errorMessage);
-    void GenerateIncludes(std::ostream & output) const;
-    void GenerateHeader(std::ostream & output) const;
-    void GenerateCode(std::ostream & output) const;
+    bool Validate(std::string & errorMessage) override;
+    void GenerateIncludes(std::ostream & output) const override;
+    void GenerateHeader(std::ostream & output) const override;
+    void GenerateCode(std::ostream & output) const override;
 
 private:
     cdgGlobal(void); // make sure constructor with line number is always used.

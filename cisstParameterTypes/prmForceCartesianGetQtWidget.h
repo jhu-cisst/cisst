@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-12-12
 
-  (C) Copyright 2017-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -62,12 +62,12 @@ public:
     prmForceCartesianGetQtWidgetComponent(const std::string & componentName, double periodInSeconds = 50.0 * cmn_ms);
     ~prmForceCartesianGetQtWidgetComponent() {}
 
-    inline void Configure(const std::string & CMN_UNUSED(filename) = "") {};
-    void Startup(void);
-    inline void Cleanup(void) {};
+    inline void Configure(const std::string & CMN_UNUSED(filename) = "") override {};
+    void Startup(void) override;
+    inline void Cleanup(void) override {};
 
 private slots:
-    void timerEvent(QTimerEvent * event);
+    void timerEvent(QTimerEvent * event) override;
 
 private:
     int TimerPeriodInMilliseconds;

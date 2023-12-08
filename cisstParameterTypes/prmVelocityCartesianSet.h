@@ -5,7 +5,7 @@
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:	2008-03-12
 
-  (C) Copyright 2008-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,8 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Cartesian Velocity move parameters.
 */
 
@@ -51,7 +51,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
 
     /*! Vector of rate of orientation change */
     vctDouble3 VelocityAngular;
-    
+
     /*! desired time derivative of linear velocity */
     vctDouble3 Acceleration;
 
@@ -74,7 +74,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     }
 
     /*! constructor with all parameters. */
-    
+
     prmVelocityCartesianSet(const vctDouble3 & velocity,
                             const vctDouble3 & velocityAngular,
                             const vctDouble3 & acceleration,
@@ -95,10 +95,10 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
       \return void
     */
     inline void SetGoal(const vctDouble6 & velocities)
-    { 
+    {
         this->Velocity[0] = velocities[0];
         this->Velocity[1] = velocities[1];
-        this->Velocity[2] = velocities[2];   
+        this->Velocity[2] = velocities[2];
         this->VelocityAngular[0] = velocities[3];
         this->VelocityAngular[1] = velocities[4];
         this->VelocityAngular[2] = velocities[5];
@@ -114,7 +114,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
         this->Velocity.Assign(velocity);
         Mask[0] = Mask[1] = Mask[2] = true;
     }
-	
+
     /*! Set angular velocity only
       \param velocityAngular angular velocity
       \return void
@@ -123,16 +123,16 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     {
         this->VelocityAngular.Assign(velocityAngular);
         Mask[3] = Mask[4] = Mask[5] = true;
-    } 
-	
-    /*! Get current goal 
+    }
+
+    /*! Get current goal
       \return vctDouble3 current goal velocity
     */
     inline vctDouble3 GetGoal(void) const
     {
         return this->Velocity;
     }
-    
+
     /*! Set the velocity parameter
       \param velocity planned velocity
       \return void
@@ -141,8 +141,8 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     {
         this->Velocity = velocity;
         Mask[0] = Mask[1] = Mask[2] = true;
-    } 
-    
+    }
+
     /*! Get the velocity parameter
       \return  vctDouble3 current planned velocity
     */
@@ -159,8 +159,8 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     {
         this->VelocityAngular = velocityAngular;
         Mask[3] = Mask[4] = Mask[5] = true;
-    } 
-    
+    }
+
     /*! Get the angular velocity parameter
       \return  vctDouble3 current planned angular velocity
     */
@@ -168,7 +168,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     {
         return this->VelocityAngular;
     }
-    
+
     /*! Set the acceleration parameters only
       \param acceleration target acceleration vector
       \return void
@@ -185,16 +185,16 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     {
         return this->Acceleration;
     }
-    
+
     /*! Set the deceleration parameters only
       \param acceleration target angular acceleration vector
-      \return void 
+      \return void
     */
     inline void SetAngularAcceleration(const vctDouble3 & accelerationAngular)
     {
         this->AccelerationAngular = accelerationAngular;
     }
-    
+
     /*! Get the current angular acceleration parameters
       \return vctDouble3 angular acceleration vector
     */
@@ -222,10 +222,10 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
 
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 
 
 }; // _prmVelocityCartesianSet_h

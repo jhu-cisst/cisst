@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #ifndef _cdgBaseClass_h
@@ -33,12 +30,12 @@ class cdgBaseClass: public cdgScope
 
 public:
     cdgBaseClass(size_t lineNumber);
-    cdgScope::Type GetScope(void) const;
-    cdgScope * Create(size_t lineNumber) const;
-    bool Validate(std::string & errorMessage);
+    cdgScope::Type GetScope(void) const override;
+    cdgScope * Create(size_t lineNumber) const override;
+    bool Validate(std::string & errorMessage) override;
     void GenerateHeaderInheritance(std::ostream & outputStream) const;
-    void GenerateHeader(std::ostream & outputStream) const;
-    void GenerateCode(std::ostream & outputStream) const;
+    void GenerateHeader(std::ostream & outputStream) const override;
+    void GenerateCode(std::ostream & outputStream) const override;
 
 private:
     cdgBaseClass(void); // make sure constructor with line number is always used.

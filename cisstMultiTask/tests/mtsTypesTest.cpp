@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2020-06-25
 
-  (C) Copyright 2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2020-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,7 +27,7 @@ class mtsTypesTestServer: public mtsTaskFromCallback {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_ALL);
 
 public:
-	inline mtsTypesTestServer(const std::string & name = "server"):
+    inline mtsTypesTestServer(const std::string & name = "server"):
         mtsTaskFromCallback(name, 50)
     {
         StateTable.AddData(mInt, "int");
@@ -45,13 +45,13 @@ public:
             mProvided->AddCommandReadState(StateTable, mBool, "ReadBool");
     }
 
-	inline ~mtsTypesTestServer() {}
+    inline ~mtsTypesTestServer() {}
 
-	// implementation of four methods that are pure virtual in mtsTask
-    inline void Configure(const std::string &) {}
-	inline void Startup(void) {}
-	inline void Run(void) {}
-    inline void Cleanup(void) {}
+    // implementation of four methods that are pure virtual in mtsTask
+    inline void Configure(const std::string &) override {}
+    inline void Startup(void) override {}
+    inline void Run(void) override {}
+    inline void Cleanup(void) override {}
 
     // public for testing
     int mInt;
@@ -73,19 +73,19 @@ class mtsTypesTestClient: public mtsTaskFromCallback {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_ALL);
 
 public:
-	inline mtsTypesTestClient(const std::string & name = "client"):
+    inline mtsTypesTestClient(const std::string & name = "client"):
         mtsTaskFromCallback(name, 50)
     {
         mRequired = AddInterfaceRequired("required");
     }
 
-	inline ~mtsTypesTestClient() {}
+    inline ~mtsTypesTestClient() {}
 
-	// implementation of four methods that are pure virtual in mtsTask
-    inline void Configure(const std::string &) {}
-	inline void Startup(void) {}
-	inline void Run(void) {}
-    inline void Cleanup(void) {}
+    // implementation of four methods that are pure virtual in mtsTask
+    inline void Configure(const std::string &) override {}
+    inline void Startup(void) override {}
+    inline void Run(void) override {}
+    inline void Cleanup(void) override {}
 
     // public for testing
     mtsInterfaceRequired * mRequired;

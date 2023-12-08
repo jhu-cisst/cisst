@@ -160,7 +160,7 @@ public:
     bool Has(const std::string & directory) const;
 
     /*! Write the path to a stream. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! A platform-independent string for separating subdirectory or file
       name from the parent directory name.  It's equal to "/" on Linux, "\\"

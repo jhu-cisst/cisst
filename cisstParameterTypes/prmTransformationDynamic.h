@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:   2008-03-03
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -119,7 +117,7 @@ class CISST_EXPORT prmTransformationDynamic: public prmTransformationBase
       frame.  Same as GetTransformation()->Execute().
 	  \return vctFrm3 relationship between this frame and its reference frame in the transformation manager.
 	 */
-    inline vctFrm3 WRTReference(void) const 
+    inline vctFrm3 WRTReference(void) const override 
 	{
         prmPositionCartesianGet result;  //identity transform by default
 	    this->TransformationCommand(result);
