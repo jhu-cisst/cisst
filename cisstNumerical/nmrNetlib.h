@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Anton Deguet, Simon Leonard
   Created on: 2005-11-24
 
-  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,14 +34,21 @@ http://www.cisst.org/cisst/license.txt.
 /*! Check if cisstNetlib has a version, i.e. it has for versions
   greater or equal to 2.  In Version 2 we introduced typedefs to make
   sure we use the correct Fortran types. */
-#ifndef CISSTNETLIB_VERSION
+#ifndef cisstNetlib_VERSION
 typedef long int CISSTNETLIB_INTEGER;
 typedef long int CISSTNETLIB_LOGICAL;
 typedef float CISSTNETLIB_FLOAT;
 typedef double CISSTNETLIB_DOUBLE;
 #endif // CISSTNETLIB_VERSION
 
+// for backward compatibility
+#ifndef CISSTNETLIB_VERSION
+#define CISSTNETLIB_VERSION cisstNetlib_VERSION
+#endif
+#ifndef CISSTNETLIB_VERSION_MAJOR
+#define CISSTNETLIB_VERSION_MAJOR cisstNetlib_VERSION_MAJOR
+#endif
+
 #endif // CISST_HAS_CISSTNETLIB
 
 #endif // _nmrNetlib_h
-
