@@ -13,7 +13,7 @@
 
 
 # Backward compatibility
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.10)
 
 # cisst (Computer Integrated Surgical Systems and Technology)
 project (cisst VERSION 1.2.0)
