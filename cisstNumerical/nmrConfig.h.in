@@ -2,14 +2,11 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-$Id$
+  Author(s): Anton Deguet
+  Created on: 2011-09-22
 
-Author(s): Anton Deguet
-Created on: 2011-09-22
-
-(C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-Reserved.
-
+  (C) Copyright 2011-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  
 --- begin cisst license - do not edit ---
 
 This software is provided "as is" under an open source license, with
@@ -17,7 +14,6 @@ no warranty. The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #ifndef _nmrConfig_h
@@ -27,5 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Do we have cisstNetlib
 #cmakedefine01 CISST_HAS_CISSTNETLIB
+
+#cmakedefine01 CISST_NMR_COMPILE_POLYNOMIALS
 
 #endif // _nmrConfig_h
