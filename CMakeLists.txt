@@ -16,7 +16,7 @@
 cmake_minimum_required (VERSION 3.10)
 
 # cisst (Computer Integrated Surgical Systems and Technology)
-project (cisst VERSION 1.2.0)
+project (cisst VERSION 1.2.1)
 
 # cisst compiler settings
 include (cmake/cisstSettings.cmake)
