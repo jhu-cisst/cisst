@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2023 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -13,10 +13,10 @@
 
 
 # Backward compatibility
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.10)
 
 # cisst (Computer Integrated Surgical Systems and Technology)
-project (cisst VERSION 1.2.0)
+project (cisst VERSION 1.2.1)
 
 # cisst compiler settings
 include (cmake/cisstSettings.cmake)
@@ -545,8 +545,8 @@ install (FILES "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
 
 # CMake use cisst file
 set (CISST_CMAKE_FILES_TO_COPY
-     Usecisst.cmake cisstSettings.cmake cisstMacros.cmake cisstConfigVersion.cmake.in
-     sawRevision.h.in sawConfig.cmake.in sawConfigVersion.cmake.in)
+     Usecisst.cmake cisstSettings.cmake cisstMacros.cmake
+     sawRevision.h.in sawConfig.cmake.in)
 foreach (cmake_file_to_copy ${CISST_CMAKE_FILES_TO_COPY})
   # copy to build for users not installing
   configure_file ("${CISST_CMAKE_SOURCE_DIR}/${cmake_file_to_copy}"

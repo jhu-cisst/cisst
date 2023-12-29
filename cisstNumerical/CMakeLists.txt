@@ -19,6 +19,8 @@ else ()
   option (CISST_HAS_CISSTNETLIB "Use the netlib.org sets of numerical methods in Fortran (provided on cisst.org)." OFF)
 endif ()
 
+option (CISST_NMR_COMPILE_POLYNOMIALS "Compile the cisstNumerical polynomial classes (deprecated)" OFF)
+
 if (CISST_HAS_CISSTNETLIB)
   find_package (CisstNetlib REQUIRED)
   cisst_set_package_settings (cisstNumerical cisstNetlib INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)

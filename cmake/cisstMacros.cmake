@@ -14,6 +14,7 @@
 #
 # --- end cisst license ---
 
+include(CMakePackageConfigHelpers)
 
 # set virtual library to CMake option name equivalence
 set (cisstFLTK_OPTION_NAME "CISST_HAS_FLTK" CACHE STRING "Name of option to use to compile cisstFLTK")
@@ -321,13 +322,8 @@ macro (cisst_add_library ...)
                          SOVERSION ${cisst_VERSION})
 
   # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
-  if (CMAKE_VERSION VERSION_GREATER "3.0.1")
-    target_compile_definitions (${LIBRARY} PRIVATE
-      LIBRARY_NAME_FOR_CISST_REGISTER="${LIBRARY}")
-  else ()
-    set_target_properties (${LIBRARY}
-      PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${LIBRARY}\"")
-  endif ()
+  target_compile_definitions (${LIBRARY} PRIVATE
+    LIBRARY_NAME_FOR_CISST_REGISTER="${LIBRARY}")
 
   # Install the library
   install (TARGETS ${LIBRARY} COMPONENT ${LIBRARY}
@@ -484,13 +480,8 @@ macro (cisst_target_link_libraries TARGET ...)
     cisst_target_link_package_libraries (${_WHO_REQUIRES} ${_REQUIRED_CISST_LIBRARIES})
 
     # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
-    if (CMAKE_VERSION VERSION_GREATER "3.0.1")
-      target_compile_definitions (${_WHO_REQUIRES} PRIVATE
-        LIBRARY_NAME_FOR_CISST_REGISTER="${_WHO_REQUIRES}")
-    else ()
-      set_target_properties (${_WHO_REQUIRES}
-        PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${_WHO_REQUIRES}\"")
-    endif ()
+    target_compile_definitions (${_WHO_REQUIRES} PRIVATE
+      LIBRARY_NAME_FOR_CISST_REGISTER="${_WHO_REQUIRES}")
 
   endif (NOT CISST_LIBRARIES)
 
@@ -1002,27 +993,20 @@ function (cisst_add_config_version ...)
     cisst_cmake_debug ("cisst_add_config_version: ${keyword}: ${${keyword}}")
   endforeach (keyword)
 
-  set (_cacv_versionTemplateFile "cisstConfigVersion.cmake.in")
-  find_file (CISST_CONFIG_VERSION_TEMPLATE
-             NAMES ${_cacv_versionTemplateFile}
-             PATHS ${CISST_CMAKE_DIRS}
-             NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
-  mark_as_advanced (CISST_CONFIG_VERSION_TEMPLATE)
-  if (CISST_CONFIG_VERSION_TEMPLATE)
-    configure_file("${CISST_CONFIG_VERSION_TEMPLATE}" "${_cacv_configFile}" @ONLY)
-    if (DESTINATION)
-      if (COMPONENT)
-        install (FILES ${_cacv_configFile}
-                 DESTINATION ${DESTINATION}
-                 COMPONENT ${COMPONENT})
-      else (COMPONENT)
-        install (FILES ${_cacv_configFile}
-                 DESTINATION ${DESTINATION})
-      endif (COMPONENT)
-    endif (DESTINATION)
-  else ()
-    message (FATAL_ERROR "cisst_add_config_version can't find template file: \"${_cacv_versionTemplateFile}\"")
-  endif ()
+  write_basic_package_version_file (
+    ${_cacv_configFile}
+    VERSION ${VERSION}
+    COMPATIBILITY SameMajorVersion)
+  if (DESTINATION)
+    if (COMPONENT)
+      install (FILES ${_cacv_configFile}
+        DESTINATION ${DESTINATION}
+        COMPONENT ${COMPONENT})
+    else (COMPONENT)
+      install (FILES ${_cacv_configFile}
+        DESTINATION ${DESTINATION})
+    endif (COMPONENT)
+  endif (DESTINATION)
 
 endfunction (cisst_add_config_version)
 
@@ -1163,15 +1147,10 @@ function (cisst_add_config_files _cacf_component_name)
   # generate componentConfigVersion.cmake
   set (_cacf_config_version_cmake
     "${_cacf_config_file_dir}/${_cacf_component_name}ConfigVersion.cmake")
-  find_file (
-    _cacf_config_version_cmake_in
-    NAMES sawConfigVersion.cmake.in
-    PATHS ${CISST_CMAKE_DIRS}
-    NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
-  configure_file (
-    ${_cacf_config_version_cmake_in}
+  write_basic_package_version_file (
     ${_cacf_config_version_cmake}
-    @ONLY)
+    VERSION ${_cacf_version}
+    COMPATIBILITY SameMajorVersion)
 
   # install cmake config files
   install (

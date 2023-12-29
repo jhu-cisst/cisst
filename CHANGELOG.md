@@ -1,6 +1,20 @@
 Change log
 ==========
 
+
+1.2.1 (2022-12-29)
+==================
+
+* API changes:
+  * CMake find_package now uses CMake `COMPATIBILITY` `SameMajorVersion`, older code used custom version check equivalent to `SameMinorVersion`
+* Deprecated features:
+  * cisstNumerical: polynomial is not compiled by default, set `CISST_NMR_COMPILE_POLYNOMIALS` if these are needed. We plan to remove this code in later releases 
+* Bug fixes:
+  * cisstDataGenerator: fixed export for enums and static methods
+  * cisstNumerical: for OS requiring CLAPACK, cisstNetlib now uses a fork that has been updated to support recent C/C++ compilers
+  * Fixed some GitHub actions/workflows
+
+
 1.2.0 (2022-11-21)
 ==================
 
