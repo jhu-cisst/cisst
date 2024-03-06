@@ -6,8 +6,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,5 +52,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmTransformationDynamic.h>
 
 #include <cisstParameterTypes/prmRobotState.h>
+
+#include <cisstParameterTypes/prmStateJoint.h>
+#include <cisstParameterTypes/prmConfigurationJoint.h>
+#include <cisstParameterTypes/prmOperatingState.h>
+#include <cisstParameterTypes/prmActuatorState.h>
 
 #endif // _prmPython_h
