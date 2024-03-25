@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2008-09-23
 
-  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -61,7 +61,7 @@ protected:
 
 	/*! The member function that is passed as 'start routine' argument for
 	  thread creation. */
-	virtual void *RunInternal(void* argument);
+    void *RunInternal(void* argument) override;
 
     /*! Called from Start */
     virtual void StartInternal(void);
@@ -112,16 +112,16 @@ public:
     /********************* Methods to change task status *****************/
 
     /* Create a new thread (if needed). */
-    void Create(void *data = 0);
+    void Create(void *data = 0) override;
 
     /*! Start/resume execution of the task */
-    void Start(void);
+    void Start(void) override;
 
     /*! Suspend the execution of the task */
-    void Suspend(void);
+    void Suspend(void) override;
 
     /*! End the task */
-    void Kill(void);
+    void Kill(void) override;
 };
 
 

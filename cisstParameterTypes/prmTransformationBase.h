@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:   2008-03-03
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -66,7 +64,7 @@ typedef prmTransformationBase* prmTransformationBasePtr;                 //conve
   
   \sa prmTransformationManager, prmTransformationFixed, prmTransformationDynamic, vctFrm3
 */
-class CISST_EXPORT prmTransformationBase
+class CISST_EXPORT prmTransformationBase: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     friend class prmTransformationManager;

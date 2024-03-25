@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2014-03-03
 
-  (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2014-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,9 +41,9 @@ class CISST_EXPORT mtsCollectorFactory: public mtsTaskFromSignal
     mtsCollectorFactory(const std::string & componentName);
     inline ~mtsCollectorFactory() {};
 
-    void Configure(const std::string & configuration);
-    void Run(void);
-    void Cleanup(void);
+    void Configure(const std::string & configuration) override;
+    void Run(void) override;
+    void Cleanup(void) override;
 
     /*! Add a signal to collect.  If needed, a new state collector
       will be created for each pair of component/state table.  One can

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:   2008-03-03
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,8 +44,8 @@ class CISST_EXPORT prmTransformationFixed: public prmTransformationBase
 
  protected:
     /*! a homogenous transform */
-    vctFrm3 Transformation; 
-    
+    vctFrm3 Transformation;
+
  public:
     /*! Default constructor.  Set the frame name as "Undefined", and NULL reference frame, no children.
      */
@@ -56,10 +54,10 @@ class CISST_EXPORT prmTransformationFixed: public prmTransformationBase
     {
 		/* Transformation is identity by default */
 	}
-    
+
     /*! Constructor with a name only.  The frame is automatically
       added to the frame manager.  The transformation between this
-      frame and its reference is set to Identity. 
+      frame and its reference is set to Identity.
       \param name const std::string describable name
 	*/
     inline prmTransformationFixed(const std::string & name):
@@ -67,9 +65,9 @@ class CISST_EXPORT prmTransformationFixed: public prmTransformationBase
     {
 		/* Transformation is identity by default */
 	}
-    
+
     /*! Constructor with a name, a reference frame and the
-      transformation from the reference frame. 
+      transformation from the reference frame.
 	  \param name cost std::string describable name
 	  \param newTransformation vctFrm3 const Cartesian frame Transformation
 	  \newReference prmTransformationBasePtr ptr to attachment point in the transformation manager
@@ -82,30 +80,30 @@ class CISST_EXPORT prmTransformationFixed: public prmTransformationBase
     {
         this->SetReferenceFrame(newReference);
     }
-    
+
     /*! Destructor.  The frame is also removed from the frame manager.
       The children of this frame will inherit its parent when the
       frame is removed.
      */
-    ~prmTransformationFixed(); 
+    ~prmTransformationFixed();
 
     /*! Set transformation between this frame and its reference. */
     //@{
-    inline void SetTransformation(const vctFrm3 & newTransformation) 
+    inline void SetTransformation(const vctFrm3 & newTransformation)
 	{
         this->Transformation.Assign(newTransformation);
     }
     /*! Query the constant transformation */
-	inline vctFrm3 GetTransformation(void) const 
+	inline vctFrm3 GetTransformation(void) const
 	{
         return this->Transformation;
     }
     //@}
-    
+
     /*! Get the transformation between the reference frame and this
-      frame.  
+      frame.
     */
-    inline vctFrm3 WRTReference(void) const 
+    inline vctFrm3 WRTReference(void) const override
 	{
         return this->GetTransformation();
     }

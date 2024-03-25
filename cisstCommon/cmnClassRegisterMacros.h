@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2006-10-30
 
-  (C) Copyright 2006-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -118,7 +115,7 @@ http://www.cisst.org/cisst/license.txt.
       enum {HAS_DYNAMIC_CREATION = hasDynamicCreation}; \
       enum {InitialLoD = lod}; \
       static cmnClassServicesBase * ClassServices(void); \
-      virtual const cmnClassServicesBase * Services(void) const; \
+      const cmnClassServicesBase * Services(void) const override; \
     private: \
       static cmnClassServicesBase * ClassServicesPointer;
 
@@ -132,7 +129,7 @@ http://www.cisst.org/cisst/license.txt.
       enum {HAS_DYNAMIC_CREATION = hasDynamicCreation}; \
       enum {InitialLoD = lod}; \
       CISST_EXPORT static cmnClassServicesBase * ClassServices(void); \
-      virtual CISST_EXPORT const cmnClassServicesBase * Services(void) const; \
+      CISST_EXPORT const cmnClassServicesBase * Services(void) const override; \
     private: \
       static cmnClassServicesBase * ClassServicesPointer;
 
@@ -145,7 +142,7 @@ http://www.cisst.org/cisst/license.txt.
       enum {HAS_DYNAMIC_CREATION = hasDynamicCreation}; \
       enum {InitialLoD = lod}; \
       _declspec(dllexport) static cmnClassServicesBase * ClassServices(void); \
-      virtual _declspec(dllexport) const cmnClassServicesBase * Services(void) const; \
+      _declspec(dllexport) const cmnClassServicesBase * Services(void) const override; \
     private: \
       static cmnClassServicesBase * ClassServicesPointer;
 #else
@@ -335,4 +332,3 @@ const int CMN_DYNAMIC_CREATION_ONEARG = 8;   // dynamic creation with one argume
 //@}
 
 #endif // _cmnClassRegisterMacros_h
-

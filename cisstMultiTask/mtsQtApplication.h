@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2012-06-26
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -66,18 +65,18 @@ public:
     int GetArgc() const { return Args.size(); }
     void GetArgv(char ***argvp) const;
 
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! Raw text output to stream */
-    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const;
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
       Returns true if successful. */
-    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
+    bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtApplicationConstructorArg);
@@ -97,8 +96,8 @@ public:
     mtsQtApplication(const mtsQtApplicationConstructorArg &arg);
     virtual ~mtsQtApplication();
 
-    void Startup(void);
-    void Run(void);
+    void Startup(void) override;
+    void Run(void) override;
     void Process(void);
 };
 

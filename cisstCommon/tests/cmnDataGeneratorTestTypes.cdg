@@ -57,8 +57,8 @@ class {
 
     inline-header {
         // to test inheritance using dynamic cast
-        inline void PureVirtualA(void) const {}
-        inline void PureVirtualB(void) const {}
+        inline void PureVirtualA(void) const override {}
+        inline void PureVirtualB(void) const override {}
     }
 
     member {

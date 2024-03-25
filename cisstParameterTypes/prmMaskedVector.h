@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:   2008-02-05
 
-  (C) Copyright 2008-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -101,20 +101,20 @@ public:
     }
 
     /*! To stream human readable output */
-    virtual void ToStream(std::ostream & outputStream) const {
+    void ToStream(std::ostream & outputStream) const override {
         mtsGenericObject::ToStream(outputStream);
         outputStream << ", " <<DataMember << ", " << MaskMember;
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const{
+    void SerializeRaw(std::ostream & outputStream) const override {
         BaseType::SerializeRaw(outputStream);
         MaskMember.SerializeRaw(outputStream);
         DataMember.SerializeRaw(outputStream);
     }
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream){
+    void DeSerializeRaw(std::istream & inputStream) override {
         BaseType::DeSerializeRaw(inputStream);
         MaskMember.DeSerializeRaw(inputStream);
         DataMember.DeSerializeRaw(inputStream);

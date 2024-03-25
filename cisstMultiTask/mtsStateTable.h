@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -85,7 +85,7 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         mtsStateIndex Last;
 
         void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                         bool headerOnly = false, const std::string & headerPrefix = "") const;
+                         bool headerOnly = false, const std::string & headerPrefix = "") const override;
     };
 
     /*! Data structure used for state table data collection.  Stores
@@ -483,7 +483,7 @@ public:
     }
 
     /*! For debugging, dumps the current data table to output stream. */
-    void ToStream(std::ostream & out) const;
+    void ToStream(std::ostream & out) const override;
 
     /*! For debugging, dumps some values of the current data table to
       output stream. */

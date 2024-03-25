@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Rajesh Kumar, Anton Deguet
+  Author(s):    Rajesh Kumar, Anton Deguet
   Created on:	2008-03-12
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -77,17 +76,17 @@ public:
     virtual ~prmForceCartesianSet();
 
     /*! Human readable output to stream. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! To stream raw data. */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 
 }; // _prmForceCartesianSet_h
 

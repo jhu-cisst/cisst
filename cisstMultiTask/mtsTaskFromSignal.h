@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-12-10
 
-  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,7 +48,7 @@ class CISST_EXPORT mtsTaskFromSignal: public mtsTaskContinuous
 
     /*! The member function that is passed as 'start routine' argument for
       thread creation. */
-    void * RunInternal(void * argument);
+    void * RunInternal(void * argument) override;
 
     /*! Method used to by the callable PostCommandQueuedCallable to wake
       up the thread when any queued command or event is sent */
@@ -77,16 +77,16 @@ class CISST_EXPORT mtsTaskFromSignal: public mtsTaskContinuous
     virtual ~mtsTaskFromSignal() {}
 
     /* documented in base class */
-	void Kill(void);
+    void Kill(void) override;
 
     /* documented in base class */
     mtsInterfaceRequired * AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
-                                                                          mtsRequiredType required = MTS_REQUIRED);
+                                                                          mtsRequiredType required = MTS_REQUIRED) override;
 
     /* documented in base class */
     mtsInterfaceProvided * AddInterfaceProvidedWithoutSystemEvents(const std::string & newInterfaceName,
                                                                    mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
-                                                                   bool isProxy = false);
+                                                                   bool isProxy = false) override;
 
 };
 

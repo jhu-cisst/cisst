@@ -5,16 +5,15 @@
   Author(s):  Anton Deguet
   Created on: 2008-06-26
 
-  (C) Copyright 2008-2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
-  --- begin cisst license - do not edit ---
+--- begin cisst license - do not edit ---
 
-  This software is provided "as is" under an open source license, with
-  no warranty.  The complete license can be found in license.txt and
-  http://www.cisst.org/cisst/license.txt.
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
 
-  --- end cisst license ---
+--- end cisst license ---
 */
 
 #pragma once
@@ -40,23 +39,23 @@ public:                                                                      \
     newName(const className & other):                                        \
         mtsGenericObject(),                                                  \
         className(other) {}                                                  \
-    void ToStream(std::ostream & outputStream) const {                       \
+    void ToStream(std::ostream & outputStream) const override {              \
         mtsGenericObject::ToStream(outputStream);                            \
         outputStream << std::endl;                                           \
         className::ToStream(outputStream);                                   \
     }                                                                        \
-    void SerializeRaw(std::ostream & outputStream) const {                   \
+    void SerializeRaw(std::ostream & outputStream) const override {          \
         mtsGenericObject::SerializeRaw(outputStream);                        \
         className::SerializeRaw(outputStream);                               \
     }                                                                        \
-    void DeSerializeRaw(std::istream & inputStream) {                        \
+    void DeSerializeRaw(std::istream & inputStream) override {               \
         mtsGenericObject::DeSerializeRaw(inputStream);                       \
         className::DeSerializeRaw(inputStream);                              \
     }                                                                        \
     void ToStreamRaw(std::ostream & outputStream,                            \
                      const char delimiter = ' ',                             \
                      bool headerOnly = false,                                \
-                     const std::string & headerPrefix = "") const {          \
+                     const std::string & headerPrefix = "") const override { \
         mtsGenericObject::ToStreamRaw(outputStream, delimiter,               \
                                       headerOnly, headerPrefix);             \
         outputStream << delimiter;                                           \
@@ -76,7 +75,6 @@ inline std::ostream & operator << (std::ostream & output,                    \
     return output;                                                           \
 }                                                                            \
 CMN_DECLARE_SERVICES_INSTANTIATION(newName)
-
 
 #endif // _mtsMacros_h
 

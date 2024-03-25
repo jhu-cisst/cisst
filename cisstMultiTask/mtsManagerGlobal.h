@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung
   Created on: 2009-11-12
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -247,60 +246,60 @@ public:
     //-------------------------------------------------------------------------
     //  Process Management
     //-------------------------------------------------------------------------
-    bool AddProcess(const std::string & processName);
+    bool AddProcess(const std::string & processName) override;
 
     bool AddProcessObject(mtsManagerLocalInterface * localManagerObject, const bool isManagerProxyServer = false);
 
-    bool FindProcess(const std::string & processName) const;
+    bool FindProcess(const std::string & processName) const override;
 
-    bool RemoveProcess(const std::string & processName, const bool networkDisconnect = false);
+    bool RemoveProcess(const std::string & processName, const bool networkDisconnect = false) override;
 
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
-    bool AddComponent(const std::string & processName, const std::string & componentName);
+    bool AddComponent(const std::string & processName, const std::string & componentName) override;
 
-    bool FindComponent(const std::string & processName, const std::string & componentName) const;
+    bool FindComponent(const std::string & processName, const std::string & componentName) const override;
 
-    bool RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock = true);
+    bool RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock = true) override;
 
     //-------------------------------------------------------------------------
     //  Interface Management
     //-------------------------------------------------------------------------
-    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) override;
 
-    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) override;
 
-    bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const override;
 
-    bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const;
+    bool FindInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const override;
 
-    bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
+    bool RemoveInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true) override;
 
-    bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true);
+    bool RemoveInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool lock = true) override;
 
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
     ConnectionIDType Connect(const std::string & requestProcessName,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceName);
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceName) override;
 
-    bool ConnectConfirm(const ConnectionIDType connectionID);
+    bool ConnectConfirm(const ConnectionIDType connectionID) override;
 
-    bool Disconnect(const ConnectionIDType connectionID);
+    bool Disconnect(const ConnectionIDType connectionID) override;
 
     bool Disconnect(const mtsDescriptionConnection & connection);
 
     bool Disconnect(
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceName);
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceName) override;
 
-    bool InitiateConnect(const ConnectionIDType connectionID);
+    bool InitiateConnect(const ConnectionIDType connectionID) override;
 
-    bool ConnectServerSideInterfaceRequest(const ConnectionIDType connectionID);
+    bool ConnectServerSideInterfaceRequest(const ConnectionIDType connectionID) override;
 
-    void GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const;
+    void GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const override;
 
     //-------------------------------------------------------------------------
     //  Getters
@@ -407,14 +406,14 @@ public:
     bool StopServer(void);
 
     /*! Set access information of interface proxy server */
-    bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
+    bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo) override;
 
     /*! Get access information of interface proxy server */
-    bool GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo);
+    bool GetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, std::string & endpointInfo) override;
 
     bool GetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName,
         const std::string & serverProcessName, const std::string & serverComponentName,
-        const std::string & serverInterfaceName, std::string & endpointInfo);
+        const std::string & serverInterfaceName, std::string & endpointInfo) override;
 
     /*! Check if there is any pending connection.  All new connections should be
         confirmed by the LCM within timeout after the GCM issues a new connection

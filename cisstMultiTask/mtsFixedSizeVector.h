@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:   2010-02-27
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -74,36 +72,36 @@ public:
     inline ~mtsFixedSizeVector() {}
 
      /*! To stream human readable output */
-    virtual  std::string ToString(void) const {
+    virtual std::string ToString(void) const {
         std::stringstream outputStream;
         this->ToStream(outputStream);
         return outputStream.str();
     }
 
     /*! To stream human readable output */
-    virtual void ToStream(std::ostream & outputStream) const {
+    void ToStream(std::ostream & outputStream) const override {
         mtsGenericObject::ToStream(outputStream);
         outputStream << std::endl;
         VectorType::ToStream(outputStream);
     }
 
     /*! To stream raw data. */
-    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override {
         mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
         outputStream << delimiter;
         VectorType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const
+    void SerializeRaw(std::ostream & outputStream) const override
     {
         mtsGenericObject::SerializeRaw(outputStream);
         VectorType::SerializeRaw(outputStream);
     }
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream)
+    void DeSerializeRaw(std::istream & inputStream) override
     {
         mtsGenericObject::DeSerializeRaw(inputStream);
         VectorType::DeSerializeRaw(inputStream);

@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2013-08-06
 
-  (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,18 +52,18 @@ public:
         Name(other.Name), IP(other.IP), Port(other.Port) {}
     ~mtsSocketProxyClientConstructorArg() {}
 
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! Raw text output to stream */
-    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const;
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
       Returns true if successful. */
-    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
+    bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsSocketProxyClientConstructorArg);
@@ -100,7 +99,7 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
     mtsCommandWriteBase *EventDisableCommand;
     void EventEnable(const std::string &eventName, const char *handle);
     void EventDisable(const std::string &eventName, const char *handle);
-    
+
     void CheckForEvents(double timeoutInSec);
 
     friend class CommandWrapperBase;
@@ -121,13 +120,13 @@ class CISST_EXPORT mtsSocketProxyClient : public mtsTaskContinuous
     /*! Destructor */
     virtual ~mtsSocketProxyClient();
 
-    void Configure(const std::string &) {}
+    void Configure(const std::string &) override {}
 
-    void Startup(void);
+    void Startup(void) override;
 
-    void Run(void);
+    void Run(void) override;
 
-    void Cleanup(void);
+    void Cleanup(void) override;
 
     // Following used by command wrappers
     bool CheckForEventsImmediate(double timeoutInSec);

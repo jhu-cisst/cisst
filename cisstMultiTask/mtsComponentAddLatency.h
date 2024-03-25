@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-12-15
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -88,10 +86,10 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
     virtual ~mtsComponentAddLatency();
 
     // methods defined as virtual in base class
-    void Configure(const std::string & filename);
-    void Startup(void);
-    void Run(void);
-    void Cleanup(void);
+    void Configure(const std::string & filename) override;
+    void Startup(void) override;
+    void Run(void) override;
+    void Cleanup(void) override;
 
     double SetLatency(double latencyInSeconds);
 

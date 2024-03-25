@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-02-06
 
-  (C) Copyright 2009-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -100,17 +100,17 @@ public:
     }
 
     /*! Human readable output to stream. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! To stream raw data. */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 
 }; // _prmForceCartesianGet_h
 

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Praneeth Sadda, Anton Deguet
   Created on: 2011-11-11
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #ifndef _mtsQtWidgetGenericObjectProxy_h
@@ -43,7 +40,7 @@ class CISST_EXPORT mtsQtWidgetIntRead: public mtsQtWidgetGenericObjectRead
     QLabel * Label;
  public:
     mtsQtWidgetIntRead(void);
-    virtual bool SetValue(const mtsGenericObject & value);
+    bool SetValue(const mtsGenericObject & value) override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetIntRead);
 
@@ -55,8 +52,8 @@ class CISST_EXPORT mtsQtWidgetIntWrite: public mtsQtWidgetGenericObjectWrite
     QSpinBox * SpinBox;
  public:
     mtsQtWidgetIntWrite(void);
-    virtual bool SetValue(const mtsGenericObject & value);
-    virtual bool GetValue(mtsGenericObject & placeHolder) const;
+    bool SetValue(const mtsGenericObject & value) override;
+    bool GetValue(mtsGenericObject & placeHolder) const override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetIntWrite);
 
@@ -70,7 +67,7 @@ class CISST_EXPORT mtsQtWidgetBoolRead: public mtsQtWidgetGenericObjectRead
     QLabel * Label;
  public:
     mtsQtWidgetBoolRead(void);
-    virtual bool SetValue(const mtsGenericObject & value);
+    bool SetValue(const mtsGenericObject & value) override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetBoolRead);
 
@@ -82,8 +79,8 @@ class CISST_EXPORT mtsQtWidgetBoolWrite: public mtsQtWidgetGenericObjectWrite
     QComboBox * ComboBox;
  public:
     mtsQtWidgetBoolWrite(void);
-    virtual bool SetValue(const mtsGenericObject & value);
-    virtual bool GetValue(mtsGenericObject & placeHolder) const;
+    bool SetValue(const mtsGenericObject & value) override;
+    bool GetValue(mtsGenericObject & placeHolder) const override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetBoolWrite);
 
@@ -97,7 +94,7 @@ class CISST_EXPORT mtsQtWidgetDoubleRead: public mtsQtWidgetGenericObjectRead
     QLabel * Label;
  public:
     mtsQtWidgetDoubleRead(void);
-    virtual bool SetValue(const mtsGenericObject & value);
+    bool SetValue(const mtsGenericObject & value) override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetDoubleRead);
 
@@ -109,8 +106,8 @@ class CISST_EXPORT mtsQtWidgetDoubleWrite: public mtsQtWidgetGenericObjectWrite
     QDoubleSpinBox * DoubleSpinBox;
  public:
     mtsQtWidgetDoubleWrite(void);
-    virtual bool SetValue(const mtsGenericObject & value);
-    virtual bool GetValue(mtsGenericObject & placeHolder) const;
+    bool SetValue(const mtsGenericObject & value) override;
+    bool GetValue(mtsGenericObject & placeHolder) const override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetDoubleWrite);
 
@@ -124,7 +121,7 @@ class CISST_EXPORT mtsQtWidgetStdStringRead: public mtsQtWidgetGenericObjectRead
     QLabel * Label;
  public:
     mtsQtWidgetStdStringRead(void);
-    virtual bool SetValue(const mtsGenericObject & value);
+    bool SetValue(const mtsGenericObject & value) override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetStdStringRead);
 
@@ -136,8 +133,8 @@ class CISST_EXPORT mtsQtWidgetStdStringWrite: public mtsQtWidgetGenericObjectWri
     QLineEdit * LineEdit;
  public:
     mtsQtWidgetStdStringWrite(void);
-    virtual bool SetValue(const mtsGenericObject & value);
-    virtual bool GetValue(mtsGenericObject & placeHolder) const;
+    bool SetValue(const mtsGenericObject & value) override;
+    bool GetValue(mtsGenericObject & placeHolder) const override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetStdStringWrite);
 
@@ -151,7 +148,7 @@ class CISST_EXPORT mtsQtWidgetStateIndexRead: public mtsQtWidgetGenericObjectRea
     QLabel * Label;
  public:
     mtsQtWidgetStateIndexRead(void);
-    virtual bool SetValue(const mtsGenericObject & value);
+    bool SetValue(const mtsGenericObject & value) override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetStateIndexRead);
 
@@ -168,8 +165,8 @@ class CISST_EXPORT mtsQtWidgetStateIndexWrite: public mtsQtWidgetGenericObjectWr
     static QWidget * MakeDoubleSpinBox();
  public:
     mtsQtWidgetStateIndexWrite(void);
-    virtual bool SetValue(const mtsGenericObject & value);
-    virtual bool GetValue(mtsGenericObject & placeHolder) const;
+    bool SetValue(const mtsGenericObject & value) override;
+    bool GetValue(mtsGenericObject & placeHolder) const override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetStateIndexWrite);
 

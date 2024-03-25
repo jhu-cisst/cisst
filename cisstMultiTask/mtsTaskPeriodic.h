@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -52,40 +52,40 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
  protected:
     /************************ Protected task data  *********************/
 
-	/*! The OS independent thread buddy, that makes the thread
-	  real-time on __ALL__ platforms. */
-	osaThreadBuddy ThreadBuddy;
+    /*! The OS independent thread buddy, that makes the thread
+      real-time on __ALL__ platforms. */
+    osaThreadBuddy ThreadBuddy;
 
     /*! The period of the task, in seconds. */
     double Period;
     osaAbsoluteTime AbsoluteTimePeriod;
 
-	/*! True if the task is hard real time. It is always false for non-real
-	  time systems. */
-	bool IsHardRealTime;
+    /*! True if the task is hard real time. It is always false for non-real
+      time systems. */
+    bool IsHardRealTime;
 
     /********************* Methods that call user methods *****************/
 
-	/*! The member function that is passed as 'start routine' argument for
-	  thread creation. */
-	virtual void *RunInternal(void* argument);
+    /*! The member function that is passed as 'start routine' argument for
+      thread creation. */
+    void *RunInternal(void* argument) override;
 
-	/*! The member funtion that is executed as soon as thread gets created.
-	  It does some housekeeping before the user code can be executed as real
-	  time. */
-	void StartupInternal(void);
+    /*! The member funtion that is executed as soon as thread gets created.
+      It does some housekeeping before the user code can be executed as real
+      time. */
+    void StartupInternal(void) override;
 
-	/*! The member function that is executed once the task terminates. This
-	  does some cleanup work */
-	void CleanupInternal(void);
+    /*! The member function that is executed once the task terminates. This
+      does some cleanup work */
+    void CleanupInternal(void) override;
 
     /*! Called from Start */
-    void StartInternal(void);
+    void StartInternal(void) override;
 
  public:
     /********************* Task constructor and destructor *****************/
 
-	/*! Create a task with name 'name', periodicity, and a flag that
+    /*! Create a task with name 'name', periodicity, and a flag that
       sets if the task needs to be hard real time.
 
       \param name The name of the task
@@ -112,14 +112,14 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
 
     mtsTaskPeriodic(const mtsTaskPeriodicConstructorArg &arg);
 
-	/*! Default Destructor. */
-	virtual ~mtsTaskPeriodic();
+    /*! Default Destructor. */
+    virtual ~mtsTaskPeriodic();
 
     /********************* Methods to change task status *****************/
     /* (use Start, Create and Kill methods from base classes)            */
 
-	/*! Suspend the execution of the task */
-	void Suspend(void);
+    /*! Suspend the execution of the task */
+    void Suspend(void) override;
 
     /********************* Methods for task period and overrun ************/
 
@@ -128,7 +128,7 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
 
     /*! Return true if thread is periodic.  Currently, returns true if
       the thread was created with a period > 0. */
-    bool IsPeriodic(void) const;
+    bool IsPeriodic(void) const override;
 
 };
 

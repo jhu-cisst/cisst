@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2010-02-26
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -47,7 +46,7 @@ public:
     mtsCollectorQtComponent(const std::string & componentName);
     ~mtsCollectorQtComponent(void);
 
-    void Configure(const std::string & CMN_UNUSED(filename) = "") {};
+    void Configure(const std::string & CMN_UNUSED(filename) = "") override {};
 
     /*! Connect to a QtWidget using slots and signals.  One can use
       the widget mtsCollectorQtWidget or any custom widget with the

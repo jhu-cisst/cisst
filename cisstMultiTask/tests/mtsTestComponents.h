@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-12-08
 
-  (C) Copyright 2009-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -408,7 +407,7 @@ public:
         }
     }
 
-    void Configure(const std::string & CMN_UNUSED(filename) = "") {}
+    void Configure(const std::string & CMN_UNUSED(filename) = "") override {}
 };
 
 typedef mtsTestDevice1<int> mtsTestDevice1_int;

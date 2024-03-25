@@ -2,12 +2,11 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung
   Created on: 2010-12-27
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+
 --- begin cisst license - do not edit ---
 
 This software is provided "as is" under an open source license, with
@@ -81,9 +80,9 @@ public:
         invalidated due to connection timeout */
     bool CheckTimeout(void) const;
 
-    void ToStream(std::ostream & outputStream) const;
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    void ToStream(std::ostream & outputStream) const override;
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsConnection)

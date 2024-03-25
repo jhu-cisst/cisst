@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -253,7 +253,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     size_t ProcessMailBoxes(void);
 
     /*! Send a human readable description of the interface. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
  protected:
  public: // adeguet1 todo fix -- this has been added for ostream << operator
