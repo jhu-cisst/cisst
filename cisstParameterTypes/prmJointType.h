@@ -43,7 +43,7 @@ std::string CISST_EXPORT prmJointTypeToString(const prmJointType & data);
 
 prmJointType CISST_EXPORT prmJointTypeFromString(const std::string & value);
 
-const std::vector<std::string> & CISST_EXPORT prmJointTypeVectorString(void);
+CISST_EXPORT const std::vector<std::string> & prmJointTypeVectorString(void);
 
 typedef vctDynamicVector<prmJointType> prmJointTypeVec;
 typedef mtsGenericObjectProxy<prmJointTypeVec> prmJointTypeProxy;
