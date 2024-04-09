@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:   2013-05-14
 
-  (C) Copyright 2013-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,31 +34,20 @@ typedef enum JointType {
     PRM_JOINT_INACTIVE
 } prmJointType;
 
+void CISST_EXPORT prmJointTypeToFactor(const vctDynamicVector<prmJointType> & types,
+                                       const double prismaticFactor,
+                                       const double revoluteFactor,
+                                       vctDynamicVector<double> & factors);
+
+std::string CISST_EXPORT prmJointTypeToString(const prmJointType & data);
+
+prmJointType CISST_EXPORT prmJointTypeFromString(const std::string & value);
+
+const std::vector<std::string> & CISST_EXPORT prmJointTypeVectorString(void);
+
 typedef vctDynamicVector<prmJointType> prmJointTypeVec;
 typedef mtsGenericObjectProxy<prmJointTypeVec> prmJointTypeProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(prmJointTypeProxy);
-
-inline std::string cmnDataHumanReadable(const prmJointType & data)
-{
-    switch (data) {
-    case PRM_JOINT_UNDEFINED:
-        return "undefined";
-        break;
-    case PRM_JOINT_PRISMATIC:
-        return "prismatic";
-        break;
-    case PRM_JOINT_REVOLUTE:
-        return "revolute";
-        break;
-    case PRM_JOINT_INACTIVE:
-        return "inactive";
-        break;
-    default:
-        return "unknown";
-        break;
-    }
-    return "unknown";
-}
 
 CMN_DATA_SPECIALIZATION_FOR_ENUM(prmJointType, int);
 
@@ -66,10 +55,4 @@ CMN_DATA_SPECIALIZATION_FOR_ENUM(prmJointType, int);
 CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM_EXPORT(prmJointType);
 #endif
 
-void CISST_EXPORT prmJointTypeToFactor(const vctDynamicVector<prmJointType> & types,
-                                       const double prismaticFactor,
-                                       const double revoluteFactor,
-                                       vctDynamicVector<double> & factors);
-
 #endif // _prmJointType_h
-

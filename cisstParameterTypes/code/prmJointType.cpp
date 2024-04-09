@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-10-20
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,9 +17,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstParameterTypes/prmJointType.h>
+#include <locale>
 
 #if CISST_HAS_JSON
-CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(prmJointType, int);
+CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM_AS_STRING(prmJointType, prmJointTypeToString, prmJointTypeFromString);
 #endif
 
 void prmJointTypeToFactor(const vctDynamicVector<prmJointType> & types,
@@ -41,4 +42,59 @@ void prmJointTypeToFactor(const vctDynamicVector<prmJointType> & types,
             break;
         }
     }
+}
+
+std::string prmJointTypeToString(const prmJointType & data)
+{
+    switch (data) {
+    case PRM_JOINT_UNDEFINED:
+        return "UNDEFINED";
+        break;
+    case PRM_JOINT_PRISMATIC:
+        return "PRISMATIC";
+        break;
+    case PRM_JOINT_REVOLUTE:
+        return "REVOLUTE";
+        break;
+    case PRM_JOINT_INACTIVE:
+        return "INACTIVE";
+        break;
+    default:
+        break;
+    }
+    cmnThrow("prmJointTypeToString called with invalid enum");
+    return "";
+}
+
+prmJointType prmJointTypeFromString(const std::string & value)
+{
+    if (value == "UNDEFINED") {
+        return PRM_JOINT_UNDEFINED;
+    };
+    if (value == "PRISMATIC") {
+        return PRM_JOINT_PRISMATIC;
+    };
+    if (value == "REVOLUTE") {
+        return PRM_JOINT_REVOLUTE;
+    };
+    if (value == "INACTIVE") {
+        return PRM_JOINT_INACTIVE;
+    };
+    std::string message = "prmJointTypeFromString can't find matching enum for " + value + ".  Options are: ";
+    std::vector<std::string> options = prmJointTypeVectorString();
+    for (std::vector<std::string>::const_iterator i = options.begin(); i != options.end(); ++i) message += *i + " ";
+    cmnThrow(message);
+    return PRM_JOINT_UNDEFINED;
+}
+
+const std::vector<std::string> & prmJointTypeVectorString(void)
+{
+    static std::vector<std::string> vectorString;
+    if (vectorString.empty()) {
+        vectorString.push_back("UNDEFINED");
+        vectorString.push_back("PRISMATIC");
+        vectorString.push_back("REVOLUTE");
+        vectorString.push_back("INACTIVE");
+    }
+    return vectorString;
 }
