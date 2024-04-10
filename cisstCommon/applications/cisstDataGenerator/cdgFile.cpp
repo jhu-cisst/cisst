@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@
   http://www.cisst.org/cisst/license.txt.
 
   --- end cisst license ---
-
 */
 
 #include "cdgFile.h"
@@ -299,7 +298,8 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
 
 bool cdgFile::Validate(std::string & errorMessage)
 {
-    return this->Global->ValidateRecursion(errorMessage);
+    return (this->Global->Validate(errorMessage)
+            && this->Global->ValidateRecursion(errorMessage));
 }
 
 

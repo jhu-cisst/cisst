@@ -97,7 +97,7 @@ CMN_IMPLEMENT_SERVICES(prmVelocityJointSet);
 CMN_IMPLEMENT_SERVICES(prmCartesianImpedance);
 
 #include <cisstParameterTypes/prmJointType.h>
-CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeVecProxy);
 
 #include <cisstParameterTypes/prmIMUSensors.h>
 CMN_IMPLEMENT_SERVICES(prmIMUSensors);
