@@ -119,7 +119,7 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
     if (ClassName == "") {
         outputStream << "CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(" << name << ", int, " << name << "ToString);" << std::endl
                      << "#if CISST_HAS_JSON" << std::endl
-                     << "  CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(" << name << ");" << std::endl
+                     << "  CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM_EXPORT(" << name << ");" << std::endl
                      << "#endif // CISST_HAS_JSON" << std::endl;
     }
 }
