@@ -92,7 +92,7 @@ void cdgGlobal::GenerateIncludes(std::ostream & outputStream) const
     for (index = 0; index < Scopes.size(); index++) {
         const std::string mtsProxy = Scopes[index]->GetFieldValue("mts-proxy");
         // includes for mts proxy
-        if (mtsProxy != "false") {
+        if ((mtsProxy == "true") || (mtsProxy == "declaration-only")) {
             needsIncludes = true;
         }
     }

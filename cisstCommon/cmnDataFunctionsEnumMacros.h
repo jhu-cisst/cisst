@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnDataFunctionsEnumMacros_h
 #define _cmnDataFunctionsEnumMacros_h
 
+#include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnDataFunctions.h>
-
 
 #define CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(_enum, _promotedType, _humanReadableFunction) \
 template <>                                                             \
