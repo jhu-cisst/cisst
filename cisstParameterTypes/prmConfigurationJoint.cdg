@@ -2,9 +2,9 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
+#include <cisstCommon/cmnJointType.h>
 #include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstParameterTypes/prmJointType.h>
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
@@ -26,7 +26,7 @@ class {
 
     member {
         name Type;
-        type vctDynamicVector<prmJointType>;
+        type vctDynamicVector<cmnJointType>;
     }
 
     member {

@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2023 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -34,7 +34,6 @@ cisst_data_generator (cisstParameterTypes
   ../prmForwardKinematicsResponse.cdg
   ../prmInverseKinematicsRequest.cdg
   ../prmInverseKinematicsResponse.cdg
-  ../prmJointType.cdg
   )
 
 # to compile cisst generated code, need to find header file
@@ -52,11 +51,6 @@ set (SOURCE_FILES
   prmVelocityCartesianSet.cpp
   prmForceCartesianGet.cpp
   prmForceCartesianSet.cpp
-  
-  prmTransformationBase.cpp
-  prmTransformationFixed.cpp
-  prmTransformationDynamic.cpp
-  prmTransformationManager.cpp
   
   prmActuatorState.cpp
   prmRobotState.cpp
@@ -81,11 +75,6 @@ set (HEADER_FILES
   prmVelocityCartesianSet.h
   prmForceCartesianGet.h
   prmForceCartesianSet.h
-  
-  prmTransformationBase.h
-  prmTransformationFixed.h
-  prmTransformationDynamic.h
-  prmTransformationManager.h
   
   prmMaskedVector.h
   prmActuatorState.h

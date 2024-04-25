@@ -398,7 +398,7 @@ robManipulator::GetJointNames(std::vector<std::string> & names) const
 }
 
 void
-robManipulator::GetJointTypes(std::vector<robJoint::Type> & types) const
+robManipulator::GetJointTypes(std::vector<cmnJointType> & types) const
 {
   if (types.size() != links.size()) {
     cmnThrow(std::range_error("robManipulator::GetJoinTypes: size of placeholder doesn't match kinematic chain length"));
@@ -609,7 +609,7 @@ void robManipulator::NormalizeAngles( vctDynamicVector<double> &q )
 {
   // normalize joint values
   for (size_t j=0; j<links.size(); j++) {
-    if (links[j].GetType() == robJoint::HINGE) {
+    if (links[j].GetType() == cmnJointType::CMN_JOINT_REVOLUTE) {
       q[j] = fmod((double)q[j], (double)2.0*cmnPI);
       if (cmnPI < q[j]) {
         q[j] = q[j] - 2.0*cmnPI;
@@ -758,7 +758,7 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
       U = links[j].ForwardKinematics( q[j] ) * U;
     }
 
-    if( links[j].GetType() == robJoint::HINGE ){         // Revolute joint
+    if( links[j].GetType() == cmnJointType::CMN_JOINT_REVOLUTE ){         // Revolute joint
       // Jn is column major
       Jn[j][0] = U[0][3]*U[1][0] - U[1][3]*U[0][0];
       Jn[j][1] = U[0][3]*U[1][1] - U[1][3]*U[0][1];
@@ -770,7 +770,7 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
     }
 
-    if( links[j].GetType() == robJoint::SLIDER ){   // Prismatic joint
+    if( links[j].GetType() == cmnJointType::CMN_JOINT_PRISMATIC ){   // Prismatic joint
       // Jn is column major
       Jn[j][0] = U[2][0]; // nz
       Jn[j][1] = U[2][1]; // oz
@@ -954,9 +954,9 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     n = A*n + (ps%f) + (s%F[i]) + N[i];        // moment externed on i by i-1
     A = links[i].Orientation(q[i]).InverseSelf(); //
 
-    if (links[i].GetType() == robJoint::HINGE )
+    if (links[i].GetType() == cmnJointType::CMN_JOINT_REVOLUTE )
       tau[i] = n*(A*z0);                       //
-    if( links[i].GetType() == robJoint::SLIDER )
+    if( links[i].GetType() == cmnJointType::CMN_JOINT_PRISMATIC )
       tau[i] = f*(A*z0);                       //
 
   }
@@ -1032,12 +1032,12 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
 
     ps = links[i].PStar();
 
-    if (links[i].GetType() == robJoint::HINGE ){
+    if (links[i].GetType() == cmnJointType::CMN_JOINT_REVOLUTE ){
       w  = A*w  + (z0*qd[i]) ;                      // angular velocity
       wd = A*wd + (z0*qdd[i]) + ((A*w)%(z0*qd[i])); // angular acceleration wrt i
       vd = A*((wd%ps) + (w%(w%ps)) + vd);           // linear acceleration
     }
-    if( links[i].GetType() == robJoint::SLIDER ){
+    if( links[i].GetType() == cmnJointType::CMN_JOINT_PRISMATIC ){
       vd = A*( (wd%ps) + (w%(w%ps)) + vd ) + 2.0*((A*w)%(z0*qd(i))) + z0*qdd(i);
       w = A*w;
       wd = A*wd;
@@ -1066,9 +1066,9 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
     n = A*n + (s%F[i]) + (ps%(A*f)) + N[i];    // moment externed on i by i-1
     f = A*f + F[i];                            // force exterted on i by i-1
 
-    if (links[i].GetType() == robJoint::HINGE )
+    if (links[i].GetType() == cmnJointType::CMN_JOINT_REVOLUTE )
       tau[i] = n*(z0);                       //
-    if( links[i].GetType() == robJoint::SLIDER )
+    if( links[i].GetType() == cmnJointType::CMN_JOINT_PRISMATIC )
       tau[i] = f*(z0);                       //
 
   }
@@ -1616,7 +1616,7 @@ robManipulator::JacobianKinematicsIdentification
         robHayati* h = dynamic_cast<robHayati*>( ki );
 
         switch( h->GetType() ){
-        case robJoint::HINGE:
+        case cmnJointType::CMN_JOINT_REVOLUTE:
           {
 
             {
@@ -1662,7 +1662,7 @@ robManipulator::JacobianKinematicsIdentification
           }
           break;
 
-        case robJoint::SLIDER:
+        case cmnJointType::CMN_JOINT_PRISMATIC:
           {
 
             {

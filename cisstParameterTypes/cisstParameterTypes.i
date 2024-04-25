@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -56,7 +55,7 @@ http://www.cisst.org/cisst/license.txt.
 // Wrap base type
 %include "cisstParameterTypes/prmMotionBase.h"
 
-// Wrap all others 
+// Wrap all others
 %include "cisstParameterTypes/prmEventButton.h"
 
 %include "cisstParameterTypes/prmPositionCartesianGet.h"
@@ -70,11 +69,6 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstParameterTypes/prmPositionJointSet.h"
 %include "cisstParameterTypes/prmVelocityJointGet.h"
 %include "cisstParameterTypes/prmVelocityJointSet.h"
-
-%include "cisstParameterTypes/prmTransformationBase.h"
-%include "cisstParameterTypes/prmTransformationManager.h"
-%include "cisstParameterTypes/prmTransformationDynamic.h"
-%include "cisstParameterTypes/prmTransformationFixed.h"
 
 %include "cisstParameterTypes/prmRobotState.h"
 

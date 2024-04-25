@@ -702,12 +702,11 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     find_program (CISST_DG_EXECUTABLE cisstDataGenerator)
   else (CMAKE_CROSSCOMPILING)
     if (TARGET cisstCommon)
-      # make sure the target existsOUTPUT_NAME
+      # make sure the target exists
       if (TARGET cisstDataGenerator)
         # if the target exists, use its destination
         cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
-        #get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
-        set(CISST_DG_EXECUTABLE $<TARGET_FILE:cisstDataGenerator>)
+        set (CISST_DG_EXECUTABLE $<TARGET_FILE:cisstDataGenerator>)
       endif (TARGET cisstDataGenerator)
     else (TARGET cisstCommon)
       cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")

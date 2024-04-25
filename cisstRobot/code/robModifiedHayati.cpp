@@ -1,10 +1,8 @@
 /*
-
   Author(s): Simon Leonard, Min Yang Jung
   Created on: April 29 2013
 
-  (C) Copyright 2009-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,14 +18,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <iomanip>
 #include <iostream>
 
-robModifiedHayati::robModifiedHayati() 
+robModifiedHayati::robModifiedHayati()
     : robKinematics(robKinematics::MODIFIED_HAYATI),
       beta(0.0), alpha(0.0), a(0.0), d(0.0), theta(0.0)
-{} 
+{}
 
-robModifiedHayati::robModifiedHayati(double _beta, 
-                         double _alpha, 
-                         double _a, 
+robModifiedHayati::robModifiedHayati(double _beta,
+                         double _alpha,
+                         double _a,
                          double _d,
                          double _theta,
                          const robJoint& joint) :
@@ -43,7 +41,7 @@ robModifiedHayati::~robModifiedHayati()
 {}
 
 
-robKinematics* robModifiedHayati::Clone() const 
+robKinematics* robModifiedHayati::Clone() const
 {
     return (robKinematics*) new robModifiedHayati(*this);
 }
@@ -56,19 +54,19 @@ vctFixedSizeVector<double,3> robModifiedHayati::PStar() const
 }
 
 vctFrame4x4<double> robModifiedHayati::ForwardKinematics(double q) const
-{ 
+{
     double a = this->a;
     double d = this->d;
     double theta = this->theta;
 
     // Add the position offset to the joint value
     switch (GetType()) {
-    case robJoint::HINGE:
+    case cmnJointType::CMN_JOINT_REVOLUTE:
         {
             theta = theta + PositionOffset() + q;
 
-            double ca = cos(this->alpha); double sa = sin(this->alpha);	
-            double cb = cos(this->beta);  double sb = sin(this->beta);	
+            double ca = cos(this->alpha); double sa = sin(this->alpha);
+            double cb = cos(this->beta);  double sb = sin(this->beta);
             double ct = cos(theta);       double st = sin(theta);
 
             vctFrame4x4<double> Ry(
@@ -100,12 +98,12 @@ vctFrame4x4<double> robModifiedHayati::ForwardKinematics(double q) const
             return (Ry * Rx * Tx * Rz);
         }
 
-    case robJoint::SLIDER:
+    case cmnJointType::CMN_JOINT_PRISMATIC:
         {
             d = d + PositionOffset() + q;
 
-            double ca = cos(this->alpha); double sa = sin(this->alpha);	
-            double cb = cos(this->beta);  double sb = sin(this->beta);	
+            double ca = cos(this->alpha); double sa = sin(this->alpha);
+            double cb = cos(this->beta);  double sb = sin(this->beta);
 
             vctFrame4x4<double> Ry(
                                    vctMatrixRotation3<double>( cb,  0.0, sb,
@@ -142,7 +140,7 @@ vctFrame4x4<double> robModifiedHayati::ForwardKinematics(double q) const
     }
 }
 
-vctMatrixRotation3<double> robModifiedHayati::Orientation(double q) const 
+vctMatrixRotation3<double> robModifiedHayati::Orientation(double q) const
 {
     vctFrame4x4<double> Rt = ForwardKinematics(q);
     return vctMatrixRotation3<double>(Rt[0][0], Rt[0][1], Rt[0][2],
