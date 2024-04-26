@@ -248,7 +248,7 @@ public:
 
   /*! Get joint types */
   virtual void
-    GetJointTypes(std::vector<robJoint::Type> & types) const;
+    GetJointTypes(std::vector<cmnJointType> & types) const;
 
   //! Evaluate the forward kinematics
   /**

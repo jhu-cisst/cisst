@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-10-20
 
-  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -69,18 +69,6 @@ CMN_IMPLEMENT_SERVICES(prmPositionJointSet);
 #include <cisstParameterTypes/prmRobotState.h>
 CMN_IMPLEMENT_SERVICES(prmRobotState);
 
-#include <cisstParameterTypes/prmTransformationBase.h>
-CMN_IMPLEMENT_SERVICES(prmTransformationBase);
-
-#include <cisstParameterTypes/prmTransformationDynamic.h>
-CMN_IMPLEMENT_SERVICES(prmTransformationDynamic);
-
-#include <cisstParameterTypes/prmTransformationFixed.h>
-CMN_IMPLEMENT_SERVICES(prmTransformationFixed);
-
-#include <cisstParameterTypes/prmTransformationManager.h>
-CMN_IMPLEMENT_SERVICES(prmTransformationManager);
-
 #include <cisstParameterTypes/prmVelocityCartesianGet.h>
 CMN_IMPLEMENT_SERVICES(prmVelocityCartesianGet);
 
@@ -95,9 +83,6 @@ CMN_IMPLEMENT_SERVICES(prmVelocityJointSet);
 
 #include <cisstParameterTypes/prmCartesianImpedance.h>
 CMN_IMPLEMENT_SERVICES(prmCartesianImpedance);
-
-#include <cisstParameterTypes/prmJointType.h>
-CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeVecProxy);
 
 #include <cisstParameterTypes/prmIMUSensors.h>
 CMN_IMPLEMENT_SERVICES(prmIMUSensors);

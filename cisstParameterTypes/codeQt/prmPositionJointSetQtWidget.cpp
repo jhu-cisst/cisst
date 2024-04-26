@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2019-12-09
 
-  (C) Copyright 2019-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2019-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,6 +16,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnJointType.h>
 #include <cisstParameterTypes/prmPositionJointSetQtWidget.h>
 #include <cisstParameterTypes/prmConfigurationJoint.h>
 #include <cisstParameterTypes/prmPositionJointSet.h>
@@ -48,7 +49,7 @@ void prmPositionJointSetQtWidget::setupUi(void)
 
     QVWPosition = new vctQtWidgetDynamicVectorDoubleWrite(vctQtWidgetDynamicVectorWriteBase::SPINBOX_WIDGET);
     QVWPosition->SetPrecision(3);
-    QVWPosition->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed)); 
+    QVWPosition->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
     layout->addWidget(QVWPosition);
 
     // connect buttons
@@ -81,7 +82,7 @@ void prmPositionJointSetQtWidget::SlotRead(void)
         }
         if (configuration.Type().size() == state.Position().size()) {
             mFactors.SetSize(configuration.Type().size());
-            prmJointTypeToFactor(configuration.Type(), mPrismaticFactor, mRevoluteFactor, mFactors);
+            cmnJointTypeToFactor(configuration.Type(), mPrismaticFactor, mRevoluteFactor, mFactors);
             // temp vectors
             mTemp1.SetSize(state.Position().size());
             mTemp2.SetSize(state.Position().size());

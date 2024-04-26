@@ -1,0 +1,67 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+
+#include <cisstCommon/cmnUnits.h>
+
+// Always include last
+#include <cisstCommon/cmnExport.h>
+}
+
+enum {
+      name cmnJointType;
+      attribute CISST_EXPORT;
+      prefix CMN_JOINT_;
+
+      enum-value {
+          name UNDEFINED;
+          description undefined;
+      }
+      enum-value {
+          name PRISMATIC;
+          description prismatic joint;
+      }
+      enum-value {
+          name REVOLUTE;
+          description revolute joint;
+      }
+      enum-value {
+          name UNIVERSAL;
+          description universal joint;
+      }
+      enum-value {
+          name BALL_SOCKET;
+          description ball and socket;
+      }
+      enum-value {
+          name INACTIVE;
+          description inactive;
+      }
+}
+
+
+inline-header {
+
+template <template<class> class _vector_type>
+void cmnJointTypeToFactor(const _vector_type<cmnJointType> & types,
+                          const double prismaticFactor,
+                          const double revoluteFactor,
+                          _vector_type<double> & factors)
+{
+    // set unitFactor;
+    for (size_t i = 0; i < types.size(); i++) {
+        switch (types.at(i)) {
+        case CMN_JOINT_PRISMATIC:
+            factors.at(i) = prismaticFactor;
+            break;
+        case CMN_JOINT_REVOLUTE:
+            factors.at(i) = revoluteFactor;
+            break;
+        default:
+            factors.at(i) = 1.0;
+            break;
+        }
+    }
+}
+} // inline-header

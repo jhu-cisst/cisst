@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -10,6 +10,13 @@
 # --- end cisst license ---
 
 project (cisstCommon)
+
+# create data type using the data generator
+cisst_data_generator (cisstCommon
+  "${cisst_BINARY_DIR}/include" # where to save the file
+  "cisstCommon/"                # sub directory for include
+  ../cmnJointType.cdg
+  )
 
 # all source files
 set (SOURCE_FILES
@@ -104,9 +111,16 @@ cisst_add_library (
   LIBRARY cisstCommon
   FOLDER cisstCommon
   SOURCE_FILES ${SOURCE_FILES}
-  HEADER_FILES ${HEADER_FILES})
+  HEADER_FILES ${HEADER_FILES}
+  ADDITIONAL_SOURCE_FILES ${cisstCommon_CISST_DG_SRCS}
+  ADDITIONAL_HEADER_FILES_RELATIVE ${cisstCommon_CISST_DG_HDRS}
+  )
 
-add_dependencies (cisstCommon cisstRevision cisstBuildType)
+add_dependencies (cisstCommon cisstRevision cisstBuildType cisstDataGenerator)
+  
+install (
+  FILES ${cisstCommon_CISST_DG_HDRS_FULLPATH}
+  DESTINATION "include/cisstCommon")
 
 if (CISST_HAS_JSON)
   if (NOT JSON_USE_SYSTEM_VERSION)
