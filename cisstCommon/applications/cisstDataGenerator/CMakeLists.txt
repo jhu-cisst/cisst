@@ -82,9 +82,4 @@ install (TARGETS cisstDataGenerator
          COMPONENT cisstCommon
          RUNTIME DESTINATION bin)
 
-# force CMake to reconfigure so we can find the data generator
-add_custom_command (
-  TARGET cisstDataGenerator
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} ARGS ${cisst_BINARY_DIR})
   
