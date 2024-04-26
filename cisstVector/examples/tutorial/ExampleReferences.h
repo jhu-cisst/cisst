@@ -39,7 +39,7 @@ void ExampleReferences(void)
     std::cout << "v4.Ref<2>(3) on a vector of 4 elements will throw an out of range exception" << std::endl;
     try {
         v2.Assign(v4.Ref<2>(3));
-    } catch (std::out_of_range _exception) {
+    } catch (std::out_of_range & _exception) {
         std::cout << " - exception received: " << _exception.what() << std::endl;
     }
 
@@ -77,14 +77,14 @@ void ExampleReferences(void)
     try {
         std::cout << "Size mismatch between dynamic vector references" << std::endl;
         vA.Ref(5) = vB.Ref(6, 3);
-    } catch (std::runtime_error _exception) {
+    } catch (std::runtime_error & _exception) {
         std::cout << " - exception received: " << _exception.what() << std::endl;
     }
 
     try {
         std::cout << "Reference out of range" << std::endl;
         std::cout << vA.Ref(5, 6) << std::endl;
-    } catch (std::out_of_range _exception) {
+    } catch (std::out_of_range & _exception) {
         std::cout << " - exception received: " << _exception.what() << std::endl;
     }
 
@@ -116,7 +116,7 @@ void ExampleReferences(void)
     std::cout << "m4.Ref<2, 2>(3, 2) on a matrix of 4 rows will throw an out of range exception" << std::endl;
     try {
         m2.Assign(m4.Ref<2, 2>(3, 2));
-    } catch (std::out_of_range _exception) {
+    } catch (std::out_of_range & _exception) {
         std::cout << " - exception received: " << _exception.what() << std::endl;
     }
 
@@ -138,14 +138,14 @@ void ExampleReferences(void)
     try {
         std::cout << "Size mismatch between dynamic matrix references" << std::endl;
         mA.Ref(5, 4) = mB.Ref(6, 3);
-    } catch (std::runtime_error _exception) {
+    } catch (std::runtime_error & _exception) {
         std::cout << " - exception received: " << _exception.what() << std::endl;
     }
 
     try {
         std::cout << "Reference out of range" << std::endl;
         std::cout << mA.Ref(5, 5, 6, 6) << std::endl;
-    } catch (std::out_of_range _exception) {
+    } catch (std::out_of_range & _exception) {
         std::cout << " - exception received: " << _exception.what() << std::endl;
     }
 
