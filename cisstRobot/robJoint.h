@@ -35,6 +35,14 @@ class CISST_EXPORT robJoint {
 
  public:
 
+  // for backward compatibility
+  typedef cmnJointType Type;
+  static const cmnJointType UNDEFINED = CMN_JOINT_UNDEFINED;
+  static const cmnJointType HINGE = CMN_JOINT_REVOLUTE;
+  static const cmnJointType SLIDER = CMN_JOINT_PRISMATIC;
+  static const cmnJointType UNIVERSAL = CMN_JOINT_UNIVERSAL;
+  static const cmnJointType BALLSOCKET = CMN_JOINT_BALL_SOCKET;
+
   //! Joint modes
   /**
      Each joint can be active (powered by a motor) or passive

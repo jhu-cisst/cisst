@@ -47,18 +47,18 @@ set (SOURCE_FILES
 
   prmVelocityJointGet.cpp
   prmVelocityJointSet.cpp
-  
+
   prmVelocityCartesianSet.cpp
   prmForceCartesianGet.cpp
   prmForceCartesianSet.cpp
-  
+
   prmActuatorState.cpp
   prmRobotState.cpp
   prmActuatorParameters.cpp
-  
+
   prmInputDataConverter.cpp
   prmOperatingState.cpp
-  
+
   prmClassServices.cpp
   )
 
@@ -71,17 +71,18 @@ set (HEADER_FILES
 
   prmVelocityJointGet.h
   prmVelocityJointSet.h
-  
+
   prmVelocityCartesianSet.h
   prmForceCartesianGet.h
   prmForceCartesianSet.h
-  
+
   prmMaskedVector.h
   prmActuatorState.h
   prmRobotState.h
   prmActuatorParameters.h
   prmGainParameters.h
-  
+
+  prmJointType.h
   prmInputDataConverter.h
   )
 

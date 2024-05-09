@@ -5,6 +5,7 @@ inline-header {
 #include <cisstCommon/cmnJointType.h>
 #include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstParameterTypes/prmJointType.h>
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
