@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on: 2006-05-05
 
-  (C) Copyright 2006-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -803,6 +803,10 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdVct3VecProxy);
 
 typedef mtsGenericObjectProxy<stdStringList> mtsStdStringListProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringListProxy);
+
+#include <cisstCommon/cmnJointType.h>
+typedef mtsGenericObjectProxy<cmnJointType> cmnJointTypeProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(cmnJointTypeProxy);
 
 // Now, define proxies for cisstVector classes (see also
 // mtsFixedSizeVectorTypes.h, which uses multiple inheritance,
