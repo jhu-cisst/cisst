@@ -30,6 +30,9 @@ cisst_data_generator (cisstParameterTypes
   ../prmInputData.cdg
   ../prmKeyValue.cdg
   ../prmOperatingState.cdg
+  ../prmImageFrame.cdg
+  ../prmCameraInfo.cdg
+  ../prmDepthMap.cdg
   ../prmForwardKinematicsRequest.cdg
   ../prmForwardKinematicsResponse.cdg
   ../prmInverseKinematicsRequest.cdg

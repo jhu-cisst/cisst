@@ -99,6 +99,15 @@ CMN_IMPLEMENT_SERVICES(prmInputData);
 #include <cisstParameterTypes/prmOperatingState.h>
 CMN_IMPLEMENT_SERVICES(prmOperatingState);
 
+#include <cisstParameterTypes/prmImageFrame.h>
+CMN_IMPLEMENT_SERVICES(prmImageFrame);
+
+#include <cisstParameterTypes/prmCameraInfo.h>
+CMN_IMPLEMENT_SERVICES(prmCameraInfo);
+
+#include <cisstParameterTypes/prmDepthMap.h>
+CMN_IMPLEMENT_SERVICES(prmDepthMap);
+
 #include <cisstParameterTypes/prmForwardKinematicsRequest.h>
 CMN_IMPLEMENT_SERVICES(prmForwardKinematicsRequest);
 
