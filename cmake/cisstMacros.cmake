@@ -606,7 +606,7 @@ function (cisst_add_swig_module ...)
                RUNTIME DESTINATION bin
                LIBRARY DESTINATION lib
                COMPONENT ${MODULE})
-      install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py
+      install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                DESTINATION lib
                COMPONENT ${MODULE})
 

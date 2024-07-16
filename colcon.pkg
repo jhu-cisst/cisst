@@ -12,5 +12,6 @@
     "-DCISST_BUILD_SHARED_LIBS=ON",
     "-DIS_SHARED=SHARED",
     "-DBUILD_SHARED_LIBS=SHARED"
-  ]
+  ],
+  "hooks": ["bin/cisstvars.sh"]
 }
