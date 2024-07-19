@@ -787,6 +787,8 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList & eventList)
                                                                            iterEventWrite->second,
                                                                            MTS_OPTIONAL));
     }
+
+    eventList.SetValid(true);
 }
 
 
