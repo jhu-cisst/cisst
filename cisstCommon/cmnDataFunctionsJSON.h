@@ -70,6 +70,11 @@ template <>
 void CISST_EXPORT cmnDataJSON<unsigned int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
+void CISST_EXPORT cmnDataJSON<long int>::SerializeText(const DataType & data, Json::Value & jsonValue);
+template <>
+void CISST_EXPORT cmnDataJSON<long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+
+template <>
 void CISST_EXPORT cmnDataJSON<unsigned long int>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
 void CISST_EXPORT cmnDataJSON<unsigned long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
