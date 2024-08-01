@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -279,14 +279,14 @@ protected:
     bool GetInterfaceProvidedDescription(
         const std::string & serverComponentName,
         const std::string & providedInterfaceName,
-        mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "") override;
 
     /*! Extract all the information on a required interface such as function
         objects and event handlers with arguments serialized */
     bool GetInterfaceRequiredDescription(
         const std::string & componentName,
         const std::string & requiredInterfaceName,
-        mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") override;
 
     /*! Change GCM connection state */
     inline void SetGCMConnected(const bool connected) {
@@ -506,7 +506,7 @@ public:
     const osaTimeServer & GetTimeServer(void) const;
 
     /*! Returns name of this local component manager */
-    inline const std::string GetProcessName(const std::string & CMN_UNUSED(listenerID) = "") const {
+    inline const std::string GetProcessName(const std::string & CMN_UNUSED(listenerID) = "") const override {
         return ProcessName;
     }
 
@@ -546,53 +546,53 @@ public:
     void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                             const std::string & componentName,
                             const std::string & providedInterfaceName,
-                            const std::string & CMN_UNUSED(listenerID) = "");
+                            const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get names of all event generators in a provided interface */
     void GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
                                    const std::string & componentName,
                                    const std::string & providedInterfaceName,
-                                   const std::string & CMN_UNUSED(listenerID) = "");
+                                   const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get names of all functions in a required interface */
     void GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
                              const std::string & componentName,
                              const std::string & requiredInterfaceName,
-                             const std::string & CMN_UNUSED(listenerID) = "");
+                             const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get names of all event handlers in a required interface */
     void GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
                                  const std::string & componentName,
                                  const std::string & requiredInterfaceName,
-                                 const std::string & CMN_UNUSED(listenerID) = "");
+                                 const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get description of a command in a provided interface */
     void GetDescriptionOfCommand(std::string & description,
                                  const std::string & componentName,
                                  const std::string & providedInterfaceName,
                                  const std::string & commandName,
-                                 const std::string & CMN_UNUSED(listenerID) = "");
+                                 const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get description of a event generator in a provided interface */
     void GetDescriptionOfEventGenerator(std::string & description,
                                         const std::string & componentName,
                                         const std::string & providedInterfaceName,
                                         const std::string & eventGeneratorName,
-                                        const std::string & CMN_UNUSED(listenerID) = "");
+                                        const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get description of a function in a required interface */
     void GetDescriptionOfFunction(std::string & description,
                                   const std::string & componentName,
                                   const std::string & requiredInterfaceName,
                                   const std::string & functionName,
-                                  const std::string & CMN_UNUSED(listenerID) = "");
+                                  const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get description of a function in a required  interface */
     void GetDescriptionOfEventHandler(std::string & description,
                                       const std::string & componentName,
                                       const std::string & requiredInterfaceName,
                                       const std::string & eventHandlerName,
-                                      const std::string & CMN_UNUSED(listenerID) = "");
+                                      const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Return IP address of this process */
     inline const std::string & GetIPAddress(void) const { return ProcessIP; }
@@ -613,11 +613,11 @@ public:
     bool GetGCMProcTimeSyncInfo(std::vector<std::string> &processNames, std::vector<double> &timeOffsets);
 
     /*! For debugging. Dumps to stream the maps maintained by the manager. */
-    void /*CISST_DEPRECATED*/ ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! Create a dot file to be used by graphviz to generate a nice
       graph of connections between tasks/interfaces. */
-    void /*CISST_DEPRECATED*/ ToStreamDot(std::ostream & outputStream) const;
+    void ToStreamDot(std::ostream & outputStream) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerLocal)

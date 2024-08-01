@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Praneeth Sadda, Anton Deguet
   Created on: 2011-11-11
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #ifndef _mtsQtWidgetVectorTypes_h
@@ -37,7 +34,7 @@ class CISST_EXPORT mtsQtWidgetDoubleVecRead: public mtsQtWidgetGenericObjectRead
     vctQtWidgetDynamicVectorDoubleRead * VectorWidget;
  public:
     mtsQtWidgetDoubleVecRead(void);
-    virtual bool SetValue(const mtsGenericObject & value);
+    bool SetValue(const mtsGenericObject & value) override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetDoubleVecRead);
 
@@ -49,8 +46,8 @@ class CISST_EXPORT mtsQtWidgetDoubleVecWrite: public mtsQtWidgetGenericObjectWri
     vctQtWidgetDynamicVectorDoubleWrite * VectorWidget;
  public:
     mtsQtWidgetDoubleVecWrite(void);
-    virtual bool SetValue(const mtsGenericObject & value);
-    virtual bool GetValue(mtsGenericObject & placeHolder) const;
+    bool SetValue(const mtsGenericObject & value) override;
+    bool GetValue(mtsGenericObject & placeHolder) const override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetDoubleVecWrite);
 
@@ -64,7 +61,7 @@ class CISST_EXPORT mtsQtWidgetBoolVecRead: public mtsQtWidgetGenericObjectRead
     vctQtWidgetDynamicVectorBoolRead * VectorWidget;
  public:
     mtsQtWidgetBoolVecRead(void);
-    virtual bool SetValue(const mtsGenericObject & value);
+    bool SetValue(const mtsGenericObject & value) override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetBoolVecRead);
 
@@ -76,8 +73,8 @@ class CISST_EXPORT mtsQtWidgetBoolVecWrite: public mtsQtWidgetGenericObjectWrite
     vctQtWidgetDynamicVectorBoolWrite * VectorWidget;
  public:
     mtsQtWidgetBoolVecWrite(void);
-    virtual bool SetValue(const mtsGenericObject & value);
-    virtual bool GetValue(mtsGenericObject & placeHolder) const;
+    bool SetValue(const mtsGenericObject & value) override;
+    bool GetValue(mtsGenericObject & placeHolder) const override;
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsQtWidgetBoolVecWrite);
 

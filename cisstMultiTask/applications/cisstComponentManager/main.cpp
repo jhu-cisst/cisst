@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2011-04-03
 
-  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -252,10 +252,10 @@ public:
     { EnableDynamicComponentManagement(); }
     ~shellTask() {}
 
-    void Configure(const std::string & CMN_UNUSED(filename));
-    void Startup(void);
-    void Run(void);
-    void Cleanup(void) {}
+    void Configure(const std::string & CMN_UNUSED(filename)) override;
+    void Startup(void) override;
+    void Run(void) override;
+    void Cleanup(void) override{}
 
     bool ExecuteMultiLine(const std::string &curLine) const;
     bool ExecuteLine(const std::string &curLine) const;

@@ -5,7 +5,7 @@
   Author(s):  Marcin Balicki, Anton Deguet
   Created on: 2010-03-31
 
-  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -196,20 +196,20 @@ public:
     inline ~mtsIntervalStatistics() {};
 
     /*! Human readable text output */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! Machine reabable text output */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Serialize the content of the object without any extra
       information, i.e. no class type nor format version.  The
       "receiver" is supposed to already know what to expect. */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
-    virtual void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatistics)

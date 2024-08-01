@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-01-21
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,17 +41,17 @@ class CISST_EXPORT mtsPeriodicTaskTest: public mtsTaskPeriodic {
 
     void AddDouble(const mtsDouble & addend); // method used for write command
     void ZeroAll(void); // method used for void command
-	
+
  public:
     // provide a frequency (time interval between calls to the
     // periodic Run).  Also used to populate the interface(s)
     mtsPeriodicTaskTest(double periodInSeconds);
     inline ~mtsPeriodicTaskTest() {};
     // all four methods are pure virtual in mtsTask
-    inline void Configure(const std::string & CMN_UNUSED(filename)) {};
-    inline void Startup(void) {};
-    void Run(void);
-    inline void Cleanup(void) {};
+    inline void Configure(const std::string & CMN_UNUSED(filename)) override {};
+    inline void Startup(void) override {};
+    void Run(void) override;
+    inline void Cleanup(void) override {};
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsPeriodicTaskTest);

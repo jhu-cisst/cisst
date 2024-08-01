@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -64,11 +64,11 @@ class cdgClass: public cdgScope
 
 public:
     cdgClass(size_t lineNumber);
-    cdgScope::Type GetScope(void) const;
-    cdgScope * Create(size_t lineNumber) const;
-    bool Validate(std::string & errorMessage);
-    void GenerateHeader(std::ostream & outputStream) const;
-    void GenerateCode(std::ostream & outputStream) const;
+    cdgScope::Type GetScope(void) const override;
+    cdgScope * Create(size_t lineNumber) const override;
+    bool Validate(std::string & errorMessage) override;
+    void GenerateHeader(std::ostream & outputStream) const override;
+    void GenerateCode(std::ostream & outputStream) const override;
 
 protected:
 

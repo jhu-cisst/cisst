@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2014-03-03
 
-  (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2014-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #ifndef _mtsCollectorQtFactory_h
@@ -47,8 +44,8 @@ class CISST_EXPORT mtsCollectorQtFactory: public mtsTaskFromSignal
     mtsCollectorQtFactory(const std::string & componentName);
     inline ~mtsCollectorQtFactory() {};
 
-    void Run(void);
-    void Cleanup(void);
+    void Run(void) override;
+    void Cleanup(void) override;
 
     /*! Define which collector factory was used to create the data
       collectors to be connected to the QtWidget.  This method must be
@@ -58,7 +55,7 @@ class CISST_EXPORT mtsCollectorQtFactory: public mtsTaskFromSignal
       called before the methods mtsCollectorQtFactory::Connect and
       mtsCollectorQtFactory::ConnectToWidget. */
     void SetFactory(const std::string & factoryName);
-    
+
     /*! Connect all the state collectors created by the
       mtsCollectorFactory to all the mtsCollectorQtComponent created
       by this class. */

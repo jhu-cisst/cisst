@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,10 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "cdgEnum.h"
 #include "cdgInline.h"
 
-/*
-
- */
-
 class cdgGlobal: public cdgScope
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -50,14 +45,14 @@ class cdgGlobal: public cdgScope
 
 public:
     cdgGlobal(size_t lineNumber);
-    cdgScope::Type GetScope(void) const;
-    cdgScope * Create(size_t lineNumber) const;
+    cdgScope::Type GetScope(void) const override;
+    cdgScope * Create(size_t lineNumber) const override;
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
-    bool Validate(std::string & errorMessage);
-    void GenerateIncludes(std::ostream & output) const;
-    void GenerateHeader(std::ostream & output) const;
-    void GenerateCode(std::ostream & output) const;
+    bool Validate(std::string & errorMessage) override;
+    void GenerateIncludes(std::ostream & output) const override;
+    void GenerateHeader(std::ostream & output) const override;
+    void GenerateCode(std::ostream & output) const override;
 
 private:
     cdgGlobal(void); // make sure constructor with line number is always used.

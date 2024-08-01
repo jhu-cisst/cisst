@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-05-17
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -66,9 +66,9 @@ public:
     mtsMessageQtWidgetComponent(const std::string & componentName);
     ~mtsMessageQtWidgetComponent() {}
 
-    inline void Configure(const std::string & CMN_UNUSED(filename) = "") {};
-    inline void Startup(void) {};
-    inline void Cleanup(void) {};
+    inline void Configure(const std::string & CMN_UNUSED(filename) = "") override {};
+    inline void Startup(void) override {};
+    inline void Cleanup(void) override {};
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMessageQtWidgetComponent);

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #ifndef _mtsCollectorState_h
@@ -75,15 +72,15 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     mtsStateTable * TargetStateTable;
 
     /*! Thread-related methods */
-    void Run(void);
+    void Run(void) override;
 
-    void Startup(void);
+    void Startup(void) override;
 
     /*! Initialization */
     void Initialize(void);
 
     // documented in base class
-    virtual std::string GetDefaultOutputName(void);
+    virtual std::string GetDefaultOutputName(void) override;
 
     mtsFunctionWrite StateTableStartCollection;
     mtsFunctionWrite StateTableStopCollection;
@@ -179,8 +176,8 @@ public:
       methods are mainly pass through, i.e. they call the
       corresponding commands from the state table component. */
     //@{
-    void StartCollection(const mtsDouble & delayInSeconds);
-    void StopCollection(const mtsDouble & delayInSeconds);
+    void StartCollection(const mtsDouble & delayInSeconds) override;
+    void StopCollection(const mtsDouble & delayInSeconds) override;
     //@}
 };
 
