@@ -75,6 +75,10 @@ public:
                        BaudRate230400 = CBR_230400,
                        BaudRate460800 = CBR_460800};
 #else
+    // MacOS doesn't define some of the baud rates
+    #ifndef B460800
+    #define B460800 460800
+    #endif
     enum BaudRateType {BaudRate300 = B300,
                        BaudRate1200 = B1200,
                        BaudRate9600 = B9600,

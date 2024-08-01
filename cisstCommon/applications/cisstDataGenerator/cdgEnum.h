@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -38,8 +38,8 @@ public:
     void GenerateHeader(std::ostream & outputStream) const override;
     void GenerateCode(std::ostream & outputStream) const override;
 
-    void GenerateDataFunctionsHeader(std::ostream & outputStream, const std::string & cScope, const std::string & attribute) const;
-    void GenerateDataFunctionsCode(std::ostream & outputStream, const std::string & cScope) const;
+    void GenerateDataFunctionsHeader(std::ostream & outputStream, const std::string & attribute) const;
+    void GenerateDataFunctionsCode(std::ostream & outputStream) const;
 
 private:
     cdgEnum(void); // make sure constructor with line number is always used.

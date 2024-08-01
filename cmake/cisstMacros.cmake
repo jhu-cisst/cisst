@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -606,7 +606,7 @@ function (cisst_add_swig_module ...)
                RUNTIME DESTINATION bin
                LIBRARY DESTINATION lib
                COMPONENT ${MODULE})
-      install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py
+      install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                DESTINATION lib
                COMPONENT ${MODULE})
 
@@ -701,18 +701,15 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
   if (CMAKE_CROSSCOMPILING)
     find_program (CISST_DG_EXECUTABLE cisstDataGenerator)
   else (CMAKE_CROSSCOMPILING)
-    if (TARGET cisstCommon)
-      # make sure the target existsOUTPUT_NAME
-      if (TARGET cisstDataGenerator)
-        # if the target exists, use its destination
-        cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
-        #get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
-        set(CISST_DG_EXECUTABLE $<TARGET_FILE:cisstDataGenerator>)
-      endif (TARGET cisstDataGenerator)
-    else (TARGET cisstCommon)
+    # make sure the target exists
+    if (TARGET cisstDataGenerator)
+      # if the target exists, use its destination
+      cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
+      set (CISST_DG_EXECUTABLE "$<TARGET_FILE:cisstDataGenerator>")
+    else (TARGET cisstDataGenerator)
       cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
       find_program (CISST_DG_EXECUTABLE cisstDataGenerator HINTS "${CISST_BINARY_DIR}/bin")
-    endif (TARGET cisstCommon)
+    endif (TARGET cisstDataGenerator)
   endif (CMAKE_CROSSCOMPILING)
   cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator executable found: ${CISST_DG_EXECUTABLE}")
 
@@ -736,15 +733,16 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     set_source_files_properties (${header_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties ("${INPUT_WE}.h" PROPERTIES GENERATED 1)
-    add_custom_command (OUTPUT ${header_absolute} ${code_absolute}
-                        COMMAND "${CISST_DG_EXECUTABLE}"
-                        --verbose
-                        --input ${input_absolute}
-                        --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
-                        --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}_cdg.cpp
-                        MAIN_DEPENDENCY ${input}
-                        DEPENDS ${CISST_DG_EXECUTABLE}
-                        COMMENT "cisstDataGenerator for ${INPUT_WE}")
+    add_custom_command (
+      OUTPUT ${header_absolute} ${code_absolute}
+      COMMAND "${CISST_DG_EXECUTABLE}"
+      --verbose
+      --input ${input_absolute}
+      --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
+      --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}_cdg.cpp
+      MAIN_DEPENDENCY ${input}
+      DEPENDS "${CISST_DG_EXECUTABLE}"
+      COMMENT "cisstDataGenerator for ${INPUT_WE}")
   endforeach(input)
 
   # create variables to store all generated files names
@@ -932,12 +930,22 @@ macro (cisst_offer_saw_component component default)
   set (cosc_OPTION_NAME SAW_${component})
   option (${cosc_OPTION_NAME} "Build ${component}" ${default})
   if (${cosc_OPTION_NAME})
-    set (${component}_DIR "${CMAKE_CURRENT_BINARY_DIR}/${component}")
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${component}/CMakeLists.txt")
+      set (${component}_DIR "${CMAKE_CURRENT_BINARY_DIR}/${component}")
+      set (cosc_SOURCE_DIR "${component}")
+    else ()
+      if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${component}/core/CMakeLists.txt")
+        set (${component}_DIR "${CMAKE_CURRENT_BINARY_DIR}/${component}/core")
+        set (cosc_SOURCE_DIR "${component}/core")
+      else ()
+        message (SEND_ERROR "Couldn't find a CMakeLists in ${component} nor ${component}/core")
+      endif ()
+    endif ()
     list (APPEND CMAKE_PREFIX_PATH
-                 "${CMAKE_CURRENT_BINARY_DIR}/${component}"
-                 "${CMAKE_CURRENT_BINARY_DIR}/${component}/components")
+                 "${${component}_DIR}"
+                 "${${component}_DIR}/components")
     mark_as_advanced (${component}_DIR)
-    add_subdirectory (${component})
+    add_subdirectory (${cosc_SOURCE_DIR})
   else (${cosc_OPTION_NAME})
     unset (${component}_DIR)
   endif (${cosc_OPTION_NAME})

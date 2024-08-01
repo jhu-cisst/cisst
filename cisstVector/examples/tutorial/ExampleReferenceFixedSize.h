@@ -55,7 +55,7 @@ void ExampleReferenceFixedSize(void) {
         std::cout << "final matrix:\n";
         std::cout << matrix << std::endl;
 
-    } catch (std::exception Exception) {
+    } catch (std::exception & Exception) {
         std::cerr << "Exception received: " << Exception.what() << std::endl;
     }
 }

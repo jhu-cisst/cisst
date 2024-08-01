@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -13,8 +11,3 @@
 
 # All cisstCommon applications
 project (cisstCommonApplications)
-
-# data generator should always be compiled so we don't use cisst_offer_application
-if (NOT CMAKE_CROSSCOMPILING)
-  add_subdirectory (cisstDataGenerator)
-endif (NOT CMAKE_CROSSCOMPILING)

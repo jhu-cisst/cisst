@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 
 #include "cdgClass.h"
+#include "cdgEnum.h"
 #include "cdgInline.h"
 
 class cdgGlobal: public cdgScope
@@ -36,6 +37,11 @@ class cdgGlobal: public cdgScope
       cisst data description file. */
     typedef std::vector<cdgClass *> ClassesType;
     ClassesType Classes;
+
+    /*! List of enums.  Corresponds to keyword "enum" in
+      cisst data description file. */
+    typedef std::vector<cdgEnum *> EnumsType;
+    EnumsType Enums;
 
 public:
     cdgGlobal(size_t lineNumber);

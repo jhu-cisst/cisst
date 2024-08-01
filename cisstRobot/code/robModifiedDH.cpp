@@ -1,10 +1,8 @@
 /*
-
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,14 +18,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <iomanip>
 #include <iostream>
 
-robModifiedDH::robModifiedDH() : 
-  robKinematics( robKinematics::MODIFIED_DH ){ 
+robModifiedDH::robModifiedDH() :
+  robKinematics( robKinematics::MODIFIED_DH ){
   alpha = a = theta = d = 0.0;
 }
 
-robModifiedDH::robModifiedDH( double alpha, 
-			      double a, 
-			      double theta, 
+robModifiedDH::robModifiedDH( double alpha,
+			      double a,
+			      double theta,
 			      double d,
 			      const robJoint& joint ) :
   robKinematics( joint, robKinematics::MODIFIED_DH ),
@@ -38,23 +36,23 @@ robModifiedDH::robModifiedDH( double alpha,
 
 robModifiedDH::~robModifiedDH(){}
 
-robKinematics* robModifiedDH::Clone() const 
+robKinematics* robModifiedDH::Clone() const
 { return (robKinematics*) new robModifiedDH( *this ); }
 
 vctFixedSizeVector<double,3> robModifiedDH::PStar() const
 { return vctFixedSizeVector<double,3>( a, -d*sin(alpha), d*cos(alpha) ); }
-  
-vctFrame4x4<double> robModifiedDH::ForwardKinematics( double q ) const { 
+
+vctFrame4x4<double> robModifiedDH::ForwardKinematics( double q ) const {
 
   double d = this->d;           // copy the prismatic value
   double theta = this->theta;   // copy the revolute value
 
   // Add the position offset to the joint value
   switch( GetType() ){
-  case robJoint::HINGE:
+  case cmnJointType::CMN_JOINT_REVOLUTE:
     theta = theta + PositionOffset() + q; // add the joint offset to the joint angle
     break;
-  case robJoint::SLIDER:
+  case cmnJointType::CMN_JOINT_PRISMATIC:
     d = d + PositionOffset() + q;     // add the joint offset to the joint length
     break;
   default:
@@ -64,9 +62,9 @@ vctFrame4x4<double> robModifiedDH::ForwardKinematics( double q ) const {
   }
 
   // should be computed once
-  double ca = cos(this->alpha); double sa = sin(this->alpha);	
+  double ca = cos(this->alpha); double sa = sin(this->alpha);
   double ct = cos(theta);       double st = sin(theta);
-    
+
   // modified DH transformation
   vctMatrixRotation3<double> R( ct,    -st,     0,
 				st*ca,  ct*ca, -sa,
@@ -86,8 +84,8 @@ vctMatrixRotation3<double> robModifiedDH::Orientation( double q ) const {
 
 void robModifiedDH::ReadParameters( std::istream& is ) {
   is >> this->alpha  // read the stuff from the stream
-     >> this->a 
-     >> this->theta 
+     >> this->a
+     >> this->theta
      >> this->d;
 
   // just make sure we're accureate
@@ -111,8 +109,8 @@ void robModifiedDH::ReadParameters(const Json::Value &config)
 
 void robModifiedDH::WriteParameters( std::ostream& os ) const {
   os << std::setw(15) << "MODIFIED DH"
-     << std::setw(10) << alpha 
-     << std::setw(10) << a 
+     << std::setw(10) << alpha
+     << std::setw(10) << a
      << std::setw(10) << theta
      << std::setw(10) << d;
 }

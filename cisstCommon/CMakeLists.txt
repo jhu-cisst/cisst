@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,8 +12,12 @@
 # All cisstCommon libraries
 project (cisstCommonLibs)
 
+# cisstDataGenerator must be compiled first
+if (NOT CMAKE_CROSSCOMPILING)
+  add_subdirectory (applications/cisstDataGenerator)
+endif()
+
 add_subdirectory (code)
-add_subdirectory (applications)
 
 cisst_offer_python (cisstCommon)
 cisst_offer_tests_python (cisstCommon)

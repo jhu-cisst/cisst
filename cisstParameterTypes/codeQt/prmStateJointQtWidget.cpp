@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-03-22
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,6 +16,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnJointType.h>
 #include <cisstParameterTypes/prmStateJointQtWidget.h>
 
 #include <QVBoxLayout>
@@ -96,7 +97,7 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
             if (newValue.Position().size() != mPositionFactors.size()) {
                 if (mConfiguration.Type().size() != 0) {
                     mPositionFactors.SetSize(mConfiguration.Type().size());
-                    prmJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mPositionFactors);
+                    cmnJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mPositionFactors);
                 }
             }
             mTempVector.SetSize(newValue.Position().size());
@@ -118,7 +119,7 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
             if (newValue.Velocity().size() != mVelocityFactors.size()) {
                 if (mConfiguration.Type().size() != 0) {
                     mVelocityFactors.SetSize(mConfiguration.Type().size());
-                    prmJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mVelocityFactors);
+                    cmnJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mVelocityFactors);
                 }
             }
             mTempVector.SetSize(newValue.Velocity().size());

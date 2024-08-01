@@ -38,6 +38,7 @@ bool prmOperatingState::ValidCommand(const prmOperatingState::CommandType & comm
         default:
             break;
         }
+        break;
     case ENABLED:
         switch (command) {
         case enable:

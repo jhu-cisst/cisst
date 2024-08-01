@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -128,7 +128,10 @@ bool cdgClass::Validate(std::string & CMN_UNUSED(errorMessage))
         }
     }
     for (size_t index = 0; index < Members.size(); index++) {
-        Members[index]->ClassName = this->ClassWithNamespace(); // this->GetFieldValue("name");
+        Members[index]->ClassName = this->ClassWithNamespace();
+    }
+    for (size_t index = 0; index < Enums.size(); index++) {
+        Enums[index]->ClassName = this->ClassWithNamespace();
     }
 
     return true;
@@ -231,7 +234,7 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     // global functions for enums have to be declared after the enum is defined
     const std::string classWithNamespace = this->ClassWithNamespace();
     for (index = 0; index < Enums.size(); ++index) {
-        Enums[index]->GenerateDataFunctionsHeader(outputStream, classWithNamespace, this->GetFieldValue("attribute"));
+        Enums[index]->GenerateDataFunctionsHeader(outputStream, this->GetFieldValue("attribute"));
     }
 
 }
@@ -912,7 +915,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
                  << "#endif // CISST_HAS_JSON" << std::endl;
 
     for (index = 0; index < Enums.size(); ++index) {
-        Enums[index]->GenerateDataFunctionsCode(outputStream, className);
+        Enums[index]->GenerateDataFunctionsCode(outputStream);
     }
 }
 

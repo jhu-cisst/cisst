@@ -1,4 +1,4 @@
-name: macOS 11.0
+name: macOS 13
 
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
@@ -11,13 +11,13 @@ on:
 jobs:
   build:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         mirror: http://mirrors.ocf.berkeley.edu/qt/
 
@@ -29,7 +29,7 @@ jobs:
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
-        cmake ${{github.workspace}}/cisstNetlib-source -DCMAKE_Fortran_COMPILER=gfortran-9
+        cmake ${{github.workspace}}/cisstNetlib-source -DcisstNetlib_LANGUAGE=C
         cmake --build . --config Release
         sudo cmake --build . --target install
 
