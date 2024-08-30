@@ -51,4 +51,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmOperatingState.h>
 #include <cisstParameterTypes/prmActuatorState.h>
 
+#include <cisstParameterTypes/prmImageFrame.h>
+#include <cisstParameterTypes/prmCameraInfo.h>
+#include <cisstParameterTypes/prmDepthMap.h>
+
 #endif // _prmPython_h

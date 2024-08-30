@@ -76,3 +76,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstParameterTypes/prmConfigurationJoint.h"
 %include "cisstParameterTypes/prmOperatingState.h"
 %include "cisstParameterTypes/prmActuatorState.h"
+
+%include "cisstParameterTypes/prmImageFrame.h"
+%include "cisstParameterTypes/prmCameraInfo.h"
+%include "cisstParameterTypes/prmDepthMap.h"
