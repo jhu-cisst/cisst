@@ -2,6 +2,33 @@ Change log
 ==========
 
 
+1.3.0 (2024-08-30)
+==================
+
+* API changes:
+  * Added `override` for all derived methods
+  * Removed redefinition of `virtual` in derived classes
+  * cisstParameterTypes: `prmJointType` is now `cmnJointType` and JSON serialization now uses the string value (not enum number)
+* Deprecated features:
+  * cisstParameterTypes: removed all classes related to transformation graph
+* New features
+  * cisstDataGenerator: added support for enum in global scope, fix for `override`
+  * cisstParameterTypes: added types `prmImageFrame`, `prmCameraInfo` and `prmDepthMap.h`
+  * cisstRobot:
+    * Gravity can be declared as vector
+    * Uses `cmnJointType`
+* Bug fixes:
+  * CMake:
+    * `cisst_offer_saw_component` updated to search for `component` or `core` (new SAW directory structure)
+  * cisstMultiTask:
+    * Fix for `mtsManagerLocal.GetInstance`
+  * cisstParameterTypes:
+    * More `CISST_EXPORT` for Windows
+    * Added new data types for SWIG wrapping
+    * Fixed `prmActuatorState::ToStream`
+    * Added missing `break` in `prmOperatingState.cpp`
+  * Fixed some GitHub actions/workflows
+
 1.2.1 (2022-12-29)
 ==================
 
