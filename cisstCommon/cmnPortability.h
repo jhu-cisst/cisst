@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
-  (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #pragma once
@@ -558,6 +557,15 @@ bool CISST_EXPORT cmnIsFinite(const double & value);
 
 #ifndef CISST_THROW
   #define CISST_THROW(exceptionParameter) throw (exceptionParameter)
+#endif
+
+
+/*! Older versions of SWIG don't support the keywords override (and final)
+  properly. https://www.swig.org/Doc4.1/SWIGDocumentation.html#CPlusPlus11_explicit_overrides_final.  */
+#ifdef SWIG_VERSION
+  #if SWIG_VERSION < 0x040100
+    #define override
+  #endif
 #endif
 
 

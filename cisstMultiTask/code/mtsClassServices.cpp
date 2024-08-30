@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -122,6 +122,8 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdDoubleVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdCharVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdStringListProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdVct3VecProxy)
+
+CMN_IMPLEMENT_SERVICES_TEMPLATED(cmnJointTypeProxy)
 
 #endif  // MTS_CLASS_SERVICES_PART2
 

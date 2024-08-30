@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-11-11
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -49,7 +49,7 @@ class CISST_EXPORT prmEventButtonQtWidgetComponent: public QWidget, public mtsCo
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 protected:
-    virtual void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     cmnNamedMap<prmEventButtonQtWidgetComponent_ButtonData> ButtonsData;
     QGridLayout * GridLayout;
     unsigned int NumberOfColumns;
@@ -57,7 +57,7 @@ protected:
 public:
     prmEventButtonQtWidgetComponent(const std::string & name);
 
-    void Startup(void);
+    void Startup(void) override;
     void SetNumberOfColumns(const size_t nbColumns);
     bool AddEventButton(const std::string & buttonName);
 };

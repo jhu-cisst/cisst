@@ -5,8 +5,7 @@
 Author(s):	Marcin Balicki
 Created on:   2008-09-14
 
-(C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-Reserved.
+(C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,17 +26,17 @@ prmActuatorState::prmActuatorState(size_type size)
 
 void prmActuatorState::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "Position: "    << this->PositionMember
+    outputStream << "Position: "            << this->PositionMember
                  << "\nVelocity : "		    << this->VelocityMember
                  << "\nInMotion: "		    << this->InMotionMember
-                 << "\nMotorOffMember: "     << this->MotorOffMember
+                 << "\nMotorOff: "          << this->MotorOffMember
                  << "\nSoftFwdLimitHit: "	<< this->SoftFwdLimitHitMember
-                 << "\nSoftRevLimitHit: "	<< this->HardRevLimitHitMember
+                 << "\nSoftRevLimitHit: "	<< this->SoftRevLimitHitMember
                  << "\nHardFwdLimitHit: "	<< this->HardFwdLimitHitMember
-                 << "\nHardRevLimitHit: "	<< this->SoftRevLimitHitMember
+                 << "\nHardRevLimitHit: "	<< this->HardRevLimitHitMember
                  << "\nHomeSwitchOn: "	    << this->HomeSwitchOnMember
                  << "\nEStopON: "			<< this->EStopONMember
-                 <<"\nIsHomed: "             <<this->IsHomedMember;
+                 <<"\nIsHomed: "            << this->IsHomedMember;
 }
 
 void prmActuatorState::SetSize(size_type size){
@@ -85,5 +84,3 @@ void prmActuatorState::DeSerializeRaw(std::istream & inputStream)
     IsHomedMember.DeSerializeRaw(inputStream);
     cmnDeSerializeRaw(inputStream,EStopONMember);
 }
-
-

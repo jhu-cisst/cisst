@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -29,6 +29,9 @@ cdgGlobal::cdgGlobal(size_t lineNumber):
     cdgClass newClass(0);
     this->AddSubScope(newClass);
 
+    cdgEnum newEnum(0);
+    this->AddSubScope(newEnum);
+
     cdgInline newInline(0, cdgInline::CDG_INLINE_HEADER);
     this->AddSubScope(newInline);
 
@@ -51,6 +54,17 @@ cdgScope * cdgGlobal::Create(size_t lineNumber) const
 
 bool cdgGlobal::Validate(std::string & CMN_UNUSED(errorMessage))
 {
+    cdgEnum * enumPtr;
+    const ScopesContainer::iterator end = Scopes.end();
+    ScopesContainer::iterator iter;
+    for (iter = Scopes.begin();
+         iter != end;
+         ++iter) {
+        enumPtr = dynamic_cast<cdgEnum *>(*iter);
+        if (enumPtr) {
+            Enums.push_back(enumPtr);
+        }
+    }
     return true;
 }
 
@@ -78,7 +92,7 @@ void cdgGlobal::GenerateIncludes(std::ostream & outputStream) const
     for (index = 0; index < Scopes.size(); index++) {
         const std::string mtsProxy = Scopes[index]->GetFieldValue("mts-proxy");
         // includes for mts proxy
-        if (mtsProxy != "false") {
+        if ((mtsProxy == "true") || (mtsProxy == "declaration-only")) {
             needsIncludes = true;
         }
     }
@@ -110,6 +124,10 @@ void cdgGlobal::GenerateCode(std::ostream & outputStream) const
     GenerateLineComment(outputStream);
     for (index = 0; index < Scopes.size(); index++) {
         Scopes[index]->GenerateCode(outputStream);
+        outputStream << std::endl;
+    }
+    for (index = 0; index < Enums.size(); index++) {
+        Enums[index]->GenerateDataFunctionsCode(outputStream);
         outputStream << std::endl;
     }
 }

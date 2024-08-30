@@ -2,7 +2,7 @@
   Author(s): Simon Leonard
   Created on: Dec 17 2009
 
-  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -83,7 +83,7 @@ robKinematics::Convention robLink::GetConvention() const {
 }
 
 
-robJoint::Type robLink::GetType() const {
+cmnJointType robLink::GetType() const {
   if( kinematics != NULL ) { return kinematics->GetType(); }
-  else                     { return robJoint::UNDEFINED;  }
+  else                     { return cmnJointType::CMN_JOINT_UNDEFINED;  }
 }

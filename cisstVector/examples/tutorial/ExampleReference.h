@@ -55,7 +55,7 @@ void ExampleReference(void) {
 		  << matrix << std::endl;
         std::cout << "Trace: " << diagonal.SumOfElements() << std::endl;
 
-    } catch (std::exception Exception) {
+    } catch (std::exception & Exception) {
         std::cout << "Exception received: " << Exception.what() << std::endl;
     }
 }

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -47,11 +44,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmVelocityJointGet.h>
 #include <cisstParameterTypes/prmVelocityJointSet.h>
 
-#include <cisstParameterTypes/prmTransformationBase.h>
-#include <cisstParameterTypes/prmTransformationManager.h>
-#include <cisstParameterTypes/prmTransformationFixed.h>
-#include <cisstParameterTypes/prmTransformationDynamic.h>
-
 #include <cisstParameterTypes/prmRobotState.h>
+
+#include <cisstParameterTypes/prmStateJoint.h>
+#include <cisstParameterTypes/prmConfigurationJoint.h>
+#include <cisstParameterTypes/prmOperatingState.h>
+#include <cisstParameterTypes/prmActuatorState.h>
+
+#include <cisstParameterTypes/prmImageFrame.h>
+#include <cisstParameterTypes/prmCameraInfo.h>
+#include <cisstParameterTypes/prmDepthMap.h>
 
 #endif // _prmPython_h

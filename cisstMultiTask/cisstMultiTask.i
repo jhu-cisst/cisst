@@ -467,7 +467,7 @@ http://www.cisst.org/cisst/license.txt.
         # or ('component', 'interfaceProvided')
         def AddInterfaceRequiredAndConnect(self, otherComponentInterface, connectionAttempts = 1):
             try:
-                localProcessName = mtsManagerLocal_GetInstance().GetProcessName()
+                localProcessName = mtsManagerLocal.GetInstance().GetProcessName()
                 num = len(otherComponentInterface)
                 if 2 <= num <= 3:
                     interfaceName = otherComponentInterface[num-1]

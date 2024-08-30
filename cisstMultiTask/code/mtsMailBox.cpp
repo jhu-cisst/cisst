@@ -222,7 +222,9 @@ void mtsMailBox::TriggerFinishedEventIfNeeded(const std::string &commandName, mt
            if (resultPointer->Valid() != result.IsOK()) {
                CMN_LOG_RUN_WARNING << "TriggerFinishedEventIfNeeded: result valid = " << resultPointer->Valid()
                                    << ", result OK = " << result.IsOK()
-                                   << ", msg = " << mtsExecutionResult::ToString(result.Value()) << std::endl;
+                                   << ", msg = " << mtsExecutionResult::ToString(result.Value())
+                                   << ", msg type = " << resultPointer->Services()->GetName()
+                                   << ", command name = " << commandName << std::endl;
            }
            resultPointer->SetValid(result.IsOK());  // Set data valid flag based on execution result
            evt_result = finishedEvent->Execute(*resultPointer, MTS_NOT_BLOCKING);

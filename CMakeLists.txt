@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2023 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -16,7 +16,7 @@
 cmake_minimum_required (VERSION 3.10)
 
 # cisst (Computer Integrated Surgical Systems and Technology)
-project (cisst VERSION 1.2.1)
+project (cisst VERSION 1.3.0)
 
 # cisst compiler settings
 include (cmake/cisstSettings.cmake)
@@ -159,7 +159,7 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CISST_CMAKE_SOURCE_DIR}")
 include (cisstMacros)
 include (cisstInternalMacros)
 
-# Set CISST_CATKIN_BUILT
+# Set CISST_CATKIN_BUILT.  For ROS2, see colcon.pkg
 cisst_is_catkin_build (CISST_CATKIN_BUILT)
 
 # Destination for CMake package config files
@@ -818,6 +818,17 @@ if (UNIX)
   configure_file ("${cisst_SOURCE_DIR}/utils/cisstvars.sh.in"
                   "${CISST_SCRIPTS_DIRECTORY}/cisstvars.sh"
                   @ONLY)
+
+  # installed version
+  configure_file (
+    "${cisst_SOURCE_DIR}/utils/cisstvars.sh.installed.in"
+    "${cisst_BINARY_DIR}/utils/cisstvars.sh.installed"
+    @ONLY)
+  install (
+    PROGRAMS "${cisst_BINARY_DIR}/utils/cisstvars.sh.installed"
+    DESTINATION bin
+    RENAME "cisstvars.sh")
+  
 endif (UNIX)
 
 # License file

@@ -180,7 +180,7 @@ void robDHTest::TestReadWAM7(){
 
     // Check
     CPPUNIT_ASSERT( dh->GetConvention() == robKinematics::STANDARD_DH  );
-    CPPUNIT_ASSERT( dh->GetType()       == robJoint::HINGE  );
+    CPPUNIT_ASSERT( dh->GetType()       == cmnJointType::CMN_JOINT_REVOLUTE  );
     CPPUNIT_ASSERT( dh->GetMode()       == robJoint::ACTIVE );
 
     delete dh;
@@ -236,7 +236,7 @@ void robDHTest::TestReadPUMA560(){
 
     // Check
     CPPUNIT_ASSERT( dh->GetConvention() == robKinematics::STANDARD_DH  );
-    CPPUNIT_ASSERT( dh->GetType()       == robJoint::HINGE  );
+    CPPUNIT_ASSERT( dh->GetType()       == cmnJointType::CMN_JOINT_REVOLUTE  );
     CPPUNIT_ASSERT( dh->GetMode()       == robJoint::ACTIVE );
 
     delete dh;

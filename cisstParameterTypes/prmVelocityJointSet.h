@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-Author(s):	Rajesh Kumar, Anton Deguet
-Created on:	2008-03-12
+  Author(s):	Rajesh Kumar, Anton Deguet
+  Created on:	2008-03-12
 
-(C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-Reserved.
+  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,8 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-\file 
+/*!
+\file
 \brief Joint Velocity move parameters.
 */
 
@@ -52,10 +51,10 @@ protected:
     used in the move */
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Goal);
 
-    /*! Corresponding accelerations where needed */   
+    /*! Corresponding accelerations where needed */
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Acceleration);
 
-    /*! Corresponding accelerations where applicable */	
+    /*! Corresponding accelerations where applicable */
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Deceleration);
 
     /*! true --> move at specified velocity until
@@ -70,7 +69,7 @@ public:
     /*! default constructor */
     inline prmVelocityJointSet():
     BaseType()
-    {} 
+    {}
 
     /*! this constructor sets the size of the vector type members */
     inline prmVelocityJointSet(size_type size):
@@ -102,15 +101,15 @@ public:
 
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 
 
 }; // _prmVelocityJointSet_h
 
-
 CMN_DECLARE_SERVICES_INSTANTIATION(prmVelocityJointSet);
+
 #endif
 

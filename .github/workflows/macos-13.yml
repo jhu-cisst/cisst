@@ -1,4 +1,4 @@
-name: macOS latest
+name: macOS 13
 
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
@@ -11,13 +11,13 @@ on:
 jobs:
   build:
 
-    runs-on: macos-latest
+    runs-on: macos-13
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         mirror: http://mirrors.ocf.berkeley.edu/qt/
 

@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -137,20 +136,20 @@ public:
 	}
 
     /*! Human readable text output */
-    virtual void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! Machine reabable text output */
-    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const;
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Serialize the content of the object without any extra
       information, i.e. no class type nor format version.  The
       "receiver" is supposed to already know what to expect. */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
-    virtual void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateIndex)

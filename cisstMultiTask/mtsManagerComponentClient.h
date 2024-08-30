@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -232,9 +231,9 @@ public:
     mtsManagerComponentClient(const std::string & componentName);
     ~mtsManagerComponentClient();
 
-    void Startup(void);
-    void Run(void);
-    void Cleanup(void);
+    void Startup(void) override;
+    void Run(void) override;
+    void Cleanup(void) override;
 
 };
 
