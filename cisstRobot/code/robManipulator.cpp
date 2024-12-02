@@ -559,11 +559,6 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
     // Evaluate the spatial Jacobian (also evaluate the forward kin)
     JacobianSpatial( q );
 
-    // compute the translation error
-    vctFixedSizeVector<double,3> dt( Rts[0][3]-Rt[0][3],
-                                     Rts[1][3]-Rt[1][3],
-                                     Rts[2][3]-Rt[2][3] );
-
     // compute the orientation error
     // first build the [ n o a ] vectors
     vctFixedSizeVector<double,3> n1( Rt[0][0],  Rt[1][0],  Rt[2][0] );
@@ -575,6 +570,11 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
     // This is the orientation error
     vctFixedSizeVector<double,3> dr = 0.5*( (n1%n2) + (o1%o2) + (a1%a2) );
+
+    // compute the translation error
+    vctFixedSizeVector<double,3> dt( Rts[0][3]-Rt[0][3]-Rt[2][3]*dr[1]+Rt[1][3]*dr[2],
+                                     Rts[1][3]-Rt[1][3]+Rt[2][3]*dr[0]-Rt[0][3]*dr[2],
+                                     Rts[2][3]-Rt[2][3]-Rt[1][3]*dr[0]+Rt[0][3]*dr[1]);
 
     // combine both errors in one R^6 vector
     doublereal e[6] = { dt[0], dt[1], dt[2], dr[0], dr[1], dr[2] };
