@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2005-08-21
 
-  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -34,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /* Put header files here */
 #include <Python.h>
-#include <numpyconfig.h>
+#include <numpy/numpyconfig.h>
 // Not using anything deprecated as of Numpy Version 1.9.
 // Newer versions of Numpy not yet tested, but based on numpyconfig.h, no new deprecated
 // items were added between Numpy Versions 1.8 and 1.15.
@@ -43,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 #else
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #endif
-#include <arrayobject.h>
+#include <numpy/arrayobject.h>
 // Numpy 1.7+ API requires PyArrayObject instead of PyObject for a number of methods.
 // The following macro performs this cast, without checking that the underlying object (A)
 // is an array because the code always either first checks if it is an array (e.g.,
