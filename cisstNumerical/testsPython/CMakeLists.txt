@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -38,8 +38,8 @@ if (WIN32)
                              ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstNumericalTests.py ${CTEST_TEST_FILE_AUTO})
 else (WIN32)
   add_custom_target (cisstNumerical_CREATE_PYTHON_TESTS_LIST ALL
-                     ${PYTHON_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstNumericalTests.py
-                     -d ${PYTHON_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO})
+                     ${Python_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstNumericalTests.py
+                     -d ${Python_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO})
 endif (WIN32)
 
 set_property (TARGET cisstNumerical_CREATE_PYTHON_TESTS_LIST PROPERTY FOLDER "cisstNumerical/tests")

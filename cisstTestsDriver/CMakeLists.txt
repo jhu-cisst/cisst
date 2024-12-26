@@ -1,9 +1,6 @@
 #
+# (C) Copyright 2003-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
-
-# (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
-# Reserved.
-
 # --- begin cisst license - do not edit ---
 #
 # This software is provided "as is" under an open source license, with
@@ -41,5 +38,5 @@ if (WIN32)
   set (BATCH_TEST_FILE ${CMAKE_CURRENT_BINARY_DIR}/cisstTestsDriverPython.bat)
   file (WRITE ${BATCH_TEST_FILE} "@ECHO OFF\n")
   file (APPEND ${BATCH_TEST_FILE} "CALL ${cisst_BINARY_DIR}/cisstvars.bat %1\n")
-  file (APPEND ${BATCH_TEST_FILE} "${PYTHON_EXECUTABLE} %2 -d ${PYTHON_EXECUTABLE} > %3\n")
+  file (APPEND ${BATCH_TEST_FILE} "${Python_EXECUTABLE} %2 -d ${Python_EXECUTABLE} > %3\n")
 endif (WIN32)

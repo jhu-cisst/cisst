@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2016 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -250,17 +250,13 @@ if (CISST_HAS_SWIG_PYTHON)
   # Find Python and NumPy
   find_package (Python COMPONENTS Interpreter Development NumPy)
 
-  # Some older CMake don't define the debug library
-  if (NOT PYTHON_DEBUG_LIBRARIES)
-    set (PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
-  endif (NOT PYTHON_DEBUG_LIBRARIES)
-
+  set (Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
   set (PYTHON_ALL_INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
   cisst_set_package_settings (cisstPython Python INCLUDE_DIRECTORIES PYTHON_ALL_INCLUDE_DIRS) 
   set (PYTHON_ALL_LIBRARIES ${Python_LIBRARIES})
   cisst_set_package_settings (cisstPython Python LIBRARIES PYTHON_ALL_LIBRARIES)
 
-  # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and PYTHON_EXECUTABLE.
+  # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and Python_EXECUTABLE.
   # (Currently, this is only created if the correct version of SWIG was found -- should that check be removed?
   #  Also, note that "if (CISST_SWIG_FOUND)" does not work at this point in the CMakeLists.txt.)
   if (NOT ${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
