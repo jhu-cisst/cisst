@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -139,9 +139,24 @@ std::string cmnPath::FindWithSubdirectory(const std::string & filename,
     std::string fullName("");
     const_iterator iter = Path.begin();
     const const_iterator end = Path.end();
+    if (filename.empty()) {
+        CMN_LOG_CLASS_RUN_WARNING << "FindWithSubdirectory called with empty filename" << std::endl;
+        return filename;
+    }
+    bool isAbsolute = false;
+#if (CISST_OS == CISST_WINDOWS)
+    size_t offset = 0;
+    // First, check for drive letter (e.g., "C:")
+    if ((filename.size() > 2) && (filename[1] == ':'))
+        offset = 2;
+    if ((filename[offset] == '/') || (filename[offset] == '\\'))
+        isAbsolute = true;
+#else
+    if (filename[0] == '/')
+        isAbsolute = true;
+#endif
     // first check if this file exists as absolute path
-    if ((filename.size() > 0)
-        && (filename[0] == '/')
+    if (isAbsolute
         && (access(filename.c_str(), mode) == 0)) {
         CMN_LOG_CLASS_RUN_VERBOSE << "Found \"" << filename << "\", it seems to be a valid absolute file name" << std::endl;
         return filename;

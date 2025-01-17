@@ -185,23 +185,62 @@ void robManipulator::DeleteTools()
   tools.clear();
 }
 
-robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
-
-  if( filename.empty() ){
+robManipulator::Errno robManipulator::LoadRobot(const std::string & filename)
+{
+  if (filename.empty()) {
     mLastError = "robManipulator::LoadRobot: no configuration file";
     CMN_LOG_RUN_ERROR << mLastError << std::endl;
     return robManipulator::EFAILURE;
   }
 
   std::ifstream ifs;
-  ifs.open( filename.data() );
-  if(!ifs){
+  ifs.open(filename.data());
+  if (!ifs) {
     mLastError = "robManipulator::LoadRobot: couldn't open configuration file "
       + filename;
     CMN_LOG_RUN_ERROR << mLastError << std::endl;
     return robManipulator::EFAILURE;
   }
 
+  // find extension, search for json
+  size_t dot = filename.find_last_of(".");
+  std::string extension = "";
+  if (dot != std::string::npos) {
+        extension = filename.substr(dot, filename.size() - dot);
+  }
+
+  if (extension != ".json") {
+    return LoadRobot(ifs);
+  }
+
+  // otherwise json
+#if CISST_HAS_JSON
+  Json::Reader jsonReader;
+  Json::Value jsonConfig;
+  if (!jsonReader.parse(ifs, jsonConfig)) {
+    mLastError = "robManipulator::LoadRobot: syntax error while parsing json file "
+      + filename + "\n" + jsonReader.getFormattedErrorMessages();
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
+    return robManipulator::EFAILURE;
+  } else {
+    // dVRK files have a DH field
+    Json::Value jsonDH = jsonConfig["DH"];
+    if (jsonDH.isNull()) {
+      return LoadRobot(jsonConfig);
+    } else {
+      return LoadRobot(jsonDH);
+    }
+  }
+#else
+  mLastError = "robManipulator::LoadRobot: cisst was compiled without JSON support, can't load "
+    + filename;
+  CMN_LOG_RUN_ERROR << mLastError << std::endl;
+  return robManipulator::EFAILURE;
+#endif
+}
+
+robManipulator::Errno robManipulator::LoadRobot(std::istream & ifs)
+{
   size_t N;       // the number of links
   {
     std::string line;

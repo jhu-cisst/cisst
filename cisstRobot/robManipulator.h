@@ -69,7 +69,13 @@ class CISST_EXPORT robManipulator{
 
 
   //! Load the kinematics and the dynamics of the robot
-  virtual robManipulator::Errno LoadRobot( const std::string& linkfile );
+  /** If the file name ends with .json it will open the file
+      and then call the overloaded method LoadRobot for Json::Value.
+      Otherwise, assumes it's the .rob format and calls the overloaded
+      method LoadRobot for istream. */
+  virtual robManipulator::Errno LoadRobot(const std::string & linkfile);
+
+  virtual robManipulator::Errno LoadRobot(std::istream & ifs);
 
 #if CISST_HAS_JSON
   //! Load the kinematics and the dynamtics of the robot from a JSON file

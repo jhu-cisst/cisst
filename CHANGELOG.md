@@ -1,6 +1,20 @@
 Change log
 ==========
 
+1.3.1 (2025-01-17)
+==================
+
+* API changes:
+  * cisstRobot robManipulator: `LoadRobot` parses file name to identify .rob or .json format
+* Deprecated features:
+  * None
+* New features
+  * None
+* Bug fixes:
+  * Missing includes for Ubuntu 24.04
+  * cisstCommon cmnPath: better handling absolute paths on Windows (#102)
+  * cisstMultiTask mtsManagerLocal: use PATH instead of LD_LIBRARY_PATH for dynamic loading on Windows
+  * cisstParameterTypes prmOperatingState: allow to enable in fault state
 
 1.3.0 (2024-08-30)
 ==================
