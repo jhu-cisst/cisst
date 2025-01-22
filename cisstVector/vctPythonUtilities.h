@@ -43,7 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 #else
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #endif
-#include <arrayobject.h>
+#include <numpy/arrayobject.h>
 // Numpy 1.7+ API requires PyArrayObject instead of PyObject for a number of methods.
 // The following macro performs this cast, without checking that the underlying object (A)
 // is an array because the code always either first checks if it is an array (e.g.,
