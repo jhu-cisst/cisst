@@ -1061,7 +1061,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
     const robMass & massData = links[i].MassData();
     m  = massData.Mass();
     s  = massData.CenterOfMass();
-    I  = massData.MomentOfInertia();
+    I  = massData.MomentOfInertiaAtCOM();
 
     if( i==0 ){
       A  = R*links[i].Orientation( q[i] );
