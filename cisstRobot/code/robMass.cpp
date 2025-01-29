@@ -105,9 +105,9 @@ robMass::Errno robMass::ReadMass(const Json::Value &config)
     com[0] = config.get("cx", 0.0).asDouble();
     com[1] = config.get("cy", 0.0).asDouble();
     com[2] = config.get("cz", 0.0).asDouble();
-    D[0][0] = config.get("Ixx", 0.0001).asDouble();
-    D[1][1] = config.get("Iyy", 0.0001).asDouble();
-    D[2][2] = config.get("Izz", 0.0001).asDouble();
+    D[0][0] = config.get("Ixx", 0.0).asDouble();
+    D[1][1] = config.get("Iyy", 0.0).asDouble();
+    D[2][2] = config.get("Izz", 0.0).asDouble();
     x1 = config.get("x1", 1.0).asDouble();
     x2 = config.get("x2", 0.0).asDouble();
     x3 = config.get("x3", 0.0).asDouble();
