@@ -41,8 +41,8 @@ if(PYTHON_EXECUTABLE)
                     )
 endif()
 
-find_path(PYTHON_NUMPY_INCLUDE_DIR arrayobject.h
-          HINTS "${NUMPY_PATH}/numpy/"
+find_path(PYTHON_NUMPY_INCLUDE_DIR numpy/arrayobject.h
+          HINTS "${NUMPY_PATH}"
                 "${PYTHON_INCLUDE_PATH}/numpy/"
           PATHS "/usr/include/python2.7/numpy/"
                 "/usr/include/python2.6/numpy/"
