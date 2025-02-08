@@ -1,0 +1,82 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctTransformationTypes.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+
+// Always include last
+#include <cisstParameterTypes/prmExport.h>
+}
+
+class {
+    name prmStateCartesian;
+
+    attribute CISST_EXPORT;
+
+    base-class {
+        type mtsGenericObject;
+        is-data true;
+    }
+
+    member {
+        name MovingFrame;
+        type std::string;
+        description Name of moving frame;
+    }
+
+    member {
+        name ReferenceFrame;
+        type std::string;
+        description Name of reference frame;
+    }
+
+    member {
+        name Position;
+        type vctFrm3;
+        default vctFrm3(); // identity
+    }
+
+    member {
+        name PositionIsValid;
+        type bool;
+        default false;
+        description Does the Position member carry valid data?;
+    }
+
+    member {
+        name Velocity;
+        type vct6;
+        default 0.0;
+    }
+
+    member {
+        name VelocityIsValid;
+        type bool;
+        default false;
+        description Does the Velocity member carry valid data?;
+    }
+
+    member {
+        name Force;
+        type vct6;
+        default 0.0;
+    }
+
+    member {
+        name ForceIsValid;
+        type bool;
+        default false;
+        description Does the Force member carry valid data?;
+    }
+
+    inline-header {
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(prmStateCartesian);
+}

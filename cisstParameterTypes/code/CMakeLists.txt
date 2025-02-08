@@ -25,6 +25,7 @@ cisst_data_generator (cisstParameterTypes
   ../prmForceTorqueJointSet.cdg
   ../prmCartesianImpedance.cdg
   ../prmIMUSensors.cdg
+  ../prmStateCartesian.cdg
   ../prmStateJoint.cdg
   ../prmConfigurationJoint.cdg
   ../prmInputData.cdg
