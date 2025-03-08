@@ -96,6 +96,12 @@ CMN_IMPLEMENT_SERVICES(prmStateJoint);
 #include <cisstParameterTypes/prmStateCartesian.h>
 CMN_IMPLEMENT_SERVICES(prmStateCartesian);
 
+#include <cisstParameterTypes/prmServoJoint.h>
+CMN_IMPLEMENT_SERVICES(prmServoJoint);
+
+#include <cisstParameterTypes/prmServoCartesian.h>
+CMN_IMPLEMENT_SERVICES(prmServoCartesian);
+
 #include <cisstParameterTypes/prmInputData.h>
 CMN_IMPLEMENT_SERVICES(prmInputData);
 

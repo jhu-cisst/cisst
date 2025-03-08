@@ -25,8 +25,10 @@ cisst_data_generator (cisstParameterTypes
   ../prmForceTorqueJointSet.cdg
   ../prmCartesianImpedance.cdg
   ../prmIMUSensors.cdg
-  ../prmStateCartesian.cdg
   ../prmStateJoint.cdg
+  ../prmStateCartesian.cdg
+  ../prmServoJoint.cdg
+  ../prmServoCartesian.cdg
   ../prmConfigurationJoint.cdg
   ../prmInputData.cdg
   ../prmKeyValue.cdg
@@ -88,6 +90,8 @@ set (HEADER_FILES
 
   prmJointType.h
   prmInputDataConverter.h
+
+  prmSetpointMode.h
   )
 
 cisst_add_library (
