@@ -51,6 +51,13 @@ class {
         default vctDoubleVec(0);
     }
 
+    member {
+        name PositionProjection;
+        type vctDoubleMat;
+        default vctDoubleMat(0, 0, 0.0);
+        description If size is 0, will be treated as if identity.;
+    }
+
     inline-header {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);

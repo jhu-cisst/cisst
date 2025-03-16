@@ -28,6 +28,26 @@ inline bool operator&(prmSetpointMode a, prmSetpointMode b)
     return static_cast<bool>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
 }
 
+inline std::ostream & operator << (std::ostream & output,
+                                   const prmSetpointMode & mode) {
+    std::string mode_name = "";
+    if (mode & prmSetpointMode::POSITION) {
+        mode_name += "P";
+    }
+    if (mode & prmSetpointMode::VELOCITY) {
+        mode_name += "V";
+    }
+    if (mode & prmSetpointMode::EFFORT) {
+        mode_name += "F";
+    }
+
+    if (mode_name == "") {
+        mode_name = "NONE";
+    }
+
+    return output << mode_name;
+}
+
 template <>
 inline void CISST_EXPORT cmnDataJSON<prmSetpointMode>::SerializeText(const DataType & data, Json::Value & jsonValue) {
     jsonValue = static_cast<uint8_t>(data);
