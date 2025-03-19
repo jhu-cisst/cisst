@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -54,5 +54,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmImageFrame.h>
 #include <cisstParameterTypes/prmCameraInfo.h>
 #include <cisstParameterTypes/prmDepthMap.h>
+#include <cisstParameterTypes/prmKeyValue.h>
 
 #endif // _prmPython_h
