@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-08-21
 
-  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /* Put header files here */
 #include <Python.h>
-#include <numpyconfig.h>
+#include <numpy/numpyconfig.h>
 // Not using anything deprecated as of Numpy Version 1.9.
 // Newer versions of Numpy not yet tested, but based on numpyconfig.h, no new deprecated
 // items were added between Numpy Versions 1.8 and 1.15.
@@ -50,6 +50,11 @@ http://www.cisst.org/cisst/license.txt.
 // by calling vctThrowUnlessIsPyArray, which calls PyArray_Check) or has just created
 // an array (e.g., by calling PyArray_SimpleNew).
 #define cast_array(A) reinterpret_cast<PyArrayObject *>(A)
+
+// PyArray_REFCOUNT is deprecated, and should be replaced by Py_REFCNT
+#ifndef PyArray_REFCOUNT
+#define PyArray_REFCOUNT(obj) Py_REFCNT(obj)
+#endif
 
 #include <typeinfo>
 #include <cisstConfig.h>
