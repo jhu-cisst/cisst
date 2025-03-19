@@ -24,7 +24,7 @@ jobs:
     - name: Download cisstNetlib
       run: |
         cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
-        git clone https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+        git clone -b devel https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
 
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build
