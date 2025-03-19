@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -54,8 +54,8 @@ if (WIN32)
                      SOURCES ${TEST_PROGRAMS})
 else (WIN32)
   add_custom_target (cisstVector_CREATE_PYTHON_TESTS_LIST ALL
-                     COMMAND ${PYTHON_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstVectorTests.py
-                             -d ${PYTHON_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
+                     COMMAND ${Python_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstVectorTests.py
+                             -d ${Python_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
                      SOURCES ${TEST_PROGRAMS})
 endif (WIN32)
 
