@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -688,6 +688,16 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 
     return newComponent;
 }
+
+mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className,
+                                                           const mtsGenericObject & constructorArg)
+{
+    std::stringstream buffer;
+    cmnSerializer serializer(buffer);
+    serializer.Serialize(constructorArg);
+    return CreateComponentDynamically(className, "(serialized)", buffer.str());
+}
+
 
 #if CISST_HAS_JSON
 bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
