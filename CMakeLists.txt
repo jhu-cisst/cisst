@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -16,7 +16,7 @@
 cmake_minimum_required (VERSION 3.10)
 
 # cisst (Computer Integrated Surgical Systems and Technology)
-project (cisst VERSION 1.3.0)
+project (cisst VERSION 1.3.1)
 
 # cisst compiler settings
 include (cmake/cisstSettings.cmake)

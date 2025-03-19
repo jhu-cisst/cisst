@@ -80,6 +80,9 @@ bool prmOperatingState::ValidCommand(const prmOperatingState::CommandType & comm
         break;
     case FAULT:
         switch (command) {
+        case enable:
+            newOperatingState = ENABLED;
+            return true;
         case disable:
             newOperatingState = DISABLED;
             return true;

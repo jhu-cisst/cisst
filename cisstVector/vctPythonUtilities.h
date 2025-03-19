@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-08-21
 
-  (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,6 +48,11 @@ http://www.cisst.org/cisst/license.txt.
 // by calling vctThrowUnlessIsPyArray, which calls PyArray_Check) or has just created
 // an array (e.g., by calling PyArray_SimpleNew).
 #define cast_array(A) reinterpret_cast<PyArrayObject *>(A)
+
+// PyArray_REFCOUNT is deprecated, and should be replaced by Py_REFCNT
+#ifndef PyArray_REFCOUNT
+#define PyArray_REFCOUNT(obj) Py_REFCNT(obj)
+#endif
 
 #include <typeinfo>
 #include <cisstConfig.h>

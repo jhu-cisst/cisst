@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: 2009-11-11
 
-  (C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -185,23 +185,62 @@ void robManipulator::DeleteTools()
   tools.clear();
 }
 
-robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
-
-  if( filename.empty() ){
+robManipulator::Errno robManipulator::LoadRobot(const std::string & filename)
+{
+  if (filename.empty()) {
     mLastError = "robManipulator::LoadRobot: no configuration file";
     CMN_LOG_RUN_ERROR << mLastError << std::endl;
     return robManipulator::EFAILURE;
   }
 
   std::ifstream ifs;
-  ifs.open( filename.data() );
-  if(!ifs){
+  ifs.open(filename.data());
+  if (!ifs) {
     mLastError = "robManipulator::LoadRobot: couldn't open configuration file "
       + filename;
     CMN_LOG_RUN_ERROR << mLastError << std::endl;
     return robManipulator::EFAILURE;
   }
 
+  // find extension, search for json
+  size_t dot = filename.find_last_of(".");
+  std::string extension = "";
+  if (dot != std::string::npos) {
+        extension = filename.substr(dot, filename.size() - dot);
+  }
+
+  if (extension != ".json") {
+    return LoadRobot(ifs);
+  }
+
+  // otherwise json
+#if CISST_HAS_JSON
+  Json::Reader jsonReader;
+  Json::Value jsonConfig;
+  if (!jsonReader.parse(ifs, jsonConfig)) {
+    mLastError = "robManipulator::LoadRobot: syntax error while parsing json file "
+      + filename + "\n" + jsonReader.getFormattedErrorMessages();
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
+    return robManipulator::EFAILURE;
+  } else {
+    // dVRK files have a DH field
+    Json::Value jsonDH = jsonConfig["DH"];
+    if (jsonDH.isNull()) {
+      return LoadRobot(jsonConfig);
+    } else {
+      return LoadRobot(jsonDH);
+    }
+  }
+#else
+  mLastError = "robManipulator::LoadRobot: cisst was compiled without JSON support, can't load "
+    + filename;
+  CMN_LOG_RUN_ERROR << mLastError << std::endl;
+  return robManipulator::EFAILURE;
+#endif
+}
+
+robManipulator::Errno robManipulator::LoadRobot(std::istream & ifs)
+{
   size_t N;       // the number of links
   {
     std::string line;
@@ -925,7 +964,8 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     I  = massData.MomentOfInertia();
 
     A  = links[i].Orientation( q[i] ).InverseSelf();
-    ps = links[i].PStar();
+    ps = links[i].ForwardKinematics( q[i] ).Translation();
+
 
     wd = A*( wd + (z0*qdd[i]) + (w%(z0*qd[i])) ); // angular acceleration wrt i
     w  = A*( w  + (z0*qd[i]) );                   // angular velocity
@@ -944,7 +984,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // Backward recursion
   for(int i=(int)links.size()-1; 0<=i; i--){
     vctMatrixRotation3<double>   A;
-    vctFixedSizeVector<double,3> ps = links[i].PStar();
+    vctFixedSizeVector<double,3> ps = links[i].ForwardKinematics( q[i] ).Translation();
     vctFixedSizeVector<double,3> s  = links[i].MassData().CenterOfMass();
 
     if(i != (int)links.size()-1)              //
@@ -1021,7 +1061,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
     const robMass & massData = links[i].MassData();
     m  = massData.Mass();
     s  = massData.CenterOfMass();
-    I  = massData.MomentOfInertia();
+    I  = massData.MomentOfInertiaAtCOM();
 
     if( i==0 ){
       A  = R*links[i].Orientation( q[i] );
@@ -1030,7 +1070,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
     else
       A  = links[i].Orientation( q[i] ).InverseSelf();
 
-    ps = links[i].PStar();
+    ps = links[i].ForwardKinematics( q[i] ).Translation();
 
     if (links[i].GetType() == cmnJointType::CMN_JOINT_REVOLUTE ){
       w  = A*w  + (z0*qd[i]) ;                      // angular velocity
@@ -1060,7 +1100,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
 
     if(i != (int)links.size()-1){              //
       A = links[i+1].Orientation( q[i+1] );    //
-      ps = links[i+1].PStar();
+      ps = links[i+1].ForwardKinematics( q[i+1] ).Translation();
     }
 
     n = A*n + (s%F[i]) + (ps%(A*f)) + N[i];    // moment externed on i by i-1

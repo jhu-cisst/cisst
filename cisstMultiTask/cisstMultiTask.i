@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2008-01-17
 
-  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -242,7 +242,6 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstMultiTask/mtsFunctionWrite.h"
 %include "cisstMultiTask/mtsFunctionWriteReturn.h"
 %include "cisstMultiTask/mtsFunctionQualifiedRead.h"
-%include "cisstMultiTask/mtsFunctionVoidReturn.h"
 
 // Extend mtsFunctionVoid
 %extend mtsFunctionVoid {
@@ -441,18 +440,18 @@ http://www.cisst.org/cisst/license.txt.
                 func = mtsFunctionVoid()
                 interfaceRequired.AddFunction(command.Name, func)
                 func.thisown = 0
-            #for command in interfaceProvided.CommandsVoidReturn:
-            #    func = mtsFunctionVoidReturn()
-            #    interfaceRequired.AddFunction(command.Name, func)
-            #    func.thisown = 0
+            for command in interfaceProvided.CommandsVoidReturn:
+                func = mtsFunctionVoidReturn()
+                interfaceRequired.AddFunction(command.Name, func)
+                func.thisown = 0
             for command in interfaceProvided.CommandsWrite:
                 func = mtsFunctionWrite()
                 interfaceRequired.AddFunction(command.Name, func)
                 func.thisown = 0
-            #for command in interfaceProvided.CommandsWriteReturn:
-            #    func = mtsFunctionWriteReturn()
-            #    interfaceRequired.AddFunction(command.Name, func)
-            #    func.thisown = 0
+            for command in interfaceProvided.CommandsWriteReturn:
+                func = mtsFunctionWriteReturn()
+                interfaceRequired.AddFunction(command.Name, func)
+                func.thisown = 0
             for command in interfaceProvided.CommandsQualifiedRead:
                 func = mtsFunctionQualifiedRead()
                 interfaceRequired.AddFunction(command.Name, func)
@@ -524,6 +523,7 @@ public:
             commands = mtsInterfaceProvided.GetNamesOfCommandsVoidReturn(self)
             for command in commands:
                 self.__dict__[command] = mtsInterfaceProvided.GetCommandVoidReturn(self, command)
+                self.__dict__[command].UpdateFromC()
             commands = mtsInterfaceProvided.GetNamesOfCommandsWrite(self)
             for command in commands:
                 self.__dict__[command] = mtsInterfaceProvided.GetCommandWrite(self, command)
@@ -807,7 +807,9 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsInterfaceProvidedDescriptionProxy, mtsIn
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsInterfaceRequiredDescriptionProxy, mtsInterfaceRequiredDescription);
 
 %template(mtsCommandsVoidDescription)          std::vector<mtsCommandVoidDescription>;
+%template(mtsCommandsVoidReturnDescription)    std::vector<mtsCommandVoidReturnDescription>;
 %template(mtsCommandsWriteDescription)         std::vector<mtsCommandWriteDescription>;
+%template(mtsCommandsWriteReturnDescription)   std::vector<mtsCommandWriteReturnDescription>;
 %template(mtsCommandsReadDescription)          std::vector<mtsCommandReadDescription>;
 %template(mtsCommandsQualifiedReadDescription) std::vector<mtsCommandQualifiedReadDescription>;
 %template(mtsEventsVoidDescription)            std::vector<mtsEventVoidDescription>;

@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -297,9 +297,15 @@ public:
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
-    /*! \brief Create a component.  Does not add it to the local component manager. */
+    /*! \brief Create a component.  Does not add it to the local component manager.
+        In this method, componentName is only used if constructorArgSerialized is an empty string. */
     mtsComponent * CreateComponentDynamically(const std::string & className, const std::string & componentName,
                                               const std::string & constructorArgSerialized);
+
+    /*! \brief Create a component.  Does not add it to the local component manager.
+        In this method, the component name is obtained from constructorArg. */
+    mtsComponent * CreateComponentDynamically(const std::string & className,
+                                              const mtsGenericObject & constructorArg);
 
 #if CISST_HAS_JSON
     /*! Configure using a JSON file.  This method will automatically
