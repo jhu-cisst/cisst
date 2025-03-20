@@ -925,9 +925,9 @@ def mtsLoadAndCreateServer(libraryName, className, componentName, argSerialized)
     print('Creating ' + componentName + ' (' + className + ')')
     LCM = mtsManagerLocal.GetInstance()
     if (not argSerialized):
-        comp = LCM.CreateComponentDynamically('mtsIntuitiveResearchKitConsole', componentName, '')
+        comp = LCM.CreateComponentDynamically(className, componentName, '')
     else:
-        comp = LCM.CreateComponentDynamically('mtsIntuitiveResearchKitConsole', argSerialized)
+        comp = LCM.CreateComponentDynamically(className, argSerialized)
     if comp:
         print('Component created')
         LCM.AddComponent(comp)
