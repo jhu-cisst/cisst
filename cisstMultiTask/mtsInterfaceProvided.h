@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -206,6 +206,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     /*! Set the desired size for the command mail box and argument
       queues.  See SetMailBoxSize and SetArgumentQueuesSize. */
     void SetMailBoxAndArgumentQueuesSize(size_t desiredSize);
+
+    /*! Get the description of this interface. */
+    mtsInterfaceProvidedDescription GetDescription() const;
 
     /*! Get the names of commands provided by this interface. */
     //@{
@@ -791,7 +794,7 @@ protected: // PK TEMP
     bool AddSystemEvents(void);
 
     /*! Get description of this interface (with serialized argument information) */
-    bool GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription);
+    bool GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription) const;
 };
 
 

@@ -579,7 +579,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
                                  << className << "\" -- no services (make sure the macros CMN_DECLARE_SERVICES and CMN_IMPLEMENT_SERVICES have been used)" << std::endl;
         return 0;
     }
-    bool isComponent = services->IsDerivedFrom<mtsComponent>();
+    bool isComponent = (services->IsDerivedFrom<mtsComponent>()) || (className == "mtsComponent");
     const cmnClassServicesBase *argServices = services->GetConstructorArgServices();
     if (services->OneArgConstructorAvailable() && argServices) {
         if (!isComponent) {

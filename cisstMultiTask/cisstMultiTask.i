@@ -466,7 +466,8 @@ http://www.cisst.org/cisst/license.txt.
         # or ('component', 'interfaceProvided')
         def AddInterfaceRequiredAndConnect(self, otherComponentInterface, connectionAttempts = 1):
             try:
-                localProcessName = mtsManagerLocal.GetInstance().GetProcessName()
+                LCM = mtsManagerLocal.GetInstance()
+                localProcessName = LCM.GetProcessName()
                 num = len(otherComponentInterface)
                 if 2 <= num <= 3:
                     interfaceName = otherComponentInterface[num-1]
@@ -476,11 +477,17 @@ http://www.cisst.org/cisst/license.txt.
                     else:
                         processName = localProcessName
                     # Now do the work here
-                    manager = self.GetManagerComponentServices()
-                    if not manager:
-                        print('Could not get manager component services')
-                        return
-                    interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
+                    if (processName != localProcessName):
+                        # When connecting remotely, this component must have management services
+                        manager = self.GetManagerComponentServices()
+                        if not manager:
+                            print('Could not get manager component services')
+                            return
+                        interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
+                    else:
+                        comp = LCM.GetComponent(componentName)
+                        prov = comp.GetInterfaceProvided(interfaceName)
+                        interfaceDescription = prov.GetDescription()
                     if not interfaceDescription.InterfaceName:
                         print('No provided interface (empty string)')
                         return
@@ -489,9 +496,13 @@ http://www.cisst.org/cisst/license.txt.
                     while (attempt < connectionAttempts):
                         attempt = attempt + 1
                         print('Trying to connect: ' + interfaceRequired.GetName() + ' - attempt # ' + str(attempt))
-                        manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
-                        # PK TEMP: need time.sleep until blocking commands supported over network
-                        time.sleep(2.0)
+                        if (processName != localProcessName):
+                            manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(),
+                                            processName, componentName, interfaceName)
+                            # PK TEMP: need time.sleep until blocking commands supported over network
+                            time.sleep(2.0)
+                        else:
+                            LCM.Connect(self.GetName(), interfaceRequired.GetName(), componentName, interfaceName)
                         interfaceRequired.UpdateFromC()
                         if interfaceRequired.GetConnectedInterface():
                             print('Required interface ' + interfaceRequired.GetName() + ' connected.')
@@ -893,3 +904,53 @@ MTS_INSTANTIATE_MATRIX(mtsLongMat, long);
 
  // Wrap mtsIntervalStatistics
 %include "cisstMultiTask/mtsIntervalStatistics.h"
+
+%pythoncode %{
+
+# Dynamically load and create a server component
+#
+# This function dynamically loads the specified library and constructs an object using the
+# specified component class (className). The component name is specified through argSerialized
+# (if not empty); otherwise componentName is used. Note that if argSerialized is not empty,
+# componentName is ignored.
+
+def mtsLoadAndCreateServer(libraryName, className, componentName, argSerialized):
+    print('Loading ' + libraryName)
+    import cisstOSAbstractionPython as cisstOSAbstraction
+    DynLoader = cisstOSAbstraction.osaDynamicLoader()
+    if not DynLoader.Load(libraryName):
+        print('Failed to load ' + libraryName + ' (see cisstLog.txt)')
+        return None
+
+    print('Creating ' + componentName + ' (' + className + ')')
+    LCM = mtsManagerLocal.GetInstance()
+    if (not argSerialized):
+        comp = LCM.CreateComponentDynamically('mtsIntuitiveResearchKitConsole', componentName, '')
+    else:
+        comp = LCM.CreateComponentDynamically('mtsIntuitiveResearchKitConsole', argSerialized)
+    if comp:
+        print('Component created')
+        LCM.AddComponent(comp)
+    return comp
+
+# Create client component (if necessary) and then create required interface to server
+# provided interface
+def mtsCreateClientInterface(clientName, serverName, interfaceName):
+    LCM = mtsManagerLocal.GetInstance()
+    if (LCM.FindComponent(clientName)):
+        print('mtsCreateClientInterface: component ' + clientName + ' already exists')
+        client = LCM.GetComponent(clientName)
+    else:
+        print('Creating ' + clientName)
+        client = LCM.CreateComponentDynamically('mtsComponent', clientName, '')
+        if not client:
+            print('Failed to create ' + clientName)
+            return None
+        LCM.AddComponent(client)
+    interface = None
+    if (serverName and interfaceName):
+        print('Connecting ' + clientName + ' to ' + serverName + ' (' + interfaceName + ')')
+        interface = client.AddInterfaceRequiredAndConnect((serverName, interfaceName))
+    return interface
+
+%}
