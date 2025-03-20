@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2024 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -553,7 +553,7 @@ function (cisst_add_swig_module ...)
     set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES CPLUSPLUS ON)
     # make sure the runtime code is not included
     set_source_files_properties (${SWIG_INTERFACE_FILE}
-                                 PROPERTIES SWIG_FLAGS "-v;-modern;-fvirtual")
+                                 PROPERTIES SWIG_FLAGS "-v;-fvirtual")
     # make sure source file is not used before libraries are build
     set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES DEPENDS "${MODULE_LINK_LIBRARIES}")
     # finally create the swig project using CMake command

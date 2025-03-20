@@ -70,6 +70,13 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstParameterTypes/prmVelocityJointGet.h"
 %include "cisstParameterTypes/prmVelocityJointSet.h"
 
+%include "cisstParameterTypes/prmForceTorqueJointSet.h"
+%include "cisstParameterTypes/prmCartesianImpedance.h"
+%include "cisstParameterTypes/prmForwardKinematicsRequest.h"
+%include "cisstParameterTypes/prmForwardKinematicsResponse.h"
+%include "cisstParameterTypes/prmInverseKinematicsRequest.h"
+%include "cisstParameterTypes/prmInverseKinematicsResponse.h"
+
 %include "cisstParameterTypes/prmRobotState.h"
 
 %include "cisstParameterTypes/prmStateJoint.h"

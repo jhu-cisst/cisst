@@ -15,6 +15,11 @@
 
 project (cisstMultiTaskPython)
 
+if (WIN32)
+  # For conditional compilation on Windows
+  set_property (SOURCE "../cisstMultiTask.i" PROPERTY COMPILE_DEFINITIONS CISST_WINDOWS)
+endif ()
+
 # create wrappers using swig
 cisst_add_swig_module (MODULE cisstMultiTask
                        INTERFACE_DIRECTORY ..
