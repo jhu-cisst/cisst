@@ -1,9 +1,8 @@
 #
 #
-# CMakeLists for cisstMultiTask
+# CMakeLists for cisstMultiTask Python wrapping
 #
-# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -17,7 +16,7 @@ project (cisstMultiTaskPython)
 
 if (WIN32)
   # For conditional compilation on Windows
-  set_property (SOURCE "../cisstMultiTask.i" PROPERTY COMPILE_DEFINITIONS CISST_WINDOWS)
+  set_property (SOURCE "../cisstMultiTask.i" PROPERTY COMPILE_DEFINITIONS SWIG_WINDOWS)
 endif ()
 
 # create wrappers using swig
