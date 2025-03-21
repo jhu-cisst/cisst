@@ -508,6 +508,7 @@ http://www.cisst.org/cisst/license.txt.
                             print('Required interface ' + interfaceRequired.GetName() + ' connected.')
                             return interfaceRequired
                     print('Unable to add required interface for ' + interfaceName)
+                    return None
                 else:
                     print('Parameter error: must specify (process, component, interface) or (component, interface)')
             except TypeError as e:
@@ -913,6 +914,26 @@ MTS_INSTANTIATE_MATRIX(mtsLongMat, long);
 
 %pythoncode %{
 
+# Define separate class so that we have more flexibility to set up namespaces.
+# For example, command /one/two/three will become one.two.three.
+class mtsInterfaceRequiredPython:
+    def __init__(self):
+        pass
+
+    def _add_entry(self, cmdName, cmdFunc):
+        # Replace dashes with underscore
+        cmdNameFixed = cmdName.replace('-', '_')
+        # Split namespaces (/)
+        items = cmdNameFixed.split('/')
+        obj = self
+        # Loop through any namespaces
+        for i in range(0, len(items)-1):
+            if not hasattr(obj, items[i]):
+                setattr(obj, items[i], mtsInterfaceRequiredPython())
+            obj = getattr(obj, items[i])
+        # Last (or only) item is set to the func
+        setattr(obj, items[len(items)-1], cmdFunc)
+
 # Dynamically load and create a server component
 #
 # This function dynamically loads the specified library and constructs an object using the
@@ -957,6 +978,22 @@ def mtsCreateClientInterface(clientName, serverName, interfaceName):
     if (serverName and interfaceName):
         print('Connecting ' + clientName + ' to ' + serverName + ' (' + interfaceName + ')')
         interface = client.AddInterfaceRequiredAndConnect((serverName, interfaceName))
-    return interface
+    interfacePython = None
+    if interface:
+        interfacePython = mtsInterfaceRequiredPython()
+        for name in interface.GetNamesOfFunctionsVoid():
+            interfacePython._add_entry(name, interface.GetFunctionVoid(name))
+        for name in interface.GetNamesOfFunctionsVoidReturn():
+            interfacePython._add_entry(name, interface.GetFunctionVoidReturn(name))
+        for name in interface.GetNamesOfFunctionsWrite():
+            interfacePython._add_entry(name, interface.GetFunctionWrite(name))
+        for name in interface.GetNamesOfFunctionsWriteReturn():
+            interfacePython._add_entry(name, interface.GetFunctionWriteReturn(name))
+        for name in interface.GetNamesOfFunctionsQualifiedRead():
+            interfacePython._add_entry(name, interface.GetFunctionQualifiedRead(name))
+        for name in interface.GetNamesOfFunctionsRead():
+            interfacePython._add_entry(name, interface.GetFunctionRead(name))
+
+    return interfacePython
 
 %}
