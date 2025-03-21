@@ -981,19 +981,8 @@ def mtsCreateClientInterface(clientName, serverName, interfaceName):
     interfacePython = None
     if interface:
         interfacePython = mtsInterfaceRequiredPython()
-        for name in interface.GetNamesOfFunctionsVoid():
-            interfacePython._add_entry(name, interface.GetFunctionVoid(name))
-        for name in interface.GetNamesOfFunctionsVoidReturn():
-            interfacePython._add_entry(name, interface.GetFunctionVoidReturn(name))
-        for name in interface.GetNamesOfFunctionsWrite():
-            interfacePython._add_entry(name, interface.GetFunctionWrite(name))
-        for name in interface.GetNamesOfFunctionsWriteReturn():
-            interfacePython._add_entry(name, interface.GetFunctionWriteReturn(name))
-        for name in interface.GetNamesOfFunctionsQualifiedRead():
-            interfacePython._add_entry(name, interface.GetFunctionQualifiedRead(name))
-        for name in interface.GetNamesOfFunctionsRead():
-            interfacePython._add_entry(name, interface.GetFunctionRead(name))
-
+        for name in interface.GetNamesOfFunctions():
+            interfacePython._add_entry(name, getattr(interface, name))
     return interfacePython
 
 %}
