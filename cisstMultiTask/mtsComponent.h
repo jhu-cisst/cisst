@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -147,7 +147,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorNameAndString)
 */
 class CISST_EXPORT mtsComponent: public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
     friend class mtsComponentProxy;

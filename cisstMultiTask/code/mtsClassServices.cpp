@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,7 +45,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndLong)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndULong)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndDouble)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndString)
-CMN_IMPLEMENT_SERVICES(mtsComponent)
+//CMN_IMPLEMENT_SERVICES(mtsComponent)
+// mtsComponent: allow dynamic creation with std::string constructor arg
+CMN_IMPLEMENT_SERVICES_INTERNAL(mtsComponent, 0, mtsGenericTypes<std::string>::FinalType)
 
 #include <cisstMultiTask/mtsComponentAddLatency.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentAddLatency, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)

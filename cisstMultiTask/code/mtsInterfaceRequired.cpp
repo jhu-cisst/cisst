@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -190,6 +190,14 @@ bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string & eventNa
     return result;
 }
 
+
+mtsInterfaceRequiredDescription mtsInterfaceRequired::GetDescription() const
+{
+    mtsInterfaceRequiredDescription desc;
+    desc.InterfaceName = GetName();
+    GetDescription(desc);
+    return desc;
+}
 
 std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctions(void) const
 {
@@ -978,7 +986,7 @@ bool mtsInterfaceRequired::RemoveEventHandlerWrite(const std::string & eventName
     return EventHandlersWrite.RemoveItem(eventName, CMN_LOG_LEVEL_INIT_WARNING);
 }
 
-void mtsInterfaceRequired::GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription)
+void mtsInterfaceRequired::GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription) const
 {
     // Serializer initialization
     std::stringstream streamBuffer;

@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -181,6 +181,9 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
       SetArgumentQueuesSize. */
     bool SetMailBoxAndArgumentQueuesSize(size_t desiredSize);
 
+    /*! Get the description of this interface. */
+    mtsInterfaceRequiredDescription GetDescription() const;
+
     /*! Get the names of commands required by this interface. */
     //@{
     virtual std::vector<std::string> GetNamesOfFunctions(void) const;
@@ -344,7 +347,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     EventHandlerWriteMapType EventHandlersWrite;
 
     /*! Get description of this interface (with serialized argument information) */
-    void GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription);
+    void GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription) const;
 
  public:
 

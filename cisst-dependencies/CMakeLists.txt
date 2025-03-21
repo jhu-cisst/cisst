@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2016 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -247,26 +247,16 @@ if (CISST_HAS_SWIG_PYTHON)
   set (CISST_CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
   set (CISST_CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
 
-  # Find Python
-  find_package (PythonLibs REQUIRED)
-  # Some older CMake don't define the debug library
-  if (NOT PYTHON_DEBUG_LIBRARIES)
-    set (PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
-  endif (NOT PYTHON_DEBUG_LIBRARIES)
-  find_package (PythonInterp REQUIRED)
-  cisst_set_package_settings (cisstPython Python INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
-  set (PYTHON_ALL_LIBRARIES "debug;${PYTHON_DEBUG_LIBRARIES};optimized;${PYTHON_LIBRARIES}")
-  cisst_set_package_settings (cisstPython Python LIBRARIES PYTHON_ALL_LIBRARIES)
-  # We also need numpy for cisstVector, cisstMultiTask and cisstNumerical
-  find_package (Numpy REQUIRED)
-  if (NUMPY_FOUND)
-    cisst_set_package_settings (cisstPython NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
-    mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
-  else (NUMPY_FOUND)
-    cisst_unset_all_package_settings (cisstPython NumPy)
-  endif (NUMPY_FOUND)
+  # Find Python and NumPy
+  find_package (Python REQUIRED COMPONENTS Interpreter Development NumPy)
 
-  # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and PYTHON_EXECUTABLE.
+  set (Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
+  set (PYTHON_ALL_INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
+  cisst_set_package_settings (cisstPython Python INCLUDE_DIRECTORIES PYTHON_ALL_INCLUDE_DIRS) 
+  set (PYTHON_ALL_LIBRARIES ${Python_LIBRARIES})
+  cisst_set_package_settings (cisstPython Python LIBRARIES PYTHON_ALL_LIBRARIES)
+
+  # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and Python_EXECUTABLE.
   # (Currently, this is only created if the correct version of SWIG was found -- should that check be removed?
   #  Also, note that "if (CISST_SWIG_FOUND)" does not work at this point in the CMakeLists.txt.)
   if (NOT ${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
@@ -283,7 +273,6 @@ else (CISST_HAS_SWIG_PYTHON)
   # propagate the fact that SWIG was not found
   set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
   cisst_unset_all_package_settings (cisstPython Python)
-  cisst_unset_all_package_settings (cisstPython NumPy)
 endif (CISST_HAS_SWIG_PYTHON)
 
 
