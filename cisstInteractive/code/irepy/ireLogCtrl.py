@@ -2,11 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#  Author(s):	Peter Kazanzides
+#  Author(s):   Peter Kazanzides
 #  Created on: 2004-04-30
 #
-#  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-#  Reserved.
+#  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -57,15 +56,15 @@ ireEmbedded = True
 try:
     import ireLogger
     from ireLogCtrl import *
-except ImportError,e:
+except ImportError as e:
     ireEmbedded = False
 
 
 class ireLogCtrl(wx.Panel):
-	
-	def __init__(self, parent, id, title='',
+
+    def __init__(self, parent, id, title='',
                  style=wx.TE_READONLY | wx.HSCROLL | wx.TE_MULTILINE | wx.TE_RICH):
-		wx.Panel.__init__(self, parent, id)
+        wx.Panel.__init__(self, parent, id)
 
         self.SetBackgroundColour(wx.BLUE)
 
@@ -126,9 +125,9 @@ class ireLogCtrl(wx.Panel):
             # we'll use the Python callback function (wx.LogMessage).
             try:
                 callback = wx._core_.PostEvent
-            except AttributeError,e:
-                print "EnableLogger warning: could not find C function:"
-                print e
+            except AttributeError as e:
+                print('EnableLogger warning: could not find C function:')
+                print(e)
             ireLogger.SetTextOutput(callback, UpdateLogEvent, self)
             self.EnableBox.SetValue(True)
 

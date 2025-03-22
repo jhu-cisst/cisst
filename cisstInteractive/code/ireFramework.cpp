@@ -6,8 +6,7 @@
   Author(s):  Andrew LaMora, Peter Kazanzides
   Created on: 2005-02-28
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -204,6 +203,7 @@ void PyTextCtrlHook::PrintLog(const char * str, int len)
 {
     PyObject* result;
 
+#if (PY_MAJOR_VERSION == 2)
     // If PythonFunc is set, we know that PythonEventClass is also set
     // and that both of them are callable objects.
     if (PythonFunc) {
@@ -251,6 +251,7 @@ void PyTextCtrlHook::PrintLog(const char * str, int len)
         // Release Python global interpreter lock
         PyGILState_Release(gstate);
     }
+#endif
 }
 
 // Cleanup:  remove logger channel, delete Streambuf object,
@@ -296,7 +297,9 @@ PyMethodDef PyTextCtrlHook::Methods[] = {
 
 void PyTextCtrlHook::InitModule(const char * name)
 {
+#if (PY_MAJOR_VERSION == 2)
     Py_InitModule(name, Methods);
+#endif
 }
 
 // ****************************************************************************
@@ -406,9 +409,11 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
         Py_DECREF(pInstance);
     pInstance = 0;
 
+#if (PY_MAJOR_VERSION == 2)
     // Initialize ireLogger module, which is used for the cmnLogger output window
     PyTextCtrlHook::InitModule("ireLogger");
     PySys_SetArgv(2, const_cast<char **>(python_args));
+#endif
 
     // Get global dictionary (pModule and pDict are borrowed references)
     PyObject *pModule = PyImport_AddModule("__main__");

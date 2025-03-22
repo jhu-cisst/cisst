@@ -5,8 +5,7 @@
 #  Author(s):	Chris Abidin, Andrew LaMora
 #  Created on: 2004-04-30
 #
-#  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-#  Reserved.
+#  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -172,8 +171,8 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
             self.list.SetItemData(Index, Index)
             self.itemDataMap.update( {Index:Data} )
         else:
-            print "ireListCtrlPanel.AddTupleItem: invalid data: "
-            print Data
+            print('ireListCtrlPanel.AddTupleItem: invalid data: ')
+            print( Data)
 
     #------------------------------------------------------
     # Add a single string to the list control.
@@ -195,11 +194,11 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
                self.list.SetItemData(Index, Index)
                self.itemDataMap.update( {Index:(Index,)} )
                return Index
-            except Exception, e:
-               print 'AddIndexedItem exception:', e
+            except Exception as e:
+               print('AddIndexedItem exception:', e)
         else:
-            print "ireListCtrlPanel.AddIndexedItem: invalid data: "
-            print Data
+            print('ireListCtrlPanel.AddIndexedItem: invalid data: ')
+            print(Data)
         return -1
 
 

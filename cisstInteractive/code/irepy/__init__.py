@@ -5,8 +5,7 @@
 #  Author(s):	Andrew LaMora
 #  Created on: 2004-04-30
 #
-#  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-#  Reserved.
+#  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -28,8 +27,8 @@ import ireMain
 #from pkgutil import extend_path
 #__path__ = extend_path(__path__, __name__)
 
-print "Welcome to the IRE!"
-print "Use irepy.launch() to launch the IRE GUI"
+print('Welcome to the IRE!')
+print('Use irepy.launch() to launch the IRE GUI')
 #ireMain.launchIrePython()
 
 
