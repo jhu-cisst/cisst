@@ -2,10 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#  Author(s):	Peter Kazanzides
+#  Author(s):   Peter Kazanzides
 #  Created on: 2009-08-09
 #
-#  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+#  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -29,14 +29,14 @@ import wx.py as py
 #create a class derived from wxFrame
 class ireTaskTree( wx.Frame ):
 
-	def __init__ (self, parent, id, title, taskManager):
-	    #call the base class init method to create the frame
-		wx.Frame.__init__(self, parent, id, title)
+    def __init__ (self, parent, id, title, taskManager):
+        #call the base class init method to create the frame
+        wx.Frame.__init__(self, parent, id, title)
 
         self.taskManager = taskManager
         self.tree = wx.TreeCtrl(self)
         root = self.tree.AddRoot("TaskManager")
-        self.AddTaskNodes(root, self.taskManager.GetNamesOfComponents(), self.taskManager.GetComponent)		
+        self.AddTaskNodes(root, self.taskManager.GetNamesOfComponents(), self.taskManager.GetComponent)
         self.tree.Expand(root)
 
     def AddTaskNodes(self, parentId, items, getter):
@@ -91,12 +91,12 @@ import sys
 
 try:
     from cisstMultiTaskPython import *
-except Exception, e:
-    print "Could not load cisstMultiTaskPython: ", e
+except Exception as e:
+    print('Could not load cisstMultiTaskPython: ', e)
 try:
     from cisstParameterTypesPython import *
-except Exception, e:
-    print "Could not load cisstParameterTypesPython: ", e
+except Exception as e:
+    print('Could not load cisstParameterTypesPython: ', e)
 
 class MyShell(py.shell.Shell):
 
@@ -146,9 +146,9 @@ class MyShell(py.shell.Shell):
 
 class ireSignalSelect( wx.Dialog ):
 
-	def __init__ (self, parent, id, title, taskManager):
-	    #call the base class init method to create the dialog
-		wx.Dialog.__init__(self, parent, id, title)
+    def __init__ (self, parent, id, title, taskManager):
+        #call the base class init method to create the dialog
+        wx.Dialog.__init__(self, parent, id, title)
 
         self.taskManager = taskManager
         self.suffix = ''
@@ -161,7 +161,7 @@ class ireSignalSelect( wx.Dialog ):
         else:
             self.tree = wx.TreeCtrl(self, style = wx.TR_DEFAULT_STYLE | wx.TR_HIDE_ROOT)
         root = self.tree.AddRoot("TaskManager")
-        self.AddTaskNodes(root, self.taskManager.GetNamesOfComponents(), self.taskManager.GetComponent)		
+        self.AddTaskNodes(root, self.taskManager.GetNamesOfComponents(), self.taskManager.GetComponent)
         self.tree.ExpandAll()
 
         self.OKButton = wx.Button(self, wx.ID_OK)

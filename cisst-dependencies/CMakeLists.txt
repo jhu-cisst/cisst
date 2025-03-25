@@ -248,7 +248,13 @@ if (CISST_HAS_SWIG_PYTHON)
   set (CISST_CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
 
   # Find Python and NumPy
-  find_package (Python REQUIRED COMPONENTS Interpreter Development NumPy)
+  set (CISST_PYTHON_VERSION_REQUIRED "" CACHE STRING "Required Python version (if not empty)")
+  if (CISST_PYTHON_VERSION_REQUIRED)
+    message (STATUS "Looking for Python ${CISST_PYTHON_VERSION_REQUIRED}")
+    find_package (Python ${CISST_PYTHON_VERSION_REQUIRED} EXACT REQUIRED COMPONENTS Interpreter Development NumPy)
+  else ()
+    find_package (Python REQUIRED COMPONENTS Interpreter Development NumPy)
+  endif ()
 
   set (Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
   set (PYTHON_ALL_INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})

@@ -2,11 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#  Author(s):	Chris Abidin, Andrew LaMora, Peter Kazanzides
+#  Author(s):   Chris Abidin, Andrew LaMora, Peter Kazanzides
 #  Created on: 2004-04-30
 #
-#  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-#  Reserved.
+#  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -49,8 +48,8 @@ warnings.simplefilter('ignore', exceptions.FutureWarning)
 try:
     import wx
     import wx.py as py
-except Exception, e:
-    print "Could not load wxPython: ", e
+except Exception as e:
+    print('Could not load wxPython: ', e)
     sys.exit(1)
 
 
@@ -69,8 +68,8 @@ ireScope = False
 try:
    from wxOscilloscope import *
    ireScope = True
-except ImportError,e:
-   print 'Could not import wxOscilloscope:', e
+except ImportError as e:
+   print('Could not import wxOscilloscope: ', e)
 
 
 # Now, see if the IRE is embedded in a C++ application.
@@ -80,7 +79,7 @@ except ImportError,e:
 ireEmbedded = True
 try:
     import ireLogger
-except ImportError,e:
+except ImportError as e:
     ireEmbedded = False
 
 ###############################  CLASSES ######################################
@@ -372,7 +371,7 @@ class ireMain(wx.Frame):
         #*********************** Initialize the Command History***********************
 
         self.CommandHistoryListCtrl.AddIndexedItem(time.strftime("--- %a, %d %b %Y, %I:%M %p ---", time.localtime()))
-	
+
         #******************** Set up callback functions for the shell ****************
 
         self.Shell = self.EditorNotebook.Shell
@@ -401,34 +400,34 @@ class ireMain(wx.Frame):
         self.ScopeVariablesListCtrl.list.SetColumnWidth(0, Width)
 
         
-	#------------------------------------------------------
-	# addVariablesToRegister
-	#
-	# Parse the input Data for variables that are to be added
-	# to the Object Register.
-	# NOTE: affected by changes to the Object Register
-	#------------------------------------------------------
+    #------------------------------------------------------
+    # addVariablesToRegister
+    #
+    # Parse the input Data for variables that are to be added
+    # to the Object Register.
+    # NOTE: affected by changes to the Object Register
+    #------------------------------------------------------
     def AddVariablesToRegister(self, Data):
         #for VariableName in Data:
             #self.ObjectRegister.Register(VariableName, self.Shell.interp.locals[VariableName])
         self.CheckRegisterContents()
 
-	#------------------------------------------------------
-	# GetVariablesFromRegister
-	#
-	# Calls RegisterGet to explicitly fetch variables 
-	# contained in the input argument "Data" (which is
-	# itself populated by List() or used to be till anton killed it)
-	#------------------------------------------------------
+    #------------------------------------------------------
+    # GetVariablesFromRegister
+    #
+    # Calls RegisterGet to explicitly fetch variables
+    # contained in the input argument "Data" (which is
+    # itself populated by List() or used to be till anton killed it)
+    #------------------------------------------------------
     def GetVariablesFromRegister(self, Data):
         for VariableName in Data:
             self.Shell.interp.locals[VariableName] = FindObject(VariableName)
         self.CheckScopeVariables()
 
-	#------------------------------------------------------
-	# The following functions handle command events
-	# in the notebook shell.
-	#------------------------------------------------------
+    #------------------------------------------------------
+    # The following functions handle command events
+    # in the notebook shell.
+    #------------------------------------------------------
 
     def PythonCommandEntered(self, Command):
         if len(Command.strip()) > 0:
@@ -439,55 +438,55 @@ class ireMain(wx.Frame):
                 if Line:
                     index = self.CommandHistoryListCtrl.AddIndexedItem(Line)
                     if index < 0:
-                       print 'Failed to add command to history: ', Line
+                       print('Failed to add command to history: ', Line)
                     elif self.IsShown():
                        self.CommandHistoryListCtrl.list.EnsureVisible(index)
             if self.LogToDiary:
                 self.WriteToDiary(Lines)
-    	    self.CheckLists()
+            self.CheckLists()
 
     def OnImportCisstCommon(self, event):
         self.ImportCisstCommon()
     def ImportCisstCommon(self):
-        print "importing cisstCommon"
-		self.Shell.push("from cisstCommonPython import *")
+        print('importing cisstCommon')
+        self.Shell.push("from cisstCommonPython import *")
 
     def OnImportCisstOSAbstraction(self, event):
         self.ImportCisstOSAbstraction()
     def ImportCisstOSAbstraction(self):
-        print "importing cisstOSAbstraction"
-		self.Shell.push("from cisstOSAbstractionPython import *")
+        print('importing cisstOSAbstraction')
+        self.Shell.push("from cisstOSAbstractionPython import *")
             
     def OnImportCisstVector(self, event):
         self.ImportCisstVector()
     def ImportCisstVector(self):
-        print "importing cisstVector"
-		self.Shell.push("from cisstVectorPython import *")
+        print('importing cisstVector')
+        self.Shell.push("from cisstVectorPython import *")
 
     def OnImportCisstNumerical(self, event):
         self.ImportCisstNumerical()
     def ImportCisstNumerical(self):
-        print "importing cisstNumerical"
-		self.Shell.push("from cisstNumericalPython import *")
+        print('importing cisstNumerical')
+        self.Shell.push("from cisstNumericalPython import *")
 
     def OnImportCisstMultiTask(self, event):
         self.ImportCisstMultiTask()
     def ImportCisstMultiTask(self):
-        print "importing cisstMultiTask"
-		self.Shell.push("from cisstMultiTaskPython import *")
+        print('importing cisstMultiTask')
+        self.Shell.push("from cisstMultiTaskPython import *")
 
     def OnImportCisstParameterTypes(self, event):
         self.ImportCisstParameterTypes()
     def ImportCisstParameterTypes(self):
-        print "importing cisstParameterTypes"
-		self.Shell.push("from cisstParameterTypesPython import *")
+        print('importing cisstParameterTypes')
+        self.Shell.push("from cisstParameterTypesPython import *")
 
-	#------------------------------------------------------
-	# Diary Functions
-	#
-	# Handle enabling, recording to and fetching from the 
-	# statement diary.  Currently not used.
-	#------------------------------------------------------
+    #------------------------------------------------------
+    # Diary Functions
+    #
+    # Handle enabling, recording to and fetching from the
+    # statement diary.  Currently not used.
+    #------------------------------------------------------
     def WriteToDiary(self, Lines):
         DiaryFile = open(self.DIARY_FILENAME, 'a')
         for Line in Lines:
@@ -564,7 +563,7 @@ class ireMain(wx.Frame):
             if not self.IsDecorated(VariableName):
                 VariableType = self.GetVariableTypeString(VariableName)
                 if VariableType not in TypesToExclude:
-                	Variables.update({VariableName:VariableType})
+                    Variables.update({VariableName:VariableType})
         return Variables
 
 
@@ -584,11 +583,11 @@ class ireMain(wx.Frame):
         exec("VariableType = str(type(" + _Str + "))")
         return VariableType[VariableType.find("'")+1:VariableType.rfind("'")]
 
-	
-	#-------------------------------------------------
-	# Methods for manipulating/displaying/truncating the 
-	# command history 
-	#-------------------------------------------------
+
+    #-------------------------------------------------
+    # Methods for manipulating/displaying/truncating the 
+    # command history 
+    #-------------------------------------------------
 
     def SaveHistoryToFile(self):
         cmdlist = self.CommandHistoryListCtrl.GetAllItems()
@@ -600,7 +599,7 @@ class ireMain(wx.Frame):
         if os.path.isfile(fn):
             try:
                 Data = cPickle.load(open(fn))
-            except exceptions.Exception, error:
+            except exceptions.Exception as error:
                 msgdlg = wx.MessageDialog(self, str(error), "Load History", wx.OK | wx.ICON_ERROR)
                 msgdlg.ShowModal()
                 msgdlg.Destroy()
@@ -775,9 +774,9 @@ class ireMain(wx.Frame):
     def OnSelectAll(self, event):
         wx.Window_FindFocus().SelectAll()
 
-	#-------------------------------------------------
-	# View menu handlers
-	#-------------------------------------------------
+    #-------------------------------------------------
+    # View menu handlers
+    #-------------------------------------------------
 
     # Check the status of the left panel (Register Contents, Shell Variables,
     # and Command History).  If all are disabled, then unsplit TopSplitter so
@@ -794,7 +793,7 @@ class ireMain(wx.Frame):
         else:
             if self.TopSplitter.IsSplit():
                 self.TopSplitter.Unsplit(self.LeftPanel)
-	
+
     def OnViewRegister(self, event):
         self.LeftBoxSizer.Show(self.RegisterContentsListCtrl, event.IsChecked())
         self.CheckLeftPanel()
@@ -818,11 +817,11 @@ class ireMain(wx.Frame):
         else:
             self.MainSplitter.Unsplit(self.LoggerPanel)
 
-	#-------------------------------------------------
-	# Workspace maintenance methods
-	# (also event handlers)
-	#-------------------------------------------------
-	
+    #-------------------------------------------------
+    # Workspace maintenance methods
+    # (also event handlers)
+    #-------------------------------------------------
+
     def OnLoadWorkspace(self, event):
         Filepath = py.editor.openSingle(directory='',wildcard='IRE Workspace (*.ws)|*.ws|All Files (*.*)|*.*').path
         if Filepath:
@@ -841,7 +840,7 @@ class ireMain(wx.Frame):
             File = open(Filepath,'w')
             SaveWorkspaceToFile(self.Shell.interp.locals, File)
             File.close()
-	
+
     def OnLoadHistory(self, event):
         self.QueryHistoryFile()
       
@@ -882,10 +881,10 @@ class ireMain(wx.Frame):
             msgdlg.Destroy()
         
     #-------------------------------------------------
-	# Methods for running scripts in the main or 
-	# separate threads.
-	#-------------------------------------------------
-	
+    # Methods for running scripts in the main or
+    # separate threads.
+    #-------------------------------------------------
+
     def OnRunInShell(self, event):
         cancel = self.EditorNotebook.bufferSave()
         if not cancel:
@@ -900,10 +899,10 @@ class ireMain(wx.Frame):
                 str = os.sys.executable + ' "' + self.EditorNotebook.buffer.doc.filepath + '"'
                 os.system(str)
 
-		
-	#-------------------------------------------------
-	# The obligatory About
-	#-------------------------------------------------
+
+    #-------------------------------------------------
+    # The obligatory About
+    #-------------------------------------------------
     def OnAbout(self, event):
         """Display an About window."""
         title = 'About'
@@ -996,15 +995,15 @@ def ModuleAvailable(name):
 def launchIrePython():
 
     if wx.VERSION[0] <= 2 and wx.VERSION[1] < 5:
-        print 'IRE requires wxPython version 2.5 or greater'
-        print 'Currently installed version is ', wx.VERSION_STRING
+        print('IRE requires wxPython version 2.5 or greater')
+        print('Currently installed version is ', wx.VERSION_STRING)
     else:
-        print "starting window "
+        print('starting window ')
         app = wx.PySimpleApp()
         try:
             frame = ireMain(None, -1, "CISST Interactive Research Environment")
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         try:
             # Load cisstCommon by default (if IRE embedded)
             if ireEmbedded:
@@ -1012,8 +1011,8 @@ def launchIrePython():
             # Run startup string (if provided)
             if len(sys.argv) > 1 and sys.argv[1]:
                 frame.Shell.push(sys.argv[1])
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         frame.Show(True)
         lastcmd = frame.CommandHistoryListCtrl.list.GetItemCount()-1
         frame.CommandHistoryListCtrl.list.EnsureVisible( lastcmd  )
@@ -1025,4 +1024,3 @@ def launchIrePython():
         app.MainLoop()
         if ireEmbedded:
             ireLogger.SetActiveFlag(False)
-
