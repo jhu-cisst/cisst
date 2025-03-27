@@ -20,8 +20,8 @@ class {
 
     member {
         name Name;
-        type vctDynamicVector<std::string>;
-        default vctDynamicVector<std::string>();
+        type std::vector<std::string>;
+        default std::vector<std::string>();
     }
 
     member {
@@ -45,7 +45,7 @@ class {
     inline-header {
     public:
         inline void SetSize(const size_t & size) {
-            Name().SetSize(size);
+            Name().resize(size);
             Position().SetSize(size);
             Velocity().SetSize(size);
             Effort().SetSize(size);
