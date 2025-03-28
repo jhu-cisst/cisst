@@ -1243,7 +1243,7 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void) for \"" << GetFullName()
                                  << "\": cannot find event named \"" << eventName
                                  << "\", the following events are available: "
-                                 << cmnStringFromVectorOfStrings(GetNamesOfEventsVoid())
+                                 << cmnDataHumanReadable(GetNamesOfEventsVoid())
                                  << std::endl;
     }
     return false;
@@ -1265,7 +1265,7 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write) for \"" << GetFullName()
                                  << "\": cannot find event named \"" << eventName
                                  << "\", the following events are available: "
-                                 << cmnStringFromVectorOfStrings(GetNamesOfEventsWrite())
+                                 << cmnDataHumanReadable(GetNamesOfEventsWrite())
                                  << std::endl;
     }
     return false;

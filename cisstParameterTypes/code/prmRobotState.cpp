@@ -122,7 +122,8 @@ bool prmRobotStateToStateJointMeasured(const prmRobotState & input, prmStateJoin
 {
     output.Valid() = input.Valid();
     output.Timestamp() = input.Timestamp();
-    output.Name().ForceAssign(input.JointName());
+    output.Name().resize(input.JointName().size());
+    std::copy(input.JointName().begin(), input.JointName().end(), output.Name().begin());
     output.Position().ForceAssign(input.JointPosition());
     output.Velocity().ForceAssign(input.JointVelocity());
     return true;
@@ -132,7 +133,8 @@ bool prmRobotStateToStateJointSetpoint(const prmRobotState & input, prmStateJoin
 {
     output.Valid() = input.Valid();
     output.Timestamp() = input.Timestamp();
-    output.Name().ForceAssign(input.JointName());
+    output.Name().resize(input.JointName().size());
+    std::copy(input.JointName().begin(), input.JointName().end(), output.Name().begin());
     output.Position().ForceAssign(input.JointPositionGoal());
     output.Velocity().ForceAssign(input.JointVelocityGoal());
     return true;

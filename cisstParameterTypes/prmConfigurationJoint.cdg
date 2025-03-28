@@ -22,7 +22,7 @@ class {
 
     member {
         name Name;
-        type vctDynamicVector<std::string>;
+        type std::vector<std::string>;
     }
 
     member {
