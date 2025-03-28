@@ -33,6 +33,9 @@ http://www.cisst.org/cisst/license.txt.
 %ignore ProductOf;
 %ignore operator==;
 
+%ignore vctFrameBase::Translation;
+%ignore vctFrameBase::Rotation;
+
 // instantiate the templated base class
 %include "cisstVector/vctFrameBase.h"
 %include "cisstVector/vctTransformationTypes.h"
