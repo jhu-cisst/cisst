@@ -61,9 +61,4 @@ CISST_EXPORT void cmnStringReplaceAll(std::string & userString,
   See https://gist.github.com/rodamber/2558e25d4d8f6b9f2ffdf7bd49471340 */
 CISST_EXPORT std::string cmnStringToUnderscoreLower(const std::string & input);
 
-/*! Convert a vector of strings to a single string with commas
-  separating the strings from the vector (default). */
-CISST_EXPORT std::string cmnStringFromVectorOfStrings(const std::vector<std::string> & input,
-                                                      const std::string & separator = ", ");
-
 #endif // _cmnStrings_h
