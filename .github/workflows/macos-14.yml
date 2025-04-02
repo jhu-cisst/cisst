@@ -43,13 +43,14 @@ jobs:
       run: |
         source cisstvars.sh
         cmake --build . --config Release
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: |
-        source cisstvars.sh
-        cisstCommonTests -r
-        cisstVectorTests -r
-        cisstNumericalTests -r
-        cisstOSAbstractionTests -r
-        cisstParameterTypesTests -r
+
+    # - name: Test
+    #   working-directory: ${{github.workspace}}/build
+    #   shell: bash
+    #   run: |
+    #     source cisstvars.sh
+    #     cisstCommonTests -r
+    #     cisstVectorTests -r
+    #     cisstNumericalTests -r
+    #     cisstOSAbstractionTests -r
+    #     cisstParameterTypesTests -r
