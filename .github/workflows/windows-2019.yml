@@ -3,7 +3,7 @@ name: Windows 2019
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master, devel ]
+    branches: [ main, devel ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -14,10 +14,10 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
 
     - name: Download cisstNetlib
       run: |
