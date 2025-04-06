@@ -987,3 +987,19 @@ def mtsCreateClientInterface(clientName, serverName, interfaceName):
     return interfacePython
 
 %}
+
+// Extend mtsGenericObjectProxy<vctMatRot3> to support construction from numpy array (using cisstVector
+// typemaps that convert between numpy array and vctDynamicMatrix). This enables vctMatRot3 to be used
+// as a parameter in cisstMultiTask commands (e.g., mtsCommandWrite).
+// Note that it is not necessary for Python to know about the vctMatRot3 data type, but this could be
+// implemented by adding Swig wrapping of this type in cisstVector.
+%extend mtsGenericObjectProxy<vctMatRot3> {
+    mtsGenericObjectProxy<vctMatRot3>(const vctDynamicMatrix<double> &matrixRot) throw(std::runtime_error) {
+        vctMatRot3 rot;
+        rot.From(matrixRot[0][0], matrixRot[0][1], matrixRot[0][2],
+                 matrixRot[1][0], matrixRot[1][1], matrixRot[1][2],
+                 matrixRot[2][0], matrixRot[2][1], matrixRot[2][2]);
+        mtsGenericObjectProxy<vctMatRot3> * result = new mtsGenericObjectProxy<vctMatRot3>(rot);
+        return result;
+    }
+}
