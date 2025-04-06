@@ -23,14 +23,14 @@ class {
 
     member {
         name Name;
-        type vctDynamicVector<std::string>;
-        default vctDynamicVector<std::string>();
+        type std::vector<std::string>;
+        default std::vector<std::string>();
     }
 
     member {
         name Mode;
-        type vctDynamicVector<prmSetpointMode>;
-        default vctDynamicVector<prmSetpointMode>(0);
+        type std::vector<prmSetpointMode>;
+        default std::vector<prmSetpointMode>(0);
     }
 
     member {
@@ -59,6 +59,15 @@ class {
     }
 
     inline-header {
+    public:
+        inline void SetSize(const size_t & size) {
+            Name().resize(size);
+            Mode().resize(size);
+            Position().SetSize(size, 0.0);
+            Velocity().SetSize(size, 0.0);
+            Effort().SetSize(size, 0.0);
+            PositionProjection().SetSize(size, size, 0.0);
+        }
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     }
