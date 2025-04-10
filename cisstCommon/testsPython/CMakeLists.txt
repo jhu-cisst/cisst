@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -25,7 +25,7 @@ cisst_add_swig_module (MODULE cisstCommonPythonTest
                        MODULE_LINK_LIBRARIES cisstCommon cisstCommon)
 
 # Copy the .py file generated to wherever the libraries are
-add_custom_command (TARGET _cisstCommonPythonTestPython
+add_custom_command (TARGET cisstCommonPythonTestPython
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND}
                     ARGS -E copy
@@ -61,8 +61,8 @@ set_property (TARGET cisstCommon_CREATE_PYTHON_TESTS_LIST PROPERTY FOLDER "cisst
 
 add_dependencies (cisstCommon_CREATE_PYTHON_TESTS_LIST
                   cisstCommon
-                  _cisstCommonPython
-		  _cisstCommonPythonTestPython)
+                  cisstCommonPython
+		  cisstCommonPythonTestPython)
 
 file (APPEND ${CTEST_TEST_FILE} "include (\"${CTEST_TEST_FILE_AUTO}\")\n")
 

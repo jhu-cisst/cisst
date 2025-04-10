@@ -1,7 +1,6 @@
 #
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -11,7 +10,7 @@
 #
 # --- end cisst license ---
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.16)
 
 # create a list of libraries needed for this project
 set (REQUIRED_CISST_LIBRARIES cisstCommon)
