@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,6 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnPath.h>
+#if (CISST_OS == CISST_WINDOWS)
+#include <algorithm>   // for std::replace
+#endif
 #include <cstdio>
 
 cmnPath::cmnPath() {
@@ -44,6 +47,7 @@ std::string cmnPath::FromNative(const std::string & nativePath) {
 #if (CISST_OS == CISST_WINDOWS)
 
 #else
+    // Could instead use std::replace
     const std::string::iterator end = internalPath.end();
     std::string::iterator iterator;
     for (iterator = internalPath.begin();
@@ -87,6 +91,9 @@ bool cmnPath::AddFromEnvironment(const std::string & variableName, bool head) {
     environmentVariable = getenv(variableName.c_str());
     if (environmentVariable) {
         std::string path = environmentVariable;
+#if (CISST_OS == CISST_WINDOWS)
+        std::replace(path.begin(), path.end(), '\\', '/');
+#endif
         this->Add(FromNative(path), head);
         return true;
     }
@@ -261,6 +268,9 @@ bool cmnPath::GetCisstRoot(std::string & result)
     environmentVariable = getenv("CISST_ROOT");
     if (environmentVariable) {
         result = environmentVariable;
+#if (CISST_OS == CISST_WINDOWS)
+        std::replace(result.begin(), result.end(), '\\', '/');
+#endif
         return true;
     }
     return false;
