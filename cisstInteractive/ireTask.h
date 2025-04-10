@@ -6,7 +6,7 @@
   Author(s): Peter Kazanzides
   Created on: 2010-12-10
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,48 +29,16 @@ http://www.cisst.org/cisst/license.txt.
 #define _ireTask_h
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
+#include <cisstInteractive/ireTaskConstructorArg.h>
 
 #include <cisstInteractive/ireExport.h>
 
-
-//enum IRE_Shell { IRE_WXPYTHON, IRE_IPYTHON, IRE_PYTHON };
-enum IRE_Shell { IRE_WXPYTHON, IRE_IPYTHON };
 
 /*!
   \brief Interactive Research Environment (IRE) Task
 
   \ingroup cisstInteractive
 */
-
-class ireTaskConstructorArg : public mtsGenericObject {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-public:
-    std::string Name;
-    IRE_Shell   Shell;
-    std::string Startup;
-
-    ireTaskConstructorArg() : mtsGenericObject(), Shell(IRE_WXPYTHON) {}
-    ireTaskConstructorArg(const std::string &name, IRE_Shell shell = IRE_WXPYTHON, const std::string &startup = "") :
-        mtsGenericObject(), Name(name), Shell(shell), Startup(startup) {}
-    ireTaskConstructorArg(const ireTaskConstructorArg &other) :
-        mtsGenericObject(), Name(other.Name), Shell(other.Shell), Startup(other.Startup) {}
-    ~ireTaskConstructorArg() {}
-
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
-
-    void ToStream(std::ostream & outputStream) const;
-
-    /*! Raw text output to stream */
-    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const;
-
-    /*! Read from an unformatted text input.
-      Returns true if successful. */
-    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
-};
-
-CMN_DECLARE_SERVICES_INSTANTIATION(ireTaskConstructorArg);
 
 class CISST_EXPORT ireTask : public mtsTaskContinuous {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);

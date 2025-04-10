@@ -427,9 +427,14 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
     char launchString[32];
     if (useIPython) {
         PyRun_SimpleString(startup);
+#if (PY_MAJOR_VERSION == 2)
         PyRun_SimpleString("from IPython.Shell import IPShellEmbed\n");
         PyRun_SimpleString("ipshell = IPShellEmbed()\n");
         strcpy(launchString, "ipshell(local_ns = globals())");
+#else
+        PyRun_SimpleString("from IPython import embed\n");
+        PyRun_SimpleString("embed()\n");
+#endif
         IRE_State = IRE_ACTIVE;  // for now, instead of using SetActiveState callback
     }
     else {
