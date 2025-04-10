@@ -13,9 +13,6 @@
 
 project (cisstInteractive)
 
-# to compile cisst generated code, need to find header file
-include_directories (${CMAKE_CURRENT_BINARY_DIR})
-
 set (SOURCE_FILES ireFramework.cpp)
 set (HEADER_FILES ireExport.h ireFramework.h)
 set (ADDITIONAL_SOURCE_FILES "")
@@ -29,6 +26,9 @@ if (CISST_cisstMultiTask)
     "cisstInteractive/"           # sub directory for include
     ../ireTaskConstructorArg.cdg
     )
+
+  # to compile cisst generated code, need to find header file
+  include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
   set (SOURCE_FILES ${SOURCE_FILES} ireTask.cpp)
   set (HEADER_FILES ${HEADER_FILES} ireTask.h)
