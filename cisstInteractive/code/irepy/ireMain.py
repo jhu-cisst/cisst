@@ -36,14 +36,17 @@ Baltimore, MD 21218
 #------------------------------------------------------
 import os, sys, time, types, warnings
 if sys.version_info.major == 2:
-    import imp, cPickle, exceptions
+    import cPickle as pickle
+    import imp
+else:
+    import pickle
+    import importlib.util
 import string as String
 
 #-----------------------------------------------------
 # Ignore Python future warnings (nuissances)
 #-----------------------------------------------------
-if sys.version_info.major == 2:
-    warnings.simplefilter('ignore', exceptions.FutureWarning)
+warnings.simplefilter('ignore', FutureWarning)
 
 #------------------------------------------------------
 # Import what we need from the wx toolkit
@@ -597,14 +600,14 @@ class ireMain(wx.Frame):
     def SaveHistoryToFile(self):
         cmdlist = self.CommandHistoryListCtrl.GetAllItems()
         f = open(self.HISTORY_FILENAME, 'w')
-        cPickle.dump(cmdlist, f)
+        pickle.dump(cmdlist, f)
     
     def LoadHistoryFromFile(self, fn=HISTORY_FILENAME):
         Data = []
         if os.path.isfile(fn):
             try:
-                Data = cPickle.load(open(fn))
-            except exceptions.Exception as error:
+                Data = pickle.load(open(fn))
+            except Exception as error:
                 msgdlg = wx.MessageDialog(self, str(error), "Load History", wx.OK | wx.ICON_ERROR)
                 msgdlg.ShowModal()
                 msgdlg.Destroy()
@@ -687,13 +690,13 @@ class ireMain(wx.Frame):
             # write the command file up to the selected line into the named file
             # fetch any existing list first and append to it
             try:
-                archlist = cPickle.load(open(fn))
+                archlist = pickle.load(open(fn))
             except IOError:
                 archlist = []
             n=0
             for n in range(choice):
                 archlist.append( cmdlist[n] )
-            cPickle.dump( archlist, open(fn, 'w'))
+            pickle.dump( archlist, open(fn, 'w'))
             text = "Your command history was archived to " + fn
             msgdlg = wx.MessageDialog(self, text, title, wx.OK | wx.ICON_INFORMATION)
             msgdlg.ShowModal()
@@ -987,10 +990,15 @@ class ireMain(wx.Frame):
 
 # ModuleAvailable:  returns true if the module 'name' is present on the path.
 def ModuleAvailable(name):
-    try:
-       imp.find_module(name)
-    except ImportError:
-       return False
+    if sys.version_info.major == 2:
+        try:
+            imp.find_module(name)
+        except ImportError:
+            return False
+    else:
+        spec = importlib.util.find_spec(name)
+        if not spec:
+            return False
     return True
 
 def launchIrePython():
