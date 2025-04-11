@@ -24,8 +24,9 @@ See ireMain.py
 """
 
 import sys
-import exceptions
-import cPickle
+if sys.version_info.major == 2:
+    import exceptions
+    import cPickle
 
 class NoOutput:
     def write(self, String):

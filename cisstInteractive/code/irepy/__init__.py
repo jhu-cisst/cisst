@@ -16,6 +16,14 @@
 # --- end cisst license ---
 
 #------------------------------------------
+# Make sure path to irepy is included
+#------------------------------------------
+#from pkgutil import extend_path
+#__path__ = extend_path(__path__, __name__)
+import sys
+sys.path.extend(__path__)
+
+#------------------------------------------
 # Import the IRE libraries
 #------------------------------------------
 import ireMain
@@ -23,9 +31,6 @@ import ireMain
 #------------------------------------------
 # Global statements
 #------------------------------------------
-
-#from pkgutil import extend_path
-#__path__ = extend_path(__path__, __name__)
 
 print('Welcome to the IRE!')
 print('Use irepy.launch() to launch the IRE GUI')

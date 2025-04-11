@@ -454,37 +454,37 @@ class ireMain(wx.Frame):
         self.ImportCisstCommon()
     def ImportCisstCommon(self):
         print('importing cisstCommon')
-        self.Shell.push("from cisstCommonPython import *")
+        self.Shell.push("import cisstCommonPython as cisstCommon")
 
     def OnImportCisstOSAbstraction(self, event):
         self.ImportCisstOSAbstraction()
     def ImportCisstOSAbstraction(self):
         print('importing cisstOSAbstraction')
-        self.Shell.push("from cisstOSAbstractionPython import *")
+        self.Shell.push("import cisstOSAbstractionPython as cisstOSAbstraction")
             
     def OnImportCisstVector(self, event):
         self.ImportCisstVector()
     def ImportCisstVector(self):
         print('importing cisstVector')
-        self.Shell.push("from cisstVectorPython import *")
+        self.Shell.push("import cisstVectorPython as cisstVector")
 
     def OnImportCisstNumerical(self, event):
         self.ImportCisstNumerical()
     def ImportCisstNumerical(self):
         print('importing cisstNumerical')
-        self.Shell.push("from cisstNumericalPython import *")
+        self.Shell.push("import cisstNumericalPython as cisstNumerical")
 
     def OnImportCisstMultiTask(self, event):
         self.ImportCisstMultiTask()
     def ImportCisstMultiTask(self):
         print('importing cisstMultiTask')
-        self.Shell.push("from cisstMultiTaskPython import *")
+        self.Shell.push("import cisstMultiTaskPython as cisstMultiTask")
 
     def OnImportCisstParameterTypes(self, event):
         self.ImportCisstParameterTypes()
     def ImportCisstParameterTypes(self):
         print('importing cisstParameterTypes')
-        self.Shell.push("from cisstParameterTypesPython import *")
+        self.Shell.push("import cisstParameterTypesPython as cisstParameterTypes")
 
     #------------------------------------------------------
     # Diary Functions
@@ -519,8 +519,8 @@ class ireMain(wx.Frame):
     def CheckLists(self):
         if not self.ObjectRegister:
             if sys.modules.has_key('cisstCommonPython'):
-                import cisstCommonPython
-                self.ObjectRegister = cisstCommonPython.cmnObjectRegister.Instance()
+                import cisstCommonPython as cisstCommon
+                self.ObjectRegister = cisstCommon.cmnObjectRegister.Instance()
         if self.ObjectRegister:
             self.CheckRegisterContents()
         self.CheckScopeVariables()
