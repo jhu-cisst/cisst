@@ -915,9 +915,6 @@ class ireMain(wx.Frame):
         text = \
 'Interactive Research Environment (IRE)'.center(twidth) + '\n' + \
 'The IRE provides a Python-based command interpreter'.center(twidth) + '\n\n' + \
-'Developed by the Engineering Research Center for'.center(twidth) + '\n' + \
-'Computer-Integrated Surgical Systems & Technology (CISST)'.center(twidth) + '\n' + \
-'http://cisst.org'.center(twidth) + '\n\n' + \
 'Copyright (c) 2004-2025, The Johns Hopkins University'.center(twidth) + '\n' + \
 'All Rights Reserved.\n\n'.center(twidth) + '\n\n' + \
 'Based on the Py module of wxPython:\n' + \
@@ -998,15 +995,15 @@ def ModuleAvailable(name):
 
 def launchIrePython():
 
-    if wx.VERSION[0] <= 2 and wx.VERSION[1] < 5:
-        print('IRE requires wxPython version 2.5 or greater')
+    if wx.VERSION[0] < 4:
+        # 4/2025: Decided to require wxPython 4.0 or greater, since that corresponds to
+        # a major rewrite of wxPython (Phoenix project). Note that wxPython 4.0.x supports
+        # Python 2.7, so it is still possible to use Python 2.7.
+        print('IRE requires wxPython version 4.0 or greater')
         print('Currently installed version is ', wx.VERSION_STRING)
     else:
         print('starting window ')
-        if wx.VERSION[0] <= 2 and wx.VERSION[1] < 9:
-            app = wx.PySimpleApp()
-        else:
-            app = wx.App(False)
+        app = wx.App(False)
         try:
             frame = ireMain(None, -1, "CISST Interactive Research Environment")
             # Load cisstCommon by default (if IRE embedded)
