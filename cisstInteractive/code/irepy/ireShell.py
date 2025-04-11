@@ -46,9 +46,9 @@ class ireShell(py.shell.Shell):
         *args, **kwds):
         py.shell.Shell.__init__(self, parent, id, pos, size, style,
         introText, locals, InterpClass, *args, **kwds)
-        wx.EVT_LEFT_DOWN(self, self.OnMouseLeftDown)
-        wx.EVT_LEFT_UP(self, self.OnMouseLeftUp)
-        wx.EVT_KEY_DOWN(self, self.OnKeyUpHndlr)
+        self.Bind(wx.EVT_LEFT_DOWN, self.OnMouseLeftDown)
+        self.Bind(wx.EVT_LEFT_UP, self.OnMouseLeftUp)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyUpHndlr)
 
         dt = ShellDropTarget(self, self.DragAndDropHandler)
         self.SetDropTarget(dt)

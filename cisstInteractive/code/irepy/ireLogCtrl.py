@@ -124,7 +124,7 @@ class ireLogCtrl(wx.Panel):
             # can call it directly.  If we can't find the C function,
             # we'll use the Python callback function (wx.LogMessage).
             try:
-                callback = wx._core_.PostEvent
+                callback = wx._core.PostEvent
             except AttributeError as e:
                 print('EnableLogger warning: could not find C function:')
                 print(e)

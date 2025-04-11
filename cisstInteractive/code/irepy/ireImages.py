@@ -5,8 +5,7 @@
 #  Author(s):	Peter Kazanzides
 #  Created on: 2006-01-06
 #
-#  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
-#  Reserved.
+#  (C) Copyright 2006-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -31,7 +30,7 @@
 # NewItem, OpenItem, SaveItem were generated from BMP files by img2py.py
 # (in wxPython tools).
 
-from wx import ImageFromStream, BitmapFromImage
+import wx
 import cStringIO, zlib
 
 #----------------------------------------------------------------------
@@ -45,11 +44,11 @@ def getSmallUpArrowData():
 \x82' 
 
 def getSmallUpArrowBitmap():
-    return BitmapFromImage(getSmallUpArrowImage())
+    return wx.Bitmap(getSmallUpArrowImage())
 
 def getSmallUpArrowImage():
     stream = cStringIO.StringIO(getSmallUpArrowData())
-    return ImageFromStream(stream)
+    return wx.Image(stream)
 
 #----------------------------------------------------------------------
 def getSmallDnArrowData():
@@ -62,11 +61,11 @@ def getSmallDnArrowData():
 ?\x84B\xef\x00\x00\x00\x00IEND\xaeB`\x82" 
 
 def getSmallDnArrowBitmap():
-    return BitmapFromImage(getSmallDnArrowImage())
+    return wx.Bitmap(getSmallDnArrowImage())
 
 def getSmallDnArrowImage():
     stream = cStringIO.StringIO(getSmallDnArrowData())
-    return ImageFromStream(stream)
+    return wx.Image(stream)
 
 #----------------------------------------------------------------------
 def getNewItemData():
@@ -79,11 +78,11 @@ def getNewItemData():
 u\x03\x9a\xcc\xe0\xe9\xea\xe7\xb2\xce)\xa1\t\x000\x8c/\xbb" )
 
 def getNewItemBitmap():
-    return BitmapFromImage(getNewItemImage())
+    return wx.Bitmap(getNewItemImage())
 
 def getNewItemImage():
     stream = cStringIO.StringIO(getNewItemData())
-    return ImageFromStream(stream)
+    return wx.Image(stream)
 
 #----------------------------------------------------------------------
 def getOpenItemData():
@@ -99,11 +98,11 @@ def getOpenItemData():
 \xcd\x18}Y\xd7\x02\x9d\xc4\xe0\xe9\xea\xe7\xb2\xce)\xa1\t\x00Y\xfcLT" )
 
 def getOpenItemBitmap():
-    return BitmapFromImage(getOpenItemImage())
+    return wx.Bitmap(getOpenItemImage())
 
 def getOpenItemImage():
     stream = cStringIO.StringIO(getOpenItemData())
-    return ImageFromStream(stream)
+    return wx.Image(stream)
 
 #----------------------------------------------------------------------
 def getSaveItemData():
@@ -117,9 +116,9 @@ j\xb2{\x89\xa4\x8b\xe7\x8a\x07\x1a\x1b\x19\xb7T\x9c\xc9\xf1\xec\xd5+o\xda\
 \xf0t\xf5sY\xe7\x94\xd0\x04\x00\xc3\xa3<:" )
 
 def getSaveItemBitmap():
-    return BitmapFromImage(getSaveItemImage())
+    return wx.Bitmap(getSaveItemImage())
 
 def getSaveItemImage():
     stream = cStringIO.StringIO(getSaveItemData())
-    return ImageFromStream(stream)
+    return wx.Image(stream)
 

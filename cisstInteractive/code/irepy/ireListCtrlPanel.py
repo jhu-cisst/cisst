@@ -85,7 +85,7 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
         # (this seems to be a wxWidgets bug on Windows).
         self.il = wx.ImageList(16, 16)
         if sys.platform == 'win32':
-            self.blank = self.il.Add(wx.EmptyBitmap(16,16), wx.EmptyBitmap(16,16))
+            self.blank = self.il.Add(wx.Bitmap(16,16), wx.Bitmap(16,16))
         self.sm_up = self.il.Add(ireImages.getSmallUpArrowBitmap())
         self.sm_dn = self.il.Add(ireImages.getSmallDnArrowBitmap())
 
@@ -164,9 +164,9 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
     def AddTupleItem(self, Data):
         Index = self.list.GetItemCount()
         if isinstance(Data, types.TupleType) and len(Data) > 0 and isinstance(Data[0], types.StringTypes):
-            self.list.InsertStringItem(Index, Data[0])
+            self.list.InsertItem(Index, Data[0])
             for i in range(1, len(Data)):
-                self.list.SetStringItem(Index, i, Data[i])
+                self.list.SetItem(Index, i, Data[i])
             # Following two lines are needed for ColumnSorterMixin
             self.list.SetItemData(Index, Index)
             self.itemDataMap.update( {Index:Data} )
@@ -189,7 +189,7 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
         Index = self.list.GetItemCount()
         if isinstance(Data, types.StringTypes):
             try:
-               self.list.InsertStringItem(Index, Data)
+               self.list.InsertItem(Index, Data)
                # Following two lines are needed for ColumnSorterMixin
                self.list.SetItemData(Index, Index)
                self.itemDataMap.update( {Index:(Index,)} )
@@ -310,7 +310,7 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
 
 
     def OnSize(self, event):
-        w,h = self.GetClientSizeTuple()
-        self.Text.SetDimensions(2, 0, w-2, 15)
-        self.list.SetDimensions(0, 15, w, h-15)
+        w,h = self.GetClientSize().Get()
+        self.Text.SetSize(2, 0, w-2, 15)
+        self.list.SetSize(0, 15, w, h-15)
 
