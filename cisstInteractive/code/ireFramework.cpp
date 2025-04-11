@@ -201,9 +201,9 @@ void PyTextCtrlHook::SetupStreambuf(void)
 //     len:  the length of the string
 void PyTextCtrlHook::PrintLog(const char * str, int len)
 {
+#if (PY_MAJOR_VERSION == 2)
     PyObject* result;
 
-#if (PY_MAJOR_VERSION == 2)
     // If PythonFunc is set, we know that PythonEventClass is also set
     // and that both of them are callable objects.
     if (PythonFunc) {
@@ -354,7 +354,10 @@ void ireFramework::InitShellInstance(void)
     }
 #endif
     Py_Initialize();
+#if (PY_MAJOR_VERSION < 3) || (PY_MINOR_VERSION < 7)
+    // PyEval_InitThreads was deprecated in Python 3.7 (it is no longer needed)
     PyEval_InitThreads();
+#endif
 #if (CISST_OS == CISST_LINUX)
     // For Linux, change dlopenflags to avoid swig::stop_iterator exceptions
     PyGILState_STATE gstate = PyGILState_Ensure();
@@ -424,17 +427,16 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
         cmnThrow(std::runtime_error("LaunchIREShellInstance: could not get global dictionary"));
     }
 
-    char launchString[32];
+    char launchString[128];
     if (useIPython) {
         PyRun_SimpleString(startup);
-#if (PY_MAJOR_VERSION == 2)
-        PyRun_SimpleString("from IPython.Shell import IPShellEmbed\n");
-        PyRun_SimpleString("ipshell = IPShellEmbed()\n");
-        strcpy(launchString, "ipshell(local_ns = globals())");
-#else
-        PyRun_SimpleString("from IPython import embed\n");
-        PyRun_SimpleString("embed()\n");
-#endif
+        // Following code is for very old versions of IPython (possibly prior to 1.0)
+        // PyRun_SimpleString("from IPython.Shell import IPShellEmbed\n");
+        // PyRun_SimpleString("ipshell = IPShellEmbed()\n");
+        // strcpy(launchString, "ipshell(local_ns = globals())");
+        PyRun_SimpleString("from IPython.terminal.embed import InteractiveShellEmbed\n");
+        PyRun_SimpleString("ipshell = InteractiveShellEmbed()\n");
+        strcpy(launchString, "ipshell('Interactive Research Environment (IRE)', local_ns=globals())");
         IRE_State = IRE_ACTIVE;  // for now, instead of using SetActiveState callback
     }
     else {
@@ -478,7 +480,14 @@ void ireFramework::JoinIREShellInstance(double timeout)
     if (NewPythonThread && pInstance && ((IRE_State == IRE_LAUNCHED) || (IRE_State == IRE_ACTIVE))) {
         // First, check whether the Python thread is still alive.
         PyObject *result;
+
+#if (PY_MAJOR_VERSION < 3) || (PY_MINOR_VERSION < 5)
+        // Prior to Python 3.5, method is called isAlive; was removed in Python 3.9
         result = PyObject_CallMethod(pInstance, "isAlive", NULL);
+#else
+        // Starting with Python 3.5, method is called is_alive
+        result = PyObject_CallMethod(pInstance, "is_alive", NULL);
+#endif
         bool isAlive = (result == Py_True);
         Py_DECREF(result);
         if (isAlive) {
