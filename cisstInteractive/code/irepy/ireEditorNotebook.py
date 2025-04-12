@@ -118,7 +118,7 @@ class ireEditorNotebook(wx.Notebook):
         """Create new buffer."""
         buffer = py.editor.Buffer()
         panel = wx.Panel(parent=self, id=-1)
-        wx.EVT_ERASE_BACKGROUND(panel, lambda x: x)        
+        panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: x)
         editor = py.editor.Editor(parent=panel)
         panel.editor = editor
         sizer = wx.BoxSizer(wx.VERTICAL)

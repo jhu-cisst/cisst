@@ -34,13 +34,15 @@ Baltimore, MD 21218
 #------------------------------------------------------
 # Import standard libraries
 #------------------------------------------------------
-import os, sys, time, types, warnings
+import os, sys, time, warnings
 if sys.version_info.major == 2:
     import cPickle as pickle
     import imp
+    from types import StringTypes
 else:
     import pickle
     import importlib.util
+    StringTypes = str
 import string as String
 
 #-----------------------------------------------------
@@ -296,17 +298,21 @@ class ireMain(wx.Frame):
         #------------------------------------------------------
 
         ToolBar = self.CreateToolBar( wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT )
-        # Set up the toolbar, using bitmaps from ireImages.py.  Note that an alternative is to 
-        # use wx.ArtProvider.GetBitmap to get the wxWidgets default bitmaps:
-        #    tsize = (16,16)
-        #    new_bmp =  wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, tsize)
-        #    open_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, tsize)
-        #    save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, tsize)
-        ToolBar.AddTool(wx.ID_NEW, "", ireImages.getNewItemBitmap(), "New")
+        # Set up the toolbar, using bitmaps from ireImages.py or wx.ArtProvider.
+        if sys.version_info.major == 2:
+            new_bitmap  = ireImages.getNewItemBitmap()
+            open_bitmap = ireImages.getOpenItemBitmap()
+            save_bitmap = ireImages.getSaveItemBitmap()
+        else:
+            tsize = (16,16)
+            new_bitmap  = wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, tsize)
+            open_bitmap = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, tsize)
+            save_bitmap = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, tsize)
+        ToolBar.AddTool(wx.ID_NEW, "", new_bitmap, "New")
         ToolBar.SetToolLongHelp(wx.ID_NEW, "New file")
-        ToolBar.AddTool(wx.ID_OPEN, "", ireImages.getOpenItemBitmap(), "Open")
+        ToolBar.AddTool(wx.ID_OPEN, "", open_bitmap, "Open")
         ToolBar.SetToolLongHelp(wx.ID_OPEN, "Open file...")
-        ToolBar.AddTool(wx.ID_SAVE, "", ireImages.getSaveItemBitmap(), "Save")
+        ToolBar.AddTool(wx.ID_SAVE, "", save_bitmap, "Save")
         ToolBar.SetToolLongHelp(wx.ID_SAVE, "Save file")
 
         #ToolBar.AddSeparator()
@@ -404,8 +410,8 @@ class ireMain(wx.Frame):
         
         Width = 10*(self.RegisterContentsListCtrl.list.GetColumnWidth(0) +
             self.RegisterContentsListCtrl.list.GetColumnWidth(1))/2
-        self.RegisterContentsListCtrl.list.SetColumnWidth(0, Width)
-        self.ScopeVariablesListCtrl.list.SetColumnWidth(0, Width)
+        self.RegisterContentsListCtrl.list.SetColumnWidth(0, int(Width))
+        self.ScopeVariablesListCtrl.list.SetColumnWidth(0, int(Width))
 
         
     #------------------------------------------------------
@@ -521,7 +527,7 @@ class ireMain(wx.Frame):
 
     def CheckLists(self):
         if not self.ObjectRegister:
-            if sys.modules.has_key('cisstCommonPython'):
+            if 'cisstCommonPython' in sys.modules:
                 import cisstCommonPython as cisstCommon
                 self.ObjectRegister = cisstCommon.cmnObjectRegister.Instance()
         if self.ObjectRegister:
@@ -531,7 +537,7 @@ class ireMain(wx.Frame):
 
 
     def CheckRegisterContents(self):
-        CurrentRegister = String.split(self.ObjectRegister.__str__())
+        CurrentRegister = self.ObjectRegister.__str__().split()
         if CurrentRegister != self.Register:
             self.UpdateList(self.RegisterContentsListCtrl, self.GetRegisterContents(self.TYPES_TO_EXCLUDE))
             self.Register = CurrentRegister
@@ -554,7 +560,7 @@ class ireMain(wx.Frame):
         Contents = {}
         VariableName = ""
         VariableType = ""
-        for tok in String.split(self.ObjectRegister.__str__(), " "):
+        for tok in self.ObjectRegister.__str__().split(" "):
             #if starts with lparen, is type, else is name
             if tok.find('(')==0:  #this is a variabletype
                 VariableType = tok[1:tok.rfind(')')]
@@ -614,8 +620,8 @@ class ireMain(wx.Frame):
         # Make sure command history is a list of strings.  Note that an empty
         # list is not considered to be an error.
         file_error = False
-        if isinstance(Data, types.ListType):
-            if len(Data) > 0 and not isinstance(Data[0], types.StringTypes):
+        if isinstance(Data, list):
+            if len(Data) > 0 and not isinstance(Data[0], StringTypes):
                 file_error = True   # list does not contain strings
         else:
             file_error = True       # not a list

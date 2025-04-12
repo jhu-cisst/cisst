@@ -17,10 +17,14 @@
 
 # ireListCtrlPanel.py
 
-import wx, sys, string, os, types
+import wx, sys, string, os
 import wx.lib.mixins.listctrl as listmix
 import ireImages
 
+if sys.version_info.major == 2:
+    from types import StringTypes
+else:
+    StringTypes = str
 
 class ireListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin):
     def __init__(self, parent, ID, pos=wx.DefaultPosition,
@@ -76,7 +80,7 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
 
     def __init__(self, parent, Label, ColumnTitles=[], Data=[]):
         wx.Panel.__init__(self, parent, -1, style=wx.WANTS_CHARS)
-        
+
         tID = wx.NewId()
 
         # Create an image list for the up and down arrows.
@@ -84,10 +88,16 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
         # otherwise, every line in the list starts with a small up arrow
         # (this seems to be a wxWidgets bug on Windows).
         self.il = wx.ImageList(16, 16)
-        if sys.platform == 'win32':
-            self.blank = self.il.Add(wx.Bitmap(16,16), wx.Bitmap(16,16))
-        self.sm_up = self.il.Add(ireImages.getSmallUpArrowBitmap())
-        self.sm_dn = self.il.Add(ireImages.getSmallDnArrowBitmap())
+        if sys.version_info.major == 2:
+            if sys.platform == 'win32':
+                self.blank = self.il.Add(wx.Bitmap(16,16), wx.Bitmap(16,16))
+            up_bitmap = ireImages.getSmallUpArrowBitmap()
+            down_bitmap = ireImages.getSmallDnArrowBitmap()
+        else:
+            up_bitmap = wx.ArtProvider.GetBitmap(wx.ART_GO_UP, wx.ART_OTHER, (16,16))
+            down_bitmap = wx.ArtProvider.GetBitmap(wx.ART_GO_DOWN, wx.ART_OTHER, (16,16))
+        self.sm_up = self.il.Add(up_bitmap)
+        self.sm_dn = self.il.Add(down_bitmap)
 
         self.list = ireListCtrl(self, tID,
                                  style=wx.LC_REPORT 
@@ -145,9 +155,9 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
             self.list.InsertColumn(x, ColumnTitles[x])
             self.list.SetColumnWidth(x, wx.LIST_AUTOSIZE)
         for line in Data:
-            if isinstance(line, types.StringTypes):
+            if isinstance(line, StringTypes):
                self.AddIndexedItem(line)
-            elif isinstance(line, types.TupleType):
+            elif isinstance(line, tuple):
                self.AddTupleItem(line)
 
 
@@ -163,7 +173,7 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
     #------------------------------------------------------
     def AddTupleItem(self, Data):
         Index = self.list.GetItemCount()
-        if isinstance(Data, types.TupleType) and len(Data) > 0 and isinstance(Data[0], types.StringTypes):
+        if isinstance(Data, tuple) and len(Data) > 0 and isinstance(Data[0], StringTypes):
             self.list.InsertItem(Index, Data[0])
             for i in range(1, len(Data)):
                 self.list.SetItem(Index, i, Data[i])
@@ -187,7 +197,7 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
     #------------------------------------------------------
     def AddIndexedItem(self, Data):
         Index = self.list.GetItemCount()
-        if isinstance(Data, types.StringTypes):
+        if isinstance(Data, StringTypes):
             try:
                self.list.InsertItem(Index, Data)
                # Following two lines are needed for ColumnSorterMixin
@@ -258,7 +268,7 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
     # Get drag and drop data:  This function returns a string
     # that is formed by joining all lines of text that have
     # been selected.  This simplifies the drag and drop
-    # implementation because wx.PyTextDataObject and
+    # implementation because wx.TextDataObject and
     # wx.TextDropTarget can be used.
     #------------------------------------------------------
     def GetDragAndDropData(self):
@@ -274,7 +284,7 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
     # Left mouse button pressed
     def OnLeftDown(self, event):
         if self.dropSource:
-            data = wx.PyTextDataObject(self.GetDragAndDropData())
+            data = wx.TextDataObject(self.GetDragAndDropData())
             self.dropSource.SetData(data)
             self.dropSource.DoDragDrop(wx.Drag_AllowMove)
         event.Skip()
