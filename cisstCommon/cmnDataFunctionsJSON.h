@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <limits>
 #include <vector>
 #include <cisstConfig.h> // for CISST_HAS_JSON
+#include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnThrow.h>
 
 // always include last
@@ -94,6 +95,38 @@ void CISST_EXPORT cmnDataJSON<std::string>::SerializeText(const DataType & data,
 template <>
 void CISST_EXPORT cmnDataJSON<std::string>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
+// fake support for cmnData<Json::Value>
+template <>
+class cmnData<Json::Value> {
+public:
+    static std::string HumanReadable(Json::Value const&) { return ""; };
+
+    static void Copy(Json::Value & data, const Json::Value & source) { data = source; };
+
+    static std::string SerializeDescription(const Json::Value &, char, const std::string &) { return ""; };
+
+    static void SerializeText(const Json::Value &, std::ostream&, const char) {};
+
+    static void DeSerializeText(Json::Value &, std::istream &, const char) {};
+
+    static void SerializeBinary(const Json::Value &, std::ostream &) {};
+
+    static void DeSerializeBinary(Json::Value &, std::istream &, const cmnDataFormat &, const cmnDataFormat &) {};
+
+    static std::string ScalarDescription(const Json::Value &, size_t, const std::string &) { return ""; };
+
+    static double Scalar(const Json::Value &, size_t) { return 0.0; };
+
+    static size_t ScalarNumber(const Json::Value &) { return 0; };
+
+    static bool ScalarNumberIsFixed(const Json::Value &) { return true; };
+};
+
+template <>
+void CISST_EXPORT cmnDataJSON<Json::Value>::SerializeText(const DataType & data, Json::Value & jsonValue);
+template <>
+void CISST_EXPORT cmnDataJSON<Json::Value>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+
 
 template <class _elementType>
 class cmnDataJSON<std::vector<_elementType> >
@@ -155,6 +188,25 @@ public:
         }
     }
 };
+
+
+template <typename _elementType>
+void cmnDataSerializeTextJSON(const _elementType & data, Json::Value & jsonValue) {
+    cmnDataJSON<_elementType>::SerializeText(data, jsonValue);
+}
+
+template <typename _elementType>
+std::string cmnDataSerializeTextJSON(const _elementType & data) {
+    Json::Value jsonValue;
+    cmnDataJSON<_elementType>::SerializeText(data, jsonValue);
+    Json::StreamWriterBuilder builder;
+    return Json::writeString(builder, jsonValue);
+}
+
+template <typename _elementType>
+void cmnDataDeSerializeTextJSON(_elementType & data, const Json::Value & jsonValue) {
+    cmnDataJSON<_elementType>::DeSerializeText(data, jsonValue);
+}
 
 #endif // CISST_HAS_JSON
 

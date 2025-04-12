@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -132,6 +132,15 @@ void cmnDataJSON<std::string>::DeSerializeText(DataType & data, const Json::Valu
         cmnThrow("cmnDataJSON<std::string>::DeSerializeText: empty JSON value");
     }
     data = jsonValue.asString();
+}
+
+template <>
+void cmnDataJSON<Json::Value>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+    jsonValue = data;
+}
+template <>
+void cmnDataJSON<Json::Value>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
+    data = jsonValue;
 }
 
 #endif // CISST_HAS_JSON
