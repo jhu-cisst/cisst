@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -37,6 +37,12 @@ cdgEnum::cdgEnum(size_t lineNumber):
     field =
 #endif
         this->AddField("description", "", false, "description of the enum");
+    CMN_ASSERT(field);
+
+#if CMN_ASSERT_IS_DEFINED
+    field =
+#endif
+        this->AddField("namespace", "", false, "namespace for the enum");
     CMN_ASSERT(field);
 
 #if CMN_ASSERT_IS_DEFINED
@@ -88,6 +94,7 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
     size_t index;
     const std::string name = this->GetFieldValue("name");
     const std::string prefix = this->GetFieldValue("prefix");
+    const std::string _namespace = this->GetFieldValue("namespace");
     std::string _indent;
     std::string _prefix;
     if (this->ClassName != "") {
@@ -95,6 +102,9 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
         _indent = "    ";
         _prefix.append("static ");
     } else {
+        if (_namespace != "") {
+            outputStream << "namespace " << _namespace << " {" << std::endl;
+        }
         _prefix = this->GetFieldValue("attribute");
         if (_prefix != "") {
             _prefix.append(" ");
@@ -116,10 +126,21 @@ void cdgEnum::GenerateHeader(std::ostream & outputStream) const
                  << _prefix << "const std::vector<int> & " << name << "VectorInt(void);" << std::endl
                  << _prefix << "const std::vector<std::string> & " << name << "VectorString(void);" << std::endl;
 
+    if (_namespace != "") {
+        outputStream << "}" << std::endl;
+    }
+
     if (ClassName == "") {
-        outputStream << "CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(" << name << ", int, " << name << "ToString);" << std::endl
+        std::string namespaced;
+        if (_namespace == "") {
+            namespaced = name;
+        } else {
+            namespaced = _namespace + "::" + name;
+        }
+        outputStream << "CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(" << namespaced
+                     << ", int, " << namespaced << "ToString);" << std::endl
                      << "#if CISST_HAS_JSON" << std::endl
-                     << "  CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM_EXPORT(" << name << ");" << std::endl
+                     << "  CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM_EXPORT(" << namespaced << ");" << std::endl
                      << "#endif // CISST_HAS_JSON" << std::endl;
     }
 }
@@ -132,6 +153,10 @@ void cdgEnum::GenerateCode(std::ostream & CMN_UNUSED(outputStream)) const
 
 void cdgEnum::GenerateDataFunctionsHeader(std::ostream & outputStream, const std::string & attribute) const
 {
+    const std::string _namespace = this->GetFieldValue("namespace");
+    if (_namespace != "") {
+        outputStream << "namespace " << _namespace << " {" << std::endl;
+    }
     const std::string name = this->GetFieldValue("name");
     std::string scope = this->ClassName;
     if (scope != "") {
@@ -145,11 +170,18 @@ void cdgEnum::GenerateDataFunctionsHeader(std::ostream & outputStream, const std
                  << "#if CISST_HAS_JSON" << std::endl
                  << "  CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(" << scope << name << ");" << std::endl
                  << "#endif // CISST_HAS_JSON" << std::endl;
+    if (_namespace != "") {
+        outputStream << "}" << std::endl;
+    }
 }
 
 
 void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream) const
 {
+    const std::string _namespace = this->GetFieldValue("namespace");
+    if (_namespace != "") {
+        outputStream << "namespace " << _namespace << " {" << std::endl;
+    }
     size_t index;
     const std::string name = this->GetFieldValue("name");
     const std::string prefix = this->GetFieldValue("prefix");
@@ -236,7 +268,18 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream) const
                  << "}" << std::endl
                  << std::endl;
 
+    if (_namespace != "") {
+        outputStream << "}" << std::endl;
+    }
+
+    std::string namespaced;
+    if (_namespace == "") {
+        namespaced = scopeName;
+    } else {
+        namespaced = _namespace + "::" + scopeName;
+    }
     outputStream << "#if CISST_HAS_JSON" << std::endl
-                 << "  CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM_AS_STRING(" << scopeName << ", " << scopeName << "ToString, " << scopeName << "FromString);" << std::endl
+                 << "  CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM_AS_STRING(" << namespaced << ", " << namespaced << "ToString, " << namespaced << "FromString);" << std::endl
                  << "#endif // CISST_HAS_JSON" << std::endl;
+
 }
