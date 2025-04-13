@@ -34,15 +34,14 @@ import sys
 import wx
 import zlib
 if sys.version_info.major == 2:
-    from cStringIO import StringIO
-    BytesIO = StringIO
+    from cStringIO import StringIO as BytesIO
 else:
-    from io import StringIO, BytesIO
+    from io import BytesIO
 
 #----------------------------------------------------------------------
 def getSmallUpArrowData():
     return \
-"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x10\x00\x00\x00\x10\x08\x06\
+b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x10\x00\x00\x00\x10\x08\x06\
 \x00\x00\x00\x1f\xf3\xffa\x00\x00\x00\x04sBIT\x08\x08\x08\x08|\x08d\x88\x00\
 \x00\x00<IDAT8\x8dcddbf\xa0\x040Q\xa4{h\x18\xf0\xff\xdf\xdf\xffd\x1b\x00\xd3\
 \x8c\xcf\x10\x9c\x06\xa0k\xc2e\x08m\xc2\x00\x97m\xd8\xc41\x0c \x14h\xe8\xf2\
@@ -54,7 +53,7 @@ def getSmallUpArrowBitmap():
 
 def getSmallUpArrowImage():
     try:
-        stream = StringIO(getSmallUpArrowData())
+        stream = BytesIO(getSmallUpArrowData())
     except TypeError as e:
         print('getSmallUpArrowImage: ', e)
     return wx.Image(stream)
@@ -62,7 +61,7 @@ def getSmallUpArrowImage():
 #----------------------------------------------------------------------
 def getSmallDnArrowData():
     return \
-"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x10\x00\x00\x00\x10\x08\x06\
+b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x10\x00\x00\x00\x10\x08\x06\
 \x00\x00\x00\x1f\xf3\xffa\x00\x00\x00\x04sBIT\x08\x08\x08\x08|\x08d\x88\x00\
 \x00\x00HIDAT8\x8dcddbf\xa0\x040Q\xa4{\xd4\x00\x06\x06\x06\x06\x06\x16t\x81\
 \xff\xff\xfe\xfe'\xa4\x89\x91\x89\x99\x11\xa7\x0b\x90%\ti\xc6j\x00>C\xb0\x89\
@@ -74,7 +73,7 @@ def getSmallDnArrowBitmap():
 
 def getSmallDnArrowImage():
     try:
-        stream = StringIO(getSmallDnArrowData())
+        stream = BytesIO(getSmallDnArrowData())
     except TypeError as e:
         print('getSmallDnArrowImage: ', e)
     return wx.Image(stream)

@@ -298,16 +298,15 @@ class ireMain(wx.Frame):
         #------------------------------------------------------
 
         ToolBar = self.CreateToolBar( wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT )
-        # Set up the toolbar, using bitmaps from ireImages.py or wx.ArtProvider.
-        if sys.version_info.major == 2:
-            new_bitmap  = ireImages.getNewItemBitmap()
-            open_bitmap = ireImages.getOpenItemBitmap()
-            save_bitmap = ireImages.getSaveItemBitmap()
-        else:
-            tsize = (16,16)
-            new_bitmap  = wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, tsize)
-            open_bitmap = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, tsize)
-            save_bitmap = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, tsize)
+        # Set up the toolbar, using bitmaps from ireImages.py
+        # Alternatively, could use wx.ArtProvider as follows:
+        #    tsize = (16,16)
+        #    new_bitmap  = wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, tsize)
+        #    open_bitmap = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, tsize)
+        #    save_bitmap = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, tsize)
+        new_bitmap  = ireImages.getNewItemBitmap()
+        open_bitmap = ireImages.getOpenItemBitmap()
+        save_bitmap = ireImages.getSaveItemBitmap()
         ToolBar.AddTool(wx.ID_NEW, "", new_bitmap, "New")
         ToolBar.SetToolLongHelp(wx.ID_NEW, "New file")
         ToolBar.AddTool(wx.ID_OPEN, "", open_bitmap, "Open")
@@ -600,9 +599,11 @@ class ireMain(wx.Frame):
     #-------------------------------------------------
 
     def SaveHistoryToFile(self):
-        cmdlist = self.CommandHistoryListCtrl.GetAllItems()
-        f = open(self.HISTORY_FILENAME, 'w')
-        pickle.dump(cmdlist, f)
+        # PK TODO: pickle not yet working in Python3
+        if sys.version_info.major == 2:
+            cmdlist = self.CommandHistoryListCtrl.GetAllItems()
+            f = open(self.HISTORY_FILENAME, 'w')
+            pickle.dump(cmdlist, f)
     
     def LoadHistoryFromFile(self, fn=HISTORY_FILENAME):
         Data = []

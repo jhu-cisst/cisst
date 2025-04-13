@@ -88,14 +88,10 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
         # otherwise, every line in the list starts with a small up arrow
         # (this seems to be a wxWidgets bug on Windows).
         self.il = wx.ImageList(16, 16)
-        if sys.version_info.major == 2:
-            if sys.platform == 'win32':
-                self.blank = self.il.Add(wx.Bitmap(16,16), wx.Bitmap(16,16))
-            up_bitmap = ireImages.getSmallUpArrowBitmap()
-            down_bitmap = ireImages.getSmallDnArrowBitmap()
-        else:
-            up_bitmap = wx.ArtProvider.GetBitmap(wx.ART_GO_UP, wx.ART_OTHER, (16,16))
-            down_bitmap = wx.ArtProvider.GetBitmap(wx.ART_GO_DOWN, wx.ART_OTHER, (16,16))
+        if sys.platform == 'win32':
+            self.blank = self.il.Add(wx.Bitmap(16,16,1), wx.Bitmap(16,16,1))
+        up_bitmap = ireImages.getSmallUpArrowBitmap()
+        down_bitmap = ireImages.getSmallDnArrowBitmap()
         self.sm_up = self.il.Add(up_bitmap)
         self.sm_dn = self.il.Add(down_bitmap)
 
