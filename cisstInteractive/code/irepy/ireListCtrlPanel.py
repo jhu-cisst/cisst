@@ -240,7 +240,7 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
     # of the current sorting status).
     #------------------------------------------------------
     def GetAllItems(self):
-        Data = range(self.list.GetItemCount())
+        Data = list(range(self.list.GetItemCount()))
         for x in range(self.list.GetItemCount()):
            Data[self.list.GetItemData(x)] = self.list.GetItemText(x)
         return Data

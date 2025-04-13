@@ -435,7 +435,7 @@ class ireMain(wx.Frame):
     #------------------------------------------------------
     def GetVariablesFromRegister(self, Data):
         for VariableName in Data:
-            self.Shell.interp.locals[VariableName] = FindObject(VariableName)
+            self.Shell.interp.locals[VariableName] = self.ObjectRegister.FindObject(VariableName)
         self.CheckScopeVariables()
 
     #------------------------------------------------------
@@ -537,9 +537,9 @@ class ireMain(wx.Frame):
 
 
     def CheckRegisterContents(self):
-        CurrentRegister = self.ObjectRegister.__str__().split()
+        CurrentRegister = list(self.ObjectRegister)
         if CurrentRegister != self.Register:
-            self.UpdateList(self.RegisterContentsListCtrl, self.GetRegisterContents(self.TYPES_TO_EXCLUDE))
+            self.UpdateList(self.RegisterContentsListCtrl, self.GetRegisterContents())
             self.Register = CurrentRegister
 
     def CheckScopeVariables(self):
@@ -556,18 +556,12 @@ class ireMain(wx.Frame):
             ListCtrl.SortList()
 
 
-    def GetRegisterContents(self, TypesToExclude=[]):
+    def GetRegisterContents(self):
         Contents = {}
-        VariableName = ""
-        VariableType = ""
-        for tok in self.ObjectRegister.__str__().split(" "):
-            #if starts with lparen, is type, else is name
-            if tok.find('(')==0:  #this is a variabletype
-                VariableType = tok[1:tok.rfind(')')]
-                if VariableType not in TypesToExclude:
-                    Contents.update( {VariableName:VariableType} )
-            else:   #this is a variablename
-                VariableName = tok
+        for entry in self.ObjectRegister:
+            VariableName = entry[0]
+            VariableType = self.GetRegisterTypeString(VariableName)
+            Contents.update( {VariableName:VariableType} )
         return Contents
 
 
@@ -586,15 +580,17 @@ class ireMain(wx.Frame):
 
 
     def GetRegisterTypeString(self, VariableName):
-        return self.GetTypeString("RegisterGet('" + VariableName + "')")
+        obj = self.ObjectRegister.FindObject(VariableName)
+        return self.GetTypeString(obj)
 
 
     def GetVariableTypeString(self, VariableName):
-        return self.GetTypeString("vars(self.Shell.interp)['locals']['" + VariableName + "']")
+        obj = vars(self.Shell.interp)['locals'][VariableName]
+        return self.GetTypeString(obj)
 
 
-    def GetTypeString(self, _Str):
-        exec("VariableType = str(type(" + _Str + "))")
+    def GetTypeString(self, obj):
+        VariableType = str(type(obj))
         return VariableType[VariableType.find("'")+1:VariableType.rfind("'")]
 
 
@@ -869,7 +865,6 @@ class ireMain(wx.Frame):
         frame.Show(True)
         
     def OnTaskTree(self, event):        
-        #taskManager = self.ObjectRegister.FindObject("TaskManager")
         taskManager = mtsManagerLocal.GetInstance()
         if taskManager:
             frame = ireTaskTree(None, -1, "Task Manager", taskManager)
@@ -883,7 +878,6 @@ class ireMain(wx.Frame):
     def OnOscilloscope(self, event):        
         import gettext
         gettext.install("irepy")
-        #taskManager = self.ObjectRegister.FindObject("TaskManager")
         taskManager = mtsManagerLocal.GetInstance()
         if taskManager:
             self.scopeFrame = COscilloscope(self, taskManager)
