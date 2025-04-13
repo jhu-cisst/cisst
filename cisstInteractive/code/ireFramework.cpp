@@ -359,11 +359,14 @@ void ireFramework::InitShellInstance(void)
     PyEval_InitThreads();
 #endif
 #if (CISST_OS == CISST_LINUX)
+#if (PY_MAJOR_VERSION == 2)
+    // TODO: check if this is needed for Python3
     // For Linux, change dlopenflags to avoid swig::stop_iterator exceptions
     PyGILState_STATE gstate = PyGILState_Ensure();
     PyThreadState *threadState = PyThreadState_Get();
     threadState->interp->dlopenflags |= RTLD_GLOBAL;
     PyGILState_Release(gstate);
+#endif
 #endif
     IRE_State = IRE_INITIALIZED;
 }

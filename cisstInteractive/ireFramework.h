@@ -6,8 +6,7 @@
   Author(s): Andrew LaMora
   Created on: 2005-02-28
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -130,7 +129,7 @@ public:
       All modules loaded and variables created from this class will
       remain in scope; note that this does NOT include objects created
       from within the IRE IDE shell. Changes IRE state to IRE_INITIALIZED. */
-	static inline void InitShell(void)  throw(std::runtime_error) {
+	static inline void InitShell(void) {
 	    Instance()->InitShellInstance();
 	}
 
@@ -140,7 +139,7 @@ public:
       itself up.  If the application wishes to restart the IRE,
 	  it will be necessary to explicitly call InitShell(). Changes
       IRE state to IRE_FINISHED. */
-	static inline void FinalizeShell(void)  throw(std::runtime_error) {
+	static inline void FinalizeShell(void) {
 	    Instance()->FinalizeShellInstance();
 	}
 
@@ -182,7 +181,7 @@ public:
       the wxPython main event loop.  On exit from the event loop, it will
       call the callback function to change the state to IRE_FINISHED. */
 	static inline void LaunchIREShell(const char *startup = "", bool newPythonThread = false, bool useIPython = false,
-                                      bool useStreambuf = true) throw(std::runtime_error) {
+                                      bool useStreambuf = true) {
 	    Instance()->LaunchIREShellInstance(startup, newPythonThread, useIPython, useStreambuf);
 	}
 
