@@ -74,7 +74,8 @@ void ireTask::Startup(void)
             << GetName() << " = cisstCommon.cmnObjectRegister.FindObject('" << GetName() << "'); "
             << StartupCommands;
     try {
-        // Don't use cmnCallbackStreambuf because we will use system-wide log
+        // Set last parameter true to use cmnCallbackStreambuf (standard CMN_LOG)
+        // Set last parameter false if using system-wide log (threaded logging)
         ireFramework::LaunchIREShell(startup.str().c_str(), true, (Shell == IRE_IPYTHON), true);
     }
     catch (...) {
