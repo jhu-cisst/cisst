@@ -421,17 +421,21 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
         Py_DECREF(pInstance);
     pInstance = 0;
 
-    const char * python_args[] = { "", startup };
-
 #if (PY_MAJOR_VERSION == 2)
     Py_Initialize();
+    // Set python_args as argv.
+    // Note that currently, startup script run separately for IPython.
+    const char * python_args[] = { "", startup };
     PySys_SetArgv(2, const_cast<char **>(python_args));
     // Initialize ireLogger module, which is used for the cmnLogger output window
     PyTextCtrlHook::InitModule();
 #else
+    // Following setting of python_args appears to be necessary when using Python 3
+    // with wxPython. Note that currently, startup script run separately for IPython.
+    const char * python_args[] = { "", "IRE", startup };
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
-    PyConfig_SetBytesArgv(&config, 2, const_cast<char **>(python_args));
+    PyConfig_SetBytesArgv(&config, 3, const_cast<char **>(python_args));
     // Initialize ireLogger module, which is used for the cmnLogger output window
     if (PyImport_AppendInittab("ireLogger", PyTextCtrlHook::InitModule) == -1)
         CMN_LOG_INIT_WARNING << "LaunchIREShellInstance: failed to import ireLogger" << std::endl;
@@ -475,6 +479,7 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
 
     char launchString[128];
     if (useIPython) {
+        // Could instead add "argv=[%s]" to launchString, where %s is startup string
         PyRun_SimpleString(startup);
         // Following code is for very old versions of IPython (possibly prior to 1.0)
         // PyRun_SimpleString("from IPython.Shell import IPShellEmbed\n");
