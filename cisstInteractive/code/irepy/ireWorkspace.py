@@ -76,7 +76,7 @@ def main():
     v1 = v2 = None
     print('v1 = ', v1, '\nv2 = ', v2)
     LoadFile(open('workspace'))
-    Workspace = pickle.load(open('workspace'))
+    Workspace = pickle.load(open('workspace', 'rb'))
     for Variable in Workspace:
         exec(Variable + " = Workspace['" + Variable + "']")
     print('v1 = ', v1, '\nv2 = ', v2)
