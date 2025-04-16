@@ -5,6 +5,7 @@
     "-DCISSTNETLIB_USE_LOCAL_INSTALL=ON",
     "-DCISST_HAS_CISSTNETLIB=ON",
     "-DCISST_cisstMesh=ON",
+    "-DCISST_cisstInteractive=ON",
     "-DCISST_USE_SI_UNITS=ON",
     "-DCISST_HAS_QT=ON",
     "-DCISST_HAS_JSON=ON",
