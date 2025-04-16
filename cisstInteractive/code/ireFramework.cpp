@@ -204,7 +204,6 @@ void PyTextCtrlHook::SetupStreambuf(void)
 //     len:  the length of the string
 void PyTextCtrlHook::PrintLog(const char * str, int len)
 {
-#if (PY_MAJOR_VERSION == 2)
     PyObject* result;
 
     // If PythonFunc is set, we know that PythonEventClass is also set
@@ -228,18 +227,25 @@ void PyTextCtrlHook::PrintLog(const char * str, int len)
         // Decrement "event" reference count (Py_BuildValue incremented it)
         Py_DECREF(event);
         // Call the callback function
+#if (PY_MAJOR_VERSION == 2)
         if (PyCFunction_Check(PythonFunc)) {
             // If it is a (wrapped) C function, call it directly.
             try {
                 result = PyCFunction_Call(PythonFunc, args, 0);
+                result = PyObject_CallObject(PythonFunc, args);
             }
             catch(...) {
                 std::cout << "PyCFunction_Call exception" << std::endl;
             }
         }
-        else
+        else {
             // Call the Python function (via the interpreter)
-            result = PyEval_CallObject(PythonFunc, args);
+            result = PyObject_CallObject(PythonFunc, args);
+        }
+#else
+        // Call the Python function (via the interpreter)
+        result = PyObject_CallObject(PythonFunc, args);
+#endif
         // Decrement reference count
         Py_DECREF(args);
 
@@ -254,7 +260,6 @@ void PyTextCtrlHook::PrintLog(const char * str, int len)
         // Release Python global interpreter lock
         PyGILState_Release(gstate);
     }
-#endif
 }
 
 // Cleanup:  remove logger channel, delete Streambuf object,
