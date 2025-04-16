@@ -75,7 +75,7 @@ void ireTask::Startup(void)
             << StartupCommands;
     try {
         // Don't use cmnCallbackStreambuf because we will use system-wide log
-        ireFramework::LaunchIREShell(startup.str().c_str(), true, (Shell == IRE_IPYTHON), false);
+        ireFramework::LaunchIREShell(startup.str().c_str(), true, (Shell == IRE_IPYTHON), true);
     }
     catch (...) {
         if (Shell == IRE_IPYTHON)

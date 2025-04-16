@@ -213,15 +213,14 @@ void PyTextCtrlHook::PrintLog(const char * str, int len)
         // This function is defined in Python 2.3 or greater.
         PyGILState_STATE gstate = PyGILState_Ensure();
 
-        PyObject* event = PyObject_CallObject(PythonEventClass, NULL);
+        // Create an instance of the event class and set the msg attribute
+        PyObject *empty = Py_BuildValue("()");
+        PyObject *kwargs = Py_BuildValue("{s:s}", "msg", str);
+        PyObject* event = PyObject_Call(PythonEventClass, empty, kwargs);
         CMN_ASSERT(event);
+        Py_DECREF(empty);
+        Py_DECREF(kwargs);
 
-        // Convert the C string to a Python string
-        PyObject* pystr = Py_BuildValue("s", str);
-        // Store the string as the "msg" attribute in the event object
-        CMN_ASSERT(PyObject_SetAttrString(event, "msg", pystr) == 0);
-        // Decrement "pystr" reference count (PyObject_SetAttrString incremented it).
-        Py_DECREF(pystr);
         // Build the args for the Python function
         PyObject* args = Py_BuildValue("OO", PythonWindow, event);
         // Decrement "event" reference count (Py_BuildValue incremented it)
