@@ -6,7 +6,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-12-10
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -52,7 +52,7 @@ void ireTask::Initialize(void)
         required->AddEventHandlerWrite(&ireTask::Log, this, 
                                        mtsManagerComponentBase::EventNames::PrintLog);
     }
-    SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
+    SetInitializationDelay(10.0);  // Allow up to 10 seconds for it to start
 }
 
 ireTask::~ireTask()

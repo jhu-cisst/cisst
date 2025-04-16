@@ -599,17 +599,15 @@ class ireMain(wx.Frame):
     #-------------------------------------------------
 
     def SaveHistoryToFile(self):
-        # PK TODO: pickle not yet working in Python3
-        if sys.version_info.major == 2:
-            cmdlist = self.CommandHistoryListCtrl.GetAllItems()
-            f = open(self.HISTORY_FILENAME, 'w')
-            pickle.dump(cmdlist, f)
+        cmdlist = self.CommandHistoryListCtrl.GetAllItems()
+        f = open(self.HISTORY_FILENAME, 'wb')
+        pickle.dump(cmdlist, f)
     
     def LoadHistoryFromFile(self, fn=HISTORY_FILENAME):
         Data = []
         if os.path.isfile(fn):
             try:
-                Data = pickle.load(open(fn))
+                Data = pickle.load(open(fn, 'rb'))
             except Exception as error:
                 msgdlg = wx.MessageDialog(self, str(error), "Load History", wx.OK | wx.ICON_ERROR)
                 msgdlg.ShowModal()
@@ -693,13 +691,13 @@ class ireMain(wx.Frame):
             # write the command file up to the selected line into the named file
             # fetch any existing list first and append to it
             try:
-                archlist = pickle.load(open(fn))
+                archlist = pickle.load(open(fn), 'rb')
             except IOError:
                 archlist = []
             n=0
             for n in range(choice):
                 archlist.append( cmdlist[n] )
-            pickle.dump( archlist, open(fn, 'w'))
+            pickle.dump( archlist, open(fn, 'wb'))
             text = "Your command history was archived to " + fn
             msgdlg = wx.MessageDialog(self, text, title, wx.OK | wx.ICON_INFORMATION)
             msgdlg.ShowModal()
@@ -836,7 +834,7 @@ class ireMain(wx.Frame):
     def OnLoadWorkspace(self, event):
         Filepath = py.editor.openSingle(directory='',wildcard='IRE Workspace (*.ws)|*.ws|All Files (*.*)|*.*').path
         if Filepath:
-            File = open(Filepath)
+            File = open(Filepath, 'rb')
             LoadWorkspaceFile(self.Shell.interp.locals, File)
             File.close()
             self.CheckScopeVariables()
@@ -848,7 +846,7 @@ class ireMain(wx.Frame):
             (name, ext) = os.path.splitext(Filepath)
             if not ext:
                Filepath += '.ws'
-            File = open(Filepath,'w')
+            File = open(Filepath,'wb')
             SaveWorkspaceToFile(self.Shell.interp.locals, File)
             File.close()
 
