@@ -88,6 +88,9 @@ class PyTextCtrlHook {
     static PyObject* PythonEventClass;   // the event object to pass to PostEvent
     static PyObject* PythonWindow;       // the window that will handle the event
     static PyMethodDef Methods[];
+#if (PY_MAJOR_VERSION >= 3)
+    static PyModuleDef ModuleDef;
+#endif
     static cmnCallbackStreambuf<char> *Streambuf;
     static cmnLogMask Mask;
 
@@ -108,7 +111,7 @@ public:
     static void PrintLog(const char * str, int len);
 
     // Initialize the Python module
-    static void InitModule(const char * name);
+    static PyObject *InitModule();
 
     // Cleanup
     static void Cleanup();
@@ -295,11 +298,31 @@ PyMethodDef PyTextCtrlHook::Methods[] = {
     { NULL, NULL, 0, NULL }
 };
 
-void PyTextCtrlHook::InitModule(const char * name)
-{
-#if (PY_MAJOR_VERSION == 2)
-    Py_InitModule(name, Methods);
+#if (PY_MAJOR_VERSION >= 3)
+PyModuleDef PyTextCtrlHook::ModuleDef = {
+    PyModuleDef_HEAD_INIT,
+    "ireLogger",
+    "ireLogger documentation",
+    -1,
+    PyTextCtrlHook::Methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
 #endif
+
+PyObject *PyTextCtrlHook::InitModule()
+{
+    PyObject *pModule;
+#if (PY_MAJOR_VERSION == 2)
+    pModule = Py_InitModule("ireLogger", Methods);
+#else
+    pModule = PyModule_Create(&ModuleDef);
+#endif
+    if (pModule == NULL)
+        CMN_LOG_INIT_ERROR << "PyTextCtrlHook::InitModule failed" << std::endl;
+    return pModule;
 }
 
 // ****************************************************************************
@@ -333,8 +356,8 @@ ireFramework* ireFramework::Instance(void) {
 //
 void ireFramework::InitShellInstance(void)
 {
-    if (IsInitialized()) {
-        CMN_LOG_INIT_WARNING << "ireFramework already initialized" << std::endl;
+    if (IRE_State != IRE_NOT_CONSTRUCTED) {
+        CMN_LOG_INIT_WARNING << "ireFramework already constructed" << std::endl;
         return;
     }
 #if (CISST_OS == CISST_LINUX)
@@ -353,22 +376,7 @@ void ireFramework::InitShellInstance(void)
                            << ": " << msg << std::endl;
     }
 #endif
-    Py_Initialize();
-#if (PY_MAJOR_VERSION < 3) || (PY_MINOR_VERSION < 7)
-    // PyEval_InitThreads was deprecated in Python 3.7 (it is no longer needed)
-    PyEval_InitThreads();
-#endif
-#if (CISST_OS == CISST_LINUX)
-#if (PY_MAJOR_VERSION == 2)
-    // TODO: check if this is needed for Python3
-    // For Linux, change dlopenflags to avoid swig::stop_iterator exceptions
-    PyGILState_STATE gstate = PyGILState_Ensure();
-    PyThreadState *threadState = PyThreadState_Get();
-    threadState->interp->dlopenflags |= RTLD_GLOBAL;
-    PyGILState_Release(gstate);
-#endif
-#endif
-    IRE_State = IRE_INITIALIZED;
+    IRE_State = IRE_CONSTRUCTED;
 }
 
 // ****************************************************************************
@@ -400,26 +408,61 @@ void ireFramework::FinalizeShellInstance(void)
 // of any PyObject s that use hard references.
 //
 void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython,
-                                          bool useStreambuf) {
-    //start python
-    const char * python_args[] = { "", startup };
-
-    if (IRE_State != IRE_INITIALIZED) {
+                                          bool useStreambuf)
+{
+    if (IRE_State != IRE_CONSTRUCTED) {
         CMN_LOG_INIT_ERROR << "LaunchIREShellInstance:  IRE state is " << IRE_State << "." << std::endl;
         cmnThrow(std::runtime_error("LaunchIREShellInstance: invalid IRE state."));
     }
-    IRE_State = IRE_LAUNCHED;
+
     NewPythonThread = newPythonThread;
 
     if (pInstance)
         Py_DECREF(pInstance);
     pInstance = 0;
 
+    const char * python_args[] = { "", startup };
+
 #if (PY_MAJOR_VERSION == 2)
-    // Initialize ireLogger module, which is used for the cmnLogger output window
-    PyTextCtrlHook::InitModule("ireLogger");
+    Py_Initialize();
     PySys_SetArgv(2, const_cast<char **>(python_args));
+    // Initialize ireLogger module, which is used for the cmnLogger output window
+    PyTextCtrlHook::InitModule();
+#else
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+    PyConfig_SetBytesArgv(&config, 2, const_cast<char **>(python_args));
+    // Initialize ireLogger module, which is used for the cmnLogger output window
+    if (PyImport_AppendInittab("ireLogger", PyTextCtrlHook::InitModule) == -1)
+        CMN_LOG_INIT_WARNING << "LaunchIREShellInstance: failed to import ireLogger" << std::endl;
+    PyStatus status;
+    status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config);
+    if (PyStatus_IsError(status)) {
+        CMN_LOG_INIT_ERROR << "LaunchIREShellInstance: init error: " << status.err_msg << std::endl;
+        cmnThrow(std::runtime_error("LaunchIREShellInstance: init error"));
+    }
+    else if (PyStatus_IsExit(status)) {
+        CMN_LOG_INIT_ERROR << "LaunchIREShellInstance: init exit: " << status.err_msg << std::endl;
+        cmnThrow(std::runtime_error("LaunchIREShellInstance: init exit"));
+    }
 #endif
+#if (PY_MAJOR_VERSION < 3) || (PY_MINOR_VERSION < 7)
+    // PyEval_InitThreads was deprecated in Python 3.7 (it is no longer needed)
+    PyEval_InitThreads();
+#endif
+#if (CISST_OS == CISST_LINUX)
+#if (PY_MAJOR_VERSION == 2)
+    // TODO: check if this is needed for Python3
+    // For Linux, change dlopenflags to avoid swig::stop_iterator exceptions
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    PyThreadState *threadState = PyThreadState_Get();
+    threadState->interp->dlopenflags |= RTLD_GLOBAL;
+    PyGILState_Release(gstate);
+#endif
+#endif
+
+    IRE_State = IRE_LAUNCHED;
 
     // Get global dictionary (pModule and pDict are borrowed references)
     PyObject *pModule = PyImport_AddModule("__main__");
@@ -526,12 +569,8 @@ bool ireFramework::IsInitialized()
 
 void ireFramework::Reset()
 {
-    if (IRE_State == IRE_FINISHED) {
-        if (!IsInitialized())
-            InitShell();
-        else
-            IRE_State = IRE_INITIALIZED;
-    }
+    if (IRE_State == IRE_FINISHED)
+        IRE_State = IRE_CONSTRUCTED;
 }
 
 void ireFramework::UnblockThreads()
