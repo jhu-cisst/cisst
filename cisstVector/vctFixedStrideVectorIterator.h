@@ -6,8 +6,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2003-09-30
 
-  (C) Copyright 2003-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -59,8 +58,7 @@ http://www.cisst.org/cisst/license.txt.
   \sa vctFixedStrideVectorIterator
 */
 template <class _elementType, vct::stride_type _stride>
-class vctFixedStrideVectorConstIterator:
-    public std::iterator<std::random_access_iterator_tag, _elementType>
+class vctFixedStrideVectorConstIterator
 {
 public:
     /* define most types from vctContainerTraits */
@@ -69,12 +67,9 @@ public:
     /*! This of the iterator itself. */
     typedef vctFixedStrideVectorConstIterator<_elementType, _stride> ThisType;
 
-    /*! Base type for this iterator, i.e. std::iterator. */
-    typedef std::iterator<std::random_access_iterator_tag, _elementType> BaseType;
-
     /*! Type (i.e. category) of iterator,
       i.e. std::random_access_iterator_tag. */
-    typedef typename BaseType::iterator_category iterator_category;
+    typedef typename std::random_access_iterator_tag iterator_category;
 
     /* Stride between the elements of a vector. */
     enum {STRIDE = _stride};
