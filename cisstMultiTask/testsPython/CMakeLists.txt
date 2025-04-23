@@ -39,7 +39,7 @@ cisst_add_swig_module (MODULE cisstMultiTaskPythonTest
                        MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstMultiTaskPythonTest)
 
 # Copy the .py file generated to wherever the libraries are
-add_custom_command (TARGET _cisstMultiTaskPythonTestPython
+add_custom_command (TARGET cisstMultiTaskPythonTestPython
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND}
                     ARGS -E copy
@@ -79,12 +79,12 @@ add_dependencies (cisstMultiTask_CREATE_PYTHON_TESTS_LIST
                   cisstCommon
                   cisstVector
                   cisstMultiTask
-                  _cisstCommonPython
-                  _cisstVectorPython
-                  _cisstOSAbstractionPython
-                  _cisstMultiTaskPython
+                  cisstCommonPython
+                  cisstVectorPython
+                  cisstOSAbstractionPython
+                  cisstMultiTaskPython
                   cisstMultiTaskPythonTest
-                  _cisstMultiTaskPythonTestPython)
+                  cisstMultiTaskPythonTestPython)
 
 file (APPEND ${CTEST_TEST_FILE} "include (\"${CTEST_TEST_FILE_AUTO}\")\n")
 

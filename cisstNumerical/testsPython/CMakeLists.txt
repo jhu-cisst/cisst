@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -48,9 +48,9 @@ add_dependencies (cisstNumerical_CREATE_PYTHON_TESTS_LIST
                   cisstCommon
                   cisstVector
                   cisstNumerical
-                  _cisstCommonPython
-                  _cisstVectorPython
-                  _cisstNumericalPython)
+                  cisstCommonPython
+                  cisstVectorPython
+                  cisstNumericalPython)
 
 file (APPEND ${CTEST_TEST_FILE} "include (\"${CTEST_TEST_FILE_AUTO}\")\n")
 

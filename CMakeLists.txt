@@ -170,6 +170,7 @@ if (CISST_CATKIN_BUILT)
   set (LIBRARY_OUTPUT_PATH    "${CATKIN_DEVEL_PREFIX}/lib")
   # Options defaults
   set (CISST_cisstMesh         ON  CACHE BOOL "")
+  set (CISST_cisstInteractive  ON  CACHE BOOL "")
   set (CISST_HAS_JSON          ON  CACHE BOOL "")
   set (CISST_HAS_SWIG_PYTHON   ON  CACHE BOOL "" FORCE)
   set (CISST_BUILD_SHARED_LIBS ON  CACHE BOOL "" FORCE)

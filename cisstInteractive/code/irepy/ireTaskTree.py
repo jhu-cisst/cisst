@@ -153,13 +153,7 @@ class ireSignalSelect( wx.Dialog ):
         self.taskManager = taskManager
         self.suffix = ''
 
-        # For older versions of wxWidgets, wx.ExpandAll causes an assertion failure if wx.TR_HIDE_ROOT is specified.
-        # This was fixed in wxWidgets ticket #4287, but I don't know the corresponding wxWindows version number.
-        # It is known to fail with wxWindows 2.8.7.1, so we at least check for that.
-        if wx.VERSION < (2,8,7,2):
-            self.tree = wx.TreeCtrl(self, style = wx.TR_DEFAULT_STYLE)
-        else:
-            self.tree = wx.TreeCtrl(self, style = wx.TR_DEFAULT_STYLE | wx.TR_HIDE_ROOT)
+        self.tree = wx.TreeCtrl(self, style = wx.TR_DEFAULT_STYLE | wx.TR_HIDE_ROOT)
         root = self.tree.AddRoot("TaskManager")
         self.AddTaskNodes(root, self.taskManager.GetNamesOfComponents(), self.taskManager.GetComponent)
         self.tree.ExpandAll()

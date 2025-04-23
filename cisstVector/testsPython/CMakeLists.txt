@@ -25,7 +25,7 @@ cisst_add_swig_module (MODULE cisstVectorPythonTest
                        MODULE_LINK_LIBRARIES cisstCommon cisstVector)
 
 # Copy the .py file generated to wherever the libraries are
-add_custom_command (TARGET _cisstVectorPythonTestPython
+add_custom_command (TARGET cisstVectorPythonTestPython
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND}
                     ARGS -E copy
@@ -64,9 +64,9 @@ set_property (TARGET cisstVector_CREATE_PYTHON_TESTS_LIST PROPERTY FOLDER "cisst
 add_dependencies (cisstVector_CREATE_PYTHON_TESTS_LIST
                   cisstCommon
                   cisstVector
-                  _cisstCommonPython
-                  _cisstVectorPython
-                  _cisstVectorPythonTestPython)
+                  cisstCommonPython
+                  cisstVectorPython
+                  cisstVectorPythonTestPython)
 
 file (APPEND ${CTEST_TEST_FILE} "include (\"${CTEST_TEST_FILE_AUTO}\")\n")
 

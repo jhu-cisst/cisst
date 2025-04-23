@@ -96,12 +96,12 @@ class ireLogCtrl(wx.Panel):
             self.ChannelMask.Enable(False)
 
         self.HeaderSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.HeaderSizer.Add(self.Text, 0, wx.ALIGN_LEFT)
+        self.HeaderSizer.Add(self.Text, 0, wx.ALIGN_TOP)
         self.HeaderSizer.Add((0,0),3)   # Add a stretchable space
-        self.HeaderSizer.Add(self.EnableBox, 0, wx.ALIGN_LEFT)
+        self.HeaderSizer.Add(self.EnableBox, 0, wx.ALIGN_TOP)
         self.HeaderSizer.Add((0,0),3)   # Add a stretchable space
-        self.HeaderSizer.Add(self.ChannelMaskText, 0, wx.ALIGN_RIGHT)
-        self.HeaderSizer.Add(self.ChannelMask, 0, wx.ALIGN_LEFT)
+        self.HeaderSizer.Add(self.ChannelMaskText, 0, wx.ALIGN_TOP)
+        self.HeaderSizer.Add(self.ChannelMask, 0, wx.ALIGN_TOP)
         self.HeaderSizer.Add((0,0),1)   # Add a smaller stretchable space
 
         self.logText = wx.TextCtrl(self, -1, style=style)
@@ -124,7 +124,7 @@ class ireLogCtrl(wx.Panel):
             # can call it directly.  If we can't find the C function,
             # we'll use the Python callback function (wx.LogMessage).
             try:
-                callback = wx._core_.PostEvent
+                callback = wx._core.PostEvent
             except AttributeError as e:
                 print('EnableLogger warning: could not find C function:')
                 print(e)

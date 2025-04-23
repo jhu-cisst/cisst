@@ -24,8 +24,10 @@ See ireMain.py
 """
 
 import sys
-import exceptions
-import cPickle
+if sys.version_info.major == 2:
+    import cPickle as pickle
+else:
+    import pickle
 
 class NoOutput:
     def write(self, String):
@@ -33,8 +35,8 @@ class NoOutput:
 
 def IsPicklable(Object):
     try:
-        cPickle.dump(Object, NoOutput())
-    except exceptions.Exception as error: #cPickle.PicklingError, error:
+        pickle.dump(Object, NoOutput())
+    except Exception as error: #pickle.PicklingError, error:
         return False
     return True
 
@@ -48,7 +50,7 @@ def SaveWorkspaceToFile(ObjectDictionary, File):
     for ObjectName in ObjectDictionary:
         if IsPicklable(ObjectDictionary[ObjectName]):
             Workspace.update({ObjectName:ObjectDictionary[ObjectName]})
-    cPickle.dump(Workspace,File)
+    pickle.dump(Workspace,File)
 
 #------------------------------------------------------
 # LoadWorkspaceFile
@@ -56,7 +58,7 @@ def SaveWorkspaceToFile(ObjectDictionary, File):
 # Load workspace variables and statements from a file
 #------------------------------------------------------
 def LoadWorkspaceFile(ObjectDictionary, File):
-    Workspace = cPickle.load(File)
+    Workspace = pickle.load(File)
     for Variable in Workspace:
         ObjectDictionary[Variable] = Workspace[Variable]
 
@@ -74,7 +76,7 @@ def main():
     v1 = v2 = None
     print('v1 = ', v1, '\nv2 = ', v2)
     LoadFile(open('workspace'))
-    Workspace = cPickle.load(open('workspace'))
+    Workspace = pickle.load(open('workspace', 'rb'))
     for Variable in Workspace:
         exec(Variable + " = Workspace['" + Variable + "']")
     print('v1 = ', v1, '\nv2 = ', v2)

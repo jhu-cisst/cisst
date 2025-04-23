@@ -62,8 +62,9 @@ def main():
            sys.exit(1)
 
     # compile the source files
-    for f in glob.glob1(src,'*.py'):
-        py_compile.compile(os.path.join(src,f), os.path.join(dest,f+'c'))
+    for fpath in glob.glob(os.path.join(src,'*.py')):
+        fname = os.path.basename(fpath)
+        py_compile.compile(fpath, os.path.join(dest,fname+'c'))
     
     #Now copy the images over.
     #This can be directly handled by CMake
@@ -71,5 +72,3 @@ def main():
     
 if __name__ == "__main__":
     main()
-    
-    
