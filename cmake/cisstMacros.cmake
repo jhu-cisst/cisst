@@ -543,7 +543,7 @@ function (cisst_add_swig_module ...)
 
   if (EXISTS ${SWIG_INTERFACE_FILE})
     # load settings for extra cisst libraries (and Python)
-    set (_LIBRARIES_AND_SETTINGS ${MODULE_LINK_LIBRARIES} cisstPython)
+    set (_LIBRARIES_AND_SETTINGS ${MODULE_LINK_LIBRARIES} cisstPython cisstSWIG)
     cisst_set_directories (${_LIBRARIES_AND_SETTINGS})
     # retrieve libraries needed for Python
     cisst_extract_settings (cisstPython LIBRARIES cisstPython_LIBRARIES)

@@ -224,28 +224,30 @@ endif (CISST_HAS_FLTK)
 # Wrapping with swig for Python
 option (CISST_HAS_SWIG_PYTHON "Build the Python wrappers for cisst with Swig." OFF)
 mark_as_advanced (CISST_HAS_SWIG_PYTHON)
+
+if (CISST_HAS_SWIG_PYTHON)
+  # Find Swig
+  set (CISST_SWIG_REQUIRED_VERSION 1.3.36)
+  find_package (SWIG ${CISST_SWIG_REQUIRED_VERSION} REQUIRED)
+  # It looks like version is not yet supported by CMake for SWIG so we are checking manually
+  if (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+    message ("SWIG version ${SWIG_VERSION} is too low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")
+    # propagate the fact that SWIG was found
+    set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
+  else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+    include (${SWIG_USE_FILE})
+    # save SWIG settings
+    set (CISST_SWIG_PACKAGE "SWIG")
+    cisst_set_package_settings (cisstSWIG SWIG PACKAGES    CISST_SWIG_PACKAGE)
+    cisst_set_package_settings (cisstSWIG SWIG CMAKE_FILES SWIG_USE_FILE)
+    # propagate the fact that SWIG was found
+    set (CISST_SWIG_FOUND 1 PARENT_SCOPE)
+  endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+else (CISST_HAS_SWIG_PYTHON)
+  cisst_unset_all_package_settings (cisstSWIG SWIG)
+endif (CISST_HAS_SWIG_PYTHON)
+
 if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
-
-  if (CISST_HAS_SWIG_PYTHON)
-    # Find Swig
-    set (CISST_SWIG_REQUIRED_VERSION 1.3.36)
-    find_package (SWIG ${CISST_SWIG_REQUIRED_VERSION} REQUIRED)
-    # It looks like version is not yet supported by CMake for SWIG so we are checking manually
-    if (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-      message ("SWIG version ${SWIG_VERSION} is too low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")
-      # propagate the fact that SWIG was found
-      set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
-    else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-      include (${SWIG_USE_FILE})
-      # save SWIG settings
-      set (CISST_SWIG_PACKAGE "SWIG")
-      cisst_set_package_settings (cisstPython SWIG PACKAGES    CISST_SWIG_PACKAGE)
-      cisst_set_package_settings (cisstPython SWIG CMAKE_FILES SWIG_USE_FILE)
-      # propagate the fact that SWIG was found
-      set (CISST_SWIG_FOUND 1 PARENT_SCOPE)
-    endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-  endif (CISST_HAS_SWIG_PYTHON)
-
   # Force to use exceptions
   set (CISST_CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
   set (CISST_CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
