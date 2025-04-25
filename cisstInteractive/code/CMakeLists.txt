@@ -43,7 +43,7 @@ cisst_set_directories (cisstPython)
 cisst_add_library (LIBRARY cisstInteractive
                    FOLDER cisstInteractive
                    DEPENDENCIES ${DEPENDENCIES}
-                   SETTINGS     cisstPython
+		   SETTINGS cisstPython
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}

@@ -443,13 +443,9 @@ if (CISST_cisstOSAbstraction OR CISST_cisstInteractive)
   endif (CMAKE_DL_LIBS)
 endif (CISST_cisstOSAbstraction OR CISST_cisstInteractive)
 
-# If cisstInteractive in turned on, also force SWIG for Python and shared libraries
-if (CISST_cisstInteractive)
-  set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
-endif (CISST_cisstInteractive)
-if (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
-endif (CISST_HAS_SWIG_PYTHON)
+endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
 
 
 # List of libraries to be built
@@ -492,8 +488,12 @@ if (CISST_HAS_FLTK)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstFLTK)
 endif (CISST_HAS_FLTK)
 
-if (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstPython)
+endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
+
+if (CISST_HAS_SWIG_PYTHON)
+  set (CISST_SETTINGS ${CISST_SETTINGS} cisstSWIG)
 endif (CISST_HAS_SWIG_PYTHON)
 
 if (CISST_HAS_OPENGL)
