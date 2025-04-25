@@ -84,6 +84,10 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstParameterTypes/prmOperatingState.h"
 %include "cisstParameterTypes/prmActuatorState.h"
 
+%include "cisstParameterTypes/prmStateCartesian.h"
+%include "cisstParameterTypes/prmServoCartesian.h"
+%include "cisstParameterTypes/prmServoJoint.h"
+
 %include "cisstParameterTypes/prmImageFrame.h"
 %include "cisstParameterTypes/prmCameraInfo.h"
 %include "cisstParameterTypes/prmDepthMap.h"

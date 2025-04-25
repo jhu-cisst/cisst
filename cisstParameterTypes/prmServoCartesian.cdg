@@ -1,0 +1,62 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctTransformationTypes.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstParameterTypes/prmSetpointMode.h>
+
+// Always include last
+#include <cisstParameterTypes/prmExport.h>
+}
+
+class {
+    name prmServoCartesian;
+
+    attribute CISST_EXPORT;
+
+    base-class {
+        type mtsGenericObject;
+        is-data true;
+    }
+
+    member {
+        name TaskFrame;
+        type vctFrm3;
+        default vctFrm3(); // identity
+    }
+
+    member {
+        name Position;
+        type vctFrm3;
+        default vctFrm3(); // identity
+    }
+
+    member {
+        name Velocity;
+        type vct6;
+        default vct6(0.0);
+    }
+
+    member {
+        name Force;
+        type vct6;
+        default vct6(0.0);
+    }
+
+    member {
+        name AxisMode;
+        type vctFixedSizeVector<prmSetpointMode, 6>;
+        default vctFixedSizeVector<prmSetpointMode, 6>(prmSetpointMode::NONE, prmSetpointMode::NONE, prmSetpointMode::NONE, prmSetpointMode::NONE, prmSetpointMode::NONE, prmSetpointMode::NONE);
+    }
+
+    inline-header {
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(prmServoCartesian);
+}
