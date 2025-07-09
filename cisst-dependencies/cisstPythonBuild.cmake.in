@@ -1,11 +1,8 @@
 #
-# $Id$
-#
 # Author(s):  Anton Deguet
 # Created on: 2011-09-11 
 #
-# (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2011-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 # 
@@ -16,4 +13,4 @@
 # --- end cisst license ---
 
 set (SWIG_EXECUTABLE "@SWIG_EXECUTABLE@")
-set (PYTHON_EXECUTABLE "@PYTHON_EXECUTABLE@")
+set (Python_EXECUTABLE "@Python_EXECUTABLE@")

@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -937,6 +937,14 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
 }
 
 
+mtsInterfaceProvidedDescription mtsInterfaceProvided::GetDescription() const
+{
+    mtsInterfaceProvidedDescription desc;
+    if (GetDescription(desc))
+        desc.InterfaceName = GetName();
+    return desc;
+}
+
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommands(void) const
 {
     std::vector<std::string> commands = GetNamesOfCommandsVoid();
@@ -1235,7 +1243,7 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void) for \"" << GetFullName()
                                  << "\": cannot find event named \"" << eventName
                                  << "\", the following events are available: "
-                                 << cmnStringFromVectorOfStrings(GetNamesOfEventsVoid())
+                                 << cmnDataHumanReadable(GetNamesOfEventsVoid())
                                  << std::endl;
     }
     return false;
@@ -1257,7 +1265,7 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write) for \"" << GetFullName()
                                  << "\": cannot find event named \"" << eventName
                                  << "\", the following events are available: "
-                                 << cmnStringFromVectorOfStrings(GetNamesOfEventsWrite())
+                                 << cmnDataHumanReadable(GetNamesOfEventsWrite())
                                  << std::endl;
     }
     return false;
@@ -1379,7 +1387,7 @@ void mtsInterfaceProvided::SendError(const std::string & message)
 }
 
 
-bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription)
+bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription) const
 {
     bool success = true;
 

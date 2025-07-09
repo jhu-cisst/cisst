@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2004-02-11
 
-  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -191,12 +191,34 @@ public:
         return TranslationMember;
     }
 
+    // GetTranslation and SetTranslation provided primarily for Python wrapping.
+    // Note that GetTranslation returns a copy, rather than a reference.
+
+    inline TranslationType GetTranslation(void) const {
+        return TranslationMember;
+    }
+
+    inline void SetTranslation(const TranslationType &trans) {
+        TranslationMember = trans;
+    }
+
     inline const RotationType & Rotation(void) const {
         return RotationMember;
     }
 
     inline RotationType & Rotation(void) {
         return RotationMember;
+    }
+
+    // GetRotation and SetRotation provided primarily for Python wrapping.
+    // Note that GetRotation returns a copy, rather than a reference.
+
+    inline RotationType GetRotation(void) const {
+        return RotationMember;
+    }
+
+    inline void SetRotation(const RotationType &rot) {
+        RotationMember = rot;
     }
 
     /*! Test if the frame is normalized.  This methods checks if the

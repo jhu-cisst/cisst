@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2024 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -543,7 +543,7 @@ function (cisst_add_swig_module ...)
 
   if (EXISTS ${SWIG_INTERFACE_FILE})
     # load settings for extra cisst libraries (and Python)
-    set (_LIBRARIES_AND_SETTINGS ${MODULE_LINK_LIBRARIES} cisstPython)
+    set (_LIBRARIES_AND_SETTINGS ${MODULE_LINK_LIBRARIES} cisstPython cisstSWIG)
     cisst_set_directories (${_LIBRARIES_AND_SETTINGS})
     # retrieve libraries needed for Python
     cisst_extract_settings (cisstPython LIBRARIES cisstPython_LIBRARIES)
@@ -553,41 +553,37 @@ function (cisst_add_swig_module ...)
     set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES CPLUSPLUS ON)
     # make sure the runtime code is not included
     set_source_files_properties (${SWIG_INTERFACE_FILE}
-                                 PROPERTIES SWIG_FLAGS "-v;-modern;-fvirtual")
+                                 PROPERTIES SWIG_FLAGS "-v;-fvirtual")
     # make sure source file is not used before libraries are build
     set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES DEPENDS "${MODULE_LINK_LIBRARIES}")
     # finally create the swig project using CMake command
     set (MODULE_NAME ${MODULE}Python)
-    if (COMMAND swig_add_library)
-      cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
-      swig_add_library (${MODULE_NAME}
-                        LANGUAGE python
-                        SOURCES ${SWIG_INTERFACE_FILE})
-    else ()
-      cisst_cmake_debug ("cisst_add_swig_module: swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})")
-      swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})
-    endif ()
+    cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
+    swig_add_library (${MODULE_NAME}
+      LANGUAGE python
+      SOURCES ${SWIG_INTERFACE_FILE})
+
     if (WIN32)
-      set_target_properties (_${MODULE_NAME} PROPERTIES SUFFIX .pyd)
-      set_target_properties (_${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
+      set_target_properties (${MODULE_NAME} PROPERTIES SUFFIX .pyd)
+      set_target_properties (${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
     endif (WIN32)
     cisst_cmake_debug ("cisst_add_swig_module: swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})")
-    swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})
+    target_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})
 
     # copy the .py file generated to wherever the libraries are
-    add_custom_command (TARGET _${MODULE_NAME}
+    add_custom_command (TARGET ${MODULE_NAME}
                         POST_BUILD
                         COMMAND ${CMAKE_COMMAND}
                         ARGS -E copy_if_different
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                                 ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${MODULE_NAME}.py)
     if (FOLDER)
-      set_property (TARGET _${MODULE_NAME} PROPERTY FOLDER "${FOLDER}")
+      set_property (TARGET ${MODULE_NAME} PROPERTY FOLDER "${FOLDER}")
     endif (FOLDER)
 
     # create a cisstCommon.py as CMake assumes one should be created
     # this is a bug that should be fixed in future releases of CMake.
-    add_custom_command (TARGET _${MODULE_NAME}
+    add_custom_command (TARGET ${MODULE_NAME}
                         POST_BUILD
                         COMMAND ${CMAKE_COMMAND}
                         ARGS -E copy_if_different
@@ -602,7 +598,7 @@ function (cisst_add_swig_module ...)
                COMPONENT ${MODULE})
 
       # install library and python file
-      install (TARGETS _${MODULE_NAME}
+      install (TARGETS ${MODULE_NAME}
                RUNTIME DESTINATION bin
                LIBRARY DESTINATION lib
                COMPONENT ${MODULE})

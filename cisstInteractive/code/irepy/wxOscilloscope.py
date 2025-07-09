@@ -10,7 +10,7 @@ from ireTaskTree import *
 try:
    from numpy.oldnumeric import *
 except:
-   print 'Numpy package is required'
+   print('Numpy package is required')
    raise
 
 from wx.lib.plot     import *
@@ -364,7 +364,7 @@ class COscilloscope(wx.Frame):
     def ResetPlotAxis(self):
         self.xAxis = (min(self.xdata), max(self.xdata)) 
         self.yAxis = (0, string.atof(self.valuerangeSC.GetValue()))
-        print 'ResetPlotAxis: ', self.yAxis
+        print('ResetPlotAxis: ', self.yAxis)
         if self.pg == None:
             self.plot.Clear()
         else:
@@ -474,7 +474,7 @@ class COscilloscope(wx.Frame):
 #       if chan >= 0 and chan < 4:
 #           self.channels[chan].SetReadCommand(readCommand)
 #       else:
-#           print 'Channel number ', chan, ' out of range (0-3)'
+#           print('Channel number ', chan, ' out of range (0-3)')
 
  
 class MyApp(wx.App):

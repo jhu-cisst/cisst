@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -164,6 +164,20 @@ public:
     static
     bool ScalarNumberIsFixed(const DataType & data);
 };
+
+
+template <typename _elementType>
+void cmnDataCopy(_elementType & destination, const _elementType & source)
+{
+    cmnData<_elementType>::Copy(destination, source);
+}
+
+template <typename _elementType>
+std::string cmnDataHumanReadable(const _elementType & data)
+{
+    return cmnData<_elementType>::HumanReadable(data);
+}
+
 
 /* Native types to overload:
    bool

@@ -5,7 +5,7 @@
   Author(s): Simon Leonard
   Created on: 2009-11-11
 
-  (C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -964,7 +964,8 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     I  = massData.MomentOfInertia();
 
     A  = links[i].Orientation( q[i] ).InverseSelf();
-    ps = links[i].PStar();
+    ps = links[i].ForwardKinematics( q[i] ).Translation();
+
 
     wd = A*( wd + (z0*qdd[i]) + (w%(z0*qd[i])) ); // angular acceleration wrt i
     w  = A*( w  + (z0*qd[i]) );                   // angular velocity
@@ -983,7 +984,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // Backward recursion
   for(int i=(int)links.size()-1; 0<=i; i--){
     vctMatrixRotation3<double>   A;
-    vctFixedSizeVector<double,3> ps = links[i].PStar();
+    vctFixedSizeVector<double,3> ps = links[i].ForwardKinematics( q[i] ).Translation();
     vctFixedSizeVector<double,3> s  = links[i].MassData().CenterOfMass();
 
     if(i != (int)links.size()-1)              //
@@ -1060,7 +1061,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
     const robMass & massData = links[i].MassData();
     m  = massData.Mass();
     s  = massData.CenterOfMass();
-    I  = massData.MomentOfInertia();
+    I  = massData.MomentOfInertiaAtCOM();
 
     if( i==0 ){
       A  = R*links[i].Orientation( q[i] );
@@ -1069,7 +1070,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
     else
       A  = links[i].Orientation( q[i] ).InverseSelf();
 
-    ps = links[i].PStar();
+    ps = links[i].ForwardKinematics( q[i] ).Translation();
 
     if (links[i].GetType() == cmnJointType::CMN_JOINT_REVOLUTE ){
       w  = A*w  + (z0*qd[i]) ;                      // angular velocity
@@ -1099,7 +1100,7 @@ robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
 
     if(i != (int)links.size()-1){              //
       A = links[i+1].Orientation( q[i+1] );    //
-      ps = links[i+1].PStar();
+      ps = links[i+1].ForwardKinematics( q[i+1] ).Translation();
     }
 
     n = A*n + (s%F[i]) + (ps%(A*f)) + N[i];    // moment externed on i by i-1

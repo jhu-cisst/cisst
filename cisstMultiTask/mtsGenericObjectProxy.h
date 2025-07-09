@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on: 2006-05-05
 
-  (C) Copyright 2006-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -781,8 +781,9 @@ typedef mtsGenericObjectProxy<bool> mtsBool;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsBool);
 
 #if (CISST_OS == CISST_WINDOWS)
-typedef mtsGenericObjectProxy<unsigned __int64> mtsUInt64;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsUInt64);
+// On Windows, size_t is unsigned __int64
+typedef mtsGenericObjectProxy<size_t> mtsSizeT;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsSizeT);
 #endif
 
 typedef mtsGenericObjectProxy<std::string> mtsStdString;

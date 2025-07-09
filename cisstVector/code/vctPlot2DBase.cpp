@@ -73,6 +73,8 @@ void vctPlot2DBase::Scale::FitX(double min, double max, double padding)
 {
     this->ViewingRangeX.Assign(min, max);
     this->ScaleValue.X() = this->Viewport.X() / ((max - min) * (1.0 + padding));
+    if (!cmnTypeTraits<double>::IsFinite(ScaleValue.X())) { ScaleValue.X() = 1.0; }
+
     this->Translation.X() =
         - min * this->ScaleValue.X()
         + 0.5 * padding * this->Viewport.X();
@@ -102,6 +104,8 @@ void vctPlot2DBase::Scale::FitY(double min, double max, double padding)
 {
     this->ViewingRangeY.Assign(min, max);
     this->ScaleValue.Y() = this->Viewport.Y() / ((max - min) * (1.0 + padding));
+    if (!cmnTypeTraits<double>::IsFinite(ScaleValue.Y())) { ScaleValue.Y() = 1.0; }
+
     this->Translation.Y() =
         - min * this->ScaleValue.Y()
         + 0.5 * padding * this->Viewport.Y();
@@ -122,6 +126,9 @@ void vctPlot2DBase::Scale::FitXY(vctDouble2 min, vctDouble2 max, const vctDouble
     vctDouble2 dataDiff;
     dataDiff.DifferenceOf(max, min);
     this->ScaleValue.ElementwiseRatioOf(this->Viewport, dataDiff);
+    if (!cmnTypeTraits<double>::IsFinite(ScaleValue.X())) { ScaleValue.X() = 1.0; }
+    if (!cmnTypeTraits<double>::IsFinite(ScaleValue.Y())) { ScaleValue.Y() = 1.0; }
+
     vctDouble2 pad(padding);
     pad.Add(1.0);
     this->ScaleValue.ElementwiseDivide(pad);

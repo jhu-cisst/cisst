@@ -6,8 +6,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,5 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaSerialPort.h>
+#include <cisstOSAbstraction/osaDynamicLoader.h>
 
 #endif // _osaPython_h

@@ -5,8 +5,7 @@
 #  Author(s):	Chris Abidin, Andrew LaMora
 #  Created on: 2004-04-30
 #
-#  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-#  Reserved.
+#  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -48,8 +47,8 @@ class ireEditorNotebook(wx.Notebook):
 
         self.Shell.SetFocus()
 
-        wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(), self.OnPageChanged)
-        #wx.EVT_IDLE(self, self.OnIdle)
+        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged, id=self.GetId())
+        #self.Bind(wx.EVT_IDLE, self.OnIdle)
 
 
 
@@ -119,7 +118,7 @@ class ireEditorNotebook(wx.Notebook):
         """Create new buffer."""
         buffer = py.editor.Buffer()
         panel = wx.Panel(parent=self, id=-1)
-        wx.EVT_ERASE_BACKGROUND(panel, lambda x: x)        
+        panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: x)
         editor = py.editor.Editor(parent=panel)
         panel.editor = editor
         sizer = wx.BoxSizer(wx.VERTICAL)

@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -44,6 +44,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmVelocityJointGet.h>
 #include <cisstParameterTypes/prmVelocityJointSet.h>
 
+#include "cisstParameterTypes/prmForceTorqueJointSet.h"
+#include "cisstParameterTypes/prmCartesianImpedance.h"
+#include "cisstParameterTypes/prmForwardKinematicsRequest.h"
+#include "cisstParameterTypes/prmForwardKinematicsResponse.h"
+#include "cisstParameterTypes/prmInverseKinematicsRequest.h"
+#include "cisstParameterTypes/prmInverseKinematicsResponse.h"
+
 #include <cisstParameterTypes/prmRobotState.h>
 
 #include <cisstParameterTypes/prmStateJoint.h>
@@ -51,8 +58,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmOperatingState.h>
 #include <cisstParameterTypes/prmActuatorState.h>
 
+#include <cisstParameterTypes/prmStateCartesian.h>
+#include <cisstParameterTypes/prmServoCartesian.h>
+#include <cisstParameterTypes/prmServoJoint.h>
+
 #include <cisstParameterTypes/prmImageFrame.h>
 #include <cisstParameterTypes/prmCameraInfo.h>
 #include <cisstParameterTypes/prmDepthMap.h>
+#include <cisstParameterTypes/prmKeyValue.h>
 
 #endif // _prmPython_h
