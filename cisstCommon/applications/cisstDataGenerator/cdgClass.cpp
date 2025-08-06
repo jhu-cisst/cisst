@@ -902,7 +902,11 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
             outputStream << "    field__cdg = jsonValue[\""
                          << Members[index]->GetFieldValue("name") << "\"];" << std::endl
                          << "    if (!field__cdg.empty()) {" << std::endl
-                         << "        cmnDataJSON<" << type << " >::DeSerializeText(this->" << name << ", field__cdg);" << std::endl;
+                         << "        try {" << std::endl
+                         << "            cmnDataJSON<" << type << " >::DeSerializeText(this->" << name << ", field__cdg);" << std::endl
+                         << "        } catch (std::exception & e) {" << std::endl
+                         << "            cmnThrow(std::string(e.what()) + \" < " << name << "\");" << std::endl
+                         << "        }" << std::endl;
             // if there is no default value, we need one from JSON
             if (Members[index]->GetFieldValue("default").empty()) {
                 outputStream << "    } else {" << std::endl
