@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,6 +30,7 @@ class cdgMember: public cdgScope
 
     bool UsesClassTypedef;
     std::string ClassName;
+    bool UseSharedPointer = false;
 
     // for C array types, e.g.  double data[10]
     bool IsCArray;

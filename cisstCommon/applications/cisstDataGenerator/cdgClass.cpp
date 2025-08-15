@@ -605,7 +605,20 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         if (Members[index]->GetFieldValue("is-data") == "true") {
             type = Members[index]->GetFieldValue("type");
             name = Members[index]->MemberName;
-            outputStream << "    cmnData<" << type << " >::Copy" << "(this->" << name << ", source__cdg." << name << ");" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "    if (source__cdg." << name << " == nullptr) {" << std::endl
+                             << "        if (this->" << name << " != nullptr) {" << std::endl
+                             << "            this->" << name << ".reset();" << std::endl
+                             << "        }" << std::endl
+                             << "    } else {" << std::endl
+                             << "        if (this->" << name << " == nullptr) {" << std::endl
+                             << "            this->" << name << " = std::make_shared<" << type << " >();" << std::endl
+                             << "            cmnData<" << type << " >::Copy" << "(*(this->" << name << "), *(source__cdg." << name << "));" << std::endl
+                             << "        }" << std::endl
+                             << "    }" << std::endl;
+            } else {
+                outputStream << "    cmnData<" << type << " >::Copy" << "(this->" << name << ", source__cdg." << name << ");" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl;
@@ -623,7 +636,13 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         if (Members[index]->GetFieldValue("is-data") == "true") {
             type = Members[index]->GetFieldValue("type");
             name = Members[index]->MemberName;
-            outputStream << "    cmnData<" << type << " >::SerializeBinary" << "(this->" << name << ", outputStream__cdg);" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "    if (this->" << name << " != nullptr) {" << std::endl
+                             << "        cmnData<" << type << " >::SerializeBinary" << "(*(this->" << name << "), outputStream__cdg);" << std::endl
+                             << "    }" << std::endl;
+            } else {
+                outputStream << "    cmnData<" << type << " >::SerializeBinary" << "(this->" << name << ", outputStream__cdg);" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl;
@@ -646,7 +665,11 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
             if (Members[index]->GetFieldValue("is-size_t") == "true") {
                 outputStream << "    cmnDataDeSerializeBinary_size_t" << "(this->" << name << ", inputStream__cdg, localFormat, remoteFormat);" << std::endl;
             } else {
-                outputStream << "    cmnData<" << type << " >::DeSerializeBinary" << "(this->" << name << ", inputStream__cdg, localFormat, remoteFormat);" << std::endl;
+                if (Members[index]->UseSharedPointer) {
+                    outputStream << "    std::cerr << CMN_LOG_DETAILS << \" no support for std::shared_ptr<" << type << ">\" << std::endl;" << std::endl;
+                } else {
+                    outputStream << "    cmnData<" << type << " >::DeSerializeBinary" << "(this->" << name << ", inputStream__cdg, localFormat, remoteFormat);" << std::endl;
+                }
             }
         }
     }
@@ -673,9 +696,13 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
             name = Members[index]->MemberName;
             outputStream << "    if (someData__cdg) {" << std::endl
                          << "        outputStream__cdg << delimiter__cdg;" << std::endl
-                         << "    }" << std::endl
-                         << "    someData__cdg = true;" << std::endl
-                         << "    " << "cmnData<" << type << " >::SerializeText(this->" << name << ", outputStream__cdg, delimiter__cdg);" << std::endl;
+                         << "    }" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "    std::cerr << CMN_LOG_DETAILS << \" no support for std::shared_ptr<" << type << ">\" << std::endl;" << std::endl;
+            } else {
+                outputStream << "    someData__cdg = true;" << std::endl
+                             << "    " << "cmnData<" << type << " >::SerializeText(this->" << name << ", outputStream__cdg, delimiter__cdg);" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl;
@@ -701,10 +728,14 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
             name = Members[index]->MemberName;
             outputStream << "    if (someData__cdg) {" << std::endl
                          << "        description__cdg << delimiter__cdg;" << std::endl
-                         << "    }" << std::endl
-                         << "    someData__cdg = true;" << std::endl
-                         << "    description__cdg << cmnData<" << type << " >::SerializeDescription(this->" << name << ", delimiter__cdg, prefix__cdg + \""
-                         << Members[index]->GetFieldValue("name") << "\");" << std::endl;
+                         << "    }" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "    std::cerr << CMN_LOG_DETAILS << \" no support for std::shared_ptr<" << type << ">\" << std::endl;" << std::endl;
+            } else {
+                outputStream << "    someData__cdg = true;" << std::endl
+                             << "    description__cdg << cmnData<" << type << " >::SerializeDescription(this->" << name << ", delimiter__cdg, prefix__cdg + \""
+                             << Members[index]->GetFieldValue("name") << "\");" << std::endl;
+            }
         }
     }
     outputStream << "    return description__cdg.str();" << std::endl
@@ -727,11 +758,15 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         if (Members[index]->GetFieldValue("is-data") == "true") {
             type = Members[index]->GetFieldValue("type");
             name = Members[index]->MemberName;
-            outputStream << "    if (someData__cdg) {" << std::endl
-                         << "        cmnDataDeSerializeTextDelimiter(inputStream__cdg, delimiter__cdg, \"" << className << "\");" << std::endl
-                         << "    }" << std::endl
-                         << "    someData__cdg = true;" << std::endl
-                         << "    cmnData<" << type << " >::DeSerializeText(this->" << name << ", inputStream__cdg, delimiter__cdg);" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "    std::cerr << CMN_LOG_DETAILS << \" no support for std::shared_ptr<" << type << ">\" << std::endl;" << std::endl;
+            } else {
+                outputStream << "    if (someData__cdg) {" << std::endl
+                             << "        cmnDataDeSerializeTextDelimiter(inputStream__cdg, delimiter__cdg, \"" << className << "\");" << std::endl
+                             << "    }" << std::endl
+                             << "    someData__cdg = true;" << std::endl
+                             << "    cmnData<" << type << " >::DeSerializeText(this->" << name << ", inputStream__cdg, delimiter__cdg);" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl;
@@ -750,9 +785,21 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         for (index = 0; index < Members.size(); index++) {
             if (Members[index]->GetFieldValue("is-data") == "true") {
                 type = Members[index]->GetFieldValue("type");
-                outputStream << "    description__cdg << \"  " << Members[index]->GetFieldValue("name")
-                             << ":\" << cmnData<" << type << " >::HumanReadable(this->"
-                             << Members[index]->MemberName << ");" << std::endl;
+                name = Members[index]->MemberName;
+                if (Members[index]->UseSharedPointer) {
+                    outputStream << "     if (this->" << name << " == nullptr) {" << std::endl
+                                 << "         description__cdg << \"  name: nullptr\";" << std::endl
+                                 << "     } else {" << std::endl
+                                 << "         description__cdg << \"  " << Members[index]->GetFieldValue("name")
+                                 << ":\" << cmnData<" << type << " >::HumanReadable(*(this->"
+                                 << name << "));" << std::endl
+                                 << "     }" << std::endl;
+
+                } else {
+                    outputStream << "    description__cdg << \"  " << Members[index]->GetFieldValue("name")
+                                 << ":\" << cmnData<" << type << " >::HumanReadable(this->"
+                                 << name << ");" << std::endl;
+                }
             }
         }
         outputStream << "    return description__cdg.str();" << std::endl
@@ -772,7 +819,11 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         if (Members[index]->GetFieldValue("is-data") == "true") {
             type = Members[index]->GetFieldValue("type");
             name = Members[index]->MemberName;
-            outputStream << "           && cmnData<" << type << " >::ScalarNumberIsFixed(this->" << name << ")" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "/* no support for std::shared_ptr<" << type << "> */" <<  std::endl;
+            } else {
+                outputStream << "           && cmnData<" << type << " >::ScalarNumberIsFixed(this->" << name << ")" << std::endl;
+            }
         }
     }
     outputStream << "    ;" << std::endl
@@ -791,7 +842,11 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         if (Members[index]->GetFieldValue("is-data") == "true") {
             type = Members[index]->GetFieldValue("type");
             name = Members[index]->MemberName;
-            outputStream << "           + cmnData<" << type << " >::ScalarNumber(this->" << name << ")" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "/* no support for std::shared_ptr<" << type << "> */" <<  std::endl;
+            } else {
+                outputStream << "           + cmnData<" << type << " >::ScalarNumber(this->" << name << ")" << std::endl;
+            }
         }
     }
     outputStream << "    ;" << std::endl
@@ -818,12 +873,16 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         if (Members[index]->GetFieldValue("is-data") == "true") {
             type = Members[index]->GetFieldValue("type");
             name = Members[index]->MemberName;
-            outputStream << "    currentMaxIndex__cdg += cmnData<" << type << " >::ScalarNumber(this->" << name << ");" << std::endl
-                         << "    if (index_cdg < currentMaxIndex__cdg) {" << std::endl
-                         << "        return cmnData<" << type << " >::ScalarDescription(this->" << name << ", index_cdg - baseIndex__cdg, prefix__cdg + \""
-                         << Members[index]->GetFieldValue("name") << "\");" << std::endl
-                         << "    }" << std::endl
-                         << "    baseIndex__cdg = currentMaxIndex__cdg;" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "    std::cerr << CMN_LOG_DETAILS << \" no support for std::shared_ptr<" << type << ">\" << std::endl;" << std::endl;
+            } else {
+                outputStream << "    currentMaxIndex__cdg += cmnData<" << type << " >::ScalarNumber(this->" << name << ");" << std::endl
+                             << "    if (index_cdg < currentMaxIndex__cdg) {" << std::endl
+                             << "        return cmnData<" << type << " >::ScalarDescription(this->" << name << ", index_cdg - baseIndex__cdg, prefix__cdg + \""
+                             << name << "\");" << std::endl
+                             << "    }" << std::endl
+                             << "    baseIndex__cdg = currentMaxIndex__cdg;" << std::endl;
+            }
         }
     }
     outputStream << "    cmnThrow(std::out_of_range(\"cmnDataScalarDescription: " << className << " index out of range\"));" << std::endl
@@ -849,11 +908,15 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         if (Members[index]->GetFieldValue("is-data") == "true") {
             type = Members[index]->GetFieldValue("type");
             name = Members[index]->MemberName;
-            outputStream << "    currentMaxIndex__cdg += cmnData<" << type << " >::ScalarNumber(this->" << name << ");" << std::endl
-                         << "    if (index_cdg < currentMaxIndex__cdg) {" << std::endl
-                         << "        return cmnData<" << type << " >::Scalar(this->" << name << ", index_cdg - baseIndex__cdg);" << std::endl
-                         << "    }" << std::endl
-                         << "    baseIndex__cdg = currentMaxIndex__cdg;" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "    std::cerr << CMN_LOG_DETAILS << \" no support for std::shared_ptr<" << type << ">\" << std::endl;" << std::endl;
+            } else {
+                outputStream << "    currentMaxIndex__cdg += cmnData<" << type << " >::ScalarNumber(this->" << name << ");" << std::endl
+                             << "    if (index_cdg < currentMaxIndex__cdg) {" << std::endl
+                             << "        return cmnData<" << type << " >::Scalar(this->" << name << ", index_cdg - baseIndex__cdg);" << std::endl
+                             << "    }" << std::endl
+                             << "    baseIndex__cdg = currentMaxIndex__cdg;" << std::endl;
+            }
         }
     }
     outputStream << "    cmnThrow(std::out_of_range(\"cmnDataScalar: " << className << " index out of range\"));" << std::endl
@@ -878,8 +941,15 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
         if (Members[index]->GetFieldValue("is-data") == "true") {
             type = Members[index]->GetFieldValue("type");
             name = Members[index]->MemberName;
-            outputStream << "    cmnDataJSON<" << type << " >::SerializeText(this->" << name << ", jsonValue[\""
-                         << Members[index]->GetFieldValue("name") << "\"]);" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "    if (this->" << name << " != nullptr) {" << std::endl
+                             << "        cmnDataJSON<" << type << " >::SerializeText" << "(*(this->" << name << "), jsonValue[\""
+                             << name << "\"]);" << std::endl
+                             << "    }" << std::endl;
+            } else {
+                outputStream << "    cmnDataJSON<" << type << " >::SerializeText(this->" << name << ", jsonValue[\""
+                             << name << "\"]);" << std::endl;
+            }
         }
     }
     outputStream << "}" << std::endl
@@ -901,16 +971,32 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
             name = Members[index]->MemberName;
             outputStream << "    field__cdg = jsonValue[\""
                          << Members[index]->GetFieldValue("name") << "\"];" << std::endl
-                         << "    if (!field__cdg.empty()) {" << std::endl
-                         << "        try {" << std::endl
-                         << "            cmnDataJSON<" << type << " >::DeSerializeText(this->" << name << ", field__cdg);" << std::endl
-                         << "        } catch (std::exception & e) {" << std::endl
-                         << "            cmnThrow(std::string(e.what()) + \" < " << name << "\");" << std::endl
-                         << "        }" << std::endl;
+                         << "    if (!field__cdg.empty()) {" << std::endl;
+            if (Members[index]->UseSharedPointer) {
+                outputStream << "        if (this->" << name << " == nullptr) {" << std::endl
+                             << "            this->" << name << " = std::make_shared<" << type << " >();" << std::endl
+                             << "        }" << std::endl
+                             << "        try {" << std::endl
+                             << "            cmnDataJSON<" << type << " >::DeSerializeText(*(this->" << name << "), field__cdg);" << std::endl
+                             << "        } catch (std::exception & e) {" << std::endl
+                             << "            cmnThrow(std::string(e.what()) + \" < " << name << "\");" << std::endl
+                             << "        }" << std::endl;
+
+            } else {
+                outputStream << "        try {" << std::endl
+                             << "            cmnDataJSON<" << type << " >::DeSerializeText(this->" << name << ", field__cdg);" << std::endl
+                             << "        } catch (std::exception & e) {" << std::endl
+                             << "            cmnThrow(std::string(e.what()) + \" < " << name << "\");" << std::endl
+                             << "        }" << std::endl;
+            }
             // if there is no default value, we need one from JSON
             if (Members[index]->GetFieldValue("default").empty()) {
-                outputStream << "    } else {" << std::endl
-                             << "        cmnThrow(\"cmnDataJson<" << type << ">::DeSerializeText: empty JSON value for: " << name << "\");" << std::endl;
+                outputStream << "    } else {" << std::endl;
+                    if (Members[index]->UseSharedPointer) {
+                        outputStream << "        this->" << name << " = nullptr;" << std::endl;
+                    } else {
+                        outputStream << "        cmnThrow(\"cmnDataJson<" << type << ">::DeSerializeText: empty JSON value for: " << name << "\");" << std::endl;
+                    }
             }
             outputStream << "    };" << std::endl;
         }

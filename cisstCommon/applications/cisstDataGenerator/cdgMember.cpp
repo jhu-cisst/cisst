@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -60,6 +60,12 @@ cdgMember::cdgMember(size_t lineNumber):
 
     field = this->AddField("is-data", "true", false,
                            "indicates if the data member is a cisst data type itself");
+    CMN_ASSERT(field);
+    field->AddPossibleValue("true");
+    field->AddPossibleValue("false");
+
+    field = this->AddField("use-shared-pointer", "false", false,
+                           "Use a shared_pointer for the data member");
     CMN_ASSERT(field);
     field->AddPossibleValue("true");
     field->AddPossibleValue("false");
@@ -121,6 +127,15 @@ bool cdgMember::Validate(std::string & errorMessage)
     } else {
         MemberName = "m" + this->GetFieldValue("name");
     }
+    // check that use shared pointer is compatible with visibility
+    if (this->GetFieldValue("use-shared-pointer") == "true") {
+        UseSharedPointer = true;
+        if (this->GetFieldValue("visibility") != "public") {
+            errorMessage = errorMessage + "\n" + ClassName + "::" + this->GetFieldValue("name")
+                + " \"use-shared-pointer\" is only supported if \"visibility\" is set to \"public\"";
+            return false;
+        }
+    }
     // check if the type is exactly size_t
     std::string type = this->GetFieldValue("type");
     if (type == "size_t") {
@@ -168,10 +183,15 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
     }
     outputStream << " " << this->GetFieldValue("visibility") << ":" << std::endl;
     if (IsCArray) {
-        outputStream << "    " << CArrayType << " " << MemberName << CArraySize << "; // " << this->GetFieldValue("description") << std::endl;
+        outputStream << "    " << CArrayType << " " << MemberName << CArraySize;
     } else {
-        outputStream << "    " << type << " " << MemberName << "; // " << this->GetFieldValue("description") << std::endl;
+        if (UseSharedPointer) {
+            outputStream << "    " << "std::shared_ptr<" << type << " > " << MemberName;
+        } else {
+            outputStream << "    " << type << " " << MemberName;
+        }
     }
+    outputStream << "; // " << this->GetFieldValue("description") << std::endl;
     if (accessors != "none") {
         outputStream << " public:" << std::endl;
     }
@@ -185,12 +205,6 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
                      << "        return " << MemberName << ";" << std::endl
                      << "    }" << std::endl
                      << "    " << depr << "void Set" << name << "(const " << type << " & newValue);" << std::endl;
-                     // << "#else" << std::endl
-                     // << "    inline " << depr << type << " Get" << name << "(void) const {" << std::endl
-                     // << "        return " << MemberName << ";" << std::endl
-                     // << "    }" << std::endl
-                     // << "#endif" << std::endl
-                     // << "    " << depr << "void Set" << name << "(const " << type << " & newValue);" << std::endl;
     }
     if ((accessors == "all")
         || (accessors == "references")) {
