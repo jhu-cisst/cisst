@@ -43,12 +43,15 @@ cisst_set_directories (cisstPython)
 cisst_add_library (LIBRARY cisstInteractive
                    FOLDER cisstInteractive
                    DEPENDENCIES ${DEPENDENCIES}
-		   SETTINGS cisstPython
+                   SETTINGS cisstPython
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
                    ADDITIONAL_HEADER_FILES_RELATIVE ${ADDITIONAL_HEADER_FILES}
                    )
+
+install (FILES ${cisstInteractive_CISST_DG_HDRS_FULLPATH}
+         DESTINATION "include/cisstInteractive")
 
 # Call makeIrepy to compile the Python source files (*.py) and place
 # the results (*.pyc files) in the destination directory.
