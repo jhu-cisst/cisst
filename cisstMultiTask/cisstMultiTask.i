@@ -427,12 +427,16 @@ http://www.cisst.org/cisst/license.txt.
                 if self.__dict__[interfaceNoSpace].GetConnectedInterface():
                     self.__dict__[interfaceNoSpace].UpdateFromC()
 
-        def AddInterfaceRequiredFromProvided(self, interfaceProvided):
+        def AddInterfaceRequiredFromProvided(self, interfaceProvided, interfaceRequiredName = ''):
             if not isinstance(interfaceProvided, mtsInterfaceProvidedDescription):
                 print('Parameter must be of type mtsInterfaceProvidedDescription')
                 return
-            interfaceProvidedNoSpace = interfaceProvided.InterfaceName.replace(' ', '')
-            interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvidedNoSpace, MTS_OPTIONAL)
+            if not interfaceRequiredName:
+                interfaceProvidedNoSpace = interfaceProvided.InterfaceName.replace(' ', '')
+                interfaceRequiredName = 'RequiredFor' + interfaceProvidedNoSpace
+            else:
+                interfaceRequiredName = interfaceRequiredName.replace(' ', '')
+            interfaceRequired = self.AddInterfaceRequired(interfaceRequiredName, MTS_OPTIONAL)
             if not interfaceRequired:
                 return
             self.__dict__[interfaceRequired.GetName()] = interfaceRequired
@@ -491,7 +495,8 @@ http://www.cisst.org/cisst/license.txt.
                     if not interfaceDescription.InterfaceName:
                         print('No provided interface (empty string)')
                         return
-                    interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
+                    interfaceRequiredName = 'RequiredFor' + componentName + '_' + interfaceName;
+                    interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription, interfaceRequiredName)
                     attempt = 0
                     while (attempt < connectionAttempts):
                         attempt = attempt + 1
