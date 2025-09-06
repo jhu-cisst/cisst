@@ -40,6 +40,12 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
     typedef mtsGenericObject BaseType;
     typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED, UNDEFINED} EventType;
 
+    // reusable instances
+    static const prmEventButton BUTTON_PRESSED;
+    static const prmEventButton BUTTON_RELEASED;
+    static const prmEventButton BUTTON_CLICKED;
+    static const prmEventButton BUTTON_DOUBLE_CLICKED;
+
  public:
     /*! Default constructor */
     inline prmEventButton()
@@ -48,7 +54,9 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
     /*! Constructor with all parameters */
     inline prmEventButton(const EventType & type):
         TypeMember(type)
-    {}
+    {
+        SetValid(true);
+    }
 
     /*! Copy constructor */
     inline prmEventButton(const prmEventButton & other):
