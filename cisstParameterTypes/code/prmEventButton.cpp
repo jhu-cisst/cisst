@@ -19,6 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmEventButton.h>
 
+const prmEventButton prmEventButton::BUTTON_PRESSED = prmEventButton(PRESSED);
+const prmEventButton prmEventButton::BUTTON_RELEASED = prmEventButton(RELEASED);
+const prmEventButton prmEventButton::BUTTON_CLICKED = prmEventButton(CLICKED);
+const prmEventButton prmEventButton::BUTTON_DOUBLE_CLICKED = prmEventButton(DOUBLE_CLICKED);
+
 prmEventButton::~prmEventButton()
 {
 }
