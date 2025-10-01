@@ -1,4 +1,4 @@
-name: macOS 13
+name: Windows Latest
 
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: macos-13
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -29,32 +29,29 @@ jobs:
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
-        cmake ${{github.workspace}}/cisstNetlib-source -DcisstNetlib_LANGUAGE=C
+        cmake ${{github.workspace}}/cisstNetlib-source
         cmake --build . --config Release
-        sudo cmake --build . --target install
+        cmake --build . --target install
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
-      shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
+      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -C ${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}/build
-      shell: bash
       run: |
-        source cisstvars.sh
+        ./cisstvars.bat Release
         cmake --build . --config Release
 
-    # - name: Test
-    #   working-directory: ${{github.workspace}}/build
-    #   shell: bash
-    #   run: |
-    #     source cisstvars.sh
-    #     cisstCommonTests -r
-    #     cisstVectorTests -r
-    #     cisstNumericalTests -r
-    #     cisstOSAbstractionTests -r
-    #     cisstParameterTypesTests -r
+#    - name: Test
+#      working-directory: ${{github.workspace}}/build
+#      run: |
+#        dir
+#        ./bin/cisstCommonTests -r
+#        ./bin/cisstVectorTests -r
+#        ./bin/cisstNumericalTests -r
+#        ./bin/cisstOSAbstractionTests -r
+#        ./bin/cisstParameterTypesTests -r
