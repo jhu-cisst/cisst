@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2014-03-03
 
-  (C) Copyright 2014-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2014-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -100,7 +100,7 @@ void mtsCollectorFactory::AddStateCollector(const std::string & component,
     // get access to component manager
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
 
-    std::string collectorName = GetName() + "::" + component + "::" + table;
+    std::string collectorName = GetName() + "_" + component + "_" + table;
     CollectorId collectorId(component, table);
     // check if there is already a collector for this component/table
     if (mCollectors.count(collectorId) == 0) {
