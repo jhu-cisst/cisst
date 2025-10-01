@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet, Rajesh Kumar
   Created on:	2008-04-08
 
-  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,23 +40,16 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
     typedef mtsGenericObject BaseType;
     typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED, UNDEFINED} EventType;
 
-    // reusable instances
-    static const prmEventButton BUTTON_PRESSED;
-    static const prmEventButton BUTTON_RELEASED;
-    static const prmEventButton BUTTON_CLICKED;
-    static const prmEventButton BUTTON_DOUBLE_CLICKED;
-
  public:
     /*! Default constructor */
-    inline prmEventButton()
+    inline prmEventButton():
+        TypeMember(UNDEFINED)
     {}
 
-    /*! Constructor with all parameters */
+    /*! Constructor with all parameters. */
     inline prmEventButton(const EventType & type):
         TypeMember(type)
-    {
-        SetValid(true);
-    }
+    {}
 
     /*! Copy constructor */
     inline prmEventButton(const prmEventButton & other):
