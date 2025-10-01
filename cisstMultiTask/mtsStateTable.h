@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -474,6 +474,10 @@ public:
 
     inline size_t GetNumberOfElements(void) const {
         return this->StateVector.size();
+    }
+
+    inline const std::vector<std::string> & GetDataNames(void) const {
+        return StateVectorDataNames;
     }
 
     /*! Return the moving average of the measured period (i.e., average of last

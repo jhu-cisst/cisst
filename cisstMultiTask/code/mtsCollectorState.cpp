@@ -6,8 +6,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -287,8 +286,15 @@ bool mtsCollectorState::AddSignal(const std::string & signalName)
         // Check if the specified signal does exist in the state table.
         int StateVectorID = TargetStateTable->GetStateVectorID(signalName); // 0: Toc, 1: Tic, 2: Period, >=3: user
         if (StateVectorID == -1) {  // 0: Toc, 1: Tic, 2: Period, >3: user
+            const auto vector_names = TargetStateTable->GetDataNames();
+            std::string names = "[ ";
+            for (const auto & name : vector_names) {
+                names.append(name);
+                names.append(" ");
+            }
+            names.append("]");
             CMN_LOG_CLASS_INIT_ERROR << "AddSignal: collector \"" << this->GetName()
-                                     << "\", cannot find signal \"" << signalName << "\"" << std::endl;
+                                     << "\", cannot find signal \"" << signalName << "\". Signals found " << names << std::endl;
             return false;
         }
 
@@ -395,10 +401,11 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
     if (this->OutputHeaderStream) {
         this->OutputHeaderStream->precision(20);
         out << "Ticks";
+        const char unlikely_char = '\u001E';
         RegisteredSignalElementType::const_iterator it = RegisteredSignalElements.begin();
         for (; it != RegisteredSignalElements.end(); ++it) {
-            out << this->Delimiter;
-            (*(TargetStateTable->StateVector[it->ID]))[0].ToStreamRaw(*((std::ostream*) &out), this->Delimiter, true,
+            out << unlikely_char;
+            (*(TargetStateTable->StateVector[it->ID]))[0].ToStreamRaw(*((std::ostream*) &out), unlikely_char, true,
                                                                       TargetStateTable->StateVectorDataNames[it->ID]);
         }
         out << std::endl;
@@ -409,7 +416,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
         std::istringstream iss(out.str());
         std::string token;
         // get token
-        while (getline(iss, token, this->Delimiter)) {
+        while (getline(iss, token, unlikely_char)) {
             fieldNames.push_back(token);
         }
 
@@ -461,7 +468,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
             if (element.find("time") != std::string::npos) {// this is a time element
                 *(this->OutputHeaderStream) << "Time: " << element << std::endl;
             } else {
-                *(this->OutputHeaderStream) << "Data:  " << element << std::endl;
+                *(this->OutputHeaderStream) << "Data: " << element << std::endl;
             }
         }
 
