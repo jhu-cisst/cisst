@@ -8,6 +8,7 @@ inline-header {
 
 enum {
     name IRE_Shell;
+    attribute CISST_EXPORT;
     enum-value {
         name IRE_WXPYTHON;
         description wxPython;
