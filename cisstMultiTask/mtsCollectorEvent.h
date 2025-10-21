@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-02-12
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -205,8 +205,8 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
       collection with delay.  For the event collector, these methods
       will enable/disable all event observers. */
     //@{
-    void StartCollection(const mtsDouble & delayInSeconds) override;
-    void StopCollection(const mtsDouble & delayInSeconds) override;
+    void StartCollection(const double & delayInSeconds) override;
+    void StopCollection(const double & delayInSeconds) override;
     //@}
 
  protected:

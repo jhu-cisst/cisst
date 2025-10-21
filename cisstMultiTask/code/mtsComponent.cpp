@@ -720,9 +720,9 @@ bool mtsComponent::AddStateTable(mtsStateTable * existingStateTable, bool addInt
         providedInterface->AddEventVoid(existingStateTable->DataCollection.CollectionStarted,
                                         "CollectionStarted");
         providedInterface->AddEventWrite(existingStateTable->DataCollection.CollectionStopped,
-                                         "CollectionStopped", mtsUInt());
+                                         "CollectionStopped", size_t(0));
         providedInterface->AddEventWrite(existingStateTable->DataCollection.Progress,
-                                         "Progress", mtsUInt());
+                                         "Progress", size_t(0));
     }
     CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName
                              << "\" and corresponding interface \"" << interfaceName

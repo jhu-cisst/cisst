@@ -20,11 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCollectorFactory_h
 #define _mtsCollectorFactory_h
 
-#include <cisstMultiTask/mtsTaskFromSignal.h>
+#include <cisstMultiTask/mtsCollectorBase.h>
 
 #include <string>
 #include <list>
 #include <map>
+
+class mtsCollectorStateData;
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -34,9 +36,12 @@ http://www.cisst.org/cisst/license.txt.
 
   Create collectors using the command pattern or configuration files.
 */
-class CISST_EXPORT mtsCollectorFactory: public mtsTaskFromSignal
+class CISST_EXPORT mtsCollectorFactory: public mtsCollectorBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+    friend class mtsCollectorStateData;
+
  public:
     mtsCollectorFactory(const std::string & componentName);
     inline ~mtsCollectorFactory() {};
@@ -72,14 +77,17 @@ class CISST_EXPORT mtsCollectorFactory: public mtsTaskFromSignal
 
  protected:
     typedef std::pair<std::string, std::string> CollectorId; // component, state table
-    typedef std::list<std::string> Signals; // list of signals
-    typedef std::pair<std::string, Signals> CollectorData; // name of collector, signals
-    typedef std::pair<CollectorId, CollectorData > Collector; // element type for the map of collectors
-    typedef std::map<CollectorId, CollectorData > CollectorsType; // map of collectors
-    CollectorsType mCollectors;
-
+    std::map<CollectorId, mtsCollectorStateData *> mCollectors;
     void AddStateCollector(const std::string & component,
                            const std::string & table);
+
+    /* methods to mimic any collector */
+    void StartCollection(const double & delayInSeconds) override;
+    void StopCollection(const double & delayInSeconds) override;
+    void SetWorkingDirectory(const std::string & directory) override;
+    void SetOutputToDefault(void) override;
+    void CollectionStartedEventHandler(const bool & started);
+    void ProgressEventHandler(const size_t & counter);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorFactory)

@@ -209,15 +209,6 @@ std::string mtsCollectorState::GetDefaultOutputName(void)
 }
 
 
-//-------------------------------------------------------
-// Thread Management
-//-------------------------------------------------------
-void mtsCollectorState::Startup(void)
-{
-    CMN_LOG_CLASS_INIT_DEBUG << "Startup: collector \"" << this->GetName() << "\"" << std::endl;
-}
-
-
 void mtsCollectorState::Run(void)
 {
     CMN_LOG_CLASS_RUN_DEBUG << "Run: collector \"" << this->GetName() << "\"" << std::endl;
@@ -226,7 +217,7 @@ void mtsCollectorState::Run(void)
 }
 
 
-void mtsCollectorState::StartCollection(const mtsDouble & delay)
+void mtsCollectorState::StartCollection(const double & delay)
 {
     mtsExecutionResult result = this->StateTableStartCollection(delay);
     if (!result.IsOK()) {
@@ -237,7 +228,7 @@ void mtsCollectorState::StartCollection(const mtsDouble & delay)
 }
 
 
-void mtsCollectorState::StopCollection(const mtsDouble & delay)
+void mtsCollectorState::StopCollection(const double & delay)
 {
     mtsExecutionResult result = this->StateTableStopCollection(delay);
     if (!result.IsOK()) {
@@ -258,17 +249,18 @@ void mtsCollectorState::BatchReadyHandler(const mtsStateTable::IndexRange & rang
 
 void mtsCollectorState::CollectionStartedHandler(void)
 {
-    this->CollectionStartedEventTrigger();
+    this->CollectionStartedEventTrigger(true);
 }
 
 
-void mtsCollectorState::CollectionStoppedHandler(const mtsUInt & count)
+void mtsCollectorState::CollectionStoppedHandler(const size_t & count)
 {
-    this->CollectionStoppedEventTrigger(count);
+    this->ProgressEventTrigger(count);
+    this->CollectionStartedEventTrigger(false);
 }
 
 
-void mtsCollectorState::ProgressHandler(const mtsUInt & count)
+void mtsCollectorState::ProgressHandler(const size_t & count)
 {
     this->ProgressEventTrigger(count);
 }

@@ -5,7 +5,7 @@
  Author(s):  Ankur Kapoor, Min Yang Jung, Anton Deguet
  Created on: 2004-04-30
 
- (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
+ (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -265,7 +265,7 @@ void mtsStateTable::Advance(void) {
             this->DataCollection.BatchRange.SetTimestamp(this->Tic);
             this->DataCollection.BatchReady(this->DataCollection.BatchRange);
             // send collection stopped event
-            this->DataCollection.CollectionStopped(mtsUInt(this->DataCollection.CounterForEvent));
+            this->DataCollection.CollectionStopped(this->DataCollection.CounterForEvent);
             this->DataCollection.CounterForEvent = 0;
             // stop collecting
             this->DataCollection.Collecting = false;
@@ -286,7 +286,7 @@ void mtsStateTable::Advance(void) {
             }
             // check if we have spent enough time for a progress event
             if ((this->Tic - this->DataCollection.TimeOfLastProgressEvent) >= this->DataCollection.TimeIntervalForProgressEvent) {
-                this->DataCollection.Progress(mtsUInt(this->DataCollection.CounterForEvent));
+                this->DataCollection.Progress(this->DataCollection.CounterForEvent);
                 this->DataCollection.CounterForEvent = 0;
                 this->DataCollection.TimeOfLastProgressEvent = this->Tic;
             }

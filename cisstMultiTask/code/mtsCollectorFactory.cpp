@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorFactory.h>
 #include <cisstMultiTask/mtsCollectorState.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include <cisstCommon/cmnPath.h>
 
@@ -27,11 +28,46 @@ http://www.cisst.org/cisst/license.txt.
   #include <json/json.h>
 #endif
 
+class mtsCollectorStateData
+{
+public:
+    mtsCollectorStateData(mtsCollectorFactory * factory,
+                          const std::string & name,
+                          mtsCollectorState * collectorComponent):
+        Factory(factory),
+        Name(name),
+        CollectorComponent(collectorComponent)
+    {}
+
+    mtsCollectorFactory * Factory = nullptr;
+    std::string Name;
+    mtsCollectorState * CollectorComponent = nullptr;
+    std::list<std::string> Signals;
+
+    mtsInterfaceRequired * InterfaceRequired = nullptr;
+    mtsFunctionWrite StartCollection;
+    mtsFunctionWrite StopCollection;
+    mtsFunctionWrite SetWorkingDirectory;
+    mtsFunctionVoid SetOutputToDefault;
+
+    void SetInterfaceRequired(mtsInterfaceRequired * interface_required) {
+        interface_required->AddFunction("StartCollection", StartCollection);
+        interface_required->AddFunction("StopCollection", StopCollection);
+        interface_required->AddFunction("SetWorkingDirectory", SetWorkingDirectory);
+        interface_required->AddFunction("SetOutputToDefault", SetOutputToDefault);
+        interface_required->AddEventHandlerWrite(&mtsCollectorFactory::CollectionStartedEventHandler, Factory,
+                                                 "CollectionStarted");
+        interface_required->AddEventHandlerWrite(&mtsCollectorFactory::ProgressEventHandler, Factory,
+                                                 "Progress");
+    }
+};
+
 
 mtsCollectorFactory::mtsCollectorFactory(const std::string & componentName):
-    mtsTaskFromSignal(componentName)
+    mtsCollectorBase(componentName, COLLECTOR_FILE_FORMAT_UNDEFINED)
 {
 }
+
 
 void mtsCollectorFactory::Configure(const std::string & configuration)
 {
@@ -83,16 +119,19 @@ void mtsCollectorFactory::Configure(const std::string & configuration)
 #endif
 }
 
+
 void mtsCollectorFactory::Run(void)
 {
     ProcessQueuedCommands();
     ProcessQueuedEvents();
 }
 
+
 void mtsCollectorFactory::Cleanup(void)
 {
 
 }
+
 
 void mtsCollectorFactory::AddStateCollector(const std::string & component,
                                             const std::string & table)
@@ -118,19 +157,22 @@ void mtsCollectorFactory::AddStateCollector(const std::string & component,
         try {
             collector->SetStateTable(component, table);
         } catch (std::exception & except) {
+            delete collector;
             CMN_LOG_CLASS_INIT_ERROR << "AddStateCollector: SetStateTable failed with error \"" << except.what() << "\"" << std::endl;
             return;
         }
         // default name is based on component/state table name
         collector->SetOutputToDefault();
         manager->AddComponent(collector);
-        mCollectors.insert(Collector(collectorId, CollectorData(collectorName, Signals())));
+        auto collector_data = new mtsCollectorStateData(this, collectorName, collector);
+        collector_data->SetInterfaceRequired(this->AddInterfaceRequired(collectorName));
+        mCollectors[collectorId] = collector_data;
         CMN_LOG_CLASS_INIT_VERBOSE << "AddStateCollector: added state collector \"" << collectorName << "\"" << std::endl;
     } else {
         CMN_LOG_CLASS_INIT_DEBUG << "AddStateCollector: state collector already exists \"" << collectorName << "\"" << std::endl;
     }
-
 }
+
 
 void mtsCollectorFactory::AddSignal(const std::string & component,
                                     const std::string & table,
@@ -141,11 +183,10 @@ void mtsCollectorFactory::AddSignal(const std::string & component,
 
     // add the collector, no effect if already created
     AddStateCollector(component, table);
-
     CollectorId collectorId(component, table);
-    const std::string collectorName = mCollectors[collectorId].first;
-    Signals & existingSignals = mCollectors[collectorId].second;
-    Signals::const_iterator it = std::find(existingSignals.begin(), existingSignals.end(), signal);
+    const std::string & collectorName = mCollectors[collectorId]->CollectorComponent->GetName();
+    auto & existingSignals = mCollectors[collectorId]->Signals;
+    const auto it = std::find(existingSignals.begin(), existingSignals.end(), signal);
     if (it == existingSignals.end()) {
         // add to the list
         existingSignals.push_back(signal);
@@ -164,56 +205,81 @@ void mtsCollectorFactory::AddSignal(const std::string & component,
     }
 }
 
+
 void mtsCollectorFactory::SetSampling(const std::string & component,
                                       const std::string & table,
                                       const int sampling)
 {
-    // get access to component manager
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
-
     // add the collector, no effect if already created
     AddStateCollector(component, table);
-
     CollectorId collectorId(component, table);
-    const std::string collectorName = mCollectors[collectorId].first;
-    // retrieve that state collector
-    mtsCollectorState * collector = dynamic_cast<mtsCollectorState *>(manager->GetComponent(collectorName));
-    if (!collector) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetSampling: unable to find state collector \"" << collectorName << "\"" << std::endl;
-        return;
-    }
-    collector->SetSamplingInterval(sampling);
+    auto * collectorComponent = mCollectors[collectorId]->CollectorComponent;
+    collectorComponent->SetSamplingInterval(sampling);
     CMN_LOG_CLASS_INIT_DEBUG << " SetSampling: sampling \"" << sampling << "\" set for \""
-                             << collectorName << "\"" << std::endl;
+                             << collectorComponent->GetName() << "\"" << std::endl;
 }
+
 
 void mtsCollectorFactory::Connect(void) const
 {
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
-
-    CollectorsType::const_iterator iter;
-    const CollectorsType::const_iterator end = mCollectors.end();
-    for (iter = mCollectors.begin();
-         iter != end;
-         ++iter) {
-        const std::string collectorName = (*iter).second.first;
-        mtsCollectorState * collector = reinterpret_cast<mtsCollectorState *>(manager->GetComponent(collectorName));
-        if (!collector) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddStateCollector: unable to find state collector \"" << collectorName << "\"" << std::endl;
-            return;
-        }
-        collector->Connect();
+    auto component_manager = mtsManagerLocal::GetInstance();
+    for (auto & collector : mCollectors) {
+        collector.second->CollectorComponent->Connect();
+        component_manager->Connect(this->GetName(), collector.second->Name,
+                                   collector.second->CollectorComponent->GetName(), "Control");
     }
 }
+
 
 void mtsCollectorFactory::GetCollectorsNames(std::list<std::string> & collectors) const
 {
     collectors.clear();
-    CollectorsType::const_iterator iter;
-    const CollectorsType::const_iterator end = mCollectors.end();
-    for (iter = mCollectors.begin();
-         iter != end;
-         ++iter) {
-        collectors.push_back((*iter).second.first);
-    }    
+    for (auto & collector : mCollectors) {
+        collectors.push_back(collector.second->CollectorComponent->GetName());
+    }
+}
+
+
+void mtsCollectorFactory::StartCollection(const double & delayInSeconds)
+{
+    for (auto & collector : mCollectors) {
+        collector.second->StartCollection(delayInSeconds);
+    }
+}
+
+
+void mtsCollectorFactory::StopCollection(const double & delayInSeconds)
+{
+    for (auto & collector : mCollectors) {
+        collector.second->StopCollection(delayInSeconds);
+    }
+}
+
+
+void mtsCollectorFactory::SetWorkingDirectory(const std::string & directory)
+{
+    for (auto & collector : mCollectors) {
+        collector.second->SetWorkingDirectory(directory);
+        collector.second->SetOutputToDefault();
+    }
+}
+
+
+void mtsCollectorFactory::SetOutputToDefault(void)
+{
+    for (auto & collector : mCollectors) {
+        collector.second->SetOutputToDefault();
+    }
+}
+
+
+void mtsCollectorFactory::CollectionStartedEventHandler(const bool & started)
+{
+    CollectionStartedEventTrigger(started);
+}
+
+
+void mtsCollectorFactory::ProgressEventHandler(const size_t & count)
+{
+    ProgressEventTrigger(count);
 }

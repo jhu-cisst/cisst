@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2010-02-26
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,8 +16,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsCollectorQtWidget.h>
+#include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
+
 #include <cisstCommon/cmnPath.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include <QGroupBox>
 #include <QGridLayout>
@@ -29,11 +30,25 @@ http://www.cisst.org/cisst/license.txt.
 #include <QLabel>
 #include <QFileDialog>
 
-mtsCollectorQtWidget::mtsCollectorQtWidget(void):
+mtsCollectorFactoryQtWidget::mtsCollectorFactoryQtWidget(const std::string & component_name):
+    mtsComponent(component_name),
     NumberOfCollectors(0),
     NumberOfActiveCollectors(0),
     NumberOfSamples(0)
 {
+    // create the cisstMultiTask interface with commands and events
+    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Collector");
+    if (interfaceRequired) {
+       interfaceRequired->AddFunction("StartCollection", Collection.Start);
+       interfaceRequired->AddFunction("StopCollection", Collection.Stop);
+       interfaceRequired->AddFunction("SetWorkingDirectory", Collection.SetWorkingDirectory);
+       interfaceRequired->AddFunction("SetOutputToDefault", Collection.SetOutputToDefault);
+       interfaceRequired->AddEventHandlerWrite(&mtsCollectorFactoryQtWidget::CollectionStartedEventHandler, this,
+                                               "CollectionStarted");
+       interfaceRequired->AddEventHandlerWrite(&mtsCollectorFactoryQtWidget::ProgressEventHandler, this,
+                                               "Progress");
+    }
+
     // create main layout
     CentralLayout = new QVBoxLayout(this);
 
@@ -86,9 +101,6 @@ mtsCollectorQtWidget::mtsCollectorQtWidget(void):
     StatsNbCollectors = new QLabel(this);
     StatsNbCollectors->setNum(0);
     StatsLayout->addWidget(StatsNbCollectors, 0, 1);
-    StatsTotalCollectors = new QLabel(this);
-    StatsTotalCollectors->setText(" out of 0");
-    StatsLayout->addWidget(StatsTotalCollectors, 0, 2);
     StatsSamples = new QLabel(this);
     StatsSamples->setText("Samples collected:");
     StatsLayout->addWidget(StatsSamples, 1, 0);
@@ -108,31 +120,35 @@ mtsCollectorQtWidget::mtsCollectorQtWidget(void):
                      this, SLOT(FileDialogSlot()));
     QObject::connect(this->FileNew, SIGNAL(clicked()),
                      this, SLOT(FileNewSlot()));
+    QObject::connect(this, SIGNAL(CollectionStartedQSignal(bool)),
+                     this, SLOT(CollectionStarted(bool)));
+    QObject::connect(this, SIGNAL(ProgressQSignal(unsigned int)),
+                     this, SLOT(Progress(unsigned int)));
 }
 
 
-void mtsCollectorQtWidget::ManualStartStopSlot(bool checked)
+void mtsCollectorFactoryQtWidget::ManualStartStopSlot(bool checked)
 {
     if (checked) {
         ManualStartStop->setText("Stop now");
-        emit StartCollection();
+        Collection.Start(0.0);
     } else {
         ManualStartStop->setText("Start now");
-        emit StopCollection();
+        Collection.Stop(0.0);
     }
 }
 
 
-void mtsCollectorQtWidget::ScheduledStartSlot(void)
+void mtsCollectorFactoryQtWidget::ScheduledStartSlot(void)
 {
     const double begin = ScheduledBegin->value();
     const double duration = ScheduledDuration->value();
-    emit StartCollectionIn(begin);
-    emit StopCollectionIn(begin + duration);
+    Collection.Start(begin);
+    Collection.Stop(begin + duration);
 }
 
 
-void mtsCollectorQtWidget::FileDialogSlot(void)
+void mtsCollectorFactoryQtWidget::FileDialogSlot(void)
 {
     QString result;
     result = QFileDialog::getExistingDirectory(this, QString("Select directory"),
@@ -143,46 +159,44 @@ void mtsCollectorQtWidget::FileDialogSlot(void)
         FileDirectory->setText(result);
         this->NumberOfSamples = 0;
         StatsNbSamples->setNum(0);
-        emit SetWorkingDirectory(result);
+        Collection.SetWorkingDirectory(result.toStdString());
     }
 }
 
 
-void mtsCollectorQtWidget::FileNewSlot(void)
+void mtsCollectorFactoryQtWidget::FileNewSlot(void)
 {
     this->NumberOfSamples = 0;
     StatsNbSamples->setNum(0);
-    emit SetOutputToDefault();
+    Collection.SetOutputToDefault();
 }
 
 
-void mtsCollectorQtWidget::CollectorAdded(void)
+void mtsCollectorFactoryQtWidget::CollectionStarted(bool started)
 {
-    this->NumberOfCollectors++;
-    QString numberOfCollectors;
-    numberOfCollectors.setNum(this->NumberOfCollectors);
-    StatsTotalCollectors->setText(QString("(out of ") + numberOfCollectors + QString(")"));
-}
-
-
-void mtsCollectorQtWidget::CollectionStarted(void)
-{
-    this->NumberOfActiveCollectors++;
+    if (started) {
+        this->NumberOfActiveCollectors++;
+    } else {
+        this->NumberOfActiveCollectors--;
+    }
     this->StatsNbCollectors->setNum(static_cast<int>(this->NumberOfActiveCollectors));
 }
 
 
-void mtsCollectorQtWidget::CollectionStopped(unsigned int count)
+void mtsCollectorFactoryQtWidget::Progress(unsigned int count)
 {
-    this->NumberOfActiveCollectors--;
-    this->StatsNbCollectors->setNum(static_cast<int>(this->NumberOfActiveCollectors));
     this->NumberOfSamples += count;
     this->StatsNbSamples->setNum(static_cast<int>(this->NumberOfSamples));
 }
 
 
-void mtsCollectorQtWidget::Progress(unsigned int count)
+void mtsCollectorFactoryQtWidget::CollectionStartedEventHandler(const bool & started)
 {
-    this->NumberOfSamples += count;
-    this->StatsNbSamples->setNum(static_cast<int>(this->NumberOfSamples));
+    emit CollectionStartedQSignal(started);
+}
+
+
+void mtsCollectorFactoryQtWidget::ProgressEventHandler(const size_t & count)
+{
+    emit ProgressQSignal(count);
 }

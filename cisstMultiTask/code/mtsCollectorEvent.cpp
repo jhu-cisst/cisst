@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-02-12
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -122,7 +120,7 @@ bool mtsCollectorEvent::CheckCollectingStatus(void)
     if (this->Collecting) {
         // check if we have been collecting long enough to send a progress info (number of samples)
         if ((currentTime - this->TimeOfLastProgressEvent) >= this->TimeIntervalForProgressEvent) {
-            this->ProgressEventTrigger(mtsUInt(this->SampleCounterForEvent));
+            this->ProgressEventTrigger(size_t(this->SampleCounterForEvent));
             this->SampleCounterForEvent = 0;
             this->TimeOfLastProgressEvent = currentTime;
         }
@@ -552,27 +550,27 @@ void mtsCollectorEvent::PrintHeader(const CollectorFileFormat & fileFormat)
 }
 
 
-void mtsCollectorEvent::StartCollection(const mtsDouble & delay)
+void mtsCollectorEvent::StartCollection(const double & delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
-    if (delay.Data == 0.0) {
+    if (delay == 0.0) {
         this->SetCollecting(true, currentTime);
         CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: starting collection now (" << currentTime << ")" << std::endl;
     } else {
-        this->ScheduledStartTime = currentTime + delay.Data;
+        this->ScheduledStartTime = currentTime + delay;
         CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: collection scheduled to start at " << this->ScheduledStartTime << std::endl;
     }
 }
 
 
-void mtsCollectorEvent::StopCollection(const mtsDouble & delay)
+void mtsCollectorEvent::StopCollection(const double & delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
-    if (delay.Data == 0.0) {
+    if (delay == 0.0) {
         this->SetCollecting(false, currentTime);
         CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: stopping collection now (" << currentTime << ")" << std::endl;
     } else {
-        this->ScheduledStopTime = currentTime + delay.Data;
+        this->ScheduledStopTime = currentTime + delay;
         CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: collection scheduled to stop at " << this->ScheduledStopTime << std::endl;
     }
 }
@@ -583,12 +581,13 @@ void mtsCollectorEvent::SetCollecting(bool collecting, double currentTime)
     this->Collecting = collecting;
     if (this->Collecting) {
         // start collecting
-        this->CollectionStartedEventTrigger();
+        this->CollectionStartedEventTrigger(true);
         this->ScheduledStartTime = 0.0;
         this->TimeOfLastProgressEvent = currentTime;
     } else {
         // stop collecting
-        this->CollectionStoppedEventTrigger(mtsUInt(this->SampleCounterForEvent));
+        this->ProgressEventTrigger(size_t(this->SampleCounterForEvent));
+        this->CollectionStartedEventTrigger(false);
         this->ScheduledStopTime = 0.0;
         this->SampleCounterForEvent = 0;
     }
