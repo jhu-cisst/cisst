@@ -19,23 +19,7 @@ cisst_set_directories (cisstQt)
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-
-if (CISST_HAS_QT4)
-  qt4_wrap_cpp (QT_WRAPPED_CPP
-                  ../prmEventButtonQtWidget.h
-                  ../prmInputDataQtWidget.h
-                  ../prmOperatingStateQtWidget.h
-                  ../prmForceCartesianGetQtWidget.h
-                  ../prmPositionCartesianGetQtWidget.h
-                  ../prmPositionCartesianGetQtWidgetFactory.h
-                  ../prmPositionCartesianArrayGetQtWidget.h
-                  ../prmPositionJointSetQtWidget.h
-                  ../prmStateJointQtWidget.h
-                  ../prmStateRobotQtWidget.h)
-else (CISST_HAS_QT4)
-  # assumes Qt 5 Auto Moc
-  set (CMAKE_AUTOMOC ON)
-endif (CISST_HAS_QT4)
+set (CMAKE_AUTOMOC ON)
 
 cisst_add_library (LIBRARY cisstParameterTypesQt
                    LIBRARY_DIR cisstParameterTypes
@@ -68,8 +52,7 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 prmPositionJointSetQtWidget.h
                                 prmStateJointQtWidget.h
                                 prmStateRobotQtWidget.h
-                                prmExportQt.h
-                   ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+                                prmExportQt.h)
 
 # link against Qt libraries
 target_link_libraries (cisstParameterTypesQt ${QT_LIBRARIES})

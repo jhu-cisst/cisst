@@ -54,23 +54,8 @@ else ()
   option (CISST_HAS_QT5 "Is Qt 5 available.  If not, Qt widgets and some examples won't be compiled" OFF)
 endif ()
 
-# try to find Qt 4 as well but offer it only if Qt5 has not been found
-set (CISST_QT4_COMPONENTS QtCore QtGui QtOpenGL QtXML QtXMLPatterns)
-find_package (Qt4 COMPONENTS ${CISST_QT4_COMPONENTS})
-if (QT_FOUND AND NOT CISST_HAS_QT5)
-  option (CISST_HAS_QT4 "Is Qt 4 available.  If not, Qt widgets and some examples won't be compiled" ON)
-  mark_as_advanced (CISST_HAS_QT4)
-else (QT_FOUND AND NOT CISST_HAS_QT5)
-  option (CISST_HAS_QT4 "Is Qt 4 available.  If not, Qt widgets and some examples won't be compiled" OFF)
-endif (QT_FOUND AND NOT CISST_HAS_QT5)
-
-# check that we don't have both Qt 4 and 5 set
-if (CISST_HAS_QT4 AND CISST_HAS_QT5)
-  message (FATAL_ERROR "You can't have both CISST_HAS_QT4 and CISST_HAS_QT5 set, pick one only")
-endif (CISST_HAS_QT4 AND CISST_HAS_QT5)
-
 # set overall Qt flag
-if (CISST_HAS_QT4 OR CISST_HAS_QT5)
+if (CISST_HAS_QT5)
   set (CISST_HAS_QT ON PARENT_SCOPE)
 else ()
   set (CISST_HAS_QT OFF PARENT_SCOPE)
@@ -87,23 +72,8 @@ else (CISST_HAS_QT5)
   cisst_unset_all_package_settings (cisstQt Qt5)
 endif (CISST_HAS_QT5)
 
-
-# if detected or if user requests it
-if (CISST_HAS_QT4)
-  # Qt is now required so we can include the QT_USE_FILE
-  find_package (Qt4 REQUIRED ${CISST_QT4_COMPONENTS})
-  include (${QT_USE_FILE})
-  set (CISST_QT4_PACKAGE "Qt4")
-  cisst_set_package_settings (cisstQt Qt4 PACKAGES           CISST_QT4_PACKAGE)
-  cisst_set_package_settings (cisstQt Qt4 PACKAGE_COMPONENTS CISST_QT4_COMPONENTS)
-  cisst_set_package_settings (cisstQt Qt4 CMAKE_FILES        QT_USE_FILE)
-  cisst_set_package_settings (cisstQt Qt4 LIBRARIES          QT_LIBRARIES)
-else (CISST_HAS_QT4)
-  cisst_unset_all_package_settings (cisstQt Qt4)
-endif (CISST_HAS_QT4)
-
 # for both version of Qt
-if (CISST_HAS_QT4 OR CISST_HAS_QT5)
+if (CISST_HAS_QT5)
   # OpenGL
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)

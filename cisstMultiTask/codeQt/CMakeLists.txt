@@ -19,26 +19,7 @@ cisst_set_directories (cisstQt)
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-if (CISST_HAS_QT4)
-  qt4_wrap_cpp (QT_WRAPPED_CPP
-                ../mtsCollectorFactoryQtWidget.h
-                ../mtsMessageQtWidget.h
-                ../mtsSystemQtWidget.h
-                ../mtsQtCommandSelector.h
-                ../mtsQtScaleAndSignalTool.h
-                ../mtsQtVisualizerShell.h
-                ../mtsIntervalStatisticsQtWidget.h
-                ../mtsQtWidgetGenericObject.h
-                ../mtsQtWidgetGenericObjectProxy.h
-                ../mtsQtWidgetVectorTypes.h
-                ../mtsQtWidgetComponent.h
-                ../mtsQtWidgetInterfaceRequired.h
-                ../mtsQtWidgetFunction.h
-                ../mtsQtWidgetEvent.h)
-else (CISST_HAS_QT4)
-  # assumes Qt 5 Auto Moc
-  set (CMAKE_AUTOMOC ON)
-endif (CISST_HAS_QT4)
+set (CMAKE_AUTOMOC ON)
 
 # add the Qt library
 cisst_add_library (LIBRARY cisstMultiTaskQt
@@ -84,8 +65,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFunction.h
                                 mtsQtWidgetEvent.h
                                 mtsQtApplication.h
-                                mtsExportQt.h
-                   ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+                                mtsExportQt.h)
 
 # link against Qt libraries
 target_link_libraries (cisstMultiTaskQt ${QT_LIBRARIES})

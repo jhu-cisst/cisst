@@ -32,13 +32,8 @@ vctQtWidgetDynamicVectorReadBase::vctQtWidgetDynamicVectorReadBase(void):
     this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
     this->setFixedHeight(this->verticalHeader()->sizeHint().height());
 }
 
@@ -136,13 +131,8 @@ vctQtWidgetDynamicVectorWriteBase::vctQtWidgetDynamicVectorWriteBase(const Displ
     this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
     this->setFixedHeight(this->verticalHeader()->sizeHint().height());
     connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(ItemChangedSlot(QTableWidgetItem *)));
 }
@@ -538,13 +528,8 @@ vctQtWidgetDynamicVectorBoolWrite::vctQtWidgetDynamicVectorBoolWrite(void):
     this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
     this->setFixedHeight(this->verticalHeader()->sizeHint().height());
 }
 

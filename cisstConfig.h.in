@@ -76,7 +76,7 @@ http://www.cisst.org/cisst/license.txt.
 #cmakedefine01 CISST_HAS_FLTK
 
 // Using Qt4 or not
-#cmakedefine01 CISST_HAS_QT4
+#define CISST_HAS_QT4 0
 
 // Using Qt5 or not
 #cmakedefine01 CISST_HAS_QT5
