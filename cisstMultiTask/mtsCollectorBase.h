@@ -278,9 +278,12 @@ public:
     /*! Set fill character for the output file. This setting will
       apply to all future files. */
     void SetOutputStreamFill(const char fillCharacter);
+
+    /*! Connect to all the components and interfaces used to collect
+      data. */
+    virtual bool Connect(void) = 0;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorBase)
 
 #endif // _mtsCollectorBase_h
-

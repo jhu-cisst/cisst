@@ -127,10 +127,10 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     void BatchCollect(const mtsStateTable::IndexRange & range);
 
 public:
-    /*! Constructor using the component name and table name. */
+    /*! Constructor without component nor state table defined. */
     mtsCollectorState(const std::string & collectorName);
 
-    /*! Constructor using a component pointer and table name. */
+    /*! Constructor using component and table names. */
     mtsCollectorState(const std::string & targetComponentName,
                       const std::string & targetStateTableName,
                       const CollectorFileFormat fileFormat);
@@ -158,7 +158,7 @@ public:
       i.e. the methods SetStateTable and SetOutput have been use,
       the collector should be added to the manager and then the
       Connect method should be called. */
-    bool Connect(void);
+    bool Connect(void) override;
 
     /*! Disconnect.  Attempt to disconnect from the observed
       component. */

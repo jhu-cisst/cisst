@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorFactory.h>
 #include <cisstMultiTask/mtsCollectorState.h>
+#include <cisstMultiTask/mtsCollectorEvent.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
@@ -28,12 +29,12 @@ http://www.cisst.org/cisst/license.txt.
   #include <json/json.h>
 #endif
 
-class mtsCollectorStateData
+class mtsCollectorBaseData
 {
 public:
-    mtsCollectorStateData(mtsCollectorFactory * factory,
-                          const std::string & name,
-                          mtsCollectorState * collectorComponent):
+    mtsCollectorBaseData(mtsCollectorFactory * factory,
+                         const std::string & name,
+                         mtsCollectorBase * collectorComponent):
         Factory(factory),
         Name(name),
         CollectorComponent(collectorComponent)
@@ -41,8 +42,7 @@ public:
 
     mtsCollectorFactory * Factory = nullptr;
     std::string Name;
-    mtsCollectorState * CollectorComponent = nullptr;
-    std::list<std::string> Signals;
+    mtsCollectorBase * CollectorComponent = nullptr;
 
     mtsInterfaceRequired * InterfaceRequired = nullptr;
     mtsFunctionWrite StartCollection;
@@ -60,6 +60,30 @@ public:
         interface_required->AddEventHandlerWrite(&mtsCollectorFactory::ProgressEventHandler, Factory,
                                                  "Progress");
     }
+};
+
+
+class mtsCollectorStateData: public mtsCollectorBaseData
+{
+public:
+    mtsCollectorStateData(mtsCollectorFactory * factory,
+                          const std::string & name,
+                          mtsCollectorState * collectorComponent):
+        mtsCollectorBaseData(factory, name, collectorComponent)
+    {}
+
+    std::list<std::string> Signals;
+};
+
+
+class mtsCollectorEventData: public mtsCollectorBaseData
+{
+public:
+    mtsCollectorEventData(mtsCollectorFactory * factory,
+                          const std::string & name,
+                          mtsCollectorEvent * collectorComponent):
+        mtsCollectorBaseData(factory, name, collectorComponent)
+    {}
 };
 
 
@@ -88,12 +112,16 @@ void mtsCollectorFactory::Configure(const std::string & configuration)
         return;
     } else {
         // look for components to collect from
-        const Json::Value stateCollectors = jsonConfig["state-collectors"];
+        if (jsonConfig.isMember("state-collectors")) {
+            cmnThrow("Configure: error in configuration file \"" + configuration + "\", state-collectors is now state_collectors");
+        }
+
+        const Json::Value & stateCollectors = jsonConfig["state_collectors"];
         for (unsigned int indexCollector = 0;
              indexCollector < stateCollectors.size();
              ++indexCollector) {
             std::string componentName = stateCollectors[indexCollector]["component"].asString();
-            Json::Value tables = stateCollectors[indexCollector]["tables"];
+            const Json::Value & tables = stateCollectors[indexCollector]["tables"];
             for (unsigned int indexTable = 0;
                  indexTable < tables.size();
                  ++indexTable) {
@@ -103,7 +131,7 @@ void mtsCollectorFactory::Configure(const std::string & configuration)
                     sampling = 1;
                 }
                 SetSampling(componentName, tableName, sampling);
-                Json::Value signals = tables[indexTable]["signals"];
+                const Json::Value & signals = tables[indexTable]["signals"];
                 for (unsigned int signalIndex = 0;
                      signalIndex < signals.size();
                      ++signalIndex) {
@@ -112,6 +140,47 @@ void mtsCollectorFactory::Configure(const std::string & configuration)
                 }
             }
         }
+
+        const Json::Value & eventCollectors = jsonConfig["event_collectors"];
+        for (unsigned int indexCollector = 0;
+             indexCollector < eventCollectors.size();
+             ++indexCollector) {
+            std::string componentName = eventCollectors[indexCollector]["component"].asString();
+            // if interfaces specified
+            if (eventCollectors[indexCollector].isMember("interfaces")) {
+                const Json::Value & interfaces = eventCollectors[indexCollector]["interfaces"];
+                for (unsigned int indexInterface = 0;
+                     indexInterface < interfaces.size();
+                     ++indexInterface) {
+                    std::string interfaceName = interfaces[indexInterface]["name"].asString();
+                    // if events are specified
+                    if (interfaces[indexInterface].isMember("events_void")
+                        || interfaces[indexInterface].isMember("events_write")) {
+                        const Json::Value & w_events = interfaces[indexInterface]["events_write"];
+                        for (unsigned int eventIndex = 0;
+                             eventIndex < w_events.size();
+                             ++eventIndex) {
+                            std::string eventName = w_events[eventIndex].asString();
+                            AddEventWrite(componentName, interfaceName, eventName);
+                        }
+                        const Json::Value & v_events = interfaces[indexInterface]["events_void"];
+                        for (unsigned int eventIndex = 0;
+                             eventIndex < v_events.size();
+                             ++eventIndex) {
+                            std::string eventName = v_events[eventIndex].asString();
+                            AddEventVoid(componentName, interfaceName, eventName);
+                        }
+                    } else {
+                        // no events specified, collect all
+                        AddAllEvents(componentName, interfaceName);
+                    }
+                }
+            } else {
+                // not interface specified, collect all
+                AddAllEvents(componentName);
+            }
+        }
+
     }
 #else
     CMN_LOG_CLASS_INIT_WARNING << "Configure: cisst has been compiled without JSON support.  Can't check if \""
@@ -139,19 +208,19 @@ void mtsCollectorFactory::AddStateCollector(const std::string & component,
     // get access to component manager
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
 
-    std::string collectorName = GetName() + "_" + component + "_" + table;
+    const std::string collector_name = GetName() + "_" + component + "_" + table;
     CollectorId collectorId(component, table);
     // check if there is already a collector for this component/table
-    if (mCollectors.count(collectorId) == 0) {
+    if (mStateCollectors.count(collectorId) == 0) {
         // check if there is already a component with that name
-        mtsComponent * genericComponent = manager->GetComponent(collectorName);
+        mtsComponent * genericComponent = manager->GetComponent(collector_name);
         if (genericComponent) {
             CMN_LOG_CLASS_INIT_ERROR << "AddStateCollector: found an existing component with name \""
-                                     << collectorName << "\".  Can't create state collector." << std::endl;
+                                     << collector_name << "\".  Can't create state collector." << std::endl;
             return;
         }
         // create the collector
-        mtsCollectorState * collector = new mtsCollectorState(collectorName);
+        mtsCollectorState * collector = new mtsCollectorState(collector_name);
         collector->UseSeparateLogFileDefault();
         // set component and table to collect from
         try {
@@ -164,12 +233,13 @@ void mtsCollectorFactory::AddStateCollector(const std::string & component,
         // default name is based on component/state table name
         collector->SetOutputToDefault();
         manager->AddComponent(collector);
-        auto collector_data = new mtsCollectorStateData(this, collectorName, collector);
-        collector_data->SetInterfaceRequired(this->AddInterfaceRequired(collectorName));
-        mCollectors[collectorId] = collector_data;
-        CMN_LOG_CLASS_INIT_VERBOSE << "AddStateCollector: added state collector \"" << collectorName << "\"" << std::endl;
+        auto collector_data = new mtsCollectorStateData(this, collector_name, collector);
+        collector_data->SetInterfaceRequired(this->AddInterfaceRequired(collector_name));
+        mStateCollectors[collectorId] = collector_data;
+        mAllCollectors.push_back(collector_data);
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddStateCollector: added state collector \"" << collector_name << "\"" << std::endl;
     } else {
-        CMN_LOG_CLASS_INIT_DEBUG << "AddStateCollector: state collector already exists \"" << collectorName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "AddStateCollector: state collector already exists \"" << collector_name << "\"" << std::endl;
     }
 }
 
@@ -184,24 +254,24 @@ void mtsCollectorFactory::AddSignal(const std::string & component,
     // add the collector, no effect if already created
     AddStateCollector(component, table);
     CollectorId collectorId(component, table);
-    const std::string & collectorName = mCollectors[collectorId]->CollectorComponent->GetName();
-    auto & existingSignals = mCollectors[collectorId]->Signals;
+    const std::string & collector_name = mStateCollectors[collectorId]->CollectorComponent->GetName();
+    auto & existingSignals = mStateCollectors[collectorId]->Signals;
     const auto it = std::find(existingSignals.begin(), existingSignals.end(), signal);
     if (it == existingSignals.end()) {
         // add to the list
         existingSignals.push_back(signal);
         // retrieve that state collector
-        mtsCollectorState * collector = dynamic_cast<mtsCollectorState *>(manager->GetComponent(collectorName));
+        mtsCollectorState * collector = dynamic_cast<mtsCollectorState *>(manager->GetComponent(collector_name));
         if (!collector) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddSignal: unable to find state collector \"" << collectorName << "\"" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "AddSignal: unable to find state collector \"" << collector_name << "\"" << std::endl;
             return;
         }
         collector->AddSignal(signal);
         CMN_LOG_CLASS_INIT_DEBUG << " AddSignal: signal \"" << signal << "\" added to \""
-                                 << collectorName << "\"" << std::endl;
+                                 << collector_name << "\"" << std::endl;
     } else {
         CMN_LOG_CLASS_INIT_DEBUG << "AddSignal: signal \"" << signal << "\" already added to \""
-                                 << collectorName << "\"" << std::endl;
+                                 << collector_name << "\"" << std::endl;
     }
 }
 
@@ -213,62 +283,117 @@ void mtsCollectorFactory::SetSampling(const std::string & component,
     // add the collector, no effect if already created
     AddStateCollector(component, table);
     CollectorId collectorId(component, table);
-    auto * collectorComponent = mCollectors[collectorId]->CollectorComponent;
+    auto * collectorComponent = dynamic_cast<mtsCollectorState *>(mStateCollectors[collectorId]->CollectorComponent);
     collectorComponent->SetSamplingInterval(sampling);
     CMN_LOG_CLASS_INIT_DEBUG << " SetSampling: sampling \"" << sampling << "\" set for \""
                              << collectorComponent->GetName() << "\"" << std::endl;
 }
 
 
-void mtsCollectorFactory::Connect(void) const
+mtsCollectorEvent * mtsCollectorFactory::GetEventCollector(const std::string & component_name)
+{
+    mtsComponentManager * manager = mtsComponentManager::GetInstance();
+    const std::string collector_name = GetName() + "_" + component_name + "_events";
+
+    const auto collector_it = mEventCollectors.find(collector_name);
+    if (collector_it != mEventCollectors.end()) {
+        return dynamic_cast<mtsCollectorEvent*>(collector_it->second->CollectorComponent);
+    }
+    // create a new one
+    mtsCollectorEvent * collector = new mtsCollectorEvent(collector_name);
+    manager->AddComponent(collector);
+    auto collector_data = new mtsCollectorEventData(this, collector_name, collector);
+    collector_data->SetInterfaceRequired(this->AddInterfaceRequired(collector_name));
+    mEventCollectors[collector_name] = collector_data;
+    mAllCollectors.push_back(collector_data);
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetEventCollector: added event collector \"" << collector_name << "\"" << std::endl;
+    return collector;
+}
+
+
+void mtsCollectorFactory::AddEventVoid(const std::string & component_name,
+                                       const std::string & interface_name,
+                                       const std::string & event_name)
+{
+    auto collector = GetEventCollector(component_name);
+    collector->AddObservedEventVoid(component_name, interface_name, event_name);
+}
+
+
+void mtsCollectorFactory::AddEventWrite(const std::string & component_name,
+                                        const std::string & interface_name,
+                                        const std::string & event_name)
+{
+    auto collector = GetEventCollector(component_name);
+    collector->AddObservedEventWrite(component_name, interface_name, event_name);
+}
+
+
+void mtsCollectorFactory::AddAllEvents(const std::string & component_name,
+                                       const std::string & interface_name)
+{
+    auto collector = GetEventCollector(component_name);
+    collector->AddObservedInterface(component_name, interface_name);
+}
+
+
+void mtsCollectorFactory::AddAllEvents(const std::string & component_name)
+{
+    auto collector = GetEventCollector(component_name);
+    collector->AddObservedComponent(component_name);
+}
+
+
+bool mtsCollectorFactory::Connect(void)
 {
     auto component_manager = mtsManagerLocal::GetInstance();
-    for (auto & collector : mCollectors) {
-        collector.second->CollectorComponent->Connect();
-        component_manager->Connect(this->GetName(), collector.second->Name,
-                                   collector.second->CollectorComponent->GetName(), "Control");
+    for (auto & collector : mAllCollectors) {
+        collector->CollectorComponent->Connect();
+        component_manager->Connect(this->GetName(), collector->Name,
+                                   collector->CollectorComponent->GetName(), "Control");
     }
+    return true;
 }
 
 
 void mtsCollectorFactory::GetCollectorsNames(std::list<std::string> & collectors) const
 {
     collectors.clear();
-    for (auto & collector : mCollectors) {
-        collectors.push_back(collector.second->CollectorComponent->GetName());
+    for (auto & collector : mAllCollectors) {
+        collectors.push_back(collector->Name);
     }
 }
 
 
 void mtsCollectorFactory::StartCollection(const double & delayInSeconds)
 {
-    for (auto & collector : mCollectors) {
-        collector.second->StartCollection(delayInSeconds);
+    for (auto collector : mAllCollectors) {
+        collector->StartCollection(delayInSeconds);
     }
 }
 
 
 void mtsCollectorFactory::StopCollection(const double & delayInSeconds)
 {
-    for (auto & collector : mCollectors) {
-        collector.second->StopCollection(delayInSeconds);
+    for (auto collector : mAllCollectors) {
+        collector->StopCollection(delayInSeconds);
     }
 }
 
 
 void mtsCollectorFactory::SetWorkingDirectory(const std::string & directory)
 {
-    for (auto & collector : mCollectors) {
-        collector.second->SetWorkingDirectory(directory);
-        collector.second->SetOutputToDefault();
+    for (auto collector : mAllCollectors) {
+        collector->SetWorkingDirectory(directory);
+        collector->SetOutputToDefault();
     }
 }
 
 
 void mtsCollectorFactory::SetOutputToDefault(void)
 {
-    for (auto & collector : mCollectors) {
-        collector.second->SetOutputToDefault();
+    for (auto collector : mAllCollectors) {
+        collector->SetOutputToDefault();
     }
 }
 

@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet, Ali Uneri, Peter Kazanzides
   Created on: 2009-10-22
 
-  (C) Copyright 2009-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 const unsigned int NumSineTasks = 2;
 
 class QWidget;
-class mtsCollectorQtWidget;
+class mtsCollectorFactoryQtWidget;
 class displayQtComponent;
 
 class CISST_EXPORT mainQtComponent: public mtsComponent
@@ -40,7 +40,7 @@ class CISST_EXPORT mainQtComponent: public mtsComponent
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
 
     QWidget * mainWidget;
-    mtsCollectorQtWidget * collectorQtWidget;
+    mtsCollectorFactoryQtWidget * collectorQtWidget;
 
     displayQtComponent * display[NumSineTasks];
 
@@ -51,7 +51,7 @@ class CISST_EXPORT mainQtComponent: public mtsComponent
 
     void Startup(void);
 
-    mtsCollectorQtWidget * GetCollectorQtWidget(void) const
+    mtsCollectorFactoryQtWidget * GetCollectorQtWidget(void) const
     { return collectorQtWidget; }
 
 };

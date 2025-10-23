@@ -145,7 +145,7 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
 
     /*! Constructor, requires to name the collector task. */
     mtsCollectorEvent(const std::string & collectorName,
-                      const CollectorFileFormat fileFormat);
+                      const CollectorFileFormat fileFormat = mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
 
     ~mtsCollectorEvent(void);
 
@@ -199,7 +199,7 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
 
  public:
     /*! \todo copy documentation for mtsCollectorState */
-    bool Connect(void);
+    bool Connect(void) override;
 
     /*! Methods defined as virtual in base class to control stop/start
       collection with delay.  For the event collector, these methods

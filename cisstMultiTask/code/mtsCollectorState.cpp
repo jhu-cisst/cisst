@@ -278,15 +278,10 @@ bool mtsCollectorState::AddSignal(const std::string & signalName)
         // Check if the specified signal does exist in the state table.
         int StateVectorID = TargetStateTable->GetStateVectorID(signalName); // 0: Toc, 1: Tic, 2: Period, >=3: user
         if (StateVectorID == -1) {  // 0: Toc, 1: Tic, 2: Period, >3: user
-            const auto vector_names = TargetStateTable->GetDataNames();
-            std::string names = "[ ";
-            for (const auto & name : vector_names) {
-                names.append(name);
-                names.append(" ");
-            }
-            names.append("]");
+            const auto names = TargetStateTable->GetDataNames();
             CMN_LOG_CLASS_INIT_ERROR << "AddSignal: collector \"" << this->GetName()
-                                     << "\", cannot find signal \"" << signalName << "\". Signals found " << names << std::endl;
+                                     << "\", cannot find signal \"" << signalName << "\". Signals available "
+                                     << cmnDataVectorHumanReadable(names) << std::endl;
             return false;
         }
 

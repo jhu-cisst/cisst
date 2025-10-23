@@ -227,7 +227,8 @@ mtsComponent * mtsCollectorEvent::CheckComponent(const std::string & componentNa
     if (!componentPointer) {
         CMN_LOG_CLASS_INIT_ERROR << "component \"" << componentName
                                  << "\" not found in component manager for collector \""
-                                 << this->GetName() << "\"" << std::endl;
+                                 << this->GetName() << "\". Available components "
+                                 << cmnDataVectorHumanReadable(ComponentManager->GetNamesOfComponents()) << std::endl;
     }
     return componentPointer;
 }
@@ -241,7 +242,8 @@ mtsInterfaceProvided * mtsCollectorEvent::CheckInterface(const mtsComponent * co
     if (!interfacePointer) {
         CMN_LOG_CLASS_INIT_ERROR << "interface \"" << interfaceName
                                  << "\" not found in component \"" << componentPointer->GetName()
-                                 << "\" for collector \"" << this->GetName() << "\"" << std::endl;
+                                 << "\" for collector \"" << this->GetName() << "\".  Available interfaces "
+                                 << cmnDataVectorHumanReadable(componentPointer->GetNamesOfInterfacesProvided()) << std::endl;
     }
     return interfacePointer;
 }
@@ -389,6 +391,15 @@ bool mtsCollectorEvent::AddObservedEventVoid(const mtsComponent * componentPoint
     }
     CMN_ASSERT(componentPointer);
     CMN_ASSERT(interfacePointer);
+    const auto events = interfacePointer->GetNamesOfEventsVoid();
+    const auto found = std::find(events.begin(), events.end(), eventName);
+    if (found == events.end()) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddObservedEventVoid: can't find event " << eventName
+                                 << " for component " << componentPointer->GetName() << ", interface "
+                                 << interfacePointer->GetName() << ".  Available events "
+                                 << cmnDataVectorHumanReadable(events) << std::endl;
+        return false;
+    }
     CMN_LOG_CLASS_INIT_DEBUG << "AddObservedEventVoid: adding event     \"" // extra spaces added for alignment
                              << componentPointer->GetName() << "."
                              << interfacePointer->GetName() << "."
@@ -417,6 +428,15 @@ bool mtsCollectorEvent::AddObservedEventWrite(const mtsComponent * componentPoin
     }
     CMN_ASSERT(componentPointer);
     CMN_ASSERT(interfacePointer);
+    const auto events = interfacePointer->GetNamesOfEventsWrite();
+    const auto found = std::find(events.begin(), events.end(), eventName);
+    if (found == events.end()) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddObservedEventWrite: can't find event " << eventName
+                                 << " for component " << componentPointer->GetName() << ", interface "
+                                 << interfacePointer->GetName() << ".  Available events "
+                                 << cmnDataVectorHumanReadable(events) << std::endl;
+        return false;
+    }
     CMN_LOG_CLASS_INIT_DEBUG << "AddObservedEventWrite: adding event    \"" // extra spaces added for alignment
                              << componentPointer->GetName() << "."
                              << interfacePointer->GetName() << "."

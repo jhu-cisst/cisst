@@ -26,7 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <list>
 #include <map>
 
+class mtsCollectorEvent;
+class mtsCollectorBaseData;
 class mtsCollectorStateData;
+class mtsCollectorEventData;
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -40,7 +43,7 @@ class CISST_EXPORT mtsCollectorFactory: public mtsCollectorBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-    friend class mtsCollectorStateData;
+    friend class mtsCollectorBaseData;
 
  public:
     mtsCollectorFactory(const std::string & componentName);
@@ -67,19 +70,47 @@ class CISST_EXPORT mtsCollectorFactory: public mtsCollectorBase
                      const std::string & table,
                      const int sampling);
 
+    /*! Add a specific event for a given component and interface. The
+      factory will create an event collector per component
+      observed. */
+    //@{
+    void AddEventWrite(const std::string & component_name,
+                       const std::string & interface_name,
+                       const std::string & event_name);
+    void AddEventVoid(const std::string & component_name,
+                      const std::string & interface_name,
+                      const std::string & event_name);
+    //@}
+
+    /*! Add all events for a given interface on a component. The
+      factory will create an event collector per component
+      observed. */
+    void AddAllEvents(const std::string & component_name,
+                      const std::string & interface_name);
+
+    /*! Add all events for a given component.  All provided interfaces
+      will be added. The factory will create an event collector per
+      component observed. */
+    void AddAllEvents(const std::string & component_name);
+
     /*! Connect all the state collectors created using the
       AddStateCollector. This method must be called after all calls to
-      mtsCollectorFactory::AddSignal. */
-    void Connect(void) const;
+      mtsCollectorFactory::AddSignal and AddEvent. */
+    bool Connect(void) override;
 
     /*! Get a list of all collectors names created so far. */
     void GetCollectorsNames(std::list<std::string> & collectors) const;
 
  protected:
     typedef std::pair<std::string, std::string> CollectorId; // component, state table
-    std::map<CollectorId, mtsCollectorStateData *> mCollectors;
+    std::map<CollectorId, mtsCollectorStateData *> mStateCollectors;
     void AddStateCollector(const std::string & component,
                            const std::string & table);
+
+    std::map<std::string, mtsCollectorEventData *> mEventCollectors;
+    mtsCollectorEvent * GetEventCollector(const std::string & component);
+
+    std::list<mtsCollectorBaseData *> mAllCollectors;
 
     /* methods to mimic any collector */
     void StartCollection(const double & delayInSeconds) override;
