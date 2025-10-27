@@ -24,21 +24,21 @@
             ]
          }
     ]
-	,
-	"event_collectors":
-	[
-		{
-			"component": "SIN0"
-		}
-		,
-		{
-			"component": "SIN1",
-			"interfaces": [
-				{
-					"name": "StateTableStateTable",
-					"events_void": ["CollectionStarted"]
-				}
-			]
-		}
-	]
+    ,
+    "event_collectors":
+    [
+        {
+            "component": "SIN0"
+        }
+        ,
+        {
+            "component": "SIN1",
+            "interfaces": [
+                {
+                    "name": "StateTableStateTable",
+                    "events_void": ["CollectionStarted"]
+                }
+            ]
+        }
+    ]
 }
