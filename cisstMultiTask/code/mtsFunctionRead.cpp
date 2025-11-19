@@ -4,7 +4,7 @@
 /*
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 mtsFunctionRead::mtsFunctionRead(void):
-    mtsFunctionBase(false),
     Command(0)
 {}
 

@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2013-08-06
 
-  (C) Copyright 2013-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -356,7 +356,7 @@ protected:
     mtsSocketProxyServer *Proxy;
 
 public:
-    FunctionVoidProxy(mtsSocketProxyServer *proxy) : mtsFunctionVoid(true), Proxy(proxy) {}
+    FunctionVoidProxy(mtsSocketProxyServer *proxy) : Proxy(proxy) {}
     ~FunctionVoidProxy() {}
 
     mtsExecutionResult ExecuteSerialized(mtsBlockingType blocking, mtsCommandWriteBase *eventSenderCommand);
@@ -389,7 +389,7 @@ public:
 };
 
 FunctionWriteProxy::FunctionWriteProxy(mtsSocketProxyServer *proxy, const std::string &argumentPrototypeSerialized)
-    : mtsFunctionWrite(true), Proxy(proxy), argSerialized(argumentPrototypeSerialized), arg(0)
+    : Proxy(proxy), argSerialized(argumentPrototypeSerialized), arg(0)
 {
     InitObjects();
     if (!arg) {
@@ -610,7 +610,7 @@ public:
 };
 
 FunctionVoidReturnProxy::FunctionVoidReturnProxy(mtsSocketProxyServer *proxy, const std::string &returnPrototypeSerialized) :
-    mtsFunctionVoidReturn(true), Proxy(proxy), returnSerialized(returnPrototypeSerialized), retVal(0)
+    Proxy(proxy), returnSerialized(returnPrototypeSerialized), retVal(0)
 {
     InitObjects();
 }
@@ -668,7 +668,7 @@ public:
 FunctionWriteReturnProxy::FunctionWriteReturnProxy(mtsSocketProxyServer *proxy,
                                                    const std::string &argumentPrototypeSerialized,
                                                    const std::string &returnPrototypeSerialized) :
-    mtsFunctionWriteReturn(true), Proxy(proxy), argSerialized(argumentPrototypeSerialized), returnSerialized(returnPrototypeSerialized),
+    Proxy(proxy), argSerialized(argumentPrototypeSerialized), returnSerialized(returnPrototypeSerialized),
     arg(0), retVal(0)
 {
     InitObjects();
