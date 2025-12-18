@@ -1,6 +1,39 @@
 Change log
 ==========
 
+1.4.0 (2025-12-18)
+==================
+
+* API changes:
+  * cisstMultiTask:
+    * `mtsFunction` classes removed `IsProxy` member
+    * Collectors cleanup, simplified collector interface
+  * cisstInteractive: changed `IRE_INITIALIZED` to `IRE_CONSTRUCTED`
+* Deprecated features:
+  * cisst: remove Qt4 support
+* New features:
+  * CMake:
+    * Settings for Python and SWIG saved in different cisst settings files
+  * cisstMultiTask:
+    * Collector factory now supports event collectors
+    * `mtsGenericObjectProxy` extended for Python numpy array creation
+  * cisstDataGenerator:
+    * Added support for `Json::Value`
+    * Added optional "namespace" for enum
+    * Using try/catch in JSON deserialization
+  * cisstInteractive: updated for Python 3 and recent wxPython/IPython
+  * cisstParameterTypes:
+    * Added `prmStateCartesian`
+    * Added default value for `prmActuatorJointCoupling`
+  * cisstRobot:
+    * `robManipulator` fix in RNE for prismatic joints
+    * `robMass` default mass set to 0
+* Bug fixes:
+  * cisstInteractive: fixed CMake install, pickle calls for Python 3
+  * cisstParameterTypes: `prmEventButton` default constructor sets type to UNDEFINED
+  * cmnPath: replace directory separator on Windows
+  * Fix plot scale for (near) constant plots
+
 1.3.1 (2025-01-17)
 ==================
 
