@@ -88,6 +88,55 @@ if (CISST_HAS_QT5)
   install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstQtBuild.cmake
            DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
            COMPONENT cisstCommon)
+  
+  # Optionally build QtNode as an external project if it is not available
+  option (CISST_HAS_QTNODES "Build QtNode (Qt + Node integration) as an external project." OFF)
+  mark_as_advanced (CISST_HAS_QTNODES)
+
+  if (CISST_HAS_QTNODES)
+    include (ExternalProject)
+  
+    set (cisstQtNodes_PREFIX cisstQtNodeExternal)
+    # Default repository and tag can be overridden by user cache variables
+    set (CISST_QTNODES_GIT_REPOSITORY "https://github.com/adeguet1/nodeeditor" CACHE STRING "Git repository URL for QtNode external project")
+    set (CISST_QTNODES_GIT_TAG "master" CACHE STRING "Git tag or branch to checkout for QtNode external project")
+    
+    ExternalProject_Add (
+      cisstQtNodesExternal
+      PREFIX ${cisstQtNodes_PREFIX}
+      GIT_REPOSITORY    ${CISST_QTNODES_GIT_REPOSITORY}
+      GIT_TAG           ${CISST_QTNODES_GIT_TAG}
+      CMAKE_ARGS
+        -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+        -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+        -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstQtNodes
+        -DBUILD_TESTING:BOOL=OFF
+        -DBUILD_DOCS:BOOL=OFF
+        -DBUILD_EXAMPLES:BOOL=OFF
+      INSTALL_DIR ${cisst_BINARY_DIR}/cisstQtNodes
+      UPDATE_COMMAND ""
+    )
+    
+    # Set variables pointing to the install dir so downstream code can use QtNode
+    set (QTNODES_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstQtNodes/include")
+    set (QTNODES_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstQtNodes/lib")
+    set (QTNODES_LIBRARIES QtNodes)
+    
+    set (QTNODES_INCLUDE_DIR ${QTNODES_INCLUDE_DIR} PARENT_SCOPE)
+    set (QTNODES_LIBRARY_DIRS ${QTNODES_LIBRARY_DIRS} PARENT_SCOPE)
+    set (QTNODES_LIBRARIES ${QTNODES_LIBRARIES} PARENT_SCOPE)
+    
+    set (QTNODES_FOUND ON PARENT_SCOPE)
+    set (QTNODES_FOUND ON)
+  endif ()
+
+  # Save settings (so other cisst modules can pick them up)
+  if (QTNODES_FOUND)
+    cisst_set_package_settings (cisstQtNodes QtNodes INCLUDE_DIRECTORIES QTNODES_INCLUDE_DIR)
+    cisst_set_package_settings (cisstQtNodes QtNodes LIBRARIES           QTNODES_LIBRARIES)
+    cisst_set_package_settings (cisstQtNodes QtNodes LINK_DIRECTORIES    QTNODES_LIBRARY_DIRS)
+  endif ()
+
 else ()
   # XML Qt based
   set (CISST_FOUND_QT_XML OFF CACHE BOOL "Is Qt XML available.  CISST_XML_LIB determines which library is actually used." FORCE)
@@ -134,7 +183,7 @@ if (CISST_HAS_FLTK)
         set (FLTK_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstFltk/include")
         set (FLTK_INCLUDE_DIR ${FLTK_INCLUDE_DIR} PARENT_SCOPE)
 
-	set (FLTK_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstFLTK/lib")
+	      set (FLTK_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstFLTK/lib")
         set (FLTK_LIBRARY_DIRS ${FLTK_LIBRARY_DIRS} PARENT_SCOPE)
 
         if (WIN32)
@@ -150,11 +199,11 @@ if (CISST_HAS_FLTK)
             set (FLTK_LIBRARIES ${FLTK_LIBRARIES} ${X11_LIBRARIES} ${FLTK_MATH_LIBRARY})
           endif()
 
-	endif (WIN32)
+	      endif (WIN32)
         set (FLTK_LIBRARIES ${FLTK_LIBRARIES} PARENT_SCOPE)
 
-	set (FLTK_FLUID_EXECUTABLE "${cisst_BINARY_DIR}/cisstFltk/bin/fluid${CMAKE_EXECUTABLE_SUFFIX}")
-	set (FLTK_FLUID_EXECUTABLE ${FLTK_FLUID_EXECUTABLE} PARENT_SCOPE)
+	      set (FLTK_FLUID_EXECUTABLE "${cisst_BINARY_DIR}/cisstFltk/bin/fluid${CMAKE_EXECUTABLE_SUFFIX}")
+	      set (FLTK_FLUID_EXECUTABLE ${FLTK_FLUID_EXECUTABLE} PARENT_SCOPE)
 
         set (FLTK_FOUND ON)
         set (FLTK_FOUND ON PARENT_SCOPE)

@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorFactory.h>
 #include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
+#include <cisstMultiTask/mtsComponentViewerQtWidget.h>
 
 #include <cisstMultiTask/mtsQtApplication.h>
 
@@ -98,6 +99,9 @@ int main(int argc, char *argv[])
     }
     componentManager->AddComponent(collectorFactory);
     collectorFactory->Connect();
+
+    mtsComponentViewerQtWidget * viewer = new mtsComponentViewerQtWidget("ComponentViewer");
+    componentManager->AddComponent(viewer);
 
     componentManager->AddComponent(mainQt->GetCollectorQtWidget());
     componentManager->Connect(mainQt->GetCollectorQtWidget()->GetName(), "Collector",
