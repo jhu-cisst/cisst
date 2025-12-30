@@ -90,7 +90,7 @@ if (CISST_HAS_QT5)
            COMPONENT cisstCommon)
   
   # Optionally build QtNode as an external project if it is not available
-  option (CISST_HAS_QTNODES "Build QtNode (Qt + Node integration) as an external project." OFF)
+  option (CISST_HAS_QTNODES "Build QtNode (Qt + Node integration) as an external project." ON)
   mark_as_advanced (CISST_HAS_QTNODES)
 
   if (CISST_HAS_QTNODES)
@@ -109,17 +109,18 @@ if (CISST_HAS_QT5)
       CMAKE_ARGS
         -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-        -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstQtNodes
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
         -DBUILD_TESTING:BOOL=OFF
         -DBUILD_DOCS:BOOL=OFF
         -DBUILD_EXAMPLES:BOOL=OFF
-      INSTALL_DIR ${cisst_BINARY_DIR}/cisstQtNodes
+        -DUSE_QT6:BOOL=OFF
+      INSTALL_DIR ${cisst_BINARY_DIR}
       UPDATE_COMMAND ""
     )
     
     # Set variables pointing to the install dir so downstream code can use QtNode
-    set (QTNODES_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstQtNodes/include")
-    set (QTNODES_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstQtNodes/lib")
+    set (QTNODES_INCLUDE_DIR "${cisst_BINARY_DIR}/include")
+    set (QTNODES_LIBRARY_DIRS "${cisst_BINARY_DIR}/lib")
     set (QTNODES_LIBRARIES QtNodes)
     
     set (QTNODES_INCLUDE_DIR ${QTNODES_INCLUDE_DIR} PARENT_SCOPE)
@@ -128,10 +129,12 @@ if (CISST_HAS_QT5)
     
     set (QTNODES_FOUND ON PARENT_SCOPE)
     set (QTNODES_FOUND ON)
+
   endif ()
 
   # Save settings (so other cisst modules can pick them up)
   if (QTNODES_FOUND)
+    set (CISST_SETTINGS ${CISST_SETTINGS} cisstQtNodes PARENT_SCOPE)
     cisst_set_package_settings (cisstQtNodes QtNodes INCLUDE_DIRECTORIES QTNODES_INCLUDE_DIR)
     cisst_set_package_settings (cisstQtNodes QtNodes LIBRARIES           QTNODES_LIBRARIES)
     cisst_set_package_settings (cisstQtNodes QtNodes LINK_DIRECTORIES    QTNODES_LIBRARY_DIRS)
