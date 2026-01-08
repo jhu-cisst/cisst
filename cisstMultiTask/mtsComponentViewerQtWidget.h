@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsComponentViewerQtWidget_h
 #define _mtsComponentViewerQtWidget_h
 
-#include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsGraphLayoutQtNodes.h>
 
 #include <QWidget>
@@ -35,7 +35,7 @@ namespace QtNodes {
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsComponentViewerQtWidget: public QWidget, public mtsComponent
+class CISST_EXPORT mtsComponentViewerQtWidget: public QWidget, public mtsTaskFromSignal
 {
     Q_OBJECT
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
@@ -47,10 +47,13 @@ public:
     void Configure(const std::string & filename = "") override;
     void Startup(void) override;
     void Cleanup(void) override;
+    void Run(void) override;
 
-    void AddComponent(mtsComponent * component);
-    void AddConnection(mtsComponent * client, const std::string & requiredInterface,
-                       mtsComponent * server, const std::string & providedInterface);
+    void AddComponentHandler(const mtsDescriptionComponent & component_description);
+    void AddConnectionHandler(const mtsDescriptionConnection & connection_description);
+    // void AddComponent(mtsComponent * component);
+    // void AddConnection(mtsComponent * client, const std::string & requiredInterface,
+    //                    mtsComponent * server, const std::string & providedInterface);
 
     // Layout control
     void StartLayout(void);
@@ -75,12 +78,12 @@ protected:
     int LayoutIterations;
 
     // Keep track of components and their node IDs
-    std::vector<mtsComponent *> Components;
-    
+    std::vector<std::string> m_components;
+
     // Keep NodeId as an unsigned int in the public header to avoid pulling
     // QtNodes types into all translation units; the implementation will use
     // QtNodes::NodeId where needed.
-    std::map<mtsComponent *, unsigned int> NodeIds;
+    std::map<std::string, unsigned int> NodeIds;
 
 private:
     // no copy constructor

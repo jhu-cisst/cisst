@@ -19,8 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsComponentModelQtNodes_h
 #define _mtsComponentModelQtNodes_h
 
-#include <cisstMultiTask/mtsComponent.h>
-
+#include <vector>
 #include <QtNodes/NodeDelegateModel>
 
 // Always include last
@@ -31,27 +30,32 @@ class CISST_EXPORT mtsComponentModelQtNodes : public QtNodes::NodeDelegateModel
    Q_OBJECT
 
 public:
-   mtsComponentModelQtNodes(mtsComponent * component);
+   mtsComponentModelQtNodes(const std::string & name);
    ~mtsComponentModelQtNodes() = default;
 
    // NodeDelegateModel interface
-   QString caption() const override;
-   QString name() const override;
+   QString caption(void) const override;
+   QString name(void) const override;
     
    unsigned int nPorts(QtNodes::PortType portType) const override;
     
    QtNodes::NodeDataType dataType(QtNodes::PortType portType,
-                          QtNodes::PortIndex portIndex) const override;
+                                  QtNodes::PortIndex portIndex) const override;
 
    void setInData(std::shared_ptr<QtNodes::NodeData> nodeData,
-               QtNodes::PortIndex port) override;
+                  QtNodes::PortIndex port) override;
 
    std::shared_ptr<QtNodes::NodeData> outData(QtNodes::PortIndex port) override;
 
-   QWidget * embeddedWidget() override;
+   QWidget * embeddedWidget(void) override;
+
+   bool AddInterfaceProvided(const std::string & name);
+   bool AddInterfaceRequired(const std::string & name);
 
 protected:
-   mtsComponent * Component;
+   std::string m_name;
+   std::vector<std::string> m_interfaces_provided;
+   std::vector<std::string> m_interfaces_required;
 };
 
 #endif // _mtsComponentModelQtNodes_h

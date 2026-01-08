@@ -54,6 +54,9 @@ int main(int argc, char *argv[])
     qtAppTask->Configure();
     componentManager->AddComponent(qtAppTask);
 
+    mtsComponentViewerQtWidget * viewer = new mtsComponentViewerQtWidget("ComponentViewer");
+    componentManager->AddComponent(viewer);
+
     mainQtComponent * mainQt = new mainQtComponent("mainQt");
     componentManager->AddComponent(mainQt);
 
@@ -90,18 +93,16 @@ int main(int argc, char *argv[])
     const std::string collectorConfig = "mtsExPeriodicTaskQtCollectors.json";
     cmnPath path;
     path.AddRelativeToCisstShare("/cisstMultiTask/examples");
+    path.Add(cmnPath::GetWorkingDirectory());
     std::string fullPath = path.Find(collectorConfig);
     if (fullPath != "") {
         std::cout << "Loading data collection configuration file \"" << fullPath << "\"" << std::endl;
         collectorFactory->Configure(fullPath);
     } else {
-        std::cerr << "Unable to find data collection configuration file \"" << collectorConfig << "\"" << std::endl;
+        std::cout << "Unable to find data collection configuration file \"" << collectorConfig << "\".  The example will run without data collection." << std::endl;
     }
     componentManager->AddComponent(collectorFactory);
     collectorFactory->Connect();
-
-    mtsComponentViewerQtWidget * viewer = new mtsComponentViewerQtWidget("ComponentViewer");
-    componentManager->AddComponent(viewer);
 
     componentManager->AddComponent(mainQt->GetCollectorQtWidget());
     componentManager->Connect(mainQt->GetCollectorQtWidget()->GetName(), "Collector",

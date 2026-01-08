@@ -25,9 +25,9 @@ void mtsGraphLayoutQtNodes::Clear(void)
     Edges.clear();
 }
 
-void mtsGraphLayoutQtNodes::AddNode(mtsComponent * component)
+void mtsGraphLayoutQtNodes::AddNode(const std::string & component)
 {
-    if (!component || Nodes.find(component) != Nodes.end()) {
+    if (Nodes.find(component) != Nodes.end()) {
         return;
     }
     
@@ -40,7 +40,7 @@ void mtsGraphLayoutQtNodes::AddNode(mtsComponent * component)
     Nodes[component] = node;
 }
 
-void mtsGraphLayoutQtNodes::RemoveNode(mtsComponent * component)
+void mtsGraphLayoutQtNodes::RemoveNode(const std::string & component)
 {
     Nodes.erase(component);
     
@@ -55,9 +55,9 @@ void mtsGraphLayoutQtNodes::RemoveNode(mtsComponent * component)
     }
 }
 
-void mtsGraphLayoutQtNodes::AddEdge(mtsComponent * from, mtsComponent * to)
+void mtsGraphLayoutQtNodes::AddEdge(const std::string & from, const std::string & to)
 {
-    if (!from || !to || from == to) {
+    if (from == to) {
         return;
     }
     
@@ -149,7 +149,7 @@ void mtsGraphLayoutQtNodes::IntegrateForces(void)
     }
 }
 
-QPointF mtsGraphLayoutQtNodes::GetPosition(mtsComponent * component) const
+QPointF mtsGraphLayoutQtNodes::GetPosition(std::string & component) const
 {
     auto it = Nodes.find(component);
     if (it != Nodes.end()) {

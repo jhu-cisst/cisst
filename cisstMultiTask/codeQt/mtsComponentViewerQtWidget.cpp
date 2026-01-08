@@ -29,12 +29,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <QPointF>
 #include <QVariant>
 
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewerQtWidget, mtsComponent, std::string);
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewerQtWidget, mtsTaskFromSignal, std::string);
 
 mtsComponentViewerQtWidget::mtsComponentViewerQtWidget(const std::string & componentName):
-    mtsComponent(componentName)
+    mtsTaskFromSignal(componentName)
 {
-    EnableDynamicComponentManagement();
+    mtsInterfaceRequired * required = EnableDynamicComponentManagement();
+    if (required) {
+        ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewerQtWidget::AddComponentHandler, this);
+        // ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewerQtWidget::ChangeStateHandler, this);
+        ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewerQtWidget::AddConnectionHandler, this);
+        // ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewerQtWidget::RemoveConnectionHandler, this);
+    } else {
+        cmnThrow(std::runtime_error("mtsComponentViewer constructor: failed to enable dynamic component composition"));
+    }
+
     setupUi();
 }
 
@@ -55,6 +64,12 @@ void mtsComponentViewerQtWidget::Startup(void)
 
 void mtsComponentViewerQtWidget::Cleanup(void)
 {
+}
+
+void mtsComponentViewerQtWidget::Run(void)
+{
+    ProcessQueuedCommands();
+    ProcessQueuedEvents();
 }
 
 void mtsComponentViewerQtWidget::setupUi(void)
@@ -82,39 +97,55 @@ void mtsComponentViewerQtWidget::setupUi(void)
     // Setup layout timer
     LayoutTimer = new QTimer(this);
     connect(LayoutTimer, &QTimer::timeout, this, &mtsComponentViewerQtWidget::updateLayout);
-    LayoutRunning = false;
+    LayoutRunning = true;
     LayoutIterations = 0;
-    SetLayoutUpdateRate(30.0); // 30 Hz default
+    SetLayoutUpdateRate(1.0); // 1 Hz default
     show();
+    LayoutTimer->start();
 }
 
-void mtsComponentViewerQtWidget::AddComponent(mtsComponent * component)
+void mtsComponentViewerQtWidget::AddComponentHandler(const mtsDescriptionComponent & component_description)
 {
-    if (!component) {
-        return;
-    }
-
+    std::cerr << "Handler: added component: " << component_description << std::endl;
     // Create node model for this component
-    Registry->registerModel<mtsComponentModelQtNodes>(
-        [component]() {
-            return std::make_unique<mtsComponentModelQtNodes>(component);
-        },
-        component->GetName().c_str()
-    );
+    const auto component_name = component_description.ComponentName;
+    std::vector<std::string> interfacesRequired, interfacesProvided;
+    ManagerComponentServices->GetNamesOfInterfaces(component_description.ProcessName, component_name,
+                                                   interfacesRequired, interfacesProvided);
+    std::cerr << "  Interfaces Required: " << interfacesRequired.size() << ", Provided: " << interfacesProvided.size() << std::endl;
 
+    Registry->registerModel<mtsComponentModelQtNodes>(
+                                                      [component_name, interfacesRequired, interfacesProvided]() {
+                                                          auto model = std::make_unique<mtsComponentModelQtNodes>(component_name);
+                                                          for (const auto & interfaceName : interfacesRequired) {
+                                                              model->AddInterfaceRequired(interfaceName);
+                                                          }
+                                                          for (const auto & interfaceName : interfacesProvided) {
+                                                              model->AddInterfaceProvided(interfaceName);
+                                                          }
+                                                          return model;
+                                                      }
+                                                      );
+    
     // Add node to graph
-    QtNodes::NodeId nodeId = GraphModel->addNode(component->GetName().c_str());
+    QtNodes::NodeId nodeId = GraphModel->addNode(QString::fromStdString(component_name));
+    std::cerr << "  Added node to graph: " << component_name << " ID: " << nodeId << std::endl;
 
     // Add to layout engine
-    Layout.AddNode(component);
+    Layout.AddNode(component_name);
 
-    Components.push_back(component);
-    NodeIds[component] = nodeId;
+    m_components.push_back(component_name);
+    NodeIds[component_name] = nodeId;
 
     // Update layout
     if (LayoutRunning) {
         updateNodePositions();
     }
+}
+
+void mtsComponentViewerQtWidget::AddConnectionHandler(const mtsDescriptionConnection & connection_description)
+{
+    std::cerr << "Handler: added connection: " << connection_description << std::endl;
 }
 
 void mtsComponentViewerQtWidget::updateLayout(void)
@@ -138,12 +169,13 @@ void mtsComponentViewerQtWidget::SetLayoutUpdateRate(double rateHz)
 void mtsComponentViewerQtWidget::updateNodePositions(void)
 {
     // Move nodes in the graph model to match layout positions
-    for (auto component : Components) {
+    for (auto component : m_components) {
         auto it = NodeIds.find(component);
         if (it == NodeIds.end()) continue;
         unsigned int nid = it->second;
         auto pos = Layout.GetPosition(component);
         // set the NodeRole::Position role on the graph model
+        std::cerr << component << " x: " << pos.x() << " y: " << pos.y() << std::endl;
         GraphModel->setNodeData(nid, QtNodes::NodeRole::Position, QVariant::fromValue(QPointF(pos.x(), pos.y())));
     }
 }

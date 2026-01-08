@@ -22,9 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QPointF>
 #include <map>
 #include <vector>
-
-// Forward declarations
-class mtsComponent;
+#include <string>
 
 class mtsGraphLayoutQtNodes {
 public:
@@ -35,15 +33,15 @@ public:
     };
 
     void Clear(void);
-    void AddNode(mtsComponent * component);
-    void RemoveNode(mtsComponent * component);
-    void AddEdge(mtsComponent * from, mtsComponent * to);
+    void AddNode(const std::string & component);
+    void RemoveNode(const std::string & component);
+    void AddEdge(const std::string & from, const std::string & to);
     
     // Run one iteration of force-directed layout
     void Step(void);
     
     // Get current position for a node
-    QPointF GetPosition(mtsComponent * component) const;
+    QPointF GetPosition(std::string &  component) const;
 
     // Parameters
     double SpringK = 0.1;        // Spring constant
@@ -57,8 +55,8 @@ protected:
     void ApplyRepulsionForces(void);
     void IntegrateForces(void);
 
-    std::map<mtsComponent *, Node> Nodes;
-    std::vector<std::pair<mtsComponent *, mtsComponent *>> Edges;
+    std::map<std::string, Node> Nodes;
+    std::vector<std::pair<std::string, std::string>> Edges;
 };
 
 #endif // _mtsGraphLayoutQtNodes_h
