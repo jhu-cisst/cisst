@@ -41,7 +41,7 @@ public:
     void Step(void);
     
     // Get current position for a node
-    QPointF GetPosition(std::string &  component) const;
+    QPointF GetPosition(const std::string & component) const;
 
     // Parameters
     double SpringK = 0.1;        // Spring constant

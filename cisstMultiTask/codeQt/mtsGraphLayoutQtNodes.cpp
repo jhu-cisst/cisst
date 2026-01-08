@@ -149,7 +149,7 @@ void mtsGraphLayoutQtNodes::IntegrateForces(void)
     }
 }
 
-QPointF mtsGraphLayoutQtNodes::GetPosition(std::string & component) const
+QPointF mtsGraphLayoutQtNodes::GetPosition(const std::string & component) const
 {
     auto it = Nodes.find(component);
     if (it != Nodes.end()) {
