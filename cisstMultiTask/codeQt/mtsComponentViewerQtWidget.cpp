@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QtNodes/GraphicsView>
 #include <QtNodes/NodeDelegateModelRegistry>
 #include <QtNodes/DataFlowGraphModel>
+#include <QtNodes/DataFlowGraphicsScene>
 #include <QVBoxLayout>
 #include <QPointF>
 #include <QVariant>
@@ -46,10 +47,10 @@ void mtsComponentViewerQtWidget::Startup(void)
     for (const auto & processName : ManagerComponentServices->GetNamesOfProcesses()) {
         std::cerr << "Process: " << processName << std::endl;
         for (const auto & componentName :
-             ManagerComponentServices->GetNamesOfComponents(processName)) {
+                 ManagerComponentServices->GetNamesOfComponents(processName)) {
             std::cerr << "  Component: " << componentName << std::endl;
         }
-    }         
+    }
 }
 
 void mtsComponentViewerQtWidget::Cleanup(void)
@@ -58,13 +59,18 @@ void mtsComponentViewerQtWidget::Cleanup(void)
 
 void mtsComponentViewerQtWidget::setupUi(void)
 {
+    Registry = std::make_shared<QtNodes::NodeDelegateModelRegistry>();
+    GraphModel = new QtNodes::DataFlowGraphModel(Registry);
+    Scene = new QtNodes::DataFlowGraphicsScene(*GraphModel);
+    View = new QtNodes::GraphicsView(Scene);
+
     QVBoxLayout * layout = new QVBoxLayout();
     this->setLayout(layout);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(View);
 
     QtNodes::ConnectionStyle::setConnectionStyle(
-        R"(
+                                                 R"(
   {
     "ConnectionStyle": {
       "UseDataDefinedColors": true,
@@ -79,6 +85,7 @@ void mtsComponentViewerQtWidget::setupUi(void)
     LayoutRunning = false;
     LayoutIterations = 0;
     SetLayoutUpdateRate(30.0); // 30 Hz default
+    show();
 }
 
 void mtsComponentViewerQtWidget::AddComponent(mtsComponent * component)
@@ -135,8 +142,8 @@ void mtsComponentViewerQtWidget::updateNodePositions(void)
         auto it = NodeIds.find(component);
         if (it == NodeIds.end()) continue;
         unsigned int nid = it->second;
-    auto pos = Layout.GetPosition(component);
-    // set the NodeRole::Position role on the graph model
-    GraphModel->setNodeData(nid, QtNodes::NodeRole::Position, QVariant::fromValue(QPointF(pos.x(), pos.y())));
+        auto pos = Layout.GetPosition(component);
+        // set the NodeRole::Position role on the graph model
+        GraphModel->setNodeData(nid, QtNodes::NodeRole::Position, QVariant::fromValue(QPointF(pos.x(), pos.y())));
     }
 }

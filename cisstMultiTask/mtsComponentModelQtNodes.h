@@ -19,8 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsComponentModelQtNodes_h
 #define _mtsComponentModelQtNodes_h
 
-#include <QtNodes/NodeDelegateModel>
 #include <cisstMultiTask/mtsComponent.h>
+
+#include <QtNodes/NodeDelegateModel>
 
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>

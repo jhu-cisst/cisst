@@ -50,7 +50,7 @@ public:
 
     void AddComponent(mtsComponent * component);
     void AddConnection(mtsComponent * client, const std::string & requiredInterface,
-                      mtsComponent * server, const std::string & providedInterface);
+                       mtsComponent * server, const std::string & providedInterface);
 
     // Layout control
     void StartLayout(void);
@@ -69,13 +69,14 @@ protected:
     QtNodes::GraphicsView * View;
 
     // Layout objects
-        mtsGraphLayoutQtNodes Layout;
+    mtsGraphLayoutQtNodes Layout;
     QTimer * LayoutTimer;
     bool LayoutRunning;
     int LayoutIterations;
 
     // Keep track of components and their node IDs
     std::vector<mtsComponent *> Components;
+    
     // Keep NodeId as an unsigned int in the public header to avoid pulling
     // QtNodes types into all translation units; the implementation will use
     // QtNodes::NodeId where needed.

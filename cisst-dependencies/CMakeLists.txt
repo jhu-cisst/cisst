@@ -109,18 +109,18 @@ if (CISST_HAS_QT5)
       CMAKE_ARGS
         -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+        -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstQtNodes
         -DBUILD_TESTING:BOOL=OFF
         -DBUILD_DOCS:BOOL=OFF
         -DBUILD_EXAMPLES:BOOL=OFF
         -DUSE_QT6:BOOL=OFF
-      INSTALL_DIR ${cisst_BINARY_DIR}
+      INSTALL_DIR ${cisst_BINARY_DIR}/cisstQtNodes
       UPDATE_COMMAND ""
     )
     
     # Set variables pointing to the install dir so downstream code can use QtNode
-    set (QTNODES_INCLUDE_DIR "${cisst_BINARY_DIR}/include")
-    set (QTNODES_LIBRARY_DIRS "${cisst_BINARY_DIR}/lib")
+    set (QTNODES_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstQtNodes/include")
+    set (QTNODES_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstQtNodes/lib")
     set (QTNODES_LIBRARIES QtNodes)
     
     set (QTNODES_INCLUDE_DIR ${QTNODES_INCLUDE_DIR} PARENT_SCOPE)
@@ -186,7 +186,7 @@ if (CISST_HAS_FLTK)
         set (FLTK_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstFltk/include")
         set (FLTK_INCLUDE_DIR ${FLTK_INCLUDE_DIR} PARENT_SCOPE)
 
-	      set (FLTK_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstFLTK/lib")
+        set (FLTK_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstFLTK/lib")
         set (FLTK_LIBRARY_DIRS ${FLTK_LIBRARY_DIRS} PARENT_SCOPE)
 
         if (WIN32)
@@ -202,11 +202,11 @@ if (CISST_HAS_FLTK)
             set (FLTK_LIBRARIES ${FLTK_LIBRARIES} ${X11_LIBRARIES} ${FLTK_MATH_LIBRARY})
           endif()
 
-	      endif (WIN32)
+        endif (WIN32)
         set (FLTK_LIBRARIES ${FLTK_LIBRARIES} PARENT_SCOPE)
 
-	      set (FLTK_FLUID_EXECUTABLE "${cisst_BINARY_DIR}/cisstFltk/bin/fluid${CMAKE_EXECUTABLE_SUFFIX}")
-	      set (FLTK_FLUID_EXECUTABLE ${FLTK_FLUID_EXECUTABLE} PARENT_SCOPE)
+        set (FLTK_FLUID_EXECUTABLE "${cisst_BINARY_DIR}/cisstFltk/bin/fluid${CMAKE_EXECUTABLE_SUFFIX}")
+        set (FLTK_FLUID_EXECUTABLE ${FLTK_FLUID_EXECUTABLE} PARENT_SCOPE)
 
         set (FLTK_FOUND ON)
         set (FLTK_FOUND ON PARENT_SCOPE)
