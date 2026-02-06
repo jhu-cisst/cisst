@@ -388,10 +388,23 @@ if (CISST_HAS_JSON)
   set (JSON_LIBRARY_DIRS ${JSON_LIBRARY_DIRS} PARENT_SCOPE)
   set (JSON_LIBRARIES ${JSON_LIBRARIES} PARENT_SCOPE)
 
-  cisst_set_package_settings (cisstCommon JSON INCLUDE_DIRECTORIES JSON_INCLUDE_DIR)
-  cisst_set_package_settings (cisstCommon JSON LIBRARIES           JSON_LIBRARIES)
   cisst_set_package_settings (cisstCommon JSON LINK_DIRECTORIES    JSON_LIBRARY_DIRS)
-
-else (CISST_HAS_JSON)
-  cisst_unset_all_package_settings (cisstCommon JSON)
 endif (CISST_HAS_JSON)
+
+# Support for Graphviz
+find_package (PkgConfig REQUIRED)
+pkg_check_modules (GRAPHVIZ libgvc libcgraph libcdt)
+
+if (GRAPHVIZ_FOUND)
+  option (CISST_HAS_GRAPHVIZ "Is Graphviz available for layout and DOT export" ON)
+  mark_as_advanced (CISST_HAS_GRAPHVIZ)
+
+  cisst_set_package_settings (cisstGraphviz GRAPHVIZ INCLUDE_DIRECTORIES GRAPHVIZ_INCLUDE_DIRS)
+  cisst_set_package_settings (cisstGraphviz GRAPHVIZ LIBRARIES           GRAPHVIZ_LIBRARIES)
+  cisst_set_package_settings (cisstGraphviz GRAPHVIZ LINK_DIRECTORIES    GRAPHVIZ_LIBRARY_DIRS)
+else ()
+  option (CISST_HAS_GRAPHVIZ "Is Graphviz available for layout and DOT export" OFF)
+endif ()
+
+
+

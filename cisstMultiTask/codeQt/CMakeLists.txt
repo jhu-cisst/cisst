@@ -16,6 +16,7 @@ project (cisstMultiTaskQt)
 # set directories for this project
 cisst_set_directories (cisstQt)
 cisst_set_directories (cisstQtNodes)
+cisst_set_directories (cisstGraphviz)
 
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
@@ -34,6 +35,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 cisstMultiTask
                    SETTINGS     cisstQt
                                 cisstQtNodes
+                                cisstGraphviz
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorFactoryQtWidget.cpp
                                 mtsMessageQtWidget.cpp
@@ -51,9 +53,8 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFunction.cpp
                                 mtsQtWidgetEvent.cpp
                                 mtsQtApplication.cpp
-                                mtsComponentViewerQtWidget.cpp
                                 mtsComponentModelQtNodes.cpp
-                                mtsGraphLayoutQtNodes.cpp
+                                mtsComponentViewerQtWidget.cpp
                    HEADER_FILES mtsForwardDeclarationsQt.h
                                 mtsCollectorFactoryQtWidget.h
                                 mtsMessageQtWidget.h
@@ -71,9 +72,8 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFunction.h
                                 mtsQtWidgetEvent.h
                                 mtsQtApplication.h
-                                mtsComponentViewerQtWidget.h
                                 mtsComponentModelQtNodes.h
-                                mtsGraphLayoutQtNodes.h
+                                mtsComponentViewerQtWidget.h
                                 mtsExportQt.h)
 
 # link against Qt libraries
