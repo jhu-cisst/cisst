@@ -22,8 +22,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 
+#include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
+
 #include <QTimer>
 #include <QWidget>
+
+class QToolBar;
 
 namespace QtNodes {
 class NodeDelegateModelRegistry;
@@ -66,6 +71,8 @@ protected slots:
   //                    providedInterface);
 
 protected:
+  QToolBar *ToolBar;
+
   void setupUi(void);
 
   // Qt Nodes objects
@@ -87,6 +94,16 @@ protected:
       m_provided_interface_to_port;
   std::map<std::string, std::map<std::string, unsigned int>>
       m_required_interface_to_port;
+
+  // Cache for rebuilding graph
+  std::vector<mtsDescriptionComponent> m_component_infos;
+  std::vector<mtsDescriptionConnection> m_connection_infos;
+
+  bool m_showSystemInterfaces;
+  void UpdateGraph(void);
+
+protected slots:
+  void onToggleSystemInterfaces(bool checked);
 
 private:
   // no copy constructor
