@@ -395,21 +395,22 @@ if (CISST_HAS_JSON)
 endif (CISST_HAS_JSON)
 
 # Support for Graphviz
-find_package (PkgConfig REQUIRED)
-pkg_check_modules (GRAPHVIZ libgvc libcgraph libcdt)
+if (NOT WIN32)
+  find_package (PkgConfig REQUIRED)
+  pkg_check_modules (GRAPHVIZ libgvc libcgraph libcdt)
 
-if (GRAPHVIZ_FOUND)
-  cisst_set_package_settings (cisstGraphviz GRAPHVIZ INCLUDE_DIRECTORIES GRAPHVIZ_INCLUDE_DIRS)
-  cisst_set_package_settings (cisstGraphviz GRAPHVIZ LIBRARIES           GRAPHVIZ_LIBRARIES)
-  cisst_set_package_settings (cisstGraphviz GRAPHVIZ LINK_DIRECTORIES    GRAPHVIZ_LIBRARY_DIRS)
-  # Mark that we have graphviz for the main cisst CMakeLists.txt
-  set (CISST_HAS_GRAPHVIZ ON PARENT_SCOPE)
-else ()
-  set (CISST_HAS_GRAPHVIZ OFF PARENT_SCOPE)
-  if (CISST_HAS_QTNODES)
-    message (FATAL_ERROR "Graphviz is required when CISST_HAS_QTNODES is ON. Please install it with: sudo apt install libgraphviz-dev")
+  if (GRAPHVIZ_FOUND)
+    cisst_set_package_settings (cisstGraphviz GRAPHVIZ INCLUDE_DIRECTORIES GRAPHVIZ_INCLUDE_DIRS)
+    cisst_set_package_settings (cisstGraphviz GRAPHVIZ LIBRARIES           GRAPHVIZ_LIBRARIES)
+    cisst_set_package_settings (cisstGraphviz GRAPHVIZ LINK_DIRECTORIES    GRAPHVIZ_LIBRARY_DIRS)
+    # Mark that we have graphviz for the main cisst CMakeLists.txt
+    set (CISST_HAS_GRAPHVIZ ON PARENT_SCOPE)
+  else ()
+    set (CISST_HAS_GRAPHVIZ OFF PARENT_SCOPE)
+    if (CISST_HAS_QTNODES)
+      message (FATAL_ERROR "Graphviz is required when CISST_HAS_QTNODES is ON. Please install it with: sudo apt install libgraphviz-dev")
+    endif ()
   endif ()
-endif ()
-
+endif (NOT WIN32)
 
 
