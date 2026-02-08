@@ -19,7 +19,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libxml2-dev libjsoncpp-dev qtbase5-dev qtbase5-dev-tools qt5-qmake-bin libqt5xmlpatterns5-dev gfortran-9
+        sudo apt-get install libxml2-dev libjsoncpp-dev qtbase5-dev qtbase5-dev-tools qt5-qmake-bin libqt5xmlpatterns5-dev gfortran-9 libgraphviz-dev
 
     - name: Download cisstNetlib
       run: |
