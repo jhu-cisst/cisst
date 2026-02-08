@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-02-18
 
-  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -80,6 +80,9 @@ http://www.cisst.org/cisst/license.txt.
 
 // Using Qt5 or not
 #cmakedefine01 CISST_HAS_QT5
+
+// Using QtNodes or not
+#cmakedefine01 CISST_HAS_QTNODES
 
 // Any version of Qt
 #cmakedefine01 CISST_HAS_QT

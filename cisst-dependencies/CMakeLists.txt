@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -339,6 +339,9 @@ if (CISST_HAS_JSON)
       set (JSON_LIBRARIES "${JSONCPP_LIBRARIES}")
       set (JSON_FOUND ON PARENT_SCOPE)
       set (JSON_USE_SYSTEM_VERSION ON PARENT_SCOPE)
+
+      cisst_set_package_settings (cisstCommon JSON INCLUDE_DIRECTORIES JSON_INCLUDE_DIR)
+      cisst_set_package_settings (cisstCommon JSON LIBRARIES           JSON_LIBRARIES)
     endif (JSONCPP_FOUND)
   endif (WIN32 OR APPLE)
 
@@ -396,14 +399,16 @@ find_package (PkgConfig REQUIRED)
 pkg_check_modules (GRAPHVIZ libgvc libcgraph libcdt)
 
 if (GRAPHVIZ_FOUND)
-  option (CISST_HAS_GRAPHVIZ "Is Graphviz available for layout and DOT export" ON)
-  mark_as_advanced (CISST_HAS_GRAPHVIZ)
-
   cisst_set_package_settings (cisstGraphviz GRAPHVIZ INCLUDE_DIRECTORIES GRAPHVIZ_INCLUDE_DIRS)
   cisst_set_package_settings (cisstGraphviz GRAPHVIZ LIBRARIES           GRAPHVIZ_LIBRARIES)
   cisst_set_package_settings (cisstGraphviz GRAPHVIZ LINK_DIRECTORIES    GRAPHVIZ_LIBRARY_DIRS)
+  # Mark that we have graphviz for the main cisst CMakeLists.txt
+  set (CISST_HAS_GRAPHVIZ ON PARENT_SCOPE)
 else ()
-  option (CISST_HAS_GRAPHVIZ "Is Graphviz available for layout and DOT export" OFF)
+  set (CISST_HAS_GRAPHVIZ OFF PARENT_SCOPE)
+  if (CISST_HAS_QTNODES)
+    message (FATAL_ERROR "Graphviz is required when CISST_HAS_QTNODES is ON. Please install it with: sudo apt install libgraphviz-dev")
+  endif ()
 endif ()
 
 
