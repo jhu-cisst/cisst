@@ -40,13 +40,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cgraph.h>
 #include <gvc.h>
 #include <set>
+#include <algorithm>
 
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewerQtWidget,
                                       mtsTaskFromSignal, std::string);
 
 mtsComponentViewerQtWidget::mtsComponentViewerQtWidget(
                                                        const std::string &componentName)
-    : mtsTaskFromSignal(componentName), m_showSystemInterfaces(false) {
+    : mtsTaskFromSignal(componentName), m_showSystemComponents(false), m_showROSComponents(true) {
     // Register NodeId and ConnectionId for Qt signal/slot connections
     qRegisterMetaType<QtNodes::NodeId>("NodeId");
     qRegisterMetaType<QtNodes::ConnectionId>("ConnectionId");
@@ -73,6 +74,28 @@ void mtsComponentViewerQtWidget::Configure(
                                            const std::string &CMN_UNUSED(filename)) {}
 
 void mtsComponentViewerQtWidget::Startup(void) {
+    // Query existing components and connections before starting event monitoring
+    auto processNames = ManagerComponentServices->GetNamesOfProcesses();
+    
+    for (const auto &processName : processNames) {
+        auto componentNames = ManagerComponentServices->GetNamesOfComponents(processName);
+        
+        for (const auto &componentName : componentNames) {
+            mtsDescriptionComponent desc;
+            desc.ProcessName = processName;
+            desc.ComponentName = componentName;
+            m_component_infos.push_back(desc);
+        }
+    }
+    
+    // Query existing connections
+    auto connections = ManagerComponentServices->GetListOfConnections();
+    m_connection_infos = connections;
+    
+    // Populate the graph with existing components and connections
+    UpdateGraph();
+    
+    // Auto-layout the graph after a short delay to ensure rendering is complete
     QTimer::singleShot(1000, this, &mtsComponentViewerQtWidget::onAutoLayout);
 }
 
@@ -99,16 +122,23 @@ void mtsComponentViewerQtWidget::setupUi(void) {
     QAction *actionExportDOT = ToolBar->addAction(tr("Export as DOT..."));
     ToolBar->addSeparator();
     QAction *actionToggleSystem =
-        ToolBar->addAction(tr("Show System Interfaces"));
+        ToolBar->addAction(tr("System Components"));
     actionToggleSystem->setCheckable(true);
     actionToggleSystem->setChecked(false);
+    
+    QAction *actionToggleROS =
+        ToolBar->addAction(tr("ROS Components"));
+    actionToggleROS->setCheckable(true);
+    actionToggleROS->setChecked(true);
 
     connect(actionAutoLayout, &QAction::triggered, this,
             &mtsComponentViewerQtWidget::onAutoLayout);
     connect(actionExportDOT, &QAction::triggered, this,
             &mtsComponentViewerQtWidget::onExportDOT);
     connect(actionToggleSystem, &QAction::toggled, this,
-            &mtsComponentViewerQtWidget::onToggleSystemInterfaces);
+            &mtsComponentViewerQtWidget::onToggleSystemComponents);
+    connect(actionToggleROS, &QAction::toggled, this,
+            &mtsComponentViewerQtWidget::onToggleROSComponents);
 
     layout->addWidget(ToolBar);
     layout->addWidget(View);
@@ -185,8 +215,13 @@ void mtsComponentViewerQtWidget::onExportDOT(void) {
     gvFreeContext(gvc);
 }
 
-void mtsComponentViewerQtWidget::onToggleSystemInterfaces(bool checked) {
-    m_showSystemInterfaces = checked;
+void mtsComponentViewerQtWidget::onToggleSystemComponents(bool checked) {
+    m_showSystemComponents = checked;
+    UpdateGraph();
+}
+
+void mtsComponentViewerQtWidget::onToggleROSComponents(bool checked) {
+    m_showROSComponents = checked;
     UpdateGraph();
 }
 
@@ -276,8 +311,18 @@ void mtsComponentViewerQtWidget::AddComponentHandler(
     QMetaObject::invokeMethod(
                               this,
                               [=]() {
-                                  m_component_infos.push_back(component_description);
-                                  UpdateGraph();
+                                  // Check if component already exists to prevent duplicates
+                                  auto it = std::find_if(m_component_infos.begin(), m_component_infos.end(),
+                                      [&](const mtsDescriptionComponent &desc) {
+                                          return desc.ProcessName == component_description.ProcessName &&
+                                                 desc.ComponentName == component_description.ComponentName;
+                                      });
+                                  
+                                  // Only add if not found
+                                  if (it == m_component_infos.end()) {
+                                      m_component_infos.push_back(component_description);
+                                      UpdateGraph();
+                                  }
                               },
                               Qt::QueuedConnection);
 }
@@ -377,23 +422,47 @@ void mtsComponentViewerQtWidget::UpdateGraph(void) {
     // Re-add components
     for (const auto &desc : m_component_infos) {
         std::string name = desc.ComponentName;
-        bool isSystem =
-            (name == "ExecIn" || name == "ExecOut" ||
-             name == "InternalInterfaceProvided");
+        
+        // Check if this is a system component using mtsManagerComponentBase helpers
+        bool isManagerComponent = mtsManagerComponentBase::IsManagerComponent(name);
+        bool isExecInterface = (name == "ExecIn" || name == "ExecOut");
+        bool isInternalInterface = (name == "InternalInterfaceProvided");
+        bool isSystem = isManagerComponent || isExecInterface || isInternalInterface;
+
+        // Check if this is a ROS component by examining its class name
+        bool isROSComponent = false;
+        auto componentClasses = ManagerComponentServices->GetListOfComponentClasses(desc.ProcessName);
+        for (const auto &compClass : componentClasses) {
+            if (compClass.ClassName == name) {
+                // Check if class name contains "ROS" (case-insensitive)
+                std::string className = compClass.ClassName;
+                std::transform(className.begin(), className.end(), className.begin(), ::toupper);
+                if (className.find("ROS") != std::string::npos) {
+                    isROSComponent = true;
+                    break;
+                }
+            }
+        }
 
         bool show = true;
+        
+        // Apply system component filtering
         if (isSystem) {
-            if (m_showSystemInterfaces) {
+            if (m_showSystemComponents) {
                 show = true;
             } else {
                 // Exception: Show ExecIn/ExecOut if connected
-                if ((name == "ExecIn" || name == "ExecOut") &&
-                    connectedComponents.count(name)) {
+                if (isExecInterface && connectedComponents.count(name)) {
                     show = true;
                 } else {
                     show = false;
                 }
             }
+        }
+        
+        // Apply ROS component filtering (only if not already hidden by system filter)
+        if (show && isROSComponent && !m_showROSComponents) {
+            show = false;
         }
 
         if (!show)

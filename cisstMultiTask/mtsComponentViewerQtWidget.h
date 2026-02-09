@@ -102,11 +102,13 @@ class CISST_EXPORT mtsComponentViewerQtWidget : public QWidget,
     std::vector<mtsDescriptionComponent> m_component_infos;
     std::vector<mtsDescriptionConnection> m_connection_infos;
 
-    bool m_showSystemInterfaces;
+    bool m_showSystemComponents;
+    bool m_showROSComponents;
     void UpdateGraph(void);
 
  protected slots:
-    void onToggleSystemInterfaces(bool checked);
+    void onToggleSystemComponents(bool checked);
+    void onToggleROSComponents(bool checked);
 
  private:
     // no copy constructor
