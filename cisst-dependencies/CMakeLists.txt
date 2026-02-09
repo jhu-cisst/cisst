@@ -325,10 +325,7 @@ option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some
 
 if (CISST_HAS_JSON)
 
-  if (WIN32 OR APPLE)
-    # On Windows, no need to use PkgConfig
-    set(JSONCPP_FOUND OFF)
-  else (WIN32 OR APPLE)
+  if (NOT WIN32 OR VCPKG_TOOLCHAIN)
     # try to find an installed version
     find_package (PkgConfig REQUIRED)
     pkg_check_modules(JSONCPP jsoncpp)
@@ -339,8 +336,8 @@ if (CISST_HAS_JSON)
       set (JSON_LIBRARIES "${JSONCPP_LIBRARIES}")
       set (JSON_FOUND ON PARENT_SCOPE)
       set (JSON_USE_SYSTEM_VERSION ON PARENT_SCOPE)
-      endif (JSONCPP_FOUND)
-  endif (WIN32 OR APPLE)
+    endif (JSONCPP_FOUND)
+  endif (NOT WIN32 OR VCPKG_TOOLCHAIN)
 
   if (NOT JSONCPP_FOUND)
 
@@ -397,7 +394,7 @@ else (CISST_HAS_JSON)
 endif (CISST_HAS_JSON)
 
 # Support for Graphviz
-if (NOT WIN32)
+if (NOT WIN32 OR VCPKG_TOOLCHAIN)
   find_package (PkgConfig REQUIRED)
   pkg_check_modules (GRAPHVIZ libgvc libcgraph libcdt)
 
@@ -413,6 +410,6 @@ if (NOT WIN32)
       message (FATAL_ERROR "Graphviz is required when CISST_HAS_QTNODES is ON. Please install it with: sudo apt install libgraphviz-dev")
     endif ()
   endif ()
-endif (NOT WIN32)
+endif (NOT WIN32 OR VCPKG_TOOLCHAIN)
 
 
