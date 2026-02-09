@@ -107,7 +107,7 @@ mtsComponentModelQtNodes::outData(QtNodes::PortIndex) {
 
 QWidget *mtsComponentModelQtNodes::embeddedWidget(void) {
     if (!m_widget) {
-        auto label = new QLabel(QString::fromStdString(m_name));
+        auto label = new QLabel(QString::fromStdString(m_state)); // Display state initially
         label->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
         m_widget = label;
     }
@@ -122,4 +122,14 @@ bool mtsComponentModelQtNodes::AddInterfaceProvided(const std::string &name) {
 bool mtsComponentModelQtNodes::AddInterfaceRequired(const std::string &name) {
     m_interfaces_required.push_back(name);
     return true;
+}
+
+void mtsComponentModelQtNodes::SetState(const std::string &state) {
+    m_state = state;
+    if (m_widget) {
+        auto label = qobject_cast<QLabel *>(m_widget);
+        if (label) {
+            label->setText(QString::fromStdString(m_state));
+        }
+    }
 }

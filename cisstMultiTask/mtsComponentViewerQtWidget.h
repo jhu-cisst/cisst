@@ -68,6 +68,10 @@ class CISST_EXPORT mtsComponentViewerQtWidget : public QWidget,
         AddComponentHandler(const mtsDescriptionComponent &component_description);
     void
         AddConnectionHandler(const mtsDescriptionConnection &connection_description);
+    void
+        RemoveConnectionHandler(const mtsDescriptionConnection &connection_description);
+    void
+        ChangeStateHandler(const mtsComponentStateChange &state_change);
 
  protected:
     QToolBar *ToolBar;

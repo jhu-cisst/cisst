@@ -55,12 +55,12 @@ mtsComponentViewerQtWidget::mtsComponentViewerQtWidget(
     if (required) {
         ManagerComponentServices->AddComponentEventHandler(
                                                            &mtsComponentViewerQtWidget::AddComponentHandler, this);
-        // ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewerQtWidget::ChangeStateHandler,
-        // this);
+        ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewerQtWidget::ChangeStateHandler,
+                                                          this);
         ManagerComponentServices->AddConnectionEventHandler(
                                                             &mtsComponentViewerQtWidget::AddConnectionHandler, this);
-        // ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewerQtWidget::RemoveConnectionHandler,
-        // this);
+        ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewerQtWidget::RemoveConnectionHandler,
+                                                               this);
     } else {
         cmnThrow(std::runtime_error("mtsComponentViewer constructor: failed to "
                                     "enable dynamic component composition"));
@@ -294,6 +294,50 @@ void mtsComponentViewerQtWidget::AddConnectionHandler(
                               Qt::QueuedConnection);
 }
 
+void mtsComponentViewerQtWidget::RemoveConnectionHandler(
+                                                         const mtsDescriptionConnection &connection_description) {
+    // Use invokeMethod to ensure GUI updates happen in the GUI thread
+    QMetaObject::invokeMethod(
+                              this,
+                              [=]() {
+                                  // Locate and remove connection from m_connection_infos
+                                  // Since we don't have a unique ID for connection descriptions, we might need to filter
+                                  // For simplicity, we can rebuild the list or just remove matching entries.
+                                  // Better yet, just remove from m_connection_infos if we can match it.
+                                  // But UpdateGraph rebuilds everything from m_connection_infos, so we must remove it from there.
+
+                                  auto it = std::remove_if(m_connection_infos.begin(), m_connection_infos.end(),
+                                                           [&](const mtsDescriptionConnection &c) {
+                                                               return (c.Client.ComponentName == connection_description.Client.ComponentName &&
+                                                                       c.Client.InterfaceName == connection_description.Client.InterfaceName &&
+                                                                       c.Server.ComponentName == connection_description.Server.ComponentName &&
+                                                                       c.Server.InterfaceName == connection_description.Server.InterfaceName);
+                                                           });
+                                  if (it != m_connection_infos.end()) {
+                                      m_connection_infos.erase(it, m_connection_infos.end());
+                                      UpdateGraph();
+                                  }
+                              },
+                              Qt::QueuedConnection);
+}
+
+void mtsComponentViewerQtWidget::ChangeStateHandler(const mtsComponentStateChange &state_change) {
+    QMetaObject::invokeMethod(
+                              this,
+                              [=]() {
+                                  std::string name = state_change.ComponentName;
+                                  auto it = NodeIds.find(name);
+                                  if (it != NodeIds.end()) {
+                                      QtNodes::NodeId id = it->second;
+                                      auto cisstNode = GraphModel->delegateModel<mtsComponentModelQtNodes>(id);
+                                      if (cisstNode) {
+                                          cisstNode->SetState(mtsComponentState::EnumToString(state_change.NewState.State()));
+                                      }
+                                  }
+                              },
+                              Qt::QueuedConnection);
+}
+
 void mtsComponentViewerQtWidget::UpdateGraph(void) {
     if (!GraphModel)
         return;
@@ -335,11 +379,7 @@ void mtsComponentViewerQtWidget::UpdateGraph(void) {
         std::string name = desc.ComponentName;
         bool isSystem =
             (name == "ExecIn" || name == "ExecOut" ||
-             name == "InternalInterfaceProvided"); // Logic per user request
-        // User said "InternalInterfaceProvided" is identified by name? Component
-        // named that? Or Interface? "They are identified by name: "ExecIn",
-        // "ExecOut", "InternalIntefaceProvide"" Assuming these are COMPONENT names
-        // based on context (ExecIn/ExecOut are typical IO components).
+             name == "InternalInterfaceProvided");
 
         bool show = true;
         if (isSystem) {
@@ -363,10 +403,12 @@ void mtsComponentViewerQtWidget::UpdateGraph(void) {
         std::vector<std::string> interfacesRequired, interfacesProvided;
         ManagerComponentServices->GetNamesOfInterfaces(
                                                        desc.ProcessName, name, interfacesRequired, interfacesProvided);
+        auto state = ManagerComponentServices->ComponentGetState(desc);
 
         Registry->registerModel<mtsComponentModelQtNodes>(
-                                                          [name, interfacesRequired, interfacesProvided]() {
+                                                          [name, state, interfacesRequired, interfacesProvided]() {
                                                               auto model = std::make_unique<mtsComponentModelQtNodes>(name);
+                                                              model->SetState(mtsComponentState::EnumToString(state.State()));
                                                               for (const auto &interfaceName : interfacesRequired) {
                                                                   model->AddInterfaceRequired(interfaceName);
                                                               }

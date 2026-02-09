@@ -62,9 +62,11 @@ class CISST_EXPORT mtsComponentModelQtNodes
 
     bool AddInterfaceProvided(const std::string &name);
     bool AddInterfaceRequired(const std::string &name);
+    void SetState(const std::string &state);
 
  protected:
     std::string m_name;
+    std::string m_state;
     std::vector<std::string> m_interfaces_provided;
     std::vector<std::string> m_interfaces_required;
     QWidget *m_widget = nullptr;
