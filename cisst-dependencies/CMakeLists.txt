@@ -130,6 +130,10 @@ if (CISST_HAS_QT5)
     set (QTNODES_FOUND ON PARENT_SCOPE)
     set (QTNODES_FOUND ON)
 
+    install (DIRECTORY ${cisst_BINARY_DIR}/cisstQtNodes/
+             DESTINATION .
+             USE_SOURCE_PERMISSIONS
+             COMPONENT cisstCommon)
   endif ()
 
   # Save settings (so other cisst modules can pick them up)
