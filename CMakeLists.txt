@@ -203,6 +203,14 @@ endif (CMAKE_CL_64)
 # to include some CMake "use" files without polluting the environment
 add_subdirectory (cisst-dependencies)
 
+# Set C++ standard based on Qt dependency
+if (CISST_HAS_QTNODES)
+  set (CMAKE_CXX_STANDARD 17)
+else ()
+  set (CMAKE_CXX_STANDARD 14)
+endif ()
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+set (CMAKE_CXX_EXTENSIONS OFF)
 
 # Extra link flag if for Apple
 if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
