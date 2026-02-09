@@ -339,9 +339,6 @@ if (CISST_HAS_JSON)
       set (JSON_LIBRARIES "${JSONCPP_LIBRARIES}")
       set (JSON_FOUND ON PARENT_SCOPE)
       set (JSON_USE_SYSTEM_VERSION ON PARENT_SCOPE)
-
-      cisst_set_package_settings (cisstCommon JSON INCLUDE_DIRECTORIES JSON_INCLUDE_DIR)
-      cisst_set_package_settings (cisstCommon JSON LIBRARIES           JSON_LIBRARIES)
     endif (JSONCPP_FOUND)
   endif (WIN32 OR APPLE)
 
