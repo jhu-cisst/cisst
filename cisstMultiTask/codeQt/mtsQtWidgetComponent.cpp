@@ -30,6 +30,7 @@ mtsQtWidgetComponent::mtsQtWidgetComponent(const std::string & name):
     QWidget(),
     mtsComponent(name)
 {
+    mCategory = mtsComponentCategory::UI;
     QLayout* layout = new QVBoxLayout();
     TabWidget = new QTabWidget();
     TabWidget->setMovable(true);

@@ -86,10 +86,10 @@ protected:
 
     /*! Typedef for interface map */
     typedef struct {
-        //ConnectedInterfaceMapType InterfaceProvidedOrOutputMap;
-        //ConnectedInterfaceMapType InterfaceRequiredOrInputMap;
         InterfaceMapElementType InterfaceProvidedOrOutputMap;
         InterfaceMapElementType InterfaceRequiredOrInputMap;
+        mtsComponentCategory Category;
+        std::string ClassName;
     } InterfaceMapType;
 
     /*! Component map: a map of registered components in a process
@@ -257,11 +257,17 @@ public:
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
-    bool AddComponent(const std::string & processName, const std::string & componentName) override;
+    bool AddComponent(const std::string & processName,
+                      const std::string & componentName,
+                      const std::string & className,
+                      const mtsComponentCategory & componentCategory = mtsComponentCategory::USER) override;
 
     bool FindComponent(const std::string & processName, const std::string & componentName) const override;
 
     bool RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock = true) override;
+
+    void GetDescriptionsOfComponents(const std::string & processName,
+                                     std::vector<mtsDescriptionComponent> & descriptions) const override;
 
     //-------------------------------------------------------------------------
     //  Interface Management
@@ -319,7 +325,6 @@ public:
     /*! Get names of all components in a process */
     void GetNamesOfComponents(const std::string & processName,
                               std::vector<std::string>& namesOfComponents) const;
-
     /*! Get names of all provided interfaces in a component */
     void GetNamesOfInterfacesProvidedOrOutput(const std::string & processName,
                                               const std::string & componentName,

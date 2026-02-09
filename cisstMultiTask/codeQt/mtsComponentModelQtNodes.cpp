@@ -24,7 +24,9 @@ mtsComponentModelQtNodes::mtsComponentModelQtNodes(const std::string &name)
     : m_name(name) {}
 
 QString mtsComponentModelQtNodes::caption(void) const {
-    return QString::fromStdString(m_name);
+    return QString("%1 : %2")
+        .arg(QString::fromStdString(m_name),
+             QString::fromStdString(m_className));
 }
 
 QString mtsComponentModelQtNodes::name(void) const {
@@ -107,9 +109,10 @@ mtsComponentModelQtNodes::outData(QtNodes::PortIndex) {
 
 QWidget *mtsComponentModelQtNodes::embeddedWidget(void) {
     if (!m_widget) {
-        auto label = new QLabel(QString::fromStdString(m_state)); // Display state initially
+        auto label = new QLabel();
         label->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
         m_widget = label;
+        UpdateWidget();
     }
     return m_widget;
 }
@@ -124,12 +127,24 @@ bool mtsComponentModelQtNodes::AddInterfaceRequired(const std::string &name) {
     return true;
 }
 
+void mtsComponentModelQtNodes::SetClassName(const std::string &className) {
+    m_className = className;
+    Q_EMIT requestNodeUpdate();
+    UpdateWidget();
+}
+
 void mtsComponentModelQtNodes::SetState(const std::string &state) {
     m_state = state;
+    Q_EMIT requestNodeUpdate();
+    UpdateWidget();
+}
+
+void mtsComponentModelQtNodes::UpdateWidget(void) {
     if (m_widget) {
         auto label = qobject_cast<QLabel *>(m_widget);
         if (label) {
-            label->setText(QString::fromStdString(m_state));
+            QString text = QString::fromStdString(m_state);
+            label->setText(text);
         }
     }
 }

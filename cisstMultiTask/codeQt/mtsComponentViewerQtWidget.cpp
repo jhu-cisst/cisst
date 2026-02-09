@@ -47,13 +47,15 @@ CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewerQtWidget,
 
 mtsComponentViewerQtWidget::mtsComponentViewerQtWidget(
                                                        const std::string &componentName)
-    : mtsTaskFromSignal(componentName), m_showSystemComponents(false), m_showROSComponents(true) {
+    : mtsTaskFromSignal(componentName), m_showSystemComponents(false), m_showROSComponents(false), m_showUIComponents(false) {
+    mCategory = mtsComponentCategory::UI;
     // Register NodeId and ConnectionId for Qt signal/slot connections
     qRegisterMetaType<QtNodes::NodeId>("NodeId");
     qRegisterMetaType<QtNodes::ConnectionId>("ConnectionId");
 
     mtsInterfaceRequired *required = EnableDynamicComponentManagement();
     if (required) {
+        required->SetMailBoxAndArgumentQueuesSize(1024);
         ManagerComponentServices->AddComponentEventHandler(
                                                            &mtsComponentViewerQtWidget::AddComponentHandler, this);
         ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewerQtWidget::ChangeStateHandler,
@@ -78,12 +80,8 @@ void mtsComponentViewerQtWidget::Startup(void) {
     auto processNames = ManagerComponentServices->GetNamesOfProcesses();
     
     for (const auto &processName : processNames) {
-        auto componentNames = ManagerComponentServices->GetNamesOfComponents(processName);
-        
-        for (const auto &componentName : componentNames) {
-            mtsDescriptionComponent desc;
-            desc.ProcessName = processName;
-            desc.ComponentName = componentName;
+        auto descriptions = ManagerComponentServices->GetDescriptionsOfComponents(processName);
+        for (const auto &desc : descriptions) {
             m_component_infos.push_back(desc);
         }
     }
@@ -93,10 +91,11 @@ void mtsComponentViewerQtWidget::Startup(void) {
     m_connection_infos = connections;
     
     // Populate the graph with existing components and connections
-    UpdateGraph();
-    
-    // Auto-layout the graph after a short delay to ensure rendering is complete
-    QTimer::singleShot(1000, this, &mtsComponentViewerQtWidget::onAutoLayout);
+    QMetaObject::invokeMethod(this, [=]() {
+        UpdateGraph();
+        // Auto-layout the graph after a short delay to ensure rendering is complete
+        QTimer::singleShot(1000, this, &mtsComponentViewerQtWidget::onAutoLayout);
+    }, Qt::QueuedConnection);
 }
 
 void mtsComponentViewerQtWidget::Cleanup(void) {}
@@ -122,14 +121,19 @@ void mtsComponentViewerQtWidget::setupUi(void) {
     QAction *actionExportDOT = ToolBar->addAction(tr("Export as DOT..."));
     ToolBar->addSeparator();
     QAction *actionToggleSystem =
-        ToolBar->addAction(tr("System Components"));
+        ToolBar->addAction(tr("System"));
     actionToggleSystem->setCheckable(true);
     actionToggleSystem->setChecked(false);
     
     QAction *actionToggleROS =
-        ToolBar->addAction(tr("ROS Components"));
+        ToolBar->addAction(tr("ROS"));
     actionToggleROS->setCheckable(true);
-    actionToggleROS->setChecked(true);
+    actionToggleROS->setChecked(false);
+
+    QAction *actionToggleUI =
+        ToolBar->addAction(tr("UI"));
+    actionToggleUI->setCheckable(true);
+    actionToggleUI->setChecked(false);
 
     connect(actionAutoLayout, &QAction::triggered, this,
             &mtsComponentViewerQtWidget::onAutoLayout);
@@ -139,6 +143,8 @@ void mtsComponentViewerQtWidget::setupUi(void) {
             &mtsComponentViewerQtWidget::onToggleSystemComponents);
     connect(actionToggleROS, &QAction::toggled, this,
             &mtsComponentViewerQtWidget::onToggleROSComponents);
+    connect(actionToggleUI, &QAction::toggled, this,
+            &mtsComponentViewerQtWidget::onToggleUIComponents);
 
     layout->addWidget(ToolBar);
     layout->addWidget(View);
@@ -222,6 +228,11 @@ void mtsComponentViewerQtWidget::onToggleSystemComponents(bool checked) {
 
 void mtsComponentViewerQtWidget::onToggleROSComponents(bool checked) {
     m_showROSComponents = checked;
+    UpdateGraph();
+}
+
+void mtsComponentViewerQtWidget::onToggleUIComponents(bool checked) {
+    m_showUIComponents = checked;
     UpdateGraph();
 }
 
@@ -423,60 +434,32 @@ void mtsComponentViewerQtWidget::UpdateGraph(void) {
     for (const auto &desc : m_component_infos) {
         std::string name = desc.ComponentName;
         
-        // Check if this is a system component using mtsManagerComponentBase helpers
-        bool isManagerComponent = mtsManagerComponentBase::IsManagerComponent(name);
-        bool isExecInterface = (name == "ExecIn" || name == "ExecOut");
-        bool isInternalInterface = (name == "InternalInterfaceProvided");
-        bool isSystem = isManagerComponent || isExecInterface || isInternalInterface;
-
-        // Check if this is a ROS component by examining its class name
-        bool isROSComponent = false;
-        auto componentClasses = ManagerComponentServices->GetListOfComponentClasses(desc.ProcessName);
-        for (const auto &compClass : componentClasses) {
-            if (compClass.ClassName == name) {
-                // Check if class name contains "ROS" (case-insensitive)
-                std::string className = compClass.ClassName;
-                std::transform(className.begin(), className.end(), className.begin(), ::toupper);
-                if (className.find("ROS") != std::string::npos) {
-                    isROSComponent = true;
-                    break;
-                }
-            }
-        }
-
-        bool show = true;
-        
         // Apply system component filtering
-        if (isSystem) {
-            if (m_showSystemComponents) {
-                show = true;
-            } else {
-                // Exception: Show ExecIn/ExecOut if connected
-                if (isExecInterface && connectedComponents.count(name)) {
-                    show = true;
-                } else {
-                    show = false;
-                }
-            }
+        if (!m_showSystemComponents && (desc.Category == mtsComponentCategory::SYSTEM)) {
+            continue;
         }
         
-        // Apply ROS component filtering (only if not already hidden by system filter)
-        if (show && isROSComponent && !m_showROSComponents) {
-            show = false;
+        // Apply ROS component filtering
+        if (!m_showROSComponents && (desc.Category == mtsComponentCategory::ROS)) {
+            continue;
         }
 
-        if (!show)
+        // Apply UI component filtering
+        if (!m_showUIComponents && (desc.Category == mtsComponentCategory::UI)) {
             continue;
+        }
 
         // Logic from AddComponentHandler
         std::vector<std::string> interfacesRequired, interfacesProvided;
         ManagerComponentServices->GetNamesOfInterfaces(
                                                        desc.ProcessName, name, interfacesRequired, interfacesProvided);
         auto state = ManagerComponentServices->ComponentGetState(desc);
+        std::string className = desc.ClassName;
 
         Registry->registerModel<mtsComponentModelQtNodes>(
-                                                          [name, state, interfacesRequired, interfacesProvided]() {
+                                                          [name, className, state, interfacesRequired, interfacesProvided]() {
                                                               auto model = std::make_unique<mtsComponentModelQtNodes>(name);
+                                                              model->SetClassName(className);
                                                               model->SetState(mtsComponentState::EnumToString(state.State()));
                                                               for (const auto &interfaceName : interfacesRequired) {
                                                                   model->AddInterfaceRequired(interfaceName);

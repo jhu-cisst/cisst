@@ -650,7 +650,10 @@ void mtsManagerGlobal::GetIPAddress(std::vector<std::string> & ipAddresses) cons
 //-------------------------------------------------------------------------
 //  Component Management
 //-------------------------------------------------------------------------
-bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::string & componentName)
+bool mtsManagerGlobal::AddComponent(const std::string & processName,
+                                  const std::string & componentName,
+                                  const std::string & className,
+                                  const mtsComponentCategory & componentCategory)
 {
     if (!FindProcess(processName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddComponent: no process found: " << "\"" << processName << "\"" << std::endl;
@@ -667,6 +670,18 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
         (ProcessMap.GetMap())[processName] = componentMap;
     }
 
+    // Allocate interface map and store component category and class name
+    InterfaceMapType * interfaceMap = componentMap->GetItem(componentName);
+    if (interfaceMap == 0) {
+        interfaceMap = new InterfaceMapType;
+        interfaceMap->Category = componentCategory;
+        interfaceMap->ClassName = className;
+        componentMap->AddItem(componentName, interfaceMap);
+    } else {
+        interfaceMap->Category = componentCategory;
+        interfaceMap->ClassName = className;
+    }
+
     // PK TEMP: special handling if componentName ends with "-END"
     // This was needed for JGraph component viewer, but is no longer needed for uDrawGraph component viewer.
     // If removed, need to generate AddComponentEvent elsewhere
@@ -676,6 +691,7 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
             componentInfo.ProcessName = processName;
             componentInfo.ComponentName = componentName.substr(0, componentName.length()-4);
             componentInfo.ClassName = "?";
+            componentInfo.Category = componentCategory;
             ManagerComponentServer->AddComponentEvent(componentInfo);
         }
 
@@ -684,15 +700,28 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
         return true;
     }
 
-    bool ret = componentMap->AddItem(componentName, 0);
-    if (!ret) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddComponent: failed to add component: "
-                                << "\"" << processName << ":" << componentName << "\"" << std::endl;
-    }
-
     ProcessMapChange.Unlock();
 
-    return ret;
+    return true;
+}
+
+void mtsManagerGlobal::GetDescriptionsOfComponents(const std::string & processName,
+                                                   std::vector<mtsDescriptionComponent> & descriptions) const
+{
+    ComponentMapType * components = ProcessMap.GetItem(processName);
+    if (!components) return;
+
+    const ComponentMapType::MapType & map = components->GetMap();
+    ComponentMapType::MapType::const_iterator it = map.begin();
+    const ComponentMapType::MapType::const_iterator itEnd = map.end();
+    for (; it != itEnd; ++it) {
+        mtsDescriptionComponent desc;
+        desc.ProcessName = processName;
+        desc.ComponentName = it->first;
+        desc.ClassName = it->second->ClassName;
+        desc.Category = it->second->Category;
+        descriptions.push_back(desc);
+    }
 }
 
 bool mtsManagerGlobal::FindComponent(const std::string & processName, const std::string & componentName) const

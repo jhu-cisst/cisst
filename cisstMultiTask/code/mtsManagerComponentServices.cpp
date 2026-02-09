@@ -69,6 +69,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceGetters.GetNamesOfProcesses);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents,
                                                ServiceGetters.GetNamesOfComponents);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetDescriptionsOfComponents,
+                                               ServiceGetters.GetDescriptionsOfComponents);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces,
                                                ServiceGetters.GetNamesOfInterfaces);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
@@ -449,6 +451,16 @@ std::vector<std::string> mtsManagerComponentServices::GetNamesOfComponents(const
     else
         CMN_LOG_CLASS_RUN_ERROR << "GetNamesOfComponents: invalid function - has not been bound to command" << std::endl;
     return namesOfComponents;
+}
+
+std::vector<mtsDescriptionComponent> mtsManagerComponentServices::GetDescriptionsOfComponents(const std::string & processName) const
+{
+    std::vector<mtsDescriptionComponent> descriptions;
+    if (ServiceGetters.GetDescriptionsOfComponents.IsValid())
+        ServiceGetters.GetDescriptionsOfComponents(processName, descriptions);
+    else
+        CMN_LOG_CLASS_RUN_ERROR << "GetDescriptionsOfComponents: invalid function - has not been bound to command" << std::endl;
+    return descriptions;
 }
 
 bool mtsManagerComponentServices::GetNamesOfInterfaces(

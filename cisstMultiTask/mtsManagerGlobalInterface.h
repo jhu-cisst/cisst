@@ -65,8 +65,13 @@ public:
     //-------------------------------------------------------------------------
     /*! \brief Register component
         \param processName Name of process 
-        \param componentName Name of component */
-    virtual bool AddComponent(const std::string & processName, const std::string & componentName) = 0;
+        \param componentName Name of component 
+        \param className Name of component class
+        \param componentCategory Category of component */
+    virtual bool AddComponent(const std::string & processName,
+                              const std::string & componentName,
+                              const std::string & className,
+                              const mtsComponentCategory & componentCategory = mtsComponentCategory::USER) = 0;
 
     /*! \brief Find component using process name and component name
         \param processName Name of process 
@@ -77,6 +82,12 @@ public:
         \param processName Name of process 
         \param componentName Name of component */
     virtual bool RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock = true) = 0;
+
+    /*! \brief Get components' descriptions
+        \param processName Name of process 
+        \param descriptions List of components' descriptions to be populated */
+    virtual void GetDescriptionsOfComponents(const std::string & processName,
+                                             std::vector<mtsDescriptionComponent> & descriptions) const = 0;
 
     //-------------------------------------------------------------------------
     //  Interface Management

@@ -102,6 +102,8 @@ protected:
     void InterfaceGCMCommands_GetNamesOfProcesses(std::vector<std::string> & names) const;
     void InterfaceGCMCommands_GetNamesOfComponents(const std::string & processName,
                                                    std::vector<std::string> & names) const;
+    void InterfaceGCMCommands_GetDescriptionsOfComponents(const std::string & processName,
+                                                          std::vector<mtsDescriptionComponent> & descriptions) const;
     void InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
     void InterfaceGCMCommands_GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc, mtsInterfaceProvidedDescription & description) const;

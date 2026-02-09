@@ -49,6 +49,7 @@ const std::string mtsManagerComponentBase::CommandNames::ComponentResume  = "Com
 const std::string mtsManagerComponentBase::CommandNames::ComponentGetState = "ComponentGetState";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfProcesses  = "GetNamesOfProcesses";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfComponents = "GetNamesOfComponents";
+const std::string mtsManagerComponentBase::CommandNames::GetDescriptionsOfComponents = "GetDescriptionsOfComponents";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces = "GetNamesOfInterfaces";
 const std::string mtsManagerComponentBase::CommandNames::GetListOfConnections = "GetListOfConnections";
 const std::string mtsManagerComponentBase::CommandNames::GetListOfComponentClasses = "GetListOfComponentClasses";

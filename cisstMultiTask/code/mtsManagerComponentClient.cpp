@@ -36,6 +36,7 @@ mtsManagerComponentClient::mtsManagerComponentClient(const std::string & compone
       MCSReady(false),
       InterfaceComponentFunctionMap("InterfaceComponentFunctionMap")
 {
+    mCategory = mtsComponentCategory::SYSTEM;
     InterfaceComponentFunctionMap.SetOwner(*this);
 }
 
@@ -490,6 +491,8 @@ bool mtsManagerComponentClient::AddInterfaceComponent(void)
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfProcesses);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfComponents,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfComponents);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetDescriptionsOfComponents,
+                              this, mtsManagerComponentBase::CommandNames::GetDescriptionsOfComponents);
     provided->AddCommandQualifiedRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfInterfaces,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
     provided->AddCommandRead(&mtsManagerComponentClient::InterfaceComponentCommands_GetListOfConnections,
@@ -598,6 +601,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
                           InterfaceLCMFunction.GetNamesOfProcesses);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents,
                           InterfaceLCMFunction.GetNamesOfComponents);
+    required->AddFunction(mtsManagerComponentBase::CommandNames::GetDescriptionsOfComponents,
+                          InterfaceLCMFunction.GetDescriptionsOfComponents);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces,
                           InterfaceLCMFunction.GetNamesOfInterfaces);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
@@ -1025,6 +1030,17 @@ void mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfComponents(
     }
 
     InterfaceLCMFunction.GetNamesOfComponents(processName, names);
+}
+
+void mtsManagerComponentClient::InterfaceComponentCommands_GetDescriptionsOfComponents(const std::string & processName,
+                                                                                      std::vector<mtsDescriptionComponent> & descriptions) const
+{
+    if (!InterfaceLCMFunction.GetDescriptionsOfComponents.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceComponentCommands_GetDescriptionsOfComponents: failed to execute \"GetDescriptionsOfComponents\"" << std::endl;
+        return;
+    }
+
+    InterfaceLCMFunction.GetDescriptionsOfComponents(processName, descriptions);
 }
 
 void mtsManagerComponentClient::InterfaceComponentCommands_GetNamesOfInterfaces(

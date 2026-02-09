@@ -104,11 +104,13 @@ class CISST_EXPORT mtsComponentViewerQtWidget : public QWidget,
 
     bool m_showSystemComponents;
     bool m_showROSComponents;
+    bool m_showUIComponents;
     void UpdateGraph(void);
 
  protected slots:
     void onToggleSystemComponents(bool checked);
     void onToggleROSComponents(bool checked);
+    void onToggleUIComponents(bool checked);
 
  private:
     // no copy constructor

@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsComponent::mtsComponent(const std::string & componentName):
     Name(componentName),
+    mCategory(mtsComponentCategory::USER),
     InterfacesProvided("InterfacesProvided"),
     InterfacesOutput("InterfacesOutput"),
     InterfacesRequired("InterfacesRequired"),
@@ -43,6 +44,7 @@ mtsComponent::mtsComponent(const std::string & componentName):
 
 
 mtsComponent::mtsComponent(void):
+    mCategory(mtsComponentCategory::USER),
     InterfacesProvided("InterfacesProvided"),
     InterfacesOutput("InterfacesOutput"),
     InterfacesRequired("InterfacesRequired"),

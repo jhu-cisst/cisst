@@ -59,8 +59,9 @@ protected:
     // Getters
     struct GetterStruct {
         mtsFunctionRead          GetNamesOfProcesses;
-        mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
-        mtsFunctionQualifiedRead GetNamesOfInterfaces; // in: process name, out: interfaces' names
+        mtsFunctionQualifiedRead GetNamesOfComponents;         // in: process name, out: components' names
+        mtsFunctionQualifiedRead GetDescriptionsOfComponents;  // in: process name, out: components' descriptions
+        mtsFunctionQualifiedRead GetNamesOfInterfaces;         // in: process name, out: interfaces' names
         mtsFunctionRead          GetListOfConnections;
         mtsFunctionQualifiedRead GetListOfComponentClasses;  // in: process name, out: list of classes
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
@@ -183,6 +184,7 @@ public:
 
     std::vector<std::string> GetNamesOfProcesses(void) const;
     std::vector<std::string> GetNamesOfComponents(const std::string & processName) const;
+    std::vector<mtsDescriptionComponent> GetDescriptionsOfComponents(const std::string & processName) const;
     bool GetNamesOfInterfaces(const std::string & processName,
                               const std::string & componentName,
                               std::vector<std::string> & namesOfInterfacesRequired,

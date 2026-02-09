@@ -7,6 +7,26 @@ inline-header {
 #include <cisstMultiTask/mtsExport.h>
 }
 
+enum {
+    name mtsComponentCategory;
+    enum-value {
+        name USER;
+        description User component (default);
+    }
+    enum-value {
+        name SYSTEM;
+        description System component (LCS/MCC);
+    }
+    enum-value {
+        name ROS;
+        description ROS bridge component;
+    }
+    enum-value {
+        name UI;
+        description UI component;
+    }
+}
+
 class {
     name mtsDescriptionComponent;
     attribute CISST_EXPORT;
@@ -32,16 +52,22 @@ class {
         type std::string;
         visibility public;
     }
+    member {
+        name Category;
+        type mtsComponentCategory;
+        visibility public;
+    }
     inline-header {
     public:
-       mtsDescriptionComponent(const std::string & processName, const std::string & componentName);
+       mtsDescriptionComponent(const std::string & processName, const std::string & componentName, const mtsComponentCategory & componentCategory = mtsComponentCategory::USER);
     }
 }
 
 inline-code {
-    mtsDescriptionComponent::mtsDescriptionComponent(const std::string & processName, const std::string & componentName):
+    mtsDescriptionComponent::mtsDescriptionComponent(const std::string & processName, const std::string & componentName, const mtsComponentCategory & componentCategory):
         ProcessName(processName),
-        ComponentName(componentName) {
+        ComponentName(componentName),
+        Category(componentCategory) {
     }
 }
 
@@ -69,6 +95,10 @@ class {
 }
 
 inline-header {
+typedef std::vector<mtsDescriptionComponent> mtsDescriptionComponentVec;
+typedef mtsGenericObjectProxy<mtsDescriptionComponentVec> mtsDescriptionComponentVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentVecProxy);
+
 typedef std::vector<mtsDescriptionComponentClass> mtsDescriptionComponentClassVec;
 typedef mtsGenericObjectProxy<mtsDescriptionComponentClassVec> mtsDescriptionComponentClassVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentClassVecProxy);

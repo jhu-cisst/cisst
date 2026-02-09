@@ -160,6 +160,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Component state. */
     mtsComponentState State;
 
+    /*! Component category. */
+    mtsComponentCategory mCategory;
+
     /*! Provided interface for component management. */
     mtsInterfaceProvided *InterfaceProvidedToManager;
 

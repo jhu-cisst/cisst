@@ -1037,7 +1037,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     }
 
     // Try to register new component to the global component manager first.
-    if (!ManagerGlobal->AddComponent(ProcessName, componentName)) {
+    if (!ManagerGlobal->AddComponent(ProcessName, componentName, component->Services()->GetName(), component->mCategory)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add component: " << componentName << std::endl;
         return false;
     }
@@ -1094,7 +1094,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: successfully added component to GCM: " << componentName << std::endl;
     // PK TEMP
-    ManagerGlobal->AddComponent(ProcessName, componentName+"-END");
+    // ManagerGlobal->AddComponent(ProcessName, componentName+"-END", component->Services()->GetName(), component->mCategory);
 
     bool success;
     ComponentMapChange.Lock();

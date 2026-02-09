@@ -30,6 +30,8 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
       GCM(gcm),
       InterfaceGCMFunctionMap("InterfaceGCMFunctionMap")
 {
+    mCategory = mtsComponentCategory::SYSTEM;
+
     // Prevent this component from being created more than once
     // MJ: singleton can be implemented instead.
     static int instanceCount = 0;
@@ -117,6 +119,8 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfProcesses);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfComponents);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetDescriptionsOfComponents,
+                              this, mtsManagerComponentBase::CommandNames::GetDescriptionsOfComponents);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
     provided->AddCommandRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections,
@@ -559,6 +563,12 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents(const 
                                                                           std::vector<std::string> & names) const
 {
     GCM->GetNamesOfComponents(processName, names);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_GetDescriptionsOfComponents(const std::string & processName,
+                                                                                 std::vector<mtsDescriptionComponent> & descriptions) const
+{
+    GCM->GetDescriptionsOfComponents(processName, descriptions);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const
