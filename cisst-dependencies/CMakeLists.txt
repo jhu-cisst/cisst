@@ -339,12 +339,7 @@ if (CISST_HAS_JSON)
       set (JSON_LIBRARIES "${JSONCPP_LIBRARIES}")
       set (JSON_FOUND ON PARENT_SCOPE)
       set (JSON_USE_SYSTEM_VERSION ON PARENT_SCOPE)
-
-      cisst_set_package_settings (cisstCommon JSON INCLUDE_DIRECTORIES JSON_INCLUDE_DIR)
-      cisst_set_package_settings (cisstCommon JSON LIBRARIES           JSON_LIBRARIES)
-      cisst_set_package_settings (cisstCommon JSON LINK_DIRECTORIES    JSON_LIBRARY_DIRS)
-
-    endif (JSONCPP_FOUND)
+      endif (JSONCPP_FOUND)
   endif (WIN32 OR APPLE)
 
   if (NOT JSONCPP_FOUND)
@@ -393,7 +388,12 @@ if (CISST_HAS_JSON)
   set (JSON_LIBRARY_DIRS ${JSON_LIBRARY_DIRS} PARENT_SCOPE)
   set (JSON_LIBRARIES ${JSON_LIBRARIES} PARENT_SCOPE)
 
+  cisst_set_package_settings (cisstCommon JSON INCLUDE_DIRECTORIES JSON_INCLUDE_DIR)
+  cisst_set_package_settings (cisstCommon JSON LIBRARIES           JSON_LIBRARIES)
   cisst_set_package_settings (cisstCommon JSON LINK_DIRECTORIES    JSON_LIBRARY_DIRS)
+
+else (CISST_HAS_JSON)
+  cisst_unset_all_package_settings (cisstCommon JSON)
 endif (CISST_HAS_JSON)
 
 # Support for Graphviz
