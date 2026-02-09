@@ -117,7 +117,7 @@ void mtsManagerLocalTest::TestAddComponent(void)
 
     // Check with the global component manager.
     // Should fail if a component has already been registered before
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, device2->GetName()));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, device2->GetName(), device2->Services()->GetName()));
     CPPUNIT_ASSERT(!localManager->AddComponent(device2));
 
     // Should succeed if a component is new
@@ -142,7 +142,7 @@ void mtsManagerLocalTest::TestAddComponent(void)
 
     // Check with the global component manager.
     // Should fail if a component to be added has already been registered before
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, continuous1->GetName()));
+    CPPUNIT_ASSERT(localManager->ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, continuous1->GetName(), continuous1->Services()->GetName()));
     CPPUNIT_ASSERT(!localManager->AddComponent(continuous1));
 
     // Should succeed if a component is new
