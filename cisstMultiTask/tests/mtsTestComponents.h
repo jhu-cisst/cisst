@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-12-08
 
-  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -677,8 +677,8 @@ public:
     } TestComponent;
 
     struct {
-        mtsFunctionVoid StartCollection;
-        mtsFunctionVoid StopCollection;
+        mtsFunctionWrite StartCollection;
+        mtsFunctionWrite StopCollection;
     } CollectorState;
 
     void BatchReadyHandler(const mtsStateTable::IndexRange & range) {
@@ -690,7 +690,7 @@ public:
         this->CollectionRunning = true;
     }
 
-    void CollectionStoppedHandler(const mtsUInt & samplesCollected) {
+    void CollectionStoppedHandler(const size_t & samplesCollected) {
         this->CollectionRunning = false;
         this->SamplesCollected = samplesCollected;
     }
