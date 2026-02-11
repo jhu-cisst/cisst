@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -97,14 +97,10 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                                     this, mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure,
                               this, mtsManagerComponentBase::CommandNames::ComponentConfigure);
-    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew,
+    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
                                     this, mtsManagerComponentBase::CommandNames::ComponentConnect);
-    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnectNew,
+    provided->AddCommandWriteReturn(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
                                     this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
-    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect,
-                              this, mtsManagerComponentBase::CommandNames::ComponentConnect);
-    provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect,
-                              this, mtsManagerComponentBase::CommandNames::ComponentDisconnect);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStart,
                               this, mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddCommandWrite(&mtsManagerComponentServer::InterfaceGCMCommands_ComponentStop,
@@ -180,10 +176,6 @@ bool mtsManagerComponentServer::AddNewClientProcess(const std::string & clientPr
                           newFunctionSet->ComponentCreate);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
                           newFunctionSet->ComponentConfigure);
-    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
-                          newFunctionSet->ComponentConnectNew);
-    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
-                          newFunctionSet->ComponentDisconnectNew);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                           newFunctionSet->ComponentConnect);
     required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
@@ -296,31 +288,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConfigure(const mt
 }
 
 
-void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/)
-{
-    // We don't check argument validity with the GCM at this stage and rely on
-    // the current normal connection procedure (GCM allows connection at the
-    // request of LCM) because the GCM guarantees that arguments are valid.
-    // The Connect request is then passed to the manager component client which
-    // calls local component manager's Connect() method.
-
-    // Get a set of function objects that are bound to the InterfaceLCM's provided
-    // interface.
-    InterfaceGCMFunctionType * functionSet = InterfaceGCMFunctionMap.GetItem(connectionDescription.Client.ProcessName);
-    if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"Component Connect\": " << connectionDescription << std::endl;
-        // result = false;
-        return;
-    }
-    mtsExecutionResult executionResult =  functionSet->ComponentConnect(connectionDescription /*, result*/);
-    if (!executionResult.IsOK()) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"ComponentConnect\": " << connectionDescription << std::endl
-                                << " error \"" << executionResult << "\"" << std::endl;
-        // result = false;
-    }
-}
-
-void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result)
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result)
 {
     // We don't check argument validity with the GCM at this stage and rely on
     // the current normal connection procedure (GCM allows connection at the
@@ -336,7 +304,7 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew(const m
         result = false;
         return;
     }
-    mtsExecutionResult executionResult =  functionSet->ComponentConnectNew(connectionDescription, result);
+    mtsExecutionResult executionResult =  functionSet->ComponentConnect(connectionDescription, result);
     if (!executionResult.IsOK()) {
         CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentConnect: failed to execute \"ComponentConnect\": " << connectionDescription << std::endl
                                 << " error \"" << executionResult << "\"" << std::endl;
@@ -344,67 +312,13 @@ void mtsManagerComponentServer::InterfaceGCMCommands_ComponentConnectNew(const m
     }
 }
 
-// MJ: Another method that does the same thing but accepts a single parameter
-// as connection id should be added.
-void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg)
-{
-    if (!GCM->Disconnect(arg)) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\" for: " << arg << std::endl;
-        return;
-    }
-
-#if 0
-    InterfaceGCMFunctionType *functionSet;
-    if (arg.Client.ProcessName != arg.Server.ProcessName) {
-        // PK TEMP fix for network disconnect
-        mtsDescriptionConnection arg2;
-        // Step 1: Disconnect Client from ServerProxy
-        CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 1 (client side disconnect)" << std::endl;
-        arg2 = arg;
-        arg2.Server.ProcessName = arg.Client.ProcessName;
-        arg2.Server.ComponentName = mtsManagerGlobal::GetComponentProxyName(arg.Server.ProcessName, arg.Server.ComponentName);
-        functionSet = InterfaceGCMFunctionMap.GetItem(arg2.Client.ProcessName);
-        if (!functionSet) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to get function set for " << arg2.Client.ProcessName << std::endl;
-            return;
-        }
-        functionSet->ComponentDisconnect(arg2);
-        // Step 2: Disconnect ClientProxy from Server
-        CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 2 (server side disconnect)" << std::endl;
-        arg2 = arg;
-        arg2.Client.ProcessName = arg.Server.ProcessName;
-        arg2.Client.ComponentName = mtsManagerGlobal::GetComponentProxyName(arg.Client.ProcessName, arg.Client.ComponentName);
-        functionSet = InterfaceGCMFunctionMap.GetItem(arg2.Server.ProcessName);
-        if (!functionSet) {
-            CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to get function set for " << arg2.Server.ProcessName << std::endl;
-            return;
-        }
-        functionSet->ComponentDisconnect(arg2);
-        // Step 3: Update the GCM database (send arg unchanged to any MCC)
-        // For now, we just fall through to the statement below
-        CMN_LOG_CLASS_RUN_WARNING << "Network disconnect for " << arg << ", step 3 (update GCM)" << std::endl;
-    }
-
-    // Get a set of function objects that are bound to the InterfaceLCM's provided
-    // interface.
-    functionSet = InterfaceGCMFunctionMap.GetItem(arg.Client.ProcessName);
-    if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\": " << arg << std::endl;
-        return;
-    }
-
-    //functionSet->ComponentDisconnect.ExecuteBlocking(arg);
-    functionSet->ComponentDisconnect(arg);
-#endif
-}
-
-void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result)
+void mtsManagerComponentServer::InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg, bool & result)
 {
     // PK: the GCM Disconnect method queue the disconnect request, so we cannot really know if it
     //     has succeeded.
     result = GCM->Disconnect(arg);
     if (!result) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnectNew: failed to execute \"Component Disconnect\" for: " << arg << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceGCMCommands_ComponentDisconnect: failed to execute \"Component Disconnect\" for: " << arg << std::endl;
         return;
     }
 }
@@ -420,13 +334,8 @@ bool mtsManagerComponentServer::ComponentDisconnect(const std::string & processN
     }
 
     bool result = true;
-#if CISST_MTS_NEW
-    //functionSet->ComponentDisconnectNew(arg, result);
-    result = false;   // PK HACK: actually works better if we don't call ComponentDisconnect or ComponentDisconnectNew
-#else
-    //functionSet->ComponentDisconnect.ExecuteBlocking(arg);
-    functionSet->ComponentDisconnect(arg);
-#endif
+    //functionSet->ComponentDisconnect(arg, result);
+    result = false;   // PK HACK: actually works better if we don't call ComponentDisconnect
     return result;
 }
 
