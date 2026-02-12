@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -18,10 +18,6 @@ if (CMAKE_SIZEOF_VOID_P EQUAL 8)
 else (CMAKE_SIZEOF_VOID_P EQUAL 8)
   set (CISST_MTS_64BIT FALSE)
 endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
-
-# New features (use with caution)
-option (CISST_MTS_NEW "Enable new cisstMultiTask features" ON)
-mark_as_advanced (CISST_MTS_NEW)
 
 add_subdirectory (code)
 

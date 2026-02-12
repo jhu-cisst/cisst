@@ -39,10 +39,8 @@ protected:
     struct ManagementStruct {
         mtsFunctionWriteReturn Create;
         mtsFunctionWrite Configure;
-        mtsFunctionWrite Connect;
-        mtsFunctionWriteReturn ConnectNew;   // used for CISST_MTS_NEW
-        mtsFunctionWrite Disconnect;
-        mtsFunctionWriteReturn DisconnectNew;   // used for CISST_MTS_NEW
+        mtsFunctionWriteReturn Connect;
+        mtsFunctionWriteReturn Disconnect;
         mtsFunctionWrite Start;
         mtsFunctionWrite Stop;
         mtsFunctionWrite Resume;
