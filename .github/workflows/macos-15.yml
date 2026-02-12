@@ -28,7 +28,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install graphviz jsoncpp qt@5 pkg-config cppunit
+        brew install graphviz jsoncpp qt@5 pkg-config cppunit ccache
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2

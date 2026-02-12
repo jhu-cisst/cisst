@@ -44,7 +44,8 @@ jobs:
           gfortran-9 \
           libgraphviz-dev \
           ros-humble-ros-base \
-          ros-humble-desktop
+          ros-humble-desktop \
+          ccache
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
