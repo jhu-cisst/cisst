@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -74,10 +74,8 @@ protected:
         // Dynamic component management
         mtsFunctionWriteReturn ComponentCreate;
         mtsFunctionWrite ComponentConfigure;
-        mtsFunctionWrite ComponentConnect;
-        mtsFunctionWriteReturn ComponentConnectNew;  // for CISST_MTS_NEW
-        mtsFunctionWrite ComponentDisconnect;
-        mtsFunctionWriteReturn ComponentDisconnectNew;  // for CISST_MTS_NEW
+        mtsFunctionWriteReturn ComponentConnect;
+        mtsFunctionWriteReturn ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
@@ -116,8 +114,7 @@ protected:
     // Because any thread can call these methods, thread-safety is obtained by using a mutex.
     struct GeneralInterfaceStruct {
         osaMutex Mutex;
-        mtsFunctionWrite ComponentConnect;
-        mtsFunctionWriteReturn ComponentConnectNew;  // for CISST_MTS_NEW
+        mtsFunctionWriteReturn ComponentConnect;
     } GeneralInterface;
 
     /*! \brief Connect two local interfaces.
@@ -165,10 +162,8 @@ protected:
     /*! Commands for InterfaceLCM's provided interface */
     void InterfaceLCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceLCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
-    void InterfaceLCMCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result);
-    void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
-    void InterfaceLCMCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result);
+    void InterfaceLCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result);
+    void InterfaceLCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg, bool & result);
     void InterfaceLCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceLCMCommands_ComponentResume(const mtsComponentStatusControl & arg);
@@ -191,10 +186,8 @@ protected:
     /*! Commands for InterfaceComponent's provided interface */
     void InterfaceComponentCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceComponentCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
-    void InterfaceComponentCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result);
-    void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
-    void InterfaceComponentCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result);
+    void InterfaceComponentCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result);
+    void InterfaceComponentCommands_ComponentDisconnect(const mtsDescriptionConnection & arg, bool & result);
     void InterfaceComponentCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceComponentCommands_ComponentResume(const mtsComponentStatusControl & arg);

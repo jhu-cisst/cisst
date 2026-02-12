@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -65,10 +65,8 @@ protected:
     typedef struct {
         mtsFunctionWriteReturn ComponentCreate;
         mtsFunctionWrite ComponentConfigure;
-        mtsFunctionWrite ComponentConnect;
-        mtsFunctionWriteReturn ComponentConnectNew;   // for CISST_MTS_NEW
-        mtsFunctionWrite ComponentDisconnect;
-        mtsFunctionWriteReturn ComponentDisconnectNew;  // for CISST_MTS_NEW
+        mtsFunctionWriteReturn ComponentConnect;
+        mtsFunctionWriteReturn ComponentDisconnect;
         mtsFunctionWrite ComponentStart;
         mtsFunctionWrite ComponentStop;
         mtsFunctionWrite ComponentResume;
@@ -91,10 +89,8 @@ protected:
     /*! Commands */
     void InterfaceGCMCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceGCMCommands_ComponentConfigure(const mtsDescriptionComponent & arg);
-    void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription /*, bool & result*/);
-    void InterfaceGCMCommands_ComponentConnectNew(const mtsDescriptionConnection & connectionDescription, bool & result);
-    void InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg);
-    void InterfaceGCMCommands_ComponentDisconnectNew(const mtsDescriptionConnection & arg, bool & result);
+    void InterfaceGCMCommands_ComponentConnect(const mtsDescriptionConnection & connectionDescription, bool & result);
+    void InterfaceGCMCommands_ComponentDisconnect(const mtsDescriptionConnection & arg, bool & result);
     void InterfaceGCMCommands_ComponentStart(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceGCMCommands_ComponentResume(const mtsComponentStatusControl & arg);

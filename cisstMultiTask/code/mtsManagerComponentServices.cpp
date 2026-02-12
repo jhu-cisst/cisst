@@ -39,10 +39,6 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
                                                ServiceComponentManagement.Configure);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
-                                               ServiceComponentManagement.ConnectNew);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
-                                               ServiceComponentManagement.DisconnectNew);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
                                                ServiceComponentManagement.Connect);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentDisconnect,
                                                ServiceComponentManagement.Disconnect);
@@ -245,13 +241,9 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
     mtsDescriptionConnection conn(connectionDescription);
     conn.ConnectionID = InvalidConnectionID;
 
-#if CISST_MTS_NEW
     // call blocking command
     bool result;
-    mtsExecutionResult executionResult = ServiceComponentManagement.ConnectNew(conn, result);
-#else
-    mtsExecutionResult executionResult = ServiceComponentManagement.Connect(conn /*, result*/);
-#endif
+    mtsExecutionResult executionResult = ServiceComponentManagement.Connect(conn, result);
 
     // check is command was sent properly
     if (!executionResult.IsOK()) {
@@ -259,12 +251,10 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
                                 << executionResult << ")" << std::endl;
         return false;
     }
-#if CISST_MTS_NEW
     if (result == false) {
         CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to connect: " << connectionDescription << std::endl;
         return false;
     }
-#endif
     CMN_LOG_CLASS_RUN_VERBOSE << "Connect: successfully connected: " << connectionDescription << std::endl;
     return true;
 }
@@ -285,11 +275,7 @@ bool mtsManagerComponentServices::Disconnect(
     const std::string & serverProcessName,
     const std::string & serverComponentName, const std::string & serverInterfaceName) const
 {
-#if CISST_MTS_NEW
-    if (!ServiceComponentManagement.DisconnectNew.IsValid()) {
-#else
     if (!ServiceComponentManagement.Disconnect.IsValid()) {
-#endif
         CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: invalid function - has not been bound to command" << std::endl;
         return false;
     }
@@ -309,11 +295,7 @@ bool mtsManagerComponentServices::Disconnect(
 bool mtsManagerComponentServices::Disconnect(const mtsDescriptionConnection & connection) const
 {
     bool result = true;
-#if CISST_MTS_NEW
-    ServiceComponentManagement.DisconnectNew(connection, result);
-#else
-    ServiceComponentManagement.Disconnect(connection);
-#endif
+    ServiceComponentManagement.Disconnect(connection, result);
 
     CMN_LOG_CLASS_RUN_VERBOSE << "ComponentDisconnect: requested component disconnection: " << connection << std::endl;
 

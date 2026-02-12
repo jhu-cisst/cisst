@@ -1316,8 +1316,8 @@ void mtsManagerGlobal::DisconnectInternal(void)
         // Step 1. Let LCM disconnect local connection
         processName = serverProcessName;
 
+        // Following is a blocking command (WriteReturn) and therefore no sleep required
         ManagerComponentServer->ComponentDisconnect(processName, connection);
-        osaSleep(100 * cmn_ms); // Give time to the GCM to actually process disconnection request
 
         // Step 2. Clean up GCM's internal data structure - Remove connection between user components
         if (!RemoveConnectionOfInterfaceRequiredOrInput(processName, clientComponentName, clientInterfaceName, connectionID)) {

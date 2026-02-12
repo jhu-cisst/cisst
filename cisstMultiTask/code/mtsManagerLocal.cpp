@@ -200,6 +200,16 @@ void mtsManagerLocal::Cleanup(void)
     __os_exit();
 }
 
+void mtsManagerLocal::DeleteInstance(void)
+{
+    if (Instance) {
+        Instance->Cleanup();
+
+        delete Instance;
+        Instance = 0;
+    }
+}
+
 const osaTimeServer & mtsManagerLocal::GetTimeServer(void) const
 {
     return TimeServer;

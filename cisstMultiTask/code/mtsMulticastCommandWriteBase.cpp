@@ -6,7 +6,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,7 +34,9 @@ bool mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
         if (command->GetArgumentPrototype()) {
             CMN_ASSERT(this->GetArgumentPrototype());
             if (command->GetArgumentPrototype()->Services() != this->GetArgumentPrototype()->Services()) {
-                CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument types don't match, this multicast command uses "
+                CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand(" << command->GetName()
+                                   << "): command argument types don't match, multicast command "
+                                   << this->GetName() << " uses "
                                    << this->GetArgumentPrototype()->Services()->GetName()
                                    << " but the command added (event handler potentially) uses "
                                    << command->GetArgumentPrototype()->Services()->GetName()

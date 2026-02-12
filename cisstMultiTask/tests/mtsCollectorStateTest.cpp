@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-01-06
 
-  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -93,7 +93,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT_EQUAL(0u, stateCollectorTestDevice->SamplesCollected);
 
     // try a start/stop without any state table advance
-    executionResult = stateCollectorTestDevice->CollectorState.StartCollection.ExecuteBlocking();
+    executionResult = stateCollectorTestDevice->CollectorState.StartCollection.ExecuteBlocking(0.0);
     CPPUNIT_ASSERT(executionResult.IsOK());
     // commands are sent to the collector which then sends to the
     // server which owns the state table.  the later command being
@@ -110,7 +110,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT_EQUAL(0u, stateCollectorTestDevice->BatchReadyEventCounter);
     CPPUNIT_ASSERT_EQUAL(0u, stateCollectorTestDevice->SamplesCollected);
     // now try to stop
-    executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking();
+    executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking(0.0);
     CPPUNIT_ASSERT(executionResult.IsOK());
     // see previous comment re. osaSleep
     osaSleep(serverExecutionDelay);
@@ -125,7 +125,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
 #if 0
 
     // now collect 300 elements so we can test replay
-    executionResult = stateCollectorTestDevice->CollectorState.StartCollection.ExecuteBlocking();
+    executionResult = stateCollectorTestDevice->CollectorState.StartCollection.ExecuteBlocking(0.0);
     CPPUNIT_ASSERT(executionResult.IsOK());
     // see previous comment re. osaSleep
     osaSleep(serverExecutionDelay);
@@ -138,7 +138,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
         CPPUNIT_ASSERT(stateCollectorTestDevice->CollectionRunning);
     }
     // stop collection
-    executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking();
+    executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking(0.0);
     CPPUNIT_ASSERT(executionResult.IsOK());
     // see previous comment re. osaSleep
     osaSleep(serverExecutionDelay);
