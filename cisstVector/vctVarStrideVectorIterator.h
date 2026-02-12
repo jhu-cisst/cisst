@@ -6,8 +6,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-02
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,8 +52,7 @@ http://www.cisst.org/cisst/license.txt.
   \sa vctVarStrideVectorIterator
 */
 template<class _elementType>
-class vctVarStrideVectorConstIterator:
-	public std::iterator<std::random_access_iterator_tag, _elementType>
+class vctVarStrideVectorConstIterator
 {
 public:
     /* define most types from vctContainerTraits */
@@ -63,12 +61,9 @@ public:
     /*! The type of the iterator itself. */
     typedef vctVarStrideVectorConstIterator<_elementType> ThisType;
 
-    /*! Base type for this iterator, i.e. std::iterator. */
-    typedef std::iterator<std::random_access_iterator_tag, _elementType> BaseType;
-
     /*! Type (i.e. category) of iterator,
       i.e. std::random_access_iterator_tag. */
-    typedef typename BaseType::iterator_category iterator_category;
+    typedef typename std::random_access_iterator_tag iterator_category;
 
 protected:
     /*! The data member points to the object being refered by this

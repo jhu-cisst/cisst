@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@
   http://www.cisst.org/cisst/license.txt.
 
   --- end cisst license ---
-
 */
 
 #include "cdgFile.h"
@@ -94,6 +91,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
             break;
         case ' ':
         case '\t':
+        case '\r':
             wordFinished = true;
             break;
         case ';':
@@ -300,7 +298,8 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
 
 bool cdgFile::Validate(std::string & errorMessage)
 {
-    return this->Global->ValidateRecursion(errorMessage);
+    return (this->Global->Validate(errorMessage)
+            && this->Global->ValidateRecursion(errorMessage));
 }
 
 
@@ -315,7 +314,7 @@ void cdgFile::RemoveTrailingSpaces(std::string & value)
 void cdgFile::GenerateMessage(std::ostream & outputStream) const
 {
     outputStream << "// file automatically generated, do not modify" << std::endl
-                 << "// cisst version: " << CISST_VERSION << std::endl
+                 << "// cisst version: " << cisst_VERSION << std::endl
                  << "// source file: " << Filename << std::endl << std::endl;
 }
 
@@ -351,6 +350,7 @@ void cdgFile::GenerateCode(std::ostream & outputStream) const
                  << "#include <cisstCommon/cmnDataFunctionsEnumMacros.h>" << std::endl
                  << "#include <cisstCommon/cmnDataFunctionsString.h>" << std::endl
                  << "#include <cisstCommon/cmnDataFunctionsVector.h>" << std::endl
+                 << "#include <cisstCommon/cmnDataFunctionsList.h>" << std::endl
                  << std::endl;
     this->Global->GenerateCode(outputStream);
 }

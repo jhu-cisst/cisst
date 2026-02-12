@@ -6,8 +6,7 @@
   Author(s):  Balazs Vagvolgyi
   Created on: 2008
 
-  (C) Copyright 2006-2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 

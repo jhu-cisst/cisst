@@ -5,8 +5,7 @@
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:   2008-03-12
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,34 +22,22 @@ prmVelocityCartesianSet::~prmVelocityCartesianSet()
 {
 }
 
-
-
 void prmVelocityCartesianSet::SerializeRaw(std::ostream & outputStream) const
 {
     BaseType::SerializeRaw(outputStream);
-    //! \todo Review SerializeRaw and DeserializeRaw, they don't seriliaze the frame pointers.
-
-    //MovingFrame.SerializeRaw(outputStream);
-    //ReferenceFrame.SerializeRaw(outputStream);
     Velocity.SerializeRaw(outputStream);
     VelocityAngular.SerializeRaw(outputStream);
     Acceleration.SerializeRaw(outputStream);
     AccelerationAngular.SerializeRaw(outputStream);
     Mask.SerializeRaw(outputStream);
-
 }
 
 void prmVelocityCartesianSet::DeSerializeRaw(std::istream & inputStream)
 {
     BaseType::DeSerializeRaw(inputStream);
-    //! \todo Review SerializeRaw and DeserializeRaw, they don't seriliaze the frame pointers.
-
-    //MovingFrame.DeSerializeRaw(inputStream);
-    //ReferenceFrame.DeSerializeRaw(inputStream);
     Velocity.DeSerializeRaw(inputStream);
     VelocityAngular.DeSerializeRaw(inputStream);
     Acceleration.DeSerializeRaw(inputStream);
     AccelerationAngular.DeSerializeRaw(inputStream);
     Mask.DeSerializeRaw(inputStream);
-
 }

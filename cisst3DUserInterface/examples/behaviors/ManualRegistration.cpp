@@ -985,7 +985,7 @@ void ManualRegistration::Startup(void) {
     // get PSM1 interface
     mtsInterfaceProvided * interfaceProvided = daVinci->GetInterfaceProvided("PSM1");
     CMN_ASSERT(interfaceProvided);
-    mtsCommandRead * command = interfaceProvided->GetCommandRead("GetPositionCartesian");
+    mtsCommandRead * command = interfaceProvided->GetCommandRead("measured_cp");
     CMN_ASSERT(command);
     GetCartesianPositionSlave.Bind(command);
 

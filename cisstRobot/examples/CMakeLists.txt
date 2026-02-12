@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2013-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2013-2021 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -16,6 +16,7 @@ set (REQUIRED_CISST_LIBRARIES
      cisstCommon
      cisstVector
      cisstOSAbstraction
+     cisstNumerical
      cisstRobot)
 
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})

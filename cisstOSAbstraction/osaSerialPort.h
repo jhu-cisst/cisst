@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Anton Deguet
   Created on: 2004-12-06
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,8 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Declaration of osaSerialPort
 */
 
@@ -59,21 +57,37 @@ public:
     /*! Type used to define the baud rate.
       \sa SetBaudRate */
 #if (CISST_OS == CISST_WINDOWS)
+    // Windows defines standard baud rates in WinBase.h, which does not include
+    // CBR_230400 or CBR_460800.
+    #ifndef CBR_230400
+    #define CBR_230400 230400
+    #endif
+    #ifndef CBR_460800
+    #define CBR_460800 460800
+    #endif
     enum BaudRateType {BaudRate300 = CBR_300,
                        BaudRate1200 = CBR_1200,
                        BaudRate9600 = CBR_9600,
                        BaudRate19200 = CBR_19200,
                        BaudRate38400 = CBR_38400,
                        BaudRate57600 = CBR_57600,
-                       BaudRate115200 = CBR_115200};
+                       BaudRate115200 = CBR_115200,
+                       BaudRate230400 = CBR_230400,
+                       BaudRate460800 = CBR_460800};
 #else
+    // MacOS doesn't define some of the baud rates
+    #ifndef B460800
+    #define B460800 460800
+    #endif
     enum BaudRateType {BaudRate300 = B300,
                        BaudRate1200 = B1200,
                        BaudRate9600 = B9600,
                        BaudRate19200 = B19200,
                        BaudRate38400 = B38400,
                        BaudRate57600 = B57600,
-                       BaudRate115200 = B115200};
+                       BaudRate115200 = B115200,
+                       BaudRate230400 = B230400,
+                       BaudRate460800 = B460800};
 #endif
 
 
@@ -138,10 +152,10 @@ public:
 #endif
     }
 
-  
+
     /*! Destructor. */
     virtual ~osaSerialPort(void);
-    
+
     /*! Set a different baud rate. */
     inline void SetBaudRate(const BaudRateType & baudRate) {
         this->BaudRate = baudRate;
@@ -212,14 +226,14 @@ public:
     inline int Write(const std::string & data) {
         return this->Write(data.c_str(), static_cast<int>(data.size()));
     }
-    
+
     /*! Receive raw data. */
     // PK: why overload for char and uchar?
     int Read(char * data, int nBytes);
     int Read(unsigned char * data, int nBytes);
 
     /*! Sends a serial break for a given duration in seconds.
-      
+
      * On Linux, if the break duration is set to 0, the actual
        duration will be at least 0.25 seconds and at most 0.5 seconds.
 
@@ -233,7 +247,7 @@ public:
 
      */
     bool WriteBreak(double breakLengthInSeconds);
-  
+
     /*! Flush. */
     bool Flush(void);
 
@@ -248,7 +262,7 @@ private:
     ParityCheckingType ParityChecking;
     StopBitsType StopBits;
     FlowControlType FlowControl;
-    
+
 #if (CISST_OS == CISST_WINDOWS)
     HANDLE PortHandle;
     OVERLAPPED OverlappedStructureRead, OverlappedStructureWrite;
@@ -256,7 +270,7 @@ private:
     bool isBlocking;
 #else // Unix
     int FileDescriptor;
-#endif  
+#endif
 };
 
 

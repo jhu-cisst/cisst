@@ -8,8 +8,7 @@
 #  Author(s): Anton Deguet
 #  Created on: 2004-10-05
 
-# (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -19,27 +18,27 @@
 # 
 # --- end cisst license ---
 
-print ">>>> In python script"
+print(">>>> In python script")
 
-objectRegister = cmnObjectRegister_Instance()
+objectRegister = cisstCommon.cmnObjectRegister.Instance()
 
-print objectRegister
+print(objectRegister.ToString())
 
 derived1 = objectRegister.FindObject("derived1")
-print "Class of derived1: ", derived1.__class__
+print("Class of derived1: ", derived1.__class__)
 
 rederived1 = objectRegister.FindObject("rederived1")
-print "Class of rederived1: ", rederived1.__class__
+print("Class of rederived1: ", rederived1.__class__)
 
-print "Create and register derived2"
+print("Create and register derived2")
 derived2 = myDerivedClass()
 objectRegister.Register("derived2", derived2)
 
-print "modifying derived1.FixedSizeVector()"
+print("modifying derived1.FixedSizeVector()")
 fixedVector1 = derived1.FixedSizeVector()
 fixedVector1 / 100
 
-print objectRegister
+print(objectRegister.ToString())
 
-print "<<<< Out of python script"
+print("<<<< Out of python script")
 

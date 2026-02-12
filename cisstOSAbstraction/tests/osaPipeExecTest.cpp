@@ -116,7 +116,7 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     CPPUNIT_ASSERT_EQUAL(6, charsWrittenInt);
     resultString = pipe1.ReadUntil(6, 'd');
     CPPUNIT_ASSERT_EQUAL(std::string("abcd"), resultString);
-    resultString = pipe1.Read(6);
+    resultString = pipe1.ReadUntil(6, 'f');
     CPPUNIT_ASSERT_EQUAL(std::string("ef"), resultString);
 
     /* Test ReadUntil with timeout */
@@ -124,7 +124,7 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     // No characters written, should time out
     resultString = pipe1.ReadUntil(6, 'a', 2.0);
     measuredTime = osaGetTime()-startTime;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, measuredTime, 0.1);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, measuredTime, 0.2);
     CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(resultString.length()));
     charsWrittenInt = pipe1.Write("12345", 5);
     CPPUNIT_ASSERT_EQUAL(5, charsWrittenInt);

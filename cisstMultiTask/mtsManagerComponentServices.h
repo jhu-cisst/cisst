@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,10 +39,8 @@ protected:
     struct ManagementStruct {
         mtsFunctionWriteReturn Create;
         mtsFunctionWrite Configure;
-        mtsFunctionWrite Connect;
-        mtsFunctionWriteReturn ConnectNew;   // used for CISST_MTS_NEW
-        mtsFunctionWrite Disconnect;
-        mtsFunctionWriteReturn DisconnectNew;   // used for CISST_MTS_NEW
+        mtsFunctionWriteReturn Connect;
+        mtsFunctionWriteReturn Disconnect;
         mtsFunctionWrite Start;
         mtsFunctionWrite Stop;
         mtsFunctionWrite Resume;
@@ -192,14 +189,27 @@ public:
     std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
 
     std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(void) const;
-    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(const std::string &processName) const;
+    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(const std::string & processName) const;
 
     mtsInterfaceProvidedDescription
         GetInterfaceProvidedDescription(const std::string & processName,
-                                        const std::string & componentName, const std::string &interfaceName) const;
+                                        const std::string & componentName, const std::string & interfaceName) const;
+    inline mtsInterfaceProvidedDescription
+        GetInterfaceProvidedDescription(const mtsDescriptionInterfaceFullName & interfaceDescription) const {
+        return GetInterfaceProvidedDescription(interfaceDescription.ProcessName,
+                                               interfaceDescription.ComponentName,
+                                               interfaceDescription.InterfaceName);
+    }
+
     mtsInterfaceRequiredDescription
         GetInterfaceRequiredDescription(const std::string & processName,
-                                        const std::string & componentName, const std::string &interfaceName) const;
+                                        const std::string & componentName, const std::string & interfaceName) const;
+    inline mtsInterfaceRequiredDescription
+        GetInterfaceRequiredDescription(const mtsDescriptionInterfaceFullName & interfaceDescription) const {
+        return GetInterfaceRequiredDescription(interfaceDescription.ProcessName,
+                                               interfaceDescription.ComponentName,
+                                               interfaceDescription.InterfaceName);
+    }
 
     // Dynamically load the file (fileName) into the current process
     bool Load(const std::string & fileName) const;

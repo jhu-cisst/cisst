@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-12-10
 
-  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -70,7 +70,11 @@ void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
         this->StartupInternal();
     }
 
-    while ((this->State == mtsComponentState::ACTIVE) || (this->State == mtsComponentState::READY)) {
+    // Use a local variable, currentState, because otherwise we can have a problem when this->State is
+    // changed by another thread. Specifically, if the state is changed from READY to ACTIVE in between
+    // these conditions, then both will evaluate to false.
+    mtsComponentState currentState = this->State;
+    while ((currentState == mtsComponentState::ACTIVE) || (currentState == mtsComponentState::READY)) {
         while (this->State == mtsComponentState::READY) {
             // Suspend the task until there is a call to Start().
             CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: wait to start task \"" << this->GetName() << "\"" << std::endl;
@@ -81,6 +85,7 @@ void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
             // put the task to sleep until next signal
             Thread.WaitForWakeup();
         }
+        currentState = this->State;
     }
 
     if (this->State == mtsComponentState::FINISHING) {

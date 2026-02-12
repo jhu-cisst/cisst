@@ -1,5 +1,5 @@
 {
-    "state-collectors":
+    "state_collectors":
     [
         {
             "component": "SIN0",
@@ -23,5 +23,22 @@
                 }
             ]
          }
+    ]
+    ,
+    "event_collectors":
+    [
+        {
+            "component": "SIN0"
+        }
+        ,
+        {
+            "component": "SIN1",
+            "interfaces": [
+                {
+                    "name": "StateTableStateTable",
+                    "events_void": ["CollectionStarted"]
+                }
+            ]
+        }
     ]
 }

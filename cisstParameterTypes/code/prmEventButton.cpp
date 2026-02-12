@@ -5,8 +5,7 @@
   Author(s):	Anton Deguet, Rajesh Kumar
   Created on:   2008-04-08
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 

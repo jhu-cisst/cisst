@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:   2008-02-05
 
-  (C) Copyright 2008-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +15,6 @@ http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
 */
-
 
 #ifndef _prmMaskedVector_h
 #define _prmMaskedVector_h
@@ -37,23 +35,16 @@ class prmMaskedVector: public mtsGenericObject
     CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-
-    /*! This type. */
+    typedef size_t size_type;
     typedef prmMaskedVector<_elementType> ThisType;
-    
-    typedef mtsGenericObject    BaseType;
-
+    typedef mtsGenericObject BaseType;
     typedef vctDynamicVector<_elementType> DataType;
 
 protected:
-    /*! Type used to define the size of the vector. */
-    typedef unsigned int size_type;
-
     /*! Vector of values for this container */
     //@{
     CMN_DECLARE_MEMBER_AND_ACCESSORS(DataType, Data);
     //@}
-
 
     /*! Masks for the cooresponding vector */
     //@{
@@ -63,44 +54,46 @@ protected:
 public:
     /*! Default constructor. */
     inline prmMaskedVector(void):
-         DataMember(0),
-         MaskMember(0)
+        DataMember(0),
+        MaskMember(0)
     {}
 
-    /*! Set vector same size for each element, this is required if the above constructor is not used 
-       Sets all elements to 0
-    */ 
-    inline void SetSize(size_type size){
-            DataMember.SetSize(size);
-            MaskMember.SetSize(size);
-            DataMember.Zeros();
-            MaskMember.Zeros();
-         }
+    /*! Set vector same size for each element, this is required if the above constructor is not used
+      Sets all elements to 0
+    */
+    inline void SetSize(const size_type size) {
+        DataMember.SetSize(size);
+        MaskMember.SetSize(size);
+        DataMember.Zeros();
+        MaskMember.Zeros();
+    }
 
 
     /*! Constructor with memory allocation for a given size. */
-    inline prmMaskedVector(size_type size){
-         SetSize(size);
+    inline prmMaskedVector(const size_type size) {
+        SetSize(size);
     }
 
-   /* inline prmMaskedVector( const DataType& data,
-                            const mtsBoolVec& mask  ):
+    inline prmMaskedVector(const DataType & data,
+                           const vctBoolVec & mask):
         DataMember(data),
         MaskMember(mask)
-    {}*/
+    {
+        CMN_ASSERT(data.size() == mask.size());
+    }
 
     /*! Copy constructor. */
     inline prmMaskedVector(const ThisType & otherVector):
-        mtsGenericObject( otherVector ),
-        DataMember( otherVector.Data() ),
-        MaskMember( otherVector.Mask() )
+        mtsGenericObject(otherVector),
+        DataMember(otherVector.Data()),
+        MaskMember(otherVector.Mask())
     {}
 
     /*! Default destructor, will call the destructor of the contained
       vector and free the memory. */
     inline ~prmMaskedVector() {}
 
-     /*! To stream human readable output */
+    /*! To stream human readable output */
     virtual  std::string ToString(void) const {
         std::stringstream outputStream;
         ToStream(outputStream);
@@ -108,20 +101,20 @@ public:
     }
 
     /*! To stream human readable output */
-    virtual void ToStream(std::ostream & outputStream) const {
+    void ToStream(std::ostream & outputStream) const override {
         mtsGenericObject::ToStream(outputStream);
-        outputStream<<" , "<<DataMember<<" , "<<MaskMember;
+        outputStream << ", " <<DataMember << ", " << MaskMember;
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const{
+    void SerializeRaw(std::ostream & outputStream) const override {
         BaseType::SerializeRaw(outputStream);
         MaskMember.SerializeRaw(outputStream);
         DataMember.SerializeRaw(outputStream);
     }
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream){
+    void DeSerializeRaw(std::istream & inputStream) override {
         BaseType::DeSerializeRaw(inputStream);
         MaskMember.DeSerializeRaw(inputStream);
         DataMember.DeSerializeRaw(inputStream);

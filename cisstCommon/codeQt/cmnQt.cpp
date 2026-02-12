@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-12-19
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,8 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnQt.h>
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnLogger.h>
 
 #include <QApplication>
+#include <QPalette>
+#include <QStyle>
+#include <QStyleFactory>
 
 #if (CISST_OS == CISST_LINUX)
 
@@ -28,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 
 void cmnQtQApplicationExitsOnCtrlC_SignalHandler(int)
 {
+    CMN_LOG_INIT_WARNING << "cmnQtQApplicationExitsOnCtrlC_SignalHandler: exiting Qt Core Application" << std::endl;
     QCoreApplication::exit(0);
 }
 #endif // CISST_OS
@@ -36,4 +41,34 @@ void cmnQt::QApplicationExitsOnCtrlC(void) {
 #if (CISST_OS == CISST_LINUX)
     signal(SIGINT, cmnQtQApplicationExitsOnCtrlC_SignalHandler);
 #endif
+}
+
+void cmnQt::SetDarkMode(void)
+{
+    QPalette * palette = new QPalette();
+    palette->setColor(QPalette::Window, QColor(53, 53, 53));
+    palette->setColor(QPalette::WindowText, Qt::white);
+    palette->setColor(QPalette::Base, QColor(75, 75, 75));
+    palette->setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+    palette->setColor(QPalette::ToolTipBase, Qt::white);
+    palette->setColor(QPalette::ToolTipText, Qt::black);
+    palette->setColor(QPalette::Text, Qt::white);
+    palette->setColor(QPalette::Button, QColor(53, 53, 53));
+    palette->setColor(QPalette::ButtonText, Qt::white);
+    palette->setColor(QPalette::BrightText, Qt::red);
+    palette->setColor(QPalette::Link, QColor(42, 130, 218));
+    palette->setColor(QPalette::Highlight, QColor(42, 130, 218));
+    palette->setColor(QPalette::HighlightedText, Qt::black);
+    QApplication::setPalette(*palette);
+}
+
+std::string cmnQt::SetStyle(const std::string & qtStyle)
+{
+    std::string result;
+    QStyle * style = QApplication::setStyle(QString(qtStyle.c_str()));
+    if (!style) {
+        result += "Style \"" + qtStyle + "\" is not valid, pick one from: "
+            + QStyleFactory::keys().join(", ").toStdString();
+    }
+    return result;
 }

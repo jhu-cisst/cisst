@@ -31,15 +31,11 @@ mtsIntervalStatisticsQtWidget::mtsIntervalStatisticsQtWidget(void):
     this->horizontalHeader()->hide();
     this->verticalScrollBar()->hide();
     this->horizontalScrollBar()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    this->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-#else
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-#endif
+
     int colIndex = 0;
 
     QTWIPeriodAverage = new QTableWidgetItem();
@@ -148,7 +144,7 @@ mtsIntervalStatisticsQtWidgetComponent::mtsIntervalStatisticsQtWidgetComponent(c
     // Setup CISST Interface
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
     if (interfaceRequired) {
-        interfaceRequired->AddFunction("GetPeriodStatistics", GetPeriodStatistics);
+        interfaceRequired->AddFunction("period_statistics", period_statistics);
     }
 }
 
@@ -164,6 +160,6 @@ void mtsIntervalStatisticsQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED
         return;
     }
 
-    GetPeriodStatistics(IntervalStatistics);
+    period_statistics(IntervalStatistics);
     mtsIntervalStatisticsQtWidget::SetValue(IntervalStatistics);
 }

@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2014-05-14
 
-  (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2014-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "user.h"
 
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
@@ -35,7 +35,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     cmnLogger::SetMaskClass("user", CMN_LOG_ALLOW_ALL);
 
     // component manager is a singleton
-    mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
+    mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
 
     // create counter and user components
     counter * counterPointer = new counter("counter", 1.0 * cmn_s);

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-01-10
 
-  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,6 +32,9 @@ http://www.cisst.org/cisst/license.txt.
 %ignore AlmostEquivalent;
 %ignore ProductOf;
 %ignore operator==;
+
+%ignore vctFrameBase::Translation;
+%ignore vctFrameBase::Rotation;
 
 // instantiate the templated base class
 %include "cisstVector/vctFrameBase.h"
@@ -71,6 +74,5 @@ typedef vctFrameBase<vctRot3 > vctFrm3;
 %apply vctDynamicMatrix         {vctFrame4x4<double, VCT_ROW_MAJOR >};
 %apply vctDynamicMatrix &       {vctFrame4x4<double, VCT_ROW_MAJOR > &};
 %apply const vctDynamicMatrix & {const vctFrame4x4<double, VCT_ROW_MAJOR > &};
-
 
 #endif // _vctFrame_i

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-05-17
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -38,11 +38,11 @@ void mtsMessageQtWidget::SetInterfaceRequired(mtsInterfaceRequired * interfaceRe
 {
     if (interfaceRequired) {
         interfaceRequired->AddEventHandlerWrite(&mtsMessageQtWidget::ErrorEventHandler,
-                                                this, "Error");
+                                                this, "error");
         interfaceRequired->AddEventHandlerWrite(&mtsMessageQtWidget::WarningEventHandler,
-                                                this, "Warning");
+                                                this, "warning");
         interfaceRequired->AddEventHandlerWrite(&mtsMessageQtWidget::StatusEventHandler,
-                                                this, "Status");
+                                                this, "status");
     }
 }
 
@@ -89,23 +89,23 @@ void mtsMessageQtWidget::setupUi(void)
 void mtsMessageQtWidget::ErrorEventHandler(const mtsMessage & message)
 {
     emit SignalSetColor(QColor("red"));
-    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Error #")
+    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" error #")
                              + QString::number(message.Counter) + QString(": ")
                              + QString(message.Message.c_str()));
 }
 
 void mtsMessageQtWidget::WarningEventHandler(const mtsMessage & message)
 {
-    emit SignalSetColor(QColor("darkRed"));
-    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Warning #")
+    emit SignalSetColor(QColor("darkOrange"));
+    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" warning #")
                              + QString::number(message.Counter) + QString(": ")
                              + QString(message.Message.c_str()));
 }
 
 void mtsMessageQtWidget::StatusEventHandler(const mtsMessage & message)
 {
-    emit SignalSetColor(QColor("black"));
-    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" Status #")
+    emit SignalSetColor(palette().color(QPalette::Text));
+    emit SignalAppendMessage(QTime::currentTime().toString("hh:mm:ss") + QString(" status #")
                              + QString::number(message.Counter) + QString(": ")
                              + QString(message.Message.c_str()));
 }

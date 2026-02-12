@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -85,7 +85,7 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         mtsStateIndex Last;
 
         void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                         bool headerOnly = false, const std::string & headerPrefix = "") const;
+                         bool headerOnly = false, const std::string & headerPrefix = "") const override;
     };
 
     /*! Data structure used for state table data collection.  Stores
@@ -228,14 +228,18 @@ public:
 
  protected:
 
-	/*! The number of rows of the state data table. */
-	size_t HistoryLength;
+    /*! Flag to indicate if the table has started.  True between
+      Start() and Advance() calls, false otherwise. */
+    bool mStarted;
 
-	/*! The index of the writer in the data table. */
-	size_t IndexWriter;
+    /*! The number of rows of the state data table. */
+    size_t HistoryLength;
 
-	/*! The index of the reader in the table. */
-	size_t IndexReader;
+    /*! The index of the writer in the data table. */
+    size_t IndexWriter;
+
+    /*! The index of the reader in the table. */
+    size_t IndexReader;
 
     /*! The index of the delayed reader in the table. */
     size_t IndexDelayed;
@@ -253,8 +257,8 @@ public:
       default. */
     bool AutomaticAdvanceFlag;
 
-	/*! The vector contains pointers to individual columns. */
-	std::vector<mtsStateArrayBase *> StateVector;
+    /*! The vector contains pointers to individual columns. */
+    std::vector<mtsStateArrayBase *> StateVector;
 
     /*! The vector contains pointers to the current values
       of elements that are to be added to the state when we
@@ -262,17 +266,17 @@ public:
       */
     std::vector<mtsGenericObject *> StateVectorElements;
 
-	/*! The columns entries can be accessed by name. This vector
-	  stores the names corresponding to the columns. */
-	std::vector<std::string> StateVectorDataNames;
+    /*! The columns entries can be accessed by name. This vector
+      stores the names corresponding to the columns. */
+    std::vector<std::string> StateVectorDataNames;
 
     /*! The vector contains pointers to the accessor methods
       (e.g., Get, GetLatest) from which command objects are created. */
     std::vector<AccessorBase *> StateVectorAccessors;
 
-	/*! The vector contains the time stamp in counts or ticks per
-	  period of the task that the state table is associated with. */
-	std::vector<mtsStateIndex::TimeTicksType> Ticks;
+    /*! The vector contains the time stamp in counts or ticks per
+      period of the task that the state table is associated with. */
+    std::vector<mtsStateIndex::TimeTicksType> Ticks;
 
     /*! The state table indices for Tic, Toc, and Period. */
     mtsStateDataId TicId, TocId;
@@ -308,8 +312,8 @@ public:
       mtsCollectorState. */
     DataCollectionInfo DataCollection;
 
-	/*! Write specified data. */
-	bool Write(mtsStateDataId id, const mtsGenericObject & obj);
+    /*! Write specified data. */
+    bool Write(mtsStateDataId id, const mtsGenericObject & obj);
 
 
  public:
@@ -320,7 +324,7 @@ public:
     /*! Default destructor. */
     ~mtsStateTable();
 
-	/*! Method to change the size of the table*/
+    /*! Method to change the size of the table*/
     bool SetSize(const size_t size);
 
     /*! Get a handle for data to be used by a reader.  All the const
@@ -383,22 +387,46 @@ public:
     }
 
     /*! Return pointer to accessor functions for the state data element.
-        \param element Pointer to state data element (i.e., working copy)
-        \returns Pointer to accessor class (0 if not found)
-        \note This method is overloaded to accept the element pointer or string name.
+      \param element Pointer to state data element (i.e., working copy)
+      \returns Pointer to accessor class (0 if not found)
     */
     template<class _elementType>
-    mtsStateTable::AccessorBase * GetAccessor(const _elementType & element) const;
+    mtsStateTable::AccessorBase * GetAccessorByInstance(const _elementType & element) const;
 
     /*! Return pointer to accessor functions for the state data element.
-        \param name Name of state data element
-        \returns Pointer to accessor class (0 if not found)
-        \note This method is overloaded to accept the element pointer or string name.
+      \param name Name of state data element
+      \returns Pointer to accessor class (0 if not found)
     */
-    mtsStateTable::AccessorBase * GetAccessor(const std::string & name) const;
-    mtsStateTable::AccessorBase * GetAccessor(const char * name) const;
-    mtsStateTable::AccessorBase * GetAccessor(const size_t id) const;
+    //@{
+    mtsStateTable::AccessorBase * GetAccessorByName(const std::string & name) const;
+    mtsStateTable::AccessorBase * GetAccessorByName(const char * name) const;
+    //@}
 
+    /*! Return pointer to accessor functions for the state data element.
+      \param id Id of state data element
+      \returns Pointer to accessor class (0 if not found)
+    */
+    mtsStateTable::AccessorBase * GetAccessorById(const size_t id) const;
+
+#ifndef SWIG
+    template<class _elementType>
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const _elementType & element) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorByInstance(element);
+    }
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const std::string & name) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorByName(name);
+    }
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const char * name) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorByName(name);
+    }
+    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const size_t id) const {
+        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
+        return GetAccessorById(id);
+    }
+#endif
 
     /*! Get a handle for data to be used by a writer */
     mtsStateIndex GetIndexWriter(void) const;
@@ -408,6 +436,11 @@ public:
 
     /*! Start if automatic advance is set and does nothing otherwise. */
     void StartIfAutomatic(void);
+
+    /*! Check if state table is "started", i.e. between Start() and Advance() calls. */
+    inline bool Started(void) const {
+        return mStarted;
+    }
 
     /*! Advance the pointers of the circular buffer. Note that since
       there is only a single writer, it is not necessary to use mutual
@@ -421,7 +454,7 @@ public:
 
     /*! Advance for replay mode, be very careful this should only be
       used in replay mode as this method only increments the reader
-      index. */ 
+      index. */
     bool ReplayAdvance(void);
 
     /*! Cleanup called when the task is being stopped. */
@@ -443,6 +476,10 @@ public:
         return this->StateVector.size();
     }
 
+    inline const std::vector<std::string> & GetDataNames(void) const {
+        return StateVectorDataNames;
+    }
+
     /*! Return the moving average of the measured period (i.e., average of last
       HistoryLength values). */
     inline double GetAveragePeriod(void) const {
@@ -450,7 +487,7 @@ public:
     }
 
     /*! For debugging, dumps the current data table to output stream. */
-    void ToStream(std::ostream & out) const;
+    void ToStream(std::ostream & out) const override;
 
     /*! For debugging, dumps some values of the current data table to
       output stream. */
@@ -515,7 +552,7 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
 }
 
 template <class _elementType>
-mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType & element) const
+mtsStateTable::AccessorBase *mtsStateTable::GetAccessorByInstance(const _elementType & element) const
 {
     for (size_t i = 0; i < StateVectorElements.size(); i++) {
         if (mtsGenericTypes<_elementType>::IsEqual(element, *StateVectorElements[i]))
@@ -525,4 +562,3 @@ mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType & ele
 }
 
 #endif // _mtsStateTable_h
-

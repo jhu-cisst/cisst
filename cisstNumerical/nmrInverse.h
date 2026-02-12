@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2006-01-27
 
-  (C) Copyright 2006-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -695,7 +695,9 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _si
                             vctFixedSizeVector<CISSTNETLIB_INTEGER, _maxSize1> & pivotIndices,
                             vctFixedSizeVector<CISSTNETLIB_DOUBLE, _lWork> & workspace)
 {
+#if CMN_ASSERT_IS_DEFINED
     const CISSTNETLIB_INTEGER maxSize1 = static_cast<CISSTNETLIB_INTEGER>(nmrInverseFixedSizeData<_size, _storageOrder>::MAX_SIZE_1);
+#endif
     const CISSTNETLIB_INTEGER lWork = static_cast<CISSTNETLIB_INTEGER>(nmrInverseFixedSizeData<_size, _storageOrder>::LWORK);
     //Assert if requirement is equal to size provided!
     CMN_ASSERT(maxSize1 == static_cast<CISSTNETLIB_INTEGER>(_maxSize1));
@@ -783,4 +785,3 @@ inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _si
 
 
 #endif // _nmrInverse_h
-

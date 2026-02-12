@@ -1,10 +1,8 @@
 /*
-
   Author(s):  Simon Leonard
   Created on: 2010
 
-  (C) Copyright 2010-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -13,7 +11,6 @@
   http://www.cisst.org/cisst/license.txt.
 
   --- end cisst license ---
-
 */
 
 #include <cisstRobot/robManipulator.h>
@@ -258,7 +255,7 @@ int main( int argc, char** argv ){
 	  robHayati* h = dynamic_cast<robHayati*>( ki );
 
 	  switch( h->GetType() ){
-	  case robJoint::HINGE:
+	  case cmnJointType::CMN_JOINT_REVOLUTE:
 	    {
 	      h->SetRotationX(    h->GetRotationX()    + dx[cnt++] );
 	      h->SetRotationY(    h->GetRotationY()    + dx[cnt++] );
@@ -266,12 +263,12 @@ int main( int argc, char** argv ){
 	      h->SetTranslationX( h->GetTranslationX() + dx[cnt++] );
 	    }
 	    break;
-	  case robJoint::SLIDER:
+	  case cmnJointType::CMN_JOINT_PRISMATIC:
 	    {
 	      h->SetRotationX(    h->GetRotationX()    + dx[cnt++] );
 	      h->SetRotationY(    h->GetRotationY()    + dx[cnt++] );
 	      h->SetTranslationZ( h->GetTranslationZ() + dx[cnt++] );
-	    } // case robJoint::SLIDER:
+	    } // case cmnJointType::CMN_JOINT_PRISMATIC:
 	    break;
 
 	  default:

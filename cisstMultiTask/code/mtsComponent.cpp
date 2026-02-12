@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2015 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 
 #include <cisstOSAbstraction/osaGetTime.h>
@@ -87,6 +87,51 @@ mtsComponent::~mtsComponent()
         delete ManagerComponentServices;
     }
 }
+
+
+#if CISST_HAS_JSON
+void mtsComponent::ConfigureJSON(const Json::Value & configuration)
+{
+    const Json::Value jsonLog = configuration["log"];
+    if (!jsonLog.empty()) {
+        const Json::Value jsonAllow = jsonLog["allow"];
+        if (!jsonAllow.empty()) {
+            const std::string allow = jsonAllow.asString();
+            const std::string className = Services()->GetName();
+            if (allow == "none") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_NONE);
+            } else if (allow == "errors") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_ERRORS);
+            } else if (allow == "errors-and-warnings") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+            } else if (allow == "verbose") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_VERBOSE);
+            } else if (allow == "debug") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_DEBUG);
+            } else if (allow == "all") {
+                cmnLogger::SetMaskClass(className, CMN_LOG_ALLOW_ALL);
+            } else {
+                CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: failed to configure \""
+                                         << this->GetName()
+                                         << "\", the \"log\":\"allow\" value must be one of: "
+                                         << "none, errors, errors-and-warnings, verbose, debug, all.  We found: \""
+                                         << allow << "\"" << std::endl;
+            }
+
+        }
+        const Json::Value jsonSeparateFile = jsonLog["separate-file"];
+        if (!jsonSeparateFile.empty()) {
+            if (jsonSeparateFile.isBool()) {
+                if (jsonSeparateFile.asBool()) {
+                    UseSeparateLogFileDefaultWithDate();
+                }
+            } else if (jsonSeparateFile.isString()) {
+                UseSeparateLogFile(jsonSeparateFile.asString());
+            }
+        }
+    }
+}
+#endif
 
 
 const std::string & mtsComponent::GetName(void) const
@@ -675,9 +720,9 @@ bool mtsComponent::AddStateTable(mtsStateTable * existingStateTable, bool addInt
         providedInterface->AddEventVoid(existingStateTable->DataCollection.CollectionStarted,
                                         "CollectionStarted");
         providedInterface->AddEventWrite(existingStateTable->DataCollection.CollectionStopped,
-                                         "CollectionStopped", mtsUInt());
+                                         "CollectionStopped", size_t(0));
         providedInterface->AddEventWrite(existingStateTable->DataCollection.Progress,
-                                         "Progress", mtsUInt());
+                                         "Progress", size_t(0));
     }
     CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName
                              << "\" and corresponding interface \"" << interfaceName
@@ -809,6 +854,43 @@ void mtsComponent::KillSeparateLogFile(void)
         delete this->LogFile;
         this->LogFile = 0;
     }
+}
+
+
+bool mtsComponent::AreAllInterfacesRequiredConnected(const bool log)
+{
+    // loop through the required interfaces and make sure they are all
+    // connected. The method doesn't end if it finds an interface that
+    // is not connected so it can log all un-connected interfaces.
+    bool allConnected = true;
+    InterfacesRequiredMapType::const_iterator requiredIterator = InterfacesRequired.begin();
+    const mtsInterfaceProvided * connectedInterface;
+    for (;
+         requiredIterator != InterfacesRequired.end();
+         requiredIterator++) {
+        connectedInterface = requiredIterator->second->GetConnectedInterface();
+        if (!connectedInterface) {
+            if (requiredIterator->second->IsRequired() == MTS_REQUIRED) {
+                if (log) {
+                    CMN_LOG_CLASS_INIT_ERROR << "AreAllInterfacesRequiredConnected: component \"" << this->GetName()
+                                             << "\", void pointer to required/input interface \""
+                                             << requiredIterator->first
+                                             << "\" (required/input not connected to provided/output)" << std::endl;
+                    allConnected = false;
+                } else {
+                    // no log, we can just abort
+                    return false;
+                }
+            }
+            else if (log) {
+                CMN_LOG_CLASS_INIT_VERBOSE << "AreAllInterfacesRequiredConnected: component \"" << this->GetName()
+                                           << "\", void pointer to optional required/input interface \""
+                                           << requiredIterator->first
+                                           << "\" (required/input not connected to provided/output)" << std::endl;
+            }
+        }
+    }
+    return allConnected;
 }
 
 

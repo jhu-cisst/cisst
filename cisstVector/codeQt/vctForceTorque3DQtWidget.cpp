@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Dorothy Hu
   Created on: 2017-01-20
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,13 +53,12 @@ void vctForceTorque3DQtWidget::closeEvent(QCloseEvent * event)
 
 void vctForceTorque3DQtWidget::setupUi(void)
 {
-
     QHBoxLayout * mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // left side, upper/lower limit, selector and legend
     QVBoxLayout * leftLayout = new QVBoxLayout;
-    leftLayout->setContentsMargins(2, 2, 2, 2);
+    leftLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addLayout(leftLayout);
 
     // combo box to select the plot item
@@ -69,12 +68,9 @@ void vctForceTorque3DQtWidget::setupUi(void)
     QPlotSelectItem->setCurrentIndex(PlotIndex);
     leftLayout->addWidget(QPlotSelectItem);
 
-    const double grey = 0.95;
-
     // legend
     QLabel * label;
     QPalette palette;
-    palette.setColor(QPalette::Window, QColor(grey * 255, grey * 255, grey * 255));
     label = new QLabel("Axis X");
     label->setAutoFillBackground(true);
     palette.setColor(QPalette::WindowText, Qt::red);
@@ -92,16 +88,11 @@ void vctForceTorque3DQtWidget::setupUi(void)
     leftLayout->addWidget(label);
     label = new QLabel("Vector");
     label->setAutoFillBackground(true);
-    palette.setColor(QPalette::WindowText, Qt::black);
+    palette.setColor(QPalette::WindowText, this->palette().color(QPalette::WindowText));
     label->setPalette(palette);
     leftLayout->addWidget(label);
 
     leftLayout->addStretch();
-
-    // Norm
-    QLScale = new QLabel("Scale");
-    QLScale->setAlignment(Qt::AlignBottom | Qt::AlignRight);
-    leftLayout->addWidget(QLScale);
 
     // plot area
     QVector = new vctVector3DQtWidget();
@@ -133,12 +124,6 @@ void vctForceTorque3DQtWidget::SetValue(const vct3 & force, const vct3 & torque)
     } else if (PlotIndex == 1) {
         QVector->SetValue(torque);
     }
-
-    // update scale
-    double scale = QVector->MaxNorm() * QVector->AxisLength();
-    QString text;
-    text.setNum(scale, 'f', 3);
-    QLScale->setText(text);
 }
 
 void vctForceTorque3DQtWidget::SlotPlotIndex(int newAxis)

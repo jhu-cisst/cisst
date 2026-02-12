@@ -39,6 +39,7 @@ set (HEADER_FILES
      vctAxisAngleRotation3.h
      vctBarycentricVector.h
      vctBinaryOperations.h
+     vctBoundingBox3.h
      vctContainerTraits.h
      vctDeterminant.h
 

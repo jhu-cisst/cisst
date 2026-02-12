@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -67,23 +67,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <stack>
 
 #include <cisstMultiTask/mtsExport.h>
-
-// Helper macro (useful to connect interfaces in main.cpp)
-#define CONNECT_LOCAL(_clientComp, _reqInt, _serverComp, _prvInt)\
-    if (!mtsManagerLocal::GetInstance()->Connect(_clientComp, _reqInt, _serverComp, _prvInt)) {\
-        CMN_LOG_INIT_ERROR << "Failed to connect: "\
-                           << _clientComp << ":" << _reqInt << " - "\
-                           << _serverComp << ":" << _prvInt << std::endl;\
-        exit(1);\
-    }
-
-#define CONNECT_REMOTE(_clientProc, _clientComp, _reqInt, _serverProc, _serverComp, _prvInt)\
-    if (!mtsManagerLocal::GetInstance()->Connect(_clientProc, _clientComp, _reqInt, _serverProc, _serverComp, _prvInt)) {\
-        CMN_LOG_INIT_ERROR << "Failed to connect: "\
-                           << _clientProc << ":" << _clientComp << ":" << _reqInt << " - "\
-                           << _serverProc << ":" << _serverComp << ":" << _prvInt << std::endl;\
-        exit(1);\
-    }
 
 class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
 {
@@ -292,63 +275,18 @@ protected:
     // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
     bool RemoveInterfaceRequired(const std::string & componentName, const std::string & interfaceRequiredName);
 
-    //-------------------------------------------------------------------------
-    //  Methods required by mtsManagerLocalInterface
-    //
-    //  See mtsManagerLocalInterface.h for detailed documentation.
-    //-------------------------------------------------------------------------
-    /*! \brief Create component proxy
-        \param componentProxyName Name of component proxy
-        \param listenerID Not used
-        \note This should be called before an interface proxy is created. */
-    bool CreateComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
-
-    /*! \brief Remove component proxy
-        \param componentProxyName Name of component proxy
-        \param listenerID Not used
-        \note Note that all the interface proxies that the proxy manages is
-              automatically removed when removing a component proxy. */
-    bool RemoveComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
-
-    /*! \brief Create provided interface proxy
-        \param serverComponentProxyName Name of server component proxy
-        \param providedInterfaceDescription Description of provided interface */
-    bool CreateInterfaceProvidedProxy(
-        const std::string & serverComponentProxyName,
-        const mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
-
-    /*! \brief Create required interface proxy
-        \param clientComponentProxyName Name of component proxy that has */
-    bool CreateInterfaceRequiredProxy(
-        const std::string & clientComponentProxyName,
-        const mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
-
-    /*! Remove provided interface proxy */
-    bool RemoveInterfaceProvidedProxy(
-        const std::string & componentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "");
-
-    /*! Remove required interface proxy */
-    bool RemoveInterfaceRequiredProxy(
-        const std::string & componentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
-
-    /*! Connect two local interfaces at the server side */
-    bool ConnectServerSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
-
-    /*! \brief Connect two local interfaces at the client side */
-    bool ConnectClientSideInterface(const mtsDescriptionConnection & description, const std::string & listenerID = "");
-
     /*! Get information about provided interface */
     bool GetInterfaceProvidedDescription(
         const std::string & serverComponentName,
         const std::string & providedInterfaceName,
-        mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "") override;
 
     /*! Extract all the information on a required interface such as function
         objects and event handlers with arguments serialized */
     bool GetInterfaceRequiredDescription(
         const std::string & componentName,
         const std::string & requiredInterfaceName,
-        mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") override;
 
     /*! Change GCM connection state */
     inline void SetGCMConnected(const bool connected) {
@@ -359,9 +297,15 @@ public:
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
-    /*! \brief Create a component.  Does not add it to the local component manager. */
+    /*! \brief Create a component.  Does not add it to the local component manager.
+        In this method, componentName is only used if constructorArgSerialized is an empty string. */
     mtsComponent * CreateComponentDynamically(const std::string & className, const std::string & componentName,
                                               const std::string & constructorArgSerialized);
+
+    /*! \brief Create a component.  Does not add it to the local component manager.
+        In this method, the component name is obtained from constructorArg. */
+    mtsComponent * CreateComponentDynamically(const std::string & className,
+                                              const mtsGenericObject & constructorArg);
 
 #if CISST_HAS_JSON
     /*! Configure using a JSON file.  This method will automatically
@@ -370,6 +314,7 @@ public:
       search path will be used to locate files that might be used to
       configure the components dynamically created. */
     bool ConfigureJSON(const std::string & filename);
+    bool ConfigureJSON(const std::list<std::string> & filenames);
 
     /*! Configure using a Json::Value.  This method will look for the
       arrays "components" and "connections" and will then call the
@@ -575,7 +520,7 @@ public:
     const osaTimeServer & GetTimeServer(void) const;
 
     /*! Returns name of this local component manager */
-    inline const std::string GetProcessName(const std::string & CMN_UNUSED(listenerID) = "") const {
+    inline const std::string GetProcessName(const std::string & CMN_UNUSED(listenerID) = "") const override {
         return ProcessName;
     }
 
@@ -615,53 +560,53 @@ public:
     void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                             const std::string & componentName,
                             const std::string & providedInterfaceName,
-                            const std::string & CMN_UNUSED(listenerID) = "");
+                            const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get names of all event generators in a provided interface */
     void GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
                                    const std::string & componentName,
                                    const std::string & providedInterfaceName,
-                                   const std::string & CMN_UNUSED(listenerID) = "");
+                                   const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get names of all functions in a required interface */
     void GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
                              const std::string & componentName,
                              const std::string & requiredInterfaceName,
-                             const std::string & CMN_UNUSED(listenerID) = "");
+                             const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get names of all event handlers in a required interface */
     void GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
                                  const std::string & componentName,
                                  const std::string & requiredInterfaceName,
-                                 const std::string & CMN_UNUSED(listenerID) = "");
+                                 const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get description of a command in a provided interface */
     void GetDescriptionOfCommand(std::string & description,
                                  const std::string & componentName,
                                  const std::string & providedInterfaceName,
                                  const std::string & commandName,
-                                 const std::string & CMN_UNUSED(listenerID) = "");
+                                 const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get description of a event generator in a provided interface */
     void GetDescriptionOfEventGenerator(std::string & description,
                                         const std::string & componentName,
                                         const std::string & providedInterfaceName,
                                         const std::string & eventGeneratorName,
-                                        const std::string & CMN_UNUSED(listenerID) = "");
+                                        const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get description of a function in a required interface */
     void GetDescriptionOfFunction(std::string & description,
                                   const std::string & componentName,
                                   const std::string & requiredInterfaceName,
                                   const std::string & functionName,
-                                  const std::string & CMN_UNUSED(listenerID) = "");
+                                  const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Get description of a function in a required  interface */
     void GetDescriptionOfEventHandler(std::string & description,
                                       const std::string & componentName,
                                       const std::string & requiredInterfaceName,
                                       const std::string & eventHandlerName,
-                                      const std::string & CMN_UNUSED(listenerID) = "");
+                                      const std::string & CMN_UNUSED(listenerID) = "") override;
 
     /*! Return IP address of this process */
     inline const std::string & GetIPAddress(void) const { return ProcessIP; }
@@ -682,11 +627,11 @@ public:
     bool GetGCMProcTimeSyncInfo(std::vector<std::string> &processNames, std::vector<double> &timeOffsets);
 
     /*! For debugging. Dumps to stream the maps maintained by the manager. */
-    void /*CISST_DEPRECATED*/ ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! Create a dot file to be used by graphviz to generate a nice
       graph of connections between tasks/interfaces. */
-    void /*CISST_DEPRECATED*/ ToStreamDot(std::ostream & outputStream) const;
+    void ToStreamDot(std::ostream & outputStream) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerLocal)

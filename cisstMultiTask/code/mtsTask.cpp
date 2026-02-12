@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -27,6 +26,7 @@
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 #include <iostream>
 
@@ -116,31 +116,10 @@ void mtsTask::ChangeStateEventHandler(const mtsComponentState &newState)
 void mtsTask::StartupInternal(void) {
     CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: started for task \"" << this->GetName() << "\"" << std::endl;
 
-    // Loop through the required interfaces and make sure they are all connected. This extra check is probably not needed.
-    bool success = true;
-    InterfacesRequiredMapType::const_iterator requiredIterator = InterfacesRequired.begin();
-    const mtsInterfaceProvided * connectedInterface;
-    for (;
-         requiredIterator != InterfacesRequired.end();
-         requiredIterator++) {
-        connectedInterface = requiredIterator->second->GetConnectedInterface();
-        if (!connectedInterface) {
-            if (requiredIterator->second->IsRequired() == MTS_REQUIRED) {
-                CMN_LOG_CLASS_INIT_ERROR << "StartupInternal: void pointer to required/input interface \""
-                                         << this->GetName() << ":" << requiredIterator->first
-                                         << "\" (required/input not connected to provided/output)" << std::endl;
-                success = false;
-            }
-
-            else {
-                CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: void pointer to optional required/input interface \""
-                                           << this->GetName() << ":" << requiredIterator->first
-                                           << "\" (required/input not connected to provided/output)" << std::endl;
-            }
-        }
-    }
+    // check that all interfaces are connected
+    bool allRequiredConnected = AreAllInterfacesRequiredConnected(true); // 'true' is to log results
     RunEventCalled = false;
-    if (success) {
+    if (allRequiredConnected) {
         try {
             // Call user-supplied startup function
             this->Startup();

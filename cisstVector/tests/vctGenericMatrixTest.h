@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):  Anton Deguet
   Created on: 2004-07-09
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+
+  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -129,10 +127,10 @@ public:
         const size_type size = matrix2.size();
         const size_type rows = matrix2.rows();
         const size_type cols = matrix2.cols();
-        
+
         value_type element;
         index = 0;
-        
+
         for (rowIndex = 0; rowIndex < rows; rowIndex++) {
             for (colIndex = 0; colIndex < cols; colIndex++) {
                 element = matrix2[rowIndex][colIndex];
@@ -162,16 +160,16 @@ public:
         bool gotException = false;
         try {
             matrix1.at(size);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
-        
+
         gotException = false;
         try {
             matrix2.at(size);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
 
@@ -179,32 +177,32 @@ public:
         gotException = false;
         try {
             matrix1.at(rows, 0);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
-        
+
         gotException = false;
         try {
             matrix2.at(rows, 0);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
 
         gotException = false;
         try {
             matrix1(rows, 0);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
-        
+
         gotException = false;
         try {
             matrix2(rows, 0);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
 
@@ -212,32 +210,32 @@ public:
         gotException = false;
         try {
             matrix1.at(0, cols);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
-        
+
         gotException = false;
         try {
             matrix2.at(0, cols);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
 
         gotException = false;
         try {
             matrix1(0, cols);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
-        
+
         gotException = false;
         try {
             matrix2(0, cols);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
 
@@ -352,7 +350,7 @@ public:
         const size_type rows = matrix1.rows();
         const size_type cols = matrix2.cols();
         const size_type common = matrix1.cols();
-        
+
         matrix3.ProductOf(matrix1, matrix2);
         for (rowIndex = 0; rowIndex < rows; rowIndex++) {
             for (colIndex = 0; colIndex < cols; colIndex++) {
@@ -363,7 +361,7 @@ public:
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(matrix3[rowIndex][colIndex]), static_cast<double>(sum), static_cast<double>(tolerance * common));
             }
         }
-        
+
         matrix3 = matrix1 * matrix2;
         for (rowIndex = 0; rowIndex < rows; rowIndex++) {
             for (colIndex = 0; colIndex < cols; colIndex++) {
@@ -394,7 +392,7 @@ public:
         bool gotException = false;
         try {
             matrix2.ProductOf(matrix1, matrix2);
-        } catch (std::runtime_error exception) {
+        } catch (std::runtime_error &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -402,7 +400,7 @@ public:
         gotException = false;
         try {
             matrix2.ProductOf(matrix2, matrix1);
-        } catch (std::runtime_error exception) {
+        } catch (std::runtime_error &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
@@ -422,7 +420,7 @@ public:
         value_type sum;
         const size_type rows = matrix1.rows();
         const size_type common = matrix1.cols();
-        
+
         vector2.ProductOf(matrix1, vector1);
         for (rowIndex = 0; rowIndex < rows; rowIndex++) {
             sum = value_type(0);
@@ -456,7 +454,7 @@ public:
         value_type sum;
         const size_type common = matrix1.rows();
         const size_type cols = matrix1.cols();
-        
+
         vector2.ProductOf(vector1, matrix1);
         for (colIndex = 0; colIndex < cols; colIndex++) {
             sum = value_type(0);
@@ -475,7 +473,7 @@ public:
             CPPUNIT_ASSERT_DOUBLES_EQUAL(static_cast<double>(vector2[colIndex]), static_cast<double>(sum), static_cast<double>(tolerance * common));
         }
     }
-    
+
 };
 
 

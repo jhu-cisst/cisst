@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):  Anton Deguet
   Created on: 2004-01-09
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,15 +34,15 @@ void vctMatrixRotation3Test::TestConstructors(void) {
     vctFixedSizeVector<_elementType, 3> y(0.0, 1.0, 0.0);
     vctFixedSizeVector<_elementType, 3> z(0.0, 0.0, 1.0);
     vctFixedSizeVector<_elementType, 3> difference;
-    
+
     typedef vctMatrixRotation3<_elementType> MatRotType;
     MatRotType testRotation1;
-    
+
     _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance();
-    
+
     CPPUNIT_ASSERT(testRotation1.rows() == 3);
     CPPUNIT_ASSERT(testRotation1.cols() == 3);
-    
+
     for (row = 0; row < 3; row++) {
         for (column = 0; column < 3; column++) {
             if (row == column) {
@@ -62,19 +60,19 @@ void vctMatrixRotation3Test::TestConstructors(void) {
                          0.0, 1.0, 0.0,
                          0.0, 0.0, 1.0);
     CPPUNIT_ASSERT(testRotation1 == MatRotType::Identity());
-    
+
     MatRotType testRotation2(vctAxisAngleRotation3<_elementType>(x, _elementType(cmnPI_2)));
     difference = testRotation2 * y - z;
     CPPUNIT_ASSERT(difference.LinfNorm() < tolerance);
     difference = -(testRotation2 * z) - y;
     CPPUNIT_ASSERT(difference.LinfNorm() < tolerance);
-    
+
     testRotation2.From(vctAxisAngleRotation3<_elementType>(y, _elementType(cmnPI_2)));
     difference = testRotation2 * z - x;
     CPPUNIT_ASSERT(difference.LinfNorm() < tolerance);
     difference = -(testRotation2 * x) - z;
     CPPUNIT_ASSERT(difference.LinfNorm() < tolerance);
-    
+
     testRotation2.From(vctAxisAngleRotation3<_elementType>(z, _elementType(cmnPI_2)));
     difference = testRotation2 * x - y;
     CPPUNIT_ASSERT(difference.LinfNorm() < tolerance);
@@ -106,10 +104,10 @@ void vctMatrixRotation3Test::TestConstructorFromVectors(void) {
 
     MatRotType matrix;
     vctRandom(matrix);
-    
+
     MatRotType matrixByColumn(matrix.Column(0), matrix.Column(1), matrix.Column(2));
     CPPUNIT_ASSERT(matrix == matrixByColumn);
-    
+
     MatRotType matrixByRow(matrix.Row(0), matrix.Row(1), matrix.Row(2), false);
     CPPUNIT_ASSERT(matrix == matrixByRow);
     CPPUNIT_ASSERT(matrixByColumn == matrixByRow);
@@ -131,17 +129,17 @@ void vctMatrixRotation3Test::TestFromVectors(void) {
 
     RotationType matrix;
     vctRandom(matrix);
-    
+
     RotationType matrixByColumn(matrix.Column(0), matrix.Column(1), matrix.Column(2));
     CPPUNIT_ASSERT(matrix == matrixByColumn);
-    
+
     matrixByColumn.From(matrix.Column(0), matrix.Column(1), matrix.Column(2));
     CPPUNIT_ASSERT(matrix == matrixByColumn);
-    
+
     RotationType matrixByRow(matrix.Row(0), matrix.Row(1), matrix.Row(2), false);
     CPPUNIT_ASSERT(matrix == matrixByRow);
     CPPUNIT_ASSERT(matrixByColumn == matrixByRow);
-    
+
     matrixByRow.From(matrix.Row(0), matrix.Row(1), matrix.Row(2), false);
     CPPUNIT_ASSERT(matrix == matrixByRow);
     CPPUNIT_ASSERT(matrixByColumn == matrixByRow);
@@ -233,6 +231,21 @@ void vctMatrixRotation3Test::TestConversionEulerZYXFloat(void) {
     TestConversionEuler<float, vctEulerRotation3Order::ZYX>();
 }
 
+void vctMatrixRotation3Test::TestConversionEulerZXZDouble(void) {
+    TestConversionEuler<double, vctEulerRotation3Order::ZXZ>();
+}
+
+void vctMatrixRotation3Test::TestConversionEulerZXZFloat(void) {
+    TestConversionEuler<float, vctEulerRotation3Order::ZXZ>();
+}
+
+void vctMatrixRotation3Test::TestConversionEulerYZXDouble(void) {
+    TestConversionEuler<double, vctEulerRotation3Order::YZX>();
+}
+
+void vctMatrixRotation3Test::TestConversionEulerYZXFloat(void) {
+    TestConversionEuler<float, vctEulerRotation3Order::YZX>();
+}
 
 template <class _elementType>
 void vctMatrixRotation3Test::TestFromSignaturesQuaternion(void) {
@@ -335,7 +348,7 @@ void vctMatrixRotation3Test::TestNormalize(void) {
     typedef vctMatrixRotation3<value_type> RotationType;
 
     RotationType m1, m2;
-    
+
     value_type tolerance = cmnTypeTraits<value_type>::Tolerance();
     unsigned int column, row;
 
@@ -380,7 +393,7 @@ void vctMatrixRotation3Test::TestInverse(void) {
     RotationType matrixRotation;
     vctRandom(matrixRotation);
     vctGenericRotationTest::TestInverse(matrixRotation);
-    
+
 }
 
 void vctMatrixRotation3Test::TestInverseDouble(void) {
@@ -511,7 +524,7 @@ void vctMatrixRotation3Test::TestApplyTo(void) {
     CPPUNIT_ASSERT((z - result).LinfNorm() < tolerance);
     composed.ApplyTo(z, result);
     CPPUNIT_ASSERT((y + result).LinfNorm() < tolerance);
-    
+
     testRotation.From(vctAxisAngleRotation3<value_type>(y, static_cast<value_type>(cmnPI_2)));
     testRotation.ApplyTo(z, result);
     CPPUNIT_ASSERT((x - result).LinfNorm() < tolerance);
@@ -553,10 +566,10 @@ void vctMatrixRotation3Test::TestApplyMethodsOperators(void) {
     typedef _elementType value_type;
     typedef vctMatrixRotation3<value_type> RotationType;
     typedef vctFixedSizeVector<value_type, 3> VectorType;
-    
+
     RotationType matrixRotation;
     vctRandom(matrixRotation);
-    
+
     VectorType vector;
     vctRandom(vector, static_cast<value_type>(-1.0), static_cast<value_type>(1.0));
     vctGenericRotationTest::TestApplyMethodsOperatorsObject(matrixRotation, vector);
@@ -577,4 +590,3 @@ void vctMatrixRotation3Test::TestApplyMethodsOperatorsFloat(void) {
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctMatrixRotation3Test);
-

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -31,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _cmnRequiresDeepCopy_h
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstCommon/cmnRequiresDeepCopy.h>
+#include <cisstCommon/cmnThrow.h>
 
 /*! Templated global function used to determine if a type/class
   requires deep copy or not. To be safe, the assumption is that all
@@ -58,5 +56,17 @@ template <> inline bool cmnRequiresDeepCopy<unsigned int>(void) { return false; 
 template <> inline bool cmnRequiresDeepCopy<long long int>(void) { return false; }
 template <> inline bool cmnRequiresDeepCopy<unsigned long long int>(void) { return false; }
 //@}
+
+#include <string.h> // for memcpy
+template <class _elementType>
+void cmnMemcpy(_elementType * destination, const _elementType * source,
+               const size_t size) {
+    memcpy(reinterpret_cast<void *>(destination), reinterpret_cast<const void *>(source), size);
+}
+
+#include <string> // for template specialization
+template <> inline void cmnMemcpy<std::string>(std::string *, const std::string *, size_t) {
+    cmnThrow("cmnMemcpy should not be called with std::string");
+}
 
 #endif // _cmnRequiresDeepCopy_h

@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
@@ -20,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsComponentStateTest.h"
 
 #include "mtsTestComponents.h"
-
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 mtsComponentStateTest::mtsComponentStateTest(void)
 {}

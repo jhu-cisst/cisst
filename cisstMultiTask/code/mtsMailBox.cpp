@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -222,7 +222,9 @@ void mtsMailBox::TriggerFinishedEventIfNeeded(const std::string &commandName, mt
            if (resultPointer->Valid() != result.IsOK()) {
                CMN_LOG_RUN_WARNING << "TriggerFinishedEventIfNeeded: result valid = " << resultPointer->Valid()
                                    << ", result OK = " << result.IsOK()
-                                   << ", msg = " << mtsExecutionResult::ToString(result.Value()) << std::endl;
+                                   << ", msg = " << mtsExecutionResult::ToString(result.Value())
+                                   << ", msg type = " << resultPointer->Services()->GetName()
+                                   << ", command name = " << commandName << std::endl;
            }
            resultPointer->SetValid(result.IsOK());  // Set data valid flag based on execution result
            evt_result = finishedEvent->Execute(*resultPointer, MTS_NOT_BLOCKING);
@@ -256,6 +258,10 @@ bool mtsMailBox::IsFull(void) const
     return CommandQueue.IsFull();
 }
 
+size_t mtsMailBox::GetAvailable(void) const
+{
+    return CommandQueue.GetAvailable();
+}
 
 void mtsMailBox::SetPostCommandDequeuedCommand(mtsCommandVoid * command)
 {

@@ -2,11 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#  Author(s):	Chris Abidin, Andrew LaMora
+#  Author(s):   Chris Abidin, Andrew LaMora
 #  Created on: 2004-04-30
 #
-#  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-#  Reserved.
+#  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -25,19 +24,21 @@ See ireMain.py
 """
 
 import sys
-import exceptions
-import cPickle
+if sys.version_info.major == 2:
+    import cPickle as pickle
+else:
+    import pickle
 
 class NoOutput:
-	def write(self, String):
-		pass
+    def write(self, String):
+        pass
 
 def IsPicklable(Object):
-	try:
-		cPickle.dump(Object, NoOutput())
-	except exceptions.Exception, error: #cPickle.PicklingError, error:
-		return False
-	return True
+    try:
+        pickle.dump(Object, NoOutput())
+    except Exception as error: #pickle.PicklingError, error:
+        return False
+    return True
 
 #------------------------------------------------------
 # SaveWorkspaceToFile
@@ -45,11 +46,11 @@ def IsPicklable(Object):
 # Save workspace variables and statements to a file
 #------------------------------------------------------
 def SaveWorkspaceToFile(ObjectDictionary, File):
-	Workspace = {}
-	for ObjectName in ObjectDictionary:
-		if IsPicklable(ObjectDictionary[ObjectName]):
-			Workspace.update({ObjectName:ObjectDictionary[ObjectName]})
-	cPickle.dump(Workspace,File)
+    Workspace = {}
+    for ObjectName in ObjectDictionary:
+        if IsPicklable(ObjectDictionary[ObjectName]):
+            Workspace.update({ObjectName:ObjectDictionary[ObjectName]})
+    pickle.dump(Workspace,File)
 
 #------------------------------------------------------
 # LoadWorkspaceFile
@@ -57,9 +58,9 @@ def SaveWorkspaceToFile(ObjectDictionary, File):
 # Load workspace variables and statements from a file
 #------------------------------------------------------
 def LoadWorkspaceFile(ObjectDictionary, File):
-	Workspace = cPickle.load(File)
-	for Variable in Workspace:
-		ObjectDictionary[Variable] = Workspace[Variable]
+    Workspace = pickle.load(File)
+    for Variable in Workspace:
+        ObjectDictionary[Variable] = Workspace[Variable]
 
 #------------------------------------------------------
 # main()
@@ -68,19 +69,19 @@ def LoadWorkspaceFile(ObjectDictionary, File):
 # variables and load them into the variable list.
 
 def main():
-	v1 = 1234
-	v2 = 'string'
-	print 'v1 = ', v1, '\nv2 = ', v2
-	SaveWorkspaceToFile(vars(), open('workspace','w'))
-	v1 = v2 = None
-	print 'v1 = ', v1, '\nv2 = ', v2
-	LoadFile(open('workspace'))
-	Workspace = cPickle.load(open('workspace'))
-	for Variable in Workspace:
-		exec(Variable + " = Workspace['" + Variable + "']")
-	print 'v1 = ', v1, '\nv2 = ', v2
+    v1 = 1234
+    v2 = 'string'
+    print('v1 = ', v1, '\nv2 = ', v2)
+    SaveWorkspaceToFile(vars(), open('workspace','w'))
+    v1 = v2 = None
+    print('v1 = ', v1, '\nv2 = ', v2)
+    LoadFile(open('workspace'))
+    Workspace = pickle.load(open('workspace', 'rb'))
+    for Variable in Workspace:
+        exec(Variable + " = Workspace['" + Variable + "']")
+    print('v1 = ', v1, '\nv2 = ', v2)
 
 if __name__ == "__main__":
-	sys.modules['ireWorkspace'] = sys.modules['__main__']
-	main()
+    sys.modules['ireWorkspace'] = sys.modules['__main__']
+    main()
     

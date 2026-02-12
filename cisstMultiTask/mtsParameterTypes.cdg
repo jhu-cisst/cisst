@@ -103,7 +103,7 @@ class {
 
 
 class {
-    name mtsDescriptionIntefaceFullName;
+    name mtsDescriptionInterfaceFullName;
     attribute CISST_EXPORT;
     mts-proxy declaration-only;
     ctor-all-members true;
@@ -124,6 +124,26 @@ class {
     }
 }
 
+inline-header {
+typedef std::vector<mtsDescriptionInterfaceFullName> mtsDescriptionInterfaceFullNameVec;
+typedef mtsGenericObjectProxy<mtsDescriptionInterfaceFullNameVec> mtsDescriptionInterfaceFullNameVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionInterfaceFullNameVecProxy);
+
+/* to use description in std::maps */
+namespace std {
+    template <>
+    struct less<mtsDescriptionInterfaceFullName>  {
+        bool operator()(const mtsDescriptionInterfaceFullName & a,
+                        const mtsDescriptionInterfaceFullName & b) const
+        {
+            return ((a.ProcessName < b.ProcessName)
+                    || (a.ComponentName < b.ComponentName)
+                    || (a.InterfaceName < b.InterfaceName));
+        }
+    };
+}
+}
+
 
 class {
     name mtsDescriptionConnection;
@@ -132,12 +152,12 @@ class {
     ctor-all-members true;
     member {
         name Client;
-        type mtsDescriptionIntefaceFullName;
+        type mtsDescriptionInterfaceFullName;
         visibility public;
     }
     member {
         name Server;
-        type mtsDescriptionIntefaceFullName;
+        type mtsDescriptionInterfaceFullName;
         visibility public;
     }
     member {
@@ -292,18 +312,40 @@ class {
         name Timestamp;
         type double;
         visibility public;
+        accessors set-get;
     }
     inline-header {
         void SetMessage(const std::string & message);
     }
 }
 inline-code {
-    #include <cisstMultiTask/mtsTaskManager.h>
+    #include <cisstMultiTask/mtsManagerLocal.h>
     void mtsMessage::SetMessage(const std::string & message) {
         Timestamp = mtsComponentManager::GetInstance()->GetTimeServer().GetAbsoluteTimeInSeconds();
         Counter++;
         Message = message;
     }
+}
+
+
+class {
+    name mtsComponentConstructorArg;
+    base-class {
+        type mtsGenericObject;
+    }
+    attribute CISST_EXPORT;
+    ctor-all-members true;
+    member {
+        name Name;
+        type std::string;
+        visibility public;
+    }
+    inline-header {
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    }
+}
+inline-header {
+    CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorArg);
 }
 
 

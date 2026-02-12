@@ -1,10 +1,8 @@
 /*
-
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,16 +18,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <iomanip>
 #include <iostream>
 
-robDH::robDH() : 
-  robKinematics( robKinematics::STANDARD_DH ){ 
+robDH::robDH() :
+  robKinematics( robKinematics::STANDARD_DH ){
   alpha = a = theta = d = 0.0;
 }
 
-robDH::robDH( double alpha, 
-	      double a, 
-	      double theta, 
-	      double d,
-	      const robJoint& joint ) :
+robDH::robDH( double alpha,
+              double a,
+              double theta,
+              double d,
+              const robJoint& joint ) :
   robKinematics( joint, robKinematics::STANDARD_DH ),
   alpha( alpha ),
   a( a ),
@@ -38,38 +36,38 @@ robDH::robDH( double alpha,
 
 robDH::~robDH(){}
 
-robKinematics* robDH::Clone() const 
+robKinematics* robDH::Clone() const
 { return (robKinematics*) new robDH( *this ); }
 
 vctFixedSizeVector<double,3> robDH::PStar() const
 { return vctFixedSizeVector<double,3>( a, d*sin(alpha), d*cos(alpha) ); }
-  
-vctFrame4x4<double> robDH::ForwardKinematics( double q ) const { 
+
+vctFrame4x4<double> robDH::ForwardKinematics( double q ) const {
 
   double d = this->d;           // copy the prismatic value
   double theta = this->theta;   // copy the revolute value
 
   // Add the position offset to the joint value
   switch( GetType() ){
-  case robJoint::HINGE:
+  case cmnJointType::CMN_JOINT_REVOLUTE:
     theta = theta + PositionOffset() + q;// add the joint offset to the joint angle
     break;
-  case robJoint::SLIDER:
+  case cmnJointType::CMN_JOINT_PRISMATIC:
     d = d + PositionOffset() + q;   // add the joint offset to the joint length
     break;
   default:
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Unsupported joint type."
-		      << std::endl;
+                      << ": Unsupported joint type."
+                      << std::endl;
   }
 
   // should be computed once
-  double ca = cos(this->alpha); double sa = sin(this->alpha);	
+  double ca = cos(this->alpha); double sa = sin(this->alpha);
   double ct = cos(theta);       double st = sin(theta);
 
   vctMatrixRotation3<double> R( ct, -st*ca,  st*sa,
-				st,  ct*ca, -ct*sa,
-				0,     sa,     ca );
+                                st,  ct*ca, -ct*sa,
+                                0,     sa,     ca );
   vctFixedSizeVector<double,3> t(a*ct, a*st, d);
   return vctFrame4x4<double>( R, t );
 
@@ -78,14 +76,14 @@ vctFrame4x4<double> robDH::ForwardKinematics( double q ) const {
 vctMatrixRotation3<double> robDH::Orientation( double q ) const {
   vctFrame4x4<double> Rt = ForwardKinematics( q );
   return vctMatrixRotation3<double>( Rt[0][0], Rt[0][1], Rt[0][2],
-				     Rt[1][0], Rt[1][1], Rt[1][2],
-				     Rt[2][0], Rt[2][1], Rt[2][2] );
+                                     Rt[1][0], Rt[1][1], Rt[1][2],
+                                     Rt[2][0], Rt[2][1], Rt[2][2] );
 }
 
 void robDH::ReadParameters( std::istream& is ) {
   is >> this->alpha  // read the stuff from the stream
-     >> this->a 
-     >> this->theta 
+     >> this->a
+     >> this->theta
      >> this->d;
 
   // just make sure we're accureate
@@ -109,8 +107,8 @@ void robDH::ReadParameters(const Json::Value &config)
 
 void robDH::WriteParameters( std::ostream& os ) const {
   os << std::setw(10) << "STANDARD DH"
-     << std::setw(13) << alpha 
-     << std::setw(13) << a 
+     << std::setw(13) << alpha
+     << std::setw(13) << a
      << std::setw(13) << theta
      << std::setw(13) << d;
 }

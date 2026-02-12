@@ -24,7 +24,9 @@ robMass::robMass( double m,
   D( D ),
   V( V ) {}
 
-double robMass::Mass() const 
+const double & robMass::Mass(void) const 
+{ return mass; }
+double & robMass::Mass(void)
 { return mass; }
 
 vctFixedSizeVector<double,3> robMass::CenterOfMass() const 
@@ -64,8 +66,7 @@ robMass::Errno robMass::ReadMass( std::istream& is ) {
 
   double x1=1, x2=0, x3=0, y1=0, y2=1, y3=0, z1=0, z2=0, z3=1; // principal axes
 
-
-  mass = 1;
+  mass = 0.0;
   com = vctFixedSizeVector<double,3>(0.0);
   D[0][0] = D[1][1] = D[2][2] = 1.0;
 
@@ -96,18 +97,17 @@ robMass::Errno robMass::ReadMass(const Json::Value &config)
 {
     double x1=1, x2=0, x3=0, y1=0, y2=1, y3=0, z1=0, z2=0, z3=1; // principal axes
 
-    mass = 1;
     com = vctFixedSizeVector<double,3>(0.0);
     D[0][0] = D[1][1] = D[2][2] = 1.0;
 
     // Read everything from JSON config
-    mass = config.get("mass", 1.0).asDouble();
+    mass = config.get("mass", 0.0).asDouble();
     com[0] = config.get("cx", 0.0).asDouble();
     com[1] = config.get("cy", 0.0).asDouble();
     com[2] = config.get("cz", 0.0).asDouble();
-    D[0][0] = config.get("Ixx", 0.0001).asDouble();
-    D[1][1] = config.get("Iyy", 0.0001).asDouble();
-    D[2][2] = config.get("Izz", 0.0001).asDouble();
+    D[0][0] = config.get("Ixx", 0.0).asDouble();
+    D[1][1] = config.get("Iyy", 0.0).asDouble();
+    D[2][2] = config.get("Izz", 0.0).asDouble();
     x1 = config.get("x1", 1.0).asDouble();
     x2 = config.get("x2", 0.0).asDouble();
     x3 = config.get("x3", 0.0).asDouble();

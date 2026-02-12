@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2005-08-21
 
-  (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -29,13 +27,35 @@ http://www.cisst.org/cisst/license.txt.
    section of the interface file. */
 
 
-#ifndef _cisstVector_i_h
-#define _cisstVector_i_h
-
+#ifndef _vctPythonUtilities_h
+#define _vctPythonUtilities_h
 
 /* Put header files here */
 #include <Python.h>
-#include <arrayobject.h>
+#include <numpy/numpyconfig.h>
+// Not using anything deprecated as of Numpy Version 1.9.
+// Newer versions of Numpy not yet tested, but based on numpyconfig.h, no new deprecated
+// items were added between Numpy Versions 1.8 and 1.15.
+#if defined(NPY_1_8_API_VERSION)
+#define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION
+#else
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#endif
+#include <numpy/arrayobject.h>
+// Numpy 1.7+ API requires PyArrayObject instead of PyObject for a number of methods.
+// The following macro performs this cast, without checking that the underlying object (A)
+// is an array because the code always either first checks if it is an array (e.g.,
+// by calling vctThrowUnlessIsPyArray, which calls PyArray_Check) or has just created
+// an array (e.g., by calling PyArray_SimpleNew).
+#define cast_array(A) reinterpret_cast<PyArrayObject *>(A)
+
+// PyArray_REFCOUNT is deprecated, and should be replaced by Py_REFCNT
+#ifndef PyArray_REFCOUNT
+#define PyArray_REFCOUNT(obj) Py_REFCNT(obj)
+#endif
+
+#include <typeinfo>
+#include <cisstConfig.h>
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstVector/vctFixedSizeConstVectorBase.h>
@@ -59,7 +79,7 @@ bool vctThrowUnlessIsPyArray(PyObject * input)
 template <class _elementType>
 bool vctThrowUnlessIsSameTypeArray(PyObject * CMN_UNUSED(input))
 {
-    PyErr_SetString(PyExc_ValueError, "Unsupported data type");
+    PyErr_Format(PyExc_ValueError, "Unsupported data type: %s", typeid(_elementType).name());
     return false;
 }
 
@@ -156,10 +176,17 @@ bool vctThrowUnlessIsSameTypeArray<unsigned int>(PyObject * input)
 template <>
 bool vctThrowUnlessIsSameTypeArray<long int>(PyObject * input)
 {
-    if (PyArray_ObjectType(input, 0) != NPY_INT64) {
-        PyErr_SetString(PyExc_ValueError, "Array must be of type long int (int64)");
+#if (CISST_DATA_MODEL == CISST_ILP32) || (CISST_DATA_MODEL == CISST_LLP64)
+    if (PyArray_ObjectType(input, 0) != NPY_INT32) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type long int (int32 on this platform)");
         return false;
     }
+#else
+    if (PyArray_ObjectType(input, 0) != NPY_INT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type long int (int64 on this platform)");
+        return false;
+    }
+#endif
     return true;
 }
 
@@ -167,13 +194,54 @@ bool vctThrowUnlessIsSameTypeArray<long int>(PyObject * input)
 template <>
 bool vctThrowUnlessIsSameTypeArray<unsigned long int>(PyObject * input)
 {
+#if (CISST_DATA_MODEL == CISST_ILP32) || (CISST_DATA_MODEL == CISST_LLP64)
+    if (PyArray_ObjectType(input, 0) != NPY_UINT32) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned long int (uint32 on this platform)");
+        return false;
+    }
+#else
     if (PyArray_ObjectType(input, 0) != NPY_UINT64) {
-        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned long int (uint64)");
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned long int (uint64 on this platform)");
+        return false;
+    }
+#endif
+    return true;
+}
+
+
+#if CISST_LONG_LONG_NATIVE
+template <>
+bool vctThrowUnlessIsSameTypeArray<long long int>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_INT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type long long int (int64)");
         return false;
     }
     return true;
 }
 
+template <>
+bool vctThrowUnlessIsSameTypeArray<unsigned long long int>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_UINT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned long long int (uint64)");
+        return false;
+    }
+    return true;
+}
+#endif
+
+#if CISST_SIZE_T_NATIVE
+template <>
+bool vctThrowUnlessIsSameTypeArray<size_t>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_UINT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type size_t (uint64)");
+        return false;
+    }
+    return true;
+}
+#endif
 
 template <>
 bool vctThrowUnlessIsSameTypeArray<float>(PyObject * input)
@@ -253,6 +321,23 @@ int vctPythonType<unsigned int>(void)
 }
 
 
+#if (CISST_DATA_MODEL == CISST_ILP32) || (CISST_DATA_MODEL == CISST_LLP64)
+
+template <>
+int vctPythonType<long int>(void)
+{
+    return NPY_INT32;
+}
+
+
+template <>
+int vctPythonType<unsigned long int>(void)
+{
+    return NPY_UINT32;
+}
+
+#else
+
 template <>
 int vctPythonType<long int>(void)
 {
@@ -266,6 +351,32 @@ int vctPythonType<unsigned long int>(void)
     return NPY_UINT64;
 }
 
+#endif
+
+#if CISST_LONG_LONG_NATIVE
+template <>
+int vctPythonType<long long int>(void)
+{
+    return NPY_INT64;
+}
+
+
+template <>
+int vctPythonType<unsigned long long int>(void)
+{
+    return NPY_UINT64;
+}
+#endif
+
+#if CISST_SIZE_T_NATIVE
+
+template <>
+int vctPythonType<size_t>(void)
+{
+    return NPY_UINT64;
+}
+
+#endif
 
 template <>
 int vctPythonType<double>(void)
@@ -274,7 +385,7 @@ int vctPythonType<double>(void)
 }
 
 
-bool vctThrowUnlessDimension1(PyObject * input)
+bool vctThrowUnlessDimension1(PyArrayObject * input)
 {
     if (PyArray_NDIM(input) != 1) {
         PyErr_SetString(PyExc_ValueError, "Array must be 1D (vector)");
@@ -284,7 +395,7 @@ bool vctThrowUnlessDimension1(PyObject * input)
 }
 
 
-bool vctThrowUnlessDimension2(PyObject * input)
+bool vctThrowUnlessDimension2(PyArrayObject * input)
 {
     if (PyArray_NDIM(input) != 2) {
         PyErr_SetString(PyExc_ValueError, "Array must be 2D (matrix)");
@@ -295,7 +406,7 @@ bool vctThrowUnlessDimension2(PyObject * input)
 
 
 template <vct::size_type _dimension>
-bool vctThrowUnlessDimensionN(PyObject * input)
+bool vctThrowUnlessDimensionN(PyArrayObject * input)
 {
     if (PyArray_NDIM(input) != _dimension) {
         std::stringstream stream;
@@ -308,10 +419,10 @@ bool vctThrowUnlessDimensionN(PyObject * input)
 }
 
 
-bool vctThrowUnlessIsWritable(PyObject * input)
+bool vctThrowUnlessIsWritable(PyArrayObject * input)
 {
     const int flags = PyArray_FLAGS(input);
-    if(!(flags & NPY_WRITEABLE)) {
+    if(!(flags & NPY_ARRAY_WRITEABLE)) {
         PyErr_SetString(PyExc_ValueError, "Array must be writable");
         return false;
     }
@@ -320,7 +431,7 @@ bool vctThrowUnlessIsWritable(PyObject * input)
 
 
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-bool vctThrowUnlessCorrectVectorSize(PyObject * input,
+bool vctThrowUnlessCorrectVectorSize(PyArrayObject * input,
                                      const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & target)
 {
     const vct::size_type inputSize = PyArray_DIM(input, 0);
@@ -337,7 +448,7 @@ bool vctThrowUnlessCorrectVectorSize(PyObject * input,
 
 
 template <class _vectorOwnerType, typename _elementType>
-bool vctThrowUnlessCorrectVectorSize(PyObject * CMN_UNUSED(input),
+bool vctThrowUnlessCorrectVectorSize(PyArrayObject * CMN_UNUSED(input),
                                      const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & CMN_UNUSED(target))
 {
     return true;
@@ -347,7 +458,7 @@ bool vctThrowUnlessCorrectVectorSize(PyObject * CMN_UNUSED(input),
 template <vct::size_type _rows, vct::size_type _cols,
           vct::stride_type _rowStride, vct::stride_type _colStride,
           class _elementType, class _dataPtrType>
-bool vctThrowUnlessCorrectMatrixSize(PyObject * input,
+bool vctThrowUnlessCorrectMatrixSize(PyArrayObject * input,
                                      const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & target)
 {
     const vct::size_type inputRows = PyArray_DIM(input, 0);
@@ -367,17 +478,17 @@ bool vctThrowUnlessCorrectMatrixSize(PyObject * input,
 
 
 template <class _matrixOwnerType, typename _elementType>
-bool vctThrowUnlessCorrectMatrixSize(PyObject * CMN_UNUSED(input),
+bool vctThrowUnlessCorrectMatrixSize(PyArrayObject * CMN_UNUSED(input),
                                      const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & CMN_UNUSED(target))
 {
     return true;
 }
 
 
-bool vctThrowUnlessOwnsData(PyObject * input)
+bool vctThrowUnlessOwnsData(PyArrayObject * input)
 {
     const int flags = PyArray_FLAGS(input);
-    if(!(flags & NPY_OWNDATA)) {
+    if(!(flags & NPY_ARRAY_OWNDATA)) {
         PyErr_SetString(PyExc_ValueError, "Array must own its data");
         return false;
     }
@@ -386,7 +497,7 @@ bool vctThrowUnlessOwnsData(PyObject * input)
 
 
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-bool vctThrowUnlessOwnsData(PyObject * CMN_UNUSED(input),
+bool vctThrowUnlessOwnsData(PyArrayObject * CMN_UNUSED(input),
                             const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & CMN_UNUSED(target))
 {
     return true;
@@ -394,11 +505,11 @@ bool vctThrowUnlessOwnsData(PyObject * CMN_UNUSED(input),
 
 
 template <class _vectorOwnerType, typename _elementType>
-bool vctThrowUnlessOwnsData(PyObject * input,
+bool vctThrowUnlessOwnsData(PyArrayObject * input,
                             const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & CMN_UNUSED(target))
 {
     const int flags = PyArray_FLAGS(input);
-    if(!(flags & NPY_OWNDATA)) {
+    if(!(flags & NPY_ARRAY_OWNDATA)) {
         PyErr_SetString(PyExc_ValueError, "Array must own its data");
         return false;
     }
@@ -409,7 +520,7 @@ bool vctThrowUnlessOwnsData(PyObject * input,
 template <vct::size_type _rows, vct::size_type _cols,
 	  vct::stride_type _rowStride, vct::stride_type _colStride,
 	  class _elementType, class _dataPtrType>
-bool vctThrowUnlessOwnsData(PyObject * CMN_UNUSED(input),
+bool vctThrowUnlessOwnsData(PyArrayObject * CMN_UNUSED(input),
                             const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & CMN_UNUSED(target))
 {
     return true;
@@ -417,11 +528,11 @@ bool vctThrowUnlessOwnsData(PyObject * CMN_UNUSED(input),
 
 
 template <class _matrixOwnerType, typename _elementType>
-bool vctThrowUnlessOwnsData(PyObject * input,
+bool vctThrowUnlessOwnsData(PyArrayObject * input,
                             const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & CMN_UNUSED(target))
 {
     const int flags = PyArray_FLAGS(input);
-    if(!(flags & NPY_OWNDATA)) {
+    if(!(flags & NPY_ARRAY_OWNDATA)) {
         PyErr_SetString(PyExc_ValueError, "Array must own its data");
         return false;
     }
@@ -482,4 +593,4 @@ bool vctThrowUnlessNotReferenced(PyObject * input,
 
 
 
-#endif // _cisstVector_i_h
+#endif // _vctPythonUtilities_h

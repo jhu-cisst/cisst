@@ -6,8 +6,7 @@
   Author(s):  Daniel Li, Ofri Sadowsky, Anton Deguet
   Created on: 2006-07-11
 
-  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,9 +42,7 @@ http://www.cisst.org/cisst/license.txt.
   \sa vctVarStrideNArrayIterator
 */
 template<class _ownerType, bool _forward>
-class vctVarStrideNArrayConstIterator:
-    public std::iterator<std::random_access_iterator_tag,
-                         typename _ownerType::value_type>
+class vctVarStrideNArrayConstIterator
 {
 public:
     /* define most types from vctContainerOwnerTraits and vctNArrayTraits */
@@ -64,12 +61,9 @@ public:
       iterator points. */
     typedef _ownerType OwnerType;
 
-    /*! Base type for this iterator, i.e. std::iterator. */
-    typedef std::iterator<std::random_access_iterator_tag, value_type> BaseType;
-
     /*! Type (i.e. category) of iterator,
       i.e. std::random_access_iterator_tag. */
-    typedef typename BaseType::iterator_category iterator_category;
+    typedef typename std::random_access_iterator_tag iterator_category;
 
 protected:
     /*! Pointer to the address of the container being referred to

@@ -3,8 +3,7 @@
   Author(s): Simon Leonard
   Created on: Nov 11 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -100,7 +99,8 @@ public:
   /**
      \return The mass of the body
   */
-  double Mass() const;
+  const double & Mass(void) const;
+  double & Mass(void);
 
   //! Return the center of mass
   /**

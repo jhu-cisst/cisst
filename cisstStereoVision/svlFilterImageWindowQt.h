@@ -6,8 +6,7 @@
   Author(s):  Balazs Vagvolgyi
   Created on: 2011
 
-  (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 class svlWindowManagerQt4OpenGL;
 class svlWindowEventHandlerBase;
 class svlWindowManagerThreadProc;
+class osaThread;
 
 
 class CISST_EXPORT svlFilterImageWindowQt : public svlFilterBase

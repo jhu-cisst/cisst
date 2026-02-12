@@ -144,12 +144,27 @@ class {
 
 
 inline-header {
+    template <typename _commandType>
+    struct mtsDescriptionNameIs {
+        mtsDescriptionNameIs(const std::string toFind): mToFind(toFind) { }
+        bool operator() (const _commandType & command)
+        { return command.Name == mToFind; }
+        std::string mToFind;
+    };
+
+    template <typename _commandsType>
+    bool mtsDescriptionHasName(const _commandsType & commands, const std::string & name) {
+        return std::find_if(commands.begin(),
+                            commands.end(),
+                            mtsDescriptionNameIs<typename _commandsType::value_type>(name)) != commands.end();
+    }
+
     typedef std::vector<mtsCommandVoidDescription>          mtsCommandsVoidDescription;
-	typedef std::vector<mtsCommandWriteDescription>         mtsCommandsWriteDescription;
-	typedef std::vector<mtsCommandReadDescription>          mtsCommandsReadDescription;
-	typedef std::vector<mtsCommandQualifiedReadDescription> mtsCommandsQualifiedReadDescription;
-	typedef std::vector<mtsCommandVoidReturnDescription>    mtsCommandsVoidReturnDescription;
-	typedef std::vector<mtsCommandWriteReturnDescription>   mtsCommandsWriteReturnDescription;
+    typedef std::vector<mtsCommandWriteDescription>         mtsCommandsWriteDescription;
+    typedef std::vector<mtsCommandReadDescription>          mtsCommandsReadDescription;
+    typedef std::vector<mtsCommandQualifiedReadDescription> mtsCommandsQualifiedReadDescription;
+    typedef std::vector<mtsCommandVoidReturnDescription>    mtsCommandsVoidReturnDescription;
+    typedef std::vector<mtsCommandWriteReturnDescription>   mtsCommandsWriteReturnDescription;
     typedef std::vector<mtsEventVoidDescription>            mtsEventsVoidDescription;
     typedef std::vector<mtsEventWriteDescription>           mtsEventsWriteDescription;
 
@@ -160,7 +175,7 @@ inline-header {
 
 
 class {
-	name mtsInterfaceProvidedDescription;
+    name mtsInterfaceProvidedDescription;
     attribute CISST_EXPORT;
     mts-proxy declaration-only;
     member {

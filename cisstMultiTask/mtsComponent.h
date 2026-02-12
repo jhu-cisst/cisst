@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -69,26 +67,26 @@ public:
         Name(name), Arg(arg) {}
     ~mtsComponentConstructorNameAndArg() {}
 
-    void SerializeRaw(std::ostream & outputStream) const {
+    void SerializeRaw(std::ostream & outputStream) const override {
         mtsGenericObject::SerializeRaw(outputStream);
         cmnSerializeRaw(outputStream, Name);
         cmnSerializeRaw(outputStream, Arg);
     }
 
-    void DeSerializeRaw(std::istream & inputStream) {
+    void DeSerializeRaw(std::istream & inputStream) override {
         mtsGenericObject::DeSerializeRaw(inputStream);
         cmnDeSerializeRaw(inputStream, Name);
         cmnDeSerializeRaw(inputStream, Arg);
     }
 
-    void ToStream(std::ostream & outputStream) const {
+    void ToStream(std::ostream & outputStream) const override {
         outputStream << "Name: " << Name
                      << ", Arg: " << Arg << std::endl;
     }
 
     /*! Raw text output to stream */
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const {
+                             bool headerOnly = false, const std::string & headerPrefix = "") const override {
         mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
         if (headerOnly) {
             outputStream << headerPrefix << "-name" << delimiter
@@ -101,7 +99,7 @@ public:
 
     /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
       Returns true if successful. */
-    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') {
+    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') override {
         mtsGenericObject::FromStreamRaw(inputStream, delimiter);
         if (inputStream.fail())
             return false;
@@ -149,7 +147,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorNameAndString)
 */
 class CISST_EXPORT mtsComponent: public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
     friend class mtsComponentProxy;
@@ -218,6 +216,32 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Default destructor. Does nothing. */
     virtual ~mtsComponent();
+
+#if CISST_HAS_JSON
+    /*! Configure using JSON.  This method can be used to configure
+      the logs for the component.  This method looks for:
+
+      "log": {
+           "allow": "none", // other valid options are errors, errors-and-warnings, verbose, debug, all
+           "separate-file": true
+       }
+
+       The "allow" setting will apply to all instances of the object's
+       class.  For example, if you have two objects a and b of type T,
+       changing the "allow" for a will apply to all instances of type
+       T, i.e. a and b.  The "allow" values are based on the log masks
+       defined cmnLogLoD.h.  The default is "errors-and-warnings".
+
+       For "separate-file", one can also provide a string,
+       i.e. filename for the separate log file for this component.  If
+       one just uses the boolean True, the separate log file name is
+       based on the component's name and time.  The separate file is
+       specific to each instance.
+
+       All fields are optional.
+    */
+    virtual void ConfigureJSON(const Json::Value & configuration);
+#endif
 
     /*! Returns the name of the component. */
     const std::string & GetName(void) const;
@@ -419,9 +443,14 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       level log (i.e. CMN_LOG_CLASS) and allows to redirect the log to
       a separate file for each component when activated by
       UseSeparateLogFile or UseSeparateLogFileDefault. */
-    cmnLogger::StreamBufType * GetLogMultiplexer(void) const;
+    cmnLogger::StreamBufType * GetLogMultiplexer(void) const override;
 
     /********************* Methods to query the task state ****************/
+
+    /*! Return true if all required interfaces are connected.  This
+      method will not log the results in cisstLog unless the flag
+      'log' is set to true. */
+    bool AreAllInterfacesRequiredConnected(const bool log = false);
 
     /*! Return true if task is active. */
     bool IsRunning(void) const;
@@ -442,10 +471,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     const mtsComponentState & GetState(void) const;
     void GetState(mtsComponentState &state) const;
 
- protected:
-
     /*! Helper function to wait on a state change, with specified timeout in seconds. */
     virtual bool WaitForState(mtsComponentState desiredState, double timeout);
+
+ protected:
 
     /*! Flag to keep track of separate log file use */
     bool UseSeparateLogFileFlag;
@@ -532,7 +561,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
  public:
     /*! Send a human readable description of the component. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! Method to set replay mode*/
     bool SetReplayMode(void);
@@ -558,4 +587,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponent)
 
 
 #endif // _mtsComponent_h
-

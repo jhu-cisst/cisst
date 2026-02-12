@@ -6,8 +6,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -210,15 +209,6 @@ std::string mtsCollectorState::GetDefaultOutputName(void)
 }
 
 
-//-------------------------------------------------------
-// Thread Management
-//-------------------------------------------------------
-void mtsCollectorState::Startup(void)
-{
-    CMN_LOG_CLASS_INIT_DEBUG << "Startup: collector \"" << this->GetName() << "\"" << std::endl;
-}
-
-
 void mtsCollectorState::Run(void)
 {
     CMN_LOG_CLASS_RUN_DEBUG << "Run: collector \"" << this->GetName() << "\"" << std::endl;
@@ -227,7 +217,7 @@ void mtsCollectorState::Run(void)
 }
 
 
-void mtsCollectorState::StartCollection(const mtsDouble & delay)
+void mtsCollectorState::StartCollection(const double & delay)
 {
     mtsExecutionResult result = this->StateTableStartCollection(delay);
     if (!result.IsOK()) {
@@ -238,7 +228,7 @@ void mtsCollectorState::StartCollection(const mtsDouble & delay)
 }
 
 
-void mtsCollectorState::StopCollection(const mtsDouble & delay)
+void mtsCollectorState::StopCollection(const double & delay)
 {
     mtsExecutionResult result = this->StateTableStopCollection(delay);
     if (!result.IsOK()) {
@@ -259,17 +249,18 @@ void mtsCollectorState::BatchReadyHandler(const mtsStateTable::IndexRange & rang
 
 void mtsCollectorState::CollectionStartedHandler(void)
 {
-    this->CollectionStartedEventTrigger();
+    this->CollectionStartedEventTrigger(true);
 }
 
 
-void mtsCollectorState::CollectionStoppedHandler(const mtsUInt & count)
+void mtsCollectorState::CollectionStoppedHandler(const size_t & count)
 {
-    this->CollectionStoppedEventTrigger(count);
+    this->ProgressEventTrigger(count);
+    this->CollectionStartedEventTrigger(false);
 }
 
 
-void mtsCollectorState::ProgressHandler(const mtsUInt & count)
+void mtsCollectorState::ProgressHandler(const size_t & count)
 {
     this->ProgressEventTrigger(count);
 }
@@ -287,8 +278,10 @@ bool mtsCollectorState::AddSignal(const std::string & signalName)
         // Check if the specified signal does exist in the state table.
         int StateVectorID = TargetStateTable->GetStateVectorID(signalName); // 0: Toc, 1: Tic, 2: Period, >=3: user
         if (StateVectorID == -1) {  // 0: Toc, 1: Tic, 2: Period, >3: user
+            const auto names = TargetStateTable->GetDataNames();
             CMN_LOG_CLASS_INIT_ERROR << "AddSignal: collector \"" << this->GetName()
-                                     << "\", cannot find signal \"" << signalName << "\"" << std::endl;
+                                     << "\", cannot find signal \"" << signalName << "\". Signals available "
+                                     << cmnDataVectorHumanReadable(names) << std::endl;
             return false;
         }
 
@@ -395,10 +388,11 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
     if (this->OutputHeaderStream) {
         this->OutputHeaderStream->precision(20);
         out << "Ticks";
+        const char unlikely_char = '\u001E';
         RegisteredSignalElementType::const_iterator it = RegisteredSignalElements.begin();
         for (; it != RegisteredSignalElements.end(); ++it) {
-            out << this->Delimiter;
-            (*(TargetStateTable->StateVector[it->ID]))[0].ToStreamRaw(*((std::ostream*) &out), this->Delimiter, true,
+            out << unlikely_char;
+            (*(TargetStateTable->StateVector[it->ID]))[0].ToStreamRaw(*((std::ostream*) &out), unlikely_char, true,
                                                                       TargetStateTable->StateVectorDataNames[it->ID]);
         }
         out << std::endl;
@@ -409,7 +403,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
         std::istringstream iss(out.str());
         std::string token;
         // get token
-        while (getline(iss, token, this->Delimiter)) {
+        while (getline(iss, token, unlikely_char)) {
             fieldNames.push_back(token);
         }
 
@@ -461,7 +455,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
             if (element.find("time") != std::string::npos) {// this is a time element
                 *(this->OutputHeaderStream) << "Time: " << element << std::endl;
             } else {
-                *(this->OutputHeaderStream) << "Data:  " << element << std::endl;
+                *(this->OutputHeaderStream) << "Data: " << element << std::endl;
             }
         }
 

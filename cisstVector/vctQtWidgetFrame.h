@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-04-20
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // cisst include
 #include <cisstVector/vctForwardDeclarations.h>
-#include <cisstVector/vctQtForwardDeclarations.h>
+#include <cisstVector/vctForwardDeclarationsQt.h>
 #include <cisstVector/vctTransformationTypes.h>
 #include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstVector/vctQtWidgetRotation.h>
@@ -62,7 +62,6 @@ class CISST_EXPORT vctQtWidgetFrameDoubleRead: public QWidget
         vctMatRot3 rotationMatrix;
         rotationMatrix.FromNormalized(frame.Rotation());
         this->RotationWidget->SetValue(rotationMatrix);
-        // always display translations in mm
         vctDoubleVec translation(frame.Translation());
         translation.Multiply(mPrismaticFactor);
         this->TranslationWidget->SetValue(translation);

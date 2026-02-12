@@ -2,8 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,16 +15,18 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstNumerical/nmrNetlib.h>
 #include <cisstVector/vctDynamicMatrix.h>
+
+// Always include last!
 #include <cisstNumerical/nmrExport.h>
 
 #ifndef _nmrSymmetricEigenProblem_h
 #define _nmrSymmetricEigenProblem_h
 
-class nmrSymmetricEigenProblem{
+class CISST_EXPORT nmrSymmetricEigenProblem {
 
 public:
   
-  class Data{
+  class CISST_EXPORT Data {
   public:
     
     char JOBZ;                     // 'N' eigenvalues; 'V' eigenvalues+vectors
@@ -78,7 +79,6 @@ public:
     // Print errors if any
     void CheckInfo() const;
 
-    // Free the data block
     void Free();
 
   };

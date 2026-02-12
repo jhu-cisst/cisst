@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -91,7 +89,7 @@ void vctDataFunctionsDynamicMatrixTest::TestTextSerializationStream(void)
     m2.SetAll(0.0);
     try {
         cmnData<DataType>::DeSerializeText(m2, stream, ',');
-    } catch (std::runtime_error) {
+    } catch (std::runtime_error &) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);
@@ -132,7 +130,7 @@ void vctDataFunctionsDynamicMatrixTest::TestScalar(void)
     // exception expected if index too high
     try {
         description = cmnData<DataType>::ScalarDescription(mInt, cmnData<DataType>::ScalarNumber(mInt) + 1);
-    } catch (std::out_of_range) {
+    } catch (std::out_of_range &) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);
@@ -140,7 +138,7 @@ void vctDataFunctionsDynamicMatrixTest::TestScalar(void)
     exceptionReceived = false;
     try {
         description = cmnData<DataType2>::ScalarDescription(mmDouble, cmnData<DataType2>::ScalarNumber(mmDouble) + 1);
-    } catch (std::out_of_range) {
+    } catch (std::out_of_range &) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);
@@ -149,7 +147,7 @@ void vctDataFunctionsDynamicMatrixTest::TestScalar(void)
     exceptionReceived = false;
     try {
         description = cmnData<DataType3>::ScalarDescription(mString, cmnData<DataType3>::ScalarNumber(mString) + 1);
-    } catch (std::out_of_range) {
+    } catch (std::out_of_range &) {
         exceptionReceived = true;
     }
     CPPUNIT_ASSERT(exceptionReceived);

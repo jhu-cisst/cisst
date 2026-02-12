@@ -6,8 +6,7 @@
   Author(s): Ankur Kapoor
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,7 +39,8 @@ http://www.cisst.org/cisst/license.txt.
 #define SCHED_FIFO 0   /*! No Scheduling Policy available in Windows */
 #endif
 
-#if (CISST_OS == CISST_DARWIN) // SCHED_FIFO is not defined otherwise
+// SCHED_FIFO is not defined otherwise
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN)
 #include <pthread.h>
 #endif
 
@@ -79,6 +79,7 @@ class CISST_EXPORT osaThreadId {
     /*! Internals that are OS-dependent in some way */
     enum {INTERNALS_SIZE = 8};
     char Internals[INTERNALS_SIZE];
+    bool Valid;
 
     friend CISST_EXPORT osaThreadId osaGetCurrentThreadId(void);
     friend class osaThread;
@@ -92,11 +93,14 @@ public:
 
     /*! Default constructor.  Does nothing but checking that the
       internal structure use to store the OS specific information for
-      osaThreadId is large enough using CMN_ASSERT. */
+      osaThreadId is large enough using CMN_ASSERT. Also sets Valid to false. */
     osaThreadId(void);
 
     /*! Default destructor.  Does nothing. */
     ~osaThreadId();
+
+    /*! Method to return whether a valid thread id has been set */
+    bool IsValid(void) const { return Valid; }
 
     /*! Method to compare two thread Ids */
     bool Equal(const osaThreadId & other) const;

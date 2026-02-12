@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2008-01-17
 
-  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -242,7 +242,6 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstMultiTask/mtsFunctionWrite.h"
 %include "cisstMultiTask/mtsFunctionWriteReturn.h"
 %include "cisstMultiTask/mtsFunctionQualifiedRead.h"
-%include "cisstMultiTask/mtsFunctionVoidReturn.h"
 
 // Extend mtsFunctionVoid
 %extend mtsFunctionVoid {
@@ -428,12 +427,16 @@ http://www.cisst.org/cisst/license.txt.
                 if self.__dict__[interfaceNoSpace].GetConnectedInterface():
                     self.__dict__[interfaceNoSpace].UpdateFromC()
 
-        def AddInterfaceRequiredFromProvided(self, interfaceProvided):
+        def AddInterfaceRequiredFromProvided(self, interfaceProvided, interfaceRequiredName = ''):
             if not isinstance(interfaceProvided, mtsInterfaceProvidedDescription):
                 print('Parameter must be of type mtsInterfaceProvidedDescription')
                 return
-            interfaceProvidedNoSpace = interfaceProvided.InterfaceName.replace(' ', '')
-            interfaceRequired = self.AddInterfaceRequired('RequiredFor'+interfaceProvidedNoSpace, MTS_OPTIONAL)
+            if not interfaceRequiredName:
+                interfaceProvidedNoSpace = interfaceProvided.InterfaceName.replace(' ', '')
+                interfaceRequiredName = 'RequiredFor' + interfaceProvidedNoSpace
+            else:
+                interfaceRequiredName = interfaceRequiredName.replace(' ', '')
+            interfaceRequired = self.AddInterfaceRequired(interfaceRequiredName, MTS_OPTIONAL)
             if not interfaceRequired:
                 return
             self.__dict__[interfaceRequired.GetName()] = interfaceRequired
@@ -441,18 +444,18 @@ http://www.cisst.org/cisst/license.txt.
                 func = mtsFunctionVoid()
                 interfaceRequired.AddFunction(command.Name, func)
                 func.thisown = 0
-            #for command in interfaceProvided.CommandsVoidReturn:
-            #    func = mtsFunctionVoidReturn()
-            #    interfaceRequired.AddFunction(command.Name, func)
-            #    func.thisown = 0
+            for command in interfaceProvided.CommandsVoidReturn:
+                func = mtsFunctionVoidReturn()
+                interfaceRequired.AddFunction(command.Name, func)
+                func.thisown = 0
             for command in interfaceProvided.CommandsWrite:
                 func = mtsFunctionWrite()
                 interfaceRequired.AddFunction(command.Name, func)
                 func.thisown = 0
-            #for command in interfaceProvided.CommandsWriteReturn:
-            #    func = mtsFunctionWriteReturn()
-            #    interfaceRequired.AddFunction(command.Name, func)
-            #    func.thisown = 0
+            for command in interfaceProvided.CommandsWriteReturn:
+                func = mtsFunctionWriteReturn()
+                interfaceRequired.AddFunction(command.Name, func)
+                func.thisown = 0
             for command in interfaceProvided.CommandsQualifiedRead:
                 func = mtsFunctionQualifiedRead()
                 interfaceRequired.AddFunction(command.Name, func)
@@ -467,7 +470,8 @@ http://www.cisst.org/cisst/license.txt.
         # or ('component', 'interfaceProvided')
         def AddInterfaceRequiredAndConnect(self, otherComponentInterface, connectionAttempts = 1):
             try:
-                localProcessName = mtsManagerLocal_GetInstance().GetProcessName()
+                LCM = mtsManagerLocal.GetInstance()
+                localProcessName = LCM.GetProcessName()
                 num = len(otherComponentInterface)
                 if 2 <= num <= 3:
                     interfaceName = otherComponentInterface[num-1]
@@ -477,27 +481,39 @@ http://www.cisst.org/cisst/license.txt.
                     else:
                         processName = localProcessName
                     # Now do the work here
-                    manager = self.GetManagerComponentServices()
-                    if not manager:
-                        print('Could not get manager component services')
-                        return
-                    interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
+                    if (processName != localProcessName):
+                        # When connecting remotely, this component must have management services
+                        manager = self.GetManagerComponentServices()
+                        if not manager:
+                            print('Could not get manager component services')
+                            return
+                        interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
+                    else:
+                        comp = LCM.GetComponent(componentName)
+                        prov = comp.GetInterfaceProvided(interfaceName)
+                        interfaceDescription = prov.GetDescription()
                     if not interfaceDescription.InterfaceName:
                         print('No provided interface (empty string)')
                         return
-                    interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription)
+                    interfaceRequiredName = 'RequiredFor' + componentName + '_' + interfaceName;
+                    interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription, interfaceRequiredName)
                     attempt = 0
                     while (attempt < connectionAttempts):
                         attempt = attempt + 1
                         print('Trying to connect: ' + interfaceRequired.GetName() + ' - attempt # ' + str(attempt))
-                        manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(), processName, componentName, interfaceName)
-                        # PK TEMP: need time.sleep until blocking commands supported over network
-                        time.sleep(2.0)
+                        if (processName != localProcessName):
+                            manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(),
+                                            processName, componentName, interfaceName)
+                            # PK TEMP: need time.sleep until blocking commands supported over network
+                            time.sleep(2.0)
+                        else:
+                            LCM.Connect(self.GetName(), interfaceRequired.GetName(), componentName, interfaceName)
                         interfaceRequired.UpdateFromC()
                         if interfaceRequired.GetConnectedInterface():
                             print('Required interface ' + interfaceRequired.GetName() + ' connected.')
                             return interfaceRequired
                     print('Unable to add required interface for ' + interfaceName)
+                    return None
                 else:
                     print('Parameter error: must specify (process, component, interface) or (component, interface)')
             except TypeError as e:
@@ -524,6 +540,7 @@ public:
             commands = mtsInterfaceProvided.GetNamesOfCommandsVoidReturn(self)
             for command in commands:
                 self.__dict__[command] = mtsInterfaceProvided.GetCommandVoidReturn(self, command)
+                self.__dict__[command].UpdateFromC()
             commands = mtsInterfaceProvided.GetNamesOfCommandsWrite(self)
             for command in commands:
                 self.__dict__[command] = mtsInterfaceProvided.GetCommandWrite(self, command)
@@ -664,9 +681,15 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsInt, int);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsUInt, unsigned int);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsShort, short);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsUShort, unsigned short);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsChar, char);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsUChar, unsigned char);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsLong, long);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsULong, unsigned long);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsBool, bool);
+#ifdef SWIG_WINDOWS
+%apply long long {size_t};
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsSizeT, size_t);
+#endif
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdString, std::string);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdStringVecProxy, stdStringVec);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdDoubleVecProxy, stdDoubleVec);
@@ -776,6 +799,7 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct3x3, vct3x3);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct4x4, vct4x4);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctMatRot3, vctMatRot3);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFrm3, vctFrm3);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFrm4x4, vctFrm4x4);
 
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctDoubleVec, vctDoubleVec);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloatVec, vctFloatVec);
@@ -793,6 +817,24 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctDoubleMat, vctDoubleMat);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloatMat, vctFloatMat);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctIntMat, vctIntMat);
 
+// Extend mtsGenericObjectProxy<vctMatRot3> to support construction from numpy array (using cisstVector
+// typemaps that convert between numpy array and vctDynamicMatrix). This enables vctMatRot3 to be used
+// as a parameter in cisstMultiTask commands (e.g., mtsCommandWrite).
+// Note that it is not necessary for Python to know about the vctMatRot3 data type, but this could be
+// implemented by adding Swig wrapping of this type in cisstVector.
+%extend mtsGenericObjectProxy<vctMatRot3> {
+    mtsGenericObjectProxy<vctMatRot3>(const vctDynamicMatrix<double> &matrixRot) throw(std::runtime_error) {
+        if ((matrixRot.rows() != 3) || (matrixRot.cols() != 3))
+            cmnThrow(std::runtime_error("mtsGenericObjectProxy<vctMatRot3>: Input is not 3x3 matrix"));
+        vctMatRot3 rot;
+        rot.From(matrixRot[0][0], matrixRot[0][1], matrixRot[0][2],
+                 matrixRot[1][0], matrixRot[1][1], matrixRot[1][2],
+                 matrixRot[2][0], matrixRot[2][1], matrixRot[2][2]);
+        mtsGenericObjectProxy<vctMatRot3> * result = new mtsGenericObjectProxy<vctMatRot3>(rot);
+        return result;
+    }
+}
+
 %include "cisstMultiTask/mtsParameterTypes.h"
 %template(mtsDescriptionConnectionVec) std::vector<mtsDescriptionConnection>;
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVecProxy, mtsDescriptionConnectionVec);
@@ -807,7 +849,9 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsInterfaceProvidedDescriptionProxy, mtsIn
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsInterfaceRequiredDescriptionProxy, mtsInterfaceRequiredDescription);
 
 %template(mtsCommandsVoidDescription)          std::vector<mtsCommandVoidDescription>;
+%template(mtsCommandsVoidReturnDescription)    std::vector<mtsCommandVoidReturnDescription>;
 %template(mtsCommandsWriteDescription)         std::vector<mtsCommandWriteDescription>;
+%template(mtsCommandsWriteReturnDescription)   std::vector<mtsCommandWriteReturnDescription>;
 %template(mtsCommandsReadDescription)          std::vector<mtsCommandReadDescription>;
 %template(mtsCommandsQualifiedReadDescription) std::vector<mtsCommandQualifiedReadDescription>;
 %template(mtsEventsVoidDescription)            std::vector<mtsEventVoidDescription>;
@@ -891,3 +935,78 @@ MTS_INSTANTIATE_MATRIX(mtsLongMat, long);
 
  // Wrap mtsIntervalStatistics
 %include "cisstMultiTask/mtsIntervalStatistics.h"
+
+%pythoncode %{
+
+# Define separate class so that we have more flexibility to set up namespaces.
+# For example, command /one/two/three will become one.two.three.
+class mtsInterfaceRequiredPython:
+    def __init__(self):
+        pass
+
+    def _add_entry(self, cmdName, cmdFunc):
+        # Replace dashes with underscore
+        cmdNameFixed = cmdName.replace('-', '_')
+        # Split namespaces (/)
+        items = cmdNameFixed.split('/')
+        obj = self
+        # Loop through any namespaces
+        for i in range(0, len(items)-1):
+            if not hasattr(obj, items[i]):
+                setattr(obj, items[i], mtsInterfaceRequiredPython())
+            obj = getattr(obj, items[i])
+        # Last (or only) item is set to the func
+        setattr(obj, items[len(items)-1], cmdFunc)
+
+# Dynamically load and create a server component
+#
+# This function dynamically loads the specified library and constructs an object using the
+# specified component class (className). The component name is specified through argSerialized
+# (if not empty); otherwise componentName is used. Note that if argSerialized is not empty,
+# componentName is ignored.
+
+def mtsLoadAndCreateServer(libraryName, className, componentName, argSerialized):
+    print('Loading ' + libraryName)
+    import cisstOSAbstractionPython as cisstOSAbstraction
+    DynLoader = cisstOSAbstraction.osaDynamicLoader()
+    if not DynLoader.Load(libraryName):
+        print('Failed to load ' + libraryName + ' (see cisstLog.txt)')
+        return None
+
+    print('Creating ' + componentName + ' (' + className + ')')
+    LCM = mtsManagerLocal.GetInstance()
+    if (not argSerialized):
+        comp = LCM.CreateComponentDynamically(className, componentName, '')
+    else:
+        comp = LCM.CreateComponentDynamically(className, argSerialized)
+    if comp:
+        print('Component created')
+        LCM.AddComponent(comp)
+    return comp
+
+# Create client component (if necessary) and then create required interface to server
+# provided interface
+def mtsCreateClientInterface(clientName, serverName, interfaceName):
+    LCM = mtsManagerLocal.GetInstance()
+    if (LCM.FindComponent(clientName)):
+        print('mtsCreateClientInterface: component ' + clientName + ' already exists')
+        client = LCM.GetComponent(clientName)
+    else:
+        print('Creating ' + clientName)
+        client = LCM.CreateComponentDynamically('mtsComponent', clientName, '')
+        if not client:
+            print('Failed to create ' + clientName)
+            return None
+        LCM.AddComponent(client)
+    interface = None
+    if (serverName and interfaceName):
+        print('Connecting ' + clientName + ' to ' + serverName + ' (' + interfaceName + ')')
+        interface = client.AddInterfaceRequiredAndConnect((serverName, interfaceName))
+    interfacePython = None
+    if interface:
+        interfacePython = mtsInterfaceRequiredPython()
+        for name in interface.GetNamesOfFunctions():
+            interfacePython._add_entry(name, getattr(interface, name))
+    return interfacePython
+
+%}

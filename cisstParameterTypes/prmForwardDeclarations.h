@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:   2008-03-03
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2007-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,7 +16,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
 /*!
   \file
   \brief Forward declarations for cisstParameterTypes
@@ -28,18 +25,12 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmForwardDeclarations_h
 #define _prmForwardDeclarations_h
 
-// transformation manager related classes
-class prmTransformationBase;
-class prmTransformationFixed;
-class prmTransformationDynamic;
-class prmTransformationManager;
-
 // motion enums
 /*! Parameters type for command execution/completion behavior specification */
-typedef enum Blocking { 
-	NO_WAIT,      /*! non blocking */
-	WAIT_START,   /*! blocking until start, non preemptive */
-	WAIT_FINISH   /*! blocking type  */
+typedef enum Blocking {
+    NO_WAIT,      /*! non blocking */
+    WAIT_START,   /*! blocking until start, non preemptive */
+    WAIT_FINISH   /*! blocking type  */
 } prmBlocking;
 
 #include <cisstCommon/cmnDataFunctionsEnumMacros.h>
@@ -64,4 +55,3 @@ class prmVelocityJointSet;
 class prmEventButton;
 
 #endif // _prmForwardDeclarations_h
-

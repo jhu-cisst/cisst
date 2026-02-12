@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnStrings.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -180,6 +181,12 @@ mtsInterfaceProvided::~mtsInterfaceProvided()
 
 void mtsInterfaceProvided::Cleanup(void)
 {
+#if 0
+    // Free memory for state filters (added by AddCommandFilteredReadStateInternal)
+    for (size_t i = 0; i < StateTableFilters.size(); i++)
+        delete StateTableFilters[i];
+    StateTableFilters.clear();
+#endif
 #if 0 // adeguet1, adv
     InterfacesProvidedCreatedType::iterator op;
     for (op = QueuedCommands.begin(); op != QueuedCommands.end(); op++) {
@@ -252,8 +259,18 @@ size_t mtsInterfaceProvided::ProcessMailBoxes(void)
              ++iterator) {
             mailBox = iterator->second->GetMailBox();
             if (mailBox) {
-                while (mailBox->ExecuteNext()) {
+                // process everything that is available now
+                size_t commandsInMailbox = mailBox->GetAvailable();
+                while (commandsInMailbox && mailBox->ExecuteNext()) {
                     numberOfCommands++;
+                    commandsInMailbox--;
+                }
+                // process whatever arrived while queue was being
+                // processed to reduce latency on client side
+                commandsInMailbox = mailBox->GetAvailable();
+                while (commandsInMailbox && mailBox->ExecuteNext()) {
+                    numberOfCommands++;
+                    commandsInMailbox--;
                 }
             }
         }
@@ -920,6 +937,14 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
 }
 
 
+mtsInterfaceProvidedDescription mtsInterfaceProvided::GetDescription() const
+{
+    mtsInterfaceProvidedDescription desc;
+    if (GetDescription(desc))
+        desc.InterfaceName = GetName();
+    return desc;
+}
+
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommands(void) const
 {
     std::vector<std::string> commands = GetNamesOfCommandsVoid();
@@ -1152,6 +1177,24 @@ mtsCommandQualifiedRead * mtsInterfaceProvided::GetCommandQualifiedRead(const st
 }
 
 
+const cmnClassServicesBase * mtsInterfaceProvided::GetCommandWriteArgumentServices(const std::string & commandName) const
+{
+    const mtsCommandWriteBase * command = this->CommandsWrite.GetItem(commandName, CMN_LOG_LEVEL_INIT_VERBOSE);
+    if (command) {
+        return command->GetArgumentClassServices();
+    }
+    return 0;
+}
+
+const cmnClassServicesBase * mtsInterfaceProvided::GetCommandReadArgumentServices(const std::string & commandName) const
+{
+    const mtsCommandRead * command = this->CommandsRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_VERBOSE);
+    if (command) {
+        return command->GetArgumentPrototype()->Services();
+    }
+    return 0;
+}
+
 mtsMulticastCommandVoid * mtsInterfaceProvided::GetEventVoid(const std::string & eventName) const
 {
     // this event might be owned by the end user provided interface, e.g. event for end of blocking command
@@ -1183,35 +1226,49 @@ mtsMulticastCommandWriteBase * mtsInterfaceProvided::GetEventWrite(const std::st
 }
 
 
-bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommandVoid * handler)
+bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
+                                       mtsCommandVoid * handler,
+                                       const mtsRequiredType required)
 {
     mtsMulticastCommandVoid * multicastCommand = GetEventVoid(eventName); // EventVoidGenerators.GetItem(eventName);
     if (multicastCommand) {
         return multicastCommand->AddCommand(handler);
-    } else {
-        // maybe the event is not defined at the end-user level but in
-        // the original interface?
-        if (this->OriginalInterface) {
-            return this->OriginalInterface->AddObserver(eventName, handler);
-        }
-        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void): cannot find event named \"" << eventName << "\"" << std::endl;
-        return false;
     }
+    // maybe the event is not defined at the end-user level but in
+    // the original interface?
+    if (this->OriginalInterface) {
+        return this->OriginalInterface->AddObserver(eventName, handler, required);
+    }
+    if (required == MTS_REQUIRED) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void) for \"" << GetFullName()
+                                 << "\": cannot find event named \"" << eventName
+                                 << "\", the following events are available: "
+                                 << cmnDataHumanReadable(GetNamesOfEventsVoid())
+                                 << std::endl;
+    }
+    return false;
 }
 
 
-bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommandWriteBase * handler)
+bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
+                                       mtsCommandWriteBase * handler,
+                                       const mtsRequiredType required)
 {
     if (this->OriginalInterface) {
-        return this->OriginalInterface->AddObserver(eventName, handler);
+        return this->OriginalInterface->AddObserver(eventName, handler, required);
     }
     mtsMulticastCommandWriteBase * multicastCommand = EventWriteGenerators.GetItem(eventName);
     if (multicastCommand) {
         return multicastCommand->AddCommand(handler);
-    } else {
-        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
-        return false;
     }
+    if (required == MTS_REQUIRED) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write) for \"" << GetFullName()
+                                 << "\": cannot find event named \"" << eventName
+                                 << "\", the following events are available: "
+                                 << cmnDataHumanReadable(GetNamesOfEventsWrite())
+                                 << std::endl;
+    }
+    return false;
 }
 
 
@@ -1220,10 +1277,14 @@ void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mt
     argout = argin;
     size_t i;
     for (i = 0; i < argin.VoidEvents.size(); i++) {
-        argout.VoidEvents[i].Result = argin.Provided->AddObserver(argin.VoidEvents[i].EventName, argin.VoidEvents[i].HandlerPointer);
+        argout.VoidEvents[i].Result = argin.Provided->AddObserver(argin.VoidEvents[i].EventName,
+                                                                  argin.VoidEvents[i].HandlerPointer,
+                                                                  argin.VoidEvents[i].Required);
     }
     for (i = 0; i < argin.WriteEvents.size(); i++) {
-        argout.WriteEvents[i].Result = argin.Provided->AddObserver(argin.WriteEvents[i].EventName, argin.WriteEvents[i].HandlerPointer);
+        argout.WriteEvents[i].Result = argin.Provided->AddObserver(argin.WriteEvents[i].EventName,
+                                                                   argin.WriteEvents[i].HandlerPointer,
+                                                                   argin.WriteEvents[i].Required);
     }
 }
 
@@ -1279,12 +1340,12 @@ void mtsInterfaceProvided::RemoveObserverList(const mtsEventHandlerList & argin,
 void mtsInterfaceProvided::AddMessageEvents(void)
 {
     // first attempt to add all three events
-    if ((!AddEventWrite(mMessages.StatusEvent, "Status", mMessages.StatusMessage))
-        || (!AddEventWrite(mMessages.WarningEvent, "Warning", mMessages.WarningMessage))
-        || (!AddEventWrite(mMessages.ErrorEvent, "Error", mMessages.ErrorMessage))
+    if ((!AddEventWrite(mMessages.StatusEvent, "status", mMessages.StatusMessage))
+        || (!AddEventWrite(mMessages.WarningEvent, "warning", mMessages.WarningMessage))
+        || (!AddEventWrite(mMessages.ErrorEvent, "error", mMessages.ErrorMessage))
         ) {
         CMN_LOG_CLASS_INIT_ERROR << "AddMessageEvents for " << GetFullName()
-                                 << " failed, make sure there is no other write event named \"Status\", \"Warning\" or \"Error\"" << std::endl;
+                                 << " failed, make sure there is no other write event named \"status\", \"warning\" or \"error\"" << std::endl;
         return;
     }
 }
@@ -1326,7 +1387,7 @@ void mtsInterfaceProvided::SendError(const std::string & message)
 }
 
 
-bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription)
+bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription) const
 {
     bool success = true;
 

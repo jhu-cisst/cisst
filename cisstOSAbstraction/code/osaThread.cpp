@@ -6,8 +6,7 @@
   Author(s): Ankur Kapoor, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,7 +44,7 @@ struct osaThreadIdInternals {
 
 
 // Constructor. Does nothing.
-osaThreadId::osaThreadId(void)
+osaThreadId::osaThreadId(void) : Valid(false)
 {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
 }
@@ -63,6 +62,8 @@ unsigned int osaThreadId::SizeOfInternals(void) {
 
 
 // Compare thread Ids
+// This probably should check whether ThreadIds are valid, but that may break existing code, since
+// Valid flag was recently added (10/2019).
 bool osaThreadId::Equal(const osaThreadId & other) const 
 {
     osaThreadId * nonConstThis = const_cast<osaThreadId *>(this);
@@ -90,6 +91,8 @@ bool osaThreadId::Equal(const osaThreadId & other) const
 
 // MJ: Don't use this comparator on Mac and Xenomai
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_WINDOWS)
+// This probably should check whether ThreadIds are valid, but that may break existing code, since
+// Valid flag was recently added (10/2019).
 bool osaThreadId::operator()(const osaThreadId & lhs, const osaThreadId & rhs) const
 {
     osaThreadId * _lhs = const_cast<osaThreadId *>(&lhs);
@@ -115,14 +118,18 @@ bool osaThreadId::operator()(const osaThreadId & lhs, const osaThreadId & rhs) c
 
 void osaThreadId::ToStream(std::ostream & outputStream) const
 {
-    osaThreadId * nonConstThis = const_cast<osaThreadId *>(this);
+    if (this->Valid) {
+        osaThreadId * nonConstThis = const_cast<osaThreadId *>(this);
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
-    outputStream << reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId;
+        outputStream << reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId;
 #elif (CISST_OS == CISST_LINUX_XENOMAI)
-    outputStream << reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->Task;
+        outputStream << reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->Task;
 #elif (CISST_OS == CISST_DARWIN)
-    outputStream << &(reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId);
+        outputStream << &(reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId);
 #endif
+    }
+    else
+        outputStream << "invalid";
 }
 
 
@@ -140,6 +147,7 @@ osaThreadId osaGetCurrentThreadId(void)
     // be used because they are only defined in the kernel.
     reinterpret_cast<osaThreadIdInternals*>(result.Internals)->ThreadId = pthread_self();
 #endif
+    result.Valid = true;
     return result;
 }
 
@@ -255,6 +263,7 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata)
     reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->ThreadId = threadId;
 #endif // CISST_WINDOWS
 
+    ThreadId.Valid = true;
     SetThreadName(name);
     Valid = true;
     Running = true;

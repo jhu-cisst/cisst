@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2012-07-09
 
-  (C) Copyright 2012-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2012-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,12 +45,15 @@ std::string cmnDataVectorHumanReadable(const _vectorType & data)
 {
     std::stringstream stringStream;
     stringStream << "[";
-    const size_t size = data.size();
-    for (size_t index = 0; index < size; ++index) {
-        if (index != 0) {
+    typedef _vectorType VectorType;
+    typedef typename VectorType::const_iterator const_iterator;
+    const const_iterator end = data.end();
+    const const_iterator begin = data.begin();
+    for (const_iterator iter = begin; iter != end; ++iter) {
+        if (iter != begin) {
             stringStream << ", ";
         }
-        stringStream << cmnData<typename _vectorType::value_type>::HumanReadable(data[index]);
+        stringStream << cmnData<typename _vectorType::value_type>::HumanReadable(*iter);
     }
     stringStream << "]";
     return stringStream.str();

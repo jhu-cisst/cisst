@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-03-22
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctQtWidgetDynamicVector.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmStateJoint.h>
+#include <cisstParameterTypes/prmConfigurationJoint.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExportQt.h>
@@ -41,6 +42,10 @@ public:
     /*! Set value, this method will update the values display in the
       Qt Widget for position, velocity and effort. */
     void SetValue(const prmStateJoint & newValue);
+
+    inline void SetConfiguration(const prmConfigurationJoint & newConfiguration) {
+        mConfiguration = newConfiguration;
+    }
 
     inline void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute) {
         mPrismaticFactor = prismatic;
@@ -62,6 +67,7 @@ protected:
         * QWVelocity,
         * QWEffort;
 
+    prmConfigurationJoint mConfiguration;
     double mPrismaticFactor, mRevoluteFactor;
     bool mNeedsConversion;
     vctDoubleVec mPositionFactors, mVelocityFactors, mTempVector;

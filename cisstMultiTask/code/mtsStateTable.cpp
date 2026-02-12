@@ -5,7 +5,7 @@
  Author(s):  Ankur Kapoor, Min Yang Jung, Anton Deguet
  Created on: 2004-04-30
 
- (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
+ (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -42,7 +42,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     IndexWriter(0),
     IndexReader(0),
     IndexDelayed(0),
-    Delay(0.0),
+    Delay(0),
     AutomaticAdvanceFlag(true),
     StateVector(0),
     StateVectorDataNames(0),
@@ -137,7 +137,7 @@ size_t mtsStateTable::SetDelay(size_t newDelay) {
 }
 
 
-mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const std::string & name) const
+mtsStateTable::AccessorBase * mtsStateTable::GetAccessorByName(const std::string & name) const
 {
     for (size_t i = 0; i < StateVectorDataNames.size(); i++) {
         if (name == StateVectorDataNames[i]) {
@@ -148,12 +148,12 @@ mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const std::string & nam
 }
 
 
-mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const char * name) const
+mtsStateTable::AccessorBase * mtsStateTable::GetAccessorByName(const char * name) const
 {
-    return GetAccessor(std::string(name));
+    return GetAccessorByName(std::string(name));
 }
 
-mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const size_t id) const{
+mtsStateTable::AccessorBase * mtsStateTable::GetAccessorById(const size_t id) const{
     return StateVectorAccessors[id];
 }
 
@@ -192,6 +192,8 @@ void mtsStateTable::Start(void) {
         StateVector[TicId]->Get(IndexReader, oldTic);
         Period = Tic - oldTic;  // in seconds
     }
+    // update "started" status
+    mStarted = true;
 }
 
 
@@ -278,7 +280,7 @@ void mtsStateTable::Advance(void) {
             this->DataCollection.BatchRange.SetTimestamp(this->Tic);
             this->DataCollection.BatchReady(this->DataCollection.BatchRange);
             // send collection stopped event
-            this->DataCollection.CollectionStopped(mtsUInt(this->DataCollection.CounterForEvent));
+            this->DataCollection.CollectionStopped(this->DataCollection.CounterForEvent);
             this->DataCollection.CounterForEvent = 0;
             // stop collecting
             this->DataCollection.Collecting = false;
@@ -299,7 +301,7 @@ void mtsStateTable::Advance(void) {
             }
             // check if we have spent enough time for a progress event
             if ((this->Tic - this->DataCollection.TimeOfLastProgressEvent) >= this->DataCollection.TimeIntervalForProgressEvent) {
-                this->DataCollection.Progress(mtsUInt(this->DataCollection.CounterForEvent));
+                this->DataCollection.Progress(this->DataCollection.CounterForEvent);
                 this->DataCollection.CounterForEvent = 0;
                 this->DataCollection.TimeOfLastProgressEvent = this->Tic;
             }
@@ -325,6 +327,9 @@ void mtsStateTable::Advance(void) {
     if (IndexReader > Delay) {
         IndexDelayed = IndexReader - Delay;
     }
+
+    // update "started" status
+    mStarted = false;
 }
 
 
@@ -337,7 +342,6 @@ void mtsStateTable::AdvanceIfAutomatic(void) {
 
 bool mtsStateTable::ReplayAdvance(void)
 {
-    std::cerr << "index: " << IndexReader << " of " << HistoryLength << std::endl;
     IndexReader++;
     if (IndexReader > HistoryLength) {
         IndexReader = 0;

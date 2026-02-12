@@ -5,8 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-11-11
 
-  (C) Copyright 2013-2018 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2013-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -35,7 +34,7 @@ prmEventButtonQtWidgetComponent_ButtonData::prmEventButtonQtWidgetComponent_Butt
 {
     InterfaceRequired->AddEventHandlerWrite(&prmEventButtonQtWidgetComponent_ButtonData::EventHandler, this, "Button");
     Widget = new QLabel((Name + ": none [0][--:--:--]").c_str()); // see format in EventHandler
-    Widget->setFrameStyle(QFrame::StyledPanel || QFrame::Sunken);
+    Widget->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     QObject::connect(this, SIGNAL(SetValueSignal(QString)),
                      Widget, SLOT(setText(QString)));
 }

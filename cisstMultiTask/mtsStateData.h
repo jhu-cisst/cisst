@@ -4,7 +4,7 @@
 /*
   Author(s):  Peter Kazanzides
 
-  (C) Copyright 2007-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -114,7 +114,7 @@ public:
     void AddToStateTable(mtsStateTable & table, const std::string & dataName = "") {
         Table = &table;
         Id = Table->NewElement(dataName, &Data);
-        Accessor = dynamic_cast<const AccessorType *>(table.GetAccessor(dataName));
+        Accessor = dynamic_cast<const AccessorType *>(table.GetAccessorByName(dataName));
         if (!Accessor) {
             CMN_LOG_INIT_ERROR << "mtsStateData: could not get data accessor for " << dataName << std::endl;
         }

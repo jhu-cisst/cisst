@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2011-04-03
 
-  (C) Copyright 2011-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #include <string>
@@ -253,10 +252,10 @@ public:
     { EnableDynamicComponentManagement(); }
     ~shellTask() {}
 
-    void Configure(const std::string & CMN_UNUSED(filename));
-    void Startup(void);
-    void Run(void);
-    void Cleanup(void) {}
+    void Configure(const std::string & CMN_UNUSED(filename)) override;
+    void Startup(void) override;
+    void Run(void) override;
+    void Cleanup(void) override{}
 
     bool ExecuteMultiLine(const std::string &curLine) const;
     bool ExecuteLine(const std::string &curLine) const;
@@ -278,13 +277,6 @@ CMN_IMPLEMENT_SERVICES(shellTask)
 
 std::string shellTask::lastError;
 
-#if CISST_MTS_HAS_ICE
-static bool gcmFunction(const std::vector<std::string> &args)
-{
-    return mtsManagerLocal::GetInstance(args[0], args[1]) != 0;
-}
-#endif
-
 void shellTask::Configure(const std::string &)
 {
     CommandList.insert(new CommandEntryMethodVoid<shellTask>("quit", "", &shellTask::Quit, this));
@@ -296,9 +288,6 @@ void shellTask::Configure(const std::string &)
     CommandList.insert(new CommandEntryMethodArgv<shellTask>("connections",
                                                              "[<process_name>] [<component_name>]",
                                                              &shellTask::Connections, this));
-#if CISST_MTS_HAS_ICE
-    CommandList.insert(new CommandEntryFunction("gcm", "<ip_addr> <process_name>", gcmFunction, 2));
-#endif
     CommandList.insert(new CommandEntryMethodStr1<shellTask>("system", "<\"string_to_execute\">",
                                                              &shellTask::System, this));
     CommandList.insert(new CommandEntryMethodStr1<shellTask>("execute", "<file_name>",
@@ -704,9 +693,6 @@ int main(int argc, char * argv[])
     // Enable system-wide thread-safe Logger
     mtsManagerLocal::SetLogForwarding(true);
 
-#if CISST_MTS_HAS_ICE
-    mtsManagerGlobal * globalManager = 0;
-#endif
     mtsManagerLocal * localManager = 0;;
 
     if ((argc < 2) || (strcmp(argv[1], "local") == 0) || (argv[1][0] == '-')) {
@@ -717,40 +703,10 @@ int main(int argc, char * argv[])
         // For now, ignoring processName
         localManager = mtsManagerLocal::GetInstance();
     }
-#if CISST_MTS_HAS_ICE
-    else if (strcmp(argv[1], "global") == 0) {
-        // This is the GCM
-        globalManager = new mtsManagerGlobal;
-        if (!globalManager->StartServer()) {
-            std::cout << "Failed to start global component manager." << std::endl;
-            return 1;
-        }
-        std::cout << "Global component manager started..." << std::endl;
-        try {
-            localManager = mtsManagerLocal::GetInstance(*globalManager);
-        } catch (...) {
-            std::cout << "Failed to initialize local component manager." << std::endl;
-            return 1;
-        }
-    }
-    else if (argv[1][0] != '-') {
-        // Connecting to GCM at specified IP address
-        std::string processName("ProcessShell");
-        if ((argc >= 3) && (argv[2][0] != '-'))
-            processName = argv[2];
-        try {
-            localManager = mtsManagerLocal::GetInstance(argv[1], processName);
-        } catch (...) {
-            std::cout << "Failed to initialize local component manager." << std::endl;
-            return 1;
-        }
-    }
-#else
     else {
         std::cout << "No network support -- set CISST_MTS_HAS_ICE via CMake" << std::endl;
         return 1;
     }
-#endif
 
     shellTask *shell = new shellTask("cisstShell", argc, argv);
     localManager->AddComponent(shell);
@@ -761,15 +717,6 @@ int main(int argc, char * argv[])
 
     localManager->CreateAll();
     localManager->StartAll();
-
-#if CISST_MTS_HAS_ICE
-    // Cleanup global component manager
-    // We don't delete it because that is currently done in localManager->Cleanup
-    if (globalManager) {
-        if (!globalManager->StopServer())
-            std::cout << "Failed to stop global component manager." << std::endl;
-    }
-#endif
 
     localManager->Cleanup();
     return 0;

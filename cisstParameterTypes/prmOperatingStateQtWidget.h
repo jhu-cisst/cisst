@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 #include <QMetaType>
 
+#include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstParameterTypes/prmOperatingState.h>
 
 // Always include last
@@ -40,17 +41,33 @@ public:
     prmOperatingStateQtWidget(void);
     ~prmOperatingStateQtWidget(void) {};
 
-    inline void setupUi(void) {};
+    void setupUi(void);
+
+    void setEnabled(bool enable);
+
+    void SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired);
 
     /*! Set value, this method will update the values display in the
       Qt Widget. */
     void SetValue(const prmOperatingState & newValue);
 
+ signals:
+    void SignalOperatingState(const prmOperatingState & state);
+
+ private slots:
+    void ShowContextMenu(const QPoint & pos);
+    void SlotOperatingStateEventHandler(const prmOperatingState & state);
+
 protected:
+    void OperatingStateEventHandler(const prmOperatingState & state);
+
     QLabel * QLState;
     QLabel * QLTime; // time and valid using background color
     QLabel * QLIsHomed;
     QLabel * QLIsBusy;
+
+    mtsFunctionWrite mStateCommand;
+    bool mEnabled = true;
 };
 
 #endif // _prmOperatingStateQtWidget_h

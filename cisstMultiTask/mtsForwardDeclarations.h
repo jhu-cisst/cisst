@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Anton Deguet
   Created on:	2007-10-07
 
-  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -106,6 +105,7 @@ class mtsFunctionQualifiedRead;
 class mtsEventReceiverBase;
 class mtsEventReceiverVoid;
 class mtsEventReceiverWrite;
+class mtsEventHandlerList;
 
 // multicast void command
 class mtsMulticastCommandVoid;
@@ -113,6 +113,9 @@ class mtsMulticastCommandVoid;
 // multicast write commands
 class mtsMulticastCommandWriteBase;
 template <class _argumentType> class mtsMulticastCommandWrite;
+
+// status/warning/error messages
+class mtsMessage;
 
 // interfaces and tasks
 class mtsInterfaceProvided;
@@ -145,6 +148,7 @@ class mtsManagerProxyClient;
 
 // managers
 class mtsManagerLocal;
+#define mtsComponentManager mtsManagerLocal
 class mtsManagerLocalInterface;
 class mtsManagerGlobal;
 class mtsManagerGlobalInterface;

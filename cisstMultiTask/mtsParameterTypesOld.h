@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-09-01
 
-  (C) Copyright 2010-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -71,9 +70,9 @@ public:
     std::vector<InfoWrite> WriteEvents;
 #endif
 
-    void ToStream(std::ostream & outputStream) const;
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    void ToStream(std::ostream & outputStream) const override;
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsEventHandlerList);
@@ -100,10 +99,10 @@ public:
     mtsLogMessage(const char * log, size_t len);
     /*! Destructor */
     ~mtsLogMessage() {}
-
-    void ToStream(std::ostream & outputStream) const;
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    mtsLogMessage & operator = (const mtsLogMessage & other);
+    void ToStream(std::ostream & outputStream) const override;
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsLogMessage);

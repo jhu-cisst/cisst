@@ -5,7 +5,7 @@
   Author(s):  Marcin Balicki, Anton Deguet
   Created on: 2010-03-31
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,13 +25,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsIntervalStatistics_h
 #define _mtsIntervalStatistics_h
 
-#include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+#include <cisstMultiTask/mtsCallableVoidMethod.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -117,6 +117,43 @@ public:
     /*! Add one sample to compute statistics */
     void Update(const double sample, const double computeTime);
 
+    /*! Set callback to act on updated statistics */
+    inline void SetCallback(mtsCallableVoidBase * callback) {
+        mCallback = callback;
+    }
+
+    template <class __classType>
+    inline void SetCallback(void (__classType::*method)(void),
+                            __classType * classInstantiation) {
+        this->SetCallback(new mtsCallableVoidMethod<__classType>(method, classInstantiation));
+    }
+
+    void Reset(void);
+
+    inline void SetFromExisting(const double periodAvg,
+                                const double periodStdDev,
+                                const double periodMin,
+                                const double periodMax,
+                                const double computeTimeAvg,
+                                const double computeTimeStdDev,
+                                const double computeTimeMin,
+                                const double computeTimeMax,
+                                const unsigned int numberOfSamples,
+                                const unsigned int numberOfOverruns,
+                                const double statisticsInterval) {
+        mPeriodAvg = periodAvg;
+        mPeriodStdDev = periodStdDev;
+        mPeriodMin = periodMin;
+        mPeriodMax = periodMax;
+        mComputeTimeAvg = computeTimeAvg;
+        mComputeTimeStdDev = computeTimeStdDev;
+        mComputeTimeMin = computeTimeMin;
+        mComputeTimeMax = computeTimeMax;
+        mNumberOfSamples = numberOfSamples;
+        mNumberOfOverruns = numberOfOverruns;
+        mStatisticsInterval = statisticsInterval;
+    }
+    
 private:
 
     /*! Internal variables for statistics calculations */
@@ -135,7 +172,7 @@ private:
     /*! The time server used to provide absolute and relative times. */
     const osaTimeServer * mTimeServer;
 
-    /*! Members that can be access, actual stats */
+    /*! Members that can be accessed after computation, actual stats */
     double mPeriodAvg;
     double mPeriodStdDev;
     double mPeriodMin;
@@ -150,6 +187,8 @@ private:
     /*! configuration. */
     double mStatisticsInterval;
 
+    /*! optional callback */
+    mtsCallableVoidBase * mCallback;
 
 public:
 
@@ -157,20 +196,20 @@ public:
     inline ~mtsIntervalStatistics() {};
 
     /*! Human readable text output */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! Machine reabable text output */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Serialize the content of the object without any extra
       information, i.e. no class type nor format version.  The
       "receiver" is supposed to already know what to expect. */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
-    virtual void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsIntervalStatistics)

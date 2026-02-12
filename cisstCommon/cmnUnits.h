@@ -238,6 +238,12 @@ const double cmn_day = 24.0 * cmn_hour;
 inline double cmnInternalTo_day(double valueInternalUnits) {
     return valueInternalUnits / cmn_day;
 }
+
+/*! Convert frequency to period */
+inline double cmnHzToPeriod(const double frequencyInHz) {
+    return cmn_s / frequencyInHz;
+}
+
 //@}
 
 

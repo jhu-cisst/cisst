@@ -2,7 +2,7 @@
   Author(s): Simon Leonard
   Created on: November 11 2009
 
-  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 #include <cisstConfig.h>
+#include <cisstCommon/cmnJointType.h>
 
 #if CISST_HAS_JSON
 #include <json/json.h>
@@ -34,13 +35,13 @@ class CISST_EXPORT robJoint {
 
  public:
 
-  enum Type{
-    UNDEFINED,   // no clue
-    HINGE,       // revolute joint
-    SLIDER,      // prismatic joint
-    UNIVERSAL,   // universal joint
-    BALLSOCKET   // ball and socket joint
-  };
+  // for backward compatibility
+  typedef cmnJointType Type;
+  static const cmnJointType UNDEFINED = CMN_JOINT_UNDEFINED;
+  static const cmnJointType HINGE = CMN_JOINT_REVOLUTE;
+  static const cmnJointType SLIDER = CMN_JOINT_PRISMATIC;
+  static const cmnJointType UNIVERSAL = CMN_JOINT_UNIVERSAL;
+  static const cmnJointType BALLSOCKET = CMN_JOINT_BALL_SOCKET;
 
   //! Joint modes
   /**
@@ -58,11 +59,13 @@ class CISST_EXPORT robJoint {
 
 private:
 
+  std::string name;
+
   //! The type of the joint
   /**
      Determine if the joint is a hinge, slider, universal, ball and socket, etc.
   */
-  robJoint::Type type;
+  cmnJointType type;
 
   //! The mode of the joint
   /**
@@ -86,21 +89,28 @@ public:
 
   //! Default constructor
   robJoint();
-  robJoint( robJoint::Type type,
-	    robJoint::Mode mode,
-	    double offset,
-	    double min,
-	    double max,
-	    double ftmax );
+  robJoint( cmnJointType type,
+            robJoint::Mode mode,
+            double offset,
+            double min,
+            double max,
+            double ftmax );
 
   // class with virtual methods should have a virtual destructor
   inline virtual ~robJoint() {};
+
+  inline const std::string & Name(void) const {
+    return name;
+  }
+  inline std::string & Name(void) {
+    return name;
+  }
 
   //! Return the type of the joint
   /**
      \return The type of the joint (hinge, slider, universal, ball and socket)
   */
-  robJoint::Type GetType() const;
+  cmnJointType GetType() const;
 
   //! Return the mode of the joint
   /**
@@ -179,7 +189,8 @@ public:
      \return The absolute value for the maximum force or torque that can be
              applied by the joint.
   */
-  double ForceTorqueMax() const;
+  const double & ForceTorqueMax(void) const;
+  double & ForceTorqueMax(void);
 
   //! Read from an input stream
   /**

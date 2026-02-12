@@ -5,7 +5,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -64,7 +64,7 @@ protected:
 public:
     /*! Default constructor.  Does nothing, use Bind before
       using. */
-    mtsFunctionWrite(const bool isProxy = false);
+    mtsFunctionWrite();
 
     /*! Destructor. */
     virtual ~mtsFunctionWrite();

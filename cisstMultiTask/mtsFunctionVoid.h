@@ -5,7 +5,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -43,7 +43,7 @@ class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
 
  public:
     /*! Default constructor.  Does nothing, use Bind before using. */
-    mtsFunctionVoid(const bool isProxy = false);
+    mtsFunctionVoid();
 
     /*! Destructor. */
     ~mtsFunctionVoid();

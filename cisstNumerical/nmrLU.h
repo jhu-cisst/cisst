@@ -5,7 +5,7 @@
   Author(s): Anton Deguet
   Created on: 2006-01-10
 
-  (C) Copyright 2006-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -183,7 +183,7 @@ public:
     /*! Helper method to compute the size of the matrix L.  This
       method can be used before UpdateMatrixLU to make sure that the
       size of L is correct.
-      
+
       \param A The matrix to be decomposed using ::nmrLU (it is used
       only to determine the sizes).
     */
@@ -199,7 +199,7 @@ public:
     /*! Helper method to compute the size of the matrix U.  This
       method can be used before UpdateMatrixLU to make sure that the
       size of U is correct.
-      
+
       \param A The matrix to be decomposed using ::nmrLU (it is used
       only to determine the sizes).
     */
@@ -214,7 +214,7 @@ public:
 
     /*! Helper method to create a usable permutation matrix from the
       vector of pivot indices created by ::nmrLU.
-      
+
       \note This method must be called after the ::nmrLU function has been called.
 
       \param A The matrix decomposed using ::nmrLU.  It is used only to check the sizes.
@@ -230,7 +230,7 @@ public:
         CISST_THROW(std::runtime_error)
     {
         const size_type minmn = (A.rows() < A.cols()) ? A.rows() : A.cols();
-        // check sizes 
+        // check sizes
         if (pivotIndices.size() != minmn) {
             cmnThrow(std::runtime_error("nmrLUDynamicData::UpdateMatrixP: Size of vector pivotIndices is incorrect."));
         }
@@ -255,7 +255,7 @@ public:
       and upper parts respectively in L and U, setting all other
       elements to zero.  The diagonal of the output is copied to U
       while all the elements of the diagonal of L are set to 1.
-      
+
       \note This method must be called after the ::nmrLU function has been called.
 
       \param A The matrix decomposed using ::nmrLU.
@@ -263,7 +263,7 @@ public:
       \param U The upper matrix
     */
     template <class _matrixOwnerTypeA, class _matrixOwnerTypeL, class _matrixOwnerTypeU>
-    static inline 
+    static inline
     void UpdateMatrixLU(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
                         vctDynamicMatrixBase<_matrixOwnerTypeL, CISSTNETLIB_DOUBLE> & L,
                         vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & U)
@@ -284,7 +284,7 @@ public:
                 }
             }
         }
- 
+
     }
 
 
@@ -343,7 +343,7 @@ public:
     {
         this->Allocate(m, n);
     }
-    
+
     /*! Constructor where the user provides the input matrix to
       specify the size and storage order.  Memory allocation is
       performed for pivot indices vector. This should be used when the
@@ -358,16 +358,16 @@ public:
     {
         this->Allocate(A);
     }
-    
+
     /*! Constructor where the user provides the vector to store the
       pivot indices.  The data object now acts as a composite
       container to hold, pass and manipulate a convenient storage for
       LU algorithm. Checks are made on the validity of the input and
       its consitency in terms of size.
-      
+
       \param A The matrix to be decomposed, used to verify the sizes.
       \param pivotIndices Vector created by the user to store the output.
- 
+
       \sa nmrLUDynamicData::SetRef
     */
     template <class _matrixOwnerTypeA,
@@ -392,7 +392,7 @@ public:
     {
         this->Allocate(A.rows(), A.cols());
     }
-    
+
     /*! This method allocates the memory for the output (pivot
       indices).  This method is not meant to be a top-level user API,
       but is used by other overloaded Allocate methods.
@@ -405,7 +405,7 @@ public:
         this->SetDimension(m, n);
         this->AllocateOutput(true);
     }
-    
+
     /*! This method doesn't allocate any memory as it relies on the user
       provided vector (pivotIndices).
 
@@ -428,7 +428,7 @@ public:
         this->ThrowUnlessOutputSizeIsCorrect(pivotIndices);
         this->PivotIndicesReference.SetRef(pivotIndices);
     }
-    
+
     /*! Const reference to the result vector PivotIndices.  This
       method must be called after the data has been computed by
       the nmrLU function. */
@@ -439,7 +439,7 @@ public:
 
 
 
-/*! 
+/*!
   \ingroup cisstNumerical
 
   \brief Data of LU problem (Fixed size).
@@ -452,7 +452,7 @@ public:
   \code
   nmrLUFixedSizeData<4, 3> data;
   \endcode
-  
+
   \note An object of type nmrLUFixedSizeData contains the memory
   required for the output, i.e. its actual size will be equal to the
   memory required to store the vector PivotIndices.
@@ -490,7 +490,7 @@ public:
 
 protected:
     VectorTypePivotIndices PivotIndicesMember; /*!< Data member used to store the output vector PivotIndices. */
-    
+
 public:
 #ifndef DOXYGEN
     /*! This class is not intended to be a top-level API.  It has been
@@ -511,22 +511,22 @@ public:
     };
     friend class Friend;
 #endif // DOXYGEN
-    
+
     /*! Default constructor.  Does nothing since the allocation is
       performed on the stack. */
     nmrLUFixedSizeData() {};
-    
+
     /*! Const reference to the result vector PivotIndices.  This
       method must be called after the data has been computed by
       the nmrLU function. */
     inline const VectorTypePivotIndices & PivotIndices(void) const {
         return PivotIndicesMember;
     }
-    
+
 
     /*! Helper method to create a usable permutation matrix from the
       vector of pivot indices created by ::nmrLU.
-      
+
       \note This method must be called after the ::nmrLU function has been called.
 
       \param pivotIndices The vector of pivot indices as computed by ::nmrLU
@@ -556,14 +556,14 @@ public:
       and upper parts respectively in L and U, setting all other
       elements to zero.  The diagonal of the output is copied to U
       while all the elements of the diagonal of L are set to 1.
-      
+
       \note This method must be called after the ::nmrLU function has been called.
 
       \param A The matrix decomposed using ::nmrLU.
       \param L The lower matrix
       \param U The upper matrix
     */
-    static inline 
+    static inline
     void UpdateMatrixLU(const MatrixTypeA & A,
                         MatrixTypeL & L,
                         MatrixTypeU & U)
@@ -702,7 +702,7 @@ public:
   This function checks for valid input (size and compact) and calls
   the LAPACK function.  If the input doesn't match the data, an
   exception is thrown (\c std::runtime_error).
-  
+
   This function modifies the input matrix A and stores the results in
   the data.  The result can be obtained via the const method
   nmrLUDynamicData::PivotIndices().
@@ -763,7 +763,7 @@ inline CISSTNETLIB_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerType, CISSTNET
   user (see nmrLUDynamicData::SetRef).  While the data is
   being build, the consistency of the output is checked.  Then, the
   nmrLU(A, data) function can be used safely.
- 
+
   \param A is a reference to a dynamic matrix of size MxN
   \param pivotIndices Vector created by the user to store the pivot indices.
 
@@ -791,7 +791,7 @@ inline CISSTNETLIB_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNE
   do if the sizes don't match.  By default CMN_ASSERT calls \c abort()
   but it can be configured to be ignored or to throw an exception (see
   #CMN_ASSERT for details).
-  
+
   This function modifies the input matrix A.  It stores the result in
   pivotIndices and A which now contains the elements of both L and U.
   The methods UpdateMatrixLU and UpdateMatrixP can ease the creation
@@ -806,10 +806,12 @@ inline CISSTNETLIB_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNE
         nmrLUTest::TestFixedSizeUserOutputColumnMajorMGeqN
  */
 template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn>
-inline CISSTNETLIB_INTEGER nmrLU(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, VCT_COL_MAJOR> & A, 
+inline CISSTNETLIB_INTEGER nmrLU(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, VCT_COL_MAJOR> & A,
                        vctFixedSizeVector<CISSTNETLIB_INTEGER, _minmn> & pivotIndices)
 {
+#if CMN_ASSERT_IS_DEFINED
     const CISSTNETLIB_INTEGER minmn = static_cast<CISSTNETLIB_INTEGER>(nmrLUFixedSizeData<_rows, _cols>::MIN_MN);
+#endif
     //Assert if requirement is equal to size provided!
     CMN_ASSERT(minmn == static_cast<CISSTNETLIB_INTEGER>(_minmn));
 
@@ -868,4 +870,3 @@ inline CISSTNETLIB_INTEGER nmrLU(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _
 
 
 #endif // _nmrLU_h
-

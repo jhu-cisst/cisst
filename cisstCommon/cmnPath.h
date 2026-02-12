@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -160,7 +160,7 @@ public:
     bool Has(const std::string & directory) const;
 
     /*! Write the path to a stream. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! A platform-independent string for separating subdirectory or file
       name from the parent directory name.  It's equal to "/" on Linux, "\\"
@@ -185,6 +185,10 @@ public:
 
     /*! Delete file.  This function doesn't use any search path. */
     static bool DeleteFile(const std::string & fullPath);
+
+    /*! Rename file.  This function doesn't use any search path. */
+    static bool RenameFile(const std::string & fullPathOld,
+                           const std::string & fullPathNew);
 
     /*! Construct the shared library name based on OS prefix and
       suffix.  For example, the return value for "MyLib" would be

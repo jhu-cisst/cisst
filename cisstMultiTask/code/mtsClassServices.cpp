@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #include <cisstCommon/cmnPortability.h>
@@ -46,7 +45,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndLong)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndULong)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndDouble)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndString)
-CMN_IMPLEMENT_SERVICES(mtsComponent)
+//CMN_IMPLEMENT_SERVICES(mtsComponent)
+// mtsComponent: allow dynamic creation with std::string constructor arg
+CMN_IMPLEMENT_SERVICES_INTERNAL(mtsComponent, 0, mtsGenericTypes<std::string>::FinalType)
 
 #include <cisstMultiTask/mtsComponentAddLatency.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentAddLatency, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
@@ -114,11 +115,17 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsUShort)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsChar)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsUChar)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsBool)
+#if (CISST_OS == CISST_WINDOWS)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsSizeT);
+#endif
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdString)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdStringVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdDoubleVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdCharVecProxy)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdStringListProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdVct3VecProxy)
+
+CMN_IMPLEMENT_SERVICES_TEMPLATED(cmnJointTypeProxy)
 
 #endif  // MTS_CLASS_SERVICES_PART2
 
@@ -332,6 +339,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentClassVecProxy);
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionInterfaceProxy);
 
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionInterfaceFullNameProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionInterfaceFullNameVecProxy);
+
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionProxy);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionConnectionVecProxy);
 
@@ -349,6 +359,7 @@ CMN_IMPLEMENT_SERVICES(mtsLogMessage);
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsMessageProxy);
 
+CMN_IMPLEMENT_SERVICES(mtsComponentConstructorArg);
 CMN_IMPLEMENT_SERVICES(mtsTaskConstructorArg);
 CMN_IMPLEMENT_SERVICES(mtsTaskContinuousConstructorArg);
 CMN_IMPLEMENT_SERVICES(mtsTaskPeriodicConstructorArg);
@@ -361,26 +372,5 @@ CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyClient, mtsTaskContinuous, m
 
 #include <cisstMultiTask/mtsSocketProxyServer.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsSocketProxyServer, mtsTaskContinuous, mtsSocketProxyServerConstructorArg)
-
-/* ICE dependent classes */
-#include <cisstMultiTask/mtsConfig.h>
-#if CISST_MTS_HAS_ICE
-
-#include "mtsComponentInterfaceProxyClient.h"
-CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyClient)
-
-#include "mtsComponentInterfaceProxyServer.h"
-CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyServer)
-
-#include "mtsComponentProxy.h"
-CMN_IMPLEMENT_SERVICES_DERIVED(mtsComponentProxy, mtsComponent)
-
-#include "mtsManagerProxyClient.h"
-CMN_IMPLEMENT_SERVICES(mtsManagerProxyClient)
-
-#include "mtsManagerProxyServer.h"
-CMN_IMPLEMENT_SERVICES(mtsManagerProxyServer)
-
-#endif // CISST_MTS_HAS_ICE
 
 #endif  // MTS_CLASS_SERVICES_PART1

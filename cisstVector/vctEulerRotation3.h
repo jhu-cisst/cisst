@@ -4,7 +4,7 @@
 /*
   Created on: 2011-05-18
 
-  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -76,6 +76,8 @@ http://www.cisst.org/cisst/license.txt.
 
 VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYZ)
 VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZYX)
+VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::ZXZ)
+VCT_DECLARE_EULER_CONVERSIONS(vctEulerRotation3Order::YZX)
 #endif
 
 
@@ -150,16 +152,20 @@ public:
 
 template <vctEulerRotation3Order::OrderType _order>
 class vctEulerRotation3 : public vctEulerRotation3Base {
+public:
     typedef vctEulerRotation3<_order> ThisType;
     typedef vctEulerRotation3Base BaseType;
-
-public:
 
     inline vctEulerRotation3() : BaseType() {}
     inline vctEulerRotation3(const ThisType & other) : BaseType(other) {}
     inline vctEulerRotation3(double phi, double theta, double psi) : BaseType(phi, theta, psi) {}
     inline vctEulerRotation3(double * angles) : BaseType(angles) {}
     inline vctEulerRotation3(const vct3 & angles) : BaseType(angles) {}
+
+    inline ThisType & operator = (const ThisType & other) {
+        Angles.Assign(other.Angles);
+        return *this;
+    }
 
     /*! Constructor from a vctMatrixRotation3. */
     template <class __containerType>
@@ -204,7 +210,8 @@ public:
     }
 
     /*! Returns the Euler angles in radians */
-    vct3 GetAngles(void) const { return Angles; }
+    const vct3 & GetAngles(void) const { return Angles; }
+    vct3 & GetAngles(void) { return Angles; }
 
     /*! Returns the Euler angles in degrees */
     vct3 GetAnglesInDegrees(void) const { return (180.0/cmnPI)*Angles; }
@@ -328,6 +335,12 @@ typedef vctEulerRotation3<vctEulerRotation3Order::ZYZ> vctEulerZYZRotation3;
 /*! Define an Euler angle rotation in dimension 3 using ZYX (yaw-pitch-roll) order. */
 typedef vctEulerRotation3<vctEulerRotation3Order::ZYX> vctEulerZYXRotation3;
 
+/*! Define an Euler angle rotation in dimension 3 using ZXZ order. */
+typedef vctEulerRotation3<vctEulerRotation3Order::ZXZ> vctEulerZXZRotation3;
+
+/*! Define an Euler angle rotation in dimension 3 using YZX order. */
+typedef vctEulerRotation3<vctEulerRotation3Order::YZX> vctEulerYZXRotation3;
+
 #ifndef SWIG
 #ifdef CISST_COMPILER_IS_MSVC
 // declare instances of helper functions
@@ -383,6 +396,8 @@ typedef vctEulerRotation3<vctEulerRotation3Order::ZYX> vctEulerZYXRotation3;
 
 VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYZ)
 VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZYX)
+VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::ZXZ)
+VCT_DECLARE_EULER_CONVERSION_TEMPLATES(vctEulerRotation3Order::YZX)
 #endif // CISST_COMPILER_IS_MSVC
 #endif // !SWIG
 

@@ -33,13 +33,8 @@ vctQtWidgetDynamicMatrixDoubleRead::vctQtWidgetDynamicMatrixDoubleRead(void):
     this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
 }
 
 bool vctQtWidgetDynamicMatrixDoubleRead::SetValue(const vctDynamicMatrix<double> & matrix)
@@ -73,13 +68,8 @@ vctQtWidgetDynamicMatrixDoubleWrite::vctQtWidgetDynamicMatrixDoubleWrite(void):
     this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
 }
 
 bool vctQtWidgetDynamicMatrixDoubleWrite::SetValue(const vctDynamicMatrix<double> & matrix)
@@ -129,13 +119,8 @@ vctQtWidgetDynamicMatrixIntRead::vctQtWidgetDynamicMatrixIntRead(void):
     this->setContentsMargins(0, 0, 0, 0);
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
 }
 
 bool vctQtWidgetDynamicMatrixIntRead::SetValue(const vctDynamicMatrix<int> & matrix)
@@ -168,13 +153,8 @@ vctQtWidgetDynamicMatrixIntWrite::vctQtWidgetDynamicMatrixIntWrite(void):
 {
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
 }
 
 bool vctQtWidgetDynamicMatrixIntWrite::SetValue(const vctDynamicMatrix<int> & matrix)
@@ -222,13 +202,8 @@ vctQtWidgetDynamicMatrixBoolRead::vctQtWidgetDynamicMatrixBoolRead(void):
 {
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
 }
 
 bool vctQtWidgetDynamicMatrixBoolRead::SetValue(const vctDynamicMatrix<bool> & matrix)
@@ -261,13 +236,8 @@ vctQtWidgetDynamicMatrixBoolWrite::vctQtWidgetDynamicMatrixBoolWrite(void):
 {
     this->verticalHeader()->hide();
     this->horizontalHeader()->hide();
-#if CISST_HAS_QT4
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    this->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
 }
 
 bool vctQtWidgetDynamicMatrixBoolWrite::SetValue(const vctDynamicMatrix<bool> & matrix)

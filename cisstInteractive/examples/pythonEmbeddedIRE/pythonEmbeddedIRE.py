@@ -8,8 +8,7 @@
 #  Author(s): Peter Kazanzides
 #  Created on: 2005-12-21
 
-# (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
  
 # --- begin cisst license - do not edit ---
 # 
@@ -19,14 +18,14 @@
 # 
 # --- end cisst license ---
 
-from cisstCommonPython import *
-from SineGeneratorPython import *
+import cisstCommonPython as cisstCommon
+import SineGeneratorPython as SineGenerator
 
-wave = cmnObjectRegister.FindObject("SineGenerator")
+wave = cisstCommon.cmnObjectRegister.FindObject("SineGenerator")
 
-print "Sine Wave: amplitude = %f, frequency = %f" % \
-      (wave.GetAmplitude(), wave.GetFrequency())
+print("Sine Wave: amplitude = %f, frequency = %f" % \
+      (wave.GetAmplitude(), wave.GetFrequency()))
 
-print "Use wave.SetAmplitude(X) to set amplitude to X"
-print "Use wave.SetFrequency(Y) to set frequency to Y"
-print "Use wave.SetFrequency(0) to pause output display"
+print("Use wave.SetAmplitude(X) to set amplitude to X")
+print("Use wave.SetFrequency(Y) to set frequency to Y")
+print("Use wave.SetFrequency(0) to pause output display")

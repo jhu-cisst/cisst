@@ -7,8 +7,7 @@
 #  Author(s):  Andrew LaMora
 #  Created on: 2005-09-06
 #
-#  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-#  Reserved.
+#  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -39,7 +38,7 @@ import os, sys, glob, py_compile
 
 def main():
     if len(sys.argv)<3:
-        print "Syntax:  python %s src-dir dest-dir" % sys.argv[0]
+        print('Syntax:  python %s src-dir dest-dir' % sys.argv[0])
         sys.exit(1)
 
     src = sys.argv[1]
@@ -49,22 +48,23 @@ def main():
     # (this won't fail even if the directory does not exist)
     try:
        map(os.remove, glob.glob(os.path.join(dest,'*.pyc')))
-    except OSError, e:
-       print 'makeIrepy: could not delete ' + e.filename + ', ' + e.strerror
+    except OSError as e:
+       print('makeIrepy: could not delete ' + e.filename + ', ' + e.strerror)
        sys.exit(1)
 
     # create the directory (if it does not already exist)
     if not os.path.isdir(dest):
         try:
            os.makedirs(dest)
-        except OSError, e:
-           print 'makeIrepy: could not create destination directory: ' + dest
-           print e
+        except OSError as e:
+           print('makeIrepy: could not create destination directory: ' + dest)
+           print(e)
            sys.exit(1)
 
     # compile the source files
-    for f in glob.glob1(src,'*.py'):
-        py_compile.compile(os.path.join(src,f), os.path.join(dest,f+'c'))
+    for fpath in glob.glob(os.path.join(src,'*.py')):
+        fname = os.path.basename(fpath)
+        py_compile.compile(fpath, os.path.join(dest,fname+'c'))
     
     #Now copy the images over.
     #This can be directly handled by CMake
@@ -72,5 +72,3 @@ def main():
     
 if __name__ == "__main__":
     main()
-    
-    

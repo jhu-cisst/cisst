@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Dorothy Hu
   Created on: 2017-01-20
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -60,17 +60,10 @@ void vctForceTorque2DQtWidget::setupUi(void)
     QHBoxLayout * mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    // left side, upper/lower limit, selector and legend
+    // left side, selector and legend
     QVBoxLayout * leftLayout = new QVBoxLayout;
     leftLayout->setContentsMargins(2, 2, 2, 2);
     mainLayout->addLayout(leftLayout);
-
-    // upper limit
-    QLUpperLimit = new QLabel("U");
-    QLUpperLimit->setAlignment(Qt::AlignTop|Qt::AlignRight);
-    leftLayout->addWidget(QLUpperLimit);
-
-    leftLayout->addStretch();
 
     // combo box to select the plot item
     QComboBox * QPlotSelectItem = new QComboBox;
@@ -80,11 +73,12 @@ void vctForceTorque2DQtWidget::setupUi(void)
     leftLayout->addWidget(QPlotSelectItem);
 
     // constants
-    const double grey = 0.95;
+    const QColor textColor = palette().color(QPalette::Text);
+    const QColor baseColor = palette().color(QPalette::Base);
     const vct3 _colors[5] = {vct3(1.0, 0.0, 0.0),
                              vct3(0.0, 1.0, 0.0),
                              vct3(0.0, 0.0, 1.0),
-                             vct3(0.0),
+                             vct3(textColor.redF(), textColor.greenF(), textColor.blueF()),
                              vct3(0.5)};
     const std::string _signals[5] = {"Axis X", "Axis Y", "Axis Z", "Norm", "Zero"};
     const std::string _scales[2] = {"F", "T"};
@@ -95,7 +89,6 @@ void vctForceTorque2DQtWidget::setupUi(void)
     // legends
     QLabel * label;
     QPalette palette;
-    palette.setColor(QPalette::Window, QColor(grey * 255, grey * 255, grey * 255));
 
     for (size_t signal = 0;
          signal < 5;
@@ -125,14 +118,9 @@ void vctForceTorque2DQtWidget::setupUi(void)
 
     leftLayout->addStretch();
 
-    // lower limit
-    QLLowerLimit = new QLabel("L");
-    QLLowerLimit->setAlignment(Qt::AlignBottom | Qt::AlignRight);
-    leftLayout->addWidget(QLLowerLimit);
-
     // plot area
     QFTPlot = new vctPlot2DOpenGLQtWidget();
-    QFTPlot->SetBackgroundColor(vct3(grey));
+    QFTPlot->SetBackgroundColor(vct3(baseColor.redF(), baseColor.greenF(), baseColor.blueF()));
     QFTPlot->resize(QFTPlot->sizeHint());
     QFTPlot->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     mainLayout->addWidget(QFTPlot);
@@ -183,13 +171,7 @@ void vctForceTorque2DQtWidget::SetValue(const double & time, const vct3 & force,
     mSignals[mScaleIndex][3]->AppendPoint(vctDouble2(time, toPlot.Norm()));
     mSignals[mScaleIndex][4]->AppendPoint(vctDouble2(time, 0.0));
 
-    // update the lower/upper limits on the plot
-    vct2 range = mScales[mScaleIndex]->GetViewingRangeY();
-    QString text;
-    text.setNum(range[0], 'f', 3);
-    QLLowerLimit->setText(text);
-    text.setNum(range[1], 'f', 3);
-    QLUpperLimit->setText(text);
+    QFTPlot->SetDisplayYRangeScale(mScales[mScaleIndex]);
 
     QFTPlot->update();
 }
@@ -205,7 +187,6 @@ void vctForceTorque2DQtWidget::SlotScaleIndex(int newAxis)
         // show current scales and user preferences
         mSignals[mScaleIndex][i]->SetVisible(mVisibleSignals[mScaleIndex][i]);
         mCheckBoxes[i]->setChecked(mVisibleSignals[mScaleIndex][i]);
-        
     }
     mScales[mScaleIndex]->AutoFitXY();
     QFTPlot->SetContinuousExpandYResetSlot();

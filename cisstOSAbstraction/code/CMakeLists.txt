@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstOSAbstraction
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -69,6 +67,7 @@ configure_file (${cisstOSAbstractionLibs_SOURCE_DIR}/osaConfig.h.in
 install (FILES ${CISST_OSA_CONFIG_FILE}
          DESTINATION include/cisstOSAbstraction
          COMPONENT cisstOSAbstraction)
+set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CISST_OSA_CONFIG_FILE}")
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_OSA_CONFIG_FILE}"

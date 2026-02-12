@@ -2,8 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
-  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -51,6 +50,7 @@ public:
     double OScale;
     double FrictionFF;
     prmGainParameters():
+        mtsGenericObject(),
         AxisNumber(0),
         PGain(0),
         IGain(0),
@@ -63,6 +63,12 @@ public:
         DACLimit(0),
         OScale(0),
         FrictionFF(0) {
+    }
+
+    prmGainParameters(const prmGainParameters & that):
+        mtsGenericObject(that)
+    {
+        Assign(that);
     }
 
     ~prmGainParameters(){}
@@ -83,7 +89,7 @@ public:
         ToStream(outputStream);
         return outputStream.str();
     }
-    virtual void ToStream(std::ostream &out) const {
+    void ToStream(std::ostream &out) const override {
         out << AxisNumber
         << ", " << PGain
         << ", " << IGain
@@ -99,8 +105,7 @@ public:
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const {
-
+    void SerializeRaw(std::ostream & outputStream) const override {
 
         BaseType::SerializeRaw(outputStream);
 
@@ -120,7 +125,7 @@ public:
     }
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream) {
+    void DeSerializeRaw(std::istream & inputStream) override {
 
         BaseType::DeSerializeRaw(inputStream);
 

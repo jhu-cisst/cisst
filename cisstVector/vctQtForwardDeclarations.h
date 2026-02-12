@@ -3,9 +3,9 @@
 
 /*
   Author(s):  Anton Deguet
-  Created on: 2013-04-16
+  Created on: 2020-03-24
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,44 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctQtForwardDeclarations_h
 #define _vctQtForwardDeclarations_h
 
-#include <cisstVector/vctForwardDeclarations.h>
-
-#include <QtGlobal>
-#if QT_VERSION >= 0x050400
-#include <QOpenGLWidget>
-typedef QOpenGLWidget vctQtOpenGLBaseWidget;
+#ifdef _MSC_VER   // Windows
+#pragma message("this file is now deprecated, include vctForwardDeclarationsQt.h instead")
 #else
-#include <QGLWidget>
-typedef QGLWidget vctQtOpenGLBaseWidget;
+#warning "this file is now deprecated, include vctForwardDeclarationsQt.h instead"
 #endif
 
-template <class _elementType>
-class vctQtWidgetDynamicVectorReadFloating;
-template <class _elementType>
-class vctQtWidgetDynamicVectorReadInteger;
-
-typedef vctQtWidgetDynamicVectorReadFloating<double> vctQtWidgetDynamicVectorDoubleRead;
-typedef vctQtWidgetDynamicVectorReadFloating<float> vctQtWidgetDynamicVectorFloatRead;
-typedef vctQtWidgetDynamicVectorReadInteger<int> vctQtWidgetDynamicVectorIntRead;
-typedef vctQtWidgetDynamicVectorReadInteger<unsigned int> vctQtWidgetDynamicVectorUIntRead;
-typedef vctQtWidgetDynamicVectorReadInteger<bool> vctQtWidgetDynamicVectorBoolRead;
-
-template <class _elementType>
-class vctQtWidgetDynamicVectorWriteFloating;
-template <class _elementType>
-class vctQtWidgetDynamicVectorWriteInteger;
-
-typedef vctQtWidgetDynamicVectorWriteFloating<double> vctQtWidgetDynamicVectorDoubleWrite;
-typedef vctQtWidgetDynamicVectorWriteFloating<float> vctQtWidgetDynamicVectorFloatWrite;
-typedef vctQtWidgetDynamicVectorWriteInteger<int> vctQtWidgetDynamicVectorIntWrite;
-typedef vctQtWidgetDynamicVectorWriteInteger<unsigned int> vctQtWidgetDynamicVectorUIntWrite;
-
-
-class vctQtWidgetDynamicMatrixDoubleRead;
-
-class vctQtWidgetRotationDoubleRead;
-class vctQtWidgetFrameDoubleRead;
-
-class vctPlot2DOpenGLQtWidget;
+#include <cisstVector/vctForwardDeclarationsQt.h>
 
 #endif  // _vctQtForwardDeclarations_h

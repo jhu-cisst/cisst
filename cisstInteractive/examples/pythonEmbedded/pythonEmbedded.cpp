@@ -6,7 +6,7 @@
   Author(s): Anton Deguet
   Created on: 2004-10-05
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -79,11 +79,11 @@ int main(void) {
 #endif
 
     std::cout << "*** Import cisstCommonPython and cisstVectorPython" << std::endl;
-    if (PyRun_SimpleString("import cisstCommonPython; from cisstCommonPython import *") != 0) {
+    if (PyRun_SimpleString("import cisstCommonPython as cisstCommon") != 0) {
         std::cout << "Failed importing cisstCommonPython!" << std::endl;
         exit(0);
     }
-    if (PyRun_SimpleString("import cisstVectorPython; from cisstVectorPython import *") != 0) {
+    if (PyRun_SimpleString("import cisstVectorPython as cisstVector") != 0) {
         std::cout << "Failed importing cisstVectorPython!" << std::endl;
         exit(0);
     }
@@ -99,9 +99,9 @@ int main(void) {
     }
 
     std::cout << "*** Run some Python commands from C" << std::endl;
-    PyRun_SimpleString("derived1 = cmnObjectRegister.FindObject(\"derived1\"); print derived1.__class__; print derived1.FixedSizeVector()");
-    PyRun_SimpleString("rederived1 = cmnObjectRegister.FindObject(\"rederived1\"); print rederived1.__class__; print rederived1.Services().GetName()");
-    PyRun_SimpleString("rederived2 = myReDerivedClass(); cmnObjectRegister.Register(\"rederived2\", rederived2);");
+    PyRun_SimpleString("derived1 = cisstCommon.cmnObjectRegister.FindObject(\"derived1\"); print(derived1.__class__); print(derived1.FixedSizeVector())");
+    PyRun_SimpleString("rederived1 = cisstCommon.cmnObjectRegister.FindObject(\"rederived1\"); print(rederived1.__class__); print(rederived1.Services().GetName())");
+    PyRun_SimpleString("rederived2 = myReDerivedClass(); cisstCommon.cmnObjectRegister.Register(\"rederived2\", rederived2);");
 
     std::cout << "*** Load a Python script and execute it" << std::endl;
     bool FileFound = true;

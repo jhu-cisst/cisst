@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 mtsComponentManager * mtsCollectorBase::ComponentManager;
 
@@ -50,7 +49,7 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     Serializer(0)
 {
     // set working directory
-    this->WorkingDirectoryMember.Data = cmnPath::GetWorkingDirectory();
+    this->WorkingDirectoryMember = cmnPath::GetWorkingDirectory();
 
     if (ComponentManager == 0) {
         ComponentManager = mtsComponentManager::GetInstance();
@@ -75,28 +74,22 @@ void mtsCollectorBase::SetupControlInterface(void)
     this->ControlInterface = AddInterfaceProvided("Control");
     if (this->ControlInterface) {
         // commands controlling the output
-        ControlInterface->AddCommandVoid(&mtsCollectorBase::SetOutputToDefault, this,
+        ControlInterface->AddCommandVoid(&mtsCollectorBase::SetOutputToDefaultCommand, this,
                                          "SetOutputToDefault");
-        ControlInterface->AddCommandWrite(&mtsCollectorBase::SetWorkingDirectory, this,
+        ControlInterface->AddCommandWrite(&mtsCollectorBase::SetWorkingDirectoryCommand, this,
                                           "SetWorkingDirectory");
         ControlInterface->AddCommandRead(&mtsCollectorBase::GetWorkingDirectory, this,
                                          "GetWorkingDirectory");
         // start/stop commands
-        ControlInterface->AddCommandVoid(&mtsCollectorBase::StartCollectionCommand, this,
-                                         "StartCollection");
-        ControlInterface->AddCommandWrite(&mtsCollectorBase::StartCollectionInCommand, this,
-                                          "StartCollectionIn");
-        ControlInterface->AddCommandVoid(&mtsCollectorBase::StopCollectionCommand, this,
-                                         "StopCollection");
-        ControlInterface->AddCommandWrite(&mtsCollectorBase::StopCollectionInCommand, this,
-                                          "StopCollectionIn");
+        ControlInterface->AddCommandWrite(&mtsCollectorBase::StartCollectionCommand, this,
+                                          "StartCollection");
+        ControlInterface->AddCommandWrite(&mtsCollectorBase::StopCollectionCommand, this,
+                                          "StopCollection");
         // events
-        ControlInterface->AddEventVoid(this->CollectionStartedEventTrigger,
-                                       "CollectionStarted");
-        ControlInterface->AddEventWrite(this->CollectionStoppedEventTrigger,
-                                        "CollectionStopped", mtsUInt());
+        ControlInterface->AddEventWrite(this->CollectionStartedEventTrigger,
+                                        "CollectionStarted", false);
         ControlInterface->AddEventWrite(this->ProgressEventTrigger,
-                                        "Progress", mtsUInt());
+                                        "Progress", size_t(0));
     }
 }
 
@@ -238,11 +231,11 @@ void mtsCollectorBase::SetOutputToDefault(const CollectorFileFormat fileFormat)
     }
 
     std::string fileName =
-        this->WorkingDirectoryMember.Data
+        this->WorkingDirectoryMember
         + cmnPath::DirectorySeparator()
         + this->GetDefaultOutputName() + "." + suffix;
     // add header file name
-    this->OutputHeaderFileName =  this->WorkingDirectoryMember.Data
+    this->OutputHeaderFileName =  this->WorkingDirectoryMember
         + cmnPath::DirectorySeparator()
         + this->GetDefaultOutputName() + ".desc" ;
 
@@ -315,13 +308,13 @@ void mtsCollectorBase::SetDelimiter(void)
 }
 
 
-void mtsCollectorBase::SetWorkingDirectory(const mtsStdString & directory)
+void mtsCollectorBase::SetWorkingDirectory(const std::string & directory)
 {
     this->WorkingDirectoryMember = directory;
 }
 
 
-void mtsCollectorBase::GetWorkingDirectory(mtsStdString & placeHolder) const
+void mtsCollectorBase::GetWorkingDirectory(std::string & placeHolder) const
 {
     placeHolder = this->WorkingDirectoryMember;
 }
@@ -384,7 +377,7 @@ void mtsCollectorBase::SetOutputStreamWidth(const int width)
     }
 }
 
-void mtsCollectorBase::SetOutputStreamFill(const char fillCharacter) 
+void mtsCollectorBase::SetOutputStreamFill(const char fillCharacter)
 {
     this->FillCharacter = fillCharacter;
     if (this->Status == COLLECTOR_COLLECTING) {
@@ -398,28 +391,28 @@ void mtsCollectorBase::SetOutputStreamFill(const char fillCharacter)
 void mtsCollectorBase::Init(void)
 {
     Status = COLLECTOR_STOP;
-    ClearTaskMap();
+    ClearComponentMap();
 }
 
 
 void mtsCollectorBase::Cleanup(void)
 {
-    ClearTaskMap();
+    ClearComponentMap();
 }
 
 
 //-------------------------------------------------------
 // Miscellaneous Functions
 //-------------------------------------------------------
-void mtsCollectorBase::ClearTaskMap(void)
+void mtsCollectorBase::ClearComponentMap(void)
 {
-    if (!TaskMap.empty()) {
-        TaskMapType::iterator itr = TaskMap.begin();
+    if (!ComponentMap.empty()) {
+        ComponentMapType::iterator itr = ComponentMap.begin();
         SignalMapType::iterator _itr;
-        for (; itr != TaskMap.end(); ++itr) {
+        for (; itr != ComponentMap.end(); ++itr) {
             itr->second->clear();
             delete itr->second;
         }
-        TaskMap.clear();
+        ComponentMap.clear();
     }
 }

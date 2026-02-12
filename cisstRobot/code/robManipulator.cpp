@@ -3,9 +3,9 @@
 
 /*
   Author(s): Simon Leonard
-  Created on: Nov 11 2009
+  Created on: 2009-11-11
 
-  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -146,9 +146,8 @@ robManipulator::robManipulator( const std::string& linkfile,
   this->Rtw0 = Rtw0;
 
   if( LoadRobot( linkfile ) == robManipulator::EFAILURE ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                      << " Failed to load the robot configuration."
-                      << std::endl;
+    mLastError = "robManipulator::robManipulator: failed to load the robot configuration";
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
   }
 }
 
@@ -159,9 +158,8 @@ robManipulator::robManipulator( const std::vector<robKinematics *> linkParms,
   this->Rtw0 = Rtw0;
 
   if( LoadRobot( linkParms ) == robManipulator::EFAILURE ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                      << " Failed to load the robot configuration."
-                      << std::endl;
+    mLastError = "robManipulator::robManipulator: failed to load the robot configuration";
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
   }
 }
 
@@ -172,26 +170,77 @@ robManipulator::~robManipulator()
 }
 
 void robManipulator::Attach( robManipulator* tool )
-{ tools.push_back( tool ); }
+{
+  tools.push_back( tool );
+}
 
-robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
+void robManipulator::DeleteTools()
+{
+  const ToolsType::iterator end = tools.end();
+  ToolsType::iterator tool;
+  for (tool = tools.begin(); tool != end; ++tool) {
+    delete *tool;
+    *tool = NULL;
+  }
+  tools.clear();
+}
 
-  if( filename.empty() ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                      << " No configuration file!."
-                      << std::endl;
+robManipulator::Errno robManipulator::LoadRobot(const std::string & filename)
+{
+  if (filename.empty()) {
+    mLastError = "robManipulator::LoadRobot: no configuration file";
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
     return robManipulator::EFAILURE;
   }
 
   std::ifstream ifs;
-  ifs.open( filename.data() );
-  if(!ifs){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                      << " Couldn't open configuration file " << filename
-                      << std::endl;
+  ifs.open(filename.data());
+  if (!ifs) {
+    mLastError = "robManipulator::LoadRobot: couldn't open configuration file "
+      + filename;
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
     return robManipulator::EFAILURE;
   }
 
+  // find extension, search for json
+  size_t dot = filename.find_last_of(".");
+  std::string extension = "";
+  if (dot != std::string::npos) {
+        extension = filename.substr(dot, filename.size() - dot);
+  }
+
+  if (extension != ".json") {
+    return LoadRobot(ifs);
+  }
+
+  // otherwise json
+#if CISST_HAS_JSON
+  Json::Reader jsonReader;
+  Json::Value jsonConfig;
+  if (!jsonReader.parse(ifs, jsonConfig)) {
+    mLastError = "robManipulator::LoadRobot: syntax error while parsing json file "
+      + filename + "\n" + jsonReader.getFormattedErrorMessages();
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
+    return robManipulator::EFAILURE;
+  } else {
+    // dVRK files have a DH field
+    Json::Value jsonDH = jsonConfig["DH"];
+    if (jsonDH.isNull()) {
+      return LoadRobot(jsonConfig);
+    } else {
+      return LoadRobot(jsonDH);
+    }
+  }
+#else
+  mLastError = "robManipulator::LoadRobot: cisst was compiled without JSON support, can't load "
+    + filename;
+  CMN_LOG_RUN_ERROR << mLastError << std::endl;
+  return robManipulator::EFAILURE;
+#endif
+}
+
+robManipulator::Errno robManipulator::LoadRobot(std::istream & ifs)
+{
   size_t N;       // the number of links
   {
     std::string line;
@@ -215,10 +264,10 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
     robKinematics* kinematics = NULL;
     try{ kinematics = robKinematics::Instantiate( convention ); }
     catch( std::bad_alloc& ){
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                        << "Failed to allocate a kinematics of type: "
-                        << convention
-                        << std::endl;
+      mLastError = "robManipulator::LoadRobot: failed to allocate a kinematics of type: "
+        + convention;
+      CMN_LOG_RUN_ERROR << mLastError << std::endl;
+      return robManipulator::EFAILURE;
     }
 
     CMN_ASSERT( kinematics != NULL );
@@ -238,41 +287,67 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
 robManipulator::Errno robManipulator::LoadRobot(const Json::Value &config)
 {
     if (config.isNull()) {
-        CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): invalid configuration" << std::endl;
+        mLastError = "robManipulator::LoadRobot(json): invalid configuration";
+        CMN_LOG_INIT_ERROR << mLastError << std::endl;
         return robManipulator::EFAILURE;
     }
 
-    const Json::Value jsonLinks = config["links"];
+    Json::Value jsonLinks = config["links"];
     if (jsonLinks.isNull()) {
-        CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): need array \"links\"" << std::endl;
-        return robManipulator::EFAILURE;
+        jsonLinks = config["joints"];
+        if (jsonLinks.isNull()) {
+            mLastError = "robManipulator::LoadRobot(json): need array \"links\" or \"joints\"";
+            CMN_LOG_INIT_ERROR << mLastError << std::endl;
+            return robManipulator::EFAILURE;
+        }
     }
 
     const unsigned int numLinks = jsonLinks.size();
     if (numLinks == 0) {
-        CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): empty array of links" << std::endl;
+        mLastError = "robManipulator::LoadRobot(json): empty array of links";
+        CMN_LOG_INIT_ERROR << mLastError << std::endl;
         return robManipulator::EFAILURE;
+    }
+
+    // Try to get convention for the whole chain first
+    std::string convention;
+    if (!(config["convention"].isNull())) {
+        convention = config["convention"].asString();
     }
 
     // load each link
     for (unsigned int i = 0; i < numLinks; i++) {
         const Json::Value jlink = jsonLinks[i];
         if (jlink.isNull()) {
-            CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): can't find link " << i + 1 << std::endl;
+            // could use c++11 std::to_string
+            std::stringstream ss;
+            ss << (i + 1);
+            mLastError = "robManipulator::LoadRobot(json): can't find link " + ss.str();
+            CMN_LOG_INIT_ERROR << mLastError << std::endl;
             return robManipulator::EFAILURE;
         }
 
-        // Find the type of kinematics convention
-        std::string convention;
-        convention = jlink.get("convention", "standard").asString();
+        // Convention is defined per link
+        if (convention == "") {
+            if (jlink["convention"].isNull()) {
+                // could use c++11 std::to_string
+                std::stringstream ss;
+                ss << (i + 1);
+                mLastError = "robManipulator::LoadRobot(json): can't find convention for link " + ss.str();
+                CMN_LOG_INIT_ERROR << mLastError << std::endl;
+                return robManipulator::EFAILURE;
+            }
+            convention = jlink["convention"].asString();
+        }
         robKinematics * kinematics = NULL;
         try {
-            kinematics = robKinematics::Instantiate( convention );
+            kinematics = robKinematics::Instantiate(convention);
         }
         catch( std::bad_alloc& ){
-            CMN_LOG_INIT_ERROR << "robManipulator::LoadRobot(json): failed to allocate a kinematics of type: "
-                               << convention
-                               << std::endl;
+            mLastError = "robManipulator::LoadRobot(json): failed to allocate a kinematics of type: "
+              + convention;
+            CMN_LOG_RUN_ERROR << mLastError << std::endl;
+            return robManipulator::EFAILURE;
         }
 
         CMN_ASSERT( kinematics != NULL );
@@ -311,39 +386,72 @@ robManipulator::Errno robManipulator::LoadRobot(std::vector<robKinematics *> Kin
 //         KINEMATICS
 //////////////////////////////////////
 
-bool
+void
 robManipulator::SetJointLimits(const vctDynamicVector<double> & lowerLimits,
                                const vctDynamicVector<double> & upperLimits)
 {
   if ((lowerLimits.size() != links.size())
       || (upperLimits.size() != links.size())) {
-    return false;
+    cmnThrow(std::range_error("robManipulator::SetJointLimits: size of inputs doesn't match kinematic chain length"));
   }
   for (size_t i = 0; i < links.size(); i++ ) {
     links[i].GetKinematics()->PositionMin() = lowerLimits.at(i);
     links[i].GetKinematics()->PositionMax() = upperLimits.at(i);
   }
-  return true;
 }
 
-bool
+void
 robManipulator::GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
-                               vctDynamicVectorRef<double> upperLimits)
+                               vctDynamicVectorRef<double> upperLimits) const
 {
   if ((lowerLimits.size() != links.size())
       || (upperLimits.size() != links.size())) {
-    return false;
+    cmnThrow(std::range_error("robManipulator::GetJointLimits: size of placeholders doesn't match kinematic chain length"));
   }
   for (size_t i = 0; i < links.size(); i++ ) {
     lowerLimits.at(i) = links[i].GetKinematics()->PositionMin();
     upperLimits.at(i) = links[i].GetKinematics()->PositionMax();
   }
-  return true;
+}
+
+void
+robManipulator::GetFTMaximums(vctDynamicVectorRef<double> ftMaximums) const
+{
+  if (ftMaximums.size() != links.size()) {
+    cmnThrow(std::range_error("robManipulator::GetFTMaximums: size of placeholder doesn't match kinematic chain length"));
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    ftMaximums.at(i) = links[i].GetKinematics()->ForceTorqueMax();
+  }
+}
+
+void
+robManipulator::GetJointNames(std::vector<std::string> & names) const
+{
+  if (names.size() != links.size()) {
+    cmnThrow(std::range_error("robManipulator::GetJointNames: size of placeholder doesn't match kinematic chain length"));
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    names.at(i) = links[i].GetKinematics()->Name();
+  }
+}
+
+void
+robManipulator::GetJointTypes(std::vector<cmnJointType> & types) const
+{
+  if (types.size() != links.size()) {
+    cmnThrow(std::range_error("robManipulator::GetJoinTypes: size of placeholder doesn't match kinematic chain length"));
+  }
+  for (size_t i = 0; i < links.size(); i++ ) {
+    types.at(i) = links[i].GetKinematics()->GetType();
+
+  }
 }
 
 vctFrame4x4<double>
 robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
-                                   int N ) const {
+                                   int N ) const
+{
 
   if( N == 0 ) return Rtw0;
 
@@ -351,11 +459,10 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
   if( N < 0 ) N = links.size();
 
   if( ((int)q.size()) < N ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                      << ": Expected " << N << " joint positions but "
-                      << "size(q) = " << q.size() << "."
-                      << std::endl;
-    return Rtw0;
+    stringstream ss;
+    ss << "robManipulator::ForwardKinematics: expected up to " << N
+       << " joint positions but received " << q.size();
+    cmnThrow(std::range_error(ss.str()));
   }
 
   // no link? then return the transformation of the base
@@ -375,7 +482,7 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
   for(int i=1; i<N; i++)
     Rtwi = Rtwi * links[i].ForwardKinematics( q[i] );
 
-  if( tools.size() == 1 ){
+  if( (tools.size() == 1) && (N == (int)links.size()) ){
     if( tools[0] != NULL )
       { return Rtwi * tools[0]->ForwardKinematics( q, 0 ); }
   }
@@ -402,17 +509,18 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
                                    double LAMBDA ){
 
   if( q.size() != links.size() ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                      << ": Expected " << links.size() << " joints values. "
-                      << " Got " << q.size()
-                      << std::endl;
+    stringstream ss;
+    ss << "robManipulator::InverseKinematics: expected "
+       << links.size() << " joints values but received "
+       << q.size();
+    mLastError = ss.str();
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
     return robManipulator::EFAILURE;
   }
 
   if( links.size() == 0 ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                      << ": The manipulator has no links."
-                      << std::endl;
+    mLastError = "robManipulator::InverseKinematics: the manipulator has no links";
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
     return robManipulator::EFAILURE;
   }
 
@@ -525,15 +633,22 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   delete[] B;
   delete[] dq;
 
-  if( i==Niterations ) return robManipulator::EFAILURE;
-  else return robManipulator::ESUCCESS;
+  if( i==Niterations ) {
+    stringstream ss;
+    ss << "robManipulator::InverseKinematics: failed to converge in "
+       << i << " iterations";
+    mLastError = ss.str();
+    return robManipulator::EFAILURE;
+  }
+
+  return robManipulator::ESUCCESS;
 }
 
 void robManipulator::NormalizeAngles( vctDynamicVector<double> &q )
 {
   // normalize joint values
   for (size_t j=0; j<links.size(); j++) {
-    if (links[j].GetType() == robJoint::HINGE) {
+    if (links[j].GetType() == cmnJointType::CMN_JOINT_REVOLUTE) {
       q[j] = fmod((double)q[j], (double)2.0*cmnPI);
       if (cmnPI < q[j]) {
         q[j] = q[j] - 2.0*cmnPI;
@@ -682,7 +797,7 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
       U = links[j].ForwardKinematics( q[j] ) * U;
     }
 
-    if( links[j].GetType() == robJoint::HINGE ){         // Revolute joint
+    if( links[j].GetType() == cmnJointType::CMN_JOINT_REVOLUTE ){         // Revolute joint
       // Jn is column major
       Jn[j][0] = U[0][3]*U[1][0] - U[1][3]*U[0][0];
       Jn[j][1] = U[0][3]*U[1][1] - U[1][3]*U[0][1];
@@ -694,7 +809,7 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
     }
 
-    if( links[j].GetType() == robJoint::SLIDER ){   // Prismatic joint
+    if( links[j].GetType() == cmnJointType::CMN_JOINT_PRISMATIC ){   // Prismatic joint
       // Jn is column major
       Jn[j][0] = U[2][0]; // nz
       Jn[j][1] = U[2][1]; // oz
@@ -806,7 +921,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
                      const vctDynamicVector<double>& qd,
                      const vctDynamicVector<double>& qdd,
                      const vctFixedSizeVector<double,6>& fext,
-                     double g ) const {
+                     const double g) const {
 
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
@@ -829,9 +944,9 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
   // coordinate frame
-  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1],Rtw0[0][2],
-                                Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
-                                Rtw0[2][0], Rtw0[2][1],Rtw0[2][2] );
+  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1], Rtw0[0][2],
+                                Rtw0[1][0], Rtw0[1][1], Rtw0[1][2],
+                                Rtw0[2][0], Rtw0[2][1], Rtw0[2][2] );
   vd = R.Transpose() * z0 * g;
 
   // Forward recursion
@@ -843,12 +958,14 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     vctMatrixRotation3<double>      A; // iA(i-1)
     vctFixedSizeVector<double,3>   ps; // distal link
 
-    m  = links[i].Mass();
-    s  = links[i].CenterOfMass();
-    I  = links[i].MomentOfInertia();
+    const robMass & massData = links[i].MassData();
+    m  = massData.Mass();
+    s  = massData.CenterOfMass();
+    I  = massData.MomentOfInertia();
 
     A  = links[i].Orientation( q[i] ).InverseSelf();
-    ps = links[i].PStar();
+    ps = links[i].ForwardKinematics( q[i] ).Translation();
+
 
     wd = A*( wd + (z0*qdd[i]) + (w%(z0*qd[i])) ); // angular acceleration wrt i
     w  = A*( w  + (z0*qd[i]) );                   // angular velocity
@@ -867,8 +984,8 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // Backward recursion
   for(int i=(int)links.size()-1; 0<=i; i--){
     vctMatrixRotation3<double>   A;
-    vctFixedSizeVector<double,3> ps = links[i].PStar();
-    vctFixedSizeVector<double,3> s  = links[i].CenterOfMass();
+    vctFixedSizeVector<double,3> ps = links[i].ForwardKinematics( q[i] ).Translation();
+    vctFixedSizeVector<double,3> s  = links[i].MassData().CenterOfMass();
 
     if(i != (int)links.size()-1)              //
       A = links[i+1].Orientation( q[i+1] );    //
@@ -877,9 +994,9 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     n = A*n + (ps%f) + (s%F[i]) + N[i];        // moment externed on i by i-1
     A = links[i].Orientation(q[i]).InverseSelf(); //
 
-    if (links[i].GetType() == robJoint::HINGE )
+    if (links[i].GetType() == cmnJointType::CMN_JOINT_REVOLUTE )
       tau[i] = n*(A*z0);                       //
-    if( links[i].GetType() == robJoint::SLIDER )
+    if( links[i].GetType() == cmnJointType::CMN_JOINT_PRISMATIC )
       tau[i] = f*(A*z0);                       //
 
   }
@@ -888,22 +1005,164 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
 }
 
 vctDynamicVector<double>
-robManipulator::CCG( const vctDynamicVector<double>& q,
-                     const vctDynamicVector<double>& qd ) const {
+robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
+                         const vctDynamicVector<double>& qd,
+                         const vctDynamicVector<double>& qdd,
+                         const vctFixedSizeVector<double,6>& fext,
+                         double g) const {
+  // The axis pointing "up"
+  vct3 vg(0.0, 0.0, g);
 
-  if( q.size() != qd.size() ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                      << ": Size of q and qd do not match."
-                      << std::endl;
-    return vctDynamicVector<double>();
+  return RNE_MDH(q, qd, qdd, fext, vg);
+  // The axis po
+
+}
+
+
+vctDynamicVector<double>
+robManipulator::RNE_MDH( const vctDynamicVector<double>& q,
+                         const vctDynamicVector<double>& qd,
+                         const vctDynamicVector<double>& qdd,
+                         const vctFixedSizeVector<double,6>& fext,
+                         const vct3 & g) const {
+  vctFixedSizeVector<double,3> w    (0.0); // angular velocity
+  vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
+  vctFixedSizeVector<double,3> v    (0.0); // linear velocity
+  vctFixedSizeVector<double,3> vd   (g); // linear acceleration
+  vctFixedSizeVector<double,3> vdhat(0.0);
+
+  const vct3 z0(0.0, 0.0, 1.0);
+
+  //total moment exerted on each link
+  std::vector<vctFixedSizeVector<double,3> > N(links.size(),
+                                               vctFixedSizeVector<double,3>(0));
+  //total force exerted on each link
+  std::vector<vctFixedSizeVector<double,3> > F(links.size(),
+                                               vctFixedSizeVector<double,3>(0));
+  // torques
+  vctDynamicVector<double> tau(links.size(), 0.0);
+
+  // acceleration of link 0
+  // extract the rotation of the base and map the vector [0 0 1] in the robot
+  // coordinate frame
+  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1], Rtw0[0][2],
+                                Rtw0[1][0], Rtw0[1][1], Rtw0[1][2],
+                                Rtw0[2][0], Rtw0[2][1], Rtw0[2][2] );
+
+  // Forward recursion
+  for(size_t i=0; i<links.size(); i++){
+
+    double                          m; // mass
+    vctFixedSizeVector<double,3>    s; // center of mass
+    vctFixedSizeMatrix<double,3,3>  I; // moment of inertia
+    vctMatrixRotation3<double>      A; // iA(i-1)
+    vctFixedSizeVector<double,3>   ps; // distal link
+
+    const robMass & massData = links[i].MassData();
+    m  = massData.Mass();
+    s  = massData.CenterOfMass();
+    I  = massData.MomentOfInertiaAtCOM();
+
+    if( i==0 ){
+      A  = R*links[i].Orientation( q[i] );
+      A = A.InverseSelf();
+    }
+    else
+      A  = links[i].Orientation( q[i] ).InverseSelf();
+
+    ps = links[i].ForwardKinematics( q[i] ).Translation();
+
+    if (links[i].GetType() == cmnJointType::CMN_JOINT_REVOLUTE ){
+      w  = A*w  + (z0*qd[i]) ;                      // angular velocity
+      wd = A*wd + (z0*qdd[i]) + ((A*w)%(z0*qd[i])); // angular acceleration wrt i
+      vd = A*((wd%ps) + (w%(w%ps)) + vd);           // linear acceleration
+    }
+    if( links[i].GetType() == cmnJointType::CMN_JOINT_PRISMATIC ){
+      vd = A*( (wd%ps) + (w%(w%ps)) + vd ) + 2.0*((A*w)%(z0*qd(i))) + z0*qdd(i);
+      w = A*w;
+      wd = A*wd;
+    }
+    vdhat = (wd%s) + (w%(w%s)) + vd;              //
+    F[i] = m*vdhat;                               // total force
+    N[i] = (I*wd) + (w%(I*w));                    // total moment
   }
 
+  // external force applied on the TCP
+  vctFixedSizeVector<double,3> f( fext[0], fext[1], fext[2] );
+  // external moment applied on the TCP
+  vctFixedSizeVector<double,3> n( fext[3], fext[4], fext[5] );
 
+  // Backward recursion
+  for(int i=(int)links.size()-1; 0<=i; i--){
+    vctMatrixRotation3<double>   A;
+    vctFixedSizeVector<double,3> ps(0.0, 0.0, 0.0);
+    vctFixedSizeVector<double,3> s  = links[i].MassData().CenterOfMass();
+
+    if(i != (int)links.size()-1){              //
+      A = links[i+1].Orientation( q[i+1] );    //
+      ps = links[i+1].ForwardKinematics( q[i+1] ).Translation();
+    }
+
+    n = A*n + (s%F[i]) + (ps%(A*f)) + N[i];    // moment externed on i by i-1
+    f = A*f + F[i];                            // force exterted on i by i-1
+
+    if (links[i].GetType() == cmnJointType::CMN_JOINT_REVOLUTE )
+      tau[i] = n*(z0);                       //
+    if( links[i].GetType() == cmnJointType::CMN_JOINT_PRISMATIC )
+      tau[i] = f*(z0);                       //
+
+  }
+
+  return tau;
+}
+
+
+vctDynamicVector<double>
+robManipulator::CCG( const vctDynamicVector<double>& q,
+                     const vctDynamicVector<double>& qd,
+                     double g ) const
+{
+  if( q.size() != qd.size() ){
+    cmnThrow(std::range_error("robManipulator::CCG: size of q and qd don't match"));
+  }
 
   return RNE( q,           // call Newton-Euler with only the joints positions
-          qd,          // and the joints velocities
-              vctDynamicVector<double>( q.size(), 0.0 ),
-              vctFixedSizeVector<double,6>(0.0) );
+              qd,          // and the joints velocities
+              vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
+              vctFixedSizeVector<double,6>(0.0), // no external forces
+              g );
+}
+
+vctDynamicVector<double>
+robManipulator::CCG_MDH( const vctDynamicVector<double>& q,
+                         const vctDynamicVector<double>& qd,
+                         double g ) const
+{
+  if( q.size() != qd.size() ){
+    cmnThrow(std::range_error("robManipulator::CCG_MDH: size of q and qd don't match"));
+  }
+
+  return RNE_MDH( q,           // call Newton-Euler with only the joints positions
+                  qd,          // and the joints velocities
+                  vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
+                  vctFixedSizeVector<double,6>(0.0), // no external forces
+                  g );
+}
+
+vctDynamicVector<double>
+robManipulator::CCG_MDH( const vctDynamicVector<double>& q,
+                         const vctDynamicVector<double>& qd,
+                         const vct3 & g ) const
+{
+  if( q.size() != qd.size() ){
+    cmnThrow(std::range_error("robManipulator::CCG_MDH: size of q and qd don't match"));
+  }
+
+  return RNE_MDH( q,           // call Newton-Euler with only the joints positions
+                  qd,          // and the joints velocities
+                  vctDynamicVector<double>( q.size(), 0.0 ), // assumes zero velocity
+                  vctFixedSizeVector<double,6>(0.0), // no external forces
+                  g );
 }
 
 vctFixedSizeVector<double,6>
@@ -937,11 +1196,11 @@ vctDynamicMatrix<double>
 robManipulator::JSinertia( const vctDynamicVector<double>& q ) const {
 
   if( q.size() != links.size() ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                      << ": Expected " << links.size() << " values. "
-                      << "Got " << q.size()
-                      << std::endl;
-    return vctDynamicMatrix<double>();
+    stringstream ss;
+    ss << "robManipulator::JSinertia: expected "
+       << links.size() << " joints values but received "
+       << q.size();
+    cmnThrow(std::range_error(ss.str()));
   }
 
   vctDynamicMatrix<double> A( links.size(), links.size(), 0.0 );
@@ -965,10 +1224,11 @@ void robManipulator::JSinertia( double **A,
                                 const vctDynamicVector<double>& q ) const {
 
   if( q.size() != links.size() ){
-    std::cerr << "robManipulator::JSinertia: Expected " << links.size()
-              << " values. Got " << q.size()
-              << std::endl;
-    return;
+    stringstream ss;
+    ss << "robManipulator::JSinertia: expected "
+       << links.size() << " joints values but received "
+       << q.size();
+    cmnThrow(std::range_error(ss.str()));
   }
 
   for(size_t c=0; c<links.size(); c++){
@@ -1396,7 +1656,7 @@ robManipulator::JacobianKinematicsIdentification
         robHayati* h = dynamic_cast<robHayati*>( ki );
 
         switch( h->GetType() ){
-        case robJoint::HINGE:
+        case cmnJointType::CMN_JOINT_REVOLUTE:
           {
 
             {
@@ -1442,7 +1702,7 @@ robManipulator::JacobianKinematicsIdentification
           }
           break;
 
-        case robJoint::SLIDER:
+        case cmnJointType::CMN_JOINT_PRISMATIC:
           {
 
             {
@@ -1508,11 +1768,71 @@ void robManipulator::PrintKinematics( std::ostream& os ) const {
 }
 
 
+robManipulator::Errno robManipulator::Truncate(const size_t linksToKeep)
+{
+  // not enough links
+  if (linksToKeep > links.size()) {
+    stringstream ss;
+    ss << "robManipulator::Truncate: can't truncate to "
+       << linksToKeep << " since the manipulator has only "
+       << links.size() << " links";
+    mLastError = ss.str();
+    CMN_LOG_RUN_ERROR << mLastError << std::endl;
+    return robManipulator::EFAILURE;
+  }
 
+  // no change
+  if (linksToKeep == links.size()) {
+    return robManipulator::ESUCCESS;
+  }
 
+  // remove links
+  links.resize(linksToKeep);
 
+  // free existing jacobians
+  if( Jn != NULL ){ free_rmatrix(Jn, 0, 0); }
+  if( Js != NULL ){ free_rmatrix(Js, 0, 0); }
 
+  // allocate new memory for jacobians
+  if (linksToKeep != 0) {
+    Js = rmatrix(0, links.size()-1, 0, 5);
+    Jn = rmatrix(0, links.size()-1, 0, 5);
+  } else {
+    Js = NULL;
+    Jn = NULL;
+  }
 
-/*
+  return robManipulator::ESUCCESS;
+}
 
-*/
+bool robManipulator::ClampJointValueAndUpdateError(const size_t link,
+                                                   double & value,
+                                                   const double & tolerance)
+{
+  const double qMax = links[link].GetKinematics()->PositionMax();
+  const double qMin = links[link].GetKinematics()->PositionMin();
+  if (value > qMax) {
+    // only set error if not within tolerance
+    if (value > (qMax + tolerance)) {
+      value = qMax;
+      stringstream ss;
+      ss << link;
+      mLastError = "robManipulator: position clamped to upper joint limit " + ss.str();
+      return true;
+    }
+    // clamp anyway
+    value = qMax;
+    return false;
+  } else if (value < qMin) {
+    if (value < (qMin - tolerance)) {
+      value = qMin;
+      stringstream ss;
+      ss << link;
+      mLastError = "robManipulator: position clamped to lower joint limit " + ss.str();
+      return true;
+    }
+    value = qMin;
+    return false;
+  }
+  return false;
+}

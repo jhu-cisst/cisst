@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2016 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -54,23 +54,8 @@ else ()
   option (CISST_HAS_QT5 "Is Qt 5 available.  If not, Qt widgets and some examples won't be compiled" OFF)
 endif ()
 
-# try to find Qt 4 as well but offer it only if Qt5 has not been found
-set (CISST_QT4_COMPONENTS QtCore QtGui QtOpenGL QtXML QtXMLPatterns)
-find_package (Qt4 COMPONENTS ${CISST_QT4_COMPONENTS})
-if (QT_FOUND AND NOT CISST_HAS_QT5)
-  option (CISST_HAS_QT4 "Is Qt 4 available.  If not, Qt widgets and some examples won't be compiled" ON)
-  mark_as_advanced (CISST_HAS_QT4)
-else (QT_FOUND AND NOT CISST_HAS_QT5)
-  option (CISST_HAS_QT4 "Is Qt 4 available.  If not, Qt widgets and some examples won't be compiled" OFF)
-endif (QT_FOUND AND NOT CISST_HAS_QT5)
-
-# check that we don't have both Qt 4 and 5 set
-if (CISST_HAS_QT4 AND CISST_HAS_QT5)
-  message (FATAL_ERROR "You can't have both CISST_HAS_QT4 and CISST_HAS_QT5 set, pick one only")
-endif (CISST_HAS_QT4 AND CISST_HAS_QT5)
-
 # set overall Qt flag
-if (CISST_HAS_QT4 OR CISST_HAS_QT5)
+if (CISST_HAS_QT5)
   set (CISST_HAS_QT ON PARENT_SCOPE)
 else ()
   set (CISST_HAS_QT OFF PARENT_SCOPE)
@@ -87,23 +72,8 @@ else (CISST_HAS_QT5)
   cisst_unset_all_package_settings (cisstQt Qt5)
 endif (CISST_HAS_QT5)
 
-
-# if detected or if user requests it
-if (CISST_HAS_QT4)
-  # Qt is now required so we can include the QT_USE_FILE
-  find_package (Qt4 REQUIRED ${CISST_QT4_COMPONENTS})
-  include (${QT_USE_FILE})
-  set (CISST_QT4_PACKAGE "Qt4")
-  cisst_set_package_settings (cisstQt Qt4 PACKAGES           CISST_QT4_PACKAGE)
-  cisst_set_package_settings (cisstQt Qt4 PACKAGE_COMPONENTS CISST_QT4_COMPONENTS)
-  cisst_set_package_settings (cisstQt Qt4 CMAKE_FILES        QT_USE_FILE)
-  cisst_set_package_settings (cisstQt Qt4 LIBRARIES          QT_LIBRARIES)
-else (CISST_HAS_QT4)
-  cisst_unset_all_package_settings (cisstQt Qt4)
-endif (CISST_HAS_QT4)
-
 # for both version of Qt
-if (CISST_HAS_QT4 OR CISST_HAS_QT5)
+if (CISST_HAS_QT5)
   # OpenGL
   set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
   mark_as_advanced (CISST_HAS_OPENGL)
@@ -224,6 +194,7 @@ endif (CISST_HAS_FLTK)
 # Wrapping with swig for Python
 option (CISST_HAS_SWIG_PYTHON "Build the Python wrappers for cisst with Swig." OFF)
 mark_as_advanced (CISST_HAS_SWIG_PYTHON)
+
 if (CISST_HAS_SWIG_PYTHON)
   # Find Swig
   set (CISST_SWIG_REQUIRED_VERSION 1.3.36)
@@ -237,36 +208,36 @@ if (CISST_HAS_SWIG_PYTHON)
     include (${SWIG_USE_FILE})
     # save SWIG settings
     set (CISST_SWIG_PACKAGE "SWIG")
-    cisst_set_package_settings (cisstPython SWIG PACKAGES    CISST_SWIG_PACKAGE)
-    cisst_set_package_settings (cisstPython SWIG CMAKE_FILES SWIG_USE_FILE)
+    cisst_set_package_settings (cisstSWIG SWIG PACKAGES    CISST_SWIG_PACKAGE)
+    cisst_set_package_settings (cisstSWIG SWIG CMAKE_FILES SWIG_USE_FILE)
     # propagate the fact that SWIG was found
     set (CISST_SWIG_FOUND 1 PARENT_SCOPE)
   endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+else (CISST_HAS_SWIG_PYTHON)
+  cisst_unset_all_package_settings (cisstSWIG SWIG)
+endif (CISST_HAS_SWIG_PYTHON)
 
+if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   # Force to use exceptions
   set (CISST_CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
   set (CISST_CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
 
-  # Find Python
-  find_package (PythonLibs REQUIRED)
-  # Some older CMake don't define the debug library
-  if (NOT PYTHON_DEBUG_LIBRARIES)
-    set (PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
-  endif (NOT PYTHON_DEBUG_LIBRARIES)
-  find_package (PythonInterp REQUIRED)
-  cisst_set_package_settings (cisstPython Python INCLUDE_DIRECTORIES PYTHON_INCLUDE_PATH)
-  set (PYTHON_ALL_LIBRARIES "debug;${PYTHON_DEBUG_LIBRARIES};optimized;${PYTHON_LIBRARIES}")
-  cisst_set_package_settings (cisstPython Python LIBRARIES PYTHON_ALL_LIBRARIES)
-  # We also need numpy for cisstVector, cisstMultiTask and cisstNumerical
-  find_package (Numpy REQUIRED)
-  if (NUMPY_FOUND)
-    cisst_set_package_settings (cisstPython NumPy INCLUDE_DIRECTORIES PYTHON_NUMPY_INCLUDE_DIR)
-    mark_as_advanced (PYTHON_NUMPY_INCLUDE_DIR)
-  else (NUMPY_FOUND)
-    cisst_unset_all_package_settings (cisstPython NumPy)
-  endif (NUMPY_FOUND)
+  # Find Python and NumPy
+  set (CISST_PYTHON_VERSION_REQUIRED "" CACHE STRING "Required Python version (if not empty)")
+  if (CISST_PYTHON_VERSION_REQUIRED)
+    message (STATUS "Looking for Python ${CISST_PYTHON_VERSION_REQUIRED}")
+    find_package (Python ${CISST_PYTHON_VERSION_REQUIRED} EXACT REQUIRED COMPONENTS Interpreter Development NumPy)
+  else ()
+    find_package (Python REQUIRED COMPONENTS Interpreter Development NumPy)
+  endif ()
 
-  # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and PYTHON_EXECUTABLE.
+  set (Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
+  set (PYTHON_ALL_INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
+  cisst_set_package_settings (cisstPython Python INCLUDE_DIRECTORIES PYTHON_ALL_INCLUDE_DIRS)
+  set (PYTHON_ALL_LIBRARIES ${Python_LIBRARIES})
+  cisst_set_package_settings (cisstPython Python LIBRARIES PYTHON_ALL_LIBRARIES)
+
+  # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and Python_EXECUTABLE.
   # (Currently, this is only created if the correct version of SWIG was found -- should that check be removed?
   #  Also, note that "if (CISST_SWIG_FOUND)" does not work at this point in the CMakeLists.txt.)
   if (NOT ${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
@@ -279,12 +250,11 @@ if (CISST_HAS_SWIG_PYTHON)
              COMPONENT cisstCommon)
   endif (NOT ${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
 
-else (CISST_HAS_SWIG_PYTHON)
+else (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   # propagate the fact that SWIG was not found
   set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
   cisst_unset_all_package_settings (cisstPython Python)
-  cisst_unset_all_package_settings (cisstPython NumPy)
-endif (CISST_HAS_SWIG_PYTHON)
+endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
 
 
 # Support for cisstCommonXML, just to see what is available
@@ -303,10 +273,10 @@ option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some
 
 if (CISST_HAS_JSON)
 
-  if (WIN32)
+  if (WIN32 OR APPLE)
     # On Windows, no need to use PkgConfig
     set(JSONCPP_FOUND OFF)
-  else (WIN32)
+  else (WIN32 OR APPLE)
     # try to find an installed version
     find_package (PkgConfig REQUIRED)
     pkg_check_modules(JSONCPP jsoncpp)
@@ -318,7 +288,7 @@ if (CISST_HAS_JSON)
       set (JSON_FOUND ON PARENT_SCOPE)
       set (JSON_USE_SYSTEM_VERSION ON PARENT_SCOPE)
     endif (JSONCPP_FOUND)
-  endif (WIN32)
+  endif (WIN32 OR APPLE)
 
   if (NOT JSONCPP_FOUND)
 

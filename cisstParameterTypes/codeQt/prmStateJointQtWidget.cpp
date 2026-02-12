@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2017-03-22
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,6 +16,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnJointType.h>
 #include <cisstParameterTypes/prmStateJointQtWidget.h>
 
 #include <QVBoxLayout>
@@ -90,12 +91,13 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
     // -- position
     if (newValue.Position().size() != 0) {
         QWPosition->show();
-        if (mNeedsConversion) {
+        if (mNeedsConversion
+            && (mConfiguration.Type().size() == newValue.Position().size())) {
             // update scaling factors if needed based on vector size
             if (newValue.Position().size() != mPositionFactors.size()) {
-                if (newValue.Type().size() != 0) {
-                    mPositionFactors.SetSize(newValue.Type().size());
-                    prmJointTypeToFactor(newValue.Type(), mPrismaticFactor, mRevoluteFactor, mPositionFactors);
+                if (mConfiguration.Type().size() != 0) {
+                    mPositionFactors.SetSize(mConfiguration.Type().size());
+                    cmnJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mPositionFactors);
                 }
             }
             mTempVector.SetSize(newValue.Position().size());
@@ -111,12 +113,13 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
     // -- velocity
     if (newValue.Velocity().size() != 0) {
         QWVelocity->show();
-        if (mNeedsConversion) {
+        if (mNeedsConversion
+            && (mConfiguration.Type().size() == newValue.Velocity().size())) {
             // update scaling factors if needed based on vector size
             if (newValue.Velocity().size() != mVelocityFactors.size()) {
-                if (newValue.Type().size() != 0) {
-                    mVelocityFactors.SetSize(newValue.Type().size());
-                    prmJointTypeToFactor(newValue.Type(), mPrismaticFactor, mRevoluteFactor, mVelocityFactors);
+                if (mConfiguration.Type().size() != 0) {
+                    mVelocityFactors.SetSize(mConfiguration.Type().size());
+                    cmnJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mVelocityFactors);
                 }
             }
             mTempVector.SetSize(newValue.Velocity().size());

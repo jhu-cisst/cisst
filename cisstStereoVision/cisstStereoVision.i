@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
-
   Author(s):	Anton Deguet
   Created on:   2009-01-26
 
-  (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -149,7 +147,7 @@ PyObject* convert_vctDynamicMatrixRef_to_PyObject(vctDynamicMatrixRef<__ValueTyp
     const npy_intp size1 = matrix_in.cols();
     const npy_intp stride0 = size1;
     const npy_intp stride1 = 1;
-    __ValueType * data = reinterpret_cast<__ValueType *>(PyArray_DATA(result));
+    __ValueType * data = reinterpret_cast<__ValueType *>(PyArray_DATA(reinterpret_cast<PyArrayObject *>(result)));
 
     vctDynamicMatrixRef<__ValueType> tempContainer(size0, size1, stride0, stride1, data);
 

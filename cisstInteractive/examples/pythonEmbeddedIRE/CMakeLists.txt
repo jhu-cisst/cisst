@@ -62,8 +62,8 @@ if (cisst_FOUND_AS_REQUIRED)
 
   # Add custom dependencies on dynamically loaded modules
   add_dependencies (pythonEmbeddedIRE
-                    _cisstCommonPython
-                    _SineGeneratorPython)
+                    cisstCommonPython
+                    SineGeneratorPython)
 
   # Copy the Python example to the binary tree
   add_custom_command (TARGET pythonEmbeddedIRE

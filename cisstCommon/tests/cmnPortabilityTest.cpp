@@ -150,6 +150,7 @@ void cmnPortabilityTest::TestCMN_ISFINITE(void) {
 
 void cmnPortabilityTest::TestDataModel(void) {
 #if (CISST_DATA_MODEL == CISST_ILP32)
+    cout << std::endl << "Cisst data model: ILP32" << std::endl;
     CPPUNIT_ASSERT(4 == sizeof(int));
     CPPUNIT_ASSERT(4 == sizeof(unsigned int));
     CPPUNIT_ASSERT(4 == sizeof(long));
@@ -161,6 +162,7 @@ void cmnPortabilityTest::TestDataModel(void) {
     CPPUNIT_ASSERT(4 == sizeof(ptrdiff_t));
 #endif
 #if (CISST_DATA_MODEL == CISST_LP64)
+    cout << std::endl << "Cisst data model: LP64" << std::endl;
     CPPUNIT_ASSERT(4 == sizeof(int));
     CPPUNIT_ASSERT(4 == sizeof(unsigned int));
     CPPUNIT_ASSERT(8 == sizeof(long));
@@ -172,6 +174,7 @@ void cmnPortabilityTest::TestDataModel(void) {
     CPPUNIT_ASSERT(8 == sizeof(ptrdiff_t));
 #endif
 #if (CISST_DATA_MODEL == CISST_LLP64)
+    cout << std::endl << "Cisst data model: LLP64" << std::endl;
     CPPUNIT_ASSERT(4 == sizeof(int));
     CPPUNIT_ASSERT(4 == sizeof(unsigned int));
     CPPUNIT_ASSERT(4 == sizeof(long));

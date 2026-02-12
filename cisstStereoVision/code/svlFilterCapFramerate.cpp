@@ -6,8 +6,7 @@
   Author(s):  Balazs Vagvolgyi, Anton Deguet
   Created on: 2011
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterCapFramerate, svlFilterBase)
 
@@ -93,7 +93,7 @@ int svlFilterCapFramerate::Process(svlProcInfo * procInfo, svlSample * syncInput
     syncOutput = syncInput;
     _OnSingleThread(procInfo)
     {
-        const double currentTime = mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime();
+        const double currentTime = mtsManagerLocal::GetInstance()->GetTimeServer().GetRelativeTime();
         const double timeSinceLastFrame = currentTime - this->TimeForLastFrame;
         this->TimeForLastFrame = currentTime;
         if (timeSinceLastFrame < this->DesiredFrameInterval) {

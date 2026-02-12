@@ -3,9 +3,9 @@
 
 /*
   Author(s): Simon Leonard
-  Created on: Nov 11 2009
+  Created on: 2009-11-11
 
-  (C) Copyright 2008-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,11 +36,14 @@ class CISST_EXPORT robManipulator{
  protected:
 
   //! A vector of tools
-  std::vector<robManipulator*> tools;
+  typedef std::vector<robManipulator*> ToolsType;
+  ToolsType tools;
 
  public:
 
   enum Errno{ ESUCCESS, EFAILURE };
+
+  std::string mLastError;
 
   //! Position and orientation of the first link
   /**
@@ -66,11 +69,17 @@ class CISST_EXPORT robManipulator{
 
 
   //! Load the kinematics and the dynamics of the robot
-  robManipulator::Errno LoadRobot( const std::string& linkfile );
+  /** If the file name ends with .json it will open the file
+      and then call the overloaded method LoadRobot for Json::Value.
+      Otherwise, assumes it's the .rob format and calls the overloaded
+      method LoadRobot for istream. */
+  virtual robManipulator::Errno LoadRobot(const std::string & linkfile);
+
+  virtual robManipulator::Errno LoadRobot(std::istream & ifs);
 
 #if CISST_HAS_JSON
   //! Load the kinematics and the dynamtics of the robot from a JSON file
-  robManipulator::Errno LoadRobot(const Json::Value & config);
+  virtual robManipulator::Errno LoadRobot(const Json::Value & config);
 #endif
 
   robManipulator::Errno LoadRobot(std::vector<robKinematics *> KinParms);
@@ -117,7 +126,21 @@ class CISST_EXPORT robManipulator{
        const vctDynamicVector<double>& qd,
        const vctDynamicVector<double>& qdd,
        const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
-       double g = 9.81 ) const;
+       double g = 9.81) const;
+
+  vctDynamicVector<double>
+  RNE_MDH( const vctDynamicVector<double>& q,
+           const vctDynamicVector<double>& qd,
+           const vctDynamicVector<double>& qdd,
+           const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
+           double g = 9.81) const;
+
+ vctDynamicVector<double>
+  RNE_MDH( const vctDynamicVector<double>& q,
+           const vctDynamicVector<double>& qd,
+           const vctDynamicVector<double>& qdd,
+           const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
+           const vct3 & g) const;
 
   //! Coriolis/centrifugal and gravity
   /**
@@ -129,7 +152,18 @@ class CISST_EXPORT robManipulator{
   */
   vctDynamicVector<double>
   CCG( const vctDynamicVector<double>& q,
-       const vctDynamicVector<double>& qd ) const;
+       const vctDynamicVector<double>& qd,
+       double g = 9.81 ) const;
+
+  vctDynamicVector<double>
+  CCG_MDH( const vctDynamicVector<double>& q,
+           const vctDynamicVector<double>& qd,
+           double g = 9.81 ) const;
+
+   vctDynamicVector<double>
+  CCG_MDH( const vctDynamicVector<double>& q,
+           const vctDynamicVector<double>& qd,
+           const vct3 & g) const;
 
   //! End-effector accelerations
   /**
@@ -192,7 +226,7 @@ public:
      \param Rtw0 The offset transformation of the robot base
   */
   robManipulator( const std::string& robotfilename,
-		  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
+                  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
 
   robManipulator( const std::vector<robKinematics *> linkParms,
                   const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
@@ -201,12 +235,26 @@ public:
   virtual ~robManipulator();
 
   /*! Set joint limits */
-  bool SetJointLimits(const vctDynamicVector<double> & lowerLimits,
-                      const vctDynamicVector<double> & upperLimits);
+  virtual void
+    SetJointLimits(const vctDynamicVector<double> & lowerLimits,
+                   const vctDynamicVector<double> & upperLimits);
 
   /*! Get joint limits */
-  bool GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
-                      vctDynamicVectorRef<double> upperLimits);
+  virtual void
+    GetJointLimits(vctDynamicVectorRef<double> lowerLimits,
+                   vctDynamicVectorRef<double> upperLimits) const;
+
+  /*! Get force/torque max */
+  virtual void
+    GetFTMaximums(vctDynamicVectorRef<double> ftMaximums) const;
+
+  /*! Get joint names */
+  virtual void
+    GetJointNames(std::vector<std::string> & names) const;
+
+  /*! Get joint types */
+  virtual void
+    GetJointTypes(std::vector<cmnJointType> & types) const;
 
   //! Evaluate the forward kinematics
   /**
@@ -283,8 +331,8 @@ public:
   virtual
     vctDynamicVector<double>
     InverseDynamics( const vctDynamicVector<double>& q,
-		     const vctDynamicVector<double>& qd,
-		     const vctFixedSizeVector<double,6>& vdwd ) const;
+                     const vctDynamicVector<double>& qd,
+                     const vctFixedSizeVector<double,6>& vdwd ) const;
 
 
   //! Compute Jacobian for kinematics identification
@@ -301,11 +349,34 @@ public:
                                       double epsilon = 1e-6 ) const;
 
   //! Print the kinematics parameters to the specified output stream
-  void PrintKinematics( std::ostream& os ) const;
+  virtual void PrintKinematics( std::ostream& os ) const;
 
   //! Attach a tool
   virtual void Attach( robManipulator* tool );
 
+  void DeleteTools(void);
+
+  //! Remove all links expect n first ones
+  /**
+      This method also resizes internal data members as needed
+      (jacobian matrices).  Returns EFAILURE if the current
+      manipulator doesn't have at least n links.
+  */
+  virtual
+    robManipulator::Errno
+    Truncate(const size_t linksToKeep);
+
+  /*! Get last error message */
+  inline const std::string & LastError(void) const {
+    return mLastError;
+  }
+
+  /*! Clamp joint value between joint limits and update the last error
+    message if the value provided is outside joint limits.  Return
+    true if clamping was necessary. */
+  bool ClampJointValueAndUpdateError(const size_t jointIndex,
+                                     double & value,
+                                     const double & tolerance = 1e-6);
 };
 
-#endif
+#endif // _robManipulator_h

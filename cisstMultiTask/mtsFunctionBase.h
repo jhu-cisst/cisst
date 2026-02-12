@@ -5,7 +5,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -37,12 +37,9 @@ class mtsEventReceiverWrite;
 
 class CISST_EXPORT mtsFunctionBase {
 
-private:
-    mtsFunctionBase(void); // default constructor should not be used.
-
 protected:
     /*! Default constructor. */
-    mtsFunctionBase(const bool isProxy);
+    mtsFunctionBase();
 
     /*! Destructor. */
     virtual ~mtsFunctionBase();
@@ -53,11 +50,6 @@ protected:
     /*! Event receiver for events containing return value or indication that
       blocking command has finished. */
     mtsEventReceiverWrite *CompletionCommand;
-
-    /*! Indicates if this function is used by a proxy required
-      interface.  If this is the case, blocking commands should not
-      block the proxy component. */
-    bool IsProxy;
 
 public:
     /*! Detach the function from the command used.  Internally, sets the command pointer to 0 */

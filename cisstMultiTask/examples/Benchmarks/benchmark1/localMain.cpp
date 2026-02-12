@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-08-10
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 #include "serverTask.h"
 #include "clientTask.h"
@@ -35,7 +35,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     clientTask * client = new clientTask("Client", confClientPeriod);
 
     // add the tasks to the task manager
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
     taskManager->AddComponent(client);
     taskManager->AddComponent(server);
 

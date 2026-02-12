@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2009-10-22
 
-  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,11 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 #include <cisstMultiTask/mtsCollectorFactory.h>
-#include <cisstMultiTask/mtsCollectorQtFactory.h>
-
-#include <cisstMultiTask/mtsCollectorEvent.h>
-#include <cisstMultiTask/mtsCollectorQtComponent.h>
-#include <cisstMultiTask/mtsCollectorQtWidget.h>
+#include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
 
 #include <cisstMultiTask/mtsQtApplication.h>
 
@@ -62,21 +58,6 @@ int main(int argc, char *argv[])
 
     sineTask * sine;
     sineTaskWithDelay * sineWithDelay;
-    mtsCollectorQtComponent * collectorQtComponent;
-
-    // create an event collector
-    mtsCollectorEvent * eventCollector =
-        new mtsCollectorEvent("EventCollector",
-                              mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
-    componentManager->AddComponent(eventCollector);
-    eventCollector->UseSeparateLogFile("event-collector-log.txt");
-    // add QtComponent to control the event collector
-    collectorQtComponent = new mtsCollectorQtComponent("EventCollectorQComponent");
-    componentManager->AddComponent(collectorQtComponent);
-    // connect to the existing Qt widget
-    collectorQtComponent->ConnectToWidget(mainQt->GetCollectorQtWidget());
-    componentManager->Connect(collectorQtComponent->GetName(), "DataCollection",
-                              eventCollector->GetName(), "Control");
 
     // create multiple sine generators along with their widget and
     // state collectors
@@ -102,9 +83,6 @@ int main(int argc, char *argv[])
             componentManager->Connect(mainQt->GetName(), displayName,
                                       sine->GetName(), "MainInterface");
         }
-
-        // add events to observe
-        eventCollector->AddObservedComponent(sine);
     }
 
     mtsCollectorFactory * collectorFactory = new mtsCollectorFactory("collectors");
@@ -121,14 +99,9 @@ int main(int argc, char *argv[])
     componentManager->AddComponent(collectorFactory);
     collectorFactory->Connect();
 
-    mtsCollectorQtFactory * collectorQtFactory = new mtsCollectorQtFactory("collectorsQt");
-    collectorQtFactory->SetFactory("collectors");
-    componentManager->AddComponent(collectorQtFactory);
-    collectorQtFactory->Connect();
-    collectorQtFactory->ConnectToWidget(mainQt->GetCollectorQtWidget());
-
-    // connect all interfaces for event collector
-    eventCollector->Connect();
+    componentManager->AddComponent(mainQt->GetCollectorQtWidget());
+    componentManager->Connect(mainQt->GetCollectorQtWidget()->GetName(), "Collector",
+                              collectorFactory->GetName(), "Control");
 
     // generate a nice tasks diagram
     std::ofstream dotFile("PeriodicTaskQt.dot");

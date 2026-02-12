@@ -62,7 +62,7 @@ mtsSystemQtWidgetComponent::mtsSystemQtWidgetComponent(const std::string & compo
     // Setup CISST Interface
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Component");
     if (interfaceRequired) {
-        interfaceRequired->AddFunction("GetPeriodStatistics", GetPeriodStatistics);
+        interfaceRequired->AddFunction("period_statistics", period_statistics);
         mtsSystemQtWidget::SetInterfaceRequired(interfaceRequired);
     }
     setupUi();
@@ -79,6 +79,6 @@ void mtsSystemQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
     if (this->isHidden()) {
         return;
     }
-    GetPeriodStatistics(IntervalStatistics);
+    period_statistics(IntervalStatistics);
     QMIntervalStatistics->SetValue(IntervalStatistics);
 }

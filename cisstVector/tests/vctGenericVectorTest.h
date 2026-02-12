@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):  Anton Deguet
   Created on: 2004-07-09
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+
+  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -81,32 +79,32 @@ class vctGenericVectorTest
         bool gotException = false;
         try {
             vector2.at(size);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
-        
+
         gotException = false;
         try {
             vector1.at(size);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
 
         gotException = false;
         try {
             vector2(size);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
-        
+
         gotException = false;
         try {
             vector1(size);
-        } catch (std::out_of_range exception) {
-            gotException = true;            
+        } catch (std::out_of_range &) {
+            gotException = true;
         }
         CPPUNIT_ASSERT(gotException);
 
@@ -257,7 +255,7 @@ class vctGenericVectorTest
         const value_type actTolerance = tolerance * value_type(numOperations);
 
         vector3.CrossProductOf(vector1, vector2);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(vector3.DotProduct(vector1), value_type(0), actTolerance);  
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(vector3.DotProduct(vector1), value_type(0), actTolerance);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(vector3.DotProduct(vector2), value_type(0), actTolerance);
 
         vector3 = vector1 % vector2;
@@ -293,7 +291,7 @@ class vctGenericVectorTest
         VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vctDotProduct(vector1, vector2), tolerance * size);
         VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vctDotProduct(vector2, vector1), tolerance * size);
         VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vector1 * vector2, tolerance * size);
-        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vector2 * vector1, tolerance * size);        
+        VCT_CPPUNIT_ASSERT_DOUBLES_EQUAL_CAST(result, vector2 * vector1, tolerance * size);
     }
 
     /*! Store copies of vector1 and vector2 in local variables.  Swap
@@ -310,7 +308,7 @@ class vctGenericVectorTest
         vector1.SwapElementsWith(vector2);
         CPPUNIT_ASSERT(tmp1 == vector2);
         CPPUNIT_ASSERT(tmp2 == vector1);
-        
+
         vector2.SwapElementsWith(vector1);
         CPPUNIT_ASSERT(tmp1 == vector1);
         CPPUNIT_ASSERT(tmp2 == vector2);
@@ -361,4 +359,3 @@ class vctGenericVectorTest
 };
 
 #endif // _vctGenericVectorTest_h
-

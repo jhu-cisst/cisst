@@ -1,8 +1,5 @@
 #
-# CMakeLists for cisstNumerical tests
-#
-# (C) Copyright 2004-2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,31 +11,38 @@
 
 # all source files
 set (SOURCE_FILES
-     nmrBernsteinPolynomialTest.cpp
-     nmrBernsteinPolynomialLineIntegralTest.cpp
-     nmrDynAllocPolynomialContainerTest.cpp
-     nmrGaussJordanInverseTest.cpp
-     nmrLinearRegressionTest.cpp
-     nmrMultiIndexCounterTest.cpp
-     nmrPolynomialBaseTest.cpp
-     nmrPolynomialTermPowerIndexTest.cpp
-     nmrStandardPolynomialTest.cpp
-     )
+  nmrGaussJordanInverseTest.cpp
+  nmrLinearRegressionTest.cpp
+  )
 
 # all header files
 set (HEADER_FILES
-     nmrBernsteinPolynomialTest.h
-     nmrBernsteinPolynomialLineIntegralTest.h
-     nmrDynAllocPolynomialContainerTest.h
-     nmrGaussJordanInverseTest.h
-     nmrLinearRegressionTest.h
-     nmrMultiIndexCounterTest.h
-     nmrPolynomialBaseTest.h
-     nmrPolynomialTermPowerIndexTest.h
-     nmrStandardPolynomialTest.h
-     )
+  nmrGaussJordanInverseTest.h
+  nmrLinearRegressionTest.h
+  )
 
-# Added tests available for cisstNetlib
+if (CISST_NMR_COMPILE_POLYNOMIALS)
+  set (SOURCE_FILES
+    ${SOURCE_FILES}
+    nmrBernsteinPolynomialTest.cpp
+    nmrBernsteinPolynomialLineIntegralTest.cpp
+    nmrDynAllocPolynomialContainerTest.cpp
+    nmrMultiIndexCounterTest.cpp
+    nmrPolynomialBaseTest.cpp
+    nmrPolynomialTermPowerIndexTest.cpp
+    nmrStandardPolynomialTest.cpp
+    )
+  set (HEADER_FILES
+    nmrBernsteinPolynomialTest.h
+    nmrBernsteinPolynomialLineIntegralTest.h
+    nmrDynAllocPolynomialContainerTest.h
+    nmrMultiIndexCounterTest.h
+    nmrPolynomialBaseTest.h
+    nmrPolynomialTermPowerIndexTest.h
+    nmrStandardPolynomialTest.h
+    )
+endif (CISST_NMR_COMPILE_POLYNOMIALS)
+
 if (CISST_HAS_CISSTNETLIB)
   set (SOURCE_FILES
        ${SOURCE_FILES}
@@ -80,22 +84,6 @@ if (CISST_HAS_CISSTNETLIB)
        # deprecated nmrSVDRSSolverTest.h
        )
 endif (CISST_HAS_CISSTNETLIB)
-
-# add files if cnetlib is used
-# IF(CISST_HAS_CNETLIB)
-#  SET(SOURCE_FILES
-#      ${SOURCE_FILES}
-#      nmrLSEISolverTest.cpp
-#      nmrNonLinSolverTest.cpp
-#      )
-
-#  SET(HEADER_FILES
-#      ${HEADER_FILES}
-#      nmrLSEISolverTest.h
-#      nmrNonLinSolverTest.h
-#      )
-#
-# ENDIF(CISST_HAS_CNETLIB)
 
 # paths for headers/libraries
 cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical cisstTestsDriver)

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-08-24
 
-  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -126,6 +126,11 @@ public:
         this->Assign(quaternionRotation);
     }
 
+    inline ThisType & operator = (const ThisType & quaternionRotation) {
+        this->Allocate();
+        this->Assign(quaternionRotation);
+        return *this;
+    }
 
     /*!
       \name Constructors with normalization test.

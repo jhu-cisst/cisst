@@ -1,10 +1,8 @@
 /*
-
   Author(s): Simon Leonard
   Created on: Dec 17 2009
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,12 +22,12 @@ robLink::robLink( const robLink& link ){
   mass       = link.mass;
 }
 
-robLink::robLink( robKinematics* kinematics, const robMass& mass ) : 
-  kinematics( kinematics ), 
+robLink::robLink( robKinematics* kinematics, const robMass& mass ) :
+  kinematics( kinematics ),
   mass( mass ) {}
 
 robLink::~robLink(){
-  if( kinematics != NULL ){ 
+  if( kinematics != NULL ){
     delete kinematics;
     kinematics = NULL;
   }
@@ -37,10 +35,13 @@ robLink::~robLink(){
 
 robKinematics* robLink::GetKinematics() const
 { return kinematics; }
-robMass        robLink::GetMass() const
+
+const robMass & robLink::MassData(void) const
+{ return mass; }
+robMass & robLink::MassData(void)
 { return mass; }
 
-robLink::Errno robLink::Read( std::istream& is ){ 
+robLink::Errno robLink::Read( std::istream& is ){
   if( kinematics != NULL ) { kinematics->Read( is ); }
   mass.ReadMass( is );
   return robLink::ESUCCESS;
@@ -55,7 +56,7 @@ robLink::Errno robLink::Read(const Json::Value &linkConfig)
 }
 #endif
 
-robLink::Errno robLink::Write( std::ostream& os ) const { 
+robLink::Errno robLink::Write( std::ostream& os ) const {
   if( kinematics != NULL ) { kinematics->Write( os ); }
   mass.WriteMass( os );
   return robLink::ESUCCESS;
@@ -82,8 +83,7 @@ robKinematics::Convention robLink::GetConvention() const {
 }
 
 
-robJoint::Type robLink::GetType() const {
+cmnJointType robLink::GetType() const {
   if( kinematics != NULL ) { return kinematics->GetType(); }
-  else                     { return robJoint::UNDEFINED;  }
+  else                     { return cmnJointType::CMN_JOINT_UNDEFINED;  }
 }
-

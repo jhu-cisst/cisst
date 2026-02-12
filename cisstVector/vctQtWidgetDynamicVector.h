@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2011-12-08
 
-  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QTableWidget>
 
 #include <cisstVector/vctDynamicVector.h>
-#include <cisstVector/vctQtForwardDeclarations.h>
+#include <cisstVector/vctForwardDeclarationsQt.h>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -77,7 +75,6 @@ class CISST_EXPORT vctQtWidgetDynamicVectorWriteBase: public QTableWidget
 public:
     typedef enum {TEXT_WIDGET, SPINBOX_WIDGET, SLIDER_WIDGET} DisplayModeType;
     vctQtWidgetDynamicVectorWriteBase(const DisplayModeType displayMode);
-    void SetDisplayMode(const DisplayModeType displayMode);
 signals:
     void valueChanged(void);
 protected:
@@ -85,8 +82,8 @@ protected:
     DisplayModeType DisplayMode;
 protected slots:
     void SliderValueChangedSlot(int value);
-    void DoubleSpinBoxValueChangedSlot(double value);
-    void SpinBoxValueChangedSlot(int value);
+    void DoubleSpinBoxEditingFinishedSlot(void);
+    void SpinBoxEditingFinishedSlot(void);
     void ItemChangedSlot(QTableWidgetItem * item);
 };
 

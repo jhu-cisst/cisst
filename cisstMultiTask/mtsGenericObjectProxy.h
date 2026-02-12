@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on: 2006-05-05
 
-  (C) Copyright 2006-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,6 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnDataFunctionsString.h>
 #include <cisstCommon/cmnDataFunctionsVector.h>
+#include <cisstCommon/cmnDataFunctionsList.h>
+
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsGenericObject.h>
@@ -38,6 +42,9 @@ http://www.cisst.org/cisst/license.txt.
 typedef std::vector<std::string> stdStringVec;
 typedef std::vector<double> stdDoubleVec;
 typedef std::vector<char> stdCharVec;
+typedef std::vector<vct3> stdVct3Vec;
+
+typedef std::list<std::string> stdStringList;
 
 // Forward declarations
 template <class _elementType> class mtsGenericObjectProxyBase;
@@ -400,9 +407,16 @@ public:
 
     inline ~mtsGenericObjectProxy(void) {}
 
+    /*! Assignment operator */
+    inline ThisType & operator = (const ThisType & other) {
+        BaseType::operator = (other);
+        Data = other.Data;
+        return *this;
+    }
+
     /*! Return pointer to data */
-    value_type& GetData(void) { return Data; }
-    const value_type& GetData(void) const { return Data; }
+    value_type& GetData(void) override{ return Data; }
+    const value_type& GetData(void) const override { return Data; }
 
     /*! Conversion assignment, from base type (i.e., Proxy or ProxyRef) to Proxy. */
     ThisType & operator=(const BaseType &data) {
@@ -432,28 +446,28 @@ public:
     //@}
 
     /*! Serialization.  Relies on the specialization, if any, of cmnSerializeRaw. */
-    inline void SerializeRaw(std::ostream & outputStream) const {
+    inline void SerializeRaw(std::ostream & outputStream) const override {
         mtsGenericObject::SerializeRaw(outputStream);
         cmnSerializeRaw(outputStream, this->Data);
     }
 
     /*! DeSerialization.  Relies on the specialization, if any, of cmnDeSerializeRaw. */
-    inline void DeSerializeRaw(std::istream & inputStream) {
+    inline void DeSerializeRaw(std::istream & inputStream) override {
         mtsGenericObject::DeSerializeRaw(inputStream);
         cmnDeSerializeRaw(inputStream, this->Data);
     }
 
     /*! To stream method.  Uses the default << operator as defined for
         the actual type. */
-    inline virtual void ToStream(std::ostream & outputStream) const {
+    inline void ToStream(std::ostream & outputStream) const override {
         BaseType::ToStream(outputStream);
         outputStream << " Value: ";
         cmnDataProxy<value_type, cmnData<value_type>::IS_SPECIALIZED>::ToStream(outputStream, this->Data);
     }
 
     /*! To stream raw data. */
-    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+    inline void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                            bool headerOnly = false, const std::string & headerPrefix = "") const override {
         if (headerOnly) {
             BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
             outputStream << delimiter << headerPrefix << "-data";
@@ -465,7 +479,7 @@ public:
     }
 
     /*! From stream raw. */
-    inline virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') {
+    inline bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') override {
         BaseType::FromStreamRaw(inputStream, delimiter);
         return cmnDataProxy<value_type, cmnData<value_type>::IS_SPECIALIZED>::FromStreamRaw(inputStream, delimiter, this->Data);
     }
@@ -766,6 +780,12 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsUChar);
 typedef mtsGenericObjectProxy<bool> mtsBool;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsBool);
 
+#if (CISST_OS == CISST_WINDOWS)
+// On Windows, size_t is unsigned __int64
+typedef mtsGenericObjectProxy<size_t> mtsSizeT;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsSizeT);
+#endif
+
 typedef mtsGenericObjectProxy<std::string> mtsStdString;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdString);
 
@@ -779,11 +799,19 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDoubleVecProxy);
 typedef mtsGenericObjectProxy<stdCharVec> mtsStdCharVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdCharVecProxy);
 
+typedef mtsGenericObjectProxy<stdVct3Vec> mtsStdVct3VecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdVct3VecProxy);
+
+typedef mtsGenericObjectProxy<stdStringList> mtsStdStringListProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringListProxy);
+
+#include <cisstCommon/cmnJointType.h>
+typedef mtsGenericObjectProxy<cmnJointType> cmnJointTypeProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(cmnJointTypeProxy);
+
 // Now, define proxies for cisstVector classes (see also
 // mtsFixedSizeVectorTypes.h, which uses multiple inheritance,
 // rather than proxies).
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
 typedef mtsGenericObjectProxy<vct1> mtsVct1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct1)
 typedef mtsGenericObjectProxy<vct2> mtsVct2;
@@ -802,11 +830,6 @@ typedef mtsGenericObjectProxy<vct8> mtsVct8;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct8)
 typedef mtsGenericObjectProxy<vct9> mtsVct9;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct9)
-
-// Define proxy for std::vector<vct3>
-typedef std::vector<vct3> stdVct3Vec;
-typedef mtsGenericObjectProxy<stdVct3Vec> mtsStdVct3VecProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdVct3VecProxy);
 
 typedef mtsGenericObjectProxy<vctFloat1> mtsVctFloat1;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat1)

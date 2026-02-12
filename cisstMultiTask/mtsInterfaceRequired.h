@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,8 +39,6 @@ http://www.cisst.org/cisst/license.txt.
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
-class mtsEventHandlerList;
 
 /*!
   \file
@@ -184,6 +181,9 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
       SetArgumentQueuesSize. */
     bool SetMailBoxAndArgumentQueuesSize(size_t desiredSize);
 
+    /*! Get the description of this interface. */
+    mtsInterfaceRequiredDescription GetDescription() const;
+
     /*! Get the names of commands required by this interface. */
     //@{
     virtual std::vector<std::string> GetNamesOfFunctions(void) const;
@@ -256,7 +256,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     size_t ProcessMailBoxes(void);
 
     /*! Send a human readable description of the interface. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
  protected:
  public: // adeguet1 todo fix -- this has been added for ostream << operator
@@ -347,7 +347,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     EventHandlerWriteMapType EventHandlersWrite;
 
     /*! Get description of this interface (with serialized argument information) */
-    void GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription);
+    void GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription) const;
 
  public:
 

@@ -5,7 +5,7 @@
   Author(s):  Zihan Chen, Anton Deguet
   Created on: 2013-03-20
 
-  (C) Copyright 2013-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -119,8 +119,8 @@ void vctQtWidgetRotationOpenGL::keyPressEvent(QKeyEvent * event)
 
 void vctQtWidgetRotationOpenGL::initializeGL(void)
 {
-    const double grey = 0.95;
-    glClearColor(grey, grey, grey, 1.0);
+    const QColor bgColor = palette().color(QPalette::Base);
+    glClearColor(bgColor.redF(), bgColor.greenF(), bgColor.blueF(), 1.0);
     glShadeModel(GL_SMOOTH);
 }
 

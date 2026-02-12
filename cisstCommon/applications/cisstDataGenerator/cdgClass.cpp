@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@
   http://www.cisst.org/cisst/license.txt.
 
   --- end cisst license ---
-
 */
 
 #include "cdgClass.h"
@@ -129,26 +128,13 @@ bool cdgClass::Validate(std::string & CMN_UNUSED(errorMessage))
         }
     }
     for (size_t index = 0; index < Members.size(); index++) {
-        Members[index]->ClassName = this->ClassWithNamespace(); // this->GetFieldValue("name");
+        Members[index]->ClassName = this->ClassWithNamespace();
+    }
+    for (size_t index = 0; index < Enums.size(); index++) {
+        Enums[index]->ClassName = this->ClassWithNamespace();
     }
 
     return true;
-}
-
-
-void cdgClass::GenerateIncludes(std::ostream & outputStream) const
-{
-    GenerateLineComment(outputStream);
-    const std::string mtsProxy = this->GetFieldValue("mts-proxy");
-    // includes for mts proxy
-    if (mtsProxy != "false") {
-        outputStream << std::endl
-                     << "// mts-proxy set to " << mtsProxy << std::endl
-                     << "#include <cisstCommon/cmnClassServices.h>" << std::endl
-                     << "#include <cisstCommon/cmnClassRegisterMacros.h>" << std::endl
-                     << "#include <cisstMultiTask/mtsGenericObjectProxy.h>" << std::endl
-                     << std::endl;
-    }
 }
 
 
@@ -183,7 +169,8 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     outputStream << " /* default constructors and destructors. */" << std::endl
                  << " public:" << std::endl
                  << "    " << className << "(void);" << std::endl
-                 << "    " << className << "(const " << this->GetFieldValue("name") << " & other);" << std::endl;
+                 << "    " << className << "(const " << this->GetFieldValue("name") << " & other);" << std::endl
+                 << "    " << className << " & operator = (const " << className << " & other);" << std::endl;
     if (this->GetFieldValue("virtual-dtor") == "true") {
         outputStream << "    virtual ~";
     } else {
@@ -247,7 +234,7 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     // global functions for enums have to be declared after the enum is defined
     const std::string classWithNamespace = this->ClassWithNamespace();
     for (index = 0; index < Enums.size(); ++index) {
-        Enums[index]->GenerateDataFunctionsHeader(outputStream, classWithNamespace, this->GetFieldValue("attribute"));
+        Enums[index]->GenerateDataFunctionsHeader(outputStream, this->GetFieldValue("attribute"));
     }
 
 }
@@ -255,18 +242,34 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
 
 void cdgClass::GenerateStandardMethodsHeader(std::ostream & outputStream) const
 {
+    std::string overrides = "";
+    for (size_t index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+            overrides = " override";
+            break;
+        }
+    }
+
     outputStream << "    /* default methods */" << std::endl
                  << " public:" << std::endl
-                 << "    void SerializeRaw(std::ostream & outputStream) const;" << std::endl
-                 << "    void DeSerializeRaw(std::istream & inputStream);" << std::endl
-                 << "    void ToStream(std::ostream & outputStream) const;" << std::endl
+                 << "    void SerializeRaw(std::ostream & outputStream) const" << overrides << ";" << std::endl
+                 << "    void DeSerializeRaw(std::istream & inputStream)" << overrides << ";" << std::endl
+                 << "    void ToStream(std::ostream & outputStream) const" << overrides << ";" << std::endl
                  << "    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' '," << std::endl
-                 << "                     bool headerOnly = false, const std::string & headerPrefix = \"\") const;" << std::endl;
+                 << "                     bool headerOnly = false, const std::string & headerPrefix = \"\") const" << overrides << ";" << std::endl;
 }
 
 
 void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
 {
+    std::string overrides = "";
+    for (size_t index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+            overrides = " override";
+            break;
+        }
+    }
+
     std::string name = this->GetFieldValue("name");
     outputStream << "    /* default data methods */" << std::endl
                  << " public:" << std::endl
@@ -277,13 +280,13 @@ void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
                  << "    std::string SerializeDescription(const char delimiter = ',', const std::string & userDescription = \"\") const;" << std::endl
                  << "    void DeSerializeText(std::istream & inputStream, const char delimiter = ',') CISST_THROW(std::runtime_error);" << std::endl
                  << "    std::string HumanReadable(void) const;" << std::endl
-                 << "    bool ScalarNumberIsFixed(void) const;" << std::endl
-                 << "    size_t ScalarNumber(void) const;" << std::endl
-                 << "    double Scalar(const size_t index) const CISST_THROW(std::out_of_range);" << std::endl
-                 << "    std::string ScalarDescription(const size_t index, const std::string & userDescription = \"\") const CISST_THROW(std::out_of_range);" << std::endl
+                 << "    bool ScalarNumberIsFixed(void) const" << overrides << ";" << std::endl
+                 << "    size_t ScalarNumber(void) const" << overrides << ";" << std::endl
+                 << "    double Scalar(const size_t index) const CISST_THROW(std::out_of_range)" << overrides << ";" << std::endl
+                 << "    std::string ScalarDescription(const size_t index, const std::string & userDescription = \"\") const CISST_THROW(std::out_of_range)" << overrides << ";" << std::endl
                  << "#if CISST_HAS_JSON" << std::endl
-                 << "    void SerializeTextJSON(Json::Value & jsonValue) const;" << std::endl
-                 << "    void DeSerializeTextJSON(const Json::Value & jsonValue) CISST_THROW(std::runtime_error);" << std::endl
+                 << "    void SerializeTextJSON(Json::Value & jsonValue) const" << overrides << ";" << std::endl
+                 << "    void DeSerializeTextJSON(const Json::Value & jsonValue) CISST_THROW(std::runtime_error)" << overrides << ";" << std::endl
                  << "#endif // CISST_HAS_JSON" << std::endl
                  << std::endl;
 }
@@ -331,6 +334,7 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
 
     std::stringstream defaultConstructor;
     std::stringstream copyConstructor;
+    std::stringstream assignOperator;
     std::stringstream membersConstructor;
 
     // default and copy constructors
@@ -339,7 +343,12 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
     bool commaNeeded = false;
 
     defaultConstructor << classWithNamespace << "::" << name << "(void)";
-    copyConstructor    << classWithNamespace << "::" << name << "(const " << name << " & " << CMN_UNUSED_wrapped("other") << ")";
+    copyConstructor    << classWithNamespace << "::" << name << "(const "
+                       << name << " & " << CMN_UNUSED_wrapped("other") << ")";
+    assignOperator     << classWithNamespace << " & " << classWithNamespace
+                       << "::operator = (const "
+                       << name << " & " << CMN_UNUSED_wrapped("other") << ")" << std::endl
+                       << "{" << std::endl;
     membersConstructor << classWithNamespace << "::" << name << "(";
     std::string memberName, memberType;
     for (index = 0; index < Members.size(); index++) {
@@ -368,12 +377,14 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
             copyConstructor    << "    , ";
             membersConstructor << "    , ";
         } else {
-            defaultConstructor << "      ";
-            copyConstructor    << "      ";
-            membersConstructor << "      ";
+            defaultConstructor << "    ";
+            copyConstructor    << "    ";
+            membersConstructor << "    ";
         }
         defaultConstructor << BaseClasses[index]->GetFieldValue("type") << "()" << std::endl;
         copyConstructor    << BaseClasses[index]->GetFieldValue("type") << "(other)" << std::endl;
+        assignOperator     << "    "
+                           << BaseClasses[index]->GetFieldValue("type") << "::operator = (other);" << std::endl;
         membersConstructor << BaseClasses[index]->GetFieldValue("type") << "()" << std::endl;
         commaNeeded = true;
     }
@@ -385,13 +396,15 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
                 copyConstructor    << "    , ";
                 membersConstructor << "    , ";
             } else {
-                defaultConstructor << "      ";
-                copyConstructor    << "      ";
-                membersConstructor << "      ";
+                defaultConstructor << "    ";
+                copyConstructor    << "    ";
+                membersConstructor << "    ";
             }
             memberName = Members[index]->MemberName;
             defaultConstructor << memberName << "(" << Members[index]->GetFieldValue("default") << ")" << std::endl;
             copyConstructor    << memberName << "(other." << memberName << ")" << std::endl;
+            assignOperator     << "    "
+                               << memberName << " = other." << memberName << ";" << std::endl;
             membersConstructor << memberName << "(new" << Members[index]->GetFieldValue("name") << ")" << std::endl;
             commaNeeded = true;
         }
@@ -399,10 +412,13 @@ void cdgClass::GenerateConstructorsCode(std::ostream & outputStream) const
 
     defaultConstructor << "{}" << std::endl << std::endl;
     copyConstructor    << "{}" << std::endl << std::endl;
+    assignOperator     << "    return *this;" << std::endl
+                       << "}"  << std::endl << std::endl;
     membersConstructor << "{}" << std::endl << std::endl;
 
     outputStream << defaultConstructor.str();
     outputStream << copyConstructor.str();
+    outputStream << assignOperator.str();
     if (this->GetFieldValue("ctor-all-members") == "true") {
         outputStream << membersConstructor.str();
     }
@@ -886,7 +902,11 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
             outputStream << "    field__cdg = jsonValue[\""
                          << Members[index]->GetFieldValue("name") << "\"];" << std::endl
                          << "    if (!field__cdg.empty()) {" << std::endl
-                         << "        cmnDataJSON<" << type << " >::DeSerializeText(this->" << name << ", field__cdg);" << std::endl;
+                         << "        try {" << std::endl
+                         << "            cmnDataJSON<" << type << " >::DeSerializeText(this->" << name << ", field__cdg);" << std::endl
+                         << "        } catch (std::exception & e) {" << std::endl
+                         << "            cmnThrow(std::string(e.what()) + \" < " << name << "\");" << std::endl
+                         << "        }" << std::endl;
             // if there is no default value, we need one from JSON
             if (Members[index]->GetFieldValue("default").empty()) {
                 outputStream << "    } else {" << std::endl
@@ -899,7 +919,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
                  << "#endif // CISST_HAS_JSON" << std::endl;
 
     for (index = 0; index < Enums.size(); ++index) {
-        Enums[index]->GenerateDataFunctionsCode(outputStream, className);
+        Enums[index]->GenerateDataFunctionsCode(outputStream);
     }
 }
 

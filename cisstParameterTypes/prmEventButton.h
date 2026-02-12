@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):	Anton Deguet, Rajesh Kumar
   Created on:	2008-04-08
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,8 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Button Event payload
 */
 
@@ -40,14 +38,15 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
 
  public:
     typedef mtsGenericObject BaseType;
-    typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED} EventType;
-    
+    typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED, UNDEFINED} EventType;
+
  public:
     /*! Default constructor */
-    inline prmEventButton()
+    inline prmEventButton():
+        TypeMember(UNDEFINED)
     {}
-    
-    /*! Constructor with all parameters */
+
+    /*! Constructor with all parameters. */
     inline prmEventButton(const EventType & type):
         TypeMember(type)
     {}
@@ -57,10 +56,18 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
         BaseType(other),
         TypeMember(other.TypeMember)
     {}
-    
+
     /*! Destructor */
     virtual ~prmEventButton();
-    
+
+    /*! Assignment operator */
+    inline prmEventButton & operator = (const prmEventButton & other)
+    {
+        BaseType::operator = (other);
+        TypeMember = other.TypeMember;
+        return *this;
+    }
+
     /*! Set and Get methods for event type. */
     //@{
     CMN_DECLARE_MEMBER_AND_ACCESSORS(EventType, Type);
@@ -69,17 +76,17 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
 public:
 
     /*! Overloaded ToStream */
-    virtual void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! To stream raw data. */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                     bool headerOnly = false, const std::string & headerPrefix = "") const;
-    
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
+
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 
 };
 
@@ -88,4 +95,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(prmEventButton);
 
 
 #endif  // _prmEventButton_h
-

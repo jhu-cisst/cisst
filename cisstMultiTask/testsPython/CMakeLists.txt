@@ -1,6 +1,5 @@
 #
-#
-# (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -40,7 +39,7 @@ cisst_add_swig_module (MODULE cisstMultiTaskPythonTest
                        MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstMultiTaskPythonTest)
 
 # Copy the .py file generated to wherever the libraries are
-add_custom_command (TARGET _cisstMultiTaskPythonTestPython
+add_custom_command (TARGET cisstMultiTaskPythonTestPython
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND}
                     ARGS -E copy
@@ -69,8 +68,8 @@ if (WIN32)
                      SOURCES ${TEST_PROGRAMS})
 else (WIN32)
   add_custom_target (cisstMultiTask_CREATE_PYTHON_TESTS_LIST ALL
-                     COMMAND ${PYTHON_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstMultiTaskTests.py
-                             -d ${PYTHON_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
+                     COMMAND ${Python_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstMultiTaskTests.py
+                             -d ${Python_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
                      SOURCES ${TEST_PROGRAMS})
 endif (WIN32)
 
@@ -80,12 +79,12 @@ add_dependencies (cisstMultiTask_CREATE_PYTHON_TESTS_LIST
                   cisstCommon
                   cisstVector
                   cisstMultiTask
-                  _cisstCommonPython
-                  _cisstVectorPython
-                  _cisstOSAbstractionPython
-                  _cisstMultiTaskPython
+                  cisstCommonPython
+                  cisstVectorPython
+                  cisstOSAbstractionPython
+                  cisstMultiTaskPython
                   cisstMultiTaskPythonTest
-                  _cisstMultiTaskPythonTestPython)
+                  cisstMultiTaskPythonTestPython)
 
 file (APPEND ${CTEST_TEST_FILE} "include (\"${CTEST_TEST_FILE_AUTO}\")\n")
 

@@ -1,8 +1,7 @@
 #
 # CMakeLists for cisstMultiTaskQt
 #
-# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -20,27 +19,7 @@ cisst_set_directories (cisstQt)
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-if (CISST_HAS_QT4)
-  qt4_wrap_cpp (QT_WRAPPED_CPP
-                ../mtsCollectorQtComponent.h
-                ../mtsCollectorQtWidget.h
-                ../mtsMessageQtWidget.h
-                ../mtsSystemQtWidget.h
-                ../mtsQtCommandSelector.h
-                ../mtsQtScaleAndSignalTool.h
-                ../mtsQtVisualizerShell.h
-                ../mtsIntervalStatisticsQtWidget.h
-                ../mtsQtWidgetGenericObject.h
-                ../mtsQtWidgetGenericObjectProxy.h
-                ../mtsQtWidgetVectorTypes.h
-                ../mtsQtWidgetComponent.h
-                ../mtsQtWidgetInterfaceRequired.h
-                ../mtsQtWidgetFunction.h
-                ../mtsQtWidgetEvent.h)
-else (CISST_HAS_QT4)
-  # assumes Qt 5 Auto Moc
-  set (CMAKE_AUTOMOC ON)
-endif (CISST_HAS_QT4)
+set (CMAKE_AUTOMOC ON)
 
 # add the Qt library
 cisst_add_library (LIBRARY cisstMultiTaskQt
@@ -53,9 +32,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 cisstMultiTask
                    SETTINGS     cisstQt
                    SOURCE_FILES mtsClassServicesQt.cpp
-                                mtsCollectorQtComponent.cpp
-                                mtsCollectorQtWidget.cpp
-                                mtsCollectorQtFactory.cpp
+                                mtsCollectorFactoryQtWidget.cpp
                                 mtsMessageQtWidget.cpp
                                 mtsSystemQtWidget.cpp
                                 mtsQtCommandSelector.cpp
@@ -71,9 +48,8 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFunction.cpp
                                 mtsQtWidgetEvent.cpp
                                 mtsQtApplication.cpp
-                   HEADER_FILES mtsCollectorQtComponent.h
-                                mtsCollectorQtWidget.h
-                                mtsCollectorQtFactory.h
+                   HEADER_FILES mtsForwardDeclarationsQt.h
+                                mtsCollectorFactoryQtWidget.h
                                 mtsMessageQtWidget.h
                                 mtsSystemQtWidget.h
                                 mtsQtCommandSelector.h
@@ -89,8 +65,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFunction.h
                                 mtsQtWidgetEvent.h
                                 mtsQtApplication.h
-                                mtsExportQt.h
-                   ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+                                mtsExportQt.h)
 
 # link against Qt libraries
 target_link_libraries (cisstMultiTaskQt ${QT_LIBRARIES})

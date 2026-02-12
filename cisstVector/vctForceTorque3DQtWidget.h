@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Dorothy Hu
   Created on: 2017-01-20
 
-  (C) Copyright 2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2017-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctForceTorque3DQtWidget_h
 #define _vctForceTorque3DQtWidget_h
 
-#include <cisstVector/vctQtForwardDeclarations.h>
+#include <cisstVector/vctForwardDeclarationsQt.h>
 #include <cisstVector/vctVector3DQtWidget.h>
 #include <QWidget>
 
@@ -41,9 +41,6 @@ protected:
 
 private:
     void setupUi(void);
-
-    QLabel * QLScale;
-
     vctVector3DQtWidget * QVector;
 
     // force vs. torque

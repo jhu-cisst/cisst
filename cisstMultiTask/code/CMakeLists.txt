@@ -1,8 +1,7 @@
 #
-#
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -51,6 +50,7 @@ set (SOURCE_FILES
      mtsComponentViewer.cpp
      mtsConnection.cpp
 
+     mtsDelayedConnections.cpp
      mtsEventReceiver.cpp
      mtsExecutionResult.cpp  # see mtsExecutionResult.cdg
 
@@ -147,6 +147,7 @@ set (HEADER_FILES
      mtsComponentViewer.h
      mtsConnection.h
 
+     mtsDelayedConnections.h
      mtsEventReceiver.h
      mtsExport.h
 
@@ -201,6 +202,7 @@ set (HEADER_FILES
      mtsStateData.h
      mtsStateIndex.h
      mtsStateTable.h
+     mtsStateTableFilter.h
 
      mtsTask.h
      mtsTaskContinuous.h
@@ -236,108 +238,6 @@ if (MINGW)
        ${CMAKE_CURRENT_BINARY_DIR}/mtsClassServices3.cpp)
 endif (MINGW)
 
-if (CISST_MTS_HAS_ICE)
-
-  set (SOURCE_FILES ${SOURCE_FILES}
-       mtsInterfaceRequiredProxy.cpp
-       mtsComponentInterfaceProxyServer.cpp
-       mtsComponentInterfaceProxyClient.cpp
-       mtsManagerProxyServer.cpp
-       mtsManagerProxyClient.cpp
-       mtsComponentProxy.cpp
-       )
-
-  set (ADDITIONAL_HEADER_FILES
-       ${ADDITIONAL_HEADER_FILES}
-
-       mtsComponentProxy.h
-
-       mtsProxyConfig.h
-       mtsProxyBaseCommon.h
-       mtsProxyBaseClient.h
-       mtsProxyBaseServer.h
-
-       mtsInterfaceRequiredProxy.h
-       mtsComponentInterfaceProxyServer.h
-       mtsComponentInterfaceProxyClient.h
-       mtsManagerProxyServer.h
-       mtsManagerProxyClient.h
-
-       mtsCommandProxyBase.h
-       mtsCommandVoidProxy.h
-       mtsCommandVoidProxyForReturnEvent.h
-       mtsCommandVoidReturnProxy.h
-       mtsCommandWriteProxy.h
-       mtsCommandWriteReturnProxy.h
-       mtsCommandReadProxy.h
-       mtsCommandQualifiedReadProxy.h
-
-       mtsFunctionReadProxy.h
-       mtsFunctionWriteProxy.h
-       mtsFunctionQualifiedReadProxy.h
-       mtsFunctionReturnProxyBase.h
-       mtsFunctionVoidReturnProxy.h
-       mtsFunctionWriteReturnProxy.h
-       mtsMulticastCommandVoidProxy.h
-       mtsMulticastCommandWriteProxy.h
-       mtsEventWriteGeneratorProxy.h
-       )
-
-  set (ICE_RESOURCE_DIR ${cisstMultiTaskLibs_SOURCE_DIR}/share/Ice)
-  set (ICE_CONFIG_FILES
-       ${ICE_RESOURCE_DIR}/config.client
-       ${ICE_RESOURCE_DIR}/config.server
-       ${ICE_RESOURCE_DIR}/config.LCM
-       ${ICE_RESOURCE_DIR}/config.GCM)
-  install (FILES ${ICE_CONFIG_FILES} DESTINATION ${CISST_SHARE_INSTALL_SUFFIX}/cisstMultiTask/Ice COMPONENT cisstMultiTask)
-
-  set (ICE_RESOURCE_FILES
-       ${ICE_CONFIG_FILES}
-       ${ICE_RESOURCE_DIR}/mtsComponentInterfaceProxy.ice
-       ${ICE_RESOURCE_DIR}/mtsManagerProxy.ice
-       )
-
-  source_group (Resources FILES ${ICE_RESOURCE_FILES})
-
-  set (SLICE_FILES
-       mtsComponentInterfaceProxy
-       mtsManagerProxy
-       )
-
-
-  # create a list of include directories for slice
-  foreach (ice_include_dir ${ICE_INCLUDE_DIR})
-    set (SLICE_OPTIONS ${SLICE_OPTIONS} -I ${ice_include_dir})
-  endforeach (ice_include_dir ${ICE_INCLUDE_DIR})
-
-  foreach (slice_file ${SLICE_FILES})
-    set (GENERATED_CPP_FILE "${CMAKE_CURRENT_BINARY_DIR}/${slice_file}.cpp")
-    set (GENERATED_H_FILE "${CMAKE_CURRENT_BINARY_DIR}/${slice_file}.h")
-
-    add_custom_command (
-      OUTPUT ${GENERATED_CPP_FILE} ${GENERATED_H_FILE} ${cisst_BINARY_DIR}/include/cisstMultiTask/${slice_file}.h
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-      # first run slice2cpp
-      COMMAND ${ICE_SLICE2CPP}
-      ARGS    -I ${ICE_SLICE_DIR} ${SLICE_OPTIONS} ${cisstMultiTaskLibs_SOURCE_DIR}/share/Ice/${slice_file}.ice
-      # then create a directory to copy the header file
-      COMMAND ${CMAKE_COMMAND}
-      ARGS -E make_directory ${cisst_BINARY_DIR}/include/cisstMultiTask
-      # and finally copy the header file
-      COMMAND ${CMAKE_COMMAND}
-      ARGS -E copy_if_different ${GENERATED_H_FILE} ${cisst_BINARY_DIR}/include/cisstMultiTask
-      COMMENT "Compiling ${slice_file}.ice"
-      MAIN_DEPENDENCY ${cisstMultiTaskLibs_SOURCE_DIR}/share/Ice/${slice_file}.ice
-    )
-
-    include_directories (${CMAKE_CURRENT_BINARY_DIR})
-    set (ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${GENERATED_CPP_FILE})
-
-  endforeach (slice_file ${SLICE_FILES})
-
-  set (ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${ICE_RESOURCE_FILES})
-endif (CISST_MTS_HAS_ICE)
-
 # Create the config file
 set (CISST_MTS_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstMultiTask/mtsConfig.h)
 configure_file (${cisstMultiTaskLibs_SOURCE_DIR}/mtsConfig.h.in
@@ -346,19 +246,12 @@ configure_file (${cisstMultiTaskLibs_SOURCE_DIR}/mtsConfig.h.in
 install (FILES ${CISST_MTS_CONFIG_FILE}
          DESTINATION include/cisstMultiTask
          COMPONENT cisstMultiTask)
+set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CISST_MTS_CONFIG_FILE}")
 
 # Add the config file to the project
 set_source_files_properties ("${CISST_MTS_CONFIG_FILE}"
                              PROPERTIES GENERATED TRUE)
 set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_MTS_CONFIG_FILE})
-
-# Create the CMake config file
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
-                ${CISST_CMAKE_BINARY_DIR}/cisstMultiTaskBuild.cmake
-                @ONLY)
-install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstMultiTaskBuild.cmake
-         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-         COMPONENT cisstMultiTask)
 
 # Finally add the library
 cisst_add_library (LIBRARY cisstMultiTask
@@ -373,38 +266,6 @@ cisst_add_library (LIBRARY cisstMultiTask
 
 install (FILES ${cisstMultiTask_CISST_DG_HDRS_FULLPATH}
          DESTINATION "include/cisstMultiTask")
-
-# Add linking to external libraries
-if (CISST_MTS_HAS_ICE)
-  if (WIN32)
-    target_link_libraries (cisstMultiTask ${ICE_LIBRARIES_ALL})
-  else (WIN32)
-    target_link_libraries (cisstMultiTask ${ICE_LIBRARIES})
-  endif (WIN32)
-
-  # copy configuration files to build tree
-  file (MAKE_DIRECTORY "${CISST_SHARE_DIR}/cisstMultiTask/Ice")
-  foreach (configFile ${ICE_CONFIG_FILES})
-    add_custom_command (TARGET cisstMultiTask
-                        POST_BUILD
-                        COMMAND ${CMAKE_COMMAND}
-                        ARGS -E copy_if_different
-                               ${configFile}
-                               ${CISST_SHARE_DIR}/cisstMultiTask/Ice)
-
-  endforeach (configFile)
-
-endif (CISST_MTS_HAS_ICE)
-
-# Add installer files (only tested on WIN32)
-if (WIN32 AND CISST_MTS_HAS_ICE)
-  set (ICE_BIN ${ICE_HOME}/bin)
-  file (GLOB icedll "${ICE_BIN}/Ice??.dll")
-  install (FILES ${icedll} DESTINATION bin COMPONENT cisstMultiTask)
-  file (GLOB iceutildll "${ICE_BIN}/IceUtil??.dll")
-  install (FILES ${iceutildll} DESTINATION bin COMPONENT cisstMultiTask)
-  install (FILES ${ICE_BIN}/bzip2.dll DESTINATION bin COMPONENT cisstMultiTask)
-endif (WIN32 AND CISST_MTS_HAS_ICE)
 
 if (WIN32 AND CMAKE_CL_64)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")

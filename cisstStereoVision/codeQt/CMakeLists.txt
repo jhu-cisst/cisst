@@ -18,10 +18,7 @@ project (cisstStereoVisionQt)
 # set directories for this project
 cisst_set_directories (cisstQt)
 
-# assumes automoc on Qt5
-if (CISST_HAS_QT5)
-  set (CMAKE_AUTOMOC ON)
-endif (CISST_HAS_QT5)
+set (CMAKE_AUTOMOC ON)
 
 set (HEADER_FILES
      svlQtObjectFactory.h
@@ -64,45 +61,10 @@ if (CISST_HAS_OPENGL)
        svlFilterImageWindowQtStereo.cpp
        svlFilterImageOpenGLQtWidget.cpp
        )
-  if (CISST_HAS_QT4)
-    qt4_wrap_cpp (QT_WRAPPED_CPP
-                  winQt4OpenGL.h
-                  winQt4OpenGLStereo.h
-                  )
-  endif (CISST_HAS_QT4)
-
 endif (CISST_HAS_OPENGL)
 
 # Include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
-
-if (CISST_HAS_QT4)
-  foreach (HEADER ${HEADER_FILES})
-    qt4_wrap_cpp (QT_WRAPPED_CPP_TEMP
-                  ../${HEADER}
-                  )
-    set (QT_WRAPPED_CPP
-         ${QT_WRAPPED_CPP}
-         ${QT_WRAPPED_CPP_TEMP}
-         )
-  endforeach (HEADER)
-endif (CISST_HAS_QT4)
-
-foreach (UI ${QT_UI_FILES})
-  if (CISST_HAS_QT4)
-    qt4_wrap_ui (QT_WRAPPED_UI
-                 ${UI}
-                 )
-  else (CISST_HAS_QT4)
-    qt5_wrap_ui (QT_WRAPPED_UI
-                 ${UI}
-                 )
-  endif (CISST_HAS_QT4)
-  set (QT_WRAPPED_UI
-       ${QT_WRAPPED_UI}
-       ${QT_WRAPPED_UI_TEMP}
-       )
-endforeach (UI)
 
 # The following two files are added after Qt wrapping
 # because they have to Qt symbols to wrap
@@ -123,10 +85,7 @@ cisst_add_library (LIBRARY cisstStereoVisionQt
                                 cisstStereoVision
                    SETTINGS     cisstQt
                    SOURCE_FILES ${SOURCE_FILES}
-                   HEADER_FILES ${HEADER_FILES} svlExportQt.h
-                   ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP}
-                                           ${QT_WRAPPED_UI}
-                   )
+                   HEADER_FILES ${HEADER_FILES} svlExportQt.h)
 
 # link against Qt libraries
 target_link_libraries (cisstStereoVisionQt ${QT_LIBRARIES})

@@ -6,7 +6,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-24
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -72,18 +72,20 @@ http://www.cisst.org/cisst/license.txt.
 
   The implementation of the event receiver class requires an osaThreadSignal to block the
   component when the Wait method is called. This design uses the ThreadSignal member of
-  the required interface mailbox, which is present for any component derived from mtsTask.
-  If the required interface does not have a mailbox, the event receiver will create its own
-  instance of osaThreadSignal. This is done to support use of event receivers by low-level
-  components that do not have their own thread of execution (e.g., mtsComponent), as long
-  as the Wait method is only called from a single thread. Note that the Wait method returns
-  a bool; a false return indicates that the Wait failed for some reason (such as being called
-  from more than one thread). An alternate implementation would be to introduce an osaThreadSignal
-  member to mtsComponent and use that instead of the one in the required interface mailbox.
+  the required interface mailbox, which is present for any component derived from mtsTask,
+  or the ThreadSignalForBlockingCommands member of the required interface for blocking commands.
+  Otherwise, the event receiver will create its own instance of osaThreadSignal. This is done
+  to support use of event receivers by low-level components that do not have their own thread of
+  execution (e.g., mtsComponent), as long as the Wait method is only called from a single thread.
+  Note that the Wait method returns a bool; a false return indicates that the Wait failed for some
+  reason (such as being called from more than one thread). An alternate implementation would be to
+  introduce an osaThreadSignal member to mtsComponent and use that instead of the one in the required
+  interface mailbox.
 */
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstOSAbstraction/osaForwardDeclarations.h>
+#include <cisstOSAbstraction/osaMutex.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -100,10 +102,36 @@ protected:
     std::string Name;
     mtsInterfaceRequired * Required;   // Pointer to the required interface
     osaThreadSignal * EventSignal;
-    bool Waiting;
     bool OwnEventSignal;   // true if we created our own thread signal
 
+    // There are 4 possible wait states.
+    // EVENT_RECEIVER_IDLE and EVENT_RECEIVER_WAITING are the only two that are required; they are
+    // equivalent to the Waiting boolean flag in the previous implementation.
+    // These are sufficient to wait on a stream of events, but not enough if waiting on a single event
+    // that could occur before the Wait is started, in which case the waiting thread could wait forever.
+    // This case could occur with blocking commands, such as VoidReturn and WriteReturn, where the basic
+    // approach is for the client thread to issue the remote command (to the server thread) and then
+    // wait for the server thread to signal when complete. The problem occurs if the server thread signals
+    // completion before the client thread starts waiting. The solution in this case is for the client
+    // thread to call PrepareToWait() before issuing the remote command. In that case, WaitState transitions
+    // to EVENT_RECEIVER_PREPARING. Subsequently, if the signal handler is called it changes WaitState to
+    // EVENT_RECEIVER_SIGNALED to indicate that the event happened before the Wait was called.
+    // Because WaitState is an integral type (enum), we assume that is is updated atomically. Nevertheless,
+    // the WaitMutex is necessary in the following cases:
+    //   1. When the event handler is called (by the server thread), it must check if WaitState is
+    //      EVENT_RECEIVER_PREPARING and, if so, transition to EVENT_RECEIVER_SIGNALED. The mutex is needed
+    //      to ensure that the client thread does not simultaneous attempt to change the state to
+    //      EVENT_RECEIVER_WAITING.
+    //   2. When the client thread calls Wait or WaitWithTimeout and attempts to change WaitState from
+    //      EVENT_RECEIVER_PREPARING (or EVENT_RECEIVER_IDLE if PrepareToWait was not called) to
+    //      EVENT_RECEIVER_WAITING. Specifically, we do not want the server thread to simultaneously
+    //      attempt to change WaitState from EVENT_RECEIVER_PREPARING to EVENT_RECEIVER_SIGNALED.
+    enum WaitStates { EVENT_RECEIVER_IDLE, EVENT_RECEIVER_PREPARING, EVENT_RECEIVER_WAITING, EVENT_RECEIVER_SIGNALED };
+    WaitStates WaitState;
+    osaMutex WaitMutex;
+
     bool CheckRequired() const;
+    void CheckEventSignal();
     bool WaitCommon();
 
 public:
@@ -117,6 +145,19 @@ public:
     virtual void SetRequired(const std::string &name, mtsInterfaceRequired *req);
 
     virtual void SetThreadSignal(osaThreadSignal *signal);
+
+    /*! Clear the WaitState (set to EVENT_RECEIVER_IDLE) */
+    void ClearWait();
+
+    /*! Indicate that the waiting thread is preparing to wait on an event, but that there may be some
+        time before Wait or WaitWithTimeout will be called. Calling this command ensures that if the event
+        if raised after the call to PrepareToWait, but before the call to Wait or WaitWithTimeout,
+        that the Wait or WaitWithTimeout methods will return rather than wait indefinitely.
+        It is not required to call this method, but it is recommended if there is a possibility
+        of an indefinite (or infinite) wait if only a single event is expected and if it can occur
+        before Wait or WaitWithTimeout is called. See the description of WaitStates above.
+        \returns true if successful, false if failed. */
+    virtual bool PrepareToWait();
 
     /*! Wait for event to be issued.
         \returns true if successful, false if failed. */

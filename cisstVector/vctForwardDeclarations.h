@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2004-10-25
 
-  (C) Copyright 2004-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -215,7 +215,7 @@ class vctRodriguezRotation3;
 
 namespace vctEulerRotation3Order {
     //enum OrderType { XZX, XZY, XYX, XYZ, YXY, YXZ, YZY, YZX, ZYZ, ZYX, ZXZ, ZXY };
-    typedef enum { ZYZ, ZYX } OrderType;
+    typedef enum { ZYZ, ZYX, ZXZ, YZX } OrderType;
 };
 
 template <vctEulerRotation3Order::OrderType _order>

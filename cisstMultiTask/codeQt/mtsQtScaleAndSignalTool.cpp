@@ -104,7 +104,6 @@ void mtsQtScaleEditor::NewScale(void)
 
 void mtsQtScaleEditor::RenameScale(void)
 {
-    vctPlot2DOpenGLQtWidget::Scale * scale = Visualizer->FindScale(CurrentScale.toLocal8Bit().data());
     QTreeWidgetItem * scaleItem = this->findItems(CurrentScale.toLocal8Bit().data(), Qt::MatchCaseSensitive | Qt::MatchFixedString).first();
     this->edit(this->model()->index(this->indexOfTopLevelItem(scaleItem), 0));
 }

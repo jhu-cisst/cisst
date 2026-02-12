@@ -16,11 +16,63 @@ class {
         is-data true;
     }
 
+    enum {
+        name StateType;
+        enum-value {
+            name UNDEFINED;
+            description undefined;
+        }
+        enum-value {
+            name DISABLED;
+            description disabled;
+        }
+        enum-value {
+            name ENABLED;
+            description enabled;
+        }
+        enum-value {
+            name PAUSED;
+            description paused;
+        }
+        enum-value {
+            name FAULT;
+            description fault;
+        }
+    }
+
+    enum {
+        name CommandType;
+        enum-value {
+            name enable;
+        }
+        enum-value {
+            name disable;
+        }
+        enum-value {
+            name pause;
+        }
+        enum-value {
+            name resume;
+        }
+        enum-value {
+            name home;
+        }
+        enum-value {
+            name unhome;
+        }
+    }
+
     member {
         name State;
-        type std::string;
-        default "UNITIALIZED";
+        type prmOperatingState::StateType;
+        default prmOperatingState::UNDEFINED;
         description Operating state, standard states include DISABLED, ENABLED, PAUSED and FAULT;
+    }
+
+    member {
+        name SubState;
+        type std::string;
+        description Sub state, application dependent;
     }
 
     member {
@@ -36,6 +88,18 @@ class {
     inline-header {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    public:
+        inline bool IsEnabledHomedAndNotBusy(void) const {
+            return ((State() == prmOperatingState::ENABLED)
+                    && IsHomed() && !IsBusy());
+        }
+        inline bool IsEnabledAndHomed(void) const {
+            return ((State() == prmOperatingState::ENABLED)
+                    && IsHomed());
+        }
+        virtual bool ValidCommand(const CommandType & command,
+                                  StateType & newOperatingState,
+                                  std::string & humanReadableMessage);
     }
 }
 

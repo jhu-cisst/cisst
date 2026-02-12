@@ -5,7 +5,7 @@
   Author(s):  Joshua Chuang
   Created on: 2011-06-01
 
-  (C) Copyright 2011-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2021 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -191,8 +191,10 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
         CPPUNIT_ASSERT(point.X() == (i % dataElements - dataElements));
         CPPUNIT_ASSERT(point.Y() == (i % dataElements - dataElements));
     }
-    delete arrayToAppend;
-    delete arrayToPrepend;
+
+    delete[] arrayToAppend;
+    delete[] arrayToPrepend;
+    delete[] defaultArray;
 }
 
 
@@ -243,26 +245,26 @@ void vctPlot2DBaseTest::TestRangeComputation(void){
     CPPUNIT_ASSERT(min == 1.0) ;
     CPPUNIT_ASSERT(max == dataElements);
 
-	min = max = 0;
+    min = max = 0;
     /****** TEST ComputeDataRangeX() , sorted = false******/
     signal->ComputeDataRangeX(min, max, false);
     CPPUNIT_ASSERT(min == 1.0) ;
     CPPUNIT_ASSERT(max == dataElements);
 
-	min = max = 0;
+    min = max = 0;
     /****** TEST ComputeDataRangeY() ******/
     signal->ComputeDataRangeY(min, max);
     CPPUNIT_ASSERT(min == 1.0) ;
     CPPUNIT_ASSERT(max == dataElements);
 
-	min = max = 0;
+    min = max = 0;
     /****** TEST ComputeDataRangeX(), by overflowing buffer ******/
     signal->AppendPoint(vctDouble2(0, 0));
     signal->ComputeDataRangeX(min, max, false);
     CPPUNIT_ASSERT(min == 0.0) ;
     CPPUNIT_ASSERT(max == dataElements);
 
-	min = max = 0;
+    min = max = 0;
     /****** TEST ComputeDataRangeY(), by overflowing buffer ******/
     signal->ComputeDataRangeY(min, max);
     CPPUNIT_ASSERT(min == 0.0) ;
@@ -275,6 +277,10 @@ void vctPlot2DBaseTest::TestRangeComputation(void){
     CPPUNIT_ASSERT(minXY.Y() == 0.0);
     CPPUNIT_ASSERT(maxXY.X() == dataElements + 1);
     CPPUNIT_ASSERT(maxXY.Y() == dataElements + 1);
+
+    delete[] arrayToAppend;
+    delete[] arrayToPrepend;
+    delete[] defaultArray;
 }
 
 void vctPlot2DBaseTest::TestAddScaleSignalLine(void)

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-10-20
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -54,6 +54,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(prmMaskedBoolVec);
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 CMN_IMPLEMENT_SERVICES(prmPositionCartesianGet);
 
+#include <cisstParameterTypes/prmPositionCartesianArrayGet.h>
+CMN_IMPLEMENT_SERVICES(prmPositionCartesianArrayGet);
+
 #include <cisstParameterTypes/prmPositionCartesianSet.h>
 CMN_IMPLEMENT_SERVICES(prmPositionCartesianSet);
 
@@ -65,18 +68,6 @@ CMN_IMPLEMENT_SERVICES(prmPositionJointSet);
 
 #include <cisstParameterTypes/prmRobotState.h>
 CMN_IMPLEMENT_SERVICES(prmRobotState);
-
-#include <cisstParameterTypes/prmTransformationBase.h>
-CMN_IMPLEMENT_SERVICES(prmTransformationBase);
-
-#include <cisstParameterTypes/prmTransformationDynamic.h>
-CMN_IMPLEMENT_SERVICES(prmTransformationDynamic);
-
-#include <cisstParameterTypes/prmTransformationFixed.h>
-CMN_IMPLEMENT_SERVICES(prmTransformationFixed);
-
-#include <cisstParameterTypes/prmTransformationManager.h>
-CMN_IMPLEMENT_SERVICES(prmTransformationManager);
 
 #include <cisstParameterTypes/prmVelocityCartesianGet.h>
 CMN_IMPLEMENT_SERVICES(prmVelocityCartesianGet);
@@ -90,23 +81,53 @@ CMN_IMPLEMENT_SERVICES(prmVelocityJointGet);
 #include <cisstParameterTypes/prmVelocityJointSet.h>
 CMN_IMPLEMENT_SERVICES(prmVelocityJointSet);
 
-#include <cisstParameterTypes/prmCartesianImpedanceGains.h>
-CMN_IMPLEMENT_SERVICES(prmCartesianImpedanceGains);
-
-#include <cisstParameterTypes/prmJointType.h>
-CMN_IMPLEMENT_SERVICES_TEMPLATED(prmJointTypeProxy);
+#include <cisstParameterTypes/prmCartesianImpedance.h>
+CMN_IMPLEMENT_SERVICES(prmCartesianImpedance);
 
 #include <cisstParameterTypes/prmIMUSensors.h>
 CMN_IMPLEMENT_SERVICES(prmIMUSensors);
 
+#include <cisstParameterTypes/prmConfigurationJoint.h>
+CMN_IMPLEMENT_SERVICES(prmConfigurationJoint);
+
 #include <cisstParameterTypes/prmStateJoint.h>
 CMN_IMPLEMENT_SERVICES(prmStateJoint);
+
+#include <cisstParameterTypes/prmStateCartesian.h>
+CMN_IMPLEMENT_SERVICES(prmStateCartesian);
+
+#include <cisstParameterTypes/prmServoJoint.h>
+CMN_IMPLEMENT_SERVICES(prmServoJoint);
+
+#include <cisstParameterTypes/prmServoCartesian.h>
+CMN_IMPLEMENT_SERVICES(prmServoCartesian);
 
 #include <cisstParameterTypes/prmInputData.h>
 CMN_IMPLEMENT_SERVICES(prmInputData);
 
 #include <cisstParameterTypes/prmOperatingState.h>
 CMN_IMPLEMENT_SERVICES(prmOperatingState);
+
+#include <cisstParameterTypes/prmImageFrame.h>
+CMN_IMPLEMENT_SERVICES(prmImageFrame);
+
+#include <cisstParameterTypes/prmCameraInfo.h>
+CMN_IMPLEMENT_SERVICES(prmCameraInfo);
+
+#include <cisstParameterTypes/prmDepthMap.h>
+CMN_IMPLEMENT_SERVICES(prmDepthMap);
+
+#include <cisstParameterTypes/prmForwardKinematicsRequest.h>
+CMN_IMPLEMENT_SERVICES(prmForwardKinematicsRequest);
+
+#include <cisstParameterTypes/prmForwardKinematicsResponse.h>
+CMN_IMPLEMENT_SERVICES(prmForwardKinematicsResponse);
+
+#include <cisstParameterTypes/prmInverseKinematicsRequest.h>
+CMN_IMPLEMENT_SERVICES(prmInverseKinematicsRequest);
+
+#include <cisstParameterTypes/prmInverseKinematicsResponse.h>
+CMN_IMPLEMENT_SERVICES(prmInverseKinematicsResponse);
 
 #if CISST_HAS_JSON
 CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(prmBlocking, int);

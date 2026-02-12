@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2014-03-03
 
-  (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2014-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,11 +20,16 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCollectorFactory_h
 #define _mtsCollectorFactory_h
 
-#include <cisstMultiTask/mtsTaskFromSignal.h>
+#include <cisstMultiTask/mtsCollectorBase.h>
 
 #include <string>
 #include <list>
 #include <map>
+
+class mtsCollectorEvent;
+class mtsCollectorBaseData;
+class mtsCollectorStateData;
+class mtsCollectorEventData;
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -36,16 +39,19 @@ http://www.cisst.org/cisst/license.txt.
 
   Create collectors using the command pattern or configuration files.
 */
-class CISST_EXPORT mtsCollectorFactory: public mtsTaskFromSignal
+class CISST_EXPORT mtsCollectorFactory: public mtsCollectorBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+    friend class mtsCollectorBaseData;
+
  public:
     mtsCollectorFactory(const std::string & componentName);
     inline ~mtsCollectorFactory() {};
 
-    void Configure(const std::string & configuration);
-    void Run(void);
-    void Cleanup(void);
+    void Configure(const std::string & configuration) override;
+    void Run(void) override;
+    void Cleanup(void) override;
 
     /*! Add a signal to collect.  If needed, a new state collector
       will be created for each pair of component/state table.  One can
@@ -64,24 +70,55 @@ class CISST_EXPORT mtsCollectorFactory: public mtsTaskFromSignal
                      const std::string & table,
                      const int sampling);
 
+    /*! Add a specific event for a given component and interface. The
+      factory will create an event collector per component
+      observed. */
+    //@{
+    void AddEventWrite(const std::string & component_name,
+                       const std::string & interface_name,
+                       const std::string & event_name);
+    void AddEventVoid(const std::string & component_name,
+                      const std::string & interface_name,
+                      const std::string & event_name);
+    //@}
+
+    /*! Add all events for a given interface on a component. The
+      factory will create an event collector per component
+      observed. */
+    void AddAllEvents(const std::string & component_name,
+                      const std::string & interface_name);
+
+    /*! Add all events for a given component.  All provided interfaces
+      will be added. The factory will create an event collector per
+      component observed. */
+    void AddAllEvents(const std::string & component_name);
+
     /*! Connect all the state collectors created using the
       AddStateCollector. This method must be called after all calls to
-      mtsCollectorFactory::AddSignal. */
-    void Connect(void) const;
+      mtsCollectorFactory::AddSignal and AddEvent. */
+    bool Connect(void) override;
 
     /*! Get a list of all collectors names created so far. */
     void GetCollectorsNames(std::list<std::string> & collectors) const;
 
  protected:
     typedef std::pair<std::string, std::string> CollectorId; // component, state table
-    typedef std::list<std::string> Signals; // list of signals
-    typedef std::pair<std::string, Signals> CollectorData; // name of collector, signals
-    typedef std::pair<CollectorId, CollectorData > Collector; // element type for the map of collectors
-    typedef std::map<CollectorId, CollectorData > CollectorsType; // map of collectors
-    CollectorsType mCollectors;
-
+    std::map<CollectorId, mtsCollectorStateData *> mStateCollectors;
     void AddStateCollector(const std::string & component,
                            const std::string & table);
+
+    std::map<std::string, mtsCollectorEventData *> mEventCollectors;
+    mtsCollectorEvent * GetEventCollector(const std::string & component);
+
+    std::list<mtsCollectorBaseData *> mAllCollectors;
+
+    /* methods to mimic any collector */
+    void StartCollection(const double & delayInSeconds) override;
+    void StopCollection(const double & delayInSeconds) override;
+    void SetWorkingDirectory(const std::string & directory) override;
+    void SetOutputToDefault(void) override;
+    void CollectionStartedEventHandler(const bool & started);
+    void ProgressEventHandler(const size_t & counter);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorFactory)

@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):  Anton Deguet
   Created on: 2004-01-12
-  
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+
+  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -53,6 +51,12 @@ class vctMatrixRotation3Test : public CppUnit::TestFixture
     CPPUNIT_TEST(TestConversionEulerZYXDouble);
     CPPUNIT_TEST(TestConversionEulerZYXFloat);
 
+    CPPUNIT_TEST(TestConversionEulerZXZDouble);
+    CPPUNIT_TEST(TestConversionEulerZXZFloat);
+
+    CPPUNIT_TEST(TestConversionEulerYZXDouble);
+    CPPUNIT_TEST(TestConversionEulerYZXFloat);
+
     CPPUNIT_TEST(TestFromSignaturesQuaternionDouble);
     CPPUNIT_TEST(TestFromSignaturesQuaternionFloat);
 
@@ -90,14 +94,14 @@ class vctMatrixRotation3Test : public CppUnit::TestFixture
     CPPUNIT_TEST(TestApplyMethodsOperatorsFloat);
 
     CPPUNIT_TEST_SUITE_END();
-    
+
  public:
     void setUp(void) {
     }
-    
+
     void tearDown(void) {
     }
-    
+
     /*! Test the constructors. */
     template<class _elementType>
         void TestConstructors(void);
@@ -141,6 +145,10 @@ class vctMatrixRotation3Test : public CppUnit::TestFixture
     void TestConversionEulerZYZFloat(void);
     void TestConversionEulerZYXDouble(void);
     void TestConversionEulerZYXFloat(void);
+    void TestConversionEulerZXZDouble(void);
+    void TestConversionEulerZXZFloat(void);
+    void TestConversionEulerYZXDouble(void);
+    void TestConversionEulerYZXFloat(void);
 
     /*! Test signatures for From(quaternion) */
     template<class _elementType>
@@ -215,4 +223,3 @@ class vctMatrixRotation3Test : public CppUnit::TestFixture
     void TestApplyMethodsOperatorsFloat(void);
 
 };
-

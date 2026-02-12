@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2013-05-17
 
-  (C) Copyright 2013-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -36,7 +36,7 @@ class CISST_EXPORT mtsSystemQtWidget: public QWidget
     Q_OBJECT;
 
 public:
-    mtsSystemQtWidget(const std::string & name = "");
+    mtsSystemQtWidget(const std::string & name = "mtsSystemQtWidget");
     inline virtual ~mtsSystemQtWidget() {}
 
     void SetInterfaceRequired(mtsInterfaceRequired * interfaceRequired);
@@ -58,16 +58,16 @@ public:
     mtsSystemQtWidgetComponent(const std::string & componentName, double periodInSeconds = 50.0 * cmn_ms);
     ~mtsSystemQtWidgetComponent() {}
 
-    inline void Configure(const std::string & CMN_UNUSED(filename) = "") {};
-    void Startup(void);
-    inline void Cleanup(void) {};
+    inline void Configure(const std::string & CMN_UNUSED(filename) = "") override {};
+    void Startup(void) override;
+    inline void Cleanup(void) override {};
 
 private slots:
-    void timerEvent(QTimerEvent * event);
+    void timerEvent(QTimerEvent * event) override;
 
 private:
     int TimerPeriodInMilliseconds;
-    mtsFunctionRead GetPeriodStatistics;
+    mtsFunctionRead period_statistics;
     mtsIntervalStatistics IntervalStatistics;
 };
 

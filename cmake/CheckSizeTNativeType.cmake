@@ -1,11 +1,8 @@
 #
-# $Id $
-#
 # Author(s):  Anton Deguet
 # Created on: 2011
 #
-# (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -17,8 +14,9 @@
 
 function (check_size_t_native_type VARIABLE)
   # make sure we don't test over and over
-  if ("${VARIABLE}" MATCHES "^${VARIABLE}$")
+  if (${VARIABLE} MATCHES "^${VARIABLE}$")
     message (STATUS "Checking to see if size_t is a native type")
+    # check against int and long long int
     set (SOURCE
          "#include <vector>
           char method(unsigned int p) {
@@ -33,13 +31,37 @@ function (check_size_t_native_type VARIABLE)
           int main(void) {}")
 
     file (WRITE
-          "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/test_size_t.cpp"
+          "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/test_size_t_int.cpp"
           "${SOURCE}\n")
 
-    try_compile (${VARIABLE}
+    try_compile (RESULT_int
                  ${CMAKE_BINARY_DIR}
-                 "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/test_size_t.cpp"
-                 OUTPUT_VARIABLE OUTPUT)
+                 "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/test_size_t_int.cpp"
+                 OUTPUT_VARIABLE OUTPUT_int)
+
+    # check against long int (ubuntu 18.04 default compiler apparently uses unsigned long int for size_t)
+    set (SOURCE
+         "#include <vector>
+          char method(unsigned long int p) {
+            return 'l';
+          }
+          char method(size_t p) {
+            return 's';
+          }
+          int main(void) {}")
+
+    file (WRITE
+          "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/test_size_t_long.cpp"
+          "${SOURCE}\n")
+
+    try_compile (RESULT_long
+                 ${CMAKE_BINARY_DIR}
+                 "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/test_size_t_long.cpp"
+                 OUTPUT_VARIABLE OUTPUT_long)
+
+    set (VARIABLE RESULT_int AND RESULT_long)
+
+    set (OUTPUT "${OUTPUT_int}\n${OUTPUT_long}")
 
     # report using message and log files
     if (${VARIABLE})
@@ -54,6 +76,6 @@ function (check_size_t_native_type VARIABLE)
             "the following output:\n${OUTPUT}\n\n")
     endif (${VARIABLE})
 
-  endif ("${VARIABLE}" MATCHES "^${VARIABLE}$")
+  endif (${VARIABLE} MATCHES "^${VARIABLE}$")
 
 endfunction (check_size_t_native_type VARIABLE)

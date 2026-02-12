@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -26,7 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 #include <cisstMultiTask/mtsEventReceiver.h>
 
+#include <cisstCommon/cmnStrings.h>
 #include <cisstCommon/cmnSerializer.h>
+#include <cisstCommon/cmnDataFunctions.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 
@@ -189,6 +191,14 @@ bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string & eventNa
     return result;
 }
 
+
+mtsInterfaceRequiredDescription mtsInterfaceRequired::GetDescription() const
+{
+    mtsInterfaceRequiredDescription desc;
+    desc.InterfaceName = GetName();
+    GetDescription(desc);
+    return desc;
+}
 
 std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctions(void) const
 {
@@ -454,12 +464,18 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                         CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional void command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsVoid())
+                                                   << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for void command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsVoid())
+                                                   << std::endl;
                     }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for void command \""
@@ -497,12 +513,18 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                         CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional void with return command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsVoidReturn())
+                                                   << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for void with return command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsVoidReturn())
+                                                   << std::endl;
                     }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for void with return command \""
@@ -540,12 +562,18 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                         CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional write command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsWrite())
+                                                   << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for write command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsWrite())
+                                                   << std::endl;
                     }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for write command \""
@@ -583,12 +611,18 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                         CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional write with return command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsWriteReturn())
+                                                   << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for write with return command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsWriteReturn())
+                                                   << std::endl;
                     }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for write with return command \""
@@ -626,12 +660,18 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                         CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional read command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsRead())
+                                                   << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for read command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsRead())
+                                                   << std::endl;
                     }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for read command \""
@@ -669,12 +709,18 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                         CMN_LOG_CLASS_INIT_VERBOSE << "BindCommands: couldn't find optional qualified read command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsQualifiedRead())
+                                                   << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for qualified read command \""
                                                    << iter->first << "\" (connecting \""
                                                    << this->GetFullName() << "\" to \""
-                                                   << interfaceProvided->GetFullName() << "\")"<< std::endl;
+                                                   << interfaceProvided->GetFullName()
+                                                   << "\"), the following commands are available: "
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsQualifiedRead())
+                                                   << std::endl;
                     }
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommands: succeeded for qualified read command \""
@@ -750,6 +796,8 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList & eventList)
                                                                            iterEventWrite->second,
                                                                            MTS_OPTIONAL));
     }
+
+    eventList.SetValid(true);
 }
 
 
@@ -761,10 +809,10 @@ bool mtsInterfaceRequired::CheckEventList(mtsEventHandlerList & eventList) const
     size_t i;
     for (i = 0; i < eventList.VoidEvents.size(); i++) {
         if (!eventList.VoidEvents[i].Result) {
-            CMN_LOG_CLASS_INIT_WARNING << "CheckEventList: failed to add observer for void event \""
-                                       << eventList.VoidEvents[i].EventName << "\" (connecting \""
-                                       << this->GetFullName() << "\" to \""
-                                       << eventList.Provided->GetFullName() << "\")"<< std::endl;
+            CMN_LOG_CLASS_INIT_DEBUG << "CheckEventList: failed to add observer for void event \""
+                                     << eventList.VoidEvents[i].EventName << "\" (connecting \""
+                                     << this->GetFullName() << "\" to \""
+                                     << eventList.Provided->GetFullName() << "\")"<< std::endl;
             if (eventList.VoidEvents[i].Required == MTS_REQUIRED) {
                 success = false;
             }
@@ -778,10 +826,10 @@ bool mtsInterfaceRequired::CheckEventList(mtsEventHandlerList & eventList) const
 
     for (i = 0; i < eventList.WriteEvents.size(); i++) {
         if (!eventList.WriteEvents[i].Result) {
-            CMN_LOG_CLASS_INIT_WARNING << "CheckEventList: failed to add observer for write event \""
-                                       << eventList.WriteEvents[i].EventName << "\" (connecting \""
-                                       << this->GetFullName() << "\" to \""
-                                       << eventList.Provided->GetFullName() << "\")"<< std::endl;
+            CMN_LOG_CLASS_INIT_DEBUG << "CheckEventList: failed to add observer for write event \""
+                                     << eventList.WriteEvents[i].EventName << "\" (connecting \""
+                                     << this->GetFullName() << "\" to \""
+                                     << eventList.Provided->GetFullName() << "\")"<< std::endl;
             if (eventList.WriteEvents[i].Required == MTS_REQUIRED) {
                 success = false;
             }
@@ -939,7 +987,7 @@ bool mtsInterfaceRequired::RemoveEventHandlerWrite(const std::string & eventName
     return EventHandlersWrite.RemoveItem(eventName, CMN_LOG_LEVEL_INIT_WARNING);
 }
 
-void mtsInterfaceRequired::GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription)
+void mtsInterfaceRequired::GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription) const
 {
     // Serializer initialization
     std::stringstream streamBuffer;

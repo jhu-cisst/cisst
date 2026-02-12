@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-12-08
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 // Always include last
 #include "mtsTestExport.h"
@@ -61,6 +60,49 @@ const double StateTransitionMaximumDelay = 5.0 * cmn_s;
    artificially slow and test blocking commands.
 */
 
+// mtsTestClassGeneric for testing AddCommandFilteredReadState
+
+template <class _elementType>
+class mtsTestClassGeneric : public mtsGenericObject {
+    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    int unused;
+    _elementType val;
+public:
+    mtsTestClassGeneric() : unused(0), val(0) {}
+    mtsTestClassGeneric(_elementType &v) : unused(0), val(v) {}
+    ~mtsTestClassGeneric() {}
+    void Init(void) { unused = 0; val = 0; }
+    void Increment(void) { val++; }
+    bool GetValue(_elementType &v) const { v = val; return true; }
+    _elementType ReturnValue(void) const { return val; }
+};
+
+typedef mtsTestClassGeneric<int> mtsTestClassGeneric_int;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestClassGeneric_int)
+typedef mtsTestClassGeneric<mtsInt> mtsTestClassGeneric_mtsInt;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestClassGeneric_mtsInt)
+
+template <class _elementType>
+bool TestClassConversion(const mtsTestClassGeneric<_elementType> &input, _elementType &output)
+{
+    return input.GetValue(output);
+}
+
+// For testing state table filtered read using a standard type
+// (not derived from mtsGenericObject)
+template <class _elementType>
+bool TestV3Conversion(const vctFixedSizeVector<_elementType, 3> &input, _elementType &output)
+{
+    output = input.SumOfElements();
+    return true;
+}
+
+// Not sure why following is needed
+CMN_DATA_SPECIALIZE_ALL_NO_BYTE_SWAP(mtsInt, mtsI);
+
+typedef vctFixedSizeVector<mtsInt, 3> vct3mtsInt;
+typedef mtsGenericObjectProxy<vct3mtsInt> mtsVct3mtsInt;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct3mtsInt)
 
 //-----------------------------------------------------------------------------
 //  Base class for all test components
@@ -76,6 +118,11 @@ public:
     mtsFunctionRead FunctionRead;
     mtsFunctionQualifiedRead FunctionQualifiedRead;
     mtsFunctionRead FunctionStateTableRead;
+    mtsFunctionRead FunctionStateTableFilteredReadGenericR;   // Read method
+    mtsFunctionRead FunctionStateTableFilteredReadGenericVR;  // Void-return method
+    mtsFunctionRead FunctionStateTableFilteredReadGenericCF;  // Conversion function
+    mtsFunctionRead FunctionStateTableFilteredReadV3VR;       // Void-return method
+    mtsFunctionRead FunctionStateTableFilteredReadV3CF;       // Conversion function
     mtsFunctionVoid FunctionStateTableAdvance;
 
     virtual int GetValue(void) const = 0; 
@@ -106,10 +153,13 @@ class mtsTestInterfaceProvided: public mtsTestInterfaceProvidedBase
 {
 public:
     typedef _elementType value_type; // STL convention
+    typedef vctFixedSizeVector<_elementType, 3> vector3_type;
 
 private:
     value_type Value, StateValue;
     value_type Argument1Prototype, Argument2Prototype;
+    mtsTestClassGeneric<value_type> StateValueFilteredGeneric;
+    vector3_type StateValueFilteredV3;
     double ExecutionDelay; // to test blocking commands
 
 public:
@@ -124,6 +174,8 @@ public:
     {
         Value = -1;   // initial value = -1;
         StateValue = 0;
+        StateValueFilteredGeneric.Init();
+        StateValueFilteredV3.SetAll(0);
         Argument1Prototype = Argument1PrototypeDefault;
         Argument2Prototype = Argument2PrototypeDefault;
     }
@@ -173,6 +225,8 @@ public:
     void StateTableAdvance(void) {
         StateTable->Start();
         StateValue++;
+        StateValueFilteredGeneric.Increment();
+        StateValueFilteredV3.SetAll(StateValue);
         StateTable->Advance();
     }
 
@@ -198,8 +252,23 @@ public:
         // add and configure state table
         StateTable = new mtsStateTable(100, "StateTable" + provided->GetName());
         StateTable->AddData(StateValue, "StateValue");
+        StateTable->AddData(StateValueFilteredGeneric, "StateValueFilteredGeneric");
+        StateTable->AddData(StateValueFilteredV3, "StateValueFilteredV3");
         StateTable->SetAutomaticAdvance(false);
         provided->AddCommandReadState(*StateTable, StateValue, "StateTableRead");
+        provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredGeneric, &mtsTestClassGeneric<value_type>::GetValue,
+                                              "StateTableFilteredReadGenericR");
+        provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredGeneric, &mtsTestClassGeneric<value_type>::ReturnValue,
+                                              "StateTableFilteredReadGenericVR");
+        provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredGeneric, &TestClassConversion<value_type>,
+                                              "StateTableFilteredReadGenericCF");
+#if 0
+        // Compiler fails to deduce template argument
+        provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredV3, &vector3_type::SumOfElements,
+                                              "StateTableFilteredReadV3VR");
+#endif
+        provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredV3, &TestV3Conversion<value_type>,
+                                              "StateTableFilteredReadV3CF");
         provided->AddCommandVoid(&mtsTestInterfaceProvided::StateTableAdvance,
                                  this, "StateTableAdvance");
     }
@@ -241,6 +310,14 @@ public:
         required->AddFunction("Read", this->FunctionRead);
         required->AddFunction("QualifiedRead", this->FunctionQualifiedRead);
         required->AddFunction("StateTableRead", this->FunctionStateTableRead);
+        required->AddFunction("StateTableFilteredReadGenericR", this->FunctionStateTableFilteredReadGenericR);
+        required->AddFunction("StateTableFilteredReadGenericVR", this->FunctionStateTableFilteredReadGenericVR);
+        required->AddFunction("StateTableFilteredReadGenericCF", this->FunctionStateTableFilteredReadGenericCF);
+#if 0
+        // Not currently supported
+        required->AddFunction("StateTableFilteredReadV3VR", this->FunctionStateTableFilteredReadV3VR);
+#endif
+        required->AddFunction("StateTableFilteredReadV3CF", this->FunctionStateTableFilteredReadV3CF);
         required->AddFunction("StateTableAdvance", this->FunctionStateTableAdvance);
         required->AddEventHandlerVoid(&mtsTestInterfaceRequired::EventVoidHandler, this, "EventVoid");
         required->AddEventHandlerWrite(&mtsTestInterfaceRequired::EventWriteHandler, this, "EventWrite");
@@ -330,7 +407,7 @@ public:
         }
     }
 
-    void Configure(const std::string & CMN_UNUSED(filename) = "") {}
+    void Configure(const std::string & CMN_UNUSED(filename) = "") override {}
 };
 
 typedef mtsTestDevice1<int> mtsTestDevice1_int;
@@ -600,8 +677,8 @@ public:
     } TestComponent;
 
     struct {
-        mtsFunctionVoid StartCollection;
-        mtsFunctionVoid StopCollection;
+        mtsFunctionWrite StartCollection;
+        mtsFunctionWrite StopCollection;
     } CollectorState;
 
     void BatchReadyHandler(const mtsStateTable::IndexRange & range) {
@@ -613,7 +690,7 @@ public:
         this->CollectionRunning = true;
     }
 
-    void CollectionStoppedHandler(const mtsUInt & samplesCollected) {
+    void CollectionStoppedHandler(const size_t & samplesCollected) {
         this->CollectionRunning = false;
         this->SamplesCollected = samplesCollected;
     }

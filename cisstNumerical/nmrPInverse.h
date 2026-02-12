@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor
   Created on: 2005-10-18
 
-  (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -894,7 +894,9 @@ inline CISSTNETLIB_INTEGER nmrPInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _r
                              vctFixedSizeVectorBase<_work, 1, CISSTNETLIB_DOUBLE, _dataPtrType> & workspace)
 {
     typedef vct::size_type size_type;
+#if CMN_ASSERT_IS_DEFINED
     const size_type lwork = nmrPInverseFixedSizeData<_rows, _cols, _storageOrder>::LWORK;
+#endif
     const size_type lwork_3 = nmrPInverseFixedSizeData<_rows, _cols, _storageOrder>::LWORK_3;
     const size_type minmn = nmrPInverseFixedSizeData<_rows, _cols, _storageOrder>::MIN_MN;
     const size_type maxmn = (_rows > _cols) ? _rows : _cols;

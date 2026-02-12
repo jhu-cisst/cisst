@@ -5,7 +5,7 @@
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2003-08-18
 
-  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -73,8 +73,12 @@ class vctFixedSizeVector : public vctFixedSizeVectorBase<
 
  public:
     /*! Default constructor.  Do nothing. */
-    inline vctFixedSizeVector()
-        {}
+    inline vctFixedSizeVector() {}
+ 
+    /*! Copy constructor */
+    inline vctFixedSizeVector(const ThisType & other) {
+        this->Assign(other);
+    }
 
     /*! Initialize all the elements to the given value.
       \param value the value used to set all the elements of the vector
