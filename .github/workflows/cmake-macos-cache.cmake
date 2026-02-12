@@ -13,6 +13,9 @@ set (CISST_USE_SI_UNITS ON CACHE BOOL "")
 set (CISST_cisstMesh ON CACHE BOOL "")
 set (CISST_cisstRobot ON CACHE BOOL "")
 
+# Build tests
+set (CISST_BUILD_TESTS ON CACHE BOOL "")
+
 # XML parsing
 set (CISST_cisstCommonXML OFF CACHE BOOL "")
 

@@ -24,13 +24,15 @@ jobs:
     - name: Cache APT packages
       uses: actions/cache@v4
       with:
-        path: /var/cache/apt/archives
+        path: ${{ github.workspace }}/apt-cache
         key: ${{ runner.os }}-apt-humble-${{ hashFiles('.github/workflows/ubuntu-22.04.yml') }}
         restore-keys: |
           ${{ runner.os }}-apt-humble-
 
     - name: Install Dependencies
       run: |
+        mkdir -p ${{ github.workspace }}/apt-cache
+        echo "Dir::Cache::archives \"${{ github.workspace }}/apt-cache\";" | sudo tee /etc/apt/apt.conf.d/10cache
         sudo apt-get update
         sudo apt-get install -y \
           libxml2-dev \
