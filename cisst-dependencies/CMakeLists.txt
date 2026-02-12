@@ -106,8 +106,10 @@ if (CISST_HAS_QT5)
       PREFIX ${cisstQtNodes_PREFIX}
       GIT_REPOSITORY    ${CISST_QTNODES_GIT_REPOSITORY}
       GIT_TAG           ${CISST_QTNODES_GIT_TAG}
-      CMAKE_ARGS
+      CMAKE_CACHE_ARGS
         -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+        -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
+        -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
         -DCMAKE_CXX_STANDARD:STRING=17
         -DCMAKE_CXX_STANDARD_REQUIRED:BOOL=ON
@@ -117,6 +119,8 @@ if (CISST_HAS_QT5)
         -DBUILD_DOCS:BOOL=OFF
         -DBUILD_EXAMPLES:BOOL=OFF
         -DUSE_QT6:BOOL=OFF
+        -DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}
+        -DQt5_DIR:PATH=${Qt5_DIR}
       INSTALL_DIR ${cisst_BINARY_DIR}/cisstQtNodes
       UPDATE_COMMAND ""
     )
@@ -183,6 +187,8 @@ if (CISST_HAS_FLTK)
                              URL ${CISST_FLTK_URL}
                              URL_MD5 ${CISST_FLTK_URL_MD5}
                              CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                              -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
+                                              -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                                               -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                                               -DOPTION_BUILD_EXAMPLES:BOOL=OFF
                                               -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstFltk
@@ -367,6 +373,8 @@ if (CISST_HAS_JSON)
                          GIT_REPOSITORY    ${CISST_JSON_GIT_REPOSITORY}
                          GIT_TAG           ${CISST_JSON_GIT_TAG}
                          CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                          -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
+                                          -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                                           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                                           -DCMAKE_CXX_FLAGS:STRING=${JSON_CMAKE_CXX_FLAGS}
                                           -DOPTION_BUILD_EXAMPLES:BOOL=OFF
