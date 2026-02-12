@@ -16,12 +16,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: '5.*.*'
-        arch: clang_64
-
     - name: Setup Homebrew cache
       uses: actions/cache@v4
       with:
@@ -34,7 +28,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install graphviz jsoncpp
+        brew install graphviz jsoncpp qt@5 pkg-config
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
@@ -58,7 +52,13 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
+      run: |
+        export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+        cmake ${{github.workspace}} \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_OSX_ARCHITECTURES=arm64 \
+          -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5" \
+          -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}/build

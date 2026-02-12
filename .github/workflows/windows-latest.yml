@@ -29,7 +29,9 @@ jobs:
       uses: actions/cache@v4
       with:
         path: C:\vcpkg\installed
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/windows-latest.yml') }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
 
     - name: Download cisstNetlib
       run: |
@@ -45,9 +47,6 @@ jobs:
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
-
-    - name: Install dependencies with vcpkg
-      run: vcpkg install jsoncpp:x64-windows graphviz:x64-windows pkgconf:x64-windows
 
     - name: Configure CMake
       working-directory: ${{github.workspace}}/build

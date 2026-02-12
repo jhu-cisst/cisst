@@ -1,0 +1,18 @@
+{
+  "name": "cisst",
+  "version-string": "1.4.0",
+  "dependencies": [
+    {
+      "name": "jsoncpp",
+      "platform": "windows | osx"
+    },
+    {
+      "name": "graphviz",
+      "platform": "windows | osx"
+    },
+    {
+      "name": "pkgconf",
+      "platform": "windows"
+    }
+  ]
+}
