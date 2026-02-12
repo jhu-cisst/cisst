@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
   This class defines the local component manager (LCM) that manages local
   components and is unique in a process.  Since only one instance of LCM should
-  exist in a process, this class is implemented as singleton.  To get an
+  exist in a process, this class is implemented as a singleton.  To get an
   instance of LCM, therefore, mtsManagerLocal::GetInstance() should be used
   (instead of constructor).
 
@@ -399,12 +399,20 @@ public:
     /*! Call KillAll method followed by WaitForStateAll. */
     bool KillAllAndWait(double timeoutInSeconds);
 
-    /*! \brief Cleanup.  Since a local component manager is a singleton, the
-               destructor will be called when the program exits but a library
-               user is not capable of handling the timing. Thus, for safe
-               termination, this method should be called before an application
-               quits. */
+    /*! \brief Cleanup. Left in the public API for backwards compatibility.
+               Client code should not call this method directly, and should
+               instead call DeleteInstance prior to quitting. DeleteInstance
+               calls this method before deleting the singleton. */
     void Cleanup(void);
+
+    /*! \brief DeleteInstance. Since a local component manager is a singleton,
+               and demand-created by the first caller of GetInstance, the
+               destructor will never be called unless an application calls
+               this method just prior to quitting. GetInstance should NOT
+               be used again after this method is called. This method calls
+               Cleanup from its implementation, so a separate call to Cleanup
+               is unnecessary. */
+    static void DeleteInstance(void);
 
     //-------------------------------------------------------------------------
     //  Connection Management

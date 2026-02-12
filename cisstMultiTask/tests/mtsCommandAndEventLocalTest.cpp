@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
@@ -192,14 +191,30 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             startTime = timeServer.GetRelativeTime();
             executionResult = client->InterfaceRequired1.FunctionVoid.ExecuteBlocking();
             stopTime = timeServer.GetRelativeTime();
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
-            std::stringstream message;
-            message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
-            CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
+            {
+                std::stringstream message;
+                message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
+                CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            }
         } else {
             // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionVoid.ExecuteBlocking();
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
         }
         CPPUNIT_ASSERT(0 == server->InterfaceProvided1.GetValue()); // reset
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
@@ -209,14 +224,30 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             startTime = timeServer.GetRelativeTime();
             executionResult = client->InterfaceRequired1.FunctionWrite.ExecuteBlocking(valueWrite);
             stopTime = timeServer.GetRelativeTime();
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
-            std::stringstream message;
-            message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
-            CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
+            {
+                std::stringstream message;
+                message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
+                CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            }
         } else {
             // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionWrite.ExecuteBlocking(valueWrite);
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
         }
         CPPUNIT_ASSERT(valueWrite == server->InterfaceProvided1.GetValue()); // set to new value
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
@@ -226,14 +257,30 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             startTime = timeServer.GetRelativeTime();
             executionResult = client->InterfaceRequired1.FunctionFilteredWrite.ExecuteBlocking(valueWrite);
             stopTime = timeServer.GetRelativeTime();
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
-            std::stringstream message;
-            message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
-            CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
+            {
+                std::stringstream message;
+                message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
+                CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            }
         } else {
             // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionFilteredWrite.ExecuteBlocking(valueWrite);
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
         }
         CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // set to new value + 1 (filter)
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
@@ -243,14 +290,30 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             startTime = timeServer.GetRelativeTime();
             executionResult = client->InterfaceRequired1.FunctionVoidReturn(valueRead);
             stopTime = timeServer.GetRelativeTime();
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
-            std::stringstream message;
-            message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
-            CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
+            {
+                std::stringstream message;
+                message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
+                CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            }
         } else {
             // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionVoidReturn(valueRead);
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
         }
         CPPUNIT_ASSERT(valueRead == 1); // number was positive
         CPPUNIT_ASSERT((-(valueWrite + 1)) == server->InterfaceProvided1.GetValue()); // negated
@@ -262,14 +325,30 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
             startTime = timeServer.GetRelativeTime();
             executionResult = client->InterfaceRequired1.FunctionWriteReturn(valueWritePlusOne, valueRead);
             stopTime = timeServer.GetRelativeTime();
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
-            std::stringstream message;
-            message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
-            CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
+            {
+                std::stringstream message;
+                message << "Actual: " << (stopTime - startTime) << " >= " << (blockingDelay * 0.9);
+                CPPUNIT_ASSERT_MESSAGE(message.str(), (stopTime - startTime) >= (blockingDelay * 0.9));
+            }
         } else {
             // no significant delay but result should be guaranteed without sleep
             executionResult = client->InterfaceRequired1.FunctionWriteReturn(valueWritePlusOne, valueRead);
-            CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
+            {
+                std::stringstream message;
+                message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                        << mtsExecutionResult::EnumToString(executionResult.GetResult());
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                             mtsExecutionResult::COMMAND_SUCCEEDED,
+                                             executionResult.GetResult());
+            }
         }
         CPPUNIT_ASSERT(valueRead == -1); // number was negative
         CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // negated back
@@ -302,7 +381,14 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     // test read command
     valueRead = 0;
     executionResult = client->InterfaceRequired1.FunctionRead(valueRead);
-    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
+    {
+        std::stringstream message;
+        message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                << mtsExecutionResult::EnumToString(executionResult.GetResult());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                     mtsExecutionResult::COMMAND_SUCCEEDED,
+                                     executionResult.GetResult());
+    }
     CPPUNIT_ASSERT((valueWrite + 1) == valueRead);
     CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // unchanged
     CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
@@ -312,7 +398,14 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     // test qualified read command
     valueRead = 0;
     executionResult = client->InterfaceRequired1.FunctionQualifiedRead(valueWrite, valueRead);
-    CPPUNIT_ASSERT_EQUAL(mtsExecutionResult::COMMAND_SUCCEEDED, executionResult.GetResult());
+    {
+        std::stringstream message;
+        message << "Execution result expected was COMMAND_SUCCEEDED, got: "
+                << mtsExecutionResult::EnumToString(executionResult.GetResult());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(message.str(),
+                                     mtsExecutionResult::COMMAND_SUCCEEDED,
+                                     executionResult.GetResult());
+    }
     CPPUNIT_ASSERT((valueWrite + 1) == valueRead);
     CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // unchanged
     CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged

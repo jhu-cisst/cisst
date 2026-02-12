@@ -85,10 +85,25 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
 
 mtsStateTable::~mtsStateTable()
 {
+    // remove all elements from the state table
+    for (size_t index = 0;
+         index < StateVector.size();
+         ++index) {
+        // accessor
+        delete StateVectorAccessors.back();
+        StateVectorAccessors.pop_back();
+        // name
+        StateVectorDataNames.pop_back();
+        // element pointers
+        StateVectorElements.pop_back();
+        // actual data
+        delete StateVector.back();
+        StateVector.pop_back();
+    }
 }
 
-bool mtsStateTable::SetSize(const size_t size){
-    if(this->HistoryLength == size){
+bool mtsStateTable::SetSize(const size_t size) {
+    if (this->HistoryLength == size) {
         return true;
     }
 
