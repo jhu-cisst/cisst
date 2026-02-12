@@ -111,6 +111,7 @@ if (CISST_HAS_QT5)
         -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
         -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+        -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_TOOLCHAIN_FILE}
         -DCMAKE_CXX_STANDARD:STRING=17
         -DCMAKE_CXX_STANDARD_REQUIRED:BOOL=ON
         -DCMAKE_CXX_EXTENSIONS:BOOL=OFF
@@ -190,6 +191,7 @@ if (CISST_HAS_FLTK)
                                               -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
                                               -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                                               -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                              -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_TOOLCHAIN_FILE}
                                               -DOPTION_BUILD_EXAMPLES:BOOL=OFF
                                               -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstFltk
                              INSTALL_DIR ${cisst_BINARY_DIR}/cisstFltk
@@ -376,6 +378,7 @@ if (CISST_HAS_JSON)
                                           -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
                                           -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                                           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                          -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_TOOLCHAIN_FILE}
                                           -DCMAKE_CXX_FLAGS:STRING=${JSON_CMAKE_CXX_FLAGS}
                                           -DOPTION_BUILD_EXAMPLES:BOOL=OFF
                                           -DJSONCPP_WITH_TESTS:BOOL=OFF

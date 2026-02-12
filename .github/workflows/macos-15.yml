@@ -43,7 +43,11 @@ jobs:
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
-        cmake ${{github.workspace}}/cisstNetlib-source -DcisstNetlib_LANGUAGE=C -DCMAKE_OSX_ARCHITECTURES=arm64
+        cmake ${{github.workspace}}/cisstNetlib-source \
+          -DcisstNetlib_LANGUAGE=C \
+          -DCMAKE_OSX_ARCHITECTURES=arm64 \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build . --config Release
         sudo cmake --build . --target install
     - name: Create Build Environment
@@ -58,6 +62,8 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_OSX_ARCHITECTURES=arm64 \
           -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5" \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
 
     - name: Build
