@@ -13,6 +13,10 @@ jobs:
 
     runs-on: windows-latest
 
+    env:
+      VCPKG_INSTALLATION_ROOT: C:\vcpkg
+      VCPKG_ROOT: C:\vcpkg
+
     steps:
     - uses: actions/checkout@v4
 
@@ -20,6 +24,12 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: '5.*.*'
+
+    - name: Cache vcpkg dependencies
+      uses: actions/cache@v4
+      with:
+        path: C:\vcpkg\installed
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/windows-latest.yml') }}
 
     - name: Download cisstNetlib
       run: |
@@ -41,7 +51,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{github.workspace}}/build
-      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake -C ${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake
+      run: cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" -C "${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake"
 
     - name: Build
       working-directory: ${{github.workspace}}/build

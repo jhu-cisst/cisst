@@ -22,9 +22,25 @@ jobs:
         version: '5.*.*'
         arch: clang_64
 
+    - name: Setup Homebrew cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Caches/Homebrew
+          /opt/homebrew/Cellar
+        key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/macos-15.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-brew-
+
     - name: Install dependencies
       run: |
-        arch -x86_64 /usr/local/bin/brew install graphviz jsoncpp
+        brew install graphviz jsoncpp
+
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/macos-15.yml') }}
+        max-size: 1G
 
     - name: Download cisstNetlib
       run: |
@@ -33,7 +49,7 @@ jobs:
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
-        cmake ${{github.workspace}}/cisstNetlib-source -DcisstNetlib_LANGUAGE=C -DCMAKE_OSX_ARCHITECTURES=x86_64
+        cmake ${{github.workspace}}/cisstNetlib-source -DcisstNetlib_LANGUAGE=C -DCMAKE_OSX_ARCHITECTURES=arm64
         cmake --build . --config Release
         sudo cmake --build . --target install
     - name: Create Build Environment
@@ -42,7 +58,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64 -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
+      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}/build

@@ -16,10 +16,38 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Setup ROS 2 Jazzy
+      uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: jazzy
+
+    - name: Cache APT packages
+      uses: actions/cache@v4
+      with:
+        path: /var/cache/apt/archives
+        key: ${{ runner.os }}-apt-jazzy-${{ hashFiles('.github/workflows/ubuntu-24.04.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-apt-jazzy-
+
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libxml2-dev libjsoncpp-dev qtbase5-dev qtbase5-dev-tools qt5-qmake-bin libqt5xmlpatterns5-dev libgraphviz-dev
+        sudo apt-get install -y \
+          libxml2-dev \
+          libjsoncpp-dev \
+          qtbase5-dev \
+          qtbase5-dev-tools \
+          qt5-qmake-bin \
+          libqt5xmlpatterns5-dev \
+          libgraphviz-dev \
+          ros-jazzy-ros-base \
+          ros-jazzy-desktop
+
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/ubuntu-24.04.yml') }}
+        max-size: 1G
 
     - name: Download cisstNetlib
       run: |

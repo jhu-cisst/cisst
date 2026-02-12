@@ -16,10 +16,39 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Setup ROS 2 Humble
+      uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: humble
+
+    - name: Cache APT packages
+      uses: actions/cache@v4
+      with:
+        path: /var/cache/apt/archives
+        key: ${{ runner.os }}-apt-humble-${{ hashFiles('.github/workflows/ubuntu-22.04.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-apt-humble-
+
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libxml2-dev libjsoncpp-dev qtbase5-dev qtbase5-dev-tools qt5-qmake-bin libqt5xmlpatterns5-dev gfortran-9 libgraphviz-dev
+        sudo apt-get install -y \
+          libxml2-dev \
+          libjsoncpp-dev \
+          qtbase5-dev \
+          qtbase5-dev-tools \
+          qt5-qmake-bin \
+          libqt5xmlpatterns5-dev \
+          gfortran-9 \
+          libgraphviz-dev \
+          ros-humble-ros-base \
+          ros-humble-desktop
+
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/ubuntu-22.04.yml') }}
+        max-size: 1G
 
     - name: Download cisstNetlib
       run: |
