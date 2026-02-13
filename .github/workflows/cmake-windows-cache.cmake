@@ -24,6 +24,14 @@ set (CISST_BUILD_TESTS OFF CACHE BOOL "")
 
 # Build examples
 set (CISST_BUILD_EXAMPLES ON CACHE BOOL "")
+set (CISST_cisstCommon_EXAMPLES ON CACHE BOOL "")
+set (CISST_cisstVector_EXAMPLES ON CACHE BOOL "")
+set (CISST_cisstOSAbstraction_EXAMPLES ON CACHE BOOL "")
+set (CISST_cisstNumerical_EXAMPLES ON CACHE BOOL "")
+set (CISST_cisstMultiTask_EXAMPLES ON CACHE BOOL "")
+set (CISST_cisstParameterTypes_EXAMPLES ON CACHE BOOL "")
+set (CISST_cisstRobot_EXAMPLES ON CACHE BOOL "")
+set (CISST_cisstMesh_EXAMPLES ON CACHE BOOL "")
 
 # cisstNetlib
 set (CISSTNETLIB_USE_LOCAL_INSTALL ON CACHE BOOL "")
