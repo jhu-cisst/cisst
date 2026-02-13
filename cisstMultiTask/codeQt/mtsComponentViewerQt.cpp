@@ -393,7 +393,8 @@ void mtsComponentViewerQt::RemoveConnectionHandler(
 
                                   auto it = std::remove_if(m_connection_infos.begin(), m_connection_infos.end(),
                                                            [&](const mtsDescriptionConnection &c) {
-                                                               return (c.Client.ComponentName == connection_description.Client.ComponentName &&
+                                                               return (c.ConnectionID == connection_description.ConnectionID &&
+                                                                       c.Client.ComponentName == connection_description.Client.ComponentName &&
                                                                        c.Client.InterfaceName == connection_description.Client.InterfaceName &&
                                                                        c.Server.ComponentName == connection_description.Server.ComponentName &&
                                                                        c.Server.InterfaceName == connection_description.Server.InterfaceName);
