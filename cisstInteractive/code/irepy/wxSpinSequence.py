@@ -6,8 +6,8 @@
 #------------------------------------------------------
 try:
     import wx
-except Exception, e:
-    print "Could not load wxPython: ", e
+except Exception as e:
+    print('Could not load wxPython: ', e)
     sys.exit(1)
 
 import string
@@ -164,7 +164,7 @@ if __name__ == '__main__':
         def OnSpinSequence(self,event):
             spin  = event.GetEventObject()
             value = spin.GetValue()
-            print "OnSpinSequence, value = %s" % value
+            print('OnSpinSequence, value = %s' % value)
         
         def OnCloseWindow(self, event):
             self.Destroy()

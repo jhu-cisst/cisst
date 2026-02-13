@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2011-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2011-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 
 set (@_cacf_component_name@_VERSION_MAJOR "@_cacf_version_major@")
@@ -27,7 +27,7 @@ else ()
     NAMES @_cacf_component_name@/@_cacf_component_name@Export.h
     HINTS ${THIS_FILE_PATH}/../.. ${THIS_FILE_PATH}/../../..)
   # set library path relative to include
-  set (@_cacf_component_name@_LIBRARY_DIR "${@_cacf_component_name@_INCLUDE_DIR}/../lib")
+  set (@_cacf_component_name@_LIBRARY_DIR "${@_cacf_component_name@_INCLUDE_DIR}/../lib" "@_cacf_library_dir@")
 endif ()
 
 set (@_cacf_component_name@_LIBRARIES "@_cacf_libraries@")

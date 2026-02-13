@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -720,9 +720,9 @@ bool mtsComponent::AddStateTable(mtsStateTable * existingStateTable, bool addInt
         providedInterface->AddEventVoid(existingStateTable->DataCollection.CollectionStarted,
                                         "CollectionStarted");
         providedInterface->AddEventWrite(existingStateTable->DataCollection.CollectionStopped,
-                                         "CollectionStopped", mtsUInt());
+                                         "CollectionStopped", size_t(0));
         providedInterface->AddEventWrite(existingStateTable->DataCollection.Progress,
-                                         "Progress", mtsUInt());
+                                         "Progress", size_t(0));
     }
     CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName
                              << "\" and corresponding interface \"" << interfaceName

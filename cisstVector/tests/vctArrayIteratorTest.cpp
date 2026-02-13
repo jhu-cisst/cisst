@@ -6,8 +6,7 @@
   Author(s):  Ofri Sadowsky
   Created on: 2003-09-30
   
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -161,7 +160,7 @@ void vctArrayIteratorTest::TestOrderingForSubsequence1(void) {
     Subsequence1Type::const_iterator iterator = Subsequence1.begin();
     Subsequence1Type::size_type position = RandomGenerator.ExtractRandomSizeT(0, Subsequence1.size());
     iterator += position;
-	Subsequence1Test::difference_type difference = RandomGenerator.ExtractRandomInt(0, std::min(position, Subsequence1.size() - position) );
+	Subsequence1Test::difference_type difference = RandomGenerator.ExtractRandomInt(0, static_cast<int>(std::min(position, Subsequence1.size() - position)) );
     Subsequence1Test::TestOrdering(iterator, difference);
 }
 

@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -67,26 +67,26 @@ public:
         Name(name), Arg(arg) {}
     ~mtsComponentConstructorNameAndArg() {}
 
-    void SerializeRaw(std::ostream & outputStream) const {
+    void SerializeRaw(std::ostream & outputStream) const override {
         mtsGenericObject::SerializeRaw(outputStream);
         cmnSerializeRaw(outputStream, Name);
         cmnSerializeRaw(outputStream, Arg);
     }
 
-    void DeSerializeRaw(std::istream & inputStream) {
+    void DeSerializeRaw(std::istream & inputStream) override {
         mtsGenericObject::DeSerializeRaw(inputStream);
         cmnDeSerializeRaw(inputStream, Name);
         cmnDeSerializeRaw(inputStream, Arg);
     }
 
-    void ToStream(std::ostream & outputStream) const {
+    void ToStream(std::ostream & outputStream) const override {
         outputStream << "Name: " << Name
                      << ", Arg: " << Arg << std::endl;
     }
 
     /*! Raw text output to stream */
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const {
+                             bool headerOnly = false, const std::string & headerPrefix = "") const override {
         mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
         if (headerOnly) {
             outputStream << headerPrefix << "-name" << delimiter
@@ -99,7 +99,7 @@ public:
 
     /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
       Returns true if successful. */
-    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') {
+    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ') override {
         mtsGenericObject::FromStreamRaw(inputStream, delimiter);
         if (inputStream.fail())
             return false;
@@ -147,7 +147,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentConstructorNameAndString)
 */
 class CISST_EXPORT mtsComponent: public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
     friend class mtsComponentProxy;
@@ -443,7 +443,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       level log (i.e. CMN_LOG_CLASS) and allows to redirect the log to
       a separate file for each component when activated by
       UseSeparateLogFile or UseSeparateLogFileDefault. */
-    cmnLogger::StreamBufType * GetLogMultiplexer(void) const;
+    cmnLogger::StreamBufType * GetLogMultiplexer(void) const override;
 
     /********************* Methods to query the task state ****************/
 
@@ -561,7 +561,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
  public:
     /*! Send a human readable description of the component. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! Method to set replay mode*/
     bool SetReplayMode(void);

@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
-  (C) Copyright 2004-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -136,27 +136,47 @@ protected:
 public:
     /*! Returns a const iterator on the first element (STL
       compatibility). */
+    //@{
     const_iterator begin(void) const {
         return Vector.begin();
     }
+    const_iterator cbegin(void) const {
+        return Vector.begin();
+    }
+    //@}
 
     /*! Returns a const iterator on the last element (STL
       compatibility). */
+    //@{
     const_iterator end(void) const {
         return Vector.end();
     }
+    const_iterator cend(void) const {
+        return Vector.end();
+    }
+    //@}
 
     /*! Returns a reverse const iterator on the last element (STL
       compatibility). */
+    //@{
     const_reverse_iterator rbegin(void) const {
         return Vector.rbegin();
     }
+    const_reverse_iterator crbegin(void) const {
+        return Vector.rbegin();
+    }
+    //@}
 
     /*! Returns a reverse const iterator on the element before first
       (STL compatibility). */
+    //@{
     const_reverse_iterator rend(void) const {
         return Vector.rend();
     }
+    const_reverse_iterator crend(void) const {
+        return Vector.rend();
+    }
+    //@}
 
     /*! Return the number of elements in the vector.  This is not
       equivalent to the difference between the end and the beginning.

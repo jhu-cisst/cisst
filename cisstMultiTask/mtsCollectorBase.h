@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-02-25
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -76,19 +76,19 @@ protected:
 
     class SignalMapElement {
     public:
-        mtsTask * Task;
+        mtsComponent * Component;
 
         SignalMapElement(void) {}
         ~SignalMapElement(void) {}
     };
 
     /*! Container definition for tasks and signals.
-        TaskMap:   (taskName, SignalMap*)
+        ComponentMap:   (taskName, SignalMap*)
         SignalMap: (SignalName, SignalMapElement)
     */
     typedef cmnNamedMap<SignalMapElement> SignalMapType;
-    typedef cmnNamedMap<SignalMapType> TaskMapType;
-    TaskMapType TaskMap;
+    typedef cmnNamedMap<SignalMapType> ComponentMapType;
+    ComponentMapType ComponentMap;
 
     /*! Static member variables */
     static mtsComponentManager * ComponentManager;
@@ -102,10 +102,10 @@ protected:
     bool FirstRunningFlag;
 
     /*! Counter for number of samples since the output has been set. */
-    unsigned int SampleCounter;
+    size_t SampleCounter;
 
     /*! Counter for number of sample since the last CollectionStopped event */
-    unsigned int SampleCounterForEvent;
+    size_t SampleCounterForEvent;
 
     /*! Interval between two progress events (in seconds) */
     double TimeIntervalForProgressEvent;
@@ -118,7 +118,7 @@ protected:
     std::string OutputHeaderFileName;
 
     /*! Current directory to save data */
-    mtsStdString WorkingDirectoryMember;
+    std::string WorkingDirectoryMember;
 
     /*! Pointer on output stream, can be create and managed by this
       class or provided by a user. */
@@ -155,7 +155,7 @@ protected:
 
     /*! Serializer for binary logging. DeSerializer is used only at
       ConvertBinaryToText() method so we don't define it here. */
-    cmnSerializer * Serializer;
+    cmnSerializer * Serializer = nullptr;
 
     /*! Update the delimiter used in output files based on file
       format.  Should be used everytime FileFormat is set. */
@@ -168,17 +168,17 @@ protected:
     mtsInterfaceProvided * ControlInterface;
 
     /*! Methods used to populate the component provided interface. */
-    inline void StartCollectionCommand(void) {
-        this->StartCollection(mtsDouble(0.0));
-    }
-    inline void StartCollectionInCommand(const mtsDouble & delayInSeconds) {
+    inline void StartCollectionCommand(const double & delayInSeconds) {
         this->StartCollection(delayInSeconds);
     }
-    inline void StopCollectionCommand(void) {
-        this->StopCollection(mtsDouble(0.0));
-    }
-    inline void StopCollectionInCommand(const mtsDouble & delayInSeconds) {
+    inline void StopCollectionCommand(const double & delayInSeconds) {
         this->StopCollection(delayInSeconds);
+    }
+    inline void SetWorkingDirectoryCommand(const std::string & directory) {
+        this->SetWorkingDirectory(directory);
+    }
+    inline void SetOutputToDefaultCommand(void) {
+        this->SetOutputToDefault();
     }
     //@}
 
@@ -188,11 +188,8 @@ protected:
     /*! Clean up internal data. */
     void Cleanup(void);
 
-    /*! Clear TaskMap */
-    void ClearTaskMap(void);
-
-    /*! Set some initial values */
-    virtual void Startup(void) = 0;
+    /*! Clear ComponentMap */
+    void ClearComponentMap(void);
 
     /*! Create the provided interface for control. */
     void SetupControlInterface(void);
@@ -203,7 +200,7 @@ public:
     virtual ~mtsCollectorBase(void);
 
     /*! Generate default file name, without the prefix (txt, csv, cdat) */
-    virtual std::string GetDefaultOutputName(void) = 0;
+    inline virtual std::string GetDefaultOutputName(void) { return ""; }
 
     /*! Define the output file and format.  If a file is already in
       use, this method will close the current one. */
@@ -232,7 +229,7 @@ public:
       format will be COLLECTOR_FILE_FORMAT_CSV, and the floating point
       notation would be COLLECTOR_FILE_FLOATING_NOTATION_NONE,
       otherwise it will use the previously used format. */
-    void SetOutputToDefault(void);
+    virtual void SetOutputToDefault(void);
 
     /*! Closes the output file stream */
     void CloseOutput(void);
@@ -248,26 +245,23 @@ public:
 
     /*! Begin collecting data. Data collection will begin after delayedStart
     second(s). If it is zero (by default), it means 'start now'. */
-    virtual void StartCollection(const mtsDouble & delayInSeconds) = 0;
+    virtual void StartCollection(const double & delayInSeconds) = 0;
 
     /*! End collecting data. Data collection will end after delayedStop
     second(s). If it is zero (by default), it means 'stop now'. */
-    virtual void StopCollection(const mtsDouble & delayInSeconds) = 0;
+    virtual void StopCollection(const double & delayInSeconds) = 0;
 
     /*! Function used to trigger Collection Started event. */
-    mtsFunctionVoid CollectionStartedEventTrigger;
-
-    /*! Function used to trigger Collection Started event. */
-    mtsFunctionWrite CollectionStoppedEventTrigger;
+    mtsFunctionWrite CollectionStartedEventTrigger;
 
     /*! Function used to trigger Progress event. */
     mtsFunctionWrite ProgressEventTrigger;
 
     /*! Set working directory, usable with commands as well */
-    void SetWorkingDirectory(const mtsStdString & directory);
+    virtual void SetWorkingDirectory(const std::string & directory);
 
     /*! Get working directory, usable with commands as well */
-    void GetWorkingDirectory(mtsStdString & placeHolder) const;
+    void GetWorkingDirectory(std::string & placeHolder) const;
 
     /*! Set floating point notation for the output stream.  This
       setting will apply to all future files opened. */
@@ -284,9 +278,12 @@ public:
     /*! Set fill character for the output file. This setting will
       apply to all future files. */
     void SetOutputStreamFill(const char fillCharacter);
+
+    /*! Connect to all the components and interfaces used to collect
+      data. */
+    virtual bool Connect(void) = 0;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorBase)
 
 #endif // _mtsCollectorBase_h
-

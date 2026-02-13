@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnThrow.h>
 #include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSocket.h>
@@ -197,6 +198,16 @@ void mtsManagerLocal::Cleanup(void)
     }
 
     __os_exit();
+}
+
+void mtsManagerLocal::DeleteInstance(void)
+{
+    if (Instance) {
+        Instance->Cleanup();
+
+        delete Instance;
+        Instance = 0;
+    }
 }
 
 const osaTimeServer & mtsManagerLocal::GetTimeServer(void) const
@@ -578,7 +589,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
                                  << className << "\" -- no services (make sure the macros CMN_DECLARE_SERVICES and CMN_IMPLEMENT_SERVICES have been used)" << std::endl;
         return 0;
     }
-    bool isComponent = services->IsDerivedFrom<mtsComponent>();
+    bool isComponent = (services->IsDerivedFrom<mtsComponent>()) || (className == "mtsComponent");
     const cmnClassServicesBase *argServices = services->GetConstructorArgServices();
     if (services->OneArgConstructorAvailable() && argServices) {
         if (!isComponent) {
@@ -687,6 +698,16 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 
     return newComponent;
 }
+
+mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className,
+                                                           const mtsGenericObject & constructorArg)
+{
+    std::stringstream buffer;
+    cmnSerializer serializer(buffer);
+    serializer.Serialize(constructorArg);
+    return CreateComponentDynamically(className, "(serialized)", buffer.str());
+}
+
 
 #if CISST_HAS_JSON
 bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
@@ -905,7 +926,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
 {
     // -1- try to dynamically load the library if specified
     if (!sharedLibrary.empty()) {
-        // create load and path based on LD_LIBRARY_PATH
+        // create load and path based on LD_LIBRARY_PATH (or PATH on Windows)
         osaDynamicLoader loader;
         std::string fullPath;
         // check if the file already exists, i.e. use provided a full path
@@ -913,7 +934,11 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
             fullPath = sharedLibrary;
         } else {
             cmnPath path;
+#if (CISST_OS == CISST_WINDOWS)
+            path.AddFromEnvironment("PATH");
+#else
             path.AddFromEnvironment("LD_LIBRARY_PATH");
+#endif
             fullPath = path.Find(cmnPath::SharedLibrary(sharedLibrary));
             if (fullPath.empty())  {
                 fullPath = sharedLibrary;

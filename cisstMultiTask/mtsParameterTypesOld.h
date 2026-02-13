@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-09-01
 
-  (C) Copyright 2010-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -70,9 +70,9 @@ public:
     std::vector<InfoWrite> WriteEvents;
 #endif
 
-    void ToStream(std::ostream & outputStream) const;
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    void ToStream(std::ostream & outputStream) const override;
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsEventHandlerList);
@@ -100,9 +100,9 @@ public:
     /*! Destructor */
     ~mtsLogMessage() {}
     mtsLogMessage & operator = (const mtsLogMessage & other);
-    void ToStream(std::ostream & outputStream) const;
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    void ToStream(std::ostream & outputStream) const override;
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsLogMessage);

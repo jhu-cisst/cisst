@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):	Ankur Kapoor, Anton Deguet
   Created on:	2006-05-05
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2006-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -114,25 +112,25 @@ public:
 
     /*! Serialization.  Relies on the specialization, if any, of
       cmnSerializeRaw. */
-    inline void SerializeRaw(std::ostream & outputStream) const {
+    inline void SerializeRaw(std::ostream & outputStream) const override {
         cmnSerializeRaw(outputStream, this->Data);
     }
 
     /*! DeSerialization.  Relies on the specialization, if any, of
       cmnDeSerializeRaw. */
-    inline void DeSerializeRaw(std::istream & inputStream) {
+    inline void DeSerializeRaw(std::istream & inputStream) override {
         cmnDeSerializeRaw(inputStream, this->Data);
     }
 
     /*! To stream method.  Uses the default << operator as defined for
         the actual type. */
-    inline virtual void ToStream(std::ostream & outputStream) const {
+    inline void ToStream(std::ostream & outputStream) const override {
         outputStream << Data;
     }
 
     /*! To stream raw data. */
-    inline virtual void ToStreamRaw(std::ostream & outputStream, const char CMN_UNUSED(delimiter) = ' ',
-                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+    inline void ToStreamRaw(std::ostream & outputStream, const char CMN_UNUSED(delimiter) = ' ',
+                            bool headerOnly = false, const std::string & headerPrefix = "") const override {
         if (headerOnly) {
             outputStream << headerPrefix << "-data";
         } else {
@@ -141,7 +139,7 @@ public:
     }
 
     /*! From stream raw data. */
-    inline virtual bool FromStreamRaw(std::istream & inputStream, const char CMN_UNUSED(delimiter) = ' ') {
+    inline bool FromStreamRaw(std::istream & inputStream, const char CMN_UNUSED(delimiter) = ' ') override {
         inputStream >> this->Data;  // assumes that operator >> is defined for _elementType
         bool valid = inputStream.good();
         if (!valid) inputStream.clear();
@@ -190,4 +188,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(cmnBool);
 
 
 #endif
-

@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky
   Created on: 2004-11-04
 
-  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -80,7 +80,7 @@ public:
         bool gotException = false;
         try {
             toRotation.From(fromRotationNormalized);
-        } catch (std::runtime_error & exception) {
+        } catch (std::runtime_error &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(!gotException);
@@ -90,7 +90,7 @@ public:
         gotException = false;
         try {
             toRotation.FromNormalized(fromRotationNormalized);
-        } catch (std::runtime_error & exception) {
+        } catch (std::runtime_error &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(!gotException);
@@ -100,7 +100,7 @@ public:
         gotException = false;
         try {
             toRotation.FromRaw(fromRotationNormalized);
-        } catch (std::runtime_error & exception) {
+        } catch (std::runtime_error &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(!gotException);
@@ -110,7 +110,7 @@ public:
         gotException = false;
         try {
             toRotation.FromNormalized(fromRotationNotNormalized);
-        } catch (std::runtime_error & exception) {
+        } catch (std::runtime_error &) {
             gotException = true;
         }
         CPPUNIT_ASSERT(!gotException);
@@ -122,7 +122,7 @@ public:
         if (inputAlwaysNormalized) {
             try {
                 toRotation.From(fromRotationNotNormalized);
-            } catch (std::runtime_error & exception) {
+            } catch (std::runtime_error &) {
                 gotException = true;
             }
             CPPUNIT_ASSERT(!gotException);
@@ -132,7 +132,7 @@ public:
         } else {
             try {
                 toRotation.From(fromRotationNotNormalized);
-            } catch (std::runtime_error & exception) {
+            } catch (std::runtime_error &) {
                 gotException = true;
             }
             CPPUNIT_ASSERT(gotException);

@@ -80,7 +80,7 @@ void ExampleNArray(void) {
         permutedVolume.PermutationOf(newVolume, IndexType(1, 0, 2));
     }  // end of try block
     // catch block
-    catch (std::exception Exception) {
+    catch (std::exception & Exception) {
 	std::cerr << "Exception occured: " << Exception.what() << std::endl;
     }
 }

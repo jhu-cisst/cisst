@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2010-02-26
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,9 +17,15 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _mtsCollectorQtWidget_h
-#define _mtsCollectorQtWidget_h
+#ifndef _mtsCollectorFactoryQtWidget_h
+#define _mtsCollectorFactoryQtWidget_h
 
+#include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsFunctionVoid.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
+
+#include <QObject>
 #include <QWidget>
 
 class QGroupBox;
@@ -34,15 +40,34 @@ class QFileDialog;
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
 
-class CISST_EXPORT mtsCollectorQtWidget: public QWidget
+class CISST_EXPORT mtsCollectorFactoryQtWidget: public QWidget, public mtsComponent
 {
     Q_OBJECT;
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-public:
-    mtsCollectorQtWidget(void);
-    ~mtsCollectorQtWidget(void) {};
+ public:
+    mtsCollectorFactoryQtWidget(const std::string & component_name);
+    ~mtsCollectorFactoryQtWidget(void) {};
+    
+    void Configure(const std::string & CMN_UNUSED(filename) = "") override {};
+    
+ protected:
+    struct {
+        mtsFunctionWrite Start;
+        mtsFunctionWrite Stop;
+        mtsFunctionWrite SetWorkingDirectory;
+        mtsFunctionVoid SetOutputToDefault;
+    } Collection;
+    
+    void CollectionStartedEventHandler(const bool & started);
+    void ProgressEventHandler(const size_t & count);
+                                              
+ signals:
+    void CollectorAddedQSignal(void) const;
+    void CollectionStartedQSignal(bool);
+    void ProgressQSignal(unsigned int);
 
-protected:
+ protected:
     unsigned int NumberOfCollectors;
     unsigned int NumberOfActiveCollectors;
     unsigned int NumberOfSamples;
@@ -66,7 +91,6 @@ protected:
     QGridLayout * StatsLayout;
     QLabel * StatsCollectors;
     QLabel * StatsNbCollectors;
-    QLabel * StatsTotalCollectors;
     QLabel * StatsSamples;
     QLabel * StatsNbSamples;
 
@@ -78,19 +102,10 @@ public slots:
     void FileNewSlot(void);
 
     // used to receive events from the QComponent
-    void CollectorAdded(void);
-    void CollectionStarted(void);
-    void CollectionStopped(unsigned int count);
+    void CollectionStarted(bool);
     void Progress(unsigned int count);
-
-public:
-signals:
-    void StartCollection(void);
-    void StopCollection(void);
-    void StartCollectionIn(double delay);
-    void StopCollectionIn(double delay);
-    void SetWorkingDirectory(QString);
-    void SetOutputToDefault(void);
 };
 
-#endif  // _mtsCollectorQtWidget_h
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorFactoryQtWidget);
+
+#endif  // _mtsCollectorFactoryQtWidget_h

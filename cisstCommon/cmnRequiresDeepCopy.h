@@ -61,7 +61,7 @@ template <> inline bool cmnRequiresDeepCopy<unsigned long long int>(void) { retu
 template <class _elementType>
 void cmnMemcpy(_elementType * destination, const _elementType * source,
                const size_t size) {
-    memcpy(destination, source, size);
+    memcpy(reinterpret_cast<void *>(destination), reinterpret_cast<const void *>(source), size);
 }
 
 #include <string> // for template specialization

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,7 +45,9 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndLong)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndULong)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndDouble)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndString)
-CMN_IMPLEMENT_SERVICES(mtsComponent)
+//CMN_IMPLEMENT_SERVICES(mtsComponent)
+// mtsComponent: allow dynamic creation with std::string constructor arg
+CMN_IMPLEMENT_SERVICES_INTERNAL(mtsComponent, 0, mtsGenericTypes<std::string>::FinalType)
 
 #include <cisstMultiTask/mtsComponentAddLatency.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentAddLatency, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
@@ -113,12 +115,17 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsUShort)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsChar)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsUChar)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsBool)
+#if (CISST_OS == CISST_WINDOWS)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsSizeT);
+#endif
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdString)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdStringVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdDoubleVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdCharVecProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdStringListProxy)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsStdVct3VecProxy)
+
+CMN_IMPLEMENT_SERVICES_TEMPLATED(cmnJointTypeProxy)
 
 #endif  // MTS_CLASS_SERVICES_PART2
 

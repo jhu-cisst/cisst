@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2022 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -13,10 +13,10 @@
 
 
 # Backward compatibility
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.16)
 
 # cisst (Computer Integrated Surgical Systems and Technology)
-project (cisst)
+project (cisst VERSION 1.4.0)
 
 # cisst compiler settings
 include (cmake/cisstSettings.cmake)
@@ -79,10 +79,7 @@ else (CISST_BUILD_SHARED_LIBS)
 endif (CISST_BUILD_SHARED_LIBS)
 
 # Set the version number
-set (CISST_VERSION_MAJOR "1")
-set (CISST_VERSION_MINOR "1")
-set (CISST_VERSION_PATCH "0")
-set (CISST_VERSION "${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}.${CISST_VERSION_PATCH}")
+set (cisst_VERSION "${cisst_VERSION_MAJOR}.${cisst_VERSION_MINOR}.${cisst_VERSION_PATCH}")
 
 # To compile examples within this project
 set (CURRENT_PROJECT_IS_CISST ON)
@@ -90,7 +87,7 @@ set (CURRENT_PROJECT_IS_CISST ON)
 # The upper case variables have been used in the past and need to be preserved
 set (CISST_BINARY_DIR "${cisst_BINARY_DIR}")
 set (CISST_SOURCE_DIR "${cisst_SOURCE_DIR}")
-set (CISST_SHARE_INSTALL_SUFFIX "share/cisst-${CISST_VERSION_MAJOR}.${CISST_VERSION_MINOR}")
+set (CISST_SHARE_INSTALL_SUFFIX "share/cisst-${cisst_VERSION_MAJOR}.${cisst_VERSION_MINOR}")
 set (CISST_SHARE_DIR  "${CISST_BINARY_DIR}/${CISST_SHARE_INSTALL_SUFFIX}")
 set (CISST_CMAKE_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake")
 set (CISST_CMAKE_MODULES_INSTALL_SUFFIX "${CISST_SHARE_INSTALL_SUFFIX}/cmake/Modules")
@@ -173,7 +170,7 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CISST_CMAKE_SOURCE_DIR}")
 include (cisstMacros)
 include (cisstInternalMacros)
 
-# Set CISST_CATKIN_BUILT
+# Set CISST_CATKIN_BUILT.  For ROS2, see colcon.pkg
 cisst_is_catkin_build (CISST_CATKIN_BUILT)
 
 # Destination for CMake package config files
@@ -184,6 +181,7 @@ if (CISST_CATKIN_BUILT)
   set (LIBRARY_OUTPUT_PATH    "${CATKIN_DEVEL_PREFIX}/lib")
   # Options defaults
   set (CISST_cisstMesh         ON  CACHE BOOL "")
+  set (CISST_cisstInteractive  ON  CACHE BOOL "")
   set (CISST_HAS_JSON          ON  CACHE BOOL "")
   set (CISST_HAS_SWIG_PYTHON   ON  CACHE BOOL "" FORCE)
   set (CISST_BUILD_SHARED_LIBS ON  CACHE BOOL "" FORCE)
@@ -456,13 +454,9 @@ if (CISST_cisstOSAbstraction OR CISST_cisstInteractive)
   endif (CMAKE_DL_LIBS)
 endif (CISST_cisstOSAbstraction OR CISST_cisstInteractive)
 
-# If cisstInteractive in turned on, also force SWIG for Python and shared libraries
-if (CISST_cisstInteractive)
-  set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
-endif (CISST_cisstInteractive)
-if (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
-endif (CISST_HAS_SWIG_PYTHON)
+endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
 
 
 # List of libraries to be built
@@ -505,8 +499,12 @@ if (CISST_HAS_FLTK)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstFLTK)
 endif (CISST_HAS_FLTK)
 
-if (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstPython)
+endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
+
+if (CISST_HAS_SWIG_PYTHON)
+  set (CISST_SETTINGS ${CISST_SETTINGS} cisstSWIG)
 endif (CISST_HAS_SWIG_PYTHON)
 
 if (CISST_HAS_OPENGL)
@@ -541,7 +539,7 @@ configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
 
 # Version file
 cisst_add_config_version ("${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config-version.cmake"
-                          VERSION ${CISST_VERSION}
+                          VERSION ${cisst_VERSION}
                           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
                           COMPONENT cisstCommon)
 
@@ -559,8 +557,8 @@ install (FILES "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
 
 # CMake use cisst file
 set (CISST_CMAKE_FILES_TO_COPY
-     Usecisst.cmake cisstSettings.cmake cisstMacros.cmake cisstConfigVersion.cmake.in
-     sawRevision.h.in sawConfig.cmake.in sawConfigVersion.cmake.in)
+     Usecisst.cmake cisstSettings.cmake cisstMacros.cmake
+     sawRevision.h.in sawConfig.cmake.in)
 foreach (cmake_file_to_copy ${CISST_CMAKE_FILES_TO_COPY})
   # copy to build for users not installing
   configure_file ("${CISST_CMAKE_SOURCE_DIR}/${cmake_file_to_copy}"
@@ -616,10 +614,10 @@ if (CISST_cisstCommonXML) # we can only test CISST_XML_LIB if cisstCommonXML is 
   endif (${CISST_XML_LIB} STREQUAL "LibXml2")
 endif (CISST_cisstCommonXML)
 set (CPACK_PACKAGE_VENDOR "JHU")
-set (CPACK_PACKAGE_VERSION "${CISST_VERSION}")
-set (CPACK_PACKAGE_VERSION_MAJOR ${CISST_VERSION_MAJOR})
-set (CPACK_PACKAGE_VERSION_MINOR ${CISST_VERSION_MINOR})
-set (CPACK_PACKAGE_VERSION_PATCH ${CISST_VERSION_PATCH})
+set (CPACK_PACKAGE_VERSION "${cisst_VERSION}")
+set (CPACK_PACKAGE_VERSION_MAJOR ${cisst_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${cisst_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${cisst_VERSION_PATCH})
 set (CPACK_RESOURCE_FILE_LICENSE "${cisst_SOURCE_DIR}/license.txt")
 set (CPACK_PACKAGE_INSTALL_DIRECTORY "cisst")
 set (CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)
@@ -832,6 +830,17 @@ if (UNIX)
   configure_file ("${cisst_SOURCE_DIR}/utils/cisstvars.sh.in"
                   "${CISST_SCRIPTS_DIRECTORY}/cisstvars.sh"
                   @ONLY)
+
+  # installed version
+  configure_file (
+    "${cisst_SOURCE_DIR}/utils/cisstvars.sh.installed.in"
+    "${cisst_BINARY_DIR}/utils/cisstvars.sh.installed"
+    @ONLY)
+  install (
+    PROGRAMS "${cisst_BINARY_DIR}/utils/cisstvars.sh.installed"
+    DESTINATION bin
+    RENAME "cisstvars.sh")
+  
 endif (UNIX)
 
 # License file

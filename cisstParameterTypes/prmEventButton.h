@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet, Rajesh Kumar
   Created on:	2008-04-08
 
-  (C) Copyright 2008-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -42,10 +42,11 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
 
  public:
     /*! Default constructor */
-    inline prmEventButton()
+    inline prmEventButton():
+        TypeMember(UNDEFINED)
     {}
 
-    /*! Constructor with all parameters */
+    /*! Constructor with all parameters. */
     inline prmEventButton(const EventType & type):
         TypeMember(type)
     {}
@@ -75,17 +76,17 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
 public:
 
     /*! Overloaded ToStream */
-    virtual void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! To stream raw data. */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 
 };
 

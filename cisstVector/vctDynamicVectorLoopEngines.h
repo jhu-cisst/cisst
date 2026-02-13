@@ -5,7 +5,7 @@
   Author(s):  Ofri Sadowsky, Anton Deguet
   Created on:  2004-07-01
 
-  (C) Copyright 2004-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -790,7 +790,10 @@ class vctDynamicVectorLoopEngines {
             }
             // last return added to avoid buggy warning with gcc 4.0,
             // this should never be evaluated
+#if (CISST_OS != CISST_WINDOWS)
+            // Some versions of Windows compilers treat unreachable code as an error
             return _incrementalOperationType::NeutralElement();
+#endif
         }
     };
 

@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsMailBox.h>
 #include <cisstMultiTask/mtsStateTable.h>
+#include <cisstMultiTask/mtsStateTableFilter.h>
 #include <cisstMultiTask/mtsCallableVoidMethod.h>
 #include <cisstMultiTask/mtsCallableVoidFunction.h>
 #include <cisstMultiTask/mtsCallableVoidReturnMethod.h>
@@ -206,6 +207,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
       queues.  See SetMailBoxSize and SetArgumentQueuesSize. */
     void SetMailBoxAndArgumentQueuesSize(size_t desiredSize);
 
+    /*! Get the description of this interface. */
+    mtsInterfaceProvidedDescription GetDescription() const;
+
     /*! Get the names of commands provided by this interface. */
     //@{
     std::vector<std::string> GetNamesOfCommands(void) const;
@@ -241,6 +245,12 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                     const mtsRequiredType required = MTS_REQUIRED) const;
     mtsCommandQualifiedRead * GetCommandQualifiedRead(const std::string & commandName,
                                                       const mtsRequiredType required = MTS_REQUIRED) const;
+    //@}
+
+    /*! Get argument class services for a command */
+    //@{
+    const cmnClassServicesBase * GetCommandWriteArgumentServices(const std::string & commandName) const;
+    const cmnClassServicesBase * GetCommandReadArgumentServices(const std::string & commandName) const;
     //@}
 
     /*! Find an event based on its name. */
@@ -409,6 +419,32 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     mtsCommandRead * AddCommandReadState(const mtsStateTable & stateTable,
                                          const _elementType & stateData, const std::string & commandName);
 
+    // Methods to read from State Table and then "filter" (convert) the result to a different data type
+    // to be returned via the command pattern. The following conversion signatures are supported,
+    // where _elementType is the type of the object in the State Table and _outputType is the data type
+    // returned via the command pattern:
+    //     bool _elementType::GetMethod(_outputType &output) const
+    //     _outputType _elementType::GetMethod(void) const
+    //     bool ConvertFunction(const _elementType &input, _outputType &output)
+
+    template <class _elementType, class _outputType>
+    mtsCommandRead * AddCommandFilteredReadState(const mtsStateTable & stateTable,
+                                                 const _elementType & stateData,
+                                                 bool (_elementType::*getMethod)(_outputType &) const,
+                                                 const std::string & commandName);
+
+    template <class _elementType, class _outputType>
+    mtsCommandRead * AddCommandFilteredReadState(const mtsStateTable & stateTable,
+                                                 const _elementType & stateData,
+                                                 _outputType (_elementType::*getMethod)(void) const,
+                                                 const std::string & commandName);
+
+    template <class _elementType, class _outputType>
+    mtsCommandRead * AddCommandFilteredReadState(const mtsStateTable & stateTable,
+                                                 const _elementType & stateData,
+                                                 bool (*convertFunction)(const _elementType &input, _outputType &output),
+                                                 const std::string & commandName);
+
     /*! Adds command objects to read from the state table with a
       delay.  The commands created ('read' and 'qualified read') are
       similar to the commands added using AddCommandReadState except
@@ -563,7 +599,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     size_t ProcessMailBoxes(void);
 
     /*! Send a human readable description of the interface. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
  protected:
 
@@ -684,6 +720,9 @@ protected: // PK TEMP
     EventWriteMapType EventWriteGenerators;
     CommandInternalMapType CommandsInternal; // internal commands (not exposed to user)
 
+    /*! The vector contains pointers to the state table filter methods from which command objects are created. */
+    std::vector<mtsStateTableFilterBase *> StateTableFilters;
+
     /*! Post command queued command */
     mtsCallableVoidBase * PostCommandQueuedCallable;
 
@@ -742,13 +781,20 @@ protected: // PK TEMP
     mtsCommandQualifiedRead * AddCommandQualifiedRead(mtsCommandQualifiedRead * command);
     //@}
 
+    /*! Internal method to avoid code duplication in AddCommandFilteredReadState */
+    template <class _elementType, class _outputType, class _filterType>
+    mtsCommandRead * AddCommandFilteredReadStateInternal(const mtsStateTable & stateTable,
+                                                         const _elementType & stateData,
+                                                         _filterType filterMethod,
+                                                         const std::string & commandName);
+
     bool AddEvent(const std::string & commandName, mtsMulticastCommandVoid * generator);
     bool AddEvent(const std::string & commandName, mtsMulticastCommandWriteBase * generator);
 
     bool AddSystemEvents(void);
 
     /*! Get description of this interface (with serialized argument information) */
-    bool GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription);
+    bool GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription) const;
 };
 
 
@@ -774,6 +820,61 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable &
                                 commandName, new FinalType(stateData));
 }
 
+template <class _elementType, class _outputType, class _filterMethod>
+mtsCommandRead * mtsInterfaceProvided::AddCommandFilteredReadStateInternal(const mtsStateTable & stateTable,
+                                                                           const _elementType & stateData,
+                                                                           _filterMethod filterMethod,
+                                                                           const std::string & commandName)
+{
+    typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
+    typedef mtsStateTableFilter<_elementType, _outputType, _filterMethod> FilterType;
+    typedef typename mtsGenericTypes<_outputType>::FinalType FinalType;
+
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessorByInstance(stateData));
+    if (!stateAccessor) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandFilteredReadState: invalid accessor for command " << commandName << std::endl;
+        return 0;
+    }
+    // Create state table filter object
+    FilterType *stf = new FilterType(stateAccessor, filterMethod);
+    // Store filter object (only used for cleanup)
+    StateTableFilters.push_back(stf);
+    // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
+    this->AddCommandQualifiedRead(new mtsCallableQualifiedReadMethod<FilterType, mtsStateIndex, _outputType>(&FilterType::GetFiltered, stf),
+                                  commandName, new mtsStateIndex, new FinalType);
+    return this->AddCommandRead(new mtsCallableReadMethod<FilterType, _outputType>(&FilterType::GetLatestFiltered, stf),
+                                commandName, new FinalType);
+}
+
+template <class _elementType, class _outputType>
+mtsCommandRead * mtsInterfaceProvided::AddCommandFilteredReadState(const mtsStateTable & stateTable,
+                                                                   const _elementType & stateData,
+                                                                   bool (_elementType::*getMethod)(_outputType &) const,
+                                                                   const std::string & commandName)
+{
+    typedef bool (_elementType::*FilterMethodType)(_outputType &) const;
+    return AddCommandFilteredReadStateInternal<_elementType, _outputType, FilterMethodType>(stateTable, stateData, getMethod, commandName);
+}
+
+template <class _elementType, class _outputType>
+mtsCommandRead * mtsInterfaceProvided::AddCommandFilteredReadState(const mtsStateTable & stateTable,
+                                                                   const _elementType & stateData,
+                                                                   _outputType (_elementType::*getMethod)(void) const,
+                                                                   const std::string & commandName)
+{
+    typedef _outputType (_elementType::*FilterMethodType)(void) const;
+    return AddCommandFilteredReadStateInternal<_elementType, _outputType, FilterMethodType>(stateTable, stateData, getMethod, commandName);
+}
+
+template <class _elementType, class _outputType>
+mtsCommandRead * mtsInterfaceProvided::AddCommandFilteredReadState(const mtsStateTable & stateTable,
+                                                                   const _elementType & stateData,
+                                                                   bool (*convertFunction)(const _elementType &input, _outputType &output),
+                                                                   const std::string & commandName)
+{
+    typedef bool (*FilterMethodType)(const _elementType &, _outputType &);
+    return AddCommandFilteredReadStateInternal<_elementType, _outputType, FilterMethodType>(stateTable, stateData, convertFunction, commandName);
+}
 
 template <class _elementType>
 mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateDelayed(const mtsStateTable & stateTable,

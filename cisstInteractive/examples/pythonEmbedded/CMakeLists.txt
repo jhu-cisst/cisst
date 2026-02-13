@@ -1,7 +1,6 @@
 #
 #
-# (C) Copyright 2004-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -66,7 +65,7 @@ if (cisst_FOUND_AS_REQUIRED)
                       COMMAND ${CMAKE_COMMAND}
                       ARGS -E copy
                            ${CMAKE_CURRENT_SOURCE_DIR}/pythonEmbedded.py
-                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/pythonEmbedded.py
+                           ${EXECUTABLE_OUTPUT_PATH}/pythonEmbedded.py
                       COMMENT "pythonEmbedded: copy pythonEmbedded.py to the executable directory")
 
 else (cisst_FOUND_AS_REQUIRED)

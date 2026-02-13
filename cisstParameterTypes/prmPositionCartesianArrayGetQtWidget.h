@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2014-07-21
 
-  (C) Copyright 2014-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2014-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -37,15 +37,15 @@ class CISST_EXPORT prmPositionCartesianArrayGetQtWidget : public QWidget, public
     prmPositionCartesianArrayGetQtWidget(const std::string & componentName, double periodInSeconds = 50.0 * cmn_ms);
     ~prmPositionCartesianArrayGetQtWidget() {}
 
-    void Configure(const std::string & filename = "");
-    void Startup(void);
-    void Cleanup(void);
+    void Configure(const std::string & filename = "") override;
+    void Startup(void) override;
+    void Cleanup(void) override;
 
  protected:
-    virtual void closeEvent(QCloseEvent * event);
+    virtual void closeEvent(QCloseEvent * event) override;
 
  private slots:
-    void timerEvent(QTimerEvent * event);
+    void timerEvent(QTimerEvent * event) override;
 
  private:
     //! setup GUI

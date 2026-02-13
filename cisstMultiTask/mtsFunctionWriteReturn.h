@@ -6,7 +6,7 @@
   Author(s): Anton Deguet
   Created on: 2010-09-16
 
-  (C) Copyright 2010-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -85,7 +85,7 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
 
  public:
     /*! Default constructor.  Does nothing, use Bind before using. */
-    mtsFunctionWriteReturn(const bool isProxy = false);
+    mtsFunctionWriteReturn();
 
     /*! Destructor. */
     ~mtsFunctionWriteReturn();

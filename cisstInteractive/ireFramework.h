@@ -3,11 +3,10 @@
 
 /*
 
-  Author(s): Andrew LaMora
+  Author(s): Andrew LaMora, Peter Kazanzides
   Created on: 2005-02-28
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -75,8 +74,8 @@ private:
 
     // IRE States:
     //     IRE_NOT_CONSTRUCTED:  initial state (before Singleton object created)
-    //     IRE_INITIALIZED:      once constructed and InitShell called (Python interpreter initialized)
-    //     IRE_LAUNCHED:         once LaunchIREShell called
+    //     IRE_CONSTRUCTED:      once constructed
+    //     IRE_LAUNCHED:         once Python shell initialized and LaunchIREShell called
     //     IRE_ACTIVE:           set by callback from Python IRE code just before
     //                              entering main event loop
     //     IRE_FINISHED:         set by callback from Python IRE code just after
@@ -84,8 +83,8 @@ private:
     //
     // In general, the IRE is expected to transition in order through the above states.
     // Currently, there is little error checking for invalid transitions. The Reset method
-    // can be used to transition from IRE_FINISHED to IRE_INITIALIZED.
-    enum IRE_STATES { IRE_NOT_CONSTRUCTED, IRE_INITIALIZED, IRE_LAUNCHED,
+    // can be used to transition from IRE_FINISHED to IRE_CONSTRUCTED.
+    enum IRE_STATES { IRE_NOT_CONSTRUCTED, IRE_CONSTRUCTED, IRE_LAUNCHED,
                       IRE_ACTIVE, IRE_FINISHED };
 
     // The current state of the IRE (see above enum)
@@ -104,7 +103,7 @@ private:
 protected:
 	/*! Constructor for this singleton object.  Initialize the Python
       subsystem upon creation.  InitShellInstance changes the IRE state
-      from IRE_NOT_CONSTRUCTED to IRE_INITIALIZED. */
+      from IRE_NOT_CONSTRUCTED to IRE_CONSTRUCTED. */
 	ireFramework() {
 	    InitShellInstance();
 	}
@@ -117,7 +116,7 @@ protected:
 public:
 
 	/*! Return a pointer to the instantiated instance of this object. Note
-        that the IRE state will change from IRE_NOT_CONSTRUCTED to IRE_INITIALIZED
+        that the IRE state will change from IRE_NOT_CONSTRUCTED to IRE_CONSTRUCTED
         on the first call to this function. */
 	static ireFramework* Instance(void);
 
@@ -129,8 +128,8 @@ public:
       will remain instantiated for the duration of the application.
       All modules loaded and variables created from this class will
       remain in scope; note that this does NOT include objects created
-      from within the IRE IDE shell. Changes IRE state to IRE_INITIALIZED. */
-	static inline void InitShell(void)  throw(std::runtime_error) {
+      from within the IRE IDE shell. Changes IRE state to IRE_CONSTRUCTED. */
+	static inline void InitShell(void) {
 	    Instance()->InitShellInstance();
 	}
 
@@ -140,13 +139,22 @@ public:
       itself up.  If the application wishes to restart the IRE,
 	  it will be necessary to explicitly call InitShell(). Changes
       IRE state to IRE_FINISHED. */
-	static inline void FinalizeShell(void)  throw(std::runtime_error) {
+	static inline void FinalizeShell(void) {
 	    Instance()->FinalizeShellInstance();
 	}
 
 
-	/*!  Loads the "irepy" Python IRE package and
-      calls the "launch()" method to launch the GUI.
+	/*! Launches the IRE Python shell.
+
+      The type of shell is specified by useIPython parameter:
+
+         false ->  Starts the standard Python interpreter, loads the "irepy"
+                   Python IRE package, which depends on wxPython, and calls
+                   the "launch()" method to launch the GUI.
+
+         true  ->  Starts the IPython shell instead of the "irepy" IRE (GUI).
+                   IPython is an enhanced interactive Python shell, with
+                   autocompletion, etc.
 
       \note Although the "irepy" package itself remains loaded for the
       duration of the application, any variables/objects instantiated
@@ -167,22 +175,18 @@ public:
 	  the C++ code before launching the IRE.  This, however, is less
 	  portable and would best be implemented using cisstOSAbstraction.
 
-	  If the useIPython parameter is true, then IPython shell will be started instead
-	  of the IRE (GUI). IPython is an enhanced interactive Python shell, allowing autocompletion, etc.
-	  For more information, see http://ipython.scipy.org/moin/
-
       If the useStreambuf field is true, the IRE logger will show locally-generated
       log messages (using cmnCallbackStreambuf).  When using the system-wide logger,
       it is recommended to set this to false.
 
-      If the IRE state on entry is IRE_INITIALIZED, this method changes
+      If the IRE state on entry is IRE_CONSTRUCTED, this method changes
       it to IRE_LAUNCHED; otherwise, it throws an exception.
       When the Python code finishes its initialization, it will call a
       callback function to change the state to IRE_ACTIVE prior to entering
       the wxPython main event loop.  On exit from the event loop, it will
       call the callback function to change the state to IRE_FINISHED. */
 	static inline void LaunchIREShell(const char *startup = "", bool newPythonThread = false, bool useIPython = false,
-                                      bool useStreambuf = true) throw(std::runtime_error) {
+                                      bool useStreambuf = true) {
 	    Instance()->LaunchIREShellInstance(startup, newPythonThread, useIPython, useStreambuf);
 	}
 
@@ -243,12 +247,11 @@ public:
         the state to IRE_ACTIVE or IRE_FINISHED. */
     static void SetActiveFlag(bool flag);
 
-    /*! Check whether the Python interpreter has been initialized (i.e., the ireFramework instance has
-        been created and FinalizeIREShell() has not been called). */
+    /*! Check whether the Python interpreter has been initialized (and not finalized). */
     static bool IsInitialized();
 
-    /*! If the current IRE state is IRE_FINISHED, change it to IRE_INITIALIZED (calling InitShell if
-        necessary). This is provided to facililate relaunching of the IRE. */
+    /*! If the current IRE state is IRE_FINISHED, change it to IRE_CONSTRUCTED.
+        This is provided to facililate relaunching of the IRE. */
     static void Reset();
 
     /*! Release the global interpreter lock. This is intended to be used as a callback (e.g., in osaThreadSignal) */
@@ -262,4 +265,3 @@ public:
 };
 
 #endif // _ireFramework_h
-

@@ -3,9 +3,9 @@
 
 /*
   Author(s): Simon Leonard
-  Created on: Nov 11 2009
+  Created on: 2009-11-11
 
-  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -69,7 +69,13 @@ class CISST_EXPORT robManipulator{
 
 
   //! Load the kinematics and the dynamics of the robot
-  virtual robManipulator::Errno LoadRobot( const std::string& linkfile );
+  /** If the file name ends with .json it will open the file
+      and then call the overloaded method LoadRobot for Json::Value.
+      Otherwise, assumes it's the .rob format and calls the overloaded
+      method LoadRobot for istream. */
+  virtual robManipulator::Errno LoadRobot(const std::string & linkfile);
+
+  virtual robManipulator::Errno LoadRobot(std::istream & ifs);
 
 #if CISST_HAS_JSON
   //! Load the kinematics and the dynamtics of the robot from a JSON file
@@ -129,6 +135,13 @@ class CISST_EXPORT robManipulator{
            const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
            double g = 9.81) const;
 
+ vctDynamicVector<double>
+  RNE_MDH( const vctDynamicVector<double>& q,
+           const vctDynamicVector<double>& qd,
+           const vctDynamicVector<double>& qdd,
+           const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
+           const vct3 & g) const;
+
   //! Coriolis/centrifugal and gravity
   /**
      Evaluate the coriolis/centrifugal and gravitational forces acting on the
@@ -146,6 +159,11 @@ class CISST_EXPORT robManipulator{
   CCG_MDH( const vctDynamicVector<double>& q,
            const vctDynamicVector<double>& qd,
            double g = 9.81 ) const;
+
+   vctDynamicVector<double>
+  CCG_MDH( const vctDynamicVector<double>& q,
+           const vctDynamicVector<double>& qd,
+           const vct3 & g) const;
 
   //! End-effector accelerations
   /**
@@ -236,7 +254,7 @@ public:
 
   /*! Get joint types */
   virtual void
-    GetJointTypes(std::vector<robJoint::Type> & types) const;
+    GetJointTypes(std::vector<cmnJointType> & types) const;
 
   //! Evaluate the forward kinematics
   /**

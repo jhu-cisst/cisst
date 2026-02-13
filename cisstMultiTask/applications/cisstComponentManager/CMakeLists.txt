@@ -1,6 +1,5 @@
 #
-#
-# (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2011-2023 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -11,9 +10,9 @@
 # --- end cisst license ---
 
 # name of project and executable
-project (cisstComponentManager)
+project (cisstComponentManager VERSION ${cisst_VERSION})
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.16)
 
 # create a list of libraries needed for this project
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask)

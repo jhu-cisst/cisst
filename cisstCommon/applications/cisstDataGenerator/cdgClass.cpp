@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-09-06
 
-  (C) Copyright 2010-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -128,7 +128,10 @@ bool cdgClass::Validate(std::string & CMN_UNUSED(errorMessage))
         }
     }
     for (size_t index = 0; index < Members.size(); index++) {
-        Members[index]->ClassName = this->ClassWithNamespace(); // this->GetFieldValue("name");
+        Members[index]->ClassName = this->ClassWithNamespace();
+    }
+    for (size_t index = 0; index < Enums.size(); index++) {
+        Enums[index]->ClassName = this->ClassWithNamespace();
     }
 
     return true;
@@ -231,7 +234,7 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
     // global functions for enums have to be declared after the enum is defined
     const std::string classWithNamespace = this->ClassWithNamespace();
     for (index = 0; index < Enums.size(); ++index) {
-        Enums[index]->GenerateDataFunctionsHeader(outputStream, classWithNamespace, this->GetFieldValue("attribute"));
+        Enums[index]->GenerateDataFunctionsHeader(outputStream, this->GetFieldValue("attribute"));
     }
 
 }
@@ -239,18 +242,34 @@ void cdgClass::GenerateHeader(std::ostream & outputStream) const
 
 void cdgClass::GenerateStandardMethodsHeader(std::ostream & outputStream) const
 {
+    std::string overrides = "";
+    for (size_t index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+            overrides = " override";
+            break;
+        }
+    }
+
     outputStream << "    /* default methods */" << std::endl
                  << " public:" << std::endl
-                 << "    void SerializeRaw(std::ostream & outputStream) const;" << std::endl
-                 << "    void DeSerializeRaw(std::istream & inputStream);" << std::endl
-                 << "    void ToStream(std::ostream & outputStream) const;" << std::endl
+                 << "    void SerializeRaw(std::ostream & outputStream) const" << overrides << ";" << std::endl
+                 << "    void DeSerializeRaw(std::istream & inputStream)" << overrides << ";" << std::endl
+                 << "    void ToStream(std::ostream & outputStream) const" << overrides << ";" << std::endl
                  << "    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' '," << std::endl
-                 << "                     bool headerOnly = false, const std::string & headerPrefix = \"\") const;" << std::endl;
+                 << "                     bool headerOnly = false, const std::string & headerPrefix = \"\") const" << overrides << ";" << std::endl;
 }
 
 
 void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
 {
+    std::string overrides = "";
+    for (size_t index = 0; index < BaseClasses.size(); index++) {
+        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+            overrides = " override";
+            break;
+        }
+    }
+
     std::string name = this->GetFieldValue("name");
     outputStream << "    /* default data methods */" << std::endl
                  << " public:" << std::endl
@@ -261,13 +280,13 @@ void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
                  << "    std::string SerializeDescription(const char delimiter = ',', const std::string & userDescription = \"\") const;" << std::endl
                  << "    void DeSerializeText(std::istream & inputStream, const char delimiter = ',') CISST_THROW(std::runtime_error);" << std::endl
                  << "    std::string HumanReadable(void) const;" << std::endl
-                 << "    bool ScalarNumberIsFixed(void) const;" << std::endl
-                 << "    size_t ScalarNumber(void) const;" << std::endl
-                 << "    double Scalar(const size_t index) const CISST_THROW(std::out_of_range);" << std::endl
-                 << "    std::string ScalarDescription(const size_t index, const std::string & userDescription = \"\") const CISST_THROW(std::out_of_range);" << std::endl
+                 << "    bool ScalarNumberIsFixed(void) const" << overrides << ";" << std::endl
+                 << "    size_t ScalarNumber(void) const" << overrides << ";" << std::endl
+                 << "    double Scalar(const size_t index) const CISST_THROW(std::out_of_range)" << overrides << ";" << std::endl
+                 << "    std::string ScalarDescription(const size_t index, const std::string & userDescription = \"\") const CISST_THROW(std::out_of_range)" << overrides << ";" << std::endl
                  << "#if CISST_HAS_JSON" << std::endl
-                 << "    void SerializeTextJSON(Json::Value & jsonValue) const;" << std::endl
-                 << "    void DeSerializeTextJSON(const Json::Value & jsonValue) CISST_THROW(std::runtime_error);" << std::endl
+                 << "    void SerializeTextJSON(Json::Value & jsonValue) const" << overrides << ";" << std::endl
+                 << "    void DeSerializeTextJSON(const Json::Value & jsonValue) CISST_THROW(std::runtime_error)" << overrides << ";" << std::endl
                  << "#endif // CISST_HAS_JSON" << std::endl
                  << std::endl;
 }
@@ -883,7 +902,11 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
             outputStream << "    field__cdg = jsonValue[\""
                          << Members[index]->GetFieldValue("name") << "\"];" << std::endl
                          << "    if (!field__cdg.empty()) {" << std::endl
-                         << "        cmnDataJSON<" << type << " >::DeSerializeText(this->" << name << ", field__cdg);" << std::endl;
+                         << "        try {" << std::endl
+                         << "            cmnDataJSON<" << type << " >::DeSerializeText(this->" << name << ", field__cdg);" << std::endl
+                         << "        } catch (std::exception & e) {" << std::endl
+                         << "            cmnThrow(std::string(e.what()) + \" < " << name << "\");" << std::endl
+                         << "        }" << std::endl;
             // if there is no default value, we need one from JSON
             if (Members[index]->GetFieldValue("default").empty()) {
                 outputStream << "    } else {" << std::endl
@@ -896,7 +919,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
                  << "#endif // CISST_HAS_JSON" << std::endl;
 
     for (index = 0; index < Enums.size(); ++index) {
-        Enums[index]->GenerateDataFunctionsCode(outputStream, className);
+        Enums[index]->GenerateDataFunctionsCode(outputStream);
     }
 }
 

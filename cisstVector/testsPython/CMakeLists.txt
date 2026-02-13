@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -25,7 +25,7 @@ cisst_add_swig_module (MODULE cisstVectorPythonTest
                        MODULE_LINK_LIBRARIES cisstCommon cisstVector)
 
 # Copy the .py file generated to wherever the libraries are
-add_custom_command (TARGET _cisstVectorPythonTestPython
+add_custom_command (TARGET cisstVectorPythonTestPython
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND}
                     ARGS -E copy
@@ -54,8 +54,8 @@ if (WIN32)
                      SOURCES ${TEST_PROGRAMS})
 else (WIN32)
   add_custom_target (cisstVector_CREATE_PYTHON_TESTS_LIST ALL
-                     COMMAND ${PYTHON_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstVectorTests.py
-                             -d ${PYTHON_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
+                     COMMAND ${Python_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstVectorTests.py
+                             -d ${Python_EXECUTABLE} > ${CTEST_TEST_FILE_AUTO}
                      SOURCES ${TEST_PROGRAMS})
 endif (WIN32)
 
@@ -64,9 +64,9 @@ set_property (TARGET cisstVector_CREATE_PYTHON_TESTS_LIST PROPERTY FOLDER "cisst
 add_dependencies (cisstVector_CREATE_PYTHON_TESTS_LIST
                   cisstCommon
                   cisstVector
-                  _cisstCommonPython
-                  _cisstVectorPython
-                  _cisstVectorPythonTestPython)
+                  cisstCommonPython
+                  cisstVectorPython
+                  cisstVectorPythonTestPython)
 
 file (APPEND ${CTEST_TEST_FILE} "include (\"${CTEST_TEST_FILE_AUTO}\")\n")
 

@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:   2009-01-26
 
-  (C) Copyright 2006-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2006-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -14,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -56,7 +55,7 @@ http://www.cisst.org/cisst/license.txt.
 // Wrap base type
 %include "cisstParameterTypes/prmMotionBase.h"
 
-// Wrap all others 
+// Wrap all others
 %include "cisstParameterTypes/prmEventButton.h"
 
 %include "cisstParameterTypes/prmPositionCartesianGet.h"
@@ -71,9 +70,27 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstParameterTypes/prmVelocityJointGet.h"
 %include "cisstParameterTypes/prmVelocityJointSet.h"
 
-%include "cisstParameterTypes/prmTransformationBase.h"
-%include "cisstParameterTypes/prmTransformationManager.h"
-%include "cisstParameterTypes/prmTransformationDynamic.h"
-%include "cisstParameterTypes/prmTransformationFixed.h"
+%include "cisstParameterTypes/prmForceTorqueJointSet.h"
+%include "cisstParameterTypes/prmCartesianImpedance.h"
+%include "cisstParameterTypes/prmForwardKinematicsRequest.h"
+%include "cisstParameterTypes/prmForwardKinematicsResponse.h"
+%include "cisstParameterTypes/prmInverseKinematicsRequest.h"
+%include "cisstParameterTypes/prmInverseKinematicsResponse.h"
 
 %include "cisstParameterTypes/prmRobotState.h"
+
+%include "cisstParameterTypes/prmStateJoint.h"
+%include "cisstParameterTypes/prmConfigurationJoint.h"
+%include "cisstParameterTypes/prmOperatingState.h"
+%include "cisstParameterTypes/prmActuatorState.h"
+
+%include "cisstParameterTypes/prmStateCartesian.h"
+%include "cisstParameterTypes/prmServoCartesian.h"
+%include "cisstParameterTypes/prmServoJoint.h"
+
+%include "cisstParameterTypes/prmImageFrame.h"
+%include "cisstParameterTypes/prmCameraInfo.h"
+%include "cisstParameterTypes/prmDepthMap.h"
+%include "cisstParameterTypes/prmKeyValue.h"
+
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(prmKeyValueProxy, prmKeyValue);

@@ -342,7 +342,7 @@ public:
         else return cv::Mat();
 #else // CISST_SVL_HAS_OPENCV
         CMN_LOG_CLASS_INIT_ERROR << "Class svlSampleImageCustom: CvMatRef() called while OpenCV is disabled" << std::endl;
-        return 0;
+        return {};
 #endif // CISST_SVL_HAS_OPENCV
     }
 

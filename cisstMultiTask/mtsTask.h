@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2033 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -170,7 +169,7 @@ protected:
     void ChangeState(mtsComponentState::Enum newState);
 
     /* documented in base class */
-    bool WaitForState(mtsComponentState desiredState, double timeout);
+    bool WaitForState(mtsComponentState desiredState, double timeout) override;
 
 public:
     /********************* Task constructor and destructor *****************/
@@ -215,7 +214,7 @@ public:
 
     /*! Virtual method that gets called when the task/interface needs
       to be configured. Should it take XML info?? */
-    virtual void Configure(const std::string & CMN_UNUSED(filename) = "") {}
+    void Configure(const std::string & CMN_UNUSED(filename) = "") override {}
 
     /*! Set the initialization delay.  See InitializationDelay. */
     void SetInitializationDelay(double delay);
@@ -225,10 +224,10 @@ public:
 
     /* Create a new thread (if needed). */
     virtual void Create(void * data) = 0;
-    inline void Create(void) { Create(0); }
+    inline void Create(void) override { Create(0); }
 
     /*! End the task */
-    void Kill(void);
+    void Kill(void) override;
 
     /*! Return the average period. */
     double GetAveragePeriod(void) const { return StateTable.GetAveragePeriod(); }
@@ -248,12 +247,12 @@ public:
 
     /* documented in base class */
     mtsInterfaceRequired * AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
-                                                                          mtsRequiredType required = MTS_REQUIRED);
+                                                                          mtsRequiredType required = MTS_REQUIRED) override;
 
     /* documented in base class */
     mtsInterfaceProvided * AddInterfaceProvidedWithoutSystemEvents(const std::string & newInterfaceName,
                                                                    mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
-                                                                   bool isProxy = false);
+                                                                   bool isProxy = false) override;
 
     /********************* Methods for task synchronization ***************/
 

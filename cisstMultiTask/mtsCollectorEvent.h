@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet
   Created on: 2010-02-12
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #ifndef _mtsCollectorEvent_h
@@ -136,19 +133,19 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
 
  public:
     /*! Thread-related methods */
-    void Run(void);
+    void Run(void) override;
 
-    void Startup(void);
+    void Startup(void) override;
 
     /*! Initialization */
     void Initialize(void);
 
     // documented in base class
-    virtual std::string GetDefaultOutputName(void);
+    virtual std::string GetDefaultOutputName(void) override;
 
     /*! Constructor, requires to name the collector task. */
     mtsCollectorEvent(const std::string & collectorName,
-                      const CollectorFileFormat fileFormat);
+                      const CollectorFileFormat fileFormat = mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
 
     ~mtsCollectorEvent(void);
 
@@ -202,14 +199,14 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
 
  public:
     /*! \todo copy documentation for mtsCollectorState */
-    bool Connect(void);
+    bool Connect(void) override;
 
     /*! Methods defined as virtual in base class to control stop/start
       collection with delay.  For the event collector, these methods
       will enable/disable all event observers. */
     //@{
-    void StartCollection(const mtsDouble & delayInSeconds);
-    void StopCollection(const mtsDouble & delayInSeconds);
+    void StartCollection(const double & delayInSeconds) override;
+    void StopCollection(const double & delayInSeconds) override;
     //@}
 
  protected:

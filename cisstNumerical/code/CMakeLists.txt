@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstNumerical
 #
-# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2023 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -15,35 +15,43 @@ project (cisstNumerical)
 
 # all source files
 set (SOURCE_FILES
-     nmrBernsteinPolynomial.cpp
-     nmrBernsteinPolynomialLineIntegral.cpp
      nmrGaussJordanInverse.cpp
-     nmrMultiIndexCounter.cpp
-     nmrMultiVariablePowerBasis.cpp
-     nmrPolynomialBase.cpp
-     nmrPolynomialTermPowerIndex.cpp
-     nmrSingleVariablePowerBasis.cpp
-     nmrStandardPolynomial.cpp
      )
-
 
 # all header files
 set (HEADER_FILES
-     nmrBernsteinPolynomial.h
-     nmrBernsteinPolynomialLineIntegral.h
-     nmrDynAllocPolynomialContainer.h
      nmrExport.h
      nmrGaussJordanInverse.h
      nmrIsOrthonormal.h
      nmrLinearRegression.h
-     nmrMultiIndexCounter.h
-     nmrMultiVariablePowerBasis.h
-     nmrPolynomialBase.h
-     nmrPolynomialContainer.h
-     nmrPolynomialTermPowerIndex.h
-     nmrSingleVariablePowerBasis.h
-     nmrStandardPolynomial.h
      )
+
+if (CISST_NMR_COMPILE_POLYNOMIALS)
+  set (SOURCE_FILES
+    ${SOURCE_FILES}
+    nmrBernsteinPolynomial.cpp
+    nmrBernsteinPolynomialLineIntegral.cpp
+    nmrMultiIndexCounter.cpp
+    nmrMultiVariablePowerBasis.cpp
+    nmrPolynomialBase.cpp
+    nmrPolynomialTermPowerIndex.cpp
+    nmrSingleVariablePowerBasis.cpp
+    nmrStandardPolynomial.cpp
+    )
+  set (HEADER_FILES
+    ${HEADER_FILES}
+    nmrBernsteinPolynomial.h
+    nmrBernsteinPolynomialLineIntegral.h
+    nmrDynAllocPolynomialContainer.h
+    nmrMultiIndexCounter.h
+    nmrMultiVariablePowerBasis.h
+    nmrPolynomialBase.h
+    nmrPolynomialContainer.h
+    nmrPolynomialTermPowerIndex.h
+    nmrSingleVariablePowerBasis.h
+    nmrStandardPolynomial.h
+    )
+endif (CISST_NMR_COMPILE_POLYNOMIALS)
 
 if (CISST_HAS_CISSTNETLIB)
   set (SOURCE_FILES

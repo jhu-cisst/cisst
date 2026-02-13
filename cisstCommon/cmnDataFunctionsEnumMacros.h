@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2011-06-27
 
-  (C) Copyright 2011-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnDataFunctionsEnumMacros_h
 #define _cmnDataFunctionsEnumMacros_h
 
+#include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnDataFunctions.h>
-
 
 #define CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(_enum, _promotedType, _humanReadableFunction) \
 template <>                                                             \
@@ -113,6 +113,17 @@ public:                                                                 \
         _promotedType dataPromoted;                                     \
         cmnDataJSON<_promotedType>::DeSerializeText(dataPromoted, jsonValue); \
         data = static_cast<_enum>(dataPromoted);                        \
+    }
+
+#define CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM_AS_STRING(_enum, _to_string, _from_string) \
+    template <> void cmnDataJSON<_enum>::SerializeText(const _enum & data, Json::Value & jsonValue) { \
+        const std::string _s = _to_string(data);                        \
+        cmnDataJSON<std::string>::SerializeText(_s, jsonValue);         \
+    }                                                                   \
+    template <> void cmnDataJSON<_enum>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) { \
+        std::string _s;                                                 \
+        cmnDataJSON<std::string>::DeSerializeText(_s, jsonValue);       \
+        data = _from_string(_s);                                        \
     }
 
 #endif // _cmnDataFunctionsEnumMacros_h

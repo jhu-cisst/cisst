@@ -1,6 +1,5 @@
 #
-# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -15,24 +14,7 @@ project (cisstVectorQt)
 # To include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-if (CISST_HAS_QT4)
-  qt4_wrap_cpp (QT_WRAPPED_CPP
-                ../vctPlot2DOpenGLQtWidget.h
-                ../vctQtWidgetDynamicVector.h
-                ../vctQtWidgetDynamicMatrix.h
-                ../vctQtWidgetRotation.h
-                ../vctQtWidgetFrame.h
-                ../vctQtWidgetFrame4x4.h
-                ../vctVector3DQtWidget.h
-                ../vctPose3DQtWidget.h
-                ../vctForceTorqueQtWidget.h
-                ../vctForceTorque2DQtWidget.h
-                ../vctForceTorque3DQtWidget.h
-                )
-else (CISST_HAS_QT4)
-  # assumes Qt 5 Auto Moc
-  set (CMAKE_AUTOMOC ON)
-endif (CISST_HAS_QT4)
+set (CMAKE_AUTOMOC ON)
 
 # set directories for this project
 cisst_set_directories (cisstQt)
@@ -69,8 +51,7 @@ cisst_add_library (
                vctForceTorqueQtWidget.h
                vctForceTorque2DQtWidget.h
                vctForceTorque3DQtWidget.h
-               vctExportQt.h
-  ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+               vctExportQt.h)
 
 # link against Qt libraries
 target_link_libraries (cisstVectorQt ${QT_LIBRARIES})

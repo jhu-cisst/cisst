@@ -5,7 +5,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,10 +29,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadSignal.h>
 
 
-mtsFunctionBase::mtsFunctionBase(const bool isProxy):
+mtsFunctionBase::mtsFunctionBase():
     ThreadSignal(0),
-    CompletionCommand(0),
-    IsProxy(isProxy)
+    CompletionCommand(0)
 {}
 
 mtsFunctionBase::~mtsFunctionBase()

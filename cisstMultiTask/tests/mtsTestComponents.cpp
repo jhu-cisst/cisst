@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-12-08
 
-  (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2022 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,5 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsTestComponents.h"
 
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestDevice1_int);
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestDevice1_mtsInt);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestClassGeneric_int)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestClassGeneric_mtsInt)
+
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsVct3mtsInt)
+
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestDevice1_int)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestDevice1_mtsInt)

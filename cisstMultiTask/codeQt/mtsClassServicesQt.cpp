@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,11 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 /* Qt dependent classes */
 #include <cisstConfig.h>
 
-#include <cisstMultiTask/mtsCollectorQtComponent.h>
-CMN_IMPLEMENT_SERVICES(mtsCollectorQtComponent);
-
-#include <cisstMultiTask/mtsCollectorQtFactory.h>
-CMN_IMPLEMENT_SERVICES(mtsCollectorQtFactory);
+#include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
+CMN_IMPLEMENT_SERVICES(mtsCollectorFactoryQtWidget);
 
 #include <cisstMultiTask/mtsQtWidgetComponent.h>
 CMN_IMPLEMENT_SERVICES(mtsQtWidgetComponent);

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
-  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,7 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnPath.h>
-
+#if (CISST_OS == CISST_WINDOWS)
+#include <algorithm>   // for std::replace
+#endif
+#include <cstdio>
 
 cmnPath::cmnPath() {
     ConfigureTokenizer();
@@ -44,6 +47,7 @@ std::string cmnPath::FromNative(const std::string & nativePath) {
 #if (CISST_OS == CISST_WINDOWS)
 
 #else
+    // Could instead use std::replace
     const std::string::iterator end = internalPath.end();
     std::string::iterator iterator;
     for (iterator = internalPath.begin();
@@ -87,6 +91,9 @@ bool cmnPath::AddFromEnvironment(const std::string & variableName, bool head) {
     environmentVariable = getenv(variableName.c_str());
     if (environmentVariable) {
         std::string path = environmentVariable;
+#if (CISST_OS == CISST_WINDOWS)
+        std::replace(path.begin(), path.end(), '\\', '/');
+#endif
         this->Add(FromNative(path), head);
         return true;
     }
@@ -113,7 +120,7 @@ bool cmnPath::AddRelativeToCisstRoot(const std::string & relativePath, bool head
 
 bool cmnPath::AddRelativeToCisstShare(const std::string & relativePath, bool head) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
-                               << relativePath << "\" relative to CISST_ROOT/share/cisst-" << CISST_VERSION_MAJOR << "." << CISST_VERSION_MINOR << "/ at the "
+                               << relativePath << "\" relative to CISST_ROOT/share/cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR << "/ at the "
                                << (head ? "beginning" : "end") << std::endl;
     std::string path;
     if (cmnPath::GetCisstShare(path)) {
@@ -139,9 +146,24 @@ std::string cmnPath::FindWithSubdirectory(const std::string & filename,
     std::string fullName("");
     const_iterator iter = Path.begin();
     const const_iterator end = Path.end();
+    if (filename.empty()) {
+        CMN_LOG_CLASS_RUN_WARNING << "FindWithSubdirectory called with empty filename" << std::endl;
+        return filename;
+    }
+    bool isAbsolute = false;
+#if (CISST_OS == CISST_WINDOWS)
+    size_t offset = 0;
+    // First, check for drive letter (e.g., "C:")
+    if ((filename.size() > 2) && (filename[1] == ':'))
+        offset = 2;
+    if ((filename[offset] == '/') || (filename[offset] == '\\'))
+        isAbsolute = true;
+#else
+    if (filename[0] == '/')
+        isAbsolute = true;
+#endif
     // first check if this file exists as absolute path
-    if ((filename.size() > 0)
-        && (filename[0] == '/')
+    if (isAbsolute
         && (access(filename.c_str(), mode) == 0)) {
         CMN_LOG_CLASS_RUN_VERBOSE << "Found \"" << filename << "\", it seems to be a valid absolute file name" << std::endl;
         return filename;
@@ -246,6 +268,9 @@ bool cmnPath::GetCisstRoot(std::string & result)
     environmentVariable = getenv("CISST_ROOT");
     if (environmentVariable) {
         result = environmentVariable;
+#if (CISST_OS == CISST_WINDOWS)
+        std::replace(result.begin(), result.end(), '\\', '/');
+#endif
         return true;
     }
     return false;
@@ -256,7 +281,7 @@ bool cmnPath::GetCisstShare(std::string & result)
 {
     if (cmnPath::GetCisstRoot(result)) {
         std::stringstream tmp;
-        tmp << result << "/share/cisst-" << CISST_VERSION_MAJOR << "." << CISST_VERSION_MINOR;
+        tmp << result << "/share/cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR;
         result = tmp.str();
         return true;
     }
@@ -276,6 +301,16 @@ bool cmnPath::Exists(const std::string & fullPath, short mode)
 bool cmnPath::DeleteFile(const std::string & fullPath)
 {
     if (remove(fullPath.c_str()) == 0) {
+        return true;
+    }
+    return false;
+}
+
+
+bool cmnPath::RenameFile(const std::string & fullPathOld,
+                         const std::string & fullPathNew)
+{
+    if (rename(fullPathOld.c_str(), fullPathNew.c_str()) == 0) {
         return true;
     }
     return false;

@@ -1,9 +1,9 @@
-name: Ubuntu 20.04
+name: Ubuntu 24.04
 
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master, devel ]
+    branches: [ main, devel ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -11,10 +11,10 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Install Dependencies
       run: |
@@ -24,7 +24,7 @@ jobs:
     - name: Download cisstNetlib
       run: |
         cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
-        git clone https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+        git clone -b devel https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
 
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build

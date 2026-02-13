@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-02-06
 
-  (C) Copyright 2009-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,12 +16,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
 /*!
   \file
   \brief Cartesian force get parameters.
 */
-
 
 #ifndef _prmForceCartesianGet_h
 #define _prmForceCartesianGet_h
@@ -72,6 +70,7 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
     //@{
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBool6, Mask);
     //@}
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, ReferenceFrame);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, MovingFrame);
 
 public:
@@ -101,17 +100,17 @@ public:
     }
 
     /*! Human readable output to stream. */
-    void ToStream(std::ostream & outputStream) const;
+    void ToStream(std::ostream & outputStream) const override;
 
     /*! To stream raw data. */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const;
+    void SerializeRaw(std::ostream & outputStream) const override;
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream);
+    void DeSerializeRaw(std::istream & inputStream) override;
 
 }; // _prmForceCartesianGet_h
 

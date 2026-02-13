@@ -2,13 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
-
   Author(s):	Anton Deguet
   Created on:   2004-10-06
 
-  (C) Copyright 2004-2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,7 +14,6 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 
@@ -65,7 +61,7 @@ http://www.cisst.org/cisst/license.txt.
 
 %ignore operator<<;
 
-// CISST_EXPORT is not needed for SWIG 
+// CISST_EXPORT is not needed for SWIG
 #define CISST_EXPORT
 
 // To load some cisst settings, mostly for conditional compilation
@@ -201,3 +197,5 @@ CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnBool, bool);
 %include "cisstCommon/cmnTypeTraits.h"
 %template(cmnTypeTraitsDouble) cmnTypeTraits<double>;
 %template(cmnTypeTraitsInt) cmnTypeTraits<int>;
+
+%include "cisstCommon/cmnJointType.h"

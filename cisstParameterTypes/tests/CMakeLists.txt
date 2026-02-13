@@ -22,7 +22,6 @@ set (SOURCE_FILES
      prmVelocityCartesianGetTest.cpp
      prmVelocityJointGetTest.cpp
      prmForceCartesianGetTest.cpp
-     prmTransformationManagerTests.cpp
      prmOperatingStateTest.cpp
      )
 
@@ -36,7 +35,6 @@ set (HEADER_FILES
      prmVelocityCartesianGetTest.h
      prmVelocityJointGetTest.h
      prmForceCartesianGetTest.h
-     prmTransformationManagerTests.h
      prmOperatingStateTest.h
      )
 

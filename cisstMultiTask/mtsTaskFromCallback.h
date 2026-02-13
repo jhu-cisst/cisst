@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2008-09-10
 
-  (C) Copyright 2008-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -88,11 +88,11 @@ protected:
 
     /*! The member function that is passed as 'start routine' argument for
       thread creation. */
-    void *RunInternal(void* argument);
+    void *RunInternal(void* argument) override;
 
     /*! The member funtion that is executed as soon as the thread gets created.
       It does some housekeeping before the user code can be executed. */
-    void StartupInternal(void);
+    void StartupInternal(void) override;
 
 public:
     /********************* Task constructor and destructor *****************/
@@ -122,16 +122,16 @@ public:
     /* (use Kill method from base class)                                 */
 
     /* Create a new thread (if needed). */
-    void Create(void *data = 0);
+    void Create(void *data = 0) override;
 
     /*! Start/resume execution of the task */
-    void Start(void);
+    void Start(void) override;
 
     /*! Suspend the execution of the task */
-    void Suspend(void);
+    void Suspend(void) override;
 
     /*! End the task */
-    void Kill(void);
+    void Kill(void) override;
 
     /*! Hook for calling RunInternal */
     virtual void *DoCallback(void *data = 0) {

@@ -9,7 +9,7 @@
 #
 # --- end cisst license ---
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.16)
 
 # create a list of libraries needed for this project
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstVectorQt)
@@ -24,18 +24,12 @@ if (cisst_FOUND_AS_REQUIRED)
 
   include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-  if (CISST_HAS_QT4)
-    qt4_wrap_cpp (QT_WRAPPED_CPP
-                  ExampleClass.h)
-  else (CISST_HAS_QT4)
-    set (CMAKE_AUTOMOC ON)
-  endif (CISST_HAS_QT4)
+  set (CMAKE_AUTOMOC ON)
 
   add_executable (vctExQtWidgets
                   main.cpp
                   ExampleClass.h
                   ExampleClass.cpp
-                  ${QT_WRAPPED_CPP}
                   )
   set_property (TARGET vctExQtWidgets PROPERTY FOLDER "cisstVector/examples")
 

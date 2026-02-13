@@ -3,9 +3,9 @@
 
 /*
   Author(s):	Anton Deguet
-  Created on:   2013-05-14
+  Created on:	2008-04-08
 
-  (C) Copyright 2013-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2024 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,59 +17,24 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+/*!
+  \file
+  \brief For backward compatibility, cmnJointType should be used instead
+*/
+
+
 #ifndef _prmJointType_h
 #define _prmJointType_h
 
-#include <cisstConfig.h>
-#include <cisstCommon/cmnDataFunctionsEnumMacros.h>
-#include <cisstMultiTask/mtsGenericObjectProxy.h>
+#include <cisstCommon/cmnJointType.h>
 
-// Always include last!
-#include <cisstParameterTypes/prmExport.h>
+typedef cmnJointType prmJointType;
 
-typedef enum JointType {
-    PRM_JOINT_UNDEFINED,
-    PRM_JOINT_PRISMATIC,
-    PRM_JOINT_REVOLUTE,
-    PRM_JOINT_INACTIVE
-} prmJointType;
+#define PRM_JOINT_UNDEFINED CMN_JOINT_UNDEFINED
+#define PRM_JOINT_PRISMATIC CMN_JOINT_PRISMATIC
+#define PRM_JOINT_REVOLUTE  CMN_JOINT_REVOLUTE
+#define PRM_JOINT_INACTIVE  CMN_JOINT_INACTIVE
 
-typedef vctDynamicVector<prmJointType> prmJointTypeVec;
-typedef mtsGenericObjectProxy<prmJointTypeVec> prmJointTypeProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(prmJointTypeProxy);
+#define prmJointTypeToFactor cmnJointTypeToFactor
 
-inline std::string cmnDataHumanReadable(const prmJointType & data)
-{
-    switch (data) {
-    case PRM_JOINT_UNDEFINED:
-        return "undefined";
-        break;
-    case PRM_JOINT_PRISMATIC:
-        return "prismatic";
-        break;
-    case PRM_JOINT_REVOLUTE:
-        return "revolute";
-        break;
-    case PRM_JOINT_INACTIVE:
-        return "inactive";
-        break;
-    default:
-        return "unknown";
-        break;
-    }
-    return "unknown";
-}
-
-CMN_DATA_SPECIALIZATION_FOR_ENUM(prmJointType, int);
-
-#if CISST_HAS_JSON
-CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM_EXPORT(prmJointType);
-#endif
-
-void CISST_EXPORT prmJointTypeToFactor(const vctDynamicVector<prmJointType> & types,
-                                       const double prismaticFactor,
-                                       const double revoluteFactor,
-                                       vctDynamicVector<double> & factors);
-
-#endif // _prmJointType_h
-
+#endif  // _prmJointType_h

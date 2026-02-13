@@ -5,7 +5,7 @@
   Author(s): Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,8 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
 #include <cisstMultiTask/mtsEventReceiver.h>
 
-mtsFunctionWriteReturn::mtsFunctionWriteReturn(const bool isProxy):
-    mtsFunctionBase(isProxy),
+mtsFunctionWriteReturn::mtsFunctionWriteReturn():
     Command(0)
 {}
 

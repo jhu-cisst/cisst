@@ -7,8 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-03-29
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -50,3 +49,5 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstVector/vctFixedSizeMatrixTypemaps.i"
 
 %include "cisstVector/vctFrame.i"
+
+%include "cisstVector/vctEulerRotation3.i"

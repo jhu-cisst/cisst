@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnStrings.h>
 #include <cisstCommon/cmnSerializer.h>
+#include <cisstCommon/cmnDataFunctions.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 
@@ -190,6 +191,14 @@ bool mtsInterfaceRequired::AddEventHandlerToReceiver(const std::string & eventNa
     return result;
 }
 
+
+mtsInterfaceRequiredDescription mtsInterfaceRequired::GetDescription() const
+{
+    mtsInterfaceRequiredDescription desc;
+    desc.InterfaceName = GetName();
+    GetDescription(desc);
+    return desc;
+}
 
 std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctions(void) const
 {
@@ -457,7 +466,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsVoid())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsVoid())
                                                    << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for void command \""
@@ -465,7 +474,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsVoid())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsVoid())
                                                    << std::endl;
                     }
                 } else {
@@ -506,7 +515,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsVoidReturn())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsVoidReturn())
                                                    << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for void with return command \""
@@ -514,7 +523,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsVoidReturn())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsVoidReturn())
                                                    << std::endl;
                     }
                 } else {
@@ -555,7 +564,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsWrite())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsWrite())
                                                    << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for write command \""
@@ -563,7 +572,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsWrite())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsWrite())
                                                    << std::endl;
                     }
                 } else {
@@ -604,7 +613,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsWriteReturn())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsWriteReturn())
                                                    << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for write with return command \""
@@ -612,7 +621,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsWriteReturn())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsWriteReturn())
                                                    << std::endl;
                     }
                 } else {
@@ -653,7 +662,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsRead())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsRead())
                                                    << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for read command \""
@@ -661,7 +670,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsRead())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsRead())
                                                    << std::endl;
                     }
                 } else {
@@ -702,7 +711,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsQualifiedRead())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsQualifiedRead())
                                                    << std::endl;
                     } else {
                         CMN_LOG_CLASS_INIT_WARNING << "BindCommands: failed for qualified read command \""
@@ -710,7 +719,7 @@ bool mtsInterfaceRequired::BindCommands(const mtsInterfaceProvided * interfacePr
                                                    << this->GetFullName() << "\" to \""
                                                    << interfaceProvided->GetFullName()
                                                    << "\"), the following commands are available: "
-                                                   << cmnStringFromVectorOfStrings(interfaceProvided->GetNamesOfCommandsQualifiedRead())
+                                                   << cmnDataHumanReadable(interfaceProvided->GetNamesOfCommandsQualifiedRead())
                                                    << std::endl;
                     }
                 } else {
@@ -787,6 +796,8 @@ void mtsInterfaceRequired::GetEventList(mtsEventHandlerList & eventList)
                                                                            iterEventWrite->second,
                                                                            MTS_OPTIONAL));
     }
+
+    eventList.SetValid(true);
 }
 
 
@@ -976,7 +987,7 @@ bool mtsInterfaceRequired::RemoveEventHandlerWrite(const std::string & eventName
     return EventHandlersWrite.RemoveItem(eventName, CMN_LOG_LEVEL_INIT_WARNING);
 }
 
-void mtsInterfaceRequired::GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription)
+void mtsInterfaceRequired::GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription) const
 {
     // Serializer initialization
     std::stringstream streamBuffer;

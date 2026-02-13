@@ -1,9 +1,9 @@
-name: Windows 2019
+name: Ubuntu 22.04
 
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master, devel ]
+    branches: [ main, devel ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -11,40 +11,48 @@ on:
 jobs:
   build:
 
-    runs-on: windows-2019
+    runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install libxml2-dev libjsoncpp-dev qtbase5-dev qtbase5-dev-tools qt5-qmake-bin libqt5xmlpatterns5-dev gfortran-9
 
     - name: Download cisstNetlib
       run: |
         cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
-        git clone https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+        git clone -b devel https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
 
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
         cmake ${{github.workspace}}/cisstNetlib-source
         cmake --build . --config Release
-        cmake --build . --target install
+        sudo cmake --build . --target install
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
+      shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -C ${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -C ${{github.workspace}}/.github/workflows/cmake-ubuntu-cache.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}/build
+      shell: bash
       run: cmake --build . --config Release
 
     - name: Test
       working-directory: ${{github.workspace}}/build
+      shell: bash
       run: |
-        dir
-        ./bin/cisstCommonTests -r
-        ./bin/cisstVectorTests -r
-        ./bin/cisstNumericalTests -r
-        ./bin/cisstOSAbstractionTests -r
-        ./bin/cisstParameterTypesTests -r
+        source cisstvars.sh
+        cisstCommonTests -r
+        cisstVectorTests -r
+        cisstNumericalTests -r
+        cisstOSAbstractionTests -r
+        cisstParameterTypesTests -r

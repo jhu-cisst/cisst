@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,6 +14,7 @@
 #
 # --- end cisst license ---
 
+include(CMakePackageConfigHelpers)
 
 # set virtual library to CMake option name equivalence
 set (cisstFLTK_OPTION_NAME "CISST_HAS_FLTK" CACHE STRING "Name of option to use to compile cisstFLTK")
@@ -317,17 +318,12 @@ macro (cisst_add_library ...)
 
   # set version number
   set_target_properties (${LIBRARY} PROPERTIES
-                         VERSION ${CISST_VERSION}
-                         SOVERSION ${CISST_VERSION})
+                         VERSION ${cisst_VERSION}
+                         SOVERSION ${cisst_VERSION})
 
   # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
-  if (CMAKE_VERSION VERSION_GREATER "3.0.1")
-    target_compile_definitions (${LIBRARY} PRIVATE
-      LIBRARY_NAME_FOR_CISST_REGISTER="${LIBRARY}")
-  else ()
-    set_target_properties (${LIBRARY}
-      PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${LIBRARY}\"")
-  endif ()
+  target_compile_definitions (${LIBRARY} PRIVATE
+    LIBRARY_NAME_FOR_CISST_REGISTER="${LIBRARY}")
 
   # Install the library
   install (TARGETS ${LIBRARY} COMPONENT ${LIBRARY}
@@ -392,8 +388,6 @@ macro (cisst_add_library ...)
 
 endmacro (cisst_add_library)
 
-
-
 macro (cisst_target_link_package_libraries target ...)
   # create list of all but target
   set (DEPENDENCIES ${ARGV})
@@ -403,7 +397,15 @@ macro (cisst_target_link_package_libraries target ...)
     if ("${lib}" STREQUAL "cisstQt")
       if (CISST_HAS_QT5)
         cisst_cmake_debug ("cisst_target_link_package_libraries: Qt5 needed for ${target}")
-        qt5_use_modules (${target} Core Widgets Gui OpenGL Xml XmlPatterns)
+        set (_qt5_libraries Core Widgets Gui OpenGL XmlPatterns)
+        if (WIN32 AND CISST_XML_LIB STREQUAL "QtXML")
+          # 5/12/23: added Xml on Windows, if CISST_XML_LIB is QtXml
+          #          (not sure if this is the best place).
+          set (_qt5_libraries ${_qt5_libraries} Xml)
+        endif ()
+        foreach (_qt5_lib ${_qt5_libraries})
+          target_link_libraries (${target} Qt5::${_qt5_lib})
+        endforeach ()
       endif (CISST_HAS_QT5)
     endif ("${lib}" STREQUAL "cisstQt")
 
@@ -478,13 +480,8 @@ macro (cisst_target_link_libraries TARGET ...)
     cisst_target_link_package_libraries (${_WHO_REQUIRES} ${_REQUIRED_CISST_LIBRARIES})
 
     # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
-    if (CMAKE_VERSION VERSION_GREATER "3.0.1")
-      target_compile_definitions (${_WHO_REQUIRES} PRIVATE
-        LIBRARY_NAME_FOR_CISST_REGISTER="${_WHO_REQUIRES}")
-    else ()
-      set_target_properties (${_WHO_REQUIRES}
-        PROPERTIES COMPILE_DEFINITIONS "LIBRARY_NAME_FOR_CISST_REGISTER=\"${_WHO_REQUIRES}\"")
-    endif ()
+    target_compile_definitions (${_WHO_REQUIRES} PRIVATE
+      LIBRARY_NAME_FOR_CISST_REGISTER="${_WHO_REQUIRES}")
 
   endif (NOT CISST_LIBRARIES)
 
@@ -546,7 +543,7 @@ function (cisst_add_swig_module ...)
 
   if (EXISTS ${SWIG_INTERFACE_FILE})
     # load settings for extra cisst libraries (and Python)
-    set (_LIBRARIES_AND_SETTINGS ${MODULE_LINK_LIBRARIES} cisstPython)
+    set (_LIBRARIES_AND_SETTINGS ${MODULE_LINK_LIBRARIES} cisstPython cisstSWIG)
     cisst_set_directories (${_LIBRARIES_AND_SETTINGS})
     # retrieve libraries needed for Python
     cisst_extract_settings (cisstPython LIBRARIES cisstPython_LIBRARIES)
@@ -556,41 +553,37 @@ function (cisst_add_swig_module ...)
     set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES CPLUSPLUS ON)
     # make sure the runtime code is not included
     set_source_files_properties (${SWIG_INTERFACE_FILE}
-                                 PROPERTIES SWIG_FLAGS "-v;-modern;-fvirtual")
+                                 PROPERTIES SWIG_FLAGS "-v;-fvirtual")
     # make sure source file is not used before libraries are build
     set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES DEPENDS "${MODULE_LINK_LIBRARIES}")
     # finally create the swig project using CMake command
     set (MODULE_NAME ${MODULE}Python)
-    if (COMMAND swig_add_library)
-      cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
-      swig_add_library (${MODULE_NAME}
-                        LANGUAGE python
-                        SOURCES ${SWIG_INTERFACE_FILE})
-    else ()
-      cisst_cmake_debug ("cisst_add_swig_module: swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})")
-      swig_add_module (${MODULE_NAME} python ${SWIG_INTERFACE_FILE})
-    endif ()
+    cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
+    swig_add_library (${MODULE_NAME}
+      LANGUAGE python
+      SOURCES ${SWIG_INTERFACE_FILE})
+
     if (WIN32)
-      set_target_properties (_${MODULE_NAME} PROPERTIES SUFFIX .pyd)
-      set_target_properties (_${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
+      set_target_properties (${MODULE_NAME} PROPERTIES SUFFIX .pyd)
+      set_target_properties (${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
     endif (WIN32)
     cisst_cmake_debug ("cisst_add_swig_module: swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})")
-    swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})
+    target_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})
 
     # copy the .py file generated to wherever the libraries are
-    add_custom_command (TARGET _${MODULE_NAME}
+    add_custom_command (TARGET ${MODULE_NAME}
                         POST_BUILD
                         COMMAND ${CMAKE_COMMAND}
                         ARGS -E copy_if_different
                                 ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                                 ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${MODULE_NAME}.py)
     if (FOLDER)
-      set_property (TARGET _${MODULE_NAME} PROPERTY FOLDER "${FOLDER}")
+      set_property (TARGET ${MODULE_NAME} PROPERTY FOLDER "${FOLDER}")
     endif (FOLDER)
 
     # create a cisstCommon.py as CMake assumes one should be created
     # this is a bug that should be fixed in future releases of CMake.
-    add_custom_command (TARGET _${MODULE_NAME}
+    add_custom_command (TARGET ${MODULE_NAME}
                         POST_BUILD
                         COMMAND ${CMAKE_COMMAND}
                         ARGS -E copy_if_different
@@ -605,11 +598,11 @@ function (cisst_add_swig_module ...)
                COMPONENT ${MODULE})
 
       # install library and python file
-      install (TARGETS _${MODULE_NAME}
+      install (TARGETS ${MODULE_NAME}
                RUNTIME DESTINATION bin
                LIBRARY DESTINATION lib
                COMPONENT ${MODULE})
-      install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py
+      install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
                DESTINATION lib
                COMPONENT ${MODULE})
 
@@ -704,18 +697,15 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
   if (CMAKE_CROSSCOMPILING)
     find_program (CISST_DG_EXECUTABLE cisstDataGenerator)
   else (CMAKE_CROSSCOMPILING)
-    if (TARGET cisstCommon)
-      # make sure the target existsOUTPUT_NAME
-      if (TARGET cisstDataGenerator)
-        # if the target exists, use its destination
-        cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
-        #get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
-        set(CISST_DG_EXECUTABLE $<TARGET_FILE:cisstDataGenerator>)
-      endif (TARGET cisstDataGenerator)
-    else (TARGET cisstCommon)
+    # make sure the target exists
+    if (TARGET cisstDataGenerator)
+      # if the target exists, use its destination
+      cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
+      set (CISST_DG_EXECUTABLE "$<TARGET_FILE:cisstDataGenerator>")
+    else (TARGET cisstDataGenerator)
       cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
       find_program (CISST_DG_EXECUTABLE cisstDataGenerator HINTS "${CISST_BINARY_DIR}/bin")
-    endif (TARGET cisstCommon)
+    endif (TARGET cisstDataGenerator)
   endif (CMAKE_CROSSCOMPILING)
   cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator executable found: ${CISST_DG_EXECUTABLE}")
 
@@ -739,15 +729,16 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     set_source_files_properties (${header_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties ("${INPUT_WE}.h" PROPERTIES GENERATED 1)
-    add_custom_command (OUTPUT ${header_absolute} ${code_absolute}
-                        COMMAND "${CISST_DG_EXECUTABLE}"
-                        --verbose
-                        --input ${input_absolute}
-                        --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
-                        --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}_cdg.cpp
-                        MAIN_DEPENDENCY ${input}
-                        DEPENDS ${CISST_DG_EXECUTABLE}
-                        COMMENT "cisstDataGenerator for ${INPUT_WE}")
+    add_custom_command (
+      OUTPUT ${header_absolute} ${code_absolute}
+      COMMAND "${CISST_DG_EXECUTABLE}"
+      --verbose
+      --input ${input_absolute}
+      --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
+      --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}_cdg.cpp
+      MAIN_DEPENDENCY ${input}
+      DEPENDS "${CISST_DG_EXECUTABLE}"
+      COMMENT "cisstDataGenerator for ${INPUT_WE}")
   endforeach(input)
 
   # create variables to store all generated files names
@@ -935,12 +926,22 @@ macro (cisst_offer_saw_component component default)
   set (cosc_OPTION_NAME SAW_${component})
   option (${cosc_OPTION_NAME} "Build ${component}" ${default})
   if (${cosc_OPTION_NAME})
-    set (${component}_DIR "${CMAKE_CURRENT_BINARY_DIR}/${component}")
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${component}/CMakeLists.txt")
+      set (${component}_DIR "${CMAKE_CURRENT_BINARY_DIR}/${component}")
+      set (cosc_SOURCE_DIR "${component}")
+    else ()
+      if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${component}/core/CMakeLists.txt")
+        set (${component}_DIR "${CMAKE_CURRENT_BINARY_DIR}/${component}/core")
+        set (cosc_SOURCE_DIR "${component}/core")
+      else ()
+        message (SEND_ERROR "Couldn't find a CMakeLists in ${component} nor ${component}/core")
+      endif ()
+    endif ()
     list (APPEND CMAKE_PREFIX_PATH
-                 "${CMAKE_CURRENT_BINARY_DIR}/${component}"
-                 "${CMAKE_CURRENT_BINARY_DIR}/${component}/components")
+                 "${${component}_DIR}"
+                 "${${component}_DIR}/components")
     mark_as_advanced (${component}_DIR)
-    add_subdirectory (${component})
+    add_subdirectory (${cosc_SOURCE_DIR})
   else (${cosc_OPTION_NAME})
     unset (${component}_DIR)
   endif (${cosc_OPTION_NAME})
@@ -996,27 +997,20 @@ function (cisst_add_config_version ...)
     cisst_cmake_debug ("cisst_add_config_version: ${keyword}: ${${keyword}}")
   endforeach (keyword)
 
-  set (_cacv_versionTemplateFile "cisstConfigVersion.cmake.in")
-  find_file (CISST_CONFIG_VERSION_TEMPLATE
-             NAMES ${_cacv_versionTemplateFile}
-             PATHS ${CISST_CMAKE_DIRS}
-             NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
-  mark_as_advanced (CISST_CONFIG_VERSION_TEMPLATE)
-  if (CISST_CONFIG_VERSION_TEMPLATE)
-    configure_file("${CISST_CONFIG_VERSION_TEMPLATE}" "${_cacv_configFile}" @ONLY)
-    if (DESTINATION)
-      if (COMPONENT)
-        install (FILES ${_cacv_configFile}
-                 DESTINATION ${DESTINATION}
-                 COMPONENT ${COMPONENT})
-      else (COMPONENT)
-        install (FILES ${_cacv_configFile}
-                 DESTINATION ${DESTINATION})
-      endif (COMPONENT)
-    endif (DESTINATION)
-  else ()
-    message (FATAL_ERROR "cisst_add_config_version can't find template file: \"${_cacv_versionTemplateFile}\"")
-  endif ()
+  write_basic_package_version_file (
+    ${_cacv_configFile}
+    VERSION ${VERSION}
+    COMPATIBILITY SameMajorVersion)
+  if (DESTINATION)
+    if (COMPONENT)
+      install (FILES ${_cacv_configFile}
+        DESTINATION ${DESTINATION}
+        COMPONENT ${COMPONENT})
+    else (COMPONENT)
+      install (FILES ${_cacv_configFile}
+        DESTINATION ${DESTINATION})
+    endif (COMPONENT)
+  endif (DESTINATION)
 
 endfunction (cisst_add_config_version)
 
@@ -1035,6 +1029,20 @@ function (cisst_is_catkin_build RESULT)
     endif ()
   endif ()
 endfunction (cisst_is_catkin_build)
+
+
+#
+# Test if this build using ROS2/colcon
+#
+function (cisst_is_colcon_build RESULT)
+  set (${RESULT} FALSE PARENT_SCOPE)
+  if (DEFINED ENV{ROS_VERSION})
+    if ($ENV{ROS_VERSION} STREQUAL "2")
+      message (STATUS "Assuming cisst is built using ROS2/colcon since ROS_VERSION is 2")
+      set (${RESULT} TRUE PARENT_SCOPE)
+    endif ()
+  endif ()
+endfunction (cisst_is_colcon_build)
 
 
 # macro to set default cpack settings
@@ -1087,6 +1095,11 @@ macro (cisst_set_output_path)
     set (LIBRARY_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/lib")
     set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
   endif ()
+  cisst_is_colcon_build (_is_colcon_build)
+  if (_is_colcon_build)
+    set (LIBRARY_OUTPUT_PATH "${CISST_BINARY_DIR}/lib")
+    set (EXECUTABLE_OUTPUT_PATH "${CISST_BINARY_DIR}/bin")
+  endif ()
 endmacro (cisst_set_output_path)
 
 # Add standard configuration files for SAW component, assumes all
@@ -1138,15 +1151,10 @@ function (cisst_add_config_files _cacf_component_name)
   # generate componentConfigVersion.cmake
   set (_cacf_config_version_cmake
     "${_cacf_config_file_dir}/${_cacf_component_name}ConfigVersion.cmake")
-  find_file (
-    _cacf_config_version_cmake_in
-    NAMES sawConfigVersion.cmake.in
-    PATHS ${CISST_CMAKE_DIRS}
-    NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
-  configure_file (
-    ${_cacf_config_version_cmake_in}
+  write_basic_package_version_file (
     ${_cacf_config_version_cmake}
-    @ONLY)
+    VERSION ${_cacf_version}
+    COMPATIBILITY SameMajorVersion)
 
   # install cmake config files
   install (

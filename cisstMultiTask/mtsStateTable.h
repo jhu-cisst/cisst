@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -85,7 +85,7 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         mtsStateIndex Last;
 
         void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                         bool headerOnly = false, const std::string & headerPrefix = "") const;
+                         bool headerOnly = false, const std::string & headerPrefix = "") const override;
     };
 
     /*! Data structure used for state table data collection.  Stores
@@ -232,14 +232,14 @@ public:
       Start() and Advance() calls, false otherwise. */
     bool mStarted;
 
-	/*! The number of rows of the state data table. */
-	size_t HistoryLength;
+    /*! The number of rows of the state data table. */
+    size_t HistoryLength;
 
-	/*! The index of the writer in the data table. */
-	size_t IndexWriter;
+    /*! The index of the writer in the data table. */
+    size_t IndexWriter;
 
-	/*! The index of the reader in the table. */
-	size_t IndexReader;
+    /*! The index of the reader in the table. */
+    size_t IndexReader;
 
     /*! The index of the delayed reader in the table. */
     size_t IndexDelayed;
@@ -257,8 +257,8 @@ public:
       default. */
     bool AutomaticAdvanceFlag;
 
-	/*! The vector contains pointers to individual columns. */
-	std::vector<mtsStateArrayBase *> StateVector;
+    /*! The vector contains pointers to individual columns. */
+    std::vector<mtsStateArrayBase *> StateVector;
 
     /*! The vector contains pointers to the current values
       of elements that are to be added to the state when we
@@ -266,17 +266,17 @@ public:
       */
     std::vector<mtsGenericObject *> StateVectorElements;
 
-	/*! The columns entries can be accessed by name. This vector
-	  stores the names corresponding to the columns. */
-	std::vector<std::string> StateVectorDataNames;
+    /*! The columns entries can be accessed by name. This vector
+      stores the names corresponding to the columns. */
+    std::vector<std::string> StateVectorDataNames;
 
     /*! The vector contains pointers to the accessor methods
       (e.g., Get, GetLatest) from which command objects are created. */
     std::vector<AccessorBase *> StateVectorAccessors;
 
-	/*! The vector contains the time stamp in counts or ticks per
-	  period of the task that the state table is associated with. */
-	std::vector<mtsStateIndex::TimeTicksType> Ticks;
+    /*! The vector contains the time stamp in counts or ticks per
+      period of the task that the state table is associated with. */
+    std::vector<mtsStateIndex::TimeTicksType> Ticks;
 
     /*! The state table indices for Tic, Toc, and Period. */
     mtsStateDataId TicId, TocId;
@@ -312,8 +312,8 @@ public:
       mtsCollectorState. */
     DataCollectionInfo DataCollection;
 
-	/*! Write specified data. */
-	bool Write(mtsStateDataId id, const mtsGenericObject & obj);
+    /*! Write specified data. */
+    bool Write(mtsStateDataId id, const mtsGenericObject & obj);
 
 
  public:
@@ -324,7 +324,7 @@ public:
     /*! Default destructor. */
     ~mtsStateTable();
 
-	/*! Method to change the size of the table*/
+    /*! Method to change the size of the table*/
     bool SetSize(const size_t size);
 
     /*! Get a handle for data to be used by a reader.  All the const
@@ -476,6 +476,10 @@ public:
         return this->StateVector.size();
     }
 
+    inline const std::vector<std::string> & GetDataNames(void) const {
+        return StateVectorDataNames;
+    }
+
     /*! Return the moving average of the measured period (i.e., average of last
       HistoryLength values). */
     inline double GetAveragePeriod(void) const {
@@ -483,7 +487,7 @@ public:
     }
 
     /*! For debugging, dumps the current data table to output stream. */
-    void ToStream(std::ostream & out) const;
+    void ToStream(std::ostream & out) const override;
 
     /*! For debugging, dumps some values of the current data table to
       output stream. */

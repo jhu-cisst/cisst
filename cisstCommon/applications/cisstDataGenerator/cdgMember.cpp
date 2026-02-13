@@ -178,8 +178,19 @@ void cdgMember::GenerateHeader(std::ostream & outputStream) const
     if ((accessors == "all")
         || (accessors == "set-get")) {
         outputStream << "    /* accessors is set to: " << accessors << " */" << std::endl
+                     << "#ifndef SWIG" << std::endl
                      << "    " << depr << "void Get" << name << "(" << type << " & placeHolder) const;" << std::endl
+                     << "#endif" << std::endl
+                     << "    inline " << depr << type << " Get" << name << "(void) const {" << std::endl
+                     << "        return " << MemberName << ";" << std::endl
+                     << "    }" << std::endl
                      << "    " << depr << "void Set" << name << "(const " << type << " & newValue);" << std::endl;
+                     // << "#else" << std::endl
+                     // << "    inline " << depr << type << " Get" << name << "(void) const {" << std::endl
+                     // << "        return " << MemberName << ";" << std::endl
+                     // << "    }" << std::endl
+                     // << "#endif" << std::endl
+                     // << "    " << depr << "void Set" << name << "(const " << type << " & newValue);" << std::endl;
     }
     if ((accessors == "all")
         || (accessors == "references")) {

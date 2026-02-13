@@ -1,9 +1,9 @@
-name: Ubuntu 16.04
+name: Windows Latest
 
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master, devel ]
+    branches: [ main, devel ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -11,15 +11,15 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-16.04
+    runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install libxml2-dev libjsoncpp-dev qtbase5-dev qtbase5-dev-tools qt5-qmake qt5-default libqt5xmlpatterns5-dev
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '5.*.*'
 
     - name: Download cisstNetlib
       run: |
@@ -31,28 +31,27 @@ jobs:
       run: |
         cmake ${{github.workspace}}/cisstNetlib-source
         cmake --build . --config Release
-        sudo cmake --build . --target install
+        cmake --build . --target install
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
-      shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -C ${{github.workspace}}/.github/workflows/cmake-ubuntu-cache.cmake
+      run: cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release -C ${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}/build
-      shell: bash
-      run: cmake --build . --config Release
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      shell: bash
       run: |
-        source cisstvars.sh
-        cisstCommonTests -r
-        cisstVectorTests -r
-        cisstNumericalTests -r
-        cisstOSAbstractionTests -r
-        cisstParameterTypesTests -r
+        ./cisstvars.bat Release
+        cmake --build . --config Release
+
+#    - name: Test
+#      working-directory: ${{github.workspace}}/build
+#      run: |
+#        dir
+#        ./bin/cisstCommonTests -r
+#        ./bin/cisstVectorTests -r
+#        ./bin/cisstNumericalTests -r
+#        ./bin/cisstOSAbstractionTests -r
+#        ./bin/cisstParameterTypesTests -r

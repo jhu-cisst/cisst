@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
         globalComponentManagerIP = "localhost";
     else
         globalComponentManagerIP = argv[1];
-    
+
     // Get the TaskManager instance and set operation mode
     mtsManagerLocal * taskManager;
     try {
@@ -54,8 +54,9 @@ int main(int argc, char * argv[])
     cmnObjectRegister::Register("TaskManager", taskManager);
 
     IRE_Shell shell = IRE_WXPYTHON;
-    if ((argc > 2) && (strncmp(argv[2], "ipy", 3) == 0))
+    if ((argc > 2) && (strncmp(argv[2], "ipy", 3) == 0)) {
         shell = IRE_IPYTHON;
+    }
     ireTask *ire = new ireTask("IRE", shell);  // Could add startup string as third parameter
     taskManager->AddComponent(ire);
 
@@ -65,8 +66,9 @@ int main(int argc, char * argv[])
             mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
             mtsManagerLocal::ProcessNameOfLCMWithGCM,
             mtsManagerComponentBase::ComponentNames::ManagerComponentServer,
-            mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided))
+            mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided)) {
         CMN_LOG_INIT_ERROR << "Failed to connect system-wide thread-safe logger" << std::endl;
+    }
 
     taskManager->CreateAll();
     taskManager->StartAll();

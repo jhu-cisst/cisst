@@ -1,6 +1,142 @@
 Change log
 ==========
 
+1.4.0 (2026-01-07)
+==================
+
+* API changes:
+  * cisstMultiTask:
+    * `mtsFunction` classes removed `IsProxy` member
+    * Collectors cleanup, simplified collector interface
+  * cisstInteractive: changed `IRE_INITIALIZED` to `IRE_CONSTRUCTED`
+* Deprecated features:
+  * cisst: remove Qt4 support
+* New features:
+  * CMake:
+    * Settings for Python and SWIG saved in different cisst settings files
+  * cisstMultiTask:
+    * Collector factory now supports event collectors
+    * `mtsGenericObjectProxy` extended for Python numpy array creation
+  * cisstDataGenerator:
+    * Added support for `Json::Value`
+    * Added optional "namespace" for enum
+    * Using try/catch in JSON deserialization
+  * cisstInteractive: updated for Python 3 and recent wxPython/IPython
+  * cisstParameterTypes:
+    * Added `prmStateCartesian`
+    * Added default value for `prmActuatorJointCoupling`
+  * cisstRobot:
+    * `robManipulator` fix in RNE for prismatic joints
+    * `robMass` default mass set to 0
+* Bug fixes:
+  * cisstInteractive: fixed CMake install, pickle calls for Python 3
+  * cisstParameterTypes: `prmEventButton` default constructor sets type to UNDEFINED
+  * cmnPath: replace directory separator on Windows
+  * Fix plot scale for (near) constant plots
+
+1.3.1 (2025-01-17)
+==================
+
+* API changes:
+  * cisstRobot robManipulator: `LoadRobot` parses file name to identify .rob or .json format
+* Deprecated features:
+  * None
+* New features
+  * None
+* Bug fixes:
+  * Missing includes for Ubuntu 24.04
+  * cisstCommon cmnPath: better handling absolute paths on Windows (#102)
+  * cisstMultiTask mtsManagerLocal: use PATH instead of LD_LIBRARY_PATH for dynamic loading on Windows
+  * cisstParameterTypes prmOperatingState: allow to enable in fault state
+
+1.3.0 (2024-08-30)
+==================
+
+* API changes:
+  * Added `override` for all derived methods
+  * Removed redefinition of `virtual` in derived classes
+  * cisstParameterTypes: `prmJointType` is now `cmnJointType` and JSON serialization now uses the string value (not enum number)
+* Deprecated features:
+  * cisstParameterTypes: removed all classes related to transformation graph
+* New features
+  * cisstDataGenerator: added support for enum in global scope, fix for `override`
+  * cisstParameterTypes: added types `prmImageFrame`, `prmCameraInfo` and `prmDepthMap.h`
+  * cisstRobot:
+    * Gravity can be declared as vector
+    * Uses `cmnJointType`
+* Bug fixes:
+  * CMake:
+    * `cisst_offer_saw_component` updated to search for `component` or `core` (new SAW directory structure)
+  * cisstMultiTask:
+    * Fix for `mtsManagerLocal.GetInstance`
+  * cisstParameterTypes:
+    * More `CISST_EXPORT` for Windows
+    * Added new data types for SWIG wrapping
+    * Fixed `prmActuatorState::ToStream`
+    * Added missing `break` in `prmOperatingState.cpp`
+  * Fixed some GitHub actions/workflows
+
+1.2.1 (2022-12-29)
+==================
+
+* API changes:
+  * CMake find_package now uses CMake `COMPATIBILITY` `SameMajorVersion`, older code used custom version check equivalent to `SameMinorVersion`
+* Deprecated features:
+  * cisstNumerical: polynomial is not compiled by default, set `CISST_NMR_COMPILE_POLYNOMIALS` if these are needed. We plan to remove this code in later releases 
+* Bug fixes:
+  * cisstDataGenerator: fixed export for enums and static methods
+  * cisstNumerical: for OS requiring CLAPACK, cisstNetlib now uses a fork that has been updated to support recent C/C++ compilers
+  * Fixed some GitHub actions/workflows
+
+
+1.2.0 (2022-11-21)
+==================
+
+* API changes:
+  * None
+* Deprecated features:
+  * cisstNetlib DOWNLOAD_NOW has been removed, cisstNetlib has to be compiled by the user.  The process is automatic with ROS1/catkin and ROS2/colcon
+  * ICE support has been removed
+  * `CISST_VERSION` is now `cisst_VERSION`
+* New features:
+  * CMake:
+    * Updated install targets and debian packages generation
+    * Works with ROS2/colcon
+    * New CMake macros to simplify CMakeLists.txt for SAW components
+  * cisstCommon:
+    * cmnCommandLineOptions:
+      * Overloaded Parse method to display the error message and usage if needed
+      * Overloaded Parse methods to support std::vector<std::string>
+    * cmnPath: added static method RenameFile
+  * cisstOSAbstraction: added definition for baud rates 230400 and 460800 for osaSerialPort
+  * cisstVector:
+    * vctDataFunctionsTransformationsJSON: normalize rotation matrices after de-serialization
+    * Added c{,r}{begin,end} for dynamic vectors
+  * cisstMultiTask:
+    * Uses "new" features by default
+    * Added mtsStateTableFilter and mtsInterfaceProvided::AddCommandFilteredReadState
+    * mtsInterfaceProvided: added method to get class services for argument types
+  * cisstParameterTypes:
+    * Added prmForceCartesianGetQtWidget
+    * Ported prmForceTorqueJointSet to use cisstDataGenerator
+    * Added data typed for kinematics queries
+* Bug fixes:
+  * General: fixes for new compilers warnings
+  * CMake:
+    * Improved DirectShow Find Module for Windows 10 SDKs (#85)
+    * cisstMacros.cmake:
+      * Added missing executable output path in cisst_set_output_path
+      * Set CMake policy CMP0026 to OLD
+      * Fixed CMake for Qt5 using `Qt5::`
+  * cisstDataGenerator:
+    * Fixed enum defined under namespace
+  * cisstMultiTask:
+    * Added missing mtsComponentConstructorArg
+  * cisstParameterTypes:
+    * Fixed data member initialization in `.cdg` files (`prmPositionCartesianSet`, `prmVelocityCartesianSet`, `prmCartesianImpedanceGains`, `prmPositionJointSet`, `prmStateJoint`...)
+  * cisstMesh:
+    * Added missing CISST_EXPORT
+
 1.1.0 (2021-04-04)
 ==================
 

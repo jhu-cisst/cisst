@@ -1,6 +1,6 @@
 #
 #
-# (C) Copyright 2005-2013 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -13,8 +13,12 @@
 add_subdirectory (tutorial)
 add_subdirectory (PeriodicTask)
 add_subdirectory (CommandsAndEvents)
-add_subdirectory (ConnectionTest)
+if (CISST_HAS_FLTK)
+  add_subdirectory (ConnectionTest)
+endif ()
 if (${CISST_cisstParameterTypes} STREQUAL ON)
   add_subdirectory (Benchmarks)
-  add_subdirectory (2DPlotVisualizer)
-endif()
+  if (CISST_HAS_QT)
+    add_subdirectory (2DPlotVisualizer)
+  endif ()
+endif ()

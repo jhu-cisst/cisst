@@ -2,11 +2,10 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-#  Author(s):	Chris Abidin, Andrew LaMora, Peter Kazanzides
+#  Author(s):   Chris Abidin, Andrew LaMora, Peter Kazanzides
 #  Created on: 2004-04-30
 #
-#  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-#  Reserved.
+#  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -35,13 +34,21 @@ Baltimore, MD 21218
 #------------------------------------------------------
 # Import standard libraries
 #------------------------------------------------------
-import os, sys, imp, time, cPickle, exceptions, types, warnings
+import os, sys, time, warnings
+if sys.version_info.major == 2:
+    import cPickle as pickle
+    import imp
+    from types import StringTypes
+else:
+    import pickle
+    import importlib.util
+    StringTypes = str
 import string as String
 
 #-----------------------------------------------------
 # Ignore Python future warnings (nuissances)
 #-----------------------------------------------------
-warnings.simplefilter('ignore', exceptions.FutureWarning)
+warnings.simplefilter('ignore', FutureWarning)
 
 #------------------------------------------------------
 # Import what we need from the wx toolkit
@@ -49,8 +56,8 @@ warnings.simplefilter('ignore', exceptions.FutureWarning)
 try:
     import wx
     import wx.py as py
-except Exception, e:
-    print "Could not load wxPython: ", e
+except Exception as e:
+    print('Could not load wxPython: ', e)
     sys.exit(1)
 
 
@@ -69,8 +76,8 @@ ireScope = False
 try:
    from wxOscilloscope import *
    ireScope = True
-except ImportError,e:
-   print 'Could not import wxOscilloscope:', e
+except ImportError as e:
+   print('Could not import wxOscilloscope: ', e)
 
 
 # Now, see if the IRE is embedded in a C++ application.
@@ -80,7 +87,7 @@ except ImportError,e:
 ireEmbedded = True
 try:
     import ireLogger
-except ImportError,e:
+except ImportError as e:
     ireEmbedded = False
 
 ###############################  CLASSES ######################################
@@ -131,7 +138,7 @@ class ireMain(wx.Frame):
     #------------------------------------------------------
     def __init__(self, parent, id, title):
 
-        
+
         # Create a frame that is 750 x 500 pixels in size (if not embedded) or
         # 750 x 750 pixels in size (if embedded).  The larger size provides more
         # room for the Register Contents and Logger Output windows, which are enabled
@@ -172,15 +179,15 @@ class ireMain(wx.Frame):
         menu = self.ViewMenu = wx.Menu()
         self.MENU_VIEW_REGISTER = wx.MenuItem(menu, self.ID_VIEW_REGISTER, "Register Contents",
                                                     "View Register Contents", wx.ITEM_CHECK)
-        menu.AppendItem(self.MENU_VIEW_REGISTER)
+        menu.Append(self.MENU_VIEW_REGISTER)
         self.MENU_VIEW_REGISTER.Check(ireEmbedded)
         self.MENU_VIEW_VARIABLES = wx.MenuItem(menu, self.ID_VIEW_VARIABLES, "Shell Variables",
                                                      "View Shell Variables", wx.ITEM_CHECK)
-        menu.AppendItem(self.MENU_VIEW_VARIABLES)
+        menu.Append(self.MENU_VIEW_VARIABLES)
         self.MENU_VIEW_VARIABLES.Check(True)
         self.MENU_VIEW_HISTORY = wx.MenuItem(menu, self.ID_VIEW_HISTORY,   "Command History",
                                                    "View Command History", wx.ITEM_CHECK)
-        menu.AppendItem(self.MENU_VIEW_HISTORY)
+        menu.Append(self.MENU_VIEW_HISTORY)
         self.MENU_VIEW_HISTORY.Check(True)
         menu.Append(self.ID_VIEW_LOGGER,   "Logger Output",   "View C++ Logger Output",   wx.ITEM_CHECK)
         menu.Check(self.ID_VIEW_LOGGER, ireEmbedded)
@@ -222,65 +229,65 @@ class ireMain(wx.Frame):
         menubar.Append(self.HelpMenu, "&Help")
         self.SetMenuBar(menubar)
 
-        wx.EVT_MENU(self, wx.ID_NEW, self.OnFileNew)
-        wx.EVT_MENU(self, wx.ID_OPEN, self.OnFileOpen)
-        wx.EVT_MENU(self, wx.ID_REVERT, self.OnFileRevert)
-        wx.EVT_MENU(self, wx.ID_CLOSE, self.OnFileClose)
-        wx.EVT_MENU(self, wx.ID_SAVE, self.OnFileSave)
-        wx.EVT_MENU(self, wx.ID_SAVEAS, self.OnFileSaveAs)
-        #wx.EVT_MENU(self, wx.ID_NAMESPACE, self.OnFileUpdateNamespace)
-        wx.EVT_MENU(self, wx.ID_PRINT, self.OnFilePrint)
-        wx.EVT_MENU(self, wx.ID_EXIT, self.OnExit)
-        wx.EVT_MENU(self, wx.ID_UNDO, self.OnUndo)
-        wx.EVT_MENU(self, wx.ID_REDO, self.OnRedo)
-        wx.EVT_MENU(self, wx.ID_CUT, self.OnCut)
-        wx.EVT_MENU(self, wx.ID_COPY, self.OnCopy)
-        wx.EVT_MENU(self, wx.ID_PASTE, self.OnPaste)
-        wx.EVT_MENU(self, wx.ID_SELECTALL, self.OnSelectAll)
-        wx.EVT_MENU(self, self.ID_VIEW_REGISTER, self.OnViewRegister)
-        wx.EVT_MENU(self, self.ID_VIEW_VARIABLES, self.OnViewVariables)
-        wx.EVT_MENU(self, self.ID_VIEW_HISTORY, self.OnViewHistory)
-        wx.EVT_MENU(self, self.ID_VIEW_LOGGER, self.OnViewLogger)
-        wx.EVT_MENU(self, self.ID_LOADWORKSPACE, self.OnLoadWorkspace)
-        wx.EVT_MENU(self, self.ID_SAVEWORKSPACE, self.OnSaveWorkspace)
-        wx.EVT_MENU(self, self.ID_RUNINSHELL, self.OnRunInShell)
-        wx.EVT_MENU(self, self.ID_RUNINNEWPROCESS, self.OnRunInNewProcess)
-        wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
-        wx.EVT_MENU(self, self.ID_TRUNCATEHISTORY, self.OnTruncateHistory)
-        wx.EVT_MENU(self, self.ID_LOADHISTORY, self.OnLoadHistory)
-        wx.EVT_MENU(self, self.ID_CLEARHISTORY, self.OnClearHistory)
-        wx.EVT_MENU(self, self.ID_TASKTREE, self.OnTaskTree)
-        wx.EVT_MENU(self, self.ID_TESTINPUTBOX, self.OnTestInputBox)
-        wx.EVT_MENU(self, self.ID_OSCILLOSCOPE, self.OnOscilloscope)
-        wx.EVT_MENU(self, self.ID_LOAD_CISSTCOMMON,  self.OnImportCisstCommon)
-        wx.EVT_MENU(self, self.ID_LOAD_CISSTOSABSTRACTION,  self.OnImportCisstOSAbstraction)
-        wx.EVT_MENU(self, self.ID_LOAD_CISSTVECTOR,  self.OnImportCisstVector)
-        wx.EVT_MENU(self, self.ID_LOAD_CISSTNUMERICAL,  self.OnImportCisstNumerical)
-        wx.EVT_MENU(self, self.ID_LOAD_CISSTMULTITASK,  self.OnImportCisstMultiTask)
-        wx.EVT_MENU(self, self.ID_LOAD_CISSTPARAMETERTYPES,  self.OnImportCisstParameterTypes)
+        self.Bind(wx.EVT_MENU, self.OnFileNew, id=wx.ID_NEW)
+        self.Bind(wx.EVT_MENU, self.OnFileOpen, id=wx.ID_OPEN)
+        self.Bind(wx.EVT_MENU, self.OnFileRevert, id=wx.ID_REVERT)
+        self.Bind(wx.EVT_MENU, self.OnFileClose, id=wx.ID_CLOSE)
+        self.Bind(wx.EVT_MENU, self.OnFileSave, id=wx.ID_SAVE)
+        self.Bind(wx.EVT_MENU, self.OnFileSaveAs, id=wx.ID_SAVEAS)
+        #self.Bind(wx.EVT_MENU, self.OnFileUpdateNamespace, id=wx.ID_NAMESPACE)
+        self.Bind(wx.EVT_MENU, self.OnFilePrint, id=wx.ID_PRINT)
+        self.Bind(wx.EVT_MENU, self.OnExit, id=wx.ID_EXIT)
+        self.Bind(wx.EVT_MENU, self.OnUndo, id=wx.ID_UNDO)
+        self.Bind(wx.EVT_MENU, self.OnRedo, id=wx.ID_REDO)
+        self.Bind(wx.EVT_MENU, self.OnCut, id=wx.ID_CUT)
+        self.Bind(wx.EVT_MENU, self.OnCopy, id=wx.ID_COPY)
+        self.Bind(wx.EVT_MENU, self.OnPaste, id=wx.ID_PASTE)
+        self.Bind(wx.EVT_MENU, self.OnSelectAll, id=wx.ID_SELECTALL)
+        self.Bind(wx.EVT_MENU, self.OnViewRegister, id=self.ID_VIEW_REGISTER)
+        self.Bind(wx.EVT_MENU, self.OnViewVariables, id=self.ID_VIEW_VARIABLES)
+        self.Bind(wx.EVT_MENU, self.OnViewHistory, id=self.ID_VIEW_HISTORY)
+        self.Bind(wx.EVT_MENU, self.OnViewLogger, id=self.ID_VIEW_LOGGER)
+        self.Bind(wx.EVT_MENU, self.OnLoadWorkspace, id=self.ID_LOADWORKSPACE)
+        self.Bind(wx.EVT_MENU, self.OnSaveWorkspace, id=self.ID_SAVEWORKSPACE)
+        self.Bind(wx.EVT_MENU, self.OnRunInShell, id=self.ID_RUNINSHELL)
+        self.Bind(wx.EVT_MENU, self.OnRunInNewProcess, id=self.ID_RUNINNEWPROCESS)
+        self.Bind(wx.EVT_MENU, self.OnAbout, id=wx.ID_ABOUT)
+        self.Bind(wx.EVT_MENU, self.OnTruncateHistory, id=self.ID_TRUNCATEHISTORY)
+        self.Bind(wx.EVT_MENU, self.OnLoadHistory, id=self.ID_LOADHISTORY)
+        self.Bind(wx.EVT_MENU, self.OnClearHistory, id=self.ID_CLEARHISTORY)
+        self.Bind(wx.EVT_MENU, self.OnTaskTree, id=self.ID_TASKTREE)
+        self.Bind(wx.EVT_MENU, self.OnTestInputBox, id=self.ID_TESTINPUTBOX)
+        self.Bind(wx.EVT_MENU, self.OnOscilloscope, id=self.ID_OSCILLOSCOPE)
+        self.Bind(wx.EVT_MENU, self.OnImportCisstCommon, id=self.ID_LOAD_CISSTCOMMON)
+        self.Bind(wx.EVT_MENU, self.OnImportCisstOSAbstraction, id=self.ID_LOAD_CISSTOSABSTRACTION)
+        self.Bind(wx.EVT_MENU, self.OnImportCisstVector, id=self.ID_LOAD_CISSTVECTOR)
+        self.Bind(wx.EVT_MENU, self.OnImportCisstNumerical, id=self.ID_LOAD_CISSTNUMERICAL)
+        self.Bind(wx.EVT_MENU, self.OnImportCisstMultiTask, id=self.ID_LOAD_CISSTMULTITASK)
+        self.Bind(wx.EVT_MENU, self.OnImportCisstParameterTypes, id=self.ID_LOAD_CISSTPARAMETERTYPES)
 
-        wx.EVT_UPDATE_UI(self, wx.ID_NEW, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_OPEN, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_REVERT, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_CLOSE, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_SAVE, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_SAVEAS, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_PRINT, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_UNDO, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_REDO, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_CUT, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_COPY, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_PASTE, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, wx.ID_SELECTALL, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_RUNINSHELL, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_RUNINNEWPROCESS, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_TASKTREE, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTCOMMON, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTVECTOR, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTNUMERICAL, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTMULTITASK, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTPARAMETERTYPES, self.OnUpdateMenu)
-        #wx.EVT_UPDATE_UI(self, self.ID_TRUNCATEHISTORY, self.OnTruncateHistory)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_NEW)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_OPEN)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_REVERT)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_CLOSE)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_SAVE)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_SAVEAS)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_PRINT)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_UNDO)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_REDO)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_CUT)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_COPY)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_PASTE)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=wx.ID_SELECTALL)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_RUNINSHELL)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_RUNINNEWPROCESS)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_TASKTREE)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTCOMMON)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTVECTOR)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTNUMERICAL)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTMULTITASK)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTPARAMETERTYPES)
+        #self.Bind(wx.EVT_UPDATE_UI, self.OnTruncateHistory, id=self.ID_TRUNCATEHISTORY)
         
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
@@ -291,15 +298,21 @@ class ireMain(wx.Frame):
         #------------------------------------------------------
 
         ToolBar = self.CreateToolBar( wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT )
-        # Set up the toolbar, using bitmaps from ireImages.py.  Note that an alternative is to 
-        # use wx.ArtProvider.GetBitmap to get the wxWidgets default bitmaps:
+        # Set up the toolbar, using bitmaps from ireImages.py
+        # Alternatively, could use wx.ArtProvider as follows:
         #    tsize = (16,16)
-        #    new_bmp =  wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, tsize)
-        #    open_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, tsize)
-        #    save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, tsize)
-        ToolBar.AddSimpleTool(wx.ID_NEW,  ireImages.getNewItemBitmap(), "New", "New file")
-        ToolBar.AddSimpleTool(wx.ID_OPEN, ireImages.getOpenItemBitmap(), "Open", "Open file...")
-        ToolBar.AddSimpleTool(wx.ID_SAVE, ireImages.getSaveItemBitmap(), "Save", "Save file")
+        #    new_bitmap  = wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, tsize)
+        #    open_bitmap = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, tsize)
+        #    save_bitmap = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, tsize)
+        new_bitmap  = ireImages.getNewItemBitmap()
+        open_bitmap = ireImages.getOpenItemBitmap()
+        save_bitmap = ireImages.getSaveItemBitmap()
+        ToolBar.AddTool(wx.ID_NEW, "", new_bitmap, "New")
+        ToolBar.SetToolLongHelp(wx.ID_NEW, "New file")
+        ToolBar.AddTool(wx.ID_OPEN, "", open_bitmap, "Open")
+        ToolBar.SetToolLongHelp(wx.ID_OPEN, "Open file...")
+        ToolBar.AddTool(wx.ID_SAVE, "", save_bitmap, "Save")
+        ToolBar.SetToolLongHelp(wx.ID_SAVE, "Save file")
 
         #ToolBar.AddSeparator()
         # Could add other tools here, such as ones for loading cisstCommon,
@@ -307,7 +320,6 @@ class ireMain(wx.Frame):
 
         ToolBar.Realize()
 
-  
         #*************** Subdivide the frame into multiple windows ***************************
         #
 
@@ -372,7 +384,7 @@ class ireMain(wx.Frame):
         #*********************** Initialize the Command History***********************
 
         self.CommandHistoryListCtrl.AddIndexedItem(time.strftime("--- %a, %d %b %Y, %I:%M %p ---", time.localtime()))
-	
+
         #******************** Set up callback functions for the shell ****************
 
         self.Shell = self.EditorNotebook.Shell
@@ -389,7 +401,7 @@ class ireMain(wx.Frame):
         # Set minimum size for entire frame to be at least twice the minimum pane size.
         # Note that (ireSize[x]-clientSize[x]) is added to account for the borders,
         # menu bar, tool bar, and status line.
-        clientSize = self.GetClientSizeTuple()
+        clientSize = self.GetClientSize().Get()
         self.SetSizeHints(2*self.TopSplitter.GetMinimumPaneSize() + (ireSize[0]-clientSize[0]),
                           2*self.MainSplitter.GetMinimumPaneSize() + (ireSize[1]-clientSize[1]))
 
@@ -397,38 +409,38 @@ class ireMain(wx.Frame):
         
         Width = 10*(self.RegisterContentsListCtrl.list.GetColumnWidth(0) +
             self.RegisterContentsListCtrl.list.GetColumnWidth(1))/2
-        self.RegisterContentsListCtrl.list.SetColumnWidth(0, Width)
-        self.ScopeVariablesListCtrl.list.SetColumnWidth(0, Width)
+        self.RegisterContentsListCtrl.list.SetColumnWidth(0, int(Width))
+        self.ScopeVariablesListCtrl.list.SetColumnWidth(0, int(Width))
 
         
-	#------------------------------------------------------
-	# addVariablesToRegister
-	#
-	# Parse the input Data for variables that are to be added
-	# to the Object Register.
-	# NOTE: affected by changes to the Object Register
-	#------------------------------------------------------
+    #------------------------------------------------------
+    # addVariablesToRegister
+    #
+    # Parse the input Data for variables that are to be added
+    # to the Object Register.
+    # NOTE: affected by changes to the Object Register
+    #------------------------------------------------------
     def AddVariablesToRegister(self, Data):
         #for VariableName in Data:
             #self.ObjectRegister.Register(VariableName, self.Shell.interp.locals[VariableName])
         self.CheckRegisterContents()
 
-	#------------------------------------------------------
-	# GetVariablesFromRegister
-	#
-	# Calls RegisterGet to explicitly fetch variables 
-	# contained in the input argument "Data" (which is
-	# itself populated by List() or used to be till anton killed it)
-	#------------------------------------------------------
+    #------------------------------------------------------
+    # GetVariablesFromRegister
+    #
+    # Calls RegisterGet to explicitly fetch variables
+    # contained in the input argument "Data" (which is
+    # itself populated by List() or used to be till anton killed it)
+    #------------------------------------------------------
     def GetVariablesFromRegister(self, Data):
         for VariableName in Data:
-            self.Shell.interp.locals[VariableName] = FindObject(VariableName)
+            self.Shell.interp.locals[VariableName] = self.ObjectRegister.FindObject(VariableName)
         self.CheckScopeVariables()
 
-	#------------------------------------------------------
-	# The following functions handle command events
-	# in the notebook shell.
-	#------------------------------------------------------
+    #------------------------------------------------------
+    # The following functions handle command events
+    # in the notebook shell.
+    #------------------------------------------------------
 
     def PythonCommandEntered(self, Command):
         if len(Command.strip()) > 0:
@@ -439,55 +451,55 @@ class ireMain(wx.Frame):
                 if Line:
                     index = self.CommandHistoryListCtrl.AddIndexedItem(Line)
                     if index < 0:
-                       print 'Failed to add command to history: ', Line
+                       print('Failed to add command to history: ', Line)
                     elif self.IsShown():
                        self.CommandHistoryListCtrl.list.EnsureVisible(index)
             if self.LogToDiary:
                 self.WriteToDiary(Lines)
-    	    self.CheckLists()
+            self.CheckLists()
 
     def OnImportCisstCommon(self, event):
         self.ImportCisstCommon()
     def ImportCisstCommon(self):
-        print "importing cisstCommon"
-		self.Shell.push("from cisstCommonPython import *")
+        print('importing cisstCommon')
+        self.Shell.push("import cisstCommonPython as cisstCommon")
 
     def OnImportCisstOSAbstraction(self, event):
         self.ImportCisstOSAbstraction()
     def ImportCisstOSAbstraction(self):
-        print "importing cisstOSAbstraction"
-		self.Shell.push("from cisstOSAbstractionPython import *")
+        print('importing cisstOSAbstraction')
+        self.Shell.push("import cisstOSAbstractionPython as cisstOSAbstraction")
             
     def OnImportCisstVector(self, event):
         self.ImportCisstVector()
     def ImportCisstVector(self):
-        print "importing cisstVector"
-		self.Shell.push("from cisstVectorPython import *")
+        print('importing cisstVector')
+        self.Shell.push("import cisstVectorPython as cisstVector")
 
     def OnImportCisstNumerical(self, event):
         self.ImportCisstNumerical()
     def ImportCisstNumerical(self):
-        print "importing cisstNumerical"
-		self.Shell.push("from cisstNumericalPython import *")
+        print('importing cisstNumerical')
+        self.Shell.push("import cisstNumericalPython as cisstNumerical")
 
     def OnImportCisstMultiTask(self, event):
         self.ImportCisstMultiTask()
     def ImportCisstMultiTask(self):
-        print "importing cisstMultiTask"
-		self.Shell.push("from cisstMultiTaskPython import *")
+        print('importing cisstMultiTask')
+        self.Shell.push("import cisstMultiTaskPython as cisstMultiTask")
 
     def OnImportCisstParameterTypes(self, event):
         self.ImportCisstParameterTypes()
     def ImportCisstParameterTypes(self):
-        print "importing cisstParameterTypes"
-		self.Shell.push("from cisstParameterTypesPython import *")
+        print('importing cisstParameterTypes')
+        self.Shell.push("import cisstParameterTypesPython as cisstParameterTypes")
 
-	#------------------------------------------------------
-	# Diary Functions
-	#
-	# Handle enabling, recording to and fetching from the 
-	# statement diary.  Currently not used.
-	#------------------------------------------------------
+    #------------------------------------------------------
+    # Diary Functions
+    #
+    # Handle enabling, recording to and fetching from the
+    # statement diary.  Currently not used.
+    #------------------------------------------------------
     def WriteToDiary(self, Lines):
         DiaryFile = open(self.DIARY_FILENAME, 'a')
         for Line in Lines:
@@ -514,9 +526,9 @@ class ireMain(wx.Frame):
 
     def CheckLists(self):
         if not self.ObjectRegister:
-            if sys.modules.has_key('cisstCommonPython'):
-                import cisstCommonPython
-                self.ObjectRegister = cisstCommonPython.cmnObjectRegister_Instance()
+            if 'cisstCommonPython' in sys.modules:
+                import cisstCommonPython as cisstCommon
+                self.ObjectRegister = cisstCommon.cmnObjectRegister.Instance()
         if self.ObjectRegister:
             self.CheckRegisterContents()
         self.CheckScopeVariables()
@@ -524,9 +536,9 @@ class ireMain(wx.Frame):
 
 
     def CheckRegisterContents(self):
-        CurrentRegister = String.split(self.ObjectRegister.__str__())
+        CurrentRegister = list(self.ObjectRegister)
         if CurrentRegister != self.Register:
-            self.UpdateList(self.RegisterContentsListCtrl, self.GetRegisterContents(self.TYPES_TO_EXCLUDE))
+            self.UpdateList(self.RegisterContentsListCtrl, self.GetRegisterContents())
             self.Register = CurrentRegister
 
     def CheckScopeVariables(self):
@@ -543,18 +555,12 @@ class ireMain(wx.Frame):
             ListCtrl.SortList()
 
 
-    def GetRegisterContents(self, TypesToExclude=[]):
+    def GetRegisterContents(self):
         Contents = {}
-        VariableName = ""
-        VariableType = ""
-        for tok in String.split(self.ObjectRegister.__str__(), " "):
-            #if starts with lparen, is type, else is name
-            if tok.find('(')==0:  #this is a variabletype
-                VariableType = tok[1:tok.rfind(')')]
-                if VariableType not in TypesToExclude:
-                    Contents.update( {VariableName:VariableType} )
-            else:   #this is a variablename
-                VariableName = tok
+        for entry in self.ObjectRegister:
+            VariableName = entry[0]
+            VariableType = self.GetRegisterTypeString(VariableName)
+            Contents.update( {VariableName:VariableType} )
         return Contents
 
 
@@ -564,7 +570,7 @@ class ireMain(wx.Frame):
             if not self.IsDecorated(VariableName):
                 VariableType = self.GetVariableTypeString(VariableName)
                 if VariableType not in TypesToExclude:
-                	Variables.update({VariableName:VariableType})
+                    Variables.update({VariableName:VariableType})
         return Variables
 
 
@@ -573,42 +579,44 @@ class ireMain(wx.Frame):
 
 
     def GetRegisterTypeString(self, VariableName):
-        return self.GetTypeString("RegisterGet('" + VariableName + "')")
+        obj = self.ObjectRegister.FindObject(VariableName)
+        return self.GetTypeString(obj)
 
 
     def GetVariableTypeString(self, VariableName):
-        return self.GetTypeString("vars(self.Shell.interp)['locals']['" + VariableName + "']")
+        obj = vars(self.Shell.interp)['locals'][VariableName]
+        return self.GetTypeString(obj)
 
 
-    def GetTypeString(self, _Str):
-        exec("VariableType = str(type(" + _Str + "))")
+    def GetTypeString(self, obj):
+        VariableType = str(type(obj))
         return VariableType[VariableType.find("'")+1:VariableType.rfind("'")]
 
-	
-	#-------------------------------------------------
-	# Methods for manipulating/displaying/truncating the 
-	# command history 
-	#-------------------------------------------------
+
+    #-------------------------------------------------
+    # Methods for manipulating/displaying/truncating the 
+    # command history 
+    #-------------------------------------------------
 
     def SaveHistoryToFile(self):
         cmdlist = self.CommandHistoryListCtrl.GetAllItems()
-        f = open(self.HISTORY_FILENAME, 'w')
-        cPickle.dump(cmdlist, f)
+        f = open(self.HISTORY_FILENAME, 'wb')
+        pickle.dump(cmdlist, f)
     
     def LoadHistoryFromFile(self, fn=HISTORY_FILENAME):
         Data = []
         if os.path.isfile(fn):
             try:
-                Data = cPickle.load(open(fn))
-            except exceptions.Exception, error:
+                Data = pickle.load(open(fn, 'rb'))
+            except Exception as error:
                 msgdlg = wx.MessageDialog(self, str(error), "Load History", wx.OK | wx.ICON_ERROR)
                 msgdlg.ShowModal()
                 msgdlg.Destroy()
         # Make sure command history is a list of strings.  Note that an empty
         # list is not considered to be an error.
         file_error = False
-        if isinstance(Data, types.ListType):
-            if len(Data) > 0 and not isinstance(Data[0], types.StringTypes):
+        if isinstance(Data, list):
+            if len(Data) > 0 and not isinstance(Data[0], StringTypes):
                 file_error = True   # list does not contain strings
         else:
             file_error = True       # not a list
@@ -637,7 +645,7 @@ class ireMain(wx.Frame):
         """Append to the command history from the selected history file (*.hist)."""
         # Use os.getcwd() instead of '.' to avoid gtk assertion on Linux.
         dlg = wx.FileDialog( self, "Select a Command Archive to Load:", os.getcwd(), "", \
-                             "IRE Command Histories (*.hist)|*.hist|All Files (*.*)|*.*", wx.OPEN)
+                             "IRE Command Histories (*.hist)|*.hist|All Files (*.*)|*.*", wx.FD_OPEN)
         # show the dialog and process it
         if dlg.ShowModal() == wx.ID_OK:
             fn = dlg.GetFilename()
@@ -673,7 +681,7 @@ class ireMain(wx.Frame):
         # query the user for a file name, and save it if one is entered.
         # Use os.getcwd() instead of '.' to avoid gtk assertion on Linux.
         idlg = wx.FileDialog( None, "Save/append to archive file:", os.getcwd(), "", \
-                              "IRE Command Histories (*.hist)|*.hist|All Files (*.*)|*.*", wx.SAVE)
+                              "IRE Command Histories (*.hist)|*.hist|All Files (*.*)|*.*", wx.FD_SAVE)
         if idlg.ShowModal() == wx.ID_OK:
             fn = idlg.GetFilename()
             # Some systems don't automatically append the .hist extension
@@ -683,13 +691,13 @@ class ireMain(wx.Frame):
             # write the command file up to the selected line into the named file
             # fetch any existing list first and append to it
             try:
-                archlist = cPickle.load(open(fn))
+                archlist = pickle.load(open(fn), 'rb')
             except IOError:
                 archlist = []
             n=0
             for n in range(choice):
                 archlist.append( cmdlist[n] )
-            cPickle.dump( archlist, open(fn, 'w'))
+            pickle.dump( archlist, open(fn, 'wb'))
             text = "Your command history was archived to " + fn
             msgdlg = wx.MessageDialog(self, text, title, wx.OK | wx.ICON_INFORMATION)
             msgdlg.ShowModal()
@@ -758,26 +766,26 @@ class ireMain(wx.Frame):
         #self.Destroy()
 
     def OnUndo(self, event):
-        wx.Window_FindFocus().Undo()
+        wx.Window.FindFocus().Undo()
 
     def OnRedo(self, event):
-        wx.Window_FindFocus().Redo()
+        wx.Window.FindFocus().Redo()
 
     def OnCut(self, event):
-        wx.Window_FindFocus().Cut()
+        wx.Window.FindFocus().Cut()
 
     def OnCopy(self, event):
-        wx.Window_FindFocus().Copy()
+        wx.Window.FindFocus().Copy()
 
     def OnPaste(self, event):
-        wx.Window_FindFocus().Paste()
+        wx.Window.FindFocus().Paste()
 
     def OnSelectAll(self, event):
-        wx.Window_FindFocus().SelectAll()
+        wx.Window.FindFocus().SelectAll()
 
-	#-------------------------------------------------
-	# View menu handlers
-	#-------------------------------------------------
+    #-------------------------------------------------
+    # View menu handlers
+    #-------------------------------------------------
 
     # Check the status of the left panel (Register Contents, Shell Variables,
     # and Command History).  If all are disabled, then unsplit TopSplitter so
@@ -794,7 +802,7 @@ class ireMain(wx.Frame):
         else:
             if self.TopSplitter.IsSplit():
                 self.TopSplitter.Unsplit(self.LeftPanel)
-	
+
     def OnViewRegister(self, event):
         self.LeftBoxSizer.Show(self.RegisterContentsListCtrl, event.IsChecked())
         self.CheckLeftPanel()
@@ -818,15 +826,15 @@ class ireMain(wx.Frame):
         else:
             self.MainSplitter.Unsplit(self.LoggerPanel)
 
-	#-------------------------------------------------
-	# Workspace maintenance methods
-	# (also event handlers)
-	#-------------------------------------------------
-	
+    #-------------------------------------------------
+    # Workspace maintenance methods
+    # (also event handlers)
+    #-------------------------------------------------
+
     def OnLoadWorkspace(self, event):
         Filepath = py.editor.openSingle(directory='',wildcard='IRE Workspace (*.ws)|*.ws|All Files (*.*)|*.*').path
         if Filepath:
-            File = open(Filepath)
+            File = open(Filepath, 'rb')
             LoadWorkspaceFile(self.Shell.interp.locals, File)
             File.close()
             self.CheckScopeVariables()
@@ -838,10 +846,10 @@ class ireMain(wx.Frame):
             (name, ext) = os.path.splitext(Filepath)
             if not ext:
                Filepath += '.ws'
-            File = open(Filepath,'w')
+            File = open(Filepath,'wb')
             SaveWorkspaceToFile(self.Shell.interp.locals, File)
             File.close()
-	
+
     def OnLoadHistory(self, event):
         self.QueryHistoryFile()
       
@@ -856,7 +864,6 @@ class ireMain(wx.Frame):
         frame.Show(True)
         
     def OnTaskTree(self, event):        
-        #taskManager = self.ObjectRegister.FindObject("TaskManager")
         taskManager = mtsManagerLocal.GetInstance()
         if taskManager:
             frame = ireTaskTree(None, -1, "Task Manager", taskManager)
@@ -870,7 +877,6 @@ class ireMain(wx.Frame):
     def OnOscilloscope(self, event):        
         import gettext
         gettext.install("irepy")
-        #taskManager = self.ObjectRegister.FindObject("TaskManager")
         taskManager = mtsManagerLocal.GetInstance()
         if taskManager:
             self.scopeFrame = COscilloscope(self, taskManager)
@@ -882,10 +888,10 @@ class ireMain(wx.Frame):
             msgdlg.Destroy()
         
     #-------------------------------------------------
-	# Methods for running scripts in the main or 
-	# separate threads.
-	#-------------------------------------------------
-	
+    # Methods for running scripts in the main or
+    # separate threads.
+    #-------------------------------------------------
+
     def OnRunInShell(self, event):
         cancel = self.EditorNotebook.bufferSave()
         if not cancel:
@@ -900,10 +906,10 @@ class ireMain(wx.Frame):
                 str = os.sys.executable + ' "' + self.EditorNotebook.buffer.doc.filepath + '"'
                 os.system(str)
 
-		
-	#-------------------------------------------------
-	# The obligatory About
-	#-------------------------------------------------
+
+    #-------------------------------------------------
+    # The obligatory About
+    #-------------------------------------------------
     def OnAbout(self, event):
         """Display an About window."""
         title = 'About'
@@ -911,14 +917,10 @@ class ireMain(wx.Frame):
         text = \
 'Interactive Research Environment (IRE)'.center(twidth) + '\n' + \
 'The IRE provides a Python-based command interpreter'.center(twidth) + '\n\n' + \
-'Developed by the Engineering Research Center for'.center(twidth) + '\n' + \
-'Computer-Integrated Surgical Systems & Technology (CISST)'.center(twidth) + '\n' + \
-'http://cisst.org'.center(twidth) + '\n\n' + \
-'Copyright (c) 2004-2011, The Johns Hopkins University'.center(twidth) + '\n' + \
+'Copyright (c) 2004-2025, The Johns Hopkins University'.center(twidth) + '\n' + \
 'All Rights Reserved.\n\n'.center(twidth) + '\n\n' + \
 'Based on the Py module of wxPython:\n' + \
-'  Shell Revision: %s\n' % self.Shell.revision + \
-'  Interpreter Revision: %s\n\n' % self.Shell.interp.revision + \
+'  Py Version: %s\n' % wx.py.version.VERSION + \
 '  Platform: %s\n' % sys.platform + \
 '  Python Version: %s\n' % sys.version.split()[0] + \
 '  wxPython Version: %s\n' % wx.VERSION_STRING
@@ -928,7 +930,7 @@ class ireMain(wx.Frame):
         dialog.Destroy()
 
     def OnUpdateMenu(self, event):
-        win = wx.Window_FindFocus()
+        win = wx.Window.FindFocus()
         id = event.GetId()
         event.Enable(True)
         try:
@@ -987,42 +989,46 @@ class ireMain(wx.Frame):
 
 # ModuleAvailable:  returns true if the module 'name' is present on the path.
 def ModuleAvailable(name):
-    try:
-       imp.find_module(name)
-    except ImportError:
-       return False
+    if sys.version_info.major == 2:
+        try:
+            imp.find_module(name)
+        except ImportError:
+            return False
+    else:
+        spec = importlib.util.find_spec(name)
+        if not spec:
+            return False
     return True
 
 def launchIrePython():
 
-    if wx.VERSION[0] <= 2 and wx.VERSION[1] < 5:
-        print 'IRE requires wxPython version 2.5 or greater'
-        print 'Currently installed version is ', wx.VERSION_STRING
+    if wx.VERSION[0] < 4:
+        # 4/2025: Decided to require wxPython 4.0 or greater, since that corresponds to
+        # a major rewrite of wxPython (Phoenix project). Note that wxPython 4.0.x supports
+        # Python 2.7, so it is still possible to use Python 2.7.
+        print('IRE requires wxPython version 4.0 or greater')
+        print('Currently installed version is ', wx.VERSION_STRING)
     else:
-        print "starting window "
-        app = wx.PySimpleApp()
+        print('starting window ')
+        app = wx.App(False)
         try:
             frame = ireMain(None, -1, "CISST Interactive Research Environment")
-        except Exception, e:
-            print e
-        try:
             # Load cisstCommon by default (if IRE embedded)
             if ireEmbedded:
                 frame.ImportCisstCommon()
             # Run startup string (if provided)
             if len(sys.argv) > 1 and sys.argv[1]:
                 frame.Shell.push(sys.argv[1])
-        except Exception, e:
-            print e
-        frame.Show(True)
-        lastcmd = frame.CommandHistoryListCtrl.list.GetItemCount()-1
-        frame.CommandHistoryListCtrl.list.EnsureVisible( lastcmd  )
-        # Redraw the left panel.  This fixes some minor display problems
-        # (e.g., stray characters) on some platforms.
-        frame.LeftBoxSizer.Layout()
+            frame.Show(True)
+            lastcmd = frame.CommandHistoryListCtrl.list.GetItemCount()-1
+            frame.CommandHistoryListCtrl.list.EnsureVisible( lastcmd  )
+            # Redraw the left panel.  This fixes some minor display problems
+            # (e.g., stray characters) on some platforms.
+            frame.LeftBoxSizer.Layout()
+        except Exception as e:
+            print(e)
         if ireEmbedded:
             ireLogger.SetActiveFlag(True)
         app.MainLoop()
         if ireEmbedded:
             ireLogger.SetActiveFlag(False)
-

@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -181,6 +181,12 @@ mtsInterfaceProvided::~mtsInterfaceProvided()
 
 void mtsInterfaceProvided::Cleanup(void)
 {
+#if 0
+    // Free memory for state filters (added by AddCommandFilteredReadStateInternal)
+    for (size_t i = 0; i < StateTableFilters.size(); i++)
+        delete StateTableFilters[i];
+    StateTableFilters.clear();
+#endif
 #if 0 // adeguet1, adv
     InterfacesProvidedCreatedType::iterator op;
     for (op = QueuedCommands.begin(); op != QueuedCommands.end(); op++) {
@@ -931,6 +937,14 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
 }
 
 
+mtsInterfaceProvidedDescription mtsInterfaceProvided::GetDescription() const
+{
+    mtsInterfaceProvidedDescription desc;
+    if (GetDescription(desc))
+        desc.InterfaceName = GetName();
+    return desc;
+}
+
 std::vector<std::string> mtsInterfaceProvided::GetNamesOfCommands(void) const
 {
     std::vector<std::string> commands = GetNamesOfCommandsVoid();
@@ -1163,6 +1177,24 @@ mtsCommandQualifiedRead * mtsInterfaceProvided::GetCommandQualifiedRead(const st
 }
 
 
+const cmnClassServicesBase * mtsInterfaceProvided::GetCommandWriteArgumentServices(const std::string & commandName) const
+{
+    const mtsCommandWriteBase * command = this->CommandsWrite.GetItem(commandName, CMN_LOG_LEVEL_INIT_VERBOSE);
+    if (command) {
+        return command->GetArgumentClassServices();
+    }
+    return 0;
+}
+
+const cmnClassServicesBase * mtsInterfaceProvided::GetCommandReadArgumentServices(const std::string & commandName) const
+{
+    const mtsCommandRead * command = this->CommandsRead.GetItem(commandName, CMN_LOG_LEVEL_INIT_VERBOSE);
+    if (command) {
+        return command->GetArgumentPrototype()->Services();
+    }
+    return 0;
+}
+
 mtsMulticastCommandVoid * mtsInterfaceProvided::GetEventVoid(const std::string & eventName) const
 {
     // this event might be owned by the end user provided interface, e.g. event for end of blocking command
@@ -1211,7 +1243,7 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void) for \"" << GetFullName()
                                  << "\": cannot find event named \"" << eventName
                                  << "\", the following events are available: "
-                                 << cmnStringFromVectorOfStrings(GetNamesOfEventsVoid())
+                                 << cmnDataHumanReadable(GetNamesOfEventsVoid())
                                  << std::endl;
     }
     return false;
@@ -1233,7 +1265,7 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName,
         CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write) for \"" << GetFullName()
                                  << "\": cannot find event named \"" << eventName
                                  << "\", the following events are available: "
-                                 << cmnStringFromVectorOfStrings(GetNamesOfEventsWrite())
+                                 << cmnDataHumanReadable(GetNamesOfEventsWrite())
                                  << std::endl;
     }
     return false;
@@ -1355,7 +1387,7 @@ void mtsInterfaceProvided::SendError(const std::string & message)
 }
 
 
-bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription)
+bool mtsInterfaceProvided::GetDescription(mtsInterfaceProvidedDescription & providedInterfaceDescription) const
 {
     bool success = true;
 

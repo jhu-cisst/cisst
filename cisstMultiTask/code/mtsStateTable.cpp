@@ -5,7 +5,7 @@
  Author(s):  Ankur Kapoor, Min Yang Jung, Anton Deguet
  Created on: 2004-04-30
 
- (C) Copyright 2004-2021 Johns Hopkins University (JHU), All Rights Reserved.
+ (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -42,7 +42,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     IndexWriter(0),
     IndexReader(0),
     IndexDelayed(0),
-    Delay(0.0),
+    Delay(0),
     AutomaticAdvanceFlag(true),
     StateVector(0),
     StateVectorDataNames(0),
@@ -85,10 +85,25 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
 
 mtsStateTable::~mtsStateTable()
 {
+    // remove all elements from the state table
+    for (size_t index = 0;
+         index < StateVector.size();
+         ++index) {
+        // accessor
+        delete StateVectorAccessors.back();
+        StateVectorAccessors.pop_back();
+        // name
+        StateVectorDataNames.pop_back();
+        // element pointers
+        StateVectorElements.pop_back();
+        // actual data
+        delete StateVector.back();
+        StateVector.pop_back();
+    }
 }
 
-bool mtsStateTable::SetSize(const size_t size){
-    if(this->HistoryLength == size){
+bool mtsStateTable::SetSize(const size_t size) {
+    if (this->HistoryLength == size) {
         return true;
     }
 
@@ -265,7 +280,7 @@ void mtsStateTable::Advance(void) {
             this->DataCollection.BatchRange.SetTimestamp(this->Tic);
             this->DataCollection.BatchReady(this->DataCollection.BatchRange);
             // send collection stopped event
-            this->DataCollection.CollectionStopped(mtsUInt(this->DataCollection.CounterForEvent));
+            this->DataCollection.CollectionStopped(this->DataCollection.CounterForEvent);
             this->DataCollection.CounterForEvent = 0;
             // stop collecting
             this->DataCollection.Collecting = false;
@@ -286,7 +301,7 @@ void mtsStateTable::Advance(void) {
             }
             // check if we have spent enough time for a progress event
             if ((this->Tic - this->DataCollection.TimeOfLastProgressEvent) >= this->DataCollection.TimeIntervalForProgressEvent) {
-                this->DataCollection.Progress(mtsUInt(this->DataCollection.CounterForEvent));
+                this->DataCollection.Progress(this->DataCollection.CounterForEvent);
                 this->DataCollection.CounterForEvent = 0;
                 this->DataCollection.TimeOfLastProgressEvent = this->Tic;
             }

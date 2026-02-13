@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet, Ali Uneri, Peter Kazanzides
   Created on: 2009-10-22
 
-  (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLoggerQtWidget.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsCollectorQtWidget.h>
+#include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
 
 #include "mainQtComponent.h"
 #include "displayQtComponent.h"
@@ -67,7 +67,7 @@ mainQtComponent::mainQtComponent(const std::string &name) : mtsComponent(name)
     // second tab for data collection
     QWidget * tab2Widget = new QWidget();
     QGridLayout * tab2Layout= new QGridLayout(tab2Widget);
-    collectorQtWidget = new mtsCollectorQtWidget();
+    collectorQtWidget = new mtsCollectorFactoryQtWidget("collectorWidget");
     tab2Layout->addWidget(collectorQtWidget);
     tabs->addTab(tab2Widget, "Collection");
 
