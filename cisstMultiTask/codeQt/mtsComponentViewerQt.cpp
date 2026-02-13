@@ -74,7 +74,7 @@ mtsComponentViewerQt::mtsComponentViewerQt(
         ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewerQt::RemoveConnectionHandler,
                                                                this);
     } else {
-        cmnThrow(std::runtime_error("mtsComponentViewer constructor: failed to "
+        cmnThrow(std::runtime_error("mtsComponentViewerQt constructor: failed to "
                                     "enable dynamic component composition"));
     }
 
