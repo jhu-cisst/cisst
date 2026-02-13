@@ -31,7 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsComponent::mtsComponent(const std::string & componentName):
     Name(componentName),
-    mCategory(mtsComponentCategory::USER),
     InterfacesProvided("InterfacesProvided"),
     InterfacesOutput("InterfacesOutput"),
     InterfacesRequired("InterfacesRequired"),
@@ -40,11 +39,11 @@ mtsComponent::mtsComponent(const std::string & componentName):
 
 {
     Initialize();
+    AddTag("Generic");
 }
 
 
 mtsComponent::mtsComponent(void):
-    mCategory(mtsComponentCategory::USER),
     InterfacesProvided("InterfacesProvided"),
     InterfacesOutput("InterfacesOutput"),
     InterfacesRequired("InterfacesRequired"),
@@ -52,6 +51,7 @@ mtsComponent::mtsComponent(void):
     StateTables("StateTables")
 {
     Initialize();
+    AddTag("Generic");
 }
 
 void mtsComponent::Initialize(void)
@@ -145,6 +145,23 @@ const std::string & mtsComponent::GetName(void) const
 void mtsComponent::GetName(std::string & placeHolder) const
 {
     placeHolder = this->Name;
+}
+
+
+void mtsComponent::AddTag(const std::string & tag)
+{
+    if (mtsManagerLocal::GetInstance()->IsValidComponentTag(tag)) {
+        this->mTags.insert(tag);
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "AddTag: " << tag << " is not a valid component tag for component \"" << this->GetName() << "\". "
+                                 << "Use mtsManagerLocal::AddValidComponentTag to register it." << std::endl;
+    }
+}
+
+
+const std::set<std::string> & mtsComponent::GetTags(void) const
+{
+    return this->mTags;
 }
 
 
@@ -708,6 +725,7 @@ bool mtsComponent::AddStateTable(mtsStateTable * existingStateTable, bool addInt
                                      << "\" to task \"" << this->GetName() << "\"" << std::endl;
             return false;
         }
+        providedInterface->AddTag("State table");
         providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStart,
                                            existingStateTable,
                                            "StartCollection");
@@ -997,6 +1015,7 @@ bool mtsComponent::AddInterfaceInternal(const bool useManagerComponentServices)
         CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: failed to add internal provided interface: " << interfaceName << std::endl;
         return false;
     }
+    provided->AddTag("System");
     provided->AddCommandVoid(&mtsComponent::Start,
                              this, mtsManagerComponentBase::CommandNames::ComponentStart, MTS_COMMAND_NOT_QUEUED);
     provided->AddCommandVoid(&mtsComponent::Suspend,

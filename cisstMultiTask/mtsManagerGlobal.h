@@ -88,7 +88,9 @@ protected:
     typedef struct {
         InterfaceMapElementType InterfaceProvidedOrOutputMap;
         InterfaceMapElementType InterfaceRequiredOrInputMap;
-        mtsComponentCategory Category;
+        std::map<std::string, std::set<std::string>> InterfaceProvidedOrOutputTags;
+        std::map<std::string, std::set<std::string>> InterfaceRequiredOrInputTags;
+        std::set<std::string> Tags;
         std::string ClassName;
     } InterfaceMapType;
 
@@ -260,7 +262,7 @@ public:
     bool AddComponent(const std::string & processName,
                       const std::string & componentName,
                       const std::string & className,
-                      const mtsComponentCategory & componentCategory = mtsComponentCategory::USER) override;
+                      const std::set<std::string> & tags = std::set<std::string>()) override;
 
     bool FindComponent(const std::string & processName, const std::string & componentName) const override;
 
@@ -269,12 +271,26 @@ public:
     void GetDescriptionsOfComponents(const std::string & processName,
                                      std::vector<mtsDescriptionComponent> & descriptions) const override;
 
+    void GetDescriptionsOfInterfacesProvided(const std::string & processName,
+                                             const std::string & componentName,
+                                             std::vector<mtsDescriptionInterfaceFullName> & descriptions) const override;
+
+    void GetDescriptionsOfInterfacesRequired(const std::string & processName,
+                                             const std::string & componentName,
+                                             std::vector<mtsDescriptionInterfaceFullName> & descriptions) const override;
+
     //-------------------------------------------------------------------------
     //  Interface Management
     //-------------------------------------------------------------------------
-    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) override;
+    bool AddInterfaceProvidedOrOutput(const std::string & processName,
+                                      const std::string & componentName,
+                                      const std::string & interfaceName,
+                                      const std::set<std::string> & tags = std::set<std::string>()) override;
 
-    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) override;
+    bool AddInterfaceRequiredOrInput(const std::string & processName,
+                                     const std::string & componentName,
+                                     const std::string & interfaceName,
+                                     const std::set<std::string> & tags = std::set<std::string>()) override;
 
     bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const override;
 

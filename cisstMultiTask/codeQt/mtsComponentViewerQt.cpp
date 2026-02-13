@@ -16,9 +16,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsComponentModelQtNodes.h>
-#include <cisstMultiTask/mtsComponentViewerQtWidget.h>
+#include <cisstMultiTask/mtsComponentViewerQt.h>
 
 #include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 #include <QAction>
 #include <QContextMenuEvent>
@@ -26,6 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <QFileDialog>
 #include <QLabel>
 #include <QMenuBar>
+#include <QMenu>
+#include <QToolButton>
 #include <QTimer>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -42,13 +45,19 @@ http://www.cisst.org/cisst/license.txt.
 #include <set>
 #include <algorithm>
 
-CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewerQtWidget,
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewerQt,
                                       mtsTaskFromSignal, std::string);
 
-mtsComponentViewerQtWidget::mtsComponentViewerQtWidget(
+mtsComponentViewerQt::mtsComponentViewerQt(
                                                        const std::string &componentName)
-    : mtsTaskFromSignal(componentName), m_showSystemComponents(false), m_showROSComponents(false), m_showUIComponents(false) {
-    mCategory = mtsComponentCategory::UI;
+    : mtsTaskFromSignal(componentName) {
+    m_show_component_tags.insert("Generic");
+    m_show_interface_tags.insert("Generic");
+    m_show_interface_tags.insert("System");
+    m_show_interface_tags.insert("State table");
+
+    this->mTags.clear();
+    this->AddTag("UI");
     // Register NodeId and ConnectionId for Qt signal/slot connections
     qRegisterMetaType<QtNodes::NodeId>("NodeId");
     qRegisterMetaType<QtNodes::ConnectionId>("ConnectionId");
@@ -57,12 +66,12 @@ mtsComponentViewerQtWidget::mtsComponentViewerQtWidget(
     if (required) {
         required->SetMailBoxAndArgumentQueuesSize(1024);
         ManagerComponentServices->AddComponentEventHandler(
-                                                           &mtsComponentViewerQtWidget::AddComponentHandler, this);
-        ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewerQtWidget::ChangeStateHandler,
+                                                           &mtsComponentViewerQt::AddComponentHandler, this);
+        ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewerQt::ChangeStateHandler,
                                                           this);
         ManagerComponentServices->AddConnectionEventHandler(
-                                                            &mtsComponentViewerQtWidget::AddConnectionHandler, this);
-        ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewerQtWidget::RemoveConnectionHandler,
+                                                            &mtsComponentViewerQt::AddConnectionHandler, this);
+        ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewerQt::RemoveConnectionHandler,
                                                                this);
     } else {
         cmnThrow(std::runtime_error("mtsComponentViewer constructor: failed to "
@@ -72,10 +81,10 @@ mtsComponentViewerQtWidget::mtsComponentViewerQtWidget(
     setupUi();
 }
 
-void mtsComponentViewerQtWidget::Configure(
+void mtsComponentViewerQt::Configure(
                                            const std::string &CMN_UNUSED(filename)) {}
 
-void mtsComponentViewerQtWidget::Startup(void) {
+void mtsComponentViewerQt::Startup(void) {
     // Query existing components and connections before starting event monitoring
     auto processNames = ManagerComponentServices->GetNamesOfProcesses();
     
@@ -94,18 +103,18 @@ void mtsComponentViewerQtWidget::Startup(void) {
     QMetaObject::invokeMethod(this, [=]() {
         UpdateGraph();
         // Auto-layout the graph after a short delay to ensure rendering is complete
-        QTimer::singleShot(1000, this, &mtsComponentViewerQtWidget::onAutoLayout);
+        QTimer::singleShot(1000, this, &mtsComponentViewerQt::onAutoLayout);
     }, Qt::QueuedConnection);
 }
 
-void mtsComponentViewerQtWidget::Cleanup(void) {}
+void mtsComponentViewerQt::Cleanup(void) {}
 
-void mtsComponentViewerQtWidget::Run(void) {
+void mtsComponentViewerQt::Run(void) {
     ProcessQueuedCommands();
     ProcessQueuedEvents();
 }
 
-void mtsComponentViewerQtWidget::setupUi(void) {
+void mtsComponentViewerQt::setupUi(void) {
     Registry = std::make_shared<QtNodes::NodeDelegateModelRegistry>();
     GraphModel = new QtNodes::DataFlowGraphModel(Registry);
     Scene = new QtNodes::DataFlowGraphicsScene(*GraphModel);
@@ -120,31 +129,40 @@ void mtsComponentViewerQtWidget::setupUi(void) {
     QAction *actionAutoLayout = ToolBar->addAction(tr("Auto-Layout"));
     QAction *actionExportDOT = ToolBar->addAction(tr("Export as DOT..."));
     ToolBar->addSeparator();
-    QAction *actionToggleSystem =
-        ToolBar->addAction(tr("System"));
-    actionToggleSystem->setCheckable(true);
-    actionToggleSystem->setChecked(false);
-    
-    QAction *actionToggleROS =
-        ToolBar->addAction(tr("ROS"));
-    actionToggleROS->setCheckable(true);
-    actionToggleROS->setChecked(false);
 
-    QAction *actionToggleUI =
-        ToolBar->addAction(tr("UI"));
-    actionToggleUI->setCheckable(true);
-    actionToggleUI->setChecked(false);
+    QMenu *filtersMenu = new QMenu(tr("Filters"), this);
+    QToolButton *filtersButton = new QToolButton(this);
+    filtersButton->setMenu(filtersMenu);
+    filtersButton->setPopupMode(QToolButton::InstantPopup);
+    filtersButton->setText(tr("Filters"));
+    ToolBar->addWidget(filtersButton);
+
+    // Components section
+    filtersMenu->addSection(tr("Components"));
+    const std::set<std::string> & componentTags = mtsManagerLocal::GetInstance()->GetValidComponentTags();
+    for (auto & tag : componentTags) {
+        QAction *action = filtersMenu->addAction(QString::fromStdString(tag));
+        action->setCheckable(true);
+        action->setChecked(m_show_component_tags.count(tag));
+        action->setData(QString::fromStdString(tag));
+        connect(action, &QAction::triggered, this, &mtsComponentViewerQt::onFilterComponents);
+    }
+
+    // Interfaces section
+    filtersMenu->addSection(tr("Interfaces"));
+    const std::set<std::string> & interfaceTags = mtsManagerLocal::GetInstance()->GetValidInterfaceTags();
+    for (auto & tag : interfaceTags) {
+        QAction *action = filtersMenu->addAction(QString::fromStdString(tag));
+        action->setCheckable(true);
+        action->setChecked(m_show_interface_tags.count(tag));
+        action->setData(QString::fromStdString(tag));
+        connect(action, &QAction::triggered, this, &mtsComponentViewerQt::onFilterInterfaces);
+    }
 
     connect(actionAutoLayout, &QAction::triggered, this,
-            &mtsComponentViewerQtWidget::onAutoLayout);
+            &mtsComponentViewerQt::onAutoLayout);
     connect(actionExportDOT, &QAction::triggered, this,
-            &mtsComponentViewerQtWidget::onExportDOT);
-    connect(actionToggleSystem, &QAction::toggled, this,
-            &mtsComponentViewerQtWidget::onToggleSystemComponents);
-    connect(actionToggleROS, &QAction::toggled, this,
-            &mtsComponentViewerQtWidget::onToggleROSComponents);
-    connect(actionToggleUI, &QAction::toggled, this,
-            &mtsComponentViewerQtWidget::onToggleUIComponents);
+            &mtsComponentViewerQt::onExportDOT);
 
     layout->addWidget(ToolBar);
     layout->addWidget(View);
@@ -164,20 +182,20 @@ void mtsComponentViewerQtWidget::setupUi(void) {
     show();
 }
 
-void mtsComponentViewerQtWidget::onContextMenuRequested(const QPoint &pos) {
+void mtsComponentViewerQt::onContextMenuRequested(const QPoint &pos) {
     QMenu contextMenu(this);
     QAction *actionAutoLayout = contextMenu.addAction(tr("Auto-Layout"));
     QAction *actionExportDOT = contextMenu.addAction(tr("Export as DOT..."));
 
     connect(actionAutoLayout, &QAction::triggered, this,
-            &mtsComponentViewerQtWidget::onAutoLayout);
+            &mtsComponentViewerQt::onAutoLayout);
     connect(actionExportDOT, &QAction::triggered, this,
-            &mtsComponentViewerQtWidget::onExportDOT);
+            &mtsComponentViewerQt::onExportDOT);
 
     contextMenu.exec(View->mapToGlobal(pos));
 }
 
-void mtsComponentViewerQtWidget::onExportDOT(void) {
+void mtsComponentViewerQt::onExportDOT(void) {
     QString fileName = QFileDialog::getSaveFileName(
                                                     this, tr("Export as DOT"), "", tr("DOT Files (*.dot);;All Files (*)"));
     if (fileName.isEmpty())
@@ -221,22 +239,33 @@ void mtsComponentViewerQtWidget::onExportDOT(void) {
     gvFreeContext(gvc);
 }
 
-void mtsComponentViewerQtWidget::onToggleSystemComponents(bool checked) {
-    m_showSystemComponents = checked;
-    UpdateGraph();
+void mtsComponentViewerQt::onFilterComponents(bool checked) {
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action) {
+        std::string tag = action->data().toString().toStdString();
+        if (checked) {
+            m_show_component_tags.insert(tag);
+        } else {
+            m_show_component_tags.erase(tag);
+        }
+        UpdateGraph();
+    }
 }
 
-void mtsComponentViewerQtWidget::onToggleROSComponents(bool checked) {
-    m_showROSComponents = checked;
-    UpdateGraph();
+void mtsComponentViewerQt::onFilterInterfaces(bool checked) {
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action) {
+        std::string tag = action->data().toString().toStdString();
+        if (checked) {
+            m_show_interface_tags.insert(tag);
+        } else {
+            m_show_interface_tags.erase(tag);
+        }
+        UpdateGraph();
+    }
 }
 
-void mtsComponentViewerQtWidget::onToggleUIComponents(bool checked) {
-    m_showUIComponents = checked;
-    UpdateGraph();
-}
-
-void mtsComponentViewerQtWidget::onAutoLayout(void) {
+void mtsComponentViewerQt::onAutoLayout(void) {
     GVC_t *gvc = gvContext();
     Agraph_t *g = agopen((char *)"G", Agdirected, nullptr);
 
@@ -316,7 +345,7 @@ void mtsComponentViewerQtWidget::onAutoLayout(void) {
     }
 }
 
-void mtsComponentViewerQtWidget::AddComponentHandler(
+void mtsComponentViewerQt::AddComponentHandler(
                                                      const mtsDescriptionComponent &component_description) {
     // Use invokeMethod to ensure GUI updates happen in the GUI thread
     QMetaObject::invokeMethod(
@@ -338,7 +367,7 @@ void mtsComponentViewerQtWidget::AddComponentHandler(
                               Qt::QueuedConnection);
 }
 
-void mtsComponentViewerQtWidget::AddConnectionHandler(
+void mtsComponentViewerQt::AddConnectionHandler(
                                                       const mtsDescriptionConnection &connection_description) {
     // Use invokeMethod to ensure GUI updates happen in the GUI thread
     QMetaObject::invokeMethod(
@@ -350,7 +379,7 @@ void mtsComponentViewerQtWidget::AddConnectionHandler(
                               Qt::QueuedConnection);
 }
 
-void mtsComponentViewerQtWidget::RemoveConnectionHandler(
+void mtsComponentViewerQt::RemoveConnectionHandler(
                                                          const mtsDescriptionConnection &connection_description) {
     // Use invokeMethod to ensure GUI updates happen in the GUI thread
     QMetaObject::invokeMethod(
@@ -377,7 +406,7 @@ void mtsComponentViewerQtWidget::RemoveConnectionHandler(
                               Qt::QueuedConnection);
 }
 
-void mtsComponentViewerQtWidget::ChangeStateHandler(const mtsComponentStateChange &state_change) {
+void mtsComponentViewerQt::ChangeStateHandler(const mtsComponentStateChange &state_change) {
     QMetaObject::invokeMethod(
                               this,
                               [=]() {
@@ -394,7 +423,7 @@ void mtsComponentViewerQtWidget::ChangeStateHandler(const mtsComponentStateChang
                               Qt::QueuedConnection);
 }
 
-void mtsComponentViewerQtWidget::UpdateGraph(void) {
+void mtsComponentViewerQt::UpdateGraph(void) {
     if (!GraphModel)
         return;
 
@@ -433,42 +462,77 @@ void mtsComponentViewerQtWidget::UpdateGraph(void) {
     // Re-add components
     for (const auto &desc : m_component_infos) {
         std::string name = desc.ComponentName;
-        
-        // Apply system component filtering
-        if (!m_showSystemComponents && (desc.Category == mtsComponentCategory::SYSTEM)) {
-            continue;
+
+        bool showComponent = false;
+        if (desc.Tags.empty()) {
+            // Components without tags are shown if Generic is checked
+            showComponent = m_show_component_tags.count("Generic");
+        } else {
+            for (auto & tag : desc.Tags) {
+                if (m_show_component_tags.count(tag)) {
+                    showComponent = true;
+                    break;
+                }
+            }
         }
-        
-        // Apply ROS component filtering
-        if (!m_showROSComponents && (desc.Category == mtsComponentCategory::ROS)) {
+        if (!showComponent) {
             continue;
         }
 
-        // Apply UI component filtering
-        if (!m_showUIComponents && (desc.Category == mtsComponentCategory::UI)) {
-            continue;
-        }
+        // Fetch interfaces and filter them
+        std::vector<mtsDescriptionInterfaceFullName> interfacesRequiredFull, interfacesProvidedFull;
+        ManagerComponentServices->GetDescriptionsOfInterfaces(desc.ProcessName, name, interfacesRequiredFull, interfacesProvidedFull);
 
-        // Logic from AddComponentHandler
         std::vector<std::string> interfacesRequired, interfacesProvided;
-        ManagerComponentServices->GetNamesOfInterfaces(
-                                                       desc.ProcessName, name, interfacesRequired, interfacesProvided);
+        for (const auto &intfc : interfacesRequiredFull) {
+            bool showIntfc = false;
+            if (intfc.Tags.empty()) {
+                showIntfc = m_show_interface_tags.count("Generic");
+            } else {
+                for (auto & tag : intfc.Tags) {
+                    if (m_show_interface_tags.count(tag)) {
+                        showIntfc = true;
+                        break;
+                    }
+                }
+            }
+            if (showIntfc) {
+                interfacesRequired.push_back(intfc.InterfaceName);
+            }
+        }
+        for (const auto &intfc : interfacesProvidedFull) {
+            bool showIntfc = false;
+            if (intfc.Tags.empty()) {
+                showIntfc = m_show_interface_tags.count("Generic");
+            } else {
+                for (auto & tag : intfc.Tags) {
+                    if (m_show_interface_tags.count(tag)) {
+                        showIntfc = true;
+                        break;
+                    }
+                }
+            }
+            if (showIntfc) {
+                interfacesProvided.push_back(intfc.InterfaceName);
+            }
+        }
+
         auto state = ManagerComponentServices->ComponentGetState(desc);
         std::string className = desc.ClassName;
 
         Registry->registerModel<mtsComponentModelQtNodes>(
-                                                          [name, className, state, interfacesRequired, interfacesProvided]() {
-                                                              auto model = std::make_unique<mtsComponentModelQtNodes>(name);
-                                                              model->SetClassName(className);
-                                                              model->SetState(mtsComponentState::EnumToString(state.State()));
-                                                              for (const auto &interfaceName : interfacesRequired) {
-                                                                  model->AddInterfaceRequired(interfaceName);
-                                                              }
-                                                              for (const auto &interfaceName : interfacesProvided) {
-                                                                  model->AddInterfaceProvided(interfaceName);
-                                                              }
-                                                              return model;
-                                                          });
+            [name, className, state, interfacesRequired, interfacesProvided]() {
+                auto model = std::make_unique<mtsComponentModelQtNodes>(name);
+                model->SetClassName(className);
+                model->SetState(mtsComponentState::EnumToString(state.State()));
+                for (const auto &interfaceName : interfacesRequired) {
+                    model->AddInterfaceRequired(interfaceName);
+                }
+                for (const auto &interfaceName : interfacesProvided) {
+                    model->AddInterfaceProvided(interfaceName);
+                }
+                return model;
+            });
 
         QtNodes::NodeId nodeId = GraphModel->addNode(QString::fromStdString(name));
         NodeIds[name] = nodeId;

@@ -16,12 +16,12 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _mtsComponentViewerQtWidget_h
-#define _mtsComponentViewerQtWidget_h
+#ifndef _mtsComponentViewerQt_h
+#define _mtsComponentViewerQt_h
 
 #include <cisstConfig.h>
 #if !CISST_HAS_QTNODES
-#error "mtsComponentViewerQtWidget.h requires CISST_HAS_QTNODES"
+#error "mtsComponentViewerQt.h requires CISST_HAS_QTNODES"
 #endif
 
 #include <cisstMultiTask/mtsTaskFromSignal.h>
@@ -44,15 +44,15 @@ namespace QtNodes {
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
 
-class CISST_EXPORT mtsComponentViewerQtWidget : public QWidget,
+class CISST_EXPORT mtsComponentViewerQt : public QWidget,
                                                 public mtsTaskFromSignal {
     Q_OBJECT
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
  public:
-    mtsComponentViewerQtWidget(
+    mtsComponentViewerQt(
                                const std::string &componentName = "ComponentViewer");
-    ~mtsComponentViewerQtWidget() = default;
+    ~mtsComponentViewerQt() = default;
 
     void Configure(const std::string &filename = "") override;
     void Startup(void) override;
@@ -102,21 +102,20 @@ class CISST_EXPORT mtsComponentViewerQtWidget : public QWidget,
     std::vector<mtsDescriptionComponent> m_component_infos;
     std::vector<mtsDescriptionConnection> m_connection_infos;
 
-    bool m_showSystemComponents;
-    bool m_showROSComponents;
-    bool m_showUIComponents;
+    std::set<std::string> m_show_component_tags;
+    std::set<std::string> m_show_interface_tags;
+
     void UpdateGraph(void);
 
  protected slots:
-    void onToggleSystemComponents(bool checked);
-    void onToggleROSComponents(bool checked);
-    void onToggleUIComponents(bool checked);
+    void onFilterComponents(bool checked);
+    void onFilterInterfaces(bool checked);
 
  private:
     // no copy constructor
-    mtsComponentViewerQtWidget(const mtsComponentViewerQtWidget &other) = delete;
+    mtsComponentViewerQt(const mtsComponentViewerQt &other) = delete;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentViewerQtWidget);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentViewerQt);
 
-#endif // _mtsComponentViewerQtWidget_h
+#endif // _mtsComponentViewerQt_h

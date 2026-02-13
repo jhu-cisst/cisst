@@ -36,7 +36,8 @@ mtsCollectorFactoryQtWidget::mtsCollectorFactoryQtWidget(const std::string & com
     NumberOfActiveCollectors(0),
     NumberOfSamples(0)
 {
-    mCategory = mtsComponentCategory::UI;
+    this->mTags.clear();
+    this->AddTag("UI");
     // create the cisstMultiTask interface with commands and events
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Collector");
     if (interfaceRequired) {

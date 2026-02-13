@@ -27,10 +27,10 @@ if (CISST_HAS_QTNODES)
 
   set (QTNODES_SOURCE_FILES
        mtsComponentModelQtNodes.cpp
-       mtsComponentViewerQtWidget.cpp)
+       mtsComponentViewerQt.cpp)
   set (QTNODES_HEADER_FILES
        mtsComponentModelQtNodes.h
-       mtsComponentViewerQtWidget.h)
+       mtsComponentViewerQt.h)
   set (QTNODES_SETTINGS
        cisstQtNodes
        cisstGraphviz)

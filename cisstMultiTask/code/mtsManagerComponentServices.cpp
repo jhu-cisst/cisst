@@ -69,6 +69,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceGetters.GetDescriptionsOfComponents);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces,
                                                ServiceGetters.GetNamesOfInterfaces);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetDescriptionsOfInterfaces,
+                                               ServiceGetters.GetDescriptionsOfInterfaces);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfConnections,
                                                ServiceGetters.GetListOfConnections);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetListOfComponentClasses,
@@ -466,6 +468,31 @@ bool mtsManagerComponentServices::GetNamesOfInterfaces(
 
     namesOfInterfacesRequired = argOut.InterfaceRequiredNames;
     namesOfInterfacesProvided = argOut.InterfaceProvidedNames;
+
+    return true;
+}
+
+bool mtsManagerComponentServices::GetDescriptionsOfInterfaces(
+    const std::string & processName, const std::string & componentName,
+    std::vector<mtsDescriptionInterfaceFullName> & descriptionsRequired, std::vector<mtsDescriptionInterfaceFullName> & descriptionsProvided) const
+{
+    if (!ServiceGetters.GetDescriptionsOfInterfaces.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetDescriptionsOfInterfaces: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    // input arg
+    mtsDescriptionComponent argIn;
+    argIn.ProcessName   = processName;
+    argIn.ComponentName = componentName;
+
+    // output arg
+    mtsDescriptionInterfaceFull argOut;
+
+    ServiceGetters.GetDescriptionsOfInterfaces(argIn, argOut);
+
+    descriptionsRequired = argOut.Required;
+    descriptionsProvided = argOut.Provided;
 
     return true;
 }

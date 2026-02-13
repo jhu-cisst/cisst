@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorFactory.h>
 #include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
-#include <cisstMultiTask/mtsComponentViewerQtWidget.h>
+#include <cisstMultiTask/mtsComponentViewerQt.h>
 
 #include <QApplication>
 
@@ -51,8 +51,8 @@ int main(int argc, char *argv[]) {
     // get the component manager to add multiple sine generator tasks
     mtsManagerLocal *componentManager = mtsManagerLocal::GetInstance();
 
-    mtsComponentViewerQtWidget *viewer =
-        new mtsComponentViewerQtWidget("ComponentViewer");
+    mtsComponentViewerQt *viewer =
+        new mtsComponentViewerQt("ComponentViewer");
     componentManager->AddComponent(viewer);
 
     mainQtComponent *mainQt = new mainQtComponent("mainQt");

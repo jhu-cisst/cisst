@@ -90,6 +90,7 @@ protected:
         mtsFunctionQualifiedRead GetNamesOfComponents;         // in: process name, out: components' names
         mtsFunctionQualifiedRead GetDescriptionsOfComponents;  // in: process name, out: components' descriptions
         mtsFunctionQualifiedRead GetNamesOfInterfaces;         // in: process name, out: interfaces' names
+        mtsFunctionQualifiedRead GetDescriptionsOfInterfaces;  // in: component description, out: pair of vector of interface descriptions
         mtsFunctionRead          GetListOfConnections;
         mtsFunctionQualifiedRead GetListOfComponentClasses;
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
@@ -200,6 +201,7 @@ protected:
     void InterfaceComponentCommands_GetDescriptionsOfComponents(const std::string & processName,
                                                                 std::vector<mtsDescriptionComponent> & descriptions) const;
     void InterfaceComponentCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
+    void InterfaceComponentCommands_GetDescriptionsOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterfaceFull & interfaces) const;
     void InterfaceComponentCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
     void InterfaceComponentCommands_GetListOfComponentClasses(const std::string &processName,
                                                               std::vector <mtsDescriptionComponentClass> & listOfComponentClasses) const;

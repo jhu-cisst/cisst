@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsInterface_h
 #define _mtsInterface_h
 
+#include <set>
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
@@ -48,6 +49,12 @@ protected:
     /*! Pointer on the device itself. */
     mtsComponent * Component;
 
+    /*! Interface tags. */
+    std::set<std::string> mTags;
+
+    /*! Initializer */
+    void Initialize(void);
+
  public:
     /*! Constructor. Sets the name.
         \param interfaceName Name of interface
@@ -70,6 +77,12 @@ protected:
 
     /*! Returns name of owner component */
     const std::string & GetComponentName(void) const;
+
+    /*! Add a tag to the interface. */
+    void AddTag(const std::string & tag);
+
+    /*! Return all tags. */
+    const std::set<std::string> & GetTags(void) const;
 };
 
 

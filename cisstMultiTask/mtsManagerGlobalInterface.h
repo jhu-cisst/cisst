@@ -67,11 +67,11 @@ public:
         \param processName Name of process 
         \param componentName Name of component 
         \param className Name of component class
-        \param componentCategory Category of component */
+        \param tags Tags of component */
     virtual bool AddComponent(const std::string & processName,
                               const std::string & componentName,
                               const std::string & className,
-                              const mtsComponentCategory & componentCategory = mtsComponentCategory::USER) = 0;
+                              const std::set<std::string> & tags = std::set<std::string>()) = 0;
 
     /*! \brief Find component using process name and component name
         \param processName Name of process 
@@ -89,20 +89,44 @@ public:
     virtual void GetDescriptionsOfComponents(const std::string & processName,
                                              std::vector<mtsDescriptionComponent> & descriptions) const = 0;
 
+    /*! \brief Get provided interfaces' descriptions
+        \param processName Name of the process
+        \param componentName Name of the component
+        \param descriptions List of interfaces' descriptions to be populated */
+    virtual void GetDescriptionsOfInterfacesProvided(const std::string & processName,
+                                                     const std::string & componentName,
+                                                     std::vector<mtsDescriptionInterfaceFullName> & descriptions) const = 0;
+
+    /*! \brief Get required interfaces' descriptions
+        \param processName Name of the process
+        \param componentName Name of the component
+        \param descriptions List of interfaces' descriptions to be populated */
+    virtual void GetDescriptionsOfInterfacesRequired(const std::string & processName,
+                                                     const std::string & componentName,
+                                                     std::vector<mtsDescriptionInterfaceFullName> & descriptions) const = 0;
+
     //-------------------------------------------------------------------------
     //  Interface Management
     //-------------------------------------------------------------------------
     /*! \brief Register provided interface. Can be called at run-time.
         \param processName Name of process 
         \param componentName Name of component 
-        \param interfaceName Name of provided interface to be added */
-    virtual bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
+        \param interfaceName Name of provided interface to be added 
+        \param tags Tags of interface */
+    virtual bool AddInterfaceProvidedOrOutput(const std::string & processName,
+                                              const std::string & componentName,
+                                              const std::string & interfaceName,
+                                              const std::set<std::string> & tags = std::set<std::string>()) = 0;
 
     /*! \brief Register required interface. Can be called at run-time.
         \param processName Name of process 
         \param componentName Name of component 
-        \param interfaceName Name of required interface to be added */
-    virtual bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
+        \param interfaceName Name of required interface to be added 
+        \param tags Tags of interface */
+    virtual bool AddInterfaceRequiredOrInput(const std::string & processName,
+                                             const std::string & componentName,
+                                             const std::string & interfaceName,
+                                             const std::set<std::string> & tags = std::set<std::string>()) = 0;
 
     /*! \brief Find provided interface using process name, component name, and interface name
         \param processName Name of process 

@@ -160,8 +160,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Component state. */
     mtsComponentState State;
 
-    /*! Component category. */
-    mtsComponentCategory mCategory;
+    /*! Component tags. */
+    std::set<std::string> mTags;
 
     /*! Provided interface for component management. */
     mtsInterfaceProvided *InterfaceProvidedToManager;
@@ -249,6 +249,12 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Returns the name of the component. */
     const std::string & GetName(void) const;
     void GetName(std::string & placeHolder) const;
+
+    /*! Add a tag to the component. */
+    void AddTag(const std::string & tag);
+
+    /*! Return all tags. */
+    const std::set<std::string> & GetTags(void) const;
 
     /*! Set name.  This method is useful to perform dynamic creation
       using the default constructor and then set the name. */
