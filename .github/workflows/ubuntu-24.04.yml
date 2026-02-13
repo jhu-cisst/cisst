@@ -85,6 +85,26 @@ jobs:
       shell: bash
       run: cmake --build . --config Release
 
+    - name: Configure CMake examples
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake $GITHUB_WORKSPACE \
+          -DCISST_BUILD_EXAMPLES=ON \
+          -DCISST_cisstCommon_EXAMPLES=ON \
+          -DCISST_cisstVector_EXAMPLES=ON \
+          -DCISST_cisstOSAbstraction_EXAMPLES=ON \
+          -DCISST_cisstNumerical_EXAMPLES=ON \
+          -DCISST_cisstMultiTask_EXAMPLES=ON \
+          -DCISST_cisstParameterTypes_EXAMPLES=ON \
+          -DCISST_cisstRobot_EXAMPLES=ON \
+          -DCISST_cisstMesh_EXAMPLES=ON
+
+    - name: Build examples
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --build . --config Release
+
     - name: Test
       working-directory: ${{github.workspace}}/build
       shell: bash

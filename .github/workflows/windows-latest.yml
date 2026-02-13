@@ -58,6 +58,26 @@ jobs:
         ./cisstvars.bat Release
         cmake --build . --config Release
 
+    - name: Configure CMake examples
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake "${{github.workspace}}" `
+          -DCISST_BUILD_EXAMPLES=ON `
+          -DCISST_cisstCommon_EXAMPLES=ON `
+          -DCISST_cisstVector_EXAMPLES=ON `
+          -DCISST_cisstOSAbstraction_EXAMPLES=ON `
+          -DCISST_cisstNumerical_EXAMPLES=ON `
+          -DCISST_cisstMultiTask_EXAMPLES=ON `
+          -DCISST_cisstParameterTypes_EXAMPLES=ON `
+          -DCISST_cisstRobot_EXAMPLES=ON `
+          -DCISST_cisstMesh_EXAMPLES=ON
+
+    - name: Build examples
+      working-directory: ${{github.workspace}}/build
+      run: |
+        ./cisstvars.bat Release
+        cmake --build . --config Release
+
 #    - name: Test
 #      working-directory: ${{github.workspace}}/build
 #      run: |
