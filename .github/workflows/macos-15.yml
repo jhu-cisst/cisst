@@ -21,7 +21,6 @@ jobs:
       with:
         path: |
           ~/Library/Caches/Homebrew
-          /opt/homebrew/Cellar
         key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/macos-15.yml') }}
         restore-keys: |
           ${{ runner.os }}-brew-
@@ -29,12 +28,16 @@ jobs:
     - name: Install dependencies
       run: |
         brew install graphviz jsoncpp qt@5 pkg-config cppunit ccache
+        # Ensure homebrew bin is in path for subsequent steps
+        echo "/opt/homebrew/bin" >> $GITHUB_PATH
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/macos-15.yml') }}
         max-size: 1G
+        # Use vcpkg provided ccache if possible, or ensure it's found
+        ccache-command: ccache
 
     - name: Download cisstNetlib
       run: |
