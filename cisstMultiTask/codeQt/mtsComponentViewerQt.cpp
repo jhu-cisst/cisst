@@ -117,8 +117,10 @@ void mtsComponentViewerQt::Run(void) {
 void mtsComponentViewerQt::setupUi(void) {
     Registry = std::make_shared<QtNodes::NodeDelegateModelRegistry>();
     GraphModel = new QtNodes::DataFlowGraphModel(Registry);
+    GraphModel->setParent(this);
     Scene = new QtNodes::DataFlowGraphicsScene(*GraphModel);
-    View = new QtNodes::GraphicsView(Scene);
+    Scene->setParent(this);
+    View = new QtNodes::GraphicsView(Scene, this);
 
     QVBoxLayout *layout = new QVBoxLayout();
     this->setLayout(layout);
