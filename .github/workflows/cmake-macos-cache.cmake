@@ -13,9 +13,6 @@ set (CISST_USE_SI_UNITS ON CACHE BOOL "")
 set (CISST_cisstMesh ON CACHE BOOL "")
 set (CISST_cisstRobot ON CACHE BOOL "")
 
-# Build tests
-set (CISST_BUILD_TESTS ON CACHE BOOL "")
-
 # XML parsing
 set (CISST_cisstCommonXML OFF CACHE BOOL "")
 
@@ -23,7 +20,10 @@ set (CISST_cisstCommonXML OFF CACHE BOOL "")
 set (CISST_HAS_JSON ON CACHE BOOL "")
 
 # Unit tests
-set (CISST_BUILD_TESTS OFF CACHE BOOL "")
+set (CISST_BUILD_TESTS ON CACHE BOOL "")
+
+# Build examples
+set (CISST_BUILD_EXAMPLES ON CACHE BOOL "")
 
 # cisstNetlib
 set (CISSTNETLIB_USE_LOCAL_INSTALL ON CACHE BOOL "")
