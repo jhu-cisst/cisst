@@ -42,7 +42,7 @@ namespace QtNodes {
 } // namespace QtNodes
 
 // Always include last
-#include <cisstMultiTask/mtsExport.h>
+#include <cisstMultiTask/mtsExportQt.h>
 
 class CISST_EXPORT mtsComponentViewerQtWidget : public QWidget,
                                                 public mtsTaskFromSignal {
