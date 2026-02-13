@@ -295,7 +295,7 @@ public:
 
 
     /*! Add non-const version of unary operator * */
-    value_type & operator* () {
+    value_type & operator* () const {
         return *(this->DataPtr);
     }
 };
