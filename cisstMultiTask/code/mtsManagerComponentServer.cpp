@@ -119,8 +119,10 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetDescriptionsOfComponents,
                               this, mtsManagerComponentBase::CommandNames::GetDescriptionsOfComponents);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces,
-                              this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetDescriptionsOfInterfaces,
-                                     this, mtsManagerComponentBase::CommandNames::GetDescriptionsOfInterfaces);    provided->AddCommandRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections,
+                              this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetDescriptionsOfInterfaces,
+                              this, mtsManagerComponentBase::CommandNames::GetDescriptionsOfInterfaces);
+    provided->AddCommandRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections,
                               this, mtsManagerComponentBase::CommandNames::GetListOfConnections);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses,
                               this, mtsManagerComponentBase::CommandNames::GetListOfComponentClasses);
