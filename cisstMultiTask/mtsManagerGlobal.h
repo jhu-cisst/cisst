@@ -86,10 +86,12 @@ protected:
 
     /*! Typedef for interface map */
     typedef struct {
-        //ConnectedInterfaceMapType InterfaceProvidedOrOutputMap;
-        //ConnectedInterfaceMapType InterfaceRequiredOrInputMap;
         InterfaceMapElementType InterfaceProvidedOrOutputMap;
         InterfaceMapElementType InterfaceRequiredOrInputMap;
+        std::map<std::string, std::set<std::string>> InterfaceProvidedOrOutputTags;
+        std::map<std::string, std::set<std::string>> InterfaceRequiredOrInputTags;
+        std::set<std::string> Tags;
+        std::string ClassName;
     } InterfaceMapType;
 
     /*! Component map: a map of registered components in a process
@@ -257,18 +259,38 @@ public:
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
-    bool AddComponent(const std::string & processName, const std::string & componentName) override;
+    bool AddComponent(const std::string & processName,
+                      const std::string & componentName,
+                      const std::string & className,
+                      const std::set<std::string> & tags = std::set<std::string>()) override;
 
     bool FindComponent(const std::string & processName, const std::string & componentName) const override;
 
     bool RemoveComponent(const std::string & processName, const std::string & componentName, const bool lock = true) override;
 
+    void GetDescriptionsOfComponents(const std::string & processName,
+                                     std::vector<mtsDescriptionComponent> & descriptions) const override;
+
+    void GetDescriptionsOfInterfacesProvided(const std::string & processName,
+                                             const std::string & componentName,
+                                             std::vector<mtsDescriptionInterfaceFullName> & descriptions) const override;
+
+    void GetDescriptionsOfInterfacesRequired(const std::string & processName,
+                                             const std::string & componentName,
+                                             std::vector<mtsDescriptionInterfaceFullName> & descriptions) const override;
+
     //-------------------------------------------------------------------------
     //  Interface Management
     //-------------------------------------------------------------------------
-    bool AddInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) override;
+    bool AddInterfaceProvidedOrOutput(const std::string & processName,
+                                      const std::string & componentName,
+                                      const std::string & interfaceName,
+                                      const std::set<std::string> & tags = std::set<std::string>()) override;
 
-    bool AddInterfaceRequiredOrInput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) override;
+    bool AddInterfaceRequiredOrInput(const std::string & processName,
+                                     const std::string & componentName,
+                                     const std::string & interfaceName,
+                                     const std::set<std::string> & tags = std::set<std::string>()) override;
 
     bool FindInterfaceProvidedOrOutput(const std::string & processName, const std::string & componentName, const std::string & interfaceName) const override;
 
@@ -319,7 +341,6 @@ public:
     /*! Get names of all components in a process */
     void GetNamesOfComponents(const std::string & processName,
                               std::vector<std::string>& namesOfComponents) const;
-
     /*! Get names of all provided interfaces in a component */
     void GetNamesOfInterfacesProvidedOrOutput(const std::string & processName,
                                               const std::string & componentName,

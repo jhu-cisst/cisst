@@ -433,7 +433,7 @@ public:
 
 
     /*! Add non const version of unary operator * */
-    value_type & operator * (void)
+    value_type & operator * (void) const
     {
         return *(this->ElementPointer);
     }

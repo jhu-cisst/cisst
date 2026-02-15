@@ -1,4 +1,4 @@
-name: Ubuntu 22.04
+name: macOS 15
 
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
@@ -11,63 +11,48 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-22.04
+    runs-on: macos-15
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup ROS 2 Humble
-      uses: ros-tooling/setup-ros@v0.7
-      with:
-        required-ros-distributions: humble
-
-    - name: Cache APT packages
+    - name: Setup Homebrew cache
       uses: actions/cache@v4
       with:
-        path: ${{ github.workspace }}/apt-cache
-        key: ${{ runner.os }}-apt-humble-${{ hashFiles('.github/workflows/ubuntu-22.04.yml') }}
+        path: |
+          ~/Library/Caches/Homebrew
+        key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/macos-15.yml') }}
         restore-keys: |
-          ${{ runner.os }}-apt-humble-
+          ${{ runner.os }}-brew-
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
-        mkdir -p ${{ github.workspace }}/apt-cache
-        echo "Dir::Cache::archives \"${{ github.workspace }}/apt-cache\";" | sudo tee /etc/apt/apt.conf.d/10cache
-        echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/01keep-debs
-        sudo apt-get update
-        sudo apt-get install -y \
-          libxml2-dev \
-          libjsoncpp-dev \
-          qtbase5-dev \
-          qtbase5-dev-tools \
-          qt5-qmake-bin \
-          libqt5xmlpatterns5-dev \
-          gfortran-9 \
-          libgraphviz-dev \
-          ros-humble-ros-base \
-          ros-humble-desktop \
-          ccache
+        brew install graphviz jsoncpp qt@5 pkg-config cppunit ccache
+        # Ensure homebrew bin is in path for subsequent steps
+        echo "/opt/homebrew/bin" >> $GITHUB_PATH
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/ubuntu-22.04.yml') }}
+        key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/macos-15.yml') }}
         max-size: 1G
+        # Use vcpkg provided ccache if possible, or ensure it's found
+        ccache-command: ccache
 
     - name: Download cisstNetlib
       run: |
         cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
-        git clone -b devel https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
-
+        git clone https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
         cmake ${{github.workspace}}/cisstNetlib-source \
+          -DcisstNetlib_LANGUAGE=C \
+          -DCMAKE_OSX_ARCHITECTURES=arm64 \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build . --config Release
         sudo cmake --build . --target install
-
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
@@ -75,22 +60,27 @@ jobs:
       shell: bash
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake $GITHUB_WORKSPACE \
+        export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+        cmake ${{github.workspace}} \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_OSX_ARCHITECTURES=arm64 \
+          -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5" \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -C ${{github.workspace}}/.github/workflows/cmake-ubuntu-cache.cmake
+          -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
-      run: cmake --build . --config Release
+      run: |
+        source cisstvars.sh
+        cmake --build . --config Release
 
     - name: Configure CMake examples
       shell: bash
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake $GITHUB_WORKSPACE \
+        cmake ${{github.workspace}} \
           -DCISST_BUILD_EXAMPLES=ON \
           -DCISST_cisstCommon_EXAMPLES=ON \
           -DCISST_cisstVector_EXAMPLES=ON \
@@ -104,15 +94,17 @@ jobs:
     - name: Build examples
       working-directory: ${{github.workspace}}/build
       shell: bash
-      run: cmake --build . --config Release
+      run: |
+        source cisstvars.sh
+        cmake --build . --config Release
 
     - name: Test
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: |
         source cisstvars.sh
-        cisstCommonTests -r
-        cisstVectorTests -r
-        cisstNumericalTests -r
-        cisstOSAbstractionTests -r
-        cisstParameterTypesTests -r
+        ./bin/cisstCommonTests -r
+        ./bin/cisstVectorTests -r
+        ./bin/cisstNumericalTests -r
+        ./bin/cisstOSAbstractionTests -r
+        ./bin/cisstParameterTypesTests -r

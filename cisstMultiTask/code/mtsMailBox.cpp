@@ -172,7 +172,6 @@ bool mtsMailBox::ExecuteNext(void)
    catch (std::exception & exceptionCaught) {
        CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
                            << "\" caught exception \"" << exceptionCaught.what() << "\"" << std::endl;
-       this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
        CommandQueue.Get();  // Remove command from mailbox queue
        if (resultPointer || isBlocking)
           TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
@@ -181,13 +180,11 @@ bool mtsMailBox::ExecuteNext(void)
    catch (...) {
        CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
                            << "\" caught exception, blocking = " << isBlocking << std::endl;
-       this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
        CommandQueue.Get();  // Remove command from mailbox queue
        if (resultPointer || isBlocking)
            TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
        throw;
    }
-   this->TriggerPostQueuedCommandIfNeeded(isBlocking, isBlockingReturn);
    if (!result.IsOK()) {
        CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
                            << "\" failed, execution result is \"" << result << "\"" << std::endl;
@@ -196,20 +193,6 @@ bool mtsMailBox::ExecuteNext(void)
    if (resultPointer || isBlocking)
        TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
    return true;
-}
-
-
-void mtsMailBox::TriggerPostQueuedCommandIfNeeded(bool isBlocking, bool isBlockingReturn)
-{
-#if CISST_MTS_HAS_ICE
-   if (isBlocking && this->PostCommandDequeuedCommand) {
-       this->PostCommandDequeuedCommand->Execute(MTS_NOT_BLOCKING);
-   } else {
-       if (isBlockingReturn && this->PostCommandReturnDequeuedCommand) {
-           this->PostCommandReturnDequeuedCommand->Execute(MTS_NOT_BLOCKING);
-       }
-   }
-#endif
 }
 
 

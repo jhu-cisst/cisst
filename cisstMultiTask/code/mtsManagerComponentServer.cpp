@@ -30,6 +30,9 @@ mtsManagerComponentServer::mtsManagerComponentServer(mtsManagerGlobal * gcm)
       GCM(gcm),
       InterfaceGCMFunctionMap("InterfaceGCMFunctionMap")
 {
+    this->mTags.clear();
+    this->AddTag("System");
+
     // Prevent this component from being created more than once
     // MJ: singleton can be implemented instead.
     static int instanceCount = 0;
@@ -113,8 +116,12 @@ bool mtsManagerComponentServer::AddInterfaceGCM(void)
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfProcesses);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfComponents);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetDescriptionsOfComponents,
+                              this, mtsManagerComponentBase::CommandNames::GetDescriptionsOfComponents);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
+    provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetDescriptionsOfInterfaces,
+                              this, mtsManagerComponentBase::CommandNames::GetDescriptionsOfInterfaces);
     provided->AddCommandRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections,
                               this, mtsManagerComponentBase::CommandNames::GetListOfConnections);
     provided->AddCommandQualifiedRead(&mtsManagerComponentServer::InterfaceGCMCommands_GetListOfComponentClasses,
@@ -470,6 +477,12 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfComponents(const 
     GCM->GetNamesOfComponents(processName, names);
 }
 
+void mtsManagerComponentServer::InterfaceGCMCommands_GetDescriptionsOfComponents(const std::string & processName,
+                                                                                 std::vector<mtsDescriptionComponent> & descriptions) const
+{
+    GCM->GetDescriptionsOfComponents(processName, descriptions);
+}
+
 void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const
 {
     // Get a list of required interfaces
@@ -477,6 +490,12 @@ void mtsManagerComponentServer::InterfaceGCMCommands_GetNamesOfInterfaces(const 
 
     // Get a list of provided interfaces
     GCM->GetNamesOfInterfacesProvidedOrOutput(component.ProcessName, component.ComponentName, interfaces.InterfaceProvidedNames);
+}
+
+void mtsManagerComponentServer::InterfaceGCMCommands_GetDescriptionsOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterfaceFull & interfaces) const
+{
+    GCM->GetDescriptionsOfInterfacesProvided(component.ProcessName, component.ComponentName, interfaces.Provided);
+    GCM->GetDescriptionsOfInterfacesRequired(component.ProcessName, component.ComponentName, interfaces.Required);
 }
 
 void mtsManagerComponentServer::InterfaceGCMCommands_GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const

@@ -16,10 +16,42 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Setup ROS 2 Jazzy
+      uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: jazzy
+
+    - name: Cache APT packages
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/apt-cache
+        key: ${{ runner.os }}-apt-jazzy-${{ hashFiles('.github/workflows/ubuntu-24.04.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-apt-jazzy-
+
     - name: Install Dependencies
       run: |
+        mkdir -p ${{ github.workspace }}/apt-cache
+        echo "Dir::Cache::archives \"${{ github.workspace }}/apt-cache\";" | sudo tee /etc/apt/apt.conf.d/10cache
+        echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/01keep-debs
         sudo apt-get update
-        sudo apt-get install libxml2-dev libjsoncpp-dev qtbase5-dev qtbase5-dev-tools qt5-qmake-bin libqt5xmlpatterns5-dev
+        sudo apt-get install -y \
+          libxml2-dev \
+          libjsoncpp-dev \
+          qtbase5-dev \
+          qtbase5-dev-tools \
+          qt5-qmake-bin \
+          libqt5xmlpatterns5-dev \
+          libgraphviz-dev \
+          ros-jazzy-ros-base \
+          ros-jazzy-desktop \
+          ccache
+
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/ubuntu-24.04.yml') }}
+        max-size: 1G
 
     - name: Download cisstNetlib
       run: |
@@ -29,7 +61,9 @@ jobs:
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
-        cmake ${{github.workspace}}/cisstNetlib-source
+        cmake ${{github.workspace}}/cisstNetlib-source \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build . --config Release
         sudo cmake --build . --target install
 
@@ -39,9 +73,34 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -C ${{github.workspace}}/.github/workflows/cmake-ubuntu-cache.cmake
+      run: |
+        cmake $GITHUB_WORKSPACE \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -C ${{github.workspace}}/.github/workflows/cmake-ubuntu-cache.cmake
 
     - name: Build
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --build . --config Release
+
+    - name: Configure CMake examples
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake $GITHUB_WORKSPACE \
+          -DCISST_BUILD_EXAMPLES=ON \
+          -DCISST_cisstCommon_EXAMPLES=ON \
+          -DCISST_cisstVector_EXAMPLES=ON \
+          -DCISST_cisstOSAbstraction_EXAMPLES=ON \
+          -DCISST_cisstNumerical_EXAMPLES=ON \
+          -DCISST_cisstMultiTask_EXAMPLES=ON \
+          -DCISST_cisstParameterTypes_EXAMPLES=ON \
+          -DCISST_cisstRobot_EXAMPLES=ON \
+          -DCISST_cisstMesh_EXAMPLES=ON
+
+    - name: Build examples
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: cmake --build . --config Release

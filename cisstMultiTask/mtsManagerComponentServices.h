@@ -57,8 +57,10 @@ protected:
     // Getters
     struct GetterStruct {
         mtsFunctionRead          GetNamesOfProcesses;
-        mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
-        mtsFunctionQualifiedRead GetNamesOfInterfaces; // in: process name, out: interfaces' names
+        mtsFunctionQualifiedRead GetNamesOfComponents;         // in: process name, out: components' names
+        mtsFunctionQualifiedRead GetDescriptionsOfComponents;  // in: process name, out: components' descriptions
+        mtsFunctionQualifiedRead GetNamesOfInterfaces;         // in: process name, out: interfaces' names
+        mtsFunctionQualifiedRead GetDescriptionsOfInterfaces;  // in: component description, out: interfaces' descriptions
         mtsFunctionRead          GetListOfConnections;
         mtsFunctionQualifiedRead GetListOfComponentClasses;  // in: process name, out: list of classes
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
@@ -181,10 +183,16 @@ public:
 
     std::vector<std::string> GetNamesOfProcesses(void) const;
     std::vector<std::string> GetNamesOfComponents(const std::string & processName) const;
+    std::vector<mtsDescriptionComponent> GetDescriptionsOfComponents(const std::string & processName) const;
     bool GetNamesOfInterfaces(const std::string & processName,
                               const std::string & componentName,
                               std::vector<std::string> & namesOfInterfacesRequired,
                               std::vector<std::string> & namesOfInterfacesProvided) const;
+
+    bool GetDescriptionsOfInterfaces(const std::string & processName,
+                                     const std::string & componentName,
+                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsRequired,
+                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsProvided) const;
 
     std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
 

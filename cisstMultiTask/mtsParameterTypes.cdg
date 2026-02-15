@@ -2,6 +2,7 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
+#include <set>
 #include <cisstMultiTask/mtsParameterTypesOld.h>
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -32,16 +33,22 @@ class {
         type std::string;
         visibility public;
     }
+    member {
+        name Tags;
+        type std::set<std::string>;
+        visibility public;
+    }
     inline-header {
     public:
-       mtsDescriptionComponent(const std::string & processName, const std::string & componentName);
+       mtsDescriptionComponent(const std::string & processName, const std::string & componentName, const std::set<std::string> & tags = std::set<std::string>());
     }
 }
 
 inline-code {
-    mtsDescriptionComponent::mtsDescriptionComponent(const std::string & processName, const std::string & componentName):
+    mtsDescriptionComponent::mtsDescriptionComponent(const std::string & processName, const std::string & componentName, const std::set<std::string> & tags):
         ProcessName(processName),
-        ComponentName(componentName) {
+        ComponentName(componentName),
+        Tags(tags) {
     }
 }
 
@@ -69,6 +76,10 @@ class {
 }
 
 inline-header {
+typedef std::vector<mtsDescriptionComponent> mtsDescriptionComponentVec;
+typedef mtsGenericObjectProxy<mtsDescriptionComponentVec> mtsDescriptionComponentVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentVecProxy);
+
 typedef std::vector<mtsDescriptionComponentClass> mtsDescriptionComponentClassVec;
 typedef mtsGenericObjectProxy<mtsDescriptionComponentClassVec> mtsDescriptionComponentClassVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponentClassVecProxy);
@@ -106,7 +117,7 @@ class {
     name mtsDescriptionInterfaceFullName;
     attribute CISST_EXPORT;
     mts-proxy declaration-only;
-    ctor-all-members true;
+    ctor-all-members false;
     member {
         name ProcessName;
         type std::string;
@@ -120,6 +131,40 @@ class {
     member {
         name InterfaceName;
         type std::string;
+        visibility public;
+    }
+    member {
+        name Tags;
+        type std::set<std::string>;
+        visibility public;
+    }
+    inline-header {
+    public:
+       mtsDescriptionInterfaceFullName(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const std::set<std::string> & tags = std::set<std::string>());
+    }
+}
+
+inline-code {
+    mtsDescriptionInterfaceFullName::mtsDescriptionInterfaceFullName(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const std::set<std::string> & tags):
+        ProcessName(processName),
+        ComponentName(componentName),
+        InterfaceName(interfaceName),
+        Tags(tags) {
+    }
+}
+
+class {
+    name mtsDescriptionInterfaceFull;
+    attribute CISST_EXPORT;
+    mts-proxy true;
+    member {
+        name Provided;
+        type std::vector<mtsDescriptionInterfaceFullName>;
+        visibility public;
+    }
+    member {
+        name Required;
+        type std::vector<mtsDescriptionInterfaceFullName>;
         visibility public;
     }
 }
