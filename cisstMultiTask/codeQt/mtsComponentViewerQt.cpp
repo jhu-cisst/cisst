@@ -39,7 +39,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <QtNodes/GraphicsView>
 #include <QtNodes/NodeDelegateModelRegistry>
 
-#define GVC_EXPORTS 1
 #include <cgraph.h>
 #include <gvc.h>
 #include <set>
