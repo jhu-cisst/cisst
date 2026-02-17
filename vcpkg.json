@@ -3,16 +3,13 @@
   "version-string": "1.4.0",
   "dependencies": [
     {
-      "name": "jsoncpp",
-      "platform": "windows | osx"
+      "name": "jsoncpp"
     },
     {
-      "name": "graphviz",
-      "platform": "windows | osx"
+      "name": "graphviz"
     },
     {
-      "name": "pkgconf",
-      "platform": "windows"
+      "name": "pkgconf"
     }
   ]
 }
