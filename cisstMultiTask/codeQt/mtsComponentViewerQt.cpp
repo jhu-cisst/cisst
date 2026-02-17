@@ -454,13 +454,6 @@ void mtsComponentViewerQt::UpdateGraph(void) {
     m_provided_interface_to_port.clear();
     m_required_interface_to_port.clear();
 
-    // Identify connected components
-    std::set<std::string> connectedComponents;
-    for (const auto &conn : m_connection_infos) {
-        connectedComponents.insert(conn.Client.ComponentName);
-        connectedComponents.insert(conn.Server.ComponentName);
-    }
-
     // Re-add components
     for (const auto &desc : m_component_infos) {
         std::string name = desc.ComponentName;
