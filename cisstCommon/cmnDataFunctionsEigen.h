@@ -60,8 +60,8 @@ public:
                           std::ostream & outputStream,
                           const char delimiter) CISST_THROW(std::runtime_error)
     {
-        const size_t rows = data.size();
-        const size_t cols = data.size();
+        const size_t rows = data.rows();
+        const size_t cols = data.cols();
         cmnData<size_t>::SerializeText(rows, outputStream, delimiter);
         outputStream << delimiter;
         cmnData<size_t>::SerializeText(cols, outputStream, delimiter);
@@ -69,8 +69,8 @@ public:
             return;
         }
 
-        for (Eigen::Index row = 0; row < rows; row++) {
-            for (Eigen::Index col = 0; col < cols; col++) {
+        for (size_t row = 0; row < rows; row++) {
+            for (size_t col = 0; col < cols; col++) {
                 outputStream << delimiter;
                 cmnData<typename DataType::Scalar>::SerializeText(
                     data.coeff(row, col),
@@ -90,13 +90,13 @@ public:
         cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "Eigen::PlainObjectBase");
         cmnData<size_t>::DeSerializeText(cols, inputStream, delimiter);
 
-        if (DataType::RowsAtCompileTime != Eigen::Dynamic && DataType::RowsAtCompileTime != rows) {
+        if (DataType::RowsAtCompileTime != Eigen::Dynamic && DataType::RowsAtCompileTime != static_cast<Eigen::Index>(rows)) {
             std::string message("cmnData<Eigen::PlainObjectBase>::DeSerializeText: ");
             message.append(", data rows must match compile-time rows");
             cmnThrow(message);
         }
 
-        if (DataType::ColsAtCompileTime != Eigen::Dynamic && DataType::ColsAtCompileTime != cols) {
+        if (DataType::ColsAtCompileTime != Eigen::Dynamic && DataType::ColsAtCompileTime != static_cast<Eigen::Index>(cols)) {
             std::string message("cmnData<Eigen::PlainObjectBase>::DeSerializeText: ");
             message.append(", data cols must match compile-time cols");
             cmnThrow(message);
@@ -105,11 +105,11 @@ public:
         // Safe to resize even for fixed-size matrices as long as rows/cols matches fixed values
         data.resize(rows, cols);
 
-        for (Eigen::Index row = 0; row < rows; row++) {
-            for (Eigen::Index col = 0; col < cols; col++) {
+        for (size_t row = 0; row < rows; row++) {
+            for (size_t col = 0; col < cols; col++) {
                 cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "Eigen::PlainObjectBase");
                 cmnData<typename DataType::Scalar>::DeSerializeText(
-                    data.coeff(row, col),
+                    data(row, col),
                     inputStream,
                     delimiter
                 );
@@ -129,8 +129,8 @@ public:
                     << delimiter
                     << cmnData<size_t>::SerializeDescription(cols, delimiter, prefix + ".cols");
 
-        for (Eigen::Index row = 0; row < rows; ++row) {
-            for (Eigen::Index col = 0; col < cols; ++col) {
+        for (size_t row = 0; row < rows; ++row) {
+            for (size_t col = 0; col < cols; ++col) {
                 description << delimiter;
                 std::stringstream index_suffix;
                 index_suffix << prefix << "[" << row << "," << col << "]";
@@ -150,7 +150,6 @@ public:
     {
         cmnData<size_t>::SerializeBinary(data.rows(), outputStream);
         cmnData<size_t>::SerializeBinary(data.cols(), outputStream);
-        cmnDataVectorSerializeBinary(data, outputStream);
 
         for (Eigen::Index row = 0; row < data.rows(); ++row) {
             for (Eigen::Index col = 0; col < data.cols(); ++col) {
@@ -169,13 +168,13 @@ public:
         cmnDataDeSerializeBinary_size_t(rows, inputStream, localFormat, remoteFormat);
         cmnDataDeSerializeBinary_size_t(cols, inputStream, localFormat, remoteFormat);
 
-        if (DataType::RowsAtCompileTime != Eigen::Dynamic && DataType::RowsAtCompileTime != rows) {
+        if (DataType::RowsAtCompileTime != Eigen::Dynamic && DataType::RowsAtCompileTime != static_cast<Eigen::Index>(rows)) {
             std::string message("cmnData<Eigen::PlainObjectBase>::DeSerializeBinary: ");
             message.append(", data rows must match compile-time rows");
             cmnThrow(message);
         }
 
-        if (DataType::ColsAtCompileTime != Eigen::Dynamic && DataType::ColsAtCompileTime != cols) {
+        if (DataType::ColsAtCompileTime != Eigen::Dynamic && DataType::ColsAtCompileTime != static_cast<Eigen::Index>(cols)) {
             std::string message("cmnData<Eigen::PlainObjectBase>::DeSerializeBinary: ");
             message.append(", data cols must match compile-time cols");
             cmnThrow(message);
@@ -187,7 +186,7 @@ public:
         for (Eigen::Index row = 0; row < data.rows(); ++row) {
             for (Eigen::Index col = 0; col < data.cols(); ++col) {
                 cmnData<typename DataType::Scalar>::DeSerializeBinary(
-                    data.coeff(row, col),
+                    data(row, col),
                     inputStream,
                     localFormat,
                     remoteFormat
@@ -244,4 +243,4 @@ public:
     }
 };
 
-#endif // _cmnDataFunctionsVector_h
+#endif // _cmnDataFunctionsEigen_h

@@ -111,3 +111,78 @@ void cmnDataFunctionsEigenTest::TestFixedSizedCopy(void)
         }
     }
 }
+
+void cmnDataFunctionsEigenTest::TestDynamicSizedBinarySerializationStream(void)
+{
+    cmnDataFormat local, remote;
+
+    std::stringstream stream;
+    {
+        Eigen::VectorXf source, destination;
+        source.resize(10);
+        for (Eigen::Index idx = 0; idx < source.size(); ++idx) {
+            source(idx) = static_cast<float>(idx);
+        }
+
+        cmnData<Eigen::VectorXf>::SerializeBinary(source, stream);
+        cmnData<Eigen::VectorXf>::DeSerializeBinary(destination, stream, local, remote);
+        CPPUNIT_ASSERT_EQUAL(destination.size(), source.size());
+        for (Eigen::Index idx = 0; idx < source.size(); ++idx) {
+            CPPUNIT_ASSERT_EQUAL(destination(idx), source(idx));
+        }
+    }
+}
+
+void cmnDataFunctionsEigenTest::TestFixedSizedBinarySerializationStream(void) {
+    cmnDataFormat local, remote;
+
+    std::stringstream stream;
+    {
+        Eigen::Vector2f source, destination;
+        for (Eigen::Index idx = 0; idx < source.size(); ++idx) {
+            source(idx) = static_cast<float>(idx);
+        }
+
+        cmnData<Eigen::Vector2f>::SerializeBinary(source, stream);
+        cmnData<Eigen::Vector2f>::DeSerializeBinary(destination, stream, local, remote);
+        for (Eigen::Index idx = 0; idx < source.size(); ++idx) {
+            CPPUNIT_ASSERT_EQUAL(destination(idx), source(idx));
+        }
+    }
+}
+
+void cmnDataFunctionsEigenTest::TestDynamicSizedTextSerializationStream(void) {
+    std::stringstream stream;
+    {
+        Eigen::VectorXf source, destination;
+        source.resize(12);
+        for (Eigen::Index idx = 0; idx < source.size(); ++idx) {
+            source(idx) = static_cast<float>(idx);
+        }
+
+        cmnData<Eigen::VectorXf>::SerializeText(source, stream, ',');
+        cmnData<Eigen::VectorXf>::DeSerializeText(destination, stream, ',');
+        CPPUNIT_ASSERT_EQUAL(destination.size(), source.size());
+        for (Eigen::Index idx = 0; idx < source.size(); ++idx) {
+            CPPUNIT_ASSERT_EQUAL(destination(idx), source(idx));
+        }
+    }
+}
+void cmnDataFunctionsEigenTest::TestFixedSizedTextSerializationStream(void) {
+    std::stringstream stream;
+    {
+        Eigen::Vector4d source, destination;
+        for (Eigen::Index idx = 0; idx < source.size(); ++idx) {
+            source(idx) = static_cast<float>(idx);
+        }
+
+        cmnData<Eigen::Vector4d>::SerializeText(source, stream, ',');
+        cmnData<Eigen::Vector4d>::DeSerializeText(destination, stream, ',');
+        for (Eigen::Index idx = 0; idx < source.size(); ++idx) {
+            CPPUNIT_ASSERT_EQUAL(destination(idx), source(idx));
+        }
+    }
+}
+
+void cmnDataFunctionsEigenTest::TestDynamicSizedScalars(void) {}
+void cmnDataFunctionsEigenTest::TestFixedSizedScalars(void) {}
