@@ -107,6 +107,12 @@ if (CISST_HAS_JSON)
        cmnDataFunctionsJSON.h)
 endif (CISST_HAS_JSON)
 
+if (CISST_HAS_EIGEN)
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       cmnDataFunctionsEigen.h)
+endif (CISST_HAS_EIGEN)
+
 cisst_add_library (
   LIBRARY cisstCommon
   FOLDER cisstCommon

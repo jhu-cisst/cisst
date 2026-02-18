@@ -343,3 +343,22 @@ if (CISST_HAS_JSON)
 else (CISST_HAS_JSON)
   cisst_unset_all_package_settings (cisstCommon JSON)
 endif (CISST_HAS_JSON)
+
+
+# Support for Eigen
+find_package (Eigen3)
+if (EIGEN_FOUND)
+  option (CISST_HAS_EIGEN "Is Eigen available." ON)
+  mark_as_advanced (CISST_HAS_EIGEN)
+else (EIGEN_FOUND)
+  option (CISST_HAS_EIGEN "Is Eigen available." OFF)
+endif (EIGEN_FOUND)
+
+if (CISST_HAS_EIGEN)
+  find_package (Eigen3 REQUIRED)
+  if (EIGEN3_INCLUDE_DIR)
+    cisst_set_package_settings (cisstCommon Eigen INCLUDE_DIRECTORIES EIGEN3_INCLUDE_DIR)
+  endif (EIGEN3_INCLUDE_DIR)
+else (CISST_HAS_EIGEN)
+  cisst_unset_all_package_settings (cisstCommon Eigen)
+endif (CISST_HAS_EIGEN)
