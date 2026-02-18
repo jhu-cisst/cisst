@@ -222,7 +222,8 @@ public:
         std::stringstream suffix;
         suffix << "[" << data.rows() << "," << data.cols() << "]";
         return cmnData<typename DataType::Scalar>::ScalarDescription(
-            data.reshaped().coeff(index - 2), // reshaped() provides linearly-indexed view
+            // reshaped() provides linearly-indexed view
+            data.template reshaped<Eigen::RowMajor>().coeff(index - 2),
             0,
             userDescription + suffix.str()
         );
@@ -239,7 +240,7 @@ public:
         }
 
         // reshaped() provides linearly-indexed view
-        return data.reshaped().coeff(index - 2);
+        return data.template reshaped<Eigen::RowMajor>().coeff(index - 2);
     }
 };
 
