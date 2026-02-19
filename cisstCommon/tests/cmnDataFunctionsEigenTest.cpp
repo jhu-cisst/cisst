@@ -242,3 +242,170 @@ void cmnDataFunctionsEigenTest::TestFixedSizedScalars() {
         CPPUNIT_ASSERT_EQUAL(static_cast<double>(idx), cmnData<Eigen::Vector3d>::Scalar(data, idx + 2));
     }
 }
+
+void cmnDataFunctionsEigenTest::TestTransformBinarySerializationStream() {
+    cmnDataFormat local, remote;
+
+    std::stringstream stream;
+    {
+        stream.str("");
+        stream.clear();
+        Eigen::Isometry3d source(Eigen::Translation3d(1.0, -1.0, 2.0));
+        Eigen::Isometry3d destination;
+
+        cmnData<Eigen::Isometry3d>::SerializeBinary(source, stream);
+        cmnData<Eigen::Isometry3d>::DeSerializeBinary(destination, stream, local, remote);
+        for (Eigen::Index row = 0; row < source.rows(); ++row) {
+            for (Eigen::Index col = 0; col < source.cols(); ++col) {
+                CPPUNIT_ASSERT_EQUAL(source.matrix()(row, col), destination.matrix()(row, col));
+            }
+        }
+    }
+
+    {
+        stream.str("");
+        stream.clear();
+        Eigen::Vector3f axis = Eigen::Vector3f(0.06, 0.7, -0.2).normalized();
+        Eigen::Projective3f source(Eigen::AngleAxisf(0.25, axis));
+        Eigen::Projective3f destination;
+
+        cmnData<Eigen::Projective3f>::SerializeBinary(source, stream);
+        cmnData<Eigen::Projective3f>::DeSerializeBinary(destination, stream, local, remote);
+        for (Eigen::Index row = 0; row < source.rows(); ++row) {
+            for (Eigen::Index col = 0; col < source.cols(); ++col) {
+                CPPUNIT_ASSERT_EQUAL(source.matrix()(row, col), destination.matrix()(row, col));
+            }
+        }
+    }
+
+    {
+        stream.str("");
+        stream.clear();
+        Eigen::AffineCompact2f source(Eigen::Translation2f(8.2, -4.5));
+        Eigen::AffineCompact2f destination;
+
+        cmnData<Eigen::AffineCompact2f>::SerializeBinary(source, stream);
+        cmnData<Eigen::AffineCompact2f>::DeSerializeBinary(destination, stream, local, remote);
+        for (Eigen::Index row = 0; row < source.rows(); ++row) {
+            for (Eigen::Index col = 0; col < source.cols(); ++col) {
+                CPPUNIT_ASSERT_EQUAL(source.matrix()(row, col), destination.matrix()(row, col));
+            }
+        }
+    }
+}
+
+void cmnDataFunctionsEigenTest::TestTransformTextSerializationStream() {
+    std::stringstream stream;
+    double stream_tolerance = std::pow(0.1, stream.precision() - 1);
+
+    {
+        stream.str("");
+        stream.clear();
+        Eigen::Isometry2f source(Eigen::Translation2f(-1.0, 2.0));
+        Eigen::Isometry2f destination;
+
+        cmnData<Eigen::Isometry2f>::SerializeText(source, stream, ',');
+        cmnData<Eigen::Isometry2f>::DeSerializeText(destination, stream, ',');
+        for (Eigen::Index row = 0; row < source.rows(); ++row) {
+            for (Eigen::Index col = 0; col < source.cols(); ++col) {
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(source.matrix()(row, col), destination.matrix()(row, col), stream_tolerance);
+            }
+        }
+    }
+
+    {
+        stream.str("");
+        stream.clear();
+        Eigen::Vector3d axis = Eigen::Vector3d(0.06, 0.7, -0.2).normalized();
+        Eigen::Affine3d source(Eigen::AngleAxisd(0.25, axis));
+        Eigen::Affine3d destination;
+
+        cmnData<Eigen::Affine3d>::SerializeText(source, stream, ',');
+        cmnData<Eigen::Affine3d>::DeSerializeText(destination, stream, ',');
+        for (Eigen::Index row = 0; row < source.rows(); ++row) {
+            for (Eigen::Index col = 0; col < source.cols(); ++col) {
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(source.matrix()(row, col), destination.matrix()(row, col), stream_tolerance);
+            }
+        }
+    }
+
+    {
+        stream.str("");
+        stream.clear();
+        Eigen::AffineCompact2d source(Eigen::Translation2d(3.2, -42.0));
+        Eigen::AffineCompact2d destination;
+
+        cmnData<Eigen::AffineCompact2d>::SerializeText(source, stream, ',');
+        cmnData<Eigen::AffineCompact2d>::DeSerializeText(destination, stream, ',');
+        for (Eigen::Index row = 0; row < source.rows(); ++row) {
+            for (Eigen::Index col = 0; col < source.cols(); ++col) {
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(source.matrix()(row, col), destination.matrix()(row, col), stream_tolerance);
+            }
+        }
+    }
+}
+
+void cmnDataFunctionsEigenTest::TestQuaternionBinarySerializationStream() {
+    cmnDataFormat local, remote;
+
+    std::stringstream stream;
+    {
+        Eigen::Quaterniond source(1.0, -2.0, 0.5, 0.15);
+        source.coeffs().normalize();
+        Eigen::Quaterniond destination;
+
+        cmnData<Eigen::Quaterniond>::SerializeBinary(source, stream);
+        cmnData<Eigen::Quaterniond>::DeSerializeBinary(destination, stream, local, remote);
+
+        CPPUNIT_ASSERT_EQUAL(source.x(), destination.x());
+        CPPUNIT_ASSERT_EQUAL(source.y(), destination.y());
+        CPPUNIT_ASSERT_EQUAL(source.z(), destination.z());
+        CPPUNIT_ASSERT_EQUAL(source.w(), destination.w());
+    }
+}
+
+void cmnDataFunctionsEigenTest::TestQuaternionTextSerializationStream() {
+    std::stringstream stream;
+    {
+        Eigen::Quaterniond source(0.8, -0.7, -0.7, -3.0);
+        source.coeffs().normalize();
+        Eigen::Quaterniond destination;
+
+        cmnData<Eigen::Quaterniond>::SerializeText(source, stream, ',');
+        cmnData<Eigen::Quaterniond>::DeSerializeText(destination, stream, ',');
+
+        double stream_tolerance = std::pow(0.1, stream.precision() - 1);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(source.x(), destination.x(), stream_tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(source.y(), destination.y(), stream_tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(source.z(), destination.z(), stream_tolerance);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(source.w(), destination.w(), stream_tolerance);
+    }
+}
+
+void cmnDataFunctionsEigenTest::TestRotation2DBinarySerializationStream() {
+    cmnDataFormat local, remote;
+
+    std::stringstream stream;
+    {
+        Eigen::Rotation2Dd source(-0.674);
+        Eigen::Rotation2Dd destination(0.0);
+
+        cmnData<Eigen::Rotation2Dd>::SerializeBinary(source, stream);
+        cmnData<Eigen::Rotation2Dd>::DeSerializeBinary(destination, stream, local, remote);
+
+        CPPUNIT_ASSERT_EQUAL(source.angle(), destination.angle());
+    }
+}
+
+void cmnDataFunctionsEigenTest::TestRotation2DTextSerializationStream() {
+    std::stringstream stream;
+    {
+        Eigen::Rotation2Df source(0.341);
+        Eigen::Rotation2Df destination(0.0);
+
+        cmnData<Eigen::Rotation2Df>::SerializeText(source, stream, ',');
+        cmnData<Eigen::Rotation2Df>::DeSerializeText(destination, stream, ',');
+
+        CPPUNIT_ASSERT_EQUAL(source.angle(), destination.angle());
+    }
+}

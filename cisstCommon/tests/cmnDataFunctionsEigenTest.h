@@ -38,6 +38,15 @@ class cmnDataFunctionsEigenTest: public CppUnit::TestFixture
 
         CPPUNIT_TEST(TestDynamicSizedScalars);
         CPPUNIT_TEST(TestFixedSizedScalars);
+
+        CPPUNIT_TEST(TestTransformBinarySerializationStream);
+        CPPUNIT_TEST(TestTransformTextSerializationStream);
+
+        CPPUNIT_TEST(TestQuaternionBinarySerializationStream);
+        CPPUNIT_TEST(TestQuaternionTextSerializationStream);
+
+        CPPUNIT_TEST(TestRotation2DBinarySerializationStream);
+        CPPUNIT_TEST(TestRotation2DTextSerializationStream);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -57,6 +66,15 @@ class cmnDataFunctionsEigenTest: public CppUnit::TestFixture
 
     void TestDynamicSizedScalars();
     void TestFixedSizedScalars();
+
+    void TestTransformBinarySerializationStream();
+    void TestTransformTextSerializationStream();
+
+    void TestQuaternionBinarySerializationStream();
+    void TestQuaternionTextSerializationStream();
+
+    void TestRotation2DTextSerializationStream();
+    void TestRotation2DBinarySerializationStream();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(cmnDataFunctionsEigenTest);
