@@ -34,6 +34,7 @@ set (SOURCE_FILES
 
      mtsCommandFilteredQueuedWrite.cpp
      mtsCommandFilteredWrite.cpp
+     mtsCommandLineOptions.cpp
      mtsCommandQualifiedRead.cpp
      mtsCommandQueuedVoid.cpp
      mtsCommandQueuedVoidReturn.cpp
@@ -128,6 +129,7 @@ set (HEADER_FILES
      mtsCommandBase.h
      mtsCommandFilteredQueuedWrite.h
      mtsCommandFilteredWrite.h
+     mtsCommandLineOptions.h
      mtsCommandQualifiedRead.h
      mtsCommandQueuedVoid.h
      mtsCommandQueuedVoidReturn.h

@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2009-10-22
 
@@ -23,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorFactory.h>
 #include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
 #include <cisstMultiTask/mtsComponentViewerQt.h>
+#include <cisstMultiTask/mtsCommandLineOptionsQt.h>
 
 #include <QApplication>
 
@@ -48,12 +48,14 @@ int main(int argc, char *argv[]) {
     // create Qt application
     QApplication application(argc, argv);
 
+    // command line options
+    mtsCommandLineOptionsQt options;
+    if (!options.Parse(argc, argv, std::cerr)) {
+        return -1;
+    }
+
     // get the component manager to add multiple sine generator tasks
     mtsManagerLocal *componentManager = mtsManagerLocal::GetInstance();
-
-    mtsComponentViewerQt *viewer =
-        new mtsComponentViewerQt("ComponentViewer");
-    componentManager->AddComponent(viewer);
 
     mainQtComponent *mainQt = new mainQtComponent("mainQt");
     componentManager->AddComponent(mainQt);
@@ -88,34 +90,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    mtsCollectorFactory *collectorFactory = new mtsCollectorFactory("collectors");
-    const std::string collectorConfig = "mtsExPeriodicTaskQtCollectors.json";
-    cmnPath path;
-    path.AddRelativeToCisstShare("/cisstMultiTask/examples");
-    path.Add(cmnPath::GetWorkingDirectory());
-    std::string fullPath = path.Find(collectorConfig);
-    if (fullPath != "") {
-        std::cout << "Loading data collection configuration file \"" << fullPath
-                  << "\"" << std::endl;
-        collectorFactory->Configure(fullPath);
-    } else {
-        std::cout << "Unable to find data collection configuration file \""
-                  << collectorConfig
-                  << "\".  The example will run without data collection."
-                  << std::endl;
-    }
-    componentManager->AddComponent(collectorFactory);
-    collectorFactory->Connect();
-
-    componentManager->AddComponent(mainQt->GetCollectorQtWidget());
-    componentManager->Connect(mainQt->GetCollectorQtWidget()->GetName(),
-                              "Collector", collectorFactory->GetName(),
-                              "Control");
-
-    // generate a nice tasks diagram
-    std::ofstream dotFile("PeriodicTaskQt.dot");
-    componentManager->ToStreamDot(dotFile);
-    dotFile.close();
+    options.Apply();
 
     // create and start all tasks
     componentManager->CreateAll();

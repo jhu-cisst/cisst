@@ -46,8 +46,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewerQt,
                                       mtsTaskFromSignal, std::string);
 
-mtsComponentViewerQt::mtsComponentViewerQt(
-                                                       const std::string &componentName)
+mtsComponentViewerQt::mtsComponentViewerQt(const std::string &componentName)
     : mtsTaskFromSignal(componentName) {
     m_show_component_tags.insert("Generic");
     m_show_interface_tags.insert("Generic");
@@ -79,8 +78,7 @@ mtsComponentViewerQt::mtsComponentViewerQt(
     setupUi();
 }
 
-void mtsComponentViewerQt::Configure(
-                                           const std::string &CMN_UNUSED(filename)) {}
+void mtsComponentViewerQt::Configure(const std::string &CMN_UNUSED(filename)) {}
 
 void mtsComponentViewerQt::Startup(void) {
     // Query existing components and connections before starting event monitoring
@@ -96,7 +94,7 @@ void mtsComponentViewerQt::Startup(void) {
     // Query existing connections
     auto connections = ManagerComponentServices->GetListOfConnections();
     m_connection_infos = connections;
-    
+
     // Populate the graph with existing components and connections
     QMetaObject::invokeMethod(this, [=]() {
         UpdateGraph();

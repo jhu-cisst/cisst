@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Ali Uneri, Peter Kazanzides
   Created on: 2009-10-22
 
@@ -25,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLoggerQtWidget.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
 
 #include "mainQtComponent.h"
 #include "displayQtComponent.h"
@@ -64,14 +62,7 @@ mainQtComponent::mainQtComponent(const std::string &name) : mtsComponent(name)
         }
     }
 
-    // second tab for data collection
-    QWidget * tab2Widget = new QWidget();
-    QGridLayout * tab2Layout= new QGridLayout(tab2Widget);
-    collectorQtWidget = new mtsCollectorFactoryQtWidget("collectorWidget");
-    tab2Layout->addWidget(collectorQtWidget);
-    tabs->addTab(tab2Widget, "Collection");
-
-    // third tab for logger widget
+    // second tab for logger widget
     QWidget * tab3Widget = new QWidget();
     QGridLayout * tab3Layout= new QGridLayout(tab3Widget);
     cmnLoggerQtWidget * loggerWidget = new cmnLoggerQtWidget(tab3Widget);

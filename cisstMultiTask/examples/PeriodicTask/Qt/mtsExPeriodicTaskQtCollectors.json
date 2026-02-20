@@ -17,12 +17,12 @@
             "tables":
             [
                 {
-                     "sampling" : 20,
-                     "table": "StateTable",
-                     "signals": ["SineData", "Tic"]
+                    "sampling" : 20,
+                    "table": "StateTable",
+                    "signals": ["SineData", "Tic"]
                 }
             ]
-         }
+        }
     ]
     ,
     "event_collectors":

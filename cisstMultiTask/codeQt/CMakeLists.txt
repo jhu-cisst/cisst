@@ -54,6 +54,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 ${QTNODES_SETTINGS}
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorFactoryQtWidget.cpp
+                                mtsCommandLineOptionsQt.cpp
                                 mtsMessageQtWidget.cpp
                                 mtsSystemQtWidget.cpp
                                 mtsQtCommandSelector.cpp
@@ -72,6 +73,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 ${QTNODES_SOURCE_FILES}
                    HEADER_FILES mtsForwardDeclarationsQt.h
                                 mtsCollectorFactoryQtWidget.h
+                                mtsCommandLineOptionsQt.h
                                 mtsMessageQtWidget.h
                                 mtsSystemQtWidget.h
                                 mtsQtCommandSelector.h
