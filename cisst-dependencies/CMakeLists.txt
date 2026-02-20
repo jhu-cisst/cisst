@@ -98,7 +98,7 @@ if (CISST_HAS_QT5)
   
     set (cisstQtNodes_PREFIX cisstQtNodeExternal)
     # Default repository and tag can be overridden by user cache variables
-    set (CISST_QTNODES_GIT_REPOSITORY "https://github.com/adeguet1/nodeeditor" CACHE STRING "Git repository URL for QtNode external project")
+    set (CISST_QTNODES_GIT_REPOSITORY "https://github.com/jhu-cisst-external/nodeeditor" CACHE STRING "Git repository URL for QtNode external project")
     set (CISST_QTNODES_GIT_TAG "master" CACHE STRING "Git tag or branch to checkout for QtNode external project")
     
     ExternalProject_Add (
