@@ -12,6 +12,8 @@ jobs:
   build:
 
     runs-on: ubuntu-24.04
+    container:
+      image: ros:jazzy-desktop
 
     steps:
     - uses: actions/checkout@v4
@@ -25,17 +27,19 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/apt-cache
-        key: ${{ runner.os }}-apt-jazzy-${{ hashFiles('.github/workflows/ubuntu-24.04.yml') }}
+        key: ${{ runner.os }}-apt-jazzy-${{ hashFiles('.github/workflows/cmake-ubuntu-cache.cmake') }}
         restore-keys: |
           ${{ runner.os }}-apt-jazzy-
 
     - name: Install Dependencies
       run: |
+        # Disable the automatic purging of the apt cache in docker images
+        rm -f /etc/apt/apt.conf.d/docker-clean
         mkdir -p ${{ github.workspace }}/apt-cache
-        echo "Dir::Cache::archives \"${{ github.workspace }}/apt-cache\";" | sudo tee /etc/apt/apt.conf.d/10cache
-        echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/01keep-debs
-        sudo apt-get update
-        sudo apt-get install -y \
+        echo "Dir::Cache::archives \"${{ github.workspace }}/apt-cache\";" | tee /etc/apt/apt.conf.d/10cache
+        echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | tee /etc/apt/apt.conf.d/01keep-debs
+        apt-get update
+        apt-get install -y \
           libxml2-dev \
           libjsoncpp-dev \
           qtbase5-dev \
@@ -43,15 +47,16 @@ jobs:
           qt5-qmake-bin \
           libqt5xmlpatterns5-dev \
           libgraphviz-dev \
-          ros-jazzy-ros-base \
-          ros-jazzy-desktop \
           ccache
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/ubuntu-24.04.yml') }}
+        key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/cmake-ubuntu-cache.cmake') }}
         max-size: 1G
+
+    - name: ccache stats (before)
+      run: ccache -s
 
     - name: Download cisstNetlib
       run: |
@@ -60,12 +65,16 @@ jobs:
 
     - name: Build cisstNetlib
       working-directory: ${{github.workspace}}/cisstNetlib-build
+      env:
+        CCACHE_BASEDIR: ${{ github.workspace }}
+        CCACHE_NOHASHDIR: "true"
+        CCACHE_COMPRESS: "true"
       run: |
         cmake ${{github.workspace}}/cisstNetlib-source \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build . --config Release
-        sudo cmake --build . --target install
+        cmake --build . --target install
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
@@ -73,6 +82,10 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
+      env:
+        CCACHE_BASEDIR: ${{ github.workspace }}
+        CCACHE_NOHASHDIR: "true"
+        CCACHE_COMPRESS: "true"
       run: |
         cmake $GITHUB_WORKSPACE \
           -DCMAKE_BUILD_TYPE=Release \
@@ -115,3 +128,6 @@ jobs:
         cisstNumericalTests -r
         cisstOSAbstractionTests -r
         cisstParameterTypesTests -r
+
+    - name: ccache stats (after)
+      run: ccache -s
