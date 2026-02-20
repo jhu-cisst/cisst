@@ -40,6 +40,9 @@ jobs:
         echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | tee /etc/apt/apt.conf.d/01keep-debs
         apt-get update
         apt-get install -y \
+          build-essential \
+          cmake \
+          git \
           libxml2-dev \
           libjsoncpp-dev \
           qtbase5-dev \
@@ -61,49 +64,49 @@ jobs:
 
     - name: Download cisstNetlib
       run: |
-        cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
-        git clone -b devel https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+        mkdir -p cisstNetlib-build
+        git clone -b devel https://github.com/jhu-cisst/cisstNetlib cisstNetlib-source
 
     - name: Build cisstNetlib
-      working-directory: ${{github.workspace}}/cisstNetlib-build
+      working-directory: cisstNetlib-build
       env:
         CCACHE_BASEDIR: ${{ github.workspace }}
         CCACHE_NOHASHDIR: "true"
         CCACHE_COMPRESS: "true"
       run: |
-        cmake ${{github.workspace}}/cisstNetlib-source \
+        cmake ../cisstNetlib-source \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build . --config Release
         cmake --build . --target install
 
     - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
+      run: mkdir -p build
 
     - name: Configure CMake
       shell: bash
-      working-directory: ${{github.workspace}}/build
+      working-directory: build
       env:
         CCACHE_BASEDIR: ${{ github.workspace }}
         CCACHE_NOHASHDIR: "true"
         CCACHE_COMPRESS: "true"
       run: |
-        cmake $GITHUB_WORKSPACE \
+        cmake .. \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -C ${{github.workspace}}/.github/workflows/cmake-ubuntu-cache.cmake
+          -C ../.github/workflows/cmake-ubuntu-cache.cmake
 
     - name: Build
-      working-directory: ${{github.workspace}}/build
+      working-directory: build
       shell: bash
       run: cmake --build . --config Release
 
     - name: Configure CMake examples
       shell: bash
-      working-directory: ${{github.workspace}}/build
+      working-directory: build
       run: |
-        cmake $GITHUB_WORKSPACE \
+        cmake .. \
           -DCISST_BUILD_EXAMPLES=ON \
           -DCISST_cisstCommon_EXAMPLES=ON \
           -DCISST_cisstVector_EXAMPLES=ON \
@@ -115,12 +118,12 @@ jobs:
           -DCISST_cisstMesh_EXAMPLES=ON
 
     - name: Build examples
-      working-directory: ${{github.workspace}}/build
+      working-directory: build
       shell: bash
       run: cmake --build . --config Release
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
+      working-directory: build
       shell: bash
       run: |
         source cisstvars.sh

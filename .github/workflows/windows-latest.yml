@@ -25,13 +25,18 @@ jobs:
       with:
         version: '5.*.*'
 
-    - name: Cache vcpkg dependencies
+    - name: Set up vcpkg binary cache
+      run: |
+        mkdir -p ${{ github.workspace }}/vcpkg_cache
+        echo "VCPKG_DEFAULT_BINARY_CACHE=${{ github.workspace }}/vcpkg_cache" >> $GITHUB_ENV
+
+    - name: Cache vcpkg binary artifacts
       uses: actions/cache@v4
       with:
-        path: ${{ github.workspace }}/build/vcpkg_installed
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+        path: ${{ github.workspace }}/vcpkg_cache
+        key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json') }}
         restore-keys: |
-          ${{ runner.os }}-vcpkg-
+          ${{ runner.os }}-vcpkg-bin-
 
     - name: Download cisstNetlib
       run: |

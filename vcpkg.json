@@ -1,6 +1,7 @@
 {
   "name": "cisst",
   "version-string": "1.4.0",
+  "builtin-baseline": "34979e2c40c8f58b09b5527a92025cfce45e99ca",
   "dependencies": [
     {
       "name": "jsoncpp"
