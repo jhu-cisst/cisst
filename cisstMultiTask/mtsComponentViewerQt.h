@@ -62,7 +62,6 @@ class CISST_EXPORT mtsComponentViewerQt : public QWidget,
  protected slots:
     void onExportDOT(void);
     void onAutoLayout(void);
-    void onContextMenuRequested(const QPoint &pos);
 
     void
         AddComponentHandler(const mtsDescriptionComponent &component_description);

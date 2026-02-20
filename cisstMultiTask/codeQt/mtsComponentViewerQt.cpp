@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 #include <QAction>
-#include <QContextMenuEvent>
 #include <QEvent>
 #include <QFileDialog>
 #include <QLabel>
@@ -168,6 +167,7 @@ void mtsComponentViewerQt::setupUi(void) {
     layout->addWidget(ToolBar);
     layout->addWidget(View);
 
+    // we don't want default context menus
     View->setContextMenuPolicy(Qt::NoContextMenu);
 
     QtNodes::ConnectionStyle::setConnectionStyle(
@@ -181,19 +181,6 @@ void mtsComponentViewerQt::setupUi(void) {
   )");
 
     show();
-}
-
-void mtsComponentViewerQt::onContextMenuRequested(const QPoint &pos) {
-    QMenu contextMenu(this);
-    QAction *actionAutoLayout = contextMenu.addAction(tr("Auto-Layout"));
-    QAction *actionExportDOT = contextMenu.addAction(tr("Export as DOT..."));
-
-    connect(actionAutoLayout, &QAction::triggered, this,
-            &mtsComponentViewerQt::onAutoLayout);
-    connect(actionExportDOT, &QAction::triggered, this,
-            &mtsComponentViewerQt::onExportDOT);
-
-    contextMenu.exec(View->mapToGlobal(pos));
 }
 
 void mtsComponentViewerQt::onExportDOT(void) {

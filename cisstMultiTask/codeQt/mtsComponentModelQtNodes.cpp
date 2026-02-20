@@ -129,13 +129,11 @@ bool mtsComponentModelQtNodes::AddInterfaceRequired(const std::string &name) {
 
 void mtsComponentModelQtNodes::SetClassName(const std::string &className) {
     m_className = className;
-    Q_EMIT requestNodeUpdate();
     UpdateWidget();
 }
 
 void mtsComponentModelQtNodes::SetState(const std::string &state) {
     m_state = state;
-    Q_EMIT requestNodeUpdate();
     UpdateWidget();
 }
 
