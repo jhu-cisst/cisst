@@ -25,7 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 #include <QtNodes/NodeDelegateModel>
-#include <vector>
 
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
@@ -35,7 +34,8 @@ class CISST_EXPORT mtsComponentModelQtNodes
     Q_OBJECT
 
  public:
-    mtsComponentModelQtNodes(const std::string &name);
+    mtsComponentModelQtNodes(const std::string &processName,
+                             const std::string &componentName);
     ~mtsComponentModelQtNodes() = default;
 
     // NodeDelegateModel interface
@@ -68,7 +68,8 @@ class CISST_EXPORT mtsComponentModelQtNodes
  protected:
     void UpdateWidget(void);
 
-    std::string m_name;
+    std::string m_processName;
+    std::string m_componentName;
     std::string m_state;
     std::string m_className;
     std::vector<std::string> m_interfaces_provided;

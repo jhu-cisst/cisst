@@ -194,16 +194,17 @@ void mtsComponentViewerQt::onExportDOT(void) {
 
     // Map nodes
     std::map<QtNodes::NodeId, Agnode_t *> graphvizNodes;
-    for (const auto &component : m_components) {
-        QtNodes::NodeId id = NodeIds[component];
-        Agnode_t *v = agnode(g, (char *)component.c_str(), 1);
+    for (const auto &key : m_components) {
+        QtNodes::NodeId id = NodeIds[key];
+        std::string nodeName = key.first + ":" + key.second;
+        Agnode_t *v = agnode(g, (char *)nodeName.c_str(), 1);
         graphvizNodes[id] = v;
     }
 
     // Map edges
-    for (const auto &component : m_components) {
-        QtNodes::NodeId id = NodeIds[component];
-        const auto &portMap = m_provided_interface_to_port[component];
+    for (const auto &key : m_components) {
+        QtNodes::NodeId id = NodeIds[key];
+        const auto &portMap = m_provided_interface_to_port[key];
         for (const auto &portPair : portMap) {
             QtNodes::PortIndex outPortIndex = portPair.second;
             for (const auto &connId :
@@ -263,9 +264,10 @@ void mtsComponentViewerQt::onAutoLayout(void) {
     agsafeset(g, (char *)"ranksep", (char *)"1.5", (char *)"1.5");
 
     std::map<QtNodes::NodeId, Agnode_t *> graphvizNodes;
-    for (const auto &component : m_components) {
-        QtNodes::NodeId id = NodeIds[component];
-        Agnode_t *v = agnode(g, (char *)component.c_str(), 1);
+    for (const auto &key : m_components) {
+        QtNodes::NodeId id = NodeIds[key];
+        std::string nodeName = key.first + ":" + key.second;
+        Agnode_t *v = agnode(g, (char *)nodeName.c_str(), 1);
 
         // Get actual size from scene
         if (Scene) {
@@ -296,9 +298,9 @@ void mtsComponentViewerQt::onAutoLayout(void) {
         graphvizNodes[id] = v;
     }
 
-    for (const auto &component : m_components) {
-        QtNodes::NodeId id = NodeIds[component];
-        const auto &portMap = m_provided_interface_to_port[component];
+    for (const auto &key : m_components) {
+        QtNodes::NodeId id = NodeIds[key];
+        const auto &portMap = m_provided_interface_to_port[key];
         for (const auto &portPair : portMap) {
             QtNodes::PortIndex outPortIndex = portPair.second;
             for (const auto &connId :
@@ -314,8 +316,8 @@ void mtsComponentViewerQt::onAutoLayout(void) {
     gvLayout(gvc, g, "dot");
 
     // Apply positions
-    for (const auto &component : m_components) {
-        QtNodes::NodeId id = NodeIds[component];
+    for (const auto &key : m_components) {
+        QtNodes::NodeId id = NodeIds[key];
         Agnode_t *v = graphvizNodes[id];
         // Graphviz uses points (1/72 inch), typical screen is 96 DPI
         double x = ND_coord(v).x;
@@ -345,7 +347,7 @@ void mtsComponentViewerQt::AddComponentHandler(
                                           return desc.ProcessName == component_description.ProcessName &&
                                                  desc.ComponentName == component_description.ComponentName;
                                       });
-                                  
+
                                   // Only add if not found
                                   if (it == m_component_infos.end()) {
                                       m_component_infos.push_back(component_description);
@@ -382,8 +384,10 @@ void mtsComponentViewerQt::RemoveConnectionHandler(
                                   auto it = std::remove_if(m_connection_infos.begin(), m_connection_infos.end(),
                                                            [&](const mtsDescriptionConnection &c) {
                                                                return (c.ConnectionID == connection_description.ConnectionID &&
+                                                                       c.Client.ProcessName == connection_description.Client.ProcessName &&
                                                                        c.Client.ComponentName == connection_description.Client.ComponentName &&
                                                                        c.Client.InterfaceName == connection_description.Client.InterfaceName &&
+                                                                       c.Server.ProcessName == connection_description.Server.ProcessName &&
                                                                        c.Server.ComponentName == connection_description.Server.ComponentName &&
                                                                        c.Server.InterfaceName == connection_description.Server.InterfaceName);
                                                            });
@@ -399,8 +403,8 @@ void mtsComponentViewerQt::ChangeStateHandler(const mtsComponentStateChange &sta
     QMetaObject::invokeMethod(
                               this,
                               [=]() {
-                                  std::string name = state_change.ComponentName;
-                                  auto it = NodeIds.find(name);
+                                  ComponentKey key = {state_change.ProcessName, state_change.ComponentName};
+                                  auto it = NodeIds.find(key);
                                   if (it != NodeIds.end()) {
                                       QtNodes::NodeId id = it->second;
                                       auto cisstNode = GraphModel->delegateModel<mtsComponentModelQtNodes>(id);
@@ -417,7 +421,7 @@ void mtsComponentViewerQt::UpdateGraph(void) {
         return;
 
     // Save positions of existing nodes
-    std::map<std::string, QPointF> savedPositions;
+    std::map<ComponentKey, QPointF> savedPositions;
     for (const auto &pair : NodeIds) {
         if (GraphModel->nodeExists(pair.second)) {
             savedPositions[pair.first] =
@@ -443,7 +447,9 @@ void mtsComponentViewerQt::UpdateGraph(void) {
 
     // Re-add components
     for (const auto &desc : m_component_infos) {
-        std::string name = desc.ComponentName;
+        const std::string processName = desc.ProcessName;
+        const std::string componentName = desc.ComponentName;
+        const ComponentKey key = {processName, componentName};
 
         bool showComponent = false;
         if (desc.Tags.empty()) {
@@ -463,7 +469,7 @@ void mtsComponentViewerQt::UpdateGraph(void) {
 
         // Fetch interfaces and filter them
         std::vector<mtsDescriptionInterfaceFullName> interfacesRequiredFull, interfacesProvidedFull;
-        ManagerComponentServices->GetDescriptionsOfInterfaces(desc.ProcessName, name, interfacesRequiredFull, interfacesProvidedFull);
+        ManagerComponentServices->GetDescriptionsOfInterfaces(processName, componentName, interfacesRequiredFull, interfacesProvidedFull);
 
         std::vector<std::string> interfacesRequired, interfacesProvided;
         for (const auto &intfc : interfacesRequiredFull) {
@@ -500,11 +506,11 @@ void mtsComponentViewerQt::UpdateGraph(void) {
         }
 
         auto state = ManagerComponentServices->ComponentGetState(desc);
-        std::string className = desc.ClassName;
+        const std::string className = desc.ClassName;
 
         Registry->registerModel<mtsComponentModelQtNodes>(
-            [name, className, state, interfacesRequired, interfacesProvided]() {
-                auto model = std::make_unique<mtsComponentModelQtNodes>(name);
+            [processName, componentName, className, state, interfacesRequired, interfacesProvided]() {
+                auto model = std::make_unique<mtsComponentModelQtNodes>(processName, componentName);
                 model->SetClassName(className);
                 model->SetState(mtsComponentState::EnumToString(state.State()));
                 for (const auto &interfaceName : interfacesRequired) {
@@ -516,38 +522,39 @@ void mtsComponentViewerQt::UpdateGraph(void) {
                 return model;
             });
 
-        QtNodes::NodeId nodeId = GraphModel->addNode(QString::fromStdString(name));
-        NodeIds[name] = nodeId;
-        m_components.push_back(name);
+        std::string registryName = processName + ":" + componentName;
+        QtNodes::NodeId nodeId = GraphModel->addNode(QString::fromStdString(registryName));
+        NodeIds[key] = nodeId;
+        m_components.push_back(key);
 
         for (unsigned int i = 0; i < interfacesProvided.size(); ++i) {
-            m_provided_interface_to_port[name][interfacesProvided[i]] = i;
+            m_provided_interface_to_port[key][interfacesProvided[i]] = i;
         }
         for (unsigned int i = 0; i < interfacesRequired.size(); ++i) {
-            m_required_interface_to_port[name][interfacesRequired[i]] = i;
+            m_required_interface_to_port[key][interfacesRequired[i]] = i;
         }
 
         // Restore position
-        if (savedPositions.count(name)) {
+        if (savedPositions.count(key)) {
             GraphModel->setNodeData(nodeId, QtNodes::NodeRole::Position,
-                                    savedPositions[name]);
+                                    savedPositions[key]);
         }
     }
 
     // Re-add connections
     for (const auto &conn : m_connection_infos) {
-        const std::string client_name = conn.Client.ComponentName;
+        const ComponentKey client_key = {conn.Client.ProcessName, conn.Client.ComponentName};
         const std::string client_interface = conn.Client.InterfaceName;
-        const std::string server_name = conn.Server.ComponentName;
+        const ComponentKey server_key = {conn.Server.ProcessName, conn.Server.ComponentName};
         const std::string server_interface = conn.Server.InterfaceName;
 
-        auto client_it = NodeIds.find(client_name);
-        auto server_it = NodeIds.find(server_name);
+        auto client_it = NodeIds.find(client_key);
+        auto server_it = NodeIds.find(server_key);
 
         if (client_it != NodeIds.end() && server_it != NodeIds.end()) {
             // Both nodes exist (passed filter)
-            auto client_port_map_it = m_required_interface_to_port.find(client_name);
-            auto server_port_map_it = m_provided_interface_to_port.find(server_name);
+            auto client_port_map_it = m_required_interface_to_port.find(client_key);
+            auto server_port_map_it = m_provided_interface_to_port.find(server_key);
             if (client_port_map_it != m_required_interface_to_port.end() &&
                 server_port_map_it != m_provided_interface_to_port.end()) {
                 auto client_port_it = client_port_map_it->second.find(client_interface);

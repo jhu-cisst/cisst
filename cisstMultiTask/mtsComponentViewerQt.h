@@ -50,8 +50,7 @@ class CISST_EXPORT mtsComponentViewerQt : public QWidget,
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
  public:
-    mtsComponentViewerQt(
-                               const std::string &componentName = "ComponentViewer");
+    mtsComponentViewerQt(const std::string &componentName = "ComponentViewer");
     ~mtsComponentViewerQt() = default;
 
     void Configure(const std::string &filename = "") override;
@@ -63,14 +62,10 @@ class CISST_EXPORT mtsComponentViewerQt : public QWidget,
     void onExportDOT(void);
     void onAutoLayout(void);
 
-    void
-        AddComponentHandler(const mtsDescriptionComponent &component_description);
-    void
-        AddConnectionHandler(const mtsDescriptionConnection &connection_description);
-    void
-        RemoveConnectionHandler(const mtsDescriptionConnection &connection_description);
-    void
-        ChangeStateHandler(const mtsComponentStateChange &state_change);
+    void AddComponentHandler(const mtsDescriptionComponent &component_description);
+    void AddConnectionHandler(const mtsDescriptionConnection &connection_description);
+    void RemoveConnectionHandler(const mtsDescriptionConnection &connection_description);
+    void ChangeStateHandler(const mtsComponentStateChange &state_change);
 
  protected:
     QToolBar *ToolBar;
@@ -83,18 +78,19 @@ class CISST_EXPORT mtsComponentViewerQt : public QWidget,
     QtNodes::DataFlowGraphicsScene *Scene;
     QtNodes::GraphicsView *View;
 
-    // Keep track of components and their node IDs
-    std::vector<std::string> m_components;
+    // Keep track of components and their node IDs.
+    typedef std::pair<std::string, std::string> ComponentKey;
+    std::vector<ComponentKey> m_components;
 
     // Keep NodeId as an unsigned int in the public header to avoid pulling
     // QtNodes types into all translation units; the implementation will use
     // QtNodes::NodeId where needed.
-    std::map<std::string, unsigned int> NodeIds;
+    std::map<ComponentKey, unsigned int> NodeIds;
 
-    // Track interface to port index mapping
-    std::map<std::string, std::map<std::string, unsigned int>>
+    // Track interface to port index mapping.
+    std::map<ComponentKey, std::map<std::string, unsigned int>>
         m_provided_interface_to_port;
-    std::map<std::string, std::map<std::string, unsigned int>>
+    std::map<ComponentKey, std::map<std::string, unsigned int>>
         m_required_interface_to_port;
 
     // Cache for rebuilding graph

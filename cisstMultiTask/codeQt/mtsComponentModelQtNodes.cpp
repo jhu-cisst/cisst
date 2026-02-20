@@ -20,17 +20,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentModelQtNodes.h>
 #include <iostream>
 
-mtsComponentModelQtNodes::mtsComponentModelQtNodes(const std::string &name)
-    : m_name(name) {}
+mtsComponentModelQtNodes::mtsComponentModelQtNodes(const std::string &processName,
+                                                   const std::string &componentName)
+    : m_processName(processName)
+    , m_componentName(componentName) {}
 
 QString mtsComponentModelQtNodes::caption(void) const {
     return QString("%1 : %2")
-        .arg(QString::fromStdString(m_name),
+        .arg(QString::fromStdString(m_componentName),
              QString::fromStdString(m_className));
 }
 
 QString mtsComponentModelQtNodes::name(void) const {
-    return QString::fromStdString(m_name);
+    return QString("%1:%2")
+        .arg(QString::fromStdString(m_processName),
+             QString::fromStdString(m_componentName));
 }
 
 unsigned int
