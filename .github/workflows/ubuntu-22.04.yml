@@ -23,10 +23,13 @@ jobs:
       with:
         required-ros-distributions: humble
 
+    - name: Ensure cache directory exists
+      run: mkdir -p apt-cache
+
     - name: Cache APT packages
       uses: actions/cache@v4
       with:
-        path: ${{ github.workspace }}/apt-cache
+        path: apt-cache
         key: ${{ runner.os }}-apt-humble-${{ hashFiles('.github/workflows/cmake-ubuntu-cache.cmake') }}
         restore-keys: |
           ${{ runner.os }}-apt-humble-
@@ -35,8 +38,9 @@ jobs:
       run: |
         # Disable the automatic purging of the apt cache in docker images
         rm -f /etc/apt/apt.conf.d/docker-clean
-        mkdir -p ${{ github.workspace }}/apt-cache
-        echo "Dir::Cache::archives \"${{ github.workspace }}/apt-cache\";" | tee /etc/apt/apt.conf.d/10cache
+        mkdir -p apt-cache
+        APT_CACHE_DIR=$(pwd)/apt-cache
+        echo "Dir::Cache::archives \"$APT_CACHE_DIR\";" | tee /etc/apt/apt.conf.d/10cache
         echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | tee /etc/apt/apt.conf.d/01keep-debs
         apt-get update
         apt-get install -y \
