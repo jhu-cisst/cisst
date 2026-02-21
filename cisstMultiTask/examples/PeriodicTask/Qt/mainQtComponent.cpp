@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Ali Uneri, Peter Kazanzides
   Created on: 2009-10-22
 
-  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,12 +17,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <QApplication>
-#include <QTabWidget>
 #include <QGridLayout>
+#include <QVBoxLayout>
 #include <QPushButton>
 #include <QWidget>
 
-#include <cisstCommon/cmnLoggerQtWidget.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include "mainQtComponent.h"
@@ -38,21 +37,17 @@ mainQtComponent::mainQtComponent(const std::string &name) : mtsComponent(name)
     QVBoxLayout * mainLayout = new QVBoxLayout(mainWidget);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    // tabs
-    QTabWidget * tabs = new QTabWidget(mainWidget);
-    mainLayout->addWidget(tabs);
-
-    // create a tab with all the sine wave controllers
-    QWidget * tab1Widget = new QWidget();
-    QGridLayout * tab1Layout= new QGridLayout(tab1Widget);
-    tab1Layout->setContentsMargins(0, 0, 0, 0);
-    tabs->addTab(tab1Widget, "Main");
+    // create a widget with all the sine wave controllers
+    QWidget * displayWidget = new QWidget();
+    QGridLayout * displayLayout = new QGridLayout(displayWidget);
+    displayLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->addWidget(displayWidget);
     for (unsigned int i = 0; i < NumSineTasks; i++) {
         std::ostringstream index;
         index << i;
         std::string displayName("DISP" + index.str());
         display[i] = new displayQtComponent;
-        tab1Layout->addWidget(display[i]->GetWidget(), 1, i);
+        displayLayout->addWidget(display[i]->GetWidget(), 1, i);
 
         // create the cisstMultiTask interface with commands and events
         mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired(displayName);
@@ -61,13 +56,6 @@ mainQtComponent::mainQtComponent(const std::string &name) : mtsComponent(name)
            interfaceRequired->AddFunction("SetAmplitude", display[i]->Generator.SetAmplitude);
         }
     }
-
-    // second tab for logger widget
-    QWidget * tab3Widget = new QWidget();
-    QGridLayout * tab3Layout= new QGridLayout(tab3Widget);
-    cmnLoggerQtWidget * loggerWidget = new cmnLoggerQtWidget(tab3Widget);
-    tab3Layout->addWidget(loggerWidget->GetWidget());
-    tabs->addTab(tab3Widget, "Logger");
 
     // one large quit button under all tabs
     QPushButton * buttonQuit = new QPushButton("Quit", mainWidget);

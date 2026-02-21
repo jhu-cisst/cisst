@@ -30,6 +30,7 @@ public:
 
     std::string QtStyle;
     bool ComponentViewer;
+    bool LoggerWidget;
 };
 
 #endif // _mtsCommandLineOptionsQt_h

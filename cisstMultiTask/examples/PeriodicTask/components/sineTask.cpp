@@ -69,6 +69,7 @@ void sineTask::SetupInterfaces(void)
 
 void sineTask::SetAmplitude(const mtsDouble & amplitude)
 {
+    CMN_LOG_CLASS_RUN_WARNING << "SetAmplitude: amplitude changed to " << amplitude.Data << std::endl;
     SineAmplitude = amplitude.Data;
 }
 

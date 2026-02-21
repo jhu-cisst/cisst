@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstCommon/cmnQt.h>
 #include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnLoggerQtWidget.h>
 #include <QApplication>
 #include <QFileInfo>
 #include <QVBoxLayout>
@@ -40,6 +41,8 @@ mtsCommandLineOptionsQt::mtsCommandLineOptionsQt(void):
                             cmnCommandLineOptions::OPTIONAL_OPTION, &QtStyle);
     this->AddOptionNoValue("M", "component-viewer",
                            "start the component viewer");
+    this->AddOptionNoValue("L", "logger",
+                           "show the logger widget to dynamically change log levels for all classes");
 }
 
 void mtsCommandLineOptionsQt::Apply(void)
@@ -57,8 +60,11 @@ void mtsCommandLineOptionsQt::Apply(void)
 
     bool showViewer = this->IsSet("component-viewer");
     bool showCollection = !CollectionConfig.empty();
+    bool showLogger = this->IsSet("logger");
 
-    if (showViewer || showCollection) {
+    int showCount = (showViewer ? 1 : 0) + (showCollection ? 1 : 0) + (showLogger ? 1 : 0);
+
+    if (showCount > 0) {
         mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
 
         QString qAppName = qApp->applicationName();
@@ -70,7 +76,7 @@ void mtsCommandLineOptionsQt::Apply(void)
         QWidget * systemWindow = nullptr;
         QTabWidget * tabWidget = nullptr;
 
-        if (showViewer && showCollection) {
+        if (showCount > 1) {
             tabWidget = new QTabWidget();
             systemWindow = tabWidget;
         } else {
@@ -106,6 +112,16 @@ void mtsCommandLineOptionsQt::Apply(void)
                 systemWindow->layout()->addWidget(viewer);
             }
         }
+
+        if (showLogger) {
+            cmnLoggerQtWidget * loggerWidget = new cmnLoggerQtWidget(nullptr);
+            if (tabWidget) {
+                tabWidget->addTab(loggerWidget->GetWidget(), "Logger");
+            } else {
+                systemWindow->layout()->addWidget(loggerWidget->GetWidget());
+            }
+        }
+
         systemWindow->show();
     }
 }
