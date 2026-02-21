@@ -46,6 +46,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                    LIBRARY_DIR cisstMultiTask
                    FOLDER cisstMultiTask
                    DEPENDENCIES cisstCommon
+                                cisstCommonQt
                                 cisstOSAbstraction
                                 cisstVector
                                 cisstVectorQt
