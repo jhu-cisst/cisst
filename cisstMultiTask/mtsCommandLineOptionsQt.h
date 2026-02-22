@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandLineOptionsQt_h
 #define _mtsCommandLineOptionsQt_h
 
+#include <cisstConfig.h>
 #include <cisstMultiTask/mtsCommandLineOptions.h>
 #include <cisstMultiTask/mtsExportQt.h>
 
@@ -29,7 +30,9 @@ public:
     void Apply(void) override;
 
     std::string QtStyle;
+#if CISST_HAS_QTNODES
     bool ComponentViewer;
+#endif
     bool LoggerWidget;
 };
 

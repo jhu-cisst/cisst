@@ -17,7 +17,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsCommandLineOptionsQt.h>
+#if CISST_HAS_QTNODES
 #include <cisstMultiTask/mtsComponentViewerQt.h>
+#endif
 #include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstCommon/cmnQt.h>
@@ -39,8 +41,10 @@ mtsCommandLineOptionsQt::mtsCommandLineOptionsQt(void):
     this->AddOptionOneValue("S", "qt-style",
                             "Qt style, use this option with a random name to see available styles",
                             cmnCommandLineOptions::OPTIONAL_OPTION, &QtStyle);
+#if CISST_HAS_QTNODES
     this->AddOptionNoValue("M", "component-viewer",
                            "start the component viewer");
+#endif
     this->AddOptionNoValue("L", "logger",
                            "show the logger widget to dynamically change log levels for all classes");
 }
@@ -48,6 +52,7 @@ mtsCommandLineOptionsQt::mtsCommandLineOptionsQt(void):
 void mtsCommandLineOptionsQt::Apply(void)
 {
     mtsCommandLineOptions::Apply();
+    cmnQt::QApplicationExitsOnCtrlC();
     if (this->IsSet("dark-mode")) {
         cmnQt::SetDarkMode();
     }
@@ -58,7 +63,11 @@ void mtsCommandLineOptionsQt::Apply(void)
         }
     }
 
+#if CISST_HAS_QTNODES
     bool showViewer = this->IsSet("component-viewer");
+#else
+    bool showViewer = false;
+#endif
     bool showCollection = !CollectionConfig.empty();
     bool showLogger = this->IsSet("logger");
 
@@ -103,6 +112,7 @@ void mtsCommandLineOptionsQt::Apply(void)
             }
         }
 
+#if CISST_HAS_QTNODES
         if (showViewer) {
             mtsComponentViewerQt * viewer = new mtsComponentViewerQt("ComponentViewer");
             componentManager->AddComponent(viewer);
@@ -112,6 +122,7 @@ void mtsCommandLineOptionsQt::Apply(void)
                 systemWindow->layout()->addWidget(viewer);
             }
         }
+#endif
 
         if (showLogger) {
             cmnLoggerQtWidget * loggerWidget = new cmnLoggerQtWidget(nullptr);

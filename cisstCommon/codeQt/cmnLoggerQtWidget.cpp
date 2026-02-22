@@ -48,8 +48,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 #include <string>
 
-CMN_IMPLEMENT_SERVICES(cmnLoggerQtWidget);
-
 // -----------------------------------------------------------------------
 // Per-nibble mask preset tables
 // Init: low nibble (bits 0-3).  Run: high nibble (bits 4-7).
