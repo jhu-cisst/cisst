@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstMultiTaskQt
 #
-# (C) Copyright 2003-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -16,6 +16,26 @@ project (cisstMultiTaskQt)
 # set directories for this project
 cisst_set_directories (cisstQt)
 
+set (QTNODES_SOURCE_FILES "")
+set (QTNODES_HEADER_FILES "")
+set (QTNODES_SETTINGS "")
+
+if (CISST_HAS_QTNODES)
+  cisst_set_directories (cisstQtNodes)
+  cisst_set_directories (cisstGraphviz)
+  add_definitions(-DNODE_EDITOR_SHARED)
+
+  set (QTNODES_SOURCE_FILES
+       mtsComponentModelQtNodes.cpp
+       mtsComponentViewerQt.cpp)
+  set (QTNODES_HEADER_FILES
+       mtsComponentModelQtNodes.h
+       mtsComponentViewerQt.h)
+  set (QTNODES_SETTINGS
+       cisstQtNodes
+       cisstGraphviz)
+endif (CISST_HAS_QTNODES)
+
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
@@ -26,13 +46,16 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                    LIBRARY_DIR cisstMultiTask
                    FOLDER cisstMultiTask
                    DEPENDENCIES cisstCommon
+                                cisstCommonQt
                                 cisstOSAbstraction
                                 cisstVector
                                 cisstVectorQt
                                 cisstMultiTask
                    SETTINGS     cisstQt
+                                ${QTNODES_SETTINGS}
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorFactoryQtWidget.cpp
+                                mtsCommandLineOptionsQt.cpp
                                 mtsMessageQtWidget.cpp
                                 mtsSystemQtWidget.cpp
                                 mtsQtCommandSelector.cpp
@@ -48,8 +71,10 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFunction.cpp
                                 mtsQtWidgetEvent.cpp
                                 mtsQtApplication.cpp
+                                ${QTNODES_SOURCE_FILES}
                    HEADER_FILES mtsForwardDeclarationsQt.h
                                 mtsCollectorFactoryQtWidget.h
+                                mtsCommandLineOptionsQt.h
                                 mtsMessageQtWidget.h
                                 mtsSystemQtWidget.h
                                 mtsQtCommandSelector.h
@@ -65,6 +90,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFunction.h
                                 mtsQtWidgetEvent.h
                                 mtsQtApplication.h
+                                ${QTNODES_HEADER_FILES}
                                 mtsExportQt.h)
 
 # link against Qt libraries

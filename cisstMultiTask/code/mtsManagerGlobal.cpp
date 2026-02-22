@@ -650,7 +650,10 @@ void mtsManagerGlobal::GetIPAddress(std::vector<std::string> & ipAddresses) cons
 //-------------------------------------------------------------------------
 //  Component Management
 //-------------------------------------------------------------------------
-bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::string & componentName)
+bool mtsManagerGlobal::AddComponent(const std::string & processName,
+                                  const std::string & componentName,
+                                  const std::string & className,
+                                  const std::set<std::string> & componentTags)
 {
     if (!FindProcess(processName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddComponent: no process found: " << "\"" << processName << "\"" << std::endl;
@@ -667,6 +670,18 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
         (ProcessMap.GetMap())[processName] = componentMap;
     }
 
+    // Allocate interface map and store component category and class name
+    InterfaceMapType * interfaceMap = componentMap->GetItem(componentName);
+    if (interfaceMap == 0) {
+        interfaceMap = new InterfaceMapType;
+        interfaceMap->Tags = componentTags;
+        interfaceMap->ClassName = className;
+        componentMap->AddItem(componentName, interfaceMap);
+    } else {
+        interfaceMap->Tags = componentTags;
+        interfaceMap->ClassName = className;
+    }
+
     // PK TEMP: special handling if componentName ends with "-END"
     // This was needed for JGraph component viewer, but is no longer needed for uDrawGraph component viewer.
     // If removed, need to generate AddComponentEvent elsewhere
@@ -676,6 +691,7 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
             componentInfo.ProcessName = processName;
             componentInfo.ComponentName = componentName.substr(0, componentName.length()-4);
             componentInfo.ClassName = "?";
+            componentInfo.Tags = componentTags;
             ManagerComponentServer->AddComponentEvent(componentInfo);
         }
 
@@ -684,15 +700,72 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
         return true;
     }
 
-    bool ret = componentMap->AddItem(componentName, 0);
-    if (!ret) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddComponent: failed to add component: "
-                                << "\"" << processName << ":" << componentName << "\"" << std::endl;
-    }
-
     ProcessMapChange.Unlock();
 
-    return ret;
+    return true;
+}
+
+void mtsManagerGlobal::GetDescriptionsOfComponents(const std::string & processName,
+                                                   std::vector<mtsDescriptionComponent> & descriptions) const
+{
+    ComponentMapType * components = ProcessMap.GetItem(processName);
+    if (!components) return;
+
+    const ComponentMapType::MapType & map = components->GetMap();
+    ComponentMapType::MapType::const_iterator it = map.begin();
+    const ComponentMapType::MapType::const_iterator itEnd = map.end();
+    for (; it != itEnd; ++it) {
+        mtsDescriptionComponent desc;
+        desc.ProcessName = processName;
+        desc.ComponentName = it->first;
+        desc.ClassName = it->second->ClassName;
+        desc.Tags = it->second->Tags;
+        descriptions.push_back(desc);
+    }
+}
+
+void mtsManagerGlobal::GetDescriptionsOfInterfacesProvided(const std::string & processName,
+                                                           const std::string & componentName,
+                                                           std::vector<mtsDescriptionInterfaceFullName> & descriptions) const
+{
+    ComponentMapType * componentMap = ProcessMap.GetItem(processName);
+    if (!componentMap) return;
+
+    InterfaceMapType * interfaceMap = componentMap->GetItem(componentName);
+    if (!interfaceMap) return;
+
+    std::map<std::string, std::set<std::string>>::const_iterator it = interfaceMap->InterfaceProvidedOrOutputTags.begin();
+    std::map<std::string, std::set<std::string>>::const_iterator itEnd = interfaceMap->InterfaceProvidedOrOutputTags.end();
+    for (; it != itEnd; ++it) {
+        mtsDescriptionInterfaceFullName desc;
+        desc.ProcessName = processName;
+        desc.ComponentName = componentName;
+        desc.InterfaceName = it->first;
+        desc.Tags = it->second;
+        descriptions.push_back(desc);
+    }
+}
+
+void mtsManagerGlobal::GetDescriptionsOfInterfacesRequired(const std::string & processName,
+                                                           const std::string & componentName,
+                                                           std::vector<mtsDescriptionInterfaceFullName> & descriptions) const
+{
+    ComponentMapType * componentMap = ProcessMap.GetItem(processName);
+    if (!componentMap) return;
+
+    InterfaceMapType * interfaceMap = componentMap->GetItem(componentName);
+    if (!interfaceMap) return;
+
+    std::map<std::string, std::set<std::string>>::const_iterator it = interfaceMap->InterfaceRequiredOrInputTags.begin();
+    std::map<std::string, std::set<std::string>>::const_iterator itEnd = interfaceMap->InterfaceRequiredOrInputTags.end();
+    for (; it != itEnd; ++it) {
+        mtsDescriptionInterfaceFullName desc;
+        desc.ProcessName = processName;
+        desc.ComponentName = componentName;
+        desc.InterfaceName = it->first;
+        desc.Tags = it->second;
+        descriptions.push_back(desc);
+    }
 }
 
 bool mtsManagerGlobal::FindComponent(const std::string & processName, const std::string & componentName) const
@@ -773,7 +846,9 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
 //  Interface Management
 //-------------------------------------------------------------------------
 bool mtsManagerGlobal::AddInterfaceProvidedOrOutput(const std::string & processName,
-    const std::string & componentName, const std::string & interfaceName)
+                                                 const std::string & componentName,
+                                                 const std::string & interfaceName,
+                                                 const std::set<std::string> & tags)
 {
     if (!FindComponent(processName, componentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddInterfaceProvidedOrOutput: no component found: "
@@ -800,6 +875,7 @@ bool mtsManagerGlobal::AddInterfaceProvidedOrOutput(const std::string & processN
         ProcessMapChange.Unlock();
         return false;
     }
+    interfaceMap->InterfaceProvidedOrOutputTags[interfaceName] = tags;
 
     ProcessMapChange.Unlock();
 
@@ -808,7 +884,9 @@ bool mtsManagerGlobal::AddInterfaceProvidedOrOutput(const std::string & processN
 
 
 bool mtsManagerGlobal::AddInterfaceRequiredOrInput(const std::string & processName,
-    const std::string & componentName, const std::string & interfaceName)
+                                                const std::string & componentName,
+                                                const std::string & interfaceName,
+                                                const std::set<std::string> & tags)
 {
     if (!FindComponent(processName, componentName)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddInterfaceRequiredOrInput: can't find a registered component: "
@@ -835,6 +913,7 @@ bool mtsManagerGlobal::AddInterfaceRequiredOrInput(const std::string & processNa
         ProcessMapChange.Unlock();
         return false;
     }
+    interfaceMap->InterfaceRequiredOrInputTags[interfaceName] = tags;
 
     ProcessMapChange.Unlock();
 

@@ -333,6 +333,7 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsExecutionResultProxy);
 
 #include <cisstMultiTask/mtsParameterTypes.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentProxy);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentVecProxy);
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentClassProxy);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionComponentClassVecProxy);

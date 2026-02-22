@@ -57,9 +57,6 @@ class CISST_EXPORT mtsMailBox
       to provide an event handler that is not queued. */
     mtsCommandVoid * PostCommandReturnDequeuedCommand;
 
-    /*! Method to determine which post queued command needs to be triggered. */
-    void TriggerPostQueuedCommandIfNeeded(bool isBlocking, bool isBlockingReturn);
-
     /*! Method to genereate finished event, if needed. This will eventually replace
       the TriggerPostQueuedCommandIfNeeded method. */
     void TriggerFinishedEventIfNeeded(const std::string &commandName, mtsCommandWriteBase *finishedEvent,
@@ -116,4 +113,3 @@ public:
 
 
 #endif // _mtsMailbox_h
-

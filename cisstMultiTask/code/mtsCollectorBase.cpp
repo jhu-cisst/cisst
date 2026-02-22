@@ -58,6 +58,9 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     // add the control interface
     this->SetupControlInterface();
 
+    this->mTags.clear();
+    this->AddTag("System");
+
     Init();
 }
 
