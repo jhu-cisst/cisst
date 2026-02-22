@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsCommandLineOptionsQt: public mtsCommandLineOptions {
 public:
-    mtsCommandLineOptionsQt();
+    mtsCommandLineOptionsQt(const std::string & options = "mcDSML");
     ~mtsCommandLineOptionsQt() override {}
     void Apply(void) override;
 

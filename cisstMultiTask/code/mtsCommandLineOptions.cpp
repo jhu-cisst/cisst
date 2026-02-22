@@ -22,14 +22,18 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPath.h>
 #include <cstdlib>
 
-mtsCommandLineOptions::mtsCommandLineOptions(void)
+mtsCommandLineOptions::mtsCommandLineOptions(const std::string & options)
 {
-    this->AddOptionMultipleValues("m", "component-manager",
-                                  "JSON files to configure component manager",
-                                  cmnCommandLineOptions::OPTIONAL_OPTION, &ManagerConfig);
-    this->AddOptionMultipleValues("c", "collection-config",
-                                  "json configuration files for data collection using cisstMultiTask state table collector",
-                                  cmnCommandLineOptions::OPTIONAL_OPTION, &CollectionConfig);
+    if (options.find('m') != std::string::npos) {
+        this->AddOptionMultipleValues("m", "component-manager",
+                                      "JSON files to configure component manager",
+                                      cmnCommandLineOptions::OPTIONAL_OPTION, &ManagerConfig);
+    }
+    if (options.find('c') != std::string::npos) {
+        this->AddOptionMultipleValues("c", "collection-config",
+                                      "json configuration files for data collection using cisstMultiTask state table collector",
+                                      cmnCommandLineOptions::OPTIONAL_OPTION, &CollectionConfig);
+    }
 }
 
 void mtsCommandLineOptions::Apply(void)

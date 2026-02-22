@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsCommandLineOptions: public cmnCommandLineOptions {
 public:
-    mtsCommandLineOptions();
+    mtsCommandLineOptions(const std::string & options = "mc");
     virtual ~mtsCommandLineOptions() {}
     virtual void Apply(void);
 

@@ -33,20 +33,28 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 #include <string>
 
-mtsCommandLineOptionsQt::mtsCommandLineOptionsQt(void):
-    mtsCommandLineOptions()
+mtsCommandLineOptionsQt::mtsCommandLineOptionsQt(const std::string & options):
+    mtsCommandLineOptions(options)
 {
-    this->AddOptionNoValue("D", "dark-mode",
-                           "replaces the default Qt palette with darker colors");
-    this->AddOptionOneValue("S", "qt-style",
-                            "Qt style, use this option with a random name to see available styles",
-                            cmnCommandLineOptions::OPTIONAL_OPTION, &QtStyle);
+    if (options.find('D') != std::string::npos) {
+        this->AddOptionNoValue("D", "dark-mode",
+                               "replaces the default Qt palette with darker colors");
+    }
+    if (options.find('S') != std::string::npos) {
+        this->AddOptionOneValue("S", "qt-style",
+                                "Qt style, use this option with a random name to see available styles",
+                                cmnCommandLineOptions::OPTIONAL_OPTION, &QtStyle);
+    }
 #if CISST_HAS_QTNODES
-    this->AddOptionNoValue("M", "component-viewer",
-                           "start the component viewer");
+    if (options.find('M') != std::string::npos) {
+        this->AddOptionNoValue("M", "component-viewer",
+                               "start the component viewer");
+    }
 #endif
-    this->AddOptionNoValue("L", "logger",
-                           "show the logger widget to dynamically change log levels for all classes");
+    if (options.find('L') != std::string::npos) {
+        this->AddOptionNoValue("L", "logger",
+                               "show the logger widget to dynamically change log levels for all classes");
+    }
 }
 
 void mtsCommandLineOptionsQt::Apply(void)
