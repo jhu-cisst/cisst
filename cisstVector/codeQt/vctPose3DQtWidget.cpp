@@ -299,15 +299,15 @@ void vctPose3DQtWidgetView::paintGL(void)
     painter.setFont(QFont("Helvetica", font_size));
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     painter.drawText(1, 1 + font_size,
-                     QString().sprintf("%c: %0.2f",
+                     QString().asprintf("%c: %0.2f",
                                        legend[mY],
                                        mBB->max()[mY] * mPrismaticFactor));
     painter.drawText(1, mViewport.Y() - font_size,
-                     QString().sprintf("%0.2f/%0.2f",
+                     QString().asprintf("%0.2f/%0.2f",
                                        mBB->min()[mY] * mPrismaticFactor,
                                        mBB->min()[mX] * mPrismaticFactor));
     painter.drawText(mViewport.X() - font_size * 10, mViewport.Y() - font_size,
-                     QString().sprintf("%c: %0.2f",
+                     QString().asprintf("%c: %0.2f",
                                        legend[mX],
                                        mBB->max()[mX] * mPrismaticFactor));
     painter.end();
