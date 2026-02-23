@@ -51,8 +51,8 @@ mtsCommandLineOptionsQt::mtsCommandLineOptionsQt(const std::string & options):
                                "start the component viewer");
     }
 #endif
-    if (options.find('L') != std::string::npos) {
-        this->AddOptionNoValue("L", "logger",
+    if (options.find('W') != std::string::npos) {
+        this->AddOptionNoValue("W", "logger",
                                "show the logger widget to dynamically change log levels for all classes");
     }
 }
