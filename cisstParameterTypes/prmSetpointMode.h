@@ -5,6 +5,8 @@
 #define _prmSetpointMode_h
 
 #include <cstdint>
+#include <iostream>
+#include <cisstCommon/cmnDataFunctionsJSON.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>

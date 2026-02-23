@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QTableWidget>
 
-#include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctForwardDeclarationsQt.h>
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -41,9 +41,10 @@ class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating: public vctQtWidgetDynam
     typedef _elementType value_type;
     int Precision;
     char Format;
+
 public:
     vctQtWidgetDynamicVectorReadFloating(void);
-    virtual bool SetValue(const vctDynamicConstVectorRef<value_type> & value);
+    virtual bool SetValue(const Eigen::VectorX<_elementType>& value);
     void SetPrecision(const int precision);
     void SetFormat(const char format);
 };
@@ -53,9 +54,10 @@ class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger: public vctQtWidgetDynami
 {
     typedef _elementType value_type;
     int Base;
+
 public:
     vctQtWidgetDynamicVectorReadInteger(void);
-    virtual bool SetValue(const vctDynamicConstVectorRef<value_type> & value);
+    virtual bool SetValue(const Eigen::VectorX<_elementType>& value);
     void SetBase(const int base);
 };
 
@@ -75,11 +77,14 @@ class CISST_EXPORT vctQtWidgetDynamicVectorWriteBase: public QTableWidget
 public:
     typedef enum {TEXT_WIDGET, SPINBOX_WIDGET, SLIDER_WIDGET} DisplayModeType;
     vctQtWidgetDynamicVectorWriteBase(const DisplayModeType displayMode);
+
 signals:
     void valueChanged(void);
+
 protected:
     enum {SLIDER_RESOLUTION = 1000};
     DisplayModeType DisplayMode;
+
 protected slots:
     void SliderValueChangedSlot(int value);
     void DoubleSpinBoxEditingFinishedSlot(void);
@@ -94,15 +99,15 @@ class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating: public vctQtWidgetDyna
     int Precision;
     char Format;
     value_type Minimum, Maximum, Step;
-    vctDynamicVector<value_type> Minimums, Maximums;
+    Eigen::VectorX<value_type> Minimums, Maximums;
 public:
     vctQtWidgetDynamicVectorWriteFloating(const DisplayModeType displayMode = TEXT_WIDGET);
-    virtual bool SetValue(const vctDynamicVector<value_type> & value, bool blockSignals = true);
-    virtual bool GetValue(vctDynamicVector<value_type> & placeHolder) const;
+    virtual bool SetValue(const Eigen::VectorX<value_type>& value, bool blockSignals = true);
+    virtual bool GetValue(Eigen::VectorX<value_type>& placeHolder) const;
     void SetPrecision(const int precision);
     void SetFormat(const char format);
     void SetRange(const value_type minimum, const value_type maximum);
-    void SetRange(const vctDynamicVector<value_type> & minimums, const vctDynamicVector<value_type> & maximums);
+    void SetRange(const Eigen::VectorX<value_type>& minimums, const Eigen::VectorX<value_type>& maximums);
     void SetStep(const value_type step);
 protected:
     void UpdateWidgetPrecision(void);
@@ -119,8 +124,8 @@ class CISST_EXPORT vctQtWidgetDynamicVectorWriteInteger: public vctQtWidgetDynam
     value_type Minimum, Maximum, Step;
 public:
     vctQtWidgetDynamicVectorWriteInteger(const DisplayModeType displayMode = TEXT_WIDGET);
-    virtual bool SetValue(const vctDynamicVector<value_type> & value, bool blockSignals = true);
-    virtual bool GetValue(vctDynamicVector<value_type> & placeHolder) const;
+    virtual bool SetValue(const Eigen::VectorX<value_type>& value, bool blockSignals = true);
+    virtual bool GetValue(Eigen::VectorX<value_type>& placeHolder) const;
     void SetBase(const int base);
     void SetRange(const value_type minimum, const value_type maximum);
     void SetStep(const value_type step);
@@ -141,8 +146,8 @@ class CISST_EXPORT vctQtWidgetDynamicVectorBoolWrite: public QTableWidget
     Q_OBJECT;
  public:
     vctQtWidgetDynamicVectorBoolWrite(void);
-    virtual bool SetValue(const vctDynamicVector<bool> & value, bool blockSignals = true);
-    virtual bool GetValue(vctDynamicVector<bool> & placeHolder) const;
+    virtual bool SetValue(const Eigen::VectorX<bool>& value, bool blockSignals = true);
+    virtual bool GetValue(Eigen::VectorX<bool>& placeHolder) const;
 signals:
     bool valueChanged(void);
 protected slots:

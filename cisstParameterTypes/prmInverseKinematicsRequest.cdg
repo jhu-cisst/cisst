@@ -2,9 +2,11 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
@@ -21,13 +23,13 @@ class {
 
     member {
         name jp;
-        type vctDynamicVector<double>;
+        type Eigen::VectorXd;
         description Reference joint position, usually the current robot position;
     }
 
     member {
         name cp;
-        type vctFrm4x4;
+        type Eigen::Isometry3d;
         description Cartesian pose;
     }
 
@@ -35,7 +37,6 @@ class {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     }
-
 }
 
 inline-header {

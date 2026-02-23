@@ -2,10 +2,10 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstParameterTypes/prmSetpointMode.h>
+
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -35,26 +35,26 @@ class {
 
     member {
         name Position;
-        type vctDoubleVec;
-        default vctDoubleVec(0);
+        type Eigen::VectorXd;
+        default Eigen::VectorXd(0);
     }
 
     member {
         name Velocity;
-        type vctDoubleVec;
-        default vctDoubleVec(0);
+        type Eigen::VectorXd;
+        default Eigen::VectorXd(0);
     }
 
     member {
         name Effort;
-        type vctDoubleVec;
-        default vctDoubleVec(0);
+        type Eigen::VectorXd;
+        default Eigen::VectorXd(0);
     }
 
     member {
         name PositionProjection;
-        type vctDoubleMat;
-        default vctDoubleMat(0, 0, 0.0);
+        type Eigen::MatrixXd;
+        default Eigen::MatrixXd(0, 0);
         description If size is 0, will be treated as if identity.;
     }
 
@@ -63,10 +63,14 @@ class {
         inline void SetSize(const size_t & size) {
             Name().resize(size);
             Mode().resize(size);
-            Position().SetSize(size, 0.0);
-            Velocity().SetSize(size, 0.0);
-            Effort().SetSize(size, 0.0);
-            PositionProjection().SetSize(size, size, 0.0);
+            Position().resize(size);
+            Position().fill(0.0);
+            Velocity().resize(size);
+            Velocity().fill(0.0);
+            Effort().resize(size);
+            Effort().fill(0.0);
+            PositionProjection().resize(size, size);
+            PositionProjection().fill(0.0);
         }
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);

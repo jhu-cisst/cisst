@@ -25,6 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmStateJoint.h>
 
+#include <Eigen/Dense>
+
 // Always include last
 #include <cisstParameterTypes/prmExportQt.h>
 
@@ -63,9 +65,9 @@ protected:
 
     double mPrismaticFactor, mRevoluteFactor;
     bool mNeedsConversion;
-    vctDoubleVec mFactors, mTemp1, mTemp2;
+    Eigen::VectorXd mFactors, mTemp1, mTemp2;
 
- private slots:
+private slots:
     void SlotRead(void);
     void SlotSetPositionGoalJoint(void);
 };

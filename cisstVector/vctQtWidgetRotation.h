@@ -21,9 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctQtWidgetRotation_h
 
 // cisst include
-#include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctForwardDeclarationsQt.h>
-#include <cisstVector/vctTransformationTypes.h>
+
+#include <Eigen/Geometry>
 
 class QVBoxLayout;
 
@@ -45,7 +45,7 @@ public:
     vctQtWidgetRotationOpenGL(void);
     inline ~vctQtWidgetRotationOpenGL(void) {};
 
-    void SetValue(const vctMatRot3 & rotation);
+    void SetValue(const Eigen::Matrix3d& rotation);
 
 protected:
     void ResetOrientation(void);
@@ -57,18 +57,17 @@ protected:
     void paintGL(void);
     void resizeGL(int width, int height);
 
-    vct3 mRotation;
-    vctQuatRot3 mCurrentOrientation, mDeltaOrientation;
-    vctInt2 mStartMousePosition;
+    Eigen::Vector3d mRotation;
+    Eigen::Quaterniond mCurrentOrientation, mDeltaOrientation;
+    Eigen::Vector2i mStartMousePosition;
 };
-
 
 /*! Qt Widget to display a rotation using cisstVector. */
 class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
 {
     Q_OBJECT;
 
- public:
+public:
     /*! Possible display modes.  See SetDisplayMode method.  Please
       note that UNDEFINED_WIDGET should never be used. */
     typedef enum {UNDEFINED_WIDGET, MATRIX_WIDGET, AXIS_ANGLE_WIDGET, QUATERNION_WIDGET,
@@ -83,10 +82,9 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
     /*! Set the rotation value to be displayed.  This method assumes
       the rotation matrix is valid, i.e. normalized and will not
       perform any check or normalization. */
-    template <class _containerType>
-    void SetValue(const vctMatrixRotation3ConstBase<_containerType> & rotation) {
-        this->Rotation.FromRaw(rotation);
-        this->UpdateCurrentWidget();
+    void SetValue(const Eigen::Matrix3d& rotation) {
+        Rotation = rotation;
+        UpdateCurrentWidget();
     }
 
     /*! Set the display mode, i.e. the widget used to represent the
@@ -98,14 +96,14 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
 
     inline void SetPrismaticRevoluteFactors(const double & CMN_UNUSED(prismatic), const double & revolute) {
         mRevoluteFactor = revolute;
-        this->UpdateCurrentWidget();
+        UpdateCurrentWidget();
     }
 
- protected slots:
+protected slots:
     /*! Contextual menu showed when the user right clicks on the widget */
     void ShowContextMenu(const QPoint & position);
 
- protected:
+protected:
     /*! Current display mode, somewhat redundant with the
       CurrentWidget pointer.  The current widget should always be
       set by changing the DisplayMode. */
@@ -118,7 +116,7 @@ class CISST_EXPORT vctQtWidgetRotationDoubleRead: public QWidget
     void UpdateCurrentWidget(void);
 
     /*! Internal representation for the rotation to display. */
-    vctMatRot3 Rotation;
+    Eigen::Matrix3d Rotation;
 
     // Matrix
     vctQtWidgetDynamicMatrixDoubleRead * MatrixWidget;

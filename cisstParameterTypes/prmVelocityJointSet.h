@@ -2,8 +2,8 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Rajesh Kumar, Anton Deguet
-  Created on:	2008-03-12
+  Author(s):  Rajesh Kumar, Anton Deguet
+  Created on:  2008-03-12
 
   (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -27,8 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmVelocityJointSet_h
 
 // basic includes
-#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstParameterTypes/prmMotionBase.h>
+#include <Eigen/Dense>
+
+// Always include last
 #include <cisstParameterTypes/prmExport.h>
 
 /*!
@@ -41,21 +43,21 @@ protected:
 
     /*! Masks joints not involved in this move, true --> corresponding
     joint index velocities will be used */
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::ArrayX<bool>, Mask);
 
     /*! Unmasked elements (mask --> true) are only used if move is
     position guarded */
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Guard);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, Guard);
 
     /*! Joint velocity goals (mask -> true) indicates goals will be
     used in the move */
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Goal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, Goal);
 
     /*! Corresponding accelerations where needed */
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Acceleration);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, Acceleration);
 
     /*! Corresponding accelerations where applicable */
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Deceleration);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, Deceleration);
 
     /*! true --> move at specified velocity until
     MoveVelocityJointSet.goal for ANY is reached */
@@ -81,11 +83,11 @@ public:
     void SetSize(size_type size);
 
     /*! constructor with all parameters */
-    prmVelocityJointSet(const vctBoolVec & mask,
-                        const vctDoubleVec & guard,
-                        const vctDoubleVec & velocity,
-                        const vctDoubleVec & acceleration,
-                        const vctDoubleVec & deceleration,
+    prmVelocityJointSet(const Eigen::ArrayX<bool>& mask,
+                        const Eigen::VectorXd& guard,
+                        const Eigen::VectorXd& velocity,
+                        const Eigen::VectorXd& acceleration,
+                        const Eigen::VectorXd& deceleration,
                         const bool & isPositionGuarded):
         BaseType(),
         MaskMember(mask),

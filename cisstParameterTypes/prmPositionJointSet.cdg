@@ -2,9 +2,9 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstParameterTypes/prmForwardDeclarations.h>
+#include <Eigen/Dense>
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
@@ -21,21 +21,21 @@ class {
 
     member {
         name Goal;
-        type vctDynamicVector<double>;
+        type Eigen::VectorXd;
         description Desired position;
     }
 
     member {
         name Velocity;
-        type vctDynamicVector<double>;
-        default vctDynamicVector<double>();
+        type Eigen::VectorXd;
+        default Eigen::VectorXd();
         description Velocity that should be used for the trajectory generator.  If the vector size is 0, this will be ignored.;
     }
 
     member {
         name Acceleration;
-        type vctDynamicVector<double>;
-        default vctDynamicVector<double>();
+        type Eigen::VectorXd;
+        default Eigen::VectorXd();
         description Acceleration and deceleration that should be used for the trajectory generator.  If the vector size is 0, this will be ignored.;
     }
 
@@ -56,14 +56,14 @@ class {
     // from original prmPositionJointSet
     member {
         name Deceleration;
-        type vctDynamicVector<double>;
-        default vctDynamicVector<double>();
+        type Eigen::VectorXd;
+        default Eigen::VectorXd();
         deprecated true;
     }
     member {
         name Mask;
-        type vctDynamicVector<bool>;
-        default vctDynamicVector<bool>();
+        type Eigen::ArrayX<bool>;
+        default Eigen::ArrayX<bool>();
         deprecated true;
     }
     // from original prmMotionBase
@@ -95,12 +95,12 @@ class {
     inline-header {
     public:
         inline CISST_DEPRECATED prmPositionJointSet(const size_t size) {
-            mGoal.SetSize(size);
-            mGoal.SetAll(0.0);
+            mGoal.resize(size);
+            mGoal.fill(0.0);
         }
         void inline CISST_DEPRECATED SetSize(const size_t size) {
-            mGoal.SetSize(size);
-            mGoal.SetAll(0.0);
+            mGoal.resize(size);
+            mGoal.fill(0.0);
         }
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);

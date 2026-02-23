@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 // cisst include
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctForwardDeclarationsQt.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
+
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -40,7 +40,7 @@ public:
     vctVector3DQtWidget(QWidget * parent = 0);
     inline ~vctVector3DQtWidget(void) {};
 
-    void SetValue(const vct3 & value);
+    void SetValue(const Eigen::Vector3d& value);
     void SetAutoResize(const bool autoResize);
     inline const double & MaxNorm(void) const {
         return mMaxNorm;
@@ -58,9 +58,9 @@ protected:
     void paintGL(void);
     void resizeGL(int width, int height);
 
-    vct3 mVector;
-    vctQuatRot3 mCurrentOrientation, mDeltaOrientation;
-    vctInt2 mStartMousePosition;
+    Eigen::Vector3d mVector;
+    Eigen::Quaterniond mCurrentOrientation, mDeltaOrientation;
+    Eigen::Vector2i mStartMousePosition;
     bool mAutoResize;
     double mVectorNorm, mMaxNorm;
     float mScale; // = 1 / mMaxNorm

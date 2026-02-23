@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctForceTorqueQtWidget_h
 
 // cisst include
-#include <cisstVector/vctForwardDeclarations.h>
+#include <Eigen/Dense>
 #include <cisstVector/vctForwardDeclarationsQt.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctForceTorque2DQtWidget.h>
@@ -41,7 +41,7 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
 {
     Q_OBJECT;
 
- public:
+public:
     /*! Possible display modes.  See SetDisplayMode method.  Please
       note that UNDEFINED_WIDGET should never be used. */
     typedef enum {UNDEFINED_WIDGET,
@@ -56,13 +56,13 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
 
     inline ~vctForceTorqueQtWidget(void) {};
 
-    /*! Set the force and torque.  For 2D plot, time is needed as
+    /*! Set the force and torque. For 2D plot, time is needed as
       well. */
-    void SetValue(const vct3 & force,
-                  const vct3 & torque,
+    void SetValue(const Eigen::Vector3d& force,
+                  const Eigen::Vector3d& torque,
                   const double & time = 0.0) {
-        mForce.Assign(force);
-        mTorque.Assign(torque);
+        mForce = force;
+        mTorque = torque;
         mTime = time;
         this->UpdateCurrentWidget();
     }
@@ -74,11 +74,11 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
       display mode UNDEFINED_WIDGET will be silently ignored. */
     void SetDisplayMode(const DisplayModeType displayMode);
 
- protected slots:
+protected slots:
     /*! Contextual menu showed when the user right clicks on the widget */
     void ShowContextMenu(const QPoint & position);
 
- protected:
+protected:
     /*! Current display mode, somewhat redundant with the
       CurrentWidget pointer.  The current widget should always be
       set by changing the DisplayMode. */
@@ -91,7 +91,7 @@ class CISST_EXPORT vctForceTorqueQtWidget: public QWidget
     void UpdateCurrentWidget(void);
 
     /*! Internal representation for the wrench/time to display. */
-    vct3 mForce, mTorque;
+    Eigen::Vector3d mForce, mTorque;
     double mTime;
 
     // Text widgets

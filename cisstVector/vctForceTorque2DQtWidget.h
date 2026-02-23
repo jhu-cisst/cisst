@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctForwardDeclarationsQt.h>
 #include <cisstVector/vctPlot2DBase.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <Eigen/Dense>
 
 #include <QWidget>
 
@@ -40,7 +40,7 @@ public:
     vctForceTorque2DQtWidget(void);
     ~vctForceTorque2DQtWidget(){}
 
-    void SetValue(const double & time, const vct3 & force, const vct3 & torque);
+    void SetValue(const double& time, const Eigen::Vector3d& force, const Eigen::Vector3d& torque);
 
 protected:
     virtual void closeEvent(QCloseEvent * event);

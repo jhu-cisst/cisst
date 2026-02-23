@@ -2,9 +2,10 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+
+#include <Eigen/Dense>
+
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
@@ -21,7 +22,7 @@ class {
 
     member {
         name jp;
-        type vctDynamicVector<double>;
+        type Eigen::VectorXd;
         description Joint position solution if result is true;
     }
 

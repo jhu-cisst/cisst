@@ -26,8 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmForceCartesianSet_h
 #define _prmForceCartesianSet_h
 
-#include <cisstVector/vctFixedSizeVector.h>
 #include <cisstParameterTypes/prmMotionBase.h>
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -39,24 +39,26 @@ class CISST_EXPORT prmForceCartesianSet: public prmMotionBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
+    typedef mtsGenericObject BaseType;
 
-    typedef prmMotionBase BaseType;
-    typedef vctFixedSizeVector<double, 6> ForceType;
-    typedef vctFixedSizeVector<bool, 6> MaskType;
+    // to prevent annoying macro issues:
+    typedef Eigen::Vector<double, 6> ForceType;
+    typedef Eigen::Array<bool, 6, 1> MaskType;
 
- protected:
+protected:
     /*! Set and Get methods for the reference frame for current
         force, mask, movinf and reference frames.  This is
         defined by a node in the transformation tree. */
     CMN_DECLARE_MEMBER_AND_ACCESSORS(ForceType, Force);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(MaskType, Mask);
 
- public:
+public:
     /*! default constructor */
-    prmForceCartesianSet():
-        ForceMember(0.0),
-        MaskMember(true)
-    {}
+    prmForceCartesianSet()
+    {
+        ForceMember.fill(0.0);
+        MaskMember.fill(true);
+    }
 
     /*!constructor with all parameters */
     prmForceCartesianSet(const ForceType & force,
@@ -67,8 +69,8 @@ public:
 
     inline void SetAll(double forceSet, bool mask)
     {
-        ForceMember.SetAll(forceSet);
-        MaskMember.SetAll(mask);
+        ForceMember.fill(forceSet);
+        MaskMember.fill(mask);
     }
 
     /*!destructor

@@ -21,12 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctQtWidgetFrame_h
 
 // cisst include
-#include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctForwardDeclarationsQt.h>
-#include <cisstVector/vctTransformationTypes.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstVector/vctQtWidgetRotation.h>
 #include <cisstVector/vctQtWidgetDynamicVector.h>
+
+#include <Eigen/Geometry>
 
 #include <QWidget>
 
@@ -41,7 +40,7 @@ class CISST_EXPORT vctQtWidgetFrameDoubleRead: public QWidget
 {
     Q_OBJECT;
 
- public:
+public:
 
     /*! Define the display mode type based on the rotation display
       mode. */
@@ -57,20 +56,15 @@ class CISST_EXPORT vctQtWidgetFrameDoubleRead: public QWidget
     /*! Set the rotation value to be displayed.  This method assumes
       the rotation matrix is valid, i.e. normalized and will nor
       perform any check nor normalization. */
-    template <class _rotationType>
-    void SetValue(const vctFrameBase<_rotationType> & frame) {
-        vctMatRot3 rotationMatrix;
-        rotationMatrix.FromNormalized(frame.Rotation());
-        this->RotationWidget->SetValue(rotationMatrix);
-        vctDoubleVec translation(frame.Translation());
-        translation.Multiply(mPrismaticFactor);
-        this->TranslationWidget->SetValue(translation);
+    inline void SetValue(const Eigen::Isometry3d& frame) {
+        RotationWidget->SetValue(frame.linear());
+        TranslationWidget->SetValue(frame.translation() * mPrismaticFactor);
     }
 
     /*! Set the display mode.  This method applies the display mode to
       the rotation widget. */
     inline void SetDisplayMode(const DisplayModeType displayMode) {
-        this->RotationWidget->SetDisplayMode(displayMode);
+        RotationWidget->SetDisplayMode(displayMode);
     }
 
     inline void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute) {
@@ -78,7 +72,7 @@ class CISST_EXPORT vctQtWidgetFrameDoubleRead: public QWidget
         RotationWidget->SetPrismaticRevoluteFactors(prismatic, revolute);
     }
 
- protected:
+protected:
     // widgets
     vctQtWidgetRotationDoubleRead * RotationWidget;
     vctQtWidgetDynamicVectorDoubleRead * TranslationWidget;

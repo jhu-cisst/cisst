@@ -43,11 +43,13 @@ mtsQtWidgetDoubleVecRead::mtsQtWidgetDoubleVecRead(void):
 
 bool mtsQtWidgetDoubleVecRead::SetValue(const mtsGenericObject & value)
 {
-    const mtsDoubleVec * doubleVecData = dynamic_cast<const mtsDoubleVec *>(&value);
-    if (doubleVecData) {
-        return VectorWidget->SetValue(*doubleVecData);
+    const mtsDoubleVec* doubleVecData = dynamic_cast<const mtsDoubleVec*>(&value);
+    if (!doubleVecData) {
+        return false;
     }
-    return false;
+
+    const Eigen::Map<const Eigen::VectorXd> vector(doubleVecData->Pointer(), doubleVecData->size());
+    return VectorWidget->SetValue(vector);
 }
 
 mtsQtWidgetDoubleVecWrite::mtsQtWidgetDoubleVecWrite(void):
@@ -60,20 +62,31 @@ mtsQtWidgetDoubleVecWrite::mtsQtWidgetDoubleVecWrite(void):
 
 bool mtsQtWidgetDoubleVecWrite::SetValue(const mtsGenericObject & value)
 {
-    const mtsDoubleVec * doubleVecData = dynamic_cast<const mtsDoubleVec *>(&value);
-    if (doubleVecData) {
-        return VectorWidget->SetValue(*doubleVecData);
+   const mtsDoubleVec* doubleVecData = dynamic_cast<const mtsDoubleVec*>(&value);
+    if (!doubleVecData) {
+        return false;
     }
-    return false;
+
+    const Eigen::Map<const Eigen::VectorXd> vector(doubleVecData->Pointer(), doubleVecData->size());
+    return VectorWidget->SetValue(vector);
 }
 
 bool mtsQtWidgetDoubleVecWrite::GetValue(mtsGenericObject & placeHolder) const
 {
-    mtsDoubleVec * doubleVecData = dynamic_cast<mtsDoubleVec *>(&placeHolder);
-    if (doubleVecData) {
-        return VectorWidget->GetValue(*doubleVecData);
+    mtsDoubleVec* doubleVecData = dynamic_cast<mtsDoubleVec*>(&placeHolder);
+    if (!doubleVecData) {
+        return false;
     }
-    return false;
+
+    Eigen::VectorXd output(doubleVecData->size());
+    bool ok = VectorWidget->GetValue(output);
+    if (!ok) {
+        return false;
+    }
+
+    Eigen::Map<Eigen::VectorXd> mapped(doubleVecData->Pointer(), doubleVecData->size());
+    mapped = output;
+    return true;
 }
 
 
@@ -88,11 +101,13 @@ mtsQtWidgetBoolVecRead::mtsQtWidgetBoolVecRead(void):
 
 bool mtsQtWidgetBoolVecRead::SetValue(const mtsGenericObject & value)
 {
-    const mtsBoolVec * boolVecData = dynamic_cast<const mtsBoolVec *>(&value);
-    if (boolVecData) {
-        return VectorWidget->SetValue(*boolVecData);
+    const mtsBoolVec* boolVecData = dynamic_cast<const mtsBoolVec*>(&value);
+    if (!boolVecData) {
+        return false;
     }
-    return false;
+
+    const Eigen::Map<const Eigen::VectorX<bool>> vector(boolVecData->Pointer(), boolVecData->size());
+    return VectorWidget->SetValue(vector);
 }
 
 mtsQtWidgetBoolVecWrite::mtsQtWidgetBoolVecWrite(void):
@@ -105,18 +120,29 @@ mtsQtWidgetBoolVecWrite::mtsQtWidgetBoolVecWrite(void):
 
 bool mtsQtWidgetBoolVecWrite::SetValue(const mtsGenericObject & value)
 {
-    const mtsBoolVec * boolVecData = dynamic_cast<const mtsBoolVec *>(&value);
-    if (boolVecData) {
-        return VectorWidget->SetValue(*boolVecData);
+    const mtsBoolVec* boolVecData = dynamic_cast<const mtsBoolVec*>(&value);
+    if (!boolVecData) {
+        return false;
     }
-    return false;
+
+    const Eigen::Map<const Eigen::VectorX<bool>> vector(boolVecData->Pointer(), boolVecData->size());
+    return VectorWidget->SetValue(vector);
 }
 
 bool mtsQtWidgetBoolVecWrite::GetValue(mtsGenericObject & placeHolder) const
 {
-    mtsBoolVec * boolVecData = dynamic_cast<mtsBoolVec *>(&placeHolder);
-    if (boolVecData) {
-        return VectorWidget->GetValue(*boolVecData);
+    mtsBoolVec* boolVecData = dynamic_cast<mtsBoolVec*>(&placeHolder);
+    if (!boolVecData) {
+        return false;
     }
-    return false;
+
+    Eigen::VectorX<bool> output(boolVecData->size());
+    bool ok = VectorWidget->GetValue(output);
+    if (!ok) {
+        return false;
+    }
+
+    Eigen::Map<Eigen::VectorX<bool>> mapped(boolVecData->Pointer(), boolVecData->size());
+    mapped = output;
+    return true;
 }

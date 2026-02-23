@@ -2,9 +2,11 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstParameterTypes/prmForwardDeclarations.h>
+
+#include <Eigen/Dense>
+
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
@@ -21,14 +23,14 @@ class {
 
     member {
         name ForceTorque;
-        type vctDynamicVector<double>;
+        type Eigen::VectorXd;
         description Desired effort;
     }
 
     member {
         name Mask;
-        type vctDynamicVector<bool>;
-        default vctDynamicVector<bool>();
+        type Eigen::ArrayX<bool>;
+        default Eigen::ArrayX<bool>();
         deprecated true;
     }
 
@@ -61,12 +63,12 @@ class {
     inline-header {
     public:
         inline CISST_DEPRECATED prmForceTorqueJointSet(const size_t size) {
-            mForceTorque.SetSize(size);
-            mForceTorque.SetAll(0.0);
+            mForceTorque = Eigen::VectorXd(size);
+            mForceTorque.fill(0.0);
         }
         void inline CISST_DEPRECATED SetSize(const size_t size) {
-            mForceTorque.SetSize(size);
-            mForceTorque.SetAll(0.0);
+            mForceTorque = Eigen::VectorXd(size);
+            mForceTorque.fill(0.0);
         }
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);

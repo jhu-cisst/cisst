@@ -2,10 +2,11 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstParameterTypes/prmForwardDeclarations.h>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
@@ -22,42 +23,42 @@ class {
 
     member {
         name Goal;
-        type vctDoubleFrm3;
+        type Eigen::Isometry3d;
         description Desired position;
     }
 
     member {
         name Velocity;
-        type vctDouble3;
-        default vctDouble3(0.0);
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         description Linear velocity that should be used for the trajectory generator.;
     }
 
     member {
         name VelocityAngular;
-        type vctDouble3;
-        default vctDouble3(0.0);
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         description Angular velocity that should be used for the trajectory generator.;
     }
 
     member {
         name Acceleration;
-        type vctDouble3;
-        default vctDouble3(0.0);
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         description Linear acceleration and deceleration that should be used for the trajectory generator.;
     }
 
     member {
         name AngularAcceleration;
-        type vctDouble3;
-        default vctDouble3(0.0);
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         description Angular acceleration and deceleration that should be used for the trajectory generator.;
     }
 
     member {
         name Mask;
-        type vctBool2;
-        default true;
+        type std::pair<bool, bool>;
+        default {true, true};
         description Two tuple, masks position/orientation parts of the Cartesian motion;
     }
 

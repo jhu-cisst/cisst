@@ -3,7 +3,8 @@
 
 inline-header {
 #include <vector>
-#include <cisstVector/vctTransformationTypes.h>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -20,7 +21,7 @@ class {
 
     typedef {
         name Type;
-        type std::vector<vctFrm3>;
+        type std::vector<Eigen::Isometry3d>;
     }
 
     member {
@@ -31,7 +32,7 @@ class {
 
     member {
         name Positions;
-        type std::vector<vctFrm3>;
+        type std::vector<Eigen::Isometry3d>;
     }
 
     inline-header {

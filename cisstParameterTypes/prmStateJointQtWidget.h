@@ -70,7 +70,7 @@ protected:
     prmConfigurationJoint mConfiguration;
     double mPrismaticFactor, mRevoluteFactor;
     bool mNeedsConversion;
-    vctDoubleVec mPositionFactors, mVelocityFactors, mTempVector;
+    Eigen::VectorXd mPositionFactors, mVelocityFactors, mTempVector;
 };
 
 #endif // _prmStateJointQtWidget_h

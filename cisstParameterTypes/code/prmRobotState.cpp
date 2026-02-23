@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-Author(s):	Marcin Balicki
+Author(s):    Marcin Balicki
 Created on:   2008-09-14
 
 (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights
@@ -21,13 +21,12 @@ http://www.cisst.org/cisst/license.txt.
 
 prmRobotState::prmRobotState()
 {
-    CartesianPosition().SetSize(6);
-    CartesianVelocity().SetSize(6);
-    CartesianPositionGoal().SetSize(6);
-    CartesianVelocityGoal().SetSize(6);
-    CartesianVelocityError().SetSize(6);
-    CartesianPositionError().SetSize(6);
-
+    CartesianPosition().resize(6);
+    CartesianVelocity().resize(6);
+    CartesianPositionGoal().resize(6);
+    CartesianVelocityGoal().resize(6);
+    CartesianVelocityError().resize(6);
+    CartesianPositionError().resize(6);
 }
 
 prmRobotState::prmRobotState(size_type size)
@@ -37,123 +36,113 @@ prmRobotState::prmRobotState(size_type size)
 
 void prmRobotState::ToStream(std::ostream & outputStream) const
 {
-
-    outputStream << "JointName: "                   << this->JointNameMember
-                 << "\nJointPosition: "             << this->JointPositionMember
-                 << "\nJointVelocity : "		    << this->JointVelocityMember
-                 << "\nJointPositionGoal: "		    << this->JointPositionGoalMember
-                 << "\nJointVelocityGoal: "         << this->JointVelocityGoalMember
-                 << "\nJointPositionError: "	    << this->JointPositionErrorMember
-                 << "\nJointVelocityError: "	    << this->JointVelocityErrorMember
-                 << "\nReferenceFrame: "            << this->ReferenceFrameMember
-                 << "\nMovingFrame: "               << this->MovingFrameMember
-                 << "\nCartesianPosition: "         << this->CartesianPositionMember
-                 << "\nCartesianVelocity : "		<< this->CartesianVelocityMember
-                 << "\nCartesianPositionGoal: "		<< this->CartesianPositionGoalMember
-                 << "\nCartesianVelocityGoal: "     << this->CartesianVelocityGoalMember
-                 << "\nCartesianVelocityError: "	<< this->CartesianVelocityErrorMember
-                 << "\nCartesianPositionError: "	<< this->CartesianPositionErrorMember
-                 << "\nEndEffectorFrame: "          << this->EndEffectorFrameMember;
+    outputStream << "JointName: "                   << cmnData<std::vector<std::string>>::HumanReadable(JointNameMember)
+                 << "\nJointPosition: "             << JointPositionMember
+                 << "\nJointVelocity : "            << JointVelocityMember
+                 << "\nJointPositionGoal: "         << JointPositionGoalMember
+                 << "\nJointVelocityGoal: "         << JointVelocityGoalMember
+                 << "\nJointPositionError: "        << JointPositionErrorMember
+                 << "\nJointVelocityError: "        << JointVelocityErrorMember
+                 << "\nReferenceFrame: "            << ReferenceFrameMember
+                 << "\nMovingFrame: "               << MovingFrameMember
+                 << "\nCartesianPosition: "         << CartesianPositionMember
+                 << "\nCartesianVelocity : "        << CartesianVelocityMember
+                 << "\nCartesianPositionGoal: "     << CartesianPositionGoalMember
+                 << "\nCartesianVelocityGoal: "     << CartesianVelocityGoalMember
+                 << "\nCartesianVelocityError: "    << CartesianVelocityErrorMember
+                 << "\nCartesianPositionError: "    << CartesianPositionErrorMember
+                 << "\nEndEffectorFrame: "          << EndEffectorFrameMember.matrix();
 }
 
 void prmRobotState::SetSize(size_type size)
 {
-    JointNameMember.SetSize(size);
-    JointPositionMember.SetSize(size);
-    JointVelocityMember.SetSize(size);
-    JointPositionGoalMember.SetSize(size);
-    JointVelocityGoalMember.SetSize(size);
-    JointPositionErrorMember.SetSize(size);
-    JointVelocityErrorMember.SetSize(size);
-    /* these are 6 by nature.   */
-    CartesianPositionMember.SetSize(6);
-    CartesianVelocityMember.SetSize(6);
-    CartesianPositionGoalMember.SetSize(6);
-    CartesianVelocityGoalMember.SetSize(6);
-    CartesianVelocityErrorMember.SetSize(6);
-    CartesianPositionErrorMember.SetSize(6);
-
+    JointNameMember.resize(size);
+    JointPositionMember.resize(size);
+    JointVelocityMember.resize(size);
+    JointPositionGoalMember.resize(size);
+    JointVelocityGoalMember.resize(size);
+    JointPositionErrorMember.resize(size);
+    JointVelocityErrorMember.resize(size);
 }
 
-
-void prmRobotState::SerializeRaw(std::ostream & outputStream) const
+void prmRobotState::SerializeRaw(std::ostream& outputStream) const
 {
     BaseType::SerializeRaw(outputStream);
 
-    this->JointNameMember.SerializeRaw(outputStream);
-    this->JointPositionMember.SerializeRaw(outputStream);
-    this->JointVelocityMember.SerializeRaw(outputStream);
-    this->JointPositionGoalMember.SerializeRaw(outputStream);
-    this->JointVelocityGoalMember.SerializeRaw(outputStream);
-    this->JointPositionErrorMember.SerializeRaw(outputStream);
-    this->JointVelocityErrorMember.SerializeRaw(outputStream);
-    this->CartesianPositionMember.SerializeRaw(outputStream);
-    this->CartesianVelocityMember.SerializeRaw(outputStream);
-    this->CartesianPositionGoalMember.SerializeRaw(outputStream);
-    this->CartesianVelocityGoalMember.SerializeRaw(outputStream);
-    this->CartesianVelocityErrorMember.SerializeRaw(outputStream);
-    this->CartesianPositionErrorMember.SerializeRaw(outputStream);
-    this->EndEffectorFrameMember.SerializeRaw(outputStream);
-
+    cmnData<std::vector<std::string>>::SerializeBinary(JointNameMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(JointPositionMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(JointVelocityMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(JointPositionGoalMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(JointVelocityGoalMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(JointPositionErrorMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(JointVelocityErrorMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(CartesianPositionMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(CartesianVelocityMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(CartesianPositionGoalMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(CartesianVelocityGoalMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(CartesianPositionErrorMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(CartesianVelocityErrorMember, outputStream);
+    cmnData<Eigen::Isometry3d>::SerializeBinary(EndEffectorFrameMember, outputStream);
 }
 
-void prmRobotState::DeSerializeRaw(std::istream & inputStream)
+void prmRobotState::DeSerializeRaw(std::istream& inputStream)
 {
     BaseType::DeSerializeRaw(inputStream);
 
-    this->JointNameMember.DeSerializeRaw(inputStream);
-    this->JointPositionMember.DeSerializeRaw(inputStream);
-    this->JointVelocityMember.DeSerializeRaw(inputStream);
-    this->JointPositionGoalMember.DeSerializeRaw(inputStream);
-    this->JointVelocityGoalMember.DeSerializeRaw(inputStream);
-    this->JointPositionErrorMember.DeSerializeRaw(inputStream);
-    this->JointVelocityErrorMember.DeSerializeRaw(inputStream);
-    this->CartesianPositionMember.DeSerializeRaw(inputStream);
-    this->CartesianVelocityMember.DeSerializeRaw(inputStream);
-    this->CartesianPositionGoalMember.DeSerializeRaw(inputStream);
-    this->CartesianVelocityGoalMember.DeSerializeRaw(inputStream);
-    this->CartesianVelocityErrorMember.DeSerializeRaw(inputStream);
-    this->CartesianPositionErrorMember.DeSerializeRaw(inputStream);
-    this->EndEffectorFrameMember.DeSerializeRaw(inputStream);
-
+    cmnDataFormat format;
+    cmnData<std::vector<std::string>>::DeSerializeBinary(JointNameMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(JointPositionMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(JointVelocityMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(JointPositionGoalMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(JointVelocityGoalMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(JointPositionErrorMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(JointVelocityErrorMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(CartesianPositionMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(CartesianVelocityMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(CartesianPositionGoalMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(CartesianVelocityGoalMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(CartesianPositionErrorMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(CartesianVelocityErrorMember, inputStream, format, format);
+    cmnData<Eigen::Isometry3d>::DeSerializeBinary(EndEffectorFrameMember, inputStream, format, format);
 }
 
-bool prmRobotStateToStateJointMeasured(const prmRobotState & input, prmStateJoint & output)
+bool prmRobotStateToStateJointMeasured(const prmRobotState& input, prmStateJoint& output)
 {
     output.Valid() = input.Valid();
     output.Timestamp() = input.Timestamp();
     output.Name().resize(input.JointName().size());
     std::copy(input.JointName().begin(), input.JointName().end(), output.Name().begin());
-    output.Position().ForceAssign(input.JointPosition());
-    output.Velocity().ForceAssign(input.JointVelocity());
+    output.Position() = input.JointPosition();
+    output.Velocity() = input.JointVelocity();
     return true;
 }
 
-bool prmRobotStateToStateJointSetpoint(const prmRobotState & input, prmStateJoint & output)
+bool prmRobotStateToStateJointSetpoint(const prmRobotState& input, prmStateJoint& output)
 {
     output.Valid() = input.Valid();
     output.Timestamp() = input.Timestamp();
     output.Name().resize(input.JointName().size());
     std::copy(input.JointName().begin(), input.JointName().end(), output.Name().begin());
-    output.Position().ForceAssign(input.JointPositionGoal());
-    output.Velocity().ForceAssign(input.JointVelocityGoal());
+    output.Position() = input.JointPositionGoal();
+    output.Velocity() = input.JointVelocityGoal();
     return true;
 }
 
-bool prmRobotStateToCartesianPositionRxRyMeasured(const prmRobotState & input, prmPositionCartesianGet & output)
+bool prmRobotStateToCartesianPositionRxRyMeasured(const prmRobotState& input, prmPositionCartesianGet& output)
 {
     if (input.CartesianPosition().size() != 5) {
         return false;
     }
+
     output.Valid() = true;
     output.Timestamp() = input.Timestamp();
     output.ReferenceFrame() = input.ReferenceFrame();
     output.MovingFrame() = input.MovingFrame();
-    output.Position().Translation().Assign(input.CartesianPosition().Ref(3));
-    vctMatRot3 rotation =
-        vctMatRot3(vctAxAnRot3(vct3(0.0, 1.0, 0.0), input.CartesianPosition().at(4)))
-        * vctMatRot3(vctAxAnRot3(vct3(1.0, 0.0, 0.0), input.CartesianPosition().at(3)));
-    output.Position().Rotation().From(rotation);
+    output.Position().translation() = input.CartesianPosition().head<3>();
+
+    Eigen::AngleAxisd y_rot(input.CartesianPosition()(4), Eigen::Vector3d::UnitY());
+    Eigen::AngleAxisd x_rot(input.CartesianPosition()(3), Eigen::Vector3d::UnitX());
+    output.Position() = y_rot * x_rot;
     return true;
 }
 
@@ -166,12 +155,10 @@ bool prmRobotStateToCartesianPositionRxRySetpoint(const prmRobotState & input, p
     output.Timestamp() = input.Timestamp();
     output.ReferenceFrame() = input.ReferenceFrame();
     output.MovingFrame() = input.MovingFrame();
-    output.Position().Translation().Assign(input.CartesianPositionGoal().Ref(3));
-    vctMatRot3 rotation =
-        vctMatRot3(vctAxAnRot3(vct3(0.0, 1.0, 0.0), input.CartesianPositionGoal().at(4)))
-        * vctMatRot3(vctAxAnRot3(vct3(1.0, 0.0, 0.0), input.CartesianPositionGoal().at(3)));
-    output.Position().Rotation().From(rotation);
+    output.Position().translation() = input.CartesianPositionGoal().head<3>();
+
+    Eigen::AngleAxisd y_rot(input.CartesianPositionGoal()(4), Eigen::Vector3d::UnitY());
+    Eigen::AngleAxisd x_rot(input.CartesianPositionGoal()(3), Eigen::Vector3d::UnitX());
+    output.Position() = y_rot * x_rot;
     return true;
 }
-
-//  $Log

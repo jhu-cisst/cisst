@@ -2,7 +2,7 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctTransformationTypes.h>
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -20,15 +20,15 @@ class {
 
     member {
         name VelocityLinear;
-        type vct3;
-        default vct3(0.0, 0.0, 0.0);
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         description Linear velocity;
     }
 
     member {
         name VelocityAngular;
-        type vct3;
-        default vct3(0.0, 0.0, 0.0);
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         description Angular velocity;
     }
 
@@ -56,24 +56,15 @@ class {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-
     public:
-        inline void SetVelocity(const vct6 & newValue) {
-            mVelocityLinear[0] = newValue[0];
-            mVelocityLinear[1] = newValue[1];
-            mVelocityLinear[2] = newValue[2];
-            mVelocityAngular[0] = newValue[3];
-            mVelocityAngular[1] = newValue[4];
-            mVelocityAngular[2] = newValue[5];
+        inline void SetVelocity(const Eigen::Vector<double, 6>& newValue) {
+            mVelocityLinear = newValue.head<3>();
+            mVelocityAngular = newValue.tail<3>();
         }
 
-        inline void GetVelocity(vct6 & placeHolder) const {
-            placeHolder[0] = mVelocityLinear[0];
-            placeHolder[1] = mVelocityLinear[1];
-            placeHolder[2] = mVelocityLinear[2];
-            placeHolder[3] = mVelocityAngular[0];
-            placeHolder[4] = mVelocityAngular[1];
-            placeHolder[5] = mVelocityAngular[2];
+        inline void GetVelocity(Eigen::Vector<double, 6>& placeHolder) const {
+            placeHolder.head<3>() = mVelocityLinear;
+            placeHolder.tail<3>() = mVelocityAngular;
         }
     }
 }

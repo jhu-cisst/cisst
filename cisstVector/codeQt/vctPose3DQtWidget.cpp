@@ -69,7 +69,7 @@ vctPose3DQtWidget::vctPose3DQtWidget(QWidget * parent):
     mLayout->addWidget(mTable, 0, 0);
 
     // create 3 views
-    vctPose3DQtWidgetView * view;
+    vctPose3DQtWidgetView* view;
     view = new vctPose3DQtWidgetView(this, &mPoses, &mBB);
     view->SetDimensions(0, 1); // plot XY
     mLayout->addWidget(view, 0, 1);
@@ -99,19 +99,19 @@ void vctPose3DQtWidget::SetPrismaticRevoluteFactors(const double & prismatic,
 
 }
 
-void vctPose3DQtWidget::SetValue(const vct3 & value)
+void vctPose3DQtWidget::SetValue(const Eigen::Vector3d& value)
 {
     // update table if there's room
     if (mTableRow < VCT_POSE_3D_MAX_ROWS) {
         QString itemValue;
         for (int column = 0; column < 3; ++column) {
-            mTable->item(mTableRow, column)->setText(QString::number(value.Element(column) * mPrismaticFactor, 'f', 2));
+            mTable->item(mTableRow, column)->setText(QString::number(value(column) * mPrismaticFactor, 'f', 2));
         }
         mTableRow++;
     }
 
     // update bounding box
-    mBB.Expand(value);
+    mBB.extend(value);
 
     // save all values for display
     mPoses.push_back(value);
@@ -148,7 +148,7 @@ void vctPose3DQtWidget::keyPressEvent(QKeyEvent * event)
 }
 
 
-vctPose3DQtWidgetView::vctPose3DQtWidgetView(QWidget * parent, PosesType * poses, vctBoundingBox3 * bb):
+vctPose3DQtWidgetView::vctPose3DQtWidgetView(QWidget* parent, PosesType* poses, Eigen::AlignedBox3d* bb):
     vctQtOpenGLBaseWidget(parent),
     mPoses(poses),
     mBB(bb)
@@ -170,13 +170,13 @@ void vctPose3DQtWidgetView::SetPrismaticRevoluteFactors(const double & prismatic
 void vctPose3DQtWidgetView::SetAutoResize(const bool autoResize)
 {
     // reset BB used to auto-center
-    mBB->Reset();
+    mBB->setEmpty();
     mAutoResize = autoResize;
 }
 
 void vctPose3DQtWidgetView::ResetSize(void)
 {
-    mBB->Reset();
+    mBB->setEmpty();
 }
 
 void vctPose3DQtWidgetView::SetDimensions(const size_t x, const size_t y)
@@ -198,17 +198,17 @@ void vctPose3DQtWidgetView::keyPressEvent(QKeyEvent * event)
     case Qt::Key_1:
         mX = 0;
         mY = 1;
-        mBB->Reset();
+        mBB->setEmpty();
         break;
     case Qt::Key_2:
         mX = 0;
         mY = 2;
-        mBB->Reset();
+        mBB->setEmpty();
         break;
     case Qt::Key_3:
         mX = 1;
         mY = 2;
-        mBB->Reset();
+        mBB->setEmpty();
         break;
     case Qt::Key_A:
         SetAutoResize(!mAutoResize);
@@ -238,9 +238,9 @@ void vctPose3DQtWidgetView::paintGL(void)
     glLoadIdentity();
 
     // update translation and scale based on viewport and bounding box
-    if (mAutoResize && (mBB->Counter() != 0)) {
+    if (mAutoResize && !mBB->isEmpty()) {
         // scale to fit viewport without changing ratio
-        vct3 sizeBB = mBB->Diagonal();
+        Eigen::Vector3d sizeBB = mBB->diagonal();
         if ((sizeBB[mX] > 0.0) && (sizeBB[mY] > 0.0)) {
             const double ratioX = mViewport.X() / sizeBB[mX];
             const double ratioY = mViewport.Y() / sizeBB[mY];
@@ -248,13 +248,13 @@ void vctPose3DQtWidgetView::paintGL(void)
         } else {
             mViewportScale = 1.0;
         }
-        // take center of BB for display
-        vct3 centerBB = mBB->MidPoint();
-        centerBB.Multiply(mViewportScale); // scale to viewport
+        // take center of BB for display and scale to viewport
+        Eigen::Vector3d centerBB = mBB->center() * mViewportScale;
         vct2 centerVP(mViewport);
         centerVP.Divide(2.0);
         mViewportTranslation.DifferenceOf(centerVP, vctDouble2(centerBB[mX], centerBB[mY]));
     }
+
     glTranslated(mViewportTranslation.X(), mViewportTranslation.Y(), 0.0);
     glScaled(mViewportScale, mViewportScale, 1.0);
     const PosesType::const_iterator end = mPoses->end();
@@ -264,30 +264,30 @@ void vctPose3DQtWidgetView::paintGL(void)
         for (PosesType::const_iterator pose = mPoses->begin();
              pose != end;
              ++pose) {
-            glVertex2d(pose->Element(mX), pose->Element(mY));
+            glVertex2d(pose->coeff(mX), pose->coeff(mY));
         }
     } glEnd();
 
     // bounding box
     glColor3d(0.7, 0.7, 0.7);
     glBegin(GL_LINE_STRIP); {
-        glVertex2d(mBB->MinCorner()[mX], mBB->MinCorner()[mY]);
-        glVertex2d(mBB->MaxCorner()[mX], mBB->MinCorner()[mY]);
-        glVertex2d(mBB->MaxCorner()[mX], mBB->MaxCorner()[mY]);
-        glVertex2d(mBB->MinCorner()[mX], mBB->MaxCorner()[mY]);
-        glVertex2d(mBB->MinCorner()[mX], mBB->MinCorner()[mY]);
+        glVertex2d(mBB->min()[mX], mBB->min()[mY]);
+        glVertex2d(mBB->max()[mX], mBB->min()[mY]);
+        glVertex2d(mBB->max()[mX], mBB->max()[mY]);
+        glVertex2d(mBB->min()[mX], mBB->max()[mY]);
+        glVertex2d(mBB->min()[mX], mBB->min()[mY]);
     } glEnd();
     // zero values
-    if (mBB->MinCorner()[mY] * mBB->MaxCorner()[mY] < 0.0) {
+    if (mBB->min()[mY] * mBB->max()[mY] < 0.0) {
         glBegin(GL_LINE_STRIP); {
-            glVertex2d(mBB->MinCorner()[mX], 0.0);
-            glVertex2d(mBB->MaxCorner()[mX], 0.0);
+            glVertex2d(mBB->min()[mX], 0.0);
+            glVertex2d(mBB->max()[mX], 0.0);
         } glEnd();
     }
-    if (mBB->MinCorner()[mX] * mBB->MaxCorner()[mX] < 0.0) {
+    if (mBB->min()[mX] * mBB->max()[mX] < 0.0) {
         glBegin(GL_LINE_STRIP); {
-            glVertex2d(0.0, mBB->MinCorner()[mY]);
-            glVertex2d(0.0, mBB->MaxCorner()[mY]);
+            glVertex2d(0.0, mBB->min()[mY]);
+            glVertex2d(0.0, mBB->max()[mY]);
         } glEnd();
     }
 
@@ -301,15 +301,15 @@ void vctPose3DQtWidgetView::paintGL(void)
     painter.drawText(1, 1 + font_size,
                      QString().sprintf("%c: %0.2f",
                                        legend[mY],
-                                       mBB->MaxCorner()[mY] * mPrismaticFactor));
+                                       mBB->max()[mY] * mPrismaticFactor));
     painter.drawText(1, mViewport.Y() - font_size,
                      QString().sprintf("%0.2f/%0.2f",
-                                       mBB->MinCorner()[mY] * mPrismaticFactor,
-                                       mBB->MinCorner()[mX] * mPrismaticFactor));
+                                       mBB->min()[mY] * mPrismaticFactor,
+                                       mBB->min()[mX] * mPrismaticFactor));
     painter.drawText(mViewport.X() - font_size * 10, mViewport.Y() - font_size,
                      QString().sprintf("%c: %0.2f",
                                        legend[mX],
-                                       mBB->MaxCorner()[mX] * mPrismaticFactor));
+                                       mBB->max()[mX] * mPrismaticFactor));
     painter.end();
 }
 

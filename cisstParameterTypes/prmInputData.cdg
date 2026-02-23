@@ -3,7 +3,7 @@
 
 inline-header {
 
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -21,13 +21,13 @@ class {
 
     member {
         name AnalogInputs;
-        type vctDoubleVec;
+        type Eigen::ArrayXd;
         description Analog inputs;
     }
 
     member {
         name DigitalInputs;
-        type vctBoolVec;
+        type Eigen::ArrayX<bool>;
         description Digital inputs;
     }
 

@@ -25,35 +25,34 @@ prmVelocityJointSet::~prmVelocityJointSet()
 
 void prmVelocityJointSet::SetSize(size_type size)
 {
-    MaskMember.SetSize(size);
-    GuardMember.SetSize(size);
-    GoalMember.SetSize(size);
-    AccelerationMember.SetSize(size);
-    DecelerationMember.SetSize(size);
-
+    MaskMember.resize(size);
+    GuardMember.resize(size);
+    GoalMember.resize(size);
+    AccelerationMember.resize(size);
+    DecelerationMember.resize(size);
 }
 
 void prmVelocityJointSet::SerializeRaw(std::ostream & outputStream) const
 {
     BaseType::SerializeRaw(outputStream);
 
-    MaskMember.SerializeRaw(outputStream);
-    GuardMember.SerializeRaw(outputStream);
-    GoalMember.SerializeRaw(outputStream);
-    AccelerationMember.SerializeRaw(outputStream);
-    DecelerationMember.SerializeRaw(outputStream);
-    cmnSerializeRaw(outputStream,IsPositionGuardedMember);
-
+    cmnData<Eigen::ArrayX<bool>>::SerializeBinary(MaskMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(GuardMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(GoalMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(AccelerationMember, outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(DecelerationMember, outputStream);
+    cmnSerializeRaw(outputStream, IsPositionGuardedMember);
 }
 
 void prmVelocityJointSet::DeSerializeRaw(std::istream & inputStream)
 {
     BaseType::DeSerializeRaw(inputStream);
-    MaskMember.DeSerializeRaw(inputStream);
-    GuardMember.DeSerializeRaw(inputStream);
-    GoalMember.DeSerializeRaw(inputStream);
-    AccelerationMember.DeSerializeRaw(inputStream);
-    DecelerationMember.DeSerializeRaw(inputStream);
-    cmnDeSerializeRaw(inputStream,IsPositionGuardedMember);
 
+    cmnDataFormat format;
+    cmnData<Eigen::ArrayX<bool>>::DeSerializeBinary(MaskMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(GuardMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(GoalMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(AccelerationMember, inputStream, format, format);
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(DecelerationMember, inputStream, format, format);
+    cmnDeSerializeRaw(inputStream,IsPositionGuardedMember);
 }

@@ -33,7 +33,7 @@ class CISST_EXPORT prmPositionCartesianArrayGetQtWidget : public QWidget, public
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
- public:
+public:
     prmPositionCartesianArrayGetQtWidget(const std::string & componentName, double periodInSeconds = 50.0 * cmn_ms);
     ~prmPositionCartesianArrayGetQtWidget() {}
 
@@ -41,23 +41,23 @@ class CISST_EXPORT prmPositionCartesianArrayGetQtWidget : public QWidget, public
     void Startup(void) override;
     void Cleanup(void) override;
 
- protected:
+protected:
     virtual void closeEvent(QCloseEvent * event) override;
 
- private slots:
+private slots:
     void timerEvent(QTimerEvent * event) override;
 
- private:
+private:
     //! setup GUI
     void setupUi(void);
     int TimerPeriodInMilliseconds;
 
- protected:
+protected:
     struct ControllerStruct {
         mtsFunctionRead measured_cp_array;
     } Controller;
 
- private:
+private:
     vctPose3DQtWidget * QVPoses;
 };
 

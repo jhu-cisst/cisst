@@ -39,8 +39,8 @@ vctForceTorqueQtWidget::vctForceTorqueQtWidget(const DisplayModeType displayMode
     DisplayMode(UNDEFINED_WIDGET),
     CurrentWidget(0)
 {
-    mForce.Zeros();
-    mTorque.Zeros();
+    mForce.fill(0.0);
+    mTorque.fill(0.0);
 
     QVBoxLayout * forceTorqueLayout = new QVBoxLayout;
     forceTorqueLayout->setContentsMargins(0, 0, 0, 0);
@@ -124,7 +124,7 @@ void vctForceTorqueQtWidget::UpdateCurrentWidget(void)
     case TEXT_WIDGET:
         ForceWidget->SetValue(mForce);
         TorqueWidget->SetValue(mTorque);
-        NormWidget->SetValue(vct1(mForce.Norm()));
+        NormWidget->SetValue(Eigen::Vector<double, 1>(mForce.norm()));
         break;
     case PLOT_2D_WIDGET:
         Plot2DWidget->SetValue(mTime, mForce, mTorque);

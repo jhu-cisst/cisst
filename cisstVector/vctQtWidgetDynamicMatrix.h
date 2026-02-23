@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QTableWidget>
 
-#include <cisstVector/vctDynamicMatrix.h>
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstVector/vctExportQt.h>
@@ -36,7 +36,7 @@ class CISST_EXPORT vctQtWidgetDynamicMatrixDoubleRead: public QTableWidget
     Q_OBJECT;
  public:
     vctQtWidgetDynamicMatrixDoubleRead(void);
-    virtual bool SetValue(const vctDynamicMatrix<double> & value);
+    virtual bool SetValue(const Eigen::MatrixXd& value);
 };
 
 class CISST_EXPORT vctQtWidgetDynamicMatrixDoubleWrite: public QTableWidget
@@ -44,8 +44,8 @@ class CISST_EXPORT vctQtWidgetDynamicMatrixDoubleWrite: public QTableWidget
     Q_OBJECT;
  public:
     vctQtWidgetDynamicMatrixDoubleWrite(void);
-    virtual bool SetValue(const vctDynamicMatrix<double> & value);
-    virtual bool GetValue(vctDynamicMatrix<double> & placeHolder) const;
+    virtual bool SetValue(const Eigen::MatrixXd& value);
+    virtual bool GetValue(Eigen::MatrixXd& placeHolder) const;
 };
 
 
@@ -55,7 +55,7 @@ class CISST_EXPORT vctQtWidgetDynamicMatrixIntRead: public QTableWidget
     Q_OBJECT;
  public:
     vctQtWidgetDynamicMatrixIntRead(void);
-    virtual bool SetValue(const vctDynamicMatrix<int> & value);
+    virtual bool SetValue(const Eigen::MatrixXi& value);
 };
 
 class CISST_EXPORT vctQtWidgetDynamicMatrixIntWrite: public QTableWidget
@@ -63,8 +63,8 @@ class CISST_EXPORT vctQtWidgetDynamicMatrixIntWrite: public QTableWidget
     Q_OBJECT;
  public:
     vctQtWidgetDynamicMatrixIntWrite(void);
-    virtual bool SetValue(const vctDynamicMatrix<int> & value);
-    virtual bool GetValue(vctDynamicMatrix<int> & placeHolder) const;
+    virtual bool SetValue(const Eigen::MatrixXi& value);
+    virtual bool GetValue(Eigen::MatrixXi& placeHolder) const;
 };
 
 
@@ -74,7 +74,7 @@ class CISST_EXPORT vctQtWidgetDynamicMatrixBoolRead: public QTableWidget
     Q_OBJECT;
  public:
     vctQtWidgetDynamicMatrixBoolRead(void);
-    virtual bool SetValue(const vctDynamicMatrix<bool> & value);
+    virtual bool SetValue(const Eigen::MatrixX<bool>& value);
 };
 
 class CISST_EXPORT vctQtWidgetDynamicMatrixBoolWrite: public QTableWidget
@@ -82,8 +82,8 @@ class CISST_EXPORT vctQtWidgetDynamicMatrixBoolWrite: public QTableWidget
     Q_OBJECT;
  public:
     vctQtWidgetDynamicMatrixBoolWrite(void);
-    virtual bool SetValue(const vctDynamicMatrix<bool> & value);
-    virtual bool GetValue(vctDynamicMatrix<bool> & placeHolder) const;
+    virtual bool SetValue(const Eigen::MatrixX<bool>& value);
+    virtual bool GetValue(Eigen::MatrixX<bool>& placeHolder) const;
 };
 
 #endif // _vctQtWidgetDynamicMatrix_h

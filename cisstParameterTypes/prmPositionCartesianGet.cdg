@@ -7,7 +7,8 @@
 // In general, the cisst data generator preserves the order of declaration, i.e. the generated
 // code follows the order of declaration in the data file.
 inline-header {
-#include <cisstVector/vctTransformationTypes.h>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -53,7 +54,7 @@ class {
     // an actual member, here 'is-data' is implicitely set to 'true'
     member {
         name Position;
-        type vctFrm3;
+        type Eigen::Isometry3d;
         description Desired position;
     }
 

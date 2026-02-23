@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Marcin Balicki
+  Author(s):    Marcin Balicki
   Created on:   2008-09-14
 
   (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
@@ -27,11 +27,12 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmRobotState_h
 
 //basic includes
-#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsMacros.h>
 #include <cisstMultiTask/mtsVector.h>
-#include <cisstVector/vctTransformationTypes.h>
+
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 // for conversion methods
 #include <cisstParameterTypes/prmStateJoint.h>
@@ -81,37 +82,37 @@ public:
 
     /*! Set and Get methods for the Joint position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDynamicVector<std::string>, JointName);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(std::vector<std::string>, JointName);
     //@}
 
     /*! Set and Get methods for the Joint position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPosition);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, JointPosition);
     //@}
 
     /*! Set and Get methods for the Joint Velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocity);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, JointVelocity);
     //@}
 
     /*! Set and Get methods for goal joint position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionGoal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, JointPositionGoal);
     //@}
 
     /*! Set and Get methods for goal joint velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityGoal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, JointVelocityGoal);
     //@}
 
     /*! Set and Get methods for error for joint position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionError);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, JointPositionError);
     //@}
 
     /*! Set and Get methods for error for joint velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityError);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, JointVelocityError);
     //@}
 
     /*! Set and Get methods for reference frame. */
@@ -126,42 +127,39 @@ public:
 
     /*! Set and Get methods for cartesian position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPosition);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, CartesianPosition);
     //@}
 
     /*! Set and Get methods for cartesian velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocity);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, CartesianVelocity);
     //@}
 
     /*! Set and Get methods for gaol cartesian position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionGoal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, CartesianPositionGoal);
     //@}
 
     /*! Set and Get methods for goal cartesian velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityGoal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, CartesianVelocityGoal);
     //@}
 
     /*! Set and Get methods for cartesian position error. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionError);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, CartesianPositionError);
     //@}
 
     /*! Set and Get methods for cartesian velocity error. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityError);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, CartesianVelocityError);
     //@}
 
     /*! Set and Get methods for EndEffector Frame wrt base robot frame.
         Slightly redundant. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctFrm3, EndEffectorFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::Isometry3d, EndEffectorFrame);
     //@}
-
-
-
 
 }; // _prmRobotState_h
 

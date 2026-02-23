@@ -2,10 +2,10 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstParameterTypes/prmSetpointMode.h>
+
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -23,32 +23,39 @@ class {
 
     member {
         name TaskFrame;
-        type vctFrm3;
-        default vctFrm3(); // identity
+        type Eigen::Isometry3d;
+        default Eigen::Isometry3d::Identity();
     }
 
     member {
         name Position;
-        type vctFrm3;
-        default vctFrm3(); // identity
+        type Eigen::Isometry3d;
+        default Eigen::Isometry3d::Identity();
     }
 
     member {
         name Velocity;
-        type vct6;
-        default vct6(0.0);
+        type Eigen::Vector<double, 6>;
+        default Eigen::Vector<double, 6>::Zero();
     }
 
     member {
         name Force;
-        type vct6;
-        default vct6(0.0);
+        type Eigen::Vector<double, 6>;
+        default Eigen::Vector<double, 6>::Zero();
     }
 
     member {
         name AxisMode;
-        type vctFixedSizeVector<prmSetpointMode, 6>;
-        default vctFixedSizeVector<prmSetpointMode, 6>(prmSetpointMode::NONE, prmSetpointMode::NONE, prmSetpointMode::NONE, prmSetpointMode::NONE, prmSetpointMode::NONE, prmSetpointMode::NONE);
+        type Eigen::Array<prmSetpointMode, 6, 1>;
+        default Eigen::Array<prmSetpointMode, 6, 1>(
+            prmSetpointMode::NONE,
+            prmSetpointMode::NONE,
+            prmSetpointMode::NONE,
+            prmSetpointMode::NONE,
+            prmSetpointMode::NONE,
+            prmSetpointMode::NONE
+        );
     }
 
     inline-header {

@@ -16,8 +16,11 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include "cisstCommon/cmnConstants.h"
 #include <cisstConfig.h>
 #include <cisstCommon/cmnPortability.h>
+
+#include <unsupported/Eigen/EulerAngles>
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
@@ -40,9 +43,6 @@ http://www.cisst.org/cisst/license.txt.
 // all these widgets should be replaced to use static vectors/matrices
 #include <cisstVector/vctQtWidgetDynamicVector.h>
 #include <cisstVector/vctQtWidgetDynamicMatrix.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctDynamicMatrixTypes.h>
-
 
 // =============================================
 // vctQtWidgetRotationOpenGL
@@ -50,7 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 
 vctQtWidgetRotationOpenGL::vctQtWidgetRotationOpenGL(void)
 {
-    mRotation.SetAll(0.0);
+    mRotation.fill(0.0);
     setFocusPolicy(Qt::StrongFocus);
     setToolTip(QString("'z' to reset orientation"));
     setMinimumHeight(100);
@@ -62,21 +62,23 @@ vctQtWidgetRotationOpenGL::vctQtWidgetRotationOpenGL(void)
 void vctQtWidgetRotationOpenGL::ResetOrientation(void)
 {
     // start with default Z up, x toward left, y towards right
-    mCurrentOrientation =
-        vctQuatRot3(vctRodRot3(0.1 * cmnPI, 0.0, 0.0)) *
-        vctQuatRot3(vctRodRot3(0.0, -0.75 * cmnPI, 0.0)) *
-        vctQuatRot3(vctRodRot3(-0.5 * cmnPI, 0.0, 0.0));
-    mStartMousePosition = 0;
-    mDeltaOrientation = vctQuatRot3::Identity();
+    mCurrentOrientation = Eigen::Quaterniond(
+        Eigen::AngleAxisd(0.1 * cmnPI, Eigen::Vector3d::UnitX()) *
+        Eigen::AngleAxisd(-0.75 * cmnPI, Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd(-0.5 * cmnPI, Eigen::Vector3d::UnitX())
+    );
+    mStartMousePosition = Eigen::Vector2i::Zero();
+    mDeltaOrientation = Eigen::Quaterniond::Identity();
 }
 
-void vctQtWidgetRotationOpenGL::SetValue(const vctMatRot3 & rot)
+void vctQtWidgetRotationOpenGL::SetValue(const Eigen::Matrix3d& rot)
 {
-    vctEulerZYXRotation3 rotEuler;
-    rotEuler.From(rot);
-    mRotation.X() = rotEuler.gamma() * cmn180_PI;  // x
-    mRotation.Y() = rotEuler.beta() * cmn180_PI;   // y
-    mRotation.Z() = rotEuler.alpha() * cmn180_PI;  // z
+    using OrderZYX = Eigen::EulerSystem<Eigen::EULER_Z, Eigen::EULER_Y, Eigen::EULER_X>;
+    Eigen::EulerAngles<double, OrderZYX> euler(rot);
+
+    mRotation.x() = euler.gamma() * cmn180_PI; // x
+    mRotation.y() = euler.beta() * cmn180_PI;  // y
+    mRotation.z() = euler.alpha() * cmn180_PI; // z
 
     // update GL display
     update();
@@ -86,11 +88,11 @@ void vctQtWidgetRotationOpenGL::mouseMoveEvent(QMouseEvent * event)
 {
     const double sensitivity = 0.01;
     if (event->buttons() & Qt::LeftButton) {
-        const vctInt2 newMousePosition(event->x(), event->y());
-        if (mStartMousePosition != 0) {
-            const vct2 deltaMouse = sensitivity * vct2(newMousePosition - mStartMousePosition);
-            vctRodRot3 deltaRot(deltaMouse.Y(), deltaMouse.X(), 0.0);
-            mDeltaOrientation.From(deltaRot);
+        const Eigen::Vector2i newMousePosition(event->x(), event->y());
+        if (mStartMousePosition.array().any()) {
+            const Eigen::Vector2d deltaMouse = sensitivity * (newMousePosition - mStartMousePosition).cast<double>();
+            Eigen::Vector3d rodrigues(deltaMouse.x(), deltaMouse.y(), 0.0);
+            mDeltaOrientation = Eigen::Quaterniond(Eigen::AngleAxis(rodrigues.norm(), rodrigues.normalized()));
             paintGL();
         } else {
             mStartMousePosition = newMousePosition;
@@ -100,10 +102,10 @@ void vctQtWidgetRotationOpenGL::mouseMoveEvent(QMouseEvent * event)
 
 void vctQtWidgetRotationOpenGL::mouseReleaseEvent(QMouseEvent *)
 {
-    mStartMousePosition = 0;
+    mStartMousePosition = Eigen::Vector2i::Zero();
     // save current rotation
     mCurrentOrientation = mDeltaOrientation * mCurrentOrientation;
-    mDeltaOrientation = vctQuatRot3::Identity();
+    mDeltaOrientation = Eigen::Quaterniond::Identity();
 }
 
 void vctQtWidgetRotationOpenGL::keyPressEvent(QKeyEvent * event)
@@ -137,8 +139,8 @@ void vctQtWidgetRotationOpenGL::paintGL(void)
 
     // user orientation
     glTranslatef(0.0f, 0.0f, -10.0f);
-    vctAxAnRot3 rot(mDeltaOrientation * mCurrentOrientation);
-    glRotated(rot.Angle() * cmn180_PI, rot.Axis().X(), rot.Axis().Y(), rot.Axis().Z());
+    Eigen::AngleAxisd rot(mDeltaOrientation * mCurrentOrientation);
+    glRotated(rot.angle() * cmn180_PI, rot.axis().x(), rot.axis().y(), rot.axis().z());
 
     // draw reference coordinate frame here
     glEnable(GL_LINE_STIPPLE);
@@ -165,9 +167,9 @@ void vctQtWidgetRotationOpenGL::paintGL(void)
     glDisable(GL_LINE_STIPPLE);
 
     // orientation
-    glRotatef(mRotation.Z(), 0.0, 0.0, 1.0);
-    glRotatef(mRotation.Y(), 0.0, 1.0, 0.0);
-    glRotatef(mRotation.X(), 1.0, 0.0, 0.0);
+    glRotatef(mRotation.z(), 0.0, 0.0, 1.0);
+    glRotatef(mRotation.y(), 0.0, 1.0, 0.0);
+    glRotatef(mRotation.x(), 1.0, 0.0, 0.0);
 
     // draw current frame
     glColor3f(1.0f, 0.0f, 0.0f);
@@ -321,34 +323,38 @@ void vctQtWidgetRotationDoubleRead::ShowContextMenu(const QPoint & pos)
 
 void vctQtWidgetRotationDoubleRead::UpdateCurrentWidget(void)
 {
-    vctAxAnRot3 rotAxAn;
-    vctQuatRot3 rotQuat;
-    vctEulerZYZRotation3 rotEulerZYZ;
-    vctEulerZYXRotation3 rotEulerZYX;
+    using OrderZYZ = Eigen::EulerSystem<Eigen::EULER_Z, Eigen::EULER_Y, Eigen::EULER_Z>;
+    using OrderZYX = Eigen::EulerSystem<Eigen::EULER_Z, Eigen::EULER_Y, Eigen::EULER_X>;
+
+    Eigen::AngleAxisd axis_angle;
+    Eigen::Quaterniond quat;
+    Eigen::EulerAngles<double, OrderZYZ> eulerZYZ;
+    Eigen::EulerAngles<double, OrderZYX> eulerZYX;
+
     // compute the value based on the internal Rotation
     switch (DisplayMode) {
     case MATRIX_WIDGET:
-        MatrixWidget->SetValue(vctDoubleMat(this->Rotation));
+        MatrixWidget->SetValue(Rotation);
         break;
     case AXIS_ANGLE_WIDGET:
-        rotAxAn.FromRaw(Rotation);
-        AxisWidget->SetValue(vctDoubleVec(rotAxAn.Axis()));
-        AngleWidget->SetValue(vctDoubleVec(1, rotAxAn.Angle() * mRevoluteFactor));
+        axis_angle = Eigen::AngleAxisd(Rotation);
+        AxisWidget->SetValue(axis_angle.axis());
+        AngleWidget->SetValue(Eigen::Vector<double, 1>(axis_angle.angle() * mRevoluteFactor));
         break;
     case QUATERNION_WIDGET:
-        rotQuat.FromRaw(Rotation);
-        QuaternionWidget->SetValue(vctDoubleVec(rotQuat));
+        quat = Eigen::Quaterniond(Rotation);
+        QuaternionWidget->SetValue(quat.coeffs());
         break;
     case OPENGL_WIDGET:
         OpenGLWidget->SetValue(Rotation);
         break;
     case EULERZYZ_WIDGET:
-        rotEulerZYZ.FromRaw(Rotation);
-        EulerZYZWidget->SetValue(vctDoubleVec(rotEulerZYZ.GetAngles() * mRevoluteFactor));
+        eulerZYZ = Eigen::EulerAngles<double, OrderZYX>(Rotation);
+        EulerZYZWidget->SetValue(eulerZYZ.angles() * mRevoluteFactor);
         break;
     case EULERZYX_WIDGET:
-        rotEulerZYX.FromRaw(Rotation);
-        EulerZYXWidget->SetValue(vctDoubleVec(rotEulerZYX.GetAngles() * mRevoluteFactor));
+        eulerZYX = Eigen::EulerAngles<double, OrderZYX>(Rotation);
+        EulerZYXWidget->SetValue(eulerZYX.angles() * mRevoluteFactor);
         break;
     default:
         break;

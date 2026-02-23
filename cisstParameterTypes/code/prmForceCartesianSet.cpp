@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Rajesh Kumar, Anton Deguet
+  Author(s):    Rajesh Kumar, Anton Deguet
   Created on:   2008-03-12
 
   (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
@@ -19,10 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmForceCartesianSet.h>
 
-prmForceCartesianSet::~prmForceCartesianSet()
-{
-}
-
+prmForceCartesianSet::~prmForceCartesianSet() {}
 
 void prmForceCartesianSet::ToStream(std::ostream & outputStream) const
 {
@@ -35,21 +32,31 @@ void prmForceCartesianSet::ToStreamRaw(std::ostream & outputStream, const char d
                                           bool headerOnly, const std::string & headerPrefix) const {
     BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
     outputStream << delimiter;
-    this->ForceMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    
+    if (headerOnly) {
+        outputStream << cmnData<ForceType>::SerializeDescription(ForceMember, delimiter, headerPrefix + "-force");
+    } else {
+        cmnData<ForceType>::SerializeText(ForceMember, outputStream, delimiter);
+    }
     outputStream << delimiter;
-    this->MaskMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    if (headerOnly) {
+        outputStream << cmnData<MaskType>::SerializeDescription(MaskMember, delimiter, headerPrefix + "-mask");
+    } else {
+        cmnData<MaskType>::SerializeText(MaskMember, outputStream, delimiter);
+    }
 }
 
 void prmForceCartesianSet::SerializeRaw(std::ostream & outputStream) const 
 {
     BaseType::SerializeRaw(outputStream);
-    this->ForceMember.SerializeRaw(outputStream);
-    this->MaskMember.SerializeRaw(outputStream);
+    cmnData<ForceType>::SerializeBinary(ForceMember, outputStream);
+    cmnData<MaskType>::SerializeBinary(MaskMember, outputStream);
 }
 
 void prmForceCartesianSet::DeSerializeRaw(std::istream & inputStream) 
 {
     BaseType::DeSerializeRaw(inputStream);
-    this->ForceMember.DeSerializeRaw(inputStream);
-    this->MaskMember.DeSerializeRaw(inputStream);
+    cmnDataFormat format;
+    cmnData<ForceType>::DeSerializeBinary(ForceMember, inputStream, format, format);
+    cmnData<MaskType>::DeSerializeBinary(MaskMember, inputStream, format, format);
 }

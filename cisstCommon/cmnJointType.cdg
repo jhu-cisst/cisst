@@ -4,6 +4,7 @@
 inline-header {
 
 #include <cisstCommon/cmnUnits.h>
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstCommon/cmnExport.h>
@@ -43,23 +44,23 @@ enum {
 
 inline-header {
 
-template <template<class> class _vector_type>
-void cmnJointTypeToFactor(const _vector_type<cmnJointType> & types,
+inline void cmnJointTypeToFactor(const std::vector<cmnJointType>& types,
                           const double prismaticFactor,
                           const double revoluteFactor,
-                          _vector_type<double> & factors)
+                          Eigen::VectorXd& factors)
 {
+    factors.resize(static_cast<Eigen::Index>(types.size()));
     // set unitFactor;
     for (size_t i = 0; i < types.size(); i++) {
         switch (types.at(i)) {
         case CMN_JOINT_PRISMATIC:
-            factors.at(i) = prismaticFactor;
+            factors(i) = prismaticFactor;
             break;
         case CMN_JOINT_REVOLUTE:
-            factors.at(i) = revoluteFactor;
+            factors(i) = revoluteFactor;
             break;
         default:
-            factors.at(i) = 1.0;
+            factors(i) = 1.0;
             break;
         }
     }

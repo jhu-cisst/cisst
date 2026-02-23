@@ -19,11 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmMaskedVector_h
 #define _prmMaskedVector_h
 
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstCommon/cmnDataFormat.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstParameterTypes/prmExport.h>
 
-//#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -35,10 +35,10 @@ class prmMaskedVector: public mtsGenericObject
     CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
-    typedef size_t size_type;
-    typedef prmMaskedVector<_elementType> ThisType;
     typedef mtsGenericObject BaseType;
-    typedef vctDynamicVector<_elementType> DataType;
+    typedef prmMaskedVector<_elementType> ThisType;
+    typedef Eigen::VectorX<_elementType> DataType;
+    typedef Eigen::ArrayX<bool> MaskType;
 
 protected:
     /*! Vector of values for this container */
@@ -48,7 +48,7 @@ protected:
 
     /*! Masks for the cooresponding vector */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(MaskType, Mask);
     //@}
 
 public:
@@ -61,21 +61,19 @@ public:
     /*! Set vector same size for each element, this is required if the above constructor is not used
       Sets all elements to 0
     */
-    inline void SetSize(const size_type size) {
-        DataMember.SetSize(size);
-        MaskMember.SetSize(size);
-        DataMember.Zeros();
-        MaskMember.Zeros();
+    inline void SetSize(const size_t size) {
+        DataMember.resize(size);
+        MaskMember.resize(size);
+        DataMember.fill(0.0);
+        MaskMember.fill(false);
     }
 
-
     /*! Constructor with memory allocation for a given size. */
-    inline prmMaskedVector(const size_type size) {
+    inline prmMaskedVector(const size_t size) {
         SetSize(size);
     }
 
-    inline prmMaskedVector(const DataType & data,
-                           const vctBoolVec & mask):
+    inline prmMaskedVector(const DataType& data, const MaskType& mask):
         DataMember(data),
         MaskMember(mask)
     {
@@ -94,7 +92,7 @@ public:
     inline ~prmMaskedVector() {}
 
     /*! To stream human readable output */
-    virtual  std::string ToString(void) const {
+    virtual std::string ToString(void) const {
         std::stringstream outputStream;
         ToStream(outputStream);
         return outputStream.str();
@@ -103,21 +101,22 @@ public:
     /*! To stream human readable output */
     void ToStream(std::ostream & outputStream) const override {
         mtsGenericObject::ToStream(outputStream);
-        outputStream << ", " <<DataMember << ", " << MaskMember;
+        outputStream << ", " << DataMember << ", " << MaskMember;
     }
 
     /*! Binary serialization */
     void SerializeRaw(std::ostream & outputStream) const override {
         BaseType::SerializeRaw(outputStream);
-        MaskMember.SerializeRaw(outputStream);
-        DataMember.SerializeRaw(outputStream);
+        cmnData<MaskType>::SerializeBinary(MaskMember, outputStream);
+        cmnData<DataType>::SerializeBinary(DataMember, outputStream);
     }
 
     /*! Binary deserialization */
     void DeSerializeRaw(std::istream & inputStream) override {
         BaseType::DeSerializeRaw(inputStream);
-        MaskMember.DeSerializeRaw(inputStream);
-        DataMember.DeSerializeRaw(inputStream);
+        cmnDataFormat local, remote;
+        cmnData<MaskType>::DeSerializeBinary(MaskMember, inputStream, local, remote);
+        cmnData<DataType>::DeSerializeBinary(DataMember, inputStream, local, remote);
     }
 };
 

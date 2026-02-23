@@ -2,8 +2,8 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Rajesh Kumar, Anton Deguet
-  Created on:	2008-03-12
+  Author(s):  Rajesh Kumar, Anton Deguet
+  Created on: 2008-03-12
 
   (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -26,8 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmVelocityCartesianSet_h
 #define _prmVelocityCartesianSet_h
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstParameterTypes/prmMotionBase.h>
+
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -41,45 +42,45 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
 {
-	CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
- protected:
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+protected:
 
     typedef prmMotionBase BaseType;
 
     /*! Linear goal (time derivative of magnitude of the vector to goal). */
-    vctDouble3 Velocity;
+    Eigen::Vector3d Velocity;
 
     /*! Vector of rate of orientation change */
-    vctDouble3 VelocityAngular;
+    Eigen::Vector3d VelocityAngular;
 
     /*! desired time derivative of linear velocity */
-    vctDouble3 Acceleration;
+    Eigen::Vector3d Acceleration;
 
     /*! desired time derivative of angular velocity */
-    vctDouble3 AccelerationAngular;
+    Eigen::Vector3d AccelerationAngular;
 
     /*! masks indicating whether velocity is valid
        (probably not necessary, since 0 velocity can be specified) */
-    vctBool6 Mask;
+    Eigen::Array<bool, 6, 1> Mask;
 
  public:
-	/*! default constructor */
+    /*! default constructor */
     inline prmVelocityCartesianSet()
     {
-        Velocity.SetAll(0.0);
-        VelocityAngular.SetAll(0.0);
-        Acceleration.SetAll(0.0);
-        AccelerationAngular.SetAll(0.0);
-        Mask.SetAll(false);
+        Velocity.fill(0.0);
+        VelocityAngular.fill(0.0);
+        Acceleration.fill(0.0);
+        AccelerationAngular.fill(0.0);
+        Mask.fill(false);
     }
 
     /*! constructor with all parameters. */
 
-    prmVelocityCartesianSet(const vctDouble3 & velocity,
-                            const vctDouble3 & velocityAngular,
-                            const vctDouble3 & acceleration,
-                            const vctDouble3 & accelerationAngular,
-                            const vctBool6 & mask):
+    prmVelocityCartesianSet(const Eigen::Vector3d& velocity,
+                            const Eigen::Vector3d& velocityAngular,
+                            const Eigen::Vector3d& acceleration,
+                            const Eigen::Vector3d& accelerationAngular,
+                            const Eigen::Array<bool, 6, 1>& mask):
         Velocity(velocity),
         VelocityAngular(velocityAngular),
         Acceleration(acceleration),
@@ -90,134 +91,130 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     /*! destructor */
     virtual ~prmVelocityCartesianSet();
 
-	/*! Set translation and angular velocities only
+    /*! Set translation and angular velocities only
       \param velocities (3 translational and 3 angular velocities)
       \return void
     */
-    inline void SetGoal(const vctDouble6 & velocities)
+    inline void SetGoal(const Eigen::Vector<double, 6>& velocities)
     {
-        this->Velocity[0] = velocities[0];
-        this->Velocity[1] = velocities[1];
-        this->Velocity[2] = velocities[2];
-        this->VelocityAngular[0] = velocities[3];
-        this->VelocityAngular[1] = velocities[4];
-        this->VelocityAngular[2] = velocities[5];
-        Mask.SetAll(true);
+        Velocity = velocities.head<3>();
+        VelocityAngular = velocities.tail<3>();
+        Mask.fill(true);
     }
 
     /*Set Translational Velocities only
       \param velocity translational velocity
       \return void
     */
-    inline void SetTranslationGoal(const vctDouble3 & velocity)
+    inline void SetTranslationGoal(const Eigen::Vector3d& velocity)
     {
-        this->Velocity.Assign(velocity);
-        Mask[0] = Mask[1] = Mask[2] = true;
+        Velocity = velocity;
+        Mask.head<3>().fill(true);
     }
 
     /*! Set angular velocity only
       \param velocityAngular angular velocity
       \return void
     */
-    inline void SetRotationGoal(const vctDouble3 & velocityAngular)
+    inline void SetRotationGoal(const Eigen::Vector3d& velocityAngular)
     {
-        this->VelocityAngular.Assign(velocityAngular);
-        Mask[3] = Mask[4] = Mask[5] = true;
+        VelocityAngular = velocityAngular;
+        Mask.tail<3>().fill(true);
     }
 
     /*! Get current goal
-      \return vctDouble3 current goal velocity
+      \return current goal velocity
     */
-    inline vctDouble3 GetGoal(void) const
+    inline Eigen::Vector3d GetGoal(void) const
     {
-        return this->Velocity;
+        return Velocity;
     }
 
     /*! Set the velocity parameter
       \param velocity planned velocity
       \return void
     */
-    inline void SetVelocity(const vctDouble3 & velocity)
+    inline void SetVelocity(const Eigen::Vector3d& velocity)
     {
-        this->Velocity = velocity;
-        Mask[0] = Mask[1] = Mask[2] = true;
+        Velocity = velocity;
+        Mask.head<3>().fill(true);
     }
 
     /*! Get the velocity parameter
-      \return  vctDouble3 current planned velocity
+      \return current planned velocity
     */
-    inline vctDouble3 GetVelocity(void) const
+    inline Eigen::Vector3d GetVelocity(void) const
     {
-        return this->Velocity;
+        return Velocity;
     }
 
     /*! Set the angular velocity parameter
       \param velocityAngular planned angular velocity
       \return void
     */
-    inline void SetAngularVelocity(const vctDouble3 & velocityAngular)
+    inline void SetAngularVelocity(const Eigen::Vector3d& velocityAngular)
     {
-        this->VelocityAngular = velocityAngular;
-        Mask[3] = Mask[4] = Mask[5] = true;
+        VelocityAngular = velocityAngular;
+        Mask.tail<3>().fill(true);
     }
 
     /*! Get the angular velocity parameter
-      \return  vctDouble3 current planned angular velocity
+      \return current planned angular velocity
     */
-    inline vctDouble3 GetAngularVelocity(void) const
+    inline Eigen::Vector3d GetAngularVelocity(void) const
     {
-        return this->VelocityAngular;
+        return VelocityAngular;
     }
 
     /*! Set the acceleration parameters only
       \param acceleration target acceleration vector
       \return void
     */
-    inline void SetAcceleration(const vctDouble3 & acceleration)
+    inline void SetAcceleration(const Eigen::Vector3d& acceleration)
     {
-        this->Acceleration = acceleration;
+        Acceleration = acceleration;
     }
 
     /*! Get the current acceleration parameters
-      \return vctDouble3 acceleration vector
+      \return acceleration vector
     */
-	inline vctDouble3 GetAcceleration(void) const
+    inline Eigen::Vector3d GetAcceleration(void) const
     {
-        return this->Acceleration;
+        return Acceleration;
     }
 
     /*! Set the deceleration parameters only
       \param acceleration target angular acceleration vector
       \return void
     */
-    inline void SetAngularAcceleration(const vctDouble3 & accelerationAngular)
+    inline void SetAngularAcceleration(const Eigen::Vector3d& accelerationAngular)
     {
-        this->AccelerationAngular = accelerationAngular;
+        AccelerationAngular = accelerationAngular;
     }
 
     /*! Get the current angular acceleration parameters
-      \return vctDouble3 angular acceleration vector
+      \return angular acceleration vector
     */
-	inline vctDouble3 GetAngularAcceleration(void) const
+    inline Eigen::Vector3d GetAngularAcceleration(void) const
     {
-        return this->AccelerationAngular;
+        return AccelerationAngular;
     }
 
     /*! Set the mask only
       \param mask mask for moves
       \return void
     */
-    inline void SetMask(const vctBool6 & mask)
+    inline void SetMask(const Eigen::Array<bool, 6, 1> & mask)
     {
-        this->Mask = mask;
+        Mask = mask;
     }
 
     /*! Get the current mask parameter
       \return prmBoolVec current mask
     */
-	inline vctBool6 GetMask(void) const
+    inline Eigen::Array<bool, 6, 1> GetMask(void) const
     {
-        return this->Mask;
+        return Mask;
     }
 
 

@@ -17,9 +17,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-// system include
-#include <iostream>
-
 // Qt includes
 #include <QMessageBox>
 #include <QCloseEvent>
@@ -111,7 +108,7 @@ void vctForceTorque3DQtWidget::setupUi(void)
     SlotPlotIndex(PlotIndex);
 }
 
-void vctForceTorque3DQtWidget::SetValue(const vct3 & force, const vct3 & torque)
+void vctForceTorque3DQtWidget::SetValue(const Eigen::Vector3d& force, const Eigen::Vector3d& torque)
 {
     // make sure we should update the display
     if (this->isHidden()) {

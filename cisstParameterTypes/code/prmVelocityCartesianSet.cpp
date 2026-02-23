@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Rajesh Kumar, Anton Deguet
+  Author(s):    Rajesh Kumar, Anton Deguet
   Created on:   2008-03-12
 
   (C) Copyright 2008-2022 Johns Hopkins University (JHU), All Rights Reserved.
@@ -16,28 +16,28 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnDataFormat.h>
 #include <cisstParameterTypes/prmVelocityCartesianSet.h>
 
-prmVelocityCartesianSet::~prmVelocityCartesianSet()
-{
-}
+prmVelocityCartesianSet::~prmVelocityCartesianSet() {}
 
 void prmVelocityCartesianSet::SerializeRaw(std::ostream & outputStream) const
 {
     BaseType::SerializeRaw(outputStream);
-    Velocity.SerializeRaw(outputStream);
-    VelocityAngular.SerializeRaw(outputStream);
-    Acceleration.SerializeRaw(outputStream);
-    AccelerationAngular.SerializeRaw(outputStream);
-    Mask.SerializeRaw(outputStream);
+    cmnData<Eigen::Vector3d>::SerializeBinary(Velocity, outputStream);
+    cmnData<Eigen::Vector3d>::SerializeBinary(VelocityAngular, outputStream);
+    cmnData<Eigen::Vector3d>::SerializeBinary(Acceleration, outputStream);
+    cmnData<Eigen::Vector3d>::SerializeBinary(AccelerationAngular, outputStream);
+    cmnData<Eigen::Array<bool, 6, 1>>::SerializeBinary(Mask, outputStream);
 }
 
 void prmVelocityCartesianSet::DeSerializeRaw(std::istream & inputStream)
 {
     BaseType::DeSerializeRaw(inputStream);
-    Velocity.DeSerializeRaw(inputStream);
-    VelocityAngular.DeSerializeRaw(inputStream);
-    Acceleration.DeSerializeRaw(inputStream);
-    AccelerationAngular.DeSerializeRaw(inputStream);
-    Mask.DeSerializeRaw(inputStream);
+    cmnDataFormat format;
+    cmnData<Eigen::Vector3d>::DeSerializeBinary(Velocity, inputStream, format, format);
+    cmnData<Eigen::Vector3d>::DeSerializeBinary(VelocityAngular, inputStream, format, format);
+    cmnData<Eigen::Vector3d>::DeSerializeBinary(Acceleration, inputStream, format, format);
+    cmnData<Eigen::Vector3d>::DeSerializeBinary(AccelerationAngular, inputStream, format, format);
+    cmnData<Eigen::Array<bool, 6, 1>>::DeSerializeBinary(Mask, inputStream, format, format);
 }

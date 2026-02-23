@@ -19,13 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctPose3DQtWidget_h
 #define _vctPose3DQtWidget_h
 
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <QGridLayout>
 
 // cisst include
-#include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctForwardDeclarationsQt.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
 #include <cisstVector/vctBoundingBox3.h>
 
 // Always include last
@@ -48,17 +47,18 @@ public:
     void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute);
 
     /*! Add a pose to plot using x, y and z coordinates. */
-    void SetValue(const vct3 & value);
+    void SetValue(const Eigen::Vector3d & value);
 
     /*! Add a pose using a frame.  The rotation part is ignored. */
-    inline void SetValue(const vctFrm3 & value) {
-        SetValue(value.Translation());
+    inline void SetValue(const Eigen::Isometry3d& value) {
+        SetValue(value.translation());
     }
 
     void Clear(void);
 
-    typedef std::list<vct3> PosesType;
+    typedef std::list<Eigen::Vector3d> PosesType;
     typedef std::list<vctPose3DQtWidgetView *> ViewsType;
+
 protected:
     QGridLayout * mLayout;
     void keyPressEvent(QKeyEvent * event);
@@ -67,7 +67,7 @@ protected:
     int mTableRow;
     ViewsType mViews;
     PosesType mPoses;
-    vctBoundingBox3 mBB;
+    Eigen::AlignedBox3d mBB;
 
     double mPrismaticFactor;
 };
@@ -78,7 +78,7 @@ class vctPose3DQtWidgetView: public vctQtOpenGLBaseWidget
 public:
     typedef vctPose3DQtWidget::PosesType PosesType;
 
-    vctPose3DQtWidgetView(QWidget * parent, PosesType * poses, vctBoundingBox3 * bb);
+    vctPose3DQtWidgetView(QWidget * parent, PosesType * poses, Eigen::AlignedBox3d* bb);
     inline ~vctPose3DQtWidgetView(void) {};
 
     void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute);
@@ -95,8 +95,8 @@ protected:
     double mPrismaticFactor;
 
     // pointers to shared data
-    PosesType * mPoses;
-    vctBoundingBox3 * mBB;
+    PosesType* mPoses;
+    Eigen::AlignedBox3d* mBB;
     bool mAutoResize;
 
     // dimensions to plot
@@ -106,6 +106,5 @@ protected:
     vctDouble2 mViewportTranslation, mViewport;
     double mViewportScale;
 };
-
 
 #endif // _vctPose3DQtWidget_h

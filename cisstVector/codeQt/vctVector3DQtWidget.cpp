@@ -16,17 +16,19 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnConstants.h>
 #include <cisstConfig.h>
 
 #include <cisstVector/vctVector3DQtWidget.h>
 #include <QKeyEvent>
 #include <QPainter>
+#include <QTextStream>
 
 const double vctVector3DQtWidgetDefaultMax = 0.0001;
 
 vctVector3DQtWidget::vctVector3DQtWidget(QWidget * parent):
     vctQtOpenGLBaseWidget(parent),
-    mVector(0.0)
+    mVector(0.0, 0.0, 0.0)
 {
     this->setFocusPolicy(Qt::StrongFocus);
     this->setToolTip(QString("'a' to turn on/off autoresize\n'r' to reset autoresize if already in autoresize mode\n'z' to reset orientation"));
@@ -40,12 +42,13 @@ vctVector3DQtWidget::vctVector3DQtWidget(QWidget * parent):
 void vctVector3DQtWidget::ResetOrientation(void)
 {
     // start with default Z up, x toward left, y towards right
-    mCurrentOrientation =
-        vctQuatRot3(vctRodRot3(0.1 * cmnPI, 0.0, 0.0)) *
-        vctQuatRot3(vctRodRot3(0.0, -0.75 * cmnPI, 0.0)) *
-        vctQuatRot3(vctRodRot3(-0.5 * cmnPI, 0.0, 0.0));
-    mStartMousePosition = 0;
-    mDeltaOrientation = vctQuatRot3::Identity();
+    mCurrentOrientation = Eigen::Quaterniond(
+        Eigen::AngleAxisd(0.1 * cmnPI, Eigen::Vector3d::UnitX()) *
+        Eigen::AngleAxisd(-0.75 * cmnPI, Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd(-0.5 * cmnPI, Eigen::Vector3d::UnitX())
+    );
+    mStartMousePosition = Eigen::Vector2i::Zero();
+    mDeltaOrientation = Eigen::Quaterniond::Identity();
 }
 
 void vctVector3DQtWidget::SetAutoResize(const bool autoResize)
@@ -58,10 +61,10 @@ void vctVector3DQtWidget::SetAutoResize(const bool autoResize)
     mAutoResize = autoResize;
 }
 
-void vctVector3DQtWidget::SetValue(const vct3 & value)
+void vctVector3DQtWidget::SetValue(const Eigen::Vector3d& value)
 {
     mVector = value;
-    mVectorNorm = mVector.Norm();
+    mVectorNorm = mVector.norm();
     if (mAutoResize && (mVectorNorm > mMaxNorm)) {
         mMaxNorm = mVectorNorm;
         mScale = 1.0f / mMaxNorm;
@@ -74,11 +77,11 @@ void vctVector3DQtWidget::mouseMoveEvent(QMouseEvent * event)
 {
     const double sensitivity = 0.01;
     if (event->buttons() & Qt::LeftButton) {
-        const vctInt2 newMousePosition(event->x(), event->y());
-        if (mStartMousePosition != 0) {
-            const vct2 deltaMouse = sensitivity * vct2(newMousePosition - mStartMousePosition);
-            vctRodRot3 deltaRot(deltaMouse.Y(), deltaMouse.X(), 0.0);
-            mDeltaOrientation.From(deltaRot);
+        const Eigen::Vector2i newMousePosition(event->x(), event->y());
+        if (mStartMousePosition.any()) {
+            const Eigen::Vector2d deltaMouse = sensitivity * (newMousePosition - mStartMousePosition).cast<double>();
+            Eigen::Vector3d rodrigues(deltaMouse.x(), deltaMouse.y(), 0.0);
+            mDeltaOrientation = Eigen::Quaterniond(Eigen::AngleAxis(rodrigues.norm(), rodrigues.normalized()));
             paintGL();
         } else {
             mStartMousePosition = newMousePosition;
@@ -88,10 +91,10 @@ void vctVector3DQtWidget::mouseMoveEvent(QMouseEvent * event)
 
 void vctVector3DQtWidget::mouseReleaseEvent(QMouseEvent *)
 {
-    mStartMousePosition = 0;
+    mStartMousePosition.fill(0);
     // save current rotation
     mCurrentOrientation = mDeltaOrientation * mCurrentOrientation;
-    mDeltaOrientation = vctQuatRot3::Identity();
+    mDeltaOrientation = Eigen::Quaterniond::Identity();
 }
 
 void vctVector3DQtWidget::keyPressEvent(QKeyEvent * event)
@@ -136,8 +139,8 @@ void vctVector3DQtWidget::paintGL(void)
     // gl transformation here
     // x+:left  y+:up   z+: point out screen
     glTranslatef(0.0f, 0.0f, -10.0f);
-    vctAxAnRot3 rot(mDeltaOrientation * mCurrentOrientation);
-    glRotated(rot.Angle() * cmn180_PI, rot.Axis().X(), rot.Axis().Y(), rot.Axis().Z());
+    Eigen::AngleAxisd rot(mDeltaOrientation * mCurrentOrientation);
+    glRotated(rot.angle() * cmn180_PI, rot.axis().x(), rot.axis().y(), rot.axis().z());
 
     // draw X/Y/Z axis, using half
     glColor3f(1.0f, 0.0f, 0.0f);
@@ -169,26 +172,26 @@ void vctVector3DQtWidget::paintGL(void)
     glColor3f(textColor.redF(), textColor.greenF(), textColor.blueF());
     glBegin(GL_LINES);
     glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(mVector.X(), mVector.Y(), mVector.Z());
+    glVertex3f(mVector.x(), mVector.y(), mVector.z());
     glEnd();
 
     // draw X/Y/Z projections
     glEnable(GL_LINE_STIPPLE);
 
     glColor3f(1.0f, 0.0f, 0.0f);
-    if (mVector.X() > 0.0) {
+    if (mVector.x() > 0.0) {
         glLineStipple(1, 0x00FF); // dashed
     } else {
         glLineStipple(1, 0x0101); // dotted
     }
     glBegin(GL_LINE_STRIP);
     glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(mVector.X(), 0.0f, 0.0f);
-    glVertex3f(mVector.X(), mVector.Y(), 0.0f);
+    glVertex3f(mVector.x(), 0.0f, 0.0f);
+    glVertex3f(mVector.x(), mVector.y(), 0.0f);
     glEnd();
 
     glColor3f(0.0f, 1.0f, 0.0f);
-    if (mVector.Y() > 0.0) {
+    if (mVector.y() > 0.0) {
         glLineStipple(1, 0x00FF); // dashed
     } else {
         glLineStipple(1, 0x0101); // dotted
@@ -196,22 +199,21 @@ void vctVector3DQtWidget::paintGL(void)
 
     glBegin(GL_LINE_STRIP);
     glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, mVector.Y(), 0.0f);
-    glVertex3f(mVector.X(), mVector.Y(), 0.0f);
+    glVertex3f(0.0f, mVector.y(), 0.0f);
+    glVertex3f(mVector.x(), mVector.y(), 0.0f);
     glEnd();
 
-
     glColor3f(0.0f, 0.0f, 1.0f);
-    if (mVector.Z() > 0.0) {
+    if (mVector.z() > 0.0) {
         glLineStipple(1, 0x00FF); // dashed
     } else {
         glLineStipple(1, 0x0101); // dotted
     }
     glBegin(GL_LINE_LOOP);
     glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, mVector.Z());
-    glVertex3f(mVector.X(), mVector.Y(), mVector.Z());
-    glVertex3f(mVector.X(), mVector.Y(), 0.0f);
+    glVertex3f(0.0f, 0.0f, mVector.z());
+    glVertex3f(mVector.x(), mVector.y(), mVector.z());
+    glVertex3f(mVector.x(), mVector.y(), 0.0f);
     glEnd();
 
     glDisable(GL_LINE_STIPPLE);
@@ -224,13 +226,17 @@ void vctVector3DQtWidget::paintGL(void)
     painter.setPen(txtColor);
     painter.setFont(QFont("Helvetica", font_size));
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-    painter.drawText(1, 1 + font_size,
-                     QString().sprintf("%0.2f/%0.2f", mVectorNorm, mMaxNorm));
+
+    QString display_string;
+    QTextStream tstream(&display_string);
+    tstream.setRealNumberPrecision(2);
+    tstream << mVectorNorm << "/" << mMaxNorm;
+
+    painter.drawText(1, 1 + font_size, display_string);
     painter.end();
 
     glFlush();
 }
-
 
 void vctVector3DQtWidget::resizeGL(int width, int height)
 {

@@ -7,8 +7,9 @@
 // pressure sensor.
 
 inline-header {
-#include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -26,19 +27,19 @@ class {
 
     member {
         name Accel;
-        type vct3;
+        type Eigen::VectorXd;
         description Accelerometer, units m/s*s;
     }
 
     member {
         name Gyro;
-        type vct3;
+        type Eigen::VectorXd;
         description Gyroscope, units rad/s;
     }
 
     member {
         name Mag;
-        type vct3;
+        type Eigen::VectorXd;
         description Magnetometer, units G (Gauss);
     }
 

@@ -2,8 +2,10 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+
+#include <Eigen/Dense>
+
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
@@ -26,29 +28,29 @@ class {
 
     member {
         name Position;
-        type vctDynamicVector<double>;
-        default vctDynamicVector<double>();
+        type Eigen::VectorXd;
+        default Eigen::VectorXd(0);
     }
 
     member {
         name Velocity;
-        type vctDynamicVector<double>;
-        default vctDynamicVector<double>();
+        type Eigen::VectorXd;
+        default Eigen::VectorXd(0);
     }
 
     member {
         name Effort;
-        type vctDynamicVector<double>;
-        default vctDynamicVector<double>();
+        type Eigen::VectorXd;
+        default Eigen::VectorXd(0);
     }
 
     inline-header {
     public:
         inline void SetSize(const size_t & size) {
             Name().resize(size);
-            Position().SetSize(size);
-            Velocity().SetSize(size);
-            Effort().SetSize(size);
+            Position().resize(size);
+            Velocity().resize(size);
+            Effort().resize(size);
         }
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);

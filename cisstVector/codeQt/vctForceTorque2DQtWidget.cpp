@@ -17,9 +17,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-// system include
-#include <iostream>
-
 // Qt includes
 #include <QMessageBox>
 #include <QCloseEvent>
@@ -150,7 +147,7 @@ void vctForceTorque2DQtWidget::setupUi(void)
     SlotScaleIndex(mScaleIndex);
 }
 
-void vctForceTorque2DQtWidget::SetValue(const double & time, const vct3 & force, const vct3 & torque)
+void vctForceTorque2DQtWidget::SetValue(const double& time, const Eigen::Vector3d& force, const Eigen::Vector3d& torque)
 {
     // make sure we should update the display
     if (this->isHidden()) {
@@ -158,24 +155,16 @@ void vctForceTorque2DQtWidget::SetValue(const double & time, const vct3 & force,
     }
 
     // plot
-    vct3 toPlot;
-    if (mScaleIndex == 0) {
-        toPlot = force;
-    } else {
-        toPlot = torque;
-    }
-
+    Eigen::Vector3d toPlot = (mScaleIndex == 0) ? force : torque;
     for (size_t i = 0; i < 3; ++i){
         mSignals[mScaleIndex][i]->AppendPoint(vctDouble2(time, toPlot[i]));
     }
-    mSignals[mScaleIndex][3]->AppendPoint(vctDouble2(time, toPlot.Norm()));
+    mSignals[mScaleIndex][3]->AppendPoint(vctDouble2(time, toPlot.norm()));
     mSignals[mScaleIndex][4]->AppendPoint(vctDouble2(time, 0.0));
 
     QFTPlot->SetDisplayYRangeScale(mScales[mScaleIndex]);
-
     QFTPlot->update();
 }
-
 
 void vctForceTorque2DQtWidget::SlotScaleIndex(int newAxis)
 {
@@ -191,7 +180,6 @@ void vctForceTorque2DQtWidget::SlotScaleIndex(int newAxis)
     mScales[mScaleIndex]->AutoFitXY();
     QFTPlot->SetContinuousExpandYResetSlot();
 }
-
 
 void vctForceTorque2DQtWidget::SlotVisibleSignal(int index)
 {

@@ -24,8 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmForceCartesianGet_h
 #define _prmForceCartesianGet_h
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -35,14 +36,8 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
- public:
+public:
     typedef mtsGenericObject BaseType;
-
-    typedef vctFixedSizeConstVectorRef<double, 3, 1> ConstForceType;
-    typedef vctFixedSizeVectorRef<double, 3, 1> ForceType;
-
-    typedef ConstForceType ConstTorqueType;
-    typedef ForceType TorqueType;
 
     /*! default constructor */
     inline prmForceCartesianGet(void):
@@ -50,10 +45,10 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
     {}
 
     /*! constructor with all parameters */
-    inline prmForceCartesianGet(const vctDouble6 & force):
+    inline prmForceCartesianGet(const Eigen::Vector<double, 6> &force):
         ForceMember(force)
     {
-        this->MaskMember.SetAll(true);
+        this->MaskMember.fill(true);
     }
 
     /*!destructor
@@ -62,41 +57,40 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
 
     /*! Set and Get methods for force */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDouble6, Force);
+    typedef Eigen::Vector<double, 6> ForceType; // to prevent annoying macro issues
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(ForceType, Force);
     //@}
-
 
     /*! Set and Get methods for mask */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBool6, Mask);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::ArrayX<bool>, Mask);
     //@}
     CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, ReferenceFrame);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, MovingFrame);
 
 public:
-
-    /*! Reference (const) to the first 3 elements (force part) of the
+    /*! Const reference to the first 3 elements (force part) of the
       "Force" vector. */
-    inline ConstForceType F(void) const {
-        return ConstForceType(ForceMember.Pointer(0));
+    inline auto F(void) const {
+        return ForceMember.head<3>();
     }
 
     /*! Reference to the first 3 elements (force part) of the "Force"
       vector. */
-    inline ForceType F(void) {
-        return ForceType(ForceMember.Pointer(0));
+    inline auto F(void) {
+        return ForceMember.head<3>();
     }
 
-    /*! Reference (const) to the last 3 elements (torque part) of the
+    /*! Const reference to the last 3 elements (torque part) of the
       "Force" vector. */
-    inline ConstTorqueType T(void) const {
-        return ConstTorqueType(ForceMember.Pointer(3));
+    inline auto T(void) const {
+        return ForceMember.tail<3>();
     }
 
     /*! Reference to the last 3 elements (torque part) of the "Force"
       vector. */
-    inline TorqueType T(void) {
-        return TorqueType(ForceMember.Pointer(3));
+    inline auto T(void) {
+        return ForceMember.tail<3>();
     }
 
     /*! Human readable output to stream. */

@@ -19,8 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctForceTorque3DQtWidget_h
 #define _vctForceTorque3DQtWidget_h
 
+#include <cisstCommon/cmnClassServicesBase.h>
+#include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstVector/vctForwardDeclarationsQt.h>
 #include <cisstVector/vctVector3DQtWidget.h>
+#include <Eigen/Dense>
 #include <QWidget>
 
 class QLabel;
@@ -41,14 +44,13 @@ protected:
 
 private:
     void setupUi(void);
-    vctVector3DQtWidget * QVector;
+    vctVector3DQtWidget* QVector;
 
     // force vs. torque
     int PlotIndex;
 
  public:
-    void SetValue(const vct3 & force, const vct3 & torque);
-
+    void SetValue(const Eigen::Vector3d& force, const Eigen::Vector3d& torque);
 
 private slots:
     void SlotPlotIndex(int newAxis);

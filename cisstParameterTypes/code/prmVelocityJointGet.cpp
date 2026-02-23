@@ -2,8 +2,8 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-Author(s):	Rajesh Kumar, Anton Deguet
-Created on:   2008-04-10
+Author(s):  Rajesh Kumar, Anton Deguet
+Created on: 2008-04-10
 
 (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
 Reserved.
@@ -19,19 +19,17 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmVelocityJointGet.h>
 
-prmVelocityJointGet::~prmVelocityJointGet()
-{
-}
+prmVelocityJointGet::~prmVelocityJointGet() {}
 
 void prmVelocityJointGet::SetSize(size_type size)
 {
-    VelocityMember.SetSize(size);
+    VelocityMember.resize(size);
 }
 
 void prmVelocityJointGet::ToStream(std::ostream & outputStream) const
 {
     BaseType::ToStream(outputStream);
-    outputStream << " Velocity: " << this->VelocityMember;
+    outputStream << " Velocity: " << VelocityMember;
 }
 
 void prmVelocityJointGet::ToStreamRaw(std::ostream & outputStream, const char delimiter,
@@ -39,17 +37,23 @@ void prmVelocityJointGet::ToStreamRaw(std::ostream & outputStream, const char de
 {
     BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
     outputStream << delimiter;
-    this->VelocityMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    
+    if (headerOnly) {
+        outputStream << cmnData<Eigen::VectorXd>::SerializeDescription(VelocityMember, delimiter, headerPrefix);
+    } else {
+        cmnData<Eigen::VectorXd>::SerializeText(VelocityMember, outputStream, delimiter);
+    }
 }
 
 void prmVelocityJointGet::SerializeRaw(std::ostream & outputStream) const 
 {
     BaseType::SerializeRaw(outputStream);
-    this->VelocityMember.SerializeRaw(outputStream);
+    cmnData<Eigen::VectorXd>::SerializeBinary(VelocityMember, outputStream);
 }
 
 void prmVelocityJointGet::DeSerializeRaw(std::istream & inputStream) 
 {
     BaseType::DeSerializeRaw(inputStream);
-    this->VelocityMember.DeSerializeRaw(inputStream);
+    cmnDataFormat format;
+    cmnData<Eigen::VectorXd>::DeSerializeBinary(VelocityMember, inputStream, format, format);
 }

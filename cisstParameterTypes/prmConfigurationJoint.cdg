@@ -3,9 +3,11 @@
 
 inline-header {
 #include <cisstCommon/cmnJointType.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstParameterTypes/prmJointType.h>
+
+#include <Eigen/Dense>
+
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
@@ -27,43 +29,43 @@ class {
 
     member {
         name Type;
-        type vctDynamicVector<cmnJointType>;
+        type std::vector<cmnJointType>;
     }
 
     member {
         name PositionMin;
-        type vctDynamicVector<double>;
+        type Eigen::ArrayXd;
     }
     member {
         name PositionMax;
-        type vctDynamicVector<double>;
+        type Eigen::ArrayXd;
     }
 
     member {
         name VelocityMin;
-        type vctDynamicVector<double>;
+        type Eigen::ArrayXd;
     }
     member {
         name VelocityMax;
-        type vctDynamicVector<double>;
+        type Eigen::ArrayXd;
     }
 
     member {
         name AccelerationMin;
-        type vctDynamicVector<double>;
+        type Eigen::ArrayXd;
     }
     member {
         name AccelerationMax;
-        type vctDynamicVector<double>;
+        type Eigen::ArrayXd;
     }
 
     member {
         name EffortMin;
-        type vctDynamicVector<double>;
+        type Eigen::ArrayXd;
     }
     member {
         name EffortMax;
-        type vctDynamicVector<double>;
+        type Eigen::ArrayXd;
     }
 
     inline-header {
