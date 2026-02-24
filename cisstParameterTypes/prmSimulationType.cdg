@@ -7,50 +7,23 @@ inline-header {
 #include <cisstParameterTypes/prmExport.h>
 }
 
-class{
+enum {
     name prmSimulationType;
     attribute CISST_EXPORT;
-
-    enum {
-          name SimulationType;    
-          enum-value {
-              name UNDEFINED;
-              description undefined;
-          }
-          enum-value {
-              name NONE;
-              description no simulation;
-          }
-          enum-value {
-              name KINEMATIC;
-              description kinematic simulation;
-          }
-          enum-value {
-              name IO;
-              description hardware-io simulation;
-          }
+    enum-value {
+        name NONE;
+        description No simulation;
     }
-
-    member {
-        name SimulationMode;
-        type prmSimulationType::SimulationType;
-        default prmSimulationType::UNDEFINED;
-        description Type of simulation;
-        accessors none;
+    enum-value {
+        name KINEMATIC;
+        description Kinematic simulation;
     }
-
-    inline-header {
-    public:
-        virtual void SetSimulationMode(const SimulationType & mode) {
-            mSimulationMode = mode;
-        }
-
-        prmSimulationType::SimulationType GetSimulationMode(void) const {
-            return mSimulationMode;
-        }
+    enum-value {
+        name DYNAMIC;
+        description Dynamic simulation;
     }
-}
-
-inline-header {
-CMN_DECLARE_SERVICES_INSTANTIATION(prmSimulationType);
+    enum-value {
+        name IO;
+        description Hardware, IO simulation;
+    }
 }
