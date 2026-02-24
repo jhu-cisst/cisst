@@ -93,4 +93,6 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstParameterTypes/prmDepthMap.h"
 %include "cisstParameterTypes/prmKeyValue.h"
 
+%include "cisstParameterTypes/prmSimulationType.h"
+
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(prmKeyValueProxy, prmKeyValue);
