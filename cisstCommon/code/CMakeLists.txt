@@ -66,6 +66,7 @@ set (HEADER_FILES
      cmnDataFunctionsList.h
      cmnDataFunctionsVectorHelpers.h
      cmnDataFunctionsMatrixHelpers.h
+     cmnDataFunctionsEigen.h
      cmnDataFormat.h
      cmnDeSerializer.h
      cmnExport.h
@@ -104,14 +105,9 @@ if (CISST_HAS_JSON)
        cmnDataFunctionsJSON.cpp)
   set (HEADER_FILES
        ${HEADER_FILES}
-       cmnDataFunctionsJSON.h)
+       cmnDataFunctionsJSON.h
+       cmnDataFunctionsEigenJSON.h)
 endif (CISST_HAS_JSON)
-
-if (CISST_HAS_EIGEN)
-  set (HEADER_FILES
-       ${HEADER_FILES}
-       cmnDataFunctionsEigen.h)
-endif (CISST_HAS_EIGEN)
 
 cisst_add_library (
   LIBRARY cisstCommon

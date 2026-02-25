@@ -47,15 +47,8 @@ class {
 
     member {
         name AxisMode;
-        type Eigen::Array<prmSetpointMode, 6, 1>;
-        default Eigen::Array<prmSetpointMode, 6, 1>(
-            prmSetpointMode::NONE,
-            prmSetpointMode::NONE,
-            prmSetpointMode::NONE,
-            prmSetpointMode::NONE,
-            prmSetpointMode::NONE,
-            prmSetpointMode::NONE
-        );
+        type std::vector<prmSetpointMode>;
+        default std::vector<prmSetpointMode>();
     }
 
     inline-header {

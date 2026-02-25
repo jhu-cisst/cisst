@@ -36,7 +36,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <json/json.h>
 
-template <typename _elementType>
+/*
+  Note: the extra default-void template parameter is not normally used but
+  added to support SFINAE-based template deduction, e.g. for Eigen types.
+*/
+template <typename _elementType, typename = void>
 class cmnDataJSON
 {
 public:

@@ -57,9 +57,9 @@ class {
 
     member {
         name Mask;
-        type std::pair<bool, bool>;
-        default {true, true};
-        description Two tuple, masks position/orientation parts of the Cartesian motion;
+        type Eigen::Array<bool, 2, 1>;
+        default Eigen::Array<bool, 2, 1>(true, true);
+        description Masks position (Mask[0]) or orientation (Mask[1]) parts of the Cartesian motion;
     }
 
     member {

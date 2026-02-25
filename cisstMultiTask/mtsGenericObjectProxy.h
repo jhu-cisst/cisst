@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsGenericObjectProxy_h
 #define _mtsGenericObjectProxy_h
 
+#include "cisstCommon/cmnClassRegisterMacros.h"
+#include "cisstCommon/cmnClassServicesBase.h"
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnSerializer.h>
@@ -26,9 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnTypeTraits.h>
 
 #include <cisstCommon/cmnDataFunctions.h>
+#include <cisstCommon/cmnDataFunctionsArray.h>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
+#include <cisstCommon/cmnDataFunctionsList.h>
 #include <cisstCommon/cmnDataFunctionsString.h>
 #include <cisstCommon/cmnDataFunctionsVector.h>
-#include <cisstCommon/cmnDataFunctionsList.h>
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctDataFunctionsFixedSizeVector.h>
@@ -48,7 +52,12 @@ typedef std::list<std::string> stdStringList;
 
 // Forward declarations
 template <class _elementType> class mtsGenericObjectProxyBase;
-template <class _elementType> class mtsGenericObjectProxy;
+/*
+  Note: the extra default-void template parameter is not normally used but
+  added to support SFINAE-based template deduction, e.g. for Eigen types.
+  TODO: would we ever need it on the ProxyBase/ProxyRef types?
+*/
+template <class _elementType, typename=void> class mtsGenericObjectProxy;
 template <class _elementType> class mtsGenericObjectProxyRef;
 template <typename _elementType> class mtsGenericTypes;
 
@@ -370,14 +379,11 @@ public:
 
 };
 
-
 template <class _elementType>
-class mtsGenericObjectProxy: public mtsGenericObjectProxyBase<_elementType>
+class mtsGenericObjectProxyIntermediate: public mtsGenericObjectProxyBase<_elementType>
 {
-    CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-
 public:
-    typedef mtsGenericObjectProxy<_elementType> ThisType;
+    typedef mtsGenericObjectProxyIntermediate<_elementType> ThisType;
     typedef mtsGenericObjectProxyBase<_elementType> BaseType;
     typedef typename mtsGenericObjectProxyBase<_elementType>::value_type value_type;
     typedef typename mtsGenericObjectProxyBase<_elementType>::DeRefType DeRefType;
@@ -386,26 +392,26 @@ public:
 
     /*! Default constructor.  The data member is initialized using its
         default constructor. */
-    inline mtsGenericObjectProxy(void):
+    inline mtsGenericObjectProxyIntermediate(void):
         BaseType(),
         Data()
     {}
 
     /*! Copy constructor. */
-    inline mtsGenericObjectProxy(const ThisType & other) :
+    inline mtsGenericObjectProxyIntermediate(const ThisType & other) :
         BaseType(other), Data(other.Data)
     {}
 
     /*! Conversion constructor.  This allows to construct the proxy
       object using an object of the actual type.  This method will
       set the Valid flag to true. */
-    inline mtsGenericObjectProxy(const value_type & data):
+    inline mtsGenericObjectProxyIntermediate(const value_type & data):
         Data(data)
     {
         this->SetValid(true);
     }
 
-    inline ~mtsGenericObjectProxy(void) {}
+    inline ~mtsGenericObjectProxyIntermediate(void) {}
 
     /*! Assignment operator */
     inline ThisType & operator = (const ThisType & other) {
@@ -485,6 +491,18 @@ public:
     }
 };
 
+template <class _elementType, typename>
+class mtsGenericObjectProxy: public mtsGenericObjectProxyIntermediate<_elementType>
+{
+    CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    using IntermediateType = mtsGenericObjectProxyIntermediate<_elementType>;
+
+    // inherit all constructors and all copy assignment overloads
+    using IntermediateType::IntermediateType;
+    using IntermediateType::operator=;
+};
 
 template <class _elementType>
 class mtsGenericObjectProxyRef: public mtsGenericObjectProxyBase<_elementType>
@@ -1079,5 +1097,84 @@ typedef mtsGenericObjectProxy<vctFloatMat> mtsVctFloatMat;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloatMat)
 typedef mtsGenericObjectProxy<vctIntMat> mtsVctIntMat;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctIntMat)
+
+// // Various Eigen types
+// typedef mtsGenericObjectProxy<Eigen::Vector<double, 1>> eigenvec1d;
+// CMN_DECLARE_SERVICES_INSTANTIATION(eigenvec1d)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Vector2d>)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Vector3d>)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Vector4d>)
+// typedef mtsGenericObjectProxy<Eigen::Vector<double, 5>> eigenvec5d;
+// CMN_DECLARE_SERVICES_INSTANTIATION(eigenvec5d)
+// typedef mtsGenericObjectProxy<Eigen::Vector<double, 6>> eigenvec6d;
+// CMN_DECLARE_SERVICES_INSTANTIATION(eigenvec6d)
+
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::VectorXd>)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Quaterniond>)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::AngleAxisd>)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Isometry3d>)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Affine3d>)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Matrix2d>)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Matrix3d>)
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::MatrixXd>)
+// typedef mtsGenericObjectProxy<Eigen::Matrix<double, 6, Eigen::Dynamic>> eigenmatrix6Xd;
+// CMN_DECLARE_SERVICES_INSTANTIATION(eigenmatrix6Xd)
+
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::ArrayXd>);
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array2d>);
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array3d>);
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array4d>);
+
+// typedef mtsGenericObjectProxy<Eigen::Array<double, 6, 1>> eigenarray6d;
+// CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray6d);
+
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::ArrayX<bool>>);
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array2<bool>>);
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array3<bool>>);
+// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array4<bool>>);
+// typedef mtsGenericObjectProxy<Eigen::Array<bool, 5, 1>> eigenarray5b;
+// CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray5b);
+// typedef mtsGenericObjectProxy<Eigen::Array<bool, 6, 1>> eigenarray6b;
+// CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray6b);
+
+// Default implementation if not explicitly provided
+
+template <typename EigenDerived>
+class mtsGenericObjectProxy<EigenDerived, typename std::enable_if_t<std::is_base_of_v<Eigen::PlainObjectBase<EigenDerived>, EigenDerived>>> : public mtsGenericObjectProxyIntermediate<EigenDerived>
+{
+    CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    using EnableType = typename std::enable_if_t<std::is_base_of_v<Eigen::PlainObjectBase<EigenDerived>, EigenDerived>>;
+    using ProxyType = mtsGenericObjectProxy<EigenDerived, EnableType>;
+    using IntermediateType = mtsGenericObjectProxyIntermediate<EigenDerived>;
+    
+    // inherit all constructors and all copy assignment overloads
+    using IntermediateType::IntermediateType;
+    using IntermediateType::operator=;
+};
+
+template <typename EigenDerived>
+cmnClassServicesBase* mtsGenericObjectProxy<EigenDerived, typename std::enable_if_t<std::is_base_of_v<Eigen::PlainObjectBase<EigenDerived>, EigenDerived>>>::ClassServices()
+{
+    static cmnClassServices<CMN_DYNAMIC_CREATION, ProxyType, ProxyType>
+        classServices(
+            std::string(typeid(ProxyType).name()), // potentially mangled name
+            &typeid(ProxyType),
+            0,
+            LIBRARY_NAME_FOR_CISST_REGISTER,
+            ProxyType::InitialLoD
+    );
+    return static_cast<cmnClassServicesBase*>(&classServices);
+}
+
+template <typename EigenDerived>
+cmnClassServicesBase* mtsGenericObjectProxy<EigenDerived, typename std::enable_if_t<std::is_base_of_v<Eigen::PlainObjectBase<EigenDerived>, EigenDerived>>>::ClassServicesPointer = mtsGenericObjectProxy<EigenDerived, typename std::enable_if_t<std::is_base_of_v<Eigen::PlainObjectBase<EigenDerived>, EigenDerived>>>::ClassServices();
+
+template <typename EigenDerived>
+const cmnClassServicesBase* mtsGenericObjectProxy<EigenDerived, typename std::enable_if_t<std::is_base_of_v<Eigen::PlainObjectBase<EigenDerived>, EigenDerived>>>::Services() const
+{
+   return this->ClassServices();
+}
 
 #endif

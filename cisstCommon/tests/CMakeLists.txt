@@ -44,6 +44,7 @@ set (SOURCE_FILES
      cmnCommandLineOptionsTest.cpp
      cmnDataFunctionsTest.cpp
      cmnDataFunctionsVectorTest.cpp
+     cmnDataFunctionsEigenTest.cpp
      cmnDataGeneratorTest.cpp
      cmnLoggerTest.cpp
      cmnLogLoDTest.cpp
@@ -61,6 +62,7 @@ set (HEADER_FILES
      cmnCommandLineOptionsTest.h
      cmnDataFunctionsTest.h
      cmnDataFunctionsVectorTest.h
+     cmnDataFunctionsEigenTest.h
      cmnDataGeneratorTest.h
      cmnLoggerTest.h
      cmnLogLoDTest.h
@@ -92,16 +94,6 @@ if (CISST_HAS_JSON)
        ${HEADER_FILES}
        cmnDataFunctionsJSONTest.h)
 endif (CISST_HAS_JSON)
-
-# Eigen tests
-if (CISST_HAS_EIGEN)
-  set (SOURCE_FILES
-       ${SOURCE_FILES}
-       cmnDataFunctionsEigenTest.cpp)
-  set (HEADER_FILES
-       ${HEADER_FILES}
-       cmnDataFunctionsEigenTest.h)
-endif (CISST_HAS_EIGEN)
 
 # Add executable for C++ tests
 add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES} ${cisstCommonTests_CISST_DG_SRCS})

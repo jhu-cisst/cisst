@@ -344,21 +344,19 @@ else (CISST_HAS_JSON)
   cisst_unset_all_package_settings (cisstCommon JSON)
 endif (CISST_HAS_JSON)
 
-
-# Support for Eigen
-find_package (Eigen3)
+# Required support for Eigen
+find_package (Eigen3 QUIET)
 if (EIGEN_FOUND)
-  option (CISST_HAS_EIGEN "Is Eigen available." ON)
-  mark_as_advanced (CISST_HAS_EIGEN)
-else (EIGEN_FOUND)
-  option (CISST_HAS_EIGEN "Is Eigen available." OFF)
-endif (EIGEN_FOUND)
-
-if (CISST_HAS_EIGEN)
-  find_package (Eigen3 REQUIRED)
-  if (EIGEN3_INCLUDE_DIR)
     cisst_set_package_settings (cisstCommon Eigen INCLUDE_DIRECTORIES EIGEN3_INCLUDE_DIR)
-  endif (EIGEN3_INCLUDE_DIR)
-else (CISST_HAS_EIGEN)
-  cisst_unset_all_package_settings (cisstCommon Eigen)
-endif (CISST_HAS_EIGEN)
+else (EIGEN_FOUND)
+  include(FetchContent)
+  set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL "Don't check for updates once external project is downloaded")
+  FetchContent_Declare(
+    Eigen
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+    GIT_TAG        3147391d946bb4b6c68edd901f2add6ac1f31f8c # v3.4.0
+    GIT_SHALLOW    TRUE
+  )
+  FetchContent_MakeAvailable(Eigen)
+  cisst_set_package_settings (cisstCommon Eigen INCLUDE_DIRECTORIES EIGEN3_INCLUDE_DIR)
+endif (EIGEN_FOUND)

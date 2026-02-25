@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmMotionBase.h>
 #include <Eigen/Dense>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>

@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmExport.h>
 
 #include <Eigen/Dense>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>

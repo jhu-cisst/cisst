@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnDataFormat.h>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
 #include <cisstParameterTypes/prmVelocityCartesianSet.h>
 
 prmVelocityCartesianSet::~prmVelocityCartesianSet() {}

@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
 
 // for conversion methods
 #include <cisstParameterTypes/prmStateJoint.h>

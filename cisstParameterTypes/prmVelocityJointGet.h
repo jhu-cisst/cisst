@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 // basic includes
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <Eigen/Dense>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>

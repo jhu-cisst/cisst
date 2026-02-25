@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmRobotState.h>
 
+#include <cisstCommon/cmnDataFunctionsEigen.h>
+
 prmRobotState::prmRobotState()
 {
     CartesianPosition().resize(6);

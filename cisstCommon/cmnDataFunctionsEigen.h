@@ -18,15 +18,19 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #pragma once
-#include <sstream>
-#include <stdexcept>
-#include <type_traits>
 #ifndef _cmnDataFunctionsEigen_h
 #define _cmnDataFunctionsEigen_h
 
 #include <cisstCommon/cmnDataFunctions.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <sstream>
+#include <stdexcept>
+#include <type_traits>
+
+#ifdef CISST_HAS_JSON
+#include <cisstCommon/cmnDataFunctionsEigenJSON.h>
+#endif
 
 // always include last
 #include <cisstCommon/cmnExport.h>
@@ -60,8 +64,8 @@ public:
     }
 
     static void SerializeText(const DataType & data,
-                          std::ostream & outputStream,
-                          const char delimiter) CISST_THROW(std::runtime_error)
+                              std::ostream & outputStream,
+                              const char delimiter) CISST_THROW(std::runtime_error)
     {
         const size_t rows = data.rows();
         const size_t cols = data.cols();
@@ -138,7 +142,7 @@ public:
                 std::stringstream index_suffix;
                 index_suffix << prefix << "[" << row << "," << col << "]";
                 description << cmnData<typename DataType::Scalar>::SerializeDescription(
-                    data.coef(row, col),
+                    data.coeff(row, col),
                     delimiter,
                     index_suffix.str()
                 );
@@ -271,12 +275,12 @@ public:
 
     static void Copy(DataType & data, const DataType & source)
     {
-        cmnData<MatrixType>(data.matrix(), source.matrix());
+        cmnData<MatrixType>::Copy(data.matrix(), source.matrix());
     }
 
     static std::string HumanReadable(const DataType & data)
     {
-        return cmnData<MatrixType>(data.matrix());
+        return cmnData<MatrixType>::HumanReadable(data.matrix());
     }
 
     static void SerializeText(const DataType & data,
@@ -446,7 +450,7 @@ public:
     }
 };
 
-// Specialization for cmnData<Eigen::Rotation2d>.
+// Specialization for cmnData<Eigen::Rotation2D>.
 //
 // Note: `cmnData<>` must be specialized for `Derived::Scalar`, and must have
 // fixed scalar number.

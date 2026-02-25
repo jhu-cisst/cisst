@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmVelocityJointGet.h>
 
+#include <cisstCommon/cmnDataFunctionsEigen.h>
+
 prmVelocityJointGet::~prmVelocityJointGet() {}
 
 void prmVelocityJointGet::SetSize(size_type size)
