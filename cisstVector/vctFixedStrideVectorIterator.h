@@ -300,6 +300,10 @@ public:
     value_type & operator* () {
         return *(this->DataPtr);
     }
+
+    value_type & operator* () const {
+        return *(this->DataPtr);
+    }
 };
 
 

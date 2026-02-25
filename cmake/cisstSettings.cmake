@@ -1,7 +1,5 @@
 #
-# $Id$
-#
-# (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -30,9 +28,12 @@ if (NOT MSVC)
   endif (CXX_SUPPORTS_WALL)
 endif (NOT MSVC)
 
-# To disable annoying warnings about sprintf, sscanf, etc. (Visual Studio)
+# Flags for Visual Studio
+#   -D_CRT_SECURE_NO_WARNINGS  To disable annoying warnings about sprintf, sscanf, etc.
+#   -Zc:__cplusplus            To cause Visual Studio to report an updated value in __cplusplus (instead of default 199711)
+#                                Available since Visual Studio 2017 version 15.7
 if (MSVC)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS -Zc:__cplusplus")
 endif (MSVC)
 
 if(MSVC)

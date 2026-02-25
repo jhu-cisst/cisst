@@ -98,6 +98,11 @@ public:
 
 
 private:
+    /*! Valid component tags */
+    std::set<std::string> ValidComponentTags;
+    /*! Valid interface tags */
+    std::set<std::string> ValidInterfaceTags;
+
     /*! Singleton object */
     static mtsManagerLocal * Instance;
 
@@ -200,6 +205,13 @@ public:
 
     /*! Check if further logs are allowed */
     static bool IsLogAllowed(void);
+
+    bool IsValidComponentTag(const std::string & tag) const;
+    bool IsValidInterfaceTag(const std::string & tag) const;
+    void AddValidComponentTag(const std::string & tag);
+    void AddValidInterfaceTag(const std::string & tag);
+    const std::set<std::string> & GetValidComponentTags(void) const;
+    const std::set<std::string> & GetValidInterfaceTags(void) const;
 
 protected:
     /*! Protected constructor (singleton) */

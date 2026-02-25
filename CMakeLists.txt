@@ -203,7 +203,6 @@ endif (CMAKE_CL_64)
 # to include some CMake "use" files without polluting the environment
 add_subdirectory (cisst-dependencies)
 
-
 # Extra link flag if for Apple
 if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -single_module")
@@ -484,6 +483,10 @@ if (CISST_HAS_QT)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstQt)
 endif (CISST_HAS_QT)
 
+if (CISST_HAS_QTNODES)
+  set (CISST_SETTINGS ${CISST_SETTINGS} cisstQtNodes)
+endif (CISST_HAS_QTNODES)
+
 if (CISST_HAS_FLTK)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstFLTK)
 endif (CISST_HAS_FLTK)
@@ -499,6 +502,10 @@ endif (CISST_HAS_SWIG_PYTHON)
 if (CISST_HAS_OPENGL)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstOpenGL)
 endif (CISST_HAS_OPENGL)
+
+if (CISST_HAS_GRAPHVIZ)
+  set (CISST_SETTINGS ${CISST_SETTINGS} cisstGraphviz)
+endif (CISST_HAS_GRAPHVIZ)
 
 
 # Finally, create lib targets

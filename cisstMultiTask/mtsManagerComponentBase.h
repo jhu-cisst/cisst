@@ -152,7 +152,9 @@ public:
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;
+        const static std::string GetDescriptionsOfComponents;
         const static std::string GetNamesOfInterfaces;
+        const static std::string GetDescriptionsOfInterfaces;
         const static std::string GetListOfConnections;
         const static std::string GetListOfComponentClasses;
         const static std::string GetInterfaceProvidedDescription;

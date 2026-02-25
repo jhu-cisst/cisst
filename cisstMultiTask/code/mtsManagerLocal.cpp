@@ -29,12 +29,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstMultiTask/mtsManagerComponentClient.h>
 #include <cisstMultiTask/mtsManagerComponentServer.h>
 #include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
@@ -131,6 +133,17 @@ void mtsManagerLocal::Initialize(void)
     TimeServerOriginSet = true;
 
     SetupSystemLogger();
+
+    ValidComponentTags.clear();
+    ValidComponentTags.insert("Generic");
+    ValidComponentTags.insert("ROS");
+    ValidComponentTags.insert("UI");
+    ValidComponentTags.insert("System");
+
+    ValidInterfaceTags.clear();
+    ValidInterfaceTags.insert("Generic");
+    ValidInterfaceTags.insert("System");
+    ValidInterfaceTags.insert("State table");
 }
 
 void mtsManagerLocal::InitializeLocal(void)
@@ -232,6 +245,30 @@ bool mtsManagerLocal::IsLogAllowed(void) {
 
 bool mtsManagerLocal::IsLogForwardingEnabled(void) {
     return LogForwardEnabled;
+}
+
+bool mtsManagerLocal::IsValidComponentTag(const std::string & tag) const {
+    return (ValidComponentTags.find(tag) != ValidComponentTags.end());
+}
+
+bool mtsManagerLocal::IsValidInterfaceTag(const std::string & tag) const {
+    return (ValidInterfaceTags.find(tag) != ValidInterfaceTags.end());
+}
+
+void mtsManagerLocal::AddValidComponentTag(const std::string & tag) {
+    ValidComponentTags.insert(tag);
+}
+
+void mtsManagerLocal::AddValidInterfaceTag(const std::string & tag) {
+    ValidInterfaceTags.insert(tag);
+}
+
+const std::set<std::string> & mtsManagerLocal::GetValidComponentTags(void) const {
+    return ValidComponentTags;
+}
+
+const std::set<std::string> & mtsManagerLocal::GetValidInterfaceTags(void) const {
+    return ValidInterfaceTags;
 }
 
 void mtsManagerLocal::SetLogForwarding(bool activate) {
@@ -1047,7 +1084,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     }
 
     // Try to register new component to the global component manager first.
-    if (!ManagerGlobal->AddComponent(ProcessName, componentName)) {
+    if (!ManagerGlobal->AddComponent(ProcessName, componentName, component->Services()->GetName(), component->mTags)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add component: " << componentName << std::endl;
         return false;
     }
@@ -1104,7 +1141,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: successfully added component to GCM: " << componentName << std::endl;
     // PK TEMP
-    ManagerGlobal->AddComponent(ProcessName, componentName+"-END");
+    // ManagerGlobal->AddComponent(ProcessName, componentName+"-END", component->Services()->GetName(), component->mTags);
 
     bool success;
     ComponentMapChange.Lock();
@@ -2241,7 +2278,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                 continue;
             }
         }
-        if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i])) {
+        if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i], interfaceProvided->GetTags())) {
             CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add provided interface: "
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
@@ -2262,7 +2299,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                 continue;
             }
         }
-        if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i])) {
+        if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i], interfaceOutput->GetTags())) {
             CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add output interface: "
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
@@ -2284,7 +2321,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                 continue;
             }
         }
-        if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i])) {
+        if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i], interfaceRequired->GetTags())) {
             CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add required interface: "
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
@@ -2306,7 +2343,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
                 continue;
             }
         }
-        if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i])) {
+        if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i], interfaceInput->GetTags())) {
             CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add input interface: "
                                      << componentName << ":" << interfaceNames[i] << std::endl;
             return false;

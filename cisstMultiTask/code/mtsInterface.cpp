@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsInterface.h>
 #include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 
 static const std::string mtsInterfaceNoComponentName = "NoName";
@@ -28,6 +29,13 @@ mtsInterface::mtsInterface(const std::string & interfaceName,
                            mtsComponent * component):
     Name(interfaceName),
     Component(component)
+{
+    Initialize();
+    AddTag("Generic");
+}
+
+
+void mtsInterface::Initialize(void)
 {
 }
 
@@ -65,4 +73,21 @@ const std::string & mtsInterface::GetComponentName(void) const
         return mtsInterfaceNoComponentName;
     }
     return Component->GetName();
+}
+
+
+void mtsInterface::AddTag(const std::string & tag)
+{
+    if (mtsManagerLocal::GetInstance()->IsValidInterfaceTag(tag)) {
+        this->mTags.insert(tag);
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "AddTag: " << tag << " is not a valid interface tag. "
+                                 << "Use mtsManagerLocal::AddValidInterfaceTag to register it." << std::endl;
+    }
+}
+
+
+const std::set<std::string> & mtsInterface::GetTags(void) const
+{
+    return this->mTags;
 }

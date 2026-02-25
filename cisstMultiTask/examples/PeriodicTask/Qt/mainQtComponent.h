@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Anton Deguet, Ali Uneri, Peter Kazanzides
   Created on: 2009-10-22
 
@@ -32,7 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 const unsigned int NumSineTasks = 2;
 
 class QWidget;
-class mtsCollectorFactoryQtWidget;
 class displayQtComponent;
 
 class CISST_EXPORT mainQtComponent: public mtsComponent
@@ -40,8 +38,6 @@ class CISST_EXPORT mainQtComponent: public mtsComponent
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
 
     QWidget * mainWidget;
-    mtsCollectorFactoryQtWidget * collectorQtWidget;
-
     displayQtComponent * display[NumSineTasks];
 
  public:
@@ -50,10 +46,6 @@ class CISST_EXPORT mainQtComponent: public mtsComponent
     ~mainQtComponent();
 
     void Startup(void);
-
-    mtsCollectorFactoryQtWidget * GetCollectorQtWidget(void) const
-    { return collectorQtWidget; }
-
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mainQtComponent);

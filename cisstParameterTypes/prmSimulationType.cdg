@@ -1,0 +1,29 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+#include <cisstMultiTask/mtsGenericObject.h>
+// Always include last
+#include <cisstParameterTypes/prmExport.h>
+}
+
+enum {
+    name prmSimulationType;
+    attribute CISST_EXPORT;
+    enum-value {
+        name NONE;
+        description No simulation;
+    }
+    enum-value {
+        name KINEMATIC;
+        description Kinematic simulation;
+    }
+    enum-value {
+        name DYNAMIC;
+        description Dynamic simulation;
+    }
+    enum-value {
+        name IO;
+        description Hardware, IO simulation;
+    }
+}

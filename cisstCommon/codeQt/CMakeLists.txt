@@ -14,6 +14,11 @@ project (cisstCommonQt)
 # set directories for this project
 cisst_set_directories (cisstQt)
 
+# to include Qt generated files
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
+
+set (CMAKE_AUTOMOC ON)
+
 # add the Qt library
 cisst_add_library (
   LIBRARY cisstCommonQt

@@ -99,7 +99,10 @@ if (CISST_HAS_CISSTNETLIB)
                          GIT_REPOSITORY    ${cisstReflexxesTypeII_GIT_REPOSITORY}
                          GIT_TAG           ${cisstReflexxesTypeII_GIT_TAG}
                          CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                          -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
+                                          -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                                           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                          -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_TOOLCHAIN_FILE}
                                           -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstReflexxesTypeII
                                           -DLIBRARY_OUTPUT_PATH:FILEPATH=${LIBRARY_OUTPUT_PATH}
                          INSTALL_DIR ${cisst_BINARY_DIR}/cisstReflexxesTypeII

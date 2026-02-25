@@ -12,42 +12,121 @@ jobs:
   build:
 
     runs-on: ubuntu-24.04
+    container:
+      image: osrf/ros:jazzy-desktop
 
     steps:
     - uses: actions/checkout@v4
 
+    - name: Setup ROS 2 Jazzy
+      uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: jazzy
+
+    - name: Ensure cache directory exists
+      run: mkdir -p apt-cache
+
+    - name: Cache APT packages
+      uses: actions/cache@v4
+      with:
+        path: apt-cache
+        key: ${{ runner.os }}-apt-jazzy-${{ hashFiles('.github/workflows/cmake-ubuntu-cache.cmake') }}
+        restore-keys: |
+          ${{ runner.os }}-apt-jazzy-
+
     - name: Install Dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install libxml2-dev libjsoncpp-dev qtbase5-dev qtbase5-dev-tools qt5-qmake-bin libqt5xmlpatterns5-dev
+        # Disable the automatic purging of the apt cache in docker images
+        rm -f /etc/apt/apt.conf.d/docker-clean
+        mkdir -p apt-cache
+        APT_CACHE_DIR=$(pwd)/apt-cache
+        echo "Dir::Cache::archives \"$APT_CACHE_DIR\";" | tee /etc/apt/apt.conf.d/10cache
+        echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | tee /etc/apt/apt.conf.d/01keep-debs
+        apt-get update
+        apt-get install -y \
+          build-essential \
+          cmake \
+          git \
+          libxml2-dev \
+          libjsoncpp-dev \
+          qtbase5-dev \
+          qtbase5-dev-tools \
+          qt5-qmake-bin \
+          libqt5xmlpatterns5-dev \
+          libgraphviz-dev \
+          ccache
+
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/cmake-ubuntu-cache.cmake') }}
+        max-size: 1G
+
+    - name: ccache stats (before)
+      run: ccache -s
 
     - name: Download cisstNetlib
       run: |
-        cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
-        git clone -b devel https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+        mkdir -p cisstNetlib-build
+        git clone -b devel https://github.com/jhu-cisst/cisstNetlib cisstNetlib-source
 
     - name: Build cisstNetlib
-      working-directory: ${{github.workspace}}/cisstNetlib-build
+      working-directory: cisstNetlib-build
+      env:
+        CCACHE_BASEDIR: ${{ github.workspace }}
+        CCACHE_NOHASHDIR: "true"
+        CCACHE_COMPRESS: "true"
       run: |
-        cmake ${{github.workspace}}/cisstNetlib-source
+        cmake ../cisstNetlib-source \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build . --config Release
-        sudo cmake --build . --target install
+        cmake --build . --target install
 
     - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
+      run: mkdir -p build
 
     - name: Configure CMake
       shell: bash
-      working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -C ${{github.workspace}}/.github/workflows/cmake-ubuntu-cache.cmake
+      working-directory: build
+      env:
+        CCACHE_BASEDIR: ${{ github.workspace }}
+        CCACHE_NOHASHDIR: "true"
+        CCACHE_COMPRESS: "true"
+      run: |
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -C ../.github/workflows/cmake-ubuntu-cache.cmake
 
     - name: Build
-      working-directory: ${{github.workspace}}/build
+      working-directory: build
+      shell: bash
+      run: cmake --build . --config Release
+
+    - name: Configure CMake examples
+      shell: bash
+      working-directory: build
+      run: |
+        cmake .. \
+          -DCISST_BUILD_EXAMPLES=ON \
+          -DCISST_cisstCommon_EXAMPLES=ON \
+          -DCISST_cisstVector_EXAMPLES=ON \
+          -DCISST_cisstOSAbstraction_EXAMPLES=ON \
+          -DCISST_cisstNumerical_EXAMPLES=ON \
+          -DCISST_cisstMultiTask_EXAMPLES=ON \
+          -DCISST_cisstParameterTypes_EXAMPLES=ON \
+          -DCISST_cisstRobot_EXAMPLES=ON \
+          -DCISST_cisstMesh_EXAMPLES=ON
+
+    - name: Build examples
+      working-directory: build
       shell: bash
       run: cmake --build . --config Release
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
+      working-directory: build
       shell: bash
       run: |
         source cisstvars.sh
@@ -56,3 +135,6 @@ jobs:
         cisstNumericalTests -r
         cisstOSAbstractionTests -r
         cisstParameterTypesTests -r
+
+    - name: ccache stats (after)
+      run: ccache -s

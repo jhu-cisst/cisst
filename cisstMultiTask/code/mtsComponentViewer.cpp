@@ -40,6 +40,7 @@ mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     SetInitializationDelay(30.0);  // Allow up to 30 seconds for it to start
     mtsInterfaceRequired * required = EnableDynamicComponentManagement();
     if (required) {
+        required->SetMailBoxAndArgumentQueuesSize(1024);
         ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponentHandler, this);
         ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewer::ChangeStateHandler, this);
         ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewer::AddConnectionHandler, this);

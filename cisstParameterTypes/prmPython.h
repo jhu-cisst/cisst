@@ -67,4 +67,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmDepthMap.h>
 #include <cisstParameterTypes/prmKeyValue.h>
 
+#include <cisstParameterTypes/prmSimulationType.h>
+
 #endif // _prmPython_h
