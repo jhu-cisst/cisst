@@ -209,7 +209,7 @@ void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetFormat(const char f
 template <class _elementType>
 typename vctQtWidgetDynamicVectorWriteFloating<_elementType>::value_type
 vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMinimum(const size_t index) const {
-    if (0 <= index && (Eigen::Index)index <= Minimums.size()) {
+    if ((Eigen::Index)index <= Minimums.size()) {
         return Minimums(index);
     }
     return Minimum;
@@ -218,7 +218,7 @@ vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMinimum(const size_t ind
 template <class _elementType>
 typename vctQtWidgetDynamicVectorWriteFloating<_elementType>::value_type
 vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMaximum(const size_t index) const {
-    if (0 <= index && (Eigen::Index)index <= Maximums.size()) {
+    if ((Eigen::Index)index <= Maximums.size()) {
         return Maximums(index);
     }
     return Maximum;
@@ -538,7 +538,7 @@ void vctQtWidgetDynamicVectorBoolWrite::ValueChangedSlot(bool CMN_UNUSED(value))
     emit this->valueChanged();
 }
 
-bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const Eigen::VectorX<bool>& vector, bool blockSignals)
+bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const Eigen::Ref<const Eigen::VectorX<bool>>& vector, bool blockSignals)
 {
     const bool previousBlockSignals = this->blockSignals(blockSignals);
 
@@ -561,7 +561,7 @@ bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const Eigen::VectorX<bool>& vec
     return true;
 }
 
-bool vctQtWidgetDynamicVectorBoolWrite::GetValue(Eigen::VectorX<bool>& placeHolder) const
+bool vctQtWidgetDynamicVectorBoolWrite::GetValue(Eigen::Ref<Eigen::VectorX<bool>> placeHolder) const
 {
     int columns = this->columnCount();
     QCheckBox * checkBox;

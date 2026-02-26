@@ -146,8 +146,8 @@ class CISST_EXPORT vctQtWidgetDynamicVectorBoolWrite: public QTableWidget
     Q_OBJECT;
  public:
     vctQtWidgetDynamicVectorBoolWrite(void);
-    virtual bool SetValue(const Eigen::VectorX<bool>& value, bool blockSignals = true);
-    virtual bool GetValue(Eigen::VectorX<bool>& placeHolder) const;
+    virtual bool SetValue(const Eigen::Ref<const Eigen::VectorX<bool>>& value, bool blockSignals = true);
+    virtual bool GetValue(Eigen::Ref<Eigen::VectorX<bool>> placeHolder) const;
 signals:
     bool valueChanged(void);
 protected slots:
