@@ -46,11 +46,11 @@ public:
         // get the matrix size from JSON and resize
         const size_t rows = jsonValue.size();
         const size_t cols = (rows > 0) ? jsonValue[0].size() : 0;
-        if (DataType::RowsAtCompileTime != Eigen::Dynamic && rows != DataType::RowsAtCompileTime) {
+        if (DataType::RowsAtCompileTime != Eigen::Dynamic && rows != (size_t)DataType::RowsAtCompileTime) {
             cmnThrow("cmnDataJSON<Eigen::PlainObjectBase>::DeSerializeText: rows doesn't match compile time size");
         }
 
-        if (DataType::ColsAtCompileTime != Eigen::Dynamic && cols != DataType::ColsAtCompileTime) {
+        if (DataType::ColsAtCompileTime != Eigen::Dynamic && cols != (size_t)DataType::ColsAtCompileTime) {
             cmnThrow("cmnDataJSON<Eigen::PlainObjectBase>::DeSerializeText: cols doesn't match compile time size");
         }
 

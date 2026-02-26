@@ -21,7 +21,7 @@ class {
 
     member {
         name cp;
-        type vctFrm4x4;
+        type Eigen::Isometry3d;
         description Cartesian pose;
     }
 
