@@ -22,45 +22,33 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstNumerical/nmrSavitzkyGolay.h>
 #include <cisstNumerical/nmrInverse.h>
 
-vctDynamicVector<double>
-CISST_EXPORT nmrSavitzkyGolay( int M,
-                               int D,
-                               int NL,
-                               int NR ){
-
-  vctDynamicMatrix<double> A( NL+NR+1, M+1, 0.0, VCT_COL_MAJOR );
-  vctDynamicVector<double> b( M, 0.0 );
-
-  for( int t=-NL; t<=NR; t++ ){
-    double tk=1.0;
-    A[ t+NL ][ 0 ] = tk;
-    for( int k=1; k<M+1; k++ ){
-      tk *= t;
-      A[ t+NL ][ k ] = tk;
+Eigen::VectorXd
+CISST_EXPORT nmrSavitzkyGolay(int M, int D, int NL, int NR)
+{
+    if (D < 0 || M < D) {
+        return Eigen::VectorXd::Zero(NL + NR + 1);
     }
-  }
 
-  vctDynamicMatrix<double> ATA = A.Transpose() * A;
-  nmrInverse( ATA );
-  vctDynamicMatrix<double> ATAAT = ATA * A.Transpose();
+    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(NL+NR+1, M+1);
+    Eigen::VectorXd b = Eigen::VectorXd::Zero(M);
 
-  vctDynamicVector<double> c( NL+NR+1, 0.0 );
-
-  for( int n=0; n<NL+NR+1; n++ ){
-    vctDynamicVector<double> en( NL+NR+1, 0.0 );
-    en[n] = 1.0;
-
-    vctDynamicVector<double> x = ATAAT * en;
-    c[n] = x[D];
-  }
-
-  double frac=1.0;
-  if( 1 < D ){
-    for( int i=1; i<=D; i++ ){
-      frac *= i;
+    // Construct Vandermonde matrix
+    // A
+    for (int z = -NL; z <= NR; z++) {
+        double azk = 1.0;
+        for(int k = 0; k<M+1; k++) {
+            A(z+NL, k) = azk;
+            azk *= z;
+        }
     }
-  }
 
-  return c*frac;
+    // Construct normal equations for Vandermonde system
+    Eigen::MatrixXd N = (A.transpose() * A).inverse() * A.transpose();
+    // Dth row corresponds to coefficient of z^D
+    Eigen::VectorXd coefficients = N.row(D);
 
+    double D_factorial = 1.0;
+    for (int i = 2; i <= D; i++) { D_factorial *= i; }
+
+    return D_factorial * coefficients;
 }

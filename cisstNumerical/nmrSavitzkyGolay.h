@@ -22,21 +22,18 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _nmrSavitzkyGolay_h
 #define _nmrSavitzkyGolay_h
 
-#include <cisstVector/vctDynamicVector.h>
+#include <Eigen/Dense>
 #include <cisstNumerical/nmrExport.h>
 
 //! Savitzky Golay filter design
 /**
-   Creates a Savitzky-Golay FIR filter. The filter is defined by the order K
+   Creates a Savitzky-Golay FIR filter. The filter is defined by the order M
    of a polynomial, which derivative D to be filtered and the support defined
    by the filter size determined by the number of samples NL left of a data 
    point and the number of samples NR right of the data point. For a causal 
    filter NR=0
 */
 
-vctDynamicVector<double> CISST_EXPORT nmrSavitzkyGolay( int K, 
-							int D, 
-							int NL, 
-							int NR );
+Eigen::VectorXd CISST_EXPORT nmrSavitzkyGolay(int M, int D, int NL, int NR);
 
 #endif

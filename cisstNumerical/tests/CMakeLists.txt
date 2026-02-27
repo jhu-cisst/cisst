@@ -61,6 +61,7 @@ if (CISST_HAS_CISSTNETLIB)
        # deprecated nmrLSISolverTest.cpp
        nmrLSqLinTest.cpp
        nmrNNLSSolverTest.cpp
+       nmrSavitzkyGolayTest.cpp
        nmrSVDRSSolverTest.cpp
        )
 
@@ -81,6 +82,7 @@ if (CISST_HAS_CISSTNETLIB)
        # deprecated nmrLSISolverTest.h
        nmrLSqLinTest.h
        nmrNNLSSolverTest.h
+       nmrSavitzkyGolayTest.h
        # deprecated nmrSVDRSSolverTest.h
        )
 endif (CISST_HAS_CISSTNETLIB)
