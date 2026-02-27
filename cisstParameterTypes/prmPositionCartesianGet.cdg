@@ -55,6 +55,7 @@ class {
     member {
         name Position;
         type Eigen::Isometry3d;
+        default Eigen::Isometry3d::Identity();
         description Desired position;
     }
 
