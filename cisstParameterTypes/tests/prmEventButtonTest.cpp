@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "prmTestGenericObjectConstructor.h"
 #include "prmSetAndTestGenericObjectSerialization.h"
 
-#include <cisstVector/vctRandom.h>
 #include <cisstParameterTypes/prmEventButton.h>
 
 

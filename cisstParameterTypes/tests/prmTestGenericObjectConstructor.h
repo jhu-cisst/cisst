@@ -23,7 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObject.h>
 
-#include <sstream>
 
 // utility function to test the data member inherited from mtsGenericObject
 template <class _elementType>
@@ -44,7 +43,6 @@ void prmTestGenericObjectConstructorSwapValues(_elementType & initial)
     initial.AutomaticTimestamp() = !initial.AutomaticTimestamp();
     initial.Valid() = !initial.Valid();
 }
-
 
 
 // utility function to test the data member inherited from mtsGenericObject

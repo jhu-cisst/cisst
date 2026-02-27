@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #include "prmTestGenericObjectConstructor.h"
 #include "prmSetAndTestGenericObjectSerialization.h"
 
-#include <cisstVector/vctRandom.h>
 #include <cisstParameterTypes/prmForceCartesianGet.h>
+#include <Eigen/Geometry>
 
 
 void prmForceCartesianGetTest::TestConstructors(void)
@@ -34,12 +34,11 @@ void prmForceCartesianGetTest::TestConstructors(void)
 
     // modify some values and then use copy constructor
     prmTestGenericObjectConstructorSwapValues(force);
-    vctRandom(force.Force(), -10.0, 10.0);
+    force.Force() = Eigen::Vector<double, 6>::Random() * 10.0;
     prmForceCartesianGet forceCopy(force);
     prmTestGenericObjectCopyConstructor(force, forceCopy);
-    CPPUNIT_ASSERT(force.Force().Equal(forceCopy.Force()));
+    CPPUNIT_ASSERT(force.Force() == forceCopy.Force());
 }
-
 
 void prmForceCartesianGetTest::TestSerialize(void)
 {
@@ -47,10 +46,10 @@ void prmForceCartesianGetTest::TestSerialize(void)
     // test part inherited from mtsGenericObject
     prmSetAndTestGenericObjectSerialization(initial);
 
-    vctRandom(initial.Force(), -10.0, 10.0);
+    initial.Force() = Eigen::Vector<double, 6>::Random() * 10.0;
     std::stringstream serializationStream;
     initial.SerializeRaw(serializationStream);
     final.DeSerializeRaw(serializationStream);
 
-    CPPUNIT_ASSERT(final.Force().Equal(initial.Force()));
+    CPPUNIT_ASSERT(final.Force() == initial.Force());
 }

@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
+
   Author(s):  Anton Deguet
   Created on: 2009-04-29
-  
+
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -30,13 +30,13 @@ void prmSetAndTestGenericObjectSerialization(_elementType & initial)
     initial.Timestamp() = 3.1435;
     initial.AutomaticTimestamp() = !initial.AutomaticTimestamp(); // do not use default value
     initial.Valid() = !initial.Valid();  // do not use default value
-    
+
     std::stringstream serializationStream;
     initial.SerializeRaw(serializationStream);
-    
+
     _elementType final;
     final.DeSerializeRaw(serializationStream);
-    
+
     // check data inherited from mtsGenericObject
     CPPUNIT_ASSERT(initial.Timestamp() == final.Timestamp());
     CPPUNIT_ASSERT(initial.AutomaticTimestamp() == final.AutomaticTimestamp());

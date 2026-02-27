@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "prmTestGenericObjectConstructor.h"
 #include "prmSetAndTestGenericObjectSerialization.h"
 
-#include <cisstVector/vctRandom.h>
 #include <cisstParameterTypes/prmVelocityCartesianGet.h>
 
 
@@ -34,12 +33,12 @@ void prmVelocityCartesianGetTest::TestConstructors(void)
 
     // modify some values and then use copy constructor
     prmTestGenericObjectConstructorSwapValues(velocity);
-    vctRandom(velocity.VelocityLinear(), -10.0, 10.0);
-    vctRandom(velocity.VelocityAngular(), -10.0, 10.0);
+    velocity.VelocityLinear() = Eigen::Vector3d::Random() * 10.0;
+    velocity.VelocityAngular() = Eigen::Vector3d::Random() * 10.0;
     prmVelocityCartesianGet velocityCopy(velocity);
     prmTestGenericObjectCopyConstructor(velocity, velocityCopy);
-    CPPUNIT_ASSERT(velocity.VelocityLinear().Equal(velocityCopy.VelocityLinear()));
-    CPPUNIT_ASSERT(velocity.VelocityAngular().Equal(velocityCopy.VelocityAngular()));
+    CPPUNIT_ASSERT(velocity.VelocityLinear() == velocityCopy.VelocityLinear());
+    CPPUNIT_ASSERT(velocity.VelocityAngular() == velocityCopy.VelocityAngular());
 }
 
 
@@ -49,12 +48,13 @@ void prmVelocityCartesianGetTest::TestSerialize(void)
     // test part inherited from mtsGenericObject
     prmSetAndTestGenericObjectSerialization(initial);
 
-    vctRandom(initial.VelocityLinear(), -10.0, 10.0);
-    vctRandom(initial.VelocityAngular(), -10.0, 10.0);
+    initial.VelocityLinear() = Eigen::Vector3d::Random() * 10.0;
+    initial.VelocityAngular() = Eigen::Vector3d::Random() * 10.0;
+
     std::stringstream serializationStream;
     initial.SerializeRaw(serializationStream);
     final.DeSerializeRaw(serializationStream);
 
-    CPPUNIT_ASSERT(final.VelocityLinear().Equal(initial.VelocityLinear()));
-    CPPUNIT_ASSERT(final.VelocityAngular().Equal(initial.VelocityAngular()));
+    CPPUNIT_ASSERT(final.VelocityLinear() == initial.VelocityLinear());
+    CPPUNIT_ASSERT(final.VelocityAngular() == initial.VelocityAngular());
 }
