@@ -10,6 +10,30 @@
 # --- end cisst license ---
 
 
+# Support for PkgConfig (used for JSON and Graphviz)
+find_package (PkgConfig QUIET)
+set (CISST_USE_PKG_CONFIG FALSE)
+if (PKG_CONFIG_FOUND AND (NOT WIN32 OR DEFINED VCPKG_TARGET_TRIPLET OR DEFINED VCPKG_TOOLCHAIN_FILE OR DEFINED CMAKE_TOOLCHAIN_FILE OR VCPKG_TOOLCHAIN))
+  set (CISST_USE_PKG_CONFIG TRUE)
+endif ()
+
+# Support for Graphviz
+if (CISST_USE_PKG_CONFIG)
+  pkg_check_modules (GRAPHVIZ libgvc libcgraph libcdt)
+
+  if (GRAPHVIZ_FOUND)
+    cisst_set_package_settings (cisstGraphviz GRAPHVIZ INCLUDE_DIRECTORIES GRAPHVIZ_INCLUDE_DIRS)
+    cisst_set_package_settings (cisstGraphviz GRAPHVIZ LIBRARIES           GRAPHVIZ_LIBRARIES)
+    cisst_set_package_settings (cisstGraphviz GRAPHVIZ LINK_DIRECTORIES    GRAPHVIZ_LIBRARY_DIRS)
+    # Mark that we have graphviz for the main cisst CMakeLists.txt
+    set (CISST_HAS_GRAPHVIZ ON PARENT_SCOPE)
+    set (CISST_HAS_GRAPHVIZ ON)
+  else ()
+    set (CISST_HAS_GRAPHVIZ OFF PARENT_SCOPE)
+    set (CISST_HAS_GRAPHVIZ OFF)
+  endif ()
+endif (CISST_USE_PKG_CONFIG)
+
 # Support for OpenGL
 find_package (OpenGL)
 if (OPENGL_FOUND)
@@ -89,9 +113,14 @@ if (CISST_HAS_QT5)
            DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
            COMPONENT cisstCommon)
   
-  # Optionally build QtNode as an external project if it is not available
-  option (CISST_HAS_QTNODES "Build QtNode (Qt + Node integration) as an external project." ON)
-  mark_as_advanced (CISST_HAS_QTNODES)
+  # Optionally build QtNode as an external project if Graphviz is available
+  if (CISST_HAS_GRAPHVIZ)
+     set (CISST_HAS_QTNODES_DEFAULT ON)
+  else ()
+     set (CISST_HAS_QTNODES_DEFAULT OFF)
+     message (WARNING "CISST_HAS_QTNODES set to OFF by default since libgraphviz is not found. You can install graphviz with: sudo apt install libgraphviz-dev and then set CISST_HAS_QTNODES back to ON.")
+  endif ()
+  option (CISST_HAS_QTNODES "Build QtNode (Qt + Node integration) as an external project." ${CISST_HAS_QTNODES_DEFAULT})
 
   if (CISST_HAS_QTNODES)
     include (ExternalProject)
@@ -335,13 +364,6 @@ else (LIBXML2_FOUND)
 endif (LIBXML2_FOUND)
 
 
-# Support for PkgConfig (used for JSON and Graphviz)
-find_package (PkgConfig QUIET)
-set (CISST_USE_PKG_CONFIG FALSE)
-if (PKG_CONFIG_FOUND AND (NOT WIN32 OR DEFINED VCPKG_TARGET_TRIPLET OR DEFINED VCPKG_TOOLCHAIN_FILE OR DEFINED CMAKE_TOOLCHAIN_FILE OR VCPKG_TOOLCHAIN))
-  set (CISST_USE_PKG_CONFIG TRUE)
-endif ()
-
 # Support for JSON
 option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some examples and utilities won't be compiled" ON)
 
@@ -415,23 +437,3 @@ if (CISST_HAS_JSON)
 else (CISST_HAS_JSON)
   cisst_unset_all_package_settings (cisstCommon JSON)
 endif (CISST_HAS_JSON)
-
-# Support for Graphviz
-if (CISST_USE_PKG_CONFIG)
-  pkg_check_modules (GRAPHVIZ libgvc libcgraph libcdt)
-
-  if (GRAPHVIZ_FOUND)
-    cisst_set_package_settings (cisstGraphviz GRAPHVIZ INCLUDE_DIRECTORIES GRAPHVIZ_INCLUDE_DIRS)
-    cisst_set_package_settings (cisstGraphviz GRAPHVIZ LIBRARIES           GRAPHVIZ_LIBRARIES)
-    cisst_set_package_settings (cisstGraphviz GRAPHVIZ LINK_DIRECTORIES    GRAPHVIZ_LIBRARY_DIRS)
-    # Mark that we have graphviz for the main cisst CMakeLists.txt
-    set (CISST_HAS_GRAPHVIZ ON PARENT_SCOPE)
-  else ()
-    set (CISST_HAS_GRAPHVIZ OFF PARENT_SCOPE)
-    if (CISST_HAS_QTNODES)
-      message (FATAL_ERROR "Graphviz is required when CISST_HAS_QTNODES is ON. Please install it with: sudo apt install libgraphviz-dev")
-    endif ()
-  endif ()
-endif (CISST_USE_PKG_CONFIG)
-
-
