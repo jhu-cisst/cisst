@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Andrew LaMora, Peter Kazanzides
   Created on: 2005-02-28
 
-  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -15,9 +14,7 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
-
 
 #include <Python.h>
 
@@ -192,8 +189,9 @@ PyObject* PyTextCtrlHook::SetMask(PyObject* CMN_UNUSED(self), PyObject* args)
 
 void PyTextCtrlHook::SetupStreambuf(void)
 {
-    if (!Streambuf)
+    if (!Streambuf) {
         Streambuf = new cmnCallbackStreambuf<char>(PrintLog);
+    }
     cmnLogger::GetMultiplexer()->AddChannel(Streambuf, Mask);
 }
 
@@ -202,7 +200,7 @@ void PyTextCtrlHook::SetupStreambuf(void)
 // Parameters:
 //     str:  a null-terminated string
 //     len:  the length of the string
-void PyTextCtrlHook::PrintLog(const char * str, int len)
+void PyTextCtrlHook::PrintLog(const char * str, int CMN_UNUSED(len))
 {
     PyObject* result;
 
@@ -251,10 +249,11 @@ void PyTextCtrlHook::PrintLog(const char * str, int len)
         // If the result is NULL, we had a problem.  Do not write
         // to CMN_LOG because that could lead to an infinite loop
         // (since the logging functions call this function).
-        if (result == NULL)
+        if (result == NULL) {
             std::cout << "CallObject returned NULL" << std::endl;
-        else
+        } else {
             Py_DECREF(result);
+        }
 
         // Release Python global interpreter lock
         PyGILState_Release(gstate);
@@ -284,8 +283,9 @@ void ireFramework::SetActiveFlag(bool flag)
 PyObject* SetActiveFlagWrap(PyObject* CMN_UNUSED(self), PyObject* args)
 {
     PyObject* pyflag;
-    if (PyArg_ParseTuple(args,"O",&pyflag))
+    if (PyArg_ParseTuple(args,"O",&pyflag)) {
         ireFramework::SetActiveFlag(pyflag == Py_True);
+    }
     return Py_None;
 }
 
@@ -324,8 +324,9 @@ PyObject *PyTextCtrlHook::InitModule()
 #else
     pModule = PyModule_Create(&ModuleDef);
 #endif
-    if (pModule == NULL)
+    if (pModule == NULL) {
         CMN_LOG_INIT_ERROR << "PyTextCtrlHook::InitModule failed" << std::endl;
+    }
     return pModule;
 }
 
@@ -411,7 +412,7 @@ void ireFramework::FinalizeShellInstance(void)
 // Developers should take care to DECREF (decrease the reference counts)
 // of any PyObject s that use hard references.
 //
-void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython,
+void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonThread, IRE_Shell shell,
                                           bool useStreambuf)
 {
     if (IRE_State != IRE_CONSTRUCTED) {
@@ -441,8 +442,9 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
     PyConfig_InitPythonConfig(&config);
     PyConfig_SetBytesArgv(&config, 3, const_cast<char **>(python_args));
     // Initialize ireLogger module, which is used for the cmnLogger output window
-    if (PyImport_AppendInittab("ireLogger", PyTextCtrlHook::InitModule) == -1)
+    if (PyImport_AppendInittab("ireLogger", PyTextCtrlHook::InitModule) == -1) {
         CMN_LOG_INIT_WARNING << "LaunchIREShellInstance: failed to import ireLogger" << std::endl;
+    }
     PyStatus status;
     status = Py_InitializeFromConfig(&config);
     PyConfig_Clear(&config);
@@ -482,7 +484,7 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
     }
 
     char launchString[128];
-    if (useIPython) {
+    if (shell == IRE_IPYTHON) {
         // Could instead add "argv=[%s]" to launchString, where %s is startup string
         PyRun_SimpleString(startup);
         // Following code is for very old versions of IPython (possibly prior to 1.0)
@@ -494,6 +496,52 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
         strcpy(launchString, "ipshell('Interactive Research Environment (IRE)', local_ns=globals())");
         IRE_State = IRE_ACTIVE;  // for now, instead of using SetActiveState callback
     }
+    else if (shell == IRE_JUPYTER) {
+        // Store startup code in __main__ - will be set as exec_lines config
+        PyRun_SimpleString("_ire_startup_code = ''");
+        PyObject* pMainModule = PyImport_AddModule("__main__");
+        PyObject* pMainDict = PyModule_GetDict(pMainModule);
+        PyObject* pStartupStr = PyUnicode_FromString(startup);
+        PyDict_SetItemString(pMainDict, "_ire_startup_code", pStartupStr);
+        Py_DECREF(pStartupStr);
+
+        int result = PyRun_SimpleString(
+            "def _start_ire_jupyter():\n"
+            "    import sys\n"
+            "    try:\n"
+            "        import asyncio\n"
+            "        asyncio.set_event_loop(asyncio.new_event_loop())\n"
+            "        from ipykernel.kernelapp import IPKernelApp\n"
+            "        from traitlets.config import Config\n"
+            "        import __main__\n"
+            "        # Configure kernel to run startup code in user namespace\n"
+            "        c = Config()\n"
+            "        c.InteractiveShellApp.exec_lines = [__main__._ire_startup_code]\n"
+            "        _ire_jupyter_app = IPKernelApp.instance(config=c, outstream_class='ipykernel.iostream.OutStream')\n"
+            "        # Disable signal handling - kernel runs in subthread\n"
+            "        _ire_jupyter_app.init_signal = lambda: None\n"
+            "        _ire_jupyter_app.initialize(['python'])\n"
+            "        _ire_jupyter_app.start()\n"
+            "    except ImportError:\n"
+            "        print('ipykernel not found. Install with:')\n"
+            "        print('  apt: sudo apt install python3-ipykernel')\n"
+            "        print('  pip: pip install ipykernel')\n"
+            "        sys.exit(1)\n"
+            "    except Exception as e:\n"
+            "        import traceback\n"
+            "        traceback.print_exc()\n"
+            "        sys.exit(1)\n"
+        );
+        if (result != 0) {
+            CMN_LOG_INIT_ERROR << "LaunchIREShellInstance: Python error while attempting to start Jupyter kernel" << std::endl;
+            IRE_State = IRE_FINISHED;
+            return;
+        }
+        // Use the same thread infrastructure as IPython: set launchString and
+        // fall through to the NewPythonThread block which creates pInstance
+        strcpy(launchString, "_start_ire_jupyter()");
+        IRE_State = IRE_ACTIVE;
+    }
     else {
         PyRun_SimpleString("from irepy import ireMain");
         strcpy(launchString, "ireMain.launchIrePython()");
@@ -504,12 +552,21 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
     if (NewPythonThread) {
         PyRun_SimpleString("import threading\n");
         char buffer[300];
-        sprintf(buffer, "class IreThread(threading.Thread):\n"
-                        "    def __init__(self):\n"
-                        "        threading.Thread.__init__(self)\n"
-                        "    def run(self):\n"
-                        "        %s",
-                        launchString);
+        if (shell == IRE_JUPYTER) {
+            sprintf(buffer, "class IreThread(threading.Thread):\n"
+                            "    def __init__(self):\n"
+                            "        threading.Thread.__init__(self, daemon=True)\n"
+                            "    def run(self):\n"
+                            "        %s",
+                            launchString);
+        } else {
+            sprintf(buffer, "class IreThread(threading.Thread):\n"
+                            "    def __init__(self):\n"
+                            "        threading.Thread.__init__(self)\n"
+                            "    def run(self):\n"
+                            "        %s",
+                            launchString);
+        }
         PyRun_SimpleString(buffer);
         PyObject* pClass = PyDict_GetItemString(pDict, "IreThread");
 
@@ -584,10 +641,15 @@ void ireFramework::Reset()
 
 void ireFramework::UnblockThreads()
 {
-    if ((IRE_State == IRE_LAUNCHED) || (IRE_State == IRE_ACTIVE))
-        IreThreadState = static_cast<void *>(PyEval_SaveThread());
-    else
+    if ((IRE_State == IRE_LAUNCHED) || (IRE_State == IRE_ACTIVE)) {
+        if (PyGILState_Check()) {
+            IreThreadState = static_cast<void *>(PyEval_SaveThread());
+        } else {
+            IreThreadState = 0;
+        }
+    } else {
         IreThreadState = 0;
+    }
 }
 
 void ireFramework::BlockThreads()

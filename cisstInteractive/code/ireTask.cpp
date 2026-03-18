@@ -2,11 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s):  Peter Kazanzides
   Created on: 2010-12-10
 
-  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -76,11 +75,13 @@ void ireTask::Startup(void)
     try {
         // Set last parameter true to use cmnCallbackStreambuf (standard CMN_LOG)
         // Set last parameter false if using system-wide log (threaded logging)
-        ireFramework::LaunchIREShell(startup.str().c_str(), true, (Shell == IRE_IPYTHON), true);
+        ireFramework::LaunchIREShell(startup.str().c_str(), true, Shell, true);
     }
     catch (...) {
         if (Shell == IRE_IPYTHON)
             CMN_LOG_CLASS_INIT_ERROR << "Could not launch IPython shell" << std::endl;
+        else if (Shell == IRE_JUPYTER)
+            CMN_LOG_CLASS_INIT_ERROR << "Could not launch Jupyter kernel" << std::endl;
         else
             CMN_LOG_CLASS_INIT_ERROR << "Could not launch IRE shell (wxPython)" << std::endl;
         return;

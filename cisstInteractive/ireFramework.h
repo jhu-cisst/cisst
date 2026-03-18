@@ -6,7 +6,7 @@
   Author(s): Andrew LaMora, Peter Kazanzides
   Created on: 2005-02-28
 
-  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -95,7 +95,7 @@ private:
     void InitShellInstance(void);
 
     void FinalizeShellInstance(void);
-    void LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython,
+    void LaunchIREShellInstance(const char * startup, bool newPythonThread, IRE_Shell shell,
                                 bool useStreambuf);
 
 	void JoinIREShellInstance(double timeout);
@@ -185,9 +185,9 @@ public:
       callback function to change the state to IRE_ACTIVE prior to entering
       the wxPython main event loop.  On exit from the event loop, it will
       call the callback function to change the state to IRE_FINISHED. */
-	static inline void LaunchIREShell(const char *startup = "", bool newPythonThread = false, bool useIPython = false,
+	static inline void LaunchIREShell(const char *startup = "", bool newPythonThread = false, IRE_Shell shell = IRE_WXPYTHON,
                                       bool useStreambuf = true) {
-	    Instance()->LaunchIREShellInstance(startup, newPythonThread, useIPython, useStreambuf);
+	    Instance()->LaunchIREShellInstance(startup, newPythonThread, shell, useStreambuf);
 	}
 
     /*! Single argument function that can be passed directly to osaThread::Create, e.g.,:
@@ -198,7 +198,7 @@ public:
     */
     static inline void *RunIRE_wxPython(const char *startup) {
         try {
-            LaunchIREShell(startup, false, false, true);
+            LaunchIREShell(startup, false, IRE_WXPYTHON, true);
         }
         catch (...) {
             CMN_LOG_INIT_ERROR << "Could not launch IRE shell (wxPython)" << std::endl;
@@ -215,7 +215,7 @@ public:
     */
     static inline void *RunIRE_IPython(const char *startup) {
         try {
-            LaunchIREShell(startup, false, true, false);
+            LaunchIREShell(startup, false, IRE_IPYTHON, false);
         }
         catch (...) {
             CMN_LOG_INIT_ERROR << "Could not launch IRE shell (IPython)" << std::endl;

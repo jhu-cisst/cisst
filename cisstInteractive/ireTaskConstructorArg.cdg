@@ -17,6 +17,10 @@ enum {
         name IRE_IPYTHON;
         description iPython;
     }
+    enum-value {
+        name IRE_JUPYTER;
+        description jupyter;
+    }
     // enum-value {
     //   name IRE_PYTHON;
     //    description python;
