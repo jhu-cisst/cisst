@@ -2,7 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-
   Author(s): Andrew LaMora, Peter Kazanzides
   Created on: 2005-02-28
 
@@ -15,15 +14,12 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
-
 
 /*!
   \file
   \brief Declaration of ireFramework for managing Python IRE tools
 */
-
 
 #ifndef _ireFramework_h
 #define _ireFramework_h
@@ -33,10 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnThrow.h>
 
-
+#include <cisstInteractive/ireTaskConstructorArg.h>
 #include <cisstInteractive/ireExport.h>
-
-
 /*!
   \brief Class to manage the preparation of Python for the
   Interactive Robot Environment, and for launching the IRE IDE and
