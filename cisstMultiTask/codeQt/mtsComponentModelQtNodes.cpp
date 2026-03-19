@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <QLabel>
+#include <QJsonObject>
 #include <cisstMultiTask/mtsComponentModelQtNodes.h>
 #include <iostream>
 
@@ -35,6 +36,22 @@ QString mtsComponentModelQtNodes::name(void) const {
     return QString("%1:%2")
         .arg(QString::fromStdString(m_processName),
              QString::fromStdString(m_componentName));
+}
+
+QJsonObject mtsComponentModelQtNodes::save() const {
+    QJsonObject modelJson = NodeDelegateModel::save();
+
+    if (m_color.isValid()) {
+        QJsonObject styleJson;
+        styleJson["NormalBoundaryColor"] = m_color.name();
+        // Since we can't easily change the title background color per node
+        // in QtNodes without a custom NodePainter, we use the boundary color
+        // and optionally set a background color if the style supports it.
+        styleJson["BackgroundColor"] = m_color.name();
+        modelJson["Style"] = styleJson;
+    }
+
+    return modelJson;
 }
 
 unsigned int
@@ -138,6 +155,11 @@ void mtsComponentModelQtNodes::SetClassName(const std::string &className) {
 
 void mtsComponentModelQtNodes::SetState(const std::string &state) {
     m_state = state;
+    UpdateWidget();
+}
+
+void mtsComponentModelQtNodes::SetColor(const QColor &color) {
+    m_color = color;
     UpdateWidget();
 }
 

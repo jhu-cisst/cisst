@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QLabel>
 #include <QMenuBar>
 #include <QMenu>
+#include <QPainter>
 #include <QToolButton>
 #include <QTimer>
 #include <QToolBar>
@@ -143,6 +144,25 @@ void mtsComponentViewerQt::setupUi(void) {
         action->setCheckable(true);
         action->setChecked(m_show_component_tags.count(tag));
         action->setData(QString::fromStdString(tag));
+        QColor color;
+        if (tag == "UI") {
+            color = QColor(255, 200, 200); // Redish
+        } else if (tag == "ROS") {
+            color = QColor(200, 200, 255); // Blueish
+        } else if (tag == "System") {
+            color = QColor(200, 255, 200); // Greenish
+        }
+
+        if (color.isValid()) {
+            QPixmap pixmap(20, 20);
+            pixmap.fill(Qt::transparent);
+            QPainter painter(&pixmap);
+            painter.setRenderHint(QPainter::Antialiasing);
+            painter.setBrush(color);
+            painter.setPen(Qt::NoPen);
+            painter.drawRoundedRect(2, 2, 16, 16, 4, 4);
+            action->setIcon(QIcon(pixmap));
+        }
         connect(action, &QAction::triggered, this, &mtsComponentViewerQt::onFilterComponents);
     }
 
@@ -260,12 +280,35 @@ void mtsComponentViewerQt::onAutoLayout(void) {
     agsafeset(g, (char *)"rankdir", (char *)"LR", (char *)"LR");
     agsafeset(g, (char *)"nodesep", (char *)"1.0", (char *)"1.0");
     agsafeset(g, (char *)"ranksep", (char *)"1.5", (char *)"1.5");
+    agsafeset(g, (char *)"splines", (char *)"ortho", (char *)"");
+
+    Agraph_t *uiSubgraph = agsubg(g, (char *)"cluster_ui", 1);
+    agsafeset(uiSubgraph, (char *)"rank", (char *)"sink", (char *)"");
+    agsafeset(uiSubgraph, (char *)"label", (char *)"UI Components", (char *)"");
+
+    Agraph_t *rosSubgraph = agsubg(g, (char *)"cluster_ros", 1);
+    agsafeset(rosSubgraph, (char *)"rank", (char *)"same", (char *)"");
+    agsafeset(rosSubgraph, (char *)"label", (char *)"ROS Components", (char *)"");
 
     std::map<QtNodes::NodeId, Agnode_t *> graphvizNodes;
     for (const auto &key : m_components) {
         QtNodes::NodeId id = NodeIds[key];
         std::string nodeName = key.first + ":" + key.second;
         Agnode_t *v = agnode(g, (char *)nodeName.c_str(), 1);
+
+        // Subgraph for UI and ROS components
+        auto it = std::find_if(m_component_infos.begin(), m_component_infos.end(),
+                               [&](const mtsDescriptionComponent &desc) {
+                                   return desc.ProcessName == key.first &&
+                                          desc.ComponentName == key.second;
+                               });
+        if (it != m_component_infos.end()) {
+            if (it->Tags.count("UI")) {
+                agsubnode(uiSubgraph, v, 1);
+            } else if (it->Tags.count("ROS")) {
+                agsubnode(rosSubgraph, v, 1);
+            }
+        }
 
         // Get actual size from scene
         if (Scene) {
@@ -454,9 +497,10 @@ void mtsComponentViewerQt::UpdateGraph(void) {
             // Components without tags are shown if Generic is checked
             showComponent = m_show_component_tags.count("Generic");
         } else {
+            showComponent = true;
             for (auto & tag : desc.Tags) {
-                if (m_show_component_tags.count(tag)) {
-                    showComponent = true;
+                if (!m_show_component_tags.count(tag)) {
+                    showComponent = false;
                     break;
                 }
             }
@@ -505,9 +549,10 @@ void mtsComponentViewerQt::UpdateGraph(void) {
 
         auto state = ManagerComponentServices->ComponentGetState(desc);
         const std::string className = desc.ClassName;
+        const std::set<std::string> tags = desc.Tags;
 
         Registry->registerModel<mtsComponentModelQtNodes>(
-            [processName, componentName, className, state, interfacesRequired, interfacesProvided]() {
+            [processName, componentName, className, state, interfacesRequired, interfacesProvided, tags]() {
                 auto model = std::make_unique<mtsComponentModelQtNodes>(processName, componentName);
                 model->SetClassName(className);
                 model->SetState(mtsComponentState::EnumToString(state.State()));
@@ -516,6 +561,13 @@ void mtsComponentViewerQt::UpdateGraph(void) {
                 }
                 for (const auto &interfaceName : interfacesProvided) {
                     model->AddInterfaceProvided(interfaceName);
+                }
+                if (tags.count("UI")) {
+                    model->SetColor(QColor(255, 200, 200));
+                } else if (tags.count("ROS")) {
+                    model->SetColor(QColor(200, 200, 255));
+                } else if (tags.count("System")) {
+                    model->SetColor(QColor(200, 255, 200));
                 }
                 return model;
             });

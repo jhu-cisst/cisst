@@ -60,6 +60,10 @@ class CISST_EXPORT mtsComponentModelQtNodes
 
     QWidget *embeddedWidget(void) override;
 
+    QJsonObject save() const override;
+
+    void SetColor(const QColor &color);
+
     bool AddInterfaceProvided(const std::string &name);
     bool AddInterfaceRequired(const std::string &name);
     void SetClassName(const std::string &className);
@@ -75,6 +79,7 @@ class CISST_EXPORT mtsComponentModelQtNodes
     std::vector<std::string> m_interfaces_provided;
     std::vector<std::string> m_interfaces_required;
     QWidget *m_widget = nullptr;
+    QColor m_color;
 };
 
 #endif // _mtsComponentModelQtNodes_h

@@ -69,6 +69,7 @@ prmEventButtonQtWidgetComponent::prmEventButtonQtWidgetComponent(const std::stri
     QWidget(),
     mtsComponent(name)
 {
+    this->AddTag("UI");
     SetNumberOfColumns(4);
     GridLayout = new QGridLayout();
     GridLayout->setSpacing(1);
