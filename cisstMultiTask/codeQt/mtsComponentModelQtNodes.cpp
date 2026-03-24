@@ -17,19 +17,28 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <QLabel>
+#include <QVBoxLayout>
 #include <QJsonObject>
 #include <cisstMultiTask/mtsComponentModelQtNodes.h>
 #include <iostream>
 
 mtsComponentModelQtNodes::mtsComponentModelQtNodes(const std::string &processName,
-                                                   const std::string &componentName)
+                                                   const std::string &componentName,
+                                                   const std::string &className,
+                                                   const QColor &color)
     : m_processName(processName)
-    , m_componentName(componentName) {}
+    , m_componentName(componentName)
+    , m_className(className)
+    , m_color(color) {}
 
 QString mtsComponentModelQtNodes::caption(void) const {
     return QString("%1 : %2")
-        .arg(QString::fromStdString(m_componentName),
-             QString::fromStdString(m_className));
+        .arg(QString::fromStdString(m_className),
+             QString::fromStdString(m_componentName));
+}
+
+bool mtsComponentModelQtNodes::captionVisible(void) const {
+    return false;
 }
 
 QString mtsComponentModelQtNodes::name(void) const {
@@ -39,19 +48,7 @@ QString mtsComponentModelQtNodes::name(void) const {
 }
 
 QJsonObject mtsComponentModelQtNodes::save() const {
-    QJsonObject modelJson = NodeDelegateModel::save();
-
-    if (m_color.isValid()) {
-        QJsonObject styleJson;
-        styleJson["NormalBoundaryColor"] = m_color.name();
-        // Since we can't easily change the title background color per node
-        // in QtNodes without a custom NodePainter, we use the boundary color
-        // and optionally set a background color if the style supports it.
-        styleJson["BackgroundColor"] = m_color.name();
-        modelJson["Style"] = styleJson;
-    }
-
-    return modelJson;
+    return NodeDelegateModel::save();
 }
 
 unsigned int
@@ -130,9 +127,22 @@ mtsComponentModelQtNodes::outData(QtNodes::PortIndex) {
 
 QWidget *mtsComponentModelQtNodes::embeddedWidget(void) {
     if (!m_widget) {
-        auto label = new QLabel();
-        label->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-        m_widget = label;
+        m_widget = new QWidget();
+        auto *layout = new QVBoxLayout(m_widget);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(2);
+        
+        auto *titleLabel = new QLabel();
+        titleLabel->setObjectName("titleLabel");
+        titleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+        layout->addWidget(titleLabel);
+        
+        auto *stateLabel = new QLabel();
+        stateLabel->setObjectName("stateLabel");
+        stateLabel->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+        layout->addWidget(stateLabel);
+
+        m_widget->setAttribute(Qt::WA_StyleSheet);
         UpdateWidget();
     }
     return m_widget;
@@ -148,27 +158,27 @@ bool mtsComponentModelQtNodes::AddInterfaceRequired(const std::string &name) {
     return true;
 }
 
-void mtsComponentModelQtNodes::SetClassName(const std::string &className) {
-    m_className = className;
-    UpdateWidget();
-}
-
 void mtsComponentModelQtNodes::SetState(const std::string &state) {
     m_state = state;
     UpdateWidget();
 }
 
-void mtsComponentModelQtNodes::SetColor(const QColor &color) {
-    m_color = color;
-    UpdateWidget();
-}
-
 void mtsComponentModelQtNodes::UpdateWidget(void) {
     if (m_widget) {
-        auto label = qobject_cast<QLabel *>(m_widget);
-        if (label) {
-            QString text = QString::fromStdString(m_state);
-            label->setText(text);
+        auto *titleLabel = m_widget->findChild<QLabel *>("titleLabel");
+        auto *stateLabel = m_widget->findChild<QLabel *>("stateLabel");
+        
+        if (titleLabel) {
+            titleLabel->setText(caption());
+            if (m_color.isValid()) {
+                titleLabel->setStyleSheet(QString("background-color: %1; color: black; padding: 2px;").arg(m_color.name()));
+            } else {
+                titleLabel->setStyleSheet("padding: 2px;");
+            }
+        }
+        if (stateLabel) {
+            stateLabel->setText(QString::fromStdString(m_state));
+            stateLabel->setStyleSheet(""); // Clear any previous background color
         }
     }
 }

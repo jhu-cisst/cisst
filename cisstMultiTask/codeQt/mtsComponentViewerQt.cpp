@@ -22,8 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 #include <QAction>
+#include <QCheckBox>
 #include <QEvent>
 #include <QFileDialog>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QMenuBar>
 #include <QMenu>
@@ -32,8 +34,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <QTimer>
 #include <QToolBar>
 #include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include <QtNodes/ConnectionStyle>
+#include <QtNodes/NodeStyle>
 #include <QtNodes/DataFlowGraphModel>
 #include <QtNodes/DataFlowGraphicsScene>
 #include <QtNodes/GraphicsView>
@@ -49,10 +53,6 @@ CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentViewerQt,
 
 mtsComponentViewerQt::mtsComponentViewerQt(const std::string &componentName)
     : mtsTaskFromSignal(componentName) {
-    m_show_component_tags.insert("Generic");
-    m_show_interface_tags.insert("Generic");
-    m_show_interface_tags.insert("System");
-    m_show_interface_tags.insert("State table");
 
     this->mTags.clear();
     this->AddTag("UI");
@@ -76,6 +76,20 @@ mtsComponentViewerQt::mtsComponentViewerQt(const std::string &componentName)
                                     "enable dynamic component composition"));
     }
 
+    // Default: hide ROS, UI, System and State table
+    const std::set<std::string> & componentTags = mtsManagerLocal::GetInstance()->GetValidComponentTags();
+    for (auto & tag : componentTags) {
+        if ((tag != "ROS") && (tag != "UI") && (tag != "System")) {
+            m_show_component_tags.insert(tag);
+        }
+    }
+    const std::set<std::string> & interfaceTags = mtsManagerLocal::GetInstance()->GetValidInterfaceTags();
+    for (auto & tag : interfaceTags) {
+        if ((tag != "System") && (tag != "State table")) {
+            m_show_interface_tags.insert(tag);
+        }
+    }
+
     setupUi();
 }
 
@@ -84,14 +98,14 @@ void mtsComponentViewerQt::Configure(const std::string &CMN_UNUSED(filename)) {}
 void mtsComponentViewerQt::Startup(void) {
     // Query existing components and connections before starting event monitoring
     auto processNames = ManagerComponentServices->GetNamesOfProcesses();
-    
+
     for (const auto &processName : processNames) {
         auto descriptions = ManagerComponentServices->GetDescriptionsOfComponents(processName);
         for (const auto &desc : descriptions) {
             m_component_infos.push_back(desc);
         }
     }
-    
+
     // Query existing connections
     auto connections = ManagerComponentServices->GetListOfConnections();
     m_connection_infos = connections;
@@ -140,10 +154,18 @@ void mtsComponentViewerQt::setupUi(void) {
     filtersMenu->addSection(tr("Components"));
     const std::set<std::string> & componentTags = mtsManagerLocal::GetInstance()->GetValidComponentTags();
     for (auto & tag : componentTags) {
-        QAction *action = filtersMenu->addAction(QString::fromStdString(tag));
-        action->setCheckable(true);
-        action->setChecked(m_show_component_tags.count(tag));
-        action->setData(QString::fromStdString(tag));
+        QWidgetAction *widgetAction = new QWidgetAction(filtersMenu);
+        QWidget *widget = new QWidget();
+        QHBoxLayout *layout = new QHBoxLayout(widget);
+        layout->setContentsMargins(4, 2, 4, 2);
+        layout->setSpacing(8);
+
+        QCheckBox *checkbox = new QCheckBox();
+        checkbox->setChecked(m_show_component_tags.count(tag));
+        layout->addWidget(checkbox);
+
+        QLabel *tagLabel = new QLabel(QString::fromStdString(tag));
+        tagLabel->setContentsMargins(4, 2, 4, 2);
         QColor color;
         if (tag == "UI") {
             color = QColor(255, 200, 200); // Redish
@@ -154,27 +176,62 @@ void mtsComponentViewerQt::setupUi(void) {
         }
 
         if (color.isValid()) {
-            QPixmap pixmap(20, 20);
-            pixmap.fill(Qt::transparent);
-            QPainter painter(&pixmap);
-            painter.setRenderHint(QPainter::Antialiasing);
-            painter.setBrush(color);
-            painter.setPen(Qt::NoPen);
-            painter.drawRoundedRect(2, 2, 16, 16, 4, 4);
-            action->setIcon(QIcon(pixmap));
+            tagLabel->setStyleSheet(QString("background-color: %1; border: 1px solid black;").arg(color.name()));
         }
-        connect(action, &QAction::triggered, this, &mtsComponentViewerQt::onFilterComponents);
+        layout->addWidget(tagLabel);
+        layout->addStretch();
+
+        widgetAction->setDefaultWidget(widget);
+        filtersMenu->addAction(widgetAction);
+
+        connect(checkbox, &QCheckBox::toggled, this, [=](bool checked) {
+            if (checked) {
+                m_show_component_tags.insert(tag);
+            } else {
+                m_show_component_tags.erase(tag);
+            }
+            UpdateGraph();
+        });
     }
 
     // Interfaces section
     filtersMenu->addSection(tr("Interfaces"));
     const std::set<std::string> & interfaceTags = mtsManagerLocal::GetInstance()->GetValidInterfaceTags();
     for (auto & tag : interfaceTags) {
-        QAction *action = filtersMenu->addAction(QString::fromStdString(tag));
-        action->setCheckable(true);
-        action->setChecked(m_show_interface_tags.count(tag));
-        action->setData(QString::fromStdString(tag));
-        connect(action, &QAction::triggered, this, &mtsComponentViewerQt::onFilterInterfaces);
+        QWidgetAction *widgetAction = new QWidgetAction(filtersMenu);
+        QWidget *widget = new QWidget();
+        QHBoxLayout *layout = new QHBoxLayout(widget);
+        layout->setContentsMargins(4, 2, 4, 2);
+        layout->setSpacing(8);
+
+        QCheckBox *checkbox = new QCheckBox();
+        checkbox->setChecked(m_show_interface_tags.count(tag));
+        layout->addWidget(checkbox);
+
+        QLabel *tagLabel = new QLabel(QString::fromStdString(tag));
+        tagLabel->setContentsMargins(4, 2, 4, 2);
+        QColor color;
+        if (tag == "State table") {
+            // No color for now
+        }
+
+        if (color.isValid()) {
+            tagLabel->setStyleSheet(QString("background-color: %1; border: 1px solid black;").arg(color.name()));
+        }
+        layout->addWidget(tagLabel);
+        layout->addStretch();
+
+        widgetAction->setDefaultWidget(widget);
+        filtersMenu->addAction(widgetAction);
+
+        connect(checkbox, &QCheckBox::toggled, this, [=](bool checked) {
+            if (checked) {
+                m_show_interface_tags.insert(tag);
+            } else {
+                m_show_interface_tags.erase(tag);
+            }
+            UpdateGraph();
+        });
     }
 
     connect(actionAutoLayout, &QAction::triggered, this,
@@ -286,17 +343,13 @@ void mtsComponentViewerQt::onAutoLayout(void) {
     agsafeset(uiSubgraph, (char *)"rank", (char *)"sink", (char *)"");
     agsafeset(uiSubgraph, (char *)"label", (char *)"UI Components", (char *)"");
 
-    Agraph_t *rosSubgraph = agsubg(g, (char *)"cluster_ros", 1);
-    agsafeset(rosSubgraph, (char *)"rank", (char *)"same", (char *)"");
-    agsafeset(rosSubgraph, (char *)"label", (char *)"ROS Components", (char *)"");
-
     std::map<QtNodes::NodeId, Agnode_t *> graphvizNodes;
     for (const auto &key : m_components) {
         QtNodes::NodeId id = NodeIds[key];
         std::string nodeName = key.first + ":" + key.second;
         Agnode_t *v = agnode(g, (char *)nodeName.c_str(), 1);
 
-        // Subgraph for UI and ROS components
+        // Subgraph for UI components
         auto it = std::find_if(m_component_infos.begin(), m_component_infos.end(),
                                [&](const mtsDescriptionComponent &desc) {
                                    return desc.ProcessName == key.first &&
@@ -305,8 +358,6 @@ void mtsComponentViewerQt::onAutoLayout(void) {
         if (it != m_component_infos.end()) {
             if (it->Tags.count("UI")) {
                 agsubnode(uiSubgraph, v, 1);
-            } else if (it->Tags.count("ROS")) {
-                agsubnode(rosSubgraph, v, 1);
             }
         }
 
@@ -471,16 +522,19 @@ void mtsComponentViewerQt::UpdateGraph(void) {
         }
     }
 
-    // Clear Model
-    // Clear Graph and Scene
+    // Re-create the registry, model and scene to ensure everything is perfectly fresh
+    // and that registry name conflicts are avoided.
+    Registry = std::make_shared<QtNodes::NodeDelegateModelRegistry>();
+    GraphModel->deleteLater();
+    GraphModel = new QtNodes::DataFlowGraphModel(Registry);
+    GraphModel->setParent(this);
     if (Scene) {
-        Scene->clearScene();
-    } else {
-        auto allIds = GraphModel->allNodeIds();
-        for (auto id : allIds) {
-            GraphModel->deleteNode(id);
-        }
+        delete Scene;
     }
+    Scene = new QtNodes::DataFlowGraphicsScene(*GraphModel);
+    Scene->setParent(this);
+    View->setScene(Scene);
+
     NodeIds.clear();
     m_components.clear();
     m_provided_interface_to_port.clear();
@@ -492,17 +546,11 @@ void mtsComponentViewerQt::UpdateGraph(void) {
         const std::string componentName = desc.ComponentName;
         const ComponentKey key = {processName, componentName};
 
-        bool showComponent = false;
-        if (desc.Tags.empty()) {
-            // Components without tags are shown if Generic is checked
-            showComponent = m_show_component_tags.count("Generic");
-        } else {
-            showComponent = true;
-            for (auto & tag : desc.Tags) {
-                if (!m_show_component_tags.count(tag)) {
-                    showComponent = false;
-                    break;
-                }
+        bool showComponent = true;
+        for (auto & tag : desc.Tags) {
+            if (!m_show_component_tags.count(tag)) {
+                showComponent = false;
+                break;
             }
         }
         if (!showComponent) {
@@ -515,15 +563,11 @@ void mtsComponentViewerQt::UpdateGraph(void) {
 
         std::vector<std::string> interfacesRequired, interfacesProvided;
         for (const auto &intfc : interfacesRequiredFull) {
-            bool showIntfc = false;
-            if (intfc.Tags.empty()) {
-                showIntfc = m_show_interface_tags.count("Generic");
-            } else {
-                for (auto & tag : intfc.Tags) {
-                    if (m_show_interface_tags.count(tag)) {
-                        showIntfc = true;
-                        break;
-                    }
+            bool showIntfc = true;
+            for (auto & tag : intfc.Tags) {
+                if (!m_show_interface_tags.count(tag)) {
+                    showIntfc = false;
+                    break;
                 }
             }
             if (showIntfc) {
@@ -531,15 +575,11 @@ void mtsComponentViewerQt::UpdateGraph(void) {
             }
         }
         for (const auto &intfc : interfacesProvidedFull) {
-            bool showIntfc = false;
-            if (intfc.Tags.empty()) {
-                showIntfc = m_show_interface_tags.count("Generic");
-            } else {
-                for (auto & tag : intfc.Tags) {
-                    if (m_show_interface_tags.count(tag)) {
-                        showIntfc = true;
-                        break;
-                    }
+            bool showIntfc = true;
+            for (auto & tag : intfc.Tags) {
+                if (!m_show_interface_tags.count(tag)) {
+                    showIntfc = false;
+                    break;
                 }
             }
             if (showIntfc) {
@@ -553,21 +593,25 @@ void mtsComponentViewerQt::UpdateGraph(void) {
 
         Registry->registerModel<mtsComponentModelQtNodes>(
             [processName, componentName, className, state, interfacesRequired, interfacesProvided, tags]() {
-                auto model = std::make_unique<mtsComponentModelQtNodes>(processName, componentName);
-                model->SetClassName(className);
+                QColor color;
+                if (!tags.empty()) {
+                    auto firstTag = *tags.begin();
+                    if (firstTag == "UI") {
+                        color = QColor(255, 200, 200);
+                    } else if (firstTag == "ROS") {
+                        color = QColor(200, 200, 255);
+                    } else if (firstTag == "System") {
+                        color = QColor(200, 255, 200);
+                    }
+                }
+
+                auto model = std::make_unique<mtsComponentModelQtNodes>(processName, componentName, className, color);
                 model->SetState(mtsComponentState::EnumToString(state.State()));
                 for (const auto &interfaceName : interfacesRequired) {
                     model->AddInterfaceRequired(interfaceName);
                 }
                 for (const auto &interfaceName : interfacesProvided) {
                     model->AddInterfaceProvided(interfaceName);
-                }
-                if (tags.count("UI")) {
-                    model->SetColor(QColor(255, 200, 200));
-                } else if (tags.count("ROS")) {
-                    model->SetColor(QColor(200, 200, 255));
-                } else if (tags.count("System")) {
-                    model->SetColor(QColor(200, 255, 200));
                 }
                 return model;
             });

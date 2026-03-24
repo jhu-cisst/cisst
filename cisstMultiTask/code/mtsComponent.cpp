@@ -39,7 +39,6 @@ mtsComponent::mtsComponent(const std::string & componentName):
 
 {
     Initialize();
-    AddTag("Generic");
 }
 
 
@@ -51,7 +50,6 @@ mtsComponent::mtsComponent(void):
     StateTables("StateTables")
 {
     Initialize();
-    AddTag("Generic");
 }
 
 void mtsComponent::Initialize(void)

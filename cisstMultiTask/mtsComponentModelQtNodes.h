@@ -35,11 +35,14 @@ class CISST_EXPORT mtsComponentModelQtNodes
 
  public:
     mtsComponentModelQtNodes(const std::string &processName,
-                             const std::string &componentName);
+                             const std::string &componentName,
+                             const std::string &className,
+                             const QColor &color = QColor());
     ~mtsComponentModelQtNodes() = default;
 
     // NodeDelegateModel interface
     QString caption(void) const override;
+    bool captionVisible(void) const override;
     QString name(void) const override;
 
     unsigned int nPorts(QtNodes::PortType portType) const override;
@@ -62,11 +65,8 @@ class CISST_EXPORT mtsComponentModelQtNodes
 
     QJsonObject save() const override;
 
-    void SetColor(const QColor &color);
-
     bool AddInterfaceProvided(const std::string &name);
     bool AddInterfaceRequired(const std::string &name);
-    void SetClassName(const std::string &className);
     void SetState(const std::string &state);
 
  protected:

@@ -135,13 +135,11 @@ void mtsManagerLocal::Initialize(void)
     SetupSystemLogger();
 
     ValidComponentTags.clear();
-    ValidComponentTags.insert("Generic");
     ValidComponentTags.insert("ROS");
     ValidComponentTags.insert("UI");
     ValidComponentTags.insert("System");
 
     ValidInterfaceTags.clear();
-    ValidInterfaceTags.insert("Generic");
     ValidInterfaceTags.insert("System");
     ValidInterfaceTags.insert("State table");
 }
