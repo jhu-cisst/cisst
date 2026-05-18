@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -25,13 +25,6 @@ if (cisst_FOUND_AS_REQUIRED)
   include_directories (${CMAKE_CURRENT_SOURCE_DIR})
   add_subdirectory (components)
   add_subdirectory (collector)
-
-  # FLTK examples
-  if (CISST_HAS_FLTK)
-    add_subdirectory (FLTK)
-  else (CISST_HAS_FLTK)
-    message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR}/FLTK will not be compiled, it requires CISST_HAS_FLTK")
-  endif (CISST_HAS_FLTK)
 
   # Qt examples
   if (CISST_HAS_QT)

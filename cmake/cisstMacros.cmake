@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -17,8 +17,6 @@
 include(CMakePackageConfigHelpers)
 
 # set virtual library to CMake option name equivalence
-set (cisstFLTK_OPTION_NAME "CISST_HAS_FLTK" CACHE STRING "Name of option to use to compile cisstFLTK")
-mark_as_advanced (cisstFLTK_OPTION_NAME)
 set (cisstQt_OPTION_NAME "CISST_HAS_QT" CACHE STRING "Name of option to use to compile cisstQt")
 mark_as_advanced (cisstQt_OPTION_NAME)
 set (cisstOpenGL_OPTION_NAME "CISST_HAS_OPENGL" CACHE STRING "Name of option to use to compile cisstOpenGL")
@@ -211,7 +209,7 @@ endmacro (cisst_extract_settings)
 # - LIBRARY is the name of the library, e.g. cisstVector
 # - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt)
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
-# - SETTINGS is a list of settings, e.g. cisstQt, cisstFLTK, ...
+# - SETTINGS is a list of settings, e.g. cisstQt, ...
 # - SOURCE_FILES is a list of files, without any path (absolute or relative)
 # - HEADER_FILES is a list of files, without any path (absolute or relative)
 # - ADDITIONAL_SOURCE_FILES is a list of source files with a full path (e.g. generated source)

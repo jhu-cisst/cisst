@@ -72,10 +72,10 @@ http://www.cisst.org/cisst/license.txt.
 // Using IRE (and Swig/Python) or not
 #cmakedefine01 CISST_HAS_IRE
 
-// Using FLTK or not
-#cmakedefine01 CISST_HAS_FLTK
+// Using FLTK (deprecated)
+#define CISST_HAS_FLTK 0
 
-// Using Qt4 or not
+// Using Qt4 (deprecated)
 #define CISST_HAS_QT4 0
 
 // Using Qt5 or not

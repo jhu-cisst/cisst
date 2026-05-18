@@ -420,11 +420,6 @@ set (CISST_LIBS_WITH_QT
      cisstParameterTypes
      cisstStereoVision)
 
-# Which librairies have FLTK Widgets
-set (CISST_LIBS_WITH_FLTK
-     cisstVector)
-
-
 # Build by default
 foreach (lib ${CISST_LIBRARIES_DEFAULT})
   option (CISST_${lib} "Build ${lib}." ON)
@@ -461,23 +456,13 @@ foreach (lib ${CISST_LIBS})
         set (CISST_${lib}Qt OFF)
       endif (${${lib}_HAS_QT} GREATER -1)
     endif (CISST_HAS_QT)
-    # Add libraries with FLTK
-    if (CISST_HAS_FLTK)
-      list (FIND CISST_LIBS_WITH_FLTK ${lib} ${lib}_HAS_FLTK)
-      if (${${lib}_HAS_FLTK} GREATER -1)
-        set (CISST_LIBRARIES ${lib}FLTK ${CISST_LIBRARIES})
-        set (CISST_${lib}FLTK ON)
-      else (${${lib}_HAS_FLTK} GREATER -1)
-        set (CISST_${lib}FLTK OFF)
-      endif (${${lib}_HAS_FLTK} GREATER -1)
-    endif (CISST_HAS_FLTK)
   endif (CISST_${lib})
 endforeach (lib)
 
 # create equivalent for cisstInteractive
 set (CISST_HAS_IRE ${CISST_cisstInteractive})
 
-# Create list of general settings, i.e. cisstPython, cisstQt, cisstFLTK, cisstOpenGL, ...
+# Create list of general settings, i.e. cisstPython, cisstQt, cisstOpenGL, ...
 set (CISST_SETTINGS "")
 if (CISST_HAS_QT)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstQt)
@@ -486,10 +471,6 @@ endif (CISST_HAS_QT)
 if (CISST_HAS_QTNODES)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstQtNodes)
 endif (CISST_HAS_QTNODES)
-
-if (CISST_HAS_FLTK)
-  set (CISST_SETTINGS ${CISST_SETTINGS} cisstFLTK)
-endif (CISST_HAS_FLTK)
 
 if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   set (CISST_SETTINGS ${CISST_SETTINGS} cisstPython)
