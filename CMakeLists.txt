@@ -347,14 +347,19 @@ if (CISST_BUILD_TESTS)
                            GIT_TAG           ${CISST_CPPUNIT_GIT_TAG}
                            CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                           INSTALL_COMMAND ""
+                                            -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstCppUnit
                            UPDATE_COMMAND ""
                            )
-      set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit/include")
+      install (DIRECTORY ${cisst_BINARY_DIR}/cisstCppUnit/
+               DESTINATION .
+               USE_SOURCE_PERMISSIONS
+               COMPONENT cisstCommon)
+
+      set (CPPUNIT_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstCppUnit/include")
       set (CPPUNIT_LIBRARIES "cppunit")
       set (CPPUNIT_DEBUG_LIBRARIES "cppunit")
       set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
-      set (CPPUNIT_LINK_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
+      set (CPPUNIT_LINK_DIR "${cisst_BINARY_DIR}/cisstCppUnit/lib")
       link_directories (${CPPUNIT_LINK_DIR})
       set (CPPUNIT_EXTERNAL_TARGET cisstCppUnit)
       set (CPPUNIT_FOUND ON)
@@ -362,6 +367,9 @@ if (CISST_BUILD_TESTS)
   endif (NOT CPPUNIT_FOUND)
 
   if (CPPUNIT_FOUND)
+    # Test headers include CppUnit directly, including from helper test
+    # libraries that don't link cisstTestsDriver.
+    include_directories (${CPPUNIT_INCLUDE_DIR})
     # set variable to confirm that cisstTestsDriver is being build
     set (CISST_cisstTestsDriver ON)
   else (CPPUNIT_FOUND)
@@ -515,11 +523,22 @@ if (TARGET cisstCommon AND CISST_HAS_JSON)
   else ()
     if (JSON_EXTERNAL_TARGET)
       add_dependencies (cisstCommon ${JSON_EXTERNAL_TARGET})
-    endif ()
-    # Bundled external-project jsoncpp: use the raw variables.
-    target_include_directories (cisstCommon PUBLIC ${JSON_INCLUDE_DIR})
-    if (JSON_LIBRARY_DIRS)
-      target_link_directories (cisstCommon PUBLIC ${JSON_LIBRARY_DIRS})
+      # External jsoncpp is installed in the build tree first, then copied
+      # into the cisst install prefix.  Keep build-tree paths out of the
+      # installed target export.
+      target_include_directories (cisstCommon PUBLIC
+        $<BUILD_INTERFACE:${JSON_INCLUDE_DIR}>
+        $<INSTALL_INTERFACE:include>)
+      if (JSON_LIBRARY_DIRS)
+        target_link_directories (cisstCommon PUBLIC
+          $<BUILD_INTERFACE:${JSON_LIBRARY_DIRS}>
+          $<INSTALL_INTERFACE:${CISST_LIBRARY_INSTALL_SUFFIX}>)
+      endif ()
+    else ()
+      target_include_directories (cisstCommon PUBLIC ${JSON_INCLUDE_DIR})
+      if (JSON_LIBRARY_DIRS)
+        target_link_directories (cisstCommon PUBLIC ${JSON_LIBRARY_DIRS})
+      endif ()
     endif ()
     target_link_libraries (cisstCommon PUBLIC ${JSON_LIBRARIES})
   endif ()
@@ -529,10 +548,19 @@ endif ()
 if (TARGET cisstTestsDriver AND CPPUNIT_FOUND)
   if (CPPUNIT_EXTERNAL_TARGET)
     add_dependencies (cisstTestsDriver ${CPPUNIT_EXTERNAL_TARGET})
-  endif ()
-  target_include_directories (cisstTestsDriver PUBLIC ${CPPUNIT_INCLUDE_DIR})
-  if (DEFINED CPPUNIT_LINK_DIR)
-    target_link_directories (cisstTestsDriver PUBLIC ${CPPUNIT_LINK_DIR})
+    target_include_directories (cisstTestsDriver PUBLIC
+      $<BUILD_INTERFACE:${CPPUNIT_INCLUDE_DIR}>
+      $<INSTALL_INTERFACE:include>)
+    if (DEFINED CPPUNIT_LINK_DIR)
+      target_link_directories (cisstTestsDriver PUBLIC
+        $<BUILD_INTERFACE:${CPPUNIT_LINK_DIR}>
+        $<INSTALL_INTERFACE:${CISST_LIBRARY_INSTALL_SUFFIX}>)
+    endif ()
+  else ()
+    target_include_directories (cisstTestsDriver PUBLIC ${CPPUNIT_INCLUDE_DIR})
+    if (DEFINED CPPUNIT_LINK_DIR)
+      target_link_directories (cisstTestsDriver PUBLIC ${CPPUNIT_LINK_DIR})
+    endif ()
   endif ()
   target_link_libraries (cisstTestsDriver ${CPPUNIT_LIBRARIES})
 endif ()
@@ -575,6 +603,7 @@ install (EXPORT cisst-targets
 # ---------------------------------------------------------------------------
 
 # Config file
+set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "${JSON_INCLUDE_DIR}")
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
                 "${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config.cmake"
                 @ONLY)
@@ -589,6 +618,11 @@ cisst_add_config_version ("${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config-versio
 set (CISST_BINARY_DIR_FOR_CONFIG "")
 set (CISST_INCLUDE_DIR_FOR_CONFIG "")
 set (CISST_CMAKE_DIRS_FOR_CONFIG "")
+if (JSON_EXTERNAL_TARGET)
+  set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "\${CISST_INCLUDE_DIR}")
+else ()
+  set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "${JSON_INCLUDE_DIR}")
+endif ()
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
                 "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
                 @ONLY)

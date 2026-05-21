@@ -385,6 +385,11 @@ if (CISST_HAS_JSON)
                          UPDATE_COMMAND ""
                          )
 
+    install (DIRECTORY ${cisst_BINARY_DIR}/cisstJSON/
+             DESTINATION .
+             USE_SOURCE_PERMISSIONS
+             COMPONENT cisstCommon)
+
     # Set all JSON variables based on install directory
     set (JSON_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstJSON/include")
     set (JSON_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstJSON/lib")

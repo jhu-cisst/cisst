@@ -104,7 +104,7 @@ set (CISST_HAS_JSON @CISST_HAS_JSON@)
 set (CISST_JSON_USE_SYSTEM_VERSION @JSON_USE_SYSTEM_VERSION@)
 # jsoncpp include dir: needed by old-style consumers that include cisst public
 # headers (e.g. cmnGenericObject.h -> json/json.h) without linking to cisstCommon.
-set (CISST_JSON_INCLUDE_DIR "@JSON_INCLUDE_DIR@")
+set (CISST_JSON_INCLUDE_DIR "@CISST_JSON_INCLUDE_DIR_FOR_CONFIG@")
 set (CISST_CATKIN_BUILT @CISST_CATKIN_BUILT@)
 set (CISST_USE_SI_UNITS @CISST_USE_SI_UNITS@)
 
