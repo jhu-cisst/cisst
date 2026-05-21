@@ -4,7 +4,7 @@
 # Author: Anton Deguet
 # Date: 2006-03-08
 #
-# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 #
@@ -23,7 +23,7 @@ from cisstCommonPython import cmnClassRegister
 class ClassRegisterTest(unittest.TestCase):
     def setUp(self):
         """Call before every test case."""
-        self.classRegister = cisstCommonPython.cmnClassRegister_Instance()
+        self.classRegister = cisstCommonPython.cmnClassRegister.Instance()
 
     def tearDown(self):
         """Call after every test case."""
@@ -48,8 +48,8 @@ class ClassRegisterTest(unittest.TestCase):
                 gotStopIteration = True
         except:
             self.fail("Unexpected exception")
-        self.failUnless(gotStopIteration)
-        self.failUnless(found_cmnPath)
+        self.assertTrue(gotStopIteration)
+        self.assertTrue(found_cmnPath)
 
     def TestForLoop(self):
         """Test for loop"""
@@ -57,4 +57,4 @@ class ClassRegisterTest(unittest.TestCase):
         for key, classInfo in self.classRegister:
             if classInfo.GetName() == "cmnPath":
                 found_cmnPath = True
-        self.failUnless(found_cmnPath)
+        self.assertTrue(found_cmnPath)

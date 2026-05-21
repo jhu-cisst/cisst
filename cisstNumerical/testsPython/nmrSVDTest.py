@@ -1,14 +1,10 @@
 # -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
-#
-#
-
 # Author: Anton Deguet
 # Date: 2005-08-14
 #
-# (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -54,5 +50,5 @@ import unittest
 #         USVt = vctDoubleMat(U.rows(), SVt.cols())
 #         USVt.ProductOf(U, SVt)
 #         error = (input - USVt).LinfNorm()
-#         self.failUnless(error < cmnTypeTraitsDouble.Tolerance())
+#         self.assertTrue(error < cmnTypeTraitsDouble.Tolerance())
 

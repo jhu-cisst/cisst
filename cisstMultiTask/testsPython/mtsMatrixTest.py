@@ -1,14 +1,10 @@
 # -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
-#
-#
-
 # Author: Anton Deguet
 # Date: 2010-01-20
 #
-# (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -36,38 +32,38 @@ class MatrixTest(unittest.TestCase):
         """Test mtsIntMat"""
         variable = cisstMultiTaskPython.mtsIntMat(3, 4)
         # check type
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsIntMat))
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
-        self.failUnless(isinstance(variable, cisstCommonPython.cmnGenericObject))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsIntMat))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
+        self.assertTrue(isinstance(variable, cisstCommonPython.cmnGenericObject))
 
     def TestDefaultConstructor(self):
         """Test default constructor"""
         variable = cisstMultiTaskPython.mtsDoubleMat()
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsDoubleMat))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsDoubleMat))
         data = variable.Data()
         # this is an array
-        self.failUnless(isinstance(data, numpy.ndarray))
+        self.assertTrue(isinstance(data, numpy.ndarray))
         # dimension is 2
-        self.failUnless(numpy.ndim(data) == 2)
+        self.assertTrue(numpy.ndim(data) == 2)
         # size is 0 by default
-        self.failUnless(data.size == 0)
+        self.assertTrue(data.size == 0)
 
     def TestSizeConstructor(self):
         """Test constructor with size"""
         variable = cisstMultiTaskPython.mtsDoubleMat(10, 5)
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsDoubleMat))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsDoubleMat))
         data = variable.Data()
         # this is an array
-        self.failUnless(isinstance(data, numpy.ndarray))
+        self.assertTrue(isinstance(data, numpy.ndarray))
         # dimension is 2
-        self.failUnless(numpy.ndim(data) == 2)
+        self.assertTrue(numpy.ndim(data) == 2)
         # size is 10 * 5 based on constructor parameter
-        self.failUnless(data.size == 10 * 5)
-        self.failUnless(data.shape == (10, 5))
+        self.assertTrue(data.size == 10 * 5)
+        self.assertTrue(data.shape == (10, 5))
         # make sure content is zeros
-        zeroMatrix = numpy.zeros((10, 5), numpy.float)
+        zeroMatrix = numpy.zeros((10, 5), numpy.float64)
         allEqual = (zeroMatrix == data).all()
-        self.failUnless(allEqual)
+        self.assertTrue(allEqual)
         
     def TestModify(self):
         """Test data modification"""
@@ -77,12 +73,12 @@ class MatrixTest(unittest.TestCase):
         data.fill(5.0)
         data2 = variable.Data()
         # these are two different objects (Python)
-        self.failUnless(data is not data2)
+        self.assertTrue(data is not data2)
         # but they should be equal
         allEqual = (data2 == data).all()
-        self.failUnless(allEqual)
+        self.assertTrue(allEqual)
         # always!
         data2[2, 2] = 10.0
         allEqual = (data2 == data).all()
-        self.failUnless(allEqual)
+        self.assertTrue(allEqual)
         
