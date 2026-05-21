@@ -116,7 +116,7 @@ if (CISST_HAS_CISSTNETLIB)
     # add wrappers to cisstRobot
     set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
     set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
-    # install for CPack
+    # install Reflexxes library (headers not installed: not needed by users of cisstRobot)
     install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
              COMPONENT cisstRobot
              DESTINATION lib)
@@ -129,8 +129,15 @@ if (CISST_HAS_CISSTNETLIB)
                      HEADER_FILES ${HEADER_FILES})
 
   if (TARGET cisstRobot AND CISST_ROB_HAS_REFLEXXES_TYPEII)
-    target_include_directories (cisstRobot PUBLIC ${cisstReflexxesTypeII_INCLUDE_DIR})
-    target_link_directories    (cisstRobot PUBLIC ${cisstReflexxesTypeII_LIBRARY_DIRS})
+    # Use BUILD_INTERFACE only for include dir: Reflexxes headers are an internal
+    # build detail and not needed by downstream consumers of cisstRobot
+    # (robReflexxes.h has no public Reflexxes includes).
+    # INSTALL_INTERFACE is omitted for includes intentionally.
+    target_include_directories (cisstRobot PUBLIC
+      $<BUILD_INTERFACE:${cisstReflexxesTypeII_INCLUDE_DIR}>)
+    target_link_directories    (cisstRobot PUBLIC
+      $<BUILD_INTERFACE:${cisstReflexxesTypeII_LIBRARY_DIRS}>
+      $<INSTALL_INTERFACE:lib>)
     target_link_libraries      (cisstRobot PUBLIC ${cisstReflexxesTypeII_LIBRARIES})
   endif ()
 
