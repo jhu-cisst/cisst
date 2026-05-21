@@ -478,16 +478,40 @@ macro (cisst_target_link_libraries TARGET ...)
       endif (${FOUND_IT} EQUAL -1 )
     endforeach (required)
 
-    # Second, create a list of libraries in the right order
+    # Second, create a list of libraries in the right order.
+    # Must cover both CISST_LIBRARIES (real libs) and CISST_SETTINGS (INTERFACE
+    # targets like cisstQt / cisstOpenGL) because the required list may include
+    # entries from either group.
     unset (_CISST_LIBRARIES_TO_USE)
     foreach (existing ${CISST_LIBRARIES})
       if ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
         set (_CISST_LIBRARIES_TO_USE ${_CISST_LIBRARIES_TO_USE} ${existing})
       endif ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
     endforeach (existing)
+    foreach (existing ${CISST_SETTINGS})
+      if ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
+        set (_CISST_LIBRARIES_TO_USE ${_CISST_LIBRARIES_TO_USE} ${existing})
+      endif ("${_REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
+    endforeach (existing)
 
-    # Finally, link with the required libraries
-    target_link_libraries (${_WHO_REQUIRES} ${_CISST_LIBRARIES_TO_USE})
+    # Finally, link with the required libraries.
+    # When consuming cisst from the installed tree (CURRENT_PROJECT_IS_CISST is not set)
+    # only the namespaced cisst:: IMPORTED targets exist; bare names won't carry
+    # transitive INTERFACE properties (e.g. Qt5 include dirs).  Prefer the
+    # namespaced form when available.
+    if (NOT CURRENT_PROJECT_IS_CISST)
+      unset (_CISST_LIBRARIES_TO_USE_NS)
+      foreach (_lib ${_CISST_LIBRARIES_TO_USE})
+        if (TARGET cisst::${_lib})
+          list (APPEND _CISST_LIBRARIES_TO_USE_NS cisst::${_lib})
+        else ()
+          list (APPEND _CISST_LIBRARIES_TO_USE_NS ${_lib})
+        endif ()
+      endforeach ()
+      target_link_libraries (${_WHO_REQUIRES} ${_CISST_LIBRARIES_TO_USE_NS})
+    else ()
+      target_link_libraries (${_WHO_REQUIRES} ${_CISST_LIBRARIES_TO_USE})
+    endif ()
 
     # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
     target_compile_definitions (${_WHO_REQUIRES} PRIVATE

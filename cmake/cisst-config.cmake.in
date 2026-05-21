@@ -163,6 +163,9 @@ else ()
   set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES})
 endif ()
 
+# Backward-compatibility alias: previously set by the old cisst_use_modules macro.
+set (cisst_FOUND_AS_REQUIRED ${cisst_FOUND})
+
 # ---------------------------------------------------------------------------
 # Modern CMake target graph (replaces the legacy variable-based mechanism)
 # Include the generated cisst-targets.cmake which encodes all cisst library
@@ -178,9 +181,15 @@ if (CISST_HAS_OPENGL)
   find_dependency (OpenGL)
 endif ()
 if (CISST_HAS_QT5)
-  foreach (_cisst_qt5_comp Core Widgets Gui OpenGL XmlPatterns)
+  foreach (_cisst_qt5_comp Core Xml Widgets Gui OpenGL XmlPatterns)
     find_dependency (Qt5${_cisst_qt5_comp})
   endforeach ()
+endif ()
+if (CISST_HAS_XML)
+  find_dependency (LibXml2)
+endif ()
+if (CISST_HAS_SWIG_PYTHON)
+  find_dependency (Python COMPONENTS Interpreter Development)
 endif ()
 if (CISST_HAS_JSON)
   find_dependency (PkgConfig QUIET)
@@ -203,4 +212,8 @@ if (NOT TARGET cisst::cisstCommon)
   endif ()
   unset (_cisst_targets_file CACHE)
 endif ()
+
+# Extend CMake Module Path to find cisst defined Macros
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIRS})
+include (cisstMacros)
 # ---------------------------------------------------------------------------

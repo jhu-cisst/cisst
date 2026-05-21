@@ -174,8 +174,12 @@ if (CISST_HAS_QT5)
     set (CISST_SETTINGS ${CISST_SETTINGS} cisstQtNodes PARENT_SCOPE)
     add_library (cisstQtNodes INTERFACE)
     add_library (cisst::cisstQtNodes ALIAS cisstQtNodes)
-    target_include_directories (cisstQtNodes INTERFACE $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>)
-    target_link_directories    (cisstQtNodes INTERFACE $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>)
+    target_include_directories (cisstQtNodes INTERFACE
+      $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
+      $<INSTALL_INTERFACE:include>)
+    target_link_directories    (cisstQtNodes INTERFACE
+      $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
+      $<INSTALL_INTERFACE:lib>)
     target_link_libraries      (cisstQtNodes INTERFACE ${QTNODES_LIBRARIES})
     install (TARGETS cisstQtNodes EXPORT cisst-targets COMPONENT cisstCommon)
   endif ()
