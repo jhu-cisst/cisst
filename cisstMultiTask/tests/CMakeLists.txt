@@ -20,7 +20,7 @@ add_library (cisstMultiTaskTestsLib
              mtsTestComponents.h
              mtsTestComponents.cpp)
 set_property (TARGET cisstMultiTaskTestsLib PROPERTY FOLDER "cisstMultiTask/tests")
-target_link_libraries (cisstMultiTaskTestsLib cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+target_link_libraries (cisstMultiTaskTestsLib cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstTestsDriver)
 
 # all source files
 set (SOURCE_FILES
