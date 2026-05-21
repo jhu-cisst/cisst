@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2006-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -21,9 +19,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   if (CISST_SVL_HAS_X11 OR WIN32)
 
     if (CISST_HAS_QT4)
@@ -34,7 +29,7 @@ if (cisst_FOUND)
 
     add_executable (svlExVideoPlayer videoplayer.cpp)
     set_property (TARGET svlExVideoPlayer PROPERTY FOLDER "cisstStereoVision/examples")
-    cisst_target_link_libraries (svlExVideoPlayer ${USED_CISST_LIBRARIES})
+    target_link_libraries (svlExVideoPlayer ${USED_CISST_LIBRARIES})
 
   else (CISST_SVL_HAS_X11 OR WIN32)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")

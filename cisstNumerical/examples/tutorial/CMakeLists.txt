@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2006-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,8 +12,7 @@
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
   if (CISST_HAS_CISSTNETLIB)
     add_executable (nmrExTutorial
@@ -36,12 +33,12 @@ if (cisst_FOUND_AS_REQUIRED)
                     ExampleGaussJordanInverse.h
                     )
     set_property (TARGET nmrExTutorial PROPERTY FOLDER "cisstNumerical/examples")
-    cisst_target_link_libraries(nmrExTutorial ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries(nmrExTutorial ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_HAS_CISSTNETLIB)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_CISSTNETLIB")
   endif (CISST_HAS_CISSTNETLIB)
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

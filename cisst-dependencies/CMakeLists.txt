@@ -22,9 +22,14 @@ if (CISST_USE_PKG_CONFIG)
   pkg_check_modules (GRAPHVIZ libgvc libcgraph libcdt)
 
   if (GRAPHVIZ_FOUND)
-    cisst_set_package_settings (cisstGraphviz GRAPHVIZ INCLUDE_DIRECTORIES GRAPHVIZ_INCLUDE_DIRS)
-    cisst_set_package_settings (cisstGraphviz GRAPHVIZ LIBRARIES           GRAPHVIZ_LIBRARIES)
-    cisst_set_package_settings (cisstGraphviz GRAPHVIZ LINK_DIRECTORIES    GRAPHVIZ_LIBRARY_DIRS)
+    # INTERFACE target: downstream targets link against cisstGraphviz and
+    # automatically inherit include dirs / link flags.
+    add_library (cisstGraphviz INTERFACE)
+    add_library (cisst::cisstGraphviz ALIAS cisstGraphviz)
+    target_include_directories (cisstGraphviz INTERFACE ${GRAPHVIZ_INCLUDE_DIRS})
+    target_link_directories    (cisstGraphviz INTERFACE ${GRAPHVIZ_LIBRARY_DIRS})
+    target_link_libraries      (cisstGraphviz INTERFACE ${GRAPHVIZ_LIBRARIES})
+    install (TARGETS cisstGraphviz EXPORT cisst-targets COMPONENT cisstCommon)
     # Mark that we have graphviz for the main cisst CMakeLists.txt
     set (CISST_HAS_GRAPHVIZ ON PARENT_SCOPE)
     set (CISST_HAS_GRAPHVIZ ON)
@@ -36,47 +41,35 @@ endif (CISST_USE_PKG_CONFIG)
 
 # Support for OpenGL
 find_package (OpenGL)
-if (OPENGL_FOUND)
-  option (CISST_HAS_OPENGL "Is OpenGL available." ON)
-  mark_as_advanced (CISST_HAS_OPENGL)
-else (OPENGL_FOUND)
-  option (CISST_HAS_OPENGL "Is OpenGL available." OFF)
-endif (OPENGL_FOUND)
+include (CMakeDependentOption)
+cmake_dependent_option (CISST_HAS_OPENGL "Is OpenGL available." ON "OPENGL_FOUND" OFF)
+mark_as_advanced (CISST_HAS_OPENGL)
 
 if (CISST_HAS_OPENGL)
   find_package (OpenGL REQUIRED)
+  add_library (cisstOpenGL INTERFACE)
+  add_library (cisst::cisstOpenGL ALIAS cisstOpenGL)
   if (OPENGL_INCLUDE_DIR)
-    cisst_set_package_settings (cisstOpenGL OpenGL INCLUDE_DIRECTORIES OPENGL_INCLUDE_DIR)
+    target_include_directories (cisstOpenGL INTERFACE ${OPENGL_INCLUDE_DIR})
   endif (OPENGL_INCLUDE_DIR)
-  cisst_set_package_settings (cisstOpenGL OpenGL LIBRARIES OPENGL_LIBRARIES)
-else (CISST_HAS_OPENGL)
-  cisst_unset_all_package_settings (cisstOpenGL OpenGL)
+  # Prefer imported targets (OpenGL::GL, OpenGL::GLU) when available (CMake >= 3.8)
+  if (TARGET OpenGL::GL)
+    target_link_libraries (cisstOpenGL INTERFACE OpenGL::GL)
+    if (TARGET OpenGL::GLU)
+      target_link_libraries (cisstOpenGL INTERFACE OpenGL::GLU)
+    endif ()
+  else ()
+    target_link_libraries (cisstOpenGL INTERFACE ${OPENGL_LIBRARIES})
+  endif ()
+  install (TARGETS cisstOpenGL EXPORT cisst-targets COMPONENT cisstCommon)
 endif (CISST_HAS_OPENGL)
 
 
-# Support for QT
-
-# first try to find Qt5
-set (CISST_QT5_PACKAGES Qt5Core Qt5Xml Qt5XmlPatterns Qt5Widgets Qt5Gui Qt5OpenGL)
-
-set (CISST_QT5_FOUND ON)
-foreach (package ${CISST_QT5_PACKAGES})
-  find_package (${package} QUIET)
-  if (${package}_FOUND)
-    cisst_cmake_debug ("Found ${package}")
-  else ()
-    message ("Looking for Qt5: can't find ${package}")
-    set (CISST_QT5_FOUND OFF)
-  endif ()
-endforeach ()
-
-# if Qt 5 has been found, offer it by default
-if (CISST_QT5_FOUND)
-  option (CISST_HAS_QT5 "Is Qt 5 available.  If not, Qt widgets and some examples won't be compiled" ON)
-  mark_as_advanced (CISST_HAS_QT5)
-else ()
-  option (CISST_HAS_QT5 "Is Qt 5 available.  If not, Qt widgets and some examples won't be compiled" OFF)
-endif ()
+# Support for Qt5
+set (CISST_QT5_COMPONENTS Core Xml XmlPatterns Widgets Gui OpenGL)
+find_package (Qt5 COMPONENTS ${CISST_QT5_COMPONENTS} QUIET)
+cmake_dependent_option (CISST_HAS_QT5 "Is Qt5 available.  If not, Qt widgets and some examples won't be compiled" ON "Qt5_FOUND" OFF)
+mark_as_advanced (CISST_HAS_QT5)
 
 # set overall Qt flag
 if (CISST_HAS_QT5)
@@ -85,15 +78,18 @@ else ()
   set (CISST_HAS_QT OFF PARENT_SCOPE)
 endif ()
 
-# Qt5: if detected or if user requests it
 if (CISST_HAS_QT5)
-  # Qt5 is now required
-  foreach (package ${CISST_QT5_PACKAGES})
-    find_package (${package} REQUIRED)
-    cisst_set_package_settings (cisstQt ${package} PACKAGES package)
+  find_package (Qt5 COMPONENTS ${CISST_QT5_COMPONENTS} REQUIRED)
+  # INTERFACE target: links Qt5 components with PUBLIC/INTERFACE visibility so
+  # any cisst library that links cisstQt automatically inherits Qt5 dependencies.
+  add_library (cisstQt INTERFACE)
+  add_library (cisst::cisstQt ALIAS cisstQt)
+  foreach (_comp ${CISST_QT5_COMPONENTS})
+    if (TARGET Qt5::${_comp})
+      target_link_libraries (cisstQt INTERFACE Qt5::${_comp})
+    endif ()
   endforeach ()
-else (CISST_HAS_QT5)
-  cisst_unset_all_package_settings (cisstQt Qt5)
+  install (TARGETS cisstQt EXPORT cisst-targets COMPONENT cisstCommon)
 endif (CISST_HAS_QT5)
 
 # for both version of Qt
@@ -176,9 +172,12 @@ if (CISST_HAS_QT5)
   # Save settings (so other cisst modules can pick them up)
   if (QTNODES_FOUND)
     set (CISST_SETTINGS ${CISST_SETTINGS} cisstQtNodes PARENT_SCOPE)
-    cisst_set_package_settings (cisstQtNodes QtNodes INCLUDE_DIRECTORIES QTNODES_INCLUDE_DIR)
-    cisst_set_package_settings (cisstQtNodes QtNodes LIBRARIES           QTNODES_LIBRARIES)
-    cisst_set_package_settings (cisstQtNodes QtNodes LINK_DIRECTORIES    QTNODES_LIBRARY_DIRS)
+    add_library (cisstQtNodes INTERFACE)
+    add_library (cisst::cisstQtNodes ALIAS cisstQtNodes)
+    target_include_directories (cisstQtNodes INTERFACE $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>)
+    target_link_directories    (cisstQtNodes INTERFACE $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>)
+    target_link_libraries      (cisstQtNodes INTERFACE ${QTNODES_LIBRARIES})
+    install (TARGETS cisstQtNodes EXPORT cisst-targets COMPONENT cisstCommon)
   endif ()
 
 else ()
@@ -203,15 +202,14 @@ if (CISST_HAS_SWIG_PYTHON)
     set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
   else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
     include (${SWIG_USE_FILE})
-    # save SWIG settings
-    set (CISST_SWIG_PACKAGE "SWIG")
-    cisst_set_package_settings (cisstSWIG SWIG PACKAGES    CISST_SWIG_PACKAGE)
-    cisst_set_package_settings (cisstSWIG SWIG CMAKE_FILES SWIG_USE_FILE)
+    # INTERFACE target for SWIG (carries no link deps itself; UseSWIG must
+    # be included separately in cisst_add_swig_module via find_package(SWIG))
+    add_library (cisstSWIG INTERFACE)
+    add_library (cisst::cisstSWIG ALIAS cisstSWIG)
+    install (TARGETS cisstSWIG EXPORT cisst-targets COMPONENT cisstCommon)
     # propagate the fact that SWIG was found
     set (CISST_SWIG_FOUND 1 PARENT_SCOPE)
   endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-else (CISST_HAS_SWIG_PYTHON)
-  cisst_unset_all_package_settings (cisstSWIG SWIG)
 endif (CISST_HAS_SWIG_PYTHON)
 
 if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
@@ -230,9 +228,18 @@ if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
 
   set (Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
   set (PYTHON_ALL_INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
-  cisst_set_package_settings (cisstPython Python INCLUDE_DIRECTORIES PYTHON_ALL_INCLUDE_DIRS)
   set (PYTHON_ALL_LIBRARIES ${Python_LIBRARIES})
-  cisst_set_package_settings (cisstPython Python LIBRARIES PYTHON_ALL_LIBRARIES)
+
+  # INTERFACE target for Python (carries include paths and link libraries)
+  add_library (cisstPython INTERFACE)
+  add_library (cisst::cisstPython ALIAS cisstPython)
+  target_include_directories (cisstPython INTERFACE ${PYTHON_ALL_INCLUDE_DIRS})
+  if (TARGET Python::Python)
+    target_link_libraries (cisstPython INTERFACE Python::Python)
+  else ()
+    target_link_libraries (cisstPython INTERFACE ${PYTHON_ALL_LIBRARIES})
+  endif ()
+  install (TARGETS cisstPython EXPORT cisst-targets COMPONENT cisstCommon)
 
   # Create cisstPythonBuild, which contains SWIG_EXECUTABLE and Python_EXECUTABLE.
   # (Currently, this is only created if the correct version of SWIG was found -- should that check be removed?
@@ -250,7 +257,6 @@ if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
 else (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   # propagate the fact that SWIG was not found
   set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
-  cisst_unset_all_package_settings (cisstPython Python)
 endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
 
 
@@ -271,7 +277,7 @@ option (CISST_HAS_JSON "Do you want to compile JsonCpp with cisst?  If not, some
 if (CISST_HAS_JSON)
 
   if (CISST_USE_PKG_CONFIG)
-    pkg_check_modules(JSONCPP jsoncpp)
+    pkg_check_modules(JSONCPP IMPORTED_TARGET jsoncpp)
 
     if (JSONCPP_FOUND)
       set (JSON_INCLUDE_DIR "${JSONCPP_INCLUDE_DIRS}")
@@ -279,6 +285,8 @@ if (CISST_HAS_JSON)
       set (JSON_LIBRARIES "${JSONCPP_LIBRARIES}")
       set (JSON_FOUND ON PARENT_SCOPE)
       set (JSON_USE_SYSTEM_VERSION ON PARENT_SCOPE)
+      # Propagate the imported target name so the parent deferred block can use it
+      set (JSON_TARGET "PkgConfig::JSONCPP" PARENT_SCOPE)
     endif (JSONCPP_FOUND)
   endif (CISST_USE_PKG_CONFIG)
 
@@ -331,10 +339,4 @@ if (CISST_HAS_JSON)
   set (JSON_LIBRARY_DIRS ${JSON_LIBRARY_DIRS} PARENT_SCOPE)
   set (JSON_LIBRARIES ${JSON_LIBRARIES} PARENT_SCOPE)
 
-  cisst_set_package_settings (cisstCommon JSON INCLUDE_DIRECTORIES JSON_INCLUDE_DIR)
-  cisst_set_package_settings (cisstCommon JSON LIBRARIES           JSON_LIBRARIES)
-  cisst_set_package_settings (cisstCommon JSON LINK_DIRECTORIES    JSON_LIBRARY_DIRS)
-
-else (CISST_HAS_JSON)
-  cisst_unset_all_package_settings (cisstCommon JSON)
 endif (CISST_HAS_JSON)

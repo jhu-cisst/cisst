@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2012-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2012-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -16,13 +16,10 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMu
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND)
 
   # Qt examples
   if (CISST_HAS_QT)
-
-    # load cisst configuration
-    include (${CISST_USE_FILE})
 
     # shared components used by either example
     include_directories (${CMAKE_CURRENT_SOURCE_DIR})
@@ -33,6 +30,6 @@ if (cisst_FOUND_AS_REQUIRED)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_QT")
   endif (CISST_HAS_QT)
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

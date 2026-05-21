@@ -20,14 +20,11 @@ include_directories (${sawSensablePhantom_INCLUDE_DIR}
 link_directories (${sawSensablePhantom_LIBRARY_DIR}
                   ${sawKeyboard_LIBRARY_DIR})
 
-
 add_executable (ui3ExSensableNoVideo main.cpp)
 
 target_link_libraries (ui3ExSensableNoVideo
                        ui3ExBehaviors
                        ${sawSensablePhantom_LIBRARIES}
-                       ${sawKeyboard_LIBRARIES})
-
-cisst_target_link_libraries (ui3ExSensableNoVideo
-                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
-                             cisstStereoVision cisstParameterTypes cisst3DUserInterface)
+                       ${sawKeyboard_LIBRARIES}
+                       cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
+                       cisstStereoVision cisstParameterTypes cisst3DUserInterface)

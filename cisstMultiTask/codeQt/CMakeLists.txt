@@ -13,16 +13,13 @@
 
 project (cisstMultiTaskQt)
 
-# set directories for this project
-cisst_set_directories (cisstQt)
+find_package (Qt5 COMPONENTS Core REQUIRED)
 
 set (QTNODES_SOURCE_FILES "")
 set (QTNODES_HEADER_FILES "")
 set (QTNODES_SETTINGS "")
 
 if (CISST_HAS_QTNODES)
-  cisst_set_directories (cisstQtNodes)
-  cisst_set_directories (cisstGraphviz)
   add_definitions(-DNODE_EDITOR_SHARED)
 
   set (QTNODES_SOURCE_FILES

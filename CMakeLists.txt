@@ -18,6 +18,12 @@ cmake_minimum_required (VERSION 3.16)
 # cisst (Computer Integrated Surgical Systems and Technology)
 project (cisst VERSION 1.4.0)
 
+# Provide a dropdown for CMAKE_BUILD_TYPE in ccmake/cmake-gui
+if (NOT CMAKE_BUILD_TYPE)
+  set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type." FORCE)
+endif ()
+set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
+
 # cisst compiler settings
 include (cmake/cisstSettings.cmake)
 
@@ -199,6 +205,12 @@ else (CMAKE_CL_64)
 endif (CMAKE_CL_64)
 
 
+# cisstInteractive requires SWIG/Python wrappers; enabling it forces CISST_HAS_SWIG_PYTHON
+option (CISST_cisstInteractive "Build cisstInteractive (requires CISST_HAS_SWIG_PYTHON)." OFF)
+if (CISST_cisstInteractive)
+  set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
+endif ()
+
 # Use a separate directory to find external dependencies, this allows
 # to include some CMake "use" files without polluting the environment
 add_subdirectory (cisst-dependencies)
@@ -215,10 +227,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   option (CISST_HAS_LINUX_RTAI "Use the RTAI real time extensions for Linux." OFF)
   if (CISST_HAS_LINUX_RTAI)
     find_package (RTAI)
-    cisst_set_package_settings (cisstCommon RTAI INCLUDE_DIRECTORIES RTAI_INCLUDE_DIR)
-    cisst_set_package_settings (cisstCommon RTAI LIBRARIES RTAI_LIBRARIES)
-  else (CISST_HAS_LINUX_RTAI)
-    cisst_unset_all_package_settings (cisstCommon RTAI)
   endif (CISST_HAS_LINUX_RTAI)
 
   # Check for Xenomai
@@ -228,30 +236,24 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # add /usr/xenomai/include/posix. This is a *must* since we want to
     # to use xenomai/include/posix/pthread.h
     set (CISST_XENOMAI_INCLUDE_DIRECTORIES ${XENOMAI_INCLUDE_DIR} )#${XENOMAI_INCLUDE_POSIX_DIR})
-    cisst_set_package_settings (cisstCommon Xenomai INCLUDE_DIRECTORIES CISST_XENOMAI_INCLUDE_DIRECTORIES)
     # add libnative libxenomai librtdm libpthread_rt
     set (CISST_XENOMAI_LIBRARIES ${XENOMAI_LIBRARY_NATIVE}
 #                                 ${XENOMAI_LIBRARY_PTHREAD_RT}
                                  ${XENOMAI_LIBRARY_RTDM}
                                  ${XENOMAI_LIBRARY_XENOMAI})
-    cisst_set_package_settings (cisstCommon Xenomai LIBRARIES CISST_XENOMAI_LIBRARIES)
     # add -D_GNU_SOURCE -D_REENTRANT -D__XENO__ -pipe
     add_definitions ("${XENOMAI_DEFINITIONS}")
     # add Xenomai wrappers for pthread
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
     set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
 
-  else (CISST_HAS_LINUX_XENOMAI)
-    cisst_unset_all_package_settings (cisstCommon Xenomai)
   endif (CISST_HAS_LINUX_XENOMAI)
 
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # Check on Apple only
-if (APPLE)
-  # User option for IOS
-  option (CISST_HAS_IOS "Compile for IOS." OFF)
-endif (APPLE)
+include (CMakeDependentOption)
+cmake_dependent_option (CISST_HAS_IOS "Compile for IOS." OFF "APPLE" OFF)
 
 
 # Determine if cmnThrow uses "throw" or "abort"
@@ -361,27 +363,15 @@ if (CISST_BUILD_TESTS)
   if (CPPUNIT_FOUND)
     # set variable to confirm that cisstTestsDriver is being build
     set (CISST_cisstTestsDriver ON)
-    # save settings for cisstTestsDriver
-    cisst_set_package_settings (cisstTestsDriver CppUnit INCLUDE_DIRECTORIES CPPUNIT_INCLUDE_DIR)
-    cisst_set_package_settings (cisstTestsDriver CppUnit LIBRARIES CPPUNIT_LIBRARIES)
-    # when using external package, we defined CPPUNIT_LINK_DIR.   If CppUnit is installed on the host
-    # (e.g. debian package), CPPUNIT_INCLUDE_DIR is defined but not CPPUNIT_LINK_DIR
-    if (DEFINED CPPUNIT_LINK_DIR)
-      cisst_set_package_settings (cisstTestsDriver CppUnit LINK_DIRECTORIES CPPUNIT_LINK_DIR)
-    endif ()
   else (CPPUNIT_FOUND)
     message (SEND_ERROR "CppUnit is needed for CISST_BUILD_TESTS, you can either install it or turn ON the option CISST_USE_EXTERNAL")
   endif (CPPUNIT_FOUND)
 else (CISST_BUILD_TESTS)
-  cisst_unset_all_package_settings (cisstTestsDriver CppUnit)
 endif (CISST_BUILD_TESTS)
 
 # Find native threads
 if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   find_package (Threads REQUIRED)
-  if (CMAKE_THREAD_LIBS_INIT)
-    cisst_set_package_settings (cisstCommon Threads LIBRARIES CMAKE_THREAD_LIBS_INIT)
-  endif (CMAKE_THREAD_LIBS_INIT)
 endif (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 
 # Which libraries to build
@@ -429,13 +419,7 @@ foreach (lib ${CISST_LIBRARIES_OPTIONAL})
   option (CISST_${lib} "Build ${lib}." OFF)
 endforeach (lib)
 
-# If OS abstraction is compiled, require dynamic loading libraries
-if (CISST_cisstOSAbstraction OR CISST_cisstInteractive)
-  if (CMAKE_DL_LIBS)
-    cisst_set_package_settings (cisstOSAbstraction DL LIBRARIES CMAKE_DL_LIBS)
-    cisst_set_package_settings (cisstInteractive DL LIBRARIES CMAKE_DL_LIBS)
-  endif (CMAKE_DL_LIBS)
-endif (CISST_cisstOSAbstraction OR CISST_cisstInteractive)
+# DL (dynamic loading) deps applied to targets after add_subdirectory; see below.
 
 if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
@@ -500,6 +484,63 @@ foreach (lib ${CISST_LIBS})
   endif (CISST_${lib})
 endforeach (lib)
 
+# ---------------------------------------------------------------------------
+# Target-based external deps applied here because all library targets now exist.
+# ---------------------------------------------------------------------------
+
+# cisstCommon: RTAI
+if (TARGET cisstCommon AND CISST_HAS_LINUX_RTAI)
+  target_include_directories (cisstCommon PUBLIC ${RTAI_INCLUDE_DIR})
+  target_link_libraries      (cisstCommon PUBLIC ${RTAI_LIBRARIES})
+endif ()
+
+# cisstCommon: Xenomai
+if (TARGET cisstCommon AND CISST_HAS_LINUX_XENOMAI)
+  target_include_directories (cisstCommon PUBLIC ${CISST_XENOMAI_INCLUDE_DIRECTORIES})
+  target_link_libraries      (cisstCommon PUBLIC ${CISST_XENOMAI_LIBRARIES})
+endif ()
+
+# cisstCommon: POSIX Threads
+if (TARGET cisstCommon AND CMAKE_THREAD_LIBS_INIT)
+  target_link_libraries (cisstCommon PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+endif ()
+
+# cisstCommon: JSON
+if (TARGET cisstCommon AND CISST_HAS_JSON)
+  if (JSON_TARGET AND TARGET ${JSON_TARGET})
+    # System jsoncpp found via pkg-config: use its IMPORTED target so include
+    # dirs are propagated correctly even when they are system defaults.
+    target_link_libraries (cisstCommon PUBLIC ${JSON_TARGET})
+  else ()
+    # Bundled external-project jsoncpp: use the raw variables.
+    target_include_directories (cisstCommon PUBLIC ${JSON_INCLUDE_DIR})
+    if (JSON_LIBRARY_DIRS)
+      target_link_directories (cisstCommon PUBLIC ${JSON_LIBRARY_DIRS})
+    endif ()
+    target_link_libraries (cisstCommon PUBLIC ${JSON_LIBRARIES})
+  endif ()
+endif ()
+
+# cisstTestsDriver: CppUnit
+if (TARGET cisstTestsDriver AND CPPUNIT_FOUND)
+  target_include_directories (cisstTestsDriver PUBLIC ${CPPUNIT_INCLUDE_DIR})
+  if (DEFINED CPPUNIT_LINK_DIR)
+    target_link_directories (cisstTestsDriver PUBLIC ${CPPUNIT_LINK_DIR})
+  endif ()
+  target_link_libraries (cisstTestsDriver ${CPPUNIT_LIBRARIES})
+endif ()
+
+# cisstOSAbstraction and cisstInteractive: DL (dynamic loading)
+if (CMAKE_DL_LIBS)
+  if (TARGET cisstOSAbstraction)
+    target_link_libraries (cisstOSAbstraction PUBLIC ${CMAKE_DL_LIBS})
+  endif ()
+  if (TARGET cisstInteractive)
+    target_link_libraries (cisstInteractive PUBLIC ${CMAKE_DL_LIBS})
+  endif ()
+endif ()
+# ---------------------------------------------------------------------------
+
 
 # Create misc. config files
 set (CISST_INCLUDE_DIR_FOR_CONFIG ${CISST_INCLUDE_DIR})
@@ -508,6 +549,23 @@ set (CISST_CMAKE_DIRS_FOR_CONFIG ${CISST_CMAKE_BINARY_DIR})
 
 set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR})
 set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
+
+# ---------------------------------------------------------------------------
+# CMake export: generate cisst-targets.cmake (target dependency graph)
+# ---------------------------------------------------------------------------
+# Export targets for the BUILD tree (lets in-source consumers use the targets
+# in the same CMake super-build without a find_package call)
+export (EXPORT cisst-targets
+        FILE      "${CISST_CMAKE_BINARY_DIR}/cisst-targets.cmake"
+        NAMESPACE cisst::)
+
+# Export targets for the INSTALL tree (consumed by external find_package(cisst))
+install (EXPORT cisst-targets
+         FILE        cisst-targets.cmake
+         NAMESPACE   cisst::
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+         COMPONENT   cisstCommon)
+# ---------------------------------------------------------------------------
 
 # Config file
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"

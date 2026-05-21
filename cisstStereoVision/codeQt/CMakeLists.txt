@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstStereoVision
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -15,9 +13,7 @@
 
 project (cisstStereoVisionQt)
 
-# set directories for this project
-cisst_set_directories (cisstQt)
-
+find_package (Qt5 COMPONENTS Core REQUIRED)
 set (CMAKE_AUTOMOC ON)
 
 set (HEADER_FILES

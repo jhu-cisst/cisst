@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # CMakeLists for cisstInteractive
 #
@@ -36,9 +36,6 @@ if (CISST_cisstMultiTask)
   set (ADDITIONAL_HEADER_FILES ${cisstInteractive_CISST_DG_HDRS})
   set (DEPENDENCIES ${DEPENDENCIES} cisstOSAbstraction cisstMultiTask)
 endif (CISST_cisstMultiTask)
-
-# set directories for this project
-cisst_set_directories (cisstPython)
 
 cisst_add_library (LIBRARY cisstInteractive
                    FOLDER cisstInteractive

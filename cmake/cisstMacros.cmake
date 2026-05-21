@@ -295,8 +295,14 @@ macro (cisst_add_library ...)
     ADDITIONAL_MAKE_CLEAN_FILES
     "${existing_files_to_clean};${LIBRARY_MAIN_HEADER}")
 
-  # Set paths
-  cisst_set_directories (${LIBRARY} ${DEPENDENCIES})
+  # Load external package settings from legacy cmake files (transitional: keeps
+  # backward compatibility while target-based properties are being built up)
+  cisst_load_package_setting (${LIBRARY} ${DEPENDENCIES} ${SETTINGS})
+  # Still call the global include/link helpers so that use-files (e.g. SWIG)
+  # are sourced and any not-yet-modernised consumers keep working.
+  cisst_include_directories (${LIBRARY} ${DEPENDENCIES} ${SETTINGS})
+  cisst_link_directories    (${LIBRARY} ${DEPENDENCIES} ${SETTINGS})
+  cisst_find_and_use_packages (${LIBRARY} ${DEPENDENCIES} ${SETTINGS})
 
   # Add the library
   list (SORT SOURCE_FILES)
@@ -314,6 +320,9 @@ macro (cisst_add_library ...)
                ${ADDITIONAL_HEADER_FILES}
                )
 
+  # Namespace alias so consumers can use either cisstVector or cisst::cisstVector
+  add_library (cisst::${LIBRARY} ALIAS ${LIBRARY})
+
   # set version number
   set_target_properties (${LIBRARY} PROPERTIES
                          VERSION ${cisst_VERSION}
@@ -323,52 +332,65 @@ macro (cisst_add_library ...)
   target_compile_definitions (${LIBRARY} PRIVATE
     LIBRARY_NAME_FOR_CISST_REGISTER="${LIBRARY}")
 
-  # Install the library
-  install (TARGETS ${LIBRARY} COMPONENT ${LIBRARY}
+  # --- Modern target-based include paths ---
+  # BUILD_INTERFACE covers in-source/build-tree use; INSTALL_INTERFACE covers
+  # installed-tree use.  Downstream targets that link against this library
+  # automatically inherit these paths via the PUBLIC keyword.
+  target_include_directories (${LIBRARY}
+    PUBLIC
+      $<BUILD_INTERFACE:${${PROJECT}_BINARY_DIR}/include>
+      $<BUILD_INTERFACE:${${PROJECT}_SOURCE_DIR}>
+      $<INSTALL_INTERFACE:include>
+  )
+
+  # Install the library and register it with the cisst export set so that
+  # downstream find_package(cisst) consumers get a proper target graph.
+  install (TARGETS ${LIBRARY}
+           EXPORT  cisst-targets
+           COMPONENT ${LIBRARY}
            RUNTIME DESTINATION bin
            LIBRARY DESTINATION lib
            ARCHIVE DESTINATION lib)
 
-  # Add dependencies for linking, also check BUILD_xxx for dependencies
+  # --- Dependencies (other cisst libraries) ---
+  # Use PUBLIC so that include dirs and link flags propagate transitively to
+  # every target that links against ${LIBRARY}.
   if (DEPENDENCIES)
-    # Check that dependencies are built
+    # Verify all required libraries were compiled
     foreach (dependency ${DEPENDENCIES})
       list (FIND CISST_LIBRARIES ${dependency} FOUND_IT)
       if (${FOUND_IT} EQUAL -1)
-        # not found
         message (SEND_ERROR "${LIBRARY} requires ${dependency} which doesn't exist or hasn't been compiled (available libraries: ${CISST_LIBRARIES}")
-      else (${FOUND_IT} EQUAL -1)
-        # found
-        cisst_library_use_libraries (${LIBRARY} ${dependency})
       endif (${FOUND_IT} EQUAL -1)
     endforeach (dependency)
-    # Set the link flags
-    target_link_libraries (${LIBRARY} ${DEPENDENCIES})
-    cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} links against: ${DEPENDENCIES}")
+    target_link_libraries (${LIBRARY} PUBLIC ${DEPENDENCIES})
+    cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} links against (PUBLIC): ${DEPENDENCIES}")
   endif (DEPENDENCIES)
 
-  # Add settings for linking, also check BUILD_xxx for dependencies
+  # --- Settings (virtual/interface targets: cisstQt, cisstOpenGL, …) ---
+  # These are INTERFACE library targets created in cisst-dependencies.  Linking
+  # them PUBLIC propagates all their interface properties (Qt5::*, OpenGL::*, …)
+  # to downstream consumers automatically.
   if (SETTINGS)
-    # Check that dependencies are built
     foreach (setting ${SETTINGS})
       list (FIND CISST_SETTINGS ${setting} FOUND_IT)
-      if (${FOUND_IT} EQUAL -1 )
-        # not found
+      if (${FOUND_IT} EQUAL -1)
         if (DEFINED ${setting}_OPTION_NAME)
           message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled, use the flag ${${setting}_OPTION_NAME} to compile it")
         else (DEFINED ${setting}_OPTION_NAME)
           message (SEND_ERROR "${LIBRARY} requires ${setting} which doesn't exist or hasn't been compiled  (available settings: ${CISST_SETTINGS}")
         endif (DEFINED ${setting}_OPTION_NAME)
-      else (${FOUND_IT} EQUAL -1 )
-        # found
-        cisst_library_use_settings (${LIBRARY} ${setting})
-      endif (${FOUND_IT} EQUAL -1 )
+      endif (${FOUND_IT} EQUAL -1)
     endforeach (setting)
-    # Set the link flags
-    cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} uses settings: ${SETTINGS}")
+    if (TARGET cisst::${LIBRARY}) # alias already set, just guard
+    endif ()
+    target_link_libraries (${LIBRARY} PUBLIC ${SETTINGS})
+    cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} uses settings (PUBLIC): ${SETTINGS}")
   endif (SETTINGS)
 
-  # Link to cisst additional libraries and settings
+  # Transitional: also apply external package libraries that were recorded via
+  # the legacy cisst_set_package_settings mechanism and have not yet been moved
+  # to target_link_libraries calls in the individual CMakeLists.txt files.
   cisst_target_link_package_libraries (${LIBRARY} ${LIBRARY} ${DEPENDENCIES} ${SETTINGS})
 
   # Install all header files
@@ -393,18 +415,9 @@ macro (cisst_target_link_package_libraries target ...)
   cisst_load_package_setting (${DEPENDENCIES})
   foreach (lib ${DEPENDENCIES})
     if ("${lib}" STREQUAL "cisstQt")
-      if (CISST_HAS_QT5)
-        cisst_cmake_debug ("cisst_target_link_package_libraries: Qt5 needed for ${target}")
-        set (_qt5_libraries Core Widgets Gui OpenGL XmlPatterns)
-        if (WIN32 AND CISST_XML_LIB STREQUAL "QtXML")
-          # 5/12/23: added Xml on Windows, if CISST_XML_LIB is QtXml
-          #          (not sure if this is the best place).
-          set (_qt5_libraries ${_qt5_libraries} Xml)
-        endif ()
-        foreach (_qt5_lib ${_qt5_libraries})
-          target_link_libraries (${target} Qt5::${_qt5_lib})
-        endforeach ()
-      endif (CISST_HAS_QT5)
+      # cisstQt is now a modern INTERFACE target that carries Qt5:: deps transitively.
+      # No need to manually link Qt5:: here; target_link_libraries(... PUBLIC cisstQt)
+      # in cisst_add_library already propagates them.
     endif ("${lib}" STREQUAL "cisstQt")
 
     # find and load setting for external packages
@@ -413,7 +426,7 @@ macro (cisst_target_link_package_libraries target ...)
       foreach (package ${${PACKAGES}})
         set (VARIABLE_NAME CISST_LIBRARIES_FOR_${lib}_USING_${package})
         if (${VARIABLE_NAME})
-          target_link_libraries (${target} ${${VARIABLE_NAME}})
+          target_link_libraries (${target} PUBLIC ${${VARIABLE_NAME}})
         endif (${VARIABLE_NAME})
       endforeach (package)
     endif (${PACKAGES})
@@ -475,7 +488,6 @@ macro (cisst_target_link_libraries TARGET ...)
 
     # Finally, link with the required libraries
     target_link_libraries (${_WHO_REQUIRES} ${_CISST_LIBRARIES_TO_USE})
-    cisst_target_link_package_libraries (${_WHO_REQUIRES} ${_REQUIRED_CISST_LIBRARIES})
 
     # Make sure this is defined for all compiled symbols, this allows proper association of symbols/library name
     target_compile_definitions (${_WHO_REQUIRES} PRIVATE
@@ -540,11 +552,11 @@ function (cisst_add_swig_module ...)
   cisst_cmake_debug ("cisst_add_swig_module: looking for interface file ${SWIG_INTERFACE_FILE}")
 
   if (EXISTS ${SWIG_INTERFACE_FILE})
-    # load settings for extra cisst libraries (and Python)
-    set (_LIBRARIES_AND_SETTINGS ${MODULE_LINK_LIBRARIES} cisstPython cisstSWIG)
-    cisst_set_directories (${_LIBRARIES_AND_SETTINGS})
-    # retrieve libraries needed for Python
-    cisst_extract_settings (cisstPython LIBRARIES cisstPython_LIBRARIES)
+    # load SWIG and generate the Python wrapper
+    find_package (SWIG REQUIRED)
+    include (${SWIG_USE_FILE})
+    # ensure Python IMPORTED targets are available in this scope
+    find_package (Python QUIET COMPONENTS Interpreter Development)
     # create a directory in build tree
     file (MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE_DIRECTORY}")
     # we are using C++ code
@@ -565,8 +577,8 @@ function (cisst_add_swig_module ...)
       set_target_properties (${MODULE_NAME} PROPERTIES SUFFIX .pyd)
       set_target_properties (${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
     endif (WIN32)
-    cisst_cmake_debug ("cisst_add_swig_module: swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})")
-    target_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${cisstPython_LIBRARIES})
+    cisst_cmake_debug ("cisst_add_swig_module: target_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} cisstPython)")
+    target_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} cisstPython)
 
     # copy the .py file generated to wherever the libraries are
     add_custom_command (TARGET ${MODULE_NAME}

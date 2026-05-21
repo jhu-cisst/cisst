@@ -1,8 +1,5 @@
 #
-# $Id: CMakeLists.txt 3331 2012-01-10 22:34:09Z adeguet1 $
-#
-# (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2014-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -22,13 +19,10 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   if (CISST_SVL_HAS_X11 OR WIN32)
     add_executable (cisstVideoPlayer main.cpp)
     set_property (TARGET cisstVideoPlayer PROPERTY FOLDER "cisstStereoVision/applications")
-    cisst_target_link_libraries (cisstVideoPlayer ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries (cisstVideoPlayer ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_SVL_HAS_X11 OR WIN32)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")

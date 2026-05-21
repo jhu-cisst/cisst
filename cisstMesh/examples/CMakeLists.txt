@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2020-206 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -12,13 +12,12 @@
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstMesh)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
-add_executable (mshExMesh mesh.cpp)
-set_property (TARGET mshExMesh PROPERTY FOLDER "cisstMesh/examples")
-cisst_target_link_libraries (mshExMesh ${REQUIRED_CISST_LIBRARIES})
+  add_executable (mshExMesh mesh.cpp)
+  set_property (TARGET mshExMesh PROPERTY FOLDER "cisstMesh/examples")
+  target_link_libraries (mshExMesh ${REQUIRED_CISST_LIBRARIES})
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

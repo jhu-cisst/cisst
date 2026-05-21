@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2014 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -17,10 +17,7 @@ set(REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask cisst
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
-
-  # load cisst configuration
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
   # name the main executable and specifies with source files to use
   add_executable(mtsExBenchmark2
@@ -34,7 +31,7 @@ if (cisst_FOUND_AS_REQUIRED)
   set_property (TARGET mtsExBenchmark2 PROPERTY FOLDER "cisstMultiTask/examples")
 
   # link with the cisst libraries
-  cisst_target_link_libraries(mtsExBenchmark2 ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries(mtsExBenchmark2 ${REQUIRED_CISST_LIBRARIES})
 
   # compile network version if ICE is available
   if (CISST_MTS_HAS_ICE)
@@ -49,7 +46,7 @@ if (cisst_FOUND_AS_REQUIRED)
     set_property (TARGET mtsExBenchmark2Server PROPERTY FOLDER "cisstMultiTask/examples")
 
     # link with the cisst libraries
-    cisst_target_link_libraries(mtsExBenchmark2Server ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries(mtsExBenchmark2Server ${REQUIRED_CISST_LIBRARIES})
 
     # name the main executable and specifies with source files to use
     add_executable(mtsExBenchmark2Client
@@ -61,10 +58,10 @@ if (cisst_FOUND_AS_REQUIRED)
     set_property (TARGET mtsExBenchmark2Client PROPERTY FOLDER "cisstMultiTask/examples")
 
     # link with the cisst libraries
-    cisst_target_link_libraries(mtsExBenchmark2Client ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries(mtsExBenchmark2Client ${REQUIRED_CISST_LIBRARIES})
 
   endif (CISST_MTS_HAS_ICE)
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

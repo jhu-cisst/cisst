@@ -20,10 +20,9 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND)
 
   # load cisst configuration
-  include (${CISST_USE_FILE})
 
   include_directories (behaviors)
   add_subdirectory (behaviors)
@@ -60,6 +59,6 @@ if (cisst_FOUND_AS_REQUIRED)
     endif (sawIntuitiveDaVinci_FOUND)
   endif (CISST_UI3_HAS_ISI_BBAPI)
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

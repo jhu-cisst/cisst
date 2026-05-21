@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -156,7 +156,6 @@ if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
        vctPlot2DBase.h
        vctPlot2DOpenGL.h
        )
-  cisst_library_use_settings (cisstVector cisstOpenGL)
 endif (CISST_HAS_OPENGL OR CISST_HAS_VTK)
 
 # JSON specific header files
@@ -176,3 +175,7 @@ cisst_add_library (
   DEPENDENCIES cisstCommon
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES})
+
+if (CISST_HAS_OPENGL AND TARGET cisstVector AND TARGET cisstOpenGL)
+  target_link_libraries (cisstVector PUBLIC cisstOpenGL)
+endif ()

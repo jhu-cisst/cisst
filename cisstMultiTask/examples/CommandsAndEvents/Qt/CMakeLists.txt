@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -22,13 +22,9 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
-
-  # load cisst configuration
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
   # wrap all Qt files
-
   set (CMAKE_AUTOMOC ON)
   qt5_wrap_ui (QT_CLIENT_WRAPPED_UI clientQtWidget.ui)
   qt5_wrap_ui (QT_SERVER_WRAPPED_UI serverQtWidget.ui)
@@ -49,8 +45,8 @@ if (cisst_FOUND_AS_REQUIRED)
                   serverWithDelay.cpp
                  )
   set_property (TARGET mtsExCommandsAndEventsQtLocal PROPERTY FOLDER "cisstMultiTask/examples")
-  cisst_target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

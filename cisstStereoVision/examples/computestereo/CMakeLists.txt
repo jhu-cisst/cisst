@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2006-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -19,16 +17,13 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMu
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
-
-  # load cisst configuration
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
   if (CISST_SVL_HAS_X11 OR WIN32)
 
     add_executable (svlExComputeStereo computestereo.cpp)
     set_property (TARGET svlExComputeStereo PROPERTY FOLDER "cisstStereoVision/examples")
-    cisst_target_link_libraries (svlExComputeStereo ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries (svlExComputeStereo ${REQUIRED_CISST_LIBRARIES})
 
     # Copy example images to the build tree
     if (WIN32)
@@ -55,6 +50,6 @@ if (cisst_FOUND_AS_REQUIRED)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")
   endif (CISST_SVL_HAS_X11 OR WIN32)
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

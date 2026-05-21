@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2007-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -13,27 +11,24 @@
 
 find_package (cisst COMPONENTS cisstCommon)
 
-if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
   add_library (cmnExSerializationClasses STATIC classes.h classes.cpp)
   set_property (TARGET cmnExSerializationClasses PROPERTY FOLDER "cisstCommon/examples")
+  target_link_libraries (cmnExSerializationClasses PRIVATE cisstCommon)
 
   add_executable (cmnExSerializationWrite write.cpp)
   set_property (TARGET cmnExSerializationWrite PROPERTY FOLDER "cisstCommon/examples")
-  cisst_target_link_libraries (cmnExSerializationWrite cisstCommon)
-  target_link_libraries (cmnExSerializationWrite cmnExSerializationClasses)
+  target_link_libraries (cmnExSerializationWrite cisstCommon cmnExSerializationClasses)
 
   add_executable (cmnExSerializationRead read.cpp)
   set_property (TARGET cmnExSerializationRead PROPERTY FOLDER "cisstCommon/examples")
-  cisst_target_link_libraries (cmnExSerializationRead cisstCommon)
-  target_link_libraries (cmnExSerializationRead cmnExSerializationClasses)
+  target_link_libraries (cmnExSerializationRead cisstCommon cmnExSerializationClasses)
 
   add_executable (cmnExSerializationStringStream writeStringStream.cpp)
   set_property (TARGET cmnExSerializationStringStream PROPERTY FOLDER "cisstCommon/examples")
-  cisst_target_link_libraries (cmnExSerializationStringStream cisstCommon)
-  target_link_libraries (cmnExSerializationStringStream cmnExSerializationClasses)
+  target_link_libraries (cmnExSerializationStringStream cisstCommon cmnExSerializationClasses)
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

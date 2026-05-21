@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -28,11 +26,9 @@ set_property (TARGET ui3ExDaVinciStereoVideo PROPERTY FOLDER "cisst3DUserInterfa
 
 target_link_libraries (ui3ExDaVinciStereoVideo
                        ui3ExBehaviors
-                       ${${CISST_UI3_ISI_WRAPPER_USED}_LIBRARIES})
-
-cisst_target_link_libraries (ui3ExDaVinciStereoVideo
-                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
-                             cisstStereoVision cisstParameterTypes cisst3DUserInterface)
+                       ${${CISST_UI3_ISI_WRAPPER_USED}_LIBRARIES}
+                       cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
+                       cisstStereoVision cisstParameterTypes cisst3DUserInterface)
 
 # Copy VTK models to the build tree
 if (WIN32)

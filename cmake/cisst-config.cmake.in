@@ -101,6 +101,10 @@ set (CISST_HAS_QT4 OFF)
 set (CISST_HAS_QT5 @CISST_HAS_QT5@)
 set (CISST_HAS_FLTK OFF)
 set (CISST_HAS_JSON @CISST_HAS_JSON@)
+set (CISST_JSON_USE_SYSTEM_VERSION @JSON_USE_SYSTEM_VERSION@)
+# jsoncpp include dir: needed by old-style consumers that include cisst public
+# headers (e.g. cmnGenericObject.h -> json/json.h) without linking to cisstCommon.
+set (CISST_JSON_INCLUDE_DIR "@JSON_INCLUDE_DIR@")
 set (CISST_CATKIN_BUILT @CISST_CATKIN_BUILT@)
 set (CISST_USE_SI_UNITS @CISST_USE_SI_UNITS@)
 
@@ -126,33 +130,77 @@ endforeach (lib ${CISST_LIBRARIES})
 # Where to install
 set (CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
 
-# Check against componenents required
-set (cisst_FOUND_AS_REQUIRED 1)
+# Set per-component _FOUND variables (modern CMake convention).
+# CMake's find_package engine reads these automatically:
+#  - if REQUIRED and cisst_<Comp>_FOUND is false → fatal error with a clear message
+#  - consumers can also test cisst_FOUND (set below) for the soft-failure pattern
+foreach (lib ${CISST_LIBRARIES} ${CISST_SETTINGS})
+  set (cisst_${lib}_FOUND 1)
+endforeach ()
+
+# Check against components required
+set (cisst_FOUND 1)
 if (cisst_FIND_COMPONENTS)
-  # First test that all libraries should have been compiled
   foreach (required ${cisst_FIND_COMPONENTS})
-    set (CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
-    list (FIND CISST_LIBRARIES_AND_SETTINGS ${required} FOUND_IT)
-    if (${FOUND_IT} EQUAL -1 )
-      # inform user and set variables to not-found/false
-      if (NOT cisst_FIND_QUIETLY)
-        # check if this is a "virtual" library
-        if (DEFINED ${required}_OPTION_NAME)
-          message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
-        else (DEFINED ${required}_OPTION_NAME)
-          message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled")
-        endif (DEFINED ${required}_OPTION_NAME)
-      endif (NOT cisst_FIND_QUIETLY)
-      set (cisst_FOUND_AS_REQUIRED 0)
+    set (_cisst_all ${CISST_LIBRARIES} ${CISST_SETTINGS})
+    list (FIND _cisst_all ${required} _cisst_idx)
+    if (${_cisst_idx} EQUAL -1)
       set (cisst_${required}_FOUND 0)
-    else (${FOUND_IT} EQUAL -1)
-      # if found, add to list of required libraries and remove duplicates (for multiple find_package (cisst))
+      set (cisst_FOUND 0)
+      if (NOT cisst_FIND_QUIETLY)
+        if (DEFINED ${required}_OPTION_NAME)
+          message (STATUS "cisst: \"${required}\" not compiled (enable with ${${required}_OPTION_NAME})")
+        else ()
+          message (STATUS "cisst: \"${required}\" not compiled or not available")
+        endif ()
+      endif ()
+    else ()
       set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES_REQUIRED_INTERNAL} ${required})
       list (REMOVE_DUPLICATES CISST_LIBRARIES_REQUIRED_INTERNAL)
-      set (cisst_${required}_FOUND 1)
-    endif (${FOUND_IT} EQUAL -1)
-  endforeach (required)
-else (cisst_FIND_COMPONENTS)
-  # otherwise, assumes user needs all available libraries
+    endif ()
+  endforeach ()
+else ()
   set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES})
-endif (cisst_FIND_COMPONENTS)
+endif ()
+
+# ---------------------------------------------------------------------------
+# Modern CMake target graph (replaces the legacy variable-based mechanism)
+# Include the generated cisst-targets.cmake which encodes all cisst library
+# targets with their full public/interface dependency information.  The file
+# is searched in CISST_CMAKE_DIRS which covers both the build tree and the
+# installed tree.
+# ---------------------------------------------------------------------------
+include (CMakeFindDependencyMacro)
+
+# Re-find external packages consumed by cisst so their imported targets are
+# available when cisst-targets.cmake references them.
+if (CISST_HAS_OPENGL)
+  find_dependency (OpenGL)
+endif ()
+if (CISST_HAS_QT5)
+  foreach (_cisst_qt5_comp Core Widgets Gui OpenGL XmlPatterns)
+    find_dependency (Qt5${_cisst_qt5_comp})
+  endforeach ()
+endif ()
+if (CISST_HAS_JSON)
+  find_dependency (PkgConfig QUIET)
+  if (CISST_JSON_USE_SYSTEM_VERSION AND PkgConfig_FOUND)
+    # Recreate the PkgConfig::JSONCPP imported target that cisstCommon depends on.
+    pkg_check_modules (JSONCPP IMPORTED_TARGET jsoncpp)
+  endif ()
+endif ()
+
+# Include the generated targets file (contains all cisst:: namespace targets)
+# Guard against re-inclusion during the same build-tree configure run, where
+# some cisst::* targets may already be defined as real (non-IMPORTED) targets.
+if (NOT TARGET cisst::cisstCommon)
+  find_file (_cisst_targets_file
+             NAMES cisst-targets.cmake
+             PATHS ${CISST_CMAKE_DIRS}
+             NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  if (_cisst_targets_file)
+    include ("${_cisst_targets_file}")
+  endif ()
+  unset (_cisst_targets_file CACHE)
+endif ()
+# ---------------------------------------------------------------------------

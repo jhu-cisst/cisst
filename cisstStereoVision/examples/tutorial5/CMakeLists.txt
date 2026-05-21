@@ -1,6 +1,5 @@
 #
-# (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2014-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -20,9 +19,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (svlExTutorial5
                   CMyEventHandler2.h
                   CMyEventHandler2.cpp
@@ -30,7 +26,7 @@ if (cisst_FOUND)
                   )
 
   set_property (TARGET svlExTutorial5 PROPERTY FOLDER "cisstStereoVision/examples")
-  cisst_target_link_libraries (svlExTutorial5 ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (svlExTutorial5 ${REQUIRED_CISST_LIBRARIES})
 
   # Copy media files to the build directory
 #  configure_file (${CMAKE_SOURCE_DIR}/wall.bmp ${CMAKE_BINARY_DIR}/wall.bmp COPYONLY)

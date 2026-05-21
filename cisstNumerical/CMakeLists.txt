@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2022 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -23,13 +23,15 @@ option (CISST_NMR_COMPILE_POLYNOMIALS "Compile the cisstNumerical polynomial cla
 
 if (CISST_HAS_CISSTNETLIB)
   find_package (CisstNetlib REQUIRED)
-  cisst_set_package_settings (cisstNumerical cisstNetlib INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
-  cisst_set_package_settings (cisstNumerical cisstNetlib LIBRARIES           CISSTNETLIB_LIBRARIES)
 else (CISST_HAS_CISSTNETLIB)
-  cisst_unset_all_package_settings (cisstNumerical cisstNetlib)
 endif (CISST_HAS_CISSTNETLIB)
 
 add_subdirectory (code)
+
+if (TARGET cisstNumerical AND CISST_HAS_CISSTNETLIB)
+  target_include_directories (cisstNumerical PUBLIC ${CISSTNETLIB_INCLUDE_DIR})
+  target_link_libraries      (cisstNumerical PUBLIC ${CISSTNETLIB_LIBRARIES})
+endif ()
 
 # SWIG Python wrappers and tests
 cisst_offer_python (cisstNumerical)

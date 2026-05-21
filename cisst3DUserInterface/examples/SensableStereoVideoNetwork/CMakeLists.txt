@@ -1,9 +1,6 @@
 #
+# (C) Copyright 2008-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
-
-# (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights
-# Reserved.
-
 # --- begin cisst license - do not edit ---
 #
 # This software is provided "as is" under an open source license, with
@@ -17,8 +14,6 @@ project (cisst3DUserInterfaceSensableStereoVideoNetwork)
 add_executable (cisst3DUserInterfaceSensableStereoVideoNetwork main.cpp)
 
 target_link_libraries (cisst3DUserInterfaceSensableStereoVideoNetwork
-                       cisst3DUserInterfaceBehaviors)
-
-cisst_target_link_libraries (cisst3DUserInterfaceSensableStereoVideoNetwork
-                             cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
-                             cisstStereoVision cisstParameterTypes cisst3DUserInterface)
+                       cisst3DUserInterfaceBehaviors
+                       cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
+                       cisstStereoVision cisstParameterTypes cisst3DUserInterface)

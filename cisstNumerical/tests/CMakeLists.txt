@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2004-2023 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -85,9 +85,6 @@ if (CISST_HAS_CISSTNETLIB)
        )
 endif (CISST_HAS_CISSTNETLIB)
 
-# paths for headers/libraries
-cisst_set_directories (cisstCommon cisstVector cisstOSAbstraction cisstNumerical cisstTestsDriver)
-
 # Add executable for C++ tests
 add_executable (cisstNumericalTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstNumericalTests PROPERTY FOLDER "cisstNumerical/tests")
@@ -97,11 +94,11 @@ target_link_libraries (cisstNumericalTests cisstTestsDriver)
 # and link differently
 if (CISST_cisstOSAbstraction)
   add_definitions (-DBUILD_MULTITHREADED_TESTS)
-  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstOSAbstraction cisstTestsDriver)
+  target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstOSAbstraction cisstTestsDriver)
   target_link_libraries (cisstNumericalTests
                          ${CMAKE_THREAD_LIBS_INIT})
 else (CISST_cisstOSAbstraction)
-  cisst_target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstTestsDriver)
+  target_link_libraries (cisstNumericalTests cisstCommon cisstVector cisstNumerical cisstTestsDriver)
 endif (CISST_cisstOSAbstraction)
 
 # To generate a CTest list of tests

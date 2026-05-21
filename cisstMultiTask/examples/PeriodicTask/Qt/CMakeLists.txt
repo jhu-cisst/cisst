@@ -1,6 +1,5 @@
 #
-#
-# (C) Copyright 2009-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -19,11 +18,7 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstMultiTask
                               cisstMultiTaskQt)
 
-# Set include/link directories
-cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
-
 set (CMAKE_AUTOMOC ON)
-
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 add_library (mtsExPeriodicTaskGuiQt ${IS_SHARED}
@@ -40,9 +35,9 @@ set_property (TARGET mtsExPeriodicTaskQt PROPERTY FOLDER "cisstMultiTask/example
 
 target_link_libraries (mtsExPeriodicTaskQt
                        mtsExPeriodicTaskGuiQt
-                       mtsExPeriodicTaskComponents)
-cisst_target_link_libraries (mtsExPeriodicTaskGuiQt ${REQUIRED_CISST_LIBRARIES})
-cisst_target_link_libraries (mtsExPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})
+                       mtsExPeriodicTaskComponents
+                       ${REQUIRED_CISST_LIBRARIES})
+target_link_libraries (mtsExPeriodicTaskGuiQt ${REQUIRED_CISST_LIBRARIES})
 
 add_custom_target (mtsExPeriodicTaskQt_Scripts ALL
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different

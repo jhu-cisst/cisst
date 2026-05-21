@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstParameterTypesQt
 #
-# (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -13,8 +13,7 @@
 
 project (cisstParameterTypesQt)
 
-# set directories for this project
-cisst_set_directories (cisstQt)
+find_package (Qt5 COMPONENTS Core REQUIRED)
 
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})

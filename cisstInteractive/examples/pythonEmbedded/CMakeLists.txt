@@ -1,6 +1,5 @@
 #
-#
-# (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -16,19 +15,18 @@ project (pythonEmbedded)
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstPython)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
   # Create myDerivedClass as a shared library
   add_library (myDerivedClass SHARED myDerivedClass.cpp myDerivedClass.h)
   set_property (TARGET myDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
-  cisst_target_link_libraries (myDerivedClass ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (myDerivedClass ${REQUIRED_CISST_LIBRARIES})
 
   # Create myReDerivedClass as a shared library
   add_library (myReDerivedClass SHARED myReDerivedClass.cpp myReDerivedClass.h)
   set_property (TARGET myReDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
-  cisst_target_link_libraries (myReDerivedClass ${REQUIRED_CISST_LIBRARIES})
-  target_link_libraries (myReDerivedClass myDerivedClass)
+  target_link_libraries (myReDerivedClass ${REQUIRED_CISST_LIBRARIES}
+                         myDerivedClass)
 
   # Allow generated c++ code to find header files
   include_directories (${CMAKE_CURRENT_SOURCE_DIR})
@@ -50,8 +48,8 @@ if (cisst_FOUND_AS_REQUIRED)
   # Built executable with embedding
   add_executable (pythonEmbedded pythonEmbedded.cpp)
   set_property (TARGET pythonEmbedded PROPERTY FOLDER "cisstInteractive/examples")
-  cisst_target_link_libraries (pythonEmbedded ${REQUIRED_CISST_LIBRARIES})
-  target_link_libraries (pythonEmbedded myDerivedClass myReDerivedClass ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries (pythonEmbedded ${REQUIRED_CISST_LIBRARIES}
+                         myDerivedClass myReDerivedClass ${CMAKE_THREAD_LIBS_INIT})
 
   if (UNIX)
     if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -68,6 +66,6 @@ if (cisst_FOUND_AS_REQUIRED)
                            ${EXECUTABLE_OUTPUT_PATH}/pythonEmbedded.py
                       COMMENT "pythonEmbedded: copy pythonEmbedded.py to the executable directory")
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

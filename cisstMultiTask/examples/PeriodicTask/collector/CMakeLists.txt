@@ -1,6 +1,6 @@
 #
 #
-# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -16,12 +16,9 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstOSAbstraction
                               cisstMultiTask)
 
-# Set include/link directories
-cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
-
 add_executable (mtsExPeriodicTaskCollector
                 main.cpp)
 set_property (TARGET mtsExPeriodicTaskCollector PROPERTY FOLDER "cisstMultiTask/examples")
 target_link_libraries (mtsExPeriodicTaskCollector
-                       mtsExPeriodicTaskComponents)
-cisst_target_link_libraries (mtsExPeriodicTaskCollector ${REQUIRED_CISST_LIBRARIES})
+                       mtsExPeriodicTaskComponents
+                       ${REQUIRED_CISST_LIBRARIES})

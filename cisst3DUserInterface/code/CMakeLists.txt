@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2003-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -70,13 +68,6 @@ if (VTK_FOUND)
     if (VTK_USE_RENDERING)
         include (${VTK_USE_FILE})
 
-        cisst_set_package_settings (cisst3DUserInterface VTK INCLUDE_DIRECTORIES VTK_INCLUDE_DIRS)
-        cisst_set_package_settings (cisst3DUserInterface VTK LINK_DIRECTORIES    VTK_LIBRARY_DIRS)
-        set (VTK_LIBRARY_USED vtkRendering vtkHybrid)
-        cisst_set_package_settings (cisst3DUserInterface VTK LIBRARIES           VTK_LIBRARY_USED)
-        set (VTK_PACKAGE_NAME VTK)
-        cisst_set_package_settings (cisst3DUserInterface VTK PACKAGES            VTK_PACKAGE_NAME)
-        cisst_set_package_settings (cisst3DUserInterface VTK CMAKE_FILES         VTK_USE_FILE)
         message (STATUS "VTK found - Switch to advanced view for details")
 
     else (VTK_USE_RENDERING)
@@ -85,7 +76,6 @@ if (VTK_FOUND)
 else (VTK_FOUND)
     mark_as_advanced (CLEAR VTK_DIR)
     message (FATAL_ERROR "${LIBRARY} requires VTK.")
-    cisst_unset_all_package_settings (cisst3DUserInterface VTK)
 endif (VTK_FOUND)
 
 
@@ -95,6 +85,12 @@ cisst_add_library (LIBRARY cisst3DUserInterface
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    )
+
+if (TARGET cisst3DUserInterface AND VTK_FOUND AND VTK_USE_RENDERING)
+  target_include_directories (cisst3DUserInterface PUBLIC ${VTK_INCLUDE_DIRS})
+  target_link_directories    (cisst3DUserInterface PUBLIC ${VTK_LIBRARY_DIRS})
+  target_link_libraries      (cisst3DUserInterface PUBLIC vtkRendering vtkHybrid)
+endif ()
 
 # find icons
 set (CISST_UI3_ICONS_DIR "${cisst3DUserInterfaceLibs_SOURCE_DIR}/share/icons")

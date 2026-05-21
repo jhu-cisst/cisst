@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2017 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -11,8 +11,7 @@
 
 project (cisstCommonQt)
 
-# set directories for this project
-cisst_set_directories (cisstQt)
+find_package (Qt5 COMPONENTS Core REQUIRED)
 
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})

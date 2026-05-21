@@ -1,6 +1,5 @@
 #
-# (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2014-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -20,12 +19,9 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (svlExTutorial1 main.cpp)
   set_property (TARGET svlExTutorial1 PROPERTY FOLDER "cisstStereoVision/examples")
-  cisst_target_link_libraries (svlExTutorial1 ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (svlExTutorial1 ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

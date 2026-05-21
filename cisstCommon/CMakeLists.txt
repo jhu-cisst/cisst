@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -26,12 +26,10 @@ if (CISST_HAS_QT)
   add_subdirectory (codeQt)
 endif (CISST_HAS_QT)
 
-# set option to compile cisstCommonXML, default is on is either libxml2 or Qt has been found
-if (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
-  option (CISST_cisstCommonXML "Build cisstCommonXML" ON)
-else (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
-  option (CISST_cisstCommonXML "Build cisstCommonXML" OFF)
-endif (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
+# set option to compile cisstCommonXML, default is on if either libxml2 or Qt has been found
+include (CMakeDependentOption)
+cmake_dependent_option (CISST_cisstCommonXML "Build cisstCommonXML" ON
+                        "CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML" OFF)
 
 # if on, include cisstCommonXML and let parent directory know for cisst-config.cmake
 if (CISST_cisstCommonXML)

@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstCommon tests
 #
-# (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -12,7 +12,6 @@
 # --- end cisst license ---
 
 # paths for headers/libraries
-cisst_set_directories (cisstCommon cisstTestsDriver)
 
 if (CISST_HAS_XML AND NOT ("${CISST_XML_LIB}" STREQUAL "QtXML"))
   set (INCLUDE_XML_TEST TRUE)
@@ -20,7 +19,6 @@ endif (CISST_HAS_XML AND NOT ("${CISST_XML_LIB}" STREQUAL "QtXML"))
 
 # set path for XML if needed
 if (INCLUDE_XML_TEST)
-  cisst_set_directories (cisstCommonXML)
 endif (INCLUDE_XML_TEST)
 
 # Configure the OS test program
@@ -96,7 +94,7 @@ endif (CISST_HAS_JSON)
 # Add executable for C++ tests
 add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES} ${cisstCommonTests_CISST_DG_SRCS})
 set_property (TARGET cisstCommonTests PROPERTY FOLDER "cisstCommon/tests")
-cisst_target_link_libraries (cisstCommonTests cisstCommon cisstTestsDriver)
+target_link_libraries (cisstCommonTests cisstCommon cisstTestsDriver)
 
 # Add a static library with some classes registered
 add_library (cmnClassRegisterTestStatic
@@ -106,6 +104,7 @@ if (CISST_HAS_JSON AND NOT JSON_USE_SYSTEM_VERSION)
   add_dependencies (cmnClassRegisterTestStatic cisstJSONExternal)
 endif ()
 set_property (TARGET cmnClassRegisterTestStatic PROPERTY FOLDER "cisstCommon/tests")
+target_link_libraries (cmnClassRegisterTestStatic PRIVATE cisstCommon)
 target_link_libraries (cisstCommonTests cmnClassRegisterTestStatic)
 
 # Add a dynamic library with some classes registered
@@ -117,7 +116,7 @@ else (NOT CISST_BUILD_SHARED_LIBS)
                cmnClassRegisterTestDynamic.cpp cmnClassRegisterTestDynamic.h)
   set_property (TARGET cmnClassRegisterTestDynamic PROPERTY FOLDER "cisstCommon/tests")
   target_link_libraries (cisstCommonTests cmnClassRegisterTestDynamic)
-  cisst_target_link_libraries (cmnClassRegisterTestDynamic cisstCommon)
+  target_link_libraries (cmnClassRegisterTestDynamic cisstCommon)
 endif (NOT CISST_BUILD_SHARED_LIBS)
 
 # To generate a CTest list of tests
