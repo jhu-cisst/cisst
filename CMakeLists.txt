@@ -344,7 +344,7 @@ if (CISST_BUILD_TESTS)
       ExternalProject_Add (cisstCppUnit
                            PREFIX ${cisstCppUnit_PREFIX}
                            GIT_REPOSITORY    ${CISST_CPPUNIT_GIT_REPOSITORY}
-                           GIT_TAG           ${CISST_CPPUNUT_GIT_TAG}
+                           GIT_TAG           ${CISST_CPPUNIT_GIT_TAG}
                            CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                            INSTALL_COMMAND ""
@@ -356,6 +356,7 @@ if (CISST_BUILD_TESTS)
       set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
       set (CPPUNIT_LINK_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
       link_directories (${CPPUNIT_LINK_DIR})
+      set (CPPUNIT_EXTERNAL_TARGET cisstCppUnit)
       set (CPPUNIT_FOUND ON)
     endif (CISST_USE_EXTERNAL)
   endif (NOT CPPUNIT_FOUND)
@@ -512,6 +513,9 @@ if (TARGET cisstCommon AND CISST_HAS_JSON)
     # dirs are propagated correctly even when they are system defaults.
     target_link_libraries (cisstCommon PUBLIC ${JSON_TARGET})
   else ()
+    if (JSON_EXTERNAL_TARGET)
+      add_dependencies (cisstCommon ${JSON_EXTERNAL_TARGET})
+    endif ()
     # Bundled external-project jsoncpp: use the raw variables.
     target_include_directories (cisstCommon PUBLIC ${JSON_INCLUDE_DIR})
     if (JSON_LIBRARY_DIRS)
@@ -523,6 +527,9 @@ endif ()
 
 # cisstTestsDriver: CppUnit
 if (TARGET cisstTestsDriver AND CPPUNIT_FOUND)
+  if (CPPUNIT_EXTERNAL_TARGET)
+    add_dependencies (cisstTestsDriver ${CPPUNIT_EXTERNAL_TARGET})
+  endif ()
   target_include_directories (cisstTestsDriver PUBLIC ${CPPUNIT_INCLUDE_DIR})
   if (DEFINED CPPUNIT_LINK_DIR)
     target_link_directories (cisstTestsDriver PUBLIC ${CPPUNIT_LINK_DIR})

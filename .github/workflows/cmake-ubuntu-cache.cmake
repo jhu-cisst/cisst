@@ -1,6 +1,6 @@
 # initial CMake cache values for travis.ci builds
 
-# Use external projects, mostly to get recent version of libcpp on Ubuntu 16.04
+# Prefer system packages and fall back to external projects when needed.
 set (CISST_USE_EXTERNAL ON CACHE BOOL "")
 
 # Compile for shared libraries

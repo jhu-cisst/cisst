@@ -94,6 +94,6 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
 target_link_libraries (cisstMultiTaskQt ${QT_LIBRARIES})
 
 # Ensure the QtNodes ExternalProject is fully built before cisstMultiTaskQt
-if (CISST_HAS_QTNODES)
+if (CISST_HAS_QTNODES AND TARGET cisstQtNodesExternal)
   add_dependencies (cisstMultiTaskQt cisstQtNodesExternal)
-endif (CISST_HAS_QTNODES)
+endif ()

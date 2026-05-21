@@ -109,16 +109,61 @@ if (CISST_HAS_QT5)
            DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
            COMPONENT cisstCommon)
   
+  # Prefer an OS-provided QtNodes package and fall back to the external project.
+  find_package (QtNodes QUIET CONFIG)
+  if (QtNodes_FOUND)
+    set (QTNODES_FOUND ON)
+    if (TARGET QtNodes::QtNodes)
+      set (QTNODES_TARGET QtNodes::QtNodes)
+    elseif (TARGET QtNodes)
+      set (QTNODES_TARGET QtNodes)
+    else ()
+      set (QTNODES_INCLUDE_DIR ${QtNodes_INCLUDE_DIRS})
+      set (QTNODES_LIBRARIES ${QtNodes_LIBRARIES})
+      if (NOT QTNODES_LIBRARIES)
+        set (QTNODES_LIBRARIES QtNodes)
+      endif ()
+    endif ()
+  else ()
+    find_path (QTNODES_INCLUDE_DIR
+               NAMES QtNodes/NodeDelegateModel)
+    find_library (QTNODES_LIBRARY
+                  NAMES QtNodes)
+    if (QTNODES_INCLUDE_DIR AND QTNODES_LIBRARY)
+      set (QTNODES_FOUND ON)
+      set (QTNODES_LIBRARIES ${QTNODES_LIBRARY})
+    endif ()
+  endif ()
+
+  if (QTNODES_FOUND)
+    set (QTNODES_FOUND ON PARENT_SCOPE)
+    set (QTNODES_INCLUDE_DIR ${QTNODES_INCLUDE_DIR} PARENT_SCOPE)
+    set (QTNODES_TARGET ${QTNODES_TARGET} PARENT_SCOPE)
+    set (QTNODES_LIBRARIES ${QTNODES_LIBRARIES} PARENT_SCOPE)
+  endif ()
+
   # Optionally build QtNode as an external project if Graphviz is available
-  if (CISST_HAS_GRAPHVIZ)
+  if (QTNODES_FOUND OR (CISST_HAS_GRAPHVIZ AND CISST_USE_EXTERNAL))
      set (CISST_HAS_QTNODES_DEFAULT ON)
   else ()
      set (CISST_HAS_QTNODES_DEFAULT OFF)
-     message (WARNING "CISST_HAS_QTNODES set to OFF by default since libgraphviz is not found. You can install graphviz with: sudo apt install libgraphviz-dev and then set CISST_HAS_QTNODES back to ON.")
+     if (NOT CISST_HAS_GRAPHVIZ)
+       message (WARNING "CISST_HAS_QTNODES set to OFF by default since libgraphviz is not found. You can install graphviz with: sudo apt install libgraphviz-dev and then set CISST_HAS_QTNODES back to ON.")
+     endif ()
   endif ()
   option (CISST_HAS_QTNODES "Build QtNode (Qt + Node integration) as an external project." ${CISST_HAS_QTNODES_DEFAULT})
 
   if (CISST_HAS_QTNODES)
+    if (NOT CISST_HAS_GRAPHVIZ)
+      message (SEND_ERROR "CISST_HAS_QTNODES requires Graphviz. Install graphviz or set CISST_HAS_QTNODES to OFF.")
+    endif ()
+
+    if (NOT QTNODES_FOUND AND NOT CISST_USE_EXTERNAL)
+      message (SEND_ERROR "CISST_HAS_QTNODES requires CISST_USE_EXTERNAL because QtNodes is built as a CMake external project")
+    endif ()
+  endif ()
+
+  if (CISST_HAS_QTNODES AND NOT QTNODES_FOUND)
     include (ExternalProject)
   
     set (cisstQtNodes_PREFIX cisstQtNodeExternal)
@@ -174,13 +219,24 @@ if (CISST_HAS_QT5)
     set (CISST_SETTINGS ${CISST_SETTINGS} cisstQtNodes PARENT_SCOPE)
     add_library (cisstQtNodes INTERFACE)
     add_library (cisst::cisstQtNodes ALIAS cisstQtNodes)
-    target_include_directories (cisstQtNodes INTERFACE
-      $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
-      $<INSTALL_INTERFACE:include>)
-    target_link_directories    (cisstQtNodes INTERFACE
-      $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
-      $<INSTALL_INTERFACE:lib>)
-    target_link_libraries      (cisstQtNodes INTERFACE ${QTNODES_LIBRARIES})
+    if (QTNODES_INCLUDE_DIR)
+      target_include_directories (cisstQtNodes INTERFACE
+        $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
+        $<INSTALL_INTERFACE:include>)
+    endif ()
+    if (QTNODES_LIBRARY_DIRS)
+      target_link_directories (cisstQtNodes INTERFACE
+        $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
+        $<INSTALL_INTERFACE:lib>)
+    endif ()
+    if (QTNODES_TARGET)
+      target_link_libraries (cisstQtNodes INTERFACE ${QTNODES_TARGET})
+    else ()
+      target_link_libraries (cisstQtNodes INTERFACE ${QTNODES_LIBRARIES})
+    endif ()
+    if (TARGET cisstQtNodesExternal)
+      add_dependencies (cisstQtNodes cisstQtNodesExternal)
+    endif ()
     install (TARGETS cisstQtNodes EXPORT cisst-targets COMPONENT cisstCommon)
   endif ()
 
@@ -294,7 +350,7 @@ if (CISST_HAS_JSON)
     endif (JSONCPP_FOUND)
   endif (CISST_USE_PKG_CONFIG)
 
-  if (NOT JSONCPP_FOUND)
+  if (NOT JSONCPP_FOUND AND CISST_USE_EXTERNAL)
 
     # otherwise, build as external project
     include (ExternalProject)
@@ -333,10 +389,16 @@ if (CISST_HAS_JSON)
     set (JSON_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstJSON/include")
     set (JSON_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstJSON/lib")
     set (JSON_LIBRARIES jsoncpp)
+    set (JSON_EXTERNAL_TARGET cisstJSONExternal)
     set (JSON_FOUND ON PARENT_SCOPE)
     set (JSON_USE_SYSTEM_VERSION OFF PARENT_SCOPE)
+    set (JSON_EXTERNAL_TARGET ${JSON_EXTERNAL_TARGET} PARENT_SCOPE)
 
-  endif (NOT JSONCPP_FOUND)
+  endif (NOT JSONCPP_FOUND AND CISST_USE_EXTERNAL)
+
+  if (NOT JSONCPP_FOUND AND NOT CISST_USE_EXTERNAL)
+    message (SEND_ERROR "JsonCpp is needed for CISST_HAS_JSON, you can either install it or turn ON the option CISST_USE_EXTERNAL")
+  endif ()
 
   # propagate to parent directory
   set (JSON_INCLUDE_DIR ${JSON_INCLUDE_DIR} PARENT_SCOPE)

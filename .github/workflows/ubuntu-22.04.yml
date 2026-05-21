@@ -48,6 +48,7 @@ jobs:
           cmake \
           git \
           libxml2-dev \
+          libcppunit-dev \
           libjsoncpp-dev \
           qtbase5-dev \
           qtbase5-dev-tools \

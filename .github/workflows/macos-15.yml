@@ -36,7 +36,6 @@ jobs:
       with:
         key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/macos-15.yml') }}
         max-size: 1G
-        # Use vcpkg provided ccache if possible, or ensure it's found
         ccache-command: ccache
 
     - name: Download cisstNetlib
