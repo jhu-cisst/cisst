@@ -20,7 +20,7 @@ if (cisst_FOUND)
   # Create SineGenerator as a shared library
   add_library (SineGenerator SHARED SineGenerator.cpp SineGenerator.h)
   set_property (TARGET SineGenerator PROPERTY FOLDER "cisstInteractive/examples")
-  target_link_libraries (SineGenerator ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (SineGenerator ${cisst_LIBRARIES})
 
   # If OS Abstraction is compiled, offer a choice
   # if (CISST_cisstOSAbstraction)
@@ -45,9 +45,9 @@ if (cisst_FOUND)
 
   # if (EXAMPLE_IRE_USE_OSATHREAD)
   add_definitions (-DCISST_OSATHREAD)
-  target_link_libraries (pythonEmbeddedIRE cisstCommon cisstInteractive cisstOSAbstraction)
+  target_link_libraries (pythonEmbeddedIRE cisst::cisstCommon cisst::cisstInteractive cisst::cisstOSAbstraction)
   #else (EXAMPLE_IRE_USE_OSATHREAD)
-  #target_link_libraries (pythonEmbeddedIRE cisstCommon cisstInteractive)
+  #target_link_libraries (pythonEmbeddedIRE cisst::cisstCommon cisst::cisstInteractive)
   #endif (EXAMPLE_IRE_USE_OSATHREAD)
 
   target_link_libraries (pythonEmbeddedIRE SineGenerator ${CMAKE_THREAD_LIBS_INIT})

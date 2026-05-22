@@ -31,7 +31,7 @@ if (cisst_FOUND)
   set_property (TARGET mtsExBenchmark2 PROPERTY FOLDER "cisstMultiTask/examples")
 
   # link with the cisst libraries
-  target_link_libraries(mtsExBenchmark2 ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries(mtsExBenchmark2 ${cisst_LIBRARIES})
 
   # compile network version if ICE is available
   if (CISST_MTS_HAS_ICE)
@@ -46,7 +46,7 @@ if (cisst_FOUND)
     set_property (TARGET mtsExBenchmark2Server PROPERTY FOLDER "cisstMultiTask/examples")
 
     # link with the cisst libraries
-    target_link_libraries(mtsExBenchmark2Server ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries(mtsExBenchmark2Server ${cisst_LIBRARIES})
 
     # name the main executable and specifies with source files to use
     add_executable(mtsExBenchmark2Client
@@ -58,7 +58,7 @@ if (cisst_FOUND)
     set_property (TARGET mtsExBenchmark2Client PROPERTY FOLDER "cisstMultiTask/examples")
 
     # link with the cisst libraries
-    target_link_libraries(mtsExBenchmark2Client ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries(mtsExBenchmark2Client ${cisst_LIBRARIES})
 
   endif (CISST_MTS_HAS_ICE)
 

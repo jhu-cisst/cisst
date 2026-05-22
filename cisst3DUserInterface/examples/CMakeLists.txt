@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -18,7 +16,7 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction
                               cisstMultiTask cisstStereoVision cisst3DUserInterface)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst ${REQUIRED_CISST_LIBRARIES} QUIET)
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND)
 

@@ -35,5 +35,5 @@ add_library (ui3ExBehaviors
 set_property (TARGET ui3ExBehaviors PROPERTY FOLDER "cisst3DUserInterface/examples")
 
 target_link_libraries (ui3ExBehaviors
-                       cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
-                       cisstStereoVision cisstRobot cisstParameterTypes cisst3DUserInterface)
+                       cisst::cisstCommon cisst::cisstVector cisst::cisstOSAbstraction cisst::cisstMultiTask
+                       cisst::cisstStereoVision cisst::cisstRobot cisst::cisstParameterTypes cisst::cisst3DUserInterface)

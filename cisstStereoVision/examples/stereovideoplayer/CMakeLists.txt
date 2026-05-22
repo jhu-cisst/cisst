@@ -23,7 +23,7 @@ if (cisst_FOUND)
 
     add_executable (svlExStereoVideoPlayer stereovideoplayer.cpp)
     set_property (TARGET svlExStereoVideoPlayer PROPERTY FOLDER "cisstStereoVision/examples")
-    target_link_libraries (svlExStereoVideoPlayer ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries (svlExStereoVideoPlayer ${cisst_LIBRARIES})
 
   else (CISST_SVL_HAS_X11 OR WIN32)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")

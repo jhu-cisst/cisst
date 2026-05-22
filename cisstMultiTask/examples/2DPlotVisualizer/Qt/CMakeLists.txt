@@ -24,4 +24,4 @@ add_executable (mtsExQt2DPlotVisualizerQt
                 ../TestComponent.cpp
                 main.cpp)
 set_property (TARGET mtsExQt2DPlotVisualizerQt PROPERTY FOLDER "cisstMultiTask/examples")
-target_link_libraries (mtsExQt2DPlotVisualizerQt ${REQUIRED_CISST_LIBRARIES})
+target_link_libraries (mtsExQt2DPlotVisualizerQt ${cisst_LIBRARIES})

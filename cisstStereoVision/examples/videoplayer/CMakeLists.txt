@@ -26,6 +26,7 @@ if (cisst_FOUND)
     else (CISST_HAS_QT4)
       set (USED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
     endif (CISST_HAS_QT4)
+    list (TRANSFORM USED_CISST_LIBRARIES PREPEND "cisst::")
 
     add_executable (svlExVideoPlayer videoplayer.cpp)
     set_property (TARGET svlExVideoPlayer PROPERTY FOLDER "cisstStereoVision/examples")

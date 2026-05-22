@@ -21,7 +21,7 @@ if (cisst_FOUND)
 
   add_executable (svlExPointTracker pointtracker.cpp)
   set_property (TARGET svlExPointTracker PROPERTY FOLDER "cisstStereoVision/examples")
-  target_link_libraries (svlExPointTracker ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (svlExPointTracker ${cisst_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

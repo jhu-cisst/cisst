@@ -27,8 +27,8 @@ set_property (TARGET ui3ExDaVinciStereoVideo PROPERTY FOLDER "cisst3DUserInterfa
 target_link_libraries (ui3ExDaVinciStereoVideo
                        ui3ExBehaviors
                        ${${CISST_UI3_ISI_WRAPPER_USED}_LIBRARIES}
-                       cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
-                       cisstStereoVision cisstParameterTypes cisst3DUserInterface)
+                       cisst::cisstCommon cisst::cisstVector cisst::cisstOSAbstraction cisst::cisstMultiTask
+                       cisst::cisstStereoVision cisst::cisstParameterTypes cisst::cisst3DUserInterface)
 
 # Copy VTK models to the build tree
 if (WIN32)

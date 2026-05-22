@@ -36,8 +36,8 @@ set_property (TARGET mtsExPeriodicTaskQt PROPERTY FOLDER "cisstMultiTask/example
 target_link_libraries (mtsExPeriodicTaskQt
                        mtsExPeriodicTaskGuiQt
                        mtsExPeriodicTaskComponents
-                       ${REQUIRED_CISST_LIBRARIES})
-target_link_libraries (mtsExPeriodicTaskGuiQt ${REQUIRED_CISST_LIBRARIES})
+                       ${cisst_LIBRARIES})
+target_link_libraries (mtsExPeriodicTaskGuiQt ${cisst_LIBRARIES})
 
 add_custom_target (mtsExPeriodicTaskQt_Scripts ALL
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different

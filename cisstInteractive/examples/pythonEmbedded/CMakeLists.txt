@@ -20,12 +20,12 @@ if (cisst_FOUND)
   # Create myDerivedClass as a shared library
   add_library (myDerivedClass SHARED myDerivedClass.cpp myDerivedClass.h)
   set_property (TARGET myDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
-  target_link_libraries (myDerivedClass ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (myDerivedClass ${cisst_LIBRARIES})
 
   # Create myReDerivedClass as a shared library
   add_library (myReDerivedClass SHARED myReDerivedClass.cpp myReDerivedClass.h)
   set_property (TARGET myReDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
-  target_link_libraries (myReDerivedClass ${REQUIRED_CISST_LIBRARIES}
+  target_link_libraries (myReDerivedClass ${cisst_LIBRARIES}
                          myDerivedClass)
 
   # Allow generated c++ code to find header files
@@ -48,7 +48,7 @@ if (cisst_FOUND)
   # Built executable with embedding
   add_executable (pythonEmbedded pythonEmbedded.cpp)
   set_property (TARGET pythonEmbedded PROPERTY FOLDER "cisstInteractive/examples")
-  target_link_libraries (pythonEmbedded ${REQUIRED_CISST_LIBRARIES}
+  target_link_libraries (pythonEmbedded ${cisst_LIBRARIES}
                          myDerivedClass myReDerivedClass ${CMAKE_THREAD_LIBS_INIT})
 
   if (UNIX)

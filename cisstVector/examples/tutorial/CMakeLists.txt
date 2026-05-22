@@ -35,7 +35,7 @@ if (cisst_FOUND)
   set_property (TARGET vctExTutorial PROPERTY FOLDER "cisstVector/examples")
 
   # link against cisst libraries (and dependencies)
-  target_link_libraries (vctExTutorial ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (vctExTutorial ${cisst_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

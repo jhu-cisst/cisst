@@ -1,5 +1,4 @@
 #
-#
 # (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -21,4 +20,4 @@ add_executable (mtsExPeriodicTaskCollector
 set_property (TARGET mtsExPeriodicTaskCollector PROPERTY FOLDER "cisstMultiTask/examples")
 target_link_libraries (mtsExPeriodicTaskCollector
                        mtsExPeriodicTaskComponents
-                       ${REQUIRED_CISST_LIBRARIES})
+                       ${cisst_LIBRARIES})

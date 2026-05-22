@@ -26,7 +26,7 @@ if (cisst_FOUND)
                   )
 
   set_property (TARGET svlExTutorial5 PROPERTY FOLDER "cisstStereoVision/examples")
-  target_link_libraries (svlExTutorial5 ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (svlExTutorial5 ${cisst_LIBRARIES})
 
   # Copy media files to the build directory
 #  configure_file (${CMAKE_SOURCE_DIR}/wall.bmp ${CMAKE_BINARY_DIR}/wall.bmp COPYONLY)

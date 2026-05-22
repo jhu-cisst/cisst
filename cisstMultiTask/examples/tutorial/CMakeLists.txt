@@ -24,7 +24,7 @@ if (cisst_FOUND)
                   user.h user.cpp
                   )
   set_property (TARGET mtsExTutorial PROPERTY FOLDER "cisstMultiTask/examples")
-  target_link_libraries (mtsExTutorial ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (mtsExTutorial ${cisst_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

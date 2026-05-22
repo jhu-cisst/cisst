@@ -17,11 +17,11 @@ if (cisst_FOUND)
   if (CISST_HAS_CISSTNETLIB)
     add_executable (nmrExRegistrationAccuracy Accuracy.cpp DataSet.cpp DataSet.h)
     set_property (TARGET nmrExRegistrationAccuracy PROPERTY FOLDER "cisstNumerical/examples")
-    target_link_libraries (nmrExRegistrationAccuracy ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries (nmrExRegistrationAccuracy ${cisst_LIBRARIES})
 
     add_executable (nmrExRegistrationDistances Distances.cpp DataSet.cpp DataSet.h)
     set_property (TARGET nmrExRegistrationDistances PROPERTY FOLDER "cisstNumerical/examples")
-    target_link_libraries (nmrExRegistrationDistances ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries (nmrExRegistrationDistances ${cisst_LIBRARIES})
 
   else (CISST_HAS_CISSTNETLIB)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_CISSTNETLIB")

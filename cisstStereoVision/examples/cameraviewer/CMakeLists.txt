@@ -26,6 +26,7 @@ if (cisst_FOUND)
     else (CISST_HAS_QT4)
       set (USED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
     endif (CISST_HAS_QT4)
+    list (TRANSFORM USED_CISST_LIBRARIES PREPEND "cisst::")
 
     add_executable (svlExCameraViewer cameraviewer.cpp)
     set_property (TARGET svlExCameraViewer PROPERTY FOLDER "cisstStereoVision/examples")
@@ -38,5 +39,4 @@ if (cisst_FOUND)
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND)
-
 

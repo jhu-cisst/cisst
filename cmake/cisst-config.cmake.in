@@ -163,6 +163,12 @@ else ()
   set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES})
 endif ()
 
+# Namespaced targets corresponding to the requested cisst components.
+# Consumers can keep a plain component list for find_package/messages and link
+# against this list to inherit modern target usage requirements.
+set (cisst_LIBRARIES ${CISST_LIBRARIES_REQUIRED_INTERNAL})
+list (TRANSFORM cisst_LIBRARIES PREPEND "cisst::")
+
 # Backward-compatibility alias: previously set by the old cisst_use_modules macro.
 set (cisst_FOUND_AS_REQUIRED ${cisst_FOUND})
 
@@ -212,6 +218,21 @@ if (NOT TARGET cisst::cisstCommon)
   endif ()
   unset (_cisst_targets_file CACHE)
 endif ()
+
+# Backward compatibility for consumers that link to legacy un-namespaced
+# target names, e.g. target_link_libraries(myexe cisstCommon cisstVector).
+# The exported package defines cisst:: targets; these wrappers preserve the
+# usage requirements (include paths, compile definitions, transitive links)
+# while warning only when the legacy target is actually used.
+foreach (_cisst_target ${CISST_LIBRARIES} ${CISST_SETTINGS})
+  if (TARGET cisst::${_cisst_target} AND NOT TARGET ${_cisst_target})
+    add_library (${_cisst_target} INTERFACE IMPORTED)
+    set_target_properties (${_cisst_target} PROPERTIES
+      DEPRECATION "The cisst target '${_cisst_target}' is deprecated. Link to 'cisst::${_cisst_target}' instead."
+      INTERFACE_LINK_LIBRARIES cisst::${_cisst_target})
+  endif ()
+endforeach ()
+unset (_cisst_target)
 
 # Extend CMake Module Path to find cisst defined Macros
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIRS})

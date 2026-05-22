@@ -25,4 +25,4 @@ add_library (mtsExPeriodicTaskComponents
 set_property (TARGET mtsExPeriodicTaskComponents PROPERTY FOLDER "cisstMultiTask/examples")
 
 # link with the cisst libraries
-target_link_libraries (mtsExPeriodicTaskComponents ${CISST_LIBRARIES_NEEDED})
+target_link_libraries (mtsExPeriodicTaskComponents ${cisst_LIBRARIES})

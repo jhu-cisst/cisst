@@ -19,19 +19,19 @@ if (cisst_FOUND)
 
   add_executable (osaExSocketUDPServer UDPServer.cpp)
   set_property (TARGET osaExSocketUDPServer PROPERTY FOLDER "cisstOSAbstraction/examples")
-  target_link_libraries (osaExSocketUDPServer ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (osaExSocketUDPServer ${cisst_LIBRARIES})
 
   add_executable (osaExSocketUDPClient UDPClient.cpp)
   set_property (TARGET osaExSocketUDPClient PROPERTY FOLDER "cisstOSAbstraction/examples")
-  target_link_libraries (osaExSocketUDPClient ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (osaExSocketUDPClient ${cisst_LIBRARIES})
 
   add_executable (osaExSocketTCPServer TCPServer.cpp)
   set_property (TARGET osaExSocketTCPServer PROPERTY FOLDER "cisstOSAbstraction/examples")
-  target_link_libraries (osaExSocketTCPServer ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (osaExSocketTCPServer ${cisst_LIBRARIES})
 
   add_executable (osaExSocketTCPClient TCPClient.cpp)
   set_property (TARGET osaExSocketTCPClient PROPERTY FOLDER "cisstOSAbstraction/examples")
-  target_link_libraries (osaExSocketTCPClient ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (osaExSocketTCPClient ${cisst_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
