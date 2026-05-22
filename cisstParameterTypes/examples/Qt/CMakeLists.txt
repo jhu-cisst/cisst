@@ -17,7 +17,8 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstOSAbstraction
                               cisstMultiTask
                               cisstMultiTaskQt
-                              cisstParameterTypes)
+                              cisstParameterTypes
+                              cisstQt)
 
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
