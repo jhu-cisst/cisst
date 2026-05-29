@@ -196,15 +196,14 @@ if (CISST_HAS_QTNODES)
   find_dependency (QtNodes CONFIG
                    PATHS "${CISST_BINARY_DIR}" "${CISST_BINARY_DIR}/cisstQtNodes")
 endif ()
-if (CISST_HAS_XML)
-  find_dependency (LibXml2)
-endif ()
 if (CISST_HAS_SWIG_PYTHON)
   find_dependency (Python COMPONENTS Interpreter Development)
 endif ()
-if (CISST_HAS_JSON)
-  find_dependency (PkgConfig QUIET)
-  if (CISST_JSON_USE_SYSTEM_VERSION AND PkgConfig_FOUND)
+if (CISST_HAS_JSON AND CISST_JSON_USE_SYSTEM_VERSION)
+  # PkgConfig is optional: if unavailable, keep cisst package loadable and
+  # let consumers disable JSON-related pieces as needed.
+  find_package (PkgConfig QUIET)
+  if (PkgConfig_FOUND)
     # Recreate the PkgConfig::JSONCPP imported target that cisstCommon depends on.
     pkg_check_modules (JSONCPP IMPORTED_TARGET jsoncpp)
   endif ()

@@ -90,8 +90,15 @@ set (CISST_CMAKE_SOURCE_DIR "${CISST_SOURCE_DIR}/cmake")
 set (CISST_CMAKE_BINARY_DIR "${CISST_BINARY_DIR}/${CISST_CMAKE_INSTALL_SUFFIX}")
 set (CISST_CMAKE_DIRS "${CISST_CMAKE_SOURCE_DIR}" "${CISST_CMAKE_BINARY_DIR}")
 
-# Option to download and build as CMake External projects external dependencies when not found automatically
-option (CISST_USE_EXTERNAL "Try to build dependencies using CMake external projects (download and build along cisst)" OFF)
+# Option to download and build external dependencies when not found automatically.
+# Default to ON on Windows to improve out-of-the-box dependency resolution.
+if (WIN32)
+  set (CISST_USE_EXTERNAL_DEFAULT ON)
+else ()
+  set (CISST_USE_EXTERNAL_DEFAULT OFF)
+endif ()
+option (CISST_USE_EXTERNAL "Try to build dependencies using CMake external projects (download and build along cisst)" ${CISST_USE_EXTERNAL_DEFAULT})
+mark_as_advanced (CISST_USE_EXTERNAL_DEFAULT)
 
 # Add include directories
 set (CISST_INCLUDE_DIR
@@ -340,6 +347,8 @@ if (CISST_BUILD_TESTS)
       set (cisstCppUnit_PREFIX cisstCppUnitExternal)
       set (CISST_CPPUNIT_GIT_REPOSITORY https://github.com/jhu-cisst-external/cppunit.git)
       set (CISST_CPPUNIT_GIT_TAG cppunit-1.13.3)
+      set (CISST_CPPUNIT_SOURCE_DIR "${cisst_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit")
+      set (CISST_CPPUNIT_BINARY_DIR "${cisst_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
 
       ExternalProject_Add (cisstCppUnit
                            PREFIX ${cisstCppUnit_PREFIX}
@@ -348,18 +357,14 @@ if (CISST_BUILD_TESTS)
                            CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                                             -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstCppUnit
+                           INSTALL_COMMAND ""
                            UPDATE_COMMAND ""
                            )
-      install (DIRECTORY ${cisst_BINARY_DIR}/cisstCppUnit/
-               DESTINATION .
-               USE_SOURCE_PERMISSIONS
-               COMPONENT cisstCommon)
-
-      set (CPPUNIT_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstCppUnit/include")
-      set (CPPUNIT_LIBRARIES "cppunit")
-      set (CPPUNIT_DEBUG_LIBRARIES "cppunit")
-      set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
-      set (CPPUNIT_LINK_DIR "${cisst_BINARY_DIR}/cisstCppUnit/lib")
+      set (CPPUNIT_INCLUDE_DIR "${CISST_CPPUNIT_SOURCE_DIR}/include")
+      set (CPPUNIT_LIBRARIES "${CISST_CPPUNIT_BINARY_DIR}/Release/cppunit.lib")
+      set (CPPUNIT_DEBUG_LIBRARIES "${CISST_CPPUNIT_BINARY_DIR}/Debug/cppunit.lib")
+      set (CPPUNIT_RELEASE_LIBRARIES "${CISST_CPPUNIT_BINARY_DIR}/Release/cppunit.lib")
+      set (CPPUNIT_LINK_DIR "${CISST_CPPUNIT_BINARY_DIR}")
       link_directories (${CPPUNIT_LINK_DIR})
       set (CPPUNIT_EXTERNAL_TARGET cisstCppUnit)
       set (CPPUNIT_FOUND ON)
