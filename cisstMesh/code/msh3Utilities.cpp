@@ -50,7 +50,7 @@
 // getcwd
 #include <errno.h>
 #ifdef _WIN32
-  #include <direct.h>;  // for _getcwd
+  #include <direct.h>   // for _getcwd
   #define getcwd _getcwd
 #else
   #include <unistd.h>

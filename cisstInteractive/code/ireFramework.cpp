@@ -642,11 +642,16 @@ void ireFramework::Reset()
 void ireFramework::UnblockThreads()
 {
     if ((IRE_State == IRE_LAUNCHED) || (IRE_State == IRE_ACTIVE)) {
+#if ((PY_MAJOR_VERSION < 3) || ((PY_MAJOR_VERSION == 3) && (PY_MINOR_VERSION < 4)))
+        IreThreadState = static_cast<void *>(PyEval_SaveThread());
+#else
+        // PyGilState_Check introduced in Python 3.4
         if (PyGILState_Check()) {
             IreThreadState = static_cast<void *>(PyEval_SaveThread());
         } else {
             IreThreadState = 0;
         }
+#endif
     } else {
         IreThreadState = 0;
     }

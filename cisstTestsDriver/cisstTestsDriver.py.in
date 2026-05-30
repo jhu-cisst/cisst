@@ -6,7 +6,7 @@
 # Author: Andy LaMora, Anton Deguet
 # Date: 2005-04-08
 
-# (C) Copyright 2005-2018 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 # This file is processed automatically by CMake, if you need to modify
 # it, modify the .in (input) processed by CMake
@@ -35,6 +35,19 @@ sys.path.append(pathLib)
 
 verbose = False
 listOfModules = []
+
+# Prior to Python 3.13, getTestCaseNames was a method in unittest.
+# Starting with Python 3.13, it is now in unittest.TestLoader
+def my_getTestCaseNames(testCaseClass, prefix):
+    ret = None
+    try:
+        # Legacy version (prior to Python 3.13)
+        ret = unittest.getTestCaseNames(testCaseClass, prefix)
+    except AttributeError:
+        # Modern version (starting with Python 3.13)
+        testMethodPrefix = prefix
+        ret = unittest.TestLoader().getTestCaseNames(testCaseClass)
+    return ret
 
 # Load all the available tests from the source directory
 ext  = '.py'
@@ -100,7 +113,7 @@ def ListTests(prefix):
     for x in tests.classList:
         moduleName = x[0]
         className = x[1]
-        list = unittest.getTestCaseNames(eval(moduleName + "." + className) , prefix)
+        list = my_getTestCaseNames(eval(moduleName + "." + className) , prefix)
         for method in list:
             print(moduleName + "." + className + "." + method)
     return 0
@@ -114,7 +127,7 @@ def ListTestsCMake(prefix, pythonExe):
     for x in tests.classList:
         moduleName = x[0]
         className = x[1]
-        list = unittest.getTestCaseNames(eval(moduleName + "." + className) , prefix)
+        list = my_getTestCaseNames(eval(moduleName + "." + className) , prefix)
         programName = sys.argv[0]
         programName = programName.replace('\\', '/')
         for method in list:
@@ -136,7 +149,7 @@ def RunAllTests(prefix):
     for x in tests.classList:
         moduleName = x[0]
         className = x[1]
-        list = unittest.getTestCaseNames(eval(moduleName + "." + className) , prefix)
+        list = my_getTestCaseNames(eval(moduleName + "." + className) , prefix)
         for method in list:
             suite.addTest(loader.loadTestsFromName(method, eval(moduleName + "." + className)))
 
