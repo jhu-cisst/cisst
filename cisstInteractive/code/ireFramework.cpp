@@ -457,7 +457,7 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
         cmnThrow(std::runtime_error("LaunchIREShellInstance: init exit"));
     }
 #endif
-#if (PY_MAJOR_VERSION < 3) || (PY_MINOR_VERSION < 7)
+#if (PY_MAJOR_VERSION < 3) || ((PY_MAJOR_VERION == 3) && (PY_MINOR_VERSION < 7))
     // PyEval_InitThreads was deprecated in Python 3.7 (it is no longer needed)
     PyEval_InitThreads();
 #endif
@@ -593,7 +593,7 @@ void ireFramework::JoinIREShellInstance(double timeout)
         // First, check whether the Python thread is still alive.
         PyObject *result;
 
-#if (PY_MAJOR_VERSION < 3) || (PY_MINOR_VERSION < 5)
+#if (PY_MAJOR_VERSION < 3) || ((PY_MAJOR_VERSION == 3) && (PY_MINOR_VERSION < 5))
         // Prior to Python 3.5, method is called isAlive; was removed in Python 3.9
         result = PyObject_CallMethod(pInstance, "isAlive", NULL);
 #else
@@ -642,7 +642,7 @@ void ireFramework::Reset()
 void ireFramework::UnblockThreads()
 {
     if ((IRE_State == IRE_LAUNCHED) || (IRE_State == IRE_ACTIVE)) {
-#if ((PY_MAJOR_VERSION < 3) || ((PY_MAJOR_VERSION == 3) && (PY_MINOR_VERSION < 4)))
+#if (PY_MAJOR_VERSION < 3) || ((PY_MAJOR_VERSION == 3) && (PY_MINOR_VERSION < 4))
         IreThreadState = static_cast<void *>(PyEval_SaveThread());
 #else
         // PyGilState_Check introduced in Python 3.4
