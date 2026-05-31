@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-10-20
 
-  (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -95,6 +95,9 @@ CMN_IMPLEMENT_SERVICES(prmStateJoint);
 
 #include <cisstParameterTypes/prmStateCartesian.h>
 CMN_IMPLEMENT_SERVICES(prmStateCartesian);
+
+#include <cisstParameterTypes/prmBaseFrame.h>
+CMN_IMPLEMENT_SERVICES(prmBaseFrame);
 
 #include <cisstParameterTypes/prmServoJoint.h>
 CMN_IMPLEMENT_SERVICES(prmServoJoint);

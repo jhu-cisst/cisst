@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -59,6 +59,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmActuatorState.h>
 
 #include <cisstParameterTypes/prmStateCartesian.h>
+#include <cisstParameterTypes/prmBaseFrame.h>
 #include <cisstParameterTypes/prmServoCartesian.h>
 #include <cisstParameterTypes/prmServoJoint.h>
 
