@@ -1,0 +1,124 @@
+// -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+
+inline-header {
+#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVector/vctFixedSizeVectorRef.h>
+#include <cisstParameterTypes/prmStateCartesian.h>
+
+// Always include last
+#include <cisstParameterTypes/prmExport.h>
+
+// Following needed on Windows
+#ifdef interface
+#undef interface
+#endif
+}
+
+class {
+    name prmBaseFrame;
+
+    attribute CISST_EXPORT;
+
+    base-class {
+        type mtsGenericObject;
+        is-data true;
+    }
+
+    member {
+        name reference_frame;
+        type std::string;
+        default "";
+        description Name of reference frame for a fixed base frame;
+    }
+
+    member {
+        name transform;
+        type vctFrm4x4;
+        default vctFrm4x4::Identity();
+        description Homogeneous transform from local frame to base frame;
+    }
+
+    member {
+        name component;
+        type std::string;
+        default "";
+        description Component name for a dynamic base frame provider;
+    }
+
+    member {
+        name interface;
+        type std::string;
+        default "";
+        description Interface name for a dynamic base frame provider;
+    }
+
+    inline-header {
+    private:
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+    public:
+        inline bool Valid(void) const {
+            return (((!reference_frame().empty())
+                     && component().empty()
+                     && interface().empty())
+                    || (reference_frame().empty()
+                        && (transform() == vctFrm4x4::Identity())
+                        && !component().empty()
+                        && !interface().empty()));
+        }
+
+        inline bool Fixed(void) const {
+            return !reference_frame().empty();
+        }
+
+        inline bool Dynamic(void) const {
+            return !component().empty();
+        }
+
+        inline void ApplyTo(const prmStateCartesian & local,
+                            prmStateCartesian & withBase) const {
+            withBase = local;
+            if (!Valid()) {
+                cmnThrow("prmBaseFrame::ApplyTo: invalid base frame");
+            }
+            if (!Fixed()) {
+                cmnThrow("prmBaseFrame::ApplyTo: only fixed base frames can be applied directly");
+            }
+
+            vctFrm3 fixedTransform;
+            fixedTransform.From(transform());
+            const vctRot3 & rotation = fixedTransform.Rotation();
+            withBase.ReferenceFrame() = reference_frame();
+
+            if (local.PositionIsValid()) {
+                withBase.Position() = fixedTransform * local.Position();
+                withBase.PositionIsValid() = true;
+            }
+
+            if (local.VelocityIsValid()) {
+                const vctFixedSizeConstVectorRef<double, 3, 1> localLinear(local.Velocity().XYZ());
+                const vctFixedSizeConstVectorRef<double, 3, 1> localAngular(local.Velocity().Pointer(3));
+                vctFixedSizeVectorRef<double, 3, 1> withBaseLinear(withBase.Velocity().XYZ());
+                vctFixedSizeVectorRef<double, 3, 1> withBaseAngular(withBase.Velocity().Pointer(3));
+                rotation.ApplyTo(localLinear, withBaseLinear);
+                rotation.ApplyTo(localAngular, withBaseAngular);
+                withBase.VelocityIsValid() = true;
+            }
+
+            if (local.ForceIsValid()) {
+                const vctFixedSizeConstVectorRef<double, 3, 1> localForce(local.Force().XYZ());
+                const vctFixedSizeConstVectorRef<double, 3, 1> localTorque(local.Force().Pointer(3));
+                vctFixedSizeVectorRef<double, 3, 1> withBaseForce(withBase.Force().XYZ());
+                vctFixedSizeVectorRef<double, 3, 1> withBaseTorque(withBase.Force().Pointer(3));
+                rotation.ApplyTo(localForce, withBaseForce);
+                rotation.ApplyTo(localTorque, withBaseTorque);
+                withBase.ForceIsValid() = true;
+            }
+        }
+    }
+}
+
+inline-header {
+CMN_DECLARE_SERVICES_INSTANTIATION(prmBaseFrame);
+}
