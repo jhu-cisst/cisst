@@ -6,7 +6,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-02-11
 
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -60,6 +60,14 @@ void vctRandom(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, _dimension> 
     }
 }
 
+template <typename _elementType, vct::size_type _dimension>
+void vctRandom(vctDynamicNArrayRef<_elementType, _dimension> && nArray,
+               const typename vctDynamicNArrayRef<_elementType, _dimension>::value_type min,
+               const typename vctDynamicNArrayRef<_elementType, _dimension>::value_type max)
+{
+    typename vctDynamicNArrayRef<_elementType, _dimension>::BaseType & base = nArray;
+    vctRandom(base, min, max);
+}
+
 
 #endif  // _vctRandomDynamicNArray_h
-

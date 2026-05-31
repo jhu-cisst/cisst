@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2007-02-11
 
-  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -55,6 +55,14 @@ void vctRandom(vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType
         randomSequence.ExtractRandomValue(min, max,
                                           *iter);
     }
+}
+
+template <class _elementType, vct::size_type _size, vct::stride_type _stride>
+void vctRandom(vctFixedSizeVectorRef<_elementType, _size, _stride> && vector,
+               const _elementType min,
+               const _elementType max) {
+    typename vctFixedSizeVectorRef<_elementType, _size, _stride>::BaseType & base = vector;
+    vctRandom(base, min, max);
 }
 
 #endif  // _vctRandomFixedSizeVector_h

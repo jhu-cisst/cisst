@@ -6,7 +6,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-02-06
   
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -537,6 +537,37 @@ void vctDynamicNArrayRefTest::TestEngines(void)
     vctGenericContainerTest::TestSTLFunctions(array1, array2);
 }
 
+template <class _elementType>
+void vctDynamicNArrayRefTest::TestRandomTemporaryRef(void)
+{
+    typedef _elementType value_type;
+
+    enum {DIMENSION = 3};
+    typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
+    typedef vctDynamicNArrayRef<value_type, DIMENSION> ArrayRefType;
+    typedef typename ArrayType::nsize_type SizesType;
+
+    SizesType sizes;
+    sizes.Assign(3, 4, 5);
+
+    ArrayType nArray(sizes);
+    nArray.SetAll(value_type(100));
+
+    vctRandom(ArrayRefType(nArray),
+              value_type(-10), value_type(10));
+
+    vctGenericContainerTest::TestElementsInRange(nArray, value_type(-10), value_type(10));
+}
+
+void vctDynamicNArrayRefTest::TestRandomTemporaryRefDouble(void) {
+    TestRandomTemporaryRef<double>();
+}
+void vctDynamicNArrayRefTest::TestRandomTemporaryRefFloat(void) {
+    TestRandomTemporaryRef<float>();
+}
+void vctDynamicNArrayRefTest::TestRandomTemporaryRefInt(void) {
+    TestRandomTemporaryRef<int>();
+}
+
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctDynamicNArrayRefTest);
-

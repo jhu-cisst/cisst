@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-08-20
   
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -447,5 +447,27 @@ void vctFixedSizeVectorRefTest::TestNormalizationFloat(void) {
     TestNormalization<float>();
 }
 
-CPPUNIT_TEST_SUITE_REGISTRATION(vctFixedSizeVectorRefTest);
+template <class _elementType>
+void vctFixedSizeVectorRefTest::TestRandomTemporaryRef(void) {
+    enum {SIZE = 7, STRIDE1 = 3};
+    typedef _elementType value_type;
+    CREATE_STORAGE_AND_REF(1);
+    vector1.SetAll(value_type(100));
 
+    vctRandom(vctFixedSizeVectorRef<value_type, SIZE, STRIDE1>(storage1),
+              value_type(-10), value_type(10));
+
+    vctGenericContainerTest::TestElementsInRange(vector1, value_type(-10), value_type(10));
+}
+
+void vctFixedSizeVectorRefTest::TestRandomTemporaryRefDouble(void) {
+    TestRandomTemporaryRef<double>();
+}
+void vctFixedSizeVectorRefTest::TestRandomTemporaryRefFloat(void) {
+    TestRandomTemporaryRef<float>();
+}
+void vctFixedSizeVectorRefTest::TestRandomTemporaryRefInt(void) {
+    TestRandomTemporaryRef<int>();
+}
+
+CPPUNIT_TEST_SUITE_REGISTRATION(vctFixedSizeVectorRefTest);

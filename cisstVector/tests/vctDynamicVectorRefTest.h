@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-11-17
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -107,6 +107,10 @@ class vctDynamicVectorRefTest : public CppUnit::TestFixture
 
     CPPUNIT_TEST(TestNormalizationDouble);
     CPPUNIT_TEST(TestNormalizationFloat);
+
+    CPPUNIT_TEST(TestRandomTemporaryRefDouble);
+    CPPUNIT_TEST(TestRandomTemporaryRefFloat);
+    CPPUNIT_TEST(TestRandomTemporaryRefInt);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -255,6 +259,11 @@ class vctDynamicVectorRefTest : public CppUnit::TestFixture
         void TestNormalization(void);
     void TestNormalizationDouble(void);
     void TestNormalizationFloat(void);
+
+    /*! Test randomization of temporary vector refs */
+    template<class _elementType>
+        void TestRandomTemporaryRef(void);
+    void TestRandomTemporaryRefDouble(void);
+    void TestRandomTemporaryRefFloat(void);
+    void TestRandomTemporaryRefInt(void);
 };
-
-

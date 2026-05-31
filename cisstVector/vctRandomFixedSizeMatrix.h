@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2007-02-11
 
-  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -58,6 +58,15 @@ void vctRandom(vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride,
         randomSequence.ExtractRandomValue(min, max,
                                           *iter);
     }
+}
+
+template <class _elementType, vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride>
+void vctRandom(vctFixedSizeMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride> && matrix,
+               const _elementType min,
+               const _elementType max) {
+    typename vctFixedSizeMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride>::BaseType & base = matrix;
+    vctRandom(base, min, max);
 }
 
 #endif  // _vctRandomFixedSizeMatrix_h
