@@ -58,7 +58,7 @@ class {
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     public:
-        inline bool Valid(void) const {
+        inline bool ValidDefinition(void) const {
             return (((!reference_frame().empty())
                      && component().empty()
                      && interface().empty())
@@ -79,7 +79,7 @@ class {
         inline void ApplyTo(const prmStateCartesian & local,
                             prmStateCartesian & withBase) const {
             withBase = local;
-            if (!Valid()) {
+            if (!ValidDefinition()) {
                 cmnThrow("prmBaseFrame::ApplyTo: invalid base frame");
             }
             if (!Fixed()) {
