@@ -244,7 +244,8 @@ void cdgClass::GenerateStandardMethodsHeader(std::ostream & outputStream) const
 {
     std::string overrides = "";
     for (size_t index = 0; index < BaseClasses.size(); index++) {
-        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+        if ((BaseClasses[index]->GetFieldValue("is-data") == "true")
+            || (BaseClasses[index]->GetFieldValue("type") == "cmnGenericObject")) {
             overrides = " override";
             break;
         }
@@ -264,7 +265,8 @@ void cdgClass::GenerateDataMethodsHeader(std::ostream & outputStream) const
 {
     std::string overrides = "";
     for (size_t index = 0; index < BaseClasses.size(); index++) {
-        if (BaseClasses[index]->GetFieldValue("is-data") == "true") {
+        if ((BaseClasses[index]->GetFieldValue("is-data") == "true")
+            || (BaseClasses[index]->GetFieldValue("type") == "cmnGenericObject")) {
             overrides = " override";
             break;
         }
