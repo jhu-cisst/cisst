@@ -68,14 +68,18 @@ endif (CISST_HAS_OPENGL)
 # Support for Qt5
 set (CISST_QT5_COMPONENTS Core Xml XmlPatterns Widgets Gui OpenGL)
 find_package (Qt5 COMPONENTS ${CISST_QT5_COMPONENTS} QUIET)
-cmake_dependent_option (CISST_HAS_QT5 "Is Qt5 available.  If not, Qt widgets and some examples won't be compiled" ON "Qt5_FOUND" OFF)
-mark_as_advanced (CISST_HAS_QT5)
-
-# set overall Qt flag
-if (CISST_HAS_QT5)
-  set (CISST_HAS_QT ON PARENT_SCOPE)
+if (Qt5_FOUND)
+  set (CISST_HAS_QT_DEFAULT ON)
 else ()
-  set (CISST_HAS_QT OFF PARENT_SCOPE)
+  set (CISST_HAS_QT_DEFAULT OFF)
+endif ()
+option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" ${CISST_HAS_QT_DEFAULT})
+
+# internal Qt5 flag (can be expanded for Qt6 later)
+if (CISST_HAS_QT)
+  set (CISST_HAS_QT5 ON)
+else ()
+  set (CISST_HAS_QT5 OFF)
 endif ()
 
 if (CISST_HAS_QT5)
