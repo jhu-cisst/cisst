@@ -487,13 +487,13 @@ if (CISST_HAS_GRAPHVIZ)
 endif (CISST_HAS_GRAPHVIZ)
 
 
-# Configuration file
-set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
-configure_file (${cisst_SOURCE_DIR}/cisstConfig.h.in
-                ${cisst_BINARY_DIR}/include/cisstConfig.h)
-install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
-         DESTINATION include
-         COMPONENT cisstCommon)
+# Create misc. config files
+set (CISST_INCLUDE_DIR_FOR_CONFIG ${CISST_INCLUDE_DIR})
+set (CISST_BINARY_DIR_FOR_CONFIG ${CISST_BINARY_DIR})
+set (CISST_CMAKE_DIRS_FOR_CONFIG ${CISST_CMAKE_BINARY_DIR})
+
+set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR})
+set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
 
 # Config file
 set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "${JSON_INCLUDE_DIR}")
@@ -620,13 +620,13 @@ endif ()
 # ---------------------------------------------------------------------------
 
 
-# Create misc. config files
-set (CISST_INCLUDE_DIR_FOR_CONFIG ${CISST_INCLUDE_DIR})
-set (CISST_BINARY_DIR_FOR_CONFIG ${CISST_BINARY_DIR})
-set (CISST_CMAKE_DIRS_FOR_CONFIG ${CISST_CMAKE_BINARY_DIR})
-
-set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR})
-set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
+# Configuration file
+set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
+configure_file (${cisst_SOURCE_DIR}/cisstConfig.h.in
+                ${cisst_BINARY_DIR}/include/cisstConfig.h)
+install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
+         DESTINATION include
+         COMPONENT cisstCommon)
 
 # ---------------------------------------------------------------------------
 # CMake export: generate cisst-targets.cmake (target dependency graph)
