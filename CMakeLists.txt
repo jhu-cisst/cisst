@@ -487,6 +487,44 @@ if (CISST_HAS_GRAPHVIZ)
 endif (CISST_HAS_GRAPHVIZ)
 
 
+# Configuration file
+set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
+configure_file (${cisst_SOURCE_DIR}/cisstConfig.h.in
+                ${cisst_BINARY_DIR}/include/cisstConfig.h)
+install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
+         DESTINATION include
+         COMPONENT cisstCommon)
+
+# Config file
+set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "${JSON_INCLUDE_DIR}")
+configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
+                "${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config.cmake"
+                @ONLY)
+
+# Version file
+cisst_add_config_version ("${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config-version.cmake"
+                          VERSION ${cisst_VERSION}
+                          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+                          COMPONENT cisstCommon)
+
+# Modify some settings just for the installed version of cisst-config.cmake
+set (CISST_BINARY_DIR_FOR_CONFIG "")
+set (CISST_INCLUDE_DIR_FOR_CONFIG "")
+set (CISST_CMAKE_DIRS_FOR_CONFIG "")
+if (JSON_EXTERNAL_TARGET)
+  set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "\${CISST_INCLUDE_DIR}")
+else ()
+  set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "${JSON_INCLUDE_DIR}")
+endif ()
+configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
+                "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
+                @ONLY)
+install (FILES "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
+         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+         RENAME "cisst-config.cmake"
+         COMPONENT cisstCommon)
+
+
 # Finally, create lib targets
 cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 cisst_cmake_debug ("General settings: ${CISST_SETTINGS}")
@@ -607,34 +645,6 @@ install (EXPORT cisst-targets
          COMPONENT   cisstCommon)
 # ---------------------------------------------------------------------------
 
-# Config file
-set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "${JSON_INCLUDE_DIR}")
-configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
-                "${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config.cmake"
-                @ONLY)
-
-# Version file
-cisst_add_config_version ("${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config-version.cmake"
-                          VERSION ${cisst_VERSION}
-                          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-                          COMPONENT cisstCommon)
-
-# Modify some settings just for the installed version of cisst-config.cmake
-set (CISST_BINARY_DIR_FOR_CONFIG "")
-set (CISST_INCLUDE_DIR_FOR_CONFIG "")
-set (CISST_CMAKE_DIRS_FOR_CONFIG "")
-if (JSON_EXTERNAL_TARGET)
-  set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "\${CISST_INCLUDE_DIR}")
-else ()
-  set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "${JSON_INCLUDE_DIR}")
-endif ()
-configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
-                "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
-                @ONLY)
-install (FILES "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
-         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-         RENAME "cisst-config.cmake"
-         COMPONENT cisstCommon)
 
 # CMake use cisst file
 set (CISST_CMAKE_FILES_TO_COPY
@@ -651,13 +661,6 @@ foreach (cmake_file_to_copy ${CISST_CMAKE_FILES_TO_COPY})
            COMPONENT cisstCommon)
 endforeach ()
 
-# Configuration file
-set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
-configure_file (${cisst_SOURCE_DIR}/cisstConfig.h.in
-                ${cisst_BINARY_DIR}/include/cisstConfig.h)
-install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
-         DESTINATION include
-         COMPONENT cisstCommon)
 
 # Clean files
 set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES

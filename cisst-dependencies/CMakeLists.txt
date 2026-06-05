@@ -78,8 +78,10 @@ option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won
 # internal Qt5 flag (can be expanded for Qt6 later)
 if (CISST_HAS_QT)
   set (CISST_HAS_QT5 ON)
+  set (CISST_HAS_QT5 ON PARENT_SCOPE)
 else ()
   set (CISST_HAS_QT5 OFF)
+  set (CISST_HAS_QT5 OFF PARENT_SCOPE)
 endif ()
 
 if (CISST_HAS_QT5)
