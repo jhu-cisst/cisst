@@ -192,7 +192,7 @@ if (CISST_HAS_QT5)
     find_dependency (Qt5${_cisst_qt5_comp})
   endforeach ()
 endif ()
-if (CISST_HAS_QTNODES)
+if (CISST_HAS_QTNODES AND NOT TARGET cisstQtNodes)
   find_dependency (QtNodes CONFIG
                    PATHS "${CISST_BINARY_DIR}" "${CISST_BINARY_DIR}/cisstQtNodes")
 endif ()
