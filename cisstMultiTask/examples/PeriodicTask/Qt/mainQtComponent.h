@@ -45,7 +45,7 @@ class CISST_EXPORT mainQtComponent: public mtsComponent
     mainQtComponent(const std::string & name);
     ~mainQtComponent();
 
-    void Startup(void);
+    void Startup(void) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mainQtComponent);

@@ -40,8 +40,8 @@ private:
 
 public:
     TestComponent();
-    virtual void Run(void);
-    virtual void Configure(const std::string & file);
+    virtual void Run(void) override;
+    virtual void Configure(const std::string & file) override;
     void CommandVoid();
     void CommandQualifiedReadDouble(const mtsDouble &, mtsStdString &) const;
     void CommandWriteReturnBool(const mtsBool &, mtsStdString &);

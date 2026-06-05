@@ -54,7 +54,7 @@ class displayQtComponent : public QObject
     mtsDouble AmplitudeData;
 
  public slots:
-    void timerEvent(QTimerEvent * event);
+    void timerEvent(QTimerEvent * event) override;
     void SetAmplitudeQSlot(int newValue);
 };
 

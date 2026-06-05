@@ -86,7 +86,6 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT(stateCollectorTestDevice->CollectorState.StopCollection.IsValid());
 
     // actual testing, preliminary conditions
-    size_t numberOfRows = 0;
     mtsStateTable::IndexRange range;
     CPPUNIT_ASSERT(!stateCollectorTestDevice->CollectionRunning);
     CPPUNIT_ASSERT_EQUAL(0u, stateCollectorTestDevice->BatchReadyEventCounter);
@@ -103,7 +102,6 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT(!stateCollectorTestDevice->CollectionRunning);
     // advance state table, this will trigger the start event
     executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
-    numberOfRows++;
     CPPUNIT_ASSERT(executionResult.IsOK());
     CPPUNIT_ASSERT(stateCollectorTestDevice->CollectionRunning);
     // to make sure, not collection should have been performed so far
@@ -133,7 +131,6 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
          index < 300;
          index++) {
         executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
-        numberOfRows++;
         CPPUNIT_ASSERT(executionResult.IsOK());
         CPPUNIT_ASSERT(stateCollectorTestDevice->CollectionRunning);
     }

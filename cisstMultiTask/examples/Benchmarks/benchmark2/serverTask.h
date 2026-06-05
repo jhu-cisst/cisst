@@ -35,11 +35,10 @@ public:
     serverTask(const std::string & taskName, double period);
     ~serverTask() {};
     
-    // Pure virtual methods defined in the mtsTask class.
-    void Configure(const std::string & CMN_UNUSED(filename)) {};
-    void Startup(void);
-    void Run(void);
-    void Cleanup(void) {};
+    void Configure(const std::string & CMN_UNUSED(filename)) override {};
+    void Startup(void) override;
+    void Run(void) override;
+    void Cleanup(void) override {};
 
     bool IsBenchmarkCompleted(void) const;
 };

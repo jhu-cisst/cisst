@@ -37,7 +37,7 @@ class serverQtComponent: public QObject, public mtsComponent
     serverQtComponent(const std::string & componentName);
     ~serverQtComponent(void) {};
 
-    void Configure(const std::string & CMN_UNUSED(filename)) {};
+    void Configure(const std::string & CMN_UNUSED(filename)) override {};
 
  protected:
     void Void(void);

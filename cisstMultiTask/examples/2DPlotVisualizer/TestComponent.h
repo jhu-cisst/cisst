@@ -36,10 +36,10 @@ private:
     mtsDouble ValueSine;
     mtsDouble ValueAbsSine;
 
-public:
+ public:
     TestComponent();
-    virtual void Run(void);
-    virtual void Configure(const std::string & file);
+    virtual void Run(void) override;
+    virtual void Configure(const std::string & file) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(TestComponent);
