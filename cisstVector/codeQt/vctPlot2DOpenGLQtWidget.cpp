@@ -56,11 +56,11 @@ void vctPlot2DOpenGLQtWidget::paintGL(void)
         painter.setPen(txtColor);
         painter.setFont(QFont("Helvetica", font_size));
         painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-        vct2 range = DisplayYRangeScale->GetViewingRangeY();
+        Eigen::Vector2d range = DisplayYRangeScale->GetViewingRangeY();
         painter.drawText(1, 1 + font_size,
-                         QString().asprintf("%0.2f", range.at(1)));
-        painter.drawText(1, this->Viewport.Y() - font_size,
-                         QString().asprintf("%0.2f", range.at(0)));
+                         QString().asprintf("%0.2f", range.y()));
+        painter.drawText(1, this->Viewport.y() - font_size,
+                         QString().asprintf("%0.2f", range.x()));
         painter.end();
     }
 }

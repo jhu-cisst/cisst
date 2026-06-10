@@ -28,13 +28,11 @@ http://www.cisst.org/cisst/license.txt.
 /*! 2D plot class using OpenGL for rendering */
 class CISST_EXPORT vctPlot2DOpenGL: public vctPlot2DBase
 {
- public:
-
+public:
     vctPlot2DOpenGL(void);
     virtual ~vctPlot2DOpenGL(void) {};
 
- protected:
-
+protected:
     /*! Define rendering function for OpenGL */
     //@{
     virtual void RenderInitialize(void);

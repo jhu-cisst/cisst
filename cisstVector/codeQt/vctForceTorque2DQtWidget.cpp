@@ -72,11 +72,13 @@ void vctForceTorque2DQtWidget::setupUi(void)
     // constants
     const QColor textColor = palette().color(QPalette::Text);
     const QColor baseColor = palette().color(QPalette::Base);
-    const vct3 _colors[5] = {vct3(1.0, 0.0, 0.0),
-                             vct3(0.0, 1.0, 0.0),
-                             vct3(0.0, 0.0, 1.0),
-                             vct3(textColor.redF(), textColor.greenF(), textColor.blueF()),
-                             vct3(0.5)};
+    const Eigen::Vector3d _colors[5] = {
+        Eigen::Vector3d(1.0, 0.0, 0.0),
+        Eigen::Vector3d(0.0, 1.0, 0.0),
+        Eigen::Vector3d(0.0, 0.0, 1.0),
+        Eigen::Vector3d(textColor.redF(), textColor.greenF(), textColor.blueF()),
+        Eigen::Vector3d(0.5, 0.5, 0.5)
+    };
     const std::string _signals[5] = {"Axis X", "Axis Y", "Axis Z", "Norm", "Zero"};
     const std::string _scales[2] = {"F", "T"};
 
@@ -96,9 +98,9 @@ void vctForceTorque2DQtWidget::setupUi(void)
         // label
         label = new QLabel(_signals[signal].c_str());
         label->setAutoFillBackground(true);
-        palette.setColor(QPalette::WindowText, QColor(_colors[signal].X() * 255,
-                                                      _colors[signal].Y() * 255,
-                                                      _colors[signal].Z() * 255));
+        palette.setColor(QPalette::WindowText, QColor(_colors[signal].x() * 255,
+                                                      _colors[signal].y() * 255,
+                                                      _colors[signal].z() * 255));
         label->setPalette(palette);
         signalLayout->addWidget(label);
         // checkbox
@@ -117,7 +119,7 @@ void vctForceTorque2DQtWidget::setupUi(void)
 
     // plot area
     QFTPlot = new vctPlot2DOpenGLQtWidget();
-    QFTPlot->SetBackgroundColor(vct3(baseColor.redF(), baseColor.greenF(), baseColor.blueF()));
+    QFTPlot->SetBackgroundColor(Eigen::Vector3d(baseColor.redF(), baseColor.greenF(), baseColor.blueF()));
     QFTPlot->resize(QFTPlot->sizeHint());
     QFTPlot->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     mainLayout->addWidget(QFTPlot);
@@ -157,10 +159,10 @@ void vctForceTorque2DQtWidget::SetValue(const double& time, const Eigen::Vector3
     // plot
     Eigen::Vector3d toPlot = (mScaleIndex == 0) ? force : torque;
     for (size_t i = 0; i < 3; ++i){
-        mSignals[mScaleIndex][i]->AppendPoint(vctDouble2(time, toPlot[i]));
+        mSignals[mScaleIndex][i]->AppendPoint(Eigen::Vector2d(time, toPlot[i]));
     }
-    mSignals[mScaleIndex][3]->AppendPoint(vctDouble2(time, toPlot.norm()));
-    mSignals[mScaleIndex][4]->AppendPoint(vctDouble2(time, 0.0));
+    mSignals[mScaleIndex][3]->AppendPoint(Eigen::Vector2d(time, toPlot.norm()));
+    mSignals[mScaleIndex][4]->AppendPoint(Eigen::Vector2d(time, 0.0));
 
     QFTPlot->SetDisplayYRangeScale(mScales[mScaleIndex]);
     QFTPlot->update();

@@ -51,12 +51,14 @@ void vctPlot2DOpenGL::RenderInitialize(void)
 
 void vctPlot2DOpenGL::RenderResize(double width, double height)
 {
-    this->Viewport.Assign(width, height);
+    Viewport = Eigen::Vector2d(width, height);
+
     const ScalesType::iterator end = Scales.end();
     for (ScalesType::iterator scale = Scales.begin();
          scale != end;
          scale++) {
-        scale->second->Viewport.Assign(width, height);
+        scale->second->Viewport.x() = width;
+        scale->second->Viewport.y() = height;
     }
 
     GLsizei w = static_cast<GLsizei>(width);
@@ -79,7 +81,7 @@ void vctPlot2DOpenGL::Render(void)
     for (ScalesType::iterator scale = Scales.begin();
          scale != end;
          scale++) {
-        this->Render(scale->second);
+        this->Render(scale->second.get());
     }
 }
 
@@ -91,7 +93,7 @@ void vctPlot2DOpenGL::Render(const vctPlot2DBase::VerticalLine * line)
 
     // todo, should check for "visible" flag
     glBegin(GL_LINE_STRIP);
-    glVertex2d(line->X, this->Viewport.Y());
+    glVertex2d(line->X, this->Viewport.y());
     glVertex2d(line->X, 0);
     glEnd();
 }
@@ -99,12 +101,12 @@ void vctPlot2DOpenGL::Render(const vctPlot2DBase::VerticalLine * line)
 void vctPlot2DOpenGL::Render(const vctPlot2DBase::Signal * signal)
 {
     if (signal->Visible) {
-        glColor3d(signal->Color.Element(0),
-                  signal->Color.Element(1),
-                  signal->Color.Element(2));
+        glColor3d(signal->Color.x(),
+                  signal->Color.y(),
+                  signal->Color.z());
         glLineWidth(static_cast<GLfloat>(signal->LineWidth));
-        const double * data = signal->Data.Element(0).Pointer();
-        size_t size = signal->Data.size();
+        const double * data = signal->data.data();
+        size_t size = signal->data.cols();
         if (signal->IndexFirst >= signal->IndexLast) {
             // circular buffer is full/split in two
             glEnableClientState(GL_VERTEX_ARRAY);
@@ -120,10 +122,10 @@ void vctPlot2DOpenGL::Render(const vctPlot2DBase::Signal * signal)
             glDisableClientState(GL_VERTEX_ARRAY);
             // draw between end of buffer and beginning
             glBegin(GL_LINE_STRIP);
-            glVertex2d(signal->Data.Element(size - 1).X(),
-                       signal->Data.Element(size - 1).Y());
-            glVertex2d(signal->Data.Element(0).X(),
-                       signal->Data.Element(0).Y());
+            glVertex2d(signal->data.col(size - 1).x(),
+                       signal->data.col(size - 1).y());
+            glVertex2d(signal->data.col(0).x(),
+                       signal->data.col(0).y());
             glEnd();
         } else {
             // simpler case, all points contiguous
@@ -141,8 +143,9 @@ void vctPlot2DOpenGL::Render(const vctPlot2DBase::Scale * scale)
 {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslated(scale->Translation.X(), scale->Translation.Y(), 0.0);
-    glScaled(scale->ScaleValue.X(), scale->ScaleValue.Y(), 1.0);
+    glTranslated(scale->Translation.x(), scale->Translation.y(), 0.0);
+    glScaled(scale->ScaleValue.x(), scale->ScaleValue.y(), 1.0);
+
     // signals
     {
         const vctPlot2DBase::Scale::SignalsType::const_iterator
@@ -150,9 +153,10 @@ void vctPlot2DOpenGL::Render(const vctPlot2DBase::Scale * scale)
         vctPlot2DBase::Scale::SignalsType::const_iterator
             iter = scale->Signals.begin();
         for (; iter != end; ++iter) {
-            Render(iter->second);
+            Render(iter->second.get());
         }
     }
+
     // lines
     {
         const vctPlot2DBase::Scale::VerticalLinesType::const_iterator
@@ -160,7 +164,7 @@ void vctPlot2DOpenGL::Render(const vctPlot2DBase::Scale * scale)
         vctPlot2DBase::Scale::VerticalLinesType::const_iterator
             iter = scale->VerticalLines.begin();
         for (; iter != end; ++iter) {
-            Render(iter->second);
+            Render(iter->second.get());
         }
     }
 }

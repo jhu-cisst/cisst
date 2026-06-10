@@ -19,6 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctForceTorque2DQtWidget_h
 #define _vctForceTorque2DQtWidget_h
 
+#include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstVector/vctForwardDeclarationsQt.h>
 #include <cisstVector/vctPlot2DBase.h>
 #include <Eigen/Dense>

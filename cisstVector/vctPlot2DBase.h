@@ -20,11 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 #define _vctPlot2DBase_h
 
 #include <map>
+#include <Eigen/Dense>
+#include <memory>
 #include <string>
 
-#include <cisstVector/vctDynamicVector.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstCommon/cmnPortability.h>
 
 // Always include last
 #include <cisstVector/vctExport.h>
@@ -42,63 +42,35 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT vctPlot2DBase
 {
-
- public:
-
+public:
     class Scale;
 
     /*! Storage for a given signal.  Each signal stores the data to
-      display in a vector (vctDynamicVector) of points (vctDouble2).
-      To prevent dynamic re-allocation, this class uses a "circular
-      buffer".  */
+      display in a contiguous circular buffer.  */
     class CISST_EXPORT Signal
     {
         friend class vctPlot2DBase;
         friend class vctPlot2DBase::Scale;
         friend class vctPlot2DOpenGL;
-        friend class vctPlot2DVTK;
-    public:
-        Signal(const std::string & name, size_t numberOfPoints, size_t pointDimension = 2);
-        ~Signal();
 
-        // see AppendPoint
-        void CISST_DEPRECATED AddPoint(const vctDouble2 & point);
+    public:
+        Signal(const std::string & name, size_t numberOfPoints);
+        ~Signal();
 
         /*! Insert point at last position and move last position
           forward.  If the circular buffer is full, this methods
           overwrite the first element. */
-        void AppendPoint(const vctDouble2 & point);
+        void AppendPoint(const Eigen::Vector2d& point);
 
         /*! Get point value in the buffer relative to first element.
           This method will throw an std::runtime_error if the index is
           invalid, i.e. greater than the buffer size. */
-        vctDouble2 GetPointAt(size_t index) CISST_THROW(std::runtime_error);
+        Eigen::Vector2d GetPointAt(size_t index) CISST_THROW(std::runtime_error);
 
         /*! Set point value at a given position, relative to first
           element.  This method will throw an std::runtime_error if
           the index is invalid, i.e. greater than the buffer size. */
-        void SetPointAt(size_t index, const vctDouble2 & point) CISST_THROW(std::runtime_error);
-
-        /*! Replaces "size" points data starting at "index".  This
-          methods assumes that the point size of the user provided
-          buffer matches the internal buffer.  If either the point
-          size, index or size of user provided data is incorrect, an
-          exception is thrown. */
-        void SetArrayAt(size_t index, const double * pointArray, size_t arraySize, size_t pointDimension = 2) CISST_THROW(std::runtime_error);
-
-        /*! Prepend user provided data at the beginning of the
-          circular buffer.  If the buffer is full or doesn't have
-          enough free space, data will be overwritten at the end of
-          buffer.  This method will throw an exception if either the
-          array size or index is invalid. */
-        bool PrependArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) CISST_THROW(std::runtime_error);
-
-        /*! Append user provided data at the end of the circular
-          buffer.  If the buffer is full or doesn't have enough free
-          space, data will be overwritten at the beginning of buffer.
-          This method will throw an exception if either the array size
-          or index is invalid. */
-        bool AppendArray(const double * pointArray, size_t arraySize, size_t pointDimension = 2) CISST_THROW(std::runtime_error);
+        void SetPointAt(size_t index, const Eigen::Vector2d& point) CISST_THROW(std::runtime_error);
 
         void Freeze(bool freeze);
         bool GetFreeze(void) const;
@@ -108,11 +80,8 @@ class CISST_EXPORT vctPlot2DBase
         //@{
         void ComputeDataRangeX(double & min, double & max, bool assumesDataSorted = false) const;
         void ComputeDataRangeY(double & min, double & max) const;
-        void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max) const;
+        void ComputeDataRangeXY(Eigen::Vector2d& min, Eigen::Vector2d& max) const;
         //@}
-
-        void CISST_DEPRECATED SetNumberOfPoints(size_t numberOfPoints);
-        void CISST_DEPRECATED GetNumberOfPoints(size_t & numberOfPoints, size_t & bufferSize) const;
 
         /*! Get size of circular buffer. */
         size_t GetSize(void) const;
@@ -120,7 +89,7 @@ class CISST_EXPORT vctPlot2DBase
         /*! Get number of points. */
         size_t GetNumberOfPoints(void) const;
 
-        void SetColor(const vctDouble3 & colorInRange0To1);
+        void SetColor(const Eigen::Vector3d& colorInRange0To1);
 
         /*! Destructive resize, this method resize the circular buffer
           and sets the first and last pointers to the buffer's
@@ -142,21 +111,21 @@ class CISST_EXPORT vctPlot2DBase
 
     protected:
         Scale * Parent;
-        /*! Signal name, used for GUI */
         std::string Name;
+
         bool Empty;
         bool Visible;
         bool Frozen;
-        /*! Actual buffer containing the data, contiguous for rendering */
-        double * Buffer;
-        size_t PointSize;
-        /*! Vector of references to the data to add, compute min/max, ... */
-        typedef vctFixedSizeVectorRef<double, 2, 1> PointRef;
-        vctDynamicVector<PointRef> Data;
-        size_t IndexFirst;
-        size_t IndexLast;
-        vctDouble3 Color;
+        
+        Eigen::Vector3d Color;
         double LineWidth;
+
+        // data series is stored as circular buffer in a 2xN matrix, where N is maximum number of points
+        Eigen::Matrix2Xd data;
+
+        // first/last (inclusive) valid entries in the circular buffer
+        Eigen::Index IndexFirst;
+        Eigen::Index IndexLast;
     };
 
     /*! Storage for a given vertical line. */
@@ -164,19 +133,18 @@ class CISST_EXPORT vctPlot2DBase
     {
         friend class vctPlot2DBase;
         friend class vctPlot2DOpenGL;
-        friend class vctPlot2DVTK;
+
     public:
         VerticalLine(const std::string & name, const double x = 0.0);
-        ~VerticalLine();
 
         void SetX(const double x);
-        void SetColor(const vctDouble3 & colorInRange0To1);
+        void SetColor(const Eigen::Vector3d& colorInRange0To1);
 
     protected:
         std::string Name;
         double X;
         bool Visible;
-        vctDouble3 Color;
+        Eigen::Vector3d Color;
         double LineWidth;
     };
 
@@ -184,18 +152,17 @@ class CISST_EXPORT vctPlot2DBase
     {
         friend class vctPlot2DBase;
         friend class vctPlot2DOpenGL;
-        friend class vctPlot2DVTK;
-    public:
 
+    public:
         // keep signals in a std::map
-        typedef std::map<std::string, Signal *> SignalsType;
+        typedef std::map<std::string, std::unique_ptr<Signal>> SignalsType;
         SignalsType Signals;
 
         // keep vertical lines in a std::map
-        typedef std::map<std::string, VerticalLine *> VerticalLinesType;
+        typedef std::map<std::string, std::unique_ptr<VerticalLine>> VerticalLinesType;
         VerticalLinesType VerticalLines;
 
-        Scale(const std::string & name, size_t pointDimension = 2);
+        Scale(const std::string & name);
         ~Scale();
 
         const std::string & GetName(void) const;
@@ -210,7 +177,7 @@ class CISST_EXPORT vctPlot2DBase
 
         vctPlot2DBase::VerticalLine * AddVerticalLine(const std::string & name);
 
-        void SetColor(const vctDouble3 & colorInRange0To1);
+        void SetColor(const Eigen::Vector3d& colorInRange0To1);
 
         void Freeze(bool freeze);
         bool GetFreeze(void) const;
@@ -234,10 +201,10 @@ class CISST_EXPORT vctPlot2DBase
         inline bool GetContinuousExpandY(void) const {
             return ContinuousExpandY;
         }
-        const vctDouble2 & GetViewingRangeX(void) {
+        const Eigen::Vector2d& GetViewingRangeX(void) {
             return this->ViewingRangeX;
         }
-        const vctDouble2 & GetViewingRangeY(void) {
+        const Eigen::Vector2d& GetViewingRangeY(void) {
             return this->ViewingRangeY;
         }
         //@}
@@ -251,7 +218,7 @@ class CISST_EXPORT vctPlot2DBase
         //@{
         bool ComputeDataRangeX(double & min, double & max, bool assumesDataSorted = false) const;
         bool ComputeDataRangeY(double & min, double & max);
-        bool ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
+        bool ComputeDataRangeXY(Eigen::Vector2d& min, Eigen::Vector2d& max);
         //@}
 
         /*! Data recentering, these methods re-align the data once
@@ -268,9 +235,9 @@ class CISST_EXPORT vctPlot2DBase
         void AutoFitY(double padding = 0.1);
         void AutoExpandY(double padding = 0.1);
         void FitY(double min, double max, double padding = 0.1);
-        void AutoFitXY(const vctDouble2 & padding = vctDouble2(0.0, 0.1));
-        void AutoFitXExpandY(const vctDouble2 & padding = vctDouble2(0.0, 0.1));
-        void FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding = vctDouble2(0.0, 0.1));
+        void AutoFitXY(const Eigen::Vector2d& padding = Eigen::Vector2d(0.0, 0.1));
+        void AutoFitXExpandY(const Eigen::Vector2d& padding = Eigen::Vector2d(0.0, 0.1));
+        void FitXY(Eigen::Vector2d min, Eigen::Vector2d max, const Eigen::Vector2d& padding = Eigen::Vector2d(0.0, 0.1));
         //@}
 
     protected:
@@ -280,24 +247,22 @@ class CISST_EXPORT vctPlot2DBase
         double ExpandYMin, ExpandYMax;
 
         // viewport sizes
-        vctDouble2 Viewport;
+        Eigen::Vector2d Viewport;
         // stores the min and max corresponding to the viewport
-        vctDouble2 ViewingRangeX, ViewingRangeY;
-        vctDouble2 Translation;
-        vctDouble2 ScaleValue;
-
+        Eigen::Vector2d ViewingRangeX, ViewingRangeY;
+        Eigen::Vector2d Translation;
+        Eigen::Vector2d ScaleValue;
 
     private:
         std::string Name;
-        size_t PointSize;
-        vctDouble3 Color;
+        Eigen::Vector3d Color;
         double LineWidth;
     };
 
     /*! Type used to store all scales used by the plot.  Each scale
       can contain multiple signals, lines, ... that will be scaled
       together. */
-    typedef std::map<std::string, Scale *> ScalesType;
+    typedef std::map<std::string, std::unique_ptr<Scale>> ScalesType;
     ScalesType Scales;
 
     /*! Create a new scale and return a pointer to the newly created
@@ -319,25 +284,10 @@ class CISST_EXPORT vctPlot2DBase
         return Scales;
     }
 
-    vctPlot2DBase(size_t PointSize = 2);
-    virtual ~vctPlot2DBase();
+    vctPlot2DBase();
 
     /*! Set the number of points for all signals. */
     void SetNumberOfPoints(size_t numberOfPoints);
-
-    /*! This method is now deprecated.  The user should first use
-      AddScale and then AddSignal on the newly created scale.  Create
-      a new signal.  This method checks if the name has already been
-      used.  If so, the signal won't be added and the method returns a
-      0 pointer. */
-    Signal CISST_DEPRECATED * AddSignal(const std::string & name);
-
-    /*! This method is now deprecated.  The user should first use
-      AddScale and then AddVecticalLine on the newly created scale.
-      Create a new vertical line.  This method checks if the name has
-      already been used.  If so, the line won't be added and the
-      method returns a 0 pointer. */
-    VerticalLine CISST_DEPRECATED * AddVerticalLine(const std::string & name);
 
     /*! Data recentering, these methods re-align the data once only,
       based on all signals.  Padding is used to make sure the data is
@@ -381,18 +331,18 @@ class CISST_EXPORT vctPlot2DBase
 
     //*! Get currently used viewing range */
     //@{
-    inline const vctDouble2 & GetViewingRangeX(void) const {
+    inline const Eigen::Vector2d& GetViewingRangeX(void) const {
         return this->ViewingRangeX;
     }
-    inline const vctDouble2 & GetViewingRangeY(void) const {
+    inline const Eigen::Vector2d& GetViewingRangeY(void) const {
         return this->ViewingRangeY;
     }
     //@}
 
     /*! Set background color, defined as RGB between 0 and 1. */
-    void SetBackgroundColor(const vctDouble3 & colorInRange0To1);
+    void SetBackgroundColor(const Eigen::Vector3d& colorInRange0To1);
 
- protected:
+protected:
 
     /*! Methods required in all derived classes */
     //@{
@@ -401,25 +351,21 @@ class CISST_EXPORT vctPlot2DBase
     virtual void Render(void) = 0;
     //@}
 
- protected:
-    /*! Point size in memory, i.e. offset in sizeof(double) between
-      points.  Different for OpenGL in 2D, VTK, ... */
-    size_t PointSize;
-
+protected:
     // default number of points for all signals
     size_t NumberOfPoints;
 
     // viewport sizes
-    vctDouble2 Viewport;
+    Eigen::Vector2d Viewport;
     // stores the min and max corresponding to the viewport
-    vctDouble2 ViewingRangeX, ViewingRangeY;
+    Eigen::Vector2d ViewingRangeX, ViewingRangeY;
 
     /*! Method called before each iteration to figure out if an
       automatic update is needed or not for each scale. */
     void ContinuousUpdate(void);
 
     // background color
-    vctDouble3 BackgroundColor;
+    Eigen::Vector3d BackgroundColor;
 };
 
 #endif  // _vctPlot2DBase_h

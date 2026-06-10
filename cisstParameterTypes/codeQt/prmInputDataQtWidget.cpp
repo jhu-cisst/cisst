@@ -53,7 +53,7 @@ prmInputDataQtWidget::prmInputDataQtWidget(const std::string & name):
     QVPlot = new vctPlot2DOpenGLQtWidget();
     vctPlot2DBase::Scale * scaleSignal = QVPlot->AddScale("signal");
     AnalogSignal = scaleSignal->AddSignal("analog");
-    AnalogSignal->SetColor(vctDouble3(1.0, 0.0, 0.0));
+    AnalogSignal->SetColor(Eigen::Vector3d(1.0, 0.0, 0.0));
     QVPlot->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     dataLayout->addWidget(QVPlot);
 
@@ -80,7 +80,7 @@ void prmInputDataQtWidget::SetValue(const prmInputData & newValue)
             QSBPlotIndex->setEnabled(true);
             PlotIndex = 0;
         }
-        AnalogSignal->AppendPoint(vctDouble2(newValue.Timestamp(), newValue.AnalogInputs()[PlotIndex]));
+        AnalogSignal->AppendPoint(Eigen::Vector2d(newValue.Timestamp(), newValue.AnalogInputs()[PlotIndex]));
         QVPlot->update();
     } else {
         QSBPlotIndex->setMaximum(-1);
