@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -98,13 +98,11 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-    // To dynamically create and add command proxies and event proxies
-    friend class mtsComponentProxy;
     // To get information about event generators in this interface
     friend class mtsManagerLocal;
     // To call GetEndUserInterface
     friend class mtsComponent;
-    friend class mtsManagerComponentClient;
+    friend class mtsManagerComponent;
 
     // to allow adding command write generic ...
     friend class mtsComponentAddLatency;

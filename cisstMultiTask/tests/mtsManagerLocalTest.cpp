@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsManagerLocalTest.h"
 
-#include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsStateTable.h>
 
@@ -36,11 +35,6 @@ using namespace std;
 
 mtsManagerLocalTest::mtsManagerLocalTest()
 {
-#if !CISST_MTS_HAS_ICE
-    mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
-#else
-    mtsManagerLocal::UnitTestNetworkProxyEnabled = true;
-#endif
 }
 
 void mtsManagerLocalTest::setUp(void)
@@ -67,34 +61,8 @@ void mtsManagerLocalTest::TestConstructor(void)
 {
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
-    CPPUNIT_ASSERT_EQUAL(localManager->ProcessName, string(DEFAULT_PROCESS_NAME));
-    CPPUNIT_ASSERT(localManager->ManagerGlobal);
-
-    mtsManagerGlobal * GCM = dynamic_cast<mtsManagerGlobal*>(localManager->ManagerGlobal);
-    CPPUNIT_ASSERT(GCM);
-
-    CPPUNIT_ASSERT(GCM->FindProcess(localManager->ProcessName));
-    CPPUNIT_ASSERT(GCM->GetProcessObject(localManager->ProcessName) == localManager);
-
-    mtsManagerLocal::DeleteInstance();
-}
-
-void mtsManagerLocalTest::TestCleanup(void)
-{
-    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-
-    CPPUNIT_ASSERT(localManager->ManagerGlobal);
-    mtsTestDevice1<mtsInt> * dummy = new mtsTestDevice1<mtsInt>;
-    CPPUNIT_ASSERT(localManager->ComponentMap.AddItem("dummy", dummy));
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), localManager->ComponentMap.size());
-
-    localManager->Cleanup();
-
-    CPPUNIT_ASSERT(localManager->ManagerGlobal == 0);
-    // Changed to 1 because size()==1, Cleanup does not remove items from ComponentMap...
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), localManager->ComponentMap.size());
-
-    // Add __os_exit() test if needed.
+    //CPPUNIT_ASSERT_EQUAL(localManager->ProcessName, string(DEFAULT_PROCESS_NAME));
+    CPPUNIT_ASSERT_EQUAL(localManager->ProcessName, string());
 
     mtsManagerLocal::DeleteInstance();
 }
@@ -104,9 +72,7 @@ void mtsManagerLocalTest::TestGetInstance(void)
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
     CPPUNIT_ASSERT(localManager);
-    CPPUNIT_ASSERT(localManager->ManagerGlobal);
     CPPUNIT_ASSERT_EQUAL(localManager, mtsManagerLocal::Instance);
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindProcess(DEFAULT_PROCESS_NAME));
 
     mtsManagerLocal::DeleteInstance();
 }
@@ -121,21 +87,9 @@ void mtsManagerLocalTest::TestAddComponent(void)
     // Invalid argument test
     CPPUNIT_ASSERT(!localManager->AddComponent(NULL));
 
-    // Check with the global component manager.
-    // Should fail if a component has already been registered before
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, device2->GetName(), device2->Services()->GetName()));
-    CPPUNIT_ASSERT(!localManager->AddComponent(device2));
-
     // Should succeed if a component is new
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->RemoveComponent(DEFAULT_PROCESS_NAME, device2->GetName()));
     CPPUNIT_ASSERT(localManager->AddComponent(device2));
-    CPPUNIT_ASSERT(localManager->ComponentMap.FindItem(device2->GetName()));
-
-    // Check if all the existing required interfaces and provided interfaces are
-    // added to the global component manager.
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceRequiredOrInput(DEFAULT_PROCESS_NAME, device2->GetName(), "r1"));
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p1"));
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, device2->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->FindComponent(device2->GetName()));
 
     // Test with mtsTask type components
     mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
@@ -143,21 +97,9 @@ void mtsManagerLocalTest::TestAddComponent(void)
     // Invalid argument test
     CPPUNIT_ASSERT(!localManager->AddComponent(NULL));
 
-    // Check with the global component manager.
-    // Should fail if a component to be added has already been registered before
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->AddComponent(DEFAULT_PROCESS_NAME, continuous1->GetName(), continuous1->Services()->GetName()));
-    CPPUNIT_ASSERT(!localManager->AddComponent(continuous1));
-
     // Should succeed if a component is new
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->RemoveComponent(DEFAULT_PROCESS_NAME, continuous1->GetName()));
     CPPUNIT_ASSERT(localManager->AddComponent(continuous1));
-    CPPUNIT_ASSERT(localManager->ComponentMap.FindItem(continuous1->GetName()));
-
-    // Check if all the existing required interfaces and provided interfaces are
-    // added to the global component manager.
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceRequiredOrInput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "r1"));
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p1"));
-    CPPUNIT_ASSERT(localManager->ManagerGlobal->FindInterfaceProvidedOrOutput(DEFAULT_PROCESS_NAME, continuous1->GetName(), "p2"));
+    CPPUNIT_ASSERT(localManager->FindComponent(continuous1->GetName()));
 
     mtsManagerLocal::DeleteInstance();
 }
@@ -217,52 +159,6 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
 
     mtsManagerLocal::DeleteInstance();
 }
-
-void mtsManagerLocalTest::TestRegisterInterfaces(void)
-{
-    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-
-    mtsManagerGlobal * globalManager = dynamic_cast<mtsManagerGlobal *>(localManager->ManagerGlobal);
-    CPPUNIT_ASSERT(globalManager);
-
-    mtsTestDevice2<mtsInt> * component = new mtsTestDevice2<mtsInt>;
-    const std::string componentName = component->GetName();
-
-    // Check initial values of GCM
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceRequiredOrInput("LCM", componentName, "r1"));
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p1"));
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p2"));
-    // This should fail because no component is registered yet
-    CPPUNIT_ASSERT(!localManager->RegisterInterfaces(component));
-
-    // Add the component. This includes registration of interfaces that have been added so far.
-    CPPUNIT_ASSERT(localManager->AddComponent(component));
-
-    // Check updated values of GCM
-    CPPUNIT_ASSERT(globalManager->FindInterfaceRequiredOrInput("LCM", componentName, "r1"));
-    CPPUNIT_ASSERT(globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p1"));
-    CPPUNIT_ASSERT(globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, "p2"));
-
-    // Now, create a new required and provided interface which have not been added.
-    mtsInterfaceRequired * requiredInterface = component->AddInterfaceRequired("newRequiredInterface");
-    CPPUNIT_ASSERT(requiredInterface);
-    mtsInterfaceProvided * providedInterface = component->AddInterfaceProvided("newProvidedInterface");
-    CPPUNIT_ASSERT(providedInterface);
-
-    // Check initial values of GCM
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceRequiredOrInput("LCM", componentName, requiredInterface->GetName()));
-    CPPUNIT_ASSERT(!globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, providedInterface->GetName()));
-
-    // Register the new interfaces
-    CPPUNIT_ASSERT(localManager->RegisterInterfaces(component));
-
-    // Check updated values of GCM
-    CPPUNIT_ASSERT(globalManager->FindInterfaceRequiredOrInput("LCM", componentName, requiredInterface->GetName()));
-    CPPUNIT_ASSERT(globalManager->FindInterfaceProvidedOrOutput("LCM", componentName, providedInterface->GetName()));
-
-    mtsManagerLocal::DeleteInstance();
-}
-
 
 void mtsManagerLocalTest::TestGetComponent(void)
 {
@@ -439,7 +335,6 @@ void mtsManagerLocalTest::TestConnectLocally(void)
     mtsManagerLocal::DeleteInstance();
 }
 
-#if CISST_MTS_HAS_ICE
 void mtsManagerLocalTest::TestGetIPAddressList(void)
 {
     vector<string> ipList1, ipList2;
@@ -451,102 +346,5 @@ void mtsManagerLocalTest::TestGetIPAddressList(void)
         CPPUNIT_ASSERT_EQUAL(ipList1[i], ipList2[i]);
     }
 }
-
-void mtsManagerLocalTest::TestGetName(void)
-{
-}
-
-void mtsManagerLocalTest::TestConnectServerSideInterface(void)
-{
-}
-
-void mtsManagerLocalTest::TestCreateInterfaceRequiredProxy(void)
-{
-}
-
-void mtsManagerLocalTest::TestCreateInterfaceProvidedProxy(void)
-{
-}
-
-void mtsManagerLocalTest::TestRemoveInterfaceRequiredProxy(void)
-{
-}
-
-void mtsManagerLocalTest::TestRemoveInterfaceProvidedProxy(void)
-{
-}
-#endif
-
-/*
-    //
-    // Remote connection test
-    //
-
-    // Test with invalid arguments.
-    managerLocal.UnitTestEnabled = true; // run in unit test mode
-    managerLocal.UnitTestNetworkProxyEnabled = false; // but disable network proxy processings
-    CPPUNIT_ASSERT(!managerLocal.Connect(P1, C1, r1, P2, C2, p1));
-
-    mtsManagerGlobal managerGlobal;
-
-    // Prepare local managers for this test
-    mtsTestDevice1<mtsInt> * P1C1 = new mtsTestDevice1<mtsInt>;
-    mtsTestDevice2<mtsInt> * P1C2 = new mtsTestDevice2<mtsInt>;
-    mtsTestDevice2<mtsInt> * P2C2 = new mtsTestDevice2<mtsInt>;
-    mtsTestDevice3<mtsInt> * P2C3 = new mtsTestDevice3<mtsInt>;
-
-    mtsManagerLocalInterface * managerLocal1 = new mtsManagerLocal(P1);
-    mtsManagerLocal * managerLocal1Object = dynamic_cast<mtsManagerLocal*>(managerLocal1);
-    managerLocal1Object->ManagerGlobal = &managerGlobal;
-    managerGlobal.AddProcess(managerLocal1->GetProcessName());
-    managerLocal1Object->AddComponent(P1C1);
-    managerLocal1Object->AddComponent(P1C2);
-    managerLocal1Object->UnitTestEnabled = true; // run in unit test mode
-    managerLocal1Object->UnitTestNetworkProxyEnabled = true; // but disable network proxy processings
-
-    mtsManagerLocalInterface * managerLocal2 = new mtsManagerLocal(P2);
-    mtsManagerLocal * managerLocal2Object = dynamic_cast<mtsManagerLocal*>(managerLocal2);
-    managerLocal2Object->ManagerGlobal = &managerGlobal;
-    managerGlobal.AddProcess(managerLocal2->GetProcessName());
-    managerLocal2Object->AddComponent(P2C2);
-    managerLocal2Object->AddComponent(P2C3);
-    managerLocal2Object->UnitTestEnabled = true; // run in unit test mode
-    managerLocal2Object->UnitTestNetworkProxyEnabled = true; // but disable network proxy processings
-
-    // Connecting two interfaces for the first time should success.
-    CPPUNIT_ASSERT(managerLocal1Object->Connect(P1, C1, r1, P2, C2, p1));
-    CPPUNIT_ASSERT(managerLocal1Object->Connect(P1, C1, r2, P2, C2, p2));
-    CPPUNIT_ASSERT(managerLocal1Object->Connect(P1, C2, r1, P2, C2, p2));
-    CPPUNIT_ASSERT(managerLocal2Object->Connect(P2, C3, r1, P2, C2, p2));
-
-    // Connecting two interfaces that are already connected should fail.
-    CPPUNIT_ASSERT(!managerLocal1Object->Connect(P1, C1, r1, P2, C2, p1));
-    CPPUNIT_ASSERT(!managerLocal1Object->Connect(P1, C1, r2, P2, C2, p2));
-    CPPUNIT_ASSERT(!managerLocal1Object->Connect(P1, C2, r1, P2, C2, p2));
-    CPPUNIT_ASSERT(!managerLocal2Object->Connect(P2, C3, r1, P2, C2, p2));
-
-    // Disconnect all the connections for the next tests
-    CPPUNIT_ASSERT(managerLocal1Object->Disconnect(P1, C1, r1, P2, C2, p1));
-    CPPUNIT_ASSERT(managerLocal1Object->Disconnect(P1, C1, r2, P2, C2, p2));
-    CPPUNIT_ASSERT(managerLocal1Object->Disconnect(P1, C2, r1, P2, C2, p2));
-    CPPUNIT_ASSERT(managerLocal2Object->Disconnect(P2, C3, r1, P2, C2, p2));
-
-    // Disconnect should fail if disconnecting non-connected interfaces.
-    CPPUNIT_ASSERT(!managerLocal1Object->Disconnect(P1, C1, r1, P2, C2, p1));
-    CPPUNIT_ASSERT(!managerLocal1Object->Disconnect(P1, C1, r2, P2, C2, p2));
-    CPPUNIT_ASSERT(!managerLocal1Object->Disconnect(P1, C2, r1, P2, C2, p2));
-    CPPUNIT_ASSERT(!managerLocal2Object->Disconnect(P2, C3, r1, P2, C2, p2));
-
-    //
-    // TODO: After implementing proxy clean-up codes (WHEN DISCONNECT() IS CALLED),
-    // enable the following tests!!!
-    //
-    return;
-
-    // Connection should be established correctly regardless whoever calls Connect() method.
-    CPPUNIT_ASSERT(managerLocal2Object->Connect(P1, C1, r1, P2, C2, p1));
-    CPPUNIT_ASSERT(managerLocal2Object->Connect(P1, C1, r2, P2, C2, p2));
-    CPPUNIT_ASSERT(managerLocal2Object->Connect(P1, C2, r1, P2, C2, p2));
-*/
 
 CPPUNIT_TEST_SUITE_REGISTRATION(mtsManagerLocalTest);

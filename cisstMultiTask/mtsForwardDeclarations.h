@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-10-07
 
-  (C) Copyright 2007-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsGenericObject.h>
 
 // MJ: if this is an inappropriate place to define invalid connection id or
-// #include is not proper, we could move this to somewhere else (e.g. mtsManagerGlobal.h)
+// #include is not proper, we could move this to somewhere else
 #include <limits> // for invalid connection id
 
 #include <cisstMultiTask/mtsConfig.h>
@@ -141,17 +141,11 @@ class mtsCollectorBase;
 class mtsCollectorState;
 
 // classes for networked configurations
-class mtsComponentProxy;
 class mtsProxySerializer;
-class mtsManagerProxyServer;
-class mtsManagerProxyClient;
 
 // managers
 class mtsManagerLocal;
 #define mtsComponentManager mtsManagerLocal
-class mtsManagerLocalInterface;
-class mtsManagerGlobal;
-class mtsManagerGlobalInterface;
 typedef unsigned int ConnectionIDType;
 // MJ: Slice only supports int type (-2^31 to 2^31-1)
 // See http://www.zeroc.com/doc/Ice-3.4.1/manual/Slice.5.8.html for details
@@ -159,8 +153,7 @@ const ConnectionIDType InvalidConnectionID = (ConnectionIDType) std::numeric_lim
 
 // dynamic component composition
 class mtsManagerComponentServices;
-class mtsManagerComponentClient;
-class mtsManagerComponentServer;
+class mtsManagerComponent;
 
 // global function to retrieve object name if available
 inline std::string mtsObjectName(const void * CMN_UNUSED(object)) {

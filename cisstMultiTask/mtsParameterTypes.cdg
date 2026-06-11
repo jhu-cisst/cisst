@@ -364,6 +364,7 @@ class {
     }
 }
 inline-code {
+    #include <cisstOSAbstraction/osaTimeServer.h>
     #include <cisstMultiTask/mtsManagerLocal.h>
     void mtsMessage::SetMessage(const std::string & message) {
         Timestamp = mtsComponentManager::GetInstance()->GetTimeServer().GetAbsoluteTimeInSeconds();

@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-07
 
-  (C) Copyright 2010-2016 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsComponentViewer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
 
 void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, double CMN_UNUSED(timeoutInSec))
@@ -482,8 +481,7 @@ std::string mtsComponentViewer::GetComponentInUDrawGraphFormat(const std::string
     buffer.append(processName + ":" + componentName);
     buffer.append("\",\"");
     std::string componentType("USER");
-    if (mtsManagerComponentBase::IsManagerComponentServer(componentName) ||
-        mtsManagerComponentBase::IsManagerComponentClient(componentName))
+    if (mtsManagerComponentBase::IsManagerComponent(componentName))
         componentType = "SYSTEM";
     buffer.append(componentType);
     buffer.append("\",[a(\"OBJECT\",\""); 
@@ -524,10 +522,8 @@ std::string mtsComponentViewer::GetConnectionInUDrawGraphFormat(const mtsDescrip
 {
     bool swapped = false;
     // If the MCS is the server, swap so that it becomes the first node (parent).  This ensures that it is displayed
-    // as the top level node. Similarly, if the MCC is the server, swap unless the MCS is the client.
-    if (mtsManagerComponentBase::IsManagerComponentServer(connection.Server.ComponentName) ||
-         (mtsManagerComponentBase::IsManagerComponentClient(connection.Server.ComponentName) &&
-          !mtsManagerComponentBase::IsManagerComponentServer(connection.Client.ComponentName)))
+    // as the top level node.
+    if (mtsManagerComponentBase::IsManagerComponent(connection.Server.ComponentName))
         swapped = true;
     bool SVLio = false;
     // PK TEMP: Check for SVL input/output. In the future, this should be an attribute in the "connection"

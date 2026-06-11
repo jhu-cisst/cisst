@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,6 +27,24 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsEventReceiver.h>
 
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+
+// Allows a component pointer to be passed through command pattern.
+// There may be a better way to implement this.
+class CISST_EXPORT mtsComponentPointer : public mtsGenericObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
+    mtsComponent * component;
+
+public:
+    mtsComponentPointer() : component(0) {}
+    mtsComponentPointer(mtsComponent *cptr) : component(cptr) {}
+    ~mtsComponentPointer() {}
+    void SetPointer(mtsComponent * cptr) { component = cptr; }
+    mtsComponent * GetPointer() const { return component; }
+};
+
 class CISST_EXPORT mtsManagerComponentServices : public cmnGenericObject {
 
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
@@ -38,6 +56,9 @@ protected:
     // Dynamic component management
     struct ManagementStruct {
         mtsFunctionWriteReturn Create;
+        mtsFunctionWriteReturn Add;
+        mtsFunctionWriteReturn Remove;
+        mtsFunctionQualifiedRead Get;
         mtsFunctionWrite Configure;
         mtsFunctionWriteReturn Connect;
         mtsFunctionWriteReturn Disconnect;
@@ -49,9 +70,7 @@ protected:
     } ServiceComponentManagement;
 
     struct LogStruct {
-        mtsFunctionWrite EnableLogForwarding;
-        mtsFunctionWrite DisableLogForwarding;
-        mtsFunctionQualifiedRead GetLogForwardingStates;
+        mtsFunctionWrite PrintLog;
     } ServiceLogManagement;
 
     // Getters
@@ -65,7 +84,6 @@ protected:
         mtsFunctionQualifiedRead GetListOfComponentClasses;  // in: process name, out: list of classes
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
-        mtsFunctionQualifiedRead GetAbsoluteTimeDiffs;
     } ServiceGetters;
 
     // Event receivers
@@ -133,6 +151,11 @@ public:
     bool ComponentCreate(
         const std::string& processName, const std::string & className, const mtsGenericObject & constructorArg) const;
 
+    bool ComponentAdd(const mtsComponent *component) const;
+    bool ComponentRemove(const mtsComponent *component) const;
+    bool ComponentRemove(const std::string &componentName) const;
+    mtsComponent *ComponentGet(const std::string &componentName) const;
+
     bool ComponentConfigure(const std::string & componentName, const std::string & configString) const;
     bool ComponentConfigure(
         const std::string& processName, const std::string & componentName, const std::string & configString) const;
@@ -183,6 +206,8 @@ public:
 
     std::vector<std::string> GetNamesOfProcesses(void) const;
     std::vector<std::string> GetNamesOfComponents(const std::string & processName) const;
+    std::vector<std::string> GetNamesOfComponents(void) const
+         { return GetNamesOfComponents(""); }
     std::vector<mtsDescriptionComponent> GetDescriptionsOfComponents(const std::string & processName) const;
     bool GetNamesOfInterfaces(const std::string & processName,
                               const std::string & componentName,
@@ -202,6 +227,12 @@ public:
     mtsInterfaceProvidedDescription
         GetInterfaceProvidedDescription(const std::string & processName,
                                         const std::string & componentName, const std::string & interfaceName) const;
+
+    mtsInterfaceProvidedDescription
+        GetInterfaceProvidedDescription(const std::string & componentName, const std::string & interfaceName) const {
+        return GetInterfaceProvidedDescription("", componentName, interfaceName);
+    }
+
     inline mtsInterfaceProvidedDescription
         GetInterfaceProvidedDescription(const mtsDescriptionInterfaceFullName & interfaceDescription) const {
         return GetInterfaceProvidedDescription(interfaceDescription.ProcessName,
@@ -212,6 +243,11 @@ public:
     mtsInterfaceRequiredDescription
         GetInterfaceRequiredDescription(const std::string & processName,
                                         const std::string & componentName, const std::string & interfaceName) const;
+    mtsInterfaceRequiredDescription
+        GetInterfaceRequiredDescription(const std::string & componentName, const std::string & interfaceName) const {
+        return GetInterfaceRequiredDescription("", componentName, interfaceName);
+    }
+
     inline mtsInterfaceRequiredDescription
         GetInterfaceRequiredDescription(const mtsDescriptionInterfaceFullName & interfaceDescription) const {
         return GetInterfaceRequiredDescription(interfaceDescription.ProcessName,
@@ -224,17 +260,6 @@ public:
     // Dynamically load the file (fileName) into the process processName
     bool Load(const std::string & processName, const std::string & fileName) const;
 
-    // Enable/disable log forwarding
-    void EnableLogForwarding(void);  // for all processes
-    void EnableLogForwarding(const std::vector<std::string> &processNames);
-    void DisableLogForwarding(void);  // for all processes
-    void DisableLogForwarding(const std::vector<std::string> &processNames);
-    void GetLogForwardingStates(stdCharVec & states) const;  // for all processes
-    void GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const;
-
-    // Get absolute time differences of specified processes with respect to GCM
-    std::vector<double> GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames) const;
-
     // Wait for component state change. This can be used to wait for a process to be created, or for a component
     // to be created (in those cases, any state is acceptable). A negative timeout is used to wait indefinitely.
     // Returns false if timeout occurred.
@@ -246,6 +271,7 @@ public:
 
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentPointer)
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponentServices)
 
 #endif // _mtsManagerComponentServices_h

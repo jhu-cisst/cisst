@@ -58,9 +58,9 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsCommandLineOptionsQt.cpp
                                 mtsMessageQtWidget.cpp
                                 mtsSystemQtWidget.cpp
-                                mtsQtCommandSelector.cpp
-                                mtsQtScaleAndSignalTool.cpp
-                                mtsQtVisualizerShell.cpp
+                                #mtsQtCommandSelector.cpp
+                                #mtsQtScaleAndSignalTool.cpp
+                                #mtsQtVisualizerShell.cpp
                                 mtsIntervalStatisticsQtWidget.cpp
                                 mtsQtWidgetFactory.cpp
                                 mtsQtWidgetGenericObject.cpp
@@ -77,9 +77,9 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsCommandLineOptionsQt.h
                                 mtsMessageQtWidget.h
                                 mtsSystemQtWidget.h
-                                mtsQtCommandSelector.h
-                                mtsQtScaleAndSignalTool.h
-                                mtsQtVisualizerShell.h
+                                #mtsQtCommandSelector.h
+                                #mtsQtScaleAndSignalTool.h
+                                #mtsQtVisualizerShell.h
                                 mtsIntervalStatisticsQtWidget.h
                                 mtsQtWidgetFactory.h
                                 mtsQtWidgetGenericObject.h

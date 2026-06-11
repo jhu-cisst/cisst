@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):  Anton Deguet, Min Yang Jung
+  Author(s):  Anton Deguet, Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,36 +32,13 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of Base Class for Manager Components
   \ingroup cisstMultiTask
 
-  In the networked configuration, the communication between the global component
-  manager (GCM) and local component managers (LCMs) is currently done by SLICE.
-  If the cisstMultiTask's command pattern is used instead, users can have more
-  flexible way to interact with the system, such as creating and starting
-  components dynamically.  To replace SLICE with the cisstMultiTask's command
-  pattern, we introduce a special type of component, manager component.
-
-  There are two different typs of it, manager component server and client. The
-  manager component server (MCS) runs in LCM that runs with GCM in the same
-  process and only one instance of MCS exists in the whole system.  On the
-  contrary, each LCM has manager component client (MCC) that connects to MCS
-  and thus more than one MCC can exist in a system.  However, LCM can have only
-  one MCC, i.e., one MCC per LCM.
-
   The cisstMultiTask's command pattern is based on a pair of interfaces that
   are connected to each other.  The following diagram shows how user and internal
   interfaces are defined and how such interfaces are connected to each other.
 
   (INTFC = one provided interface + one required interface)
 
-              GCM - LCM - MCS (of type mtsManagerComponentServer)
-                           |
-                         INTFC ("InterfaceGCM")
-
-                           :
-                           :
-
-                         INTFC ("InterfaceLCM")
-                           |
-                    LCM - MCC (of type mtsManagerComponentClient)
+                    LCM - MCS (of type mtsManagerComponent)
                            |
                          INTFC ("InterfaceComponent")
 
@@ -73,26 +50,15 @@ http://www.cisst.org/cisst/license.txt.
                      User Component
                 with internal interfaces
 
-  The cisstMultiTask has four different set of internal connections between
+  The cisstMultiTask has two different set of internal connections between
   components.
 
   1) InterfaceInternal.Required - InterfaceComponent.Provided
-     : Established whenever mtsManagerLocal::AddComponent() gets called
+     : Established whenever mtsManagerComponent::ComponentAdd() gets called
 
-  2) InterfaceLCM.Required - InterfaceGCM.Provided
-     : Established when a singleton of mtsManagerLocal gets instantiated
-       (See mtsManagerLocal's constructor)
-
-  3) InterfaceGCM.Required - InterfaceLCM.Provided
-     : When MCC connects to MCS
-       (See mtsManagerComponentServer::AddNewClientProcess())
-
-  4) InterfaceComponent.Required - InterfaceInternal.Provided
-     : When user component with internal interfaces connects to MCC
-       (See mtsManagerComponentClient::AddNewClientComponent())
-
-  \note Related classes: mtsManagerLocalInterface, mtsManagerGlobalInterface,
-  mtsManagerGlobal, mtsManagerProxyServer
+  2) InterfaceComponent.Required - InterfaceInternal.Provided
+     : When user component with internal interfaces connects to MCS
+       (See mtsManagerComponent::AddNewClientComponent())
 */
 
 class CISST_EXPORT mtsManagerComponentBase : public mtsTaskFromSignal
@@ -103,9 +69,8 @@ public:
     /*! Component name definitions */
     class CISST_EXPORT ComponentNames {
     public:
-        /*! Name of manager component server.  Should be globally unique */
-        const static std::string ManagerComponentServer;
-        const static std::string ManagerComponentClientSuffix;
+        /*! Name of manager component.  Should be globally unique */
+        const static std::string ManagerComponent;
     };
 
     /*! Interface name definitions */
@@ -116,10 +81,6 @@ public:
         const static std::string InterfaceInternalRequired;
         const static std::string InterfaceComponentProvided;
         const static std::string InterfaceComponentRequired;
-        const static std::string InterfaceLCMProvided;
-        const static std::string InterfaceLCMRequired;
-        const static std::string InterfaceGCMProvided;
-        const static std::string InterfaceGCMRequired;
         // Interface for system-wide thread-safe logging
         const static std::string InterfaceSystemLoggerProvided;
         const static std::string InterfaceSystemLoggerRequired;
@@ -133,6 +94,9 @@ public:
     public:
         // Dynamic component management
         const static std::string ComponentCreate;
+        const static std::string ComponentAdd;
+        const static std::string ComponentRemove;
+        const static std::string ComponentGet;
         const static std::string ComponentConfigure;
         const static std::string ComponentConnect;
         const static std::string ComponentDisconnect;
@@ -143,12 +107,6 @@ public:
         const static std::string LoadLibrary;  // dynamic loading
         // Logging
         const static std::string PrintLog;
-        const static std::string SetLogForwarding;
-        const static std::string GetLogForwardingStateInternal;
-        const static std::string EnableLogForwarding;
-        const static std::string DisableLogForwarding;
-        const static std::string GetLogForwardingState;
-        const static std::string GetLogForwardingStates;
         // Getters
         const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;
@@ -161,8 +119,6 @@ public:
         const static std::string GetInterfaceRequiredDescription;
         // Get absolute time for each process
         const static std::string GetAbsoluteTimeInSeconds;
-        // Get absolute time differences between each process and GCM
-        const static std::string GetAbsoluteTimeDiffs;
         // Establishing connections
         const static std::string GetEndUserInterface;
         const static std::string AddObserverList;
@@ -178,7 +134,6 @@ public:
         const static std::string AddConnection;
         const static std::string RemoveConnection;
         const static std::string ChangeState;
-        const static std::string MCSReady;
         const static std::string PrintLog;
     };
 
@@ -188,24 +143,12 @@ public:
     static bool IsManagerComponent(const std::string & componentName);
     static bool IsNameOfInternalInterface(const std::string & interfaceName);
 
-    static bool IsManagerComponentServer(const std::string & componentName);
-    static bool IsManagerComponentClient(const std::string & componentName);
-
-    static bool IsNameOfInterfaceGCMRequired(const std::string & interfaceName);
-    static bool IsNameOfInterfaceGCMProvided(const std::string & interfaceName);
-    static bool IsNameOfInterfaceLCMRequired(const std::string & interfaceName);
-    static bool IsNameOfInterfaceLCMProvided(const std::string & interfaceName);
     static bool IsNameOfInterfaceComponentRequired(const std::string & interfaceName);
     static bool IsNameOfInterfaceComponentProvided(const std::string & interfaceName);
     static bool IsNameOfInterfaceInternalRequired(const std::string & interfaceName);
     static bool IsNameOfInterfaceInternalProvided(const std::string & interfaceName);
 
-    static const std::string GetNameOfManagerComponentServer(void);
-    static const std::string GetNameOfManagerComponentClientFor(const std::string & processName);
-    static const std::string GetNameOfInterfaceGCMRequiredFor(const std::string & processName);
-    static const std::string GetNameOfInterfaceGCMProvided(void);
-    static const std::string GetNameOfInterfaceLCMRequired(void);
-    static const std::string GetNameOfInterfaceLCMProvided(void);
+    static const std::string GetNameOfManagerComponent(void);
     static const std::string GetNameOfInterfaceComponentRequiredFor(const std::string & componentName);
     static const std::string GetNameOfInterfaceComponentProvided(void);
     static const std::string GetNameOfInterfaceInternalRequired(void);

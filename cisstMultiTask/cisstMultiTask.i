@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2008-01-17
 
-  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -521,14 +521,6 @@ http://www.cisst.org/cisst/license.txt.
     %}
 }
 
-// For IRE, because EnableDynamicComponentManagement is protected (see also mtsPython.h)
-class mtsComponentWithManagement : public mtsComponent
-{
-public:
-    mtsComponentWithManagement(const std::string &name);
-    ~mtsComponentWithManagement();
-};
-
 %include "cisstMultiTask/mtsInterface.h"
 %include "cisstMultiTask/mtsInterfaceProvided.h"
 %extend mtsInterfaceProvided {
@@ -639,7 +631,6 @@ public:
 %include "cisstMultiTask/mtsTaskPeriodic.h"
 %include "cisstMultiTask/mtsTaskFromSignal.h"
 
-%include "cisstMultiTask/mtsManagerLocalInterface.h"
 %include "cisstMultiTask/mtsManagerLocal.h"
 %extend mtsManagerLocal {
     %pythoncode %{

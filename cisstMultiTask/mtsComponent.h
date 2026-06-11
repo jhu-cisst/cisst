@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 #include <cisstMultiTask/mtsFunctionVoidReturn.h>
 #include <cisstMultiTask/mtsFunctionWriteReturn.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
@@ -149,8 +150,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
-    friend class mtsManagerLocal;
-    friend class mtsComponentProxy;
+    friend class mtsManagerComponent;
 
  protected:
 
@@ -594,5 +594,36 @@ inline std::string mtsObjectName(const mtsComponent * object) {
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponent)
 
+
+// Following derived class enables dynamic component management, and adds a mailbox to the required interface,
+// so that events can be queued.
+class CISST_EXPORT mtsComponentWithManagement : public mtsComponent
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    /*! Default constructor. Sets the name. */
+    mtsComponentWithManagement(const std::string &deviceName) : mtsComponent(deviceName)
+        { EnableDynamicComponentManagement(); }
+
+    /*! Default destructor. Does nothing. */
+    virtual ~mtsComponentWithManagement() { }
+
+    // Overloaded from base class (same implementation as mtsTask)
+    mtsInterfaceRequired *AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
+                                                                         mtsRequiredType required = MTS_REQUIRED)
+    {
+        mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events",
+                                              mtsInterfaceRequired::DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE);
+        mtsInterfaceRequired *result;
+        // try to create and add interface
+        result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox, required);
+        if (!result)
+            delete mailBox;
+        return result;
+    }
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentWithManagement)
 
 #endif // _mtsComponent_h

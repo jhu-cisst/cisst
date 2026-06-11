@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-12-07
 
-  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,75 +27,30 @@ http://www.cisst.org/cisst/license.txt.
   exist in a process, this class is implemented as a singleton.  To get an
   instance of LCM, therefore, mtsManagerLocal::GetInstance() should be used
   (instead of constructor).
-
-  The LCM replaces the previous task manager (mtsTaskManager) which was similar
-  to the LCM without networking support.  Major differences between the two are:
-
-  1) The LCM manages tasks and components as a unified object--component--which
-  is of type mtsComponent and is stored in a single data structure--component map.
-  That is, task map and device map in the previous task manager has been
-  consolidated into the component map.
-
-  2) While the previous task manager keeps all information about tasks (devices)
-  and connections, the LCM only keeps information about local components; it does
-  not keep any connection information.  All connection information are now
-  managed by the global component manager (GCM) and the LCM requests and retrieves
-  such information as needed.
-
-  Note that this class implements mtsManagerLocalInterface class which defines
-  common APIs to communicate with the GCM and is declared as pure virtual. See
-  mtsManagerProxyServer class as another example that implements the interface.
-
-  \note Related classes: mtsManagerLocalInterface, mtsManagerGlobalInterface,
-  mtsManagerGlobal, mtsManagerProxyServer
 */
 
 #ifndef _mtsManagerLocal_h
 #define _mtsManagerLocal_h
 
-#include <cisstCommon/cmnNamedMap.h>
+#include <string>
+#include <set>
+#include <stack>
+
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnPath.h>
-#include <cisstOSAbstraction/osaThreadBuddy.h>
-#include <cisstOSAbstraction/osaMutex.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
-#include <cisstMultiTask/mtsManagerLocalInterface.h>
-#include <cisstMultiTask/mtsManagerGlobalInterface.h>
-
-#include <stack>
+#include <cisstMultiTask/mtsComponent.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
+class CISST_EXPORT mtsManagerLocal: public cmnGenericObject
 {
     // for unit-testing
     friend class mtsManagerLocalTest;
-    friend class mtsManagerGlobalTest;
-    // for internal access to manage proxy objects
-    friend class mtsManagerGlobal;
-    friend class mtsManagerProxyClient;
-    // for dynamic creation of a component
-    friend class mtsManagerComponentClient;
-    // for reconfiguration
-    friend class mtsComponentProxy;
 
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-
-public:
-    /*! Typedef for local component manager's configuration */
-    enum ConfigurationType {
-        // Standalone mode: supports only local components/connections
-        LCM_CONFIG_STANDALONE,
-        // Networked mode: supports both local and remote components/connections
-        LCM_CONFIG_NETWORKED,
-        // Networked mode with global component manager: basically identical to
-        // LCM_CONFIG_NETWORKED configuration except that LCM runs with the
-        // global component manager on the same process.
-        LCM_CONFIG_NETWORKED_WITH_GCM
-    };
-
 
 private:
     /*! Valid component tags */
@@ -106,8 +61,11 @@ private:
     /*! Singleton object */
     static mtsManagerLocal * Instance;
 
-    /*! Thread ID of main thread */
+    /*! Thread ID of thread that called GetInstance(). In the future,
+        we will support multiple threads. */
     osaThreadId MainThreadId;
+
+    // PK TODO:  Review MainTaskNames and CurrentMainTask
 
     /*! List of main tasks (in chronological order) */
     std::stack<std::string> MainTaskNames;
@@ -115,197 +73,95 @@ private:
     /*! Pointer to task that currently has main thread (set when that task is started) */
     mtsTaskContinuous * CurrentMainTask;
 
-    /*! Flag for unit tests. Enabled only for unit tests (false by default) */
-    static bool UnitTestEnabled;
-
-    /*! Flag that allows unit tests to skip network-related processings such as
-        network proxy creation/setup or remote connection (false by default) */
-    static bool UnitTestNetworkProxyEnabled;
-
-    ConfigurationType Configuration;
-
-    /*! Temporary singleton object for reconfiguration.  Should not be used
-        except reconfiguration */
-    static mtsManagerLocal * InstanceReconfiguration;
-    static mtsManagerLocal * GetSafeInstance(void);
-
-    /*! Typedef for component map: key is component name, value is component
-        object */
-    typedef cmnNamedMap<mtsComponent> ComponentMapType;
-    ComponentMapType ComponentMap;
-
-    /*! Time server used by all tasks. */
-    // MJ: Move this to mtsManagerLocal.cpp (for system-wide logging)
-    //osaTimeServer TimeServer;
-
-    /*! Process name of this local component manager. Should be globally unique
-        across the whole system. */
+    /*! Process name (for a multi-process system).
+     */
     std::string ProcessName;
 
-    /*! IP address of the global component manager that this LCM connects to */
-    const std::string GlobalComponentManagerIP;
+    /*! Name of this object
+     */
+    std::string Name;
 
-    /*! IP address of this machine. Internally set by SetIPAddress(). */
-    std::string ProcessIP;
-
-    /*! List of all IP addresses detected on this machine */
-    std::vector<std::string> ProcessIPList;
-
-    /*! Mutex to use ComponentMap safely */
-    osaMutex ComponentMapChange;
-
-    /*! Mutex for thread-safe transition of configuration from standalone mode to
-        networked mode */
-    static osaMutex ConfigurationChange;
-
-    /*! Pointer to the global component manager.
-        Depending on configuration, this can be of two different type of object:
-        - In standalone mode: an instance of the GCM (of type
-          mtsManagerGlobal) which runs in the same process.
-        - In networked mode: a network proxy object for the GCM
-          (of type mtsManagerGlobalProxyClient) that possibly runs in a
-          different process or a different host. */
-    mtsManagerGlobalInterface * ManagerGlobal;
-
-    /*! Manager component instances (for direct access) */
-    struct {
-        mtsManagerComponentClient * Client;
-        mtsManagerComponentServer * Server;
-    } ManagerComponent;
-
-    /*! If connection to GCM is active */
-    bool GCMConnected;
+    /*! Manager component instance (for direct access) */
+    mtsManagerComponent *ManagerComponent;
 
     /*! Internal thread to buffer log messages */
-    osaThread       LogThead;
-    osaThreadSignal LogTheadFinished;
+    osaThread       LogThread;
+    osaThreadSignal LogThreadFinished;
     bool            LogThreadFinishWaiting;
     void*           LogDispatchThread(void * arg);
-
-    /*! Set up system logger that allows collecting system-wide logs across network */
-    void SetupSystemLogger(void);
-
-    /*! If Manager Component Client (MCC) is ready to forward logs to
-        Manager Component Server (MCS) */
-    bool MCCReadyForLogForwarding(void) const;
-
-public:
-    /*! Callback function for system-wide thread-safe logging */
-    static void LogDispatcher(const char * str, int len);
-
-    /*! Enable or disable system-wide thread-safe logging */
-    static void SetLogForwarding(bool activate);
-
-    /*! Get whether system-wide logging is enabled or not */
-    static void GetLogForwardingState(bool & state);
-    static bool GetLogForwardingState(void);
-
-    /*! Is system-wide thread-safe logging enabled? */
-    static bool IsLogForwardingEnabled(void);
-
-    /*! Check if further logs are allowed */
-    static bool IsLogAllowed(void);
-
-    bool IsValidComponentTag(const std::string & tag) const;
-    bool IsValidInterfaceTag(const std::string & tag) const;
-    void AddValidComponentTag(const std::string & tag);
-    void AddValidInterfaceTag(const std::string & tag);
-    const std::set<std::string> & GetValidComponentTags(void) const;
-    const std::set<std::string> & GetValidInterfaceTags(void) const;
 
 protected:
     /*! Protected constructor (singleton) */
     mtsManagerLocal(void);
-
-    mtsManagerLocal(const std::string & globalComponentManagerIP,
-                    const std::string & thisProcessName,
-                    const std::string & thisProcessIP);
-    mtsManagerLocal(mtsManagerGlobal & globalComponentManager);
 
     /*! Destructor. Includes OS-specific cleanup. */
     virtual ~mtsManagerLocal();
 
     /*! Initialization */
     void Initialize(void);
-    void InitializeLocal(void);
 
-    /*! \brief Create internal manager components automatically when LCM is
-               initialized.  */
-    bool CreateManagerComponents(void);
+    /*! \brief Create internal manager component. */
+    bool CreateManagerComponent(void);
 
-    /*! \brief Add an internal manager component
-        \param processName Name of this process (or this LCM)
-        \param isServer True to create manager component server, false to create
-               manager component client.  Note that this argument should be true
-               only when LCM runs with GCM in the same process. */
-    bool AddManagerComponent(const std::string & processName, const bool isServer = false);
+    /* Local component */
+    mtsComponentWithManagement * LocalComponent;
 
-    /*! \brief Connect manager component client to manager component server
-               (connect InterfaceLCM.Required - InterfaceGCM.Provided)
-               This will make the manager component server dynamically create
-               a required interface which connects to InterfaceLCM's provided
-               interface. */
-    bool ConnectManagerComponentClientToServer(void);
+    /*! Return the ManagerComponentServices.
+        This is a method so that we can later add thread-safety.
+     */
+    mtsManagerComponentServices * GetManagerServices() const;
 
-    /*! \brief Connect a local component which has internal interfaces to the
-               manager component client (connect InterfaceInternal.Required -
-               InterfaceComponent.Provided) */
-    bool ConnectToManagerComponentClient(const std::string & componentName);
+    struct LogInterface {
+        mtsFunctionWrite PrintLog;
+    };
+    LogInterface Logger;
 
-    /*! \brief Set IP address of this machine */
-    void SetIPAddress(void);
-
-    /*! \brief Create Ice proxy for this LCM and connects to the GCM
-        \return True if success, false otherwise */
-    bool ConnectToGlobalComponentManager(void);
-
-    /*! \brief Register all interfaces that a component owns to the global
-               component manager.  The GCM uses this information to connect
-               interfaces that are in different processes.
-        \param component Component object instance
-        \param componentName Name of component */
-    bool RegisterInterfaces(mtsComponent * component);
-    bool RegisterInterfaces(const std::string & componentName);
-
-    // PK: following two methods were part of Connect method
-    ConnectionIDType ConnectSetup(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
-
-    bool ConnectNotify(ConnectionIDType connectionId,
-                       const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-                       const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
-
-    /*! Remove component from this local component manager */
-    bool RemoveComponent(mtsComponent * component, const bool notifyGCM);
-    bool RemoveComponent(const std::string & componentName, const bool notifyGCM);
-
-    /*! Remove provided interface */
-    // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
-    bool RemoveInterfaceProvided(const std::string & componentName, const std::string & interfaceProvidedName);
-
-    /*! Remove required interface */
-    // MJ: Current implemention should be reviwed -- interfaces have to be removed in a thread-safe way
-    bool RemoveInterfaceRequired(const std::string & componentName, const std::string & interfaceRequiredName);
+    /*! Return the LoggerServices.
+        This is a method so that we can later add thread-safety.
+     */
+    const LogInterface * GetLoggerServices() const;
 
     /*! Get information about provided interface */
-    bool GetInterfaceProvidedDescription(
-        const std::string & serverComponentName,
-        const std::string & providedInterfaceName,
-        mtsInterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "") override;
+    void GetInterfaceProvidedDescription(
+         const std::string & componentName,
+         const std::string & interfaceName,
+         mtsInterfaceProvidedDescription & interfaceProvidedDescription);
 
     /*! Extract all the information on a required interface such as function
         objects and event handlers with arguments serialized */
-    bool GetInterfaceRequiredDescription(
-        const std::string & componentName,
-        const std::string & requiredInterfaceName,
-        mtsInterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "") override;
+    void GetInterfaceRequiredDescription(
+         const std::string & componentName,
+         const std::string & interfaceName,
+         mtsInterfaceRequiredDescription & interfaceRequiredDescription);
 
-    /*! Change GCM connection state */
-    inline void SetGCMConnected(const bool connected) {
-        GCMConnected = connected;
-    }
+    /*! Set up system logger that allows collecting system-wide logs across network */
+    void SetupSystemLogger(void);
 
 public:
+
+    /*! Get a singleton object of local component manager.
+    */
+    static mtsManagerLocal * GetInstance(void);
+
+    /*! \brief Cleanup. Left in the public API for backwards compatibility.
+               Client code should not call this method directly, and should
+               instead call DeleteInstance prior to quitting. DeleteInstance
+               calls this method before deleting the singleton. */
+    void Cleanup(void);
+
+    /*! \brief DeleteInstance. Since a local component manager is a singleton,
+               and demand-created by the first caller of GetInstance, the
+               destructor will never be called unless an application calls
+               this method just prior to quitting. GetInstance should NOT
+               be used again after this method is called. This method calls
+               Cleanup from its implementation, so a separate call to Cleanup
+               is unnecessary. */
+    static void DeleteInstance(void);
+
+    /*! Returns name of this local component manager (for mtsProxyBaseCommon.h) */
+    inline const std::string CISST_DEPRECATED GetName(void) const {
+        return Name;
+    }
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
@@ -361,13 +217,13 @@ public:
                                                   const std::string & constructorArgSerialized);
 #endif
 
-    /*! \brief Add a component to this local component manager.
+    /*! \brief Add a component to the component manager.
         \param component Component instance to be added */
     bool AddComponent(mtsComponent * component);
     bool CISST_DEPRECATED AddTask(mtsTask * component); // For backward compatibility
     bool CISST_DEPRECATED AddDevice(mtsComponent * component); // For backward compatibility
 
-    /*! \brief Remove component from this local component manager. */
+    /*! \brief Remove component from component manager. */
     bool RemoveComponent(mtsComponent * component);
     bool RemoveComponent(const std::string & componentName);
 
@@ -411,21 +267,6 @@ public:
     /*! Call KillAll method followed by WaitForStateAll. */
     bool KillAllAndWait(double timeoutInSeconds);
 
-    /*! \brief Cleanup. Left in the public API for backwards compatibility.
-               Client code should not call this method directly, and should
-               instead call DeleteInstance prior to quitting. DeleteInstance
-               calls this method before deleting the singleton. */
-    void Cleanup(void);
-
-    /*! \brief DeleteInstance. Since a local component manager is a singleton,
-               and demand-created by the first caller of GetInstance, the
-               destructor will never be called unless an application calls
-               this method just prior to quitting. GetInstance should NOT
-               be used again after this method is called. This method calls
-               Cleanup from its implementation, so a separate call to Cleanup
-               is unnecessary. */
-    static void DeleteInstance(void);
-
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
@@ -448,7 +289,6 @@ public:
         \param serverProcessName Name of server process
         \param serverComponentName Name of server component
         \param serverInterfaceProvidedName Name of provided interface
-        \param retryCount Number of times this connection is retried (default: 10)
         \return True if success, false otherwise
         \note If connection is established successfully, this information is
               reported to the global component manager. Since connection between
@@ -467,8 +307,7 @@ public:
     bool Connect(const std::string & clientProcessName, const std::string & clientComponentName,
                  const std::string & clientInterfaceRequiredName,
                  const std::string & serverProcessName, const std::string & serverComponentName,
-                 const std::string & serverInterfaceProvidedName,
-                 const unsigned int retryCount = 10);
+                 const std::string & serverInterfaceProvidedName);
 
     /*! Disconnect two interfaces */
     bool Disconnect(const ConnectionIDType connectionID);
@@ -484,67 +323,20 @@ public:
     //-------------------------------------------------------------------------
     //  Getters and Utilities
     //-------------------------------------------------------------------------
-    /*! Default name of local component manager */
-    static const std::string ProcessNameOfLCMDefault;
 
-    /*! Name of local component manager running with the global component manager */
-    static const std::string ProcessNameOfLCMWithGCM;
-
-    /*! Get a singleton object of local component manager.
-        \note  If this is called first, the local component manager is
-               configured in standalone mode. If one of the other GetInstance
-               methods (with arguments) is later called, the singleton object is
-               reconfigured in networked mode if (CISST_MTS_HAS_ICE is defined)
-               to support inter-process communication. During
-               this reconfiguration process, a caller thread is blocked for
-               thread-safe transition of all internal data.
-    */
-    static mtsManagerLocal * GetInstance(void);
-
-    /*! \brief Return singleton object of local component manager (networked mode)
-        \param globalComponentManagerIP Ip address of global component manager
-               that this local component manager connects to
-        \param thisProcessName Name of this process. If not specified, set as
-               ip address of this host by default
-        \param thisProcessIP IP address of this process. If not specified, set
-               as the first ip address detected
-        \return Pointer to singleton object
-    */
-    static mtsManagerLocal * GetInstance(const std::string & globalComponentManagerIP,
-                                         const std::string & thisProcessName = "",
-                                         const std::string & thisProcessIP = "");
-
-    /*! \brief Return singleton object of local component manager (networked mode, as GCM)
-        \param globalComponentManager reference to global component manager (GCM)
-    */
-    static mtsManagerLocal * GetInstance(mtsManagerGlobal & globalComponentManager);
+    /*! Returns name of this local component manager */
+    inline const std::string GetProcessName(void) const {
+        return ProcessName;
+    }
 
     /*! Enumerate all the names of components added */
     std::vector<std::string> GetNamesOfComponents(void) const;
     void GetNamesOfComponents(std::vector<std::string>& namesOfComponents) const;
 
     /*! Return a reference to the time server. */
-#if 0
-    inline const osaTimeServer & GetTimeServer(void) const {
-        return TimeServer;
-    }
-#endif
     const osaTimeServer & GetTimeServer(void) const;
 
-    /*! Returns name of this local component manager */
-    inline const std::string GetProcessName(const std::string & CMN_UNUSED(listenerID) = "") const override {
-        return ProcessName;
-    }
-
-    /*! Returns the current configuration of this local component manager */
-    ConfigurationType GetConfiguration(void) const {
-        return Configuration;
-    }
-
-    /*! Check if connection to GCM is active */
-    inline bool IsGCMActive(void) const {
-        return GCMConnected;
-    }
+#ifndef PK_TODO  // Review following methods
 
     /*! Set main thread id based on the current thread. In most situations, it is not
         necessary to call this function because the main thread id is initialized
@@ -563,87 +355,87 @@ public:
     void PushCurrentMainTask(mtsTaskContinuous *cur);
 
     /*! Restore previous active task that has main thread (called when task is exiting) */
-    mtsTaskContinuous *PopCurrentMainTask();
+    mtsTaskContinuous CISST_DEPRECATED *PopCurrentMainTask();
 
     /*! Get pointer to active task that has main thread (if none, returns 0) */
-    mtsTaskContinuous *GetCurrentMainTask(void) const { return CurrentMainTask; }
+    mtsTaskContinuous CISST_DEPRECATED *GetCurrentMainTask(void) const { return CurrentMainTask; }
+#endif
 
     /*! Get names of all commands in a provided interface */
     void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                             const std::string & componentName,
-                            const std::string & providedInterfaceName,
-                            const std::string & CMN_UNUSED(listenerID) = "") override;
+                            const std::string & providedInterfaceName);
 
     /*! Get names of all event generators in a provided interface */
     void GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
                                    const std::string & componentName,
-                                   const std::string & providedInterfaceName,
-                                   const std::string & CMN_UNUSED(listenerID) = "") override;
+                                   const std::string & providedInterfaceName);
 
     /*! Get names of all functions in a required interface */
     void GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
                              const std::string & componentName,
-                             const std::string & requiredInterfaceName,
-                             const std::string & CMN_UNUSED(listenerID) = "") override;
+                             const std::string & requiredInterfaceName);
 
     /*! Get names of all event handlers in a required interface */
     void GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
                                  const std::string & componentName,
-                                 const std::string & requiredInterfaceName,
-                                 const std::string & CMN_UNUSED(listenerID) = "") override;
+                                 const std::string & requiredInterfaceName);
 
     /*! Get description of a command in a provided interface */
     void GetDescriptionOfCommand(std::string & description,
                                  const std::string & componentName,
                                  const std::string & providedInterfaceName,
-                                 const std::string & commandName,
-                                 const std::string & CMN_UNUSED(listenerID) = "") override;
+                                 const std::string & commandName);
 
     /*! Get description of a event generator in a provided interface */
     void GetDescriptionOfEventGenerator(std::string & description,
                                         const std::string & componentName,
                                         const std::string & providedInterfaceName,
-                                        const std::string & eventGeneratorName,
-                                        const std::string & CMN_UNUSED(listenerID) = "") override;
+                                        const std::string & eventGeneratorName);
 
     /*! Get description of a function in a required interface */
     void GetDescriptionOfFunction(std::string & description,
                                   const std::string & componentName,
                                   const std::string & requiredInterfaceName,
-                                  const std::string & functionName,
-                                  const std::string & CMN_UNUSED(listenerID) = "") override;
+                                  const std::string & functionName);
 
     /*! Get description of a function in a required  interface */
     void GetDescriptionOfEventHandler(std::string & description,
                                       const std::string & componentName,
                                       const std::string & requiredInterfaceName,
-                                      const std::string & eventHandlerName,
-                                      const std::string & CMN_UNUSED(listenerID) = "") override;
+                                      const std::string & eventHandlerName);
 
     /*! Return IP address of this process */
-    inline const std::string & GetIPAddress(void) const { return ProcessIP; }
+    inline std::string CISST_DEPRECATED GetIPAddress(void) const { return ""; }
 
     /*! Return a list of all IP addresses detected on this machine. */
     static std::vector<std::string> GetIPAddressList(void);
     static void GetIPAddressList(std::vector<std::string> & ipAddresses);
 
-    /*! Returns name of this local component manager (for mtsProxyBaseCommon.h) */
-    inline const std::string GetName(void) const {
-        return GetProcessName();
-    }
+    /*! Check if further logs are allowed (used in mtsTask); this could be
+        moved to cmnLogger. */
+    static bool IsLogAllowed(void);
 
-    /*! Set endpoint access information */
-    bool SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo);
+    /*! Is system-wide thread-safe logging enabled? */
+    static bool IsLogForwardingEnabled(void);
 
-    //returns the list or processes in the system and their absolute time differences relative to GCM
-    bool GetGCMProcTimeSyncInfo(std::vector<std::string> &processNames, std::vector<double> &timeOffsets);
+    /*! Enable or disable system-wide thread-safe logging */
+    static void SetLogForwarding(bool activate);
 
-    /*! For debugging. Dumps to stream the maps maintained by the manager. */
-    void ToStream(std::ostream & outputStream) const override;
+    /*! Get whether system-wide logging is enabled or not */
+    static void GetLogForwardingState(bool & state);
+    static bool GetLogForwardingState(void);
 
-    /*! Create a dot file to be used by graphviz to generate a nice
-      graph of connections between tasks/interfaces. */
-    void ToStreamDot(std::ostream & outputStream) const;
+    /*! Callback function for system-wide thread-safe logging */
+    static void LogDispatcher(const char * str, int len);
+
+    // TODO: should the following be moved somewhere else?
+    bool IsValidComponentTag(const std::string & tag) const;
+    bool IsValidInterfaceTag(const std::string & tag) const;
+    void AddValidComponentTag(const std::string & tag);
+    void AddValidInterfaceTag(const std::string & tag);
+    const std::set<std::string> & GetValidComponentTags(void) const;
+    const std::set<std::string> & GetValidInterfaceTags(void) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerLocal)

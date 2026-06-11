@@ -22,23 +22,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSocket.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
+#include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceOutput.h>
-#include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceInput.h>
-#include <cisstMultiTask/mtsManagerComponentClient.h>
-#include <cisstMultiTask/mtsManagerComponentServer.h>
+#include <cisstMultiTask/mtsManagerComponent.h>
+#include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
 
 // Time server used by all tasks
@@ -46,14 +45,6 @@ osaTimeServer TimeServer;
 bool TimeServerOriginSet = false;
 
 mtsManagerLocal * mtsManagerLocal::Instance = 0;
-mtsManagerLocal * mtsManagerLocal::InstanceReconfiguration = 0;
-osaMutex mtsManagerLocal::ConfigurationChange;
-
-bool mtsManagerLocal::UnitTestEnabled = false;
-bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
-
-const std::string mtsManagerLocal::ProcessNameOfLCMDefault = "LCM";
-const std::string mtsManagerLocal::ProcessNameOfLCMWithGCM = "GCM";
 
 // System-wide logging: Define logger-related variables here so that
 // the logger doesn't have to call GetInstance() everytime it receives
@@ -66,68 +57,25 @@ osaMutex       LogMutex;
 typedef std::list<mtsLogMessage> LogQueueType;
 LogQueueType   LogQueue;
 
-std::string    ThisProcessName;
 // }}
 
-mtsManagerLocal::mtsManagerLocal(void) : ComponentMap("ComponentMap")
-{
-    CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager: STANDALONE mode" << std::endl;
-    InitializeLocal();
-}
+//************************* Protected Methods **************************************
 
-mtsManagerLocal::mtsManagerLocal(mtsManagerGlobal & CMN_UNUSED(globalComponentManager)) : ComponentMap("ComponentMap")
+mtsManagerLocal::mtsManagerLocal(void) : Name("LCM"), ManagerComponent(0), LocalComponent(0)
 {
-    CMN_LOG_CLASS_INIT_ERROR << "Requested NETWORK mode with GCM, but CISST_MTS_HAS_ICE is false" << std::endl;
-    InitializeLocal();
-}
-
-mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
-                                 const std::string & thisProcessName,
-                                 const std::string & thisProcessIP)
-                                 : ComponentMap("ComponentMap"),
-                                   ProcessName(thisProcessName),
-                                   GlobalComponentManagerIP(globalComponentManagerIP),
-                                   ProcessIP(thisProcessIP)
-{
-    CMN_LOG_CLASS_INIT_ERROR << "mtsManagerLocal(" << globalComponentManagerIP << ", "
-                               << thisProcessName << ", " << thisProcessIP
-                               << ") called, but CISST_MTS_HAS_ICE is false" << std::endl;
-    InitializeLocal();
-}
-
-bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
-{
-    CMN_LOG_CLASS_INIT_WARNING << "ConnectToGlobalComponentManager called when CISST_MTS_HAS_ICE is false"
-                               << std::endl;
-    return true;
+    Initialize();
 }
 
 mtsManagerLocal::~mtsManagerLocal()
 {
-    /*
-    // If ManagerGlobal is not NULL, it means Cleanup() has not been called
-    // before. Thus, it needs to be called here for safe and clean termination.
-    if (ManagerGlobal) {
-        //if (Configuration == LCM_CONFIG_NETWORKED) {
-            Cleanup();
-        //}
-    }
-    */
     Cleanup();
 }
 
 void mtsManagerLocal::Initialize(void)
 {
     __os_init();
-    ComponentMap.SetOwner(*this);
-
-    InstanceReconfiguration = 0;
-    ManagerComponent.Client = 0;
-    ManagerComponent.Server = 0;
 
     CurrentMainTask = 0;
-
-    SetGCMConnected(false);
 
     TimeServer.SetTimeOrigin();
     TimeServerOriginSet = true;
@@ -142,37 +90,8 @@ void mtsManagerLocal::Initialize(void)
     ValidInterfaceTags.clear();
     ValidInterfaceTags.insert("System");
     ValidInterfaceTags.insert("State table");
-}
 
-void mtsManagerLocal::InitializeLocal(void)
-{
-    Initialize();
-
-    // In standalone mode, process name is set as ProcessNameOfLCMDefault by
-    // default since there is only one instance of local task manager.
-    ProcessName = ProcessNameOfLCMDefault;
-    ThisProcessName = ProcessName;
-
-    // In standalone mode, the global component manager is an instance of
-    // mtsManagerGlobal that runs in the same process in which this local
-    // component manager runs.
-    mtsManagerGlobal * globalManager = new mtsManagerGlobal;
-
-    // Register process name to the global component manager
-    if (!globalManager->AddProcess(ProcessName)) {
-        cmnThrow(std::runtime_error("Failed to register process name to Global Component Manager"));
-    }
-
-    // Register process object to the global component manager
-    if (!globalManager->AddProcessObject(this)) {
-        cmnThrow(std::runtime_error("Failed to register process object to Global Component Manager"));
-    }
-
-    ManagerGlobal = globalManager;
-
-    Configuration = LCM_CONFIG_STANDALONE;
-
-    SetGCMConnected(true); // Always true in case of standalone configuration
+    // Leave ProcessName empty
 }
 
 void mtsManagerLocal::Cleanup(void)
@@ -180,25 +99,17 @@ void mtsManagerLocal::Cleanup(void)
     if (LogThreadFinishWaiting) return;
 
     LogThreadFinishWaiting = true;
-    LogTheadFinished.Wait();
+    LogThreadFinished.Wait();
 
-    if (ManagerGlobal) {
-        delete ManagerGlobal;
-        ManagerGlobal = 0;
+    if (ManagerComponent) {
+        ManagerComponent->Kill();
+        delete ManagerComponent;
+        ManagerComponent = 0;
     }
 
-    if (ManagerComponent.Client) {
-        ManagerComponent.Client->Kill();
-        ManagerComponent.Client->WaitForState(mtsComponentState::FINISHED, 30.0 * cmn_s);
-        delete ManagerComponent.Client;
-        ManagerComponent.Client = 0;
-    }
-
-    if (ManagerComponent.Server) {
-        ManagerComponent.Server->Kill();
-        ManagerComponent.Server->WaitForState(mtsComponentState::FINISHED, 30.0 * cmn_s);
-        delete ManagerComponent.Server;
-        ManagerComponent.Server = 0;
+    if (LocalComponent) {
+        delete LocalComponent;
+        LocalComponent = 0;
     }
 
     if (SystemLogMultiplexer) {
@@ -211,6 +122,118 @@ void mtsManagerLocal::Cleanup(void)
     __os_exit();
 }
 
+bool mtsManagerLocal::CreateManagerComponent(void)
+{
+    // Create manager component
+    mtsManagerComponent * managerComponent = new mtsManagerComponent();
+    CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponent: created " << managerComponent->GetName() << std::endl;
+
+    managerComponent->Create();
+
+    // Set up local component with dynamic component management
+    LocalComponent = new mtsComponentWithManagement("LCM");
+
+    std::string requiredName = mtsManagerComponentBase::GetNameOfInterfaceInternalRequired();
+    mtsInterfaceRequired *required = LocalComponent->GetInterfaceRequired(requiredName);
+    if (!required) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponent: failed to find required interface "
+                                 << requiredName << std::endl;
+        return false;
+    }
+    std::string providedName = mtsManagerComponentBase::GetNameOfInterfaceComponentProvided();
+    mtsInterfaceProvided *provided = managerComponent->GetInterfaceProvided(providedName);
+    if (!provided) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponent: failed to find provided interface "
+                                 << providedName << std::endl;
+        return false;
+    }
+
+    // Here, we know that Manager Component is not yet running, so can call internal ConnectTo method
+    if (!required->ConnectTo(provided)) {
+        CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponent: failed to connect LCM to ComponentManager" << std::endl;
+        return false;
+    }
+
+    // Add an interface to PrintLog
+    std::string logInterfaceRequired = mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired;
+    mtsInterfaceRequired *requiredLog = LocalComponent->AddInterfaceRequired(logInterfaceRequired);
+    if (requiredLog) {
+        requiredLog->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog, Logger.PrintLog);
+    }
+    else {
+        CMN_LOG_CLASS_INIT_WARNING << "CreateManagerComponent: failed to add Logger interface" << std::endl;
+    }
+    std::string logInterfaceProvided = mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided;
+    mtsInterfaceProvided *providedLog = managerComponent->GetInterfaceProvided(logInterfaceProvided);
+    if (!providedLog) {
+        CMN_LOG_CLASS_INIT_WARNING << "CreateManagerComponent: failed to find provided interface "
+                                 << providedName << std::endl;
+    }
+    if (requiredLog && providedLog) {
+        // Here, we know that Manager Component is not yet running, so can call internal ConnectTo method
+        if (!requiredLog->ConnectTo(providedLog)) {
+            CMN_LOG_CLASS_INIT_WARNING << "CreateManagerComponent: failed to connect provided/required log interfaces" << std::endl;
+        }
+    }
+
+    // Start manager component
+    managerComponent->Start();
+
+    return true;
+}
+
+mtsManagerComponentServices * mtsManagerLocal::GetManagerServices() const
+{
+    return LocalComponent->GetManagerComponentServices();
+}
+
+const mtsManagerLocal::LogInterface * mtsManagerLocal::GetLoggerServices() const
+{
+    return &Logger;
+}
+
+void mtsManagerLocal::GetInterfaceProvidedDescription(
+    const std::string & componentName, const std::string & interfaceName,
+    mtsInterfaceProvidedDescription & interfaceProvidedDescription)
+{
+    interfaceProvidedDescription = GetManagerServices()->GetInterfaceProvidedDescription(componentName, interfaceName);
+}
+
+void mtsManagerLocal::GetInterfaceRequiredDescription(
+    const std::string & componentName, const std::string & interfaceName,
+    mtsInterfaceRequiredDescription & interfaceRequiredDescription)
+{
+    interfaceRequiredDescription = GetManagerServices()->GetInterfaceRequiredDescription(componentName, interfaceName);
+}
+
+void mtsManagerLocal::SetupSystemLogger(void)
+{
+    LogThreadFinishWaiting = false;
+    LogThread.Create<mtsManagerLocal, void *>(this, &mtsManagerLocal::LogDispatchThread);
+
+    SystemLogMultiplexer = new mtsLODMultiplexerStreambuf();
+    if (!cmnLogger::GetMultiplexer()->AddMultiplexer(SystemLogMultiplexer)) {
+        CMN_LOG_INIT_ERROR << "Failed to add mts system logger" << std::endl;
+    }
+}
+
+//*************************** Public Methods ****************************************
+
+mtsManagerLocal * mtsManagerLocal::GetInstance(void)
+{
+    if (!Instance) {
+        Instance = new mtsManagerLocal;
+        Instance->MainThreadId = osaGetCurrentThreadId();
+
+        // Create manager component
+        if (!Instance->CreateManagerComponent()) {
+            CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager component" << std::endl;
+        }
+    }
+
+    return Instance;
+}
+
 void mtsManagerLocal::DeleteInstance(void)
 {
     if (Instance) {
@@ -220,398 +243,6 @@ void mtsManagerLocal::DeleteInstance(void)
         Instance = 0;
     }
 }
-
-const osaTimeServer & mtsManagerLocal::GetTimeServer(void) const
-{
-    return TimeServer;
-}
-
-void mtsManagerLocal::SetupSystemLogger(void)
-{
-    LogThreadFinishWaiting = false;
-    LogThead.Create<mtsManagerLocal, void *>(this, &mtsManagerLocal::LogDispatchThread);
-
-    SystemLogMultiplexer = new mtsLODMultiplexerStreambuf();
-    if (!cmnLogger::GetMultiplexer()->AddMultiplexer(SystemLogMultiplexer)) {
-        CMN_LOG_INIT_ERROR << "Failed to add mts system logger" << std::endl;
-    }
-}
-
-bool mtsManagerLocal::IsLogAllowed(void) {
-    return !LogDisabled;
-}
-
-bool mtsManagerLocal::IsLogForwardingEnabled(void) {
-    return LogForwardEnabled;
-}
-
-bool mtsManagerLocal::IsValidComponentTag(const std::string & tag) const {
-    return (ValidComponentTags.find(tag) != ValidComponentTags.end());
-}
-
-bool mtsManagerLocal::IsValidInterfaceTag(const std::string & tag) const {
-    return (ValidInterfaceTags.find(tag) != ValidInterfaceTags.end());
-}
-
-void mtsManagerLocal::AddValidComponentTag(const std::string & tag) {
-    ValidComponentTags.insert(tag);
-}
-
-void mtsManagerLocal::AddValidInterfaceTag(const std::string & tag) {
-    ValidInterfaceTags.insert(tag);
-}
-
-const std::set<std::string> & mtsManagerLocal::GetValidComponentTags(void) const {
-    return ValidComponentTags;
-}
-
-const std::set<std::string> & mtsManagerLocal::GetValidInterfaceTags(void) const {
-    return ValidInterfaceTags;
-}
-
-void mtsManagerLocal::SetLogForwarding(bool activate) {
-    LogForwardEnabled = activate;
-}
-
-void mtsManagerLocal::GetLogForwardingState(bool & state) {
-    state = IsLogForwardingEnabled();
-}
-
-bool mtsManagerLocal::GetLogForwardingState(void) {
-    return IsLogForwardingEnabled();
-}
-
-bool mtsManagerLocal::MCCReadyForLogForwarding(void) const
-{
-    if (!Instance) return false;
-
-    if (!Instance->ManagerComponent.Client ||
-        !Instance->ManagerComponent.Client->CanForwardLog())
-    {
-        return false;
-    }
-
-    return true;
-}
-
-void mtsManagerLocal::LogDispatcher(const char * str, int len)
-{
-    if (!LogForwardEnabled) return;
-
-    bool deadlockAvoidance = false;
-    if (Instance) {
-        if (LogMutex.IsLocker() && Instance->MCCReadyForLogForwarding()) {
-            deadlockAvoidance = true;
-        }
-    }
-
-    if (!deadlockAvoidance) {
-        LogMutex.Lock();
-    }
-
-    if (len == 1 && str[0] == '\n') {
-        if (!deadlockAvoidance) {
-            LogMutex.Unlock();
-        }
-        return;
-    }
-
-    // MJ TODO: Deal with cases that len > 1000
-    mtsLogMessage log(str, len);
-    // Timestamping (as early as possible)
-    if (TimeServerOriginSet) {
-        log.SetTimestamp(TimeServer.GetAbsoluteTimeInSeconds());
-        log.SetValid(true);
-    } else {
-        log.SetTimestamp(0);
-        log.SetValid(false);
-    }
-    log.ProcessName = ThisProcessName;
-
-    if (!deadlockAvoidance) {
-        // Queue log message and return immediately
-        LogQueue.push_back(log);
-    } else {
-        // If current thread locked this mutex earlier, forward the log immediately
-        // to avoid deadlock.  Note that all validity checks are already done
-        // in the log dispatch thread in this case.
-        if (Instance->MCCReadyForLogForwarding()) {
-            Instance->ManagerComponent.Client->ForwardLog(log);
-        }
-    }
-
-    if (!deadlockAvoidance) {
-        LogMutex.Unlock();
-    }
-}
-
-void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
-{
-    int count = 0;
-
-    while (!LogThreadFinishWaiting) {
-        if (LogQueue.size() == 0) {
-            osaSleep(1.0 * cmn_ms);
-            continue;
-        }
-
-        // Wait for MCC to be ready (activated and connected) before starting log fowarding
-        if (!MCCReadyForLogForwarding()) {
-            osaSleep(100.0 * cmn_ms);
-            continue;
-        }
-
-        LogMutex.Lock();
-        count = 0;
-        for (LogQueueType::iterator it = LogQueue.begin();
-             it != LogQueue.end();
-             ++count)
-        {
-            if (Instance->ManagerComponent.Client->ForwardLog(*it)) {
-                ++it;
-                LogQueue.pop_front(); // FIFO
-            }
-            // MJ: after 30 log messages forwarded, give other threads a chance to queue
-            // logs by releasing the lock (30 is arbitrary)
-            if (count == 30)
-                break;
-        }
-        LogMutex.Unlock();
-    }
-
-    LogTheadFinished.Raise();
-
-    return 0;
-}
-
-mtsManagerLocal * mtsManagerLocal::GetSafeInstance(void)
-{
-    mtsManagerLocal * instance = mtsManagerLocal::InstanceReconfiguration;
-    if (!instance) {
-        instance = mtsManagerLocal::GetInstance();
-    }
-
-    return instance;
-}
-
-mtsManagerLocal * mtsManagerLocal::GetInstance(void)
-{
-    if (!Instance) {
-        Instance = new mtsManagerLocal;
-        Instance->MainThreadId = osaGetCurrentThreadId();
-
-        // Create manager components
-        if (!Instance->CreateManagerComponents()) {
-            CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
-        }
-    }
-
-    return Instance;
-}
-
-mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalComponentManagerIP,
-                                               const std::string & thisProcessName,
-                                               const std::string & thisProcessIP)
-{
-    if (!Instance) {
-        // If no argument is specified, standalone configuration is set by default.
-        if (globalComponentManagerIP == "" && thisProcessName == "" && thisProcessIP == "") {
-            Instance = new mtsManagerLocal;
-            CMN_LOG_INIT_WARNING << "WARNING: Inter-process communication support is disabled" << std::endl;
-        } else {
-            Instance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
-        }
-        Instance->MainThreadId = osaGetCurrentThreadId();
-
-        // Create manager components
-        if (!Instance->CreateManagerComponents()) {
-            CMN_LOG_INIT_ERROR << "GetInstance: Failed to add internal manager components" << std::endl;
-        }
-
-        return Instance;
-    }
-
-    if (globalComponentManagerIP == "" && thisProcessName == "" && thisProcessIP == "") {
-        return Instance;
-    }
-
-    CMN_LOG_INIT_ERROR << "GetInstance(" << globalComponentManagerIP << ", "
-                       << thisProcessName << ", " << thisProcessIP
-                       << ") called, but network support is disabled" << std::endl;
-
-    return Instance;
-}
-
-mtsManagerLocal * mtsManagerLocal::GetInstance(mtsManagerGlobal & CMN_UNUSED(globalComponentManager))
-{
-    CMN_LOG_INIT_ERROR << "GetInstance(GCM) called when CISST_MTS_HAS_ICE is false" << std::endl;
-    return GetInstance();
-}
-
-bool mtsManagerLocal::AddManagerComponent(const std::string & processName, const bool isServer)
-{
-    // Create manager component client
-    if (!isServer) {
-        const std::string managerComponentName = mtsManagerComponentBase::GetNameOfManagerComponentClientFor(processName);
-
-        mtsManagerComponentClient * managerComponentClient = new mtsManagerComponentClient(managerComponentName);
-        CMN_LOG_CLASS_INIT_VERBOSE << "AddManagerComponent: MCC is created: " << managerComponentClient->GetName() << std::endl;
-
-        if (AddComponent(managerComponentClient)) {
-            ManagerComponent.Client = managerComponentClient;
-            CMN_LOG_CLASS_INIT_VERBOSE << "AddManagerComponent: MCC is added: " << managerComponentClient->GetName() << std::endl;
-        } else {
-            CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Failed to add MCC" << std::endl;
-            return false;
-        }
-    }
-    // Create manager component server
-    else {
-        mtsManagerGlobal * gcm = dynamic_cast<mtsManagerGlobal *>(ManagerGlobal);
-        if (!gcm) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Cannot create manager component server: invalid type of Global Component Manager" << std::endl;
-            return false;
-        }
-        mtsManagerComponentServer * managerComponentServer = new mtsManagerComponentServer(gcm);
-        gcm->SetMCS(managerComponentServer);
-
-        CMN_LOG_CLASS_INIT_VERBOSE << "AddManagerComponent: MCS is created: " << managerComponentServer->GetName() << std::endl;
-
-        if (AddComponent(managerComponentServer)) {
-            ManagerComponent.Server = managerComponentServer;
-            CMN_LOG_CLASS_INIT_VERBOSE << "AddManagerComponent: MCS is added: " << managerComponentServer->GetName() << std::endl;
-        } else {
-            CMN_LOG_CLASS_INIT_ERROR << "AddManagerComponent: Failed to add MCS" << std::endl;
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-bool mtsManagerLocal::ConnectManagerComponentClientToServer(void)
-{
-    switch (Configuration) {
-        case LCM_CONFIG_STANDALONE:
-            // Check if both manager component client and server have been created
-            if (!ManagerComponent.Client) {
-                CMN_LOG_CLASS_INIT_ERROR << "ConnectManagerComponentClientToServer: MCC (standalone) is not initialized" << std::endl;
-                return false;
-            }
-            if (!ManagerComponent.Server) {
-                CMN_LOG_CLASS_INIT_ERROR << "ConnectManagerComponentClientToServer: MCS (standalone) is not initialized" << std::endl;
-                return false;
-            }
-            if (!Connect(ManagerComponent.Client->GetName(),
-                         mtsManagerComponentBase::GetNameOfInterfaceLCMRequired(),
-                         mtsManagerComponentBase::GetNameOfManagerComponentServer(),
-                         mtsManagerComponentBase::GetNameOfInterfaceGCMProvided())
-                )
-            {
-                CMN_LOG_CLASS_INIT_ERROR << "ConnectManagerComponentClientToServer: failed to connect: "
-                                         << ManagerComponent.Client->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceLCMRequired()
-                                         << " - "
-                                         << mtsManagerComponentBase::GetNameOfManagerComponentServer() << ":" << mtsManagerComponentBase::GetNameOfInterfaceGCMProvided()
-                                         << std::endl;
-                return false;
-            }
-            break;
-        case LCM_CONFIG_NETWORKED_WITH_GCM:
-            // Check if manager component server has been created
-            if (!ManagerComponent.Server) {
-                CMN_LOG_CLASS_INIT_ERROR << "Manager component server (networked) is not initialized" << std::endl;
-                return false;
-            }
-
-            // Connection between InterfaceGCM's required interface and
-            // InterfaceLCM's provided interface is not established here
-            // because InterfaceGCM's required interface needs to be dynamically
-            // created when a manager component client connects to the manager
-            // component server.
-
-            // NOTE: no break statement here so that we fall through to the next block of code
-            // to connect the MCC to the MCS in the GCM process.
-
-        case LCM_CONFIG_NETWORKED:
-            // Check if manager component client has been created
-            if (!ManagerComponent.Client) {
-                CMN_LOG_CLASS_INIT_ERROR << "ConnectManagerComponentClientToServer: manager component client (networked) is not initialized" << std::endl;
-                return false;
-            }
-            if (!Connect(this->ProcessName,
-                         ManagerComponent.Client->GetName(),
-                         mtsManagerComponentBase::GetNameOfInterfaceLCMRequired(),
-                         ProcessNameOfLCMWithGCM,
-                         mtsManagerComponentBase::GetNameOfManagerComponentServer(),
-                         mtsManagerComponentBase::GetNameOfInterfaceGCMProvided()))
-            {
-                CMN_LOG_CLASS_INIT_ERROR << "ConnectManagerComponentClientToServer: failed to connect: "
-                                         << mtsManagerGlobal::GetInterfaceUID(this->ProcessName,
-                                                                              ManagerComponent.Client->GetName(),
-                                                                              mtsManagerComponentBase::GetNameOfInterfaceLCMRequired())
-                                         << " - "
-                                         << mtsManagerGlobal::GetInterfaceUID(ProcessNameOfLCMWithGCM,
-                                                                              mtsManagerComponentBase::GetNameOfManagerComponentServer(),
-                                                                              mtsManagerComponentBase::GetNameOfInterfaceGCMProvided())
-                                         << std::endl;
-                return false;
-            }
-            break;
-
-    }
-
-    return true;
-}
-
-
-bool mtsManagerLocal::ConnectToManagerComponentClient(const std::string & componentName)
-{
-    mtsManagerComponentClient * managerComponent = ManagerComponent.Client;
-    if (!ManagerComponent.Client) {
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponentClient: MCC is not created" << std::endl;
-        return false;
-    }
-
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponentClient: no component found with name of "
-            << "\"" << componentName << "\"" << std::endl;
-        return false;
-    }
-
-    // Connect InterfaceComponent's required interface to InterfaceInternal's
-    // provided interface of the connecting component.
-    const std::string nameOfinterfaceComponentRequired
-        = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(componentName);
-    if (!Connect(managerComponent->GetName(), nameOfinterfaceComponentRequired,
-                 componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())) {
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponentClient: failed to connect: "
-                                 << managerComponent->GetName() << ":" << nameOfinterfaceComponentRequired
-                                 << " - "
-                                 << componentName << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalProvided()
-                                 << std::endl;
-        return false;
-    }
-
-    // If a component has support for the dynamic component control services,
-    // connect InterfaceInternal's required interface to InterfaceComponent's
-    // provided interface.
-    if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
-        if (!Connect(component->GetName(), mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
-                     managerComponent->GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
-            CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponentClient: failed to connect: "
-                                     << component->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
-                                     << " - "
-                                     << managerComponent->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceComponentProvided()
-                                     << std::endl;
-            return false;
-        }
-    }
-
-    return true;
-}
-
 
 mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & className, const std::string & componentName,
                                                            const std::string & constructorArgSerialized)
@@ -1067,144 +698,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         CMN_LOG_CLASS_INIT_ERROR << "AddComponent: invalid component" << std::endl;
         return false;
     }
-
-    std::string componentName = component->GetName();
-
-    // If component does not yet have a valid name, assign one now, based on the class
-    // name and the pointer value (to ensure that name is unique).
-    if (componentName == "") {
-        componentName.assign(component->Services()->GetName());
-        char buf[20];
-        sprintf(buf, "_%p", component);
-        componentName.append(buf);
-        CMN_LOG_CLASS_INIT_DEBUG << "AddComponent: assigning name \"" << componentName << "\"" << std::endl;
-        component->SetName(componentName);
-    }
-
-    // Try to register new component to the global component manager first.
-    if (!ManagerGlobal->AddComponent(ProcessName, componentName, component->Services()->GetName(), component->mTags)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add component: " << componentName << std::endl;
-        return false;
-    }
-
-    // If dynamic component management is enabled
-    if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
-        // Add internal provided and required interface for dynamic component management service
-        if (!component->AddInterfaceInternal(true)) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Internal\" provided and required interfaces: " << componentName << std::endl;
-            return false;
-        }
-    }
-    // If dynamic component management is not enabled
-    else {
-        // Add internal interfaces depending on a type of the component.
-        // Manager component client
-        mtsManagerComponentClient * managerComponentClient = dynamic_cast<mtsManagerComponentClient*>(component);
-        mtsManagerComponentServer * managerComponentServer = dynamic_cast<mtsManagerComponentServer*>(component);
-        if (managerComponentClient) {
-            if (!managerComponentClient->AddInterfaceComponent()) {
-                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Component\" interfaces: " << componentName << std::endl;
-                return false;
-            }
-            if (!managerComponentClient->AddInterfaceLCM()) {
-                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"LCM\" interfaces: " << componentName << std::endl;
-                return false;
-            }
-        }
-        // Manager component server
-        else if (managerComponentServer) {
-            if (!managerComponentServer->AddInterfaceGCM()) {
-                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"GCM\" interfaces: " << componentName << std::endl;
-                return false;
-            }
-        }
-        // User(generic) component
-        else {
-            // Add a internal provided interface.  This interface is connected to the
-            // manager component client and is used to inform it of the change of
-            // the running state of this component (more features can be added later).
-            if (!component->AddInterfaceInternal()) {
-                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Internal\" provided interfaces: " << componentName << std::endl;
-                return false;
-            }
-        }
-    }
-
-    // Register all the existing required interfaces and provided interfaces to
-    // the global component manager and mark them as registered.
-    if (!RegisterInterfaces(component)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to register interfaces" << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: successfully added component to GCM: " << componentName << std::endl;
-    // PK TEMP
-    // ManagerGlobal->AddComponent(ProcessName, componentName+"-END", component->Services()->GetName(), component->mTags);
-
-    bool success;
-    ComponentMapChange.Lock();
-    success = ComponentMap.AddItem(componentName, component);
-    ComponentMapChange.Unlock();
-
-    if (!success) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddComponent: "
-                                 << "failed to add component to local component manager: " << componentName << std::endl;
-        return false;
-    }
-
-    // MJ: The current design of dynamic component composition services
-    // assumes that no user component runs in the GCM's process.  That is,
-    // the manager component server (MCS) running in the GCM doesn't need
-    // to be connected to any component.
-    const bool isManagerComponent = (mtsManagerComponentBase::IsManagerComponentServer(componentName) ||
-                                     mtsManagerComponentBase::IsManagerComponentClient(componentName));
-    if (!isManagerComponent) {
-        // Connect user component's internal interface to the manager component.
-        // That is, connect InterfaceInternal.Required to InterfaceComponent.Provided.
-        // This enables user components to use dynamic component composition services
-        // through cisstMultiTask's thread-safe command pattern.
-        // PK: Always do this
-        //if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED)) {
-        if (1) {
-            mtsManagerComponentClient * managerComponent = ManagerComponent.Client;
-            if (!managerComponent) {
-                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to get MCC" << std::endl;
-                return false;
-            }
-
-            if (componentName != managerComponent->GetName() &&
-                componentName != mtsManagerComponentBase::GetNameOfManagerComponentServer())
-            {
-                // Create InterfaceComponent's required interface which will be connected
-                // to connect user component's InterfaceInternal's provided interface.
-                if (!managerComponent->AddNewClientComponent(componentName)) {
-                    CMN_LOG_CLASS_INIT_ERROR << "AddComponent: "
-                        << "failed to add InterfaceComponent's required interface to MCC: "
-                        << "\"" << componentName << "\"" << std::endl;
-                    return false;
-                }
-
-                // Connect user component to the manager component client.  If a component
-                // has InterfaceInternal's required interface which provides dynamic
-                // component control services, the required interface gets connected to
-                // InterfaceComponent's provided interface.
-                if (!ConnectToManagerComponentClient(componentName)) {
-                    CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to connect component \"" << componentName << "\" "
-                        << "to MCC" << std::endl;
-                    return false;
-                }
-
-                CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: connected user components "
-                    << "\"" << componentName << "\" to manager component client "
-                    << "\"" << managerComponent->GetName() << "\""
-                    << std::endl;
-            }
-        }
-    }
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: successfully added component to LCM: " << componentName << std::endl;
-
-    return true;
+    return GetManagerServices()->ComponentAdd(component);
 }
 
 bool CISST_DEPRECATED mtsManagerLocal::AddTask(mtsTask * component)
@@ -1219,77 +713,31 @@ bool CISST_DEPRECATED mtsManagerLocal::AddDevice(mtsComponent * component)
 
 bool mtsManagerLocal::RemoveComponent(mtsComponent * component)
 {
-    if (component == 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: null component pointer passed to this method" << std::endl;
+    if (!component) {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: invalid component" << std::endl;
         return false;
     }
-    return RemoveComponent(component->GetName(), true);
+    return GetManagerServices()->ComponentRemove(component);
 }
 
 bool mtsManagerLocal::RemoveComponent(const std::string & componentName)
 {
-    return RemoveComponent(componentName, true);
-}
-
-bool mtsManagerLocal::RemoveComponent(mtsComponent * component, const bool notifyGCM)
-{
-    if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: invalid argument" << std::endl;
-        return false;
-    }
-
-    return RemoveComponent(component->GetName(), notifyGCM);
-}
-
-bool mtsManagerLocal::RemoveComponent(const std::string & componentName, const bool notifyGCM)
-{
-    // Notify the global component manager of the removal of this component
-    if (notifyGCM) {
-        if (!ManagerGlobal->RemoveComponent(ProcessName, componentName)) {
-            CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove \"" << componentName << "\""
-                << "from component Global Component Manager" << std::endl;
-            return false;
-        }
-    }
-
-    // Get a component to be removed
-    mtsComponent * component = ComponentMap.GetItem(componentName, CMN_LOG_LEVEL_NONE);
-    if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to get component to be removed: " << componentName << std::endl;
-        return false;
-    }
-
-    bool success;
-    ComponentMapChange.Lock();
-    success = ComponentMap.RemoveItem(componentName);
-    ComponentMapChange.Unlock();
-
-    if (!success) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: failed to remove component: " << componentName << std::endl;
-        return false;
-    }
-    else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "RemoveComponent: removed component: " << componentName << std::endl;
-    }
-
-    return true;
+    return GetManagerServices()->ComponentRemove(componentName);
 }
 
 size_t mtsManagerLocal::RemoveAllUserComponents(void)
 {
-    std::vector<std::string> componentNames = ComponentMap.GetNames();
+    std::vector<std::string> componentNames;
+    GetNamesOfComponents(componentNames);
     size_t numRemoved = 0;
     for (size_t i = 0; i < componentNames.size(); i++) {
-        const bool isManagerComponent = (mtsManagerComponentBase::IsManagerComponentServer(componentNames[i]) ||
-                                         mtsManagerComponentBase::IsManagerComponentClient(componentNames[i]));
-        if (!isManagerComponent) {
-            if (!RemoveComponent(componentNames[i])) {
-                CMN_LOG_CLASS_RUN_WARNING << "RemoveAllUserComponents: failed to remove "
-                                          << componentNames[i] << std::endl;
-            }
-            else {
-                numRemoved++;
-            }
+        // Do not need to check if this is the manager component, because RemoveComponent will not remove it.
+        if (!RemoveComponent(componentNames[i])) {
+            CMN_LOG_CLASS_RUN_WARNING << "RemoveAllUserComponents: failed to remove "
+                                      << componentNames[i] << std::endl;
+        }
+        else {
+            numRemoved++;
         }
     }
     if (numRemoved > 0) {
@@ -1299,14 +747,266 @@ size_t mtsManagerLocal::RemoveAllUserComponents(void)
     return numRemoved;
 }
 
+mtsComponent * mtsManagerLocal::GetComponent(const std::string & componentName) const
+{
+    mtsManagerComponentServices *services = GetManagerServices();
+    return services->ComponentGet(componentName);
+}
+
+mtsTask * mtsManagerLocal::GetComponentAsTask(const std::string & componentName) const
+{
+    mtsTask * componentTask = 0;
+
+    mtsComponent * component = GetComponent(componentName);
+    if (component) {
+        componentTask = dynamic_cast<mtsTask*>(component);
+    }
+
+    return componentTask;
+}
+
+mtsComponent CISST_DEPRECATED * mtsManagerLocal::GetDevice(const std::string & deviceName)
+{
+    return GetComponent(deviceName);
+}
+
+mtsTask CISST_DEPRECATED * mtsManagerLocal::GetTask(const std::string & taskName)
+{
+    return GetComponentAsTask(taskName);
+}
+
+bool mtsManagerLocal::FindComponent(const std::string & componentName) const
+{
+    return (GetComponent(componentName) != 0);
+}
+
+bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double timeout) const
+{
+    // wait for all components to be started if timeout is positive
+    bool allAtState = true;
+    if (timeout > 0.0) {
+        // will iterate on all components
+        std::vector<std::string> componentNames = GetNamesOfComponents();
+        std::vector<std::string>::const_iterator iterator = componentNames.begin();
+        const std::vector<std::string>::const_iterator end = componentNames.end();
+        double timeStartedAll = TimeServer.GetRelativeTime();
+        double timeEnd = timeStartedAll + timeout;
+        bool timedOut = false;
+        for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
+            mtsComponent *component = GetComponent(*iterator);
+            // compute how much time do we have left based on when we started
+            double timeLeft = timeEnd - TimeServer.GetRelativeTime();
+            // skip in 2 cases, manager components and tasks with ExecIn
+            mtsManagerComponentBase * isManager = dynamic_cast<mtsManagerComponentBase *>(component);
+            bool isIndependent = true;
+            mtsTask * task = dynamic_cast<mtsTask *>(component);
+            if (task && task->ExecIn && task->ExecIn->GetConnectedInterface()) {
+                isIndependent = false;
+            }
+            // wait if needed
+            if (!isManager && isIndependent) {
+                allAtState = component->WaitForState(desiredState, timeLeft);
+                if (!allAtState) {
+                    CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: component \"" << (*iterator) << "\" failed to reach state \""
+                                             << desiredState << "\"" << std::endl;
+                }
+            }
+            if (TimeServer.GetRelativeTime() > timeEnd) {
+                // looks like we don't have any time left to start the remaining components.
+                timedOut = true;
+                allAtState = false;
+                CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: timed out while waiting for state \""
+                                         << desiredState << "\"" << std::endl;
+            }
+        }
+        // report results
+        if (allAtState && !timedOut) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "WaitForStateAll: all components reached state \""
+                                       << desiredState << "\" in " << (TimeServer.GetRelativeTime() - timeStartedAll) << " seconds" << std::endl;
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: failed to reached state \""
+                                     << desiredState << "\" for all components" << std::endl;
+        }
+    } else {
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForStateAll: called with null timeout (not blocking)" << std::endl;
+    }
+    return allAtState;
+}
+
+
+void mtsManagerLocal::CreateAll(void)
+{
+    std::vector<std::string> componentNames = GetNamesOfComponents();
+    std::vector<std::string>::const_iterator iterator = componentNames.begin();
+    const std::vector<std::string>::const_iterator end = componentNames.end();
+
+    mtsManagerComponentServices *services = GetManagerServices();
+    for (; iterator != end; ++iterator) {
+        // Could instead define a new ComponentCreate method
+        mtsComponent *component = services->ComponentGet(*iterator);
+        if (component) component->Create();
+    }
+}
+
+
+bool mtsManagerLocal::CreateAllAndWait(double timeoutInSeconds)
+{
+    this->CreateAll();
+    return this->WaitForStateAll(mtsComponentState::READY, timeoutInSeconds);
+}
+
+
+void mtsManagerLocal::StartAll(void)
+{
+    // Get the current thread id in order to check if any task will use the current thread.
+    // If so, start that task last.
+    const osaThreadId threadId = osaGetCurrentThreadId();
+    if (threadId != this->MainThreadId) {
+        CMN_LOG_CLASS_RUN_WARNING << "StartAll: current thread is not main thread." << std::endl;
+    }
+
+    mtsTask * lastTask = 0;   // Last task to be started (if non-zero)
+
+    std::vector<std::string> componentNames = GetNamesOfComponents();
+    std::vector<std::string>::const_iterator iterator = componentNames.begin();
+    const std::vector<std::string>::const_iterator end = componentNames.end();
+
+    mtsManagerComponentServices *services = GetManagerServices();
+
+    for (; iterator != end; ++iterator) {
+        mtsComponent *component = GetComponent(*iterator);
+        // look for component
+        mtsTask *componentTask = dynamic_cast<mtsTask*>(component);
+        if (componentTask) {
+            // Check if the task will use the current thread.
+            if (componentTask->Thread.GetId() == threadId) {
+                if (dynamic_cast<mtsTaskFromCallback*>(componentTask)) {
+                    CMN_LOG_CLASS_INIT_VERBOSE << "StartAll: component \"" << (*iterator)
+                                               << "\" uses current thread, but is a callback task;"
+                                               << " expect that it will be called by dispatcher." << std::endl;
+                    componentTask->Start();
+                }
+                else {
+                    CMN_LOG_CLASS_INIT_WARNING << "StartAll: component \"" << (*iterator)
+                                               << "\" uses current thread, will be started last." << std::endl;
+                    if (lastTask) {
+                        CMN_LOG_CLASS_INIT_ERROR << "StartAll: found another task using current thread (\""
+                                                 << (*iterator) << "\"), only first will be started (\""
+                                                 << lastTask->GetName() << "\")." << std::endl;
+                        // PK: I don't think this task should be started if it uses the current thread
+                        componentTask->Start();
+                    } else {
+                        // set pointer to last task to be started
+                        lastTask = componentTask;
+                    }
+                }
+            } else {
+                CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << (*iterator) << "\"" << std::endl;
+                if (componentTask->Thread.GetId() == MainThreadId) {
+                    if (dynamic_cast<mtsTaskContinuous *>(componentTask)) {
+                        CMN_LOG_CLASS_INIT_WARNING << "StartAll: is the main task really " << (*iterator) << "???" << std::endl;
+                    }
+                }
+                componentTask->Start();  // If task will not use current thread, start it immediately.
+            }
+        } else {
+            CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting component \"" << (*iterator) << "\"" << std::endl;
+            component->Start();  // this is a component, it doesn't have a thread
+        }
+    }
+
+    if (!lastTask) {
+        lastTask->Start();
+    }
+}
+
+
+bool mtsManagerLocal::StartAllAndWait(double timeoutInSeconds)
+{
+    this->StartAll();
+    return this->WaitForStateAll(mtsComponentState::ACTIVE, timeoutInSeconds);
+}
+
+
+void mtsManagerLocal::KillAll(void)
+{
+    std::vector<std::string> componentNames = GetNamesOfComponents();
+    std::vector<std::string>::const_iterator iterator = componentNames.begin();
+    const std::vector<std::string>::const_iterator end = componentNames.end();
+
+    for (; iterator != end; ++iterator) {
+        mtsComponent *component = GetComponent(*iterator);
+        if (component) {
+            component->Kill();
+        }
+        else {
+            CMN_LOG_CLASS_RUN_DEBUG << "KillAll: null component \""
+                                    << (*iterator) << "\"" << std::endl;
+        }
+    }
+
+    // Block further logs
+    LogDisabled = true;
+    SetLogForwarding(false);
+}
+
+
+bool mtsManagerLocal::KillAllAndWait(double timeoutInSeconds)
+{
+    this->KillAll();
+    return this->WaitForStateAll(mtsComponentState::FINISHED, timeoutInSeconds);
+}
+
+
+bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceName,
+                              const std::string & serverComponentName, const std::string & serverInterfaceName)
+{
+    return GetManagerServices()->Connect(clientComponentName, clientInterfaceName,
+                                         serverComponentName, serverInterfaceName);
+}
+
+bool mtsManagerLocal::Connect(const std::string & clientProcessName,
+                              const std::string & clientComponentName, const std::string & clientInterfaceName,
+                              const std::string & serverProcessName,
+                              const std::string & serverComponentName, const std::string & serverInterfaceName)
+{
+    return GetManagerServices()->Connect(clientProcessName, clientComponentName, clientInterfaceName,
+                                         serverProcessName, serverComponentName, serverInterfaceName);
+}
+
+bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
+{
+    return GetManagerServices()->Disconnect(connectionID);
+}
+
+bool mtsManagerLocal::Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceName,
+                                 const std::string & serverComponentName, const std::string & serverInterfaceName)
+{
+    return GetManagerServices()->Disconnect(clientComponentName, clientInterfaceName,
+                                            serverComponentName, serverInterfaceName);
+}
+
+bool mtsManagerLocal::Disconnect(
+    const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceName,
+    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceName)
+{
+    return GetManagerServices()->Disconnect(clientProcessName, clientComponentName, clientInterfaceName,
+                                            serverProcessName, serverComponentName, serverInterfaceName);
+}
+
 std::vector<std::string> mtsManagerLocal::GetNamesOfComponents(void) const
 {
-    return ComponentMap.GetNames();
+    return GetManagerServices()->GetNamesOfComponents();
 }
 
 void mtsManagerLocal::GetNamesOfComponents(std::vector<std::string> & namesOfComponents) const
 {
-    ComponentMap.GetNames(namesOfComponents);
+    namesOfComponents = GetManagerServices()->GetNamesOfComponents();
+}
+
+const osaTimeServer & mtsManagerLocal::GetTimeServer(void) const
+{
+    return TimeServer;
 }
 
 void mtsManagerLocal::PushCurrentMainTask(mtsTaskContinuous *cur)
@@ -1351,15 +1051,10 @@ mtsTaskContinuous *mtsManagerLocal::PopCurrentMainTask(void)
 
 void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                                          const std::string & componentName,
-                                         const std::string & interfaceName,
-                                         const std::string & CMN_UNUSED(listenerID))
+                                         const std::string & interfaceName)
 {
     mtsInterfaceProvidedDescription desc;
-    if (!GetInterfaceProvidedDescription(componentName, interfaceName, desc)) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetNamesOfCommands: failed to get provided interface information: "
-                                 << this->ProcessName << ":" << componentName << ":" << interfaceName << std::endl;
-        return;
-    }
+    GetInterfaceProvidedDescription(componentName, interfaceName, desc);
 
     std::string name;
     for (size_t i = 0; i < desc.CommandsVoid.size(); ++i) {
@@ -1396,15 +1091,10 @@ void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfComman
 
 void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string> & namesOfEventGenerators,
                                                 const std::string & componentName,
-                                                const std::string & interfaceName,
-                                                const std::string & CMN_UNUSED(listenerID))
+                                                const std::string & interfaceName)
 {
     mtsInterfaceProvidedDescription desc;
-    if (!GetInterfaceProvidedDescription(componentName, interfaceName, desc)) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetNamesOfEventGenerators: failed to get provided interface information: "
-                                 << this->ProcessName << ":" << componentName << ":" << interfaceName << std::endl;
-        return;
-    }
+    GetInterfaceProvidedDescription(componentName, interfaceName, desc);
 
     std::string name;
     for (size_t i = 0; i < desc.EventsVoid.size(); ++i) {
@@ -1421,13 +1111,10 @@ void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string> & names
 
 void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string> & namesOfFunctions,
                                           const std::string & componentName,
-                                          const std::string & requiredInterfaceName,
-                                          const std::string & CMN_UNUSED(listenerID))
+                                          const std::string & requiredInterfaceName)
 {
     mtsInterfaceRequiredDescription desc;
-    if (!GetInterfaceRequiredDescription(componentName, requiredInterfaceName, desc)) {
-        return;
-    }
+    GetInterfaceRequiredDescription(componentName, requiredInterfaceName, desc);
 
     std::string name;
     for (size_t i = 0; i < desc.FunctionVoidNames.size(); ++i) {
@@ -1464,13 +1151,10 @@ void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string> & namesOfFunc
 
 void mtsManagerLocal::GetNamesOfEventHandlers(std::vector<std::string> & namesOfEventHandlers,
                                               const std::string & componentName,
-                                              const std::string & requiredInterfaceName,
-                                              const std::string & CMN_UNUSED(listenerID))
+                                              const std::string & requiredInterfaceName)
 {
     mtsInterfaceRequiredDescription desc;
-    if (!GetInterfaceRequiredDescription(componentName, requiredInterfaceName, desc)) {
-        return;
-    }
+    GetInterfaceRequiredDescription(componentName, requiredInterfaceName, desc);
 
     std::string name;
     for (size_t i = 0; i < desc.EventHandlersVoid.size(); ++i) {
@@ -1488,8 +1172,7 @@ void mtsManagerLocal::GetNamesOfEventHandlers(std::vector<std::string> & namesOf
 void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
                                               const std::string & componentName,
                                               const std::string & interfaceName,
-                                              const std::string & commandName,
-                                              const std::string & CMN_UNUSED(listenerID))
+                                              const std::string & commandName)
 {
     mtsComponent * component = GetComponent(componentName);
     if (!component) return;
@@ -1560,8 +1243,7 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
 void mtsManagerLocal::GetDescriptionOfEventGenerator(std::string & description,
                                                      const std::string & componentName,
                                                      const std::string & interfaceName,
-                                                     const std::string & eventGeneratorName,
-                                                     const std::string & CMN_UNUSED(listenerID))
+                                                     const std::string & eventGeneratorName)
 {
     mtsComponent * component = GetComponent(componentName);
     if (!component) return;
@@ -1604,8 +1286,7 @@ void mtsManagerLocal::GetDescriptionOfEventGenerator(std::string & description,
 void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
                                                const std::string & componentName,
                                                const std::string & requiredInterfaceName,
-                                               const std::string & functionName,
-                                               const std::string & CMN_UNUSED(listenerID))
+                                               const std::string & functionName)
 {
     mtsComponent * component = GetComponent(componentName);
     if (!component) return;
@@ -1690,8 +1371,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
 void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
                                                    const std::string & componentName,
                                                    const std::string & requiredInterfaceName,
-                                                   const std::string & eventHandlerName,
-                                                   const std::string & CMN_UNUSED(listenerID))
+                                                   const std::string & eventHandlerName)
 {
     mtsComponent * component = GetComponent(componentName);
     if (!component) return;
@@ -1731,347 +1411,10 @@ void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
     }
 }
 
-
-mtsComponent * mtsManagerLocal::GetComponent(const std::string & componentName) const
-{
-    return ComponentMap.GetItem(componentName, CMN_LOG_LEVEL_NONE);
-}
-
-mtsTask * mtsManagerLocal::GetComponentAsTask(const std::string & componentName) const
-{
-    mtsTask * componentTask = 0;
-
-    mtsComponent * component = ComponentMap.GetItem(componentName, CMN_LOG_LEVEL_NONE);
-    if (component) {
-        componentTask = dynamic_cast<mtsTask*>(component);
-    }
-
-    return componentTask;
-}
-
-mtsTask CISST_DEPRECATED * mtsManagerLocal::GetTask(const std::string & taskName)
-{
-    return GetComponentAsTask(taskName);
-}
-
-mtsComponent CISST_DEPRECATED * mtsManagerLocal::GetDevice(const std::string & deviceName)
-{
-    return ComponentMap.GetItem(deviceName, CMN_LOG_LEVEL_NONE);
-}
-
-bool mtsManagerLocal::FindComponent(const std::string & componentName) const
-{
-    return (GetComponent(componentName) != 0);
-}
-
-bool mtsManagerLocal::CreateManagerComponents(void)
-{
-    // Automatically add internal manager component when the LCM is initialized.
-    if (Configuration == LCM_CONFIG_STANDALONE) {
-        if (!AddManagerComponent(GetProcessName(), true)) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add internal manager component server" << std::endl;
-            return false;
-        }
-    }
-
-    // Always add the MCC and connect it to the MCS
-    //if ((Configuration == LCM_CONFIG_STANDALONE) || (Configuration == LCM_CONFIG_NETWORKED)) {
-    if (1) {
-        if (!AddManagerComponent(GetProcessName())) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add internal MCC" << std::endl;
-            return false;
-        }
-        // Connect manager component client to manager component server, i.e.,
-        // connect InterfaceLCM.Required - InterfaceGCM.Provided
-        if (!ConnectManagerComponentClientToServer()) {
-            CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to connect MCC to server" << std::endl;
-            return false;
-        }
-    }
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponents: Successfully created manager components" << std::endl;
-
-    ManagerComponent.Client->MCSReady = true;
-
-    return true;
-}
-
-
-bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double timeout) const
-{
-    // wait for all components to be started if timeout is positive
-    bool allAtState = true;
-    if (timeout > 0.0) {
-        // will iterate on all components
-        ComponentMapType::const_iterator iterator = ComponentMap.begin();
-        const ComponentMapType::const_iterator end = ComponentMap.end();
-        double timeStartedAll = TimeServer.GetRelativeTime();
-        double timeEnd = timeStartedAll + timeout;
-        bool timedOut = false;
-        for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
-            // compute how much time do we have left based on when we started
-            double timeLeft = timeEnd - TimeServer.GetRelativeTime();
-            // skip in 2 cases, manager components and tasks with ExecIn
-            mtsManagerComponentBase * isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
-            bool isIndependent = true;
-            mtsTask * task = dynamic_cast<mtsTask *>(iterator->second);
-            if (task && task->ExecIn && task->ExecIn->GetConnectedInterface()) {
-                isIndependent = false;
-            }
-            // wait if needed
-            if (!isManager && isIndependent) {
-                allAtState = iterator->second->WaitForState(desiredState, timeLeft);
-                if (!allAtState) {
-                    CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: component \"" << iterator->first << "\" failed to reach state \""
-                                             << desiredState << "\"" << std::endl;
-                }
-            }
-            if (TimeServer.GetRelativeTime() > timeEnd) {
-                // looks like we don't have any time left to start the remaining components.
-                timedOut = true;
-                allAtState = false;
-                CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: timed out while waiting for state \""
-                                         << desiredState << "\"" << std::endl;
-            }
-        }
-        // report results
-        if (allAtState && !timedOut) {
-            CMN_LOG_CLASS_INIT_VERBOSE << "WaitForStateAll: all components reached state \""
-                                       << desiredState << "\" in " << (TimeServer.GetRelativeTime() - timeStartedAll) << " seconds" << std::endl;
-        } else {
-            CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: failed to reached state \""
-                                     << desiredState << "\" for all components" << std::endl;
-        }
-    } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForStateAll: called with null timeout (not blocking)" << std::endl;
-    }
-    return allAtState;
-}
-
-
-void mtsManagerLocal::CreateAll(void)
-{
-    ComponentMapChange.Lock();
-
-    ComponentMapType::const_iterator iterator = ComponentMap.begin();
-    const ComponentMapType::const_iterator end = ComponentMap.end();
-    for (; iterator != end; ++iterator) {
-        iterator->second->Create();
-    }
-
-    ComponentMapChange.Unlock();
-}
-
-
-bool mtsManagerLocal::CreateAllAndWait(double timeoutInSeconds)
-{
-    this->CreateAll();
-    return this->WaitForStateAll(mtsComponentState::READY, timeoutInSeconds);
-}
-
-
-void mtsManagerLocal::StartAll(void)
-{
-    // Get the current thread id in order to check if any task will use the current thread.
-    // If so, start that task last.
-    const osaThreadId threadId = osaGetCurrentThreadId();
-    if (threadId != this->MainThreadId) {
-        CMN_LOG_CLASS_RUN_WARNING << "StartAll: current thread is not main thread." << std::endl;
-    }
-
-    mtsTask * componentTask;
-
-    ComponentMapChange.Lock();
-
-    ComponentMapType::const_iterator iterator = ComponentMap.begin();
-    const ComponentMapType::const_iterator end = ComponentMap.end();
-    ComponentMapType::const_iterator lastTask = ComponentMap.end();
-
-    for (; iterator != end; ++iterator) {
-        // look for component
-        componentTask = dynamic_cast<mtsTask*>(iterator->second);
-        if (componentTask) {
-            // Check if the task will use the current thread.
-            if (componentTask->Thread.GetId() == threadId) {
-                if (dynamic_cast<mtsTaskFromCallback*>(iterator->second)) {
-                    CMN_LOG_CLASS_INIT_VERBOSE << "StartAll: component \"" << iterator->first
-                                               << "\" uses current thread, but is a callback task;"
-                                               << " expect that it will be called by dispatcher." << std::endl;
-                    iterator->second->Start();
-                }
-                else {
-                    CMN_LOG_CLASS_INIT_WARNING << "StartAll: component \"" << iterator->first
-                                               << "\" uses current thread, will be started last." << std::endl;
-                    if (lastTask != end) {
-                        CMN_LOG_CLASS_INIT_ERROR << "StartAll: found another task using current thread (\""
-                                                 << iterator->first << "\"), only first will be started (\""
-                                                 << lastTask->first << "\")." << std::endl;
-                        // PK: I don't think this task should be started if it uses the current thread
-                        iterator->second->Start();
-                    } else {
-                        // set iterator to last task to be started
-                        lastTask = iterator;
-                    }
-                }
-            } else {
-                CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << iterator->first << "\"" << std::endl;
-                if (componentTask->Thread.GetId() == MainThreadId) {
-                    if (dynamic_cast<mtsTaskContinuous *>(componentTask)) {
-                        CMN_LOG_CLASS_INIT_WARNING << "StartAll: is the main task really " << iterator->first << "???" << std::endl;
-                    }
-                }
-                iterator->second->Start();  // If task will not use current thread, start it immediately.
-            }
-        } else {
-            CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting component \"" << iterator->first << "\"" << std::endl;
-            iterator->second->Start();  // this is a component, it doesn't have a thread
-        }
-    }
-
-    ComponentMapChange.Unlock();
-
-    if (lastTask != end) {
-        lastTask->second->Start();
-    }
-}
-
-
-bool mtsManagerLocal::StartAllAndWait(double timeoutInSeconds)
-{
-    this->StartAll();
-    return this->WaitForStateAll(mtsComponentState::ACTIVE, timeoutInSeconds);
-}
-
-
-void mtsManagerLocal::KillAll(void)
-{
-    mtsManagerComponentBase * isManager;
-    ComponentMapChange.Lock(); {
-        ComponentMapType::const_iterator iterator = ComponentMap.begin();
-        const ComponentMapType::const_iterator end = ComponentMap.end();
-        for (; iterator != end; ++iterator) {
-            if (!iterator->second) {
-                CMN_LOG_CLASS_INIT_DEBUG << "KillAll: null component" << std::endl;
-                continue;
-            }
-            isManager = dynamic_cast<mtsManagerComponentBase *>(iterator->second);
-            if (!isManager) {
-                iterator->second->Kill();
-            } else {
-                CMN_LOG_CLASS_INIT_DEBUG << "KillAll: skip manager component: " << iterator->second->GetName() << std::endl;
-            }
-        }
-    }
-    ComponentMapChange.Unlock();
-
-    // Block further logs
-    LogDisabled = true;
-    SetLogForwarding(false);
-}
-
-
-bool mtsManagerLocal::KillAllAndWait(double timeoutInSeconds)
-{
-    this->KillAll();
-    return this->WaitForStateAll(mtsComponentState::FINISHED, timeoutInSeconds);
-}
-
-
-bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceName,
-                              const std::string & serverComponentName, const std::string & serverInterfaceName)
-{
-    if (!ManagerComponent.Client) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: MCC not yet created" << std::endl;
-        return false;
-    }
-
-    return ManagerComponent.Client->Connect(clientComponentName, clientInterfaceName,
-                                            serverComponentName, serverInterfaceName);
-}
-
-ConnectionIDType mtsManagerLocal::ConnectSetup(const std::string & clientComponentName, const std::string & clientInterfaceName,
-                                               const std::string & serverComponentName, const std::string & serverInterfaceName)
-{
-    std::vector<std::string> options;
-    std::stringstream allOptions;
-    std::ostream_iterator< std::string > output(allOptions, ", ");
-
-    // Make sure all interfaces created so far are registered to the GCM.
-    if (!RegisterInterfaces(clientComponentName)) {
-        GetNamesOfComponents(options);
-        if (options.size() == 0) {
-            allOptions << "there is no component available";
-        } else {
-            allOptions << "the following component(s) are available: ";
-            std::copy(options.begin(), options.end(), output);
-        }
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to register interfaces for component \""
-                                 << clientComponentName << "\", " << allOptions.str() << std::endl;
-        return InvalidConnectionID;
-    }
-    if (!RegisterInterfaces(serverComponentName)) {
-        GetNamesOfComponents(options);
-        if (options.size() == 0) {
-            allOptions << "there is no component available";
-        } else {
-            allOptions << "the following component(s) are available: ";
-            std::copy(options.begin(), options.end(), output);
-        }
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to register interfaces for component \""
-                                 << serverComponentName << "\", " << allOptions.str() << std::endl;
-        return InvalidConnectionID;
-    }
-
-    const ConnectionIDType connectionID =
-        ManagerGlobal->Connect(ProcessName,
-                               ProcessName, clientComponentName, clientInterfaceName,
-                               ProcessName, serverComponentName, serverInterfaceName);
-    if (connectionID == InvalidConnectionID) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get connection id from Global Component Manager: "
-                                 << clientComponentName << ":" << clientInterfaceName << " - "
-                                 << serverComponentName << ":" << serverInterfaceName << std::endl;
-    } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "Connect: new connection id: LOCAL (" << connectionID << ") for "
-                                   << mtsManagerGlobal::GetInterfaceUID(ProcessName, clientComponentName, clientInterfaceName)
-                                   << " - "
-                                   << mtsManagerGlobal::GetInterfaceUID(ProcessName, serverComponentName, serverInterfaceName)
-                                   << std::endl;
-    }
-
-    return connectionID;
-}
-
-bool mtsManagerLocal::ConnectNotify(ConnectionIDType connectionId,
-                                    const std::string & clientComponentName, const std::string & clientInterfaceName,
-                                    const std::string & serverComponentName, const std::string & serverInterfaceName)
-{
-    // Notify the GCM of successful local connection
-    if (!ManagerGlobal->ConnectConfirm(connectionId)) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to notify GCM of this connection (" << connectionId << "): "
-                                 << clientComponentName << ":" << clientInterfaceName << " - "
-                                 << serverComponentName << ":" << serverInterfaceName << std::endl;
-
-        if (!Disconnect(clientComponentName, clientInterfaceName, serverComponentName, serverInterfaceName)) {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect: clean up error: disconnection failed: "
-                                     << clientComponentName << ":" << clientInterfaceName << " - "
-                                     << serverComponentName << ":" << serverInterfaceName << std::endl;
-        }
-
-        return false;
-    }
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "Connect: successfully established local connection: "
-                               << clientComponentName << ":" << clientInterfaceName << " - "
-                               << serverComponentName << ":" << serverInterfaceName << std::endl;
-
-    return true;
-}
-
 std::vector<std::string> mtsManagerLocal::GetIPAddressList(void)
 {
     std::vector<std::string> ipAddresses;
-    osaSocket::GetLocalhostIP(ipAddresses);
-
+    GetIPAddressList(ipAddresses);
     return ipAddresses;
 }
 
@@ -2080,467 +1423,134 @@ void mtsManagerLocal::GetIPAddressList(std::vector<std::string> & ipAddresses)
     osaSocket::GetLocalhostIP(ipAddresses);
 }
 
-bool mtsManagerLocal::Connect(const std::string & clientProcessName,
-                              const std::string & clientComponentName, const std::string & clientInterfaceName,
-                              const std::string & serverProcessName,
-                              const std::string & serverComponentName, const std::string & serverInterfaceName,
-                              const unsigned int CMN_UNUSED(retryCount))
-{
-    // Prevent this method from being used to connect two local interfaces
-    if (clientProcessName == serverProcessName) {
-        return Connect(clientComponentName, clientInterfaceName, serverComponentName, serverInterfaceName);
-    }
-
-    CMN_LOG_CLASS_INIT_ERROR << "Connect: CISST_MTS_HAS_ICE is false, so could not make network connection: "
-                             << mtsManagerGlobal::GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceName)
-                             << " - "
-                             << mtsManagerGlobal::GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceName)
-                             << std::endl;
-    return true;
+bool mtsManagerLocal::IsLogAllowed(void) {
+    return !LogDisabled;
 }
 
-bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
-{
-    // If GCM is not connected, don't reqeust disconnection
-    if (!IsGCMActive()) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: GCM disconnected -- Disconnection request ignored (connection id [ " << connectionID << " ])" << std::endl;
-        return true;
-    }
-
-    bool success = ManagerGlobal->Disconnect(connectionID);
-    if (IsGCMActive()) { // Connection to GCM can be disconnected while executing the line above
-        if (!success) {
-            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: disconnection request failed: connection id [ " << connectionID << " ]" << std::endl;
-            return false;
-        }
-    }
-
-    return true;
+bool mtsManagerLocal::IsLogForwardingEnabled(void) {
+    return LogForwardEnabled;
 }
 
-// This should probably be split to functions such as DisconnectSetup and DisconnectNotify.
-bool mtsManagerLocal::Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceName,
-                                 const std::string & serverComponentName, const std::string & serverInterfaceName)
-{
-    if (!IsGCMActive()) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "Disconnect: GCM disconnected -- disconnection request ignored: \""
-            << mtsManagerGlobal::GetInterfaceUID(ProcessName, clientComponentName, clientInterfaceName)
-            << " - "
-            << mtsManagerGlobal::GetInterfaceUID(ProcessName, serverComponentName, serverInterfaceName)
-            << std::endl;
-        return true;
-    }
-
-    bool success = ManagerGlobal->Disconnect(
-        ProcessName, clientComponentName, clientInterfaceName,
-        ProcessName, serverComponentName, serverInterfaceName);
-
-    if (IsGCMActive()) { // Connection to GCM can be disconnected while executing the line above
-        if (!success) {
-            CMN_LOG_CLASS_RUN_ERROR << "Disconnect: disconnection request failed: \""
-                << mtsManagerGlobal::GetInterfaceUID(ProcessName, clientComponentName, clientInterfaceName)
-                << " - "
-                << mtsManagerGlobal::GetInterfaceUID(ProcessName, serverComponentName, serverInterfaceName)
-                << std::endl;
-            return false;
-        }
-    }
-
-    return true;
+void mtsManagerLocal::SetLogForwarding(bool activate) {
+    LogForwardEnabled = activate;
 }
 
-void CISST_DEPRECATED mtsManagerLocal::ToStream(std::ostream & CMN_UNUSED(outputStream)) const
-{
-#if 0
-    TaskMapType::const_iterator taskIterator = TaskMap.begin();
-    const TaskMapType::const_iterator taskEndIterator = TaskMap.end();
-    outputStream << "List of tasks: name and address" << std::endl;
-    for (; taskIterator != taskEndIterator; ++taskIterator) {
-        outputStream << "  Task: " << taskIterator->first << ", address: " << taskIterator->second << std::endl;
-    }
-    DeviceMapType::const_iterator deviceIterator = DeviceMap.begin();
-    const DeviceMapType::const_iterator deviceEndIterator = DeviceMap.end();
-    outputStream << "List of devices: name and address" << std::endl;
-    for (; deviceIterator != deviceEndIterator; ++deviceIterator) {
-        outputStream << "  Device: " << deviceIterator->first << ", adress: " << deviceIterator->second << std::endl;
-    }
-    AssociationSetType::const_iterator associationIterator = AssociationSet.begin();
-    const AssociationSetType::const_iterator associationEndIterator = AssociationSet.end();
-    outputStream << "Associations: task::requiredInterface associated to device/task::requiredInterface" << std::endl;
-    for (; associationIterator != associationEndIterator; ++associationIterator) {
-        outputStream << "  " << associationIterator->first.first << "::" << associationIterator->first.second << std::endl
-                     << "  -> " << associationIterator->second.first << "::" << associationIterator->second.second << std::endl;
-    }
-#endif
+void mtsManagerLocal::GetLogForwardingState(bool & state) {
+    state = IsLogForwardingEnabled();
 }
 
-void CISST_DEPRECATED mtsManagerLocal::ToStreamDot(std::ostream & CMN_UNUSED(outputStream)) const
-{
-#if 0
-    std::vector<std::string> interfacesProvidedAvailable, requiredInterfacesAvailable;
-    std::vector<std::string>::const_iterator stringIterator;
-    unsigned int clusterNumber = 0;
-    // dot header
-    outputStream << "/* Automatically generated by cisstMultiTask, mtsTaskManager::ToStreamDot.\n"
-                 << "   Use Graphviz utility \"dot\" to generate a graph of tasks/devices interactions. */"
-                 << std::endl;
-    outputStream << "digraph mtsTaskManager {" << std::endl;
-    // create all nodes for tasks
-    TaskMapType::const_iterator taskIterator = TaskMap.begin();
-    const TaskMapType::const_iterator taskEndIterator = TaskMap.end();
-    for (; taskIterator != taskEndIterator; ++taskIterator) {
-        outputStream << "subgraph cluster" << clusterNumber << "{" << std::endl
-                     << "node[style=filled,color=white,shape=box];" << std::endl
-                     << "style=filled;" << std::endl
-                     << "color=lightgrey;" << std::endl;
-        clusterNumber++;
-        outputStream << taskIterator->first
-                     << " [label=\"Task:\\n" << taskIterator->first << "\"];" << std::endl;
-        interfacesProvidedAvailable = taskIterator->second->GetNamesOfInterfaceProvideds();
-        for (stringIterator = interfacesProvidedAvailable.begin();
-             stringIterator != interfacesProvidedAvailable.end();
-             stringIterator++) {
-            outputStream << taskIterator->first << "interfaceProvided" << *stringIterator
-                         << " [label=\"Provided interface:\\n" << *stringIterator << "\"];" << std::endl;
-            outputStream << taskIterator->first << "interfaceProvided" << *stringIterator
-                         << "->" << taskIterator->first << ";" << std::endl;
-        }
-        requiredInterfacesAvailable = taskIterator->second->GetNamesOfInterfacesRequired();
-        for (stringIterator = requiredInterfacesAvailable.begin();
-             stringIterator != requiredInterfacesAvailable.end();
-             stringIterator++) {
-            outputStream << taskIterator->first << "requiredInterface" << *stringIterator
-                         << " [label=\"Required interface:\\n" << *stringIterator << "\"];" << std::endl;
-            outputStream << taskIterator->first << "->"
-                         << taskIterator->first << "requiredInterface" << *stringIterator << ";" << std::endl;
-        }
-        outputStream << "}" << std::endl;
-    }
-    // create all nodes for devices
-    DeviceMapType::const_iterator deviceIterator = DeviceMap.begin();
-    const DeviceMapType::const_iterator deviceEndIterator = DeviceMap.end();
-    for (; deviceIterator != deviceEndIterator; ++deviceIterator) {
-        outputStream << "subgraph cluster" << clusterNumber << "{" << std::endl
-                     << "node[style=filled,color=white,shape=box];" << std::endl
-                     << "style=filled;" << std::endl
-                     << "color=lightgrey;" << std::endl;
-        clusterNumber++;
-        outputStream << deviceIterator->first
-                     << " [label=\"Device:\\n" << deviceIterator->first << "\"];" << std::endl;
-        interfacesProvidedAvailable = deviceIterator->second->GetNamesOfInterfaceProvideds();
-        for (stringIterator = interfacesProvidedAvailable.begin();
-             stringIterator != interfacesProvidedAvailable.end();
-             stringIterator++) {
-            outputStream << deviceIterator->first << "interfaceProvided" << *stringIterator
-                         << " [label=\"Provided interface:\\n" << *stringIterator << "\"];" << std::endl;
-            outputStream << deviceIterator->first << "interfaceProvided" << *stringIterator
-                         << "->" << deviceIterator->first << ";" << std::endl;
-        }
-        outputStream << "}" << std::endl;
-    }
-    // create edges
-    AssociationSetType::const_iterator associationIterator = AssociationSet.begin();
-    const AssociationSetType::const_iterator associationEndIterator = AssociationSet.end();
-    for (; associationIterator != associationEndIterator; ++associationIterator) {
-        outputStream << associationIterator->first.first << "requiredInterface" << associationIterator->first.second
-                     << "->"
-                     << associationIterator->second.first << "interfaceProvided" << associationIterator->second.second
-                     << ";" << std::endl;
-    }
-    // end of file
-    outputStream << "}" << std::endl;
-#endif
+bool mtsManagerLocal::GetLogForwardingState(void) {
+    return IsLogForwardingEnabled();
 }
 
-
-
-
-bool mtsManagerLocal::RegisterInterfaces(mtsComponent * component)
+void mtsManagerLocal::LogDispatcher(const char * str, int len)
 {
-    if (!component) {
-        return false;
-    }
+    if (!LogForwardEnabled) return;
 
-    const std::string componentName = component->GetName();
-    std::vector<std::string> interfaceNames;
-
-    mtsInterfaceProvided * interfaceProvided;
-    interfaceNames = component->GetNamesOfInterfacesProvided();
-    for (size_t i = 0; i < interfaceNames.size(); ++i) {
-        interfaceProvided = component->GetInterfaceProvided(interfaceNames[i]);
-        if (!interfaceProvided) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL provided interface detected: " << interfaceNames[i] << std::endl;
-            return false;
-        } else {
-            if (ManagerGlobal->FindInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i])) {
-                continue;
-            }
-        }
-        if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i], interfaceProvided->GetTags())) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add provided interface: "
-                                     << componentName << ":" << interfaceNames[i] << std::endl;
-            return false;
-        }
-        if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
-            osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
-        }
-    }
-    mtsInterfaceOutput * interfaceOutput;
-    interfaceNames = component->GetNamesOfInterfacesOutput();
-    for (size_t i = 0; i < interfaceNames.size(); ++i) {
-        interfaceOutput = component->GetInterfaceOutput(interfaceNames[i]);
-        if (!interfaceOutput) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL output interface detected: " << interfaceNames[i] << std::endl;
-            return false;
-        } else {
-            if (ManagerGlobal->FindInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i])) {
-                continue;
-            }
-        }
-        if (!ManagerGlobal->AddInterfaceProvidedOrOutput(ProcessName, componentName, interfaceNames[i], interfaceOutput->GetTags())) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add output interface: "
-                                     << componentName << ":" << interfaceNames[i] << std::endl;
-            return false;
-        }
-        if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
-            osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
+    bool deadlockAvoidance = false;
+    if (Instance) {
+        if (LogMutex.IsLocker()) {
+            deadlockAvoidance = true;
         }
     }
 
-    mtsInterfaceRequired * interfaceRequired;
-    interfaceNames = component->GetNamesOfInterfacesRequired();
-    for (size_t i = 0; i < interfaceNames.size(); ++i) {
-        interfaceRequired = component->GetInterfaceRequired(interfaceNames[i]);
-        if (!interfaceRequired) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL required interface detected: " << interfaceNames[i] << std::endl;
-            return false;
-        } else {
-            if (ManagerGlobal->FindInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i])) {
-                continue;
-            }
+    if (!deadlockAvoidance) {
+        LogMutex.Lock();
+    }
+
+    if (len == 1 && str[0] == '\n') {
+        if (!deadlockAvoidance) {
+            LogMutex.Unlock();
         }
-        if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i], interfaceRequired->GetTags())) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add required interface: "
-                                     << componentName << ":" << interfaceNames[i] << std::endl;
-            return false;
-        }
-        if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
-            osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
-        }
-    }
-
-    mtsInterfaceInput * interfaceInput;
-    interfaceNames = component->GetNamesOfInterfacesInput();
-    for (size_t i = 0; i < interfaceNames.size(); ++i) {
-        interfaceInput = component->GetInterfaceInput(interfaceNames[i]);
-        if (!interfaceInput) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: NULL input interface detected: " << interfaceNames[i] << std::endl;
-            return false;
-        } else {
-            if (ManagerGlobal->FindInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i])) {
-                continue;
-            }
-        }
-        if (!ManagerGlobal->AddInterfaceRequiredOrInput(ProcessName, componentName, interfaceNames[i], interfaceInput->GetTags())) {
-            CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: failed to add input interface: "
-                                     << componentName << ":" << interfaceNames[i] << std::endl;
-            return false;
-        }
-        if (this->GetConfiguration() != LCM_CONFIG_STANDALONE) {
-            osaSleep(0.1 * cmn_s);  // PK TEMP until blocking commands supported
-        }
-    }
-
-    return true;
-}
-
-
-bool mtsManagerLocal::RegisterInterfaces(const std::string & componentName)
-{
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "RegisterInterfaces: invalid component name: \"" << componentName << "\"" << std::endl;
-        return false;
-    }
-
-    return RegisterInterfaces(component);
-}
-
-
-
-bool mtsManagerLocal::Disconnect(
-    const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceName,
-    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceName)
-{
-    if (clientProcessName == serverProcessName)
-        return Disconnect(clientComponentName, clientInterfaceName,
-                          serverComponentName, serverInterfaceName);
-    CMN_LOG_CLASS_INIT_ERROR << "Cannot disconnect components in different processes because CISST_MTS_HAS_ICE is false" << std::endl;
-    return false;
-}
-
-bool mtsManagerLocal::GetInterfaceProvidedDescription(
-    const std::string & serverComponentName, const std::string & interfaceName,
-    mtsInterfaceProvidedDescription & interfaceProvidedDescription,
-    const std::string & CMN_UNUSED(listenerID))
-{
-    // Get component specified
-    mtsComponent * component = GetComponent(serverComponentName);
-    if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetInterfaceProvidedDescription: no component \""
-                                 << serverComponentName << "\" found in process: \"" << ProcessName << "\"" << std::endl;
-        return false;
-    }
-
-    // Get provided interface specified
-    mtsInterfaceProvided * interfaceProvided = component->GetInterfaceProvided(interfaceName);
-    if (!interfaceProvided) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetInterfaceProvidedDescription: no provided interface \""
-                                 << interfaceName << "\" found in component \"" << serverComponentName << "\"" << std::endl;
-        return false;
-    }
-
-    // Extract complete information about all commands and event generators in
-    // the provided interface specified. Argument prototypes are serialized.
-    interfaceProvidedDescription.InterfaceName = interfaceName;
-    if (!interfaceProvided->GetDescription(interfaceProvidedDescription)) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetInterfaceProvidedDescription: failed to get complete information of \""
-                                 << interfaceName << "\" found in component \"" << serverComponentName << "\"" << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-bool mtsManagerLocal::GetInterfaceRequiredDescription(
-    const std::string & componentName, const std::string & requiredInterfaceName,
-    mtsInterfaceRequiredDescription & requiredInterfaceDescription,
-    const std::string & CMN_UNUSED(listenerID))
-{
-    // Get the component instance specified
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetInterfaceRequiredDescription: no component \""
-                                 << componentName << "\" found in local component manager \"" << ProcessName << "\"" << std::endl;
-        return false;
-    }
-
-    // Get the provided interface specified
-    mtsInterfaceRequired * requiredInterface = component->GetInterfaceRequired(requiredInterfaceName);
-    if (!requiredInterface) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetInterfaceRequiredDescription: no provided interface \""
-                                 << requiredInterfaceName << "\" found in component \"" << componentName << "\"" << std::endl;
-        return false;
-    }
-
-    // Extract complete information about all functions and event handlers in
-    // a required interface. Argument prototypes are fetched with serialization.
-    requiredInterfaceDescription.InterfaceName = requiredInterfaceName;
-    requiredInterface->GetDescription(requiredInterfaceDescription);
-
-    return true;
-}
-
-bool mtsManagerLocal::RemoveInterfaceRequired(const std::string & componentName, const std::string & interfaceName)
-{
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequired: can't find client component: " << componentName << std::endl;
-        return false;
-    }
-
-    // Check total number of required interfaces using (connecting to) this provided interface.
-    mtsInterfaceRequired * interfaceRequired = component->GetInterfaceRequired(interfaceName);
-    if (!interfaceRequired) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequired: no required interface found: " << interfaceName << std::endl;
-        return false;
-    }
-
-    // Remove required interface
-    if (!component->RemoveInterfaceRequired(interfaceName)) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceRequired: failed to remove provided interface proxy: " << interfaceName << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "RemoveInterfaceRequired: removed provided interface: "
-                               << componentName << ":" << interfaceName << std::endl;
-
-    return true;
-}
-
-bool mtsManagerLocal::RemoveInterfaceProvided(const std::string & componentName, const std::string & interfaceName)
-{
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvided: can't find client component: " << componentName << std::endl;
-        return false;
-    }
-
-    // Check total number of required interfaces using (connecting to) this provided interface.
-    mtsInterfaceProvided * interfaceProvided = component->GetInterfaceProvided(interfaceName);
-    if (!interfaceProvided) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvided: no provided interface found: " << interfaceName << std::endl;
-        return false;
-    }
-
-    // Remove provided interface only when user counter is zero.
-    if (interfaceProvided->UserCounter > 0) {
-        --interfaceProvided->UserCounter;
-    }
-    if (interfaceProvided->UserCounter == 0) {
-        // Remove provided interface
-        if (!component->RemoveInterfaceProvided(interfaceName)) {
-            CMN_LOG_CLASS_INIT_ERROR << "RemoveInterfaceProvided: failed to remove provided interface proxy: " << interfaceName << std::endl;
-            return false;
-        }
-
-        CMN_LOG_CLASS_INIT_VERBOSE << "RemoveInterfaceProvided: removed provided interface: "
-                                   << componentName << ":" << interfaceName << std::endl;
-    } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "RemoveInterfaceProvided: decreased active user counter. current counter: "
-                                   << interfaceProvided->UserCounter << std::endl;
-    }
-
-    return true;
-}
-
-void mtsManagerLocal::SetIPAddress(void)
-{
-    // Fetch all ip addresses available on this machine.
-    std::vector<std::string> ipAddresses;
-    int ret = osaSocket::GetLocalhostIP(ipAddresses);
-    if (ret == 0) {
-        CMN_LOG_CLASS_INIT_WARNING << "Failed to get local host ip address" << std::endl;
         return;
     }
 
-    for (size_t i = 0; i < ipAddresses.size(); ++i) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "IP detected: (" << i + 1 << ") " << ipAddresses[i] << std::endl;
+    // MJ TODO: Deal with cases that len > 1000
+    mtsLogMessage log(str, len);
+    // Timestamping (as early as possible)
+    if (TimeServerOriginSet) {
+        log.SetTimestamp(TimeServer.GetAbsoluteTimeInSeconds());
+        log.SetValid(true);
+    } else {
+        log.SetTimestamp(0);
+        log.SetValid(false);
+    }
+    log.ProcessName = "";
+
+    if (!deadlockAvoidance) {
+        // Queue log message and return immediately
+        LogQueue.push_back(log);
+    } else {
+        // If current thread locked this mutex earlier, forward the log immediately
+        // to avoid deadlock.  Note that all validity checks are already done
+        // in the log dispatch thread in this case.
+        Instance->GetLoggerServices()->PrintLog(log);
     }
 
-    ProcessIPList.insert(ProcessIPList.begin(), ipAddresses.begin(), ipAddresses.end());
+    if (!deadlockAvoidance) {
+        LogMutex.Unlock();
+    }
 }
 
-bool mtsManagerLocal::SetInterfaceProvidedProxyAccessInfo(const ConnectionIDType connectionID, const std::string & endpointInfo)
+void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
 {
-    return ManagerGlobal->SetInterfaceProvidedProxyAccessInfo(connectionID, endpointInfo);
+    int count = 0;
+
+    while (!LogThreadFinishWaiting) {
+        if (LogQueue.size() == 0) {
+            osaSleep(1.0 * cmn_ms);
+            continue;
+        }
+
+        // Wait for MCC to be ready (activated and connected) before starting log fowarding
+        if (!ManagerComponent || !ManagerComponent->IsRunning()) {
+            osaSleep(100.0 * cmn_ms);
+            continue;
+        }
+
+        LogMutex.Lock();
+        count = 0;
+        for (LogQueueType::iterator it = LogQueue.begin();
+             it != LogQueue.end();
+             ++count)
+        {
+            if (Instance->GetLoggerServices()->PrintLog(*it)) {
+                ++it;
+                LogQueue.pop_front(); // FIFO
+            }
+            // MJ: after 30 log messages forwarded, give other threads a chance to queue
+            // logs by releasing the lock (30 is arbitrary)
+            if (count == 30)
+                break;
+        }
+        LogMutex.Unlock();
+    }
+
+    LogThreadFinished.Raise();
+
+    return 0;
 }
 
-bool mtsManagerLocal::GetGCMProcTimeSyncInfo(std::vector<std::string> &processNames, std::vector<double> &timeOffsets) {
+bool mtsManagerLocal::IsValidComponentTag(const std::string & tag) const {
+    return (ValidComponentTags.find(tag) != ValidComponentTags.end());
+}
 
-    if (!IsGCMActive())
-        return false;
+bool mtsManagerLocal::IsValidInterfaceTag(const std::string & tag) const {
+    return (ValidInterfaceTags.find(tag) != ValidInterfaceTags.end());
+}
 
-    if (ManagerComponent.Server){
-        ManagerComponent.Server->GetNamesOfProcesses(processNames);
-        ManagerComponent.Server->InterfaceGCMCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets);
-        return true;
-    }
-    else if (ManagerComponent.Client) {
-        ManagerComponent.Client->GetNamesOfProcesses(processNames);
-        ManagerComponent.Client->InterfaceComponentCommands_GetAbsoluteTimeDiffs(processNames,timeOffsets);
-        return true;
-    }
-    else
-        return false;
+void mtsManagerLocal::AddValidComponentTag(const std::string & tag) {
+    ValidComponentTags.insert(tag);
+}
+
+void mtsManagerLocal::AddValidInterfaceTag(const std::string & tag) {
+    ValidInterfaceTags.insert(tag);
+}
+
+const std::set<std::string> & mtsManagerLocal::GetValidComponentTags(void) const {
+    return ValidComponentTags;
+}
+
+const std::set<std::string> & mtsManagerLocal::GetValidInterfaceTags(void) const {
+    return ValidInterfaceTags;
 }
