@@ -6,8 +6,7 @@
   Author(s):  Praneeth Sadda
   Created on: 2012-05-14
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,20 +22,20 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QStringList>
 
-mtsQtCommandSelector::mtsQtCommandSelector(mtsManagerGlobal* globalComponentManager, QWidget* parent)
-    : QTreeWidget(parent), GlobalManager(globalComponentManager)
+mtsQtCommandSelector::mtsQtCommandSelector(mtsManagerLocal* componentManager, QWidget* parent)
+    : QTreeWidget(parent), LocalManager(componentManager)
 {
     setColumnCount(2);
     QStringList headerLabels;
     headerLabels << "Name" << "Type";
     setHeaderLabels(headerLabels);
     setSortingEnabled(true);
-    BuildTree(globalComponentManager);
+    BuildTree(LocalManager);
     connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(CurrentItemChanged));
     connect(this, SIGNAL(itemActivated(QTreeWidgetItem*, int)), this, SLOT(ItemActivated));
 }
 
-void mtsQtCommandSelector::BuildTree(mtsManagerGlobal* globalComponentManager) {
+void mtsQtCommandSelector::BuildTree(mtsManagerLocal* componentManager) {
     clear();
 
     QTreeWidgetItem* processItem;
@@ -47,10 +46,11 @@ void mtsQtCommandSelector::BuildTree(mtsManagerGlobal* globalComponentManager) {
 
     std::vector<std::string> processNames;
     std::vector<std::string> componentNames;
-    std::vector<std::string> interfaceNames;
+    std::vector<std::string> interfaceRequiredNames;
+    std::vector<std::string> interfaceProvidedNames;
     std::vector<std::string> commandNames;
 
-    globalComponentManager->GetNamesOfProcesses(processNames);
+    componentManager->GetNamesOfProcesses(processNames);
     // Processes
     for(std::vector<std::string>::const_iterator processName = processNames.begin(); processName < processNames.end(); ++processName) {
         strings << processName->c_str() << "Process";
@@ -59,23 +59,28 @@ void mtsQtCommandSelector::BuildTree(mtsManagerGlobal* globalComponentManager) {
         strings.clear();
         // Components
         componentNames.clear();
-        globalComponentManager->GetNamesOfComponents(*processName, componentNames);
+        componentManager->GetNamesOfComponents(*processName, componentNames);
         for(std::vector<std::string>::const_iterator componentName = componentNames.begin(); componentName < componentNames.end(); ++componentName) {
             strings << componentName->c_str() << "Component";
             componentItem = new QTreeWidgetItem(strings);
             processItem->addChild(componentItem);
             strings.clear();
             // Interfaces
-            interfaceNames.clear();
-            globalComponentManager->GetNamesOfInterfacesProvidedOrOutput(*processName, *componentName, interfaceNames);
-            for(std::vector<std::string>::const_iterator interfaceName = interfaceNames.begin(); interfaceName < interfaceNames.end(); ++interfaceName) {
+            interfaceRequiredNames.clear();
+            interfaceProvidedNames.clear();
+            // Provided or output
+            componentManager->GetNamesOfInterfaces(*processName, *componentName, interfaceRequiredNames, interfaceProvidedNames);
+            for(std::vector<std::string>::const_iterator interfaceName = interfaceProvidedNames.begin();
+                interfaceName < interfaceProvidedNames.end(); ++interfaceName) {
                 strings << interfaceName->c_str() << "Interface";
                 interfaceItem = new QTreeWidgetItem(strings);
                 componentItem->addChild(interfaceItem);
                 strings.clear();
                 // Commands
                 commandNames.clear();
-                globalComponentManager->GetNamesOfCommands(*processName, *componentName, *interfaceName, commandNames);
+                // Note that following no longer accepts processName (as of June 2026)
+                //componentManager->GetNamesOfCommands(*processName, *componentName, *interfaceName, commandNames);
+                componentManager->GetNamesOfCommands(commandNames, *componentName, *interfaceName);
                 for(std::vector<std::string>::const_iterator commandName = commandNames.begin(); commandName < commandNames.end(); ++commandName) {
                     strings << commandName->c_str() << "Command";
                     commandItem = new QTreeWidgetItem(strings);
@@ -88,7 +93,7 @@ void mtsQtCommandSelector::BuildTree(mtsManagerGlobal* globalComponentManager) {
 }
 
 void mtsQtCommandSelector::Refresh(void) {
-    BuildTree(GlobalManager);
+    BuildTree(LocalManager);
 }
 
 void mtsQtCommandSelector::CurrentItemChanged(QTreeWidgetItem* CMN_UNUSED(current),

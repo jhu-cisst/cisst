@@ -329,9 +329,51 @@ public:
         return ProcessName;
     }
 
+    /*! Get names of all processes */
+    void GetNamesOfProcesses(std::vector<std::string>& namesOfProcesses) const;
+
     /*! Enumerate all the names of components added */
     std::vector<std::string> GetNamesOfComponents(void) const;
     void GetNamesOfComponents(std::vector<std::string>& namesOfComponents) const;
+    void GetNamesOfComponents(const std::string & processName,
+                              std::vector<std::string>& namesOfComponents) const;
+
+    std::vector<mtsDescriptionComponent> GetDescriptionsOfComponents(const std::string & processName = "") const;
+
+    bool GetNamesOfInterfaces(const std::string & processName,
+                              const std::string & componentName,
+                              std::vector<std::string> & namesOfInterfacesRequired,
+                              std::vector<std::string> & namesOfInterfacesProvided) const;
+
+    bool GetNamesOfInterfaces(const std::string & componentName,
+                              std::vector<std::string> & namesOfInterfacesRequired,
+                              std::vector<std::string> & namesOfInterfacesProvided) const
+    { return GetNamesOfInterfaces("", componentName, namesOfInterfacesRequired, namesOfInterfacesProvided); }
+
+    bool GetDescriptionsOfInterfaces(const std::string & processName,
+                                     const std::string & componentName,
+                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsRequired,
+                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsProvided) const;
+
+    bool GetDescriptionsOfInterfaces(const std::string & componentName,
+                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsRequired,
+                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsProvided) const
+    { return GetDescriptionsOfInterfaces("", componentName, descriptionsRequired, descriptionsProvided); }
+
+    std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
+
+    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(const std::string & processName = "") const;
+
+    mtsInterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName,
+                                    const std::string & componentName, const std::string & interfaceName) const;
+
+    mtsInterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & componentName, const std::string & interfaceName) const
+    { return GetInterfaceProvidedDescription("", componentName, interfaceName); }
+
+    mtsInterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & processName,
+                                    const std::string & componentName, const std::string & interfaceName) const;
+    mtsInterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & componentName, const std::string & interfaceName) const
+    { return GetInterfaceRequiredDescription("", componentName, interfaceName); }
 
     /*! Return a reference to the time server. */
     const osaTimeServer & GetTimeServer(void) const;

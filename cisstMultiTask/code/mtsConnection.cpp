@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung
   Created on: 2010-12-27
 
-  (C) Copyright 2010-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,8 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(mtsConnection);
 
-mtsConnection::mtsConnection(const mtsDescriptionConnection & description, const std::string & requestProcessName)
-    : ConnectionDescription(description), RequestProcessName(requestProcessName), Connected(false)
+mtsConnection::mtsConnection(const mtsDescriptionConnection & description)
+    : ConnectionDescription(description), Connected(false)
 {
 }
 

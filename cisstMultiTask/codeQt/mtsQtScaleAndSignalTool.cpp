@@ -6,8 +6,7 @@
   Author(s):  Praneeth Sadda
   Created on: 2012-05-24
 
-  (C) Copyright 2012-2013 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsQtCommandSelector.h>
 #include <cisstMultiTask/mtsQtScaleAndSignalTool.h>
 
-mtsQtScaleAndSignalTool::mtsQtScaleAndSignalTool(mtsManagerGlobal * globalManager, vctPlot2DOpenGLQtWidget * visualizer, QWidget * parent)
+mtsQtScaleAndSignalTool::mtsQtScaleAndSignalTool(mtsManagerLocal * componentManager, vctPlot2DOpenGLQtWidget * visualizer, QWidget * parent)
     : QWidget(parent), Visualizer(visualizer)
 {
     QLayout * layout = new QVBoxLayout();
@@ -42,7 +41,7 @@ mtsQtScaleAndSignalTool::mtsQtScaleAndSignalTool(mtsManagerGlobal * globalManage
     layout->addWidget(splitter);
 
     splitter->addWidget(new mtsQtScaleEditor(visualizer));
-    splitter->addWidget(new mtsQtCommandSelector(globalManager));
+    splitter->addWidget(new mtsQtCommandSelector(componentManager));
 }
 
 mtsQtScaleEditor::mtsQtScaleEditor(vctPlot2DOpenGLQtWidget * visualizer, QWidget * parent)

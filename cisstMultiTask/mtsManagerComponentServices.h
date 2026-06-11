@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 // There may be a better way to implement this.
 class CISST_EXPORT mtsComponentPointer : public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT)
     mtsComponent * component;
 
 public:
@@ -43,6 +43,10 @@ public:
     ~mtsComponentPointer() {}
     void SetPointer(mtsComponent * cptr) { component = cptr; }
     mtsComponent * GetPointer() const { return component; }
+
+    void ToStream(std::ostream & outputStream) const override;
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 class CISST_EXPORT mtsManagerComponentServices : public cmnGenericObject {
@@ -69,19 +73,15 @@ protected:
         mtsFunctionQualifiedRead LoadLibrary;  // in: process, library name, out: result (bool)
     } ServiceComponentManagement;
 
-    struct LogStruct {
-        mtsFunctionWrite PrintLog;
-    } ServiceLogManagement;
-
     // Getters
     struct GetterStruct {
         mtsFunctionRead          GetNamesOfProcesses;
         mtsFunctionQualifiedRead GetNamesOfComponents;         // in: process name, out: components' names
         mtsFunctionQualifiedRead GetDescriptionsOfComponents;  // in: process name, out: components' descriptions
-        mtsFunctionQualifiedRead GetNamesOfInterfaces;         // in: process name, out: interfaces' names
+        mtsFunctionQualifiedRead GetNamesOfInterfaces;         // in: component description, out: interfaces' names
         mtsFunctionQualifiedRead GetDescriptionsOfInterfaces;  // in: component description, out: interfaces' descriptions
         mtsFunctionRead          GetListOfConnections;
-        mtsFunctionQualifiedRead GetListOfComponentClasses;  // in: process name, out: list of classes
+        mtsFunctionQualifiedRead GetListOfComponentClasses;    // in: process name, out: list of classes
         mtsFunctionQualifiedRead GetInterfaceProvidedDescription;
         mtsFunctionQualifiedRead GetInterfaceRequiredDescription;
     } ServiceGetters;
@@ -221,8 +221,7 @@ public:
 
     std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
 
-    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(void) const;
-    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(const std::string & processName) const;
+    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(const std::string & processName = "") const;
 
     mtsInterfaceProvidedDescription
         GetInterfaceProvidedDescription(const std::string & processName,

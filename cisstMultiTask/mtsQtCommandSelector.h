@@ -6,8 +6,7 @@
   Author(s):  Praneeth Sadda
   Created on: 2012-05-14
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QTreeWidget>
 
-#include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExportQt.h>
@@ -33,7 +32,7 @@ class mtsQtCommandSelector : public QTreeWidget {
     Q_OBJECT;  
 
 public:
-    mtsQtCommandSelector(mtsManagerGlobal* globalComponentManager, QWidget* parent = 0);
+    mtsQtCommandSelector(mtsManagerLocal* componentManager, QWidget* parent = 0);
 
 private slots:
     void CurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
@@ -46,9 +45,9 @@ signals:
     void CommandSelected(QString command);
 
 private:
-    void BuildTree(mtsManagerGlobal* globalComponentManager);
+    void BuildTree(mtsManagerLocal* componentManager);
 
-    mtsManagerGlobal* GlobalManager;
+    mtsManagerLocal* LocalManager;
 };
 
 #endif

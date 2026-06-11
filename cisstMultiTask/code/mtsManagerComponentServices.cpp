@@ -26,6 +26,25 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsComponentPointer)
 CMN_IMPLEMENT_SERVICES(mtsManagerComponentServices)
 
+void mtsComponentPointer::ToStream(std::ostream & outputStream) const
+{
+    mtsGenericObject::ToStream(outputStream);
+    outputStream << ", " << component << "("
+                 << component->GetName() << ")" << std::endl;
+}
+
+void mtsComponentPointer::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, component);
+}
+
+void mtsComponentPointer::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, component);
+}
+
 // Constructor
 mtsManagerComponentServices::mtsManagerComponentServices(mtsInterfaceRequired * internalInterfaceRequired)
     : InternalInterfaceRequired(internalInterfaceRequired)
@@ -59,10 +78,6 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceComponentManagement.GetState);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
                                                ServiceComponentManagement.LoadLibrary);
-
-        // Log services
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog,
-                                               ServiceLogManagement.PrintLog);
 
         // Getter services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
@@ -593,11 +608,6 @@ std::vector<mtsDescriptionConnection> mtsManagerComponentServices::GetListOfConn
     else
         CMN_LOG_CLASS_RUN_ERROR << "GetListOfConnections: invalid function - has not been bound to command" << std::endl;
     return listOfConnections;
-}
-
-std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses(void) const
-{
-    return GetListOfComponentClasses("");
 }
 
 std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses(const std::string &processName) const
