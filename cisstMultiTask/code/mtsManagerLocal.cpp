@@ -795,7 +795,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         double timeEnd = timeStartedAll + timeout;
         bool timedOut = false;
         for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
-            if (isManagerComponent(*iterator))
+            if (mtsManagerComponentBase::IsManagerComponent(*iterator))
                 continue;
             mtsComponent *component = services->ComponentGet(*iterator);
             // compute how much time do we have left based on when we started
@@ -846,7 +846,7 @@ void mtsManagerLocal::CreateAll(void)
 
     mtsManagerComponentServices *services = GetManagerServices();
     for (; iterator != end; ++iterator) {
-        if (isManagerComponent(*iterator))
+        if (mtsManagerComponentBase::IsManagerComponent(*iterator))
             continue;
         // Could instead define a new ComponentCreate method
         mtsComponent *component = services->ComponentGet(*iterator);
@@ -880,7 +880,7 @@ void mtsManagerLocal::StartAll(void)
     mtsManagerComponentServices *services = GetManagerServices();
 
     for (; iterator != end; ++iterator) {
-        if (isManagerComponent(*iterator))
+        if (mtsManagerComponentBase::IsManagerComponent(*iterator))
             continue;
         mtsComponent *component = services->ComponentGet(*iterator);
         // look for component
@@ -945,7 +945,7 @@ void mtsManagerLocal::KillAll(void)
     mtsManagerComponentServices *services = GetManagerServices();
 
     for (; iterator != end; ++iterator) {
-        if (isManagerComponent(*iterator))
+        if (mtsManagerComponentBase::IsManagerComponent(*iterator))
             continue;
         mtsComponent *component = services->ComponentGet(*iterator);
         if (component) {
