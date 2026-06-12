@@ -782,6 +782,8 @@ bool mtsManagerLocal::FindComponent(const std::string & componentName) const
 
 bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double timeout) const
 {
+    mtsManagerComponentServices *services = GetManagerServices();
+
     // wait for all components to be started if timeout is positive
     bool allAtState = true;
     if (timeout > 0.0) {
@@ -793,7 +795,9 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         double timeEnd = timeStartedAll + timeout;
         bool timedOut = false;
         for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
-            mtsComponent *component = GetComponent(*iterator);
+            if (isManagerComponent(*iterator))
+                continue;
+            mtsComponent *component = services->ComponentGet(*iterator);
             // compute how much time do we have left based on when we started
             double timeLeft = timeEnd - TimeServer.GetRelativeTime();
             // skip in 2 cases, manager components and tasks with ExecIn
@@ -842,6 +846,8 @@ void mtsManagerLocal::CreateAll(void)
 
     mtsManagerComponentServices *services = GetManagerServices();
     for (; iterator != end; ++iterator) {
+        if (isManagerComponent(*iterator))
+            continue;
         // Could instead define a new ComponentCreate method
         mtsComponent *component = services->ComponentGet(*iterator);
         if (component) component->Create();
@@ -874,7 +880,9 @@ void mtsManagerLocal::StartAll(void)
     mtsManagerComponentServices *services = GetManagerServices();
 
     for (; iterator != end; ++iterator) {
-        mtsComponent *component = GetComponent(*iterator);
+        if (isManagerComponent(*iterator))
+            continue;
+        mtsComponent *component = services->ComponentGet(*iterator);
         // look for component
         mtsTask *componentTask = dynamic_cast<mtsTask*>(component);
         if (componentTask) {
@@ -915,7 +923,7 @@ void mtsManagerLocal::StartAll(void)
         }
     }
 
-    if (!lastTask) {
+    if (lastTask) {
         lastTask->Start();
     }
 }
@@ -934,8 +942,12 @@ void mtsManagerLocal::KillAll(void)
     std::vector<std::string>::const_iterator iterator = componentNames.begin();
     const std::vector<std::string>::const_iterator end = componentNames.end();
 
+    mtsManagerComponentServices *services = GetManagerServices();
+
     for (; iterator != end; ++iterator) {
-        mtsComponent *component = GetComponent(*iterator);
+        if (isManagerComponent(*iterator))
+            continue;
+        mtsComponent *component = services->ComponentGet(*iterator);
         if (component) {
             component->Kill();
         }
