@@ -47,9 +47,6 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsManagerLocal: public cmnGenericObject
 {
-    // for unit-testing
-    friend class mtsManagerLocalTest;
-
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 private:
@@ -64,8 +61,6 @@ private:
     /*! Thread ID of thread that called GetInstance(). In the future,
         we will support multiple threads. */
     osaThreadId MainThreadId;
-
-    // PK TODO:  Review MainTaskNames and CurrentMainTask
 
     /*! List of main tasks (in chronological order) */
     std::stack<std::string> MainTaskNames;
@@ -378,7 +373,9 @@ public:
     /*! Return a reference to the time server. */
     const osaTimeServer & GetTimeServer(void) const;
 
-#ifndef PK_TODO  // Review following methods
+    //---------------------------------------------------------------------------------------------
+    // Methods to track the "main" thread, which actually is the thread in which the Instance
+    // of this class was created. In most cases, that will be the main thread of the process.
 
     /*! Set main thread id based on the current thread. In most situations, it is not
         necessary to call this function because the main thread id is initialized
@@ -401,7 +398,7 @@ public:
 
     /*! Get pointer to active task that has main thread (if none, returns 0) */
     mtsTaskContinuous CISST_DEPRECATED *GetCurrentMainTask(void) const { return CurrentMainTask; }
-#endif
+    //---------------------------------------------------------------------------------------------
 
     /*! Get names of all commands in a provided interface */
     void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,

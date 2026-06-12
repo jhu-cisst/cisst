@@ -595,8 +595,7 @@ inline std::string mtsObjectName(const mtsComponent * object) {
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponent)
 
 
-// Following derived class enables dynamic component management, and adds a mailbox to the required interface,
-// so that events can be queued.
+// Following derived class enables dynamic component management.
 class CISST_EXPORT mtsComponentWithManagement : public mtsComponent
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
@@ -608,20 +607,6 @@ public:
 
     /*! Default destructor. Does nothing. */
     virtual ~mtsComponentWithManagement() { }
-
-    // Overloaded from base class (same implementation as mtsTask)
-    mtsInterfaceRequired *AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
-                                                                         mtsRequiredType required = MTS_REQUIRED)
-    {
-        mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events",
-                                              mtsInterfaceRequired::DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE);
-        mtsInterfaceRequired *result;
-        // try to create and add interface
-        result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox, required);
-        if (!result)
-            delete mailBox;
-        return result;
-    }
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentWithManagement)
