@@ -165,7 +165,8 @@ protected:
 
     /*********** Methods for changing task state **************************/
 
-    /* documented in base class */
+    /* Change to desired state (newState). The change is protected by a mutex if
+       called from another thread. */
     void ChangeState(mtsComponentState::Enum newState);
 
     /* documented in base class */

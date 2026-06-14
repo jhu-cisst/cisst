@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2008-09-23
 
-  (C) Copyright 2008-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -130,9 +130,12 @@ void mtsTaskContinuous::Create(void *data)
         }
     }
     else {
-        // NOTE: still need to update GCM
-        RemoveInterfaceRequired("ExecIn", true);
-        ExecIn = 0;
+        if (ExecIn) {
+            if (!RemoveInterfaceRequired(ExecIn->GetName())) {
+                CMN_LOG_CLASS_RUN_WARNING << "Create: failed to remove ExecIn required interface" << std::endl;
+            }
+            ExecIn = 0;
+        }
         if (NewThread) {
             CMN_LOG_CLASS_INIT_VERBOSE << "Create: creating thread for task " << this->GetName() << std::endl;
             ChangeState(mtsComponentState::INITIALIZING);

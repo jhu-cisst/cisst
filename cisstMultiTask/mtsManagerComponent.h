@@ -158,12 +158,7 @@ protected:
     bool DisconnectInternal(const std::string & clientComponentName, const std::string & clientInterfaceName,
                             const std::string & serverComponentName, const std::string & serverInterfaceName);
 
-    // If connection between InterfaceComponent.required - InterfaceInternal.provided is
-    // disconnected, required interface instance of InterfaceComponent that corresponds
-    // to the connection should be removed.
-    bool DisconnectCleanup(const std::string & componentName);
-
-    //********************************* OTHER
+    //*************************************** OTHER METHODS *********************************************
 
     /*! Create a new set of function objects, add a new instance of
         InterfaceComponent's required interface to this component, and connect
@@ -177,6 +172,10 @@ protected:
                manager component (connect InterfaceInternal.Required -
                InterfaceComponent.Provided) */
     bool ConnectToManagerComponent(const std::string & componentName);
+
+    /*! \brief Disconnect local component from manager component
+              (disconnect InterfaceInternal.Required - InterfaceComponent.Provided) */
+    bool DisconnectFromManagerComponent(const std::string & componentName);
 
 public:
     mtsManagerComponent();

@@ -354,7 +354,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     size_t GetNumberOfInterfacesOutput(void) const;
 
     /*! Remove a provided interface identified by its name */
-    bool RemoveInterfaceProvided(const std::string & interfaceProvidedName, const bool skipDisconnect = false);
+    bool RemoveInterfaceProvided(const std::string & interfaceProvidedName);
 
     /*! Remove an output interface identified by its name */
     //bool RemoveInterfaceOutput(const std::string & interfaceOutputName);
@@ -404,7 +404,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     size_t GetNumberOfInterfacesInput(void) const;
 
     /*! Remove a required interface identified by its name */
-    bool RemoveInterfaceRequired(const std::string & interfaceRequiredName, const bool skipDisconnect = false);
+    bool RemoveInterfaceRequired(const std::string & interfaceRequiredName);
 
     /*! Remove an input interface identified by its name */
     //bool RemoveInterfaceInput(const std::string & interfaceInputName);

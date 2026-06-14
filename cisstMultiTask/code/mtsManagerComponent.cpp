@@ -275,27 +275,8 @@ void mtsManagerComponent::ComponentAdd(const mtsComponentPointer & componentPtr,
 
 void mtsManagerComponent::ComponentRemove(const std::string & componentName, bool & result)
 {
-    result = false;
-    if (ComponentMap.FindItem(componentName)) {
-        // First remove internal connection to MCS
-        const std::string nameOfInterfaceComponentRequired
-            = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(componentName);
-        if (!DisconnectInternal(GetName(), nameOfInterfaceComponentRequired,
-                                componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())) {
-            CMN_LOG_CLASS_RUN_ERROR << "ComponentRemove: failed to disconnect: "
-                                     << GetName() << ":" << nameOfInterfaceComponentRequired
-                                     << " - "
-                                     << componentName << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalProvided()
-                                     << std::endl;
-        }
-        // Next, remove internal required interface on MCS
-        // true --> skip disconnect, since it was done above
-        if (!this->RemoveInterfaceRequired(nameOfInterfaceComponentRequired, true)) {
-            CMN_LOG_CLASS_RUN_ERROR << "ComponentRemove: failed to remove interface "
-                                    << nameOfInterfaceComponentRequired << " on MCS" << std::endl;
-        }
-        result = ComponentMap.RemoveItem(componentName);
-    }
+    DisconnectFromManagerComponent(componentName);
+    result = ComponentMap.RemoveItem(componentName);
 }
 
 void mtsManagerComponent::ComponentGet(const std::string & componentName, mtsComponentPointer & componentPtr) const
@@ -1079,28 +1060,6 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
         }
     }
 
-    // Special handling for connections which ManagerComponent is involved with
-    //
-    // Remove InterfaceComponentRequired instance (InterfaceComponentRequired - InterfaceInternalProvided)
-    if (mtsManagerComponentBase::IsNameOfInterfaceInternalProvided(serverInterfaceName)) {
-        const std::string nameOfInterfaceComponentRequired = GetNameOfInterfaceComponentRequiredFor(serverComponentName);
-        if (!RemoveInterfaceRequired(nameOfInterfaceComponentRequired)) {
-            CMN_LOG_CLASS_INIT_ERROR << "ComponentDisconnect: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceName << " - "
-                                     << serverComponentName << ":" << serverInterfaceName
-                                     << ", failed to remove InterfaceComponent's required interface: "
-                                     << "\"" << nameOfInterfaceComponentRequired << "\"" << std::endl;
-            return false;
-        }
-        if (!DisconnectCleanup(serverComponentName)) {
-            CMN_LOG_CLASS_INIT_ERROR << "ComponentDisconnect: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceName << " - "
-                                     << serverComponentName << ":" << serverInterfaceName
-                                     << ", failed to clean up InterfaceComponent's required interface" << std::endl;
-            return false;
-        }
-    }
-
     // Finally, remove from ConnectionMap
     ConnectionIDType id = GetConnectionID("", clientComponentName, clientInterfaceName);
     if (id == InvalidConnectionID) {
@@ -1115,22 +1074,6 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
 
     // Generate the event
     InterfaceComponentEvents_RemoveConnection(description);
-    return true;
-}
-
-bool mtsManagerComponent::DisconnectCleanup(const std::string & componentName)
-{
-    // Get instance of InterfaceComponent's required interface that corresponds to
-    // "componentName"
-    InterfaceComponentFunctionType * functionSet = InterfaceComponentFunctionMap.GetItem(componentName);
-    if (!functionSet) {
-        CMN_LOG_CLASS_RUN_ERROR << "DisconnectCleanup: failed to get function set for component \"" << componentName << "\"" << std::endl;
-        return false;
-    }
-
-    InterfaceComponentFunctionMap.RemoveItem(componentName);
-    delete functionSet;
-
     return true;
 }
 
@@ -1225,5 +1168,57 @@ bool mtsManagerComponent::ConnectToManagerComponent(const std::string & componen
         }
     }
 
+    return true;
+}
+
+bool mtsManagerComponent::DisconnectFromManagerComponent(const std::string & componentName)
+{
+    mtsComponent * component = ComponentMap.GetItem(componentName);
+    if (!component) {
+        CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: no component found with name of "
+            << "\"" << componentName << "\"" << std::endl;
+        return false;
+    }
+
+    // First remove internal connection between MCS and component
+    const std::string nameOfInterfaceComponentRequired
+                      = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(componentName);
+    if (!DisconnectInternal(GetName(), nameOfInterfaceComponentRequired,
+                            componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())) {
+        CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to disconnect: "
+                                  << GetName() << ":" << nameOfInterfaceComponentRequired
+                                  << " - "
+                                  << componentName << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalProvided()
+                                  << std::endl;
+    }
+    // Next, remove the internal required interface
+    RemoveInterfaceRequired(nameOfInterfaceComponentRequired);
+
+    // Next, remove the function set
+    InterfaceComponentFunctionType * functionSet = InterfaceComponentFunctionMap.GetItem(componentName);
+    if (functionSet) {
+        InterfaceComponentFunctionMap.RemoveItem(componentName);
+        delete functionSet;
+    }
+    else {
+        CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to get function set for component \""
+                                  << componentName << "\"" << std::endl;
+    }
+
+    // If the component has support for dynamic component control services,
+    // disconnect InterfaceInternal's required interface from InterfaceComponent's
+    // provided interface.
+    if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
+        if (!DisconnectInternal(component->GetName(), mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
+                                GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
+            CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to connect: "
+                                      << component->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
+                                      << " - "
+                                      << GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceComponentProvided()
+                                      << std::endl;
+            return false;
+        }
+    }
+    // For now, return true because failure to disconnect an interface is not critical
     return true;
 }
