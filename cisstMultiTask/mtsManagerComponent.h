@@ -141,9 +141,6 @@ protected:
 
     //********************************* Connect/Disconnect Internal **************************************
 
-    /*! Check if two interfaces are connected */
-    bool IsAlreadyConnected(const mtsDescriptionConnection & description) const;
-
     /*! Get connection id that the required interface specified involves in */
     ConnectionIDType GetConnectionID(const std::string & clientProcessName,
         const std::string & clientComponentName, const std::string & interfaceName) const;

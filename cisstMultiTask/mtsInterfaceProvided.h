@@ -155,8 +155,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
       performs a wakeup (signal) on the task's thread. */
     mtsInterfaceProvided(const std::string & name, mtsComponent * component,
                          mtsInterfaceQueueingPolicy queueingPolicy,
-                         mtsCallableVoidBase * postCommandQueuedCallable = 0,
-                         bool isProxy = false);
+                         mtsCallableVoidBase * postCommandQueuedCallable = 0);
 
     /*! Default Destructor. */
     virtual ~mtsInterfaceProvided();
@@ -661,9 +660,6 @@ protected: // PK TEMP
     typedef std::pair<size_t, ThisType *> InterfaceProvidedCreatedPairType;
     typedef std::list<InterfaceProvidedCreatedPairType> InterfaceProvidedCreatedListType;
     InterfaceProvidedCreatedListType InterfacesProvidedCreated;
-
-    /*! Indicates if this interface is used to generate a proxy */
-    bool IsProxy;
 
     /*! Mailbox (if supported).  Mailboxes should only be provided for
       end user provided interfaces (if needed).  Factory interfaces

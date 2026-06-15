@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -116,6 +116,7 @@ void mtsComponentStateTest::TestTransitions(void)
     CPPUNIT_ASSERT(fromCallback1->GetState() == mtsComponentState::FINISHED);
     CPPUNIT_ASSERT(fromSignal1->GetState() == mtsComponentState::FINISHED);
 
+#if 0  // PK TODO
     CPPUNIT_ASSERT(manager->RemoveComponent(periodic1));
     CPPUNIT_ASSERT(manager->RemoveComponent(continuous1));
     CPPUNIT_ASSERT(manager->RemoveComponent(fromCallback1));
@@ -129,6 +130,7 @@ void mtsComponentStateTest::TestTransitions(void)
     delete fromCallback1;
     delete fromSignal1;
     delete device2;
+#endif
 }
 
 

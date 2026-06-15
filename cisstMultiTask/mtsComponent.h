@@ -312,8 +312,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       safety. */
     virtual mtsInterfaceProvided *
         AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
-                                                bool isProxy = false);
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceProvided * AddProvidedInterface(const std::string & interfaceProvidedName) {

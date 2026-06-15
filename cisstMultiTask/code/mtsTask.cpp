@@ -352,8 +352,7 @@ mtsInterfaceRequired * mtsTask::AddInterfaceRequiredWithoutSystemEventHandlers(c
 
 
 mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                                        mtsInterfaceQueueingPolicy queueingPolicy,
-                                                                        bool isProxy)
+                                                                        mtsInterfaceQueueingPolicy queueingPolicy)
 {
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
@@ -361,13 +360,13 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const st
         mtsCallableVoidBase * postCommandQueuedCallable = 0;
         if (interfaceProvidedName == mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())
             postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable, isProxy);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
                                    << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe."
                                    << std::endl;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0);
     }
     if (interfaceProvided) {
         if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {

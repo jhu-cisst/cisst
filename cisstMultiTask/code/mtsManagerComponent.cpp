@@ -656,24 +656,6 @@ void mtsManagerComponent::LogInterface::PrintLog(const mtsLogMessage & log)
 
 //********************************** Connect/Disconnect Internal *************************************************
 
-bool mtsManagerComponent::IsAlreadyConnected(const mtsDescriptionConnection & description) const
-{
-    const std::string serverComponentName = description.Server.ComponentName;
-    const std::string serverInterfaceName = description.Server.InterfaceName;
-    const std::string clientComponentName = description.Client.ComponentName;
-    const std::string clientInterfaceName = description.Client.InterfaceName;
-
-    // Since a required interface can have only one connection with a provided interface,
-    // a required interface in the connection map has unique connection id.  Based on this
-    // property, we can check if two interfaces are already connected by searching the
-    // connection id that corresponds to the required interface from a list of connection
-    // id that the provided interface has.
-
-    // PK TODO: This method not yet implemented
-
-    return false;
-}
-
 ConnectionIDType mtsManagerComponent::GetConnectionID(const std::string & clientProcessName,
         const std::string & clientComponentName, const std::string & interfaceName) const
 {
@@ -763,16 +745,26 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
             return false;
         }
 
-        // Check if the two interfaces are already connected to each other
-        bool isAlreadyConnected = IsAlreadyConnected(mtsDescriptionConnection(
-            "", clientComponentName, clientInterfaceName,
-            "", serverComponentName, serverInterfaceName));
-        if (isAlreadyConnected) {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to connect - already connected interfaces: \""
-                                     << GetInterfaceUID("", clientComponentName, clientInterfaceName)
-                                     << "\" - \""
-                                     << GetInterfaceUID("", serverComponentName, serverInterfaceName)
-                                     << "\"" << std::endl;
+        // Check if the required interface is already connected
+        const mtsInterfaceProvided * interfaceConnected = clientInterfaceRequired->GetConnectedInterface();
+        if (interfaceConnected) {
+            interfaceConnected = interfaceConnected->GetOriginalInterface();
+            if (interfaceConnected == serverInterfaceProvided) {
+                CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to connect - already connected interfaces: \""
+                                         << GetInterfaceUID("", clientComponentName, clientInterfaceName)
+                                         << "\" - \""
+                                         << GetInterfaceUID("", serverComponentName, serverInterfaceName)
+                                         << "\"" << std::endl;
+            }
+            else {
+                CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to connect: \""
+                                         << GetInterfaceUID("", clientComponentName, clientInterfaceName)
+                                         << "\" - \""
+                                         << GetInterfaceUID("", serverComponentName, serverInterfaceName)
+                                         << " -- required interface already connected to: \""
+                                         << GetInterfaceUID("", interfaceConnected->GetComponentName(), interfaceConnected->GetName())
+                                         << "\"" << std::endl;
+            }
             return false;
         }
 
