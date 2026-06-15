@@ -216,6 +216,12 @@ void mtsManagerComponent::ComponentAdd(const mtsComponentPointer & componentPtr,
         component->SetName(componentName);
     }
 
+    if (ComponentMap.FindItem(componentName)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddComponent: component with name \"" << componentName
+                                 << "\" already exists" << std::endl;
+        return;
+    }
+
     // If dynamic component management is enabled
     if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
         // Add internal provided and required interface for dynamic component management service
@@ -281,8 +287,14 @@ void mtsManagerComponent::ComponentAdd(const mtsComponentPointer & componentPtr,
 void mtsManagerComponent::ComponentRemove(const std::string & componentName, bool & result)
 {
     result = false;
-    if (DisconnectFromManagerComponent(componentName))
-        result = ComponentMap.RemoveItem(componentName);
+    if (mtsManagerComponentBase::IsManagerComponent(componentName)) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "ComponentRemove: ignoring manager component " << componentName << std::endl;
+    }
+    else {
+        CMN_LOG_CLASS_INIT_ERROR << "MCS COMPONENT REMOVE: " << componentName << std::endl;
+        if (DisconnectFromManagerComponent(componentName))
+            result = ComponentMap.RemoveItem(componentName);
+    }
 }
 
 void mtsManagerComponent::ComponentGet(const std::string & componentName, mtsComponentPointer & componentPtr) const
@@ -1009,7 +1021,12 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
             mtsEndUserInterfaceArg endUserInterfaceArg(reinterpret_cast<size_t>(serverInterfaceProvided),
                                                        clientInterfaceName,
                                                        reinterpret_cast<size_t>(endUserInterface));
-            serverFunctionSet->RemoveEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
+            mtsExecutionResult executionResult = serverFunctionSet->RemoveEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
+            if (!executionResult.IsOK()) {
+                CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to execute command \"RemoveEndUserInterface\" (error "
+                                        << executionResult << ")" << std::endl;
+                success = false;
+            }
             if (endUserInterfaceArg.EndUserInterface != 0) {
                 CMN_LOG_CLASS_RUN_WARNING << "ComponentDisconnect: failed to remove end-user interface for " << serverComponentName << std::endl;
                 success = false;
@@ -1178,7 +1195,21 @@ bool mtsManagerComponent::DisconnectFromManagerComponent(const std::string & com
         return false;
     }
 
-    // First remove internal connection between MCS and component
+    // If the component has support for dynamic component control services,
+    // disconnect InterfaceInternal's required interface from InterfaceComponent's
+    // provided interface.
+    if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
+        if (!DisconnectInternal(component->GetName(), mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
+                                GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
+            CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to connect: "
+                                      << component->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
+                                      << " - "
+                                      << GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceComponentProvided()
+                                      << std::endl;
+        }
+    }
+
+    // Remove internal connection between MCS and component
     const std::string nameOfInterfaceComponentRequired
                       = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(componentName);
     if (!DisconnectInternal(GetName(), nameOfInterfaceComponentRequired,
@@ -1203,19 +1234,6 @@ bool mtsManagerComponent::DisconnectFromManagerComponent(const std::string & com
                                   << componentName << "\"" << std::endl;
     }
 
-    // If the component has support for dynamic component control services,
-    // disconnect InterfaceInternal's required interface from InterfaceComponent's
-    // provided interface.
-    if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
-        if (!DisconnectInternal(component->GetName(), mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
-                                GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
-            CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to connect: "
-                                      << component->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
-                                      << " - "
-                                      << GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceComponentProvided()
-                                      << std::endl;
-        }
-    }
     // For now, return true because failure to disconnect an interface is not critical
     return true;
 }

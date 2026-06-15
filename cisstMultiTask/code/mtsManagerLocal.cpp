@@ -61,7 +61,8 @@ LogQueueType   LogQueue;
 
 //************************* Protected Methods **************************************
 
-mtsManagerLocal::mtsManagerLocal(void) : Name("LCM"), ManagerComponent(0), LocalComponent(0)
+mtsManagerLocal::mtsManagerLocal(void) : Name(mtsManagerComponentBase::ComponentNames::ManagerLocal),
+                                         ManagerComponent(0), LocalComponent(0)
 {
     Initialize();
 }
@@ -69,6 +70,7 @@ mtsManagerLocal::mtsManagerLocal(void) : Name("LCM"), ManagerComponent(0), Local
 mtsManagerLocal::~mtsManagerLocal()
 {
     Cleanup();
+    __os_exit();
 }
 
 void mtsManagerLocal::Initialize(void)
@@ -97,29 +99,8 @@ void mtsManagerLocal::Initialize(void)
 void mtsManagerLocal::Cleanup(void)
 {
     if (LogThreadFinishWaiting) return;
-
     LogThreadFinishWaiting = true;
     LogThreadFinished.Wait();
-
-    if (ManagerComponent) {
-        ManagerComponent->Kill();
-        delete ManagerComponent;
-        ManagerComponent = 0;
-    }
-
-    if (LocalComponent) {
-        delete LocalComponent;
-        LocalComponent = 0;
-    }
-
-    if (SystemLogMultiplexer) {
-        cmnLogger::GetMultiplexer()->RemoveMultiplexer(SystemLogMultiplexer);
-        SystemLogMultiplexer->RemoveAllChannels();
-        delete SystemLogMultiplexer;
-        SystemLogMultiplexer = 0;
-    }
-
-    __os_exit();
 }
 
 bool mtsManagerLocal::CreateManagerComponent(void)
@@ -131,7 +112,7 @@ bool mtsManagerLocal::CreateManagerComponent(void)
     managerComponent->Create();
 
     // Set up local component with dynamic component management
-    LocalComponent = new mtsComponentWithManagement("LCM");
+    LocalComponent = new mtsComponentWithManagement(mtsManagerComponentBase::ComponentNames::ManagerLocal);
 
     std::string requiredName = mtsManagerComponentBase::GetNameOfInterfaceInternalRequired();
     mtsInterfaceRequired *required = LocalComponent->GetInterfaceRequired(requiredName);
@@ -182,8 +163,40 @@ bool mtsManagerLocal::CreateManagerComponent(void)
     return true;
 }
 
+void mtsManagerLocal::DestroyManagerComponent(void)
+{
+    // Remove LCM connection to MCS logger
+    Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
+               mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
+               mtsManagerComponentBase::ComponentNames::ManagerComponent,
+               mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided);
+    // Remove LCM connection to MCS dynamic component management services
+    Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
+               mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
+               mtsManagerComponentBase::ComponentNames::ManagerComponent,
+               mtsManagerComponentBase::GetNameOfInterfaceComponentProvided());
+    // Delete local component (LCM)
+    if (LocalComponent) {
+        delete LocalComponent;
+        LocalComponent = 0;
+    }
+    // Kill manager component (MCS) and then delete it.
+    if (ManagerComponent) {
+        ManagerComponent->Kill();
+        if (!ManagerComponent->WaitForState(mtsComponentState::FINISHED, 3.0)) {
+            std::cerr << "DestroyManagerComponent::ManagerComponent not finished" << std::endl;
+        }
+        delete ManagerComponent;
+        ManagerComponent = 0;
+    }
+}
+
 mtsManagerComponentServices * mtsManagerLocal::GetManagerServices() const
 {
+    if (Instance->MainThreadId != osaGetCurrentThreadId()) {
+        // Warn about potential thread safety issue
+        CMN_LOG_CLASS_RUN_WARNING << "GetManagerServices: additional thread detected" << std::endl;
+    }
     return LocalComponent->GetManagerComponentServices();
 }
 
@@ -238,6 +251,17 @@ void mtsManagerLocal::DeleteInstance(void)
 {
     if (Instance) {
         Instance->Cleanup();
+    }
+
+    if (SystemLogMultiplexer) {
+        cmnLogger::GetMultiplexer()->RemoveMultiplexer(SystemLogMultiplexer);
+        SystemLogMultiplexer->RemoveAllChannels();
+        delete SystemLogMultiplexer;
+        SystemLogMultiplexer = 0;
+    }
+
+    if (Instance) {
+        Instance->DestroyManagerComponent();
 
         delete Instance;
         Instance = 0;
@@ -714,7 +738,7 @@ bool CISST_DEPRECATED mtsManagerLocal::AddDevice(mtsComponent * component)
 bool mtsManagerLocal::RemoveComponent(mtsComponent * component)
 {
     if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "RemoveComponent: invalid component" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveComponent: invalid component" << std::endl;
         return false;
     }
     return GetManagerServices()->ComponentRemove(component);
@@ -731,13 +755,14 @@ size_t mtsManagerLocal::RemoveAllUserComponents(void)
     GetNamesOfComponents(componentNames);
     size_t numRemoved = 0;
     for (size_t i = 0; i < componentNames.size(); i++) {
-        // Do not need to check if this is the manager component, because RemoveComponent will not remove it.
-        if (!RemoveComponent(componentNames[i])) {
-            CMN_LOG_CLASS_RUN_WARNING << "RemoveAllUserComponents: failed to remove "
-                                      << componentNames[i] << std::endl;
-        }
-        else {
-            numRemoved++;
+        if (!mtsManagerComponentBase::IsManagerComponent(componentNames[i])) {
+            if (!RemoveComponent(componentNames[i])) {
+                CMN_LOG_CLASS_RUN_WARNING << "RemoveAllUserComponents: failed to remove "
+                                          << componentNames[i] << std::endl;
+            }
+            else {
+                numRemoved++;
+            }
         }
     }
     if (numRemoved > 0) {

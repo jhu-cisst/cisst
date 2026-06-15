@@ -71,6 +71,8 @@ public:
     public:
         /*! Name of manager component.  Should be globally unique */
         const static std::string ManagerComponent;
+        /*! Name of internal component used by mtsManagerLocal */
+        const static std::string ManagerLocal;
     };
 
     /*! Interface name definitions */

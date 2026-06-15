@@ -198,14 +198,10 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     if (!(ExecIn && ExecIn->GetConnectedInterface()))
         ChangeStateEvent(mtsComponentState(newState));
 
-    if (CheckForOwnThread()) {
-        this->State = newState;
-    }
-    else {
-        StateChange.Lock();
-        this->State = newState;
-        StateChange.Unlock();
-    }
+    StateChange.Lock();
+    this->State = newState;
+    StateChange.Unlock();
+
     StateChangeSignal.Raise();
 
     // Inform the manager component client of the state change

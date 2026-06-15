@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 // MJ: If naming convention changes, all the check and getter methods should be updated accordingly.
 // Names of components
 const std::string mtsManagerComponentBase::ComponentNames::ManagerComponent = "MCS";
+const std::string mtsManagerComponentBase::ComponentNames::ManagerLocal = "LCM";
 // Names of interfaces
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided  = "InterfaceInternalProvided";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired  = "InterfaceInternalRequired";
@@ -92,7 +93,8 @@ void mtsManagerComponentBase::Cleanup(void)
 
 bool mtsManagerComponentBase::IsManagerComponent(const std::string & componentName)
 {
-   return (componentName == ComponentNames::ManagerComponent);
+    return ((componentName == ComponentNames::ManagerComponent) ||
+            (componentName == ComponentNames::ManagerLocal));
 }
 
 bool mtsManagerComponentBase::IsNameOfInterfaceComponentRequired(const std::string & interfaceName)

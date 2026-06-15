@@ -98,6 +98,9 @@ protected:
     /*! \brief Create internal manager component. */
     bool CreateManagerComponent(void);
 
+    /*! \brief Destroy internal manager component. */
+    void DestroyManagerComponent(void);
+
     /* Local component */
     mtsComponentWithManagement * LocalComponent;
 

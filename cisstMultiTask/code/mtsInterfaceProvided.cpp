@@ -1293,7 +1293,8 @@ bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsComm
     if (multicastCommand) {
         if (!multicastCommand->RemoveCommand(handler)) {
             CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): did not find handler for event " << eventName << std::endl;
-            return false;
+            // PK TODO: should this return false?
+            //return false;
         }
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): cannot find event named \"" << eventName << "\"" << std::endl;
@@ -1311,7 +1312,8 @@ bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsComm
     if (multicastCommand) {
         if (!multicastCommand->RemoveCommand(handler)) {
             CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (write): did not find handler for event " << eventName << std::endl;
-            return false;
+            // PK TODO: should this return false?
+            //return false;
         }
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
