@@ -950,8 +950,6 @@ bool mtsComponent::AddInterfaceInternal(const bool useManagerComponentServices)
                                     mtsManagerComponentBase::CommandNames::RemoveEndUserInterface);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_RemoveObserverList, this,
                                     mtsManagerComponentBase::CommandNames::RemoveObserverList);
-    provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_ComponentCreate, this,
-                                    mtsManagerComponentBase::CommandNames::ComponentCreate);
     provided->AddCommandWrite(&mtsComponent::InterfaceInternalCommands_ComponentStartOther, this,
                               mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddEventWrite(EventGeneratorChangeState, mtsManagerComponentBase::EventNames::ChangeState,
@@ -999,40 +997,11 @@ void mtsComponent::InterfaceInternalCommands_RemoveObserverList(const mtsEventHa
     argin.Provided->RemoveObserverList(argin, argout);
 }
 
-// Code was previously in mtsManagerComponentClient::CreateAndAddNewComponent
-void mtsComponent::InterfaceInternalCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
-{
-    // Try to create component as requested
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-
-    mtsComponent * newComponent = LCM->CreateComponentDynamically(componentDescription.ClassName,
-                                                                  componentDescription.ComponentName,
-                                                                  componentDescription.ConstructorArgSerialized);
-    result = false;
-    if (newComponent) {
-        if (LCM->AddComponent(newComponent)) {
-            CMN_LOG_CLASS_RUN_VERBOSE << GetName() << ": successfully created and added component: "
-                                      << "\"" << componentDescription.ComponentName << "\" of type \""
-                                      << componentDescription.ClassName << "\"" << std::endl;
-            result = true;
-        }
-        else {
-            CMN_LOG_CLASS_RUN_ERROR << GetName() << ": failed to add component: "
-                                    << "\"" << componentDescription.ComponentName << "\" of type \""
-                                    << componentDescription.ClassName << "\"" << std::endl;
-        }
-    }
-    else {
-        CMN_LOG_CLASS_RUN_ERROR << GetName() << ": failed to create component: "
-                                << "\"" << componentDescription.ComponentName << "\" of type \""
-                                << componentDescription.ClassName << "\"" << std::endl;
-    }
-}
-
 void mtsComponent::InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg)
 {
-    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
-    mtsComponent *component = LCM->GetComponent(arg.ComponentName);
+    // Call to ComponentGet could be eliminated by adding component pointer to mtsComponentStatusControl.
+    // At least this should not deadlock because ComponentGet is a qualified read (non-blocking).
+    mtsComponent * component = GetManagerComponentServices()->ComponentGet(arg.ComponentName);
     if (component) {
         if (component->GetState() == mtsComponentState::CONSTRUCTED) {
             // Start an internal thread (if needed)

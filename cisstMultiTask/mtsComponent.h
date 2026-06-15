@@ -410,7 +410,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     //bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
     /*! Get pointer to manager component services, which extends the internal required interface
-      to the Manager Component Client (MCC).  This is used by the IRE (Python wrapping) */
+      to the Manager Component Client (MCS).  This is used by the IRE (Python wrapping) */
     const mtsManagerComponentServices *GetManagerComponentServices(void) const
     { return this->ManagerComponentServices; }
     mtsManagerComponentServices *GetManagerComponentServices(void)
@@ -565,7 +565,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg & argout);
     void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
-    void InterfaceInternalCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
     void InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg);
 
  public:

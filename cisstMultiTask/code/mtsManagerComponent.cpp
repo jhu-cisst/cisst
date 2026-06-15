@@ -168,29 +168,34 @@ bool mtsManagerComponent::AddInterfaceComponent(void)
     return true;
 }
 
+
+// Note that this dynamically creates a new component.  Do not confuse with mtsComponent::Create().
 void mtsManagerComponent::ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result)
 {
+    result = false;
+    // CreateComponentDynamically is in LCM so that it can be run in the caller's thread when needed.
     mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    if (LCM->GetCurrentMainTask() && (LCM->GetCurrentMainTask() != this)) {
-        result = false;
-        std::string mainTaskName = LCM->GetCurrentMainTask()->GetName();
-        CMN_LOG_CLASS_RUN_VERBOSE << "ComponentCreate: planning to call main task " << mainTaskName
-                                  << " to create component " << componentDescription.ComponentName << std::endl;
-        InterfaceComponentFunctionType *functionSet = InterfaceComponentFunctionMap.GetItem(mainTaskName);
-        if (functionSet) {
-            if (functionSet->ComponentCreate.IsValid())
-                functionSet->ComponentCreate(componentDescription, result);
-            else
-                CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: failed to find valid function for main task "
-                                        << mainTaskName << std::endl;
+    mtsComponent * newComponent = LCM->CreateComponentDynamically(componentDescription.ClassName,
+                                                                  componentDescription.ComponentName,
+                                                                  componentDescription.ConstructorArgSerialized);
+    if (newComponent) {
+        ComponentAdd(newComponent, result);
+        if (result) {
+            CMN_LOG_CLASS_RUN_VERBOSE << GetName() << ": successfully created and added component: "
+                                      << "\"" << componentDescription.ComponentName << "\" of type \""
+                                      << componentDescription.ClassName << "\"" << std::endl;
+            result = true;
         }
-        else
-            CMN_LOG_CLASS_RUN_ERROR << "ComponentCreate: failed to find function set for main task "
-                                    << mainTaskName << std::endl;
+        else {
+            CMN_LOG_CLASS_RUN_ERROR << GetName() << ": failed to add component: "
+                                    << "\"" << componentDescription.ComponentName << "\" of type \""
+                                    << componentDescription.ClassName << "\"" << std::endl;
+        }
     }
     else {
-        // Call method in mtsComponent.cpp
-        InterfaceInternalCommands_ComponentCreate(componentDescription, result);
+        CMN_LOG_CLASS_RUN_ERROR << GetName() << ": failed to create component: "
+                                << "\"" << componentDescription.ComponentName << "\" of type \""
+                                << componentDescription.ClassName << "\"" << std::endl;
     }
 }
 
@@ -275,8 +280,9 @@ void mtsManagerComponent::ComponentAdd(const mtsComponentPointer & componentPtr,
 
 void mtsManagerComponent::ComponentRemove(const std::string & componentName, bool & result)
 {
-    DisconnectFromManagerComponent(componentName);
-    result = ComponentMap.RemoveItem(componentName);
+    result = false;
+    if (DisconnectFromManagerComponent(componentName))
+        result = ComponentMap.RemoveItem(componentName);
 }
 
 void mtsManagerComponent::ComponentGet(const std::string & componentName, mtsComponentPointer & componentPtr) const
@@ -1216,7 +1222,6 @@ bool mtsManagerComponent::DisconnectFromManagerComponent(const std::string & com
                                       << " - "
                                       << GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceComponentProvided()
                                       << std::endl;
-            return false;
         }
     }
     // For now, return true because failure to disconnect an interface is not critical

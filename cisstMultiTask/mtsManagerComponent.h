@@ -81,7 +81,6 @@ protected:
         mtsFunctionWriteReturn AddObserverList;
         mtsFunctionWriteReturn RemoveEndUserInterface;
         mtsFunctionWriteReturn RemoveObserverList;
-        mtsFunctionWriteReturn ComponentCreate;
         mtsFunctionWrite       ComponentStartOther;
     };
 
