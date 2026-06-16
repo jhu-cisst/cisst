@@ -59,6 +59,45 @@ LogQueueType   LogQueue;
 
 // }}
 
+class ManagerLocalComponent : public mtsComponent {
+
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+protected:
+    mtsFunctionWrite FunctionPrintLog;
+
+public:
+    /*! Default constructor. */
+    ManagerLocalComponent();
+
+    /*! Default destructor. Does nothing. */
+    virtual ~ManagerLocalComponent() { }
+
+    void PrintLog(const mtsLogMessage &log) const
+    { FunctionPrintLog(log); }
+};
+
+ManagerLocalComponent::ManagerLocalComponent() :
+    mtsComponent(mtsManagerComponentBase::ComponentNames::ManagerLocal)
+{
+    EnableDynamicComponentManagement();
+    AddInterfaceInternal(true);
+
+    // Add an interface to PrintLog
+    std::string logInterfaceRequired = mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired;
+    mtsInterfaceRequired *requiredLog = AddInterfaceRequired(logInterfaceRequired);
+    if (requiredLog) {
+        requiredLog->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog, FunctionPrintLog);
+    }
+    else {
+        CMN_LOG_CLASS_INIT_WARNING << "ManagerLocalComponent: failed to add Logger interface" << std::endl;
+    }
+}
+
+CMN_DECLARE_SERVICES_INSTANTIATION(ManagerLocalComponent)
+CMN_IMPLEMENT_SERVICES(ManagerLocalComponent)
+
+
 //************************* Protected Methods **************************************
 
 mtsManagerLocal::mtsManagerLocal(void) : Name(mtsManagerComponentBase::ComponentNames::ManagerLocal),
@@ -101,18 +140,19 @@ void mtsManagerLocal::Cleanup(void)
     if (LogThreadFinishWaiting) return;
     LogThreadFinishWaiting = true;
     LogThreadFinished.Wait();
+    //LogThread.Delete();
 }
 
 bool mtsManagerLocal::CreateManagerComponent(void)
 {
     // Create manager component
-    mtsManagerComponent * managerComponent = new mtsManagerComponent();
-    CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponent: created " << managerComponent->GetName() << std::endl;
+    ManagerComponent = new mtsManagerComponent;
+    CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponent: created " << ManagerComponent->GetName() << std::endl;
 
-    managerComponent->Create();
+    ManagerComponent->Create();
 
     // Set up local component with dynamic component management
-    LocalComponent = new mtsComponentWithManagement(mtsManagerComponentBase::ComponentNames::ManagerLocal);
+    LocalComponent = new ManagerLocalComponent;
 
     std::string requiredName = mtsManagerComponentBase::GetNameOfInterfaceInternalRequired();
     mtsInterfaceRequired *required = LocalComponent->GetInterfaceRequired(requiredName);
@@ -121,8 +161,9 @@ bool mtsManagerLocal::CreateManagerComponent(void)
                                  << requiredName << std::endl;
         return false;
     }
+
     std::string providedName = mtsManagerComponentBase::GetNameOfInterfaceComponentProvided();
-    mtsInterfaceProvided *provided = managerComponent->GetInterfaceProvided(providedName);
+    mtsInterfaceProvided *provided = ManagerComponent->GetInterfaceProvided(providedName);
     if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponent: failed to find provided interface "
                                  << providedName << std::endl;
@@ -135,51 +176,38 @@ bool mtsManagerLocal::CreateManagerComponent(void)
         return false;
     }
 
-    // Add an interface to PrintLog
-    std::string logInterfaceRequired = mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired;
-    mtsInterfaceRequired *requiredLog = LocalComponent->AddInterfaceRequired(logInterfaceRequired);
-    if (requiredLog) {
-        requiredLog->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog, Logger.PrintLog);
-    }
-    else {
-        CMN_LOG_CLASS_INIT_WARNING << "CreateManagerComponent: failed to add Logger interface" << std::endl;
-    }
-    std::string logInterfaceProvided = mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided;
-    mtsInterfaceProvided *providedLog = managerComponent->GetInterfaceProvided(logInterfaceProvided);
-    if (!providedLog) {
-        CMN_LOG_CLASS_INIT_WARNING << "CreateManagerComponent: failed to find provided interface "
-                                 << providedName << std::endl;
-    }
-    if (requiredLog && providedLog) {
-        // Here, we know that Manager Component is not yet running, so can call internal ConnectTo method
-        if (!requiredLog->ConnectTo(providedLog)) {
-            CMN_LOG_CLASS_INIT_WARNING << "CreateManagerComponent: failed to connect provided/required log interfaces" << std::endl;
-        }
-    }
-
     // Start manager component
-    managerComponent->Start();
+    ManagerComponent->Start();
 
+    // Add LCM component
+    AddComponent(LocalComponent);
+
+    // Connect logger interface
+    if (!Connect(LocalComponent->GetName(), mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
+                 ManagerComponent->GetName(), mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided)) {
+        CMN_LOG_CLASS_INIT_WARNING << "CreateManagerComponent: failed to connect provided/required log interfaces" << std::endl;
+    }
     return true;
 }
 
 void mtsManagerLocal::DestroyManagerComponent(void)
 {
     // Remove LCM connection to MCS logger
-    Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
-               mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
-               mtsManagerComponentBase::ComponentNames::ManagerComponent,
-               mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided);
-    // Remove LCM connection to MCS dynamic component management services
-    Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
-               mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
-               mtsManagerComponentBase::ComponentNames::ManagerComponent,
-               mtsManagerComponentBase::GetNameOfInterfaceComponentProvided());
-    // Delete local component (LCM)
-    if (LocalComponent) {
-        delete LocalComponent;
-        LocalComponent = 0;
+    if (!Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
+                    mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
+                    mtsManagerComponentBase::ComponentNames::ManagerComponent,
+                    mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided)) {
+        CMN_LOG_RUN_WARNING << "DestroyManagerComponent: failed to disconnect logger from LCM to MCS" << std::endl;
     }
+
+    // Remove LCM connection to MCS dynamic component management services
+    if (!Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
+                    mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
+                    mtsManagerComponentBase::ComponentNames::ManagerComponent,
+                    mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
+        CMN_LOG_RUN_WARNING << "DestroyManagerComponent: failed to disconnect dynamic component management from LCM to MCS" << std::endl;
+    }
+
     // Kill manager component (MCS) and then delete it.
     if (ManagerComponent) {
         ManagerComponent->Kill();
@@ -188,6 +216,12 @@ void mtsManagerLocal::DestroyManagerComponent(void)
         }
         delete ManagerComponent;
         ManagerComponent = 0;
+    }
+
+    // Delete local component (LCM)
+    if (LocalComponent) {
+        delete LocalComponent;
+        LocalComponent = 0;
     }
 }
 
@@ -200,9 +234,9 @@ mtsManagerComponentServices * mtsManagerLocal::GetManagerServices() const
     return LocalComponent->GetManagerComponentServices();
 }
 
-const mtsManagerLocal::LogInterface * mtsManagerLocal::GetLoggerServices() const
+const ManagerLocalComponent * mtsManagerLocal::GetLoggerServices() const
 {
-    return &Logger;
+    return LocalComponent;
 }
 
 void mtsManagerLocal::GetInterfaceProvidedDescription(
@@ -1606,10 +1640,8 @@ void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
              it != LogQueue.end();
              ++count)
         {
-            if (Instance->GetLoggerServices()->PrintLog(*it)) {
-                ++it;
-                LogQueue.pop_front(); // FIFO
-            }
+            Instance->GetLoggerServices()->PrintLog(*it++);
+            LogQueue.pop_front(); // FIFO
             // MJ: after 30 log messages forwarded, give other threads a chance to queue
             // logs by releasing the lock (30 is arbitrary)
             if (count == 30)

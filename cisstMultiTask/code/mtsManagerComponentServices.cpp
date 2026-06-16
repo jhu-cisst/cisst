@@ -277,13 +277,7 @@ mtsComponent *mtsManagerComponentServices::ComponentGet(const std::string &compo
         return 0;
     }
 
-    mtsComponent * component = componentPtr.GetPointer();
-    if (!component) {
-        CMN_LOG_CLASS_RUN_ERROR << "ComponentGet: failed to get component: " << componentName << std::endl;
-        return 0;
-    }
-
-    return component;
+    return componentPtr.GetPointer();
 }
 
 bool mtsManagerComponentServices::ComponentConfigure(const std::string & componentName,

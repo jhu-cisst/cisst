@@ -41,9 +41,6 @@ mtsManagerComponent::mtsManagerComponent()
     ComponentMap.SetOwner(*this);
     InterfaceComponentFunctionMap.SetOwner(*this);
 
-    // Add this component to the map
-    ComponentMap.AddItem(mtsManagerComponentBase::ComponentNames::ManagerComponent, this);
-
     // Add provided interface for dynamic component management
     AddInterfaceComponent();
 
@@ -57,6 +54,23 @@ mtsManagerComponent::mtsManagerComponent()
                                 mtsManagerComponentBase::EventNames::PrintLog,
                                 mtsLogMessage());
     }
+
+    // Add this component to the map
+    ComponentMap.AddItem(mtsManagerComponentBase::ComponentNames::ManagerComponent, this);
+
+    // Add the LCM connection for dynamic component management, since it was done externally
+    // (in mtsManagerLocal, rather than by calling Connect)
+    mtsDescriptionConnection description(
+        "", mtsManagerComponentBase::ComponentNames::ManagerLocal,            // Client process, component (LCM)
+        mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),        // Client interface
+        "", mtsManagerComponentBase::ComponentNames::ManagerComponent,        // Server process, component (MCS)
+        mtsManagerComponentBase::GetNameOfInterfaceComponentProvided(),       // Server interface
+        ConnectionID);
+    mtsConnection connection(description);
+    // Could eliminate connected field in mtsConnection (no longer needed)
+    connection.SetConnected();
+
+    ConnectionMap.insert(std::make_pair(ConnectionID, connection));
 }
 
 mtsManagerComponent::~mtsManagerComponent()
@@ -224,11 +238,14 @@ void mtsManagerComponent::ComponentAdd(const mtsComponentPointer & componentPtr,
 
     // If dynamic component management is enabled
     if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
-        // Add internal provided and required interface for dynamic component management service
-        if (!component->AddInterfaceInternal(true)) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Internal\" provided and required interfaces: "
-                                     << componentName << std::endl;
-            return;
+        if (!mtsManagerComponentBase::IsManagerComponent(componentName)) {
+            // Add internal provided and required interface for dynamic component management service
+            // (except for LCM, which was already done)
+            if (!component->AddInterfaceInternal(true)) {
+                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Internal\" provided and required interfaces: "
+                                         << componentName << std::endl;
+                return;
+            }
         }
     }
     // If dynamic component management is not enabled
@@ -291,7 +308,6 @@ void mtsManagerComponent::ComponentRemove(const std::string & componentName, boo
         CMN_LOG_CLASS_RUN_VERBOSE << "ComponentRemove: ignoring manager component " << componentName << std::endl;
     }
     else {
-        CMN_LOG_CLASS_INIT_ERROR << "MCS COMPONENT REMOVE: " << componentName << std::endl;
         if (DisconnectFromManagerComponent(componentName))
             result = ComponentMap.RemoveItem(componentName);
     }
@@ -537,7 +553,6 @@ void mtsManagerComponent::GetListOfConnections(std::vector <mtsDescriptionConnec
     const ConnectionMapType::const_iterator itEnd = ConnectionMap.end();
 
     for (; it != itEnd; ++it) {
-        // Check if this connection has been successfully established
         if (it->second.IsConnected())
             listOfConnections.push_back(it->second.GetDescriptionConnection());
     }
@@ -898,6 +913,8 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
         "", serverComponentName, serverInterfaceName,
         thisConnectionID);
     mtsConnection connection(description);
+    // Could eliminate connected field in mtsConnection (no longer needed)
+    connection.SetConnected();
 
     ConnectionMap.insert(std::make_pair(thisConnectionID, connection));
 
@@ -1017,7 +1034,6 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
             // Now, pause/stop the client component.  In the future, the component could be left
             // running if the required interface is MTS_OPTIONAL.
             clientComponent->Suspend(); // Could instead use serverFunctionSet->ComponentStop
-            clientInterfaceRequired->DetachCommands();
             mtsEndUserInterfaceArg endUserInterfaceArg(reinterpret_cast<size_t>(serverInterfaceProvided),
                                                        clientInterfaceName,
                                                        reinterpret_cast<size_t>(endUserInterface));
@@ -1031,6 +1047,7 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
                 CMN_LOG_CLASS_RUN_WARNING << "ComponentDisconnect: failed to remove end-user interface for " << serverComponentName << std::endl;
                 success = false;
             }
+            clientInterfaceRequired->DetachCommands();
         }
         if (success) {
             CMN_LOG_CLASS_INIT_VERBOSE << "ComponentDisconnect: successfully disconnected required/provided: "
@@ -1170,8 +1187,9 @@ bool mtsManagerComponent::ConnectToManagerComponent(const std::string & componen
 
     // If a component has support for the dynamic component control services,
     // connect InterfaceInternal's required interface to InterfaceComponent's
-    // provided interface.
-    if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
+    // provided interface (except for LCM, which has already been done).
+    if (!mtsManagerComponentBase::IsManagerComponent(componentName) &&
+        component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
         if (!ConnectInternal(component->GetName(), mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
                              GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponent: failed to connect: "

@@ -45,6 +45,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
+// Forward declaration
+class ManagerLocalComponent;
+
 class CISST_EXPORT mtsManagerLocal: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
@@ -102,22 +105,17 @@ protected:
     void DestroyManagerComponent(void);
 
     /* Local component */
-    mtsComponentWithManagement * LocalComponent;
+    ManagerLocalComponent * LocalComponent;
 
     /*! Return the ManagerComponentServices.
         This is a method so that we can later add thread-safety.
      */
     mtsManagerComponentServices * GetManagerServices() const;
 
-    struct LogInterface {
-        mtsFunctionWrite PrintLog;
-    };
-    LogInterface Logger;
-
-    /*! Return the LoggerServices.
+    /*! Return the logger services.
         This is a method so that we can later add thread-safety.
      */
-    const LogInterface * GetLoggerServices() const;
+    const ManagerLocalComponent * GetLoggerServices() const;
 
     /*! Get information about provided interface */
     void GetInterfaceProvidedDescription(
