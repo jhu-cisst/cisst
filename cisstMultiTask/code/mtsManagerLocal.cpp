@@ -218,10 +218,16 @@ void mtsManagerLocal::DestroyManagerComponent(void)
 
 mtsManagerComponentServices * mtsManagerLocal::GetManagerServices() const
 {
+#if 0  // PK TODO
+    // Consider changing design to create multiple local components, or multiple required interfaces
+    // in LocalComponent, to support multiple threads using LCM to access MCS services.
+    // One option is to have required interfaces for a primary thread (main thread), secondary thread
+    // (e.g., embedded Python interpreter), and use a mutex to handle any other threads.
     if (Instance->MainThreadId != osaGetCurrentThreadId()) {
         // Warn about potential thread safety issue
         CMN_LOG_CLASS_RUN_WARNING << "GetManagerServices: additional thread detected" << std::endl;
     }
+#endif
     return LocalComponent->GetManagerComponentServices();
 }
 
