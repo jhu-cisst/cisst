@@ -44,11 +44,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsPython.h>
 %}
 
-// PK TEMP: need time.sleep until blocking commands supported over network
-%pythoncode %{
-   import time
-%}
-
 // use class type to create the correct Python type
 %apply cmnGenericObject * {mtsGenericObject *};
 
@@ -468,7 +463,7 @@ http://www.cisst.org/cisst/license.txt.
 
         # otherComponentInterface should be a tuple ('process', 'component', 'interfaceProvided')
         # or ('component', 'interfaceProvided')
-        def AddInterfaceRequiredAndConnect(self, otherComponentInterface, connectionAttempts = 1):
+        def AddInterfaceRequiredAndConnect(self, otherComponentInterface):
             try:
                 LCM = mtsManagerLocal.GetInstance()
                 localProcessName = LCM.GetProcessName()
@@ -480,40 +475,23 @@ http://www.cisst.org/cisst/license.txt.
                         processName = otherComponentInterface[num-3]
                     else:
                         processName = localProcessName
-                    # Now do the work here
-                    if (processName != localProcessName):
-                        # When connecting remotely, this component must have management services
-                        manager = self.GetManagerComponentServices()
-                        if not manager:
-                            print('Could not get manager component services')
-                            return
-                        interfaceDescription = manager.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
-                    else:
-                        comp = LCM.GetComponent(componentName)
-                        prov = comp.GetInterfaceProvided(interfaceName)
-                        interfaceDescription = prov.GetDescription()
+                    interfaceDescription = LCM.GetInterfaceProvidedDescription(processName, componentName, interfaceName)
                     if not interfaceDescription.InterfaceName:
                         print('No provided interface (empty string)')
-                        return
+                        return None
                     interfaceRequiredName = 'RequiredFor' + componentName + '_' + interfaceName;
                     interfaceRequired = self.AddInterfaceRequiredFromProvided(interfaceDescription, interfaceRequiredName)
-                    attempt = 0
-                    while (attempt < connectionAttempts):
-                        attempt = attempt + 1
-                        print('Trying to connect: ' + interfaceRequired.GetName() + ' - attempt # ' + str(attempt))
-                        if (processName != localProcessName):
-                            manager.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(),
-                                            processName, componentName, interfaceName)
-                            # PK TEMP: need time.sleep until blocking commands supported over network
-                            time.sleep(2.0)
-                        else:
-                            LCM.Connect(self.GetName(), interfaceRequired.GetName(), componentName, interfaceName)
-                        interfaceRequired.UpdateFromC()
-                        if interfaceRequired.GetConnectedInterface():
-                            print('Required interface ' + interfaceRequired.GetName() + ' connected.')
-                            return interfaceRequired
-                    print('Unable to add required interface for ' + interfaceName)
-                    return None
+                    if (processName != localProcessName):
+                        LCM.Connect(localProcessName, self.GetName(), interfaceRequired.GetName(),
+                                    processName, componentName, interfaceName)
+                    else:
+                        LCM.Connect(self.GetName(), interfaceRequired.GetName(), componentName, interfaceName)
+                    interfaceRequired.UpdateFromC()
+                    if interfaceRequired.GetConnectedInterface():
+                        print('Required interface ' + interfaceRequired.GetName() + ' connected.')
+                    else:
+                        print('Required interface ' + interfaceRequired.GetName() + ' not connected.')
+                    return interfaceRequired
                 else:
                     print('Parameter error: must specify (process, component, interface) or (component, interface)')
             except TypeError as e:
