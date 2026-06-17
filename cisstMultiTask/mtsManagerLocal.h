@@ -454,12 +454,14 @@ public:
 
     /*! Check if further logs are allowed (used in mtsTask); this could be
         moved to cmnLogger. */
-    static bool IsLogAllowed(void);
+    static bool CISST_DEPRECATED IsLogAllowed(void);
 
     /*! Is system-wide thread-safe logging enabled? */
     static bool IsLogForwardingEnabled(void);
 
-    /*! Enable or disable system-wide thread-safe logging */
+    /*! Enable or disable system-wide thread-safe logging.
+        As of 6/2026, system-wide logging will only be initialized on first call
+        to this method. */
     static void SetLogForwarding(bool activate);
 
     /*! Get whether system-wide logging is enabled or not */

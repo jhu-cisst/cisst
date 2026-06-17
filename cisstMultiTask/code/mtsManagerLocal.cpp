@@ -121,7 +121,9 @@ void mtsManagerLocal::Initialize(void)
     TimeServer.SetTimeOrigin();
     TimeServerOriginSet = true;
 
-    SetupSystemLogger();
+    // 6/2026: set up logger only if enabled
+    //         (see SetLogForwarding)
+    // SetupSystemLogger();
 
     ValidComponentTags.clear();
     ValidComponentTags.insert("ROS");
@@ -137,10 +139,12 @@ void mtsManagerLocal::Initialize(void)
 
 void mtsManagerLocal::Cleanup(void)
 {
-    if (LogThreadFinishWaiting) return;
-    LogThreadFinishWaiting = true;
-    LogThreadFinished.Wait();
-    //LogThread.Delete();
+    if (SystemLogMultiplexer) {
+        if (LogThreadFinishWaiting) return;
+        LogThreadFinishWaiting = true;
+        LogThreadFinished.Wait();
+        //LogThread.Delete();
+    }
 }
 
 bool mtsManagerLocal::CreateManagerComponent(void)
@@ -182,24 +186,11 @@ bool mtsManagerLocal::CreateManagerComponent(void)
     // Add LCM component
     AddComponent(LocalComponent);
 
-    // Connect logger interface
-    if (!Connect(LocalComponent->GetName(), mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
-                 ManagerComponent->GetName(), mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided)) {
-        CMN_LOG_CLASS_INIT_WARNING << "CreateManagerComponent: failed to connect provided/required log interfaces" << std::endl;
-    }
     return true;
 }
 
 void mtsManagerLocal::DestroyManagerComponent(void)
 {
-    // Remove LCM connection to MCS logger
-    if (!Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
-                    mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
-                    mtsManagerComponentBase::ComponentNames::ManagerComponent,
-                    mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided)) {
-        CMN_LOG_RUN_WARNING << "DestroyManagerComponent: failed to disconnect logger from LCM to MCS" << std::endl;
-    }
-
     // Remove LCM connection to MCS dynamic component management services
     if (!Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
                     mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
@@ -262,6 +253,12 @@ void mtsManagerLocal::SetupSystemLogger(void)
     if (!cmnLogger::GetMultiplexer()->AddMultiplexer(SystemLogMultiplexer)) {
         CMN_LOG_INIT_ERROR << "Failed to add mts system logger" << std::endl;
     }
+
+    // Connect logger interface to MCS
+    if (!Connect(LocalComponent->GetName(), mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
+                 ManagerComponent->GetName(), mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided)) {
+        CMN_LOG_CLASS_INIT_WARNING << "SetupSystemLogger: failed to connect provided/required log interfaces" << std::endl;
+    }
 }
 
 //*************************** Public Methods ****************************************
@@ -288,6 +285,16 @@ void mtsManagerLocal::DeleteInstance(void)
     }
 
     if (SystemLogMultiplexer) {
+        if (Instance) {
+            // Remove LCM connection to MCS logger
+            if (!Instance->Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
+                           mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
+                           mtsManagerComponentBase::ComponentNames::ManagerComponent,
+                           mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided)) {
+                CMN_LOG_RUN_WARNING << "DeleteInstance: failed to disconnect logger from LCM to MCS" << std::endl;
+            }
+        }
+        // Remove log multiplexer and cleanup
         cmnLogger::GetMultiplexer()->RemoveMultiplexer(SystemLogMultiplexer);
         SystemLogMultiplexer->RemoveAllChannels();
         delete SystemLogMultiplexer;
@@ -1558,6 +1565,14 @@ bool mtsManagerLocal::IsLogForwardingEnabled(void) {
 }
 
 void mtsManagerLocal::SetLogForwarding(bool activate) {
+    if (activate && !SystemLogMultiplexer) {
+        if (Instance) {
+            Instance->SetupSystemLogger();
+        }
+        else {
+            CMN_LOG_INIT_ERROR << "SetLogForwarding: LCM instance not yet created" << std::endl;
+        }
+    }
     LogForwardEnabled = activate;
 }
 
