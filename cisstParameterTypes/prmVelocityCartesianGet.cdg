@@ -3,6 +3,7 @@
 
 inline-header {
 #include <cisstVector/vctTransformationTypes.h>
+#include <cisstVector/vctFixedSizeVectorRef.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -19,17 +20,10 @@ class {
     }
 
     member {
-        name VelocityLinear;
-        type vct3;
-        default vct3(0.0, 0.0, 0.0);
-        description Linear velocity;
-    }
-
-    member {
-        name VelocityAngular;
-        type vct3;
-        default vct3(0.0, 0.0, 0.0);
-        description Angular velocity;
+        name Velocity;
+        type vct6;
+        default vct6(0.0);
+        description 6D velocity vector (linear xyz, angular xyz);
     }
 
     member {
@@ -56,24 +50,24 @@ class {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-
     public:
-        inline void SetVelocity(const vct6 & newValue) {
-            mVelocityLinear[0] = newValue[0];
-            mVelocityLinear[1] = newValue[1];
-            mVelocityLinear[2] = newValue[2];
-            mVelocityAngular[0] = newValue[3];
-            mVelocityAngular[1] = newValue[4];
-            mVelocityAngular[2] = newValue[5];
+        inline vctFixedSizeVectorRef<double, 3, 1> VelocityLinear(void) {
+            return vctFixedSizeVectorRef<double, 3, 1>(mVelocity.Pointer(0));
         }
-
-        inline void GetVelocity(vct6 & placeHolder) const {
-            placeHolder[0] = mVelocityLinear[0];
-            placeHolder[1] = mVelocityLinear[1];
-            placeHolder[2] = mVelocityLinear[2];
-            placeHolder[3] = mVelocityAngular[0];
-            placeHolder[4] = mVelocityAngular[1];
-            placeHolder[5] = mVelocityAngular[2];
+        inline vctFixedSizeConstVectorRef<double, 3, 1> VelocityLinear(void) const {
+            return vctFixedSizeConstVectorRef<double, 3, 1>(mVelocity.Pointer(0));
+        }
+        inline void SetVelocityLinear(const vct3 & v) {
+            VelocityLinear().Assign(v);
+        }
+        inline vctFixedSizeVectorRef<double, 3, 1> VelocityAngular(void) {
+            return vctFixedSizeVectorRef<double, 3, 1>(mVelocity.Pointer(3));
+        }
+        inline vctFixedSizeConstVectorRef<double, 3, 1> VelocityAngular(void) const {
+            return vctFixedSizeConstVectorRef<double, 3, 1>(mVelocity.Pointer(3));
+        }
+        inline void SetVelocityAngular(const vct3 & v) {
+            VelocityAngular().Assign(v);
         }
     }
 }
