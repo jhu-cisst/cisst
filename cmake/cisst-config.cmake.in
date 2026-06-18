@@ -102,6 +102,7 @@ set (CISST_HAS_QT5 @CISST_HAS_QT5@)
 set (CISST_HAS_QTNODES @CISST_HAS_QTNODES@)
 set (CISST_HAS_FLTK OFF)
 set (CISST_HAS_JSON @CISST_HAS_JSON@)
+set (CISST_XML_LIB "@CISST_XML_LIB@")
 set (CISST_JSON_USE_SYSTEM_VERSION @JSON_USE_SYSTEM_VERSION@)
 # jsoncpp include dir: needed by old-style consumers that include cisst public
 # headers (e.g. cmnGenericObject.h -> json/json.h) without linking to cisstCommon.
@@ -191,6 +192,9 @@ if (CISST_HAS_QT5)
   foreach (_cisst_qt5_comp Core Xml Widgets Gui OpenGL XmlPatterns)
     find_dependency (Qt5${_cisst_qt5_comp})
   endforeach ()
+endif ()
+if (CISST_HAS_XML AND "${CISST_XML_LIB}" STREQUAL "LibXml2")
+  find_dependency (LibXml2)
 endif ()
 if (CISST_HAS_QTNODES AND NOT TARGET cisstQtNodes)
   find_dependency (QtNodes CONFIG

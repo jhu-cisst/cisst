@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -456,6 +456,35 @@ foreach (lib ${CISST_LIBS})
     endif (CISST_HAS_QT)
   endif (CISST_${lib})
 endforeach (lib)
+
+# cisstCommonXML is controlled by dependencies discovered in cisst-dependencies,
+# but cisst-config.cmake is generated before cisstCommon is added below.  Decide
+# its availability here so generated package metadata matches the targets that
+# will be built later.
+cmake_dependent_option (CISST_cisstCommonXML "Build cisstCommonXML" ON
+                        "CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML" OFF)
+if (CISST_cisstCommonXML)
+  set (CISST_HAS_XML ON)
+  if (NOT DEFINED CISST_XML_LIB OR "${CISST_XML_LIB}" STREQUAL "")
+    if (CISST_FOUND_LIBXML2_XML)
+      set (CISST_XML_LIB "LibXml2")
+    elseif (CISST_FOUND_QT_XML)
+      set (CISST_XML_LIB "QtXML")
+    else ()
+      set (CISST_XML_LIB "Either LibXml2 or QtXML")
+    endif ()
+  endif ()
+  set (CISST_XML_LIB "${CISST_XML_LIB}" CACHE STRING "Library used to support XML Path, can be either \"LibXml2\" or \"QtXML\"")
+  set_property (CACHE CISST_XML_LIB PROPERTY STRINGS "LibXml2" "QtXML")
+  list (FIND CISST_LIBRARIES cisstCommonXML _cisstCommonXML_index)
+  if (${_cisstCommonXML_index} EQUAL -1)
+    set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
+  endif ()
+  unset (_cisstCommonXML_index)
+else ()
+  set (CISST_HAS_XML OFF)
+  set (CISST_XML_LIB "")
+endif ()
 
 # create equivalent for cisstInteractive
 set (CISST_HAS_IRE ${CISST_cisstInteractive})
