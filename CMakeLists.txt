@@ -1,7 +1,7 @@
 ## -*- Mode: CMAKE; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 
 #
-# (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -492,6 +492,16 @@ endif (CISST_HAS_GRAPHVIZ)
 # Finally, create lib targets
 cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 cisst_cmake_debug ("General settings: ${CISST_SETTINGS}")
+
+
+if (CMAKE_GENERATOR MATCHES "Visual Studio*" )
+  # CMake 3.27 introduced CMAKE_VS_DEBUGGER_ENVIRONMENT, which sets the
+  # VS_DEBUGGER_ENVIRONMENT property (introduced in CMake 3.13) on each created target.
+  file (TO_NATIVE_PATH ${cisst_BINARY_DIR} cisst_BINARY_DIR_NATIVE)
+  set (CISST_VS_DEBUG_DIR "Debug" CACHE STRING "Configuration used for Visual Studio debugger paths (e.g., Release/Debug)")
+  set (CMAKE_VS_DEBUGGER_ENVIRONMENT
+       "PATH=${cisst_BINARY_DIR_NATIVE}\\bin\\${CISST_VS_DEBUG_DIR};${cisst_BINARY_DIR_NATIVE}\\lib\\${CISST_VS_DEBUG_DIR};%PATH%")
+endif()
 
 # Build all libraries
 foreach (lib ${CISST_LIBS})

@@ -70,6 +70,11 @@ set_property (TARGET cisstMultiTaskTests PROPERTY FOLDER "cisstMultiTask/tests")
 target_link_libraries (cisstMultiTaskTests cisstTestsDriver cisstMultiTaskTestsLib)
 cisst_target_link_libraries (cisstMultiTaskTests cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstTestsDriver)
 
+if (CMAKE_GENERATOR MATCHES "Visual Studio*" )
+  # CMake 3.13 introduced the VS_DEBUGGER_COMMAND_ARGUMENTS property
+  # Set its default value to run all tests
+  set_target_properties(cisstMultiTaskTests PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-r")
+endif ()
 
 # to generate a CTest list of tests
 cisst_add_test (cisstMultiTaskTests ITERATIONS 1 INSTANCES 1)
