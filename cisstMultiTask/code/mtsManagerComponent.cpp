@@ -683,35 +683,6 @@ void mtsManagerComponent::LogInterface::PrintLog(const mtsLogMessage & log)
 
 //********************************** Connect/Disconnect Internal *************************************************
 
-ConnectionIDType mtsManagerComponent::GetConnectionID(const std::string & clientProcessName,
-        const std::string & clientComponentName, const std::string & interfaceName) const
-{
-    ConnectionMapType::const_iterator it = ConnectionMap.begin();
-    const ConnectionMapType::const_iterator itEnd = ConnectionMap.end();
-
-    mtsDescriptionConnection description;
-    for (; it != itEnd; ++it) {
-        it->second.GetDescriptionConnection(description);
-        if ((description.Client.ComponentName == clientComponentName) &&
-            (description.Client.InterfaceName == interfaceName))
-        {
-            return description.ConnectionID;
-        }
-    }
-
-    return InvalidConnectionID;
-}
-
-mtsConnection * mtsManagerComponent::GetConnectionInformation(const ConnectionIDType connectionID)
-{
-    const ConnectionMapType::iterator it = ConnectionMap.find(connectionID);
-    if (it == ConnectionMap.end()) {
-        return 0;
-    } else {
-        return &it->second;
-    }
-}
-
 bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentName, const std::string & clientInterfaceName,
                                           const std::string & serverComponentName, const std::string & serverInterfaceName)
 {
@@ -1093,16 +1064,25 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
     }
 
     // Finally, remove from ConnectionMap
-    ConnectionIDType id = GetConnectionID("", clientComponentName, clientInterfaceName);
-    if (id == InvalidConnectionID) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: no connection id found for "
+    ConnectionMapType::const_iterator it;
+    mtsDescriptionConnection description;
+    for (it = ConnectionMap.begin(); it != ConnectionMap.end(); ++it) {
+        it->second.GetDescriptionConnection(description);
+        if ((description.Client.ComponentName == clientComponentName) &&
+            (description.Client.InterfaceName == clientInterfaceName))
+        {
+            break;
+        }
+    }
+    if (it == ConnectionMap.end()) {
+        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: no connection found for "
             << "\"" << GetInterfaceUID("", clientComponentName, clientInterfaceName) << "\" - "
             << "\"" << GetInterfaceUID("", serverComponentName, serverInterfaceName) << std::endl;
         return false;
     }
-    ConnectionMapType::iterator itConnectionMap = ConnectionMap.find(id);
-    mtsDescriptionConnection description = itConnectionMap->second.GetDescriptionConnection();
-    ConnectionMap.erase(itConnectionMap);
+    else {
+        ConnectionMap.erase(it);
+    }
 
     // Generate the event
     InterfaceComponentEvents_RemoveConnection(description);

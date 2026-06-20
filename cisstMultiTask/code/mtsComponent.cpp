@@ -983,10 +983,11 @@ void mtsComponent::InterfaceInternalCommands_RemoveEndUserInterface(const mtsEnd
                                                                     mtsEndUserInterfaceArg & argout)
 {
     CMN_ASSERT(argin.OriginalInterface);
+    CMN_ASSERT(argin.EndUserInterface);
     argout = argin;  // not really needed
-    argout.EndUserInterface =
-        reinterpret_cast<size_t>(reinterpret_cast<mtsInterfaceProvided*>(argin.OriginalInterface)
-                                 ->RemoveEndUserInterface(reinterpret_cast<mtsInterfaceProvided*>(argin.EndUserInterface), argin.UserName));
+    mtsInterfaceProvided *original = reinterpret_cast<mtsInterfaceProvided*>(argin.OriginalInterface);
+    mtsInterfaceProvided *endUser = reinterpret_cast<mtsInterfaceProvided*>(argin.EndUserInterface);
+    argout.EndUserInterface = reinterpret_cast<size_t>(original->RemoveEndUserInterface(endUser, argin.UserName));
 }
 
 void mtsComponent::InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin,

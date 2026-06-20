@@ -66,7 +66,8 @@ protected:
     typedef std::map<ConnectionIDType, mtsConnection> ConnectionMapType;
     ConnectionMapType ConnectionMap;
 
-    /*! Counter to issue a new connection ID */
+    /*! Counter to issue a new connection ID.
+        NOTE: ConnectionID may be eliminated in future versions. */
     ConnectionIDType ConnectionID;
 
     /*! Functions for InterfaceComponent's required interface.  Since one
@@ -140,13 +141,6 @@ protected:
     LogInterface Logger;
 
     //********************************* Connect/Disconnect Internal **************************************
-
-    /*! Get connection id that the required interface specified involves in */
-    ConnectionIDType GetConnectionID(const std::string & clientProcessName,
-        const std::string & clientComponentName, const std::string & interfaceName) const;
-
-    /*! Get connection information using connection id */
-    mtsConnection * GetConnectionInformation(const ConnectionIDType connectionID);
 
     bool ConnectInternal(const std::string & clientComponentName, const std::string & clientInterfaceName,
                          const std::string & serverComponentName, const std::string & serverInterfaceName);
