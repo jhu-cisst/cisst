@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// [doc-example-start]
 void ExampleCommon(void) {
     // fill a vector with random numbers
     vctFixedSizeVector<double, 8> vector1, vector2;
@@ -55,3 +56,4 @@ void ExampleCommon(void) {
     rot1.From(axisAngle);
     cmnTypeTraits<double>::SetTolerance(cmnTypeTraits<double>::DefaultTolerance);
 }
+// [doc-example-end]

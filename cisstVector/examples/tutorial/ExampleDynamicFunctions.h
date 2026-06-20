@@ -1,3 +1,4 @@
+// [doc-example-start]
 // take any dynamic matrix as input parameter
 // Const or not, Reference or not
 template <class _matrixOwnerType, class _elementType>
@@ -56,3 +57,4 @@ FunctionDynamicF(const vctDynamicConstVectorBase<_vectorOwnerType,
     // ...... do something to resultStorage
     return vctReturnDynamicVector<value_type>(resultStorage);
 }
+// [doc-example-end]

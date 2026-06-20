@@ -3,6 +3,7 @@
 #ifndef _CMyFilter3_h
 #define _CMyFilter3_h
 
+// [doc-filter3-h-start]
 #include <cisstStereoVision/svlFilterBase.h>
 
 class CMyFilter3 : public svlFilterBase
@@ -17,5 +18,6 @@ protected:
 private:
     unsigned int MaxVal;
 };
+// [doc-filter3-h-end]
 
 #endif // _CMyFilter3_h

@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleSVDFixedSizeData(void) {
     // fill a matrix with random numbers
     vctFixedSizeMatrix<double, 5, 7, VCT_COL_MAJOR> A, Acopy;
@@ -16,3 +17,4 @@ void ExampleSVDFixedSizeData(void) {
               << "\nU * S * Vt:\n"
               << svdData.U() * S * svdData.Vt() << std::endl;
 }
+// [doc-example-end]

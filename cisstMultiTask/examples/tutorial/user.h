@@ -30,14 +30,18 @@ class user: public mtsTaskContinuous {
     void SetupInterfaces(void);
     void PrintUsage(void) const;
 
+    // [doc-required-functions-start]
     // functions used in the interface required to send commands to counter
     mtsFunctionVoid Reset;
     mtsFunctionRead GetValue;
     mtsFunctionWrite SetIncrement;
+    // [doc-required-functions-end]
 
+    // [doc-event-handlers-start]
     // methods used as event handlers for events coming from counter
     void OverflowHandler(void);
     void InvalidIncrementHandler(const std::string & message);
+    // [doc-event-handlers-end]
 
  public:
     bool Quit;

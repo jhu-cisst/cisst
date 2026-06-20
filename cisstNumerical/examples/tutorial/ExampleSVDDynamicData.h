@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleSVDDynamicData(void) {
     // fill a matrix with random numbers
     vctDynamicMatrix<double> A(10, 3, VCT_COL_MAJOR);
@@ -13,6 +14,7 @@ void ExampleSVDDynamicData(void) {
               << "\nS:\n" << svdData.S()
               << "\nV:\n" << svdData.Vt().TransposeRef() << std::endl;
 }
+// [doc-example-end]
 
 void ExampleSVDEconomyDynamicData(void) {
     // fill a matrix with random numbers

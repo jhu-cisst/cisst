@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// [doc-example-start]
 void ExampleSTL(void) {
     typedef vctFixedSizeVector<double, 6> VectorType;
 
@@ -34,3 +35,4 @@ void ExampleSTL(void) {
     std::sort(vector1.begin(), vector1.end());
     std::cout << vector1 << std::endl;
 }
+// [doc-example-end]

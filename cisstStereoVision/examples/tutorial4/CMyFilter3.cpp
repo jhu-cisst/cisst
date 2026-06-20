@@ -1,6 +1,7 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
 
+// [doc-filter3-cpp-start]
 #include "CMyFilter3.h"
 #include <cisstStereoVision/svlImageProcessing.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -44,7 +45,7 @@ int CMyFilter3::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* 
     _SynchronizeThreads(procInfo);                                          // All threads wait until finished
                                                                             //
     if (MaxVal > 0) {                                                       //
-
+ 
         svlSampleImage* subimage = image->GetSubImage(procInfo);
         
         _CriticalSection(procInfo)
@@ -64,4 +65,5 @@ int CMyFilter3::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* 
                                                                             //
     return SVL_OK;                                                          //
 }
+// [doc-filter3-cpp-end]
 

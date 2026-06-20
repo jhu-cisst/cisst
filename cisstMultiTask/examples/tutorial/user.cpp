@@ -39,6 +39,7 @@ user::user(const std::string & componentName):
 
 void user::SetupInterfaces(void)
 {
+    // [doc-required-interface-start]
     // add an interface required.
     mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("Counter");
     if (!interfaceRequired) {
@@ -54,7 +55,9 @@ void user::SetupInterfaces(void)
 
     // add a write function, i.e. send a request with a payload
     interfaceRequired->AddFunction("SetIncrement", this->SetIncrement);
+    // [doc-required-interface-end]
 
+    // [doc-event-handlers-setup-start]
     // add a void event handler, i.e. handle an event without a
     // payload.  The method used should have the signature "void
     // method(void)"
@@ -64,6 +67,7 @@ void user::SetupInterfaces(void)
     // The method used should have the signature "void method(const
     // type & payload)"
     interfaceRequired->AddEventHandlerWrite(&user::InvalidIncrementHandler, this, "InvalidIncrement");
+    // [doc-event-handlers-setup-end]
 }
 
 void user::PrintUsage(void) const
@@ -90,10 +94,12 @@ void user::InvalidIncrementHandler(const std::string & message)
     std::cout << "Invalid increment detected with message \"" << message << "\"" << std::endl;
 }
 
+// [doc-process-queued-events-start]
 void user::Run(void)
 {
     // process the events received
     ProcessQueuedEvents();
+    // [doc-process-queued-events-end]
 
     // detect if the user has pressed a key
     if (!cmnKbHit()) {

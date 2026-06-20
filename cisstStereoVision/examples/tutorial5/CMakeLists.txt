@@ -10,6 +10,7 @@
 #
 # --- end cisst license ---
 
+# [doc-cmake-start]
 cmake_minimum_required (VERSION 2.6)
 
 # create a list of libraries needed for this project
@@ -39,3 +40,4 @@ if (cisst_FOUND)
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
 endif (cisst_FOUND)
+# [doc-cmake-end]

@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleSVDImplicitWorkspace(void) {
     const unsigned int size = 6;
     // fill a matrix with random numbers
@@ -16,6 +17,7 @@ void ExampleSVDImplicitWorkspace(void) {
         std::cout << "An exception occured, check cisstLog.txt." << std::endl;
     }
 }
+// [doc-example-end]
 
 void ExampleSVDEconomyImplicitWorkspace(void) {
     const unsigned int sizerows = 20;
