@@ -34,6 +34,7 @@ CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponent, mtsManagerComponentBase);
 mtsManagerComponent::mtsManagerComponent()
     : mtsManagerComponentBase(mtsManagerComponentBase::ComponentNames::ManagerComponent),
       ComponentMap("ComponentMap"),
+      ConnectionID(0),
       InterfaceComponentFunctionMap("InterfaceComponentFunctionMap")
 {
     this->mTags.clear();
@@ -971,12 +972,14 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
             clientInterfaceRequired->GetEventList(eventList);
             serverInterfaceProvided->RemoveObserverList(eventList, eventList);
             success = clientInterfaceRequired->CheckEventList(eventList);
-            // Now, pause/stop the client component.  In the future, the component could be left
+            // Now, pause/stop the client component (if not this component).  In the future, the component could be left
             // running if the required interface is MTS_OPTIONAL.
-            clientComponent->Suspend();
+            if (clientComponent != this) {
+                clientComponent->Suspend();
             clientInterfaceRequired->DetachCommands();
             if (serverInterfaceProvided->RemoveEndUserInterface(endUserInterface, clientInterfaceName) != 0)
                 success = false;
+            }
         }
         else {
             mtsExecutionResult executionResult;
@@ -1007,9 +1010,10 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
                                         << executionResult << ")" << std::endl;
             }
             success = clientInterfaceRequired->CheckEventList(eventList);
-            // Now, pause/stop the client component.  In the future, the component could be left
+            // Now, pause/stop the client component (if not this component).  In the future, the component could be left
             // running if the required interface is MTS_OPTIONAL.
-            clientComponent->Suspend(); // Could instead use serverFunctionSet->ComponentStop
+            if (clientComponent != this)
+                clientComponent->Suspend();
             mtsEndUserInterfaceArg endUserInterfaceArg(reinterpret_cast<size_t>(serverInterfaceProvided),
                                                        clientInterfaceName,
                                                        reinterpret_cast<size_t>(endUserInterface));
