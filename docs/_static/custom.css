@@ -1,0 +1,19 @@
+/* Widen the main content area for better readability of wide tables and code blocks */
+
+/* RTD theme wraps content in .wy-nav-content — remove the default max-width cap */
+.wy-nav-content {
+    max-width: none;
+}
+
+/* Keep a comfortable reading width on very large monitors by capping at 1400px,
+   but allow it to grow well beyond the default ~800px */
+.wy-nav-content-wrap {
+    max-width: 1400px;
+}
+
+/* Ensure wide tables and code blocks can use the full available width */
+.rst-content .section table,
+div[class^="highlight"] {
+    max-width: 100%;
+    overflow-x: auto;
+}

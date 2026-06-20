@@ -2,6 +2,12 @@ cisst Libraries
 ===============
 
 .. toctree::
+   :maxdepth: 1
+   :caption: About
+
+   about
+
+.. toctree::
    :maxdepth: 2
    :caption: Contents
 
@@ -9,9 +15,3 @@ cisst Libraries
    libraries/index
    development/index
    api/index
-
-.. toctree::
-   :maxdepth: 1
-   :caption: About
-
-   about
