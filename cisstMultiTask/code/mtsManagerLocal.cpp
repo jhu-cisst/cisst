@@ -784,10 +784,6 @@ bool CISST_DEPRECATED mtsManagerLocal::AddDevice(mtsComponent * component)
 
 bool mtsManagerLocal::RemoveComponent(mtsComponent * component)
 {
-    if (!component) {
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveComponent: invalid component" << std::endl;
-        return false;
-    }
     return GetManagerServices()->ComponentRemove(component);
 }
 
