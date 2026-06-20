@@ -5,20 +5,20 @@ Concepts
 
 This is an introduction to the features of cisstMultiTask, which provides the component-based framework for the cisst package. It replaces the outdated `cisstMultiTask Quick Start <http://unittest.lcsr.jhu.edu/cisst/downloads/cisst/current/doc/latex/multiTask-quickstart.pdf>`__. The code and examples are available as part of the cisst repository http://github.com/jhu-cisst/cisst. The library headers are in ``cisst/cisstMultiTask`` and the code can be found in ``cisst/cisstMultiTask/code``. Examples can be found on ``cisst/cisstMultiTask/examples`` and unit tests are in ``cisst/cisstMultiTask/tests``. To compile your own code, remember to include ``cisstMultiTask.h`` (which includes all public header files) or the required set of individual files (e.g., ``cisstMultiTask/mtsXXXX.h``). Per convention, all the symbols starting with ``mts`` are defined in cisstMultiTask. Symbols prefixed with ``cmn``, ``osa`` and ``vct`` come from cisstCommon, cisstOSAbstraction and cisstVector, respectively.
 
-.. _11-component-model:
+.. _component-model:
 
-1.1 Component Model
--------------------
+Component Model
+---------------
 
 .. image:: images/mtsComponent.png
    :alt: cisstMultiTask component
 
 A cisstMultiTask component can include "provided interfaces", "required interfaces", "input interfaces", and "output interfaces". The base component class ``mtsComponent`` provides all the base implementation to add interfaces but doesn't manage any thread nor thread safety mechanism. If a thread is needed for a given component, this component should be derived from one of the ``mtsTask`` derived classes (``mtsTaskContinuous``, ``mtsTaskPeriodic``, ``mtsTaskFromSignal``, ``mtsTaskFromCallback``, ...). Libraries based on cisstMultiTask can also define their own base component type (e.g. cisstStereoVision filters are components derived from ``svlFilterBase``). Internally, a component may contain "state tables" to manage important component data. The component may have a state associated with it (e.g., initialized, paused, started). Note that every component contains at least two provided interface: (1) an internal interface that is connected to the "component manager", and (2) an ``ExecOut`` interface that can be used to provide the execution thread to other components.
 
-.. _12-components-in-use:
+.. _components-in-use:
 
-1.2 Components In Use
----------------------
+Components In Use
+-----------------
 
 .. image:: images/ComponentsInUse.png
    :alt: cisstMultiTask components in use
@@ -27,17 +27,17 @@ The above figure shows a hypothetical deployment of components for visual servo 
 
 An important point to consider is how to achieve "plug & play" capabilities within the system. For example, it is desirable for this application to work for any robot that can provide a low-level Joint Servo controller. This requires some standardization -- in the cisst library, we have chosen to standardize at the command level; specifically, by standardizing the name of a command (a string) and its payload (a data type). For example, the command to retrieve the joint positions should be named "GetPositionJoint" and it should return the joint positions in an instance of the ``prmPositionJointGet`` class (see cisstParameterTypes library). The cisst library does not enforce this standard, however, so users can create components with any command names and data types, but will lose the benefits of "plug & play".
 
-.. _13-provided-and-required-interfaces:
+.. _provided-and-required-interfaces:
 
-1.3 Provided and Required Interfaces
-------------------------------------
+Provided and Required Interfaces
+---------------------------------
 
 .. image:: images/mtsInterfaces.png
    :alt: cisstMultiTask interfaces
 
 All components can have multiple ''provided interfaces'' (``mtsInterfaceProvided``) and ''required interfaces'' (``mtsInterfaceRequired``). A component that contains only provided interfaces can be called a ''Server'', whereas a component that contains only required interfaces can be called a ''Client''. Of course, the more typical case is that a component will have both provided and required interfaces.
 
-Each provided interface can have multiple command objects which encapsulate the available services, as well as event generators that broadcast events with or without payloads. Several command object classes are defined to handle commands with no parameters, one input parameter, one output parameter, or one of each, as described `below <#4--commands-and-functions>`__. Provided interfaces are created and added to a component using ``AddInterfaceProvided("name")``. Once created, they can be populated with commands and events.
+Each provided interface can have multiple command objects which encapsulate the available services, as well as event generators that broadcast events with or without payloads. Several command object classes are defined to handle commands with no parameters, one input parameter, one output parameter, or one of each, as described `below <#commands-and-functions>`__. Provided interfaces are created and added to a component using ``AddInterfaceProvided("name")``. Once created, they can be populated with commands and events.
 
 Each required interface has multiple function objects that are bound to command objects to use the services that the connected command objects provide. It may also have event receivers or handlers to respond to events generated by the connected component. As with the command objects, several corresponding function object classes are defined. When two interfaces are connected to each other, all function objects in the required interface are bound to the corresponding command objects in the provided interface, and event handlers/receivers in the required interface become observers of the events generated by the provided interface. Required interfaces are created and added to a component using ``AddInterfaceRequired("name")``. Once created, they can be populated with functions and event handlers/receivers.
 
@@ -50,21 +50,21 @@ It is important to note that during the connection between a required and a prov
 
 Interfaces automatically create message queues when needed to ensure thread safety (for task components) for both commands and events. This behavior can be overloaded at the interface or command/event level if the user has a more efficient way to enforce thread safety.
 
-.. _14-output-and-input-interfaces:
+.. _output-and-input-interfaces:
 
-1.4 Output and Input Interfaces
--------------------------------
+Output and Input Interfaces
+---------------------------
 
 All components can have multiple ''output interfaces'' (``mtsInterfaceOutput``). An output interface provides an output data port (e.g., a video source). It is created and added to a component using ``AddInterfaceOutput("name")``.
 
 All components can have multiple ''input interfaces'' (``mtsInterfaceOutput``). An input interface is used to accept data, such as a video image. It is created and added to component using ``AddInterfaceInput("name")``.
 
-For further details, see the `cisstStereoVision Tutorial <cisstStereoVision-tutorial>`__.
+For further details, see the :doc:`cisstStereoVision Tutorials </libraries/cisstStereoVision/tutorials/index>`.
 
-.. _15-technical-concepts:
+.. _technical-concepts:
 
-1.5 Technical concepts
-----------------------
+Technical concepts
+------------------
 
 To provide a flexible programming interface (API), the cisstMultiTask library uses the “command pattern”. In this design, an object API is not defined by its public methods but rather by a list of pointers on methods. The list of methods pointers (commands) can be defined and queried at run-time which provides much more flexibility than compile-time binding. The matching between commands is performed using a string compare.
 
@@ -85,10 +85,10 @@ The main classes of the cisstMultiTask library are:
 -  State tables: ``mtsStateTable``
 -  Component manager
 
-.. _2-components-and-tasks:
+.. _components-and-tasks:
 
-2 Components and tasks
-----------------------
+Components and tasks
+--------------------
 
 As mentioned in the introduction, cisstMultiTask provides different base components that can be used as a base class depending on the user's application:
 
@@ -100,7 +100,7 @@ As mentioned in the introduction, cisstMultiTask provides different base compone
    -  ``mtsTaskFromSignal``: base class for a task that should run only upon receipt of a command. This task is appropriate for event based applications -- the ``Run`` method gets called only when a command is queued.
    -  ``mtsTaskFromCallback``: base class for a task using an external trigger to start any computation. The ``Run`` method is used as a callback attached to an external library, driver, ...
 
--  ``svlFilterBase``: this class is defined in the `cisstStereoVision (SVL) library <cisstStereoVision-tutorial>`__; it is the base class for all SVL filters. It does not contain a thread, but is intended to be added to an SVL "stream" that is managed by the ``svlStreamManager`` component. The ``svlStreamManager`` provides the execution thread (or thread pool). See the `cisstStereoVision Tutorial <cisstStereoVision-tutorial>`__ for further details.
+-  ``svlFilterBase``: this class is defined in the :doc:`cisstStereoVision (SVL) library </libraries/cisstStereoVision/tutorials/index>`; it is the base class for all SVL filters. It does not contain a thread, but is intended to be added to an SVL "stream" that is managed by the ``svlStreamManager`` component. The ``svlStreamManager`` provides the execution thread (or thread pool). See the :doc:`cisstStereoVision Tutorials </libraries/cisstStereoVision/tutorials/index>` for further details.
 
 All tasks derived from ``mtsTask`` must define the following methods which are pure virtual in the base type:
 
@@ -124,15 +124,15 @@ For all threaded components, it is important to remember that most messages (com
 
 Both methods return the number of commands/events dequeued.
 
-.. _3-interfaces:
+.. _interfaces:
 
-3 Interfaces
-------------
+Interfaces
+----------
 
-.. _31-provided-interfaces:
+.. _provided-interfaces:
 
-3.1 Provided interfaces
-~~~~~~~~~~~~~~~~~~~~~~~
+Provided interfaces
+~~~~~~~~~~~~~~~~~~~
 
 Provided interfaces can be added to any existing component using the method ``mtsComponent::AddInterfaceProvided``. The result of ``AddInterfaceProvided`` is a pointer on the newly create interface. It is the caller's responsibility to verify that it is a valid pointer (the most likely cause of error is an attempt to create to interfaces with the same name).
 
@@ -156,10 +156,10 @@ Internally, cisstMultiTask configures the provided interface differently based o
 
 All queues for a given provided interface can be configured using a combination of ``SetMailBoxSize``, ``SetArgumentQueuesSize`` and/or ``SetMailBoxAndArgumentQueuesSize`` (see Doxygen reference manual for details).
 
-.. _32-required-interfaces:
+.. _required-interfaces:
 
-3.2 Required interfaces
-~~~~~~~~~~~~~~~~~~~~~~~
+Required interfaces
+~~~~~~~~~~~~~~~~~~~
 
 Required interfaces are very similar to provided interfaces. They can be added to any existing component using the method ``mtsComponent::AddInterfaceRequired`` which returns a pointer on a new required interface.
 
@@ -184,15 +184,15 @@ cisstMultiTask uses queues to ensure thread safety when messages are sent to an 
 
 As for provided interfaces, all queues of a required interface can be configured using a combination of ``SetMailBoxSize``, ``SetArgumentQueuesSize`` and/or ``SetMailBoxAndArgumentQueuesSize`` (see Doxygen reference manual for details).
 
-.. _4-commands-and-functions:
+.. _commands-and-functions:
 
-4 Commands and functions
-------------------------
+Commands and functions
+----------------------
 
-.. _41-types-available:
+.. _types-available:
 
-4.1 Types available
-~~~~~~~~~~~~~~~~~~~
+Types available
+~~~~~~~~~~~~~~~
 
 During initialization, a given component has to populate its provided interfaces with pointers to existing methods. Within cisstMultiTask, the following types of commands are available (as internally the commands are C++ method pointers or C function pointers, a limited number of signatures is supported):
 
@@ -244,15 +244,15 @@ All function classes have a method ``Execute`` which can be called to trigger th
    StopRobot.Execute(); // equivalent to ()
    StopRobot.ExecuteBlocking(); // make sure the command has been executed on server side
 
-.. _42-declaration:
+.. _declaration:
 
-4.2 Declaration
-~~~~~~~~~~~~~~~
+Declaration
+~~~~~~~~~~~
 
-.. _421-commands:
+.. _commands:
 
-4.2.1 Commands
-^^^^^^^^^^^^^^
+Commands
+^^^^^^^^
 
 To add a command to a provided interface, one must first define the corresponding C global function or C++ method. In most cases, a command relies on a C++ method therefore all the following examples will rely on methods. We must first provide a few C++ methods corresponding to the provided commands.
 
@@ -320,10 +320,10 @@ Notes:
 
 -  For all non queued commands, the programmer must make sure that the underlying C++ method is thread safe.
 
-.. _422-functions:
+.. _functions:
 
-4.2.2 Functions
-^^^^^^^^^^^^^^^
+Functions
+^^^^^^^^^
 
 Functions in cisstMultiTask are objects added to required interface. These functions are ultimately bound to commands which are bound to C functions or C++ methods. A cisstMultiTask function can be declared using:
 
@@ -377,15 +377,15 @@ This allows to bind to extra features. The user can check if the function was bo
       // set some flag telling the component that the extra command is not available
    }
 
-.. _43-runtime:
+.. _runtime:
 
-4.3 Runtime
-~~~~~~~~~~~
+Runtime
+~~~~~~~
 
-.. _431-execution-result:
+.. _execution-result:
 
-4.3.1 Execution result
-^^^^^^^^^^^^^^^^^^^^^^
+Execution result
+^^^^^^^^^^^^^^^^
 
 At runtime, the "client" component can use the function objects to trigger the commands provided by the "server" component. All functions return an '''execution result''' of type ``mtsExecutionResult``:
 
@@ -407,10 +407,10 @@ The method ``IsOK()`` can be used to make sure the everything is working as expe
 -  ``mtsExecutionResult::INVALID_INPUT_TYPE``: when using the function object, the parameter types don't match those of the provided command
 -  ``mtsExecutionResult::METHOD_OR_FUNCTION_FAILED``: for non queued commands (read and qualified read), it is actually possible to use C++ methods returning ``bool`` and not ``void`` (e.g. ``bool ReadMethod(mtsDouble & placeHolder)``). In this case, the function object checks the returned boolean and if it is set to false returns ``METHOD_OR_FUNCTION_FAILED``. All other codes are used mostly to debug the cisstMultiTask library itself.
 
-.. _432-single-process:
+.. _single-process:
 
-4.3.2 Single process
-^^^^^^^^^^^^^^^^^^^^
+Single process
+^^^^^^^^^^^^^^
 
 This section presents a high level view of the command execution. The goal is to help users with a deeper interest in the internal mechanisms to understand the different steps involved.
 
@@ -452,26 +452,26 @@ This section presents a high level view of the command execution. The goal is to
 
       1. Return ``COMMAND_SUCCEEDED``
 
-.. _433-inter-process:
+.. _inter-process:
 
-4.3.3 Inter-process
-^^^^^^^^^^^^^^^^^^^
+Inter-process
+^^^^^^^^^^^^^
 
-Inter-process communication means communication between two executables, either on the same computer or on different computers. Generally, this requires "proxy" or "bridge" components to convert between cisstMultiTask messages and the middleware used for inter-process communication. Originally, this was implemented using proxy components that relied on the Internet Communication Engine (ICE) middleware (CMake ``CISST_MTS_HAS_ICE`` option), but that is now deprecated. There are two currently supported alternatives:
+Inter-process communication means communication between two executables, either on the same computer or on different computers. Generally, this requires "proxy" or "bridge" components to convert between cisstMultiTask messages and the middleware used for inter-process communication. There are two currently supported alternatives:
 
 1. Using ``mtsSocketProxyClient`` and ``mtsSocketProxyServer``. This uses a standard UDP socket (no external middleware required), but currently requires the programmer to manually create the proxies.
 
 2. Using Robot Operating System (ROS) as middleware. This also requires the programmer to manually create the ROS bridges, using components provided in the `cisst-ros repository <https://github.com/jhu-cisst/cisst-ros>`__ for ROS 1 (Linux only). There is emerging support for ROS 2.
 
-.. _5-events-and-event-handlers:
+.. _events-and-event-handlers:
 
-5 Events and event handlers
----------------------------
+Events and event handlers
+-------------------------
 
-.. _51-types-available:
+.. _events-types-available:
 
-5.1 Types available
-~~~~~~~~~~~~~~~~~~~
+Types available
+~~~~~~~~~~~~~~~
 
 Two types of events are available, void events don't carry any payload while write events do.
 
@@ -483,15 +483,15 @@ Two types of events are available, void events don't carry any payload while wri
 | Write | ``void method(const & message)`` | ``this->ReachedJointLimit(jointIndex)`` |
 +-------+----------------------------------+-----------------------------------------+
 
-.. _52-declaration:
+.. _events-declaration:
 
-5.2 Declaration
-~~~~~~~~~~~~~~~
+Declaration
+~~~~~~~~~~~
 
-.. _521-events:
+.. _events:
 
-5.2.1 Events
-^^^^^^^^^^^^
+Events
+^^^^^^
 
 To add an event to a provided interface it is recommended to use a cisstMultiTask function as a way to trigger the event.
 
@@ -523,10 +523,10 @@ When the component is being built, these functions can be bound to events:
        }
    }
 
-.. _522-event-handlers:
+.. _event-handlers:
 
-5.2.2 Event handlers
-^^^^^^^^^^^^^^^^^^^^
+Event handlers
+^^^^^^^^^^^^^^
 
 To add an event handler to a required interface, one must first define the corresponding C global function or C++ method. We must first provide a few C++ methods corresponding to the event handlers.
 
@@ -566,22 +566,22 @@ Notes:
 -  For a given event handler only using ``required->AddEventHandlerVoid(&MyClientClass::VoidEventHandler, this, "EventVoid", MTS_EVENT_NOT_QUEUED)``
 -  For all non queued event handlers, the programmer must make sure that the underlying C++ method is thread safe.
 
-.. _6-state-data-and-table:
+.. _state-data-and-table:
 
-6 State data and table
-----------------------
+State data and table
+--------------------
 
-.. _61-state-table:
+.. _state-table:
 
-6.1 State table
-~~~~~~~~~~~~~~~
+State table
+~~~~~~~~~~~
 
 Each task owns a default state table (mtsStateTable) which can be used to store the state of the task (the data member is ``mtsTask::StateTable``). The table is a matrix indexed by time. At each iteration, one or more data objects used to define the state (``mtsStateData``) are saved in the table. At any given time, the task can write in the last row while anyone can safely read the previous states (including from other threads/tasks). The state table length is fixed to avoid dynamic re-allocation. Its size is defined by a ``mtsTask`` constructor parameter. The table will not overflow because it is implemented as a circular buffer. The class ``mtsStateData`` provides easy ways to create commands to access the state table.
 
-.. _62-user-state-tables:
+.. _user-state-tables:
 
-6.2 User state tables
-~~~~~~~~~~~~~~~~~~~~~
+User state tables
+~~~~~~~~~~~~~~~~~
 
 It is possible to add more state tables to a component using the method ``mtsComponent::AddStateTable``. There are a few reasons why a user would want to add some extra state tables to a component:
 
@@ -593,10 +593,10 @@ It is possible to add more state tables to a component using the method ``mtsCom
 
 -  similar groups of data. For example, one can imagine a component for a two arms robot, each arm storing joint and Cartesian positions. A naive solution would be to create four variables ``j1``, ``j2``, ``c1`` and ``c2``. A more flexible solution is to create a small struct ``arm`` with the data members ``j`` and ``c``. Then one can create a state table per arm with ``ArmTable[i]`` containing ``Arm[i].j`` and ``Arm[i].c``.
 
-.. _63-automatic-advance:
+.. _automatic-advance:
 
-6.3 Automatic advance
-~~~~~~~~~~~~~~~~~~~~~
+Automatic advance
+~~~~~~~~~~~~~~~~~
 
 By default, all state tables are set to automatically advance, i.e. the component automatically timestamps the state table before the ``Run`` method is called and will also *advance* the state table after the ``Run`` is over. This means that all the *read* commands relying on state data will keep using the previous state until the ``Run`` method is over.
 
@@ -609,16 +609,16 @@ Users can have a tighter control on the timestamping and advance steps by turnin
       ...
       MyStateTable.Advance();
 
-.. _7-connecting-component-interfaces:
+.. _connecting-component-interfaces:
 
-7 Connecting component interfaces
----------------------------------
+Connecting component interfaces
+-------------------------------
 
 Once all the components are defined, it is necessary to connect them. Each component can have multiple provided interfaces. Reciprocally, a component may have multiple required interfaces, i.e. a component “user” can connect to multiple provided interfaces provided by one or more “resource” component. For each interface provided by a resource, a user task must define a required interface. To manage the components and their connections, use the cisstMultiTask class ``mtsComponentManager`` (note: this is equivalent to the ``mtsManagerLocal`` class).
 
-.. _71-execin--execout-interfaces:
+.. _execin-execout-interfaces:
 
-7.1 ExecIn / ExecOut interfaces
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ExecIn / ExecOut interfaces
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Every component is created with an ``ExecOut`` provided interface and an ``ExecIn`` required interface. These can be used to share a thread between multiple components. To accomplish this, it is necessary to connect the ``ExecOut`` interface of the first component to the ``ExecIn`` interface of the second component, before calling ``mtsComponent::Create`` for the second component. If ``mtsComponent::Create`` is called before the ``ExecIn`` interface is connected, the ``ExecIn`` interface is removed and a new thread is created for the component.

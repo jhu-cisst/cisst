@@ -110,119 +110,6 @@ cisstNetLib is a customized binary distribution of some elements from the Netlib
 4. Depending on your OS, you may be prompted for additional information, such as 32 vs. 64 bits
 5. CMake will automatically download the cisstNetLib libraries to your build tree and set the paths
 
-ICE
----
-
-Supported Platforms
-~~~~~~~~~~~~~~~~~~~
-
--  http://zeroc.com/platforms_3_4_2.html Ice-3.4.2
--  http://zeroc.com/platforms_3_4_1.html Ice-3.4.1
--  http://zeroc.com/platforms_3_3_1.html Ice-3.3.1
-
-Installation
-~~~~~~~~~~~~
-
-General Guideline
-^^^^^^^^^^^^^^^^^
-
-1. [Download](http://www.zeroc.com/download.html Download) and install ZeroC's ICE.
-
--  There are two ways to install ICE; One is to build ICE using source distribution and the other one is to use pre-built archives.
--  If you choose the first method, you also need 3rd party packages.
--  If you use pre-built packages, it should be the easiest and fastest way to install ICE. However, the binary distribution archive may not be available for your environment so you need to to check if ZeroC provides binary distribution archive for your environment (see [here](http://www.zeroc.com/platforms_3_3_1.html here)).
-
-2. Build cisst library with ``CISST_MTS_HAS_ICE`` option turned on.
-
-Windows
-^^^^^^^
-
-The easiest and quickest installation method on Windows is to use .msi file.
-
-Linux
-^^^^^
-
-Binary distribution can be installed through the package manager (e.g. apt-get on Ubuntu, yum on Fedora)
-
-Mac OS X
-^^^^^^^^
-
-Use port : ``sudo port install ice-cpp``
-
--  `Using Ice Mac OS X Binary Distribution <http://doc.zeroc.com/display/Ice/Using+the+Mac+OS+X+Binary+Distribution>`__
-
-IDE Setup
-~~~~~~~~~
-
-Visual Studio 2008/2010 IDE
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
--  `The Ice Visual Studio Extension <http://www.zeroc.com/vsplugin.html>`__ comes with Ice package installer and is automatically installed and activated if Visual Studio 2008 is found on the target machine.
--  If you install Visual Studio 2008 or Visual Studio 2010 after installing Ice, you will have to re-run the Ice installer and choose "Repair" to install the extension.
--  To activate the extension:
-
-1. Right-click on ``cisstMultiTask`` project in Solution Explorer and choose "Ice Configuration..."
-2. Set options as follows: [[Image(IceExtensionSetup.png)]]
-
-Visual C++ Express
-^^^^^^^^^^^^^^^^^^
-
--  The Ice Visual Studio Extension is not available for Visual C++ Express and you need to configure Visual Studio manually (Microsoft does not allow plug-in extensions to run with Express editions of Visual Studio).
--  Please follow the steps below:
-
-1. In the IDE, choose '''Tools->Options->Projects and Solutions->VC++ Directories'''
-2. Select '''Include files'''
-
--  Add ``<Ice installation root directory>\include``
-
-3. Select '''Library files'''
-
--  For x86 libraries add ``<Ice installation root directory>\lib``
--  For x64 libraries add ``<Ice installation root directory>\lib\x64``
-
-4. Select '''Executable files'''
-
--  For x86 binaries add ``<Ice installation root directory>\bin``
--  For x64 binaries add ``<Ice installation root directory>\bin\x64``
-
-Run-time Environment Setup
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To use Ice for C++, there are two ways to set up the environment.
-
-1. Add the Ice ``bin`` directory to your PATH.
-
--  On x86 platforms:
-
-::
-
-   (command line prompt)> set PATH=<Ice installation root directory>\bin;%PATH%
-
--  On x64 platforms: (Note: the ``x64`` directory must come first in your PATH)
-
-::
-
-   (command line prompt)> set PATH=<Ice installation root directory>\bin;%PATH%
-   (command line prompt)> set PATH=<Ice installation root directory>\bin\x64;%PATH%
-
--  If you're using C++Builder: (Note: the ``bcc10`` directory must come first in your PATH)
-
-::
-
-   (command line prompt)> set PATH=<Ice installation root directory>\bin;%PATH%
-   (command line prompt)> set PATH=<Ice installation root directory>\bin\bcc10;%PATH%
-
-2. Copy necessary DLL files to the same folder as your executable
-
--  For Ice-3.4.1
-
-   -  Debug compilation: ``bzip2d.dll``, ``ice.dll``, ``ice34d.dll``, ``iceutil34d.dll``
-   -  Release compilation: ``bzip2.dll``, ``ice.dll``, ``ice34.dll``, ``iceutil34.dll``
-
--  For Ice-3.3.x
-
-   -  Debug compilation: ``bzip2d.dll``, ``ice.dll``, ``ice33d.dll``, ``iceutil33d.dll``
-   -  Release compilation: ``bzip2.dll``, ``ice.dll``, ``ice33.dll``, ``iceutil33.dll``
 
 Python
 ------
@@ -277,29 +164,6 @@ Windows
 -  Now that this is done, run cmake on your CISST folder and turn on CISST_HAS_XML, it will ask you the location of ``xmllint.exe``, include, and ``libxml2.lib``.
 -  Remember to recompile CISST afterwards.
 
-FLTK
-----
-
-Notes:
-
-1. If you are using 64-bit OS, please see [https://trac.lcsr.jhu.edu/cisst/wiki/Compiling this guideline] for compiling FLTK on 64-bit machine.
-
-2. For information about writing cisst FLTK components, see [wiki:cisstFLTK this page].
-
-Window
-~~~~~~
-
-1. Download and extract [http://www.fltk.org/ FLTK 1.1.9].
-2. Run CMake.
-
--  ''Where is the source code'': FLTK source directory.
--  ''Where to build the binaries'': custom build directory.
-
-1. Click *Configure*.
-2. Click *Configure* and click *Generate*.
-3. Open ``FLTK.sln`` under FLTK build directory.
-4. Build ``ALL_BUILD`` in release configuration.
-5. Build ``INSTALL`` in release configuration (This places the libraries under Program Files/FLTK).
 
 Qt
 --
@@ -384,6 +248,8 @@ National Instruments Data Acquisition (DAQ) Hardware
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Download and install from http://www.3dconnexion.com/support/downloads.php SpaceNavigator SE.
+
+.. _getting-started-faq-cppunit:
 
 CppUnit
 -------

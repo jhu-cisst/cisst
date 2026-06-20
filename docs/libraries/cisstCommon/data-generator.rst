@@ -98,7 +98,7 @@ Whichever approach is chosen, there is a fair amount of code to write for each d
 -  It's fairly easy to introduce some bugs in the code by omitting one or more data members or base class in the serialize/de-serialize methods
 -  Each and every data type class has to be updated when a new feature is introduced
 
-To avoid these issues, many libraries rely on a high level description (see for example Corba IDL, ICE, ROS messages, ...) and a code generator to produce the appropriate code in C, C++, ObjectiveC, Python, ... For the *cisst* libraries, we developed yet another data description format. One of the decisions made is to allow inline C/C++ code in the data description and therefore restrict the target language to C++. On the other hand, this allows us to:
+To avoid these issues, many libraries rely on a high level description (see for example Corba IDL, ROS messages, ...) and a code generator to produce the appropriate code in C, C++, ObjectiveC, Python, ... For the *cisst* libraries, we developed yet another data description format. One of the decisions made is to allow inline C/C++ code in the data description and therefore restrict the target language to C++. On the other hand, this allows us to:
 
 -  Create customized API for our data types while the code generator handles the common and repetitive part of the code.
 -  Use any C/C++ class within your data structures. The only requirement is that a few global functions need to be overloaded to handle non standard data types (e.g. a VTK mesh). See Hand Written data types.

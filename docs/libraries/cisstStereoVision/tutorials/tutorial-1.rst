@@ -196,7 +196,7 @@ Creating compiler specific projects using CMake
       4. Press ``c`` to *Configure*, and wait until done
       5. Press ``t`` to enable *Advanced* mode
       6. Set all ``CISST_BUILD_*_EXAMPLES`` to ``OFF`` but keep ``CISST_BUILD_cisstStereoVision_EXAMPLES`` ``ON`` (we need only the stereo vision examples for this tutorial)
-      7. Make sure ``CISST_HAS_FLTK``, ``CISST_HAS_QT`` and ``CISST_MTS_HAS_ICE`` are all set to ``OFF`` (these are not needed for this tutorial)
+      7. Make sure ``CISST_HAS_QT`` is set to ``OFF`` (this is not needed for this tutorial)
       8. Press ``c`` to *Configure*, and wait until done (CMake will automatically find all the dependencies for you)
       9. You're all set: press ``g`` to *Generate* the makefile project, then press ``q`` to quit CMake.
 

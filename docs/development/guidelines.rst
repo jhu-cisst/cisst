@@ -161,5 +161,3 @@ For example, you can have a CISST_HAS_SOME_GPL_LIBRARY option in CMake and can u
 In this case, we would have to make it clear to potential users that if they use CISST with SOME_GPL_LIBRARY, all of their code is subject to the GPL license.
 
 Note: SOME_GPL_LIBRARY, is any code that has GPL license.
-
-The cisst libraries currently have a "hook" for [http://www.zeroc.com ICE], which has a GPL license, to provide the network middleware. This is enabled by the ``CISST_MTS_HAS_ICE`` CMake option.

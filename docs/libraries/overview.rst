@@ -34,85 +34,128 @@ SAW components overview
 
 The SAW package currently contains the following implemented components:
 
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| Component                                                       | Description                                                                                                                       | Status   |
-+=================================================================+===================================================================================================================================+==========+
-| saw3Dconnexion                                                  | Interface to 3D Connexion Space Navigator 3D mouse                                                                                | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawATIForceSensor                                               | Interface to ATI force sensor (Ethernet)                                                                                          | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawAtracsysFusionTrack </jhu-saw/sawAtracsysFusionTrack>`__    | Interface to Atracsys fusionTrack                                                                                                 | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawBarrett                                                      | Interface to Barrett Technology Whole Arm Manipulator (WAM) robot and components                                                  | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawCANBus                                                       | Generic Controller Area Network (CAN) bus interfaces                                                                              | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawClaronMicronTracker                                          | Interface to Claron Technology Micron optical tracking system                                                                     | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawCMUSphinx4                                                   | Interface to Sphinx4 speech recognition package                                                                                   | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawConstraintController                                         | Constraint based controller                                                                                                       | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawConstraintOptimizer                                          | Constraint optimizer                                                                                                              | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawControllers </jhu-saw/sawControllers>`__                    | Various control components, including PD (with gravity comp.), PID, teleoperation                                                 | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawCopleyController </jhu-saw/sawCopleyController>`__          | Interface to Copley Xenus motor controller                                                                                        | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawDataPlayer                                                   | Application to replay recorded multi-media data                                                                                   | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawDATAQSerial                                                  | DATAQ serial port                                                                                                                 | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawForceDimensionSDK </jhu-saw/sawForceDimensionSDK>`__        | Interface to the ForceDimension SDK, supports haptic devices Omega, Sigma and Novint Falcons                                      | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawGalilController </jhu-saw/sawGalilController>`__            | Interface to Galil motor controller                                                                                               | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawGLUTSimulator                                                | GLUT-based simulator (simpler than sawOpenSceneGraph simulator)                                                                   | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawIntuitiveDaVinci </jhu-saw/sawIntuitiveDaVinci>`__          | Interface to da Vinci surgical robot via read-only research interface (requires license and library from Intuitive Surgical)      | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawIntuitiveResearchKit </jhu-dvrk/sawIntuitiveResearchKit>`__ | Components for the da Vinci Research Kit                                                                                          | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawJoystick                                                     | Interface to joysticks                                                                                                            | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawJR3ForceSensor                                               | Interface to JR3 force sensor using Comedi                                                                                        | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawKeyboard </jhu-saw/sawKeyboard>`__                          | Keyboard interface (generate commands or events from key presses)                                                                 | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawMaxonEPOS </jhu-saw/sawMaxonEPOS>`__                        | Interface to Maxon controllers using the EPOS Command Library over USB                                                            | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawMedtronicStealthlink                                         | Interface to Medtronic Stealthstation via Stealthlink research interface (requires license and library from Medtronic Navigation) | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawMicroScribeDigitizer                                         | Interface to `Revware <http://www.revware.net>`__ MicroScribe digitizer device (requires Arm32Dll SDK from Revware)               | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawNDITracker </jhu-saw/sawNDITracker>`__                      | Interface to Northern Digital Inc. (NDI) tracking systems that use a serial port; includes Polaris and Aurora                     | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawOpenAL                                                       | Interface to Open Audio Library                                                                                                   | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawOpenDynamicsEngine                                           | Interface to Open Dynamics Engine (ODE) physics-based simulator; requires sawOpenSceneGraph                                       | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawOpenIGTLink </jhu-saw/sawOpenIGTLink>`__                    | Bridge between ''cisst'' interfaces and OpenIGTLink                                                                               | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawOpenNI                                                       | Interface to Microsoft Kinect via OpenNI                                                                                          | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawOpenSceneGraph                                               | Interface to Open Scene Graph (OSG) visualization software (used for simulations)                                                 | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawOptoforceSensor </jhu-saw/sawOptoforceSensor>`__            | Interface to OptoForce force sensors using a serial port over USB                                                                 | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawRobotIO1394 </jhu-saw/sawRobotIO1394>`__                    | Interface to custom `IEEE-1394 (Firewire) motor controller </jhu-cisst/mechatronics>`__                                           | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawSartoriusScale                                               | Interface to high-precision scale                                                                                                 | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawSensablePhantom </jhu-saw/sawSensablePhantom>`__            | Interface to Sensable Phantom haptic device (e.g., Phantom Omni)                                                                  | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawSocketStreamer </jhu-saw/sawSocketStreamer>`__              | Component to stream data from another component over a socket                                                                     | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawTextToSpeech </jhu-saw/sawTextToSpeech>`__                  | Component to convert text to speech output (Windows, Linux, Mac)                                                                  | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| sawTrajectories                                                 | Various trajectory planners and generators (no hardware dependency)                                                               | Inactive |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
-| `sawUniversalRobot </jhu-saw/sawUniversalRobot>`__              | Interface to Universal Robots via real-time scripting interface                                                                   | Active   |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+----------+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 60 10
+
+   * - Component
+     - Description
+     - Status
+   * - saw3Dconnexion
+     - Interface to 3D Connexion Space Navigator 3D mouse
+     - Inactive
+   * - `sawATIForceSensor <https://github.com/jhu-saw/sawATIForceSensor>`__
+     - Interface to ATI force sensor (Ethernet)
+     - Active
+   * - `sawAtracsysFusionTrack <https://github.com/jhu-saw/sawAtracsysFusionTrack>`__
+     - Interface to Atracsys fusionTrack
+     - Active
+   * - sawBarrett
+     - Interface to Barrett Technology Whole Arm Manipulator (WAM) robot and components
+     - Inactive
+   * - sawCANBus
+     - Generic Controller Area Network (CAN) bus interfaces
+     - Inactive
+   * - sawClaronMicronTracker
+     - Interface to Claron Technology Micron optical tracking system
+     - Inactive
+   * - sawCMUSphinx4
+     - Interface to Sphinx4 speech recognition package
+     - Inactive
+   * - `sawConstraintController <https://github.com/jhu-saw/sawConstraintController>`__
+     - Constraint based controller
+     - Active
+   * - `sawConstraintOptimizer <https://github.com/jhu-saw/sawConstraintOptimizer>`__
+     - Constraint optimizer
+     - Active
+   * - `sawControllers <https://github.com/jhu-saw/sawControllers>`__
+     - Various control components, including PD (with gravity comp.), PID, teleoperation
+     - Active
+   * - `sawCopleyController <https://github.com/jhu-saw/sawCopleyController>`__
+     - Interface to Copley Xenus motor controller
+     - Active
+   * - sawDataPlayer
+     - Application to replay recorded multi-media data
+     - Inactive
+   * - `sawDATAQSerial <https://github.com/jhu-saw/sawDATAQSerial>`__
+     - DATAQ serial port
+     - Active
+   * - `sawForceDimensionSDK <https://github.com/jhu-saw/sawForceDimensionSDK>`__
+     - Interface to the ForceDimension SDK, supports haptic devices Omega, Sigma and Novint Falcons
+     - Active
+   * - `sawGalilController <https://github.com/jhu-saw/sawGalilController>`__
+     - Interface to Galil motor controller
+     - Active
+   * - sawGLUTSimulator
+     - GLUT-based simulator (simpler than sawOpenSceneGraph simulator)
+     - Inactive
+   * - `sawIntuitiveDaVinci <https://github.com/jhu-saw/sawIntuitiveDaVinci>`__
+     - Interface to da Vinci surgical robot via read-only research interface (requires license and library from Intuitive Surgical)
+     - Active
+   * - `sawIntuitiveResearchKit <https://github.com/jhu-dvrk/sawIntuitiveResearchKit>`__
+     - Components for the da Vinci Research Kit
+     - Active
+   * - `sawJoystick <https://github.com/jhu-saw/sawJoystick>`__
+     - Interface to joysticks
+     - Active
+   * - sawJR3ForceSensor
+     - Interface to JR3 force sensor using Comedi
+     - Inactive
+   * - `sawKeyboard <https://github.com/jhu-saw/sawKeyboard>`__
+     - Keyboard interface (generate commands or events from key presses)
+     - Active
+   * - `sawMaxonEPOS <https://github.com/jhu-saw/sawMaxonEPOS>`__
+     - Interface to Maxon controllers using the EPOS Command Library over USB
+     - Active
+   * - sawMedtronicStealthlink
+     - Interface to Medtronic Stealthstation via Stealthlink research interface (requires license and library from Medtronic Navigation)
+     - Inactive
+   * - sawMicroScribeDigitizer
+     - Interface to `Revware <http://www.revware.net>`__ MicroScribe digitizer device (requires Arm32Dll SDK from Revware)
+     - Inactive
+   * - `sawNDITracker <https://github.com/jhu-saw/sawNDITracker>`__
+     - Interface to Northern Digital Inc. (NDI) tracking systems that use a serial port; includes Polaris and Aurora
+     - Active
+   * - sawOpenAL
+     - Interface to Open Audio Library
+     - Inactive
+   * - sawOpenDynamicsEngine
+     - Interface to Open Dynamics Engine (ODE) physics-based simulator; requires sawOpenSceneGraph
+     - Inactive
+   * - `sawOpenIGTLink <https://github.com/jhu-saw/sawOpenIGTLink>`__
+     - Bridge between *cisst* interfaces and OpenIGTLink
+     - Active
+   * - sawOpenNI
+     - Interface to Microsoft Kinect via OpenNI
+     - Inactive
+   * - sawOpenSceneGraph
+     - Interface to Open Scene Graph (OSG) visualization software (used for simulations)
+     - Inactive
+   * - `sawOptoforceSensor <https://github.com/jhu-saw/sawOptoforceSensor>`__
+     - Interface to OptoForce force sensors using a serial port over USB
+     - Active
+   * - `sawRobotIO1394 <https://github.com/jhu-saw/sawRobotIO1394>`__
+     - Interface to custom `IEEE-1394 (Firewire) motor controller <https://github.com/jhu-cisst/mechatronics>`__
+     - Active
+   * - `sawSartoriusScale <https://github.com/jhu-saw/sawSartoriusScale>`__
+     - Interface to high-precision scale
+     - Active
+   * - `sawSensablePhantom <https://github.com/jhu-saw/sawSensablePhantom>`__
+     - Interface to Sensable Phantom haptic device (e.g., Phantom Omni)
+     - Active
+   * - `sawSocketStreamer <https://github.com/jhu-saw/sawSocketStreamer>`__
+     - Component to stream data from another component over a socket
+     - Active
+   * - `sawTextToSpeech <https://github.com/jhu-saw/sawTextToSpeech>`__
+     - Component to convert text to speech output (Windows, Linux, Mac)
+     - Active
+   * - sawTrajectories
+     - Various trajectory planners and generators (no hardware dependency)
+     - Inactive
+   * - `sawUniversalRobot <https://github.com/jhu-saw/sawUniversalRobot>`__
+     - Interface to Universal Robots via real-time scripting interface
+     - Active
+
 
 cisst libraries description
 ===========================

@@ -1,7 +1,7 @@
-.. _1-compiling-cisst-and-saw:
+.. _compiling-cisst-and-saw:
 
-1. Compiling cisst and SAW
-==========================
+Compiling cisst and SAW
+=======================
 
 The *cisst* libraries and *SAW* components use CMake for their build process, please check `www.cmake.org <http://www.cmake.org>`__. CMake is already available on most Linux distributions and can be installed using MacPort or Brew on Mac OS. A binary installer for Windows is available on CMake’s web site.
 
@@ -9,10 +9,10 @@ If you clone the ``cisst-saw.git`` repository, the main CMakeLists.txt is at the
 
 To clone ``cisst`` and most of the ``saw`` components, use: ``sh git clone https://github.com/jhu-cisst/cisst-saw --recursive`` A new directory will be created (``cisst-saw``). This is the source directory CMake will need to start configuring cisst. CMake configures your build in multiple passes as some settings will change based on user preferences. Since the cisst libraries and saw components rely on numerous external libraries and device drivers, it is important to figure out what you really need. Trying to compile everything can be a very tedious task because you might have to download and install many external packages. Here are some important external packages and options.
 
-.. _11-external-packages:
+.. _external-packages:
 
-1.1. External packages
-----------------------
+External packages
+-----------------
 
 -  **cisstNetlib** (recommended): this library is a set of numerical routines that can mostly be found on netlib.org. These routines are originally written in Fortran but an equivalent in C is available. On Linux, since it is easy to install a fortran compiler we use the Fortran version. On other OSs, we use the C version by default. You can compile the *cisst* libraries without cisstNetlib but it is recommended to keep ``CISST_HAS_CISSTNETLIB`` turned ``ON`` as many features depend on these numerical routines. cisstNetlib is one of the git sub-modules in the cisst-saw repository. You should build and install cisstNetlib before compiling cisst and the SAW components:
 
@@ -27,18 +27,16 @@ To clone ``cisst`` and most of the ``saw`` components, use: ``sh git clone https
 
 -  **Qt** (recommended): some Qt widgets are provided with the cisst libraries as well as most examples with a GUI. If you don’t already have Qt installed and don’t intend to write a Qt application, you can leave ``CISST_HAS_QT`` as ``OFF``. On Linux, you should use your package manager to install Qt. On Windows and Mac OS, you should download the latest Qt version from their web site (see also :doc:`install FAQ </getting-started/faq>`)). We support both Qt 4 and 5. For Qt5 on Windows, make sure you use the "OpenGL" version, not the "ANGLE" version of Qt.
 
--  **FLTK** (rarely used): some examples use FLTK. If you don’t already have FLTK installed and don’t intend to write an FLTK application, you can leave ``CISST_HAS_FLTK`` as ``OFF`` (majority of users). On Linux, you should use your package manager to install FLTK. On Mac OS, you can use !MacPort’s package ``fltk-dev``. On Windows, you have two options. The first one is to turn on ``CISST_USE_EXTERNAL`` in CMake. FLTK will be downloaded and built along the cisst/SAW libraries. The second option is to download FLTK yourself (http://www.fltk.org), compile it and then configure cisst/SAW to use your local installation.
-
 -  **Python and numpy**: most features from cisst and SAW can be used from a Python interpreter. If you plan to use Python, you will need SWIG (Python wrapper generator) along with the Python development libraries and numpy. You can change the variable ``CISST_HAS_SWIG_PYTHON`` to set your preference. On Linux, you should use your package manager to install Python, SWIG and numpy. On Mac OS, Python is already installed but you will need SWIG. MacPort provides a package but you should check the different “variants” to avoid re-installing all possible interpreters (include Python). You can alternatively download SWIG’s source and compile it. For Windows, SWIG provides a very convenient binary distribution on their web page (see also :doc:`install FAQ </getting-started/faq>`).
 
 -  **XML**: cisst provides an XML wrapper which can rely on either QtXML or LibXml2. LibXml2 is preferred since it supports reads and writes and doesn’t require a QApplication. You can use the variable ``CISST_XML_LIB`` to determine which underlying library to use (QtXML or LibXml2). On Linux, you should use your package manager to install either one. On MacOS, MacPort provides both packages. On Windows, QtXML comes with the Qt binary distribution, LibXml2 is a bit harder to find and compile as it has many external dependencies (see also :doc:`install FAQ </getting-started/faq>`).
 
--  **CppUnit**: we use CppUnit for our unit tests. If you want to run these tests, you will have to set ``CISST_BUILD_TESTS`` to ``ON``. On Linux you should use your package manager to install CppUnit. On Mac OS, MacPort provides a package. On Windows, you will need to download the source files and compile (http://sourceforge.net/apps/mediawiki/cppunit). Compiling CppUnit on Windows is fairly easy as this library doesn’t have any external dependency and comes with a Visual Studio “solution”. See also the cisst `install FAQ <DownloadAndInstallationFAQ#CppUnit>`__ and how to `run the tests <Unit-Tests>`__.
+-  **CppUnit**: we use CppUnit for our unit tests. If you want to run these tests, you will have to set ``CISST_BUILD_TESTS`` to ``ON``. On Linux you should use your package manager to install CppUnit. On Mac OS, MacPort provides a package. On Windows, you will need to download the source files and compile (http://sourceforge.net/apps/mediawiki/cppunit). Compiling CppUnit on Windows is fairly easy as this library doesn’t have any external dependency and comes with a Visual Studio “solution”. See also the :ref:`cisst install FAQ <getting-started-faq-cppunit>` and how to :doc:`run the tests </development/testing/unit-tests>`.
 
-.. _12-cisst-cmake-options:
+.. _cisst-cmake-options:
 
-1.2. *cisst* CMake Options
---------------------------
+*cisst* CMake Options
+---------------------
 
 Assuming you're back in the directory where you cloned cisst-saw, create a build directory and start setting your options in CMake:
 
@@ -62,10 +60,10 @@ Once you have decided which external packages to use and configured CMake, you w
 
 -  ``SAW_BUILD_<component_name>`` options control which SAW component should be built. Most components have their own external dependencies (e.g. vendor’s SDK).
 
-.. _13-building-using-catkin-build-tools-for-ros:
+.. _building-using-catkin-build-tools-for-ros:
 
-1.3. Building using catkin build tools for ROS
-----------------------------------------------
+Building using catkin build tools for ROS
+-----------------------------------------
 
 If you are using a computer with catkin/ROS installed, you can compile most of the cisst libraries and SAW components using the `catkin build tools <http://catkin-tools.readthedocs.org/en/latest/index.html>`__ (please note that this process works with ``catkin build``, not ``catkin_make``).
 
@@ -221,30 +219,30 @@ Every time you toggle between profiles, make sure you change two things:
 -  Set active profile, e.g. to switch to release:``catkin profile set release``
 -  Set environment variables, e.g. to switch to release: ``source ~/catkin_ws/devel_release/setup.bash``
 
-.. _2-using-cisst-and-saw:
+.. _using-cisst-and-saw:
 
-2. Using cisst and saw
-======================
+Using cisst and saw
+===================
 
-.. _21-compiling-against-the-cisst-libraries:
+.. _compiling-against-the-cisst-libraries:
 
-2.1. Compiling against the cisst libraries
-------------------------------------------
+Compiling against the cisst libraries
+-------------------------------------
 
 We strongly encourage using CMake. The following section describes the main commands you will need to write a ``CMakeLists.txt`` file for your own code.
 
-*cisst* libraries and “settings” One of the difficulties with CMake is to propagate the different settings used for a library to the library user. For example, if ``cisstCommonQt`` requires Qt, an application using ``cisstCommonQt`` will also need to link against some Qt libraries. During the cisst configuration, the user already had to specify which cisst libraries were compiled and which external packages were used. The cisst CMake scripts store this information in files so it can be used later (all files are in the build tree in ``cisst/CMakeFiles``. When building against the cisst libraries, the user can now specify what is needed using either the library name (e.g. ``cisstCommon``, ``cisstVector``, ``cisstStereoVision``, …) or general settings (e.g. ``cisstQt``, ``cisstFLTK``, ``cisstPython``, ``cisstOpenGL``, …).
+*cisst* libraries and “settings” One of the difficulties with CMake is to propagate the different settings used for a library to the library user. For example, if ``cisstCommonQt`` requires Qt, an application using ``cisstCommonQt`` will also need to link against some Qt libraries. During the cisst configuration, the user already had to specify which cisst libraries were compiled and which external packages were used. The cisst CMake scripts store this information in files so it can be used later (all files are in the build tree in ``cisst/CMakeFiles``. When building against the cisst libraries, the user can now specify what is needed using either the library name (e.g. ``cisstCommon``, ``cisstVector``, ``cisstStereoVision``, …) or general settings (e.g. ``cisstQt``, ``cisstPython``, ``cisstOpenGL``, …).
 
 ``find_package (cisst)`` When ''cisst'' is being configured, a configuration file is created: ``cisst-config.cmake``. In your ``CMakeLists.txt``, using ``find_package (cisst)``, you will need to load this file. Your ``CMakeLists.txt`` should contain one of the following: \* ``find_package (cisst)``: you are just trying to find cisst and don’t care about the configuration. Your script should then check that ``cisst_FOUND`` is true. \* ``find_package (cisst REQUIRED cisstCommon cisstVector cisstPython)``: you want to find cisst and make sure the following components have been compiled. Your script should then check that ``cisst_FOUND_AS_REQUIRED`` is true. This syntax is a bit more complicated but it is recommended.
 
 ``include (${CISST_USE_FILE})`` It is important to note that finding ''cisst'' doesn’t change your CMake project settings. To start using ''cisst'' you must ``include`` the file defined by the variable ``${CISST_USE_FILE}``. Doing so will set the include and link directories for the libraries and settings used in ``find_package``. In CMake, this must happen before the target is created (either ``add_library``, ``add_executable`` or ``add_swig_module``) If you haven’t specified any library or setting, all libraries and settings will be used. If you have used the ``COMPONENT`` option for ``find_package``, the include and link directories will be restricted to your settings. The second case is preferred as it tends to reduce the number of options passed to your compiler and linker.
 
-``cisst_target_link_libraries (<target_name> cisstCommon cisstVector …)`` Once you have defined your target you will need to specify which ''cisst'' libraries and settings should be used by the linker. In CMake, one can find the command ``target_link_libraries``. For cisst, we also defined the macro ``cisst_target_link_libraries``. This macro should only be used to link against ''cisst'' libraries (e.g. ``cisstMultiTask``) or cisst settings (e.g. ``cisstQt``). On top of a regular ``target_link_libraries``, the macro checks that the required ''cisst'' libraries and settings have been compiled. It also adds all the external dependencies for each ''cisst'' library (e.g. if ``cisstMultiTask`` has been compiled with ZeroC ICE, it will add the required ICE libraries).
+``cisst_target_link_libraries (<target_name> cisstCommon cisstVector …)`` Once you have defined your target you will need to specify which ''cisst'' libraries and settings should be used by the linker. In CMake, one can find the command ``target_link_libraries``. For cisst, we also defined the macro ``cisst_target_link_libraries``. This macro should only be used to link against ''cisst'' libraries (e.g. ``cisstMultiTask``) or cisst settings (e.g. ``cisstQt``). On top of a regular ``target_link_libraries``, the macro checks that the required ''cisst'' libraries and settings have been compiled. It also adds all the external dependencies for each ''cisst'' library.
 
-.. _22-cmakeliststxt-examples:
+.. _cmakeliststxt-examples:
 
-2.2. CMakeLists.txt examples
-----------------------------
+CMakeLists.txt examples
+-----------------------
 
 Simple example
 ~~~~~~~~~~~~~~
@@ -318,10 +316,10 @@ Please note that all ''cisst'' examples come with their own ``CMakeLists.txt`` a
 -  An example with Qt: [source:trunk/cisst/cisstCommon/examples/LoggerQt/CMakeLists.txt cisstCommon logger Qt example]
 -  An example with SWIG and Python: [source:trunk/cisst/cisstInteractive/examples/pythonEmbedded/CMakeLists.txt cisstInteractive pythonEmbedded example] - please note the use of ``cisstPython`` and ``cisst_add_swig_module``
 
-.. _23-compiling-against-the-saw-components:
+.. _compiling-against-the-saw-components:
 
-2.3. Compiling against the saw components
------------------------------------------
+Compiling against the saw components
+------------------------------------
 
 The *SAW* components use the conventional CMake approach:
 
@@ -333,29 +331,28 @@ The *SAW* components use the conventional CMake approach:
 For each component, the CMake settings should provide the paths and libraries for the wrapper itself as well as all its dependencies (except the cisst libraries). For example, since the component ``sawClaronMicronTracker`` requires some extra libraries provided by the vendor, the CMake variable ``sawClaronMicronTracker_LIBRARIES`` will list all vendor libraries. A typical CMakeLists.txt should first search for *cisst* and then all the required packages:
 
 -  An example with a saw component and Qt: https://github.com/jhu-saw/sawNDITracker/blob/master/examples/CMakeLists.txt
--  An example with some extra checks, testing if ``cisstMultiTask`` uses ZeroC Ice: [source:trunk/saw/components/sawMedtronicStealthlink/examples/CMakeLists.txt sawMedtronicStealthlink example]
 
-.. _24-edit-cmakeliststxt-with-emacs:
+.. _edit-cmakeliststxt-with-emacs:
 
-2.4. Edit CMakeLists.txt with Emacs
------------------------------------
+Edit CMakeLists.txt with Emacs
+------------------------------
 
 CMake mode is available for Emacs:
 
 -  Download: http://www.cmake.org/CMakeDocs/cmake-mode.el
 -  Documentation: http://www.cmake.org/Wiki/CMake_Editors_Support
 
-.. _3-running-cisst-and-saw-programs:
+.. _running-cisst-and-saw-programs:
 
-3. Running *cisst* and *SAW* programs
-=====================================
+Running *cisst* and *SAW* programs
+==================================
 
 Once you have compiled the *cisst* libraries and optionally some *SAW* components, you will very likely need to set some environment variables. This can be done manually or using one of the *cisst* provided option.
 
-.. _31-environment-variables:
+.. _environment-variables:
 
-3.1. Environment variables
---------------------------
+Environment variables
+---------------------
 
 The following environment variables might be needed to run your *cisst* applications properly:
 
@@ -369,10 +366,10 @@ The following environment variables might be needed to run your *cisst* applicat
 -  Mac OS uses ``DYLD_LIBRARY_PATH``
 -  Python path: ``PYTHONPATH``, path to find generated ``.py`` and ``.pyd`` or ``.so`` generated by SWIG.
 
-.. _32-available-tools:
+.. _available-tools:
 
-3.2. Available tools
---------------------
+Available tools
+---------------
 
 Unix
 ~~~~
