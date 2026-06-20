@@ -68,6 +68,9 @@ html_theme_options = {
     'collapse_navigation': False,
 }
 
+html_css_files = ['custom.css']
+
+
 html_title = 'cisst libraries'
 
 # -- Code highlighting -------------------------------------------------------
