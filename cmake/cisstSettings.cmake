@@ -33,7 +33,7 @@ endif (NOT MSVC)
 #   -Zc:__cplusplus            To cause Visual Studio to report an updated value in __cplusplus (instead of default 199711)
 #                                Available since Visual Studio 2017 version 15.7
 if (MSVC)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS -Zc:__cplusplus")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS -Zc:__cplusplus /MP")
 endif (MSVC)
 
 if(MSVC)

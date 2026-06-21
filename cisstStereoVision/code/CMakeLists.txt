@@ -1246,10 +1246,10 @@ cisst_add_library (
   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${cisstStereoVision_CISST_DG_HDRS})
 
 if (CISST_STEREO_INCLUDE_DIRECTORIES)
-  target_include_directories (cisstStereoVision PUBLIC ${CISST_STEREO_INCLUDE_DIRECTORIES})
+  target_include_directories (cisstStereoVision PUBLIC "$<BUILD_INTERFACE:${CISST_STEREO_INCLUDE_DIRECTORIES}>")
 endif ()
 if (CISST_STEREO_LINK_DIRECTORIES)
-  target_link_directories (cisstStereoVision PUBLIC ${CISST_STEREO_LINK_DIRECTORIES})
+  target_link_directories (cisstStereoVision PUBLIC "$<BUILD_INTERFACE:${CISST_STEREO_LINK_DIRECTORIES}>")
 endif ()
 if (CISST_STEREO_LIBRARIES)
   target_link_libraries (cisstStereoVision ${CISST_STEREO_LIBRARIES})

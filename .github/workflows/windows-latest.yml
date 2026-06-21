@@ -47,7 +47,7 @@ jobs:
       working-directory: ${{github.workspace}}/cisstNetlib-build
       run: |
         cmake ${{github.workspace}}/cisstNetlib-source
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel
         cmake --build . --target install
 
     - name: Create Build Environment
@@ -61,7 +61,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         ./cisstvars.bat Release
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel
 
     - name: Configure CMake examples
       working-directory: ${{github.workspace}}/build
@@ -81,4 +81,4 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         ./cisstvars.bat Release
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel

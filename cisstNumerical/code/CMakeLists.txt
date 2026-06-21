@@ -123,6 +123,6 @@ cisst_add_library (LIBRARY cisstNumerical
                    ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
 if (CISST_HAS_CISSTNETLIB)
-  target_include_directories (cisstNumerical PUBLIC ${CISSTNETLIB_INCLUDE_DIR})
+  target_include_directories (cisstNumerical PUBLIC "$<BUILD_INTERFACE:${CISSTNETLIB_INCLUDE_DIR}>")
   target_link_libraries (cisstNumerical ${CISSTNETLIB_LIBRARIES})
 endif ()

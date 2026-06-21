@@ -124,9 +124,9 @@ install (
   DESTINATION "include/cisstCommon")
 
 if (CISST_HAS_JSON)
-  target_include_directories (cisstCommon PUBLIC ${JSON_INCLUDE_DIR})
+  target_include_directories (cisstCommon PUBLIC "$<BUILD_INTERFACE:${JSON_INCLUDE_DIR}>")
   if (JSON_LIBRARY_DIRS)
-    target_link_directories (cisstCommon PUBLIC ${JSON_LIBRARY_DIRS})
+    target_link_directories (cisstCommon PUBLIC "$<BUILD_INTERFACE:${JSON_LIBRARY_DIRS}>")
   endif ()
   target_link_libraries (cisstCommon ${JSON_LIBRARIES})
   if (NOT JSON_USE_SYSTEM_VERSION)

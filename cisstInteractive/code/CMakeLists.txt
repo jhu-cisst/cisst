@@ -46,7 +46,7 @@ cisst_add_library (LIBRARY cisstInteractive
                    ADDITIONAL_HEADER_FILES_RELATIVE ${ADDITIONAL_HEADER_FILES}
                    )
 
-target_include_directories (cisstInteractive PUBLIC ${PYTHON_ALL_INCLUDE_DIRS})
+target_include_directories (cisstInteractive PUBLIC "$<BUILD_INTERFACE:${PYTHON_ALL_INCLUDE_DIRS}>")
 target_link_libraries (cisstInteractive ${PYTHON_ALL_LIBRARIES})
 
 install (FILES ${cisstInteractive_CISST_DG_HDRS_FULLPATH}
