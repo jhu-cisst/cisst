@@ -30,8 +30,8 @@ class classA: public cmnGenericObject {
 
 public:
     double Value;
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 // Add services instantiation
@@ -43,8 +43,8 @@ class classB: public cmnGenericObject {
 
 public:
     std::string Value;
-    void SerializeRaw(std::ostream & outputStream) const;
-    void DeSerializeRaw(std::istream & inputStream);
+    void SerializeRaw(std::ostream & outputStream) const override;
+    void DeSerializeRaw(std::istream & inputStream) override;
 };
 
 // Add services instantiation

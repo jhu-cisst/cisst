@@ -48,10 +48,10 @@ class user: public mtsTaskContinuous {
     ~user() {};
 
     // all four methods are pure virtual in mtsTask
-    void Configure(const std::string & CMN_UNUSED(filename)) {};
-    void Startup(void);    // set some initial values
-    void Run(void);        // performed over and over
-    void Cleanup(void) {}; // user defined cleanup
+    void Configure(const std::string & CMN_UNUSED(filename)) override {};
+    void Startup(void) override;    // set some initial values
+    void Run(void) override;        // performed over and over
+    void Cleanup(void) override {}; // user defined cleanup
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(user);
