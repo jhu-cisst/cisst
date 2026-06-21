@@ -11,9 +11,6 @@
 
 project (cisstCommonQt)
 
-# set directories for this project
-cisst_set_directories (cisstQt)
-
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
@@ -25,10 +22,11 @@ cisst_add_library (
   LIBRARY_DIR cisstCommon
   FOLDER cisstCommon
   DEPENDENCIES cisstCommon
-  SETTINGS     cisstQt
   SOURCE_FILES cmnClassServicesQt.cpp
                cmnLoggerQtWidget.cpp
                cmnQt.cpp
   HEADER_FILES cmnExportQt.h
                cmnLoggerQtWidget.h
                cmnQt.h)
+
+target_link_libraries (cisstCommonQt ${CISST_QT_LIBRARIES})

@@ -30,7 +30,7 @@ if (cisst_FOUND_AS_REQUIRED)
   set_property (TARGET cisstIREComponent PROPERTY FOLDER "cisstMultiTask/applications")
 
   # link with the cisst libraries
-  cisst_target_link_libraries (cisstIREComponent ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (cisstIREComponent ${REQUIRED_CISST_LIBRARIES})
 
   install (TARGETS cisstIREComponent
            COMPONENT cisstMultiTask

@@ -13,7 +13,6 @@
 
 # List of cisst libraries needed
 set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
-cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
 # Keep a list all tests for ctest
 set (CTEST_TEST_FILE ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-cisstMultiTaskPython.txt)
@@ -27,7 +26,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 add_library (cisstMultiTaskPythonTest SHARED
              mtsPeriodicTaskTest.h mtsPeriodicTaskTest.cpp)
 set_property (TARGET cisstMultiTaskPythonTest PROPERTY FOLDER "cisstMultiTask/tests")
-cisst_target_link_libraries (cisstMultiTaskPythonTest ${CISST_LIBRARIES_NEEDED})
+target_link_libraries (cisstMultiTaskPythonTest ${CISST_LIBRARIES_NEEDED})
 
 
 # Allow generated c++ code to find header files

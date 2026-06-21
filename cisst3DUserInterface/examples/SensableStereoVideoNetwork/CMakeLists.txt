@@ -19,6 +19,6 @@ add_executable (cisst3DUserInterfaceSensableStereoVideoNetwork main.cpp)
 target_link_libraries (cisst3DUserInterfaceSensableStereoVideoNetwork
                        cisst3DUserInterfaceBehaviors)
 
-cisst_target_link_libraries (cisst3DUserInterfaceSensableStereoVideoNetwork
+target_link_libraries (cisst3DUserInterfaceSensableStereoVideoNetwork
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
                              cisstStereoVision cisstParameterTypes cisst3DUserInterface)

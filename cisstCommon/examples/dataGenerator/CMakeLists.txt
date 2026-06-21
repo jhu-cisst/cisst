@@ -29,7 +29,7 @@ if (cisst_FOUND_AS_REQUIRED)
                   ${cmnExDataGenerator_CISST_DG_SRCS}
                   main.cpp)
   set_property (TARGET cmnExDataGenerator PROPERTY FOLDER "cisstCommon/examples")
-  cisst_target_link_libraries (cmnExDataGenerator cisstCommon)
+  target_link_libraries (cmnExDataGenerator cisstCommon)
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")
 endif (cisst_FOUND_AS_REQUIRED)

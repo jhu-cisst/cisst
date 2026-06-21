@@ -26,16 +26,13 @@ endif (CISST_FOUND_LIBXML2_XML)
 # now, based on user preference create the library
 if (${CISST_XML_LIB} STREQUAL "LibXml2")
   find_package (LibXml2 REQUIRED)
-  cisst_set_package_settings (cisstCommonXML LibXml2 LIBRARIES LIBXML2_LIBRARIES)
   include_directories (${LIBXML2_INCLUDE_DIR})
-  cisst_library_remove_settings (cisstCommonXML cisstQt)
   set (CISST_HAS_QT_XML 0) # for cmnConfigXML.h
 else (${CISST_XML_LIB} STREQUAL "LibXml2")
-  cisst_unset_all_package_settings (cisstCommonXML LibXml2)
   if (${CISST_XML_LIB} STREQUAL "QtXML")
-    # cisstCommonXML relies on cisstQt settings (for future use)
-    cisst_library_use_settings (cisstCommonXML cisstQt)
-    cisst_set_directories (cisstQt)
+    if (CISST_HAS_QT6)
+      message (FATAL_ERROR "CISST_XML_LIB=QtXML is not supported with Qt6 because QtXmlPatterns was removed. Use CISST_XML_LIB=LibXml2 instead.")
+    endif ()
     set (CISST_HAS_QT_XML 1) # for cmnConfigXML.h
   else (${CISST_XML_LIB} STREQUAL "QtXML")
     message (SEND_ERROR "CISST_XML_LIB must be set to either \"LibXml2\" or \"QtXML\" to compile cisstCommonXML.  You can also turn off CISST_CommonXML")
@@ -69,6 +66,12 @@ cisst_add_library (LIBRARY cisstCommonXML
                    SOURCE_FILES cmnXMLPath.cpp
                    HEADER_FILES cmnExportXML.h cmnXMLPath.h
                    ADDITIONAL_HEADER_FILES ${CISST_CMN_XML_CONFIG_FILE})
+
+if (${CISST_XML_LIB} STREQUAL "LibXml2")
+  target_link_libraries (cisstCommonXML LibXml2::LibXml2)
+elseif (${CISST_XML_LIB} STREQUAL "QtXML")
+  target_link_libraries (cisstCommonXML ${CISST_QT_LIBRARIES})
+endif ()
 
 # Add libxml2 runtime dependencies (so far, only tested on WIN32).
 # There must be a better way to do this.

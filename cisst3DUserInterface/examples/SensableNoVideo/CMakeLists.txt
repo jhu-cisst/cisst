@@ -28,6 +28,6 @@ target_link_libraries (ui3ExSensableNoVideo
                        ${sawSensablePhantom_LIBRARIES}
                        ${sawKeyboard_LIBRARIES})
 
-cisst_target_link_libraries (ui3ExSensableNoVideo
+target_link_libraries (ui3ExSensableNoVideo
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
                              cisstStereoVision cisstParameterTypes cisst3DUserInterface)

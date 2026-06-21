@@ -36,7 +36,7 @@ if (cisst_FOUND_AS_REQUIRED)
                     ExampleGaussJordanInverse.h
                     )
     set_property (TARGET nmrExTutorial PROPERTY FOLDER "cisstNumerical/examples")
-    cisst_target_link_libraries(nmrExTutorial ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries (nmrExTutorial ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_HAS_CISSTNETLIB)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_HAS_CISSTNETLIB")

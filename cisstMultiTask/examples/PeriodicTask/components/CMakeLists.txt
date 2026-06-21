@@ -13,7 +13,6 @@
 
 # List of cisst libraries needed
 set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstMultiTask)
-cisst_set_directories (${CISST_LIBRARIES_NEEDED})
 
 # create a library of components
 add_library (mtsExPeriodicTaskComponents
@@ -27,4 +26,4 @@ add_library (mtsExPeriodicTaskComponents
 set_property (TARGET mtsExPeriodicTaskComponents PROPERTY FOLDER "cisstMultiTask/examples")
 
 # link with the cisst libraries
-cisst_target_link_libraries (mtsExPeriodicTaskComponents ${CISST_LIBRARIES_NEEDED})
+target_link_libraries (mtsExPeriodicTaskComponents ${CISST_LIBRARIES_NEEDED})

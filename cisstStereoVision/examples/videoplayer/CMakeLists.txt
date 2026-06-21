@@ -14,7 +14,7 @@
 cmake_minimum_required (VERSION 2.6)
 
 # create a list of libraries needed for this project
-set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt cisstQt)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt)
 
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
@@ -34,7 +34,7 @@ if (cisst_FOUND)
 
     add_executable (svlExVideoPlayer videoplayer.cpp)
     set_property (TARGET svlExVideoPlayer PROPERTY FOLDER "cisstStereoVision/examples")
-    cisst_target_link_libraries (svlExVideoPlayer ${USED_CISST_LIBRARIES})
+    target_link_libraries (svlExVideoPlayer ${USED_CISST_LIBRARIES})
 
   else (CISST_SVL_HAS_X11 OR WIN32)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")

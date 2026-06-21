@@ -13,9 +13,6 @@
 
 project (cisstParameterTypesQt)
 
-# set directories for this project
-cisst_set_directories (cisstQt)
-
 # to include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
@@ -30,7 +27,6 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 cisstVectorQt
                                 cisstMultiTask
                                 cisstParameterTypes
-                   SETTINGS     cisstQt
                    SOURCE_FILES prmEventButtonQtWidget.cpp
                                 prmInputDataQtWidget.cpp
                                 prmOperatingStateQtWidget.cpp
@@ -54,5 +50,4 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 prmStateRobotQtWidget.h
                                 prmExportQt.h)
 
-# link against Qt libraries
-target_link_libraries (cisstParameterTypesQt ${QT_LIBRARIES})
+target_link_libraries (cisstParameterTypesQt ${CISST_QT_LIBRARIES})

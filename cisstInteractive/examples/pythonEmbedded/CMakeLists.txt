@@ -13,21 +13,21 @@
 
 project (pythonEmbedded)
 
-set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstPython)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND_AS_REQUIRED AND CISST_HAS_SWIG_PYTHON)
   include (${CISST_USE_FILE})
 
   # Create myDerivedClass as a shared library
   add_library (myDerivedClass SHARED myDerivedClass.cpp myDerivedClass.h)
   set_property (TARGET myDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
-  cisst_target_link_libraries (myDerivedClass ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (myDerivedClass ${REQUIRED_CISST_LIBRARIES})
 
   # Create myReDerivedClass as a shared library
   add_library (myReDerivedClass SHARED myReDerivedClass.cpp myReDerivedClass.h)
   set_property (TARGET myReDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
-  cisst_target_link_libraries (myReDerivedClass ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (myReDerivedClass ${REQUIRED_CISST_LIBRARIES})
   target_link_libraries (myReDerivedClass myDerivedClass)
 
   # Allow generated c++ code to find header files
@@ -50,7 +50,7 @@ if (cisst_FOUND_AS_REQUIRED)
   # Built executable with embedding
   add_executable (pythonEmbedded pythonEmbedded.cpp)
   set_property (TARGET pythonEmbedded PROPERTY FOLDER "cisstInteractive/examples")
-  cisst_target_link_libraries (pythonEmbedded ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (pythonEmbedded ${REQUIRED_CISST_LIBRARIES})
   target_link_libraries (pythonEmbedded myDerivedClass myReDerivedClass ${CMAKE_THREAD_LIBS_INIT})
 
   if (UNIX)
@@ -68,6 +68,6 @@ if (cisst_FOUND_AS_REQUIRED)
                            ${EXECUTABLE_OUTPUT_PATH}/pythonEmbedded.py
                       COMMENT "pythonEmbedded: copy pythonEmbedded.py to the executable directory")
 
-else (cisst_FOUND_AS_REQUIRED)
-  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+else ()
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES} and cisst Python/SWIG support")
+endif ()

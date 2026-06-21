@@ -13,9 +13,6 @@
 #
 # --- end cisst license ---
 
-# paths for headers/libraries
-cisst_set_directories (cisstCommon cisstOSAbstraction cisstTestsDriver)
-
 # all source files
 set (SOURCE_FILES
      osaMutexTest.cpp
@@ -47,7 +44,7 @@ add_definitions(-DCMAKE_CFG_INTDIR_WITH_QUOTES="${CMAKE_CFG_INTDIR}")
 add_executable (cisstOSAbstractionTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstOSAbstractionTests PROPERTY FOLDER "cisstOSAbstraction/tests")
 target_link_libraries (cisstOSAbstractionTests cisstTestsDriver )
-cisst_target_link_libraries (cisstOSAbstractionTests cisstCommon cisstOSAbstraction cisstTestsDriver)
+target_link_libraries (cisstOSAbstractionTests cisstCommon cisstOSAbstraction cisstTestsDriver)
 add_dependencies(cisstOSAbstractionTests cisstOSAbstractionTestsPipeExecUtility)
 
 # threads

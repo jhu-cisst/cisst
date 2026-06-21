@@ -26,7 +26,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstStereoVision/svlWindowManagerBase.h>
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QOpenGLWidget>
+typedef QOpenGLWidget svlQtOpenGLWidgetBase;
+#else
 #include <QGLWidget>
+typedef QGLWidget svlQtOpenGLWidgetBase;
+#endif
 #include <QCloseEvent>
 
 // Forward declarations
@@ -37,7 +44,7 @@ class svlWindowManagerQt4OpenGL;
 // Always include last
 #include <cisstStereoVision/svlExportQt.h>
 
-class CISST_EXPORT svlWidgetQt4OpenGL : public QGLWidget
+class CISST_EXPORT svlWidgetQt4OpenGL : public svlQtOpenGLWidgetBase
 {
     Q_OBJECT
 

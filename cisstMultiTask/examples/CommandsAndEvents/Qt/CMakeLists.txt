@@ -15,8 +15,7 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstVector
                               cisstOSAbstraction
                               cisstMultiTask
-                              cisstMultiTaskQt
-                              cisstQt)
+                              cisstMultiTaskQt)
 
 
 # find cisst and make sure the required libraries have been compiled
@@ -49,7 +48,7 @@ if (cisst_FOUND_AS_REQUIRED)
                   serverWithDelay.cpp
                  )
   set_property (TARGET mtsExCommandsAndEventsQtLocal PROPERTY FOLDER "cisstMultiTask/examples")
-  cisst_target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

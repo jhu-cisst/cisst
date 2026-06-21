@@ -19,9 +19,6 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstMultiTask
                               cisstMultiTaskQt)
 
-# Set include/link directories
-cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
-
 set (CMAKE_AUTOMOC ON)
 
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
@@ -41,8 +38,8 @@ set_property (TARGET mtsExPeriodicTaskQt PROPERTY FOLDER "cisstMultiTask/example
 target_link_libraries (mtsExPeriodicTaskQt
                        mtsExPeriodicTaskGuiQt
                        mtsExPeriodicTaskComponents)
-cisst_target_link_libraries (mtsExPeriodicTaskGuiQt ${REQUIRED_CISST_LIBRARIES})
-cisst_target_link_libraries (mtsExPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})
+target_link_libraries (mtsExPeriodicTaskGuiQt ${REQUIRED_CISST_LIBRARIES})
+target_link_libraries (mtsExPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})
 
 add_custom_target (mtsExPeriodicTaskQt_Scripts ALL
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different

@@ -28,7 +28,7 @@ if (cisst_FOUND_AS_REQUIRED)
 
   add_executable (cisstKinematicsIdentification KinematicsIdentification.cpp)
   set_property (TARGET cisstKinematicsIdentification PROPERTY FOLDER "cisstRobot/applications")
-  cisst_target_link_libraries (cisstKinematicsIdentification ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (cisstKinematicsIdentification ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

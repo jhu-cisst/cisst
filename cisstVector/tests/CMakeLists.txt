@@ -11,9 +11,6 @@
 #
 # --- end cisst license ---
 
-# paths for headers/libraries
-cisst_set_directories (cisstCommon cisstVector cisstTestsDriver)
-
 # all source files
 set (SOURCE_FILES
      vctArrayIteratorTest.cpp
@@ -149,7 +146,7 @@ endif (CISST_HAS_JSON)
 add_executable (cisstVectorTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstVectorTests PROPERTY FOLDER "cisstVector/tests")
 target_link_libraries (cisstVectorTests cisstTestsDriver)
-cisst_target_link_libraries (cisstVectorTests cisstCommon cisstVector cisstTestsDriver)
+target_link_libraries (cisstVectorTests cisstCommon cisstVector cisstTestsDriver)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstVectorTests ITERATIONS 10 INSTANCES 2)

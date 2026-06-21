@@ -34,7 +34,7 @@ if (cisst_FOUND_AS_REQUIRED)
 
   set_property (TARGET cisstComponentGenerator PROPERTY FOLDER "cisstMultiTask/applications")
 
-  cisst_target_link_libraries (cisstComponentGenerator ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (cisstComponentGenerator ${REQUIRED_CISST_LIBRARIES})
 
   install (TARGETS cisstComponentGenerator
            COMPONENT cisstMultiTask

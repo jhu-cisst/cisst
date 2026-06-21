@@ -11,9 +11,6 @@
 #
 # --- end cisst license ---
 
-# paths for headers/libraries
-cisst_set_directories (cisstCommon cisstOSAbstraction cisstVector cisstMultiTask cisstParameterTypes cisstTestsDriver)
-
 # all source files
 set (SOURCE_FILES
      prmEventButtonTest.cpp
@@ -45,7 +42,7 @@ include_directories (${CPPUNIT_INCLUDE_DIR})
 add_executable (cisstParameterTypesTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstParameterTypesTests PROPERTY FOLDER "cisstParameterTypes/tests")
 target_link_libraries (cisstParameterTypesTests cisstTestsDriver)
-cisst_target_link_libraries (cisstParameterTypesTests cisstParameterTypes cisstVector cisstCommon cisstMultiTask cisstTestsDriver)
+target_link_libraries (cisstParameterTypesTests cisstParameterTypes cisstVector cisstCommon cisstMultiTask cisstTestsDriver)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstParameterTypesTests ITERATIONS 1 INSTANCES 1)

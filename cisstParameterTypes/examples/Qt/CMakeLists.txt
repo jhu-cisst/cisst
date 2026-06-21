@@ -29,7 +29,7 @@ if (cisst_FOUND_AS_REQUIRED)
                   TestComponent.cpp
                   main.cpp)
   set_property (TARGET prmExQt PROPERTY FOLDER "cisstParameterTypes/examples")
-  cisst_target_link_libraries (prmExQt ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (prmExQt ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

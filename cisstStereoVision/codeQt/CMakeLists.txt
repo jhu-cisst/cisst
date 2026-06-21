@@ -15,9 +15,6 @@
 
 project (cisstStereoVisionQt)
 
-# set directories for this project
-cisst_set_directories (cisstQt)
-
 set (CMAKE_AUTOMOC ON)
 
 set (HEADER_FILES
@@ -83,9 +80,10 @@ cisst_add_library (LIBRARY cisstStereoVisionQt
                                 cisstVector
                                 cisstMultiTask
                                 cisstStereoVision
-                   SETTINGS     cisstQt
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES} svlExportQt.h)
 
-# link against Qt libraries
-target_link_libraries (cisstStereoVisionQt ${QT_LIBRARIES})
+target_link_libraries (cisstStereoVisionQt ${CISST_QT_LIBRARIES})
+if (CISST_HAS_OPENGL)
+  target_link_libraries (cisstStereoVisionQt ${CISST_OPENGL_LIBRARIES})
+endif ()

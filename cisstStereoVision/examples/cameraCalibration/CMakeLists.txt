@@ -24,7 +24,7 @@ if (cisst_FOUND)
 
   IF(CISST_SVL_HAS_OPENCV2)
     add_executable (svlExCameraCalibration cameraCalibration.cpp)
-    cisst_target_link_libraries (svlExCameraCalibration ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries (svlExCameraCalibration ${REQUIRED_CISST_LIBRARIES})
   ENDIF(CISST_SVL_HAS_OPENCV2)
 
 else (cisst_FOUND)

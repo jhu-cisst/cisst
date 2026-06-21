@@ -28,7 +28,7 @@ if (cisst_FOUND)
   if (CISST_SVL_HAS_X11 OR WIN32)
     add_executable (cisstVideoConverter main.cpp)
     set_property (TARGET cisstVideoConverter PROPERTY FOLDER "cisstStereoVision/applications")
-    cisst_target_link_libraries (cisstVideoConverter ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries (cisstVideoConverter ${REQUIRED_CISST_LIBRARIES})
 
   else (CISST_SVL_HAS_X11 OR WIN32)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")

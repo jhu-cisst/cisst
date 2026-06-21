@@ -34,7 +34,7 @@ if (cisst_FOUND_AS_REQUIRED)
   set_property (TARGET vctExQtWidgets PROPERTY FOLDER "cisstVector/examples")
 
   # link against cisst libraries (and dependencies)
-  cisst_target_link_libraries (vctExQtWidgets ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (vctExQtWidgets ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

@@ -23,10 +23,6 @@ option (CISST_NMR_COMPILE_POLYNOMIALS "Compile the cisstNumerical polynomial cla
 
 if (CISST_HAS_CISSTNETLIB)
   find_package (CisstNetlib REQUIRED)
-  cisst_set_package_settings (cisstNumerical cisstNetlib INCLUDE_DIRECTORIES CISSTNETLIB_INCLUDE_DIR)
-  cisst_set_package_settings (cisstNumerical cisstNetlib LIBRARIES           CISSTNETLIB_LIBRARIES)
-else (CISST_HAS_CISSTNETLIB)
-  cisst_unset_all_package_settings (cisstNumerical cisstNetlib)
 endif (CISST_HAS_CISSTNETLIB)
 
 add_subdirectory (code)

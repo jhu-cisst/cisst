@@ -16,7 +16,6 @@
 set (REQUIRED_CISST_LIBRARIES
      cisstCommon)
 
-cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
 # we intentionally don't link against cisstCommon to make sure we are

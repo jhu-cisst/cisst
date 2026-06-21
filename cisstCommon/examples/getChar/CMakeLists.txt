@@ -19,7 +19,7 @@ if (cisst_FOUND_AS_REQUIRED)
                   getChar.cpp)
   set_property (TARGET cmnExGetChar PROPERTY FOLDER "cisstCommon/examples")
 
-  cisst_target_link_libraries (cmnExGetChar cisstCommon)
+  target_link_libraries (cmnExGetChar cisstCommon)
 else (cisst_FOUND_AS_REQUIRED)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")
 endif (cisst_FOUND_AS_REQUIRED)

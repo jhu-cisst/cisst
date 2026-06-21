@@ -21,17 +21,17 @@ if (cisst_FOUND_AS_REQUIRED)
 
   add_executable (cmnExSerializationWrite write.cpp)
   set_property (TARGET cmnExSerializationWrite PROPERTY FOLDER "cisstCommon/examples")
-  cisst_target_link_libraries (cmnExSerializationWrite cisstCommon)
+  target_link_libraries (cmnExSerializationWrite cisstCommon)
   target_link_libraries (cmnExSerializationWrite cmnExSerializationClasses)
 
   add_executable (cmnExSerializationRead read.cpp)
   set_property (TARGET cmnExSerializationRead PROPERTY FOLDER "cisstCommon/examples")
-  cisst_target_link_libraries (cmnExSerializationRead cisstCommon)
+  target_link_libraries (cmnExSerializationRead cisstCommon)
   target_link_libraries (cmnExSerializationRead cmnExSerializationClasses)
 
   add_executable (cmnExSerializationStringStream writeStringStream.cpp)
   set_property (TARGET cmnExSerializationStringStream PROPERTY FOLDER "cisstCommon/examples")
-  cisst_target_link_libraries (cmnExSerializationStringStream cisstCommon)
+  target_link_libraries (cmnExSerializationStringStream cisstCommon)
   target_link_libraries (cmnExSerializationStringStream cmnExSerializationClasses)
 
 else (cisst_FOUND_AS_REQUIRED)

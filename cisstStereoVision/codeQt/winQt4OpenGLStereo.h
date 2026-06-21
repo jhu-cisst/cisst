@@ -26,7 +26,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstStereoVision/svlWindowManagerBase.h>
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QOpenGLWidget>
+typedef QOpenGLWidget svlQtOpenGLWidgetBase;
+#else
 #include <QGLWidget>
+typedef QGLWidget svlQtOpenGLWidgetBase;
+#endif
 #include <QCloseEvent>
 
 // Always include last!
@@ -38,7 +45,7 @@ class osaThreadSignal;
 class svlWindowManagerQt4OpenGLStereo;
 
 
-class CISST_EXPORT svlWidgetQt4OpenGLStereo : public QGLWidget
+class CISST_EXPORT svlWidgetQt4OpenGLStereo : public svlQtOpenGLWidgetBase
 {
     Q_OBJECT
 
@@ -138,4 +145,3 @@ private:
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlWindowManagerQt4OpenGLStereo)
 
 #endif // _winQt4OpenGLStereo_h
-
