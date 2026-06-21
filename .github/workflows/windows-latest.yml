@@ -24,6 +24,7 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: '5.*.*'
+        cache: 'true'
 
     - name: Set up vcpkg binary cache
       shell: bash
