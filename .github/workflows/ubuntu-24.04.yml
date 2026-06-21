@@ -153,7 +153,7 @@ jobs:
       shell: bash
       run: |
         mkdir -p ${{github.workspace}}/test_export_project
-        echo -e "cmake_minimum_required(VERSION 3.16)\nproject(test_export_qt_example)\nadd_subdirectory(${{github.workspace}}/cisstMultiTask/examples/CommandsAndEvents/Qt test_qt_example)" > ${{github.workspace}}/test_export_project/CMakeLists.txt
+        echo -e "cmake_minimum_required(VERSION 3.16)\nproject(test_export_qt_example)\nadd_subdirectory(../cisstMultiTask/examples/CommandsAndEvents/Qt test_qt_example)" > ${{github.workspace}}/test_export_project/CMakeLists.txt
 
     - name: Test exported targets against build tree
       shell: bash
