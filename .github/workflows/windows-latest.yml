@@ -88,14 +88,16 @@ jobs:
 
     - name: Build
       working-directory: ${{github.workspace}}/build
+      shell: cmd
       run: |
-        ./cisstvars.bat Release
-        cmake --build . --config Release --parallel $env:NUMBER_OF_PROCESSORS
+        call cisstvars.bat Release
+        cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build
+      shell: cmd
       run: |
-        ./cisstvars.bat Release
+        call cisstvars.bat Release
         ctest -C Release --output-on-failure
 
     - name: Configure CMake examples
@@ -114,6 +116,7 @@ jobs:
 
     - name: Build examples
       working-directory: ${{github.workspace}}/build
+      shell: cmd
       run: |
-        ./cisstvars.bat Release
-        cmake --build . --config Release --parallel $env:NUMBER_OF_PROCESSORS
+        call cisstvars.bat Release
+        cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
