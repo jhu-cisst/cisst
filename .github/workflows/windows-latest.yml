@@ -40,14 +40,24 @@ jobs:
           ${{ runner.os }}-vcpkg-bin-
 
     - name: Download cisstNetlib
+      shell: bash
       run: |
-        cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
-        git clone https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+        git clone --depth 1 https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+        echo "CISSTNETLIB_HASH=$(git -C ${{github.workspace}}/cisstNetlib-source rev-parse HEAD)" >> $GITHUB_ENV
+
+    - name: Cache cisstNetlib build
+      id: cache-cisstnetlib
+      uses: actions/cache@v4
+      with:
+        path: ${{github.workspace}}/cisstNetlib-install
+        key: ${{ runner.os }}-cisstnetlib-${{ env.CISSTNETLIB_HASH }}
 
     - name: Build cisstNetlib
-      working-directory: ${{github.workspace}}/cisstNetlib-build
+      if: steps.cache-cisstnetlib.outputs.cache-hit != 'true'
       run: |
-        cmake ${{github.workspace}}/cisstNetlib-source
+        cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
+        cd ${{github.workspace}}/cisstNetlib-build
+        cmake ${{github.workspace}}/cisstNetlib-source -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/cisstNetlib-install
         cmake --build . --config Release --parallel
         cmake --build . --target install
 
@@ -61,7 +71,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{github.workspace}}/build
-      run: cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" "-DVCPKG_OVERLAY_TRIPLETS=${{github.workspace}}/.github/workflows/vcpkg-triplets" -DVCPKG_MANIFEST_INSTALL=OFF -C "${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake"
+      run: cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" "-DVCPKG_OVERLAY_TRIPLETS=${{github.workspace}}/.github/workflows/vcpkg-triplets" -DVCPKG_MANIFEST_INSTALL=OFF "-DCisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib" -C "${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake"
 
     - name: Build
       working-directory: ${{github.workspace}}/build

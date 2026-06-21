@@ -40,19 +40,32 @@ jobs:
         ccache-command: ccache
 
     - name: Download cisstNetlib
+      shell: bash
+      run: |
+        git clone --depth 1 https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+        echo "CISSTNETLIB_HASH=$(git -C ${{github.workspace}}/cisstNetlib-source rev-parse HEAD)" >> $GITHUB_ENV
+
+    - name: Cache cisstNetlib build
+      id: cache-cisstnetlib
+      uses: actions/cache@v4
+      with:
+        path: ${{github.workspace}}/cisstNetlib-install
+        key: ${{ runner.os }}-cisstnetlib-${{ env.CISSTNETLIB_HASH }}
+
+    - name: Build cisstNetlib
+      if: steps.cache-cisstnetlib.outputs.cache-hit != 'true'
       run: |
         cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
-        git clone https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
-    - name: Build cisstNetlib
-      working-directory: ${{github.workspace}}/cisstNetlib-build
-      run: |
+        cd ${{github.workspace}}/cisstNetlib-build
         cmake ${{github.workspace}}/cisstNetlib-source \
+          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/cisstNetlib-install \
           -DcisstNetlib_LANGUAGE=C \
           -DCMAKE_OSX_ARCHITECTURES=arm64 \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build . --config Release
-        sudo cmake --build . --target install
+        cmake --build . --target install
+
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
@@ -67,6 +80,7 @@ jobs:
           -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;/opt/homebrew" \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib \
           -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
 
     - name: Build
