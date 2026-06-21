@@ -26,6 +26,9 @@ jobs:
           ${{ runner.os }}-brew-
 
     - name: Install dependencies
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: "1"
+        HOMEBREW_NO_INSTALL_CLEANUP: "1"
       run: |
         brew install graphviz jsoncpp qt@5 pkg-config cppunit ccache
         # Ensure homebrew bin is in path for subsequent steps
@@ -63,7 +66,7 @@ jobs:
           -DCMAKE_OSX_ARCHITECTURES=arm64 \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
         cmake --build . --target install
 
     - name: Create Build Environment
@@ -88,7 +91,7 @@ jobs:
       shell: bash
       run: |
         source cisstvars.sh
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
 
     - name: Configure CMake examples
       shell: bash
@@ -110,7 +113,7 @@ jobs:
       shell: bash
       run: |
         source cisstvars.sh
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
 
     - name: Test
       working-directory: ${{github.workspace}}/build

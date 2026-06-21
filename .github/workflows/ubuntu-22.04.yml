@@ -93,7 +93,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/cisstNetlib-install \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel $(nproc)
         cmake --build . --target install
 
     - name: Create Build Environment
@@ -117,7 +117,7 @@ jobs:
     - name: Build
       working-directory: build
       shell: bash
-      run: cmake --build . --config Release
+      run: cmake --build . --config Release --parallel $(nproc)
 
     - name: Configure CMake examples
       shell: bash
@@ -137,7 +137,7 @@ jobs:
     - name: Build examples
       working-directory: build
       shell: bash
-      run: cmake --build . --config Release
+      run: cmake --build . --config Release --parallel $(nproc)
 
     - name: Test
       working-directory: build
