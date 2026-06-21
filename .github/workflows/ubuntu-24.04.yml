@@ -49,6 +49,7 @@ jobs:
           git \
           libxml2-dev \
           libjsoncpp-dev \
+          libcppunit-dev \
           qtbase5-dev \
           qtbase5-dev-tools \
           qt5-qmake-bin \
