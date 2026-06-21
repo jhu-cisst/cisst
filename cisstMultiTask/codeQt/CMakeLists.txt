@@ -89,15 +89,17 @@ if (CISST_HAS_QTNODES)
   target_compile_definitions (cisstMultiTaskQt PUBLIC NODE_EDITOR_SHARED)
   target_include_directories (cisstMultiTaskQt PUBLIC
     $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include>
-    ${GRAPHVIZ_INCLUDE_DIRS})
+    $<INSTALL_INTERFACE:include>)
+  if (GRAPHVIZ_INCLUDE_DIRS)
+    target_include_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_INCLUDE_DIRS})
+  endif ()
   if (QTNODES_LIBRARY_DIRS)
     target_link_directories (cisstMultiTaskQt PUBLIC
       $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
       $<INSTALL_INTERFACE:lib>)
   endif ()
   if (GRAPHVIZ_LIBRARY_DIRS)
-    target_link_directories (cisstMultiTaskQt PUBLIC ${GRAPHVIZ_LIBRARY_DIRS})
+    target_link_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_LIBRARY_DIRS})
   endif ()
   target_link_libraries (cisstMultiTaskQt
                          ${QTNODES_LIBRARIES}

@@ -51,6 +51,9 @@ if (WIN32)
                 ${CPPUNIT_INCLUDE_DIR}/../lib
                 /usr/local/lib
                 /usr/lib)
+  if (CPPUNIT_LIBRARY AND NOT CPPUNIT_DEBUG_LIBRARY)
+    set (CPPUNIT_DEBUG_LIBRARY ${CPPUNIT_LIBRARY} CACHE FILEPATH "CppUnit debug library" FORCE)
+  endif ()
 else (WIN32)
   # On unix system, debug and release have the same name
   find_library (CPPUNIT_LIBRARY cppunit
@@ -76,4 +79,3 @@ if (CPPUNIT_INCLUDE_DIR)
                       CPPUNIT_FOUND CPPUNIT_INCLUDE_DIR)
   endif (CPPUNIT_LIBRARY)
 endif (CPPUNIT_INCLUDE_DIR)
-
