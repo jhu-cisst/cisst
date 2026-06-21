@@ -9,7 +9,6 @@
 #
 # --- end cisst license ---
 
-
 # create a list of libraries needed for this project
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
@@ -17,9 +16,6 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMu
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
-
-  # load cisst configuration
-  include (${CISST_USE_FILE})
 
   # shared components used by either example
   include_directories (${CMAKE_CURRENT_SOURCE_DIR})

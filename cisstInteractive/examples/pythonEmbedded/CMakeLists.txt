@@ -10,14 +10,12 @@
 #
 # --- end cisst license ---
 
-
 project (pythonEmbedded)
 
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND_AS_REQUIRED AND CISST_HAS_SWIG_PYTHON)
-  include (${CISST_USE_FILE})
 
   # Create myDerivedClass as a shared library
   add_library (myDerivedClass SHARED myDerivedClass.cpp myDerivedClass.h)
@@ -50,8 +48,9 @@ if (cisst_FOUND_AS_REQUIRED AND CISST_HAS_SWIG_PYTHON)
   # Built executable with embedding
   add_executable (pythonEmbedded pythonEmbedded.cpp)
   set_property (TARGET pythonEmbedded PROPERTY FOLDER "cisstInteractive/examples")
+  target_include_directories (pythonEmbedded PRIVATE ${PYTHON_ALL_INCLUDE_DIRS})
   target_link_libraries (pythonEmbedded ${REQUIRED_CISST_LIBRARIES})
-  target_link_libraries (pythonEmbedded myDerivedClass myReDerivedClass ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries (pythonEmbedded myDerivedClass myReDerivedClass ${CMAKE_THREAD_LIBS_INIT} ${PYTHON_ALL_LIBRARIES})
 
   if (UNIX)
     if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

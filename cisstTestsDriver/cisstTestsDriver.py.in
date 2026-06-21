@@ -39,15 +39,9 @@ listOfModules = []
 # Prior to Python 3.13, getTestCaseNames was a method in unittest.
 # Starting with Python 3.13, it is now in unittest.TestLoader
 def my_getTestCaseNames(testCaseClass, prefix):
-    ret = None
-    try:
-        # Legacy version (prior to Python 3.13)
-        ret = unittest.getTestCaseNames(testCaseClass, prefix)
-    except AttributeError:
-        # Modern version (starting with Python 3.13)
-        testMethodPrefix = prefix
-        ret = unittest.TestLoader().getTestCaseNames(testCaseClass)
-    return ret
+    loader = unittest.TestLoader()
+    loader.testMethodPrefix = prefix
+    return loader.getTestCaseNames(testCaseClass)
 
 # Load all the available tests from the source directory
 ext  = '.py'

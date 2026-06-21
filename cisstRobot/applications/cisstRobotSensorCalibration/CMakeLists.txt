@@ -24,9 +24,6 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (cisstRobotSensorCalibration RobotSensorCalibration.cpp)
   set_property (TARGET cisstRobotSensorCalibration PROPERTY FOLDER "cisstRobot/applications")
   target_link_libraries (cisstRobotSensorCalibration ${REQUIRED_CISST_LIBRARIES})

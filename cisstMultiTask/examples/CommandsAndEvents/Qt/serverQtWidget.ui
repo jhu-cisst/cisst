@@ -198,54 +198,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>ReadSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>ReadValue</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>166</x>
-     <y>119</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>222</x>
-     <y>119</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>QualifiedReadSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>QualifiedReadValue</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>166</x>
-     <y>156</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>222</x>
-     <y>156</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>EventWriteSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>EventWriteValue</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>386</x>
-     <y>78</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>468</x>
-     <y>78</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ 
 </ui>

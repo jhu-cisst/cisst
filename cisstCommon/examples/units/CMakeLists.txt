@@ -14,7 +14,6 @@
 find_package (cisst COMPONENTS cisstCommon)
 
 if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
   add_executable (cmnExUnits units.cpp)
   set_property (TARGET cmnExUnits PROPERTY FOLDER "cisstCommon/examples")
   target_link_libraries (cmnExUnits cisstCommon)

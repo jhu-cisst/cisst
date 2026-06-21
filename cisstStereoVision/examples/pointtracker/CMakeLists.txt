@@ -21,9 +21,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (svlExPointTracker pointtracker.cpp)
   set_property (TARGET svlExPointTracker PROPERTY FOLDER "cisstStereoVision/examples")
   target_link_libraries (svlExPointTracker ${REQUIRED_CISST_LIBRARIES})

@@ -20,9 +20,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   if (CISST_SVL_HAS_X11 OR WIN32)
 
     if (CISST_HAS_QT4)

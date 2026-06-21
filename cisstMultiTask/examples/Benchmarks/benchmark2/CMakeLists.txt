@@ -19,9 +19,6 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   # name the main executable and specifies with source files to use
   add_executable(mtsExBenchmark2
                  clientTask.cpp

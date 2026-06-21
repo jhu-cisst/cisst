@@ -22,9 +22,6 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   if (CISST_SVL_HAS_X11 OR WIN32)
     add_executable (cisstVideoPlayer main.cpp)
     set_property (TARGET cisstVideoPlayer PROPERTY FOLDER "cisstStereoVision/applications")

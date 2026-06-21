@@ -21,9 +21,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (svlExExposureCorrection exposurecorrection.cpp)
   set_property (TARGET svlExExposureCorrection PROPERTY FOLDER "cisstStereoVision/examples")
   target_link_libraries (svlExExposureCorrection ${REQUIRED_CISST_LIBRARIES})

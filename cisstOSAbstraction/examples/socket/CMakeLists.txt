@@ -17,7 +17,6 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
 
   add_executable (osaExSocketUDPServer UDPServer.cpp)
   set_property (TARGET osaExSocketUDPServer PROPERTY FOLDER "cisstOSAbstraction/examples")

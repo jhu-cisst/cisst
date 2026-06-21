@@ -15,7 +15,6 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
 
   if (CISST_HAS_CISSTNETLIB)
     add_executable (nmrExTutorial

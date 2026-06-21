@@ -19,9 +19,6 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
   set (CMAKE_AUTOMOC ON)

@@ -19,9 +19,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   IF(CISST_SVL_HAS_OPENCV2)
     add_executable (svlExCameraCalibration cameraCalibration.cpp)
     target_link_libraries (svlExCameraCalibration ${REQUIRED_CISST_LIBRARIES})

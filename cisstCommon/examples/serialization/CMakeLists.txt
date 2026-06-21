@@ -14,7 +14,6 @@
 find_package (cisst COMPONENTS cisstCommon)
 
 if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
 
   add_library (cmnExSerializationClasses STATIC classes.h classes.cpp)
   set_property (TARGET cmnExSerializationClasses PROPERTY FOLDER "cisstCommon/examples")

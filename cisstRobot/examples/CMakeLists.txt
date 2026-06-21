@@ -9,8 +9,6 @@
 #
 # --- end cisst license ---
 
-
-
 # create a list of required cisst libraries
 set (REQUIRED_CISST_LIBRARIES
      cisstCommon
@@ -22,7 +20,6 @@ set (REQUIRED_CISST_LIBRARIES
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
 
   add_executable (robExManipulator example.cpp)
   set_property (TARGET robExManipulator PROPERTY FOLDER "cisstRobot/examples")

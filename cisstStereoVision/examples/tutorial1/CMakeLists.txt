@@ -20,9 +20,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (svlExTutorial1 main.cpp)
   set_property (TARGET svlExTutorial1 PROPERTY FOLDER "cisstStereoVision/examples")
   target_link_libraries (svlExTutorial1 ${REQUIRED_CISST_LIBRARIES})

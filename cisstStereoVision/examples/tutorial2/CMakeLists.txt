@@ -20,9 +20,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (svlExTutorial2
                   CMyEventHandler.h
                   CMyEventHandler.cpp

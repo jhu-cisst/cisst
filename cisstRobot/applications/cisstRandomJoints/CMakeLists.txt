@@ -23,9 +23,6 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (cisstRandomJoints RandomJoints.cpp)
   set_property (TARGET cisstRandomJoints PROPERTY FOLDER "cisstRobot/applications")
   target_link_libraries (cisstRandomJoints ${REQUIRED_CISST_LIBRARIES})

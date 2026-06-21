@@ -14,7 +14,6 @@
 find_package (cisst COMPONENTS cisstCommon)
 
 if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
 
   # create data type using the data generator
   cisst_data_generator (cmnExDataGenerator

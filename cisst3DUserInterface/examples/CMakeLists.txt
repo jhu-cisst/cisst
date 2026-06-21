@@ -22,9 +22,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   include_directories (behaviors)
   add_subdirectory (behaviors)
 

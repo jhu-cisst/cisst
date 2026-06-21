@@ -19,9 +19,6 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (vctExTutorial
                   main.cpp
                   ExampleFrame.h

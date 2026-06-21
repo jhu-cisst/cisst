@@ -14,7 +14,6 @@
 find_package (cisst COMPONENTS cisstCommon)
 
 if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
   add_executable (cmnExPortability portability.cpp)
   set_property (TARGET cmnExPortability PROPERTY FOLDER "cisstCommon/examples")
   target_link_libraries (cmnExPortability cisstCommon)

@@ -16,8 +16,6 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  include (${CISST_USE_FILE})
-
   # This project is designed to be built outside the Insight source tree.
   # Find ITK.
   find_package (ITK QUIET)

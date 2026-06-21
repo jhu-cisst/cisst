@@ -21,9 +21,6 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND_AS_REQUIRED)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   if (CISST_SVL_HAS_X11 OR WIN32)
     add_executable (svlExSimpleStream simplestream.cpp)
     set_property (TARGET svlExSimpleStream PROPERTY FOLDER "cisstStereoVision/examples")
