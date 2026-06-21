@@ -358,7 +358,7 @@ if (CISST_BUILD_TESTS)
       ExternalProject_Add (cisstCppUnit
                            PREFIX ${cisstCppUnit_PREFIX}
                            GIT_REPOSITORY    ${CISST_CPPUNIT_GIT_REPOSITORY}
-                           GIT_TAG           ${CISST_CPPUNUT_GIT_TAG}
+                           GIT_TAG           ${CISST_CPPUNIT_GIT_TAG}
                            CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                            INSTALL_COMMAND ""
@@ -370,6 +370,13 @@ if (CISST_BUILD_TESTS)
       set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
       set (CPPUNIT_LINK_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
       link_directories (${CPPUNIT_LINK_DIR})
+      if (NOT TARGET CppUnit::CppUnit)
+        add_library (CppUnit::CppUnit INTERFACE IMPORTED)
+        set_target_properties (CppUnit::CppUnit PROPERTIES
+                               INTERFACE_INCLUDE_DIRECTORIES "${CPPUNIT_INCLUDE_DIR}"
+                               INTERFACE_LINK_DIRECTORIES "${CPPUNIT_LINK_DIR}"
+                               INTERFACE_LINK_LIBRARIES "cppunit")
+      endif ()
       set (CPPUNIT_FOUND ON)
     endif (CISST_USE_EXTERNAL)
   endif (NOT CPPUNIT_FOUND)

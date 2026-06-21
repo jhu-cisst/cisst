@@ -26,6 +26,14 @@ if (CISST_USE_PKG_CONFIG)
     set (GRAPHVIZ_INCLUDE_DIRS ${GRAPHVIZ_INCLUDE_DIRS} PARENT_SCOPE)
     set (GRAPHVIZ_LIBRARY_DIRS ${GRAPHVIZ_LIBRARY_DIRS} PARENT_SCOPE)
     set (GRAPHVIZ_LIBRARIES ${GRAPHVIZ_LIBRARIES} PARENT_SCOPE)
+    if (NOT TARGET cisstGraphviz)
+      add_library (cisstGraphviz INTERFACE)
+      target_include_directories (cisstGraphviz INTERFACE ${GRAPHVIZ_INCLUDE_DIRS})
+      if (GRAPHVIZ_LIBRARY_DIRS)
+        target_link_directories (cisstGraphviz INTERFACE ${GRAPHVIZ_LIBRARY_DIRS})
+      endif ()
+      target_link_libraries (cisstGraphviz INTERFACE ${GRAPHVIZ_LIBRARIES})
+    endif ()
     set (CISST_HAS_GRAPHVIZ ON PARENT_SCOPE)
     set (CISST_HAS_GRAPHVIZ ON)
   else ()
@@ -195,7 +203,18 @@ if (CISST_HAS_QT)
     set (QTNODES_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstQtNodes/include")
     set (QTNODES_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstQtNodes/lib")
     set (QTNODES_LIBRARIES QtNodes)
-    
+    if (NOT TARGET cisstQtNodes)
+      add_library (cisstQtNodes INTERFACE)
+      add_dependencies (cisstQtNodes cisstQtNodesExternal)
+      target_include_directories (cisstQtNodes INTERFACE
+                                  $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
+                                  $<INSTALL_INTERFACE:include>)
+      target_link_directories (cisstQtNodes INTERFACE
+                               $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
+                               $<INSTALL_INTERFACE:lib>)
+      target_link_libraries (cisstQtNodes INTERFACE ${QTNODES_LIBRARIES})
+    endif ()
+
     set (QTNODES_INCLUDE_DIR ${QTNODES_INCLUDE_DIR} PARENT_SCOPE)
     set (QTNODES_LIBRARY_DIRS ${QTNODES_LIBRARY_DIRS} PARENT_SCOPE)
     set (QTNODES_LIBRARIES ${QTNODES_LIBRARIES} PARENT_SCOPE)
@@ -341,5 +360,15 @@ if (CISST_HAS_JSON)
   set (JSON_INCLUDE_DIR ${JSON_INCLUDE_DIR} PARENT_SCOPE)
   set (JSON_LIBRARY_DIRS ${JSON_LIBRARY_DIRS} PARENT_SCOPE)
   set (JSON_LIBRARIES ${JSON_LIBRARIES} PARENT_SCOPE)
+  if (NOT TARGET cisstJsonCpp)
+    add_library (cisstJsonCpp INTERFACE IMPORTED)
+    set_target_properties (cisstJsonCpp PROPERTIES
+                           INTERFACE_INCLUDE_DIRECTORIES "${JSON_INCLUDE_DIR}"
+                           INTERFACE_LINK_LIBRARIES "${JSON_LIBRARIES}")
+    if (JSON_LIBRARY_DIRS)
+      set_target_properties (cisstJsonCpp PROPERTIES
+                             INTERFACE_LINK_DIRECTORIES "${JSON_LIBRARY_DIRS}")
+    endif ()
+  endif ()
 
 endif (CISST_HAS_JSON)

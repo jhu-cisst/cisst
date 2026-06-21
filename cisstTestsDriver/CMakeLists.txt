@@ -11,8 +11,6 @@
 
 project (cisstTestsDriver)
 
-include_directories (${CPPUNIT_INCLUDE_DIR})
-
 # Force static link for this library
 set (IS_SHARED STATIC)
 
@@ -23,11 +21,14 @@ cisst_add_library (LIBRARY cisstTestsDriver
 
 set_property (TARGET cisstTestsDriver PROPERTY FOLDER "cisstCommon/tests")
 
-target_link_libraries (cisstTestsDriver
-                       optimized ${CPPUNIT_LIBRARIES}
-                       debug ${CPPUNIT_DEBUG_LIBRARIES})
-
-target_include_directories (cisstTestsDriver PUBLIC "$<BUILD_INTERFACE:${CPPUNIT_INCLUDE_DIR}>")
+if (TARGET CppUnit::CppUnit)
+  target_link_libraries (cisstTestsDriver CppUnit::CppUnit)
+else ()
+  target_link_libraries (cisstTestsDriver
+                         optimized ${CPPUNIT_LIBRARIES}
+                         debug ${CPPUNIT_DEBUG_LIBRARIES})
+  target_include_directories (cisstTestsDriver PUBLIC "$<BUILD_INTERFACE:${CPPUNIT_INCLUDE_DIR}>")
+endif ()
 
 # add dependency to external project if needed
 if (TARGET cisstCppUnit)

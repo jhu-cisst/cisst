@@ -74,6 +74,18 @@ if (CPPUNIT_INCLUDE_DIR)
     set (CPPUNIT_FOUND ON)
     set (CPPUNIT_LIBRARIES ${CPPUNIT_LIBRARY} ${CMAKE_DL_LIBS})
     set (CPPUNIT_DEBUG_LIBRARIES ${CPPUNIT_DEBUG_LIBRARY} ${CMAKE_DL_LIBS})
+    if (NOT TARGET CppUnit::CppUnit)
+      add_library (CppUnit::CppUnit UNKNOWN IMPORTED)
+      set_target_properties (CppUnit::CppUnit PROPERTIES
+                             INTERFACE_INCLUDE_DIRECTORIES "${CPPUNIT_INCLUDE_DIR}"
+                             IMPORTED_LOCATION "${CPPUNIT_LIBRARY}"
+                             IMPORTED_LOCATION_RELEASE "${CPPUNIT_LIBRARY}"
+                             IMPORTED_LOCATION_DEBUG "${CPPUNIT_DEBUG_LIBRARY}")
+      if (CMAKE_DL_LIBS)
+        set_property (TARGET CppUnit::CppUnit APPEND PROPERTY
+                      INTERFACE_LINK_LIBRARIES ${CMAKE_DL_LIBS})
+      endif ()
+    endif ()
     mark_as_advanced (CPPUNIT_LIBRARIES CPPUNIT_DEBUG_LIBRARIES
                       CPPUNIT_LIBRARY   CPPUNIT_DEBUG_LIBRARY
                       CPPUNIT_FOUND CPPUNIT_INCLUDE_DIR)

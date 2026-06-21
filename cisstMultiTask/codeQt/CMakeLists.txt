@@ -87,22 +87,30 @@ target_link_libraries (cisstMultiTaskQt ${CISST_QT_LIBRARIES})
 # Ensure the QtNodes ExternalProject is fully built before cisstMultiTaskQt
 if (CISST_HAS_QTNODES)
   target_compile_definitions (cisstMultiTaskQt PUBLIC NODE_EDITOR_SHARED)
-  target_include_directories (cisstMultiTaskQt PUBLIC
-    $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include>)
-  if (GRAPHVIZ_INCLUDE_DIRS)
-    target_include_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_INCLUDE_DIRS})
+  if (TARGET cisstQtNodes)
+    set_property (TARGET cisstMultiTaskQt APPEND PROPERTY
+                  LINK_LIBRARIES cisstQtNodes)
+  else ()
+    target_include_directories (cisstMultiTaskQt PUBLIC
+      $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
+      $<INSTALL_INTERFACE:include>)
+    if (QTNODES_LIBRARY_DIRS)
+      target_link_directories (cisstMultiTaskQt PUBLIC
+        $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
+        $<INSTALL_INTERFACE:lib>)
+    endif ()
+    target_link_libraries (cisstMultiTaskQt ${QTNODES_LIBRARIES})
   endif ()
-  if (QTNODES_LIBRARY_DIRS)
-    target_link_directories (cisstMultiTaskQt PUBLIC
-      $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
-      $<INSTALL_INTERFACE:lib>)
-  endif ()
-  if (GRAPHVIZ_LIBRARY_DIRS)
-    target_link_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_LIBRARY_DIRS})
-  endif ()
-  target_link_libraries (cisstMultiTaskQt ${QTNODES_LIBRARIES})
-  if (GRAPHVIZ_LIBRARIES)
+  if (TARGET cisstGraphviz)
+    set_property (TARGET cisstMultiTaskQt APPEND PROPERTY
+                  LINK_LIBRARIES cisstGraphviz)
+  elseif (GRAPHVIZ_LIBRARIES)
+    if (GRAPHVIZ_INCLUDE_DIRS)
+      target_include_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_INCLUDE_DIRS})
+    endif ()
+    if (GRAPHVIZ_LIBRARY_DIRS)
+      target_link_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_LIBRARY_DIRS})
+    endif ()
     set_property (TARGET cisstMultiTaskQt APPEND PROPERTY
                   LINK_LIBRARIES ${GRAPHVIZ_LIBRARIES})
   endif ()

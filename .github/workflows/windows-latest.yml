@@ -58,11 +58,7 @@ jobs:
           "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" `
           "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" `
           -DVCPKG_MANIFEST_INSTALL=OFF `
-          -DCISST_HAS_CISSTNETLIB=OFF `
-          -DCISSTNETLIB_USE_LOCAL_INSTALL=OFF `
-          -DCISST_cisstMesh=OFF `
-          -DCISST_cisstRobot=OFF `
-          -C "${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake"
+          -C "${{github.workspace}}/.github/workflows/cmake-windows-smoke-cache.cmake"
 
     - name: Download cisstNetlib
       shell: bash
