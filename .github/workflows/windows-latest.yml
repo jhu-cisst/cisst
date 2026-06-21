@@ -60,6 +60,8 @@ jobs:
           -DVCPKG_MANIFEST_INSTALL=OFF `
           -DCISST_HAS_CISSTNETLIB=OFF `
           -DCISSTNETLIB_USE_LOCAL_INSTALL=OFF `
+          -DCISST_cisstMesh=OFF `
+          -DCISST_cisstRobot=OFF `
           -C "${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake"
 
     - name: Download cisstNetlib
