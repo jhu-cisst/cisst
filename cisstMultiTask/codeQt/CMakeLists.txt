@@ -101,8 +101,10 @@ if (CISST_HAS_QTNODES)
   if (GRAPHVIZ_LIBRARY_DIRS)
     target_link_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_LIBRARY_DIRS})
   endif ()
-  target_link_libraries (cisstMultiTaskQt
-                         ${QTNODES_LIBRARIES}
-                         ${GRAPHVIZ_LIBRARIES})
+  target_link_libraries (cisstMultiTaskQt ${QTNODES_LIBRARIES})
+  if (GRAPHVIZ_LIBRARIES)
+    set_property (TARGET cisstMultiTaskQt APPEND PROPERTY
+                  LINK_LIBRARIES ${GRAPHVIZ_LIBRARIES})
+  endif ()
   add_dependencies (cisstMultiTaskQt cisstQtNodesExternal)
 endif (CISST_HAS_QTNODES)
