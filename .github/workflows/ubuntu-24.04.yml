@@ -149,5 +149,45 @@ jobs:
         cisstOSAbstractionTests -r
         cisstParameterTypesTests -r
 
+    - name: Create standalone example project
+      shell: bash
+      run: |
+        mkdir -p ${{github.workspace}}/test_export_project
+        echo -e "cmake_minimum_required(VERSION 3.16)\nproject(test_export_qt_example)\nadd_subdirectory(${{github.workspace}}/cisstMultiTask/examples/CommandsAndEvents/Qt test_qt_example)" > ${{github.workspace}}/test_export_project/CMakeLists.txt
+
+    - name: Test exported targets against build tree
+      shell: bash
+      run: |
+        mkdir -p ${{github.workspace}}/test_export_build_tree_build
+        cd ${{github.workspace}}/test_export_build_tree_build
+        cmake ${{github.workspace}}/test_export_project \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -Dcisst_DIR=${{github.workspace}}/build \
+          -DcisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib
+        cmake --build . --config Release --parallel $(nproc)
+
+    - name: Install cisst
+      working-directory: build
+      shell: bash
+      run: cmake --install . --prefix ${{github.workspace}}/cisst-install
+
+    - name: Test exported targets against install tree
+      shell: bash
+      run: |
+        CISST_DIR_PATH=$(find ${{github.workspace}}/cisst-install -name "cisst-config.cmake" -exec dirname {} \;)
+        echo "Found cisst cmake directory: $CISST_DIR_PATH"
+        mkdir -p ${{github.workspace}}/test_export_install_tree_build
+        cd ${{github.workspace}}/test_export_install_tree_build
+        cmake ${{github.workspace}}/test_export_project \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -Dcisst_DIR="$CISST_DIR_PATH" \
+          -DcisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib
+        cmake --build . --config Release --parallel $(nproc)
+
     - name: ccache stats (after)
       run: ccache -s
+

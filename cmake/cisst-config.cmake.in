@@ -217,7 +217,7 @@ unset (_cisst_common_xml_index)
 
 find_file (_cisstTargets_file
            cisst-targets.cmake
-           PATHS ${CISST_CMAKE_DIRS}
+           PATHS ${CISST_CMAKE_DIRS} ${CISST_BINARY_DIR}
            NO_DEFAULT_PATH)
 if (EXISTS ${_cisstTargets_file})
   include (${_cisstTargets_file})
@@ -241,6 +241,13 @@ foreach (lib ${CISST_LIBRARIES})
   set (BUILD_LIBS_${lib} ON) # Backward compatibility
   set (CISST_${lib} ON)
 endforeach (lib ${CISST_LIBRARIES})
+
+# Create alias targets for backward compatibility (non-namespaced names)
+foreach (lib ${CISST_LIBRARIES})
+  if (TARGET cisst::${lib} AND NOT TARGET ${lib})
+    add_library (${lib} ALIAS cisst::${lib})
+  endif ()
+endforeach ()
 
 # Where to install
 set (CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
