@@ -67,7 +67,7 @@ jobs:
     - name: Install dependencies via vcpkg
       working-directory: ${{github.workspace}}/build
       run: |
-        C:\vcpkg\vcpkg install --triplet x64-windows --overlay-triplets="${{github.workspace}}/.github/workflows/vcpkg-triplets" --manifest-root="${{github.workspace}}"
+        C:\vcpkg\vcpkg install --triplet x64-windows --overlay-triplets="${{github.workspace}}/.github/workflows/vcpkg-triplets" --x-install-root="${{github.workspace}}/build/vcpkg_installed"
 
     - name: Configure CMake
       working-directory: ${{github.workspace}}/build
