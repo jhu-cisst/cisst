@@ -34,6 +34,8 @@ find_path (CPPUNIT_INCLUDE_DIR
                /usr/include
                # MacPorts
                /opt/local/include
+               # Homebrew
+               /opt/homebrew/include
                # Windows, many options
                C:/cppunit-1.12.1/include
                C:/cppunit-1.12.0/include
@@ -54,11 +56,13 @@ else (WIN32)
   find_library (CPPUNIT_LIBRARY cppunit
                 ${CPPUNIT_INCLUDE_DIR}/../lib
                 /usr/local/lib
-                /usr/lib)
+                /usr/lib
+                /opt/homebrew/lib)
   find_library (CPPUNIT_DEBUG_LIBRARY cppunit
                 ${CPPUNIT_INCLUDE_DIR}/../lib
                 /usr/local/lib
-                /usr/lib)
+                /usr/lib
+                /opt/homebrew/lib)
 endif (WIN32)
 
 set (CPPUNIT_FOUND OFF)

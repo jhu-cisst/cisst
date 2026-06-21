@@ -27,6 +27,8 @@ target_link_libraries (cisstTestsDriver
                        optimized ${CPPUNIT_LIBRARIES}
                        debug ${CPPUNIT_DEBUG_LIBRARIES})
 
+target_include_directories (cisstTestsDriver PUBLIC ${CPPUNIT_INCLUDE_DIR})
+
 # add dependency to external project if needed
 if (TARGET cisstCppUnit)
    add_dependencies (cisstTestsDriver cisstCppUnit)
