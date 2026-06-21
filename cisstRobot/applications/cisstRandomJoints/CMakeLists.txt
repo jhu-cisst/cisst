@@ -21,12 +21,12 @@ set (REQUIRED_CISST_LIBRARIES
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND)
 
   add_executable (cisstRandomJoints RandomJoints.cpp)
   set_property (TARGET cisstRandomJoints PROPERTY FOLDER "cisstRobot/applications")
   target_link_libraries (cisstRandomJoints ${REQUIRED_CISST_LIBRARIES})
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

@@ -20,7 +20,7 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND)
 
   # name the main executable and specifies with source files to use
   add_executable (cisstIREComponent main.cpp)
@@ -33,6 +33,6 @@ if (cisst_FOUND_AS_REQUIRED)
            COMPONENT cisstMultiTask
            RUNTIME DESTINATION bin)
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   cisst_information_message_missing_libraries (${REQUIRED_CISST_LIBRARIES})
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

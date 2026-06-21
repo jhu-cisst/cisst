@@ -19,7 +19,7 @@ set (REQUIRED_CISST_LIBRARIES
 
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND)
 
   add_executable (robExManipulator example.cpp)
   set_property (TARGET robExManipulator PROPERTY FOLDER "cisstRobot/examples")
@@ -41,6 +41,6 @@ if (cisst_FOUND_AS_REQUIRED)
   # set_property (TARGET robExReflexxes PROPERTY FOLDER "cisstRobot/examples")
   # target_link_libraries (robExReflexxes ${REQUIRED_CISST_LIBRARIES})
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires " ${REQUIRED_CISST_LIBRARIES})
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

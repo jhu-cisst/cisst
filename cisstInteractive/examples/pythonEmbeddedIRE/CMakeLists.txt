@@ -16,7 +16,7 @@ project (pythonEmbeddedIRE)
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstInteractive)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND_AS_REQUIRED AND CISST_HAS_SWIG_PYTHON)
+if (cisst_FOUND AND CISST_HAS_SWIG_PYTHON)
 
   # Create SineGenerator as a shared library
   add_library (SineGenerator SHARED SineGenerator.cpp SineGenerator.h)

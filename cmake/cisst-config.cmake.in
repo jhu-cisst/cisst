@@ -64,6 +64,9 @@ endif ("${CISST_BINARY_DIR}" STREQUAL "")
 # set CISST_LIBRARY_DIR
 set (CISST_LIBRARY_DIR "${CISST_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
 
+# set CISST_SHARE_DIR
+set (CISST_SHARE_DIR "${CISST_BINARY_DIR}/${CISST_SHARE_INSTALL_SUFFIX}")
+
 # locate cisst use file
 find_file (CISST_USE_FILE
            NAMES Usecisst.cmake
@@ -253,7 +256,6 @@ endforeach ()
 set (CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
 
 # Check against componenents required
-set (cisst_FOUND_AS_REQUIRED 1)
 if (cisst_FIND_COMPONENTS)
   # First test that all libraries should have been compiled
   foreach (required ${cisst_FIND_COMPONENTS})
@@ -263,7 +265,7 @@ if (cisst_FIND_COMPONENTS)
       if (NOT cisst_FIND_QUIETLY)
         message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled")
       endif (NOT cisst_FIND_QUIETLY)
-      set (cisst_FOUND_AS_REQUIRED 0)
+      set (cisst_FOUND FALSE)
       set (cisst_${required}_FOUND 0)
     else (${FOUND_IT} EQUAL -1)
       # if found, add to list of required libraries and remove duplicates (for multiple find_package (cisst))

@@ -13,12 +13,12 @@
 
 find_package (cisst COMPONENTS cisstCommon)
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND)
   add_executable (cmnExGetChar
                   getChar.cpp)
   set_property (TARGET cmnExGetChar PROPERTY FOLDER "cisstCommon/examples")
 
   target_link_libraries (cmnExGetChar cisstCommon)
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

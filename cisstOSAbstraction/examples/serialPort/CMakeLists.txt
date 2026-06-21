@@ -14,7 +14,7 @@
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND)
 
   add_executable (osaExSerialPortServer server.cpp)
   set_property (TARGET osaExSerialPortServer PROPERTY FOLDER "cisstOSAbstraction/examples")
@@ -24,6 +24,6 @@ if (cisst_FOUND_AS_REQUIRED)
   set_property (TARGET osaExSerialPortClient PROPERTY FOLDER "cisstOSAbstraction/examples")
   target_link_libraries (osaExSerialPortClient ${REQUIRED_CISST_LIBRARIES})
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

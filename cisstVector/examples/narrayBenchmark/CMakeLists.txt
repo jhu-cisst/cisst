@@ -14,7 +14,7 @@
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND)
 
   # This project is designed to be built outside the Insight source tree.
   # Find ITK.
@@ -50,6 +50,6 @@ if (cisst_FOUND_AS_REQUIRED)
   set_property (TARGET vctExOptimizedEngines PROPERTY FOLDER "cisstVector/examples")
   target_link_libraries (vctExOptimizedEngines ${REQUIRED_CISST_LIBRARIES})
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

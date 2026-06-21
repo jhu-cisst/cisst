@@ -17,7 +17,7 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstVectorQt)
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
+if (cisst_FOUND)
 
   include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
@@ -33,6 +33,6 @@ if (cisst_FOUND_AS_REQUIRED)
   # link against cisst libraries (and dependencies)
   target_link_libraries (vctExQtWidgets ${REQUIRED_CISST_LIBRARIES})
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)
