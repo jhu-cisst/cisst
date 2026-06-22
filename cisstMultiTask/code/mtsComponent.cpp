@@ -933,14 +933,6 @@ bool mtsComponent::AddInterfaceInternal(const bool useManagerComponentServices)
         return false;
     }
     provided->AddTag("System");
-    provided->AddCommandVoid(&mtsComponent::Start,
-                             this, mtsManagerComponentBase::CommandNames::ComponentStart, MTS_COMMAND_NOT_QUEUED);
-    provided->AddCommandVoid(&mtsComponent::Suspend,
-                             this, mtsManagerComponentBase::CommandNames::ComponentStop, MTS_COMMAND_NOT_QUEUED);
-    provided->AddCommandVoid(&mtsComponent::Start,
-                             this, mtsManagerComponentBase::CommandNames::ComponentResume, MTS_COMMAND_NOT_QUEUED);
-    provided->AddCommandRead(&mtsComponent::GetState,
-                             this, mtsManagerComponentBase::CommandNames::ComponentGetState);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_GetEndUserInterface, this,
                                     mtsManagerComponentBase::CommandNames::GetEndUserInterface);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_AddObserverList, this,
@@ -949,8 +941,6 @@ bool mtsComponent::AddInterfaceInternal(const bool useManagerComponentServices)
                                     mtsManagerComponentBase::CommandNames::RemoveEndUserInterface);
     provided->AddCommandWriteReturn(&mtsComponent::InterfaceInternalCommands_RemoveObserverList, this,
                                     mtsManagerComponentBase::CommandNames::RemoveObserverList);
-    provided->AddCommandWrite(&mtsComponent::InterfaceInternalCommands_ComponentStartOther, this,
-                              mtsManagerComponentBase::CommandNames::ComponentStart);
     provided->AddEventWrite(EventGeneratorChangeState, mtsManagerComponentBase::EventNames::ChangeState,
                             mtsComponentStateChange());
 
@@ -995,27 +985,6 @@ void mtsComponent::InterfaceInternalCommands_RemoveObserverList(const mtsEventHa
 {
     CMN_ASSERT(argin.Provided);
     argin.Provided->RemoveObserverList(argin, argout);
-}
-
-void mtsComponent::InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg)
-{
-    // Call to ComponentGet could be eliminated by adding component pointer to mtsComponentStatusControl.
-    // At least this should not deadlock because ComponentGet is a qualified read (non-blocking).
-    mtsComponent * component = GetManagerComponentServices()->ComponentGet(arg.ComponentName);
-    if (component) {
-        if (component->GetState() == mtsComponentState::CONSTRUCTED) {
-            // Start an internal thread (if needed)
-            component->Create();
-            // Wait for internal thread to be created
-            osaSleep(arg.DelayInSecond);
-        }
-
-        // Start the component
-        component->Start();
-    }
-    else
-        CMN_LOG_CLASS_RUN_ERROR << GetName() << ": could not find component " << arg.ComponentName
-                                << " to start" << std::endl;
 }
 
 bool mtsComponent::SetReplayMode(void) {

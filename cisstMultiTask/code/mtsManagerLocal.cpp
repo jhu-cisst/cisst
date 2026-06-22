@@ -116,8 +116,6 @@ void mtsManagerLocal::Initialize(void)
 {
     __os_init();
 
-    CurrentMainTask = 0;
-
     TimeServer.SetTimeOrigin();
     TimeServerOriginSet = true;
 
@@ -1142,46 +1140,6 @@ mtsInterfaceRequiredDescription mtsManagerLocal::GetInterfaceRequiredDescription
 const osaTimeServer & mtsManagerLocal::GetTimeServer(void) const
 {
     return TimeServer;
-}
-
-void mtsManagerLocal::PushCurrentMainTask(mtsTaskContinuous *cur)
-{
-    if (!cur) {
-        CMN_LOG_CLASS_RUN_ERROR << "PushCurrentMainTask: null parameter" << std::endl;
-        return;
-    }
-    if (cur == CurrentMainTask) {
-        CMN_LOG_CLASS_RUN_WARNING << "PushCurrentMainTask: duplicate call to push " << cur->GetName() << std::endl;
-        return;
-    }
-    if (CurrentMainTask)
-         CMN_LOG_CLASS_RUN_WARNING << "CurrentMainTask changing from " << CurrentMainTask->GetName()
-                                      << " to " << cur->GetName() << std::endl;
-    else
-         CMN_LOG_CLASS_RUN_VERBOSE << "Setting CurrentMainTask to " << cur->GetName() << std::endl;
-    CurrentMainTask = cur;
-    MainTaskNames.push(CurrentMainTask->GetName());
-}
-
-mtsTaskContinuous *mtsManagerLocal::PopCurrentMainTask(void)
-{
-    mtsTaskContinuous *previousMainTask = 0;
-    while (!previousMainTask && !MainTaskNames.empty()) {
-        previousMainTask = dynamic_cast<mtsTaskContinuous *>(GetComponent(MainTaskNames.top()));
-        if (!previousMainTask) {
-            CMN_LOG_CLASS_RUN_WARNING << "PopCurrentMainTask: could not find " << MainTaskNames.top() << std::endl;
-        }
-        MainTaskNames.pop();
-    }
-    if (previousMainTask) {
-        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, so main task reverts to "
-                                  << previousMainTask->GetName() << std::endl;
-    }
-    else {
-        CMN_LOG_CLASS_RUN_VERBOSE << CurrentMainTask->GetName() << " is exiting, no main task remaining" << std::endl;
-    }
-    CurrentMainTask = previousMainTask;
-    return CurrentMainTask;
 }
 
 void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfCommands,

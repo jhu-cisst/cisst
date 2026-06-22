@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstCommon/cmnUnits.h>
 
 
@@ -55,10 +54,6 @@ void * mtsTaskContinuous::RunInternal(void *data)
     }
 
     CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: ending task " << this->GetName() << std::endl;
-    mtsManagerLocal *LCM = mtsManagerLocal::GetInstance();
-    if (this == LCM->GetCurrentMainTask())
-        LCM->PopCurrentMainTask();
-
     CleanupInternal();
     return this->ReturnValue;
 }
@@ -166,9 +161,6 @@ void mtsTaskContinuous::Start(void)
                 CMN_LOG_CLASS_INIT_ERROR << "Start: cannot start task " << this->GetName() << " (wrong thread)" << std::endl;
                 return;
             }
-            mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-            if (Thread.GetId() == LCM->GetMainThreadId())
-                LCM->PushCurrentMainTask(this);
             CaptureThread = false;
             CMN_LOG_CLASS_INIT_VERBOSE << "Start: started task " << this->GetName() << " with current thread" << std::endl;
             RunInternal(ThreadStartData);

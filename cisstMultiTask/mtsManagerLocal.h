@@ -65,12 +65,6 @@ private:
         we will support multiple threads. */
     osaThreadId MainThreadId;
 
-    /*! List of main tasks (in chronological order) */
-    std::stack<std::string> MainTaskNames;
-
-    /*! Pointer to task that currently has main thread (set when that task is started) */
-    mtsTaskContinuous * CurrentMainTask;
-
     /*! Process name (for a multi-process system).
      */
     std::string ProcessName;
@@ -391,14 +385,6 @@ public:
     /*! Return main thread id. */
     osaThreadId GetMainThreadId(void) const { return MainThreadId; }
 
-    /*! Set active task that has main thread (called by mtsTaskContinuous::Start) */
-    void PushCurrentMainTask(mtsTaskContinuous *cur);
-
-    /*! Restore previous active task that has main thread (called when task is exiting) */
-    mtsTaskContinuous CISST_DEPRECATED *PopCurrentMainTask();
-
-    /*! Get pointer to active task that has main thread (if none, returns 0) */
-    mtsTaskContinuous CISST_DEPRECATED *GetCurrentMainTask(void) const { return CurrentMainTask; }
     //---------------------------------------------------------------------------------------------
 
     /*! Get names of all commands in a provided interface */

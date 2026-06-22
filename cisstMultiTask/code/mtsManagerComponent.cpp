@@ -373,37 +373,19 @@ void mtsManagerComponent::ComponentStart(const mtsComponentStatusControl & arg)
         CMN_LOG_CLASS_RUN_WARNING << "ComponentStart for " << arg.ComponentName << " ignored." << std::endl;
         return;
     }
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    if (LCM->GetCurrentMainTask() && (LCM->GetCurrentMainTask() != this)) {
-        // If there is a main task, we call Start from there. This is really only necessary if we need
-        // to start another task that captures the main thread.
-        std::string mainTaskName = LCM->GetCurrentMainTask()->GetName();
-        CMN_LOG_CLASS_RUN_VERBOSE << "ComponentStart: planning to call main task " << mainTaskName
-                                  << " to start component " << arg.ComponentName << std::endl;
-        InterfaceComponentFunctionType *functionSetMain = InterfaceComponentFunctionMap.GetItem(mainTaskName);
-        if (functionSetMain) {
-            if (functionSetMain->ComponentStartOther.IsValid()) {
-                functionSetMain->ComponentStartOther(arg);
-            }
-            else {
-                CMN_LOG_CLASS_RUN_ERROR << "ComponentStart: failed to find valid function for main task "
-                                        << mainTaskName << ", trying to start component " << arg.ComponentName << std::endl;
-            }
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentStart: starting component " << arg.ComponentName << " from MCS" << std::endl;
+    mtsComponent * component = GetComponent(arg.ComponentName);
+    if (component) {
+        if (component->GetState() == mtsComponentState::CONSTRUCTED) {
+            // Start an internal thread (if needed)
+            component->Create();
+            // Wait for internal thread to be created
+            osaSleep(arg.DelayInSecond);
         }
-        else {
-            CMN_LOG_CLASS_RUN_ERROR << "ComponentStart: failed to find function set for main task "
-                                    << mainTaskName << std::endl;
-        }
+        component->Start();
     }
     else {
-        CMN_LOG_CLASS_RUN_VERBOSE << "ComponentStart: starting component " << arg.ComponentName << " from MCS" << std::endl;
-        mtsComponent * component = GetComponent(arg.ComponentName);
-        if (component) {
-            component->Start();
-        }
-        else {
-            CMN_LOG_CLASS_RUN_ERROR << "ComponentStart: could find component \"" << arg.ComponentName << "\"" << std::endl;
-        }
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentStart: could find component \"" << arg.ComponentName << "\"" << std::endl;
     }
 }
 
@@ -996,12 +978,6 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
                 CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: RemoveObserverList invalid for " << serverComponentName << std::endl;
                 return false;
             }
-#if 0
-            if (!serverFunctionSet->ComponentStop.IsValid()) {
-                CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: ComponentStop invalid for " << serverComponentName << std::endl;
-                return false;
-            }
-#endif
             mtsEventHandlerList eventList(serverInterfaceProvided);
             clientInterfaceRequired->GetEventList(eventList);
             executionResult = serverFunctionSet->RemoveObserverList(eventList, eventList);
@@ -1111,12 +1087,6 @@ bool mtsManagerComponent::AddNewClientComponent(const std::string & clientCompon
         CMN_LOG_CLASS_INIT_ERROR << "AddNewClientComponent: failed to create \"Component\" required interface: " << interfaceName << std::endl;
         return false;
     }
-    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStop,
-                          newFunctionSet->ComponentStop);
-    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentResume,
-                          newFunctionSet->ComponentResume);
-    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGetState,
-                          newFunctionSet->ComponentGetState);
     required->AddFunction(mtsManagerComponentBase::CommandNames::GetEndUserInterface,
                           newFunctionSet->GetEndUserInterface);
     required->AddFunction(mtsManagerComponentBase::CommandNames::AddObserverList,
@@ -1125,8 +1095,6 @@ bool mtsManagerComponent::AddNewClientComponent(const std::string & clientCompon
                           newFunctionSet->RemoveEndUserInterface);
     required->AddFunction(mtsManagerComponentBase::CommandNames::RemoveObserverList,
                           newFunctionSet->RemoveObserverList);
-    required->AddFunction(mtsManagerComponentBase::CommandNames::ComponentStart,
-                          newFunctionSet->ComponentStartOther);
     required->AddEventHandlerWrite(&mtsManagerComponent::HandleChangeStateFromComponent, this,
                                    mtsManagerComponentBase::EventNames::ChangeState);
 

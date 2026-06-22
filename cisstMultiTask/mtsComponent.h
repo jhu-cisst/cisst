@@ -564,7 +564,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg & argout);
     void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
-    void InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg);
 
  public:
     /*! Send a human readable description of the component. */
