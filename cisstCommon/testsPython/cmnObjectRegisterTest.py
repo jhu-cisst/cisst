@@ -48,7 +48,7 @@ class ObjectRegisterTest(unittest.TestCase):
             try:
                 it = self.objectRegister.__iter__()
                 while True:
-                    key, value = it.next()
+                    key, value = next(it)
                     if key == "path1":
                         path1found = True
                     if key == "path2":

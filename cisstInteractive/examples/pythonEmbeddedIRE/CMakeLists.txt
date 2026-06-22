@@ -9,18 +9,17 @@
 #
 # --- end cisst license ---
 
-
 project (pythonEmbeddedIRE)
 
-set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstPython)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstInteractive)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND)
+if (cisst_FOUND AND CISST_HAS_SWIG_PYTHON)
 
   # Create SineGenerator as a shared library
   add_library (SineGenerator SHARED SineGenerator.cpp SineGenerator.h)
   set_property (TARGET SineGenerator PROPERTY FOLDER "cisstInteractive/examples")
-  target_link_libraries (SineGenerator ${cisst_LIBRARIES})
+  target_link_libraries (SineGenerator ${REQUIRED_CISST_LIBRARIES})
 
   # If OS Abstraction is compiled, offer a choice
   # if (CISST_cisstOSAbstraction)
@@ -42,18 +41,24 @@ if (cisst_FOUND)
 
   add_executable (pythonEmbeddedIRE pythonEmbeddedIRE.cpp)
   set_property (TARGET pythonEmbeddedIRE PROPERTY FOLDER "cisstInteractive/examples")
+  target_include_directories (pythonEmbeddedIRE PRIVATE ${PYTHON_ALL_INCLUDE_DIRS})
 
   # if (EXAMPLE_IRE_USE_OSATHREAD)
   add_definitions (-DCISST_OSATHREAD)
-  target_link_libraries (pythonEmbeddedIRE cisst::cisstCommon cisst::cisstInteractive cisst::cisstOSAbstraction)
+  target_link_libraries (pythonEmbeddedIRE
+    cisstCommon
+    cisstInteractive
+    cisstOSAbstraction
+    SineGenerator
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${PYTHON_ALL_LIBRARIES}
+    util)
   #else (EXAMPLE_IRE_USE_OSATHREAD)
-  #target_link_libraries (pythonEmbeddedIRE cisst::cisstCommon cisst::cisstInteractive)
+  #target_link_libraries (pythonEmbeddedIRE cisstCommon cisstInteractive)
   #endif (EXAMPLE_IRE_USE_OSATHREAD)
 
-  target_link_libraries (pythonEmbeddedIRE SineGenerator ${CMAKE_THREAD_LIBS_INIT})
   if (UNIX)
     if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      target_link_libraries (pythonEmbeddedIRE util)
     endif (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   endif (UNIX)
 
@@ -71,6 +76,6 @@ if (cisst_FOUND)
                            ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/pythonEmbeddedIRE.py
                       COMMENT "Copy of pythonEmbeddedIRE.py to the library directory")
 
-else (cisst_FOUND)
-  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND)
+else ()
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES} and cisst Python/SWIG support")
+endif ()

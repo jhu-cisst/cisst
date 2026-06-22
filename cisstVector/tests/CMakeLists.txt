@@ -145,7 +145,10 @@ endif (CISST_HAS_JSON)
 # Add executable for C++ tests
 add_executable (cisstVectorTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstVectorTests PROPERTY FOLDER "cisstVector/tests")
-target_link_libraries (cisstVectorTests cisstCommon cisstVector cisstTestsDriver)
+target_link_libraries (cisstVectorTests
+  cisstTestsDriver
+  cisstCommon
+  cisstVector)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstVectorTests ITERATIONS 10 INSTANCES 2)

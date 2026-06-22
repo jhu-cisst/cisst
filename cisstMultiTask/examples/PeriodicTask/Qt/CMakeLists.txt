@@ -16,12 +16,10 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstVectorQt
                               cisstOSAbstraction
                               cisstMultiTask
-                              cisstMultiTaskQt
-                              cisstQt)
-
-find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
+                              cisstMultiTaskQt)
 
 set (CMAKE_AUTOMOC ON)
+
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 add_library (mtsExPeriodicTaskGuiQt ${IS_SHARED}
@@ -37,17 +35,15 @@ add_executable (mtsExPeriodicTaskQt main.cpp)
 set_property (TARGET mtsExPeriodicTaskQt PROPERTY FOLDER "cisstMultiTask/examples")
 
 target_link_libraries (mtsExPeriodicTaskQt
-                       mtsExPeriodicTaskGuiQt
-                       mtsExPeriodicTaskComponents
-                       ${cisst_LIBRARIES})
-
-target_link_libraries (mtsExPeriodicTaskGuiQt
-                       ${cisst_LIBRARIES})
+  mtsExPeriodicTaskGuiQt
+  mtsExPeriodicTaskComponents
+  ${REQUIRED_CISST_LIBRARIES})
+target_link_libraries (mtsExPeriodicTaskGuiQt ${REQUIRED_CISST_LIBRARIES})
 
 add_custom_target (mtsExPeriodicTaskQt_Scripts ALL
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
                            ${CMAKE_CURRENT_SOURCE_DIR}/mtsExPeriodicTaskQt.cisst
-                           ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/mtsExPeriodicTaskQt.cisst
+                           $<TARGET_FILE_DIR:mtsExPeriodicTaskQt>/mtsExPeriodicTaskQt.cisst
                    SOURCES mtsExPeriodicTaskQt.cisst
                    COMMENT "Copying cisst scripts to the binary directory")
 set_property (TARGET mtsExPeriodicTaskQt_Scripts PROPERTY FOLDER "cisstMultiTask/examples")

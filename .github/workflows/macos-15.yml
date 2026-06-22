@@ -12,6 +12,15 @@ jobs:
   build:
 
     runs-on: macos-15
+    strategy:
+      matrix:
+        include:
+          - qt_version: 5
+            qt_brew_package: qt@5
+            qt_prefix: /opt/homebrew/opt/qt@5
+          - qt_version: 6
+            qt_brew_package: qt
+            qt_prefix: /opt/homebrew/opt/qt
 
     steps:
     - uses: actions/checkout@v4
@@ -26,8 +35,11 @@ jobs:
           ${{ runner.os }}-brew-
 
     - name: Install dependencies
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: "1"
+        HOMEBREW_NO_INSTALL_CLEANUP: "1"
       run: |
-        brew install graphviz jsoncpp qt@5 pkg-config cppunit ccache
+        brew install graphviz jsoncpp ${{ matrix.qt_brew_package }} pkg-config cppunit ccache
         # Ensure homebrew bin is in path for subsequent steps
         echo "/opt/homebrew/bin" >> $GITHUB_PATH
 
@@ -39,19 +51,32 @@ jobs:
         ccache-command: ccache
 
     - name: Download cisstNetlib
+      shell: bash
+      run: |
+        git clone --depth 1 https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
+        echo "CISSTNETLIB_HASH=$(git -C ${{github.workspace}}/cisstNetlib-source rev-parse HEAD)" >> $GITHUB_ENV
+
+    - name: Cache cisstNetlib build
+      id: cache-cisstnetlib
+      uses: actions/cache@v4
+      with:
+        path: ${{github.workspace}}/cisstNetlib-install
+        key: ${{ runner.os }}-cisstnetlib-${{ env.CISSTNETLIB_HASH }}
+
+    - name: Build cisstNetlib
+      if: steps.cache-cisstnetlib.outputs.cache-hit != 'true'
       run: |
         cmake -E make_directory ${{github.workspace}}/cisstNetlib-build
-        git clone https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
-    - name: Build cisstNetlib
-      working-directory: ${{github.workspace}}/cisstNetlib-build
-      run: |
+        cd ${{github.workspace}}/cisstNetlib-build
         cmake ${{github.workspace}}/cisstNetlib-source \
+          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/cisstNetlib-install \
           -DcisstNetlib_LANGUAGE=C \
           -DCMAKE_OSX_ARCHITECTURES=arm64 \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        cmake --build . --config Release
-        sudo cmake --build . --target install
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
+        cmake --build . --target install
+
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
@@ -59,13 +84,14 @@ jobs:
       shell: bash
       working-directory: ${{github.workspace}}/build
       run: |
-        export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
         cmake ${{github.workspace}} \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCISST_QT_VERSION=${{ matrix.qt_version }} \
           -DCMAKE_OSX_ARCHITECTURES=arm64 \
-          -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5" \
+          -DCMAKE_PREFIX_PATH="${{ matrix.qt_prefix }};/opt/homebrew" \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib \
           -C ${{github.workspace}}/.github/workflows/cmake-macos-cache.cmake
 
     - name: Build
@@ -73,7 +99,7 @@ jobs:
       shell: bash
       run: |
         source cisstvars.sh
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
 
     - name: Configure CMake examples
       shell: bash
@@ -95,7 +121,40 @@ jobs:
       shell: bash
       run: |
         source cisstvars.sh
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
+
+    - name: Test exported targets against build tree
+      shell: bash
+      run: |
+        mkdir -p ${{github.workspace}}/test_export_build_tree_build
+        cd ${{github.workspace}}/test_export_build_tree_build
+        cmake ${{github.workspace}}/cisstMultiTask/examples/PeriodicTask \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -Dcisst_DIR=${{github.workspace}}/build \
+          -DcisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
+
+    - name: Install cisst
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --install . --prefix ${{github.workspace}}/cisst-install
+
+    - name: Test exported targets against install tree
+      shell: bash
+      run: |
+        CISST_DIR_PATH=$(find ${{github.workspace}}/cisst-install -name "cisst-config.cmake" -exec dirname {} \;)
+        echo "Found cisst cmake directory: $CISST_DIR_PATH"
+        mkdir -p ${{github.workspace}}/test_export_install_tree_build
+        cd ${{github.workspace}}/test_export_install_tree_build
+        cmake ${{github.workspace}}/cisstMultiTask/examples/PeriodicTask \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -Dcisst_DIR="$CISST_DIR_PATH" \
+          -DcisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
 
     - name: Test
       working-directory: ${{github.workspace}}/build

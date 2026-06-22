@@ -67,7 +67,8 @@ if (VTK_FOUND)
 
     if (VTK_USE_RENDERING)
         include (${VTK_USE_FILE})
-
+        set (VTK_LIBRARY_USED vtkRendering vtkHybrid)
+        set (VTK_PACKAGE_NAME VTK)
         message (STATUS "VTK found - Switch to advanced view for details")
 
     else (VTK_USE_RENDERING)
@@ -86,11 +87,11 @@ cisst_add_library (LIBRARY cisst3DUserInterface
                    HEADER_FILES ${HEADER_FILES}
                    )
 
-if (TARGET cisst3DUserInterface AND VTK_FOUND AND VTK_USE_RENDERING)
-  target_include_directories (cisst3DUserInterface PUBLIC ${VTK_INCLUDE_DIRS})
-  target_link_directories    (cisst3DUserInterface PUBLIC ${VTK_LIBRARY_DIRS})
-  target_link_libraries      (cisst3DUserInterface PUBLIC vtkRendering vtkHybrid)
+target_include_directories (cisst3DUserInterface PUBLIC ${VTK_INCLUDE_DIRS})
+if (VTK_LIBRARY_DIRS)
+  target_link_directories (cisst3DUserInterface PUBLIC ${VTK_LIBRARY_DIRS})
 endif ()
+target_link_libraries (cisst3DUserInterface ${VTK_LIBRARY_USED})
 
 # find icons
 set (CISST_UI3_ICONS_DIR "${cisst3DUserInterfaceLibs_SOURCE_DIR}/share/icons")

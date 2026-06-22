@@ -15,7 +15,7 @@ cmake_minimum_required (VERSION 3.16)
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
@@ -23,7 +23,7 @@ if (cisst_FOUND)
 
     add_executable (svlExComputeStereo computestereo.cpp)
     set_property (TARGET svlExComputeStereo PROPERTY FOLDER "cisstStereoVision/examples")
-    target_link_libraries (svlExComputeStereo ${cisst_LIBRARIES})
+    target_link_libraries (svlExComputeStereo ${REQUIRED_CISST_LIBRARIES})
 
     # Copy example images to the build tree
     if (WIN32)

@@ -161,7 +161,7 @@ mark_as_advanced (CISST_HAS_CMAKE_DEBUG)
 
 # Function to expend a list without repetitions, forces the list to be internal
 function (CISST_ADD_TO_INTERNAL list newElements)
-  message (SEND_ERROR "cisst_add_to_internal is now deprecated, use cisst_set_package_settings instead")
+  message (SEND_ERROR "cisst_add_to_internal is deprecated; attach dependencies directly to CMake targets instead")
 endfunction (CISST_ADD_TO_INTERNAL)
 
 # Where to find cisst defined CMake Macros/Modules
@@ -222,6 +222,31 @@ endif ()
 # to include some CMake "use" files without polluting the environment
 add_subdirectory (cisst-dependencies)
 
+if (CISST_HAS_QT)
+  find_package (Qt${CISST_QT_VERSION} REQUIRED COMPONENTS ${CISST_QT_COMPONENTS})
+  set (CISST_QT_LIBRARIES)
+  foreach (component ${CISST_QT_COMPONENTS})
+    list (APPEND CISST_QT_LIBRARIES Qt${CISST_QT_VERSION}::${component})
+  endforeach ()
+endif ()
+
+if (CISST_HAS_OPENGL)
+  find_package (OpenGL REQUIRED)
+  set (CISST_OPENGL_LIBRARIES)
+  if (TARGET OpenGL::OpenGL)
+    list (APPEND CISST_OPENGL_LIBRARIES OpenGL::OpenGL)
+    if (TARGET OpenGL::GLX)
+      list (APPEND CISST_OPENGL_LIBRARIES OpenGL::GLX)
+    endif ()
+  elseif (TARGET OpenGL::GL)
+    list (APPEND CISST_OPENGL_LIBRARIES OpenGL::GL)
+  elseif (OPENGL_LIBRARIES)
+    list (APPEND CISST_OPENGL_LIBRARIES ${OPENGL_LIBRARIES})
+  else ()
+    list (APPEND CISST_OPENGL_LIBRARIES ${OPENGL_opengl_LIBRARY} ${OPENGL_glx_LIBRARY})
+  endif ()
+endif ()
+
 # Extra link flag if for Apple
 if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -single_module")
@@ -253,14 +278,15 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # add Xenomai wrappers for pthread
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
     set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}")
-
   endif (CISST_HAS_LINUX_XENOMAI)
 
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # Check on Apple only
-include (CMakeDependentOption)
-cmake_dependent_option (CISST_HAS_IOS "Compile for IOS." OFF "APPLE" OFF)
+if (APPLE)
+  # User option for IOS
+  option (CISST_HAS_IOS "Compile for IOS." OFF)
+endif (APPLE)
 
 
 # Determine if cmnThrow uses "throw" or "abort"
@@ -356,31 +382,32 @@ if (CISST_BUILD_TESTS)
                            GIT_TAG           ${CISST_CPPUNIT_GIT_TAG}
                            CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                                             -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                                            -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstCppUnit
                            INSTALL_COMMAND ""
                            UPDATE_COMMAND ""
                            )
-      set (CPPUNIT_INCLUDE_DIR "${CISST_CPPUNIT_SOURCE_DIR}/include")
-      set (CPPUNIT_LIBRARIES "${CISST_CPPUNIT_BINARY_DIR}/Release/cppunit.lib")
-      set (CPPUNIT_DEBUG_LIBRARIES "${CISST_CPPUNIT_BINARY_DIR}/Debug/cppunit.lib")
-      set (CPPUNIT_RELEASE_LIBRARIES "${CISST_CPPUNIT_BINARY_DIR}/Release/cppunit.lib")
-      set (CPPUNIT_LINK_DIR "${CISST_CPPUNIT_BINARY_DIR}")
+      set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit/include")
+      set (CPPUNIT_LIBRARIES "cppunit")
+      set (CPPUNIT_DEBUG_LIBRARIES "cppunit")
+      set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
+      set (CPPUNIT_LINK_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
       link_directories (${CPPUNIT_LINK_DIR})
-      set (CPPUNIT_EXTERNAL_TARGET cisstCppUnit)
+      if (NOT TARGET CppUnit::CppUnit)
+        add_library (CppUnit::CppUnit INTERFACE IMPORTED)
+        set_target_properties (CppUnit::CppUnit PROPERTIES
+                               INTERFACE_INCLUDE_DIRECTORIES "${CPPUNIT_INCLUDE_DIR}"
+                               INTERFACE_LINK_DIRECTORIES "${CPPUNIT_LINK_DIR}"
+                               INTERFACE_LINK_LIBRARIES "cppunit")
+      endif ()
       set (CPPUNIT_FOUND ON)
     endif (CISST_USE_EXTERNAL)
   endif (NOT CPPUNIT_FOUND)
 
   if (CPPUNIT_FOUND)
-    # Test headers include CppUnit directly, including from helper test
-    # libraries that don't link cisstTestsDriver.
-    include_directories (${CPPUNIT_INCLUDE_DIR})
     # set variable to confirm that cisstTestsDriver is being build
     set (CISST_cisstTestsDriver ON)
   else (CPPUNIT_FOUND)
     message (SEND_ERROR "CppUnit is needed for CISST_BUILD_TESTS, you can either install it or turn ON the option CISST_USE_EXTERNAL")
   endif (CPPUNIT_FOUND)
-else (CISST_BUILD_TESTS)
 endif (CISST_BUILD_TESTS)
 
 # Find native threads
@@ -433,8 +460,6 @@ foreach (lib ${CISST_LIBRARIES_OPTIONAL})
   option (CISST_${lib} "Build ${lib}." OFF)
 endforeach (lib)
 
-# DL (dynamic loading) deps applied to targets after add_subdirectory; see below.
-
 if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
 endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
@@ -461,6 +486,7 @@ endforeach (lib)
 # but cisst-config.cmake is generated before cisstCommon is added below.  Decide
 # its availability here so generated package metadata matches the targets that
 # will be built later.
+include (CMakeDependentOption)
 cmake_dependent_option (CISST_cisstCommonXML "Build cisstCommonXML" ON
                         "CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML" OFF)
 if (CISST_cisstCommonXML)
@@ -489,31 +515,25 @@ endif ()
 # create equivalent for cisstInteractive
 set (CISST_HAS_IRE ${CISST_cisstInteractive})
 
-# Create list of general settings, i.e. cisstPython, cisstQt, cisstOpenGL, ...
-set (CISST_SETTINGS "")
-if (CISST_HAS_QT)
-  set (CISST_SETTINGS ${CISST_SETTINGS} cisstQt)
-endif (CISST_HAS_QT)
+# Finally, create lib targets
+cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
 
-if (CISST_HAS_QTNODES)
-  set (CISST_SETTINGS ${CISST_SETTINGS} cisstQtNodes)
-endif (CISST_HAS_QTNODES)
 
-if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
-  set (CISST_SETTINGS ${CISST_SETTINGS} cisstPython)
-endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
+if (CMAKE_GENERATOR MATCHES "Visual Studio*" )
+  # CMake 3.27 introduced CMAKE_VS_DEBUGGER_ENVIRONMENT, which sets the
+  # VS_DEBUGGER_ENVIRONMENT property (introduced in CMake 3.13) on each created target.
+  file (TO_NATIVE_PATH ${cisst_BINARY_DIR} cisst_BINARY_DIR_NATIVE)
+  set (CISST_VS_DEBUG_DIR "Debug" CACHE STRING "Configuration used for Visual Studio debugger paths (e.g., Release/Debug)")
+  set (CMAKE_VS_DEBUGGER_ENVIRONMENT
+       "PATH=${cisst_BINARY_DIR_NATIVE}\\bin\\${CISST_VS_DEBUG_DIR};${cisst_BINARY_DIR_NATIVE}\\lib\\${CISST_VS_DEBUG_DIR};%PATH%")
+endif()
 
-if (CISST_HAS_SWIG_PYTHON)
-  set (CISST_SETTINGS ${CISST_SETTINGS} cisstSWIG)
-endif (CISST_HAS_SWIG_PYTHON)
-
-if (CISST_HAS_OPENGL)
-  set (CISST_SETTINGS ${CISST_SETTINGS} cisstOpenGL)
-endif (CISST_HAS_OPENGL)
-
-if (CISST_HAS_GRAPHVIZ)
-  set (CISST_SETTINGS ${CISST_SETTINGS} cisstGraphviz)
-endif (CISST_HAS_GRAPHVIZ)
+# Build all libraries
+foreach (lib ${CISST_LIBS})
+  if (CISST_${lib})
+    add_subdirectory (${lib})
+  endif (CISST_${lib})
+endforeach (lib)
 
 
 # Create misc. config files
@@ -525,7 +545,6 @@ set (CISST_BUILD_DOXYGEN_DIRECTORY ${cisst_SOURCE_DIR})
 set (CISST_BUILD_LINK_DIRECTORIES ${cisst_LIBRARY_PATH})
 
 # Config file
-set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "${JSON_INCLUDE_DIR}")
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
                 "${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config.cmake"
                 @ONLY)
@@ -540,11 +559,6 @@ cisst_add_config_version ("${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-config-versio
 set (CISST_BINARY_DIR_FOR_CONFIG "")
 set (CISST_INCLUDE_DIR_FOR_CONFIG "")
 set (CISST_CMAKE_DIRS_FOR_CONFIG "")
-if (JSON_EXTERNAL_TARGET)
-  set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "\${CISST_INCLUDE_DIR}")
-else ()
-  set (CISST_JSON_INCLUDE_DIR_FOR_CONFIG "${JSON_INCLUDE_DIR}")
-endif ()
 configure_file ("${CISST_CMAKE_SOURCE_DIR}/cisst-config.cmake.in"
                 "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
                 @ONLY)
@@ -553,127 +567,14 @@ install (FILES "${cisst_BINARY_DIR}/cisst-config.cmake-to-be-installed"
          RENAME "cisst-config.cmake"
          COMPONENT cisstCommon)
 
-
-# Finally, create lib targets
-cisst_cmake_debug ("Libraries to be built: ${CISST_LIBRARIES}")
-cisst_cmake_debug ("General settings: ${CISST_SETTINGS}")
-
-# Build all libraries
-foreach (lib ${CISST_LIBS})
-  if (CISST_${lib})
-    add_subdirectory (${lib})
-  endif (CISST_${lib})
-endforeach (lib)
-
-# ---------------------------------------------------------------------------
-# Target-based external deps applied here because all library targets now exist.
-# ---------------------------------------------------------------------------
-
-# cisstCommon: RTAI
-if (TARGET cisstCommon AND CISST_HAS_LINUX_RTAI)
-  target_include_directories (cisstCommon PUBLIC ${RTAI_INCLUDE_DIR})
-  target_link_libraries      (cisstCommon PUBLIC ${RTAI_LIBRARIES})
-endif ()
-
-# cisstCommon: Xenomai
-if (TARGET cisstCommon AND CISST_HAS_LINUX_XENOMAI)
-  target_include_directories (cisstCommon PUBLIC ${CISST_XENOMAI_INCLUDE_DIRECTORIES})
-  target_link_libraries      (cisstCommon PUBLIC ${CISST_XENOMAI_LIBRARIES})
-endif ()
-
-# cisstCommon: POSIX Threads
-if (TARGET cisstCommon AND CMAKE_THREAD_LIBS_INIT)
-  target_link_libraries (cisstCommon PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-endif ()
-
-# cisstCommon: JSON
-if (TARGET cisstCommon AND CISST_HAS_JSON)
-  if (JSON_TARGET AND TARGET ${JSON_TARGET})
-    # System jsoncpp found via pkg-config: use its IMPORTED target so include
-    # dirs are propagated correctly even when they are system defaults.
-    target_link_libraries (cisstCommon PUBLIC ${JSON_TARGET})
-  else ()
-    if (JSON_EXTERNAL_TARGET)
-      add_dependencies (cisstCommon ${JSON_EXTERNAL_TARGET})
-      # External jsoncpp is installed in the build tree first, then copied
-      # into the cisst install prefix.  Keep build-tree paths out of the
-      # installed target export.
-      target_include_directories (cisstCommon PUBLIC
-        $<BUILD_INTERFACE:${JSON_INCLUDE_DIR}>
-        $<INSTALL_INTERFACE:include>)
-      if (JSON_LIBRARY_DIRS)
-        target_link_directories (cisstCommon PUBLIC
-          $<BUILD_INTERFACE:${JSON_LIBRARY_DIRS}>
-          $<INSTALL_INTERFACE:${CISST_LIBRARY_INSTALL_SUFFIX}>)
-      endif ()
-    else ()
-      target_include_directories (cisstCommon PUBLIC ${JSON_INCLUDE_DIR})
-      if (JSON_LIBRARY_DIRS)
-        target_link_directories (cisstCommon PUBLIC ${JSON_LIBRARY_DIRS})
-      endif ()
-    endif ()
-    target_link_libraries (cisstCommon PUBLIC ${JSON_LIBRARIES})
-  endif ()
-endif ()
-
-# cisstTestsDriver: CppUnit
-if (TARGET cisstTestsDriver AND CPPUNIT_FOUND)
-  if (CPPUNIT_EXTERNAL_TARGET)
-    add_dependencies (cisstTestsDriver ${CPPUNIT_EXTERNAL_TARGET})
-    target_include_directories (cisstTestsDriver PUBLIC
-      $<BUILD_INTERFACE:${CPPUNIT_INCLUDE_DIR}>
-      $<INSTALL_INTERFACE:include>)
-    if (DEFINED CPPUNIT_LINK_DIR)
-      target_link_directories (cisstTestsDriver PUBLIC
-        $<BUILD_INTERFACE:${CPPUNIT_LINK_DIR}>
-        $<INSTALL_INTERFACE:${CISST_LIBRARY_INSTALL_SUFFIX}>)
-    endif ()
-  else ()
-    target_include_directories (cisstTestsDriver PUBLIC ${CPPUNIT_INCLUDE_DIR})
-    if (DEFINED CPPUNIT_LINK_DIR)
-      target_link_directories (cisstTestsDriver PUBLIC ${CPPUNIT_LINK_DIR})
-    endif ()
-  endif ()
-  target_link_libraries (cisstTestsDriver ${CPPUNIT_LIBRARIES})
-endif ()
-
-# cisstOSAbstraction and cisstInteractive: DL (dynamic loading)
-if (CMAKE_DL_LIBS)
-  if (TARGET cisstOSAbstraction)
-    target_link_libraries (cisstOSAbstraction PUBLIC ${CMAKE_DL_LIBS})
-  endif ()
-  if (TARGET cisstInteractive)
-    target_link_libraries (cisstInteractive PUBLIC ${CMAKE_DL_LIBS})
-  endif ()
-endif ()
-# ---------------------------------------------------------------------------
-
-
-# Configuration file
-set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
-configure_file (${cisst_SOURCE_DIR}/cisstConfig.h.in
-                ${cisst_BINARY_DIR}/include/cisstConfig.h)
-install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
-         DESTINATION include
-         COMPONENT cisstCommon)
-
-# ---------------------------------------------------------------------------
-# CMake export: generate cisst-targets.cmake (target dependency graph)
-# ---------------------------------------------------------------------------
-# Export targets for the BUILD tree (lets in-source consumers use the targets
-# in the same CMake super-build without a find_package call)
 export (EXPORT cisst-targets
-        FILE      "${CISST_CMAKE_BINARY_DIR}/cisst-targets.cmake"
+        FILE "${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-targets.cmake"
         NAMESPACE cisst::)
-
-# Export targets for the INSTALL tree (consumed by external find_package(cisst))
 install (EXPORT cisst-targets
-         FILE        cisst-targets.cmake
-         NAMESPACE   cisst::
+         FILE cisst-targets.cmake
+         NAMESPACE cisst::
          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-         COMPONENT   cisstCommon)
-# ---------------------------------------------------------------------------
-
+         COMPONENT cisstCommon)
 
 # CMake use cisst file
 set (CISST_CMAKE_FILES_TO_COPY
@@ -690,6 +591,13 @@ foreach (cmake_file_to_copy ${CISST_CMAKE_FILES_TO_COPY})
            COMPONENT cisstCommon)
 endforeach ()
 
+# Configuration file
+set (CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
+configure_file (${cisst_SOURCE_DIR}/cisstConfig.h.in
+                ${cisst_BINARY_DIR}/include/cisstConfig.h)
+install (FILES  ${cisst_BINARY_DIR}/include/cisstConfig.h
+         DESTINATION include
+         COMPONENT cisstCommon)
 
 # Clean files
 set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES

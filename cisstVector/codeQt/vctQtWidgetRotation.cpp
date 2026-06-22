@@ -86,7 +86,11 @@ void vctQtWidgetRotationOpenGL::mouseMoveEvent(QMouseEvent * event)
 {
     const double sensitivity = 0.01;
     if (event->buttons() & Qt::LeftButton) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        const vctInt2 newMousePosition(event->position().x(), event->position().y());
+#else
         const vctInt2 newMousePosition(event->x(), event->y());
+#endif
         if (mStartMousePosition != 0) {
             const vct2 deltaMouse = sensitivity * vct2(newMousePosition - mStartMousePosition);
             vctRodRot3 deltaRot(deltaMouse.Y(), deltaMouse.X(), 0.0);

@@ -31,36 +31,7 @@ if (cisst_FOUND)
   set_property (TARGET mtsExBenchmark2 PROPERTY FOLDER "cisstMultiTask/examples")
 
   # link with the cisst libraries
-  target_link_libraries(mtsExBenchmark2 ${cisst_LIBRARIES})
-
-  # compile network version if ICE is available
-  if (CISST_MTS_HAS_ICE)
-
-    # name the main executable and specifies with source files to use
-    add_executable(mtsExBenchmark2Server
-                   serverTask.cpp
-                   serverMain.cpp
-                   serverTask.h
-                   configuration.h
-                   )
-    set_property (TARGET mtsExBenchmark2Server PROPERTY FOLDER "cisstMultiTask/examples")
-
-    # link with the cisst libraries
-    target_link_libraries(mtsExBenchmark2Server ${cisst_LIBRARIES})
-
-    # name the main executable and specifies with source files to use
-    add_executable(mtsExBenchmark2Client
-                   clientTask.cpp
-                   clientMain.cpp
-                   clientTask.h
-                   configuration.h
-                   )
-    set_property (TARGET mtsExBenchmark2Client PROPERTY FOLDER "cisstMultiTask/examples")
-
-    # link with the cisst libraries
-    target_link_libraries(mtsExBenchmark2Client ${cisst_LIBRARIES})
-
-  endif (CISST_MTS_HAS_ICE)
+  target_link_libraries (mtsExBenchmark2 ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

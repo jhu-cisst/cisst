@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-12-10
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -130,8 +130,7 @@ mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequiredWithoutSystemEvent
 
 
 mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                                                  mtsInterfaceQueueingPolicy queueingPolicy,
-                                                                                  bool isProxy)
+                                                                                  mtsInterfaceQueueingPolicy queueingPolicy)
 {
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
@@ -142,14 +141,14 @@ mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvidedWithoutSystemEvent
         // Note that if the task is active, we always wait for the task's DoRunInternal method to process this mailbox.
         if (interfaceProvidedName == mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())
             postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable, isProxy);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
                                    << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe.  "
                                    << "Furthermore, the thread will not wake up since the post queued command will not be executed. "
                                    << std::endl;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0);
     }
     if (interfaceProvided) {
         if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {

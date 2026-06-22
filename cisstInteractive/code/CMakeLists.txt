@@ -40,12 +40,14 @@ endif (CISST_cisstMultiTask)
 cisst_add_library (LIBRARY cisstInteractive
                    FOLDER cisstInteractive
                    DEPENDENCIES ${DEPENDENCIES}
-                   SETTINGS cisstPython
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}
                    ADDITIONAL_HEADER_FILES_RELATIVE ${ADDITIONAL_HEADER_FILES}
                    )
+
+target_include_directories (cisstInteractive PUBLIC "$<BUILD_INTERFACE:${PYTHON_ALL_INCLUDE_DIRS}>")
+target_link_libraries (cisstInteractive ${PYTHON_ALL_LIBRARIES})
 
 install (FILES ${cisstInteractive_CISST_DG_HDRS_FULLPATH}
          DESTINATION "include/cisstInteractive")

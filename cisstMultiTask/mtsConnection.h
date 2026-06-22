@@ -39,21 +39,15 @@ protected:
     /* String representation of connection */
     mtsDescriptionConnection ConnectionDescription;
 
-    /* Name of connect request process */
-    const std::string RequestProcessName;
-
     /* Connection status. False if pending connection, true if established connection */
     bool Connected;
-
-    /* Ice server proxy access information (to send messages to client proxy) */
-    std::string EndpointInfo;
 
     /* Time when pending connection becomes invalidated; any pending connection
        should be confirmed before this time limit */
     double TimeoutTime;
 
 public:
-    mtsConnection(const mtsDescriptionConnection & description, const std::string & requestProcessName);
+    mtsConnection(const mtsDescriptionConnection & description);
 
     /*! Getters and Setters */
     ConnectionIDType GetConnectionID(void) const;
@@ -72,9 +66,6 @@ public:
     void SetConnected(void) { Connected = true; }
 
     bool IsRemoteConnection(void) const;
-
-    std::string GetEndpointInfo(void) const { return EndpointInfo; }
-    void SetProxyAccessInfo(const std::string & endpointInfo) { EndpointInfo = endpointInfo; }
 
     /*! In the state of pending connection, check if this connection should be
         invalidated due to connection timeout */

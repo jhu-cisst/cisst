@@ -24,17 +24,21 @@ else (CISST_FOUND_LIBXML2_XML)
 endif (CISST_FOUND_LIBXML2_XML)
 
 # now, based on user preference create the library
-if ("${CISST_XML_LIB}" STREQUAL "LibXml2")
+if (${CISST_XML_LIB} STREQUAL "LibXml2")
   find_package (LibXml2 REQUIRED)
+  include_directories (${LIBXML2_INCLUDE_DIR})
   set (CISST_HAS_QT_XML 0) # for cmnConfigXML.h
-else ("${CISST_XML_LIB}" STREQUAL "LibXml2")
-  if ("${CISST_XML_LIB}" STREQUAL "QtXML")
+else (${CISST_XML_LIB} STREQUAL "LibXml2")
+  if (${CISST_XML_LIB} STREQUAL "QtXML")
+    if (CISST_HAS_QT6)
+      message (FATAL_ERROR "CISST_XML_LIB=QtXML is not supported with Qt6 because QtXmlPatterns was removed. Use CISST_XML_LIB=LibXml2 instead.")
+    endif ()
     set (CISST_HAS_QT_XML 1) # for cmnConfigXML.h
-  else ("${CISST_XML_LIB}" STREQUAL "QtXML")
+  else (${CISST_XML_LIB} STREQUAL "QtXML")
     message (SEND_ERROR "CISST_XML_LIB must be set to either \"LibXml2\" or \"QtXML\" to compile cisstCommonXML.  You can also turn off CISST_CommonXML")
     set (CISST_HAS_QT_XML 0) # for cmnConfigXML.h
-  endif ("${CISST_XML_LIB}" STREQUAL "QtXML")
-endif ("${CISST_XML_LIB}" STREQUAL "LibXml2")
+  endif (${CISST_XML_LIB} STREQUAL "QtXML")
+endif (${CISST_XML_LIB} STREQUAL "LibXml2")
 
 # Create the config file
 set (CISST_CMN_XML_CONFIG_FILE ${cisst_BINARY_DIR}/include/cisstCommon/cmnConfigXML.h)
@@ -51,7 +55,7 @@ set_source_files_properties ("${CISST_CMN_XML_CONFIG_FILE}"
                              PROPERTIES GENERATED TRUE)
 
 # link against Qt libraries if needed
-if ("${CISST_XML_LIB}" STREQUAL "QtXML")
+if (${CISST_XML_LIB} STREQUAL "QtXML")
   set (cisstCommonXML_EXTRA_DEP cisstCommonQt)
 endif ()
 
@@ -63,30 +67,24 @@ cisst_add_library (LIBRARY cisstCommonXML
                    HEADER_FILES cmnExportXML.h cmnXMLPath.h
                    ADDITIONAL_HEADER_FILES ${CISST_CMN_XML_CONFIG_FILE})
 
-if (TARGET cisstCommonXML)
-  if ("${CISST_XML_LIB}" STREQUAL "LibXml2")
-    # Prefer imported target when available (CMake >= 3.12)
-    if (TARGET LibXml2::LibXml2)
-      target_link_libraries (cisstCommonXML PUBLIC LibXml2::LibXml2)
-    else ()
-      target_include_directories (cisstCommonXML PUBLIC ${LIBXML2_INCLUDE_DIR})
-      target_link_libraries      (cisstCommonXML PUBLIC ${LIBXML2_LIBRARIES})
-    endif ()
-  elseif ("${CISST_XML_LIB}" STREQUAL "QtXML")
-    if (TARGET cisstQt)
-      target_link_libraries (cisstCommonXML PUBLIC cisstQt)
-    endif ()
+if ("${CISST_XML_LIB}" STREQUAL "LibXml2")
+  if (TARGET LibXml2::LibXml2)
+    target_link_libraries (cisstCommonXML PUBLIC LibXml2::LibXml2)
+  else ()
+    target_include_directories (cisstCommonXML PUBLIC ${LIBXML2_INCLUDE_DIR})
+    target_link_libraries (cisstCommonXML PUBLIC ${LIBXML2_LIBRARIES})
   endif ()
+elseif ("${CISST_XML_LIB}" STREQUAL "QtXML")
 endif ()
 
 # Add libxml2 runtime dependencies (so far, only tested on WIN32).
 # There must be a better way to do this.
 # Also, zlib1.dll is also needed by cisstStereoVision (gnuwin32 package) --
 # which one should be used?
-if (WIN32 AND "${CISST_XML_LIB}" STREQUAL "LibXml2")
+if (WIN32 AND ${CISST_XML_LIB} STREQUAL "LibXml2")
   # Assume that xmllint.exe was found and DLLs are in that directory
   get_filename_component (LIBXML2_BIN ${LIBXML2_XMLLINT_EXECUTABLE} PATH)
   install (FILES ${LIBXML2_BIN}/libxml2.dll ${LIBXML2_BIN}/iconv.dll ${LIBXML2_BIN}/zlib1.dll
            DESTINATION bin
            COMPONENT cisstCommonXML)
-endif (WIN32 AND "${CISST_XML_LIB}" STREQUAL "LibXml2")
+endif (WIN32 AND ${CISST_XML_LIB} STREQUAL "LibXml2")

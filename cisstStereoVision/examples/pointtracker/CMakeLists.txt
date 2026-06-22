@@ -15,13 +15,13 @@ cmake_minimum_required (VERSION 3.16)
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
   add_executable (svlExPointTracker pointtracker.cpp)
   set_property (TARGET svlExPointTracker PROPERTY FOLDER "cisstStereoVision/examples")
-  target_link_libraries (svlExPointTracker ${cisst_LIBRARIES})
+  target_link_libraries (svlExPointTracker ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

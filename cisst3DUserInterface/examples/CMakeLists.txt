@@ -16,11 +16,9 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction
                               cisstMultiTask cisstStereoVision cisst3DUserInterface)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
+find_package (cisst REQUIRED COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND)
-
-  # load cisst configuration
 
   include_directories (behaviors)
   add_subdirectory (behaviors)

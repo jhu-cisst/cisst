@@ -6,7 +6,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2011 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,8 +46,6 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsInterfaceRequiredOrInput: public cmnGenericObject
 {
-    friend class mtsComponentProxy;
-    friend class mtsComponentInterfaceProxyClient;
     friend class mtsManagerLocal;
     friend class mtsManagerLocalTest;
 

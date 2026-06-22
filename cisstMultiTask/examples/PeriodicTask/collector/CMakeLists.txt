@@ -19,5 +19,5 @@ add_executable (mtsExPeriodicTaskCollector
                 main.cpp)
 set_property (TARGET mtsExPeriodicTaskCollector PROPERTY FOLDER "cisstMultiTask/examples")
 target_link_libraries (mtsExPeriodicTaskCollector
-                       mtsExPeriodicTaskComponents
-                       ${cisst_LIBRARIES})
+  mtsExPeriodicTaskComponents
+  ${REQUIRED_CISST_LIBRARIES})

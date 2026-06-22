@@ -22,14 +22,21 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageOpenGLQtWidget_h
 #define _svlFilterImageOpenGLQtWidget_h
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QOpenGLWidget>
+typedef QOpenGLWidget svlQtOpenGLWidgetBase;
+#else
 #include <QGLWidget>
+typedef QGLWidget svlQtOpenGLWidgetBase;
+#endif
 #include <cisstStereoVision/svlFilterImageOpenGL.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExportQt.h>
 
 //! this class is useful for embedding an svl stream inside a qt widget
-class CISST_EXPORT svlFilterImageOpenGLQtWidget: public QGLWidget, public svlFilterImageOpenGL
+class CISST_EXPORT svlFilterImageOpenGLQtWidget: public svlQtOpenGLWidgetBase, public svlFilterImageOpenGL
 {
     Q_OBJECT
 

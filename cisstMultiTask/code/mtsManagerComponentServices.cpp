@@ -23,7 +23,27 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
 
+CMN_IMPLEMENT_SERVICES(mtsComponentPointer)
 CMN_IMPLEMENT_SERVICES(mtsManagerComponentServices)
+
+void mtsComponentPointer::ToStream(std::ostream & outputStream) const
+{
+    mtsGenericObject::ToStream(outputStream);
+    outputStream << ", " << component << "("
+                 << component->GetName() << ")" << std::endl;
+}
+
+void mtsComponentPointer::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, component);
+}
+
+void mtsComponentPointer::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, component);
+}
 
 // Constructor
 mtsManagerComponentServices::mtsManagerComponentServices(mtsInterfaceRequired * internalInterfaceRequired)
@@ -36,6 +56,12 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
         // Dynamic component composition (DCC) services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentCreate,
                                                ServiceComponentManagement.Create);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentAdd,
+                                               ServiceComponentManagement.Add);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentRemove,
+                                               ServiceComponentManagement.Remove);
+        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentGet,
+                                               ServiceComponentManagement.Get);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConfigure,
                                                ServiceComponentManagement.Configure);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::ComponentConnect,
@@ -52,13 +78,6 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceComponentManagement.GetState);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::LoadLibrary,
                                                ServiceComponentManagement.LoadLibrary);
-        // Log services
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::EnableLogForwarding,
-                                               ServiceLogManagement.EnableLogForwarding);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::DisableLogForwarding,
-                                               ServiceLogManagement.DisableLogForwarding);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetLogForwardingStates,
-                                               ServiceLogManagement.GetLogForwardingStates);
 
         // Getter services
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
@@ -79,8 +98,6 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceGetters.GetInterfaceProvidedDescription);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetInterfaceRequiredDescription,
                                                ServiceGetters.GetInterfaceRequiredDescription);
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetAbsoluteTimeDiffs,
-                                               ServiceGetters.GetAbsoluteTimeDiffs);
 
         // Event receivers
         InternalInterfaceRequired->AddEventReceiver(mtsManagerComponentBase::EventNames::AddComponent,
@@ -99,8 +116,7 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
 
 bool mtsManagerComponentServices::ComponentCreate(const std::string & className, const std::string & componentName) const
 {
-    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return ComponentCreate(processName, className, componentName);
+    return ComponentCreate("", className, componentName);
 }
 
 
@@ -136,8 +152,7 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
 
 bool mtsManagerComponentServices::ComponentCreate(const std::string & className, const mtsGenericObject & constructorArg) const
 {
-    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return ComponentCreate(processName, className, constructorArg);
+    return ComponentCreate("", className, constructorArg);
 }
 
 
@@ -178,12 +193,97 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
     return true;
 }
 
+bool mtsManagerComponentServices::ComponentAdd(const mtsComponent * component) const
+{
+    if (!component) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentAdd: invalid (null) component" << std::endl;
+        return false;
+    }
+    if (!ServiceComponentManagement.Add.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentAdd: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    // Unfortunately, have to cast away the constness to fit the cisst command pattern
+    mtsComponent * componentNonConst = const_cast<mtsComponent *>(component);
+    bool result;
+    mtsExecutionResult executionResult = ServiceComponentManagement.Add(mtsComponentPointer(componentNonConst), result);
+
+    // check if command was sent properly
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentAdd: failed to execute command \"Add\" (error "
+                                << executionResult << ")" << std::endl;
+        return false;
+    }
+
+    if (result == false) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentAdd: failed to add component: " << component->GetName() << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentAdd: successfully added component: " << component->GetName() << std::endl;
+    return true;
+}
+
+bool mtsManagerComponentServices::ComponentRemove(const mtsComponent * component) const
+{
+    if (!component) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentRemove: invalid (null) component" << std::endl;
+        return false;
+    }
+    return ComponentRemove(component->GetName());
+}
+
+bool mtsManagerComponentServices::ComponentRemove(const std::string & componentName) const
+{
+    if (!ServiceComponentManagement.Remove.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentRemove: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    bool result;
+    mtsExecutionResult executionResult = ServiceComponentManagement.Remove(componentName, result);
+
+    // check if command was sent properly
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentRemove: failed to execute command \"Remove\" (error "
+                                << executionResult << ")" << std::endl;
+        return false;
+    }
+
+    if (result == false) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentRemove: failed to remove component: " << componentName << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "ComponentRemove: successfully removed component: " << componentName << std::endl;
+    return true;
+}
+
+mtsComponent *mtsManagerComponentServices::ComponentGet(const std::string &componentName) const
+{
+    if (!ServiceComponentManagement.Get.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentGet: invalid function - has not been bound to command" << std::endl;
+        return 0;
+    }
+
+    mtsComponentPointer componentPtr;
+    mtsExecutionResult executionResult = ServiceComponentManagement.Get(componentName, componentPtr);
+
+    // check if command was sent properly
+    if (!executionResult.IsOK()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentGet: failed to execute command \"Get\" (error "
+                                << executionResult << ")" << std::endl;
+        return 0;
+    }
+
+    return componentPtr.GetPointer();
+}
 
 bool mtsManagerComponentServices::ComponentConfigure(const std::string & componentName,
                                                      const std::string & configString) const
 {
-    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return ComponentConfigure(processName, componentName, configString);
+    return ComponentConfigure("", componentName, configString);
 }
 
 bool mtsManagerComponentServices::ComponentConfigure(
@@ -212,7 +312,7 @@ bool mtsManagerComponentServices::Connect(const std::string & clientComponentNam
                                           const std::string & serverComponentName,
                                           const std::string & serverInterfaceName) const
 {
-    const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
+    const std::string thisProcessName = "";
     return Connect(thisProcessName, clientComponentName, clientInterfaceName,
                    thisProcessName, serverComponentName, serverInterfaceName);
 }
@@ -266,7 +366,7 @@ bool mtsManagerComponentServices::Disconnect(
     const std::string & clientComponentName, const std::string & clientInterfaceName,
     const std::string & serverComponentName, const std::string & serverInterfaceName) const
 {
-    const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
+    const std::string thisProcessName = "";
     return Disconnect(thisProcessName, clientComponentName, clientInterfaceName,
                       thisProcessName, serverComponentName, serverInterfaceName);
 }
@@ -306,14 +406,14 @@ bool mtsManagerComponentServices::Disconnect(const mtsDescriptionConnection & co
 
 bool mtsManagerComponentServices::Disconnect(ConnectionIDType connectionID) const
 {
-    // PK TEMP
-    return mtsManagerLocal::GetInstance()->Disconnect(connectionID);
+    // PK TODO
+    CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect(connectionID) not implemented" << std::endl;
+    return false;
 }
 
 bool mtsManagerComponentServices::ComponentStart(const std::string & componentName, const double delayInSecond) const
 {
-    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return ComponentStart(processName, componentName, delayInSecond);
+    return ComponentStart("", componentName, delayInSecond);
 }
 
 bool mtsManagerComponentServices::ComponentStart(
@@ -340,8 +440,7 @@ bool mtsManagerComponentServices::ComponentStart(
 
 bool mtsManagerComponentServices::ComponentStop(const std::string & componentName, const double delayInSecond) const
 {
-    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return ComponentStop(processName, componentName, delayInSecond);
+    return ComponentStop("", componentName, delayInSecond);
 }
 
 bool mtsManagerComponentServices::ComponentStop(
@@ -368,8 +467,7 @@ bool mtsManagerComponentServices::ComponentStop(
 
 bool mtsManagerComponentServices::ComponentResume(const std::string & componentName, const double delayInSecond) const
 {
-    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return ComponentResume(processName, componentName, delayInSecond);
+    return ComponentResume("", componentName, delayInSecond);
 }
 
 bool mtsManagerComponentServices::ComponentResume(
@@ -406,8 +504,7 @@ mtsComponentState mtsManagerComponentServices::ComponentGetState(const mtsDescri
 
 std::string mtsManagerComponentServices::ComponentGetState(const std::string componentName) const
 {
-    std::string processName = mtsManagerLocal::GetInstance()->GetProcessName();
-    return ComponentGetState(processName, componentName);
+    return ComponentGetState("", componentName);
 }
 
 std::string mtsManagerComponentServices::ComponentGetState(const std::string & processName,
@@ -507,11 +604,6 @@ std::vector<mtsDescriptionConnection> mtsManagerComponentServices::GetListOfConn
     return listOfConnections;
 }
 
-std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses(void) const
-{
-    return GetListOfComponentClasses(mtsManagerLocal::GetInstance()->GetProcessName());
-}
-
 std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses(const std::string &processName) const
 {
     std::vector<mtsDescriptionComponentClass> listOfComponentClasses;
@@ -576,7 +668,7 @@ mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string &
 
 bool mtsManagerComponentServices::Load(const std::string & fileName) const
 {
-    return Load(mtsManagerLocal::GetInstance()->GetProcessName(), fileName);
+    return Load("", fileName);
 }
 
 bool mtsManagerComponentServices::Load(const std::string & processName, const std::string & fileName) const
@@ -585,43 +677,6 @@ bool mtsManagerComponentServices::Load(const std::string & processName, const st
     bool result = false;
     ServiceComponentManagement.LoadLibrary(argIn, result);
     return result;
-}
-
-void mtsManagerComponentServices::EnableLogForwarding(void)
-{
-    EnableLogForwarding(GetNamesOfProcesses());
-}
-
-void mtsManagerComponentServices::EnableLogForwarding(const std::vector<std::string> &processNames)
-{
-    ServiceLogManagement.EnableLogForwarding(processNames);
-}
-
-void mtsManagerComponentServices::DisableLogForwarding(void)
-{
-    DisableLogForwarding(GetNamesOfProcesses());
-}
-
-void mtsManagerComponentServices::DisableLogForwarding(const std::vector<std::string> &processNames)
-{
-    ServiceLogManagement.DisableLogForwarding(processNames);
-}
-
-void mtsManagerComponentServices::GetLogForwardingStates(stdCharVec & states) const
-{
-    ServiceLogManagement.GetLogForwardingStates(GetNamesOfProcesses(), states);
-}
-
-void mtsManagerComponentServices::GetLogForwardingStates(const stdStringVec & processNames, stdCharVec & states) const
-{
-    ServiceLogManagement.GetLogForwardingStates(processNames, states);
-}
-
-std::vector<double> mtsManagerComponentServices::GetAbsoluteTimeDiffs(const std::vector<std::string> &processNames) const
-{
-    std::vector<double> processTimes(processNames.size());
-    ServiceGetters.GetAbsoluteTimeDiffs(processNames, processTimes);
-    return processTimes;
 }
 
 bool mtsManagerComponentServices::CheckAndWait(const std::vector<std::string> &list, const std::string &key, double &timeoutInSec,

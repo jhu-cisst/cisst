@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2010-09-01
 
-  (C) Copyright 2010-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -17,7 +17,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsParameterTypes.h>
-#include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 mtsDescriptionConnection::mtsDescriptionConnection(

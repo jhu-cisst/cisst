@@ -129,8 +129,8 @@ void mtsIntervalStatisticsQtWidget::SetValue(const mtsIntervalStatistics & newVa
                            .arg(newValue.ComputeTimeMax() * periodPercent, -5, 'f', 1));
 
     QTWIInterval->setText(QString("%1s").arg(newValue.StatisticsInterval(), -6, 'f', 3));
-    QTWINumberOfSamples->setText(QString("%1 samples").arg(newValue.NumberOfSamples(), 0, 'g', -1, '0'));
-    QTWINumberOfOverruns->setText(QString("%1 > period").arg(newValue.NumberOfOverruns(), 0, 'g', -1, '0'));
+    QTWINumberOfSamples->setText(QString("%1 samples").arg(newValue.NumberOfSamples()));
+    QTWINumberOfOverruns->setText(QString("%1 > period").arg(newValue.NumberOfOverruns()));
 }
 
 

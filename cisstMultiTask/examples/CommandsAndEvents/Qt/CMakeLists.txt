@@ -15,9 +15,7 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstVector
                               cisstOSAbstraction
                               cisstMultiTask
-                              cisstMultiTaskQt
-                              cisstQt)
-
+                              cisstMultiTaskQt)
 
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
@@ -26,8 +24,13 @@ if (cisst_FOUND)
 
   # wrap all Qt files
   set (CMAKE_AUTOMOC ON)
-  qt5_wrap_ui (QT_CLIENT_WRAPPED_UI clientQtWidget.ui)
-  qt5_wrap_ui (QT_SERVER_WRAPPED_UI serverQtWidget.ui)
+  if (CISST_QT_VERSION STREQUAL "6")
+    qt6_wrap_ui (QT_CLIENT_WRAPPED_UI clientQtWidget.ui)
+    qt6_wrap_ui (QT_SERVER_WRAPPED_UI serverQtWidget.ui)
+  else ()
+    qt5_wrap_ui (QT_CLIENT_WRAPPED_UI clientQtWidget.ui)
+    qt5_wrap_ui (QT_SERVER_WRAPPED_UI serverQtWidget.ui)
+  endif ()
 
   # needed to include Qt generated header files
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -45,7 +48,7 @@ if (cisst_FOUND)
                   serverWithDelay.cpp
                  )
   set_property (TARGET mtsExCommandsAndEventsQtLocal PROPERTY FOLDER "cisstMultiTask/examples")
-  target_link_libraries (mtsExCommandsAndEventsQtLocal ${cisst_LIBRARIES})
+  target_link_libraries (mtsExCommandsAndEventsQtLocal ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

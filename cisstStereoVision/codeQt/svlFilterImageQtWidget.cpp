@@ -33,7 +33,7 @@ CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterImageQtWidget, svlFilterBase)
 
 
 svlFilterImageQtWidget::svlFilterImageQtWidget(QWidget * parent):
-    QGLWidget(parent),
+    svlQtOpenGLWidgetBase(parent),
     svlFilterBase(),
     Image(0)
 {
@@ -43,7 +43,7 @@ svlFilterImageQtWidget::svlFilterImageQtWidget(QWidget * parent):
 
     AddOutput("output", true);
     SetAutomaticOutputType(true);
-    QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(updateGL()));
+    QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(update()));
 }
 
 

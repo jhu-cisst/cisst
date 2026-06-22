@@ -11,7 +11,7 @@
 
 project (cisstVectorQt)
 
-find_package (Qt5 COMPONENTS Core REQUIRED)
+find_package (Qt${CISST_QT_VERSION} COMPONENTS Core REQUIRED)
 
 # To include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
@@ -25,8 +25,6 @@ cisst_add_library (
   FOLDER cisstVector
   DEPENDENCIES cisstCommon
                cisstVector
-  SETTINGS     cisstQt
-               cisstOpenGL
   SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp
                vctQtWidgetDynamicVector.cpp
                vctQtWidgetDynamicMatrix.cpp
@@ -52,5 +50,6 @@ cisst_add_library (
                vctForceTorque3DQtWidget.h
                vctExportQt.h)
 
-# link against Qt libraries
-target_link_libraries (cisstVectorQt ${QT_LIBRARIES})
+target_link_libraries (cisstVectorQt
+                       ${CISST_QT_LIBRARIES}
+                       ${CISST_OPENGL_LIBRARIES})

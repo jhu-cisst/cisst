@@ -29,19 +29,24 @@ endif (CISST_HAS_LINUX_RTAI)
 
 
 # QNX does not require rt library for clock_gettime (contained in libc)
-# (platform link deps are applied after the target is created; see below)
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+  # QNX requires socket library
+  set (CISST_SOCKET_LIBRARY socket)
+else ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+  if (UNIX AND NOT APPLE)
+    # clock_gettime requires linking with librt
+    set (CISST_RT_LIBRARY rt)
+  endif (UNIX AND NOT APPLE)
+endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+
+
+# for windows, needs WinSock
+if (WIN32)
+    set (CISST_WSOCK_LIBRARY WSOCK32)
+endif (WIN32)
+
 
 add_subdirectory (code)
-
-if (TARGET cisstOSAbstraction)
-  if ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
-    target_link_libraries (cisstOSAbstraction PUBLIC socket)
-  elseif (UNIX AND NOT APPLE)
-    target_link_libraries (cisstOSAbstraction PUBLIC rt)
-  elseif (WIN32)
-    target_link_libraries (cisstOSAbstraction PUBLIC WSOCK32)
-  endif ()
-endif ()
 
 cisst_offer_python (cisstOSAbstraction)
 

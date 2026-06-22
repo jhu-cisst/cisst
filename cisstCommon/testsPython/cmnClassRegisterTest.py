@@ -41,7 +41,7 @@ class ClassRegisterTest(unittest.TestCase):
             try:
                 it = self.classRegister.__iter__()
                 while True:
-                    key, classInfo = it.next()
+                    key, classInfo = next(it)
                     if classInfo.GetName() == "cmnPath":
                         found_cmnPath = True
             except StopIteration:

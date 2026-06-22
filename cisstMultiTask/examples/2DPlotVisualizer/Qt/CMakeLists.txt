@@ -17,14 +17,11 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstOSAbstraction
                               cisstMultiTask
                               cisstMultiTaskQt
-                              cisstParameterTypes
-                              cisstQt)
-
-find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
+                              cisstParameterTypes)
 
 add_executable (mtsExQt2DPlotVisualizerQt
                 ../TestComponent.h
                 ../TestComponent.cpp
                 main.cpp)
 set_property (TARGET mtsExQt2DPlotVisualizerQt PROPERTY FOLDER "cisstMultiTask/examples")
-target_link_libraries (mtsExQt2DPlotVisualizerQt ${cisst_LIBRARIES})
+target_link_libraries (mtsExQt2DPlotVisualizerQt ${REQUIRED_CISST_LIBRARIES})

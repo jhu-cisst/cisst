@@ -124,7 +124,33 @@ install (
   DESTINATION "include/cisstCommon")
 
 if (CISST_HAS_JSON)
+  target_include_directories (cisstCommon PUBLIC "$<BUILD_INTERFACE:${JSON_INCLUDE_DIR}>")
+  if (TARGET cisstJsonCpp)
+    set_property (TARGET cisstCommon APPEND PROPERTY
+                  LINK_LIBRARIES cisstJsonCpp)
+    set_property (TARGET cisstCommon APPEND PROPERTY
+                  INTERFACE_LINK_LIBRARIES cisstJsonCpp)
+  else ()
+    if (JSON_LIBRARY_DIRS)
+      target_link_directories (cisstCommon PUBLIC "$<BUILD_INTERFACE:${JSON_LIBRARY_DIRS}>")
+    endif ()
+    target_link_libraries (cisstCommon ${JSON_LIBRARIES})
+  endif ()
   if (NOT JSON_USE_SYSTEM_VERSION)
     add_dependencies (cisstCommon cisstJSONExternal)
   endif ()
+endif ()
+
+if (CISST_HAS_LINUX_RTAI)
+  target_include_directories (cisstCommon PUBLIC ${RTAI_INCLUDE_DIR})
+  target_link_libraries (cisstCommon ${RTAI_LIBRARIES})
+endif ()
+
+if (CISST_HAS_LINUX_XENOMAI)
+  target_include_directories (cisstCommon PUBLIC ${CISST_XENOMAI_INCLUDE_DIRECTORIES})
+  target_link_libraries (cisstCommon ${CISST_XENOMAI_LIBRARIES})
+endif ()
+
+if (CMAKE_THREAD_LIBS_INIT)
+  target_link_libraries (cisstCommon ${CMAKE_THREAD_LIBS_INIT})
 endif ()

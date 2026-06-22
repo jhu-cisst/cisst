@@ -15,14 +15,14 @@ cmake_minimum_required (VERSION 3.16)
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
   if (CISST_SVL_HAS_X11 OR WIN32)
     add_executable (svlExSimpleStream simplestream.cpp)
     set_property (TARGET svlExSimpleStream PROPERTY FOLDER "cisstStereoVision/examples")
-    target_link_libraries (svlExSimpleStream ${cisst_LIBRARIES})
+    target_link_libraries (svlExSimpleStream ${REQUIRED_CISST_LIBRARIES})
   else (CISST_SVL_HAS_X11 OR WIN32)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")
   endif (CISST_SVL_HAS_X11 OR WIN32)

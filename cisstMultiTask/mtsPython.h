@@ -6,8 +6,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -64,16 +63,5 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsVector.h>
 #include <cisstMultiTask/mtsMatrix.h>
-
-// For IRE, because EnableDynamicComponentManagement is protected
-// This could be instead be added to mtsComponent.h
-// (also see mtsComponentWithManagement in cisstMultiTask.i)
-class mtsComponentWithManagement : public mtsComponent
-{
-public:
-    mtsComponentWithManagement(const std::string &name)
-        : mtsComponent(name) { EnableDynamicComponentManagement(); }
-    ~mtsComponentWithManagement() {}
-};
 
 #endif // _mtsPython_h

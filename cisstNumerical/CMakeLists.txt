@@ -23,15 +23,9 @@ option (CISST_NMR_COMPILE_POLYNOMIALS "Compile the cisstNumerical polynomial cla
 
 if (CISST_HAS_CISSTNETLIB)
   find_package (CisstNetlib REQUIRED)
-else (CISST_HAS_CISSTNETLIB)
 endif (CISST_HAS_CISSTNETLIB)
 
 add_subdirectory (code)
-
-if (TARGET cisstNumerical AND CISST_HAS_CISSTNETLIB)
-  target_include_directories (cisstNumerical PUBLIC ${CISSTNETLIB_INCLUDE_DIR})
-  target_link_libraries      (cisstNumerical PUBLIC ${CISSTNETLIB_LIBRARIES})
-endif ()
 
 # SWIG Python wrappers and tests
 cisst_offer_python (cisstNumerical)

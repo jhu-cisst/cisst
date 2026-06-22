@@ -17,8 +17,7 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstOSAbstraction
                               cisstMultiTask
                               cisstMultiTaskQt
-                              cisstParameterTypes
-                              cisstQt)
+                              cisstParameterTypes)
 
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
@@ -28,7 +27,7 @@ if (cisst_FOUND)
                   TestComponent.cpp
                   main.cpp)
   set_property (TARGET prmExQt PROPERTY FOLDER "cisstParameterTypes/examples")
-  target_link_libraries (prmExQt ${cisst_LIBRARIES})
+  target_link_libraries (prmExQt ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

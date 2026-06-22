@@ -11,15 +11,9 @@
 #
 # --- end cisst license ---
 
-# paths for headers/libraries
-
 if (CISST_HAS_XML AND NOT ("${CISST_XML_LIB}" STREQUAL "QtXML"))
   set (INCLUDE_XML_TEST TRUE)
 endif (CISST_HAS_XML AND NOT ("${CISST_XML_LIB}" STREQUAL "QtXML"))
-
-# set path for XML if needed
-if (INCLUDE_XML_TEST)
-endif (INCLUDE_XML_TEST)
 
 # Configure the OS test program
 get_filename_component (CMAKE_C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
@@ -94,7 +88,9 @@ endif (CISST_HAS_JSON)
 # Add executable for C++ tests
 add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES} ${cisstCommonTests_CISST_DG_SRCS})
 set_property (TARGET cisstCommonTests PROPERTY FOLDER "cisstCommon/tests")
-target_link_libraries (cisstCommonTests cisstCommon cisstTestsDriver)
+target_link_libraries (cisstCommonTests
+  cisstCommon
+  cisstTestsDriver)
 
 # Add a static library with some classes registered
 add_library (cmnClassRegisterTestStatic
@@ -104,7 +100,7 @@ if (CISST_HAS_JSON AND NOT JSON_USE_SYSTEM_VERSION)
   add_dependencies (cmnClassRegisterTestStatic cisstJSONExternal)
 endif ()
 set_property (TARGET cmnClassRegisterTestStatic PROPERTY FOLDER "cisstCommon/tests")
-target_link_libraries (cmnClassRegisterTestStatic PRIVATE cisstCommon)
+target_link_libraries (cmnClassRegisterTestStatic cisstCommon)
 target_link_libraries (cisstCommonTests cmnClassRegisterTestStatic)
 
 # Add a dynamic library with some classes registered

@@ -11,8 +11,6 @@
 #
 # --- end cisst license ---
 
-# paths for headers/libraries
-
 # all source files
 set (SOURCE_FILES
   mshAlgPDTreeCPMeshTest.cpp
@@ -25,7 +23,10 @@ set (HEADER_FILES
 
 add_executable (cisstMeshTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstMeshTests PROPERTY FOLDER "cisstMesh/tests")
-target_link_libraries (cisstMeshTests cisstCommon cisstMesh cisstTestsDriver)
+target_link_libraries (cisstMeshTests
+  cisstTestsDriver
+  cisstCommon
+  cisstMesh)
 
 # to generate a CTest list of tests
 cisst_add_test (cisstMeshTests INSTANCES 2 ITERATIONS 2)
