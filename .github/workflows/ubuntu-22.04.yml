@@ -70,8 +70,8 @@ jobs:
     - name: Download cisstNetlib
       shell: bash
       run: |
-        git clone --depth 1 -b devel https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
-        echo "CISSTNETLIB_HASH=$(git -C ${{github.workspace}}/cisstNetlib-source rev-parse HEAD)" >> $GITHUB_ENV
+        git clone --depth 1 -b devel https://github.com/jhu-cisst/cisstNetlib $GITHUB_WORKSPACE/cisstNetlib-source
+        echo "CISSTNETLIB_HASH=$(git -C $GITHUB_WORKSPACE/cisstNetlib-source rev-parse HEAD)" >> $GITHUB_ENV
 
     - name: Cache cisstNetlib build
       id: cache-cisstnetlib
@@ -87,10 +87,10 @@ jobs:
         CCACHE_NOHASHDIR: "true"
         CCACHE_COMPRESS: "true"
       run: |
-        mkdir -p ${{github.workspace}}/cisstNetlib-build
-        cd ${{github.workspace}}/cisstNetlib-build
-        cmake ${{github.workspace}}/cisstNetlib-source \
-          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/cisstNetlib-install \
+        mkdir -p $GITHUB_WORKSPACE/cisstNetlib-build
+        cd $GITHUB_WORKSPACE/cisstNetlib-build
+        cmake $GITHUB_WORKSPACE/cisstNetlib-source \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/cisstNetlib-install \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build . --config Release --parallel $(nproc)
@@ -111,7 +111,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -DCisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib \
+          -DCisstNetlib_DIR=$GITHUB_WORKSPACE/cisstNetlib-install/share/cisstNetlib \
           -C ../.github/workflows/cmake-ubuntu-cache.cmake
 
     - name: Build

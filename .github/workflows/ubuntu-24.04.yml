@@ -91,10 +91,10 @@ jobs:
         CCACHE_NOHASHDIR: "true"
         CCACHE_COMPRESS: "true"
       run: |
-        mkdir -p ${{github.workspace}}/cisstNetlib-build
-        cd ${{github.workspace}}/cisstNetlib-build
-        cmake ${{github.workspace}}/cisstNetlib-source \
-          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/cisstNetlib-install \
+        mkdir -p $GITHUB_WORKSPACE/cisstNetlib-build
+        cd $GITHUB_WORKSPACE/cisstNetlib-build
+        cmake $GITHUB_WORKSPACE/cisstNetlib-source \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/cisstNetlib-install \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build . --config Release --parallel $(nproc)
@@ -116,7 +116,7 @@ jobs:
           -DCISST_QT_VERSION=${{ matrix.qt_version }} \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -DCisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib \
+          -DCisstNetlib_DIR=$GITHUB_WORKSPACE/cisstNetlib-install/share/cisstNetlib \
           -C ../.github/workflows/cmake-ubuntu-cache.cmake
 
     - name: Build
