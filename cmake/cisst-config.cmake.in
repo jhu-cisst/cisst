@@ -229,6 +229,14 @@ if (EXISTS ${_cisstTargets_file})
 endif ()
 unset (_cisstTargets_file CACHE)
 
+if (CISST_HAS_CISSTNETLIB)
+  find_dependency (CisstNetlib)
+  if (TARGET cisst::cisstNumerical)
+    set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CISSTNETLIB_INCLUDE_DIR}")
+    set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${CISSTNETLIB_LIBRARIES}")
+  endif ()
+endif ()
+
 find_file (_cisstSettings_file
            cisstSettings.cmake
            PATHS ${CISST_CMAKE_DIRS}
