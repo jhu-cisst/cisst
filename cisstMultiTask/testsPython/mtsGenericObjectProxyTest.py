@@ -1,14 +1,10 @@
 # -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
-#
-#
-
 # Author: Anton Deguet
 # Date: 2010-01-20
 #
-# (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -34,43 +30,43 @@ class GenericObjectProxyTest(unittest.TestCase):
         """Test mtsInt"""
         variable = cisstMultiTaskPython.mtsInt(4)
         # check type
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsInt))
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
-        self.failUnless(isinstance(variable, cisstCommonPython.cmnGenericObject))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsInt))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
+        self.assertTrue(isinstance(variable, cisstCommonPython.cmnGenericObject))
         # check default value and modify
-        self.failUnless(variable.Data == 4)
+        self.assertTrue(variable.Data == 4)
         variable.Data = 8
-        self.failUnless(variable.Data == 8)
+        self.assertTrue(variable.Data == 8)
 
     def Test_mtsDouble(self):
         """Test mtsDouble"""
         variable = cisstMultiTaskPython.mtsDouble(4.0)
         # check type
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsDouble))
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
-        self.failUnless(isinstance(variable, cisstCommonPython.cmnGenericObject))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsDouble))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
+        self.assertTrue(isinstance(variable, cisstCommonPython.cmnGenericObject))
         # check default value and modify
-        self.failUnless(variable.Data == 4.0)
+        self.assertTrue(variable.Data == 4.0)
         variable.Data = 8.0
-        self.failUnless(variable.Data == 8.0)
+        self.assertTrue(variable.Data == 8.0)
 
     def Test_mtsGenericObject(self):
         """Test mtsGenericObject methods"""
         variable = cisstMultiTaskPython.mtsInt(4)
         # check type
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsInt))
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsInt))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
         # check default timestamp and modify
         timestamp = variable.GetTimestamp()
-        self.failUnless(timestamp == 0.0)
+        self.assertTrue(timestamp == 0.0)
         variable.SetTimestamp(10.0)
         timestamp = variable.GetTimestamp()
-        self.failUnless(timestamp == 10.0)
+        self.assertTrue(timestamp == 10.0)
         # check default valid flag and modify
         valid = variable.GetValid()
-        self.failUnless(valid == True)
+        self.assertTrue(valid == True)
         variable.SetValid(False)
         valid = variable.GetValid()
-        self.failUnless(valid == False)
+        self.assertTrue(valid == False)
         
 

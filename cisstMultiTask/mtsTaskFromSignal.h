@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-12-10
 
-  (C) Copyright 2009-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -85,8 +85,7 @@ class CISST_EXPORT mtsTaskFromSignal: public mtsTaskContinuous
 
     /* documented in base class */
     mtsInterfaceProvided * AddInterfaceProvidedWithoutSystemEvents(const std::string & newInterfaceName,
-                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
-                                                                   bool isProxy = false) override;
+                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY) override;
 
 };
 

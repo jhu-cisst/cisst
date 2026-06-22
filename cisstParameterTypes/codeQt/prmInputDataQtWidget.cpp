@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2019-01-03
 
-  (C) Copyright 2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2019-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QHBoxLayout>
 #include <QLabel>
 
+#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 

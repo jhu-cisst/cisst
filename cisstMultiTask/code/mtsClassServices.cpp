@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,6 +48,8 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsComponentConstructorNameAndString)
 //CMN_IMPLEMENT_SERVICES(mtsComponent)
 // mtsComponent: allow dynamic creation with std::string constructor arg
 CMN_IMPLEMENT_SERVICES_INTERNAL(mtsComponent, 0, mtsGenericTypes<std::string>::FinalType)
+// mtsComponentWithManagement: allow dynamic creation with std::string constructor arg
+CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentWithManagement, mtsComponent, std::string)
 
 #include <cisstMultiTask/mtsComponentAddLatency.h>
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(mtsComponentAddLatency, mtsTaskPeriodic, mtsTaskPeriodicConstructorArg)
@@ -313,13 +315,8 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsBoolMat)
 
 #ifdef MTS_CLASS_SERVICES_PART1
 
-#include <cisstMultiTask/mtsManagerGlobal.h>
-CMN_IMPLEMENT_SERVICES(mtsManagerGlobal)
-CMN_IMPLEMENT_SERVICES(mtsManagerGlobalInterface)
-
 #include <cisstMultiTask/mtsManagerLocal.h>
 CMN_IMPLEMENT_SERVICES(mtsManagerLocal)
-CMN_IMPLEMENT_SERVICES(mtsManagerLocalInterface)
 
 #include <cisstMultiTask/mtsInterfaceCommon.h>
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsInterfaceProvidedDescriptionProxy);

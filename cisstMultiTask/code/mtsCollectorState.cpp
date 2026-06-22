@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -74,7 +74,7 @@ mtsCollectorState::~mtsCollectorState()
     }
     // this is a stream created internally, we should clean it
     if (this->OutputFile) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "desctructor: closing file \"" << this->OutputFileName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "destructor: closing file \"" << this->OutputFileName << "\"" << std::endl;
         this->OutputFile->close();
         delete this->OutputFile;
     }
@@ -87,7 +87,7 @@ bool mtsCollectorState::SetStateTable(const std::string & componentName,
     // check if this component has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "SetStateTable: collector \"" << this->GetName()
-                                 << "\" is already connected, you can not modify the state table to collect" << std::endl;
+                                 << "\" is already connected, you cannot modify the state table to collect" << std::endl;
         return false;
     }
     // check if there is the specified component and the specified state table.
@@ -99,12 +99,12 @@ bool mtsCollectorState::SetStateTable(const std::string & componentName,
     // this task needs a pointer on the state table to perform a fast copy
     this->TargetStateTable = this->TargetComponent->GetStateTable(stateTableName);
     if (!this->TargetStateTable) {
-        CMN_LOG_CLASS_INIT_ERROR << "Initialize: can not find state table \""
+        CMN_LOG_CLASS_INIT_ERROR << "Initialize: cannot find state table \""
                                  << stateTableName << "\" in component \""
                                  << componentName << "\" for collector \""
                                  << this->GetName() << "\"" << std::endl;
         this->TargetComponent = 0;
-        cmnThrow(std::runtime_error("mtsCollectorState::SetStateTable: can not find state table."));
+        cmnThrow(std::runtime_error("mtsCollectorState::SetStateTable: cannot find state table."));
     }
     return true;
 }

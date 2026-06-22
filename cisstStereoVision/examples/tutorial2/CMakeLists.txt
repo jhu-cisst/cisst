@@ -1,6 +1,5 @@
 #
-# (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2014-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -11,7 +10,7 @@
 # --- end cisst license ---
 
 # [doc-cmake-start]
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.16)
 
 # create a list of libraries needed for this project
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
@@ -21,16 +20,13 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   add_executable (svlExTutorial2
                   CMyEventHandler.h
                   CMyEventHandler.cpp
                   main.cpp
                   )
   set_property (TARGET svlExTutorial2 PROPERTY FOLDER "cisstStereoVision/examples")
-  cisst_target_link_libraries (svlExTutorial2 ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (svlExTutorial2 ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")

@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2006-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2006-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -11,18 +9,15 @@
 #
 # --- end cisst license ---
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.16)
 
 # create a list of libraries needed for this project
-set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt cisstQt)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision cisstStereoVisionQt)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
+find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
-
-  # load cisst configuration
-  include (${CISST_USE_FILE})
 
   if (CISST_SVL_HAS_X11 OR WIN32)
 
@@ -31,10 +26,11 @@ if (cisst_FOUND)
     else (CISST_HAS_QT4)
       set (USED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)
     endif (CISST_HAS_QT4)
+    list (TRANSFORM USED_CISST_LIBRARIES PREPEND "cisst::")
 
     add_executable (svlExVideoPlayer videoplayer.cpp)
     set_property (TARGET svlExVideoPlayer PROPERTY FOLDER "cisstStereoVision/examples")
-    cisst_target_link_libraries (svlExVideoPlayer ${USED_CISST_LIBRARIES})
+    target_link_libraries (svlExVideoPlayer ${USED_CISST_LIBRARIES})
 
   else (CISST_SVL_HAS_X11 OR WIN32)
     message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires CISST_SVL_HAS_X11 or WIN32")

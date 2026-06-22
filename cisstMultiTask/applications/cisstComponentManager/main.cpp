@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2011-04-03
 
-  (C) Copyright 2011-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnTokenizer.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
-#include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 
@@ -565,10 +565,10 @@ bool shellTask::Connections(const std::vector<std::string> &args) const
                 // Following is same as mtsDescriptionConnection::ToStream, except that is does not
                 // stream out the mtsGenericObject base.
                 std::cout << "  (" << connection.ConnectionID << ") "
-                          << mtsManagerGlobal::GetInterfaceUID(connection.Client.ProcessName,
+                          << mtsManagerComponent::GetInterfaceUID(connection.Client.ProcessName,
                                                connection.Client.ComponentName, connection.Client.InterfaceName)
                           << " - "
-                          << mtsManagerGlobal::GetInterfaceUID(connection.Server.ProcessName,
+                          << mtsManagerComponent::GetInterfaceUID(connection.Server.ProcessName,
                                                connection.Server.ComponentName, connection.Server.InterfaceName)
                           << std::endl;
             }
@@ -684,7 +684,7 @@ bool shellTask::Echo(const std::string &message) const
     return true;
 }
 
-// Syntax:  cisstComponentManager [global|local|ip_addr] [process_name] [-e filename] [-c commands]
+// Syntax:  cisstComponentManager [-e filename] [-c commands]
 int main(int argc, char * argv[])
 {
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
@@ -693,20 +693,7 @@ int main(int argc, char * argv[])
     // Enable system-wide thread-safe Logger
     mtsManagerLocal::SetLogForwarding(true);
 
-    mtsManagerLocal * localManager = 0;;
-
-    if ((argc < 2) || (strcmp(argv[1], "local") == 0) || (argv[1][0] == '-')) {
-        // Local configuration
-        std::string processName("ProcessShell");
-        if ((argc >= 3) && (argv[2][0] != '-'))
-            processName = argv[2];
-        // For now, ignoring processName
-        localManager = mtsManagerLocal::GetInstance();
-    }
-    else {
-        std::cout << "No network support -- set CISST_MTS_HAS_ICE via CMake" << std::endl;
-        return 1;
-    }
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
     shellTask *shell = new shellTask("cisstShell", argc, argv);
     localManager->AddComponent(shell);

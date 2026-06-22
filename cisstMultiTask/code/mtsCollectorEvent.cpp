@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-02-12
 
-  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -266,7 +266,7 @@ bool mtsCollectorEvent::AddObservedComponent(const mtsComponent * componentPoint
     // check if this task has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObservedComponent: collector \"" << this->GetName()
-                                 << "\" is already connected, you can not add an observed component" << std::endl;
+                                 << "\" is already connected, you cannot add an observed component" << std::endl;
         return false;
     }
     CMN_LOG_CLASS_INIT_DEBUG << "AddObservedComponent: adding component \""
@@ -311,7 +311,7 @@ bool mtsCollectorEvent::AddObservedInterface(const mtsComponent * componentPoint
     // check if this task has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObservedInterface: collector \"" << this->GetName()
-                                 << "\" is already connected, you can not add an observed interface" << std::endl;
+                                 << "\" is already connected, you cannot add an observed interface" << std::endl;
         return false;
     }
     CMN_ASSERT(componentPointer);
@@ -386,7 +386,7 @@ bool mtsCollectorEvent::AddObservedEventVoid(const mtsComponent * componentPoint
     // check if this task has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObservedEventVoid: collector \"" << this->GetName()
-                                 << "\" is already connected, you can not add an observed event" << std::endl;
+                                 << "\" is already connected, you cannot add an observed event" << std::endl;
         return false;
     }
     CMN_ASSERT(componentPointer);
@@ -423,7 +423,7 @@ bool mtsCollectorEvent::AddObservedEventWrite(const mtsComponent * componentPoin
     // check if this task has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObservedEventWrite: collector \"" << this->GetName()
-                                 << "\" is already connected, you can not add an observed event" << std::endl;
+                                 << "\" is already connected, you cannot add an observed event" << std::endl;
         return false;
     }
     CMN_ASSERT(componentPointer);

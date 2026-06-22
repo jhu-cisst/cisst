@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctVector3DQtWidget.h>
 #include <QKeyEvent>
 #include <QPainter>
+#include <QtGlobal>
 
 const double vctVector3DQtWidgetDefaultMax = 0.0001;
 
@@ -74,7 +75,11 @@ void vctVector3DQtWidget::mouseMoveEvent(QMouseEvent * event)
 {
     const double sensitivity = 0.01;
     if (event->buttons() & Qt::LeftButton) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        const vctInt2 newMousePosition(event->position().x(), event->position().y());
+#else
         const vctInt2 newMousePosition(event->x(), event->y());
+#endif
         if (mStartMousePosition != 0) {
             const vct2 deltaMouse = sensitivity * vct2(newMousePosition - mStartMousePosition);
             vctRodRot3 deltaRot(deltaMouse.Y(), deltaMouse.X(), 0.0);
@@ -225,7 +230,7 @@ void vctVector3DQtWidget::paintGL(void)
     painter.setFont(QFont("Helvetica", font_size));
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     painter.drawText(1, 1 + font_size,
-                     QString().sprintf("%0.2f/%0.2f", mVectorNorm, mMaxNorm));
+                     QString::asprintf("%0.2f/%0.2f", mVectorNorm, mMaxNorm));
     painter.end();
 
     glFlush();

@@ -6,8 +6,7 @@
   Author(s):  Praneeth Sadda, Anton Deguet
   Created on: 2011-11-11
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <QMainWindow>
 
 #include <cisstMultiTask/mtsManagerLocal.h>
-#include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsQtVisualizerShell.h>
 
 int main(int argc, char** argv)
@@ -36,9 +34,7 @@ int main(int argc, char** argv)
     cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cerr, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
-    mtsManagerGlobal globalManager;
-
-    mtsManagerLocal * manager = mtsManagerLocal::GetInstance(globalManager);
+    mtsManagerLocal * manager = mtsManagerLocal::GetInstance();
     TestComponent * testComponent = new TestComponent();
     testComponent->Configure("");
     manager->AddComponent(testComponent);
@@ -46,7 +42,7 @@ int main(int argc, char** argv)
     QApplication app(argc, argv);
 
     QMainWindow win;
-    win.setCentralWidget(new mtsQtVisualizerShell(&globalManager));
+    win.setCentralWidget(new mtsQtVisualizerShell(manager));
     win.show();
 
     manager->CreateAll();

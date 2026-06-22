@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2007-02-11
 
-  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -56,6 +56,15 @@ void vctRandom(vctDynamicMatrixBase<_matrixOwnerType, _elementType> & matrix,
         randomSequence.ExtractRandomValue(min, max,
                                           *iter);
     }
+}
+
+template <typename _elementType>
+void vctRandom(vctDynamicMatrixRef<_elementType> && matrix,
+               const typename vctDynamicMatrixRef<_elementType>::value_type min,
+               const typename vctDynamicMatrixRef<_elementType>::value_type max)
+{
+    typename vctDynamicMatrixRef<_elementType>::BaseType & base = matrix;
+    vctRandom(base, min, max);
 }
 
 #endif  // _vctRandomDynamicMatrix_h

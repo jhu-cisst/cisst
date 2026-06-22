@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // include what is needed from cisst
 #include <cisstVector/vctTransformationTypes.h>
-#include <cisstVector/vctQtForwardDeclarations.h>
+#include <cisstVector/vctForwardDeclarationsQt.h>
 
 #include <QFrame>
 #include <QVBoxLayout>

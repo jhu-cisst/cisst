@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 #include <cisstMultiTask/mtsFunctionVoidReturn.h>
 #include <cisstMultiTask/mtsFunctionWriteReturn.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
@@ -149,8 +150,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
-    friend class mtsManagerLocal;
-    friend class mtsComponentProxy;
+    friend class mtsManagerComponent;
 
  protected:
 
@@ -312,8 +312,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       safety. */
     virtual mtsInterfaceProvided *
         AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
-                                                bool isProxy = false);
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceProvided * AddProvidedInterface(const std::string & interfaceProvidedName) {
@@ -354,7 +353,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     size_t GetNumberOfInterfacesOutput(void) const;
 
     /*! Remove a provided interface identified by its name */
-    bool RemoveInterfaceProvided(const std::string & interfaceProvidedName, const bool skipDisconnect = false);
+    bool RemoveInterfaceProvided(const std::string & interfaceProvidedName);
 
     /*! Remove an output interface identified by its name */
     //bool RemoveInterfaceOutput(const std::string & interfaceOutputName);
@@ -404,13 +403,13 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     size_t GetNumberOfInterfacesInput(void) const;
 
     /*! Remove a required interface identified by its name */
-    bool RemoveInterfaceRequired(const std::string & interfaceRequiredName, const bool skipDisconnect = false);
+    bool RemoveInterfaceRequired(const std::string & interfaceRequiredName);
 
     /*! Remove an input interface identified by its name */
     //bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
     /*! Get pointer to manager component services, which extends the internal required interface
-      to the Manager Component Client (MCC).  This is used by the IRE (Python wrapping) */
+      to the Manager Component Client (MCS).  This is used by the IRE (Python wrapping) */
     const mtsManagerComponentServices *GetManagerComponentServices(void) const
     { return this->ManagerComponentServices; }
     mtsManagerComponentServices *GetManagerComponentServices(void)
@@ -565,8 +564,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
     void InterfaceInternalCommands_RemoveEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg & argout);
     void InterfaceInternalCommands_RemoveObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout);
-    void InterfaceInternalCommands_ComponentCreate(const mtsDescriptionComponent & componentDescription, bool & result);
-    void InterfaceInternalCommands_ComponentStartOther(const mtsComponentStatusControl & arg);
 
  public:
     /*! Send a human readable description of the component. */
@@ -594,5 +591,21 @@ inline std::string mtsObjectName(const mtsComponent * object) {
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponent)
 
+
+// Following derived class enables dynamic component management.
+class CISST_EXPORT mtsComponentWithManagement : public mtsComponent
+{
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
+
+public:
+    /*! Default constructor. Sets the name. */
+    mtsComponentWithManagement(const std::string &deviceName) : mtsComponent(deviceName)
+        { EnableDynamicComponentManagement(); }
+
+    /*! Default destructor. Does nothing. */
+    virtual ~mtsComponentWithManagement() { }
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentWithManagement)
 
 #endif // _mtsComponent_h

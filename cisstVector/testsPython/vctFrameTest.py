@@ -1,14 +1,10 @@
 # -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
-#
-#
-
 # Author: Anton Deguet
 # Date: 2010-01-20
 #
-# (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -27,8 +23,8 @@ from cisstVectorPython import vctFrm3
 class FrameTest(unittest.TestCase):
     def setUp(self):
         """Call before every test case."""
-        self.ZeroTranslation = numpy.zeros(3, numpy.float)
-        self.IdentityRotation = numpy.zeros((3, 3), numpy.float)
+        self.ZeroTranslation = numpy.zeros(3, numpy.float64)
+        self.IdentityRotation = numpy.zeros((3, 3), numpy.float64)
         self.IdentityRotation[0, 0] = 1.0
         self.IdentityRotation[1, 1] = 1.0
         self.IdentityRotation[2, 2] = 1.0
@@ -41,10 +37,10 @@ class FrameTest(unittest.TestCase):
         frame = vctFrm3()
         translation = frame.Translation()
         translationIsZero = (self.ZeroTranslation == translation).all()
-        self.failUnless(translationIsZero)
+        self.assertTrue(translationIsZero)
         rotation = frame.Rotation()
         rotationIsIdentity = (self.IdentityRotation == rotation).all()
-        self.failUnless(rotationIsIdentity)
+        self.assertTrue(rotationIsIdentity)
 
     def TestTranslationModification(self):
         """Test translation modification."""
@@ -53,10 +49,10 @@ class FrameTest(unittest.TestCase):
         translation.fill(10.0)
         translationOtherRef = frame.Translation()
         translationsAreEqual = (translation == translationOtherRef).all()
-        self.failUnless(translationsAreEqual)
+        self.assertTrue(translationsAreEqual)
 
     def TestRotationModification(self):
-        """Test translation modification."""
+        """Test rotation modification."""
         frame = vctFrm3()
         rotation = frame.Rotation()
         rotation[0, 0] = 0.0
@@ -65,5 +61,5 @@ class FrameTest(unittest.TestCase):
         rotation[1, 1] = 0.0
         rotationOtherRef = frame.Rotation()
         rotationsAreEqual = (rotation == rotationOtherRef).all()
-        self.failUnless(rotationsAreEqual)
-        self.failUnless(numpy.linalg.det(rotation) == 1.0)
+        self.assertTrue(rotationsAreEqual)
+        self.assertTrue(numpy.linalg.det(rotation) == 1.0)
