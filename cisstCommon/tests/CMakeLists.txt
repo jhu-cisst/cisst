@@ -90,10 +90,7 @@ add_executable (cisstCommonTests ${SOURCE_FILES} ${HEADER_FILES} ${cisstCommonTe
 set_property (TARGET cisstCommonTests PROPERTY FOLDER "cisstCommon/tests")
 target_link_libraries (cisstCommonTests
   cisstCommon
-  cisstTestsDriver
-  cmnClassRegisterTestStatic
-  cmnClassRegisterTestDynamic
-  cisstCommonXML)
+  cisstTestsDriver)
 
 # Add a static library with some classes registered
 add_library (cmnClassRegisterTestStatic
@@ -104,6 +101,7 @@ if (CISST_HAS_JSON AND NOT JSON_USE_SYSTEM_VERSION)
 endif ()
 set_property (TARGET cmnClassRegisterTestStatic PROPERTY FOLDER "cisstCommon/tests")
 target_link_libraries (cmnClassRegisterTestStatic cisstCommon)
+target_link_libraries (cisstCommonTests cmnClassRegisterTestStatic)
 
 # Add a dynamic library with some classes registered
 if (NOT CISST_BUILD_SHARED_LIBS)
@@ -113,6 +111,7 @@ else (NOT CISST_BUILD_SHARED_LIBS)
                SHARED
                cmnClassRegisterTestDynamic.cpp cmnClassRegisterTestDynamic.h)
   set_property (TARGET cmnClassRegisterTestDynamic PROPERTY FOLDER "cisstCommon/tests")
+  target_link_libraries (cisstCommonTests cmnClassRegisterTestDynamic)
   target_link_libraries (cmnClassRegisterTestDynamic cisstCommon)
 endif (NOT CISST_BUILD_SHARED_LIBS)
 
@@ -120,6 +119,7 @@ endif (NOT CISST_BUILD_SHARED_LIBS)
 cisst_add_test (cisstCommonTests ITERATIONS 2 INSTANCES 2)
 
 if (INCLUDE_XML_TEST)
+  target_link_libraries (cisstCommonTests cisstCommonXML)
 endif (INCLUDE_XML_TEST)
 
 set_target_properties (cisstCommonTests
