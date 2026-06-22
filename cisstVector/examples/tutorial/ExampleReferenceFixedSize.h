@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// [doc-example-start]
 void ExampleReferenceFixedSize(void) {
     // define our preferred type
     typedef vctFixedSizeMatrix<float,4,4> MatrixType;
@@ -59,3 +60,4 @@ void ExampleReferenceFixedSize(void) {
         std::cerr << "Exception received: " << Exception.what() << std::endl;
     }
 }
+// [doc-example-end]

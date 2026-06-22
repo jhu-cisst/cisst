@@ -338,6 +338,7 @@ if (CISST_HAS_JSON)
                                           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                                           -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_TOOLCHAIN_FILE}
                                           -DCMAKE_CXX_FLAGS:STRING=${JSON_CMAKE_CXX_FLAGS}
+                                          -DCMAKE_POLICY_VERSION_MINIMUM:STRING=3.5
                                           -DOPTION_BUILD_EXAMPLES:BOOL=OFF
                                           -DJSONCPP_WITH_TESTS:BOOL=OFF
                                           -DJSONCPP_WITH_POST_BUILD_UNITTEST:BOOL=OFF

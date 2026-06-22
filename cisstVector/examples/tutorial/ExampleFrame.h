@@ -16,6 +16,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// [doc-example-start]
 void ExampleFrame(void) {
     // create 3 points
     vct3 point000(0.0, 0.0, 0.0);
@@ -113,3 +114,4 @@ void ExampleFrame(void) {
     std::cout << "Identity frame: " << std::endl
               << vctFrm3::Identity() << std::endl;
 }
+// [doc-example-end]

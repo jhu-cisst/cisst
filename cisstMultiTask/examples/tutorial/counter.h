@@ -20,33 +20,41 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _counter_h
 #define _counter_h
 
+// [doc-task-header-start]
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 
 class counter: public mtsTaskPeriodic {
+// [doc-task-header-end]
 
     // used to control the log level, "Run Error" by default
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
  protected:
 
+    // [doc-state-table-members-start]
     // internal counter data
     double Counter;
 
     // increment used for the counter
     mtsStateTable ConfigurationStateTable;
     double Increment;
+    // [doc-state-table-members-end]
 
+    // [doc-event-members-start]
     // overflow event
     mtsFunctionVoid OverflowEvent;
 
     // event thrown if the increment value is invalid, sends current increment
     mtsFunctionWrite InvalidIncrementEvent;
+    // [doc-event-members-end]
 
     // internal method to configure this component
     void SetupInterfaces(void);
 
+    // [doc-command-methods-start]
     // internal methods used for the provided commands
     void SetIncrement(const double & increment);
     void Reset(void);
+    // [doc-command-methods-end]
 
  public:
     // provide a name for the task and define the frequency (time

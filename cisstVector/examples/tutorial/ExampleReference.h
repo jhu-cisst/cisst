@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// [doc-example-start]
 void ExampleReference(void) {
     // define our preferred type
     typedef vctDynamicMatrix<int> MatrixType;
@@ -59,3 +60,4 @@ void ExampleReference(void) {
         std::cout << "Exception received: " << Exception.what() << std::endl;
     }
 }
+// [doc-example-end]
