@@ -14,6 +14,9 @@ jobs:
     runs-on: ubuntu-24.04
     container:
       image: osrf/ros:jazzy-desktop
+    strategy:
+      matrix:
+        qt_version: [5, 6]
 
     steps:
     - uses: actions/checkout@v4
@@ -54,6 +57,8 @@ jobs:
           qtbase5-dev-tools \
           qt5-qmake-bin \
           libqt5xmlpatterns5-dev \
+          qt6-base-dev \
+          qt6-base-dev-tools \
           libgraphviz-dev \
           ccache
 
@@ -69,8 +74,8 @@ jobs:
     - name: Download cisstNetlib
       shell: bash
       run: |
-        git clone --depth 1 -b devel https://github.com/jhu-cisst/cisstNetlib ${{github.workspace}}/cisstNetlib-source
-        echo "CISSTNETLIB_HASH=$(git -C ${{github.workspace}}/cisstNetlib-source rev-parse HEAD)" >> $GITHUB_ENV
+        git clone --depth 1 -b devel https://github.com/jhu-cisst/cisstNetlib $GITHUB_WORKSPACE/cisstNetlib-source
+        echo "CISSTNETLIB_HASH=$(git -C $GITHUB_WORKSPACE/cisstNetlib-source rev-parse HEAD)" >> $GITHUB_ENV
 
     - name: Cache cisstNetlib build
       id: cache-cisstnetlib
@@ -108,6 +113,7 @@ jobs:
       run: |
         cmake .. \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCISST_QT_VERSION=${{ matrix.qt_version }} \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCisstNetlib_DIR=${{github.workspace}}/cisstNetlib-install/share/cisstNetlib \
@@ -137,17 +143,6 @@ jobs:
       working-directory: build
       shell: bash
       run: cmake --build . --config Release --parallel $(nproc)
-
-    - name: Test
-      working-directory: build
-      shell: bash
-      run: |
-        source cisstvars.sh
-        cisstCommonTests -r
-        cisstVectorTests -r
-        cisstNumericalTests -r
-        cisstOSAbstractionTests -r
-        cisstParameterTypesTests -r
 
     - name: Test exported targets against build tree
       shell: bash
@@ -181,6 +176,17 @@ jobs:
           -Dcisst_DIR="$CISST_DIR_PATH" \
           -DcisstNetlib_DIR=$GITHUB_WORKSPACE/cisstNetlib-install/share/cisstNetlib
         cmake --build . --config Release --parallel $(nproc)
+
+    - name: Test
+      working-directory: build
+      shell: bash
+      run: |
+        source cisstvars.sh
+        cisstCommonTests -r
+        cisstVectorTests -r
+        cisstNumericalTests -r
+        cisstOSAbstractionTests -r
+        cisstParameterTypesTests -r
 
     - name: ccache stats (after)
       run: ccache -s

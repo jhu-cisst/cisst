@@ -93,13 +93,6 @@ jobs:
         call cisstvars.bat Release
         cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
 
-    - name: Run Tests
-      working-directory: ${{github.workspace}}/build
-      shell: cmd
-      run: |
-        call cisstvars.bat Release
-        ctest -C Release --output-on-failure
-
     - name: Configure CMake examples
       working-directory: ${{github.workspace}}/build
       run: |
@@ -120,3 +113,48 @@ jobs:
       run: |
         call cisstvars.bat Release
         cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
+
+    - name: Test exported targets against build tree
+      shell: cmd
+      run: |
+        mkdir "${{github.workspace}}\test_export_build_tree_build"
+        cd "${{github.workspace}}\test_export_build_tree_build"
+        cmake "${{github.workspace}}/cisstMultiTask/examples/PeriodicTask" ^
+          -DCMAKE_BUILD_TYPE=Release ^
+          "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
+          "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
+          -DVCPKG_MANIFEST_INSTALL=OFF ^
+          -Dcisst_DIR="${{github.workspace}}/build" ^
+          -DcisstNetlib_DIR="${{github.workspace}}/cisstNetlib-install/share/cisstNetlib"
+        cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
+
+    - name: Install cisst
+      working-directory: ${{github.workspace}}/build
+      shell: cmd
+      run: |
+        cmake --install . --prefix ${{github.workspace}}/cisst-install
+
+    - name: Test exported targets against install tree
+      shell: cmd
+      run: |
+        mkdir "${{github.workspace}}\test_export_install_tree_build"
+        cd "${{github.workspace}}\test_export_install_tree_build"
+        cmake "${{github.workspace}}/cisstMultiTask/examples/PeriodicTask" ^
+          -DCMAKE_BUILD_TYPE=Release ^
+          "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
+          "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
+          -DVCPKG_MANIFEST_INSTALL=OFF ^
+          -Dcisst_DIR="${{github.workspace}}/cisst-install/share/cisst-1.4/cmake" ^
+          -DcisstNetlib_DIR="${{github.workspace}}/cisstNetlib-install/share/cisstNetlib"
+        cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
+
+    - name: Run Tests
+      working-directory: ${{github.workspace}}/build
+      shell: cmd
+      run: |
+        call cisstvars.bat Release
+        bin\Release\cisstCommonTests.exe -r
+        bin\Release\cisstVectorTests.exe -r
+        bin\Release\cisstNumericalTests.exe -r
+        bin\Release\cisstOSAbstractionTests.exe -r
+        bin\Release\cisstParameterTypesTests.exe -r

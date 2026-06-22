@@ -115,6 +115,39 @@ jobs:
         source cisstvars.sh
         cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
 
+    - name: Test exported targets against build tree
+      shell: bash
+      run: |
+        mkdir -p $GITHUB_WORKSPACE/test_export_build_tree_build
+        cd $GITHUB_WORKSPACE/test_export_build_tree_build
+        cmake $GITHUB_WORKSPACE/cisstMultiTask/examples/PeriodicTask \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -Dcisst_DIR=$GITHUB_WORKSPACE/build \
+          -DcisstNetlib_DIR=$GITHUB_WORKSPACE/cisstNetlib-install/share/cisstNetlib
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
+
+    - name: Install cisst
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --install . --prefix $GITHUB_WORKSPACE/cisst-install
+
+    - name: Test exported targets against install tree
+      shell: bash
+      run: |
+        CISST_DIR_PATH=$(find $GITHUB_WORKSPACE/cisst-install -name "cisst-config.cmake" -exec dirname {} \;)
+        echo "Found cisst cmake directory: $CISST_DIR_PATH"
+        mkdir -p $GITHUB_WORKSPACE/test_export_install_tree_build
+        cd $GITHUB_WORKSPACE/test_export_install_tree_build
+        cmake $GITHUB_WORKSPACE/cisstMultiTask/examples/PeriodicTask \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -Dcisst_DIR="$CISST_DIR_PATH" \
+          -DcisstNetlib_DIR=$GITHUB_WORKSPACE/cisstNetlib-install/share/cisstNetlib
+        cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
+
     - name: Test
       working-directory: ${{github.workspace}}/build
       shell: bash
