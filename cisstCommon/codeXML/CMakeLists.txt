@@ -67,11 +67,14 @@ cisst_add_library (LIBRARY cisstCommonXML
                    HEADER_FILES cmnExportXML.h cmnXMLPath.h
                    ADDITIONAL_HEADER_FILES ${CISST_CMN_XML_CONFIG_FILE})
 
-if (${CISST_XML_LIB} STREQUAL "LibXml2")
-  target_link_libraries (cisstCommonXML
-    LibXml2::LibXml2
-    ${CISST_QT_LIBRARIES})
-elseif (${CISST_XML_LIB} STREQUAL "QtXML")
+if ("${CISST_XML_LIB}" STREQUAL "LibXml2")
+  if (TARGET LibXml2::LibXml2)
+    target_link_libraries (cisstCommonXML PUBLIC LibXml2::LibXml2)
+  else ()
+    target_include_directories (cisstCommonXML PUBLIC ${LIBXML2_INCLUDE_DIR})
+    target_link_libraries (cisstCommonXML PUBLIC ${LIBXML2_LIBRARIES})
+  endif ()
+elseif ("${CISST_XML_LIB}" STREQUAL "QtXML")
 endif ()
 
 # Add libxml2 runtime dependencies (so far, only tested on WIN32).
