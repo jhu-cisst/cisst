@@ -22,11 +22,13 @@ cisst_add_library (LIBRARY cisstTestsDriver
 set_property (TARGET cisstTestsDriver PROPERTY FOLDER "cisstCommon/tests")
 
 if (TARGET CppUnit::CppUnit)
-  target_link_libraries (cisstTestsDriver CppUnit::CppUnit)
-else ()
   target_link_libraries (cisstTestsDriver
-                         optimized ${CPPUNIT_LIBRARIES}
-                         debug ${CPPUNIT_DEBUG_LIBRARIES})
+    CppUnit::CppUnit
+    optimized
+    ${CPPUNIT_LIBRARIES}
+    debug
+    ${CPPUNIT_DEBUG_LIBRARIES})
+else ()
   target_include_directories (cisstTestsDriver PUBLIC "$<BUILD_INTERFACE:${CPPUNIT_INCLUDE_DIR}>")
 endif ()
 

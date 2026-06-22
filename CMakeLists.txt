@@ -18,6 +18,12 @@ cmake_minimum_required (VERSION 3.16)
 # cisst (Computer Integrated Surgical Systems and Technology)
 project (cisst VERSION 1.4.0)
 
+# Provide a dropdown for CMAKE_BUILD_TYPE in ccmake/cmake-gui
+if (NOT CMAKE_BUILD_TYPE)
+  set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type." FORCE)
+endif ()
+set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
+
 # cisst compiler settings
 include (cmake/cisstSettings.cmake)
 
@@ -84,8 +90,15 @@ set (CISST_CMAKE_SOURCE_DIR "${CISST_SOURCE_DIR}/cmake")
 set (CISST_CMAKE_BINARY_DIR "${CISST_BINARY_DIR}/${CISST_CMAKE_INSTALL_SUFFIX}")
 set (CISST_CMAKE_DIRS "${CISST_CMAKE_SOURCE_DIR}" "${CISST_CMAKE_BINARY_DIR}")
 
-# Option to download and build as CMake External projects external dependencies when not found automatically
-option (CISST_USE_EXTERNAL "Try to build dependencies using CMake external projects (download and build along cisst)" OFF)
+# Option to download and build external dependencies when not found automatically.
+# Default to ON on Windows to improve out-of-the-box dependency resolution.
+if (WIN32)
+  set (CISST_USE_EXTERNAL_DEFAULT ON)
+else ()
+  set (CISST_USE_EXTERNAL_DEFAULT OFF)
+endif ()
+option (CISST_USE_EXTERNAL "Try to build dependencies using CMake external projects (download and build along cisst)" ${CISST_USE_EXTERNAL_DEFAULT})
+mark_as_advanced (CISST_USE_EXTERNAL_DEFAULT)
 
 # Add include directories
 set (CISST_INCLUDE_DIR
@@ -198,6 +211,12 @@ else (CMAKE_CL_64)
   set (CISST_CMAKE_COMPILER_IS_MSVC_64 OFF)
 endif (CMAKE_CL_64)
 
+
+# cisstInteractive requires SWIG/Python wrappers; enabling it forces CISST_HAS_SWIG_PYTHON
+option (CISST_cisstInteractive "Build cisstInteractive (requires CISST_HAS_SWIG_PYTHON)." OFF)
+if (CISST_cisstInteractive)
+  set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
+endif ()
 
 # Use a separate directory to find external dependencies, this allows
 # to include some CMake "use" files without polluting the environment
@@ -354,6 +373,8 @@ if (CISST_BUILD_TESTS)
       set (cisstCppUnit_PREFIX cisstCppUnitExternal)
       set (CISST_CPPUNIT_GIT_REPOSITORY https://github.com/jhu-cisst-external/cppunit.git)
       set (CISST_CPPUNIT_GIT_TAG cppunit-1.13.3)
+      set (CISST_CPPUNIT_SOURCE_DIR "${cisst_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit")
+      set (CISST_CPPUNIT_BINARY_DIR "${cisst_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
 
       ExternalProject_Add (cisstCppUnit
                            PREFIX ${cisstCppUnit_PREFIX}
@@ -460,6 +481,36 @@ foreach (lib ${CISST_LIBS})
     endif (CISST_HAS_QT)
   endif (CISST_${lib})
 endforeach (lib)
+
+# cisstCommonXML is controlled by dependencies discovered in cisst-dependencies,
+# but cisst-config.cmake is generated before cisstCommon is added below.  Decide
+# its availability here so generated package metadata matches the targets that
+# will be built later.
+include (CMakeDependentOption)
+cmake_dependent_option (CISST_cisstCommonXML "Build cisstCommonXML" ON
+                        "CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML" OFF)
+if (CISST_cisstCommonXML)
+  set (CISST_HAS_XML ON)
+  if (NOT DEFINED CISST_XML_LIB OR "${CISST_XML_LIB}" STREQUAL "")
+    if (CISST_FOUND_LIBXML2_XML)
+      set (CISST_XML_LIB "LibXml2")
+    elseif (CISST_FOUND_QT_XML)
+      set (CISST_XML_LIB "QtXML")
+    else ()
+      set (CISST_XML_LIB "Either LibXml2 or QtXML")
+    endif ()
+  endif ()
+  set (CISST_XML_LIB "${CISST_XML_LIB}" CACHE STRING "Library used to support XML Path, can be either \"LibXml2\" or \"QtXML\"")
+  set_property (CACHE CISST_XML_LIB PROPERTY STRINGS "LibXml2" "QtXML")
+  list (FIND CISST_LIBRARIES cisstCommonXML _cisstCommonXML_index)
+  if (${_cisstCommonXML_index} EQUAL -1)
+    set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES})
+  endif ()
+  unset (_cisstCommonXML_index)
+else ()
+  set (CISST_HAS_XML OFF)
+  set (CISST_XML_LIB "")
+endif ()
 
 # create equivalent for cisstInteractive
 set (CISST_HAS_IRE ${CISST_cisstInteractive})

@@ -1,8 +1,5 @@
 #
-# $Id: CMakeLists.txt 3331 2012-01-10 22:34:09Z adeguet1 $
-#
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #

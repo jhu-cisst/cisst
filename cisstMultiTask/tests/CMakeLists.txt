@@ -64,8 +64,13 @@ add_definitions(-DCMAKE_CFG_INTDIR_WITH_QUOTES="${CMAKE_CFG_INTDIR}")
 # add executable for C++ tests
 add_executable (cisstMultiTaskTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstMultiTaskTests PROPERTY FOLDER "cisstMultiTask/tests")
-target_link_libraries (cisstMultiTaskTests cisstTestsDriver cisstMultiTaskTestsLib)
-target_link_libraries (cisstMultiTaskTests cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstTestsDriver)
+target_link_libraries (cisstMultiTaskTests
+  cisstTestsDriver
+  cisstMultiTaskTestsLib
+  cisstCommon
+  cisstVector
+  cisstOSAbstraction
+  cisstMultiTask)
 
 if (CMAKE_GENERATOR MATCHES "Visual Studio*" )
   # CMake 3.13 introduced the VS_DEBUGGER_COMMAND_ARGUMENTS property

@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2020 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -68,9 +68,10 @@ cisst_add_library (LIBRARY cisstCommonXML
                    ADDITIONAL_HEADER_FILES ${CISST_CMN_XML_CONFIG_FILE})
 
 if (${CISST_XML_LIB} STREQUAL "LibXml2")
-  target_link_libraries (cisstCommonXML LibXml2::LibXml2)
+  target_link_libraries (cisstCommonXML
+    LibXml2::LibXml2
+    ${CISST_QT_LIBRARIES})
 elseif (${CISST_XML_LIB} STREQUAL "QtXML")
-  target_link_libraries (cisstCommonXML ${CISST_QT_LIBRARIES})
 endif ()
 
 # Add libxml2 runtime dependencies (so far, only tested on WIN32).

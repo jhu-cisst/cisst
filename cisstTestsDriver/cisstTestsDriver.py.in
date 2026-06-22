@@ -107,7 +107,9 @@ def ListTests(prefix):
     for x in tests.classList:
         moduleName = x[0]
         className = x[1]
-        list = my_getTestCaseNames(eval(moduleName + "." + className) , prefix)
+        loader = unittest.TestLoader()
+        loader.testMethodPrefix = prefix
+        list = loader.getTestCaseNames(eval(moduleName + "." + className))
         for method in list:
             print(moduleName + "." + className + "." + method)
     return 0
@@ -121,7 +123,9 @@ def ListTestsCMake(prefix, pythonExe):
     for x in tests.classList:
         moduleName = x[0]
         className = x[1]
-        list = my_getTestCaseNames(eval(moduleName + "." + className) , prefix)
+        loader = unittest.TestLoader()
+        loader.testMethodPrefix = prefix
+        list = loader.getTestCaseNames(eval(moduleName + "." + className))
         programName = sys.argv[0]
         programName = programName.replace('\\', '/')
         for method in list:
@@ -143,7 +147,8 @@ def RunAllTests(prefix):
     for x in tests.classList:
         moduleName = x[0]
         className = x[1]
-        list = my_getTestCaseNames(eval(moduleName + "." + className) , prefix)
+        loader.testMethodPrefix = prefix
+        list = loader.getTestCaseNames(eval(moduleName + "." + className))
         for method in list:
             suite.addTest(loader.loadTestsFromName(method, eval(moduleName + "." + className)))
 

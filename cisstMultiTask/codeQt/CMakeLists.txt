@@ -82,7 +82,9 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 ${QTNODES_HEADER_FILES}
                                 mtsExportQt.h)
 
-target_link_libraries (cisstMultiTaskQt ${CISST_QT_LIBRARIES})
+target_link_libraries (cisstMultiTaskQt
+  ${CISST_QT_LIBRARIES}
+  ${QTNODES_LIBRARIES})
 
 # Ensure the QtNodes ExternalProject is fully built before cisstMultiTaskQt
 if (CISST_HAS_QTNODES)
@@ -99,7 +101,6 @@ if (CISST_HAS_QTNODES)
         $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
         $<INSTALL_INTERFACE:lib>)
     endif ()
-    target_link_libraries (cisstMultiTaskQt ${QTNODES_LIBRARIES})
   endif ()
   if (TARGET cisstGraphviz)
     set_property (TARGET cisstMultiTaskQt APPEND PROPERTY

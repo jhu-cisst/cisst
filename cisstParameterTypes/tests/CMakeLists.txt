@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstParameterTypes Tests
 #
-# (C) Copyright 2003-2019 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -41,8 +41,12 @@ include_directories (${CPPUNIT_INCLUDE_DIR})
 # Add executable for C++ tests
 add_executable (cisstParameterTypesTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstParameterTypesTests PROPERTY FOLDER "cisstParameterTypes/tests")
-target_link_libraries (cisstParameterTypesTests cisstTestsDriver)
-target_link_libraries (cisstParameterTypesTests cisstParameterTypes cisstVector cisstCommon cisstMultiTask cisstTestsDriver)
+target_link_libraries (cisstParameterTypesTests
+  cisstTestsDriver
+  cisstParameterTypes
+  cisstVector
+  cisstCommon
+  cisstMultiTask)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstParameterTypesTests ITERATIONS 1 INSTANCES 1)

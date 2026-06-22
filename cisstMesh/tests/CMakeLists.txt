@@ -1,8 +1,7 @@
 #
 # CMakeLists for cisstMesh tests
 #
-# (C) Copyright 2006-2013 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2006-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -24,8 +23,10 @@ set (HEADER_FILES
 
 add_executable (cisstMeshTests ${SOURCE_FILES} ${HEADER_FILES})
 set_property (TARGET cisstMeshTests PROPERTY FOLDER "cisstMesh/tests")
-target_link_libraries (cisstMeshTests cisstTestsDriver )
-target_link_libraries (cisstMeshTests cisstCommon cisstMesh cisstTestsDriver)
+target_link_libraries (cisstMeshTests
+  cisstTestsDriver
+  cisstCommon
+  cisstMesh)
 
 # to generate a CTest list of tests
 cisst_add_test (cisstMeshTests INSTANCES 2 ITERATIONS 2)

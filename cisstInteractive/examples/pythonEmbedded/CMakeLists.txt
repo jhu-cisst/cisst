@@ -1,6 +1,5 @@
 #
-#
-# (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -25,8 +24,9 @@ if (cisst_FOUND AND CISST_HAS_SWIG_PYTHON)
   # Create myReDerivedClass as a shared library
   add_library (myReDerivedClass SHARED myReDerivedClass.cpp myReDerivedClass.h)
   set_property (TARGET myReDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
-  target_link_libraries (myReDerivedClass ${REQUIRED_CISST_LIBRARIES})
-  target_link_libraries (myReDerivedClass myDerivedClass)
+  target_link_libraries (myReDerivedClass
+    ${REQUIRED_CISST_LIBRARIES}
+    myDerivedClass)
 
   # Allow generated c++ code to find header files
   include_directories (${CMAKE_CURRENT_SOURCE_DIR})
@@ -49,12 +49,16 @@ if (cisst_FOUND AND CISST_HAS_SWIG_PYTHON)
   add_executable (pythonEmbedded pythonEmbedded.cpp)
   set_property (TARGET pythonEmbedded PROPERTY FOLDER "cisstInteractive/examples")
   target_include_directories (pythonEmbedded PRIVATE ${PYTHON_ALL_INCLUDE_DIRS})
-  target_link_libraries (pythonEmbedded ${REQUIRED_CISST_LIBRARIES})
-  target_link_libraries (pythonEmbedded myDerivedClass myReDerivedClass ${CMAKE_THREAD_LIBS_INIT} ${PYTHON_ALL_LIBRARIES})
+  target_link_libraries (pythonEmbedded
+    ${REQUIRED_CISST_LIBRARIES}
+    myDerivedClass
+    myReDerivedClass
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${PYTHON_ALL_LIBRARIES}
+    util)
 
   if (UNIX)
     if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      target_link_libraries (pythonEmbedded util)
     endif (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   endif (UNIX)
 

@@ -1,6 +1,5 @@
 #
-#
-# (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2006-2026 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -25,8 +24,9 @@ if (cisst_FOUND)
 
     add_executable (vctExSubarrayITKBenchmark Subarray_ITK_Benchmark.cpp)
     set_property (TARGET vctExSubarrayITKBenchmark PROPERTY FOLDER "cisstVector/examples")
-    target_link_libraries (vctExSubarrayITKBenchmark ${REQUIRED_CISST_LIBRARIES})
-    target_link_libraries (vctExSubarrayITKBenchmark ITKCommon)
+    target_link_libraries (vctExSubarrayITKBenchmark
+      ${REQUIRED_CISST_LIBRARIES}
+      ITKCommon)
 
     add_executable (vctExSubarrayNArrayBenchmark Subarray_nArray_Benchmark.cpp)
     set_property (TARGET vctExSubarrayNArrayBenchmark PROPERTY FOLDER "cisstVector/examples")
@@ -34,8 +34,9 @@ if (cisst_FOUND)
 
     add_executable (vctExImageAddITKBenchmark ImageAdd_ITK_Benchmark.cpp)
     set_property (TARGET vctExImageAddITKBenchmark PROPERTY FOLDER "cisstVector/examples")
-    target_link_libraries (vctExImageAddITKBenchmark ${REQUIRED_CISST_LIBRARIES})
-    target_link_libraries (vctExImageAddITKBenchmark ITKCommon)
+    target_link_libraries (vctExImageAddITKBenchmark
+      ${REQUIRED_CISST_LIBRARIES}
+      ITKCommon)
 
     add_executable (vctExImageAddNArrayBenchmark ImageAdd_nArray_Benchmark.cpp)
     set_property (TARGET vctExImageAddNArrayBenchmark PROPERTY FOLDER "cisstVector/examples")

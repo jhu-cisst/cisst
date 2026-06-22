@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -23,7 +23,6 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 if (cisst_FOUND)
 
   # wrap all Qt files
-
   set (CMAKE_AUTOMOC ON)
   if (CISST_QT_VERSION STREQUAL "6")
     qt6_wrap_ui (QT_CLIENT_WRAPPED_UI clientQtWidget.ui)

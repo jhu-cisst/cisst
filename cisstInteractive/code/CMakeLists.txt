@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # CMakeLists for cisstInteractive
 #

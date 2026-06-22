@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -47,15 +45,20 @@ if (cisst_FOUND AND CISST_HAS_SWIG_PYTHON)
 
   # if (EXAMPLE_IRE_USE_OSATHREAD)
   add_definitions (-DCISST_OSATHREAD)
-  target_link_libraries (pythonEmbeddedIRE cisstCommon cisstInteractive cisstOSAbstraction)
+  target_link_libraries (pythonEmbeddedIRE
+    cisstCommon
+    cisstInteractive
+    cisstOSAbstraction
+    SineGenerator
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${PYTHON_ALL_LIBRARIES}
+    util)
   #else (EXAMPLE_IRE_USE_OSATHREAD)
   #target_link_libraries (pythonEmbeddedIRE cisstCommon cisstInteractive)
   #endif (EXAMPLE_IRE_USE_OSATHREAD)
 
-  target_link_libraries (pythonEmbeddedIRE SineGenerator ${CMAKE_THREAD_LIBS_INIT} ${PYTHON_ALL_LIBRARIES})
   if (UNIX)
     if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      target_link_libraries (pythonEmbeddedIRE util)
     endif (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   endif (UNIX)
 

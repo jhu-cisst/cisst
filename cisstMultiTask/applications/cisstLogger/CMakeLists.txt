@@ -10,9 +10,7 @@
 # --- end cisst license ---
 
 # name of project and executable
-project (cisstComponentManager VERSION ${cisst_VERSION})
-
-cmake_minimum_required (VERSION 3.16)
+project (cisstLogger)
 
 # create a list of libraries needed for this project
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask)
@@ -25,15 +23,12 @@ if (cisst_FOUND)
   include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
   # name the main executable and specifies with source files to use
-  add_executable (cisstComponentManager main.cpp)
-  set_property (TARGET cisstComponentManager PROPERTY FOLDER "cisstMultiTask/applications")
+  add_executable (cisstLogger main.cpp)
+
+  set_property (TARGET cisstLogger PROPERTY FOLDER "cisstMultiTask/applications")
 
   # link with the cisst libraries
-  target_link_libraries (cisstComponentManager ${REQUIRED_CISST_LIBRARIES})
-
-  install (TARGETS cisstComponentManager
-           COMPONENT cisstMultiTask
-           RUNTIME DESTINATION bin)
+  target_link_libraries (cisstLogger ${REQUIRED_CISST_LIBRARIES})
 
 else (cisst_FOUND)
   cisst_information_message_missing_libraries (${REQUIRED_CISST_LIBRARIES})

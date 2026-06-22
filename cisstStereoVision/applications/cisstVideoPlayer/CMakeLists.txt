@@ -1,8 +1,5 @@
 #
-# $Id: CMakeLists.txt 3331 2012-01-10 22:34:09Z adeguet1 $
-#
-# (C) Copyright 2014 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2014-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -12,7 +9,7 @@
 #
 # --- end cisst license ---
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.16)
 
 # create a list of libraries needed for this project
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstStereoVision)

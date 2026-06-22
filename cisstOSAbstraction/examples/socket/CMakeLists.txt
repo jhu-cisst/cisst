@@ -1,9 +1,8 @@
 #
-#
 #   Author(s):  Peter Kazanzides
 #   Created on: 2009
 #
-#   (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights Reserved.
+#   (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #

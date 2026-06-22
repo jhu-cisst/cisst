@@ -1,6 +1,5 @@
 #
-#
-# (C) Copyright 2009-2015 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -36,10 +35,10 @@ add_executable (mtsExPeriodicTaskQt main.cpp)
 set_property (TARGET mtsExPeriodicTaskQt PROPERTY FOLDER "cisstMultiTask/examples")
 
 target_link_libraries (mtsExPeriodicTaskQt
-                       mtsExPeriodicTaskGuiQt
-                       mtsExPeriodicTaskComponents)
+  mtsExPeriodicTaskGuiQt
+  mtsExPeriodicTaskComponents
+  ${REQUIRED_CISST_LIBRARIES})
 target_link_libraries (mtsExPeriodicTaskGuiQt ${REQUIRED_CISST_LIBRARIES})
-target_link_libraries (mtsExPeriodicTaskQt ${REQUIRED_CISST_LIBRARIES})
 
 add_custom_target (mtsExPeriodicTaskQt_Scripts ALL
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
