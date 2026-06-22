@@ -178,17 +178,14 @@ cisst_add_library (
 
 if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
   if (TARGET OpenGL::OpenGL)
-    target_link_libraries (cisstVector
-      OpenGL::OpenGL
-      OpenGL::GLX
-      OpenGL::GL
-      ${OPENGL_opengl_LIBRARY}
-      ${OPENGL_glx_LIBRARY}
-      ${OPENGL_LIBRARIES})
+    target_link_libraries (cisstVector OpenGL::OpenGL)
     if (TARGET OpenGL::GLX)
+      target_link_libraries (cisstVector OpenGL::GLX)
     endif ()
   elseif (TARGET OpenGL::GL)
+    target_link_libraries (cisstVector OpenGL::GL)
   else ()
     target_include_directories (cisstVector PUBLIC ${OPENGL_INCLUDE_DIR})
+    target_link_libraries (cisstVector ${OPENGL_opengl_LIBRARY} ${OPENGL_glx_LIBRARY} ${OPENGL_LIBRARIES})
   endif ()
 endif ()
