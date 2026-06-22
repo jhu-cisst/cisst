@@ -116,9 +116,17 @@ if (CISST_HAS_CISSTNETLIB)
     set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
     set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
     # install for CPack
-    install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
-             COMPONENT cisstRobot
-             DESTINATION lib)
+    if (WIN32)
+      install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/$<CONFIG>/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
+               COMPONENT cisstRobot
+               DESTINATION lib
+               OPTIONAL)
+    else ()
+      install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
+               COMPONENT cisstRobot
+               DESTINATION lib
+               OPTIONAL)
+    endif ()
   endif ()
 
   cisst_add_library (LIBRARY cisstRobot
