@@ -92,15 +92,14 @@ if (CISST_HAS_QTNODES)
   if (TARGET cisstQtNodes)
     set_property (TARGET cisstMultiTaskQt APPEND PROPERTY
                   LINK_LIBRARIES cisstQtNodes)
-  else ()
-    target_include_directories (cisstMultiTaskQt PUBLIC
-      $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
-      $<INSTALL_INTERFACE:include>)
-    if (QTNODES_LIBRARY_DIRS)
-      target_link_directories (cisstMultiTaskQt PUBLIC
-        $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
-        $<INSTALL_INTERFACE:lib>)
-    endif ()
+  endif ()
+  target_include_directories (cisstMultiTaskQt PUBLIC
+    $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>)
+  if (QTNODES_LIBRARY_DIRS)
+    target_link_directories (cisstMultiTaskQt PUBLIC
+      $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
+      $<INSTALL_INTERFACE:lib>)
   endif ()
   if (TARGET cisstGraphviz)
     set_property (TARGET cisstMultiTaskQt APPEND PROPERTY
