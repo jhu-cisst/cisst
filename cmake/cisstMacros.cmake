@@ -751,6 +751,14 @@ macro (cisst_set_output_path)
   endif ()
 endmacro (cisst_set_output_path)
 
+# Deprecated macro to set output directories
+macro (cisst_use_cisst_output_directories)
+  message (DEPRECATION "cisst_use_cisst_output_directories is deprecated.")
+  set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
+  set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin")
+endmacro (cisst_use_cisst_output_directories)
+
+
 # Add standard configuration files for SAW component, assumes all
 # settings are already defined
 function (cisst_add_config_files _cacf_component_name)

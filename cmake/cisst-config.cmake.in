@@ -168,7 +168,11 @@ endif (CISST_HAS_JSON)
 
 list (FIND CISST_LIBRARIES cisstTestsDriver _cisst_tests_driver_index)
 if (NOT _cisst_tests_driver_index EQUAL -1)
-  find_dependency (CppUnit)
+  list (FIND cisst_FIND_COMPONENTS cisstTestsDriver _cisst_tests_driver_requested)
+  if (NOT _cisst_tests_driver_requested EQUAL -1)
+    find_dependency (CppUnit)
+  endif ()
+  unset (_cisst_tests_driver_requested)
 endif ()
 unset (_cisst_tests_driver_index)
 
