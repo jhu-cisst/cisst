@@ -57,7 +57,7 @@ html_context = {
     'display_github': True,
     'github_user': 'jhu-cisst',
     'github_repo': 'cisst',
-    'github_version': 'main/docs/',
+    'github_version': 'devel/docs/',
 }
 
 html_logo = '_static/cisst-logo.png' if os.path.exists('_static/cisst-logo.png') else None

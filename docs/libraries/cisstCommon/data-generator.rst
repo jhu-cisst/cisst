@@ -164,11 +164,11 @@ It is important to note that the cisst data generator doesn't force any specific
 
 See examples with inlined comments:
 
--  Classes not used with cisstMultiTask: `demoData.cdg <https://github.com/jhu-cisst/cisst/blob/master/cisstCommon/examples/dataGenerator/demoData.cdg>`__
+-  Classes not used with cisstMultiTask: `demoData.cdg <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/examples/dataGenerator/demoData.cdg>`__
 -  Classes used with cisstMultiTask:
--  `mtsComponentState.cdg </jhu-cisst/cisst/blob/master/cisstMultiTask/mtsComponentState.cdg>`__ and user implementation for extra code `mtsComponentState.cpp </jhu-cisst/cisst/blob/master/cisstMultiTask/code/mtsComponentState.cpp>`__. This class uses macros to implement the proxy pattern (see the ``mtsGenericObjectProxy`` definition at the end of the ``cdg`` file).
--  `prmPositionCartesianGet.cdg </jhu-cisst/cisst/blob/master/cisstParameterTypes/prmPositionCartesianGet.cdg>`__. This class is derived from ``mtsGenericObject``
--  `prmPositionJointGet.cdg </jhu-cisst/cisst/blob/master/cisstParameterTypes/prmPositionJointGet.cdg>`__. This class is derived from ``mtsGenericObject``
+-  `mtsComponentState.cdg </jhu-cisst/cisst/blob/main/cisstMultiTask/mtsComponentState.cdg>`__ and user implementation for extra code `mtsComponentState.cpp </jhu-cisst/cisst/blob/main/cisstMultiTask/code/mtsComponentState.cpp>`__. This class uses macros to implement the proxy pattern (see the ``mtsGenericObjectProxy`` definition at the end of the ``cdg`` file).
+-  `prmPositionCartesianGet.cdg </jhu-cisst/cisst/blob/main/cisstParameterTypes/prmPositionCartesianGet.cdg>`__. This class is derived from ``mtsGenericObject``
+-  `prmPositionJointGet.cdg </jhu-cisst/cisst/blob/main/cisstParameterTypes/prmPositionJointGet.cdg>`__. This class is derived from ``mtsGenericObject``
 
 CMake
 -----
@@ -313,5 +313,5 @@ Examples
 
 The best examples are existing instantiations for the C/C++ native types, STL types and *cisstVector* data types.
 
--  Native types: these heavily rely on a set of `macros <https://github.com/jhu-cisst/cisst/blob/master/cisstCommon/cmnDataFunctionsMacros.h>`__, see `cmnDataFunctions.h <https://github.com/jhu-cisst/cisst/blob/master/cisstCommon/cmnDataFunctions.h>`__ and `cmnDataFunctions.cpp <https://github.com/jhu-cisst/cisst/blob/master/cisstCommon/code/cmnDataFunctions.cpp>`__
--  ``std::string``: `cmnDataFunctionsString.h <https://github.com/jhu-cisst/cisst/blob/master/cisstCommon/cmnDataFunctionsString.h>`__ and `cmnDataFunctionsStrings.cpp <https://github.com/jhu-cisst/cisst/blob/master/cisstCommon/code/cmnDataFunctionsString.cpp>`__
+-  Native types: these heavily rely on a set of `macros <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/cmnDataFunctionsMacros.h>`__, see `cmnDataFunctions.h <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/cmnDataFunctions.h>`__ and `cmnDataFunctions.cpp <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/code/cmnDataFunctions.cpp>`__
+-  ``std::string``: `cmnDataFunctionsString.h <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/cmnDataFunctionsString.h>`__ and `cmnDataFunctionsStrings.cpp <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/code/cmnDataFunctionsString.cpp>`__

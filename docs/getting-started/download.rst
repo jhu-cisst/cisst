@@ -61,7 +61,7 @@ The most useful repositories are:
 
    .. code:: bash
 
-      git pull origin master
+      git pull origin main
 
 *cisst* with the shared data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +76,7 @@ The most useful repositories are:
 
    .. code:: bash
 
-      git pull origin master
+      git pull origin main
       git submodule update --recursive
 
 *cisst* and *SAW*
@@ -99,14 +99,14 @@ The most useful repositories are:
 
    .. code:: bash
 
-      git pull origin master
+      git pull origin main
       git submodule update --recursive
 
 -  Update your local copy, if new submodules have been added
 
    .. code:: bash
 
-      git pull origin master
+      git pull origin main
       git submodule update --init --recursive
 
 .. _22-windows-gui:
@@ -141,7 +141,7 @@ For a single submodule to update:
 
    git pull
    cd module1
-   git checkout master
+   git checkout main
    git pull
    cd ..
    git status # to check if there is anything different
@@ -152,7 +152,7 @@ For multiple modules, you can use the ``foreach`` syntax in git:
 .. code:: bash
 
    git pull
-   git submodule foreach git checkout master 
+   git submodule foreach git checkout main 
    git submodule foreach git pull
    git status # to check if there is anything different
    git commit -a -m "use latest version of submodules"

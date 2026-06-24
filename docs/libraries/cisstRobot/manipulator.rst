@@ -3,31 +3,31 @@ cisstRobot
 
 cisstRobot is a library that provides computational tools and algorithms for robotics. Among others, the cisstRobot library provides tools for evaluating kinematics and dynamics and for interpolating and blending trajectories. It is somewhat analogous to the Robotics Toolbox for Matlab.
 
-cisstRobot is developed around the class `robManipulator </jhu-cisst/cisst/blob/master/cisstRobot/robManipulator.h>`__ that implements several algorithms for a kinematic chain. `robManipulator </jhu-cisst/cisst/blob/master/cisstRobot/robManipulator.h>`__ does not naturally extend to parallel or closed-loop manipulators. Each robot must have a configuration file that contains the parameters that are used by the various algorithms.
+cisstRobot is developed around the class `robManipulator </jhu-cisst/cisst/blob/main/cisstRobot/robManipulator.h>`__ that implements several algorithms for a kinematic chain. `robManipulator </jhu-cisst/cisst/blob/main/cisstRobot/robManipulator.h>`__ does not naturally extend to parallel or closed-loop manipulators. Each robot must have a configuration file that contains the parameters that are used by the various algorithms.
 
 This tutorial will explain how you can define your robot and use it with cisstRobot.
 
-`robManipulator </jhu-cisst/cisst/blob/master/cisstRobot/robManipulator.h>`__
+`robManipulator </jhu-cisst/cisst/blob/main/cisstRobot/robManipulator.h>`__
 -----------------------------------------------------------------------------
 
-`robManipulator </jhu-cisst/cisst/blob/master/cisstRobot/robManipulator.h>`__ is the main class of cisstRobot. It provides the tools for computing forward/inverse kinematics, inverse dynamics and tools that can be useful for control such as joint/Cartesian space inertia matrices, spatial/body Jacobians, gravity loads, etc.
+`robManipulator </jhu-cisst/cisst/blob/main/cisstRobot/robManipulator.h>`__ is the main class of cisstRobot. It provides the tools for computing forward/inverse kinematics, inverse dynamics and tools that can be useful for control such as joint/Cartesian space inertia matrices, spatial/body Jacobians, gravity loads, etc.
 
-Before looking at `robManipulator </jhu-cisst/cisst/blob/master/cisstRobot/robManipulator.h>`__, we will look at how the kinematics/dynamics of a robot is defined. For your robot you need to create a text file that contains the kinematics and, optionally, the dynamics parameters of each link. By convention, these files have the .rob suffix. The CISST library provides .rob files of a few robots in the ``share/models`` sub-directory: `7DOF WAM </jhu-cisst/share/blob/master/models/WAM/wam7.rob>`__, `PUMA 560 </jhu-cisst/share/blob/master/models/PUMA560/puma560.rob>`__, `IRB 6600 </jhu-cisst/share/blob/master/models/IRB6600/irb6600.rob>`__, IRB 2400, CRS 260, FANUC and m16ib). All the robots have the mandatory kinematics parameters and only the 7DOF WAM has dynamics parameters. Note that you must provide the kinematics parameters of your robot. The dynamics parameters are optional and you cannot use "dynamics" methods unless you provide these parameters.
+Before looking at `robManipulator </jhu-cisst/cisst/blob/main/cisstRobot/robManipulator.h>`__, we will look at how the kinematics/dynamics of a robot is defined. For your robot you need to create a text file that contains the kinematics and, optionally, the dynamics parameters of each link. By convention, these files have the .rob suffix. The CISST library provides .rob files of a few robots in the ``share/models`` sub-directory: `7DOF WAM </jhu-cisst/share/blob/main/models/WAM/wam7.rob>`__, `PUMA 560 </jhu-cisst/share/blob/main/models/PUMA560/puma560.rob>`__, `IRB 6600 </jhu-cisst/share/blob/main/models/IRB6600/irb6600.rob>`__, IRB 2400, CRS 260, FANUC and m16ib). All the robots have the mandatory kinematics parameters and only the 7DOF WAM has dynamics parameters. Note that you must provide the kinematics parameters of your robot. The dynamics parameters are optional and you cannot use "dynamics" methods unless you provide these parameters.
 
-First, let's look at an example of the configuration file for a `7DOF WAM </jhu-cisst/share/blob/master/models/WAM/wam7.rob>`__. The first line is straightforward -- it says how many links the robot has. Since the 7DOF WAM has 7 links, the first line contains the number "7". A PUMA 560 has 6 links and, therefore, its first line has the number "6".
+First, let's look at an example of the configuration file for a `7DOF WAM </jhu-cisst/share/blob/main/models/WAM/wam7.rob>`__. The first line is straightforward -- it says how many links the robot has. Since the 7DOF WAM has 7 links, the first line contains the number "7". A PUMA 560 has 6 links and, therefore, its first line has the number "6".
 
-Then, on each of the subsequent lines, you enter the parameters of each link. Each parameter is separated by one or more spaces. The first parameter describes the kind of kinematics parameters. The word "standard" refers to standard Denavit-Hartenberg (DH) parameters. CISST robot supports the following kinematics conventions: `"standard" DH parameters </jhu-cisst/cisst/blob/master/cisstRobot/robDH.h>`__, `"modified" DH parameters </jhu-cisst/cisst/blob/master/cisstRobot/robModifiedDH.h>`__ and `Hayati parameters </jhu-cisst/cisst/blob/master/cisstRobot/robHayati.h>`__. Each of these conventions requires 4 numbers that represent the position and orientation of a distal coordinate frame with respect to the previous one. Reviewing these conventions is beyond the scope of this tutorial, as we will only describe the nature of each parameter.
+Then, on each of the subsequent lines, you enter the parameters of each link. Each parameter is separated by one or more spaces. The first parameter describes the kind of kinematics parameters. The word "standard" refers to standard Denavit-Hartenberg (DH) parameters. CISST robot supports the following kinematics conventions: `"standard" DH parameters </jhu-cisst/cisst/blob/main/cisstRobot/robDH.h>`__, `"modified" DH parameters </jhu-cisst/cisst/blob/main/cisstRobot/robModifiedDH.h>`__ and `Hayati parameters </jhu-cisst/cisst/blob/main/cisstRobot/robHayati.h>`__. Each of these conventions requires 4 numbers that represent the position and orientation of a distal coordinate frame with respect to the previous one. Reviewing these conventions is beyond the scope of this tutorial, as we will only describe the nature of each parameter.
 
-Once the configuration file is completed, you can create a `robManipulator </jhu-cisst/cisst/blob/master/cisstRobot/robManipulator.h>`__ object and load the file. Likewise, you can derive a new class from robManipulator to implement control and trajectory algorithms.
+Once the configuration file is completed, you can create a `robManipulator </jhu-cisst/cisst/blob/main/cisstRobot/robManipulator.h>`__ object and load the file. Likewise, you can derive a new class from robManipulator to implement control and trajectory algorithms.
 
 Note: the rob file format is likely to change. It may be better to have a more structured format, such as "keyword=value" (as in an ``.ini`` file) or "keyword value" (as parsed by ``cmnStreamRawParser``) or XML format. There should be a field for the file format version number.
 
-`Kinematics Parameters </jhu-cisst/cisst/blob/master/cisstRobot/robKinematics.h>`__
+`Kinematics Parameters </jhu-cisst/cisst/blob/main/cisstRobot/robKinematics.h>`__
 -----------------------------------------------------------------------------------
 
 The first set of parameters represent the kinematics of each link. These parameters are mandatory and the order in which you specify them does matter.
 
-`"Standard" DH Parameters </jhu-cisst/cisst/blob/master/cisstRobot/robDH.h>`__
+`"Standard" DH Parameters </jhu-cisst/cisst/blob/main/cisstRobot/robDH.h>`__
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Following the DH standard^1^ you must provide 4 numbers that define the orientation of the *ith* link with respect to the *i-1th* link. "Standard" DH convention assumes that the *ith* coordinate frame is at the *i+1* joint.
@@ -40,7 +40,7 @@ Following the DH standard^1^ you must provide 4 numbers that define the orientat
 
 4. The fourth number represents the distance (in meters) along axis *zi-1* between the origin of the *i-1th* coordinate frame and the point where the common perpendicular intersects axis *zi-1*
 
-`"Modified" DH Parameters </jhu-cisst/cisst/blob/master/cisstRobot/robModifiedDH.h>`__ (also called Craig's convention)
+`"Modified" DH Parameters </jhu-cisst/cisst/blob/main/cisstRobot/robModifiedDH.h>`__ (also called Craig's convention)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Following the modified DH standard^2,3^, you must provide 4 numbers that define the orientation of the *ith* link with respect to the *i-1th* link. Unlike the "standard" DH convention, the "modified" DH convention assumes that the *ith* coordinate frame is at the *i* joint.
@@ -53,7 +53,7 @@ Following the modified DH standard^2,3^, you must provide 4 numbers that define 
 
 4. The fourth number represents the distance (in meters) along axis *zi* between the origin of the *ith* coordinate frame and the point where the common perpendicular intersects axis *zi*
 
-`Hayati Parameters </jhu-cisst/cisst/blob/master/cisstRobot/robHayati.h>`__
+`Hayati Parameters </jhu-cisst/cisst/blob/main/cisstRobot/robHayati.h>`__
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Hayati parameters^4^ are beneficial when representing coordinate frames that have parallel, or near parallel, *z* axes. Like the DH convention, the Hayati convention assumes that the *ith* coordinate frame is at the *i+1* joint. Furthermore, the nature of the parameters depends on whether the joint is revolute or prismatic. For a prismatic joint, the parameters are
@@ -91,7 +91,7 @@ Maximum Force/Torque
 
 The next parameter (``tm``) specifies the maximum force (for prismatic joints) or torque (for revolute joints) that can be applied by the joint.
 
-`Dynamics Parameters </jhu-cisst/cisst/blob/master/cisstRobot/robMass.h>`__
+`Dynamics Parameters </jhu-cisst/cisst/blob/main/cisstRobot/robMass.h>`__
 ---------------------------------------------------------------------------
 
 Following the kinematics parameters you can specify dynamics parameters. These parameters are optional; that is you do not have to specify them or you can enter your grocery list if you do not intend to use dynamics of your robot.

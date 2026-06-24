@@ -149,7 +149,7 @@ Creating compiler specific projects using CMake
 
       5.  Select your compiler from the list, and wait until your CISST settings show up
 
-      6.  Check ``CISST_BUILD_cisstStereoVision``
+      6.  Check ``CISST_cisstStereoVision``
 
       7.  Check ``CISST_BUILD_EXAMPLES``
 
@@ -157,7 +157,7 @@ Creating compiler specific projects using CMake
 
       9.  Enable *Advanced* mode (just under the ``build`` directory field)
 
-      10. Un-check all ``CISST_BUILD_*_EXAMPLES`` but keep ``CISST_BUILD_cisstStereoVision_EXAMPLES`` checked (we need only the stereo vision examples for this tutorial)
+      10. Un-check all ``CISST_*_EXAMPLES`` but keep ``CISST_cisstStereoVision_EXAMPLES`` checked (we need only the stereo vision examples for this tutorial)
 
       11. Click *Configure*, and wait until done
 
@@ -191,11 +191,11 @@ Creating compiler specific projects using CMake
          ccmake ../source
 
       1. Press ``c`` to *Configure*
-      2. Set ``CISST_BUILD_cisstStereoVision`` to ``ON``
+      2. Set ``CISST_cisstStereoVision`` to ``ON``
       3. Set ``CISST_BUILD_EXAMPLES`` to ``ON``
       4. Press ``c`` to *Configure*, and wait until done
       5. Press ``t`` to enable *Advanced* mode
-      6. Set all ``CISST_BUILD_*_EXAMPLES`` to ``OFF`` but keep ``CISST_BUILD_cisstStereoVision_EXAMPLES`` ``ON`` (we need only the stereo vision examples for this tutorial)
+      6. Set all ``CISST_*_EXAMPLES`` to ``OFF`` but keep ``CISST_cisstStereoVision_EXAMPLES`` ``ON`` (we need only the stereo vision examples for this tutorial)
       7. Make sure ``CISST_HAS_QT`` is set to ``OFF`` (this is not needed for this tutorial)
       8. Press ``c`` to *Configure*, and wait until done (CMake will automatically find all the dependencies for you)
       9. You're all set: press ``g`` to *Generate* the makefile project, then press ``q`` to quit CMake.
@@ -226,7 +226,7 @@ Creating compiler specific projects using CMake
 
       4.  Press ``c`` to *Configure*
 
-      5.  Set ``CISST_BUILD_cisstStereoVision`` to ``ON``
+      5.  Set ``CISST_cisstStereoVision`` to ``ON``
 
       6.  Set ``CISST_BUILD_EXAMPLES`` to ``ON``
 
@@ -234,7 +234,7 @@ Creating compiler specific projects using CMake
 
       8.  Press ``t`` to enable *Advanced* mode
 
-      9.  Set all ``CISST_BUILD_*_EXAMPLES`` to ``OFF`` but keep ``CISST_BUILD_cisstStereoVision_EXAMPLES`` ``ON`` (we need only the stereo vision examples for this tutorial)
+      9.  Set all ``CISST_*_EXAMPLES`` to ``OFF`` but keep ``CISST_cisstStereoVision_EXAMPLES`` ``ON`` (we need only the stereo vision examples for this tutorial)
 
       10. Press ``c`` to *Configure*, and wait until done (CMake will automatically find all the dependencies for you)
 

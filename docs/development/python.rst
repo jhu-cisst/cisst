@@ -36,7 +36,7 @@ In Python:
 
    import cisstCommonPython
    dir(cisstCommonPython)
-   print cisstCommonPython.cmnClassRegister_ToString()
+   print(cisstCommonPython.cmnClassRegister_ToString())
 
 *cisstVector* typemaps
 ======================

@@ -6,7 +6,7 @@ Overview
 
 The *cisst* package is a collection of libraries designed to ease the development of computer assisted intervention systems. The `Surgical Assistant Workstation (SAW) <https://github.com/jhu-saw>`__ is a platform that combines robotics, stereo vision, and intraoperative imaging (e.g., ultrasound) to enhance a surgeon's capabilities. The SAW package therefore consists of implemented components (e.g., interfaces to many of the devices used for computer-integrated surgery) as well as reusable applications.
 
-All software is available under an open source license, which can be found `here <http://www.cisst.org/cisst/license.txt>`__. The source code can be obtained from github.com, https://github.com/jhu-cisst and https://github.com/jhu-saw. Most users should check out the master branch.
+All software is available under an open source license, which can be found `here <http://www.cisst.org/cisst/license.txt>`__. The source code can be obtained from github.com, https://github.com/jhu-cisst and https://github.com/jhu-saw. Most users should check out the main branch.
 
 Documentation
 -------------
@@ -18,7 +18,7 @@ Documentation
 -  Tutorial Video, Sept. 2021: `Part 1 <https://youtu.be/SSo2MPsfBlk>`__ (30 min), `Part 2 <https://youtu.be/XD0S4GzvfM8>`__ (45 min)
 -  Build and tests status:
 
-   -  master branchComing with the next release...
+   -  main branchComing with the next release...
    -  devel |Ubuntu 24.04| |Ubuntu 22.04| |macOS 14| |Windows latest|
 
 Contact

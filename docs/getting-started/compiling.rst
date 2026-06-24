@@ -25,7 +25,7 @@ External packages
       make -j install
       cd ..
 
--  **Qt** (recommended): some Qt widgets are provided with the cisst libraries as well as most examples with a GUI. If you don’t already have Qt installed and don’t intend to write a Qt application, you can leave ``CISST_HAS_QT`` as ``OFF``. On Linux, you should use your package manager to install Qt. On Windows and Mac OS, you should download the latest Qt version from their web site (see also :doc:`install FAQ </getting-started/faq>`)). We support both Qt 4 and 5. For Qt5 on Windows, make sure you use the "OpenGL" version, not the "ANGLE" version of Qt.
+-  **Qt** (recommended): some Qt widgets are provided with the cisst libraries as well as most examples with a GUI. If you don’t already have Qt installed and don’t intend to write a Qt application, you can leave ``CISST_HAS_QT`` as ``OFF``. On Linux, you should use your package manager to install Qt. On Windows and Mac OS, you should download the latest Qt version from their web site (see also :doc:`install FAQ </getting-started/faq>`)). We support both Qt 5 and 6.
 
 -  **Python and numpy**: most features from cisst and SAW can be used from a Python interpreter. If you plan to use Python, you will need SWIG (Python wrapper generator) along with the Python development libraries and numpy. You can change the variable ``CISST_HAS_SWIG_PYTHON`` to set your preference. On Linux, you should use your package manager to install Python, SWIG and numpy. On Mac OS, Python is already installed but you will need SWIG. MacPort provides a package but you should check the different “variants” to avoid re-installing all possible interpreters (include Python). You can alternatively download SWIG’s source and compile it. For Windows, SWIG provides a very convenient binary distribution on their web page (see also :doc:`install FAQ </getting-started/faq>`).
 
@@ -50,115 +50,83 @@ You can replace ``ccmake`` by ``cmake-gui`` if you prefer a GUI.
 
 Once you have decided which external packages to use and configured CMake, you will have to decide which parts of the cisst/saw code you want to compile:
 
--  You can turn ``ON``/``OFF`` each library using ``CISST_BUILD_<library_name>``
+-  You can turn ``ON``/``OFF`` each library using ``CISST_<library_name>``
 
--  All examples can be turned ``ON/OFF`` using ``CISST_BUILD_EXAMPLES``. If ``CISST_BUILD_EXAMPLES`` is turned ``ON``, you can use the CMake advanced options to select which examples should be compiled, library-by-library. If examples are available for a given library, the option will be ``CISST_BUILD_<library-name>_EXAMPLES``.
+-  All examples can be turned ``ON/OFF`` using ``CISST_BUILD_EXAMPLES``. If ``CISST_BUILD_EXAMPLES`` is turned ``ON``, you can use the CMake advanced options to select which examples should be compiled, library-by-library. If examples are available for a given library, the option will be ``CISST_<library-name>_EXAMPLES``.
 
--  Tests programs are treated as the examples, i.e. you can use ``CISST_BUILD_TESTS`` to control if any test should be compiled and then use the CMake advanced options to select which tests should be compiled, library-by-library. If tests are available for a given library, the option will be ``CISST_BUILD_<library-name>_TESTS``.
+-  Tests programs are treated as the examples, i.e. you can use ``CISST_BUILD_TESTS`` to control if any test should be compiled and then use the CMake advanced options to select which tests should be compiled, library-by-library. If tests are available for a given library, the option will be ``CISST_<library-name>_TESTS``.
 
 -  All ''saw'' components can be turned ``ON/OFF`` using the option ``CISST_BUILD_SAW``.
 
 -  ``SAW_BUILD_<component_name>`` options control which SAW component should be built. Most components have their own external dependencies (e.g. vendor’s SDK).
 
-.. _building-using-catkin-build-tools-for-ros:
+.. _building-using-colcon-for-ros2:
 
-Building using catkin build tools for ROS
------------------------------------------
+Building using colcon for ROS 2
+-------------------------------
 
-If you are using a computer with catkin/ROS installed, you can compile most of the cisst libraries and SAW components using the `catkin build tools <http://catkin-tools.readthedocs.org/en/latest/index.html>`__ (please note that this process works with ``catkin build``, not ``catkin_make``).
+If you are using a computer with ROS 2 installed, you can compile the cisst libraries and SAW components using the `colcon build tool <https://colcon.readthedocs.io/>`__.
 
-Install ROS
-~~~~~~~~~~~
+Install ROS 2
+~~~~~~~~~~~~~
 
-Instructions can be found on `www.ros.org <http://www.ros.org>`__. ROS has multiple releases, named in alphabetical order (Hydro, Indigo, Jade...). We recommend the following releases:
+Instructions can be found on `docs.ros.org <https://docs.ros.org/>`__. We recommend the following LTS distributions:
 
--  Ubuntu 16.04: Kinetic, http://wiki.ros.org/kinetic/Installation/Ubuntu
--  Ubuntu 18.04: Melodic, http://wiki.ros.org/melodic/Installation/Ubuntu
--  Ubuntu 20.04: Noetic, http://wiki.ros.org/noetic/Installation/Ubuntu (still somewhat experimental)
+-  Ubuntu 24.04: Jazzy Jalisco, https://docs.ros.org/en/jazzy/Installation.html
+-  Ubuntu 22.04: Humble Hawksbill, https://docs.ros.org/en/humble/Installation.html
 
-In the following directions, make sure you replace ``kinetic`` by whatever ROS release you have installed.
-
-You will also need some standard Ubuntu packages.
-
-For **Ubuntu 14.04**, ``sudo apt-get install libxml2-dev libraw1394-dev libncurses5-dev qtcreator swig flite sox espeak cmake-curses-gui cmake-qt-gui libopencv-dev git subversion gfortran libcppunit-dev``. If you want Qt5 instead of Qt4, add: ``sudo apt-get install qt5-default libqt5xmlpatterns5-dev``
-
-For **Ubuntu 16.04**, add: ``sudo apt-get install libxml2-dev libraw1394-dev libncurses5-dev qtcreator swig flite sox espeak cmake-curses-gui cmake-qt-gui libopencv-dev git subversion gfortran libcppunit-dev qt5-default``
-
-For **Ubunty 18.04** and **20.04**, all the packages to install (once ROS Full Desktop is installed) are: ``sudo apt-get install libxml2-dev libraw1394-dev libncurses5-dev qtcreator swig sox espeak cmake-curses-gui cmake-qt-gui git subversion gfortran libcppunit-dev libqt5xmlpatterns5-dev``
-
-Initializing your catkin workspace to work with catkin tools
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Assuming you have already installed ROS and you're using Ubuntu, you can install the catkin build tools using.
-
-For **Ubuntu up-to 18.04**:
+You will need standard ROS 2 and vcstool/colcon packages:
 
 .. code:: bash
 
-   sudo apt-get install python-catkin-tools
+   sudo apt install python-is-python3 python3-vcstool python3-colcon-common-extensions python3-pykdl
 
-For **Ubuntu 20.04**:
-
-.. code:: bash
-
-   sudo apt-get install python3-catkin-tools python3-osrf-pycommon
-
-To make sure your path includes the ROS directories:
+You will also need standard Ubuntu and development packages:
 
 .. code:: bash
 
-   source /opt/ros/kinetic/setup.bash   # replace kinetic by whatever your ROS distribution is
+   sudo apt install libxml2-dev libraw1394-dev libncurses5-dev qtcreator swig sox espeak cmake-curses-gui cmake-qt-gui git subversion gfortran libcppunit-dev libbluetooth-dev libhidapi-dev python3-pyudev
 
-If you're using a different ROS version, you'll need a different path, e.g. ``/opt/ros/melodic/setup.bash``.
+Initializing your ROS 2 workspace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Then you should be able to create your catkin workspace. Please note that existing workspaces used in combination with ``catkin_make`` are not compatible with the catkin build tools.
-
-.. code:: bash
-
-   mkdir -p ~/catkin_ws/src
-   cd ~/catkin_ws
-   catkin init
-
-Get the sources
-~~~~~~~~~~~~~~~
+Create a workspace directory and retrieve the sources using `vcs` (vcstool) with the configuration files maintained in the `jhu-saw/vcs <https://github.com/jhu-saw/vcs>`__ repository. For example, for the dVRK:
 
 .. code:: bash
 
-   cd ~/catkin_ws/src
-   git clone https://github.com/jhu-cisst/cisst-saw --recursive
+   mkdir -p ~/ros2_ws/src
+   cd ~/ros2_ws
+   vcs import src --input https://raw.githubusercontent.com/jhu-saw/vcs/main/ros2-dvrk-main.vcs --recursive
 
 Configure and build
 ~~~~~~~~~~~~~~~~~~~
 
-For (significantly) better performances, you should compile your code in CMake Release mode. Using the catkin build tools, this can be done using profile configuration. Then you can build and update your environment variables:
+For optimal performance, compile your code in Release mode using `colcon`:
 
 .. code:: bash
 
-   # make sure we are in the right place
-   cd ~/catkin_ws
-   # make sure you have the proper ROS environment variables
-   source /opt/ros/kinetic/setup.bash  # or whatever your ROS distribution is
-   # set default CMake build type
-   catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release
-   # build
-   catkin build --summary
-   # set environment variables - MAKE SURE YOU SOURCE THE RIGHT FILE
-   source devel/setup.bash
+   cd ~/ros2_ws
+   # make sure you have sourced the system ROS 2 setup
+   source /opt/ros/jazzy/setup.bash  # or /opt/ros/humble/setup.bash depending on your OS
+   # build the workspace
+   colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 
-Setting up your environment variables for ROS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sourcing your workspace
+~~~~~~~~~~~~~~~~~~~~~~~
 
-If you have a single catkin workspace, you might want to automatically ``source`` the ``setup.bash`` when you log in. To do so, you should add the following lines at the end of your ``~/.bashrc`` (hidden file in your home directory):
+After a successful build, you must source the installation setup file to make the compiled packages available in your current terminal:
+
+.. code:: bash
+
+   source ~/ros2_ws/install/setup.bash
+
+If you want to automatically source the workspace setup when you log in, add the following lines at the end of your ``~/.bashrc`` file:
 
 .. code:: sh
 
-   # for ROS
-   if [ -f ~/catkin_ws/devel/setup.bash ]; then
-     . ~/catkin_ws/devel/setup.bash
-   fi
-   # for cisst (optional)
-   if [ -f ~/catkin_ws/devel/cisstvars.sh ]; then
-     . ~/catkin_ws/devel/cisstvars.sh
+   # Source ROS 2 setup
+   if [ -f ~/ros2_ws/install/setup.bash ]; then
+     source ~/ros2_ws/install/setup.bash
    fi
 
 If you're new to Unix, you can launch the text editor ``gedit`` with:
@@ -167,57 +135,38 @@ If you're new to Unix, you can launch the text editor ``gedit`` with:
 
    gedit ~/.bashrc
 
-Then close all your terminals and re-open one terminal. To make sure your environment variables are set, use:
+To verify that your environment variables are set correctly after opening a new terminal, run:
 
-::
+.. code:: bash
 
    env | grep ROS
 
-Maintaining multiple Catkin profiles (optional)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Maintaining multiple build configurations (optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For **advanced users**, you can also create multiple profiles and have different compilation options in each profile. To create a release profile, use the following sequence of commands:
+Unlike ROS 1/catkin, `colcon` does not have built-in profiles. To maintain multiple build configurations (e.g., debug vs. release), you can either:
 
-.. code:: bash
+1. **Use separate workspaces:** You can maintain separate workspaces for different build types (e.g. `~/ros2_ws` and `~/ros2_ws_debug`) and build each with the appropriate build type arguments:
 
-   # make sure we are in the right place
-   cd ~/catkin_ws
-   # make sure you have the proper ROS environment variables
-   source /opt/ros/kinetic/setup.bash  # or whatever your ROS distribution is
-   # create a profile named release with _release extension
-   catkin config --profile release -x _release
-   # switch to newly created release profile
-   catkin profile set release
-   # set default CMake build type
-   catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release
-   # build
-   catkin build --summary
-   # set environment variables - MAKE SURE YOU SOURCE THE RIGHT FILE (debug vs. release)
-   source devel_release/setup.bash
+   .. code:: bash
 
-To create another profile (e.g. debug), the safest way is to '''open a new shell''' without any environment variables specific to the current profile and then:
+      mkdir -p ~/ros2_ws_debug/src
+      # clone/vcs import as needed, then build:
+      colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug
 
-.. code:: bash
+2. **Use custom build/install directories in the same workspace:** You can build to different target directories using the `--build-base` and `--install-base` options:
 
-   # make sure we are in the right place
-   cd ~/catkin_ws
-   # make sure you have the proper ROS environment variables
-   source /opt/ros/kinetic/setup.bash
-   # create a profile named debug with _debug extension
-   catkin config --profile debug -x _debug
-   # switch to newly created debug profile
-   catkin profile set debug
-   # set default CMake build type
-   catkin config --cmake-args -DCMAKE_BUILD_TYPE=Debug
-   # build
-   catkin build --summary
-   # set environment variables
-   source devel_debug/setup.bash
+   .. code:: bash
 
-Every time you toggle between profiles, make sure you change two things:
+      # Build debug configurations
+      colcon build --build-base build_debug --install-base install_debug --cmake-args -DCMAKE_BUILD_TYPE=Debug
+      # Source debug build
+      source install_debug/setup.bash
 
--  Set active profile, e.g. to switch to release:``catkin profile set release``
--  Set environment variables, e.g. to switch to release: ``source ~/catkin_ws/devel_release/setup.bash``
+      # Build release configurations
+      colcon build --build-base build_release --install-base install_release --cmake-args -DCMAKE_BUILD_TYPE=Release
+      # Source release build
+      source install_release/setup.bash
 
 .. _using-cisst-and-saw:
 
@@ -330,17 +279,7 @@ The *SAW* components use the conventional CMake approach:
 
 For each component, the CMake settings should provide the paths and libraries for the wrapper itself as well as all its dependencies (except the cisst libraries). For example, since the component ``sawClaronMicronTracker`` requires some extra libraries provided by the vendor, the CMake variable ``sawClaronMicronTracker_LIBRARIES`` will list all vendor libraries. A typical CMakeLists.txt should first search for *cisst* and then all the required packages:
 
--  An example with a saw component and Qt: https://github.com/jhu-saw/sawNDITracker/blob/master/examples/CMakeLists.txt
-
-.. _edit-cmakeliststxt-with-emacs:
-
-Edit CMakeLists.txt with Emacs
-------------------------------
-
-CMake mode is available for Emacs:
-
--  Download: http://www.cmake.org/CMakeDocs/cmake-mode.el
--  Documentation: http://www.cmake.org/Wiki/CMake_Editors_Support
+-  An example with a saw component and Qt: https://github.com/jhu-saw/sawNDITracker/blob/main/examples/CMakeLists.txt
 
 .. _running-cisst-and-saw-programs:
 
