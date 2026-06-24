@@ -62,6 +62,8 @@ jobs:
 
     - name: Build cisstNetlib
       if: steps.cache-cisstnetlib.outputs.cache-hit != 'true'
+      env:
+        CFLAGS: -std=gnu17
       run: |
         workspace="$(cygpath -u "${GITHUB_WORKSPACE}")"
         cmake -S "${workspace}/cisstNetlib-source" \
@@ -72,7 +74,7 @@ jobs:
           -DcisstNetlib_LANGUAGE=C \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_C_FLAGS="-std=gnu17"
+          -DCMAKE_C_FLAGS=-std=gnu17
         cmake --build "${workspace}/cisstNetlib-build" --parallel "$(nproc)"
         cmake --install "${workspace}/cisstNetlib-build"
 
