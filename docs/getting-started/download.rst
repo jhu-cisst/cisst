@@ -1,5 +1,5 @@
-1. Repositories
-===============
+Repositories
+============
 
 The cisst/SAW code is modular by nature. There is a main repository for the cisst libraries and then a repository per SAW component. To facilitate the code deployment, we also maintain some "meta" projects, each of them consisting of git submodules and a main CMakeLists. These "meta" projects allow to pull a subset of git repositories and provide a CMake configuration that can be tailored for a specific application.
 
@@ -7,44 +7,44 @@ The cisst/SAW code primary repositories are now hosted on github.com. To avoid c
 
 -  http://github.com/jhu-cisst
 
--  cisst.git, all the cisst libraries, recommended for users not interested in SAW components and applications
+  -  cisst.git, all the cisst libraries, recommended for users not interested in SAW components and applications
 
--  share.git, data used for some of the *cisst* examples and unit tests, this is a git submodule of cisst.git
+  -  share.git, data used for some of the *cisst* examples and unit tests, this is a git submodule of cisst.git
 
--  cisst-saw.git, meta project containing cisst and most SAW modules, strongly recommended for cisst/SAW users
+  -  cisst-saw.git, meta project containing cisst and most SAW modules, strongly recommended for cisst/SAW users
 
--  cisst-ros.git, SAW component and conversion functions used to create bridges between the cisst/SAW components and ROS
+  -  cisst-ros.git, SAW component and conversion functions used to create bridges between the cisst/SAW components and ROS
 
--  mechatronics-\*, projects related to the QLA-FPGA controller board
+  -  mechatronics-\*, projects related to the QLA-FPGA controller board
 
 -  http://github.com/jhu-saw
 
--  Generic SAW components
+  -  Generic SAW components
 
--  Individual projects, all of them require the cisst libraries
+  -  Individual projects, all of them require the cisst libraries
 
--  If you decided to checkout the SAW components individually, you will need to build them against an existing cisst build tree
+  -  If you decided to checkout the SAW components individually, you will need to build them against an existing cisst build tree
 
 -  http://github.com/jhu-dvrk
 
--  SAW components specific to the da Vinci Research Kit
+  -  SAW components specific to the da Vinci Research Kit
 
--  ROS files for the da Vinci Research Kit
+  -  ROS files for the da Vinci Research Kit
 
-.. _2-getting-the-latest-version:
+.. _getting-the-latest-version:
 
-2. Getting the latest version
-=============================
+Getting the latest version
+==========================
 
 The most useful repositories are:
 
 -  http://github.com/jhu-cisst/cisst.git - *cisst* libraries, examples and test programs. Also adds *share* directory as a git submodule
 -  http://github.com/jhu-cisst/cisst-saw.git. This repository is useless if the git submodules are not initialized and updated properly.
 
-.. _21-command-line-linux-mac-os-x-:
+.. _command-line-linux-mac-os-x-:
 
-2.1. Command line (Linux, Mac OS X, ...)
-----------------------------------------
+Command line (Linux, Mac OS X, ...)
+------------------------------------
 
 .. _cisst-without-the-data-eg-cisstgit:
 
@@ -109,10 +109,10 @@ The most useful repositories are:
       git pull origin main
       git submodule update --init --recursive
 
-.. _22-windows-gui:
+.. _windows-gui:
 
-2.2. Windows GUI
-----------------
+Windows GUI
+-----------
 
 There are many GUI based tools for git. You can find a list on http://git-scm.com/downloads/guis.
 
@@ -121,10 +121,10 @@ There are many GUI based tools for git. You can find a list on http://git-scm.co
 
 If you are cloning a project with submodules, make sure you check the "Initialize all submodules"
 
-.. _3-cisstsaw-developers:
+.. _cisstsaw-developers:
 
-3. cisst/SAW developers
-=======================
+cisst/SAW developers
+--------------------
 
 Working with submodules can be a bit tricky. When you are working within a meta project and modify multiple submodules, you will need to:
 
