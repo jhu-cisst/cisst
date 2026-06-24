@@ -751,9 +751,8 @@ macro (cisst_set_output_path)
   endif ()
 endmacro (cisst_set_output_path)
 
-# Deprecated macro to set output directories
+# For projects using cisst in CMake add_subdirectory
 macro (cisst_use_cisst_output_directories)
-  message (DEPRECATION "cisst_use_cisst_output_directories is deprecated.")
   set (LIBRARY_OUTPUT_PATH "${cisst_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
   set (EXECUTABLE_OUTPUT_PATH "${cisst_BINARY_DIR}/bin")
 endmacro (cisst_use_cisst_output_directories)

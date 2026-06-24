@@ -224,20 +224,34 @@ if (NOT ${_cisst_common_xml_index} EQUAL -1 AND CISST_XML_LIB STREQUAL "LibXml2"
 endif ()
 unset (_cisst_common_xml_index)
 
-find_file (_cisstTargets_file
-           cisst-targets.cmake
-           PATHS ${CISST_CMAKE_DIRS} ${CISST_BINARY_DIR}
-           NO_DEFAULT_PATH)
-if (EXISTS ${_cisstTargets_file})
-  include (${_cisstTargets_file})
+if (TARGET cisstCommon)
+  foreach (lib ${CISST_LIBRARIES})
+    if (TARGET ${lib} AND NOT TARGET cisst::${lib})
+      add_library (cisst::${lib} ALIAS ${lib})
+    endif ()
+  endforeach ()
+else ()
+  find_file (_cisstTargets_file
+             cisst-targets.cmake
+             PATHS ${CISST_CMAKE_DIRS} ${CISST_BINARY_DIR}
+             NO_DEFAULT_PATH)
+  if (EXISTS ${_cisstTargets_file})
+    include (${_cisstTargets_file})
+  endif ()
+  unset (_cisstTargets_file CACHE)
 endif ()
-unset (_cisstTargets_file CACHE)
 
 if (CISST_HAS_CISSTNETLIB)
   find_dependency (CisstNetlib)
   if (TARGET cisst::cisstNumerical)
-    set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CISSTNETLIB_INCLUDE_DIR}")
-    set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${CISSTNETLIB_LIBRARIES}")
+    get_target_property (_aliased_target cisst::cisstNumerical ALIASED_TARGET)
+    if (_aliased_target)
+      set_property (TARGET ${_aliased_target} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CISSTNETLIB_INCLUDE_DIR}")
+      set_property (TARGET ${_aliased_target} APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${CISSTNETLIB_LIBRARIES}")
+    else ()
+      set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CISSTNETLIB_INCLUDE_DIR}")
+      set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${CISSTNETLIB_LIBRARIES}")
+    endif ()
   endif ()
 endif ()
 

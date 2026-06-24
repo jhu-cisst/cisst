@@ -111,6 +111,7 @@ if (CISST_HAS_CISSTNETLIB)
     # set all cisstReflexxesTypeII variables based on install directory
     set (cisstReflexxesTypeII_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstReflexxesTypeII/include/ReflexxesTypeII")
     set (cisstReflexxesTypeII_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib")
+    file (MAKE_DIRECTORY "${cisstReflexxesTypeII_INCLUDE_DIR}")
     set (cisstReflexxesTypeII_LIBRARIES ReflexxesTypeII)
     # add wrappers to cisstRobot
     set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)

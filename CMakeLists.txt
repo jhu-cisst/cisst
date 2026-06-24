@@ -53,11 +53,8 @@ mark_as_advanced (CISST_BUILD_APPLICATIONS)
 
 # Activate tests before any directory is added
 if (CISST_BUILD_TESTS)
-  # Settings for CTest
   enable_testing ()
   mark_as_advanced (BUILD_TESTING) # CMake variable for CTest
-  include (Dart)
-  mark_as_advanced (DART_ROOT)
 endif (CISST_BUILD_TESTS)
 
 # Build static or dynamic libraries
@@ -385,6 +382,7 @@ if (CISST_BUILD_TESTS)
                            UPDATE_COMMAND ""
                            )
       set (CPPUNIT_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit/include")
+      file (MAKE_DIRECTORY "${CPPUNIT_INCLUDE_DIR}")
       set (CPPUNIT_LIBRARIES "cppunit")
       set (CPPUNIT_DEBUG_LIBRARIES "cppunit")
       set (CPPUNIT_RELEASE_LIBRARIES "cppunit")
