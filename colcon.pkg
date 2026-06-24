@@ -7,7 +7,6 @@
     "-DCISST_USE_EXTERNAL=ON",
     "-DCISST_cisstMesh=ON",
     "-DCISST_cisstInteractive=ON",
-    "-DCISST_USE_SI_UNITS=ON",
     "-DCISST_HAS_QT=ON",
     "-DCISST_HAS_JSON=ON",
     "-DCISST_HAS_SWIG_PYTHON=ON",

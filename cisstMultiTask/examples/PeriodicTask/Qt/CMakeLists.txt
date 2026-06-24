@@ -23,12 +23,12 @@ set (CMAKE_AUTOMOC ON)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 add_library (mtsExPeriodicTaskGuiQt ${IS_SHARED}
-                mainQtComponent.cpp
-                mainQtComponent.h
-                displayQtComponent.cpp
-                displayQtComponent.h
-                displayQtWidget.cpp
-                displayQtWidget.h)
+             mainQtComponent.cpp
+             mainQtComponent.h
+             displayQtComponent.cpp
+             displayQtComponent.h
+             displayQtWidget.cpp
+              displayQtWidget.h)
 set_property (TARGET mtsExPeriodicTaskGuiQt PROPERTY FOLDER "cisstMultiTask/examples")
 
 add_executable (mtsExPeriodicTaskQt main.cpp)

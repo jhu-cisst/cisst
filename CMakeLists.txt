@@ -187,7 +187,6 @@ if (CISST_CATKIN_BUILT)
   set (CISST_HAS_JSON          ON  CACHE BOOL "")
   set (CISST_HAS_SWIG_PYTHON   ON  CACHE BOOL "" FORCE)
   set (CISST_BUILD_SHARED_LIBS ON  CACHE BOOL "" FORCE)
-  set (CISST_USE_SI_UNITS      ON  CACHE BOOL "")
   set (IS_SHARED SHARED)
   set (BUILD_SHARED_LIBS SHARED)
 else ()
@@ -314,7 +313,7 @@ endif (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 
 
 # Determine is cisst is SI or not
-option (CISST_USE_SI_UNITS "Use SI units, if not, distances are in millimeters (default if OFF)" OFF)
+option (CISST_USE_SI_UNITS "Use SI units, if not, distances are in millimeters (default if ON)" ON)
 mark_as_advanced (CISST_USE_SI_UNITS)
 
 
