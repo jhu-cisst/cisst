@@ -16,7 +16,7 @@ if (cisst_FOUND)
 
 add_executable (mshExMesh mesh.cpp)
 set_property (TARGET mshExMesh PROPERTY FOLDER "cisstMesh/examples")
-target_link_libraries (mshExMesh ${REQUIRED_CISST_LIBRARIES})
+target_link_libraries (mshExMesh ${cisst_LIBRARIES})
 
 else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
