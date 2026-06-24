@@ -128,9 +128,9 @@ To use the Interactive Research Environment (IRE):
 XML
 ---
 
-To use XML within cisst, you must turn ON the ``CISST_cisstCommonXML`` option in CMake. There are two options for XML support: LibXML2 or Qt. CMake will attempt to find these packages on its own. If both are present, the default is to use libXML2. This can be changed in CMake by modifying the CISST_XML_LIB variable to be either LibXml2 or QtXML. Note, however, that to use the Qt XML, your code must have a ``QApplication`` (i.e., it is not enough to just link with the Qt libraries). Also, if you are getting linker errors in external projects, be sure that ``cisstCommonXML`` is added to your ``cisst_target_link_libraries``, i.e.:
+To use XML within cisst, you must turn ON the ``CISST_cisstCommonXML`` option in CMake. There are two options for XML support: LibXML2 or Qt. CMake will attempt to find these packages on its own. If both are present, the default is to use libXML2. This can be changed in CMake by modifying the CISST_XML_LIB variable to be either LibXml2 or QtXML. Note, however, that to use the Qt XML, your code must have a ``QApplication`` (i.e., it is not enough to just link with the Qt libraries). Also, if you are getting linker errors in external projects, be sure that ``cisst::cisstCommonXML`` is added to your ``target_link_libraries``, i.e.:
 
-``cisst_target_link_libraries (yourProgram cisstCommon cisstCommonXML ....)``
+``target_link_libraries (yourProgram cisst::cisstCommon cisst::cisstCommonXML)``
 
 .. _windows-1:
 

@@ -128,8 +128,10 @@ if (CISST_HAS_JSON)
   if (TARGET cisstJsonCpp)
     set_property (TARGET cisstCommon APPEND PROPERTY
                   LINK_LIBRARIES cisstJsonCpp)
-    set_property (TARGET cisstCommon APPEND PROPERTY
-                  INTERFACE_LINK_LIBRARIES cisstJsonCpp)
+    if (NOT (MINGW AND CISST_BUILD_SHARED_LIBS))
+      set_property (TARGET cisstCommon APPEND PROPERTY
+                    INTERFACE_LINK_LIBRARIES cisstJsonCpp)
+    endif ()
   else ()
     if (JSON_LIBRARY_DIRS)
       target_link_directories (cisstCommon PUBLIC "$<BUILD_INTERFACE:${JSON_LIBRARY_DIRS}>")

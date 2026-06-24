@@ -180,13 +180,13 @@ Compiling against the cisst libraries
 
 We strongly encourage using CMake. The following section describes the main commands you will need to write a ``CMakeLists.txt`` file for your own code.
 
-*cisst* libraries and “settings” One of the difficulties with CMake is to propagate the different settings used for a library to the library user. For example, if ``cisstCommonQt`` requires Qt, an application using ``cisstCommonQt`` will also need to link against some Qt libraries. During the cisst configuration, the user already had to specify which cisst libraries were compiled and which external packages were used. The cisst CMake scripts store this information in files so it can be used later (all files are in the build tree in ``cisst/CMakeFiles``. When building against the cisst libraries, the user can now specify what is needed using either the library name (e.g. ``cisstCommon``, ``cisstVector``, ``cisstStereoVision``, …) or general settings (e.g. ``cisstQt``, ``cisstPython``, ``cisstOpenGL``, …).
+When building against the cisst libraries, the user can specify what is needed using the library names (e.g. ``cisstCommon``, ``cisstVector``, ``cisstStereoVision``, …). ``find_package (cisst)`` When ''cisst'' is being configured, a configuration file is created: ``cisst-config.cmake``. In your ``CMakeLists.txt``, using ``find_package (cisst)``, you will need to load this file. Your ``CMakeLists.txt`` should contain one of the following:
 
-``find_package (cisst)`` When ''cisst'' is being configured, a configuration file is created: ``cisst-config.cmake``. In your ``CMakeLists.txt``, using ``find_package (cisst)``, you will need to load this file. Your ``CMakeLists.txt`` should contain one of the following: \* ``find_package (cisst)``: you are just trying to find cisst and don’t care about the configuration. Your script should then check that ``cisst_FOUND`` is true. \* ``find_package (cisst REQUIRED cisstCommon cisstVector cisstPython)``: you want to find cisst and make sure the following components have been compiled. Your script should then check that ``cisst_FOUND_AS_REQUIRED`` is true. This syntax is a bit more complicated but it is recommended.
+* ``find_package (cisst)``: you are just trying to find cisst and don’t care about the configuration.
 
-``include (${CISST_USE_FILE})`` It is important to note that finding ''cisst'' doesn’t change your CMake project settings. To start using ''cisst'' you must ``include`` the file defined by the variable ``${CISST_USE_FILE}``. Doing so will set the include and link directories for the libraries and settings used in ``find_package``. In CMake, this must happen before the target is created (either ``add_library``, ``add_executable`` or ``add_swig_module``) If you haven’t specified any library or setting, all libraries and settings will be used. If you have used the ``COMPONENT`` option for ``find_package``, the include and link directories will be restricted to your settings. The second case is preferred as it tends to reduce the number of options passed to your compiler and linker.
+* ``find_package (cisst REQUIRED COMPONENTS cisstCommon cisstVector cisstPython)``: you want to find cisst and make sure the following components have been compiled. In both cases, your script should check that ``cisst_FOUND`` is true.
 
-``cisst_target_link_libraries (<target_name> cisstCommon cisstVector …)`` Once you have defined your target you will need to specify which ''cisst'' libraries and settings should be used by the linker. In CMake, one can find the command ``target_link_libraries``. For cisst, we also defined the macro ``cisst_target_link_libraries``. This macro should only be used to link against ''cisst'' libraries (e.g. ``cisstMultiTask``) or cisst settings (e.g. ``cisstQt``). On top of a regular ``target_link_libraries``, the macro checks that the required ''cisst'' libraries and settings have been compiled. It also adds all the external dependencies for each ''cisst'' library.
+Linking against *cisst* libraries is done using the standard CMake ``target_link_libraries`` command. The *cisst* CMake targets are fully modernized and use the namespace prefix ``cisst::`` (e.g. ``cisst::cisstCommon``). Linking against a *cisst* target automatically propagates its include directories and all nested/external library dependencies.
 
 .. _cmakeliststxt-examples:
 
@@ -204,10 +204,6 @@ Simple example
    # make sure cisst is found
    if (cisst_FOUND)
 
-     # this will set the include and link directories
-     # using all cisst settings
-     include (${CISST_USE_FILE})
-     
      # add a library
      add_library (myLibrary libFile.cpp libFile.h)
      # add a program
@@ -215,9 +211,8 @@ Simple example
      # usual CMake link
      target_link_libraries (myExecutable myLibrary)
 
-     # using cisst libraries and settings
-     # if any of these has not be compiled/set, you will get a CMake error
-     cisst_target_link_libraries (myExecutable cisstCommon cisstVector cisstQt)
+     # using cisst libraries
+     target_link_libraries (myExecutable cisst::cisstCommon cisst::cisstVector cisst::cisstQt)
 
    else (cisst_FOUND)
      message (SEND_ERROR "Oops, cisst not found")
@@ -228,42 +223,37 @@ Using ``REQUIRED/COMPONENTS``
 
 In this example we demonstrate how to be a bit more specific and specify which libraries are needed.
 
-.. code:: bash
+.. code:: cmake
 
    # make a list of libraries and settings we will need
    set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstQt)
 
    # in CMake we will have to set cisst_DIR to <cisst-build-tree>/cisst
-   find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
+   find_package (cisst REQUIRED COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-   # make sure cisst is found AS REQUIRED
-   # this checks that all required components are found
-   if (cisst_FOUND_AS_REQUIRED)
+   # make sure cisst is found
+   if (cisst_FOUND)
 
-     # this will set the include and link directories
-     # using only the settings for cisstCommon, cisstVector and cisstQt
-     include (${CISST_USE_FILE})
-     
      # same as above
      add_library (myLibrary libFile.cpp libFile.h)
      add_executable (myExecutable main.cpp)
      target_link_libraries (myExecutable myLibrary)
 
-     # using cisst libraries and settings as defined before
-     cisst_target_link_libraries (myExecutable ${REQUIRED_CISST_LIBRARIES})
+     # using cisst libraries as defined before
+     target_link_libraries (myExecutable cisst::cisstCommon cisst::cisstVector cisst::cisstQt)
 
-   else (cisst_FOUND_AS_REQUIRED)
+   else (cisst_FOUND)
      message (SEND_ERROR "Oops, cisst ${REQUIRED_CISST_LIBRARIES} not found")
-   endif (cisst_FOUND_AS_REQUIRED) 
+   endif (cisst_FOUND) 
 
 More examples
 ~~~~~~~~~~~~~
 
 Please note that all ''cisst'' examples come with their own ``CMakeLists.txt`` and can be copied to be compiled outside the ''cisst'' source tree. See more complex examples:
 
--  An example with a test to make sure cisstNetlib has been compiled: [source:trunk/cisst/cisstNumerical/examples/tutorial/CMakeLists.txt cisstNumerical tutorial example]
--  An example with Qt: [source:trunk/cisst/cisstCommon/examples/LoggerQt/CMakeLists.txt cisstCommon logger Qt example]
--  An example with SWIG and Python: [source:trunk/cisst/cisstInteractive/examples/pythonEmbedded/CMakeLists.txt cisstInteractive pythonEmbedded example] - please note the use of ``cisstPython`` and ``cisst_add_swig_module``
+-  An example with a test to make sure cisstNetlib has been compiled: `cisstNumerical tutorial example <https://github.com/jhu-cisst/cisst/blob/main/cisstNumerical/examples/tutorial/CMakeLists.txt>`__
+-  An example with Qt: `cisstCommon logger Qt example <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/examples/LoggerQt/CMakeLists.txt>`__
+-  An example with SWIG and Python: `cisstInteractive pythonEmbedded example <https://github.com/jhu-cisst/cisst/blob/main/cisstInteractive/examples/pythonEmbedded/CMakeLists.txt>`__ - please note the use of ``cisstPython`` and ``cisst_add_swig_module``
 
 .. _compiling-against-the-saw-components:
 

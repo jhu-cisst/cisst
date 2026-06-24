@@ -8,7 +8,7 @@ cisstNumerical contains native functions as well as wrappers for existing numeri
 An illustrative example: SVD
 ============================
 
-The Singular Value Decomposition is a common algorithm and the cisst implementation illustrates many features of the cisstNumerical FORTRAN wrappers. The goal of SVD is to find the decomposition of a matrix A such as A = U \* Sigma \* V where both U and V are orthonormal and S is a diagonal matrix composed of singular values.
+The Singular Value Decomposition is a common algorithm and the cisst implementation illustrates many features of the cisstNumerical FORTRAN wrappers. The goal of SVD is to find the decomposition of a matrix A such as ``A = U * Sigma * V`` where both U and V are orthonormal and S is a diagonal matrix composed of singular values.
 
 Most of the FORTRAN routines we are using will not allocate any memory nor check that the parameters are valid (see also section 5). Our wrappers not only check the size of the parameters to verify that enough memory has been allocated but they also provide some flexible mechanisms to allocate the required memory.
 

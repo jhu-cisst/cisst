@@ -37,8 +37,8 @@ For the cisst libraries developers, we have a few important macros that should b
    In this example the following keywords are used:
 
    -  ``LIBRARY``: name of the library to be generated
-   -  ``LIBRARY_DIR``: relative path to include files from the cisst source directory, i.e. ``trunk/cisst/``
+   -  ``LIBRARY_DIR``: relative path to include files from the cisst source directory, i.e. ``cisst/``
    -  ``DEPENDENCIES``: list of cisst libraries required for this library
    -  ``SOURCE_FILES``: list of source files found in the current source directory, i.e. directory containing this CMakeLists.txt file
-   -  ``HEADER_FILES``: list of header files found in the ``LIBRARY_DIR``. In this example, header files are found in ``trunk/cisst/cisstVector``
+   -  ``HEADER_FILES``: list of header files found in the ``LIBRARY_DIR``. In this example, header files are found in ``cisst/cisstVector``
    -  ``ADDITIONAL_SOURCE_FILES`` (and ``ADDITIONAL_HEADER_FILES``): extra source (header) files not found in the default directories. These can be generated files, private header files, ...

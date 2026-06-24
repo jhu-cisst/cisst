@@ -49,7 +49,7 @@ Vectors, matrices and multi-dimensional arrays
    -  ``vctInt2``, ``vctInt3``, ``vctInt4``, ...
    -  Supported types include ``Int``, ``UInt``, ``Char``, ``UChar``, ``Bool``, ...
    -  Supported sizes go from 1 to 9 (as of 2012, more might be added later).
-   -  All types are defined in file ``vctFixedSizeVectorTypes.h`` (see current version source:/trunk/cisst/cisstVector/vctFixedSizeVectorTypes.h)
+   -  All types are defined in file ``vctFixedSizeVectorTypes.h`` (see `current version <https://github.com/jhu-cisst/cisst/blob/main/cisstVector/vctFixedSizeVectorTypes.h>`__)
 
 -  Fixed size matrix: ``vctFixedSizeMatrix<type, rows, cols, storageOrder>``. For example, one can declare a 2 by 2 fixed size matrix of unsigned integers using ``vctFixedSizeMatrix<unsigned int, 2, 2> myMatrix``.
 
@@ -59,28 +59,28 @@ Vectors, matrices and multi-dimensional arrays
    -  ``vctInt2x2``, ``vctInt3x3``, ``vctInt4x4``, ...
    -  Supported types include ``Int``, ``Char``, ``Bool``, ...
    -  Supported sizes go from 1 to 4 for either rows and columns (as of 2012, more might be added later).
-   -  All types are defined in file ``vctFixedSizeMatrixTypes.h`` (see current version source:/trunk/cisst/cisstVector/vctFixedSizeMatrixTypes.h)
+   -  All types are defined in file ``vctFixedSizeMatrixTypes.h`` (see `current version <https://github.com/jhu-cisst/cisst/blob/main/cisstVector/vctFixedSizeMatrixTypes.h>`__)
 
 -  Dynamic vector: ``vctDynamicVector<type>``. For example, one can declare a dynamic vector of unsigned integers using ``vctDynamicVector<unsigned int> myVector``.
 
    -  ``vctDoubleVec`` also known as ``vctVec``
    -  ``vctIntVec``, ...
    -  Supported types include ``Int``, ``UInt``, ``Char``, ``UChar``, ``Bool``, ...
-   -  All types are defined in file ``vctDynamicVectorTypes.h`` (see current version source:/trunk/cisst/cisstVector/vctDynamicVectorTypes.h)
+   -  All types are defined in file ``vctDynamicVectorTypes.h`` (see `current version <https://github.com/jhu-cisst/cisst/blob/main/cisstVector/vctDynamicVectorTypes.h>`__)
 
 -  Dynamic matrix: ``vctDynamicMatrix<type>``. For example, one can declare a dynamic matrix of unsigned integers using ``vctDynamicMatrix<unsigned int> myMatrix``.
 
    -  ``vctDoubleMat`` also known as ``vctMat``
    -  ``vctIntMat``, ...
    -  Supported types include ``Int``, ``UInt``, ``Char``, ``UChar``, ``Bool``, ...
-   -  All types are defined in file ``vctDynamicMatrixTypes.h`` (see current version source:/trunk/cisst/cisstVector/vctDynamicMatrixTypes.h)
+   -  All types are defined in file ``vctDynamicMatrixTypes.h`` (see `current version <https://github.com/jhu-cisst/cisst/blob/main/cisstVector/vctDynamicMatrixTypes.h>`__)
 
 -  Dynamic multi-dimensional arrays: ``vctDynamicNArray<type>``. For example one can declare a 4D array of unsigned integers using ``vctDynamicNArray<unsigned int, 4> myArray``.
 
 Transformations
 ~~~~~~~~~~~~~~~
 
-All types are defined in file ``vctTransformationTypes.h`` (see current version source:/trunk/cisst/cisstVector/vctTransformationTypes.h)
+All types are defined in file ``vctTransformationTypes.h`` (see `current version <https://github.com/jhu-cisst/cisst/blob/main/cisstVector/vctTransformationTypes.h>`__)
 
 -  3D rotations:
 
@@ -109,7 +109,7 @@ All types are defined in file ``vctTransformationTypes.h`` (see current version 
 
       -  ``vctEulerZYZRotation3`` (same as ``vctEulerRotation3<vctEulerRotation3Order::ZYZ>``)
       -  ``vctEulerZYXRotation3`` (same as ``vctEulerRotation3<vctEulerRotation3Order::ZYX>``)
-      -  Euler rotation types are defined in file ``vctEulerRotation3.h`` (see current version source:/trunk/cisst/cisstVector/vctEulerRotation3.h)
+      -  Euler rotation types are defined in file ``vctEulerRotation3.h`` (see `current version <https://github.com/jhu-cisst/cisst/blob/main/cisstVector/vctEulerRotation3.h>`__)
 
 -  3D transformations -- to be documented
 
