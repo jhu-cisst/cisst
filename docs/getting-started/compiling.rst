@@ -240,7 +240,7 @@ In this example we demonstrate how to be a bit more specific and specify which l
      target_link_libraries (myExecutable myLibrary)
 
      # using cisst libraries as defined before
-     target_link_libraries (myExecutable cisst::cisstCommon cisst::cisstVector cisst::cisstQt)
+     target_link_libraries (myExecutable cisst_LIBRARIES)
 
    else (cisst_FOUND)
      message (SEND_ERROR "Oops, cisst ${REQUIRED_CISST_LIBRARIES} not found")
