@@ -71,7 +71,8 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="${workspace}/cisstNetlib-install" \
           -DcisstNetlib_LANGUAGE=C \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_C_FLAGS="-std=gnu17"
         cmake --build "${workspace}/cisstNetlib-build" --parallel "$(nproc)"
         cmake --install "${workspace}/cisstNetlib-build"
 
