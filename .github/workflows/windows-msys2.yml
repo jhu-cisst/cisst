@@ -68,15 +68,14 @@ jobs:
         workspace="$(cygpath -u "${GITHUB_WORKSPACE}")"
         cmake -S "${workspace}/cisstNetlib-source" \
           -B "${workspace}/cisstNetlib-build" \
-          -G Ninja \
-          -DCMAKE_BUILD_TYPE=Release \
+          -G "Ninja Multi-Config" \
           -DCMAKE_INSTALL_PREFIX="${workspace}/cisstNetlib-install" \
           -DcisstNetlib_LANGUAGE=C \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCMAKE_C_FLAGS=-std=gnu17
-        cmake --build "${workspace}/cisstNetlib-build" --parallel "$(nproc)"
-        cmake --install "${workspace}/cisstNetlib-build"
+        cmake --build "${workspace}/cisstNetlib-build" --config Release --parallel "$(nproc)"
+        cmake --install "${workspace}/cisstNetlib-build" --config Release
 
     - name: Configure CMake
       run: |
