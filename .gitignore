@@ -44,4 +44,7 @@ docs/_build/
 docs/.venv/
 build.log
 
-
+# LaTeX intermediate build files
+*.aux
+*.log
+*.toc
