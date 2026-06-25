@@ -50,14 +50,14 @@ jobs:
       run: |
         workspace="$(cygpath -u "${GITHUB_WORKSPACE}")"
         github_env="$(cygpath -u "${GITHUB_ENV}")"
-        git clone --depth 1 https://github.com/jhu-cisst/cisstNetlib "${workspace}/cisstNetlib-source"
-        echo "CISSTNETLIB_HASH=$(git -C "${workspace}/cisstNetlib-source" rev-parse HEAD)" >> "${github_env}"
+        git clone --depth 1 https://github.com/jhu-cisst/cisstNetlib "${workspace}/../cisstNetlib-source"
+        echo "CISSTNETLIB_HASH=$(git -C "${workspace}/../cisstNetlib-source" rev-parse HEAD)" >> "${github_env}"
 
     - name: Cache cisstNetlib build
       id: cache-cisstnetlib
       uses: actions/cache@v4
       with:
-        path: ${{github.workspace}}/cisstNetlib-install
+        path: ${{github.workspace}}/../cisstNetlib-install
         key: ${{ runner.os }}-msys2-cisstnetlib-${{ env.CISSTNETLIB_HASH }}
 
     - name: Build cisstNetlib
@@ -66,16 +66,16 @@ jobs:
         CFLAGS: -std=gnu17
       run: |
         workspace="$(cygpath -u "${GITHUB_WORKSPACE}")"
-        cmake -S "${workspace}/cisstNetlib-source" \
-          -B "${workspace}/cisstNetlib-build" \
+        cmake -S "${workspace}/../cisstNetlib-source" \
+          -B "${workspace}/../cisstNetlib-build" \
           -G "Ninja Multi-Config" \
-          -DCMAKE_INSTALL_PREFIX="${workspace}/cisstNetlib-install" \
+          -DCMAKE_INSTALL_PREFIX="${workspace}/../cisstNetlib-install" \
           -DcisstNetlib_LANGUAGE=C \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCMAKE_C_FLAGS=-std=gnu17
-        cmake --build "${workspace}/cisstNetlib-build" --config Release --parallel "$(nproc)"
-        cmake --install "${workspace}/cisstNetlib-build" --config Release
+        cmake --build "${workspace}/../cisstNetlib-build" --config Release --parallel "$(nproc)"
+        cmake --install "${workspace}/../cisstNetlib-build" --config Release
 
     - name: Configure CMake
       run: |
@@ -86,7 +86,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -DCisstNetlib_DIR="${workspace}/cisstNetlib-install/share/cisstNetlib" \
+          -DCisstNetlib_DIR="${workspace}/../cisstNetlib-install/share/cisstNetlib" \
           -C "${workspace}/.github/workflows/cmake-windows-cache.cmake"
 
     - name: Build
