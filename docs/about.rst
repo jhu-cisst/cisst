@@ -16,10 +16,6 @@ Documentation
 -  :doc:`Compile </getting-started/compiling>`
 -  `Reference manual <http://jhu-cisst.github.io/cisst-saw-doxygen/html>`__ (for cisst and main SAW components, Doxygen generated)
 -  Tutorial Video, Sept. 2021: `Part 1 <https://youtu.be/SSo2MPsfBlk>`__ (30 min), `Part 2 <https://youtu.be/XD0S4GzvfM8>`__ (45 min)
--  Build and tests status:
-
-   -  main branchComing with the next release...
-   -  devel |Ubuntu 24.04| |Ubuntu 22.04| |macOS 14| |Windows latest|
 
 Contact
 -------
@@ -32,12 +28,3 @@ Acknowledgments
 ---------------
 
 The cisst software has been developed with the support of the National Science Foundation, EEC 9731748, EEC 0646678, and MRI 0722943, and by Johns Hopkins University internal funds.
-
-.. |Ubuntu 24.04| image:: https://github.com/jhu-cisst/cisst/actions/workflows/ubuntu-24.04.yml/badge.svg
-   :target: https://github.com/jhu-cisst/cisst/actions/workflows/ubuntu-24.04.yml
-.. |Ubuntu 22.04| image:: https://github.com/jhu-cisst/cisst/actions/workflows/ubuntu-22.04.yml/badge.svg
-   :target: https://github.com/jhu-cisst/cisst/actions/workflows/ubuntu-22.04.yml
-.. |macOS 14| image:: https://github.com/jhu-cisst/cisst/actions/workflows/macos-14.yml/badge.svg
-   :target: https://github.com/jhu-cisst/cisst/actions/workflows/macos-14.yml
-.. |Windows latest| image:: https://github.com/jhu-cisst/cisst/actions/workflows/windows-latest.yml/badge.svg
-   :target: https://github.com/jhu-cisst/cisst/actions/workflows/windows-latest.yml
