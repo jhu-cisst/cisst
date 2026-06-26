@@ -4,7 +4,7 @@
 /*
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,6 +34,7 @@ bool mtsFunctionVoid::Detach(void)
 {
     if (this->IsValid()) {
         this->Command = 0;
+        DeleteCompletionCommand();
         return true;
     }
     return false;

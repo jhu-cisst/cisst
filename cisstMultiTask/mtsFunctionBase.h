@@ -5,7 +5,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -63,6 +63,9 @@ public:
 
     /*! Initialize the completion command (mtsEventReceiverWrite), creating it if necessary. */
     virtual void InitCompletionCommand(const std::string &name);
+
+    /*! Delete the completion command (mtsEventReceiverWrite), if it exists. */
+    virtual void DeleteCompletionCommand(void);
 
     /*! Set the thread signal used for blocking commands */
     void SetThreadSignal(osaThreadSignal * threadSignal);

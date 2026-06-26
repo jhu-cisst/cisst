@@ -5,7 +5,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -45,6 +45,14 @@ void mtsFunctionBase::InitCompletionCommand(const std::string &name)
         this->CompletionCommand = new mtsEventReceiverWrite;
     this->CompletionCommand->SetName(name);
     this->CompletionCommand->SetThreadSignal(this->ThreadSignal);
+}
+
+void mtsFunctionBase::DeleteCompletionCommand(void)
+{
+    if (this->CompletionCommand) {
+        delete this->CompletionCommand;
+        CompletionCommand = 0;
+    }
 }
 
 void mtsFunctionBase::SetThreadSignal(osaThreadSignal * threadSignal)
