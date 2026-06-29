@@ -6,7 +6,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-15
 
-  (C) Copyright 2008-2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -138,7 +138,7 @@ public:
 
     /*! Destructor.  Relies on std::map destructor. */
     ~cmnNamedMap() {
-        //DeleteAll();
+        DeleteAll();
     }
 
     /*! Set the map owner */

@@ -432,8 +432,8 @@ bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequired
     }
     const mtsInterfaceProvided * connectedInterface = interfaceRequired->GetConnectedInterface();
     if (connectedInterface) {
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: cannot remove interface because it is connected to "
-                                << connectedInterface->GetFullName() << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: cannot remove interface " << interfaceRequiredName
+                                << " because it is connected to " << connectedInterface->GetFullName() << std::endl;
         return false;
     }
     if (!InterfacesRequired.RemoveItem(interfaceRequiredName)) {

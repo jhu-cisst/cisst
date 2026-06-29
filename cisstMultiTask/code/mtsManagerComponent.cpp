@@ -35,7 +35,7 @@ mtsManagerComponent::mtsManagerComponent()
     : mtsManagerComponentBase(mtsManagerComponentBase::ComponentNames::ManagerComponent),
       ComponentMap("ComponentMap"),
       ConnectionID(0),
-      InterfaceComponentFunctionMap("InterfaceComponentFunctionMap")
+      InterfaceComponentFunctionMap("InterfaceComponentFunctionMap", true)
 {
     this->mTags.clear();
     this->AddTag("System");
@@ -752,7 +752,7 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
         bool success = false;
         // If the server is this component (ManagerComponent), or if the server component is not active,
         // we can use the previous implementation (mtsInterfaceRequired::ConnectTo), which directly calls the methods.
-        if ((serverComponentName == GetName()) ||
+        if ((serverComponent == this) ||
             !serverComponent->IsRunning()) {
             success = clientInterfaceRequired->ConnectTo(serverInterfaceProvided);
         }
@@ -946,20 +946,22 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
             return false;
         }
         bool success = false;
-        // If the server is this component (ManagerComponent), or if this component is not active,
+        // If the server is this component (ManagerComponent), or if it is not active,
         // we can directly call the methods. Note that we could use the StateChange mutex to make sure that the state
         // does not change during execution of this method, but that is unlikely.
-        if ((serverComponentName == GetName()) || !IsRunning()) {
+        if ((serverComponent == this) || !serverComponent->IsRunning()) {
             mtsEventHandlerList eventList(serverInterfaceProvided);
             clientInterfaceRequired->GetEventList(eventList);
             serverInterfaceProvided->RemoveObserverList(eventList, eventList);
             success = clientInterfaceRequired->CheckEventList(eventList);
             // Now, pause/stop the client component (if not this component).  In the future, the component could be left
             // running if the required interface is MTS_OPTIONAL.
-            if (clientComponent != this) {
+            if (clientComponent != this)
                 clientComponent->Suspend();
             clientInterfaceRequired->DetachCommands();
-            if (serverInterfaceProvided->RemoveEndUserInterface(endUserInterface, clientInterfaceName) != 0)
+            if (serverInterfaceProvided->RemoveEndUserInterface(endUserInterface, clientInterfaceName) != 0) {
+                CMN_LOG_CLASS_RUN_WARNING << "ComponentDisconnect: failed to remove end user interface for client "
+                                          << clientComponentName << ":" << clientInterfaceName << std::endl;
                 success = false;
             }
         }
@@ -986,25 +988,36 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
                                         << executionResult << ")" << std::endl;
             }
             success = clientInterfaceRequired->CheckEventList(eventList);
-            // Now, pause/stop the client component (if not this component).  In the future, the component could be left
-            // running if the required interface is MTS_OPTIONAL.
-            if (clientComponent != this)
-                clientComponent->Suspend();
             mtsEndUserInterfaceArg endUserInterfaceArg(reinterpret_cast<size_t>(serverInterfaceProvided),
                                                        clientInterfaceName,
                                                        reinterpret_cast<size_t>(endUserInterface));
-            executionResult = serverFunctionSet->RemoveEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
-            if (!executionResult.IsOK()) {
-                CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to execute command \"RemoveEndUserInterface\" (error "
-                                        << executionResult << ")" << std::endl;
-                success = false;
+            if (clientComponent == this) {
+                // If client component in the Manager Component, server provided interface must be the internal
+                // interface. Since we are disconnecting it, we cannot use it, so we instead directly call the
+                // provided interface method. To be safe, we could suspend the server component.
+                if (serverInterfaceProvided->RemoveEndUserInterface(endUserInterface, clientInterfaceName) != 0) {
+                    CMN_LOG_CLASS_RUN_WARNING << "ComponentDisconnect: could not remove end user interface from "
+                                              << serverComponentName << std::endl;
+                    success = false;
+                }
             }
-            if (endUserInterfaceArg.EndUserInterface != 0) {
-                CMN_LOG_CLASS_RUN_WARNING << "ComponentDisconnect: failed to remove end-user interface for " << serverComponentName << std::endl;
-                success = false;
+            else {
+                // Pause/stop the client component.  In the future, the component could be left
+                // running if the required interface is MTS_OPTIONAL.
+                clientComponent->Suspend();
+                executionResult = serverFunctionSet->RemoveEndUserInterface(endUserInterfaceArg, endUserInterfaceArg);
+                if (!executionResult.IsOK()) {
+                    CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to execute command \"RemoveEndUserInterface\" (error "
+                                            << executionResult << ")" << std::endl;
+                    success = false;
+                }
+                if (endUserInterfaceArg.EndUserInterface != 0) {
+                    CMN_LOG_CLASS_RUN_WARNING << "ComponentDisconnect: failed to remove end-user interface for " << serverComponentName << std::endl;
+                    success = false;
+                }
             }
-            clientInterfaceRequired->DetachCommands();
         }
+        clientInterfaceRequired->DetachCommands();
         if (success) {
             CMN_LOG_CLASS_INIT_VERBOSE << "ComponentDisconnect: successfully disconnected required/provided: "
                                        << clientComponentName << ":" << clientInterfaceName << " - "
@@ -1174,16 +1187,15 @@ bool mtsManagerComponent::DisconnectFromManagerComponent(const std::string & com
     // disconnect InterfaceInternal's required interface from InterfaceComponent's
     // provided interface.
     if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
-        if (!DisconnectInternal(component->GetName(), mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
+        if (!DisconnectInternal(componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
                                 GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
-            CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to connect: "
-                                      << component->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
+            CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to disconnect: "
+                                      << componentName << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
                                       << " - "
                                       << GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceComponentProvided()
                                       << std::endl;
         }
     }
-
     // Remove internal connection between MCS and component
     const std::string nameOfInterfaceComponentRequired
                       = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(componentName);
@@ -1205,7 +1217,6 @@ bool mtsManagerComponent::DisconnectFromManagerComponent(const std::string & com
     InterfaceComponentFunctionType * functionSet = InterfaceComponentFunctionMap.GetItem(componentName);
     if (functionSet) {
         InterfaceComponentFunctionMap.RemoveItem(componentName);
-        delete functionSet;
     }
     else {
         CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to get function set for component \""

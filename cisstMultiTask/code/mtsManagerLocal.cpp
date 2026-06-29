@@ -189,12 +189,31 @@ bool mtsManagerLocal::CreateManagerComponent(void)
 
 void mtsManagerLocal::DestroyManagerComponent(void)
 {
-    // Remove LCM connection to MCS dynamic component management services
-    if (!Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
-                    mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
-                    mtsManagerComponentBase::ComponentNames::ManagerComponent,
-                    mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
-        CMN_LOG_RUN_WARNING << "DestroyManagerComponent: failed to disconnect dynamic component management from LCM to MCS" << std::endl;
+    if (LocalComponent && ManagerComponent) {
+        // Remove LCM connection to MCS dynamic component management services.
+        // Here, we cannot use dynamic component management services.
+        // This is probably not necessary, since deleting the Manager Component will clear the
+        // map of connnections.
+        mtsInterfaceRequired *required = LocalComponent->GetInterfaceRequired(
+                                                         mtsManagerComponentBase::GetNameOfInterfaceInternalRequired());
+        mtsInterfaceProvided *provided = ManagerComponent->GetInterfaceProvided(
+                                                         mtsManagerComponentBase::GetNameOfInterfaceComponentProvided());
+        mtsInterfaceProvided *endUserInterface = provided->FindEndUserInterfaceByName(LocalComponent->GetName());
+        if (required && provided && endUserInterface) {
+            mtsEventHandlerList eventList(provided);
+            required->GetEventList(eventList);
+            provided->RemoveObserverList(eventList, eventList);
+            if (!required->CheckEventList(eventList)) {
+                CMN_LOG_RUN_WARNING << "DestroyManagerComponent: failed to remove event observers" << std::endl;
+            }
+            required->DetachCommands();
+            if (provided->RemoveEndUserInterface(endUserInterface, LocalComponent->GetName()) != 0) {
+                CMN_LOG_RUN_WARNING << "DestroyManagerComponent: failed to remove end user interface" << std::endl;
+            }
+        }
+        else {
+            CMN_LOG_RUN_WARNING << "DestroyManagerComponent: null interface pointer" << std::endl;
+        }
     }
 
     // Kill manager component (MCS) and then delete it.

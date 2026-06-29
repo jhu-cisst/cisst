@@ -111,10 +111,8 @@ void mtsManagerLocalTest::TestFindComponent(void)
     CPPUNIT_ASSERT(localManager->AddComponent(device1));
     CPPUNIT_ASSERT(localManager->FindComponent(componentName));
 
-#if 0  // PK TODO
     CPPUNIT_ASSERT(localManager->RemoveComponent(componentName));
     CPPUNIT_ASSERT(!localManager->FindComponent(componentName));
-#endif
 
     mtsManagerLocal::DeleteInstance();
 }
@@ -130,7 +128,6 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
     CPPUNIT_ASSERT(!localManager->RemoveComponent(NULL));
     CPPUNIT_ASSERT(!localManager->RemoveComponent("dummy"));
 
-#if 0  // PK TODO
     CPPUNIT_ASSERT(localManager->AddComponent(device1));
     CPPUNIT_ASSERT(localManager->FindComponent(componentName1));
     CPPUNIT_ASSERT(localManager->RemoveComponent(componentName1));
@@ -155,7 +152,6 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
     CPPUNIT_ASSERT(localManager->FindComponent(componentName2));
     CPPUNIT_ASSERT(localManager->RemoveComponent(periodic1));
     CPPUNIT_ASSERT(!localManager->FindComponent(componentName2));
-#endif
 
     mtsManagerLocal::DeleteInstance();
 }
