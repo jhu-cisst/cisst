@@ -46,8 +46,6 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsInterfaceRequiredOrInput: public cmnGenericObject
 {
-    friend class mtsManagerLocal;
-    friend class mtsManagerLocalTest;
 
 protected:
 

@@ -84,7 +84,6 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerLocal;
-    friend class mtsManagerLocalTest;
     friend class mtsEventReceiverBase;
     friend class mtsManagerComponent;
     // for GetDescription
@@ -262,8 +261,6 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     template <class _PointerType>
         class FunctionOrReceiverInfo
     {
-        friend class mtsManagerLocal;
-        friend class mtsManagerComponent;
         friend class mtsInterfaceRequired;
     protected:
         _PointerType * Pointer;

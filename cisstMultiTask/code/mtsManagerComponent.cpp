@@ -377,10 +377,20 @@ void mtsManagerComponent::ComponentStart(const mtsComponentStatusControl & arg)
     mtsComponent * component = GetComponent(arg.ComponentName);
     if (component) {
         if (component->GetState() == mtsComponentState::CONSTRUCTED) {
-            // Start an internal thread (if needed)
-            component->Create();
-            // Wait for internal thread to be created
-            osaSleep(arg.DelayInSecond);
+            mtsTaskContinuous *task = dynamic_cast<mtsTaskContinuous *>(component);
+            if (task->CreatesThread()) {
+                // Start an internal thread (if needed)
+                component->Create();
+                // Wait for internal thread to be created
+                osaSleep(arg.DelayInSecond);
+            }
+            else {
+                // If the component does not create its own thread, then we do not create (or start) it
+                // because otherwise it would capture the current (MCS) thread.
+                CMN_LOG_CLASS_RUN_WARNING << "ComponentStart: not starting component (task) " << arg.ComponentName
+                                          << " because it would capture MCS thread" << std::endl;
+                return;
+            }
         }
         component->Start();
     }
