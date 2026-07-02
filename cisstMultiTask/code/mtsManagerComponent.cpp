@@ -960,9 +960,10 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
         // we can directly call the methods. Note that we could use the StateChange mutex to make sure that the state
         // does not change during execution of this method, but that is unlikely.
         if ((serverComponent == this) || !serverComponent->IsRunning()) {
-            mtsEventHandlerList eventList(serverInterfaceProvided);
+            mtsEventHandlerList eventList(endUserInterface);
             clientInterfaceRequired->GetEventList(eventList);
-            serverInterfaceProvided->RemoveObserverList(eventList, eventList);
+            // Following could use serverInterfaceProvided or endUserInterface
+            endUserInterface->RemoveObserverList(eventList, eventList);
             success = clientInterfaceRequired->CheckEventList(eventList);
             // Now, pause/stop the client component (if not this component).  In the future, the component could be left
             // running if the required interface is MTS_OPTIONAL.
@@ -990,7 +991,7 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
                 CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: RemoveObserverList invalid for " << serverComponentName << std::endl;
                 return false;
             }
-            mtsEventHandlerList eventList(serverInterfaceProvided);
+            mtsEventHandlerList eventList(endUserInterface);
             clientInterfaceRequired->GetEventList(eventList);
             executionResult = serverFunctionSet->RemoveObserverList(eventList, eventList);
             if (!executionResult.IsOK()) {

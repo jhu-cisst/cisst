@@ -1288,15 +1288,16 @@ void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mt
 
 bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsCommandVoid * handler)
 {
-    if (this->OriginalInterface) {
+    if (this->OriginalInterface && !IsSystemEventVoid(eventName)) {
+        // Not clear if this is still needed
         return this->OriginalInterface->RemoveObserver(eventName, handler);
     }
     mtsMulticastCommandVoid * multicastCommand = GetEventVoid(eventName); // EventVoidGenerators.GetItem(eventName);
     if (multicastCommand) {
         if (!multicastCommand->RemoveCommand(handler)) {
-            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): did not find handler for event " << eventName << std::endl;
-            // PK TODO: should this return false?
-            //return false;
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): did not find handler for event " << eventName
+                                     << " in " << GetFullName() << std::endl;
+            return false;
         }
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): cannot find event named \"" << eventName << "\"" << std::endl;
@@ -1308,14 +1309,15 @@ bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsComm
 bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsCommandWriteBase * handler)
 {
     if (this->OriginalInterface) {
+        // Not clear if this is still needed
         return this->OriginalInterface->RemoveObserver(eventName, handler);
     }
     mtsMulticastCommandWriteBase * multicastCommand = EventWriteGenerators.GetItem(eventName);
     if (multicastCommand) {
         if (!multicastCommand->RemoveCommand(handler)) {
-            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (write): did not find handler for event " << eventName << std::endl;
-            // PK TODO: should this return false?
-            //return false;
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (write): did not find handler for event " << eventName
+                                     << " in " << GetFullName() << std::endl;
+            return false;
         }
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
