@@ -437,8 +437,6 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(v
         // PK: check for MailBox overlaps with code in UseQueueBasedOnInterfacePolicy
         if (MailBox) {
             mtsCommandQueuedWriteGeneric *tmp = new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize);
-            if (argumentPrototype)
-                tmp->SetArgumentPrototype(argumentPrototype);
             EventHandlersWrite.AddItem(eventName,  tmp);
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write generic \"" << eventName << "\"" << std::endl;

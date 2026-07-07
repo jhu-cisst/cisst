@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2017 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -57,7 +57,7 @@ mtsCommandQueuedWriteGeneric::mtsCommandQueuedWriteGeneric(mtsMailBox * mailBox,
     if (this->ActualCommand) {
         this->SetArgumentPrototype(ActualCommand->GetArgumentPrototype());
     }
-    const mtsGenericObject * argumentPrototype = dynamic_cast<const mtsGenericObject *>(this->GetArgumentPrototype());
+    const mtsGenericObject * argumentPrototype = this->GetArgumentPrototype();
     if (argumentPrototype) {
         ArgumentsQueue.SetSize(size, *argumentPrototype);
         BlockingFlagQueue.SetSize(size, MTS_NOT_BLOCKING);
@@ -77,7 +77,7 @@ void mtsCommandQueuedWriteGeneric::Allocate(size_t size)
             CMN_LOG_INIT_WARNING << "Class mtsCommandQueuedWriteGeneric: Allocate: changing ArgumentsQueue size from " << ArgumentsQueue.GetSize()
                                  << " to " << size << std::endl;
         }
-        const mtsGenericObject * argumentPrototype = dynamic_cast<const mtsGenericObject *>(this->GetArgumentPrototype());
+        const mtsGenericObject * argumentPrototype = this->GetArgumentPrototype();
         if (argumentPrototype) {
             ArgumentsQueue.SetSize(size, *argumentPrototype);
             BlockingFlagQueue.SetSize(size, MTS_NOT_BLOCKING);
