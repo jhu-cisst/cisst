@@ -21,7 +21,6 @@ set (CISST_HAS_JSON ON CACHE BOOL "")
 
 # Unit tests
 set (CISST_BUILD_TESTS ON CACHE BOOL "")
-set (CISST_cisstMultiTask_TESTS OFF CACHE BOOL "")
 set (CISST_cisstRobot_TESTS OFF CACHE BOOL "")
 set (CISST_cisstMesh_TESTS OFF CACHE BOOL "")
 

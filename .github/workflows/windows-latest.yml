@@ -158,3 +158,4 @@ jobs:
         bin\Release\cisstNumericalTests.exe -r
         bin\Release\cisstOSAbstractionTests.exe -r
         bin\Release\cisstParameterTypesTests.exe -r
+        bin\Release\cisstMultiTaskTests.exe -r

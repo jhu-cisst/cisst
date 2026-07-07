@@ -191,6 +191,7 @@ jobs:
         cisstNumericalTests -r
         cisstOSAbstractionTests -r
         cisstParameterTypesTests -r
+        cisstMultiTaskTests -r
 
     - name: ccache stats (after)
       run: ccache -s

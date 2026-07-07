@@ -157,3 +157,4 @@ jobs:
         ./bin/cisstNumericalTests -r
         ./bin/cisstOSAbstractionTests -r
         ./bin/cisstParameterTypesTests -r
+        ./bin/cisstMultiTaskTests -r
