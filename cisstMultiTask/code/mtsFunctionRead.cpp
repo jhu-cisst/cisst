@@ -62,10 +62,10 @@ mtsExecutionResult mtsFunctionRead::ExecuteGeneric(mtsGenericObject & argument) 
     mtsExecutionResult executionResult;
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
-    CompletionCommand->PrepareToWait();
+    CompletionCommand->PrepareToWait(argument);
     executionResult = Command->Execute(argument, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
-        executionResult = WaitForResult(argument);
+        executionResult = WaitForResult();
     CompletionCommand->ClearWait();
     return executionResult;
 }

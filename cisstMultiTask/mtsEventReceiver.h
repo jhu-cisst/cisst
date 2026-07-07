@@ -6,7 +6,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-24
 
-  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -146,9 +146,6 @@ public:
 
     virtual void SetThreadSignal(osaThreadSignal *signal);
 
-    /*! Clear the WaitState (set to EVENT_RECEIVER_IDLE) */
-    void ClearWait();
-
     /*! Indicate that the waiting thread is preparing to wait on an event, but that there may be some
         time before Wait or WaitWithTimeout will be called. Calling this command ensures that if the event
         if raised after the call to PrepareToWait, but before the call to Wait or WaitWithTimeout,
@@ -166,6 +163,9 @@ public:
     /*! Wait for event to be issued, up to specified timeout.
         \returns true if successful, false if failed or timeout occurred. */
     virtual bool WaitWithTimeout(double timeoutInSec);
+
+    /*! Clear the WaitState (set to EVENT_RECEIVER_IDLE) */
+    virtual void ClearWait();
 
     virtual void Detach();
 
@@ -248,15 +248,24 @@ public:
     // PK: Do we need the "generic" version (AddEventHandlerWriteGeneric)?
 
 
+    using mtsEventReceiverBase::PrepareToWait;
+    virtual bool PrepareToWait(mtsGenericObject &obj);
+
+    bool IsArgValid() const
+    { return (ArgPtr && ArgPtr->Valid()); }
+
     // Note that we are using the Wait and WaitWithTimeout member functions from the base class.
     using mtsEventReceiverBase::Wait;
     using mtsEventReceiverBase::WaitWithTimeout;
 
-    /*! Wait for event to be issued and return received argument.
+    /*! Wait for event to be issued. If successful, object specified in PrepareToWait is valid.
         \returns true if successful, false if failed (including case where wait succeeded but return value obj
                  is invalid) */
-    virtual bool Wait(mtsGenericObject &obj);
-    virtual bool WaitWithTimeout(double timeoutInSec, mtsGenericObject &obj);
+    virtual bool Wait();
+    virtual bool WaitWithTimeout(double timeoutInSec);
+
+    using mtsEventReceiverBase::ClearWait;
+    virtual void ClearWait();
 
     //PK: might be nice to have this
     //const mtsGenericObject *GetArgumentPrototype() const;

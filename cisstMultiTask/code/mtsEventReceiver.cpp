@@ -242,26 +242,45 @@ void mtsEventReceiverWrite::SetHandlerCommand(mtsCommandWriteBase *cmdHandler)
     }
 }
 
-// Here, a false return value could mean that the wait failed, or that the wait succeeded but the return value (obj)
-// is invalid.
-bool mtsEventReceiverWrite::Wait(mtsGenericObject &obj)
+bool mtsEventReceiverWrite::PrepareToWait(mtsGenericObject &obj)
 {
-    ArgPtr = &obj;
-    bool ret = mtsEventReceiverBase::Wait();
-    if (ArgPtr == 0) ret = false;
-    ArgPtr = 0;
+    bool ret = mtsEventReceiverBase::PrepareToWait();
+    if (ret) {
+        ArgPtr = &obj;
+    }
     return ret;
 }
 
-// Here, a false return value could mean that the wait failed, or that the wait succeeded but the return value (obj)
-// is invalid.
-bool mtsEventReceiverWrite::WaitWithTimeout(double timeoutInSec, mtsGenericObject &obj)
+// Here, a false return value could mean that the wait failed, or that the wait succeeded but the return object
+// is invalid. Note that the return object was specified in PrepareToWait.
+bool mtsEventReceiverWrite::Wait()
 {
-    ArgPtr = &obj;
+    if (ArgPtr == 0) {
+        CMN_LOG_RUN_WARNING << "mtsEventReceverWrite::Wait -- null ArgPtr (should first call PrepareToWait)" << std::endl;
+        // Wait anyway, but will return false
+    }
+    bool ret = mtsEventReceiverBase::Wait();
+    if (ArgPtr == 0) ret = false;
+    return ret;
+}
+
+// Here, a false return value could mean that the wait failed, or that the wait succeeded but the return object
+// is invalid. Note that the return object was specified in PrepareToWait.
+bool mtsEventReceiverWrite::WaitWithTimeout(double timeoutInSec)
+{
+    if (ArgPtr == 0) {
+        CMN_LOG_RUN_WARNING << "mtsEventReceverWrite::WaitWithTimeout -- null ArgPtr (should first call PrepareToWait)" << std::endl;
+        // Wait anyway, but will return false
+    }
     bool ret = mtsEventReceiverBase::WaitWithTimeout(timeoutInSec);
     if (ArgPtr == 0) ret = false;
-    ArgPtr = 0;
     return ret;
+}
+
+void mtsEventReceiverWrite::ClearWait()
+{
+    mtsEventReceiverBase::ClearWait();
+    ArgPtr = 0;
 }
 
 bool mtsEventReceiverWrite::RemoveHandler(void)
