@@ -49,7 +49,6 @@ set (SOURCE_FILES
      mtsComponent.cpp
      mtsComponentAddLatency.cpp
      mtsComponentViewer.cpp
-     mtsConnection.cpp
 
      mtsDelayedConnections.cpp
      mtsEventReceiver.cpp
@@ -145,7 +144,6 @@ set (HEADER_FILES
      mtsComponentAddLatency.h
      mtsComponentGeneratorMacros.h
      mtsComponentViewer.h
-     mtsConnection.h
 
      mtsDelayedConnections.h
      mtsEventReceiver.h

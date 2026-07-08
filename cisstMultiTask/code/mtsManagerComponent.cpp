@@ -58,20 +58,6 @@ mtsManagerComponent::mtsManagerComponent()
 
     // Add this component to the map
     ComponentMap.AddItem(mtsManagerComponentBase::ComponentNames::ManagerComponent, this);
-
-    // Add the LCM connection for dynamic component management, since it was done externally
-    // (in mtsManagerLocal, rather than by calling Connect)
-    mtsDescriptionConnection description(
-        "", mtsManagerComponentBase::ComponentNames::ManagerLocal,            // Client process, component (LCM)
-        mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),        // Client interface
-        "", mtsManagerComponentBase::ComponentNames::ManagerComponent,        // Server process, component (MCS)
-        mtsManagerComponentBase::GetNameOfInterfaceComponentProvided(),       // Server interface
-        ConnectionID);
-    mtsConnection connection(description);
-    // Could eliminate connected field in mtsConnection (no longer needed)
-    connection.SetConnected();
-
-    ConnectionMap.insert(std::make_pair(ConnectionID, connection));
 }
 
 mtsManagerComponent::~mtsManagerComponent()
@@ -235,6 +221,17 @@ void mtsManagerComponent::ComponentAdd(const mtsComponentPointer & componentPtr,
         CMN_LOG_CLASS_INIT_ERROR << "AddComponent: component with name \"" << componentName
                                  << "\" already exists" << std::endl;
         return;
+    }
+
+    if (componentName == mtsManagerComponentBase::ComponentNames::ManagerLocal) {
+        // Special case handling: when the LCM is added, we set the Connection ID for the internal
+        // required interface, because the connection was done in mtsManagerLocal rather than by
+        // calling Connect.
+        std::string requiredName = mtsManagerComponentBase::GetNameOfInterfaceInternalRequired();
+        mtsInterfaceRequired *required = component->GetInterfaceRequired(requiredName);
+        if (required && (required->ConnectionID == InvalidConnectionID)) {
+            required->ConnectionID = ConnectionID++;
+        }
     }
 
     // If dynamic component management is enabled
@@ -538,17 +535,45 @@ void mtsManagerComponent::GetDescriptionsOfInterfaces(
     }
 }
 
-void mtsManagerComponent::GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const
+void mtsManagerComponent::GetListOfConnections(std::vector<mtsDescriptionConnection> & listOfConnections) const
 {
-    mtsDescriptionConnection connection;
-
-    ConnectionMapType::const_iterator it = ConnectionMap.begin();
-    const ConnectionMapType::const_iterator itEnd = ConnectionMap.end();
-
-    for (; it != itEnd; ++it) {
-        if (it->second.IsConnected())
-            listOfConnections.push_back(it->second.GetDescriptionConnection());
+    // Loop through components, looking at required and input interfaces, which can have at most
+    // one connection (as opposed to provided or output interfaces, which can have multiple).
+    typename ComponentMapType::const_iterator itComp;
+    for (itComp = ComponentMap.begin(); itComp != ComponentMap.end(); itComp++) {
+        mtsComponent *component = itComp->second;
+        // Get a list of required interfaces
+        std::vector<std::string> interfaceRequiredNames = component->GetNamesOfInterfacesRequired();
+        typename std::vector<std::string>::const_iterator itReq;
+        for (itReq = interfaceRequiredNames.begin(); itReq != interfaceRequiredNames.end(); ++itReq) {
+            const mtsInterfaceRequired * required = component->GetInterfaceRequired(*itReq);
+            CMN_ASSERT(required);
+            const mtsInterfaceProvided * provided = required->GetConnectedInterface();
+            if (provided) {
+                provided = provided->GetOriginalInterface();
+                mtsDescriptionConnection conn("", itComp->first, *itReq,
+                                              "", provided->GetComponent()->GetName(), provided->GetName(),
+                                              required->GetConnectionID());
+                listOfConnections.push_back(conn);
+            }
+        }
+        // Get a list of input interfaces
+        std::vector<std::string> interfaceInputNames = component->GetNamesOfInterfacesInput();
+        typename std::vector<std::string>::const_iterator itIn;
+        for (itIn = interfaceInputNames.begin(); itIn != interfaceInputNames.end(); ++itIn) {
+            const mtsInterfaceInput * input = component->GetInterfaceInput(*itIn);
+            CMN_ASSERT(input);
+            const mtsInterfaceOutput * output = input->GetConnectedInterface();
+            if (output) {
+                mtsDescriptionConnection conn("", itComp->first, *itIn,
+                                              "", output->GetComponent()->GetName(), output->GetName(),
+                                              input->GetConnectionID());
+                listOfConnections.push_back(conn);
+            }
+        }
     }
+    // Sort the list based on ConnectionID (lowest to highest)
+    std::sort(listOfConnections.begin(), listOfConnections.end());
 }
 
 void mtsManagerComponent::GetListOfComponentClasses(const std::string &processName,
@@ -826,6 +851,8 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
                 success = false;
         }
         if (success) {
+            // Assign ConnectionID
+            clientInterfaceRequired->ConnectionID = ConnectionID;
             CMN_LOG_CLASS_INIT_VERBOSE << "ComponentConnect: successfully connected required/provided: "
                                        << clientComponentName << ":" << clientInterfaceName << " - "
                                        << serverComponentName << ":" << serverInterfaceName << std::endl;
@@ -852,6 +879,8 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
             return false;
         }
         if (clientInterfaceInput->ConnectTo(serverInterfaceOutput)) {
+            // Assign ConnectionID
+            clientInterfaceInput->ConnectionID = ConnectionID;
             CMN_LOG_CLASS_INIT_VERBOSE << "ComponentConnect: component \""
                                        << this->GetName()
                                        << "\" input interface \"" << clientInterfaceName
@@ -869,18 +898,10 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
 
     // Successful connection, now update data structures
 
-    // Assign new connection id
-    ConnectionIDType thisConnectionID = ConnectionID;
-
     mtsDescriptionConnection description(
         "", clientComponentName, clientInterfaceName,
         "", serverComponentName, serverInterfaceName,
-        thisConnectionID);
-    mtsConnection connection(description);
-    // Could eliminate connected field in mtsConnection (no longer needed)
-    connection.SetConnected();
-
-    ConnectionMap.insert(std::make_pair(thisConnectionID, connection));
+        ConnectionID);
 
     // Increase connection id
     if (ConnectionID + 1 == InvalidConnectionID) {
@@ -928,6 +949,7 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
 
     // Now, handle the disconnection.  First, we look for connection between required/provided interfaces.  Then, we look
     // for connection between input/output interfaces.
+    ConnectionIDType thisConnectionID = InvalidConnectionID;
     if (serverInterfaceProvided) {
         mtsInterfaceRequired *clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceName);
         if (!clientInterfaceRequired) {
@@ -1030,6 +1052,8 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
         }
         clientInterfaceRequired->DetachCommands();
         if (success) {
+            thisConnectionID = clientInterfaceRequired->ConnectionID;
+            clientInterfaceRequired->ConnectionID = InvalidConnectionID;
             CMN_LOG_CLASS_INIT_VERBOSE << "ComponentDisconnect: successfully disconnected required/provided: "
                                        << clientComponentName << ":" << clientInterfaceName << " - "
                                        << serverComponentName << ":" << serverInterfaceName << std::endl;
@@ -1057,6 +1081,8 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
             return false;
         }
         if (clientInterfaceInput->Disconnect()) {
+            thisConnectionID = clientInterfaceInput->ConnectionID;
+            clientInterfaceInput->ConnectionID = InvalidConnectionID;
             CMN_LOG_CLASS_INIT_VERBOSE << "ComponentDisconnect: component \""
                                        << this->GetName()
                                        << "\" input interface \"" << clientInterfaceName
@@ -1072,26 +1098,10 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
         }
     }
 
-    // Finally, remove from ConnectionMap
-    ConnectionMapType::const_iterator it;
-    mtsDescriptionConnection description;
-    for (it = ConnectionMap.begin(); it != ConnectionMap.end(); ++it) {
-        it->second.GetDescriptionConnection(description);
-        if ((description.Client.ComponentName == clientComponentName) &&
-            (description.Client.InterfaceName == clientInterfaceName))
-        {
-            break;
-        }
-    }
-    if (it == ConnectionMap.end()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Disconnect: no connection found for "
-            << "\"" << GetInterfaceUID("", clientComponentName, clientInterfaceName) << "\" - "
-            << "\"" << GetInterfaceUID("", serverComponentName, serverInterfaceName) << std::endl;
-        return false;
-    }
-    else {
-        ConnectionMap.erase(it);
-    }
+    mtsDescriptionConnection description(
+        "", clientComponentName, clientInterfaceName,
+        "", serverComponentName, serverInterfaceName,
+        thisConnectionID);
 
     // Generate the event
     InterfaceComponentEvents_RemoveConnection(description);

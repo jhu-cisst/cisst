@@ -21,7 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceOutput.h>
 
 mtsInterfaceInput::mtsInterfaceInput(const std::string & interfaceName, mtsComponent * component) :
-    mtsInterface(interfaceName, component)
+    mtsInterface(interfaceName, component),
+    ConnectionID(InvalidConnectionID)
 {
 }
 

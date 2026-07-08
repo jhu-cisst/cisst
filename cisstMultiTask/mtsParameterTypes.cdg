@@ -219,6 +219,8 @@ class {
         const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
         const ConnectionIDType connectionId = InvalidConnectionID);
     void Init(void);
+    // Comparison operator for std::sort
+    bool operator < (const mtsDescriptionConnection& other) const { return ConnectionID < other.ConnectionID; }
     }
 }
 

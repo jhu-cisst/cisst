@@ -585,38 +585,6 @@ const mtsInterfaceProvided * mtsComponent::GetInterfaceProvidedFor(const std::st
     return interfaceRequired ? interfaceRequired->GetConnectedInterface() : 0;
 }
 
-#if 0  // Obsolete
-// PK: Following code is obsolete -- connections should be made in mtsManagerComponentClient
-// In retrospect, maybe it was not a good idea to combine Required/Input and Provided/Output interfaces.
-bool mtsComponent::ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
-                                                   mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
-{
-    mtsInterfaceRequiredOrInput * interfaceRequiredOrInput =
-        InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName);
-    if (interfaceRequiredOrInput) {
-        if (interfaceRequiredOrInput->ConnectTo(interfaceProvidedOrOutput)) {
-            CMN_LOG_CLASS_INIT_VERBOSE << "ConnectInterfaceRequiredOrInput: component \""
-                                       << this->GetName()
-                                       << "\" required/input interface \"" << interfaceRequiredOrInputName
-                                       << "\" successfully connected to provided/output interface \""
-                                       << interfaceProvidedOrOutput->GetName() << "\"" << std::endl;
-            return true;
-        } else {
-            CMN_LOG_CLASS_INIT_ERROR << "ConnectInterfaceRequiredOrInput: component \""
-                                     << this->GetName()
-                                     << "\" required/input interface \"" << interfaceRequiredOrInputName
-                                     << "\" failed to connect to provided/output interface \""
-                                     << interfaceProvidedOrOutput->GetName() << "\"" << std::endl;
-        }
-    } else {
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectInterfaceRequiredOrInput: component \""
-                                 << this->GetName()
-                                 << "\" doesn't have required/input interface \""
-                                 << interfaceRequiredOrInputName << "\"" << std::endl;
-    }
-    return false;
-}
-#endif  // OBSOLETE
 
 mtsStateTable * mtsComponent::GetStateTable(const std::string & stateTableName)
 {

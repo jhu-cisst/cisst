@@ -37,7 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
-#include <cisstMultiTask/mtsConnection.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -56,18 +55,7 @@ protected:
     typedef cmnNamedMap<mtsComponent> ComponentMapType;
     ComponentMapType ComponentMap;
 
-    /*! Connection element map: a map of strings that defines a connection
-        key=(connection id), value=(an instance of Connection)
-        When the local component manager requests establishing a connection, an
-        element is created and added. If a connection is not established before
-        timeout, the element is removed. When a local component manager notifies
-        that a connection is successfully established, the element is marked
-        as connected. */
-    typedef std::map<ConnectionIDType, mtsConnection> ConnectionMapType;
-    ConnectionMapType ConnectionMap;
-
-    /*! Counter to issue a new connection ID.
-        NOTE: ConnectionID may be eliminated in future versions. */
+    /*! Counter to issue a new connection ID. */
     ConnectionIDType ConnectionID;
 
     /*! Functions for InterfaceComponent's required interface.  Since one

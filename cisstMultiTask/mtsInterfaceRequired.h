@@ -108,6 +108,10 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     /*! Size to be used for argument queues */
     size_t ArgumentQueuesSize;
 
+    /*! Connection ID assigned by manager component. This is not really needed,
+        but is maintained for historical reasons. */
+    ConnectionIDType ConnectionID;
+
     /*! Default constructor. Does nothing, should not be used. */
     mtsInterfaceRequired(void);
 
@@ -177,6 +181,9 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
       argument queues.  See SetMailBoxSize and
       SetArgumentQueuesSize. */
     bool SetMailBoxAndArgumentQueuesSize(size_t desiredSize);
+
+    ConnectionIDType GetConnectionID(void) const
+    { return ConnectionID; }
 
     /*! Get the description of this interface. */
     mtsInterfaceRequiredDescription GetDescription() const;
