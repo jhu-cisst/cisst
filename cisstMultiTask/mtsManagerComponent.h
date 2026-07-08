@@ -132,6 +132,8 @@ protected:
     bool DisconnectInternal(const std::string & clientComponentName, const std::string & clientInterfaceName,
                             const std::string & serverComponentName, const std::string & serverInterfaceName);
 
+    bool FindByConnectionID(mtsDescriptionConnection & arg) const;
+
     //*************************************** OTHER METHODS *********************************************
 
     /*! Create a new set of function objects, add a new instance of

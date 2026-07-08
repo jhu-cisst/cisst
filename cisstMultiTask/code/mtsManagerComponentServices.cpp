@@ -406,9 +406,15 @@ bool mtsManagerComponentServices::Disconnect(const mtsDescriptionConnection & co
 
 bool mtsManagerComponentServices::Disconnect(ConnectionIDType connectionID) const
 {
-    // PK TODO
-    CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect(connectionID) not implemented" << std::endl;
-    return false;
+    if (!ServiceComponentManagement.Disconnect.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsDescriptionConnection arg;
+    arg.ConnectionID = connectionID;
+
+    return Disconnect(arg);
 }
 
 bool mtsManagerComponentServices::ComponentStart(const std::string & componentName, const double delayInSecond) const

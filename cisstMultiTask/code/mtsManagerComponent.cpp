@@ -339,7 +339,24 @@ void mtsManagerComponent::ComponentConnect(const mtsDescriptionConnection & arg,
 
 void mtsManagerComponent::ComponentDisconnect(const mtsDescriptionConnection & arg, bool & result)
 {
+    if ((arg.Client.ComponentName.empty() || arg.Server.ComponentName.empty())
+        && (arg.ConnectionID != InvalidConnectionID)) {
+        // Disconnect based on ConnectionID (also check that either Client or Server
+        // component name is empty to avoid infinite loop)
+        mtsDescriptionConnection argCopy(arg);
+        if (FindByConnectionID(argCopy)) {
+            ComponentDisconnect(argCopy, result);
+        }
+        else {
+            CMN_LOG_CLASS_RUN_WARNING << "ComponentDisconnect: could not find connection with ID "
+                                      << arg.ConnectionID << std::endl;
+            result = false;
+        }
+        return;
+    }
+
     result = true;
+
     if (!GetComponent(arg.Client.ComponentName)) {
         result = false;
         CMN_LOG_CLASS_RUN_WARNING << "ComponentDisconnect: did not find client component: "
@@ -1107,6 +1124,54 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
     InterfaceComponentEvents_RemoveConnection(description);
     return true;
 }
+
+
+bool mtsManagerComponent::FindByConnectionID(mtsDescriptionConnection & arg) const
+{
+    typename ComponentMapType::const_iterator itComp;
+    for (itComp = ComponentMap.begin(); itComp != ComponentMap.end(); itComp++) {
+        mtsComponent *component = itComp->second;
+        // Get a list of required interfaces
+        std::vector<std::string> interfaceRequiredNames = component->GetNamesOfInterfacesRequired();
+        typename std::vector<std::string>::const_iterator itReq;
+        for (itReq = interfaceRequiredNames.begin(); itReq != interfaceRequiredNames.end(); ++itReq) {
+            const mtsInterfaceRequired * required = component->GetInterfaceRequired(*itReq);
+            if (required && (required->ConnectionID == arg.ConnectionID)) {
+                const mtsInterfaceProvided * provided = required->GetConnectedInterface();
+                if (provided) {
+                    provided = provided->GetOriginalInterface();
+                    arg.Client.ProcessName = "";
+                    arg.Client.ComponentName = itComp->first;
+                    arg.Client.InterfaceName = *itReq;
+                    arg.Server.ProcessName = "";
+                    arg.Server.ComponentName = provided->GetComponent()->GetName();
+                    arg.Server.InterfaceName = provided->GetName();
+                    return true;
+                }
+            }
+        }
+        // Get a list of input interfaces
+        std::vector<std::string> interfaceInputNames = component->GetNamesOfInterfacesInput();
+        typename std::vector<std::string>::const_iterator itIn;
+        for (itIn = interfaceInputNames.begin(); itIn != interfaceInputNames.end(); ++itIn) {
+            const mtsInterfaceInput * input = component->GetInterfaceInput(*itIn);
+            if (input && (input->ConnectionID == arg.ConnectionID)) {
+                const mtsInterfaceOutput * output = input->GetConnectedInterface();
+                if (output) {
+                    arg.Client.ProcessName = "";
+                    arg.Client.ComponentName = itComp->first;
+                    arg.Client.InterfaceName = *itIn;
+                    arg.Server.ProcessName = "";
+                    arg.Server.ComponentName = output->GetComponent()->GetName();
+                    arg.Server.InterfaceName = output->GetName();
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 
 //**************************************************************************************************************************
 
