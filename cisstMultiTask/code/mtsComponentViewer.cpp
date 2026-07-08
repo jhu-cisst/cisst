@@ -60,16 +60,15 @@ void mtsComponentViewer::Startup(void)
 
 void mtsComponentViewer::Run(void)
 {
+    ProcessQueuedCommands();
+    ProcessQueuedEvents();
     if (!UDrawPipeConnected) {
        ConnectToUDrawGraph();
        if (UDrawPipeConnected) {
            CMN_LOG_CLASS_INIT_VERBOSE << "Run: Sending all info" << std::endl;
-           // Should flush all events before calling SendAllInfo
            SendAllInfo();
        }
     }
-    ProcessQueuedCommands();
-    ProcessQueuedEvents();
     if (UDrawPipeConnected)
         ProcessResponse();
 }
