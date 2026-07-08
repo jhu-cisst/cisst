@@ -47,7 +47,6 @@ void mtsManagerLocalTest::tearDown(void)
 
 void mtsManagerLocalTest::TestInitialize(void)
 {
-    std::cout << std::endl << "mtsManagerLocalTest";
     // Add __os_init() test if needed.
 }
 

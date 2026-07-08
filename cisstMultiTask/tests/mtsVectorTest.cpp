@@ -38,7 +38,6 @@ void mtsVectorTest::TestSetSizeFrom(void)
 
 void mtsVectorTest::TestSetSizeFromDouble(void)
 {
-    std::cout << std::endl << "mtsVectorTest";
     TestSetSizeFrom<double>();
 }
 

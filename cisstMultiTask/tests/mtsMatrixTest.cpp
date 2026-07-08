@@ -40,7 +40,6 @@ void mtsMatrixTest::TestSetSizeFrom(void)
 
 void mtsMatrixTest::TestSetSizeFromDouble(void)
 {
-    std::cout << std::endl << "mtsMatrixTest";
     TestSetSizeFrom<double>();
 }
 

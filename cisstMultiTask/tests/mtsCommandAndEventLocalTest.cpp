@@ -441,7 +441,6 @@ void mtsCommandAndEventLocalTest::TestDeviceDevice(void)
     delete server;
 }
 void mtsCommandAndEventLocalTest::TestDeviceDevice_mtsInt(void) {
-    std::cout << std::endl << "mtsCommandAndEventLocalTest";
     mtsCommandAndEventLocalTest::TestDeviceDevice<mtsInt>();
 }
 void mtsCommandAndEventLocalTest::TestDeviceDevice_int(void) {

@@ -22,8 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsSocketProxyTest::TestCommandHandle(void)
 {
-    std::cout << std::endl << "mtsSocketProxyTest";
-
     void *addr = (void *)0x12345678;
     CommandHandle handle('V', addr);
     CPPUNIT_ASSERT(handle.IsValid());

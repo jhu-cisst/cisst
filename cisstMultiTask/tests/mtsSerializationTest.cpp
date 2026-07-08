@@ -45,7 +45,6 @@ void mtsSerializationTest::TestSerializeRaw(_elementType & initial)
 
 void mtsSerializationTest::TestSerializeRawDoubleQuat(void)
 {
-    std::cout << std::endl << "mtsSerializationTest";
     mtsDoubleQuat initial;
     vctRandom(initial, -10.0, 10.0);
     TestSerializeRaw(initial);

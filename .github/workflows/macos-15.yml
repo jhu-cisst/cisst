@@ -152,9 +152,9 @@ jobs:
       shell: bash
       run: |
         source cisstvars.sh
-        ./bin/cisstCommonTests -r
-        ./bin/cisstVectorTests -r
-        ./bin/cisstNumericalTests -r
-        ./bin/cisstOSAbstractionTests -r
-        ./bin/cisstParameterTypesTests -r
-        ./bin/cisstMultiTaskTests -r
+        ./bin/cisstCommonTests -r -v
+        ./bin/cisstVectorTests -r -v
+        ./bin/cisstNumericalTests -r -v
+        ./bin/cisstOSAbstractionTests -r -v
+        ./bin/cisstParameterTypesTests -r -v
+        ./bin/cisstMultiTaskTests -r -v

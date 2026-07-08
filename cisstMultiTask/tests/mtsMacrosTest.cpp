@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsMacrosTest::TestMTS_DECLARE_MEMBER_AND_ACCESSORS(void)
 {
-    std::cout << std::endl << "mtsMacrosTest";
     mtsMacrosTestClassA objectA;
     double placeHolder;
     const double constant = 4321.45689;

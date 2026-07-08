@@ -108,8 +108,6 @@ void mtsTypesTest::tearDown(void)
 
 void mtsTypesTest::TestSetup(void)
 {
-    std::cout << std::endl << "mtsTypesTest";
-
     CPPUNIT_ASSERT(mServer);
     CPPUNIT_ASSERT(mServer->mProvided);
     CPPUNIT_ASSERT(mServer->mIntCommandRead);

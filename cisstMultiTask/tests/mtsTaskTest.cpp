@@ -46,7 +46,6 @@ void mtsTaskTestTask::TestGetStateVectorID(void)
 
 void mtsTaskTest::TestGetStateVectorID(void)
 {
-    std::cout << std::endl << "mtsTaskTest";
     mtsTaskTestTask task("testingTask", 10 * cmn_ms);
     task.TestGetStateVectorID();
 }

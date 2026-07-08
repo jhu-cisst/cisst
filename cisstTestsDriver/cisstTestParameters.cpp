@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):  Anton Deguet, Ofri Sadowsky
   Created on: 2003-11-10
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -94,6 +92,13 @@ void cisstTestParameters::ParseCmdLine(int argc, const char * argv[])
             continue;
         }
 
+        if (strcmp(argv[1], "--verbose") == 0 || strcmp(argv[1], "-v") == 0) {
+            Verbose = true;
+            ++argv;
+            --argc;
+            continue;
+        }
+
         TestRunMode = PRINT_HELP;
         return;
     }
@@ -111,7 +116,8 @@ int cisstTestParameters::PrintHelp(const char* programName) {
         << "-R, --listandrun         print and run the available test instances" << std::endl
         << "-t, --testname [name]    add the specified test case or suite to the list" << std::endl
         << "-o, --numinstances [n]   specify the number of instances to create of each test" << std::endl
-        << "-i, --numiterations [n]  specify the number of iterations for each test instance" << std::endl;
+        << "-i, --numiterations [n]  specify the number of iterations for each test instance" << std::endl
+        << "-v, --verbose            print test name on start and completion instead of '.'" << std::endl;
 
     std::cerr << std::endl << std::endl;
     std::cerr

@@ -42,7 +42,6 @@ void mtsFixedSizeVectorTest::TestConversion(void)
 
 void mtsFixedSizeVectorTest::TestConversionDouble3(void)
 {
-    std::cout << std::endl << "mtsFixedSizeVectorTest";
     TestConversion<double, 3>();
 }
 

@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2003-07-28
 
-  (C) Copyright 2003-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,12 +21,27 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/extensions/RepeatedTest.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/TestListener.h>
+#include <cppunit/TestResult.h>
 
 #include <string>
 #include <list>
 #include <iostream>
 
 #include "cisstTestParameters.h"
+
+
+/*! TestListener that prints the test name on start and completion. */
+class VerboseTestListener : public CppUnit::TestListener
+{
+public:
+    void startTest(CppUnit::Test * test) override {
+        std::cout << test->getName() << " -> start" << std::endl;
+    }
+    void endTest(CppUnit::Test * test) override {
+        std::cout << test->getName() << " -> complete" << std::endl;
+    }
+};
 
 
 CppUnit::Test* FindTestInTestSuite(CppUnit::Test* tests, const std::string& name) {
@@ -185,8 +200,12 @@ int main(int argc, const char *argv[])
         CppUnit::RepeatedTest * repeatedTest =
             new CppUnit::RepeatedTest(allTests, testParameters.GetNumIterations());
         CppUnit::TextUi::TestRunner runner;
+        VerboseTestListener verboseListener;
+        if (testParameters.GetVerbose()) {
+            runner.eventManager().addListener(&verboseListener);
+        }
         runner.addTest(repeatedTest);
-        bool wasSuccessful = runner.run();
+        bool wasSuccessful = runner.run("", false, true, !testParameters.GetVerbose());
         if (wasSuccessful) {
             return 0;
         } else {

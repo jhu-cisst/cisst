@@ -181,12 +181,12 @@ jobs:
       shell: bash
       run: |
         source cisstvars.sh
-        cisstCommonTests -r
-        cisstVectorTests -r
-        cisstNumericalTests -r
-        cisstOSAbstractionTests -r
-        cisstParameterTypesTests -r
-        cisstMultiTaskTests -r
+        cisstCommonTests -r -v
+        cisstVectorTests -r -v
+        cisstNumericalTests -r -v
+        cisstOSAbstractionTests -r -v
+        cisstParameterTypesTests -r -v
+        cisstMultiTaskTests -r -v
 
     - name: ccache stats (after)
       run: ccache -s

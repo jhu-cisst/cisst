@@ -153,9 +153,9 @@ jobs:
       shell: cmd
       run: |
         call cisstvars.bat Release
-        bin\Release\cisstCommonTests.exe -r
-        bin\Release\cisstVectorTests.exe -r
-        bin\Release\cisstNumericalTests.exe -r
-        bin\Release\cisstOSAbstractionTests.exe -r
-        bin\Release\cisstParameterTypesTests.exe -r
-        bin\Release\cisstMultiTaskTests.exe -r
+        bin\Release\cisstCommonTests.exe -r -v
+        bin\Release\cisstVectorTests.exe -r -v
+        bin\Release\cisstNumericalTests.exe -r -v
+        bin\Release\cisstOSAbstractionTests.exe -r -v
+        bin\Release\cisstParameterTypesTests.exe -r -v
+        bin\Release\cisstMultiTaskTests.exe -r -v

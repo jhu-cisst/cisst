@@ -23,8 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsQueueTest::TestQueue_mtsDouble(void)
 {
-    std::cout << std::endl << "mtsQueueTest";
-
     // test default constructor
     mtsQueueGeneric queue;
     CPPUNIT_ASSERT_EQUAL(queue.GetSize(), static_cast<size_t>(0));
