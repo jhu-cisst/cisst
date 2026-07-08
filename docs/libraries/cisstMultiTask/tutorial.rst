@@ -208,7 +208,7 @@ When connecting a required interface to a provided interface:
 -  The provided interface can have more commands and events than the required interface (unused features)
 -  Functions and event handlers of a required interface can be tagged as *optional*. If so, the required interface can still be connected to a provided interface that doesn't provide said features
 
-To manage all the components, use the ``mtsComponentManager`` object. The manager is implemented as a singleton so we need to call the static ``mtsComponentManager::GetInstance()`` method. The following steps are:
+To manage all the components, use the ``mtsComponentManager`` (or ``mtsManagerLocal``) object. The manager is implemented as a singleton so we need to call the static ``mtsComponentManager::GetInstance()`` method. The following steps are:
 
 -  Add the components to the manager
 -  Connect the components

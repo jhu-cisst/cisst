@@ -80,10 +80,10 @@ The main classes of the cisstMultiTask library are:
 
 -  Component: ``mtsComponent``, ``mtsTask``, ``mtsTaskContinuous``, ``mtsTaskFromSignal``, ``mtsTaskFromCallback``, ``mtsTaskPeriodic``, ...
 -  Interfaces: ``mtsInterfaceProvided`` and ``mtsInterfaceRequired``
--  Commands: ``mtsCommandVoid``, ``mtsCommandWrite``, ``mtsCommandRead``, ``mtsCommandQualifiedRead``
+-  Commands: ``mtsCommandVoid``, ``mtsCommandWrite``, ``mtsCommandRead``, ``mtsCommandQualifiedRead``, ``mtsCommandVoidReturn``, ``mtsCommandWriteReturn``
 -  Events
 -  State tables: ``mtsStateTable``
--  Component manager
+-  Component manager: ``mtsManagerLocal`` (\#define to ``mtsComponentManager``)
 
 .. _components-and-tasks:
 
@@ -461,7 +461,7 @@ Inter-process communication means communication between two executables, either 
 
 1. Using ``mtsSocketProxyClient`` and ``mtsSocketProxyServer``. This uses a standard UDP socket (no external middleware required), but currently requires the programmer to manually create the proxies.
 
-2. Using Robot Operating System (ROS) as middleware. This also requires the programmer to manually create the ROS bridges, using components provided in the `cisst-ros repository <https://github.com/jhu-cisst/cisst-ros>`__ for ROS 1 (Linux only). There is emerging support for ROS 2.
+2. Using Robot Operating System (ROS) as middleware. This also requires the programmer to manually create the ROS bridges, using components provided in the `cisst-ros repository <https://github.com/jhu-cisst/cisst-ros>`__ for ROS 1 (Linux only) or ROS 2.
 
 .. _events-and-event-handlers:
 
