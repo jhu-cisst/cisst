@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-04-29
   
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -46,6 +45,7 @@ void mtsSerializationTest::TestSerializeRaw(_elementType & initial)
 
 void mtsSerializationTest::TestSerializeRawDoubleQuat(void)
 {
+    std::cout << std::endl << "mtsSerializationTest";
     mtsDoubleQuat initial;
     vctRandom(initial, -10.0, 10.0);
     TestSerializeRaw(initial);

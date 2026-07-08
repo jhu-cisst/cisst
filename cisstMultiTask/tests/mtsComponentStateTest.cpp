@@ -35,7 +35,7 @@ void mtsComponentStateTest::tearDown(void)
 
 void mtsComponentStateTest::TestOrder(void)
 {
-
+    std::cout << std::endl << "mtsComponentStateTest";
 }
 
 

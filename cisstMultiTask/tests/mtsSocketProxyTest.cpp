@@ -6,7 +6,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2013-09-23
   
-  (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2013-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsSocketProxyTest::TestCommandHandle(void)
 {
+    std::cout << std::endl << "mtsSocketProxyTest";
+
     void *addr = (void *)0x12345678;
     CommandHandle handle('V', addr);
     CPPUNIT_ASSERT(handle.IsValid());
@@ -46,4 +48,3 @@ void mtsSocketProxyTest::TestCommandHandle(void)
     testHandle.FromString(strBuffer.data());
     CPPUNIT_ASSERT(handle == testHandle);
 }
-

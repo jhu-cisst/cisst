@@ -36,6 +36,8 @@ void mtsStateTableTest::tearDown(void)
 
 void mtsStateTableTest::TestGetStateVectorID(void)
 {
+    std::cout << std::endl << "mtsStateTableTest";
+
     mtsStateTable StateTable(20, "Test");
 
     const size_t default_column_count = StateTable.GetNumberOfElements();

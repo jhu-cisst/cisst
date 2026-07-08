@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-06-11
   
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsMacrosTest::TestMTS_DECLARE_MEMBER_AND_ACCESSORS(void)
 {
+    std::cout << std::endl << "mtsMacrosTest";
     mtsMacrosTestClassA objectA;
     double placeHolder;
     const double constant = 4321.45689;

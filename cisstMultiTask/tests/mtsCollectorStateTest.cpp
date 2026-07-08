@@ -207,6 +207,7 @@ void mtsCollectorStateTest::TestDevice(void)
     delete server;
 }
 void mtsCollectorStateTest::TestDevice_mtsInt(void) {
+    std::cout << std::endl << "mtsCollectorStateTest";
     mtsCollectorStateTest::TestDevice<mtsInt>();
 }
 void mtsCollectorStateTest::TestDevice_int(void) {

@@ -39,21 +39,15 @@ mtsManagerLocalTest::mtsManagerLocalTest()
 
 void mtsManagerLocalTest::setUp(void)
 {
-    //localManager1 = new mtsManagerLocal();
-    //localManager2 = new mtsManagerLocal();
-
-    //localManager1->ProcessName = P1;
-    //localManager2->ProcessName = P2;
 }
 
 void mtsManagerLocalTest::tearDown(void)
 {
-    //delete localManager1;
-    //delete localManager2;
 }
 
 void mtsManagerLocalTest::TestInitialize(void)
 {
+    std::cout << std::endl << "mtsManagerLocalTest";
     // Add __os_init() test if needed.
 }
 

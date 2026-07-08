@@ -6,8 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-04-29
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsQueueTest::TestQueue_mtsDouble(void)
 {
+    std::cout << std::endl << "mtsQueueTest";
+
     // test default constructor
     mtsQueueGeneric queue;
     CPPUNIT_ASSERT_EQUAL(queue.GetSize(), static_cast<size_t>(0));
