@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnThrow.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include <iostream>
@@ -91,7 +91,7 @@ bool mtsCollectorState::SetStateTable(const std::string & componentName,
         return false;
     }
     // check if there is the specified component and the specified state table.
-    this->TargetComponent = ComponentManager->GetComponent(componentName);
+    this->TargetComponent = GetManagerComponentServices()->ComponentGet(componentName);
     if (!this->TargetComponent) {
         cmnThrow(std::runtime_error("mtsCollectorState::SetStateTable: component \"" + componentName
                                     + "\" not found in component manager."));
@@ -123,8 +123,8 @@ bool mtsCollectorState::Connect(void)
     // then connect the interface
     CMN_LOG_CLASS_INIT_DEBUG << "Connect: connecting required interface \"" << this->GetName() << "::StateTable\" to provided interface \""
                              << this->TargetComponent->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
-    if (!this->ComponentManager->Connect(this->GetName(), "StateTable",
-                                         this->TargetComponent->GetName(), "StateTable" + this->TargetStateTable->GetName())) {
+    if (!GetManagerComponentServices()->Connect(this->GetName(), "StateTable",
+                                                this->TargetComponent->GetName(), "StateTable" + this->TargetStateTable->GetName())) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: connect failed for required interface \"" << this->GetName() << "::StateTable\" to provided interface \""
                                  << this->TargetComponent->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
         return false;
@@ -146,8 +146,8 @@ bool mtsCollectorState::Disconnect(void)
     // then connect the interface
     CMN_LOG_CLASS_INIT_DEBUG << "Disconnect: disconnecting required interface \"" << this->GetName() << "::StateTable\" from provided interface \""
                              << this->TargetComponent->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
-    if (!this->ComponentManager->Disconnect(this->GetName(), "StateTable",
-                                            this->TargetComponent->GetName(), "StateTable" + this->TargetStateTable->GetName())) {
+    if (!GetManagerComponentServices()->Disconnect(this->GetName(), "StateTable",
+                                                   this->TargetComponent->GetName(), "StateTable" + this->TargetStateTable->GetName())) {
         CMN_LOG_CLASS_INIT_ERROR << "Disconnect: connect failed for required interface \"" << this->GetName() << "::StateTable\" from provided interface \""
                                  << this->TargetComponent->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
         return false;
@@ -380,8 +380,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
     std::string currentDateTime;
     std::ostringstream out;
     osaGetDateTimeString(currentDateTime);
-    mtsTaskManager * componentManager = mtsTaskManager::GetInstance();
-    const osaTimeServer & timeServer = componentManager->GetTimeServer();
+    const osaTimeServer & timeServer = mtsManagerLocal::GetInstance()->GetTimeServer();
     osaAbsoluteTime origin;
     timeServer.GetTimeOrigin(origin);
     out.precision(20);

@@ -103,6 +103,14 @@ protected:
     /*! Callable object used when queueing. */
     mtsCallableVoidBase * InterfaceProvidedToManagerCallable;
 
+    /*! Get pointer to manager component services, which extends the internal required interface
+      to the Manager Component Client (MCS).  Returns a const pointer; internal methods
+      that need a non-const pointer can directly access ManagerComponentServices.
+      This method checks if the internal interface is connected; if not, it returns services
+      from mtsManagerLocal. */
+    using mtsComponent::GetManagerComponentServices;
+    virtual const mtsManagerComponentServices *GetManagerComponentServices(void) const override;
+
     /******************** ExecIn interface *************************/
 
     /*! ExecIn required interface. */

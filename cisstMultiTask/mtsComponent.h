@@ -151,6 +151,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsManagerComponent;
+    friend class mtsManagerLocal;
 
  protected:
 
@@ -408,13 +409,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Remove an input interface identified by its name */
     //bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
-    /*! Get pointer to manager component services, which extends the internal required interface
-      to the Manager Component Client (MCS).  This is used by the IRE (Python wrapping) */
-    const mtsManagerComponentServices *GetManagerComponentServices(void) const
-    { return this->ManagerComponentServices; }
-    mtsManagerComponentServices *GetManagerComponentServices(void)
-    { return this->ManagerComponentServices; }
-
     /*! Return a pointer to state table with the given name. */
     mtsStateTable * GetStateTable(const std::string & stateTableName);
 
@@ -558,6 +552,13 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       If true, the internal required interface is added to this
       component (the internal provided interface is added by default) */
     bool AddInterfaceInternal(const bool useMangerComponentServices = false);
+
+    /*! Get pointer to manager component services, which extends the internal required interface
+      to the Manager Component Client (MCS).  Returns a const pointer; internal methods
+      that need a non-const pointer can directly access ManagerComponentServices.
+      This method checks if the internal interface is connected; if not, it returns services
+      from mtsManagerLocal. */
+    virtual const mtsManagerComponentServices *GetManagerComponentServices(void) const;
 
     /*! Internal commands to process command execution request coming from LCM (by invoking class methods) */
     void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg & argout);

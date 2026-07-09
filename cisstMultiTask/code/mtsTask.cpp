@@ -33,6 +33,19 @@
 
 std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
 
+const mtsManagerComponentServices *mtsTask::GetManagerComponentServices(void) const
+{
+    if (CheckForOwnThread()) {
+        return mtsComponent::GetManagerComponentServices();
+    }
+    else {
+        CMN_LOG_CLASS_RUN_VERBOSE << GetName()
+                                  << ": ManagerComponentServices not available (different thread), using mtsManagerLocal"
+                                  << std::endl;
+        return mtsManagerLocal::GetInstance()->GetManagerComponentServices();
+    }
+}
+
 /********************* Methods that call user methods *****************/
 
 void mtsTask::DoRunInternal(void)

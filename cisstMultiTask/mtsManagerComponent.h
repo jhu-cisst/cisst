@@ -63,10 +63,10 @@ protected:
         components, we keep a list of function objects using named map with
         (key = component name, value = function object set instance) */
     struct InterfaceComponentFunctionType {
-        mtsFunctionWriteReturn GetEndUserInterface;
-        mtsFunctionWriteReturn AddObserverList;
-        mtsFunctionWriteReturn RemoveEndUserInterface;
-        mtsFunctionWriteReturn RemoveObserverList;
+        mtsFunctionWriteReturn GetEndUserInterface;     // used in Connect
+        mtsFunctionWriteReturn AddObserverList;         // used in Connect
+        mtsFunctionWriteReturn RemoveEndUserInterface;  // used in Disconnect
+        mtsFunctionWriteReturn RemoveObserverList;      // used in Disconnect
     };
 
     typedef cmnNamedMap<InterfaceComponentFunctionType> InterfaceComponentFunctionMapType;

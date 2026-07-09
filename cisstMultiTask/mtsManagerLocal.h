@@ -101,16 +101,6 @@ protected:
     /* Local component */
     ManagerLocalComponent * LocalComponent;
 
-    /*! Return the ManagerComponentServices.
-        This is a method so that we can later add thread-safety.
-     */
-    mtsManagerComponentServices * GetManagerServices() const;
-
-    /*! Return the logger services.
-        This is a method so that we can later add thread-safety.
-     */
-    const ManagerLocalComponent * GetLoggerServices() const;
-
     /*! Get information about provided interface */
     void GetInterfaceProvidedDescription(
          const std::string & componentName,
@@ -152,6 +142,27 @@ public:
     inline const std::string CISST_DEPRECATED GetName(void) const {
         return Name;
     }
+
+    //------------------------------------------------------------------------------
+    // Access to underlying services.
+    //
+    // In most cases, it easier to instead call a method of this class, e.g.,
+    //    LCM->AddComponent(component)
+    // rather than
+    //    LCM->GetManagerServices()->ComponentAdd(component)
+    //
+    //------------------------------------------------------------------------------
+
+    /*! Return the ManagerComponentServices.
+        This is a method so that we can later add thread-safety.
+     */
+    const mtsManagerComponentServices * GetManagerComponentServices() const;
+
+    /*! Return the logger services.
+        This is a method so that we can later add thread-safety.
+     */
+    const ManagerLocalComponent * GetLoggerServices() const;
+
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------

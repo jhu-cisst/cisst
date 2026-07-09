@@ -301,56 +301,55 @@ void shellTask::Configure(const std::string &)
                                                              &shellTask::WaitFor, this));
     CommandList.insert(new CommandEntryMethodStr1<shellTask>("echo", "<\"message_string\">",
                                                              &shellTask::Echo, this));
-    mtsManagerComponentServices *Manager = GetManagerComponentServices();
-    if (Manager) {
+    if (ManagerComponentServices) {
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "create", "<class_name> <component_name>",
-                               &mtsManagerComponentServices::ComponentCreate, Manager));
+                               &mtsManagerComponentServices::ComponentCreate, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr3<mtsManagerComponentServices>(
                                "create", "<process_name> <class_name> <component_name>",
-                               &mtsManagerComponentServices::ComponentCreate, Manager));
+                               &mtsManagerComponentServices::ComponentCreate, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "configure", "<component_name> <config_string>",
-                               &mtsManagerComponentServices::ComponentConfigure, Manager));
+                               &mtsManagerComponentServices::ComponentConfigure, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr3<mtsManagerComponentServices>(
                                "configure", "<process_name> <component_name> <config_string>",
-                               &mtsManagerComponentServices::ComponentConfigure, Manager));
+                               &mtsManagerComponentServices::ComponentConfigure, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr4<mtsManagerComponentServices>(
                                "connect",
                                "<component1> <component1_interface> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Connect, Manager));
+                               &mtsManagerComponentServices::Connect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr6<mtsManagerComponentServices>(
                                "connect",
                                "<process1> <component1> <component1_interface> "
                                "<process2> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Connect, Manager));
+                               &mtsManagerComponentServices::Connect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr4<mtsManagerComponentServices>(
                                "disconnect",
                                "<component1> <component1_interface> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Disconnect, Manager));
+                               &mtsManagerComponentServices::Disconnect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr6<mtsManagerComponentServices>(
                                "disconnect",
                                "<process1> <component1> <component1_interface> "
                                "<process2> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Disconnect, Manager));
+                               &mtsManagerComponentServices::Disconnect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
                                "start", "<component_name>",
-                               &mtsManagerComponentServices::ComponentStart, Manager));
+                               &mtsManagerComponentServices::ComponentStart, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "start", "<process_name> <component_name>",
-                               &mtsManagerComponentServices::ComponentStart, Manager));
+                               &mtsManagerComponentServices::ComponentStart, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
                                "stop", "<component_name>",
-                                &mtsManagerComponentServices::ComponentStop, Manager));
+                                &mtsManagerComponentServices::ComponentStop, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "stop", "<process_name> <component_name>",
-                                &mtsManagerComponentServices::ComponentStop, Manager));
+                                &mtsManagerComponentServices::ComponentStop, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
                                "load", "<file_name>",
-                                &mtsManagerComponentServices::Load, Manager));
+                                &mtsManagerComponentServices::Load, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "load", "<process_name> <file_name>",
-                                &mtsManagerComponentServices::Load, Manager));
+                                &mtsManagerComponentServices::Load, ManagerComponentServices));
     }
 }
 
@@ -661,14 +660,13 @@ bool shellTask::Viewer(void) const
 // waitfor <processName> [<componentName> [<componentState>]]
 bool shellTask::WaitFor(const std::vector<std::string> &args)
 {
-    mtsManagerComponentServices *Manager = GetManagerComponentServices();
-    if (Manager) {
+    if (ManagerComponentServices) {
         if (args.size() == 1)
-            Manager->WaitFor(args[0]);
+            ManagerComponentServices->WaitFor(args[0]);
         else if (args.size() == 2)
-            Manager->WaitFor(args[0], args[1]);
+            ManagerComponentServices->WaitFor(args[0], args[1]);
         else if (args.size() == 3)
-            Manager->WaitFor(args[0], args[1], args[2]);
+            ManagerComponentServices->WaitFor(args[0], args[1], args[2]);
         else {
             std::cout << "Syntax: waitfor processName [<componentName> [<componentState>]]" << std::endl;
             return false;

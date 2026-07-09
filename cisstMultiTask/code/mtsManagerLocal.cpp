@@ -233,7 +233,7 @@ void mtsManagerLocal::DestroyManagerComponent(void)
     }
 }
 
-mtsManagerComponentServices * mtsManagerLocal::GetManagerServices() const
+const mtsManagerComponentServices * mtsManagerLocal::GetManagerComponentServices() const
 {
 #if 0  // PK TODO
     // Consider changing design to create multiple local components, or multiple required interfaces
@@ -242,10 +242,13 @@ mtsManagerComponentServices * mtsManagerLocal::GetManagerServices() const
     // (e.g., embedded Python interpreter), and use a mutex to handle any other threads.
     if (Instance->MainThreadId != osaGetCurrentThreadId()) {
         // Warn about potential thread safety issue
-        CMN_LOG_CLASS_RUN_WARNING << "GetManagerServices: additional thread detected" << std::endl;
+        CMN_LOG_CLASS_RUN_WARNING << "GetManagerComponentServices: additional thread detected" << std::endl;
     }
 #endif
-    return LocalComponent->GetManagerComponentServices();
+    // Avoid calling LocalComponent->GetManagerComponentServices() because in theory it could lead to
+    // an infinite loop (though it shouldn't, since the local component should be connected when GetInstance()
+    // is called).
+    return LocalComponent->ManagerComponentServices;
 }
 
 const ManagerLocalComponent * mtsManagerLocal::GetLoggerServices() const
@@ -257,14 +260,14 @@ void mtsManagerLocal::GetInterfaceProvidedDescription(
     const std::string & componentName, const std::string & interfaceName,
     mtsInterfaceProvidedDescription & interfaceProvidedDescription)
 {
-    interfaceProvidedDescription = GetManagerServices()->GetInterfaceProvidedDescription(componentName, interfaceName);
+    interfaceProvidedDescription = GetManagerComponentServices()->GetInterfaceProvidedDescription(componentName, interfaceName);
 }
 
 void mtsManagerLocal::GetInterfaceRequiredDescription(
     const std::string & componentName, const std::string & interfaceName,
     mtsInterfaceRequiredDescription & interfaceRequiredDescription)
 {
-    interfaceRequiredDescription = GetManagerServices()->GetInterfaceRequiredDescription(componentName, interfaceName);
+    interfaceRequiredDescription = GetManagerComponentServices()->GetInterfaceRequiredDescription(componentName, interfaceName);
 }
 
 void mtsManagerLocal::SetupSystemLogger(void)
@@ -786,7 +789,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         CMN_LOG_CLASS_INIT_ERROR << "AddComponent: invalid component" << std::endl;
         return false;
     }
-    return GetManagerServices()->ComponentAdd(component);
+    return GetManagerComponentServices()->ComponentAdd(component);
 }
 
 bool CISST_DEPRECATED mtsManagerLocal::AddTask(mtsTask * component)
@@ -801,12 +804,12 @@ bool CISST_DEPRECATED mtsManagerLocal::AddDevice(mtsComponent * component)
 
 bool mtsManagerLocal::RemoveComponent(mtsComponent * component)
 {
-    return GetManagerServices()->ComponentRemove(component);
+    return GetManagerComponentServices()->ComponentRemove(component);
 }
 
 bool mtsManagerLocal::RemoveComponent(const std::string & componentName)
 {
-    return GetManagerServices()->ComponentRemove(componentName);
+    return GetManagerComponentServices()->ComponentRemove(componentName);
 }
 
 size_t mtsManagerLocal::RemoveAllUserComponents(void)
@@ -834,8 +837,7 @@ size_t mtsManagerLocal::RemoveAllUserComponents(void)
 
 mtsComponent * mtsManagerLocal::GetComponent(const std::string & componentName) const
 {
-    mtsManagerComponentServices *services = GetManagerServices();
-    return services->ComponentGet(componentName);
+    return GetManagerComponentServices()->ComponentGet(componentName);
 }
 
 mtsTask * mtsManagerLocal::GetComponentAsTask(const std::string & componentName) const
@@ -867,7 +869,7 @@ bool mtsManagerLocal::FindComponent(const std::string & componentName) const
 
 bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double timeout) const
 {
-    mtsManagerComponentServices *services = GetManagerServices();
+    const mtsManagerComponentServices *services = GetManagerComponentServices();
 
     // wait for all components to be started if timeout is positive
     bool allAtState = true;
@@ -929,7 +931,7 @@ void mtsManagerLocal::CreateAll(void)
     std::vector<std::string>::const_iterator iterator = componentNames.begin();
     const std::vector<std::string>::const_iterator end = componentNames.end();
 
-    mtsManagerComponentServices *services = GetManagerServices();
+    const mtsManagerComponentServices *services = GetManagerComponentServices();
     for (; iterator != end; ++iterator) {
         if (mtsManagerComponentBase::IsManagerComponent(*iterator))
             continue;
@@ -962,7 +964,7 @@ void mtsManagerLocal::StartAll(void)
     std::vector<std::string>::const_iterator iterator = componentNames.begin();
     const std::vector<std::string>::const_iterator end = componentNames.end();
 
-    mtsManagerComponentServices *services = GetManagerServices();
+    const mtsManagerComponentServices *services = GetManagerComponentServices();
 
     for (; iterator != end; ++iterator) {
         if (mtsManagerComponentBase::IsManagerComponent(*iterator))
@@ -1027,7 +1029,7 @@ void mtsManagerLocal::KillAll(void)
     std::vector<std::string>::const_iterator iterator = componentNames.begin();
     const std::vector<std::string>::const_iterator end = componentNames.end();
 
-    mtsManagerComponentServices *services = GetManagerServices();
+    const mtsManagerComponentServices *services = GetManagerComponentServices();
 
     for (; iterator != end; ++iterator) {
         if (mtsManagerComponentBase::IsManagerComponent(*iterator))
@@ -1058,8 +1060,8 @@ bool mtsManagerLocal::KillAllAndWait(double timeoutInSeconds)
 bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientInterfaceName,
                               const std::string & serverComponentName, const std::string & serverInterfaceName)
 {
-    return GetManagerServices()->Connect(clientComponentName, clientInterfaceName,
-                                         serverComponentName, serverInterfaceName);
+    return GetManagerComponentServices()->Connect(clientComponentName, clientInterfaceName,
+                                                  serverComponentName, serverInterfaceName);
 }
 
 bool mtsManagerLocal::Connect(const std::string & clientProcessName,
@@ -1067,53 +1069,53 @@ bool mtsManagerLocal::Connect(const std::string & clientProcessName,
                               const std::string & serverProcessName,
                               const std::string & serverComponentName, const std::string & serverInterfaceName)
 {
-    return GetManagerServices()->Connect(clientProcessName, clientComponentName, clientInterfaceName,
-                                         serverProcessName, serverComponentName, serverInterfaceName);
+    return GetManagerComponentServices()->Connect(clientProcessName, clientComponentName, clientInterfaceName,
+                                                  serverProcessName, serverComponentName, serverInterfaceName);
 }
 
 bool mtsManagerLocal::Disconnect(const ConnectionIDType connectionID)
 {
-    return GetManagerServices()->Disconnect(connectionID);
+    return GetManagerComponentServices()->Disconnect(connectionID);
 }
 
 bool mtsManagerLocal::Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceName,
                                  const std::string & serverComponentName, const std::string & serverInterfaceName)
 {
-    return GetManagerServices()->Disconnect(clientComponentName, clientInterfaceName,
-                                            serverComponentName, serverInterfaceName);
+    return GetManagerComponentServices()->Disconnect(clientComponentName, clientInterfaceName,
+                                                     serverComponentName, serverInterfaceName);
 }
 
 bool mtsManagerLocal::Disconnect(
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceName,
     const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceName)
 {
-    return GetManagerServices()->Disconnect(clientProcessName, clientComponentName, clientInterfaceName,
-                                            serverProcessName, serverComponentName, serverInterfaceName);
+    return GetManagerComponentServices()->Disconnect(clientProcessName, clientComponentName, clientInterfaceName,
+                                                     serverProcessName, serverComponentName, serverInterfaceName);
 }
 
 void mtsManagerLocal::GetNamesOfProcesses(std::vector<std::string> & namesOfProcesses) const
 {
-    namesOfProcesses = GetManagerServices()->GetNamesOfProcesses();
+    namesOfProcesses = GetManagerComponentServices()->GetNamesOfProcesses();
 }
 
 std::vector<std::string> mtsManagerLocal::GetNamesOfComponents(void) const
 {
-    return GetManagerServices()->GetNamesOfComponents();
+    return GetManagerComponentServices()->GetNamesOfComponents();
 }
 
 void mtsManagerLocal::GetNamesOfComponents(std::vector<std::string> & namesOfComponents) const
 {
-    namesOfComponents = GetManagerServices()->GetNamesOfComponents();
+    namesOfComponents = GetManagerComponentServices()->GetNamesOfComponents();
 }
 
 void mtsManagerLocal::GetNamesOfComponents(const std::string & processName, std::vector<std::string> & namesOfComponents) const
 {
-    namesOfComponents = GetManagerServices()->GetNamesOfComponents(processName);
+    namesOfComponents = GetManagerComponentServices()->GetNamesOfComponents(processName);
 }
 
 std::vector<mtsDescriptionComponent> mtsManagerLocal::GetDescriptionsOfComponents(const std::string & processName) const
 {
-    return GetManagerServices()->GetDescriptionsOfComponents(processName);
+    return GetManagerComponentServices()->GetDescriptionsOfComponents(processName);
 }
 
 bool mtsManagerLocal::GetNamesOfInterfaces(const std::string & processName,
@@ -1121,8 +1123,8 @@ bool mtsManagerLocal::GetNamesOfInterfaces(const std::string & processName,
                                            std::vector<std::string> & namesOfInterfacesRequired,
                                            std::vector<std::string> & namesOfInterfacesProvided) const
 {
-    return GetManagerServices()->GetNamesOfInterfaces(processName, componentName,
-                                                      namesOfInterfacesRequired, namesOfInterfacesProvided);
+    return GetManagerComponentServices()->GetNamesOfInterfaces(processName, componentName,
+                                                               namesOfInterfacesRequired, namesOfInterfacesProvided);
 }
 
 bool mtsManagerLocal::GetDescriptionsOfInterfaces(const std::string & processName,
@@ -1130,30 +1132,30 @@ bool mtsManagerLocal::GetDescriptionsOfInterfaces(const std::string & processNam
                                                   std::vector<mtsDescriptionInterfaceFullName> & descriptionsRequired,
                                                   std::vector<mtsDescriptionInterfaceFullName> & descriptionsProvided) const
 {
-    return GetManagerServices()->GetDescriptionsOfInterfaces(processName, componentName,
-                                                             descriptionsRequired, descriptionsProvided);
+    return GetManagerComponentServices()->GetDescriptionsOfInterfaces(processName, componentName,
+                                                                      descriptionsRequired, descriptionsProvided);
 }
 
 std::vector<mtsDescriptionConnection> mtsManagerLocal::GetListOfConnections(void) const
 {
-    return GetManagerServices()->GetListOfConnections();
+    return GetManagerComponentServices()->GetListOfConnections();
 }
 
 std::vector<mtsDescriptionComponentClass> mtsManagerLocal::GetListOfComponentClasses(const std::string & processName) const
 {
-    return GetManagerServices()->GetListOfComponentClasses();
+    return GetManagerComponentServices()->GetListOfComponentClasses();
 }
 
 mtsInterfaceProvidedDescription mtsManagerLocal::GetInterfaceProvidedDescription(const std::string & processName,
                                 const std::string & componentName, const std::string & interfaceName) const
 {
-    return GetManagerServices()->GetInterfaceProvidedDescription(processName, componentName, interfaceName);
+    return GetManagerComponentServices()->GetInterfaceProvidedDescription(processName, componentName, interfaceName);
 }
 
 mtsInterfaceRequiredDescription mtsManagerLocal::GetInterfaceRequiredDescription(const std::string & processName,
                                 const std::string & componentName, const std::string & interfaceName) const
 {
-    return GetManagerServices()->GetInterfaceRequiredDescription(processName, componentName, interfaceName);
+    return GetManagerComponentServices()->GetInterfaceRequiredDescription(processName, componentName, interfaceName);
 }
 
 const osaTimeServer & mtsManagerLocal::GetTimeServer(void) const

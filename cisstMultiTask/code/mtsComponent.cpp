@@ -918,6 +918,18 @@ bool mtsComponent::AddInterfaceInternal(const bool useManagerComponentServices)
     return true;
 }
 
+const mtsManagerComponentServices *mtsComponent::GetManagerComponentServices(void) const
+{
+    if (ManagerComponentServices && ManagerComponentServices->IsConnected()) {
+        return ManagerComponentServices;
+    }
+    else {
+        CMN_LOG_CLASS_RUN_WARNING << GetName()
+                                  << ": ManagerComponentServices not available, using mtsManagerLocal instead" << std::endl;
+        return mtsManagerLocal::GetInstance()->GetManagerComponentServices();
+    }
+}
+
 // Internal command
 void mtsComponent::InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin,
                                                                  mtsEndUserInterfaceArg & argout)

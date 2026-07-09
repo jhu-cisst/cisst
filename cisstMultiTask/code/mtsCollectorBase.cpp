@@ -23,9 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstMultiTask/mtsManagerLocal.h>
-
-mtsComponentManager * mtsCollectorBase::ComponentManager;
 
 //-------------------------------------------------------
 // Constructor, Destructor, and Initializer
@@ -51,9 +48,8 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     // set working directory
     this->WorkingDirectoryMember = cmnPath::GetWorkingDirectory();
 
-    if (ComponentManager == 0) {
-        ComponentManager = mtsComponentManager::GetInstance();
-    }
+    // Enable interface to MCS for component management
+    // EnableDynamicComponentManagement();
 
     // add the control interface
     this->SetupControlInterface();
