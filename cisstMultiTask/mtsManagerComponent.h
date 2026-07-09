@@ -127,10 +127,12 @@ protected:
     //********************************* Connect/Disconnect Internal **************************************
 
     bool ConnectInternal(const std::string & clientComponentName, const std::string & clientInterfaceName,
-                         const std::string & serverComponentName, const std::string & serverInterfaceName);
+                         const std::string & serverComponentName, const std::string & serverInterfaceName,
+                         const std::string & requestComponentName);
  
     bool DisconnectInternal(const std::string & clientComponentName, const std::string & clientInterfaceName,
-                            const std::string & serverComponentName, const std::string & serverInterfaceName);
+                            const std::string & serverComponentName, const std::string & serverInterfaceName,
+                            const std::string & requestComponentName);
 
     bool FindByConnectionID(mtsDescriptionConnection & arg) const;
 

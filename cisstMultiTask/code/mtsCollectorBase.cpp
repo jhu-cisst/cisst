@@ -48,9 +48,6 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     // set working directory
     this->WorkingDirectoryMember = cmnPath::GetWorkingDirectory();
 
-    // Enable interface to MCS for component management
-    // EnableDynamicComponentManagement();
-
     // add the control interface
     this->SetupControlInterface();
 

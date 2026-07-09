@@ -333,7 +333,8 @@ void mtsManagerComponent::ComponentConfigure(const mtsDescriptionComponent & arg
 void mtsManagerComponent::ComponentConnect(const mtsDescriptionConnection & arg, bool & result)
 {
     result = ConnectInternal(arg.Client.ComponentName, arg.Client.InterfaceName,
-                             arg.Server.ComponentName, arg.Server.InterfaceName);
+                             arg.Server.ComponentName, arg.Server.InterfaceName,
+                             arg.Requestor);
 }
 
 
@@ -369,7 +370,7 @@ void mtsManagerComponent::ComponentDisconnect(const mtsDescriptionConnection & a
     }
     if (result) {
         if (DisconnectInternal(arg.Client.ComponentName, arg.Client.InterfaceName,
-                               arg.Server.ComponentName, arg.Server.InterfaceName))
+                               arg.Server.ComponentName, arg.Server.InterfaceName, arg.Requestor))
         {
             CMN_LOG_CLASS_RUN_VERBOSE << "ComponentDisconnect: successfully disconnected: " << arg << std::endl;
         }
@@ -719,7 +720,8 @@ void mtsManagerComponent::LogInterface::PrintLog(const mtsLogMessage & log)
 //********************************** Connect/Disconnect Internal *************************************************
 
 bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentName, const std::string & clientInterfaceName,
-                                          const std::string & serverComponentName, const std::string & serverInterfaceName)
+                                          const std::string & serverComponentName, const std::string & serverInterfaceName,
+                                          const std::string & requestComponentName)
 {
     std::vector<std::string> options;
     std::stringstream allOptions;
@@ -759,7 +761,7 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
         } else {
             CMN_LOG_CLASS_INIT_DEBUG << "ComponentConnect: Swapping client/server" << std::endl;
             return ConnectInternal(serverComponentName, serverInterfaceName,
-                   clientComponentName, clientInterfaceName);
+                                   clientComponentName, clientInterfaceName, requestComponentName);
         }
     }
 
@@ -802,10 +804,12 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
         }
 
         bool success = false;
-        // If the server is this component (ManagerComponent), or if the server component is not active,
+        // If the server is this component (ManagerComponent), or if the server component is not active, or
+        // if the server component is the same as the requestor (and therefore waiting for the connection),
         // we can use the previous implementation (mtsInterfaceRequired::ConnectTo), which directly calls the methods.
         if ((serverComponent == this) ||
-            !serverComponent->IsRunning()) {
+            !serverComponent->IsRunning() ||
+            (serverComponentName == requestComponentName)) {
             success = clientInterfaceRequired->ConnectTo(serverInterfaceProvided);
         }
         else {
@@ -933,7 +937,8 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
 }
 
 bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponentName, const std::string & clientInterfaceName,
-                                             const std::string & serverComponentName, const std::string & serverInterfaceName)
+                                             const std::string & serverComponentName, const std::string & serverInterfaceName,
+                                             const std::string & requestComponentName)
 {
     mtsComponent * clientComponent = GetComponent(clientComponentName);
     if (!clientComponent) {
@@ -960,7 +965,8 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
             return false;
         } else {
             CMN_LOG_CLASS_INIT_DEBUG << "ComponentDisconnect: Swapping client/server" << std::endl;
-            return DisconnectInternal(serverComponentName, serverInterfaceName, clientComponentName, clientInterfaceName);
+            return DisconnectInternal(serverComponentName, serverInterfaceName, clientComponentName, clientInterfaceName,
+                                      requestComponentName);
         }
     }
 
@@ -995,10 +1001,10 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
             return false;
         }
         bool success = false;
-        // If the server is this component (ManagerComponent), or if it is not active,
+        // If the server is this component (ManagerComponent), or if it is not active, or if it is the same as the requestor,
         // we can directly call the methods. Note that we could use the StateChange mutex to make sure that the state
         // does not change during execution of this method, but that is unlikely.
-        if ((serverComponent == this) || !serverComponent->IsRunning()) {
+        if ((serverComponent == this) || !serverComponent->IsRunning() || (serverComponentName == requestComponentName)) {
             mtsEventHandlerList eventList(endUserInterface);
             clientInterfaceRequired->GetEventList(eventList);
             // Following could use serverInterfaceProvided or endUserInterface
@@ -1232,7 +1238,8 @@ bool mtsManagerComponent::ConnectToManagerComponent(const std::string & componen
     const std::string nameOfInterfaceComponentRequired
         = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(componentName);
     if (!ConnectInternal(GetName(), nameOfInterfaceComponentRequired,
-                         componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())) {
+                         componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided(),
+                         GetName())) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponent: failed to connect: "
                                  << GetName() << ":" << nameOfInterfaceComponentRequired
                                  << " - "
@@ -1247,7 +1254,8 @@ bool mtsManagerComponent::ConnectToManagerComponent(const std::string & componen
     if (!mtsManagerComponentBase::IsManagerComponent(componentName) &&
         component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
         if (!ConnectInternal(component->GetName(), mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
-                             GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
+                             GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided(),
+                             GetName())) {
             CMN_LOG_CLASS_INIT_ERROR << "ConnectToManagerComponent: failed to connect: "
                                      << component->GetName() << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
                                      << " - "
@@ -1274,7 +1282,8 @@ bool mtsManagerComponent::DisconnectFromManagerComponent(const std::string & com
     // provided interface.
     if (component->GetInterfaceRequired(mtsManagerComponentBase::GetNameOfInterfaceInternalRequired())) {
         if (!DisconnectInternal(componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalRequired(),
-                                GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided())) {
+                                GetName(), mtsManagerComponentBase::GetNameOfInterfaceComponentProvided(),
+                                GetName())) {
             CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to disconnect: "
                                       << componentName << ":" << mtsManagerComponentBase::GetNameOfInterfaceInternalRequired()
                                       << " - "
@@ -1286,7 +1295,8 @@ bool mtsManagerComponent::DisconnectFromManagerComponent(const std::string & com
     const std::string nameOfInterfaceComponentRequired
                       = mtsManagerComponentBase::GetNameOfInterfaceComponentRequiredFor(componentName);
     if (!DisconnectInternal(GetName(), nameOfInterfaceComponentRequired,
-                            componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())) {
+                            componentName, mtsManagerComponentBase::GetNameOfInterfaceInternalProvided(),
+                            GetName())) {
         CMN_LOG_CLASS_RUN_WARNING << "DisconnectFromManagerComponent: failed to disconnect: "
                                   << GetName() << ":" << nameOfInterfaceComponentRequired
                                   << " - "

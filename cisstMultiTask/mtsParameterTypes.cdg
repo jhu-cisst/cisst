@@ -211,6 +211,12 @@ class {
         visibility public;
         default InvalidConnectionID;
     }
+    member {
+        name Requestor;
+        type std::string;   // Could instead use mtsDescriptionComponent
+        description component requesting connection change;
+        visibility public;
+    }
     inline-header {
     mtsDescriptionConnection(
         const std::string & clientProcessName,

@@ -342,6 +342,8 @@ bool mtsManagerComponentServices::Connect(const mtsDescriptionConnection & conne
     // Make a copy because the parameter is const
     mtsDescriptionConnection conn(connectionDescription);
     conn.ConnectionID = InvalidConnectionID;
+    if (InternalInterfaceRequired)
+        conn.Requestor = InternalInterfaceRequired->GetComponentName();
 
     // call blocking command
     bool result;
@@ -397,7 +399,11 @@ bool mtsManagerComponentServices::Disconnect(
 bool mtsManagerComponentServices::Disconnect(const mtsDescriptionConnection & connection) const
 {
     bool result = true;
-    ServiceComponentManagement.Disconnect(connection, result);
+    // Make a copy because the parameter is const
+    mtsDescriptionConnection conn(connection);
+    if (InternalInterfaceRequired)
+        conn.Requestor = InternalInterfaceRequired->GetComponentName();
+    ServiceComponentManagement.Disconnect(conn, result);
 
     CMN_LOG_CLASS_RUN_VERBOSE << "ComponentDisconnect: requested component disconnection: " << connection << std::endl;
 
