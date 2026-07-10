@@ -66,8 +66,11 @@ As explained above, a cisstMultiTask process has one instance of ``mtsManagerLoc
 1. Access to the Manager Component services described above, through methods that internally call ``GetManagerComponentServices`` (note that ``GetManagerComponentServices`` is also a public method).
 
 2. Extended component management services, including:
+
    a. Methods that operate on all components, such as ``CreateAll``, ``StartAll``, ``KillAll`` and ``WaitForStateAll``.
+
    b. Methods that enable component management through JSON strings.
+
    c. Methods to manage component and interface tags.
 
 3. Access to a global (for the process) time server.
