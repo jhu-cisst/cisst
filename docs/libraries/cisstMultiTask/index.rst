@@ -6,3 +6,4 @@ cisstMultiTask
 
    concepts
    tutorial
+   design
