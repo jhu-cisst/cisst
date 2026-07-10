@@ -12,34 +12,37 @@ Component Management
 .. image:: images/ComponentManagement.svg
    :alt: Component Management
 
-There are two primary system objects used for component management, as shown in the figure above:  (1) the local component manager (``mtsManagerLocal``), and (2) the manager component (``mtsManagerComponent``). The local component manager adopts the Singleton design pattern, so there is only one instance in the process. This instance is obtained (and created, if needed), by calling ``mtsManagerLocal::GetInstance()``. The ``mtsManagerLocal`` constructor creates an instance of ``mtsManagerComponent``, which is named "MCS". Although ``mtsManagerComponent`` does not use the Singleton design pattern, it is effectively a Singleton because it can only be created by ``mtsManagerLocal``. Note that the name ``mtsManagerLocal`` is a historical artifact from an earlier implementation where cisstMultiTask natively supported multiple processes -- in that prior design, each process had a local manager and the overall system had a global manager. However, that design has been abandoned and currently cisstMultiTask only supports multiple components in a single process. Users can instantiate "bridges" (for example, ``cisst-to-ros`` bridges) to interface with other processes, which may or may not be based on cisstMultiTask.
+There are two primary system objects used for component management, as shown in the figure above:  (1) the local component manager, ``mtsManagerLocal``, and (2) the manager component, ``mtsManagerComponent``. The local component manager adopts the Singleton design pattern, so there is only one instance in the process. This instance is obtained (and created, if needed), by calling ``mtsManagerLocal::GetInstance()``. The ``mtsManagerLocal`` constructor creates an instance of ``mtsManagerComponent``, which is named "MCS". Although ``mtsManagerComponent`` does not use the Singleton design pattern, it is effectively a Singleton because it can only be created by ``mtsManagerLocal``. Note that the name ``mtsManagerLocal`` is a historical artifact from an earlier implementation where cisstMultiTask natively supported multiple processes -- in that prior design, each process had a local manager and the overall system had a global manager. However, that design has been abandoned and currently cisstMultiTask only supports multiple components in a single process. Users can instantiate "bridges" (for example, ``cisst-to-ros`` bridges) to interface with other processes, which may or may not be based on cisstMultiTask.
 
 The Manager Component ("MCS") is a task with its own thread. It is derived from ``mtsTaskFromSignal``, which means that it sleeps until it receives a command (via a provided interface) or an event (via a required interface). The key provided interface is called "InterfaceComponentProvided" -- it provides the following component management services:
 
-============                    ============    ======================     ==============           ===========================
-Command Name                    Command Type    Arg Type                   Return Type              Purpose
-============                    ============    ======================     ==============           ===========================
-ComponentCreate                 WriteReturn     mtsComponentDescription    bool                     Dynamically create (and add) component
-ComponentAdd                    WriteReturn     mtsComponentPointer        bool                     Add a component to the manager
-ComponentRemove                 WriteReturn     std::string                bool                     Remove specified component
-ComponentGet                    QualifiedRead   std::string                mtsComponentPointer      Get pointer to specified component
-ComponentConfigure              Write           mtsDescriptionComponent                             Call component ``Configure`` method
-ComponentConnect                WriteReturn     mtsDescriptionConnection   bool                     Connect two components
-ComponentDisconnect             WriteReturn     mtsDescriptionConnection   bool                     Disconnect two components
-ComponentStart                  Write           mtsComponentStatusControl                           Call component ``Start`` method
-ComponentStop                   Write           mtsComponentStatusControl                           Call component ``Suspend`` method
-ComponentResume                 Write           mtsComponentStatusControl                           Call component ``Start`` method
-ComponentGetState               QualifiedRead   mtsDescriptionComponent    mtsComponentState        Get component state
-LoadLibrary                     QualifiedRead   mtsDescriptionLoadLibrary  bool                     Dynamically load specified library
-GetNamesOfProcesses             Read                                       std::vector<std::string> Get names of processes (OBSOLETE)
-GetNamesOfComponents            QualifiedRead   std::string                std::vector<std::string> Get names of components in process
-GetDescriptionsOfComponents     QualifiedRead   std::string                std::vector<mtsDescriptionComponent>  Get details of components
-GetNamesOfInterfaces            QualifiedRead   mtsDescriptionComponent    mtsDescriptionInterface  Get list of component interfaces
-GetDescriptionsOfInterfaces     QualifiedRead   mtsDescriptionComponent    mtsDescriptionInterfaceFull  Get details of component interfaces
-GetListOfConnections            Read                                       std::vector<mtsDescriptionConnection>  Get list of connections
+============                    ============    ======================     =================================          ===========================
+Command Name                    Command Type    Arg Type                   Return Type                                Purpose
+============                    ============    ======================     =================================          ===========================
+ComponentCreate                 WriteReturn     mtsComponentDescription    bool                                        Dynamically create (and add) component
+ComponentAdd                    WriteReturn     mtsComponentPointer        bool                                        Add a component to the manager
+ComponentRemove                 WriteReturn     std::string                bool                                        Remove specified component
+ComponentGet                    QualifiedRead   std::string                mtsComponentPointer                         Get pointer to specified component
+ComponentConfigure              Write           mtsDescriptionComponent                                                Call component ``Configure`` method
+ComponentConnect                WriteReturn     mtsDescriptionConnection   bool                                        Connect two components
+ComponentDisconnect             WriteReturn     mtsDescriptionConnection   bool                                        Disconnect two components
+ComponentStart                  Write           mtsComponentStatusControl                                              Call component ``Start`` method
+ComponentStop                   Write           mtsComponentStatusControl                                              Call component ``Suspend`` method
+ComponentResume                 Write           mtsComponentStatusControl                                              Call component ``Start`` method
+ComponentGetState               QualifiedRead   mtsDescriptionComponent    mtsComponentState                           Get component state
+LoadLibrary                     QualifiedRead   mtsDescriptionLoadLibrary  bool                                        Dynamically load specified library
+GetNamesOfProcesses             Read                                       std::vector<std::string>                    Get names of processes (OBSOLETE)
+GetNamesOfComponents            QualifiedRead   std::string                std::vector<std::string>                    Get names of components in process
+GetDescriptionsOfComponents     QualifiedRead   std::string                std::vector<mtsDescriptionComponent>        Get details of components
+GetNamesOfInterfaces            QualifiedRead   mtsDescriptionComponent    mtsDescriptionInterface                     Get list of component interfaces
+GetDescriptionsOfInterfaces     QualifiedRead   mtsDescriptionComponent    mtsDescriptionInterfaceFull                 Get details of component interfaces
+GetListOfConnections            Read                                       std::vector<mtsDescriptionConnection>       Get list of connections
 GetListOfComponentClasses       QualifiedRead   std::string                std::vector <mtsDescriptionComponentClass>  Get list of available classes
-GetInterfaceProvidedDescription QualifiedRead   mtsDescriptionInterface    mtsInterfaceProvidedDescription  Get details of provided interface
-GetInterfaceRequiredDescription QualifiedRead   mtsDescriptionInterface    mtsInterfaceRequiredDescription  Get details of required interface
+GetInterfaceProvidedDescription QualifiedRead   mtsDescriptionInterface    mtsInterfaceProvidedDescription             Get details of provided interface
+GetInterfaceRequiredDescription QualifiedRead   mtsDescriptionInterface    mtsInterfaceRequiredDescription             Get details of required interface
+=============================== =============   =======================    ==========================================  ===================================
+
+In addition, the provided interface generates four events (of type Write), called "AddComponentEvent", "AddConnectionEvent", "RemoveConnectionEvent", and "ChangeState". TODO: add an event "RemoveComponentEvent".
 
 Note, however, that users should never need to directly invoke these commands. Instead, there is a wrapper class ``mtsManagerComponentServices`` that provides a more convenient interface. In particular, many of the above commands refer to a process name (again, due to the historical support for multiple processes). Currently, it is sufficient to leave the process name empty (i.e., empty string) and this is handled by the methods in ``mtsManagerComponentServices``.
 
