@@ -1,13 +1,16 @@
+Design
+======
+
 Purpose
-=======
+-------
 
 This page provides design details for cisstMultiTask. It is intended for programmers maintaining the library. Library users should instead refer to the concepts and tutorial pages.
 
 Component Management
-====================
+--------------------
 
 .. image:: images/ComponentManagement.svg
-   :alt: cisstMultiTask component
+   :alt: Component Management
 
 There are two primary system objects used for component management, as shown in the figure above:  (1) the local component manager (``mtsManagerLocal``), and (2) the manager component (``mtsManagerComponent``). The local component manager adopts the Singleton design pattern, so there is only one instance in the process. This instance is obtained (and created, if needed), by calling ``mtsManagerLocal::GetInstance()``. The ``mtsManagerLocal`` constructor creates an instance of ``mtsManagerComponent``, which is named "MCS". Although ``mtsManagerComponent`` does not use the Singleton design pattern, it is effectively a Singleton because it can only be created by ``mtsManagerLocal``. Note that the name ``mtsManagerLocal`` is a historical artifact from an earlier implementation where cisstMultiTask natively supported multiple processes -- in that prior design, each process had a local manager and the overall system had a global manager. However, that design has been abandoned and currently cisstMultiTask only supports multiple components in a single process. Users can instantiate "bridges" (for example, ``cisst-to-ros`` bridges) to interface with other processes, which may or may not be based on cisstMultiTask.
 
