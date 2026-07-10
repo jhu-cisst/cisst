@@ -48,7 +48,7 @@ Note, however, that users should never need to directly invoke these commands. I
 
 Since "MCS" makes the component management services available through a provided interface ("InterfaceComponentProvided"), these services can only be accessed by another component with a required interface. There are two ways to access these services:
 
-1. From anywhere, via ``mtsManagerLocal::GetInstance()->GetManagerComponentServices()``. This is implemented by having ``mtsManagerLocal`` create an internal component, called "LCM", with the matching required interface ("InterfaceInternalRequired"), that is then connected to the "MCS" provided interface. Currently, this method is not thread-safe.
+1. From anywhere, via ``mtsManagerLocal::GetInstance()->GetManagerComponentServices()``. This is implemented by having ``mtsManagerLocal`` create an internal component, called "LCM", with the matching required interface ("InterfaceInternalRequired"), that is then connected to the "MCS" provided interface. Currently, this method is not thread-safe. See also the section below on ``mtsManagerLocal``
 
 2. From within a component, via ``this->GetManagerComponentServices()``. There are two sub-cases:
 
@@ -57,3 +57,23 @@ Since "MCS" makes the component management services available through a provided
    b. For components that did not call ``EnableDynamicComponentManager()`` in their constructor, ``GetManagerComponentServices()`` returns ``mtsManagerLocal::GetInstance()->GetManagerComponentServices()`` (i.e., the first case above).
 
 The figure above also shows several user components, where each user component has a provided interface called "InterfaceInternalProvided" (the "LCM" component also has this provided interface, but it has been omitted for simplicity). When the component is added to the Manager Component, the Manager Component dynamically creates a required interface "InterfaceComponentRequiredForXXXX" where "XXXX" is the name of the component being added. Currently, the component interface provides two commands that are used when connecting components:  ``GetEndUserInterface`` and ``AddObserverList``, and two commands that are used when disconnecting components:  ``RemoveEndUserInterface`` and ``RemoveObserverList``. All four of these commands pertain to the provided (or output) interface in the connection.
+
+Local Manager Singleton
+-----------------------
+
+As explained above, a cisstMultiTask process has one instance of ``mtsManagerLocal``, which is created/obtained by calling the static method ``GetInstance``. The Local Manager provides several services:
+
+1. Access to the Manager Component services described above, through methods that internally call ``GetManagerComponentServices`` (note that ``GetManagerComponentServices`` is also a public method).
+
+2. Extended component management services, including:
+   a. Methods that operate on all components, such as ``CreateAll``, ``StartAll``, ``KillAll`` and ``WaitForStateAll``.
+   b. Methods that enable component management through JSON strings.
+   c. Methods to manage component and interface tags.
+
+3. Access to a global (for the process) time server.
+
+4. Methods for log management (somewhat obsolete).
+
+5. Methods to obtain a list of IP addresses on the machine (historical artifact)
+
+There is also a ``DeleteInstance`` method to destroy the Singleton object.

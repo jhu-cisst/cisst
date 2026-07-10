@@ -830,7 +830,7 @@ size_t mtsManagerLocal::RemoveAllUserComponents(void)
     }
     if (numRemoved > 0) {
         CMN_LOG_CLASS_RUN_VERBOSE << "RemoveAllUserComponents: removed " << numRemoved << " user components, leaving "
-                                  << componentNames.size() << " system components" << std::endl;
+                                  << (componentNames.size()-numRemoved) << " system components" << std::endl;
     }
     return numRemoved;
 }
