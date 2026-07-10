@@ -4,7 +4,7 @@ Design
 Purpose
 -------
 
-This page provides design details for cisstMultiTask. It is intended for programmers maintaining the library. Library users should instead refer to the concepts and tutorial pages.
+This page provides design details for cisstMultiTask. It is intended for programmers maintaining the library. Library users should instead refer to the :doc:`concepts` and :doc:`tutorial` pages.
 
 Component Management
 --------------------
