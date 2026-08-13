@@ -1,6 +1,40 @@
 Change log
 ==========
 
+1.5.0 (TBD)
+===========
+
+* API changes:
+  * cisstMultiTask:
+    * Removed `mtsManagerGlobal` and consolidated the manager-component client/server classes into `mtsManagerComponent`
+    * Removed the `CISST_MTS_NEW` CMake option and the obsolete implementation it selected
+    * Reworked connection management to use connection IDs and build connection lists on demand
+    * `mtsDescriptionConnection` now includes the requesting component name
+  * cisstParameterTypes: renamed `prmBaseFrame::Valid` to `ValidDefinition`
+  * cisstMultiTask: renamed the logger option in `mtsCommandLineOptionsQt` to avoid a conflict with dVRK
+* Deprecated features:
+  * Removed FLTK support
+  * CMake: removed the legacy cisst CMake macros; use target-based dependency propagation instead
+* New features:
+  * CMake:
+    * Requires CMake 3.16 or later
+    * Added Qt6 support and improved Qt, JSON, CppUnit, pkg-config, and exported-target configuration
+    * SI units are enabled by default
+  * cisstCommon: added data-function support for `std::set`
+  * cisstInteractive: added support for a Jupyter kernel started from embedded Python
+  * cisstMultiTask:
+    * Added a Qt component viewer using QtNodes and Graphviz for automatic layout
+    * Added interface and component tags for component-viewer filtering
+    * Added `mtsManagerLocal::DeleteInstance` to support sequential singleton lifetimes in test scenarios
+    * Added `mtsTaskContinuous::CreatesThread` and `DeleteCompletionCommand`
+  * Documentation:
+    * Migrated documentation from the GitHub wiki to Read the Docs
+    * Added cisstMultiTask design documentation and an active SAW-component list
+* Bug fixes:
+  * cisstMultiTask: fixed races in `mtsFunction` classes and observer removal
+  * CMake: fixed package configuration, external-project include-directory creation, and cisstMesh example configuration
+  * Tests and CI: improved test diagnostics and reliability, including Python 3.13 and Windows support
+
 1.4.0 (2026-01-07)
 ==================
 
