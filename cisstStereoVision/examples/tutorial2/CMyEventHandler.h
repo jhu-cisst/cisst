@@ -3,6 +3,7 @@
 #ifndef _CMyEventHandler_h
 #define _CMyEventHandler_h
 
+// [doc-handler-h-start]
 #include <cisstStereoVision/svlWindowManagerBase.h>
 
 class CMyEventHandler : public svlWindowEventHandlerBase
@@ -16,6 +17,7 @@ private:
     svlRect ROI;
     bool LMouseButtonPressed;
 };
+// [doc-handler-h-end]
 
 
 #endif // _CMyEventHandler_h

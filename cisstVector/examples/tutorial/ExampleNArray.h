@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// [doc-example-start]
 void ExampleNArray(void) {
     // Define a working volume and index types
     typedef vctDynamicNArray<unsigned short, 3> InputVolumeType;
@@ -84,3 +85,4 @@ void ExampleNArray(void) {
 	std::cerr << "Exception occured: " << Exception.what() << std::endl;
     }
 }
+// [doc-example-end]

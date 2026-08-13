@@ -34,6 +34,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     cmnLogger::SetMaskClass("counter", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClass("user", CMN_LOG_ALLOW_ALL);
 
+    // [doc-main-start]
     // component manager is a singleton
     mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
 
@@ -69,6 +70,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 
     delete counterPointer;
     delete userPointer;
+    // [doc-main-end]
 
     // stop all logs
     cmnLogger::SetMask(CMN_LOG_ALLOW_NONE);

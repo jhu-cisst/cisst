@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2008-09-23
 
-  (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -41,8 +41,6 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT mtsTaskContinuous: public mtsTask
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-
-    friend class mtsComponentManager;
 
 public:
     typedef mtsTask BaseType;
@@ -122,6 +120,11 @@ public:
 
     /*! End the task */
     void Kill(void) override;
+
+    /********************* Other Methods *****************/
+
+    /*! Returns true if task creates its own thread */
+    virtual bool CreatesThread(void) const { return NewThread; }
 };
 
 

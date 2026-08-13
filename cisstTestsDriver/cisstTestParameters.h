@@ -2,12 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
   Author(s):  Anton Deguet, Ofri Sadowsky
   Created on: 2003-11-10
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -39,13 +37,15 @@ private:
     int NumTestIterations;
     TestRunModeType TestRunMode;
     std::string ProgramName;
+    bool Verbose;
 
 public:
     cisstTestParameters():
         TestNames(),
         NumTestInstances(1),
         NumTestIterations(1),
-        TestRunMode(PRINT_HELP)
+        TestRunMode(PRINT_HELP),
+        Verbose(false)
     {}
 
     void ParseCmdLine(int argc, const char * argv[]);
@@ -72,6 +72,10 @@ public:
 
     std::string GetProgramName(void) const {
         return ProgramName;
+    }
+
+    bool GetVerbose(void) const {
+        return Verbose;
     }
 
     static int PrintHelp(const char * programName);

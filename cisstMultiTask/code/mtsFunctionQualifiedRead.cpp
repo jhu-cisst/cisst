@@ -4,7 +4,7 @@
 /*
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,6 +34,7 @@ mtsFunctionQualifiedRead::~mtsFunctionQualifiedRead()
 bool mtsFunctionQualifiedRead::Detach(void) {
     if (this->IsValid()) {
         Command = 0;
+        DeleteCompletionCommand();
         return true;
     }
     return false;
@@ -62,10 +63,10 @@ mtsExecutionResult mtsFunctionQualifiedRead::ExecuteGeneric(const mtsGenericObje
     }
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
-    CompletionCommand->PrepareToWait();
+    CompletionCommand->PrepareToWait(argument);
     mtsExecutionResult executionResult = Command->Execute(qualifier, argument, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
-        executionResult = WaitForResult(argument);
+        executionResult = WaitForResult();
     CompletionCommand->ClearWait();
     return executionResult;
 }

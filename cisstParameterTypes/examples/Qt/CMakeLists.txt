@@ -1,6 +1,5 @@
 #
-#
-# (C) Copyright 2009-2012 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -22,15 +21,14 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon
 
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
-if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
   add_executable (prmExQt
                   TestComponent.h
                   TestComponent.cpp
                   main.cpp)
   set_property (TARGET prmExQt PROPERTY FOLDER "cisstParameterTypes/examples")
-  cisst_target_link_libraries (prmExQt ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (prmExQt ${REQUIRED_CISST_LIBRARIES})
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

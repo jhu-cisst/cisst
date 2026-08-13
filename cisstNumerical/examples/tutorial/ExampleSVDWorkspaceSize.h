@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleSVDWorkspaceSize(void) {
     const unsigned int size = 6;
     // create the input matrix with the correct size
@@ -7,6 +8,7 @@ void ExampleSVDWorkspaceSize(void) {
     workspace.SetSize(nmrSVDDynamicData::WorkspaceSize(A));
     // Allocate U, Vt, S and use the workspace for nmrSVD ...
 }
+// [doc-example-end]
 
 void ExampleSVDEconomyWorkspaceSize(void) {
     const unsigned int sizerows = 20;

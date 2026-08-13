@@ -1,0 +1,1056 @@
+%
+% $Id: vector-quicksheet.tex 75 2009-02-24 16:47:20Z adeguet1 $
+%
+% Author: Anton Deguet
+%
+
+\documentclass[letterpaper,10pt]{article}
+
+\usepackage{html}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\newcommand{\doctitle}{ERC CISST Software\\cisstVector Quick-Sheet}
+\newcommand{\docauthor}{Anton Deguet}
+\newcommand{\docdate}{$ $Date: 2006/11/21 21:21:53 $ $}
+\newcommand{\docrev}{$ $Revision: 1.18 $ $}
+
+
+\newcommand{\doublehlinefour}{\hline & & & \\ [-10pt] \hline}
+\newcommand{\doublehlinethree}{\hline & & \\ [-10pt] \hline}
+
+
+\pagestyle{empty}
+
+\addtolength{\hoffset}{-1.3in}
+\addtolength{\textwidth}{2.6in}
+\addtolength{\voffset}{-1.2in}
+\addtolength{\textheight}{2.4in}
+
+
+\long\def\symbolfootnotemark[#1]{
+  \begingroup
+  \def\thefootnote{\fnsymbol{footnote}}
+  \footnotemark[#1]
+  \endgroup
+}
+
+\long\def\symbolfootnotetext[#1]#2{
+  \begingroup
+  \def\thefootnote{\fnsymbol{footnote}}
+  \footnotetext[#1]{#2}
+  \endgroup
+}
+
+
+\begin{document}
+
+\small
+
+\begin{center}
+  
+  \begin{tabular}{p{5.5in}p{1.5in}}
+    \large \bf
+    \texttt{cisstVector}: Vectors and matrices quick sheet (part 1 of 4) & {\tiny \textsf{\docrev - \docdate}}
+  \end{tabular}
+  
+  \begin{tabular}{|p{0.7in}|p{3.5in}|p{2.6in}|}
+    
+    \hline
+    &
+        {\bf Code}\symbolfootnotemark[2] &
+        {\bf Description} \\
+        \doublehlinethree
+        
+        
+        % --- User types ---
+        Classes \newline
+        and typedefs
+        &
+        \texttt{vctFixedSizeVector<\_elementType, \_size>} \newline
+        - \texttt{vctDouble1} \texttt{vctDouble2} \texttt{vctDouble3} \texttt{vctDouble4} \ldots \newline
+        - \texttt{vct1} \texttt{vct2} \texttt{vct3} \texttt{vct4} \texttt{vct5} \texttt{vct6} \ldots \newline
+        - \texttt{vctFloat1} \texttt{vctFloat2} \texttt{vctFloat3} \texttt{vctFloat4} \texttt{vctFloat5} \ldots \newline
+        - \texttt{vctInt1} \texttt{vctInt2} \texttt{vctInt3} \texttt{vctInt4} \texttt{vctInt5} \texttt{vctInt6} \ldots \newline
+        - \texttt{vctChar1} \texttt{vctChar2} \texttt{vctChar3} \texttt{vctChar4} \texttt{vctChar5} \ldots
+        &
+        Fixed size vector \newline
+        \ldots of \texttt{double}s \newline
+        \ldots of \texttt{double}s (implicit) \newline
+        \ldots of \texttt{float}s \newline
+        \ldots of \texttt{int}s \newline
+        \ldots of \texttt{char}s
+        \\
+        \cline{2-3}
+        &
+        \texttt{vctFixedSizeMatrix<\_elementType, \_rows, \_cols>} \newline
+        - \texttt{vctDouble2x2} \texttt{vctDouble3x3} \texttt{vctDouble2x3} \ldots \newline
+        - \texttt{vct2x2} \texttt{vct3x3} \texttt{vct4x4} \texttt{vct2x3} \texttt{vct2x4} \texttt{vct3x4} \ldots \newline
+        - \texttt{vctFloat2x2} \texttt{vctFloat3x3} \texttt{vctFloat4x4} \texttt{vctFloat3x2} \ldots \newline
+        - \texttt{vctInt2x2} \texttt{vctInt3x3} \texttt{vctInt4x4} \texttt{vctInt3x4} \ldots \newline
+        \texttt{vctFixedSizeMatrix<\_elementType, \_rows, \_cols, \_order>} \newline
+        - \texttt{vctFixedSizeMatrix<double, 3, 3, VCT\_ROW\_MAJOR> m1;} \newline
+        - \texttt{vctFixedSizeMatrix<double, 3, 3, VCT\_COL\_MAJOR> m2;}
+        &
+        Fixed size matrix \newline
+        \ldots of \texttt{double}s \newline
+        \ldots of \texttt{double}s (implicit) \newline
+        \ldots of \texttt{float}s \newline
+        \ldots of \texttt{int}s \newline
+        With specific storage order \newline
+        - row major\symbolfootnotemark[4] (default, $\simeq$ \texttt{vct3x3}) \newline
+        - col major (Fortran like)
+        \\
+        \cline{2-3}
+        &
+        \texttt{vctDynamicVector<\_elementType>} \newline
+        - \texttt{vctDoubleVec}, \texttt{vctVec} \newline
+        - \texttt{vctFloatVec}, \texttt{vctIntVec}
+        &
+        Dynamic vector \newline
+        \ldots of \texttt{double}s, \texttt{double}s (implicit) \newline
+        \ldots of \texttt{float}s, \texttt{int}s
+        \\
+        \cline{2-3}
+        &
+        \texttt{vctDynamicMatrix<\_elementType>} \newline
+        - \texttt{vctDoubleMat}, \texttt{vctMat} \newline
+        - \texttt{vctFloatMat}, \texttt{vctIntMat}
+        &
+        Dynamic matrix \newline
+        \ldots of \texttt{double}s, \texttt{double}s (implicit) \newline
+        \ldots of \texttt{float}s, \texttt{int}s
+        \\
+        \doublehlinethree
+        Constructors
+        &
+        \texttt{vct4 v1;} \newline
+        \texttt{vct4 v2(0.0); vct4 v3(0.1, 0.2, 0.3, 0.4);} \newline
+        \texttt{vct4 v4(v1);}
+        &
+        Default constructor (undefined content) \newline
+        Assign values, all or individually \newline
+        Copy constructor (copy elements)
+        \\
+        \cline{2-3}
+        &
+        \texttt{vct2x2 m1;} \newline
+        \texttt{vct2x2 m2(0.0); vct2x2 m3(0.1, 0.2, 0.3, 0.4);} \newline
+        \texttt{vct2x2 m4(m1);}
+        &
+        Default constructor (undefined content) \newline
+        Assign values, all or individually (by rows) \newline
+        Copy constructor (copy elements)
+        \\
+        \cline{2-3}
+        &
+        \texttt{vctVec v1;} \newline
+        \texttt{vctVec v2(12);} \newline
+        \texttt{vctVec v3(2, 0.0); vctVec v4(2, 0.1, 0.2);} \newline
+        \texttt{vctVec v5(v1);}
+        &
+        Default constructor, size is zero \newline
+        Set size (undefined content) \newline
+        Set size \& assign values, all or individually \newline
+        Copy constructor (copy elements)
+        \\
+        \cline{2-3}
+        &
+        \texttt{vctMat m1;} \newline
+        \texttt{vctMat m2(12, 7);} \newline
+        \texttt{vctMat m3(6, 4, VCT\_ROW\_MAJOR);} \newline
+        \texttt{vctMat m4(5, 7, VCT\_COL\_MAJOR);} \newline
+        \texttt{vctMat m5(2, 3, 0.0);} \newline
+        \texttt{vctMat m6(3, 5, 0.0, VCT\_ROW\_MAJOR);} \newline
+        \texttt{vctMat m7(2, 3, 0.0, VCT\_COL\_MAJOR);} \newline
+        \texttt{vctMat m8(2, 2, 0.1, 0.2, 0.3, 0.4);} \newline
+        \texttt{vctMat m9(m4);}
+        &
+        Default constructor, size is zero \newline
+        Set size; rows and colums (undefined content) \newline
+        Set size and row major\symbolfootnotemark[4] (undefined content) \newline
+        Set size and column major (undefined content) \newline
+        Set size \& assign value to all \newline
+        Set size, row major\symbolfootnotemark[4] \& assign value to all \newline
+        Set size, column major \& assign value to all \newline
+        Set size and assign values by rows \newline
+        Copy constructor (copy elements)
+        \\
+        \doublehlinethree
+
+        % --- Assignements ---
+        Assignments
+        &
+        \texttt{c1.Assign(c2); c1 = c2}
+        &
+        Assign from similar container \\
+        \cline{2-3}
+        & 
+        \texttt{c.Assign(s0, s1, s2, ...)} \newline
+        e.g.: \texttt{v.Assign((double)0, 1.3, .34, 0.0);}
+        &
+        Assign from multiple variables using \texttt{va\_arg}\newline
+        \emph{Input must be explicitly cast to element type!} \\
+        \cline{2-3}
+        &
+        \texttt{c.SetAll(value); c = value;} \newline
+        \texttt{vctRandom(c, s\_min, s\_max;})
+        &
+        Assign \texttt{value} to all elements \newline
+        Fill with random values in $[s_{min}, s_{max}]$\\
+        \cline{2-3}
+        &
+        \texttt{bool succeeded = c1.FastCopyOf(c2);} \newline
+        \texttt{bool succeeded = c1.FastCopyOf(c2, false);}
+        &
+        Shallow copy using \texttt{memcpy}\symbolfootnotemark[7] \newline
+        Shallow copy without safety checks
+        \\
+        \doublehlinethree
+        Identity \newline
+        (Eye for $I$)
+        &
+        \texttt{MatrixType::Eye()} \newline
+        - \texttt{vct4x4 m = vct4x4::Eye();} \newline
+        - \texttt{vctInt3x3 m = vctFixedSizeMatrix<int, 3, 3>::Eye();} \newline
+        - \texttt{vctMat m = vctMat::Eye(9); } \newline
+        - \texttt{vctIntMat = vctDynamicMatrix<int>::Eye(6); }
+        &
+        \texttt{Eye} for dynamic \& fixed size matrices using:\newline
+        - fixed size matrix typedef \newline
+        - fixed size matrix class definition \newline
+        - dynamic matrix typedef and dimension ($9\times9$) \newline
+        - dynamic matrix class definition ($6\times6$)
+        \\
+        \hline
+
+    \end{tabular}
+  \end{center}
+
+  \symbolfootnotetext[2]{\texttt{v} is for vector, \texttt{m} for
+    matrix, \texttt{c} for a container (either vector or matrix) and
+    \texttt{s} is for scalar.}
+
+  \symbolfootnotetext[4]{\texttt{VCT\_ROW\_MAJOR} is the default for
+    fixed size and dynamic matrices.  Use \texttt{VCT\_COL\_MAJOR} to
+    store by column.}
+
+  \symbolfootnotetext[7]{\texttt{FastCopyOf} fails and returns
+    \texttt{false} if the containers are not compact or don't have the
+    same memory layout (storage order).}
+
+
+
+  \newpage
+
+
+  \begin{center}
+
+    \begin{tabular}{p{5.5in}p{1.5in}}
+      \large \bf
+      \texttt{cisstVector}: Vectors and matrices quick sheet (part 2 of 4) & {\tiny \textsf{\docrev - \docdate}}
+    \end{tabular}
+
+    \begin{tabular}{|p{1.1in}|p{3.1in}|p{2.6in}|}
+      
+      \hline
+          &
+          {\bf Code} &
+          {\bf Description} \\
+          \doublehlinethree
+
+          % --- Types ---
+          Member \newline
+          typedefs \newline
+          (STL like)
+          &
+          \texttt{ContainerType::size\_type size;} \newline
+          \texttt{ContainerType::index\_type index;} \newline
+          \texttt{ContainerType::stride\_type stride;} \newline
+          \texttt{ContainerType::value\_type element;} \newline
+          \texttt{ContainerType::reference ref;} \newline
+          \texttt{ContainerType::const\_reference constRef;} \newline
+          \texttt{ContainerType::pointer ptr;} \newline
+          \texttt{ContainerType::const\_pointer constPtr;} \newline
+          \texttt{ContainerType::NormType norm;} \newline
+          \texttt{ContainerType::AngleType angle;}
+          &
+          Size type (\texttt{unsigned int})\newline
+          Index type (\texttt{unsigned int})\newline
+          Stride type (\texttt{int}) \newline
+          Type of contained elements \newline
+          Reference on element (\texttt{value\_type \&}) \newline
+          Const reference (\texttt{const value\_type \&}) \newline
+          Pointer on element (\texttt{value\_type *}) \newline
+          Const pointer (\texttt{const value\_type *}) \newline
+          Norm type (\texttt{double}) \newline
+          Angle type (\texttt{double})
+          \\
+          \doublehlinethree
+
+          % --- Iterators ---
+          Iterators \newline
+          (STL like)
+          &
+          \texttt{ContainerType::iterator iter;} \newline
+          \texttt{ContainerType::const\_iterator iter;} \newline
+          \texttt{ContainerType::reverse\_iterator iter;} \newline
+          \texttt{ContainerType::const\_reverse\_iterator iter;} \newline
+          \texttt{iter = c.begin(); iter = c.end();} \newline
+          \texttt{iter = c.rbegin(); iter = c.rend();}
+          &
+          Iterator type \newline
+          Const iterator type \newline
+          Reverse iterator type \newline
+          Const reverse iterator type\newline
+          Iterator on first/last element \newline
+          Reverse iterator on last/first element
+          \\
+          \doublehlinethree
+
+          % --- Size and stride ---
+          Memory layout
+          &
+          \texttt{size = c.size();} \newline
+          \texttt{nbRows = m.rows(); nbCols = m.cols();} \newline
+          \texttt{b = c.empty();} \newline
+          \texttt{b = m.IsSquare();} \newline
+          \texttt{b = m.IsSquare(5);} 
+          &
+          Length for vectors, rows $\times$ cols for matrices\newline
+          Number of rows/columns \newline
+          Test if size is zero \newline
+          Test if matrix is square \newline
+          Test if square matrix of a given size (e.g. 5)
+          \\
+          \cline{2-3}
+          &
+          \texttt{stride = v.stride();} \newline
+          \texttt{rowStride = m.row\_stride();} \newline
+          \texttt{colStride = m.col\_stride();}
+          &
+          Stride between elements \newline
+          Stride between rows \newline
+          Stride between columns
+          \\
+          \cline{2-3}
+          &
+          \texttt{ptr = c.Pointer();} \newline
+          \texttt{ptr = v.Pointer(i);} \newline
+          \texttt{ptr = m.Pointer(row, col);}
+          &
+          Pointer on first element \newline
+          Pointer on $i^{th}$ vector element \newline
+          Pointer on $[row,col]$ matrix element
+          \\
+          \hline
+
+          % --- Index tests ---
+          Test indices
+          &
+          \texttt{bool b = c.ValidIndex(index);} \newline
+          \texttt{bool b = m.ValidIndex(row, col);} \newline
+          \texttt{bool b = m.ValidRowIndex(row);} \newline
+          \texttt{bool b = m.ValidColIndex(col);}
+          &
+          Index is lesser or equal to size \newline
+          Both row and column indices are correct \newline
+          Row index is valid \newline
+          Column index is valid
+          \\
+          \hline
+
+          % --- Storage types ---
+          Storage  &  \texttt{bool b = m.IsRowMajor();} & 
+          Stored row first (C/C++ like - default) \\
+          & \texttt{bool b = m.IsColMajor();} &
+          Stored column first (Fortran like) \\
+          & \texttt{bool b = m.IsCompact();} &
+          Uses a compact block of memory , i.e., all elements are in
+          one contiguous block. \\
+          & \texttt{bool b = m.IsFortran();} &
+          Both compact and column major \\
+          & \texttt{bool storageOrder = m.StorageOrder();}
+          & Returns storage order ({\tt true} for row major, {\tt false}
+          for column major) \\
+          \doublehlinethree
+
+          % --- Size modification ---
+          Dynamic vector\newline
+          resizing
+          &
+          \texttt{v.SetSize(newSize);} \newline
+          \texttt{v.resize(newSize);}
+          &
+          Destructive size change \newline
+          Non destructive size change
+          \\
+          \hline
+          Dynamic matrix\newline
+          resizing
+          &
+          \texttt{m.SetSize(rows, cols, storageOrder);} \newline
+          \texttt{m.resize(rows, cols);}
+          &
+          Destructive size change \newline
+          Non destructive size change
+          \\
+          \doublehlinethree
+
+          % --- Vector access ---
+          Access vector parts
+          &
+          \texttt{v.X() = x; y = v.Y(); v.Z() = z; w = v.W();} 
+          &
+          Access elements by name \\
+          &
+          \texttt{v.XY() = v2; v3 = v.XYZ(); v4 = v.XYZW();}
+          &
+          Access subvectors by name \\
+          &
+          \texttt{v.XZ(); v.XW(); v.YZ(); v.YW(); v.ZW(); v.YZW()};
+          &
+          Access subvectors other than ``head'' \\
+          \hline
+
+          % --- Matrix access ---
+          Access matrix parts
+          &
+          \texttt{v = m.Row(index); v = m.Column(index); } \newline
+          \texttt{v = m.Diagonal(); mt = m.TransposeRef(); }
+          &
+          Reference to a given row/column \newline
+          Reference to the diagonal/transpose
+          \\
+          \doublehlinethree
+
+          % --- Matrix permutations ---
+          Matrix \newline
+          permutations
+          &
+          \texttt{m.ExchangeRows(r1, r2); } \newline
+          \texttt{m.ExchangeColumns(c1, c2);}
+          &
+          Swap the values between two rows/columns
+          \\
+          \doublehlinethree
+
+          % --- Tests ---
+          Elementwise tests
+          &
+          \texttt{b = c.IsPositive();} \newline
+          \texttt{b = c.IsNonNegative();} \newline
+          \texttt{b = c.IsNegative();} \newline
+          \texttt{b = c.IsNonPositive();} \newline
+          \texttt{b = c.All();} \newline
+          \texttt{b = c.Any();}
+          &
+          All elements are greater than zero \newline
+          All elements are greater than or equal to zero \newline
+          All elements are lesser than zero \newline
+          All elements are lesser than or equal to zero \newline
+          All elements are different from zero \newline
+          At least one element is different from zero
+          \\
+          \doublehlinethree
+
+          % --- IO ---
+          Formatted output
+          &
+          \texttt{std::string s = c.ToString();} \newline
+          \texttt{std::cout << c; c.ToStream(std::cout);}
+          &
+          Output to \texttt{std::string} \newline
+          Output to a C++ stream
+          \\
+          \hline
+          
+    \end{tabular}
+  
+  \end{center}
+
+
+
+  \newpage
+
+
+
+
+\begin{center}
+  
+  \begin{tabular}{p{5.5in}p{1.5in}}
+    \large \bf
+    \texttt{cisstVector}: Vectors and matrices quick sheet (part 3 of 4) & {\tiny \textsf{\docrev - \docdate}}
+  \end{tabular}
+    
+    \begin{tabular}{|p{0.6in}|p{1.9in}|p{3.1in}|p{1.3in}|}
+      
+      \hline
+          {\bf } &
+          {\bf Description} &
+          {\bf Method} or {\bf Function}\symbolfootnotemark[2] &
+          {\bf Operator}\\
+          \doublehlinefour
+          
+% --- Addition ---
+          $+$
+          &
+          Addition
+          &
+          \texttt{c.SumOf(c1, cs2);} \newline
+          \texttt{c.Add(cs1);}
+          &
+          \texttt{c = c1 + cs2;} \newline
+          \texttt{c += cs1;}
+          \\
+          \hline
+          
+% --- Subtraction ---
+          $-$ \newline
+          &
+          Subtraction \newline
+          &
+          \texttt{c.DifferenceOf(c1, cs2);} \newline
+          \texttt{c.Subtract(cs1);}
+          &
+          \texttt{c = c1 - cs2;} \newline
+          \texttt{c -= cs1;}
+          \\
+          \doublehlinefour
+
+% --- Product ---
+          $\times$
+          &
+          Container scalar multiplication
+          &
+          \texttt{c1.ProductOf(c2, s);} \newline
+          \texttt{c1.ProductOf(s, c2);} \newline
+          \texttt{c.Multiply(s1);}
+          &
+          \texttt{c1 = c2 * s;} \newline
+          \texttt{c1 = s * c2;} \newline
+          \texttt{c *= s1;}
+          \\
+          \cline{2-4}
+
+          &
+          Matrix vector multiplication \newline
+          &
+          \texttt{v2.ProductOf(m, v1);} \newline
+          \texttt{v2.ProductOf(v1, m);}
+          &
+          \texttt{v2 = m * v1;} \newline
+          \texttt{v2 = v1 * m;}
+          \\
+          \cline{2-4}
+
+          &
+          Matrix matrix multiplication\symbolfootnotemark[4]
+          &
+          \texttt{m.ProductOf(m1, m2);}
+          &
+          \texttt{m = m1 * m2;}
+          \\
+          \cline{2-4}
+          
+          &
+          Vector outer product
+          &
+          \texttt{m.OuterProductOf(v1, v2);}
+          &
+          \\
+          \cline{2-4}
+
+          &
+          Elementwise multiplication \newline
+          $c_1[i] = c_2[i] * c_3[i]$ and $c_1[i] *= c_2[i]$
+          &
+          \texttt{c1.ElementwiseProductOf(c2, c3);} \newline
+          \texttt{c1.ElementwiseMultiply(c2);}
+          &
+          \\
+          \hline
+
+% --- Ratio ---
+          $\div$
+          &
+          Container scalar division
+          &
+          \texttt{c1.RatioOf(c2, s);} \newline
+          \texttt{c.Divide(s);}
+          &
+          \texttt{c1 = c2 / s;} \newline
+          \texttt{c /= s;}
+          \\
+          \cline{2-4}
+
+          &
+          Elementwise division \newline
+          $c_1[i] = c_2[i] / c_3[i]$ and $c_1[i] /= c_2[i]$
+          &
+          \texttt{c1.ElementwiseRatioOf(c2, c3);} \newline
+          \texttt{c1.ElementwiseDivide(c2);}
+          &
+          \\
+          \hline
+
+% --- Cross Product ---
+          $\times$ $\wedge$
+          &
+          Cross product (size 3 only) \newline
+          \texttt{\%} operator has high precedence
+          &
+          \texttt{v1.CrossProductOf(v2, v3);} \newline
+          \texttt{v1 = vctCrossProduct(v2, v3);}
+          &
+          \texttt{v1 = v2 \% v3;}
+          \\
+          \hline
+          
+% --- Dot Product ---
+          $\circ$ $\bullet$
+          &
+          Dot product (inner product)
+          &
+          \texttt{s = v1.DotProduct(v2);} \newline
+          \texttt{s = vctDotProduct(v1, v2);}
+          &
+          \texttt{s = v1 * v2;}
+          \\
+          \hline
+
+% --- Accumulation ---
+          $+\times$
+          &
+          Accumulation
+          &
+          \texttt{c2.AddProductOf(s, c1);}
+          &
+          \texttt{c2 += (s * c1);}
+          \\
+          \doublehlinefour
+
+% --- Compare --
+          $=$ \newline \newline
+          $\neq$ \newline \newline
+          $\simeq$
+          &
+          Equal \newline
+          \newline
+          Not equal \newline
+          \newline
+          Approximately equal
+          &
+          \texttt{b = c1.Equal(cs2);} \newline
+          \texttt{cb = c1.ElementwiseEqual(cs2);} \newline
+          \texttt{b = c1.NotEqual(c2);} \newline
+          \texttt{cb = c1.ElementwiseNotEqual(c2);} \newline
+          \texttt{b = c1.AlmostEqual(c2, tolerance);}
+          &
+          \texttt{b = (c1 == cs2);} \newline \newline
+          \texttt{b = (c1 != cs2);}
+          \\
+          \hline
+          
+          $<$ \newline \newline
+          $\leq$
+          &
+          Lesser \newline \newline
+          Lesser or equal
+          &
+          \texttt{b = c1.Lesser(cs2);} \newline
+          \texttt{cb = c1.ElementwiseLesser(cs2);} \newline
+          \texttt{b = c1.LesserOrEqual(cs2);} \newline
+          \texttt{cb = c1.ElementwiseLesserOrEqual(cs2);}
+          &
+          \\
+          \hline
+
+          $>$ \newline \newline
+          $\geq$
+          &
+          Greater \newline \newline
+          Greater or equal
+          &
+          \texttt{b = c1.Greater(cs2);} \newline
+          \texttt{cb = c1.ElementwiseGreater(cs2);} \newline
+          \texttt{b = c1.GreaterOrEqual(cs2);} \newline
+          \texttt{cb = c1.ElementwiseGreaterOrEqual(cs2);}
+          &
+          \\
+          \doublehlinefour
+
+          $min(c_i, u)$ \newline \newline \newline
+          $max(c_i, l)$
+          &
+          Clip above \underline{u}pper bound \newline \newline \newline
+          Clip below \underline{l}ower bound
+          &
+          \texttt{c.ClipAbove(s);} \newline
+          \texttt{c2.ClippedAboveOf(c1, s);} \newline
+          \texttt{c2.ClippedAboveOf(s, c1);} \newline
+          \texttt{c.ClipBelow(s);} \newline
+          \texttt{c2.ClippedBelowOf(c1, s);} \newline
+          \texttt{c2.ClippedBelowOf(s, c1);}
+          &
+          \\
+          \hline
+
+
+    \end{tabular}
+  
+  \end{center}
+
+  \symbolfootnotetext[2]{Operand types: \texttt{b} boolean, \texttt{s}
+    scalar, \texttt{v} vector, \texttt{m} matrix, \texttt{c} container
+    (\texttt{v} or \texttt{m}), \texttt{cs} container \emph{or}
+    scalar, \texttt{cb} container of booleans.}
+  
+  \symbolfootnotetext[4]{Verifies that output base pointer is
+    different from input pointers, throws \texttt{std::runtime\_error}
+    otherwise.}
+
+  \newpage
+
+
+
+
+\begin{center}
+  
+  \begin{tabular}{p{5.5in}p{1.5in}}
+    \large \bf
+    \texttt{cisstVector}: Vectors and matrices quick sheet (part 4 of 4) & {\tiny \textsf{\docrev - \docdate}}
+  \end{tabular}
+    
+    \begin{tabular}{|p{0.6in}|p{1.9in}|p{3.1in}|p{1.3in}|}
+
+      \hline
+          {\bf } &
+          {\bf Description} &
+          {\bf Method} or {\bf Function}\symbolfootnotemark[2] &
+          {\bf Operator}\\
+          \doublehlinefour
+
+% --- Norms ---
+          $\|c\|_2$ \newline
+          $\|c\|_2^2$ \newline
+          $\|c\|_1$ \newline
+          $\|c\|_\infty$ \newline
+          $\sum_i c[i]$ \newline
+          $\prod_i c[i]$ \newline
+          $\sum_i m[i,i]$ \newline
+          $\min_i c[i]$ \newline
+          $\max_i c[i]$ \newline
+          $\min_i |c[i]|$ \newline
+          $\max_i |c[i]|$
+          &
+          $\ell_2$ norm \newline
+          $\ell_2$ norm square \newline
+          $\ell_1$ norm \newline
+          $\ell_\infty$ norm \newline
+          Sum of elements \newline
+          Product of elements \newline
+          Trace \newline
+          Minimum \newline
+          Maximum \newline
+          Minimum of absolute values \newline
+          Maximum of absolute values \newline
+          Minimum and maximum
+          &
+          \texttt{s = c.Norm();} \newline
+          \texttt{s = c.NormSquare();} \newline
+          \texttt{s = c.L1Norm();} \newline
+          \texttt{s = c.LinfNorm();} \newline
+          \texttt{s = c.SumOfElements();} \newline
+          \texttt{s = c.ProductOfElements();} \newline
+          \texttt{s = m.Trace();} \newline
+          \texttt{s = c.MinElement();} \newline
+          \texttt{s = c.MaxElement();} \newline
+          \texttt{s = c.MinAbsElement();} \newline
+          \texttt{s = c.MaxAbsElement();} \newline
+          \texttt{c.MinAndMaxElement(s\_min, s\_max);}
+          &
+          \\
+          \hline
+          
+% --- Normalization ---
+          $c/\|c\|$
+          &
+          Normalization
+          &
+          \texttt{c.NormalizedSelf(); b = c.IsNormalized();} \newline
+          \texttt{c2.NormalizedOf(c1); c2 = c1.Normalized();}
+          &
+          \texttt{c /= c.Norm();}
+          \\
+          \doublehlinefour
+
+% --- Absolute value ---
+          $|c_i|$
+          &
+          Elementwise absolute values
+          &
+          \texttt{c.AbsSelf(); c2.AbsOf(c1); c2 = c1.Abs();}
+          &
+          \\
+          \hline
+
+% --- Floor ---
+          $\lfloor c_i \rfloor$
+          &
+          Elementwise floor
+          &
+          \texttt{c.FloorSelf(); c2.FloorOf(c1); c2 = c1.Floor();}
+          &
+          \\
+          \hline
+
+% --- Ceil ---
+          $\lceil c_i \rceil$
+          &
+          Elementwise ceil
+          &
+          \texttt{c.CeilSelf(); c2.CeilOf(c1); c2 = c1.Ceil();}
+          &
+          \\
+          \hline
+
+% --- Negation ---
+          $-$
+          &
+          Negation
+          &
+          \texttt{c.NegationSelf();} \newline
+          \texttt{c2.NegationOf(c1); c2 = c1.Negation();}
+          &
+          \ \newline
+          \texttt{c2 = -c1;}
+          \\
+          \doublehlinefour
+
+% --- Element Access ---
+          $v_i$ \newline
+          &
+          Access vector elements \newline
+          &
+          \texttt{s = v.Element(i);} \newline
+          \texttt{s = v.at(i);}\symbolfootnotemark[5]
+          &
+          \texttt{s = v[i];} \newline
+          \texttt{s = v(i);}\symbolfootnotemark[5]
+          \\
+          \hline
+
+          $m_{i,j}$
+          &
+          Access matrix elements
+          &
+          \texttt{s = m.Element(row,col);} \newline
+          \texttt{s = m.at(row, col);}\symbolfootnotemark[5] \newline
+          \texttt{v = m.Row(row);} \newline
+          \texttt{v = m.Column(col);}
+          \texttt{v = m.Diagonal();}
+          &
+          \texttt{s = m[row][col];} \newline
+          \texttt{s = m(row, col);}\symbolfootnotemark[5] \newline
+          \texttt{v = m[row];} 
+          \\
+          \hline
+
+    \end{tabular}
+    
+  \end{center}
+ 
+  \symbolfootnotetext[2]{Operand types: \texttt{b} boolean, \texttt{s}
+    scalar, \texttt{v} vector, \texttt{m} matrix, \texttt{c} container
+    (\texttt{v} or \texttt{m}), \texttt{cs} container \emph{or}
+    scalar, \texttt{cb} container of booleans.}
+  
+  \symbolfootnotetext[5]{Performs a bound check and throws
+    \texttt{std::out\_of\_range} if necessary.}
+
+
+
+
+  \newpage
+
+  \begin{center}
+
+    \begin{tabular}{p{5.5in}p{1.5in}}
+      \large \bf
+      \texttt{cisstVector}: Transformations quick sheet & {\tiny \textsf{\docrev - \docdate}}
+    \end{tabular}
+
+    \begin{tabular}{|p{1.2in}|p{3.2in}|p{2.4in}|}
+      
+      \hline
+          &
+          {\bf Code} &
+          {\bf Description} \\
+          \doublehlinethree
+
+          % --- Constants ---
+          Global constants
+          &
+          \texttt{cmnPI}, \texttt{cmnPI\_2}, \texttt{cmnPI\_4}
+          &
+          $\pi$, $\pi / 2$ , $\pi / 4$
+          \\
+          \hline
+
+          % --- Typedefs ---
+          Typedefs for \newline
+          rotations \& \newline
+          frames
+          &
+          \texttt{vctRot2} (a.k.a. \texttt{vctMatRot2}), \texttt{vctAnRot2} \newline
+          \texttt{vctRot3} (a.k.a. \texttt{vctMatRot3}), \texttt{vctQuatRot3} \newline
+          \texttt{vctAxAnRot3}, \texttt{vctRodRot3} \newline
+          \texttt{vctFrm3} (a.k.a. \texttt{vctMatFrm3}) \newline
+          \texttt{vctQuatFrm3}
+          &
+          Matrix/angle rotation SO(2) \newline
+          Matrix/quaternion rotation SO(3) \newline
+          Axis-angle/Rodriguez rotation SO(3) \newline
+          Frame based on matrix rotation SO(3) \newline
+          Frame based on quaternion rotation SO(3)
+          \\
+          \hline
+
+          % --- Frame components ---
+          Frame components
+          &
+          \texttt{rotation = frame.Rotation();} \newline
+          \texttt{translation = frame.Translation();}
+          &
+          Rotation reference (\texttt{\&} and \texttt{const \&}) \newline
+          Translation reference (\texttt{\&} and \texttt{const \&})
+          \\
+          \hline
+
+          % --- Identity ---
+          Identity constants
+          &
+          \texttt{id = TransformationType::Identity();} \newline
+          e.g.: \texttt{vctRot3 id = vctRot3::Identity();}
+          &
+          Identity (static method per class)
+          \\
+          \hline
+
+          % --- Inversion/normalization ---
+          Inverse \& \newline
+          normalization
+          &
+          \texttt{invTr.InverseOf(tr); invTr = tr.Inverse();} \newline
+          \texttt{tr.InverseSelf();}
+          &
+          Inverse transformation
+          \\
+          \cline{2-3}
+          &
+          \texttt{norTr.NormalizedOf(tr); norTr = tr.Normalized();} \newline
+          \texttt{tr.NormalizedSelf();}
+          &
+          Normalized transformation\symbolfootnotemark[5]
+          \\
+          \cline{2-2}
+          &
+          \texttt{b = tr.IsNormalized(tolerance);}\symbolfootnotemark[8]
+          &
+          \\
+          \doublehlinethree
+
+          % --- Comparison ---
+          Equality \newline
+          \emph{See equivalence for non unique representations}
+          &
+          \texttt{b = tr1.Equal(tr2);} \newline
+          \texttt{b = (tr1 == tr2);} \newline
+          \texttt{b = tr1.AlmostEqual(tr2);}\symbolfootnotemark[8] \newline
+          \texttt{b = tr1.AlmostEqual(tr2, tolerance);}
+          &
+          Exactly equal (elementwise) \newline
+          \newline
+          Almost equal (elementwise) \newline
+          With user specified tolerance
+          \\
+          \hline
+          Equivalence \emph{across non-unique representations, such as axis-angle}
+          &
+          \texttt{b = tr1.AlmostEquivalent(tr2);}\symbolfootnotemark[8] \newline
+          \texttt{b = tr1.AlmostEquivalent(tr2, tolerance);}
+          &
+          Equivalent transformations \newline
+          With user specified tolerance
+          \\
+          \doublehlinethree
+          
+          % --- Conversion methods ---
+          Conversions \newline
+          between rotations\symbolfootnotemark[2]
+          &
+          \texttt{TypeA rotA(rotB);} \newline
+          \texttt{TypeA rotA; rotA.From(rotB);}
+          &
+          If \texttt{rotB} is normalized convert to \newline
+          \texttt{TypeA} otherwise throw an exception
+          \\
+          \cline{2-3}
+          or frames
+          &
+          \texttt{TypeA rotA(rotB, VCT\_NORMALIZE);} \newline
+          \texttt{TypeA rotA; rotA.FromNormalized(rotB);}
+          &
+          Convert to \texttt{TypeA} from a normalized \newline
+          copy of \texttt{rotB}
+          \\
+          \cline{2-3}
+          
+          &
+          \texttt{TypeA rotA(rotB, VCT\_DO\_NOT\_NORMALIZE);} \newline
+          \texttt{TypeA rotA; rotA.FromRaw(rotB);}
+          &
+          Convert to \texttt{TypeA} with neither validation \newline
+          nor modification of \texttt{rotB}
+          \\
+          \doublehlinethree
+
+          % --- Apply methods ---
+          Apply \& \newline
+          apply inverse\symbolfootnotemark[7]
+          &
+          \texttt{tr.ApplyTo(in, out);} \newline
+          \texttt{out = tr.ApplyTo(in); out = tr * in} \newline
+          \texttt{tr.ApplyInverseTo(in, out);} \newline
+          \texttt{out = tr.ApplyInverseTo(in);}
+          &
+          Apply to either a vector, a matrix or a transformation of the same type.
+          Note that the methods with \texttt{(in, out)} avoid the creation of a temporary variable.
+          \\
+
+          \hline
+
+    \end{tabular}
+  
+  \end{center}
+
+  \symbolfootnotetext[2]{\texttt{TypeA} and \texttt{TypeB} can be
+    \texttt{vctAnRot2} or \texttt{vctMatRot2} for 2D rotations and
+    \texttt{vctMatRot3}, \texttt{vctQuatRot3}, \texttt{vctAxAnRot3} or
+    \texttt{vctRodRot3} in 3D.}
+ 
+  \symbolfootnotetext[5]{The normalization methods do not modify the
+    angle of \texttt{vctAnRot2} and \texttt{vctAxAnRot3} nor
+    \texttt{vctRodRot3}.}
+
+  \symbolfootnotetext[7]{The rotations \texttt{vctAnRot2},
+    \texttt{vctAxAnRot3} and \texttt{vctRodRot3} do not support the
+    \texttt{Apply}* methods nor the operator \texttt{*}.}
+
+  \symbolfootnotetext[8]{Most methods requiring a tolerance use
+    \texttt{cmnTypeTraits<value\_type>::Tolerance()} by default.}
+
+
+\end{document}
+  

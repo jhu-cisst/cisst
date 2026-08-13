@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2011-04-03
 
-  (C) Copyright 2011-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnTokenizer.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
-#include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 
@@ -301,56 +301,55 @@ void shellTask::Configure(const std::string &)
                                                              &shellTask::WaitFor, this));
     CommandList.insert(new CommandEntryMethodStr1<shellTask>("echo", "<\"message_string\">",
                                                              &shellTask::Echo, this));
-    mtsManagerComponentServices *Manager = GetManagerComponentServices();
-    if (Manager) {
+    if (ManagerComponentServices) {
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "create", "<class_name> <component_name>",
-                               &mtsManagerComponentServices::ComponentCreate, Manager));
+                               &mtsManagerComponentServices::ComponentCreate, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr3<mtsManagerComponentServices>(
                                "create", "<process_name> <class_name> <component_name>",
-                               &mtsManagerComponentServices::ComponentCreate, Manager));
+                               &mtsManagerComponentServices::ComponentCreate, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "configure", "<component_name> <config_string>",
-                               &mtsManagerComponentServices::ComponentConfigure, Manager));
+                               &mtsManagerComponentServices::ComponentConfigure, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr3<mtsManagerComponentServices>(
                                "configure", "<process_name> <component_name> <config_string>",
-                               &mtsManagerComponentServices::ComponentConfigure, Manager));
+                               &mtsManagerComponentServices::ComponentConfigure, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr4<mtsManagerComponentServices>(
                                "connect",
                                "<component1> <component1_interface> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Connect, Manager));
+                               &mtsManagerComponentServices::Connect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr6<mtsManagerComponentServices>(
                                "connect",
                                "<process1> <component1> <component1_interface> "
                                "<process2> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Connect, Manager));
+                               &mtsManagerComponentServices::Connect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr4<mtsManagerComponentServices>(
                                "disconnect",
                                "<component1> <component1_interface> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Disconnect, Manager));
+                               &mtsManagerComponentServices::Disconnect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr6<mtsManagerComponentServices>(
                                "disconnect",
                                "<process1> <component1> <component1_interface> "
                                "<process2> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Disconnect, Manager));
+                               &mtsManagerComponentServices::Disconnect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
                                "start", "<component_name>",
-                               &mtsManagerComponentServices::ComponentStart, Manager));
+                               &mtsManagerComponentServices::ComponentStart, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "start", "<process_name> <component_name>",
-                               &mtsManagerComponentServices::ComponentStart, Manager));
+                               &mtsManagerComponentServices::ComponentStart, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
                                "stop", "<component_name>",
-                                &mtsManagerComponentServices::ComponentStop, Manager));
+                                &mtsManagerComponentServices::ComponentStop, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "stop", "<process_name> <component_name>",
-                                &mtsManagerComponentServices::ComponentStop, Manager));
+                                &mtsManagerComponentServices::ComponentStop, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
                                "load", "<file_name>",
-                                &mtsManagerComponentServices::Load, Manager));
+                                &mtsManagerComponentServices::Load, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "load", "<process_name> <file_name>",
-                                &mtsManagerComponentServices::Load, Manager));
+                                &mtsManagerComponentServices::Load, ManagerComponentServices));
     }
 }
 
@@ -565,10 +564,10 @@ bool shellTask::Connections(const std::vector<std::string> &args) const
                 // Following is same as mtsDescriptionConnection::ToStream, except that is does not
                 // stream out the mtsGenericObject base.
                 std::cout << "  (" << connection.ConnectionID << ") "
-                          << mtsManagerGlobal::GetInterfaceUID(connection.Client.ProcessName,
+                          << mtsManagerComponent::GetInterfaceUID(connection.Client.ProcessName,
                                                connection.Client.ComponentName, connection.Client.InterfaceName)
                           << " - "
-                          << mtsManagerGlobal::GetInterfaceUID(connection.Server.ProcessName,
+                          << mtsManagerComponent::GetInterfaceUID(connection.Server.ProcessName,
                                                connection.Server.ComponentName, connection.Server.InterfaceName)
                           << std::endl;
             }
@@ -661,14 +660,13 @@ bool shellTask::Viewer(void) const
 // waitfor <processName> [<componentName> [<componentState>]]
 bool shellTask::WaitFor(const std::vector<std::string> &args)
 {
-    mtsManagerComponentServices *Manager = GetManagerComponentServices();
-    if (Manager) {
+    if (ManagerComponentServices) {
         if (args.size() == 1)
-            Manager->WaitFor(args[0]);
+            ManagerComponentServices->WaitFor(args[0]);
         else if (args.size() == 2)
-            Manager->WaitFor(args[0], args[1]);
+            ManagerComponentServices->WaitFor(args[0], args[1]);
         else if (args.size() == 3)
-            Manager->WaitFor(args[0], args[1], args[2]);
+            ManagerComponentServices->WaitFor(args[0], args[1], args[2]);
         else {
             std::cout << "Syntax: waitfor processName [<componentName> [<componentState>]]" << std::endl;
             return false;
@@ -684,7 +682,7 @@ bool shellTask::Echo(const std::string &message) const
     return true;
 }
 
-// Syntax:  cisstComponentManager [global|local|ip_addr] [process_name] [-e filename] [-c commands]
+// Syntax:  cisstComponentManager [-e filename] [-c commands]
 int main(int argc, char * argv[])
 {
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
@@ -693,20 +691,7 @@ int main(int argc, char * argv[])
     // Enable system-wide thread-safe Logger
     mtsManagerLocal::SetLogForwarding(true);
 
-    mtsManagerLocal * localManager = 0;;
-
-    if ((argc < 2) || (strcmp(argv[1], "local") == 0) || (argv[1][0] == '-')) {
-        // Local configuration
-        std::string processName("ProcessShell");
-        if ((argc >= 3) && (argv[2][0] != '-'))
-            processName = argv[2];
-        // For now, ignoring processName
-        localManager = mtsManagerLocal::GetInstance();
-    }
-    else {
-        std::cout << "No network support -- set CISST_MTS_HAS_ICE via CMake" << std::endl;
-        return 1;
-    }
+    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
     shellTask *shell = new shellTask("cisstShell", argc, argv);
     localManager->AddComponent(shell);

@@ -64,18 +64,26 @@ endif ("${CISST_BINARY_DIR}" STREQUAL "")
 # set CISST_LIBRARY_DIR
 set (CISST_LIBRARY_DIR "${CISST_BINARY_DIR}/${CISST_LIBRARY_INSTALL_SUFFIX}")
 
+# set CISST_SHARE_DIR
+set (CISST_SHARE_DIR "${CISST_BINARY_DIR}/${CISST_SHARE_INSTALL_SUFFIX}")
+
 # locate cisst use file
 find_file (CISST_USE_FILE
            NAMES Usecisst.cmake
            PATHS ${CISST_CMAKE_DIRS}
            NO_DEFAULT_PATH)
 
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIRS})
+include (CMakeFindDependencyMacro)
+include (cisstMacros)
+include_directories (${CISST_INCLUDE_DIR})
+link_directories (${CISST_LIBRARY_DIR})
+
 # On Windows, CMake uses a different compiler at configuration time
 set (CISST_CMAKE_COMPILER_IS_MSVC_64 @CISST_CMAKE_COMPILER_IS_MSVC_64@)
 
 # Which libraries have been compiled
 set (CISST_LIBRARIES "@CISST_LIBRARIES@")
-set (CISST_SETTINGS "@CISST_SETTINGS@")
 set (CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@)
 
 # Build static or dynamic libraries
@@ -99,22 +107,164 @@ set (CISST_HAS_OPENGL @CISST_HAS_OPENGL@)
 set (CISST_HAS_QT @CISST_HAS_QT@)
 set (CISST_HAS_QT4 OFF)
 set (CISST_HAS_QT5 @CISST_HAS_QT5@)
+set (CISST_HAS_QT6 @CISST_HAS_QT6@)
+set (CISST_QT_VERSION @CISST_QT_VERSION@)
+set (CISST_QT_COMPONENTS "@CISST_QT_COMPONENTS@")
+set (CISST_XML_LIB "@CISST_XML_LIB@")
 set (CISST_HAS_FLTK OFF)
 set (CISST_HAS_JSON @CISST_HAS_JSON@)
 set (CISST_CATKIN_BUILT @CISST_CATKIN_BUILT@)
 set (CISST_USE_SI_UNITS @CISST_USE_SI_UNITS@)
 
-# Include settings per library
-foreach (lib ${CISST_LIBRARIES})
-  find_file (ADDITIONAL_BUILD_CMAKE
-             NAMES ${lib}Build.cmake
-             PATHS ${CISST_CMAKE_DIRS}
+# Feature metadata for optional cisstNumerical code
+set (CISST_HAS_CISSTNETLIB @CISST_HAS_CISSTNETLIB@)
+set (CISST_NMR_COMPILE_POLYNOMIALS @CISST_NMR_COMPILE_POLYNOMIALS@)
+
+# Feature metadata for optional cisstStereoVision code
+set (CISST_SVL_HAS_CISSTNETLIB @CISST_SVL_HAS_CISSTNETLIB@)
+set (CISST_SVL_HAS_JPEG @CISST_SVL_HAS_JPEG@)
+set (CISST_SVL_HAS_OPENCV @CISST_SVL_HAS_OPENCV2@) # for backward compatibility
+set (CISST_SVL_HAS_OPENCV2 @CISST_SVL_HAS_OPENCV2@)
+set (CISST_SVL_HAS_ZLIB @CISST_SVL_HAS_ZLIB@)
+set (CISST_SVL_HAS_PNG @CISST_SVL_HAS_PNG@)
+set (CISST_SVL_HAS_FFMPEG @CISST_SVL_HAS_FFMPEG@)
+set (CISST_SVL_HAS_MIL @CISST_SVL_HAS_MIL@)
+set (CISST_SVL_HAS_DIRECTSHOW @CISST_SVL_HAS_DIRECTSHOW@)
+set (CISST_SVL_HAS_SVS @CISST_SVL_HAS_SVS@)
+set (CISST_SVL_HAS_VIDEO4LINUX2 @CISST_SVL_HAS_VIDEO4LINUX2@)
+set (CISST_SVL_HAS_DC1394 @CISST_SVL_HAS_DC1394@)
+set (CISST_SVL_HAS_X11 @CISST_SVL_HAS_X11@)
+set (CISST_SVL_HAS_XV @CISST_SVL_HAS_XV@)
+set (CISST_SVL_HAS_CUDA @CISST_SVL_HAS_CUDA@)
+set (CISST_SVL_HAS_BM_DECKLINK @CISST_SVL_HAS_BM_DECKLINK@)
+
+if (CISST_HAS_JSON)
+  find_package (PkgConfig QUIET)
+  if (PkgConfig_FOUND)
+    pkg_check_modules (JSONCPP jsoncpp)
+    if (JSONCPP_FOUND)
+      set (JSON_INCLUDE_DIR "${JSONCPP_INCLUDE_DIRS}")
+      set (JSON_LIBRARY_DIRS "${JSONCPP_LIBDIR}")
+      set (JSON_LIBRARIES "${JSONCPP_LIBRARIES}")
+      if (NOT TARGET cisstJsonCpp)
+        add_library (cisstJsonCpp INTERFACE IMPORTED)
+        set_target_properties (cisstJsonCpp PROPERTIES
+                               INTERFACE_INCLUDE_DIRECTORIES "${JSON_INCLUDE_DIR}"
+                               INTERFACE_LINK_LIBRARIES "${JSON_LIBRARIES}")
+        if (JSON_LIBRARY_DIRS)
+          set_target_properties (cisstJsonCpp PROPERTIES
+                                 INTERFACE_LINK_DIRECTORIES "${JSON_LIBRARY_DIRS}")
+        endif ()
+      endif ()
+      include_directories (${JSON_INCLUDE_DIR})
+      if (JSON_LIBRARY_DIRS)
+        link_directories (${JSON_LIBRARY_DIRS})
+      endif ()
+    else ()
+      message (WARNING "cisst was built with JSON support, but jsoncpp was not found. Consumers of cisstCommon headers may fail to compile.")
+    endif ()
+  endif ()
+endif (CISST_HAS_JSON)
+
+list (FIND CISST_LIBRARIES cisstTestsDriver _cisst_tests_driver_index)
+if (NOT _cisst_tests_driver_index EQUAL -1)
+  list (FIND cisst_FIND_COMPONENTS cisstTestsDriver _cisst_tests_driver_requested)
+  if (NOT _cisst_tests_driver_requested EQUAL -1)
+    find_dependency (CppUnit)
+  endif ()
+  unset (_cisst_tests_driver_requested)
+endif ()
+unset (_cisst_tests_driver_index)
+
+if (CISST_HAS_QT)
+  find_dependency (Qt${CISST_QT_VERSION} COMPONENTS ${CISST_QT_COMPONENTS})
+  set (CISST_QT_LIBRARIES)
+  foreach (_cisst_qt_component ${CISST_QT_COMPONENTS})
+    list (APPEND CISST_QT_LIBRARIES Qt${CISST_QT_VERSION}::${_cisst_qt_component})
+  endforeach ()
+  unset (_cisst_qt_component)
+endif (CISST_HAS_QT)
+
+if (CISST_HAS_OPENGL)
+  find_dependency (OpenGL)
+  set (CISST_OPENGL_LIBRARIES)
+  if (TARGET OpenGL::OpenGL)
+    list (APPEND CISST_OPENGL_LIBRARIES OpenGL::OpenGL)
+    if (TARGET OpenGL::GLX)
+      list (APPEND CISST_OPENGL_LIBRARIES OpenGL::GLX)
+    endif ()
+  elseif (TARGET OpenGL::GL)
+    list (APPEND CISST_OPENGL_LIBRARIES OpenGL::GL)
+  elseif (OPENGL_LIBRARIES)
+    list (APPEND CISST_OPENGL_LIBRARIES ${OPENGL_LIBRARIES})
+  else ()
+    list (APPEND CISST_OPENGL_LIBRARIES ${OPENGL_opengl_LIBRARY} ${OPENGL_glx_LIBRARY})
+  endif ()
+endif (CISST_HAS_OPENGL)
+
+if (CISST_HAS_SWIG_PYTHON OR "@CISST_cisstInteractive@")
+  set (CISST_PYTHON_VERSION_REQUIRED "@CISST_PYTHON_VERSION_REQUIRED@")
+  if (CISST_PYTHON_VERSION_REQUIRED)
+    find_dependency (Python ${CISST_PYTHON_VERSION_REQUIRED} EXACT COMPONENTS Interpreter Development NumPy)
+  else ()
+    find_dependency (Python COMPONENTS Interpreter Development NumPy)
+  endif ()
+  set (Python_EXECUTABLE ${Python_EXECUTABLE})
+  set (PYTHON_ALL_INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
+  set (PYTHON_ALL_LIBRARIES ${Python_LIBRARIES})
+endif ()
+
+if (CISST_HAS_SWIG_PYTHON)
+  find_dependency (SWIG @CISST_SWIG_REQUIRED_VERSION@)
+endif ()
+
+list (FIND CISST_LIBRARIES cisstCommonXML _cisst_common_xml_index)
+if (NOT ${_cisst_common_xml_index} EQUAL -1 AND CISST_XML_LIB STREQUAL "LibXml2")
+  find_dependency (LibXml2)
+endif ()
+unset (_cisst_common_xml_index)
+
+if (TARGET cisstCommon)
+  foreach (lib ${CISST_LIBRARIES})
+    if (TARGET ${lib} AND NOT TARGET cisst::${lib})
+      add_library (cisst::${lib} ALIAS ${lib})
+    endif ()
+  endforeach ()
+else ()
+  find_file (_cisstTargets_file
+             cisst-targets.cmake
+             PATHS ${CISST_CMAKE_DIRS} ${CISST_BINARY_DIR}
              NO_DEFAULT_PATH)
-  if (ADDITIONAL_BUILD_CMAKE)
-    include (${ADDITIONAL_BUILD_CMAKE})
-  endif (ADDITIONAL_BUILD_CMAKE)
-  unset (ADDITIONAL_BUILD_CMAKE CACHE) # find_file stores the result in cache
-endforeach (lib ${CISST_LIBRARIES})
+  if (EXISTS ${_cisstTargets_file})
+    include (${_cisstTargets_file})
+  endif ()
+  unset (_cisstTargets_file CACHE)
+endif ()
+
+if (CISST_HAS_CISSTNETLIB)
+  find_dependency (CisstNetlib)
+  if (TARGET cisst::cisstNumerical)
+    get_target_property (_aliased_target cisst::cisstNumerical ALIASED_TARGET)
+    if (_aliased_target)
+      set_property (TARGET ${_aliased_target} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CISSTNETLIB_INCLUDE_DIR}")
+      set_property (TARGET ${_aliased_target} APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${CISSTNETLIB_LIBRARIES}")
+    else ()
+      set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CISSTNETLIB_INCLUDE_DIR}")
+      set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${CISSTNETLIB_LIBRARIES}")
+    endif ()
+  endif ()
+endif ()
+
+find_file (_cisstSettings_file
+           cisstSettings.cmake
+           PATHS ${CISST_CMAKE_DIRS}
+           NO_DEFAULT_PATH)
+if (EXISTS ${_cisstSettings_file})
+  include (${_cisstSettings_file})
+else ()
+  message (FATAL_ERROR "Can't find cisstSettings.cmake in path: ${CISST_CMAKE_DIRS}")
+endif ()
+unset (_cisstSettings_file CACHE)
 
 # To allow users to check if a library has been compiled
 foreach (lib ${CISST_LIBRARIES})
@@ -123,27 +273,28 @@ foreach (lib ${CISST_LIBRARIES})
   set (CISST_${lib} ON)
 endforeach (lib ${CISST_LIBRARIES})
 
+# Create alias targets for backward compatibility (non-namespaced names)
+foreach (lib ${CISST_LIBRARIES})
+  if (TARGET cisst::${lib} AND NOT TARGET ${lib})
+    add_library (${lib} ALIAS cisst::${lib})
+  endif ()
+endforeach ()
+
 # Where to install
 set (CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
 
 # Check against componenents required
-set (cisst_FOUND_AS_REQUIRED 1)
+set (CISST_LIBRARIES_REQUIRED_INTERNAL)
 if (cisst_FIND_COMPONENTS)
   # First test that all libraries should have been compiled
   foreach (required ${cisst_FIND_COMPONENTS})
-    set (CISST_LIBRARIES_AND_SETTINGS ${CISST_LIBRARIES} ${CISST_SETTINGS})
-    list (FIND CISST_LIBRARIES_AND_SETTINGS ${required} FOUND_IT)
+    list (FIND CISST_LIBRARIES ${required} FOUND_IT)
     if (${FOUND_IT} EQUAL -1 )
       # inform user and set variables to not-found/false
       if (NOT cisst_FIND_QUIETLY)
-        # check if this is a "virtual" library
-        if (DEFINED ${required}_OPTION_NAME)
-          message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled, use the flag ${${required}_OPTION_NAME} to compile it")
-        else (DEFINED ${required}_OPTION_NAME)
-          message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled")
-        endif (DEFINED ${required}_OPTION_NAME)
+        message (WARNING "find_package: cisst library \"${required}\" doesn't exist or hasn't been compiled")
       endif (NOT cisst_FIND_QUIETLY)
-      set (cisst_FOUND_AS_REQUIRED 0)
+      set (cisst_FOUND FALSE)
       set (cisst_${required}_FOUND 0)
     else (${FOUND_IT} EQUAL -1)
       # if found, add to list of required libraries and remove duplicates (for multiple find_package (cisst))
@@ -156,3 +307,16 @@ else (cisst_FIND_COMPONENTS)
   # otherwise, assumes user needs all available libraries
   set (CISST_LIBRARIES_REQUIRED_INTERNAL ${CISST_LIBRARIES})
 endif (cisst_FIND_COMPONENTS)
+
+set (cisst_LIBRARIES)
+foreach (required ${CISST_LIBRARIES_REQUIRED_INTERNAL})
+  list (FIND CISST_LIBRARIES ${required} _cisst_required_library_index)
+  if (NOT ${_cisst_required_library_index} EQUAL -1)
+    if (TARGET cisst::${required})
+      list (APPEND cisst_LIBRARIES cisst::${required})
+    else ()
+      list (APPEND cisst_LIBRARIES ${required})
+    endif ()
+  endif ()
+endforeach ()
+unset (_cisst_required_library_index)

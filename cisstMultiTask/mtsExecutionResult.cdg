@@ -5,7 +5,7 @@
 // Author(s):  Peter Kazanzides
 // Created on: 2013-12-29
 //
-// (C) Copyright 2013 Johns Hopkins University (JHU), All Rights Reserved.
+// (C) Copyright 2013-2026 Johns Hopkins University (JHU), All Rights Reserved.
 //
 // --- begin cisst license - do not edit ---
 //
@@ -70,10 +70,6 @@ class {
         enum-value {
             name METHOD_OR_FUNCTION_FAILED;
             description underlying method or function returned \"false\";
-        }
-        enum-value {
-            name NETWORK_ERROR;
-            description network error;
         }
         enum-value {
             name INVALID_COMMAND_ID;

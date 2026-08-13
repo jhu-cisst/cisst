@@ -6,7 +6,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-02-06
   
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -43,6 +43,10 @@ class vctDynamicNArrayRefTest : public CppUnit::TestFixture
 
     CPPUNIT_TEST(TestEngines);
 
+    CPPUNIT_TEST(TestRandomTemporaryRefDouble);
+    CPPUNIT_TEST(TestRandomTemporaryRefFloat);
+    CPPUNIT_TEST(TestRandomTemporaryRefInt);
+
     CPPUNIT_TEST_SUITE_END();
     
  public:
@@ -75,6 +79,10 @@ class vctDynamicNArrayRefTest : public CppUnit::TestFixture
 
     /*! Test all engines for doubles */
     void TestEngines(void);
+
+    /*! Test randomization of temporary nArray refs */
+    template<class _elementType> void TestRandomTemporaryRef(void);
+    void TestRandomTemporaryRefDouble(void);
+    void TestRandomTemporaryRefFloat(void);
+    void TestRandomTemporaryRefInt(void);
 };
-
-

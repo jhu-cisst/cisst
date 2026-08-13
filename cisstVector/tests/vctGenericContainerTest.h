@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-11-12
 
-  (C) Copyright 2004-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -79,6 +79,19 @@ void RemoveQuasiZero(_containerType & container) {
 class vctGenericContainerTest
 {
  public:
+
+    /*! Test all elements are within a range. */
+    template <class _containerType>
+    static void TestElementsInRange(const _containerType & container,
+                                    const typename _containerType::value_type min,
+                                    const typename _containerType::value_type max) {
+        const typename _containerType::const_iterator end = container.end();
+        typename _containerType::const_iterator iter;
+        for (iter = container.begin(); iter != end; ++iter) {
+            CPPUNIT_ASSERT((*iter) >= min);
+            CPPUNIT_ASSERT((*iter) <= max);
+        }
+    }
 
     /*! Test SoCi based operations. */
     template <class _containerType1, class _containerType2>

@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-02-25
 
-  (C) Copyright 2009-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
+#include <cisstMultiTask/mtsManagerComponentServices.h>
 
 #include <string>
 #include <stdexcept>
@@ -89,9 +90,6 @@ protected:
     typedef cmnNamedMap<SignalMapElement> SignalMapType;
     typedef cmnNamedMap<SignalMapType> ComponentMapType;
     ComponentMapType ComponentMap;
-
-    /*! Static member variables */
-    static mtsComponentManager * ComponentManager;
 
     /*! Flag to determine if the collector is connected.  Once the
       collector is connected, it becomes impossible to change the

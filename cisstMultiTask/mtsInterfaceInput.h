@@ -6,7 +6,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -40,6 +40,8 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsInterfaceInput: public mtsInterface
 {
+    friend class mtsManagerComponent;
+
  protected:
 
     /*! Default constructor. Does nothing, should not be used. */
@@ -48,6 +50,10 @@ class CISST_EXPORT mtsInterfaceInput: public mtsInterface
     /*! Pointer to output interface that we are connected to.
         We could instead use the Connection member in svlFilterInput. */
     mtsInterfaceOutput * InterfaceOutput;
+
+    /*! Connection ID assigned by manager component. This is not really needed,
+        but is maintained for historical reasons. */
+    ConnectionIDType ConnectionID;
 
  public:
 
@@ -61,6 +67,9 @@ class CISST_EXPORT mtsInterfaceInput: public mtsInterface
     virtual ~mtsInterfaceInput();
 
     const mtsInterfaceOutput * GetConnectedInterface(void) const;
+
+    ConnectionIDType GetConnectionID(void) const
+    { return ConnectionID; }
 
     virtual bool CouldConnectTo(mtsInterfaceOutput * interfaceOutput) = 0;
     virtual bool ConnectTo(mtsInterfaceOutput * interfacePOutput) = 0;

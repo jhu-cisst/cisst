@@ -5,7 +5,7 @@
   Author(s): Anton Deguet
   Created on: 2011-12-14
 
-  (C) Copyright 2011-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2011-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -394,8 +394,12 @@ bool mtsComponentAddLatency::AddEventWriteDelayedInternal(const mtsGenericObject
     interfaceProvided->AddEventWriteGeneric(delayedWrite->Function,
                                             eventProvidedName == "" ? eventRequiredName : eventProvidedName,
                                             data);
+    // Create a temporary argument prototype (using copy constructor) to pass to AddEventHandlerWriteGeneric.
+    // The alternative would be to cast away the const-ness of "data".
+    mtsGenericObject * argPrototype = dynamic_cast<mtsGenericObject *>(data.Services()->Create(data));
     interfaceRequired->AddEventHandlerWriteGeneric(&mtsComponentAddLatencyDelayedWrite::Method, delayedWrite,
-                                                   eventRequiredName);
+                                                   eventRequiredName, MTS_INTERFACE_EVENT_POLICY, argPrototype);
+    delete argPrototype;
     DelayedWrites.push_back(delayedWrite);
     return true;
 }

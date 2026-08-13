@@ -1,14 +1,10 @@
 # -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
-#
-#
-
 # Author: Anton Deguet
 # Date: 2010-01-20
 #
-# (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -36,38 +32,38 @@ class VectorTest(unittest.TestCase):
         """Test mtsIntVec"""
         variable = cisstMultiTaskPython.mtsIntVec(4)
         # check type
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsIntVec))
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
-        self.failUnless(isinstance(variable, cisstCommonPython.cmnGenericObject))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsIntVec))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsGenericObject))
+        self.assertTrue(isinstance(variable, cisstCommonPython.cmnGenericObject))
 
     def TestDefaultConstructor(self):
         """Test default constructor"""
         variable = cisstMultiTaskPython.mtsDoubleVec()
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsDoubleVec))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsDoubleVec))
         data = variable.Data()
         # this is an array
-        self.failUnless(isinstance(data, numpy.ndarray))
+        self.assertTrue(isinstance(data, numpy.ndarray))
         # dimension is 1
-        self.failUnless(numpy.ndim(data) == 1)
+        self.assertTrue(numpy.ndim(data) == 1)
         # size is 0 by default
-        self.failUnless(data.size == 0)
+        self.assertTrue(data.size == 0)
 
     def TestSizeConstructor(self):
         """Test constructor with size"""
         variable = cisstMultiTaskPython.mtsDoubleVec(10)
-        self.failUnless(isinstance(variable, cisstMultiTaskPython.mtsDoubleVec))
+        self.assertTrue(isinstance(variable, cisstMultiTaskPython.mtsDoubleVec))
         data = variable.Data()
         # this is an array
-        self.failUnless(isinstance(data, numpy.ndarray))
+        self.assertTrue(isinstance(data, numpy.ndarray))
         # dimension is 1
-        self.failUnless(numpy.ndim(data) == 1)
+        self.assertTrue(numpy.ndim(data) == 1)
         # size is 10 based on constructor parameter
-        self.failUnless(data.size == 10)
-        self.failUnless(data.shape == (10,))
+        self.assertTrue(data.size == 10)
+        self.assertTrue(data.shape == (10,))
         # make sure content is zeros
-        zeroVector = numpy.zeros(10, numpy.float)
+        zeroVector = numpy.zeros(10, numpy.float64)
         allEqual = (zeroVector == data).all()
-        self.failUnless(allEqual)
+        self.assertTrue(allEqual)
         
     def TestModify(self):
         """Test data modification"""
@@ -77,12 +73,12 @@ class VectorTest(unittest.TestCase):
         data.fill(5.0)
         data2 = variable.Data()
         # these are two different objects (Python)
-        self.failUnless(data is not data2)
+        self.assertTrue(data is not data2)
         # but they should be equal
         allEqual = (data2 == data).all()
-        self.failUnless(allEqual)
+        self.assertTrue(allEqual)
         # always!
         data2[3] = 10.0
         allEqual = (data2 == data).all()
-        self.failUnless(allEqual)
+        self.assertTrue(allEqual)
         

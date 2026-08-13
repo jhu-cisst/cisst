@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleSVDFixedSize(void) {
     // fill a matrix with random numbers
     vctFixedSizeMatrix<double, 5, 5> A, Acopy;
@@ -13,3 +14,4 @@ void ExampleSVDFixedSize(void) {
     std::cout << "U:\n" << U << "\nS:\n" << S << "\nV:\n"
               << Vt.TransposeRef() << std::endl;
 }
+// [doc-example-end]

@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -35,10 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponent * component,
                                            mtsInterfaceQueueingPolicy queueingPolicy,
-                                           mtsCallableVoidBase * postCommandQueuedCallable,
-                                           bool isProxy):
+                                           mtsCallableVoidBase * postCommandQueuedCallable) :
     BaseType(name, component),
-    IsProxy(isProxy),
     MailBox(0),
     QueueingPolicy(queueingPolicy),
     ArgumentQueuesSize(DEFAULT_MAIL_BOX_AND_ARGUMENT_QUEUES_SIZE),
@@ -48,12 +46,13 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     EndUserInterface(false),
     UserName("OriginalInterface"),
     UserCounter(0),
-    CommandsVoid("CommandsVoid", true),
-    CommandsVoidReturn("CommandsVoidReturn", true),
-    CommandsWrite("CommandsWrite", true),
-    CommandsWriteReturn("CommandsWriteReturn", true),
-    CommandsRead("CommandsRead", true),
-    CommandsQualifiedRead("CommandsQualifiedRead", true),
+    // PK TODO: Following had "true" for second parameter
+    CommandsVoid("CommandsVoid"),
+    CommandsVoidReturn("CommandsVoidReturn"),
+    CommandsWrite("CommandsWrite"),
+    CommandsWriteReturn("CommandsWriteReturn"),
+    CommandsRead("CommandsRead"),
+    CommandsQualifiedRead("CommandsQualifiedRead"),
     EventVoidGenerators("EventVoidGenerators", true),
     EventWriteGenerators("EventWriteGenerators", true),
     CommandsInternal("CommandsInternal", true),
@@ -71,7 +70,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
                                  << name << "\"" << std::endl;
     }
 
-    // set queue size, 0 meanings to queue to be used (e.g. mtsComponent)
+    // set queue size, 0 means no queue to be used (e.g., mtsComponent)
     if (queueingPolicy == MTS_COMMANDS_SHOULD_NOT_BE_QUEUED) {
         MailBoxSize = 0;
     } else {
@@ -127,12 +126,13 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     EndUserInterface(true),
     UserName(userName),
     UserCounter(0),
-    CommandsVoid("CommandsVoid", true),
-    CommandsVoidReturn("CommandsVoidReturn", true),
-    CommandsWrite("CommandsWrite", true),
-    CommandsWriteReturn("CommandsWriteReturn", true),
-    CommandsRead("CommandsRead", true),
-    CommandsQualifiedRead("CommandsQualifiedRead", true),
+    // PK TODO: Following had "true" for second parameter
+    CommandsVoid("CommandsVoid"),
+    CommandsVoidReturn("CommandsVoidReturn"),
+    CommandsWrite("CommandsWrite"),
+    CommandsWriteReturn("CommandsWriteReturn"),
+    CommandsRead("CommandsRead"),
+    CommandsQualifiedRead("CommandsQualifiedRead"),
     EventVoidGenerators("EventVoidGenerators", true),
     EventWriteGenerators("EventWriteGenerators", true),
     CommandsInternal("CommandsInternal", true),
@@ -319,34 +319,34 @@ bool mtsInterfaceProvided::UseQueueBasedOnInterfacePolicy(mtsCommandQueueingPoli
             CMN_LOG_CLASS_INIT_VERBOSE << methodName << ": adding non queued command \""
                                        << commandName << "\" to provided interface \""
                                        << this->GetFullName()
-                                       << "\" which has beed created with policy MTS_COMMANDS_SHOULD_BE_QUEUED, thread safety has to be provided by the underlying method"
+                                       << "\" which has been created with policy MTS_COMMANDS_SHOULD_BE_QUEUED, thread safety has to be provided by the underlying method"
                                        << std::endl;
         } else {
             // send message to tell explicit queueing policy is useless
             CMN_LOG_CLASS_INIT_DEBUG << methodName << ": adding non queued command \""
                                      << commandName << "\" to provided interface \""
                                      << this->GetFullName()
-                                     << "\" which has beed created with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, this is the default therefore there is no need to explicitely define the queueing policy"
+                                     << "\" which has been created with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, this is the default therefore there is no need to explicitly define the queueing policy"
                                      << std::endl;
         }
         return false;
     }
     if (queueingPolicy == MTS_COMMAND_QUEUED) {
-        // send error if the interface has no mailbox, can not queue
+        // send error if the interface has no mailbox, cannot queue
         if (this->QueueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED) {
             // send message to tell explicit queueing policy is useless
             CMN_LOG_CLASS_INIT_DEBUG << methodName << ": adding queued command \""
                                      << commandName << "\" to provided interface \""
                                      << this->GetFullName()
-                                     << "\" which has beed created with policy MTS_COMMANDS_SHOULD_BE_QUEUED, this is the default therefore there is no need to explicitely define the queueing policy"
+                                     << "\" which has been created with policy MTS_COMMANDS_SHOULD_BE_QUEUED, this is the default therefore there is no need to explicitly define the queueing policy"
                                      << std::endl;
             return true;
         } else {
-            // this is a case we can not handle
+            // this is a case we cannot handle
             CMN_LOG_CLASS_INIT_ERROR << methodName << ": adding queued command \""
                                      << commandName << "\" to provided interface \""
                                      << this->GetFullName()
-                                     << "\" which has beed created with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED is not possible.  The command will NOT be queued"
+                                     << "\" which has been created with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED is not possible.  The command will NOT be queued"
                                      << std::endl;
             return false;
         }
@@ -699,9 +699,7 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
     InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
 
     // finally, add system events
-    if (!this->IsProxy) {
-        interfaceProvided->AddSystemEvents();
-    }
+    interfaceProvided->AddSystemEvents();
 
     return interfaceProvided;
 }
@@ -917,7 +915,7 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
     if (this->MailBox) {
         MailBox->SetPostCommandDequeuedCommand(this->BlockingCommandExecuted);
     } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "AddSystemEvents: can not set mailbox post dequeued command for blocking commands for interface \""
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddSystemEvents: cannot set mailbox post dequeued command for blocking commands for interface \""
                                    << this->GetFullName() << "\"" << std::endl;
     }
 
@@ -930,7 +928,7 @@ bool mtsInterfaceProvided::AddSystemEvents(void)
     if (this->MailBox) {
         MailBox->SetPostCommandReturnDequeuedCommand(this->BlockingCommandReturnExecuted);
     } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "AddSystemEvents: can not set mailbox post dequeued command for blocking return commands for interface \""
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddSystemEvents: cannot set mailbox post dequeued command for blocking return commands for interface \""
                                    << this->GetFullName() << "\"" << std::endl;
     }
     return true;
@@ -1290,13 +1288,15 @@ void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mt
 
 bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsCommandVoid * handler)
 {
-    if (this->OriginalInterface) {
+    if (this->OriginalInterface && !IsSystemEventVoid(eventName)) {
+        // Not clear if this is still needed
         return this->OriginalInterface->RemoveObserver(eventName, handler);
     }
     mtsMulticastCommandVoid * multicastCommand = GetEventVoid(eventName); // EventVoidGenerators.GetItem(eventName);
     if (multicastCommand) {
         if (!multicastCommand->RemoveCommand(handler)) {
-            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): did not find handler for event " << eventName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (void): did not find handler for event " << eventName
+                                     << " in " << GetFullName() << std::endl;
             return false;
         }
     } else {
@@ -1309,12 +1309,14 @@ bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsComm
 bool mtsInterfaceProvided::RemoveObserver(const std::string & eventName, mtsCommandWriteBase * handler)
 {
     if (this->OriginalInterface) {
+        // Not clear if this is still needed
         return this->OriginalInterface->RemoveObserver(eventName, handler);
     }
     mtsMulticastCommandWriteBase * multicastCommand = EventWriteGenerators.GetItem(eventName);
     if (multicastCommand) {
         if (!multicastCommand->RemoveCommand(handler)) {
-            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (write): did not find handler for event " << eventName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "RemoveObserver (write): did not find handler for event " << eventName
+                                     << " in " << GetFullName() << std::endl;
             return false;
         }
     } else {

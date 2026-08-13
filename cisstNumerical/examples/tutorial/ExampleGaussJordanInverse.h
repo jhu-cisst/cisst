@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleGaussJordanInverse(void) {
     vctFixedSizeMatrix<double, 4, 4> A, AInverse;
     vctRandom(A, -10.0, 10.0);
@@ -11,3 +12,4 @@ void ExampleGaussJordanInverse(void) {
 	std::cout << "A is a singular matrix" << std::endl;
     }
 }
+// [doc-example-end]

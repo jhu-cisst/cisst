@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2008-11-13
 
-  (C) Copyright 2008-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -83,12 +83,9 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-    friend class mtsComponentProxy;
-    friend class mtsComponentInterfaceProxyClient;
     friend class mtsManagerLocal;
-    friend class mtsManagerLocalTest;
     friend class mtsEventReceiverBase;
-    friend class mtsManagerComponentClient;
+    friend class mtsManagerComponent;
     // for GetDescription
     friend class mtsSocketProxyClient;
     // for MailBox
@@ -110,6 +107,10 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
 
     /*! Size to be used for argument queues */
     size_t ArgumentQueuesSize;
+
+    /*! Connection ID assigned by manager component. This is not really needed,
+        but is maintained for historical reasons. */
+    ConnectionIDType ConnectionID;
 
     /*! Default constructor. Does nothing, should not be used. */
     mtsInterfaceRequired(void);
@@ -181,6 +182,9 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
       SetArgumentQueuesSize. */
     bool SetMailBoxAndArgumentQueuesSize(size_t desiredSize);
 
+    ConnectionIDType GetConnectionID(void) const
+    { return ConnectionID; }
+
     /*! Get the description of this interface. */
     mtsInterfaceRequiredDescription GetDescription() const;
 
@@ -222,7 +226,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
         return true;
         } */
 
-    bool ConnectTo(mtsInterfaceProvided * interfaceProvided);  // used by mtsManagerComponentClient.cpp
+    bool ConnectTo(mtsInterfaceProvided * interfaceProvided);  // used by mtsManagerComponent.cpp
     //    bool Disconnect(void) { return DetachCommands(); }  // Should be deprecated -- adeguet1 OrOutput
 
     /*! Check if this interface is required or not for the component to function. */
@@ -242,7 +246,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     void BlockingCommandReturnExecutedHandler(void);
 
     bool BindCommands(const mtsInterfaceProvided * interfaceProvided);
-    bool DetachCommands(void); // used by mtsManagerComponentClient
+    bool DetachCommands(void); // used by mtsManagerComponent
 
     void GetEventList(mtsEventHandlerList & eventList);
     bool CheckEventList(mtsEventHandlerList & eventList) const;
@@ -264,8 +268,6 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     template <class _PointerType>
         class FunctionOrReceiverInfo
     {
-        // For GCM UI
-        friend class mtsManagerLocal;
         friend class mtsInterfaceRequired;
     protected:
         _PointerType * Pointer;
@@ -442,8 +444,6 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(v
         // PK: check for MailBox overlaps with code in UseQueueBasedOnInterfacePolicy
         if (MailBox) {
             mtsCommandQueuedWriteGeneric *tmp = new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, this->ArgumentQueuesSize);
-            if (argumentPrototype)
-                tmp->SetArgumentPrototype(argumentPrototype);
             EventHandlersWrite.AddItem(eventName,  tmp);
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write generic \"" << eventName << "\"" << std::endl;

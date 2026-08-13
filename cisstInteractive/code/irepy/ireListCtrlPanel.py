@@ -5,7 +5,7 @@
 #  Author(s):	Chris Abidin, Andrew LaMora
 #  Created on: 2004-04-30
 #
-#  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
+#  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 # 
@@ -268,14 +268,14 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
     # wx.TextDropTarget can be used.
     #------------------------------------------------------
     def GetDragAndDropData(self):
-        Data = []
+        Data = ''
         Index = self.list.GetFirstSelected()
 
         while Index != -1:
             Data.append( self.getColumnText(Index, 0) )
             Index = self.list.GetNextSelected(Index)
 
-        return string.join(Data, os.linesep)
+        return Data.join(os.linesep)
 
     # Left mouse button pressed
     def OnLeftDown(self, event):

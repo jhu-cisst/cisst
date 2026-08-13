@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleInverse(void) {
     // Start with a fixed size matrix
     vctFixedSizeMatrix<double, 6, 6> A, AInverse;
@@ -18,3 +19,4 @@ void ExampleInverse(void) {
     nmrInverse(BInverse);
     std::cout << B * BInverse << std::endl;
 }
+// [doc-example-end]

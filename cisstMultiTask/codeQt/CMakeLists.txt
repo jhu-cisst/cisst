@@ -13,16 +13,10 @@
 
 project (cisstMultiTaskQt)
 
-# set directories for this project
-cisst_set_directories (cisstQt)
-
 set (QTNODES_SOURCE_FILES "")
 set (QTNODES_HEADER_FILES "")
-set (QTNODES_SETTINGS "")
 
 if (CISST_HAS_QTNODES)
-  cisst_set_directories (cisstQtNodes)
-  cisst_set_directories (cisstGraphviz)
   add_definitions(-DNODE_EDITOR_SHARED)
 
   set (QTNODES_SOURCE_FILES
@@ -31,9 +25,6 @@ if (CISST_HAS_QTNODES)
   set (QTNODES_HEADER_FILES
        mtsComponentModelQtNodes.h
        mtsComponentViewerQt.h)
-  set (QTNODES_SETTINGS
-       cisstQtNodes
-       cisstGraphviz)
 endif (CISST_HAS_QTNODES)
 
 # to include Qt generated files
@@ -51,8 +42,6 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 cisstVector
                                 cisstVectorQt
                                 cisstMultiTask
-                   SETTINGS     cisstQt
-                                ${QTNODES_SETTINGS}
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorFactoryQtWidget.cpp
                                 mtsCommandLineOptionsQt.cpp
@@ -93,10 +82,37 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 ${QTNODES_HEADER_FILES}
                                 mtsExportQt.h)
 
-# link against Qt libraries
-target_link_libraries (cisstMultiTaskQt ${QT_LIBRARIES})
+target_link_libraries (cisstMultiTaskQt
+  ${CISST_QT_LIBRARIES}
+  ${QTNODES_LIBRARIES})
 
 # Ensure the QtNodes ExternalProject is fully built before cisstMultiTaskQt
 if (CISST_HAS_QTNODES)
+  target_compile_definitions (cisstMultiTaskQt PUBLIC NODE_EDITOR_SHARED)
+  if (TARGET cisstQtNodes)
+    set_property (TARGET cisstMultiTaskQt APPEND PROPERTY
+                  LINK_LIBRARIES cisstQtNodes)
+  endif ()
+  target_include_directories (cisstMultiTaskQt PUBLIC
+    $<BUILD_INTERFACE:${QTNODES_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>)
+  if (QTNODES_LIBRARY_DIRS)
+    target_link_directories (cisstMultiTaskQt PUBLIC
+      $<BUILD_INTERFACE:${QTNODES_LIBRARY_DIRS}>
+      $<INSTALL_INTERFACE:lib>)
+  endif ()
+  if (TARGET cisstGraphviz)
+    set_property (TARGET cisstMultiTaskQt APPEND PROPERTY
+                  LINK_LIBRARIES cisstGraphviz)
+  elseif (GRAPHVIZ_LIBRARIES)
+    if (GRAPHVIZ_INCLUDE_DIRS)
+      target_include_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_INCLUDE_DIRS})
+    endif ()
+    if (GRAPHVIZ_LIBRARY_DIRS)
+      target_link_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_LIBRARY_DIRS})
+    endif ()
+    set_property (TARGET cisstMultiTaskQt APPEND PROPERTY
+                  LINK_LIBRARIES ${GRAPHVIZ_LIBRARIES})
+  endif ()
   add_dependencies (cisstMultiTaskQt cisstQtNodesExternal)
 endif (CISST_HAS_QTNODES)

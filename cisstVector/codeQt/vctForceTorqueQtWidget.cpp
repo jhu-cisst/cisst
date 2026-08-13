@@ -31,6 +31,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctForceTorqueQtWidget.h>
 
+#include <QGridLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QVBoxLayout>
+
 // all these widgets should be replaced to use static vectors/matrices
 #include <cisstVector/vctQtWidgetDynamicVector.h>
 #include <cisstVector/vctDynamicVectorTypes.h>

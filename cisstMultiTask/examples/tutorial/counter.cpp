@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES_DERIVED(counter, mtsTaskPeriodic);
 
+// [doc-constructor-start]
 counter::counter(const std::string & componentName, double periodInSeconds):
     // base constructor, same component name and period.  Third
     // parameter is "false" because we don't need hard realtime.  Last
@@ -36,9 +37,11 @@ counter::counter(const std::string & componentName, double periodInSeconds):
 {
     SetupInterfaces();
 }
+// [doc-constructor-end]
 
 void counter::SetupInterfaces(void)
 {
+    // [doc-state-table-start]
     // state table variables
     StateTable.AddData(Counter, "Counter");
 
@@ -49,7 +52,10 @@ void counter::SetupInterfaces(void)
     ConfigurationStateTable.SetAutomaticAdvance(false);
     // finally, add data to the state table
     ConfigurationStateTable.AddData(Increment, "Increment");
+    // [doc-state-table-end]
 
+    // [doc-provided-and-commands-start]
+    // [doc-provided-interface-start]
     // add a provided interface
     mtsInterfaceProvided * interfaceProvided = AddInterfaceProvided("User");
 
@@ -62,6 +68,7 @@ void counter::SetupInterfaces(void)
                                  << this->GetName() << "\"" << std::endl;
         return;
     }
+    // [doc-provided-interface-end]
 
     // add a void command.  The signature of the method used should be
     // "void method(void)".  As for the interface, it is possible to
@@ -88,7 +95,9 @@ void counter::SetupInterfaces(void)
                                            "GetValue");
     interfaceProvided->AddCommandReadState(ConfigurationStateTable, Increment,
                                            "GetIncrement");
+    // [doc-provided-and-commands-end]
 
+    // [doc-events-setup-start]
     // add a void event.  We need to provide the function
     // (mtsFunction) that will be used to trigger the event.
     interfaceProvided->AddEventVoid(OverflowEvent, "Overflow");
@@ -98,6 +107,7 @@ void counter::SetupInterfaces(void)
     // the event as well as the default value/type of the payload.
     interfaceProvided->AddEventWrite(InvalidIncrementEvent, "InvalidIncrement",
                                      std::string());
+    // [doc-events-setup-end]
 }
 
 void counter::Reset(void)
@@ -129,11 +139,13 @@ void counter::SetIncrement(const double & increment)
         }
         return;
     }
+    // [doc-state-table-manual-start]
     // now we can add to the state table
     ConfigurationStateTable.Start();
     Increment = increment;
     // make the circular buffer move one step
     ConfigurationStateTable.Advance();
+    // [doc-state-table-manual-end]
 }
 
 void counter::Startup(void)
@@ -145,6 +157,7 @@ void counter::Startup(void)
     SetIncrement(1.0);
 }
 
+// [doc-run-method-start]
 void counter::Run(void)
 {
     // process the commands received
@@ -153,11 +166,14 @@ void counter::Run(void)
     Counter += Increment;
     if (Counter > 100.0) {
         Counter = 0.0;
+        // [doc-trigger-event-start]
         // it's good practice to check the returned value
         mtsExecutionResult result = OverflowEvent();
         if (!result) {
             CMN_LOG_CLASS_RUN_ERROR << "SetIncrement: trigger \"OverflowEvent\" returned "
                                     << result << std::endl;
         }
+        // [doc-trigger-event-end]
     }
 }
+// [doc-run-method-end]

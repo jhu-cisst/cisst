@@ -1,8 +1,4 @@
-#
-#
-
-# (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2008-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 # --- begin cisst license - do not edit ---
 #
@@ -18,6 +14,6 @@ add_executable (cisst3DUserInterfaceSensableStereoVideo main.cpp)
 
 target_link_libraries (cisst3DUserInterfaceSensableStereoVideo cisst3DUserInterfaceBehaviors)
 
-cisst_target_link_libraries (3DUserInterfaceTutorialExample2
+target_link_libraries (3DUserInterfaceTutorialExample2
                              cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
                              cisstStereoVision cisstParameterTypes cisst3DUserInterface)

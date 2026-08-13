@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2021 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -111,20 +111,23 @@ if (CISST_HAS_CISSTNETLIB)
     # set all cisstReflexxesTypeII variables based on install directory
     set (cisstReflexxesTypeII_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstReflexxesTypeII/include/ReflexxesTypeII")
     set (cisstReflexxesTypeII_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib")
+    file (MAKE_DIRECTORY "${cisstReflexxesTypeII_INCLUDE_DIR}")
     set (cisstReflexxesTypeII_LIBRARIES ReflexxesTypeII)
-    # save for external packages
-    cisst_set_package_settings (cisstRobot cisstReflexxesTypeII INCLUDE_DIRECTORIES cisstReflexxesTypeII_INCLUDE_DIR)
-    cisst_set_package_settings (cisstRobot cisstReflexxesTypeII LIBRARIES           cisstReflexxesTypeII_LIBRARIES)
-    cisst_set_package_settings (cisstRobot cisstReflexxesTypeII LINK_DIRECTORIES    cisstReflexxesTypeII_LIBRARY_DIRS)
     # add wrappers to cisstRobot
     set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
     set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
     # install for CPack
-    install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
-             COMPONENT cisstRobot
-             DESTINATION lib)
-  else ()
-    cisst_unset_all_package_settings (cisstRobot cisstReflexxesTypeII)
+    if (WIN32)
+      install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/$<CONFIG>/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
+               COMPONENT cisstRobot
+               DESTINATION lib
+               OPTIONAL)
+    else ()
+      install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
+               COMPONENT cisstRobot
+               DESTINATION lib
+               OPTIONAL)
+    endif ()
   endif ()
 
   cisst_add_library (LIBRARY cisstRobot
@@ -135,6 +138,9 @@ if (CISST_HAS_CISSTNETLIB)
 
   if (CISST_ROB_HAS_REFLEXXES_TYPEII)
     add_dependencies (cisstRobot cisstReflexxesTypeIIExternal)
+    target_include_directories (cisstRobot PRIVATE ${cisstReflexxesTypeII_INCLUDE_DIR})
+    target_link_directories (cisstRobot PRIVATE ${cisstReflexxesTypeII_LIBRARY_DIRS})
+    target_link_libraries (cisstRobot ${cisstReflexxesTypeII_LIBRARIES})
   endif ()
 
 else (CISST_HAS_CISSTNETLIB)

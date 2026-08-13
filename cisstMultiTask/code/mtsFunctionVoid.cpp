@@ -4,7 +4,7 @@
 /*
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,6 +34,7 @@ bool mtsFunctionVoid::Detach(void)
 {
     if (this->IsValid()) {
         this->Command = 0;
+        DeleteCompletionCommand();
         return true;
     }
     return false;
@@ -72,10 +73,23 @@ mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
     }
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
-    CompletionCommand->PrepareToWait();
+    mtsExecutionResultProxy remoteResult(mtsExecutionResult::UNDEFINED);
+    CompletionCommand->PrepareToWait(remoteResult);
     mtsExecutionResult executionResult = Command->Execute(MTS_BLOCKING, CompletionCommand->GetCommand());
-    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
         executionResult = WaitForResult();
+        if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
+            executionResult = remoteResult.GetData();
+        }
+        else {
+            CMN_LOG_RUN_WARNING << "mtsFunctionVoid::ExecuteBlocking: queued execution result = "
+                                << executionResult << std::endl;
+        }
+    }
+    else if (executionResult.GetResult() != mtsExecutionResult::COMMAND_SUCCEEDED) {
+        CMN_LOG_RUN_WARNING << "mtsFunctionVoid::ExecuteBlocking: execution result = "
+                            << executionResult << std::endl;
+    }
     CompletionCommand->ClearWait();
     return executionResult;
 }

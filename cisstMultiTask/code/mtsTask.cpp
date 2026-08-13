@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2020 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
   --- begin cisst license - do not edit ---
 
@@ -32,6 +32,19 @@
 
 
 std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
+
+const mtsManagerComponentServices *mtsTask::GetManagerComponentServices(void) const
+{
+    if (CheckForOwnThread()) {
+        return mtsComponent::GetManagerComponentServices();
+    }
+    else {
+        CMN_LOG_CLASS_RUN_VERBOSE << GetName()
+                                  << ": ManagerComponentServices not available (different thread), using mtsManagerLocal"
+                                  << std::endl;
+        return mtsManagerLocal::GetInstance()->GetManagerComponentServices();
+    }
+}
 
 /********************* Methods that call user methods *****************/
 
@@ -201,12 +214,12 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     StateChange.Lock();
     this->State = newState;
     StateChange.Unlock();
+
     StateChangeSignal.Raise();
 
     // Inform the manager component client of the state change
     if (InterfaceProvidedToManager) {
-        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-        EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), this->State));
+        EventGeneratorChangeState(mtsComponentStateChange("", this->GetName(), this->State));
     }
 }
 
@@ -348,8 +361,7 @@ mtsInterfaceRequired * mtsTask::AddInterfaceRequiredWithoutSystemEventHandlers(c
 
 
 mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
-                                                                        mtsInterfaceQueueingPolicy queueingPolicy,
-                                                                        bool isProxy)
+                                                                        mtsInterfaceQueueingPolicy queueingPolicy)
 {
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
@@ -357,13 +369,13 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const st
         mtsCallableVoidBase * postCommandQueuedCallable = 0;
         if (interfaceProvidedName == mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())
             postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable, isProxy);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
                                    << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe."
                                    << std::endl;
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0, isProxy);
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, 0);
     }
     if (interfaceProvided) {
         if (InterfacesProvided.AddItem(interfaceProvidedName, interfaceProvided)) {

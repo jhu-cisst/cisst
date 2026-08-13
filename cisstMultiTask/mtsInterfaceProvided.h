@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -98,13 +98,11 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
-    // To dynamically create and add command proxies and event proxies
-    friend class mtsComponentProxy;
     // To get information about event generators in this interface
     friend class mtsManagerLocal;
     // To call GetEndUserInterface
     friend class mtsComponent;
-    friend class mtsManagerComponentClient;
+    friend class mtsManagerComponent;
 
     // to allow adding command write generic ...
     friend class mtsComponentAddLatency;
@@ -157,8 +155,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
       performs a wakeup (signal) on the task's thread. */
     mtsInterfaceProvided(const std::string & name, mtsComponent * component,
                          mtsInterfaceQueueingPolicy queueingPolicy,
-                         mtsCallableVoidBase * postCommandQueuedCallable = 0,
-                         bool isProxy = false);
+                         mtsCallableVoidBase * postCommandQueuedCallable = 0);
 
     /*! Default Destructor. */
     virtual ~mtsInterfaceProvided();
@@ -663,9 +660,6 @@ protected: // PK TEMP
     typedef std::pair<size_t, ThisType *> InterfaceProvidedCreatedPairType;
     typedef std::list<InterfaceProvidedCreatedPairType> InterfaceProvidedCreatedListType;
     InterfaceProvidedCreatedListType InterfacesProvidedCreated;
-
-    /*! Indicates if this interface is used to generate a proxy */
-    bool IsProxy;
 
     /*! Mailbox (if supported).  Mailboxes should only be provided for
       end user provided interfaces (if needed).  Factory interfaces

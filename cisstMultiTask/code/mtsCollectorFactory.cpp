@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2014-03-03
 
-  (C) Copyright 2014-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2014-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorFactory.h>
 #include <cisstMultiTask/mtsCollectorState.h>
 #include <cisstMultiTask/mtsCollectorEvent.h>
-#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include <cisstCommon/cmnPath.h>
@@ -205,15 +204,12 @@ void mtsCollectorFactory::Cleanup(void)
 void mtsCollectorFactory::AddStateCollector(const std::string & component,
                                             const std::string & table)
 {
-    // get access to component manager
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
-
     const std::string collector_name = GetName() + "_" + component + "_" + table;
     CollectorId collectorId(component, table);
     // check if there is already a collector for this component/table
     if (mStateCollectors.count(collectorId) == 0) {
         // check if there is already a component with that name
-        mtsComponent * genericComponent = manager->GetComponent(collector_name);
+        mtsComponent * genericComponent = GetManagerComponentServices()->ComponentGet(collector_name);
         if (genericComponent) {
             CMN_LOG_CLASS_INIT_ERROR << "AddStateCollector: found an existing component with name \""
                                      << collector_name << "\".  Can't create state collector." << std::endl;
@@ -232,7 +228,7 @@ void mtsCollectorFactory::AddStateCollector(const std::string & component,
         }
         // default name is based on component/state table name
         collector->SetOutputToDefault();
-        manager->AddComponent(collector);
+        GetManagerComponentServices()->ComponentAdd(collector);
         auto collector_data = new mtsCollectorStateData(this, collector_name, collector);
         collector_data->SetInterfaceRequired(this->AddInterfaceRequired(collector_name));
         mStateCollectors[collectorId] = collector_data;
@@ -248,9 +244,6 @@ void mtsCollectorFactory::AddSignal(const std::string & component,
                                     const std::string & table,
                                     const std::string & signal)
 {
-    // get access to component manager
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
-
     // add the collector, no effect if already created
     AddStateCollector(component, table);
     CollectorId collectorId(component, table);
@@ -261,7 +254,7 @@ void mtsCollectorFactory::AddSignal(const std::string & component,
         // add to the list
         existingSignals.push_back(signal);
         // retrieve that state collector
-        mtsCollectorState * collector = dynamic_cast<mtsCollectorState *>(manager->GetComponent(collector_name));
+        mtsCollectorState * collector = dynamic_cast<mtsCollectorState *>(GetManagerComponentServices()->ComponentGet(collector_name));
         if (!collector) {
             CMN_LOG_CLASS_INIT_ERROR << "AddSignal: unable to find state collector \"" << collector_name << "\"" << std::endl;
             return;
@@ -292,7 +285,6 @@ void mtsCollectorFactory::SetSampling(const std::string & component,
 
 mtsCollectorEvent * mtsCollectorFactory::GetEventCollector(const std::string & component_name)
 {
-    mtsComponentManager * manager = mtsComponentManager::GetInstance();
     const std::string collector_name = GetName() + "_" + component_name + "_events";
 
     const auto collector_it = mEventCollectors.find(collector_name);
@@ -301,7 +293,7 @@ mtsCollectorEvent * mtsCollectorFactory::GetEventCollector(const std::string & c
     }
     // create a new one
     mtsCollectorEvent * collector = new mtsCollectorEvent(collector_name);
-    manager->AddComponent(collector);
+    GetManagerComponentServices()->ComponentAdd(collector);
     auto collector_data = new mtsCollectorEventData(this, collector_name, collector);
     collector_data->SetInterfaceRequired(this->AddInterfaceRequired(collector_name));
     mEventCollectors[collector_name] = collector_data;
@@ -346,11 +338,11 @@ void mtsCollectorFactory::AddAllEvents(const std::string & component_name)
 
 bool mtsCollectorFactory::Connect(void)
 {
-    auto component_manager = mtsManagerLocal::GetInstance();
+    const mtsManagerComponentServices *services = GetManagerComponentServices();
     for (auto & collector : mAllCollectors) {
         collector->CollectorComponent->Connect();
-        component_manager->Connect(this->GetName(), collector->Name,
-                                   collector->CollectorComponent->GetName(), "Control");
+        services->Connect(this->GetName(), collector->Name,
+                          collector->CollectorComponent->GetName(), "Control");
     }
     return true;
 }

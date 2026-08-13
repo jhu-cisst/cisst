@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorFactory.h>
 #include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
-#include <cisstMultiTask/mtsComponentViewerQt.h>
 #include <cisstMultiTask/mtsCommandLineOptionsQt.h>
 
 #include <QApplication>

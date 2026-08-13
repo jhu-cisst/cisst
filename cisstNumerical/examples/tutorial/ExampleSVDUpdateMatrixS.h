@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleSVDUpdateMatrixS(void) {
     // fill a matrix with random numbers
     vctDynamicMatrix<double> A(5, 7, VCT_COL_MAJOR);
@@ -15,6 +16,7 @@ void ExampleSVDUpdateMatrixS(void) {
               << "\nU * S * Vt:\n"
               << svdData.U() * S * svdData.Vt() << std::endl;
 }
+// [doc-example-end]
 
 void ExampleSVDEconomyUpdateMatrixS(void) {
     // fill a matrix with random numbers

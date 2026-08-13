@@ -34,6 +34,8 @@ find_path (CPPUNIT_INCLUDE_DIR
                /usr/include
                # MacPorts
                /opt/local/include
+               # Homebrew
+               /opt/homebrew/include
                # Windows, many options
                C:/cppunit-1.12.1/include
                C:/cppunit-1.12.0/include
@@ -49,16 +51,21 @@ if (WIN32)
                 ${CPPUNIT_INCLUDE_DIR}/../lib
                 /usr/local/lib
                 /usr/lib)
+  if (CPPUNIT_LIBRARY AND NOT CPPUNIT_DEBUG_LIBRARY)
+    set (CPPUNIT_DEBUG_LIBRARY ${CPPUNIT_LIBRARY} CACHE FILEPATH "CppUnit debug library" FORCE)
+  endif ()
 else (WIN32)
   # On unix system, debug and release have the same name
   find_library (CPPUNIT_LIBRARY cppunit
                 ${CPPUNIT_INCLUDE_DIR}/../lib
                 /usr/local/lib
-                /usr/lib)
+                /usr/lib
+                /opt/homebrew/lib)
   find_library (CPPUNIT_DEBUG_LIBRARY cppunit
                 ${CPPUNIT_INCLUDE_DIR}/../lib
                 /usr/local/lib
-                /usr/lib)
+                /usr/lib
+                /opt/homebrew/lib)
 endif (WIN32)
 
 set (CPPUNIT_FOUND OFF)
@@ -67,9 +74,20 @@ if (CPPUNIT_INCLUDE_DIR)
     set (CPPUNIT_FOUND ON)
     set (CPPUNIT_LIBRARIES ${CPPUNIT_LIBRARY} ${CMAKE_DL_LIBS})
     set (CPPUNIT_DEBUG_LIBRARIES ${CPPUNIT_DEBUG_LIBRARY} ${CMAKE_DL_LIBS})
+    if (NOT TARGET CppUnit::CppUnit)
+      add_library (CppUnit::CppUnit UNKNOWN IMPORTED)
+      set_target_properties (CppUnit::CppUnit PROPERTIES
+                             INTERFACE_INCLUDE_DIRECTORIES "${CPPUNIT_INCLUDE_DIR}"
+                             IMPORTED_LOCATION "${CPPUNIT_LIBRARY}"
+                             IMPORTED_LOCATION_RELEASE "${CPPUNIT_LIBRARY}"
+                             IMPORTED_LOCATION_DEBUG "${CPPUNIT_DEBUG_LIBRARY}")
+      if (CMAKE_DL_LIBS)
+        set_property (TARGET CppUnit::CppUnit APPEND PROPERTY
+                      INTERFACE_LINK_LIBRARIES ${CMAKE_DL_LIBS})
+      endif ()
+    endif ()
     mark_as_advanced (CPPUNIT_LIBRARIES CPPUNIT_DEBUG_LIBRARIES
                       CPPUNIT_LIBRARY   CPPUNIT_DEBUG_LIBRARY
                       CPPUNIT_FOUND CPPUNIT_INCLUDE_DIR)
   endif (CPPUNIT_LIBRARY)
 endif (CPPUNIT_INCLUDE_DIR)
-

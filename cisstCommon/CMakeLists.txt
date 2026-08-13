@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2005-2024 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -26,23 +26,18 @@ if (CISST_HAS_QT)
   add_subdirectory (codeQt)
 endif (CISST_HAS_QT)
 
-# set option to compile cisstCommonXML, default is on is either libxml2 or Qt has been found
-if (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
-  option (CISST_cisstCommonXML "Build cisstCommonXML" ON)
-else (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
-  option (CISST_cisstCommonXML "Build cisstCommonXML" OFF)
-endif (CISST_FOUND_LIBXML2_XML OR CISST_FOUND_QT_XML)
-
-# if on, include cisstCommonXML and let parent directory know for cisst-config.cmake
+# if on, include cisstCommonXML and expose XML support to local tests/headers
 if (CISST_cisstCommonXML)
   add_subdirectory (codeXML)
   set (CISST_HAS_XML ON PARENT_SCOPE) # to generate cisstConfig.h properly
   set (CISST_HAS_XML ON) # both seems needed so sub-directory "tests" also knows if CISST_HAS_XML
 
   # Add cisstCommonXML if needed
-  if (CISST_HAS_XML)
+  list (FIND CISST_LIBRARIES cisstCommonXML _cisstCommonXML_index)
+  if (CISST_HAS_XML AND ${_cisstCommonXML_index} EQUAL -1)
     set (CISST_LIBRARIES cisstCommonXML ${CISST_LIBRARIES} PARENT_SCOPE)
-  endif (CISST_HAS_XML)
+  endif ()
+  unset (_cisstCommonXML_index)
 
 else (CISST_cisstCommonXML)
   set (CISST_HAS_XML OFF PARENT_SCOPE)

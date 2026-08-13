@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-02-12
 
-  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <iostream>
@@ -223,12 +223,12 @@ std::string mtsCollectorEvent::GetDefaultOutputName(void)
 mtsComponent * mtsCollectorEvent::CheckComponent(const std::string & componentName) const
 {
     // todo, replace with GetComponent when available
-    mtsComponent * componentPointer = ComponentManager->GetComponent(componentName);
+    mtsComponent * componentPointer = GetManagerComponentServices()->ComponentGet(componentName);
     if (!componentPointer) {
         CMN_LOG_CLASS_INIT_ERROR << "component \"" << componentName
                                  << "\" not found in component manager for collector \""
                                  << this->GetName() << "\". Available components "
-                                 << cmnDataVectorHumanReadable(ComponentManager->GetNamesOfComponents()) << std::endl;
+                                 << cmnDataVectorHumanReadable(GetManagerComponentServices()->GetNamesOfComponents()) << std::endl;
     }
     return componentPointer;
 }
@@ -266,7 +266,7 @@ bool mtsCollectorEvent::AddObservedComponent(const mtsComponent * componentPoint
     // check if this task has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObservedComponent: collector \"" << this->GetName()
-                                 << "\" is already connected, you can not add an observed component" << std::endl;
+                                 << "\" is already connected, you cannot add an observed component" << std::endl;
         return false;
     }
     CMN_LOG_CLASS_INIT_DEBUG << "AddObservedComponent: adding component \""
@@ -311,7 +311,7 @@ bool mtsCollectorEvent::AddObservedInterface(const mtsComponent * componentPoint
     // check if this task has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObservedInterface: collector \"" << this->GetName()
-                                 << "\" is already connected, you can not add an observed interface" << std::endl;
+                                 << "\" is already connected, you cannot add an observed interface" << std::endl;
         return false;
     }
     CMN_ASSERT(componentPointer);
@@ -386,7 +386,7 @@ bool mtsCollectorEvent::AddObservedEventVoid(const mtsComponent * componentPoint
     // check if this task has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObservedEventVoid: collector \"" << this->GetName()
-                                 << "\" is already connected, you can not add an observed event" << std::endl;
+                                 << "\" is already connected, you cannot add an observed event" << std::endl;
         return false;
     }
     CMN_ASSERT(componentPointer);
@@ -423,7 +423,7 @@ bool mtsCollectorEvent::AddObservedEventWrite(const mtsComponent * componentPoin
     // check if this task has already been connected
     if (this->ConnectedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "AddObservedEventWrite: collector \"" << this->GetName()
-                                 << "\" is already connected, you can not add an observed event" << std::endl;
+                                 << "\" is already connected, you cannot add an observed event" << std::endl;
         return false;
     }
     CMN_ASSERT(componentPointer);
@@ -475,8 +475,8 @@ bool mtsCollectorEvent::Connect(void)
                                      << "\" to \""
                                      << iterComponents->first << "::" << iterInterfaces->first
                                      << "\"" << std::endl;
-            if (!ComponentManager->Connect(this->GetName(), iterInterfaces->second->GetName(),
-                                           iterComponents->first, iterInterfaces->first)) {
+            if (GetManagerComponentServices()->Connect(this->GetName(), iterInterfaces->second->GetName(),
+                                                       iterComponents->first, iterInterfaces->first)) {
                 CMN_LOG_CLASS_INIT_ERROR << "Connect: connect failed for required interface \""
                                          << this->GetName() << "::" << iterInterfaces->second->GetName()
                                          << "\" to \""
@@ -500,7 +500,7 @@ void mtsCollectorEvent::SaveEventVoid(const CollectorEventVoid * event)
             this->OpenFileIfNeeded();
             this->PrintHeader(this->FileFormat);
         }
-        *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime()
+        *(this->OutputStream) << mtsManagerLocal::GetInstance()->GetTimeServer().GetRelativeTime()
                               << this->Delimiter << event->EventId << std::endl;
         this->SampleCounter++;
         this->SampleCounterForEvent++;
@@ -517,7 +517,7 @@ void mtsCollectorEvent::SaveEventWrite(const CollectorEventWrite * event, const 
             this->OpenFileIfNeeded();
             this->PrintHeader(this->FileFormat);
         }
-        *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime()
+        *(this->OutputStream) << mtsManagerLocal::GetInstance()->GetTimeServer().GetRelativeTime()
                               << this->Delimiter << event->EventId << this->Delimiter;
         payload.ToStreamRaw(*(this->OutputStream), this->Delimiter);
         *(this->OutputStream) << std::endl;

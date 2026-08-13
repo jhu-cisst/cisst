@@ -1,7 +1,7 @@
 # initial CMake cache values for travis.ci builds
 
-# Use external projects, mostly to get recent version of libcpp on Ubuntu 16.04
-set (CISST_USE_EXTERNAL OFF CACHE BOOL "")
+# Use external projects for dependencies not provided by the Windows runner.
+set (CISST_USE_EXTERNAL ON CACHE BOOL "")
 
 # Compile for shared libraries
 set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "")
@@ -20,7 +20,9 @@ set (CISST_cisstCommonXML OFF CACHE BOOL "")
 set (CISST_HAS_JSON ON CACHE BOOL "")
 
 # Unit tests
-set (CISST_BUILD_TESTS OFF CACHE BOOL "")
+set (CISST_BUILD_TESTS ON CACHE BOOL "")
+set (CISST_cisstRobot_TESTS OFF CACHE BOOL "")
+set (CISST_cisstMesh_TESTS OFF CACHE BOOL "")
 
 # Build examples
 set (CISST_BUILD_EXAMPLES OFF CACHE BOOL "")
@@ -30,5 +32,5 @@ set (CISSTNETLIB_USE_LOCAL_INSTALL ON CACHE BOOL "")
 set (CISST_HAS_CISSTNETLIB ON CACHE BOOL "")
 
 # Qt
-set (CISST_HAS_QT5 ON CACHE BOOL "")
+set (CISST_QT_VERSION 5 CACHE STRING "")
 set (CISST_HAS_QTNODES ON CACHE BOOL "")

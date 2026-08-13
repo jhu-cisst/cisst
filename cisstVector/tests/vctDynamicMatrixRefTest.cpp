@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-11-17
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -483,7 +483,29 @@ void vctDynamicMatrixRefTest::TestSTLFunctionsInt(void) {
     TestSTLFunctions<int>();
 }
 
+template <class _elementType>
+void vctDynamicMatrixRefTest::TestRandomTemporaryRef(void) {
+    typedef _elementType value_type;
+    CREATE_STORAGE_AND_REF(1);
+    matrix1.SetAll(value_type(100));
+
+    vctRandom(vctDynamicMatrixRef<value_type>(matrix1.rows(), matrix1.cols(),
+                                              matrix1.row_stride(), matrix1.col_stride(),
+                                              matrix1.Pointer()),
+              value_type(-10), value_type(10));
+
+    vctGenericContainerTest::TestElementsInRange(matrix1, value_type(-10), value_type(10));
+}
+
+void vctDynamicMatrixRefTest::TestRandomTemporaryRefDouble(void) {
+    TestRandomTemporaryRef<double>();
+}
+void vctDynamicMatrixRefTest::TestRandomTemporaryRefFloat(void) {
+    TestRandomTemporaryRef<float>();
+}
+void vctDynamicMatrixRefTest::TestRandomTemporaryRefInt(void) {
+    TestRandomTemporaryRef<int>();
+}
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctDynamicMatrixRefTest);
-

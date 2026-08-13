@@ -1,6 +1,7 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
 
+// [doc-filter2-cpp-start]
 #include "CMyFilter2.h"
 
 
@@ -41,4 +42,5 @@ int CMyFilter2::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* 
                                                                             //
     return SVL_OK;                                                          //
 }
+// [doc-filter2-cpp-end]
 

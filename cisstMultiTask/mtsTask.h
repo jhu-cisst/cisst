@@ -5,7 +5,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2033 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -103,6 +103,14 @@ protected:
     /*! Callable object used when queueing. */
     mtsCallableVoidBase * InterfaceProvidedToManagerCallable;
 
+    /*! Get pointer to manager component services, which extends the internal required interface
+      to the Manager Component Client (MCS).  Returns a const pointer; internal methods
+      that need a non-const pointer can directly access ManagerComponentServices.
+      This method checks if the internal interface is connected; if not, it returns services
+      from mtsManagerLocal. */
+    using mtsComponent::GetManagerComponentServices;
+    virtual const mtsManagerComponentServices *GetManagerComponentServices(void) const override;
+
     /******************** ExecIn interface *************************/
 
     /*! ExecIn required interface. */
@@ -165,7 +173,8 @@ protected:
 
     /*********** Methods for changing task state **************************/
 
-    /* documented in base class */
+    /* Change to desired state (newState). The change is protected by a mutex
+       so can be called from another thread. */
     void ChangeState(mtsComponentState::Enum newState);
 
     /* documented in base class */
@@ -251,8 +260,7 @@ public:
 
     /* documented in base class */
     mtsInterfaceProvided * AddInterfaceProvidedWithoutSystemEvents(const std::string & newInterfaceName,
-                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY,
-                                                                   bool isProxy = false) override;
+                                                                   mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY) override;
 
     /********************* Methods for task synchronization ***************/
 
