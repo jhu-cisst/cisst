@@ -31,6 +31,9 @@ http://www.cisst.org/cisst/license.txt.
 
 %import "cisstConfig.h"
 
+// cmnJointType is imported through cisstCommon and encountered again through
+// generated parameter headers; SWIG reports the harmless duplicate enum.
+%warnfilter(302) cmnJointType;
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
 %import "cisstMultiTask/cisstMultiTask.i"
@@ -48,6 +51,30 @@ http://www.cisst.org/cisst/license.txt.
 
 #define CISST_EXPORT
 #define CISST_DEPRECATED
+
+// Deprecated members are kept in the C++ API for source compatibility, but
+// should not be exposed by the Python bindings.
+%ignore prmPositionJointSet::prmPositionJointSet;
+%ignore prmPositionJointSet::SetSize;
+%ignore prmPositionJointSet::Deceleration;
+%ignore prmPositionJointSet::Mask;
+%ignore prmPositionJointSet::BlockingFlag;
+%ignore prmPositionJointSet::BlendingFactor;
+%ignore prmPositionJointSet::IsPreemptable;
+%ignore prmPositionJointSet::IsGoalOnly;
+
+%ignore prmPositionCartesianSet::BlockingFlag;
+%ignore prmPositionCartesianSet::BlendingFactor;
+%ignore prmPositionCartesianSet::IsPreemptable;
+%ignore prmPositionCartesianSet::IsGoalOnly;
+
+%ignore prmForceTorqueJointSet::prmForceTorqueJointSet;
+%ignore prmForceTorqueJointSet::SetSize;
+%ignore prmForceTorqueJointSet::Mask;
+%ignore prmForceTorqueJointSet::BlockingFlag;
+%ignore prmForceTorqueJointSet::BlendingFactor;
+%ignore prmForceTorqueJointSet::IsPreemptable;
+%ignore prmForceTorqueJointSet::IsGoalOnly;
 
 // Import file with macros and typedefs
 %import "cisstMultiTask/mtsMacros.h"
