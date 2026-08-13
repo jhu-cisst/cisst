@@ -152,11 +152,19 @@ http://www.cisst.org/cisst/license.txt.
     %}
 }
 
+// These operators have no useful Python method representation.
+%ignore cmnGenericObjectProxy::operator=;
+%ignore cmnGenericObjectProxy::operator const value_type&;
+
 // Wrap some basic types
 %include "cisstCommon/cmnGenericObjectProxy.h"
 %define CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(name, elementType)
     // ignore the operator &
     %ignore cmnGenericObjectProxy<elementType>::operator value_type&;
+    // assignment and conversion operators are not representable as Python
+    // methods and are intentionally not wrapped
+    %ignore cmnGenericObjectProxy<elementType>::operator=;
+    %ignore cmnGenericObjectProxy<elementType>::operator const value_type&;
     // Instantiate the template
     %template(name) cmnGenericObjectProxy<elementType>;
     // Type addition for dynamic type checking
