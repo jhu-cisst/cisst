@@ -173,7 +173,7 @@ See examples with inlined comments:
 CMake
 -----
 
-We provide a CMake macro that simplifies the build process. This macro manages the dependencies as well as build rules between the description file, generated header and source files and object files. The macro is defined in the file ``cisstMacros.cmake`` which is automatically included when you ``include (${CISST_USE_FILE})`` in your ``CMakeLists.txt``. Here are two examples of use:
+We provide a CMake macro that simplifies the build process. This macro manages the dependencies as well as build rules between the description file, generated header and source files and object files. The macro is defined in ``cisstMacros.cmake`` and is loaded automatically by ``find_package (cisst ...)``; see :ref:`cmake-for-cisst-users`. Here are two examples of use:
 
 .. code:: cmake
 
