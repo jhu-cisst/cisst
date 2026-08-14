@@ -16,7 +16,7 @@
 cmake_minimum_required (VERSION 3.16)
 
 # cisst (Computer Integrated Surgical Systems and Technology)
-project (cisst VERSION 1.4.0)
+project (cisst VERSION 1.5.0)
 
 # Provide a dropdown for CMAKE_BUILD_TYPE in ccmake/cmake-gui
 if (NOT CMAKE_BUILD_TYPE)
