@@ -53,6 +53,9 @@ void * mtsTaskContinuous::RunInternal(void *data)
         currentState = this->State;
     }
 
+    if (this->State == mtsComponentState::FINISHING)
+        RunFinal();
+
     CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: ending task " << this->GetName() << std::endl;
     CleanupInternal();
     return this->ReturnValue;

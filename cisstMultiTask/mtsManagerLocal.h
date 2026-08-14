@@ -119,6 +119,12 @@ protected:
 
 public:
 
+    /*! Strategy used to select the order in which components are stopped. */
+    typedef enum {
+        MAP_ORDER,       /*!< Component map order (the historical behavior). */
+        DEPENDENCIES     /*!< Stop components with no remaining users first. */
+    } KillAllStrategy;
+
     /*! Get a singleton object of local component manager.
     */
     static mtsManagerLocal * GetInstance(void);
@@ -262,11 +268,14 @@ public:
     bool StartAllAndWait(double timeoutInSeconds);
 
     /*! \brief Stop all components. If a component is of type mtsTask,
-      mtsTask::Kill() is called internally. */
-    void KillAll(void);
+      mtsTask::Kill() is called internally.  DEPENDENCIES orders Kill calls
+      from components with no users towards their providers; as this method
+      does not wait, it does not guarantee Cleanup ordering. */
+    void KillAll(KillAllStrategy strategy = MAP_ORDER);
 
-    /*! Call KillAll method followed by WaitForStateAll. */
-    bool KillAllAndWait(double timeoutInSeconds);
+    /*! Stop all components and wait for completion.  With DEPENDENCIES, wait
+      for each dependency layer before stopping its providers. */
+    bool KillAllAndWait(double timeoutInSeconds, KillAllStrategy strategy = MAP_ORDER);
 
     //-------------------------------------------------------------------------
     //  Connection Management

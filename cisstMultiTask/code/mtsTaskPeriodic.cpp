@@ -57,6 +57,9 @@ void * mtsTaskPeriodic::RunInternal(void *data)
         currentState = this->State;
     }
 
+    if (this->State == mtsComponentState::FINISHING)
+        RunFinal();
+
     CMN_LOG_CLASS_RUN_VERBOSE << "RunInternal: End of task " << Name << std::endl;
     CleanupInternal();
     return this->ReturnValue;

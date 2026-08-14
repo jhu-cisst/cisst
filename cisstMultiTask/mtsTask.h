@@ -146,6 +146,10 @@ protected:
         This should not be overloaded. */
     void DoRunInternal(void);
 
+    /*! Run one final queue-draining iteration from the task thread before
+        cleanup. */
+    virtual void RunFinal(void);
+
     /*! The member funtion that is executed as soon as the thread gets created.
       It does some housekeeping before the user code can be executed. */
     virtual void StartupInternal(void);
@@ -318,4 +322,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsTask)
 
 
 #endif // _mtsTask_h
-

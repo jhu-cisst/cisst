@@ -89,6 +89,7 @@ void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
     }
 
     if (this->State == mtsComponentState::FINISHING) {
+        RunFinal();
         CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: end of task \"" << this->GetName() << "\"" << std::endl;
         this->CleanupInternal();
     }

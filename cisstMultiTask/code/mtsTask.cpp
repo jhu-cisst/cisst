@@ -69,6 +69,11 @@ void mtsTask::DoRunInternal(void)
     RunEvent();  // only generates event if RunEventCalled is false
 }
 
+void mtsTask::RunFinal(void)
+{
+    this->DoRunInternal();
+}
+
 void mtsTask::RunEventHandler(void)
 {
     RunEventCalled = false;

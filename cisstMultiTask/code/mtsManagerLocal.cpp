@@ -40,9 +40,140 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
 
+#include <algorithm>
+#include <set>
+
 // Time server used by all tasks
 osaTimeServer TimeServer;
 bool TimeServerOriginSet = false;
+
+namespace {
+
+typedef std::vector<std::vector<std::string> > mtsKillBatches;
+
+int mtsShutdownTagPriority(const mtsComponent * component)
+{
+    if (!component) {
+        return 2;
+    }
+    const std::set<std::string> & tags = component->GetTags();
+    if (tags.find("GUI") != tags.end() || tags.find("UI") != tags.end()) {
+        return 0;
+    }
+    if (tags.find("ROS") != tags.end()) {
+        return 1;
+    }
+    return 2;
+}
+
+void mtsSortCycleComponents(std::vector<std::string> & components,
+                            const mtsManagerComponentServices * services)
+{
+    std::stable_sort(components.begin(), components.end(),
+                     [services](const std::string & left, const std::string & right) {
+        const int leftPriority = mtsShutdownTagPriority(services->ComponentGet(left));
+        const int rightPriority = mtsShutdownTagPriority(services->ComponentGet(right));
+        return leftPriority != rightPriority
+            ? leftPriority < rightPriority
+            : left < right;
+    });
+}
+
+mtsKillBatches mtsComputeDependencyKillBatches(
+    const std::vector<std::string> & componentNames,
+    const std::vector<mtsDescriptionConnection> & connections,
+    const mtsManagerComponentServices * services)
+{
+    std::set<std::string> remaining;
+    for (std::vector<std::string>::const_iterator component = componentNames.begin();
+         component != componentNames.end(); ++component) {
+        if (!mtsManagerComponentBase::IsManagerComponent(*component)) {
+            remaining.insert(*component);
+        }
+    }
+
+    mtsKillBatches batches;
+    while (!remaining.empty()) {
+        // A server has a user if another component still has an interface
+        // connected to one of its provided/output interfaces.
+        std::vector<std::string> batch(remaining.begin(), remaining.end());
+        for (std::vector<mtsDescriptionConnection>::const_iterator connection = connections.begin();
+             connection != connections.end(); ++connection) {
+            if ((remaining.find(connection->Client.ComponentName) != remaining.end())
+                && (remaining.find(connection->Server.ComponentName) != remaining.end())) {
+                batch.erase(std::remove(batch.begin(), batch.end(),
+                                        connection->Server.ComponentName), batch.end());
+            }
+        }
+
+        if (batch.empty()) {
+            // A cyclic dependency has no component without a user. Apply the
+            // explicit fallback priority and stop the remaining cycle together.
+            batch.assign(remaining.begin(), remaining.end());
+            mtsSortCycleComponents(batch, services);
+            CMN_LOG_RUN_WARNING << "KillAll: dependency cycle detected; stopping "
+                                << batch.size() << " remaining components together" << std::endl;
+        }
+
+        batches.push_back(batch);
+        for (std::vector<std::string>::const_iterator component = batch.begin();
+             component != batch.end(); ++component) {
+            remaining.erase(*component);
+        }
+    }
+    return batches;
+}
+
+void mtsKillComponents(const std::vector<std::string> & componentNames,
+                       const mtsManagerComponentServices * services)
+{
+    for (std::vector<std::string>::const_iterator componentName = componentNames.begin();
+         componentName != componentNames.end(); ++componentName) {
+        mtsComponent * component = services->ComponentGet(*componentName);
+        if (component) {
+            component->Kill();
+        } else {
+            CMN_LOG_RUN_DEBUG << "KillAll: null component \""
+                              << *componentName << "\"" << std::endl;
+        }
+    }
+}
+
+bool mtsWaitForComponents(const std::vector<std::string> & componentNames,
+                          const mtsManagerComponentServices * services,
+                          const double timeEnd,
+                          const bool logFailure = true)
+{
+    for (std::vector<std::string>::const_iterator componentName = componentNames.begin();
+         componentName != componentNames.end(); ++componentName) {
+        mtsComponent * component = services->ComponentGet(*componentName);
+        if (!component) {
+            continue;
+        }
+        // Match WaitForStateAll behavior: an ExecIn task is driven by its
+        // owner and cannot be waited on independently.
+        mtsTask * task = dynamic_cast<mtsTask *>(component);
+        mtsInterfaceRequired * execIn = task
+            ? task->GetInterfaceRequired(mtsManagerComponentBase::InterfaceNames::InterfaceExecIn)
+            : 0;
+        if (execIn && execIn->GetConnectedInterface()) {
+            continue;
+        }
+        const double timeLeft = timeEnd - TimeServer.GetRelativeTime();
+        if ((timeLeft <= 0.0)
+            || !component->WaitForState(mtsComponentState::FINISHED, timeLeft)) {
+            if (logFailure) {
+            CMN_LOG_RUN_ERROR << "KillAllAndWait: component \"" << *componentName
+                              << "\" failed to reach state \""
+                              << mtsComponentState::FINISHED << "\"" << std::endl;
+            }
+            return false;
+        }
+    }
+    return true;
+}
+
+}
 
 mtsManagerLocal * mtsManagerLocal::Instance = 0;
 
@@ -1023,25 +1154,31 @@ bool mtsManagerLocal::StartAllAndWait(double timeoutInSeconds)
 }
 
 
-void mtsManagerLocal::KillAll(void)
+void mtsManagerLocal::KillAll(KillAllStrategy strategy)
 {
     std::vector<std::string> componentNames = GetNamesOfComponents();
-    std::vector<std::string>::const_iterator iterator = componentNames.begin();
-    const std::vector<std::string>::const_iterator end = componentNames.end();
-
     const mtsManagerComponentServices *services = GetManagerComponentServices();
 
-    for (; iterator != end; ++iterator) {
-        if (mtsManagerComponentBase::IsManagerComponent(*iterator))
-            continue;
-        mtsComponent *component = services->ComponentGet(*iterator);
-        if (component) {
-            component->Kill();
+    if (strategy == DEPENDENCIES) {
+        const mtsKillBatches batches = mtsComputeDependencyKillBatches(
+            componentNames, services->GetListOfConnections(), services);
+        for (mtsKillBatches::const_iterator batch = batches.begin();
+             batch != batches.end(); ++batch) {
+            mtsKillComponents(*batch, services);
+            // Allow the stopped batch to run its final drain before stopping
+            // providers in the next dependency layer.
+            mtsWaitForComponents(*batch, services,
+                                 TimeServer.GetRelativeTime() + 0.1, false);
         }
-        else {
-            CMN_LOG_CLASS_RUN_DEBUG << "KillAll: null component \""
-                                    << (*iterator) << "\"" << std::endl;
+    } else {
+        std::vector<std::string> components;
+        for (std::vector<std::string>::const_iterator component = componentNames.begin();
+             component != componentNames.end(); ++component) {
+            if (!mtsManagerComponentBase::IsManagerComponent(*component)) {
+                components.push_back(*component);
+            }
         }
+        mtsKillComponents(components, services);
     }
 
     // Block further logs
@@ -1050,10 +1187,30 @@ void mtsManagerLocal::KillAll(void)
 }
 
 
-bool mtsManagerLocal::KillAllAndWait(double timeoutInSeconds)
+bool mtsManagerLocal::KillAllAndWait(double timeoutInSeconds, KillAllStrategy strategy)
 {
-    this->KillAll();
-    return this->WaitForStateAll(mtsComponentState::FINISHED, timeoutInSeconds);
+    if (strategy == MAP_ORDER) {
+        this->KillAll(MAP_ORDER);
+        return this->WaitForStateAll(mtsComponentState::FINISHED, timeoutInSeconds);
+    }
+
+    const mtsManagerComponentServices * services = GetManagerComponentServices();
+    const mtsKillBatches batches = mtsComputeDependencyKillBatches(
+        GetNamesOfComponents(), services->GetListOfConnections(), services);
+    const double timeEnd = TimeServer.GetRelativeTime() + timeoutInSeconds;
+
+    for (mtsKillBatches::const_iterator batch = batches.begin();
+         batch != batches.end(); ++batch) {
+        mtsKillComponents(*batch, services);
+        if ((timeoutInSeconds > 0.0) && !mtsWaitForComponents(*batch, services, timeEnd)) {
+            return false;
+        }
+    }
+
+    // Match KillAll behavior after components have been stopped.
+    LogDisabled = true;
+    SetLogForwarding(false);
+    return true;
 }
 
 
