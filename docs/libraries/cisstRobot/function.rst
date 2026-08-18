@@ -8,7 +8,7 @@ In this tutorial, robLinear is first used as an example showing basic use of rob
 robFunction
 ===========
 
-The question here given two positions (start, stop), how do you interpolate points between them. For simplicity, let's consider R2 space. If we put in real number, start position is q0 = [0, 0] and stop position is q1 = [pi, pi]. One simple approach is to use linear interpolation. So first joint position time series would be like 0, 0.1, 0.2, 0.3, ...., 0.9, 1.0. robLinearRn does exactly that for you and the interface is simple. In the constructor, all you need to do is to pass start position, stop position, max velocity constraint and start time. And then later, you can pass current time and get interpolated position, velocity and acceleration. See `mainLinearRn.cpp </jhu-cisst/cisst/tree/main/cisstRobot/examples/mainLinearRn.cpp>`__
+The question here given two positions (start, stop), how do you interpolate points between them. For simplicity, let's consider R2 space. If we put in real number, start position is q0 = [0, 0] and stop position is q1 = [pi, pi]. One simple approach is to use linear interpolation. So first joint position time series would be like 0, 0.1, 0.2, 0.3, ...., 0.9, 1.0. robLinearRn does exactly that for you and the interface is simple. In the constructor, all you need to do is to pass start position, stop position, max velocity constraint and start time. And then later, you can pass current time and get interpolated position, velocity and acceleration. See `mainLinearRn.cpp <https://github.com/jhu-cisst/cisst/tree/main/cisstRobot/examples/mainLinearRn.cpp>`__
 
 .. code:: cpp
 
@@ -24,7 +24,7 @@ The question here given two positions (start, stop), how do you interpolate poin
 Compare robLinear and robQuintic
 --------------------------------
 
-So you know how to use robLinear now, then what is the difference between different robFunctionRn? Good question, short answer is they apply different algorithm for interpolation. Let's use robLinearRn and robQuintic as an example. See `mainQuinticRn.cpp </jhu-cisst/cisst/tree/main/cisstRobot/examples/mainQuinticRn.cpp>`__
+So you know how to use robLinear now, then what is the difference between different robFunctionRn? Good question, short answer is they apply different algorithm for interpolation. Let's use robLinearRn and robQuintic as an example. See `mainQuinticRn.cpp <https://github.com/jhu-cisst/cisst/tree/main/cisstRobot/examples/mainQuinticRn.cpp>`__
 
 In this example, we use robLinearRn and robQuintic to interpolate between q0 and q1. And later in the while loop log the output of these two to two seperate log files.
 
@@ -44,7 +44,7 @@ In this example, we use robLinearRn and robQuintic to interpolate between q0 and
                           tstop,
                           q1, qd1, qdd1);
 
-Once, we get the data, then a Matlab script `QuinticRn.m </jhu-cisst/cisst/tree/main/cisstRobot/examples/QuinticRn.m>`__ takes the two log file and plot them.
+Once, we get the data, then a Matlab script `QuinticRn.m <https://github.com/jhu-cisst/cisst/tree/main/cisstRobot/examples/QuinticRn.m>`__ takes the two log file and plot them.
 
 .. image:: images/LinearVSQuintic.png
    :alt: robLinear vs robQuintic

@@ -182,7 +182,7 @@ A well defined component can be:
 -  interfaced to OpenIGTLink with little or no code (see https://github.com/jhu-saw/sawOpenIGTLink)
 -  integrated in a Qt application using cisst Qt widgets
 
-To make sure components are inter-changeable, interfaces should be as standardized as possible and follow the `CRTK API </collaborative-robotics/documentation/wiki/Robot-API>`__.
+To make sure components are inter-changeable, interfaces should be as standardized as possible and follow the `CRTK API <https://github.com/collaborative-robotics/documentation/wiki/Robot-API>`__.
 
 Directories
 -----------
@@ -213,7 +213,7 @@ Components can also be dynamically loaded and connected. There are two main ways
 C++ dynamic loading
 ~~~~~~~~~~~~~~~~~~~
 
-You can use the ``mtsComponentManager`` to load the component's shared library, dynamically create and configure an instance of the component's class and finally connect it to other components. This can also be performed using a JSON configuration file. The following example can be found in ```sawSensablePhantom`` <https://github.com/jhu-saw/sawSensablePhantom>`__\ ``/share/igtl``. The file ``manager-igtl-default.json`` contains the name of the shared library to load, the class name and parameter to use when instantiating the class (i.e., constructor parameter):
+You can use the ``mtsComponentManager`` to load the component's shared library, dynamically create and configure an instance of the component's class and finally connect it to other components. This can also be performed using a JSON configuration file. The following example can be found in `sawSensablePhantom <https://github.com/jhu-saw/sawSensablePhantom>`__ ``/share/igtl``. The file ``manager-igtl-default.json`` contains the name of the shared library to load, the class name and parameter to use when instantiating the class (i.e., constructor parameter):
 
 .. code:: json
 
@@ -232,12 +232,12 @@ You can use the ``mtsComponentManager`` to load the component's shared library, 
        ]
    }
 
-The last parameter (``configure-parameter``) is the file used to configure the bridge. In this case, we are creating an OpenIGTLBridge for our device, a Sensable Phantom haptic device. Once the components are connected, the cisst/SAW program will be able to send data and receive commands over OpenIGTLink (mostly likely with `Slicer <https://www.slicer.org>`__). The configuration file format depends on the SAW component (see ``igtl-default.json`` in ```sawSensablePhatom`` <https://github.com/jhu-saw/sawSensablePhantom>`__\ ``/share``)
+The last parameter (``configure-parameter``) is the file used to configure the bridge. In this case, we are creating an OpenIGTLBridge for our device, a Sensable Phantom haptic device. Once the components are connected, the cisst/SAW program will be able to send data and receive commands over OpenIGTLink (mostly likely with `Slicer <https://www.slicer.org>`__). The configuration file format depends on the SAW component (see ``igtl-default.json`` in `sawSensablePhantom <https://github.com/jhu-saw/sawSensablePhantom>`__ ``/share``)
 
 Python
 ~~~~~~
 
-Using the *cisst* Python wrappers, it is also possible to dynamically load the component's library, and create and configure an instance of the component. Once the component is created, you can then create a Python proxy (acts like a bridge). The proxy will be created with an interface (*required interface*) that will match the component's interface (*provided interface*). Once the proxy is connected to the device's component, you can use Python to receive data and send commands to the device. You can find a *cisstMultiTask* Python example in ```sawNDITracker`` <https://github.com/jhu-saw/sawNDITracker/>`__\ ``/examples/mainPython.py``. The main commands used are:
+Using the *cisst* Python wrappers, it is also possible to dynamically load the component's library, and create and configure an instance of the component. Once the component is created, you can then create a Python proxy (acts like a bridge). The proxy will be created with an interface (*required interface*) that will match the component's interface (*provided interface*). Once the proxy is connected to the device's component, you can use Python to receive data and send commands to the device. You can find a *cisstMultiTask* Python example in `sawNDITracker <https://github.com/jhu-saw/sawNDITracker>`__ ``/examples/mainPython.py``. The main commands used are:
 
 -  ``services.Load``: load the component's shared library
 -  ``services.ComponentCreate``: dynamically create the component

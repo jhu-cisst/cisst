@@ -166,9 +166,9 @@ See examples with inlined comments:
 
 -  Classes not used with cisstMultiTask: `demoData.cdg <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/examples/dataGenerator/demoData.cdg>`__
 -  Classes used with cisstMultiTask:
--  `mtsComponentState.cdg </jhu-cisst/cisst/blob/main/cisstMultiTask/mtsComponentState.cdg>`__ and user implementation for extra code `mtsComponentState.cpp </jhu-cisst/cisst/blob/main/cisstMultiTask/code/mtsComponentState.cpp>`__. This class uses macros to implement the proxy pattern (see the ``mtsGenericObjectProxy`` definition at the end of the ``cdg`` file).
--  `prmPositionCartesianGet.cdg </jhu-cisst/cisst/blob/main/cisstParameterTypes/prmPositionCartesianGet.cdg>`__. This class is derived from ``mtsGenericObject``
--  `prmPositionJointGet.cdg </jhu-cisst/cisst/blob/main/cisstParameterTypes/prmPositionJointGet.cdg>`__. This class is derived from ``mtsGenericObject``
+-  `mtsComponentState.cdg <https://github.com/jhu-cisst/cisst/blob/main/cisstMultiTask/mtsComponentState.cdg>`__ and user implementation for extra code `mtsComponentState.cpp <https://github.com/jhu-cisst/cisst/blob/main/cisstMultiTask/code/mtsComponentState.cpp>`__. This class uses macros to implement the proxy pattern (see the ``mtsGenericObjectProxy`` definition at the end of the ``cdg`` file).
+-  `prmPositionCartesianGet.cdg <https://github.com/jhu-cisst/cisst/blob/main/cisstParameterTypes/prmPositionCartesianGet.cdg>`__. This class is derived from ``mtsGenericObject``
+-  `prmPositionJointGet.cdg <https://github.com/jhu-cisst/cisst/blob/main/cisstParameterTypes/prmPositionJointGet.cdg>`__. This class is derived from ``mtsGenericObject``
 
 CMake
 -----

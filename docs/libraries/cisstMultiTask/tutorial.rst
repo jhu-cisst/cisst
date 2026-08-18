@@ -5,7 +5,7 @@ In this tutorial we will create two simple components. The first component is a 
 
 The second component ``user`` is designed to be connected to the ``counter`` component. In this example, we're avoiding using a GUI toolkit to make the code as simple as possible. The user interface is text based.
 
-The latest version of the code for this tutorial can be compiled along the *cisst* using the CMake options ``CISST_BUILD_EXAMPLES`` and ``CISST_cisstMultiTask_EXAMPLES``. The code itself can be found in ```cisst/cisstMultiTask/examples/tutorial`` </jhu-cisst/cisst/tree/main/cisstMultiTask/examples/tutorial>`__
+The latest version of the code for this tutorial can be compiled along the *cisst* using the CMake options ``CISST_BUILD_EXAMPLES`` and ``CISST_cisstMultiTask_EXAMPLES``. The code itself can be found in `cisst/cisstMultiTask/examples/tutorial <https://github.com/jhu-cisst/cisst/tree/main/cisstMultiTask/examples/tutorial>`__.
 
 Counter component
 -----------------
