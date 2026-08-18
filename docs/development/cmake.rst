@@ -47,7 +47,7 @@ CMake for cisst Developers
 
 For the cisst libraries developers, we have a few important macros that should be used to maintain the consistency of the CMake configuration:
 
--  ``cisst_add_library``: this macro is used to add a new library. For example, the \`cisstVectorQt CMakeLists.txt CMake configuration file] contains:
+-  ``cisst_add_library``: this macro is used to add a new library. For example, the cisstVectorQt `CMakeLists.txt <https://github.com/jhu-cisst/cisst/blob/main/cisstVector/cisstVectorQt/CMakeLists.txt>`__ CMake configuration file contains:
 
    .. code:: cmake
 

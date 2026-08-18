@@ -35,7 +35,7 @@ Provided and Required Interfaces
 .. image:: images/mtsInterfaces.png
    :alt: cisstMultiTask interfaces
 
-All components can have multiple ''provided interfaces'' (``mtsInterfaceProvided``) and ''required interfaces'' (``mtsInterfaceRequired``). A component that contains only provided interfaces can be called a ''Server'', whereas a component that contains only required interfaces can be called a ''Client''. Of course, the more typical case is that a component will have both provided and required interfaces.
+All components can have multiple *provided interfaces* (``mtsInterfaceProvided``) and *required interfaces* (``mtsInterfaceRequired``). A component that contains only provided interfaces can be called a *Server*, whereas a component that contains only required interfaces can be called a *Client*. Of course, the more typical case is that a component will have both provided and required interfaces.
 
 Each provided interface can have multiple command objects which encapsulate the available services, as well as event generators that broadcast events with or without payloads. Several command object classes are defined to handle commands with no parameters, one input parameter, one output parameter, or one of each, as described `below <#commands-and-functions>`__. Provided interfaces are created and added to a component using ``AddInterfaceProvided("name")``. Once created, they can be populated with commands and events.
 
@@ -55,9 +55,9 @@ Interfaces automatically create message queues when needed to ensure thread safe
 Output and Input Interfaces
 ---------------------------
 
-All components can have multiple ''output interfaces'' (``mtsInterfaceOutput``). An output interface provides an output data port (e.g., a video source). It is created and added to a component using ``AddInterfaceOutput("name")``.
+All components can have multiple *output interfaces* (``mtsInterfaceOutput``). An output interface provides an output data port (e.g., a video source). It is created and added to a component using ``AddInterfaceOutput("name")``.
 
-All components can have multiple ''input interfaces'' (``mtsInterfaceOutput``). An input interface is used to accept data, such as a video image. It is created and added to component using ``AddInterfaceInput("name")``.
+All components can have multiple *input interfaces* (``mtsInterfaceInput``). An input interface is used to accept data, such as a video image. It is created and added to a component using ``AddInterfaceInput("name")``.
 
 For further details, see the :doc:`cisstStereoVision Tutorials </libraries/cisstStereoVision/tutorials/index>`.
 
@@ -68,7 +68,7 @@ Technical concepts
 
 To provide a flexible programming interface (API), the cisstMultiTask library uses the “command pattern”. In this design, an object API is not defined by its public methods but rather by a list of pointers on methods. The list of methods pointers (commands) can be defined and queried at run-time which provides much more flexibility than compile-time binding. The matching between commands is performed using a string compare.
 
-Commands are grouped in "provided interfaces" corresponding to the list of provided functionalities. A component can have multiple provided interfaces to group its functionalities. In other words, a '''component''' can have multiple '''provided interfaces''' and each '''provided interface''' can have multiple '''commands'''. To use the provided functionalities of a given component (similar to a "server"), one needs to create a "client" component with a list of required "functions" grouped in a "required interface" . In other words a '''component''' can have multiple '''required interfaces''' and each '''required interface''' can have multiple '''functions'''. For the "client" component to use the "server" features, its required interface needs to be connected to the "server"'s provided interface.
+Commands are grouped in "provided interfaces" corresponding to the list of provided functionalities. A component can have multiple provided interfaces to group its functionalities. In other words, a **component** can have multiple **provided interfaces** and each **provided interface** can have multiple **commands**. To use the provided functionalities of a given component (similar to a "server"), one needs to create a "client" component with a list of required "functions" grouped in a "required interface". In other words a **component** can have multiple **required interfaces** and each **required interface** can have multiple **functions**. For the "client" component to use the "server" features, its required interface needs to be connected to the "server"'s provided interface.
 
 When the two interfaces get connected, the "client" required functions get bound to the "server" provided commands based on their names (strings). At runtime, a call to the required function causes an invocation of the provided command and ultimately runs the underlying method. Once the initial matching based on strings is performed, all calls within a single process rely on method pointers and are therefore quite efficient.
 
@@ -218,7 +218,7 @@ During initialization, a given component has to populate its provided interfaces
    -  Void and write commands with a return value are always blocking.
 
 -  All read and qualified read commands are not queued, i.e. they are executed in the thread space of the caller. Programmers will have to be careful when creating read commands not based on the state table (see next section).
--  The significant difference between ``mtsCommandVoidReturn`` and ``mtsCommandRead`` is that the later is ''const''. A read command must not change the state of the component with the provided interface ("server"), it must only read. On the other hand, a void return command is used to perform an action on the "server" side and get the result of this action. This also applies to ``mtsCommandWriteReturn`` and ``mtsCommandQualifiedRead``.
+-  The significant difference between ``mtsCommandVoidReturn`` and ``mtsCommandRead`` is that the latter is ``const``. A read command must not change the state of the component with the provided interface ("server"), it must only read. On the other hand, a void return command is used to perform an action on the "server" side and get the result of this action. This also applies to ``mtsCommandWriteReturn`` and ``mtsCommandQualifiedRead``.
 -  Read methods can be used to:
 
    -  Read the "server"'s configuration. In this case, thread safety is fairly easy to enforce as the component is not continuously updating this data
@@ -387,7 +387,7 @@ Runtime
 Execution result
 ^^^^^^^^^^^^^^^^
 
-At runtime, the "client" component can use the function objects to trigger the commands provided by the "server" component. All functions return an '''execution result''' of type ``mtsExecutionResult``:
+At runtime, the "client" component can use the function objects to trigger the commands provided by the "server" component. All functions return an **execution result** of type ``mtsExecutionResult``:
 
 .. code:: c++
 

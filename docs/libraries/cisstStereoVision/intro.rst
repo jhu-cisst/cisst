@@ -146,7 +146,7 @@ Filters
 =======
 
 -  Filters are C++ classes derived from ``svlFilterBase`` class
--  The '''Filter''' is the unit of processing element in the stream
+-  The **Filter** is the unit of processing element in the stream
 -  Filters have inputs and outputs
 -  Filters have states:
 
@@ -238,7 +238,7 @@ Available Filters (as of 04-18-2011)
 +-------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
 | svlFilterImageTranslation                                                                 | Applies translation to the image plane                                                                                                      |                    |
 +-------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
-| svlFilterImageUnsharpMask                                                                 | Performs ''Unsharp-Masking'' (high-pass filtering)                                                                                          |                    |
+| svlFilterImageUnsharpMask                                                                 | Performs *Unsharp-Masking* (high-pass filtering)                                                                            |                    |
 +-------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
 | svlFilterImageZoom                                                                        | Magnifies images with respect to a user-provided image center location                                                                      |                    |
 +-------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
@@ -246,9 +246,9 @@ Available Filters (as of 04-18-2011)
 +-------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
 | svlFilterStereoImageJoiner                                                                | Converts a stereo image stream into a mono stream by placing the two images side-by-side (other layouts also supported)                     |                    |
 +-------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
-| svlFilterStereoImageSplitter                                                              | Opposite of ''svlFilterStereoImageJoiner''; Separates previously joined stereo stream to real stereo stream                                 |                    |
+| svlFilterStereoImageSplitter                                                              | Opposite of ``svlFilterStereoImageJoiner``; Separates previously joined stereo stream to real stereo stream                                 |                    |
 +-------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
-| svlFilterStereoImageOptimizer                                                             | Takes a stereo image input and corrects ''right'' channel brightness and color balance to match ''left'' channel                            |                    |
+| svlFilterStereoImageOptimizer                                                             | Takes a stereo image input and corrects *right* channel brightness and color balance to match *left* channel                                |                    |
 +-------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
 | svlFilterToolTracker                                                                      | Detects and tracks the tool-tip and shaft of surgical instrument in the image stream                                                        |                    |
 +-------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
