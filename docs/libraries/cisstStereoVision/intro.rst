@@ -83,7 +83,7 @@ Filter Inputs and Outputs
 -  Each input and output need to support one or more sample types
 -  An output can be connected to an input only if there is a match between their supported sample types
 -  Filters are allowed to have any number of inputs and outputs
--  A special filter, called ```svlFilterSplitter`` </jhu-cisst/cisst/wiki/cisstStereoVision-svlFilterSplitter>`__ can be used to split any stream to multiple streams
+-  A special filter, called :doc:`svlFilterSplitter </libraries/cisstStereoVision/filter-splitter>`, can be used to split any stream to multiple streams
 -  There are two mayor type of ports:
 -  Synchronous:
 -  Can be only one sync input and one sync output on a filter

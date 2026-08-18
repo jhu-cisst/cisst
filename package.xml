@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>cisst</name>
-  <version>1.4.0</version>
+  <version>1.5.0</version>
   <description>
   This package provides the cisst libraries
   </description>
@@ -10,14 +10,12 @@
   <url>https://github.com/jhu-cisst/cisst</url>
 
   <buildtool_depend condition="$ROS_VERSION == 1">catkin</buildtool_depend>
-  <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
 
   <build_depend>cisst_netlib</build_depend>
   <exec_depend>cisst_netlib</exec_depend>
 
   <export>
     <build_type condition="$ROS_VERSION == 1">catkin</build_type>
-    <build_type condition="$ROS_VERSION == 2">ament_cmake</build_type>
+    <build_type condition="$ROS_VERSION == 2">cmake</build_type>
   </export>
 </package>
-

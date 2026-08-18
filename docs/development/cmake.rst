@@ -1,26 +1,51 @@
-CMake for cisst Developers
-==========================
+CMake for cisst
+===============
 
 .. note::
 
    This page is for cisst **library developers**. For users building against
-   cisst, see :doc:`Compiling cisst and SAW with CMake </getting-started/compiling>`.
+   cisst, see :ref:`cmake-for-cisst-users`.
 
+.. _cmake-for-cisst-users:
 
+CMake for cisst Users
+---------------------
+
+Applications and external libraries should find the installed cisst package,
+request the components they use, and link its imported targets.  Do not add
+cisst include directories, library directories, or use cisst helper linking
+macros manually; the imported targets propagate their required usage
+requirements and dependencies.
+
+.. code:: cmake
+
+   cmake_minimum_required (VERSION 3.16)
+   project (myApplication)
+
+   find_package (cisst 1.5 REQUIRED COMPONENTS cisstCommon cisstVector)
+
+   add_executable (myApplication main.cpp)
+   target_link_libraries (myApplication PRIVATE
+     cisst::cisstCommon
+     cisst::cisstVector)
+
+When using ``COMPONENTS``, CMake also populates ``cisst_LIBRARIES`` with the
+required libraries.  It can be passed to ``target_link_libraries`` when a
+component list is assembled dynamically:
+
+.. code:: cmake
+
+   target_link_libraries (myApplication PRIVATE ${cisst_LIBRARIES})
+
+Set ``cisst_DIR`` to the directory containing ``cisst-config.cmake``, or add
+the cisst installation prefix to ``CMAKE_PREFIX_PATH``, when CMake cannot find
+the package.  See :ref:`compiling-against-the-cisst-libraries` for additional
+examples and component-specific guidance.
+
+CMake for cisst Developers
+--------------------------
 
 For the cisst libraries developers, we have a few important macros that should be used to maintain the consistency of the CMake configuration:
-
--  ``cisst_set_package_settings``: this macro allows to save some specific settings associated to a given cisst library. For example, in the ``cisstCommon`` CMakeLists.txt configuration file, ``cisst_set_package_settings (cisstCommon LibXml2 INCLUDE_DIRECTORIES LIBXML2_INCLUDE_DIR)`` indicates that any library compiled against ``cisstCommon`` will need to use some extra include directories (keyword ``INCLUDE_DIRECTORIES``) because ``cisstCommon`` has been compiled with LibXml2 support. The extra include directories are defined by the CMake variable ``LIBXML2_INCLUDE_DIR`` defined by ``FindLibXml2.cmake``. The following settings can be saved:
-
-   -  ``INCLUDE_DIRECTORIES``: will be used with CMake ``include_directories`` in the cisst use file (``include (${CISST_USE_FILE})``
-
-   -  ``LIBRARIES``: will be used by ``cisst_target_link_libraries``
-
-   -  ``LINK_DIRECTORIES``: will be used with CMake ``link_directories`` in the cisst use file (``include (${CISST_USE_FILE})``
-
-   -  ``PACKAGES``, ``PACKAGE_COMPONENTS`` and ``CMAKE_FILES``: will be used by CMake ``find_package`` and ``include`` in the cisst use file (``include (${CISST_USE_FILE})``
-
--  ``cisst_unset_all_package_settings``: this macro is used to remove all settings. For example ``cisst_unset_all_package_settings (cisstCommon LibXml2)`` tells that ``cisstCommon`` doesn't use LibXml2 anymore. For all external dependencies, the CMake configuration should have an ``if else endif`` to make sure settings are removed when an external dependency is either not found or turned off by the user.
 
 -  ``cisst_add_library``: this macro is used to add a new library. For example, the \`cisstVectorQt CMakeLists.txt CMake configuration file] contains:
 

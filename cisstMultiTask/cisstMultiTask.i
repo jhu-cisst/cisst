@@ -897,9 +897,11 @@ MTS_INSTANTIATE_MATRIX(mtsShortMat, short);
 MTS_INSTANTIATE_MATRIX(mtsLongMat, long);
 
 %import "cisstMultiTask/mtsMacros.h"
+%import "cisstVector/vctTransformationTypes.h"
 %include "cisstMultiTask/mtsTransformationTypes.h"
 
 // Wrap mtsStateIndex
+%ignore mtsStateIndex::operator--;
 %include "cisstMultiTask/mtsStateIndex.h"
 
  // Wrap mtsIntervalStatistics

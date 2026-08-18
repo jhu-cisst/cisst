@@ -31,6 +31,9 @@ http://www.cisst.org/cisst/license.txt.
 
 %import "cisstConfig.h"
 
+// cmnJointType is imported through cisstCommon and encountered again through
+// generated parameter headers; SWIG reports the harmless duplicate enum.
+%warnfilter(302) cmnJointType;
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
 %import "cisstMultiTask/cisstMultiTask.i"
@@ -48,6 +51,43 @@ http://www.cisst.org/cisst/license.txt.
 
 #define CISST_EXPORT
 #define CISST_DEPRECATED
+
+// Deprecated members are kept in the C++ API for source compatibility, but
+// should not be exposed by the Python bindings.  These accessors are emitted
+// by the same generated member pattern in each motion-set class.
+%define CISST_IGNORE_DEPRECATED_MOTION_ACCESSORS(Class)
+%ignore Class::BlockingFlag;
+%ignore Class::GetBlockingFlag;
+%ignore Class::SetBlockingFlag;
+%ignore Class::BlendingFactor;
+%ignore Class::GetBlendingFactor;
+%ignore Class::SetBlendingFactor;
+%ignore Class::IsPreemptable;
+%ignore Class::GetIsPreemptable;
+%ignore Class::SetIsPreemptable;
+%ignore Class::IsGoalOnly;
+%ignore Class::GetIsGoalOnly;
+%ignore Class::SetIsGoalOnly;
+%enddef
+
+%ignore prmPositionJointSet::prmPositionJointSet;
+%ignore prmPositionJointSet::SetSize;
+%ignore prmPositionJointSet::Deceleration;
+%ignore prmPositionJointSet::GetDeceleration;
+%ignore prmPositionJointSet::SetDeceleration;
+%ignore prmPositionJointSet::Mask;
+%ignore prmPositionJointSet::GetMask;
+%ignore prmPositionJointSet::SetMask;
+CISST_IGNORE_DEPRECATED_MOTION_ACCESSORS(prmPositionJointSet)
+
+CISST_IGNORE_DEPRECATED_MOTION_ACCESSORS(prmPositionCartesianSet)
+
+%ignore prmForceTorqueJointSet::prmForceTorqueJointSet;
+%ignore prmForceTorqueJointSet::SetSize;
+%ignore prmForceTorqueJointSet::Mask;
+%ignore prmForceTorqueJointSet::GetMask;
+%ignore prmForceTorqueJointSet::SetMask;
+CISST_IGNORE_DEPRECATED_MOTION_ACCESSORS(prmForceTorqueJointSet)
 
 // Import file with macros and typedefs
 %import "cisstMultiTask/mtsMacros.h"

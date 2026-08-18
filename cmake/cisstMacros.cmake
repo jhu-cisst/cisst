@@ -268,6 +268,13 @@ function (cisst_add_swig_module ...)
       LANGUAGE python
       SOURCES ${SWIG_INTERFACE_FILE})
 
+    # SWIG generates function-pointer casts for some standard stream
+    # conversions.  These are part of the generated wrapper runtime rather
+    # than cisst code, so suppress this warning only for the SWIG target.
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+      target_compile_options (${MODULE_NAME} PRIVATE -Wno-cast-function-type)
+    endif ()
+
     if (WIN32)
       set_target_properties (${MODULE_NAME} PROPERTIES SUFFIX .pyd)
       set_target_properties (${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
