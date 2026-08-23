@@ -34,14 +34,14 @@ Header files
 ============
 
 -  All header files should have "header guards". As each class definition corresponds to a class name, the header guards should be ``_<className>_h``. For example, the class ``cmnPath`` is declared in the file ``cmnPath.h`` and used the guards ``#ifndef _cmnPath_h``. The guard's end at the end of file should include a comment to easily identify it, i.e. ``#endif // _cmnPath_h``
--  All ``#include`` related to ''cisst'' should use ``<>``, not ``""``. For example, one should use ``#include <cisstCommon/cmnGenericObject.h>``, not ``#include "cmnGenericObject.h"``. The only exception is for private header files which are found in the ``code`` directory.
+-  All ``#include`` related to *cisst* should use ``<>``, not ``""``. For example, one should use ``#include <cisstCommon/cmnGenericObject.h>``, not ``#include "cmnGenericObject.h"``. The only exception is for private header files which are found in the ``code`` directory.
 -  To include the headers of a given library, one can use the convenient ``cisstXyz.h`` header (e.g. ``#include <cisstCommon.h>``). Programmers must be aware that these library headers (automatically generated) include all the library headers and hence greatly increase the compilation time. Therefore, the libraries we distribute should always use targeted headers, e.g. if the only type needed is ``cmnPath``, one should have ``#include <cisstCommon/cmnPath.h>``, NOT ``#include <cisstCommon.h>``.
 -  As a convention, if a library needs forward declarations, one should create a ``xyzForwardDeclarations.h`` file (e.g. ``mtsForwardDeclarations.h`` for ``cisstMultiTask``). Forward declarations might be needed for circular dependencies but they can also greatly reduce compilation time.
 
 Formatting
 ==========
 
--  The ''cisst'' libraries use Unix end of line. If you are working on a Unix computer, you can run ``dos2unix`` to convert to the right format. On a Mac, you can install dos2unix via macports.org.
+-  The *cisst* libraries use Unix end of line. If you are working on a Unix computer, you can run ``dos2unix`` to convert to the right format. On a Mac, you can install dos2unix via macports.org.
 -  Configure your text editor so that tabulations are replaced by spaces and tabulations are 4 spaces long. This is very important for code versioning. If the number of spaces is modified for each line, cvs/svn/git will consider that the whole file has been modified. How to configure ...
 
    -  Emacs: All files contain a header which tells Emacs to use 4 spaces as tabs. For newly created files, you can do M-x customize, then pick Programming followed by Languages and C. Select the option C Basic Offset, show the current value and set it to 4. To save, select state and Save for future sessions. To indent a region, C-M-q (i.e. esc, ctrl+q).
@@ -102,7 +102,7 @@ This section is a quick reminder of basic practices which should be applied.
 -  Limit the use of multiple inheritance as much as possible.
 -  All includes use <>, not "" (e.g. ``#include <iostream>``).
 -  For the standard library headers, use the filename without the .h suffix, e.g: ``#include <vector>``, ``#include <string>`` or ``#include <iostream>``, not ``#include <iostream.h>``.
--  Your files should #include only those header files required for the code that is in them. If your implementation file (YourClass.cpp) uses a class or a function that is not needed for the declaration of YourClass, ``#include`` that header file only through !YourClass.cpp and not through !YourClass.h.
+-  Your files should #include only those header files required for the code that is in them. If your implementation file (YourClass.cpp) uses a class or a function that is not needed for the declaration of YourClass, ``#include`` that header file only through ``YourClass.cpp`` and not through ``YourClass.h``.
 -  Avoid the declaration of the iterator/index in the ``for`` statements since compilers have different ways to interpret them. Statement like for ``(int i=0; i < 10; i++)`` must be avoided.
 -  For a constructor, prefer initialization of data members to assignment in the body, e.g: ``myClass::myClass(const int & a, const int & b): A(a), B(b) {};``. The order of initialization must match the order of declaration of the data members in the class.
 -  Do not write a copy constructor or assignment operator unless it is necessary. If you have a copy constructor, the parameter's name should be ``other``, e.g. ``myClass::myClass(const myClass& other): X(other.X) {};``

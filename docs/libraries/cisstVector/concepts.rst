@@ -55,7 +55,7 @@ Vectors, matrices and multi-dimensional arrays
 
    -  The last template parameter defines the storage order, i.e. are the elements stored by row or by column. Options are ``VCT_ROW_MAJOR`` (implicit default across cisstVector) or ``VCT_COL_MAJOR``.
    -  ``vctDouble2x2``, ``vctDouble3x3``, ``vctDouble4x4``, ...
-   -  ``vct2x2``, ``vct3x3,``\ vct4x4\ ``, ... (matrices of``\ double`s)
+   -  ``vct2x2``, ``vct3x3``, ``vct4x4``, ... (matrices of ``double``\ s)
    -  ``vctInt2x2``, ``vctInt3x3``, ``vctInt4x4``, ...
    -  Supported types include ``Int``, ``Char``, ``Bool``, ...
    -  Supported sizes go from 1 to 4 for either rows and columns (as of 2012, more might be added later).
@@ -124,15 +124,22 @@ The following section is important to understand one of the key features of the 
 
 One of the key design trait of the cisstVector containers is the ability to own or reference an existing block of memory. For example, one can see a column of a matrix as a vector. One naive implementation would be to copy the column elements to a new vector but this would first create unnecessary copies and second complicate all write commands. To avoid this, the vector class is templated by a parameter representing either a block of memory owned by the vector or a reference (internal a pointer) to an existing block of memory. It is important to note at that point that the block of memory can be owned/managed by another cisst container or an external package. This allows us to create cisstVector references to an C array, OpenCV image, VTK data block, ...
 
-To reference an existing block of memory, one first needs to get a base pointer, i.e. a pointer on the first element. The second parameter is the offset between elements, also known as '''stride'''. For a compact block of memory, this stride is set to one, i.e. one just has to increment the element pointer by 1 to move from one element to the next. Now, if we consider the matrix example and assuming the elements of the matrix are stored contiguously and row-by-row, a column can be represented using reference with a stride equal to the number of columns. Considering a 3x3 matrix:
+To reference an existing block of memory, one first needs to get a base pointer, i.e. a pointer on the first element. The second parameter is the offset between elements, also known as **stride**. For a compact block of memory, this stride is set to one, i.e. one just has to increment the element pointer by 1 to move from one element to the next. Now, if we consider the matrix example and assuming the elements of the matrix are stored contiguously and row-by-row, a column can be represented using reference with a stride equal to the number of columns. Considering a 3x3 matrix:
 
-\| m(0,0) @ ``p[0]`` \| m(0,1) @ ``p[1]`` \| m(0,2) @ ``p[2]`` \| \| m(1,0) @ ``p[3]`` \| m(1,1) @ ``p[4]`` \| m(1,2) @ ``p[5]`` \| \| m(2,0) @ ``p[6]`` \| m(2,1) @ ``p[7]`` \| m(2,2) @ ``p[8]`` \| \| m(3,0) @ ``p[9]`` \| m(3,1) @ ``p[10]`` \| m(3,2) @ ``p[11]`` \|
+.. code:: text
+
+   | m(0,0) @ p[0] | m(0,1) @ p[1]  | m(0,2) @ p[2]  |
+   | m(1,0) @ p[3] | m(1,1) @ p[4]  | m(1,2) @ p[5]  |
+   | m(2,0) @ p[6] | m(2,1) @ p[7]  | m(2,2) @ p[8]  |
+   | m(3,0) @ p[9] | m(3,1) @ p[10] | m(3,2) @ p[11] |
 
 Using a reference one can now create multiple "views" of the data:
 
 -  The first column is represented by a vector reference; pointer is ``p[0]``, stride to next element is 3 (i.e. ``p[0]``, ``p[3]``, ``p[6]``, ...) and size is 4:
 
-   \| m(0,0) @ ``p[0]`` \| m(1,0) @ ``p[3]`` \| m(2,0) @ ``p[6]`` \| m(3,0) @ ``p[9]`` \|
+   .. code:: text
+
+      | m(0,0) @ p[0] | m(1,0) @ p[3] | m(2,0) @ p[6] | m(3,0) @ p[9] |
 
    -  For other columns, just change the pointer.
 
@@ -140,27 +147,41 @@ Using a reference one can now create multiple "views" of the data:
 
    -  For the diagonal, one can use a reference vector; pointer is ``p[0]``, stride is 4 (i.e. ``p[0]``, ``p[4]``, ``p[8]``) and size is 3 (minimum of number of rows and columns)
 
-      \| m(0,0) @ ``p[0]`` \| m(1,1) @ ``p[4]`` \| m(2,2) @ ``p[8]`` \|
+      .. code:: text
+
+         | m(0,0) @ p[0] | m(1,1) @ p[4] | m(2,2) @ p[8] |
 
 What applies to vectors also applies to matrices and N-arrays. For a matrix, one needs two strides, a row stride which represents the memory offset to go from one element to the next in a column and the column stride which represents the offset to go from one element to the next in a row. For a multi-dimensional array, the number of strides is equal to the array dimension.
 
 For example, the above matrix is stored in a contiguous block of memory and row-by-row so it's row stride is 3 (i.e. number of columns) and it's column stride is 1. Considering the row stride ``rs = 3``, the previous matrix elements can be seen as follow (in the example the column stride is implicitly 1):
 
-\| m(0,0) @ ``p[0 * rs + 0]`` \| m(0,1) @ ``p[0 * rs + 1]`` \| m(0,2) @ ``p[0 * rs + 2]`` \| \| m(1,0) @ ``p[1 * rs + 0]`` \| m(1,1) @ ``p[1 * rs + 1]`` \| m(1,2) @ ``p[1 * rs + 2]`` \| \| m(2,0) @ ``p[2 * rs + 0]`` \| m(2,1) @ ``p[2 * rs + 1]`` \| m(2,2) @ ``p[2 * rs + 2]`` \| \| m(3,0) @ ``p[3 * rs + 0]`` \| m(3,1) @ ``p[3 * rs + 1]`` \| m(3,2) @ ``p[3 * rs + 2]`` \|
+.. code:: text
 
-Storing the matrix elements row-by-row is often the default in C/C++ while in Fortran it is common to store matrix elements column-by-column. This is called the '''storage order''', and it can either be '''row major''' or '''column major'''. The cisst matrices can use either but the default storage order is row major.
+   | m(0,0) @ p[0 * rs + 0] | m(0,1) @ p[0 * rs + 1] | m(0,2) @ p[0 * rs + 2] |
+   | m(1,0) @ p[1 * rs + 0] | m(1,1) @ p[1 * rs + 1] | m(1,2) @ p[1 * rs + 2] |
+   | m(2,0) @ p[2 * rs + 0] | m(2,1) @ p[2 * rs + 1] | m(2,2) @ p[2 * rs + 2] |
+   | m(3,0) @ p[3 * rs + 0] | m(3,1) @ p[3 * rs + 1] | m(3,2) @ p[3 * rs + 2] |
+
+Storing the matrix elements row-by-row is often the default in C/C++ while in Fortran it is common to store matrix elements column-by-column. This is called the **storage order**, and it can either be **row major** or **column major**. The cisst matrices can use either but the default storage order is row major.
 
 Using matrix strides also allows to create different views of the data:
 
 -  The transpose of the matrix can be obtained by swapping the row and column strides as well as the row and column numbers:
 
-   \| t(0,0) @ ``p[0]`` \| t(0,1) @ ``p[3]`` \| t(0,2) @ ``p[6]`` \| t(0,3) @ ``p[9]`` \| \| t(1,0) @ ``p[1]`` \| t(1,1) @ ``p[4]`` \| t(1,2) @ ``p[7]`` \| t(0,3) @ ``p[10]`` \| \| t(2,0) @ ``p[2]`` \| t(2,1) @ ``p[5]`` \| t(2,2) @ ``p[8]`` \| t(0,3) @ ``p[11]`` \|
+   .. code:: text
+
+      | t(0,0) @ p[0] | t(0,1) @ p[3] | t(0,2) @ p[6] | t(0,3) @ p[9]  |
+      | t(1,0) @ p[1] | t(1,1) @ p[4] | t(1,2) @ p[7] | t(1,3) @ p[10] |
+      | t(2,0) @ p[2] | t(2,1) @ p[5] | t(2,2) @ p[8] | t(2,3) @ p[11] |
 
    Note that the addresses of the diagonal elements (0, 4 and 8) are unchanged as expected.
 
 -  A sub-matrix, using the same strides but a different starting pointer and different sizes:
 
-   \| s(0,0) @ ``p[4]`` \| s(0,1) @ ``p[7]`` \| \| s(1,0) @ ``p[5]`` \| s(1,1) @ ``p[8]`` \|
+   .. code:: text
+
+      | s(0,0) @ p[4] | s(0,1) @ p[7] |
+      | s(1,0) @ p[5] | s(1,1) @ p[8] |
 
 In this example, we are considering a 2 by 2 sub-matrix starting at m(1,1).
 

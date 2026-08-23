@@ -103,7 +103,7 @@ Introduction to CMake
 
 -  Tool to create platform-specific compiler projects for platform-independent source code
 
--  Supports virtually all major compilers and [ IDEs (Wikipedia)](http://en.wikipedia.org/wiki/Integrated_development_environment, such as *MS Visual C++*, *XCode* or *Makefile*)
+-  Supports virtually all major compilers and `IDEs (Wikipedia) <https://en.wikipedia.org/wiki/Integrated_development_environment>`__, such as *MS Visual C++*, *Xcode* or *Makefile*
 
 -  **Windows**
 
@@ -167,14 +167,21 @@ Creating compiler specific projects using CMake
 
       14. If you have *OpenCV* installed on your computer, check ``CISST_SVL_HAS_OPENCV2``. You might need to manually set ``OpenCV_DIR`` in CMake. This should point to the directory that contains the file *OpenCVConfig.cmake*.
 
-      15. If you have the ''ZLIB+JPEG+PNG'' dependencies (see the paragraph ''Windows specific pre-requisites'') on your computer: a. Check ``CISST_SVL_HAS_JPEG``, ``CISST_SVL_HAS_PNG`` and ``CISST_SVL_HAS_ZLIB`` a. Click *Configure*, and wait until an error message shows up indicating that CMake failed to automatically find those dependencies a. Dismiss the error message dialog box a. Scroll down in the list and set the following options:
+      15. If you have the *ZLIB+JPEG+PNG* dependencies (see the paragraph *Windows specific pre-requisites*) on your computer:
 
-          ::
+          a. Check ``CISST_SVL_HAS_JPEG``, ``CISST_SVL_HAS_PNG`` and ``CISST_SVL_HAS_ZLIB``
+          b. Click *Configure*, and wait until an error message shows up indicating that CMake failed to automatically find those dependencies
+          c. Dismiss the error message dialog box
+          d. Scroll down in the list and set the following options:
 
-             JPEG_INCLUDE_DIR = [dependencies]\gnuwin32\include
-             JPEG_LIBRARY     = [dependencies]\gnuwin32\lib\jpeg.lib
+             ::
 
-          a. Click *Configure*, and wait until done a. CMake should automatically be able to find all your *ZLIB+JPEG+PNG* dependencies; the newly found locations will show up on top of the list in red a. Click *Configure*, and wait until done
+                JPEG_INCLUDE_DIR = [dependencies]\gnuwin32\include
+                JPEG_LIBRARY     = [dependencies]\gnuwin32\lib\jpeg.lib
+
+          e. Click *Configure*, and wait until done
+          f. CMake should automatically be able to find all your *ZLIB+JPEG+PNG* dependencies; the newly found locations will show up on top of the list in red
+          g. Click *Configure*, and wait until done
 
       16. You're all set: click *Generate* to create the Visual Studio "solution" (``.sln`` file), then close CMake.
 

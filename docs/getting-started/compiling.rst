@@ -56,7 +56,7 @@ Once you have decided which external packages to use and configured CMake, you w
 
 -  Tests programs are treated as the examples, i.e. you can use ``CISST_BUILD_TESTS`` to control if any test should be compiled and then use the CMake advanced options to select which tests should be compiled, library-by-library. If tests are available for a given library, the option will be ``CISST_<library-name>_TESTS``.
 
--  All ''saw'' components can be turned ``ON/OFF`` using the option ``CISST_BUILD_SAW``.
+-  All *saw* components can be turned ``ON/OFF`` using the option ``CISST_BUILD_SAW``.
 
 -  ``SAW_BUILD_<component_name>`` options control which SAW component should be built. Most components have their own external dependencies (e.g. vendor’s SDK).
 
@@ -236,7 +236,7 @@ In this example we demonstrate how to be a bit more specific and specify which l
 More examples
 ~~~~~~~~~~~~~
 
-Please note that all ''cisst'' examples come with their own ``CMakeLists.txt`` and can be copied to be compiled outside the ''cisst'' source tree. See more complex examples:
+Please note that all *cisst* examples come with their own ``CMakeLists.txt`` and can be copied to be compiled outside the *cisst* source tree. See more complex examples:
 
 -  An example with a test to make sure cisstNetlib has been compiled: `cisstNumerical tutorial example <https://github.com/jhu-cisst/cisst/blob/main/cisstNumerical/examples/tutorial/CMakeLists.txt>`__
 -  An example with Qt: `cisstCommon logger Qt example <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/examples/LoggerQt/CMakeLists.txt>`__
@@ -306,7 +306,7 @@ On Windows, we offer two different approaches:
 -  Set the environment variables for Visual Studio
 -  Set the environment variables for *cisst* for a given configuration.
 -  Start Visual Studio in this shell. Once Visual Studio is started, it is **important** to set the configuration to match the script name, i.e. if the script used was ``visual-studio-Release.bat``, use the build configuration ``Release``.
--  Add some environment variables using the registry. To do so, in CMake, you can turn the flag ``CISST_PATH_REGISTER``. This is an advanced variable. Please note that once this flag is set, it will modify your user settings and these settings will apply system wide. If you are using multiple copies of ''cisst'' this might lead to some confusion! When this option is turned on, it will create the following environment variables:
+-  Add some environment variables using the registry. To do so, in CMake, you can turn the flag ``CISST_PATH_REGISTER``. This is an advanced variable. Please note that once this flag is set, it will modify your user settings and these settings will apply system wide. If you are using multiple copies of *cisst* this might lead to some confusion! When this option is turned on, it will create the following environment variables:
 -  ``CISST_PATH``, path to executables and dynamic libraries. This variable can then be used to extend your own path, i.e. set ``PATH`` to whatever it contains followed by ``;%CISST_PATH%``
 -  ``CISST_PYTHONPATH``, path to Python files. As for ``CISST_PATH``, this variable can be added to your existing ``PYTHONPATH`` by appending ``;%CISST_PYTHONPATH%``
 -  ``CISST_ROOT``

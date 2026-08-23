@@ -8,7 +8,7 @@ The cisstStereoVision library has a built in filter called ``svlFilterImageWindo
 +============+=============+====================================+================================================================================================================+
 | MS Windows | Win32       | ``SetDIBitsToDevice``              |                                                                                                                |
 +------------+-------------+------------------------------------+----------------------------------------------------------------------------------------------------------------+
-| Linux      | X11 or Xv   | ``XPutImage`` or ``XvShmPutImage`` | Xv is a hardware-accelerated imaging library. When ''Xv'' is available, image refresh is synchronized to VSYNC |
+| Linux      | X11 or Xv   | ``XPutImage`` or ``XvShmPutImage`` | Xv is a hardware-accelerated imaging library. When *Xv* is available, image refresh is synchronized to VSYNC |
 +------------+-------------+------------------------------------+----------------------------------------------------------------------------------------------------------------+
 | Mac OS X   | X11         | ``XPutImage``                      | Xv is not available on Mac OS X; Carbon is not used due to the lack of 64 bit support                          |
 +------------+-------------+------------------------------------+----------------------------------------------------------------------------------------------------------------+
@@ -41,7 +41,7 @@ Handling keyboard and mouse inputs
 
 In order to handle keyboard and mouse inputs inside the image window, the user may register a event handler object to the filter that will receive callbacks upon user events. The custom event handler class needs to be derived from the base class ``svlWindowEventHandlerBase`` declared in ``<cisstStereoVision/svlFilterImageWindow.h>``. User input events are dispatched to the callback method ``OnUserEvent`` that needs to be overloaded by the user in order to perform custom event-handling. Additionally, another callback method called ``OnNewFrame`` may be overloaded by the user. ``OnNewFrame`` is called by the filter once for every video frame before rendering.
 
-The method ``GetMousePos`` may be used to get the position of the mouse cursor. The retrieved cursor position is valid only when the mouse cursor is hovering on top of the window's client area or the mouse focus is currently captured. The '''mouse focus''' becomes captured when the user clicks on the image window and keeps the button depressed. As long as the mouse button remains depressed all the mouse input will be dispatched to the event handler, even if the mouse cursor moves off the window area. The mouse cursor loses the focus when the user releases the button.
+The method ``GetMousePos`` may be used to get the position of the mouse cursor. The retrieved cursor position is valid only when the mouse cursor is hovering on top of the window's client area or the mouse focus is currently captured. The **mouse focus** becomes captured when the user clicks on the image window and keeps the button depressed. As long as the mouse button remains depressed all the mouse input will be dispatched to the event handler, even if the mouse cursor moves off the window area. The mouse cursor loses the focus when the user releases the button.
 
 svlWindowEventHandlerBase:: callback methods
 --------------------------------------------

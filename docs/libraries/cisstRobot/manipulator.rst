@@ -30,7 +30,7 @@ The first set of parameters represent the kinematics of each link. These paramet
 `"Standard" DH Parameters <https://github.com/jhu-cisst/cisst/blob/main/cisstRobot/robDH.h>`__
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Following the DH standard^1^ you must provide 4 numbers that define the orientation of the *ith* link with respect to the *i-1th* link. "Standard" DH convention assumes that the *ith* coordinate frame is at the *i+1* joint.
+Following the DH standard [1]_ you must provide 4 numbers that define the orientation of the *ith* link with respect to the *i-1th* link. "Standard" DH convention assumes that the *ith* coordinate frame is at the *i+1* joint.
 
 1. The first number represents the angle (in radians) between *zi-1* and *zi* about *xi*.
 
@@ -43,7 +43,7 @@ Following the DH standard^1^ you must provide 4 numbers that define the orientat
 `"Modified" DH Parameters <https://github.com/jhu-cisst/cisst/blob/main/cisstRobot/robModifiedDH.h>`__ (also called Craig's convention)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Following the modified DH standard^2,3^, you must provide 4 numbers that define the orientation of the *ith* link with respect to the *i-1th* link. Unlike the "standard" DH convention, the "modified" DH convention assumes that the *ith* coordinate frame is at the *i* joint.
+Following the modified DH standard [2]_, [3]_, you must provide 4 numbers that define the orientation of the *ith* link with respect to the *i-1th* link. Unlike the "standard" DH convention, the "modified" DH convention assumes that the *ith* coordinate frame is at the *i* joint.
 
 1. The first number represents the angle (in radians) between *zi-1* and *zi* about *xi-1*.
 
@@ -56,7 +56,7 @@ Following the modified DH standard^2,3^, you must provide 4 numbers that define 
 `Hayati Parameters <https://github.com/jhu-cisst/cisst/blob/main/cisstRobot/robHayati.h>`__
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Hayati parameters^4^ are beneficial when representing coordinate frames that have parallel, or near parallel, *z* axes. Like the DH convention, the Hayati convention assumes that the *ith* coordinate frame is at the *i+1* joint. Furthermore, the nature of the parameters depends on whether the joint is revolute or prismatic. For a prismatic joint, the parameters are
+Hayati parameters [4]_ are beneficial when representing coordinate frames that have parallel, or near parallel, *z* axes. Like the DH convention, the Hayati convention assumes that the *ith* coordinate frame is at the *i+1* joint. Furthermore, the nature of the parameters depends on whether the joint is revolute or prismatic. For a prismatic joint, the parameters are
 
 1. The first number represents the angle (in radians) between *xi-1* and *xi*
 
@@ -128,9 +128,9 @@ You can set the transformation of the base frame of your robot (link 0) in the c
 Forward Kinematics
 ~~~~~~~~~~~~~~~~~~
 
-Given a vector of joints, you can use the method ``robManipulator::ForwardKinematics``. The methods uses a vector of joint positions as an input and an optional link number. The method returns a 4x4 homogeneous transformation representing the orientation and position of the end-effector with respect to the world frame. The forward kinematics will account for the [#basetransformation base transformation].
+Given a vector of joints, you can use the method ``robManipulator::ForwardKinematics``. The methods uses a vector of joint positions as an input and an optional link number. The method returns a 4x4 homogeneous transformation representing the orientation and position of the end-effector with respect to the world frame. The forward kinematics will account for the base transformation (see `Base Transformation`_).
 
-By default, the forward kinematics will return the position and orientation of the end-effector, but if you need a the orientation and position of any link you can specify an optional parameter indicating a link number. The link number are *zero indexed* such that link number *0* refer to the base of the robot and will return the [#basetransformation base transformation]. Link number *1* will return the position and orientation of the first link and so on.
+By default, the forward kinematics will return the position and orientation of the end-effector, but if you need a the orientation and position of any link you can specify an optional parameter indicating a link number. The link number are *zero indexed* such that link number *0* refer to the base of the robot and will return the base transformation (see `Base Transformation`_). Link number *1* will return the position and orientation of the first link and so on.
 
 .. code:: c++
 
@@ -140,7 +140,7 @@ By default, the forward kinematics will return the position and orientation of t
 Inverse Kinematics
 ~~~~~~~~~~~~~~~~~~
 
-robManipulator provides the method ``robManipulator::InverseKinematics`` to solve inverse kinematics problems. The method is generic and applicable to any manipulator. !InverseKinematics computes the inverse kinematics by solving a damped least-squares problem by using Newton's method. As Newton's method iterates towards a solution, it is important to provide an initial guess that is as close as possible to the desired solution. The method returns ``robManipulator::ESUCCESS`` if the algorithm converged within the specified accuracy and iteration limits. Otherwise it returns ``robManipulator::EFAILURE``.
+robManipulator provides the method ``robManipulator::InverseKinematics`` to solve inverse kinematics problems. The method is generic and applicable to any manipulator. InverseKinematics computes the inverse kinematics by solving a damped least-squares problem by using Newton's method. As Newton's method iterates towards a solution, it is important to provide an initial guess that is as close as possible to the desired solution. The method returns ``robManipulator::ESUCCESS`` if the algorithm converged within the specified accuracy and iteration limits. Otherwise it returns ``robManipulator::EFAILURE``.
 
 The first argument is a vector of joint positions. As an input, this vector represents the initial guess to the inverse kinematics problem. As an output, the vector contains the solution of the problem (given that the algorithm was successful). The second argument is a 4x4 homogeneous transformation that represents the desired position and orientation of the end-effector. The third argument is optional and represent the accuracy tolerance. By default, this value is set to 1e-12. The fourth argument is also optional and represent the maximum number of iteration that the algorithm is given. By default this value is 1000 (which is very large). Thus InverseKinematics will return ``robManipulator::EFAILURE`` if the algorithm fails to converge within 1e-12 by using less than 1000 iterations. The last argument is the damping coefficient for tuning the solver.
 
@@ -153,12 +153,12 @@ The first argument is a vector of joint positions. As an input, this vector repr
 Spatial Manipulator Jacobian
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The geometric spatial Jacobian is a linear transformation that maps joints velocities to spatial velocities *[vs, ws] = Js(q)qd*. The reader is referred to ^5^ for the difference between ''spatial'' and ''body'' Jacobians. The method used to evaluate the spatial Jacobian is ``robManipulator::JacobianSpatial``. Its only argument is a vector of joint positions.
+The geometric spatial Jacobian is a linear transformation that maps joints velocities to spatial velocities *[vs, ws] = Js(q)qd*. The reader is referred to [5]_ for the difference between *spatial* and *body* Jacobians. The method used to evaluate the spatial Jacobian is ``robManipulator::JacobianSpatial``. Its only argument is a vector of joint positions.
 
 Body Manipulator Jacobian
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The geometric body Jacobian is a linear transformation that maps joints velocities to body velocities *[vb, wb] = Jb(q)qd*. The reader is referred to ^5^ for the difference between ''spatial'' and ''body'' Jacobians. The method used to evaluate the body Jacobian is ``robManipulator::JacobianBody``. Its only argument is a vector of joint positions.
+The geometric body Jacobian is a linear transformation that maps joints velocities to body velocities *[vb, wb] = Jb(q)qd*. The reader is referred to [5]_ for the difference between *spatial* and *body* Jacobians. The method used to evaluate the body Jacobian is ``robManipulator::JacobianBody``. Its only argument is a vector of joint positions.
 
 Joint Space Inverse Dynamics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -228,12 +228,8 @@ Note: The Barrett WAM component currently has two provided interfaces: (1) an ``
 References
 ----------
 
-1. Michael Brady, ''Robot motion: planning and control'', MIT Press 1982
-
-2. W. Khalil, J.F. Kleinfinger, ''A new geometric notation for open and closed-loop robots'', ICRA 1986, pp. 1174-1179
-
-3. J.J. Craig, ''Introduction to Robotics: Mechanics and Control'', Prentiss Hall, 1986
-
-4. S. Hayati, M. Mirmirani, ''Improving the absolute positioning accuracy of robot manipulators'', Journal of Robotic Systems 2(4) 1985
-
-5. R.M. Murray, Z. Li, S.S, Sastry, ''A mathematical introduction to robotic manipulation''', CRC Press, 1994
+.. [1] Michael Brady, *Robot motion: planning and control*, MIT Press 1982
+.. [2] W. Khalil, J.F. Kleinfinger, *A new geometric notation for open and closed-loop robots*, ICRA 1986, pp. 1174-1179
+.. [3] J.J. Craig, *Introduction to Robotics: Mechanics and Control*, Prentiss Hall, 1986
+.. [4] S. Hayati, M. Mirmirani, *Improving the absolute positioning accuracy of robot manipulators*, Journal of Robotic Systems 2(4) 1985
+.. [5] R.M. Murray, Z. Li, S.S. Sastry, *A mathematical introduction to robotic manipulation*, CRC Press, 1994
