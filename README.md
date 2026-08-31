@@ -1,6 +1,6 @@
 # cisst
 
-[![Documentation Status](https://readthedocs.org/projects/cisst/badge/?version=latest)](https://cisst.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/cisst/badge/?version=main)](https://cisst.readthedocs.io/en/latest/?badge=main)
 [![Ubuntu 22.04](https://github.com/jhu-cisst/cisst/actions/workflows/ubuntu-22.04.yml/badge.svg)](https://github.com/jhu-cisst/cisst/actions/workflows/ubuntu-22.04.yml)
 [![Ubuntu 24.04](https://github.com/jhu-cisst/cisst/actions/workflows/ubuntu-24.04.yml/badge.svg)](https://github.com/jhu-cisst/cisst/actions/workflows/ubuntu-24.04.yml)
 [![macOS 15](https://github.com/jhu-cisst/cisst/actions/workflows/macos-15.yml/badge.svg)](https://github.com/jhu-cisst/cisst/actions/workflows/macos-15.yml)
