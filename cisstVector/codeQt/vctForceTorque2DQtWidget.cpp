@@ -113,8 +113,13 @@ void vctForceTorque2DQtWidget::setupUi(void)
         connect(mCheckBoxes[signal], SIGNAL(released()), mSignalMapper, SLOT(map()));
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(mSignalMapper, &QSignalMapper::mappedInt,
+            this, &vctForceTorque2DQtWidget::SlotVisibleSignal);
+#else
     connect(mSignalMapper, SIGNAL(mapped(int)),
             this, SLOT(SlotVisibleSignal(int)));
+#endif
 
     leftLayout->addStretch();
 
