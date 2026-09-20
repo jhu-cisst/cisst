@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstMultiTask
 #
-# (C) Copyright 2003-2022 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -49,7 +49,6 @@ set (SOURCE_FILES
      mtsComponent.cpp
      mtsComponentAddLatency.cpp
      mtsComponentViewer.cpp
-     mtsConnection.cpp
 
      mtsDelayedConnections.cpp
      mtsEventReceiver.cpp
@@ -76,10 +75,8 @@ set (SOURCE_FILES
 
      mtsMailBox.cpp
      mtsManagerLocal.cpp
-     mtsManagerGlobal.cpp
      mtsManagerComponentBase.cpp
-     mtsManagerComponentServer.cpp
-     mtsManagerComponentClient.cpp
+     mtsManagerComponent.cpp
      mtsManagerComponentServices.cpp
 
      mtsMulticastCommandVoid.cpp
@@ -147,7 +144,6 @@ set (HEADER_FILES
      mtsComponentAddLatency.h
      mtsComponentGeneratorMacros.h
      mtsComponentViewer.h
-     mtsConnection.h
 
      mtsDelayedConnections.h
      mtsEventReceiver.h
@@ -179,13 +175,9 @@ set (HEADER_FILES
      mtsMacros.h
      mtsMailBox.h
      mtsManagerComponentBase.h
-     mtsManagerComponentServer.h
-     mtsManagerComponentClient.h
+     mtsManagerComponent.h
      mtsManagerComponentServices.h
-     mtsManagerGlobal.h
-     mtsManagerGlobalInterface.h
      mtsManagerLocal.h
-     mtsManagerLocalInterface.h
      mtsMatrix.h
      mtsMulticastCommandVoid.h
      mtsMulticastCommandWrite.h

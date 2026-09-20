@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctVector3DQtWidget.h>
 #include <QKeyEvent>
 #include <QPainter>
-#include <QTextStream>
+#include <QtGlobal>
 
 const double vctVector3DQtWidgetDefaultMax = 0.0001;
 
@@ -77,7 +77,11 @@ void vctVector3DQtWidget::mouseMoveEvent(QMouseEvent * event)
 {
     const double sensitivity = 0.01;
     if (event->buttons() & Qt::LeftButton) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        const Eigen::Vector2i newMousePosition(event->position().x(), event->position().y());
+#else
         const Eigen::Vector2i newMousePosition(event->x(), event->y());
+#endif
         if (mStartMousePosition.any()) {
             const Eigen::Vector2d deltaMouse = sensitivity * (newMousePosition - mStartMousePosition).cast<double>();
             Eigen::Vector3d rodrigues(deltaMouse.x(), deltaMouse.y(), 0.0);
@@ -226,13 +230,8 @@ void vctVector3DQtWidget::paintGL(void)
     painter.setPen(txtColor);
     painter.setFont(QFont("Helvetica", font_size));
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-
-    QString display_string;
-    QTextStream tstream(&display_string);
-    tstream.setRealNumberPrecision(2);
-    tstream << mVectorNorm << "/" << mMaxNorm;
-
-    painter.drawText(1, 1 + font_size, display_string);
+    painter.drawText(1, 1 + font_size,
+                     QString::asprintf("%0.2f/%0.2f", mVectorNorm, mMaxNorm));
     painter.end();
 
     glFlush();

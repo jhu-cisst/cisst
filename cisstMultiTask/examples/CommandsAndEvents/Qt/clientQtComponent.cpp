@@ -50,6 +50,8 @@ clientQtComponent::clientQtComponent(const std::string & componentName):
     // trigger write command
     QObject::connect(ClientWidget.WriteSlider, SIGNAL(valueChanged(int)),
                      this, SLOT(WriteQSlot(int)));
+    QObject::connect(ClientWidget.WriteSlider, SIGNAL(valueChanged(int)),
+                     ClientWidget.WriteValue, SLOT(setNum(int)));
     // trigger read command and then refresh the UI
     QObject::connect(ClientWidget.ReadButton, SIGNAL(clicked()),
                      this, SLOT(ReadQSlot()));
@@ -58,6 +60,8 @@ clientQtComponent::clientQtComponent(const std::string & componentName):
     // trigger qualified read command and then refresh the UI
     QObject::connect(ClientWidget.QualifiedReadSlider, SIGNAL(valueChanged(int)),
                      this, SLOT(QualifiedReadQSlot(int)));
+    QObject::connect(ClientWidget.QualifiedReadSlider, SIGNAL(valueChanged(int)),
+                     ClientWidget.QualifiedReadQualifierValue, SLOT(setNum(int)));
     QObject::connect(this, SIGNAL(QualifiedReadQSignal(int)),
                      ClientWidget.QualifiedReadReadValue, SLOT(setNum(int)));
     // refresh event counter when events are received

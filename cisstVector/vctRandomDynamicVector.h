@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2007-02-11
 
-  (C) Copyright 2003-2014 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -56,6 +56,15 @@ void vctRandom(vctDynamicVectorBase<_vectorOwnerType, _elementType> & vector,
         randomSequence.ExtractRandomValue(min, max,
                                           *iter);
     }
+}
+
+template <typename _elementType>
+void vctRandom(vctDynamicVectorRef<_elementType> && vector,
+               const typename vctDynamicVectorRef<_elementType>::value_type min,
+               const typename vctDynamicVectorRef<_elementType>::value_type max)
+{
+    typename vctDynamicVectorRef<_elementType>::BaseType & base = vector;
+    vctRandom(base, min, max);
 }
 
 #endif  // _vctRandomDynamicVector_h

@@ -122,10 +122,7 @@ cisst_add_library (LIBRARY cisstNumerical
                    SOURCE_FILES ${SOURCE_FILES}
                    ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES})
 
-# Create the CMake config file
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstNumericalBuild.cmake.in
-                ${CISST_CMAKE_BINARY_DIR}/cisstNumericalBuild.cmake
-                @ONLY)
-install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstNumericalBuild.cmake
-         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-         COMPONENT cisstNumerical)
+if (CISST_HAS_CISSTNETLIB)
+  target_include_directories (cisstNumerical PUBLIC "$<BUILD_INTERFACE:${CISSTNETLIB_INCLUDE_DIR}>")
+  target_link_libraries (cisstNumerical ${CISSTNETLIB_LIBRARIES})
+endif ()

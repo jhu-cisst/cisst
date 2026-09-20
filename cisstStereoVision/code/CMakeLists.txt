@@ -1,7 +1,7 @@
 #
 # CMakeLists for cisstStereoVision
 #
-# (C) Copyright 2003-2016 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -312,8 +312,8 @@ IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
     IF(JPEG_FOUND)
         MARK_AS_ADVANCED(FORCE ${JPEG_OPTIONS})
 
-        cisst_set_package_settings (cisstStereoVision JPEG INCLUDE_DIRECTORIES JPEG_INCLUDE_DIR)
-        cisst_set_package_settings (cisstStereoVision JPEG LIBRARIES           JPEG_LIBRARY)
+        list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${JPEG_INCLUDE_DIR})
+        list (APPEND CISST_STEREO_LIBRARIES ${JPEG_LIBRARY})
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlImageCodecJPEG.h           # private header
@@ -334,7 +334,6 @@ IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
         ENDIF(WIN32 AND NOT SVL_GNU_OPTIONS)
 
     ELSE(JPEG_FOUND)
-        cisst_unset_all_package_settings (cisstStereoVision JPEG)
 
         IF(CISST_SVL_HAS_JPEG)
             MARK_AS_ADVANCED(CLEAR ${JPEG_OPTIONS})
@@ -346,7 +345,6 @@ IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
     ENDIF(JPEG_FOUND)
 
 ELSE(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
-    cisst_unset_all_package_settings (cisstStereoVision JPEG)
 
     MARK_AS_ADVANCED(FORCE ${JPEG_OPTIONS})
     OPTION(CISST_SVL_HAS_JPEG "Use JPEG extensions" OFF)
@@ -364,9 +362,8 @@ if (OpenCV_FOUND)
         set (OpenCV2_PACKAGE_NAME "OpenCV")
         if (${OpenCV_VERSION} VERSION_GREATER 2.1.9)
             message ("OpenCV Version from 2.2.0. onwards.")
-            cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
-            cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBS)
-            cisst_set_package_settings (cisstStereoVision OpenCV2 PACKAGES            OpenCV2_PACKAGE_NAME)
+            list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${OpenCV_INCLUDE_DIRS})
+            list (APPEND CISST_STEREO_LIBRARIES ${OpenCV_LIBS})
 
             # OpenCV 2.0 does not define OpenCV_INCLUDE_DIRS
             # NOTE: OpenCV 2.0. and 2.1. do no specify correct lib path in the OpenCVConfig.cmake files
@@ -375,21 +372,18 @@ if (OpenCV_FOUND)
             message ("OpenCV Version: 2.0.0 and 2.1.0")
             set (OpenCV2_INCLUDE_DIRS "${THIS_OPENCV_CONFIG_PATH}/include"
                  "${THIS_OPENCV_CONFIG_PATH}/include/opencv")
-            cisst_set_package_settings (cisstStereoVision OpenCV2 PACKAGES            OpenCV2_PACKAGE_NAME)
-            cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV2_INCLUDE_DIRS)
-            cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBS)
+                        list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${OpenCV2_INCLUDE_DIRS})
+            list (APPEND CISST_STEREO_LIBRARIES ${OpenCV_LIBS})
 
         else (${OpenCV_VERSION} VERSION_GREATER 2.1.9)
             message (FATAL_ERROR "OpenCV Versions earlier than 2.0 are not supported by cisst.")
-            cisst_set_package_settings (cisstStereoVision OpenCV2 INCLUDE_DIRECTORIES OpenCV_INCLUDE_DIRS)
-            cisst_set_package_settings (cisstStereoVision OpenCV2 LIBRARIES           OpenCV_LIBS)
+            list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${OpenCV_INCLUDE_DIRS})
+            list (APPEND CISST_STEREO_LIBRARIES ${OpenCV_LIBS})
 
         endif (${OpenCV_VERSION} VERSION_GREATER 2.1.9)
     else (CISST_SVL_HAS_OPENCV2)
-        cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
     endif (CISST_SVL_HAS_OPENCV2)
 else (OpenCV_FOUND)
-    cisst_unset_all_package_settings (cisstStereoVision OpenCV2)
     option (CISST_SVL_HAS_OPENCV2 "Compile OpenCV extensions" OFF)
 endif (OpenCV_FOUND)
 
@@ -452,8 +446,8 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
     IF(ZLIB_FOUND)
         MARK_AS_ADVANCED(FORCE ${ZLIB_OPTIONS})
 
-        cisst_set_package_settings (cisstStereoVision ZLIB INCLUDE_DIRECTORIES ZLIB_INCLUDE_DIR)
-        cisst_set_package_settings (cisstStereoVision ZLIB LIBRARIES           ZLIB_LIBRARY)
+        list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${ZLIB_INCLUDE_DIR})
+        list (APPEND CISST_STEREO_LIBRARIES ${ZLIB_LIBRARY})
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlVideoCodecCVI.h              # private header
@@ -467,7 +461,6 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
         OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" ON)
 
         IF(WIN32 AND NOT SVL_GNU_OPTIONS)
-            cisst_unset_all_package_settings (cisstStereoVision ZLIB)
 
             SET(SVL_GNU_OPTIONS
                 SVL_GNU_INCLUDE_DIR
@@ -480,7 +473,6 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
         ENDIF(WIN32 AND NOT SVL_GNU_OPTIONS)
 
     ELSE(ZLIB_FOUND)
-        cisst_unset_all_package_settings (cisstStereoVision ZLIB)
 
         IF(CISST_SVL_HAS_ZLIB)
             MARK_AS_ADVANCED(CLEAR ${ZLIB_OPTIONS})
@@ -521,8 +513,8 @@ IF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
             MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
 
             ADD_DEFINITIONS(${PNG_DEFINITIONS})
-            cisst_set_package_settings (cisstStereoVision PNG INCLUDE_DIRECTORIES PNG_PNG_INCLUDE_DIR)
-            cisst_set_package_settings (cisstStereoVision PNG LIBRARIES           PNG_LIBRARY)
+            list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${PNG_PNG_INCLUDE_DIR})
+            list (APPEND CISST_STEREO_LIBRARIES ${PNG_LIBRARY})
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
                 svlImageCodecPNG.h            # private header
@@ -542,14 +534,12 @@ IF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
         ENDIF(PNG_FOUND)
 
     ELSE(CISST_SVL_HAS_PNG OR NOT PNG_OPTIONS)
-        cisst_unset_all_package_settings (cisstStereoVision PNG)
 
         MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
         OPTION(CISST_SVL_HAS_PNG "Use PNG extensions" OFF)
     ENDIF(CISST_SVL_HAS_PNG OR NOT PNG_OPTIONS)
 
 ELSE(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
-    cisst_unset_all_package_settings (cisstStereoVision PNG)
 
     MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
     OPTION(CISST_SVL_HAS_PNG "Use PNG extensions" OFF)
@@ -645,12 +635,12 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
                                           "${FFMPEG_avformat_INCLUDE_DIR}"
                                           "${FFMPEG_avutil_INCLUDE_DIR}"
                                           "${FFMPEG_swscale_INCLUDE_DIR}")
-        cisst_set_package_settings (cisstStereoVision FFMPEG INCLUDE_DIRECTORIES CISST_SVL_ALL_FFMPEG_INCLUDE)
+        list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${CISST_SVL_ALL_FFMPEG_INCLUDE})
         set (CISST_SVL_ALL_FFMPEG_LIBRARIES "${FFMPEG_avcodec_LIBRARY}"
                                             "${FFMPEG_avformat_LIBRARY}"
                                             "${FFMPEG_avutil_LIBRARY}"
                                             "${FFMPEG_swscale_LIBRARY}")
-        cisst_set_package_settings (cisstStereoVision FFMPEG LIBRARIES CISST_SVL_ALL_FFMPEG_LIBRARIES)
+        list (APPEND CISST_STEREO_LIBRARIES ${CISST_SVL_ALL_FFMPEG_LIBRARIES})
 
         SET(SOURCE_FILES
             ${SOURCE_FILES}
@@ -661,7 +651,6 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
         OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" ON)
 
     ELSE(FFMPEG_FOUND)
-        cisst_unset_all_package_settings (cisstStereoVision FFMPEG)
 
         IF(CISST_SVL_HAS_FFMPEG)
             MARK_AS_ADVANCED(CLEAR ${FFMPEG_OPTIONS})
@@ -673,7 +662,6 @@ IF(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
     ENDIF(FFMPEG_FOUND)
 
 ELSE(CISST_SVL_HAS_FFMPEG OR NOT FFMPEG_OPTIONS)
-    cisst_unset_all_package_settings (cisstStereoVision FFMPEG)
 
     MARK_AS_ADVANCED(FORCE ${FFMPEG_OPTIONS})
     OPTION(CISST_SVL_HAS_FFMPEG "Compile FFMPEG extensions" OFF)
@@ -712,8 +700,8 @@ IF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
     IF(MIL_FOUND)
         MARK_AS_ADVANCED(FORCE ${MIL_OPTIONS})
 
-        cisst_set_package_settings (cisstStereoVision MIL INCLUDE_DIRECTORIES MIL_INCLUDE_DIR)
-        cisst_set_package_settings (cisstStereoVision MIL LIBRARIES           MIL_mil_LIBRARY)
+        list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${MIL_INCLUDE_DIR})
+        list (APPEND CISST_STEREO_LIBRARIES ${MIL_mil_LIBRARY})
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlVidCapSrcMIL.h      # private header
@@ -723,7 +711,6 @@ IF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
         OPTION(CISST_SVL_HAS_MIL "Compile MIL extensions" ON)
 
     ELSE(MIL_FOUND)
-        cisst_unset_all_package_settings (cisstStereoVision MIL)
 
         IF(CISST_SVL_HAS_MIL)
             MARK_AS_ADVANCED(CLEAR ${MIL_OPTIONS})
@@ -735,7 +722,6 @@ IF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
     ENDIF(MIL_FOUND)
 
 ELSE(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
-    cisst_unset_all_package_settings (cisstStereoVision MIL)
 
     MARK_AS_ADVANCED(FORCE ${MIL_OPTIONS})
     OPTION(CISST_SVL_HAS_MIL "Compile Matrox Imaging Library (MIL) extensions" OFF)
@@ -753,7 +739,7 @@ IF(WIN32)
         svlVideoCodecVfW32.cpp
         )
     set (CISST_VFW32_LIBRARY vfw32)
-    cisst_set_package_settings (cisstStereoVision VideoForWindows LIBRARIES CISST_VFW32_LIBRARY)
+    list (APPEND CISST_STEREO_LIBRARIES ${CISST_VFW32_LIBRARY})
 
     # set windows specific linker flags enabling C++ code compilation on .NET compilers
     SET(SVL_ADDITIONAL_EXE_LINKER_FLAGS
@@ -776,11 +762,11 @@ IF(WIN32)
             set (CISST_SVL_ALL_DIRECTSHOW_INCLUDE
                  "${DIRECTSHOW_INCLUDE_DIR}"
                  "${DIRECTX_INCLUDE_DIR}")
-            cisst_set_package_settings (cisstStereoVision DirectShow INCLUDE_DIRECTORIES CISST_SVL_ALL_DIRECTSHOW_INCLUDE)
+            list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${CISST_SVL_ALL_DIRECTSHOW_INCLUDE})
             set (CISST_SVL_ALL_DIRECTSHOW_LIBRARIES
                  "${DIRECTSHOW_strmiids_LIBRARY}"
                  "${DIRECTSHOW_WinMM_LIBRARY}")
-            cisst_set_package_settings (cisstStereoVision DirectShow LIBRARIES CISST_SVL_ALL_DIRECTSHOW_LIBRARIES)
+            list (APPEND CISST_STEREO_LIBRARIES ${CISST_SVL_ALL_DIRECTSHOW_LIBRARIES})
 
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
@@ -793,7 +779,6 @@ IF(WIN32)
             OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" ON)
 
         ELSE(DIRECTSHOW_FOUND)
-            cisst_unset_all_package_settings (cisstStereoVision DirectShow)
 
             IF(CISST_SVL_HAS_DIRECTSHOW)
                 MARK_AS_ADVANCED(CLEAR ${DIRECTSHOW_OPTIONS})
@@ -805,7 +790,6 @@ IF(WIN32)
         ENDIF(DIRECTSHOW_FOUND)
 
     ELSE(CISST_SVL_HAS_DIRECTSHOW OR NOT DIRECTSHOW_OPTIONS)
-        cisst_unset_all_package_settings (cisstStereoVision DirectShow)
 
         MARK_AS_ADVANCED(FORCE ${DIRECTSHOW_OPTIONS})
         OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" OFF)
@@ -859,11 +843,11 @@ IF(WIN32)
         IF(SVS_FOUND)
             MARK_AS_ADVANCED(FORCE ${SVS_OPTIONS})
 
-            cisst_set_package_settings (cisstStereoVision SVS INCLUDE_DIRECTORIES SVS_INCLUDE_DIR)
+            list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${SVS_INCLUDE_DIR})
             set (CISST_SVL_ALL_SVS_LIBRARIES
                  "${SVS_svs_LIBRARY}"
                  "${SVS_svsgrab_LIBRARY}")
-            cisst_set_package_settings (cisstStereoVision SVS LIBRARIES CISST_SVL_ALL_SVS_LIBRARIES)
+            list (APPEND CISST_STEREO_LIBRARIES ${CISST_SVL_ALL_SVS_LIBRARIES})
 
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
@@ -874,7 +858,6 @@ IF(WIN32)
             OPTION(CISST_SVL_HAS_SVS "Compile Videre Design (SVS) extensions" ON)
 
         ELSE(SVS_FOUND)
-            cisst_unset_all_package_settings (cisstStereoVision SVS)
 
             IF(CISST_SVL_HAS_SVS)
                 MARK_AS_ADVANCED(CLEAR ${SVS_OPTIONS})
@@ -886,7 +869,6 @@ IF(WIN32)
         ENDIF(SVS_FOUND)
 
     ELSE(CISST_SVL_HAS_SVS OR NOT SVS_OPTIONS)
-        cisst_unset_all_package_settings (cisstStereoVision SVS)
 
         MARK_AS_ADVANCED(FORCE ${SVS_OPTIONS})
         OPTION(CISST_SVL_HAS_SVS "Compile Videre Design (SVS) extensions" OFF)
@@ -956,8 +938,8 @@ IF(UNIX)
         IF(DC1394_FOUND)
             MARK_AS_ADVANCED(FORCE ${DC1394_OPTIONS})
 
-            cisst_set_package_settings (cisstStereoVision dc1394 INCLUDE_DIRECTORIES DC1394_INCLUDE_DIR)
-            cisst_set_package_settings (cisstStereoVision dc1394 LIBRARIES           DC1394_dc1394_LIBRARY)
+            list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${DC1394_INCLUDE_DIR})
+            list (APPEND CISST_STEREO_LIBRARIES ${DC1394_dc1394_LIBRARY})
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
                 svlVidCapSrcDC1394.h         # private header
@@ -974,7 +956,6 @@ IF(UNIX)
             ENDIF(CMAKE_SYSTEM_NAME MATCHES Darwin)
 
         ELSE(DC1394_FOUND)
-            cisst_unset_all_package_settings (cisstStereoVision dc1394)
 
             IF(CISST_SVL_HAS_DC1394)
                 MARK_AS_ADVANCED(CLEAR ${DC1394_OPTIONS})
@@ -986,7 +967,6 @@ IF(UNIX)
         ENDIF(DC1394_FOUND)
 
     ELSE(CISST_SVL_HAS_DC1394 OR NOT DC1394_OPTIONS)
-        cisst_unset_all_package_settings (cisstStereoVision dc1394)
 
         MARK_AS_ADVANCED(FORCE ${DC1394_OPTIONS})
         OPTION(CISST_SVL_HAS_DC1394 "Compile LibDC1394 extensions" OFF)
@@ -998,8 +978,8 @@ IF(UNIX)
         IF(X11_FOUND)
             SET(SVL_X11_FOUND ${X11_FOUND} CACHE INTERNAL "SVL X11 found")
 
-            cisst_set_package_settings (cisstStereoVision X11 INCLUDE_DIRECTORIES X11_INCLUDE_DIR)
-            cisst_set_package_settings (cisstStereoVision X11 LIBRARIES           X11_LIBRARIES)
+            list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${X11_INCLUDE_DIR})
+            list (APPEND CISST_STEREO_LIBRARIES ${X11_LIBRARIES})
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
                 winX11.h                 # private header
@@ -1012,8 +992,8 @@ IF(UNIX)
                 # Xv video acceleration is not supported on Darwin (as of yet)
                 # Search for Xvideo extensions for fast image drawing
                 IF(X11_Xv_FOUND AND X11_Xext_FOUND)
-                    cisst_set_package_settings (cisstStereoVision Xext LIBRARIES X11_Xext_LIB)
-                    cisst_set_package_settings (cisstStereoVision Xv   LIBRARIES X11_Xv_LIB)
+                    list (APPEND CISST_STEREO_LIBRARIES ${X11_Xext_LIB})
+                    list (APPEND CISST_STEREO_LIBRARIES ${X11_Xv_LIB})
                     MESSAGE(STATUS "X11 libraries Xv and Xext were found")
                     OPTION(CISST_SVL_HAS_XV "Compile Xvideo extensions" ON)
                 ELSE(X11_Xv_FOUND AND X11_Xext_FOUND)
@@ -1028,9 +1008,6 @@ IF(UNIX)
             ENDIF(CMAKE_SYSTEM_NAME MATCHES Linux)
 
         ELSE(X11_FOUND)
-            cisst_unset_all_package_settings (cisstStereoVision X11)
-            cisst_unset_all_package_settings (cisstStereoVision Xext)
-            cisst_unset_all_package_settings (cisstStereoVision Xv)
 
             IF(CISST_SVL_HAS_X11)
                 MESSAGE(FATAL_ERROR "X11 required. Please specify its location.")
@@ -1040,9 +1017,6 @@ IF(UNIX)
         ENDIF(X11_FOUND)
 
     ELSE(CISST_SVL_HAS_X11 OR NOT DEFINED SVL_X11_FOUND)
-        cisst_unset_all_package_settings (cisstStereoVision X11)
-        cisst_unset_all_package_settings (cisstStereoVision Xext)
-        cisst_unset_all_package_settings (cisstStereoVision Xv)
 
         OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
         SET(CISST_SVL_HAS_XV "OFF" CACHE INTERNAL "SVL Has Xvideo")
@@ -1100,8 +1074,8 @@ IF(CISST_SVL_HAS_CUDA)
                          STATIC
                          )
 
-        cisst_set_package_settings (cisstStereoVisionCUDA CUDA INCLUDE_DIRECTORIES CUDA_INCLUDE_DIRS)
-        cisst_set_package_settings (cisstStereoVisionCUDA CUDA LIBRARIES CUDA_CUTIL_LIBRARY)
+        target_include_directories (cisstStereoVisionCUDA PUBLIC ${CUDA_INCLUDE_DIRS})
+        target_link_libraries (cisstStereoVisionCUDA ${CUDA_CUTIL_LIBRARY})
 
 #        CUDA_INCLUDE_DIRECTORIES("${CUDA_SDK_ROOT_DIR}/common/inc"
 #                                 "${CUDA_SDK_ROOT_DIR}/../shared/inc")
@@ -1157,7 +1131,6 @@ IF(CISST_SVL_HAS_CUDA)
         OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" ON)
 
     ELSE(CUDA_FOUND)
-        cisst_unset_all_package_settings (cisstStereoVisionCUDA CUDA)
 
         IF(CISST_SVL_HAS_CUDA)
 #            MARK_AS_ADVANCED(CLEAR ${CUDA_OPTIONS})
@@ -1170,7 +1143,6 @@ IF(CISST_SVL_HAS_CUDA)
 
 #ELSE(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
 ELSE(CISST_SVL_HAS_CUDA)
-    cisst_unset_all_package_settings (cisstStereoVisionCUDA CUDA)
 #    MARK_AS_ADVANCED(FORCE ${CUDA_OPTIONS})
     OPTION(CISST_SVL_HAS_CUDA "Compile CUDA extensions" OFF)
 #ENDIF(CISST_SVL_HAS_CUDA OR NOT CUDA_OPTIONS)
@@ -1189,13 +1161,11 @@ if (CISST_SVL_HAS_BM_DECKLINK)
              )
         set (SVL_ADDITIONAL_LIBRARIES ${SVL_ADDITIONAL_LIBRARIES} ${DeckLink_LIBRARIES})
         mark_as_advanced (DeckLink_INCLUDE_DIR DeckLink_LIBRARIES)
-        cisst_set_package_settings (cisstStereoVision decklink INCLUDE_DIRECTORIES DeckLink_INCLUDE_DIR)
-        cisst_set_package_settings (cisstStereoVision decklink LIBRARIES           DeckLink_LIBRARIES)
+        list (APPEND CISST_STEREO_INCLUDE_DIRECTORIES ${DeckLink_INCLUDE_DIR})
+        list (APPEND CISST_STEREO_LIBRARIES ${DeckLink_LIBRARIES})
     else (DeckLink_FOUND)
-        cisst_unset_all_package_settings (cisstStereoVision decklink)
     endif (DeckLink_FOUND)
 else (CISST_SVL_HAS_BM_DECKLINK)
-    cisst_unset_all_package_settings (cisstStereoVision decklink)
 endif (CISST_SVL_HAS_BM_DECKLINK)
 
 
@@ -1265,14 +1235,6 @@ set_source_files_properties ("${CISST_SVL_CONFIG_FILE}"
                              PROPERTIES GENERATED TRUE)
 set (ADDITIONAL_HEADER_FILES ${CISST_SVL_CONFIG_FILE})
 
-# Create the CMake config file
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/cisstStereoVisionBuild.cmake.in
-                ${CISST_CMAKE_BINARY_DIR}/cisstStereoVisionBuild.cmake
-                @ONLY)
-install (FILES ${CISST_CMAKE_BINARY_DIR}/cisstStereoVisionBuild.cmake
-         DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
-         COMPONENT cisstStereoVision)
-
 # Finally create the library
 cisst_add_library (
   LIBRARY cisstStereoVision
@@ -1282,6 +1244,16 @@ cisst_add_library (
   HEADER_FILES ${HEADER_FILES}
   ADDITIONAL_SOURCE_FILES ${cisstStereoVision_CISST_DG_SRCS}
   ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${cisstStereoVision_CISST_DG_HDRS})
+
+if (CISST_STEREO_INCLUDE_DIRECTORIES)
+  target_include_directories (cisstStereoVision PUBLIC "$<BUILD_INTERFACE:${CISST_STEREO_INCLUDE_DIRECTORIES}>")
+endif ()
+if (CISST_STEREO_LINK_DIRECTORIES)
+  target_link_directories (cisstStereoVision PUBLIC "$<BUILD_INTERFACE:${CISST_STEREO_LINK_DIRECTORIES}>")
+endif ()
+if (CISST_STEREO_LIBRARIES)
+  target_link_libraries (cisstStereoVision ${CISST_STEREO_LIBRARIES})
+endif ()
 
 install (FILES ${cisstStereoVision_CISST_DG_HDRS_FULLPATH}
          DESTINATION "include/cisstStereoVision")

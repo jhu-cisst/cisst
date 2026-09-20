@@ -6,8 +6,7 @@
   Author(s):	Praneeth Sadda
   Created on:	2012-05-14
 
-  (C) Copyright 2012 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2012-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -25,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsQtScaleAndSignalTool.h>
 #include <cisstMultiTask/mtsQtVisualizerShell.h>
 
-mtsQtVisualizerShell::mtsQtVisualizerShell(mtsManagerGlobal * managerGlobal, vctPlot2DOpenGLQtWidget * visualizer, QWidget * parent)
+mtsQtVisualizerShell::mtsQtVisualizerShell(mtsManagerLocal * componentManager, vctPlot2DOpenGLQtWidget * visualizer, QWidget * parent)
     : QWidget(parent), Visualizer(visualizer)
 {
     QLayout * layout = new QHBoxLayout();
@@ -36,7 +35,7 @@ mtsQtVisualizerShell::mtsQtVisualizerShell(mtsManagerGlobal * managerGlobal, vct
 
     if(Visualizer == 0) Visualizer = new vctPlot2DOpenGLQtWidget();
 
-    mtsQtScaleAndSignalTool * scaleAndSignalTool = new mtsQtScaleAndSignalTool(managerGlobal, Visualizer);
+    mtsQtScaleAndSignalTool * scaleAndSignalTool = new mtsQtScaleAndSignalTool(componentManager, Visualizer);
     scaleAndSignalTool->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
     splitter->addWidget(scaleAndSignalTool);
 

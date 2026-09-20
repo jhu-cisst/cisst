@@ -18,8 +18,21 @@ http://www.cisst.org/cisst/license.txt.
 robLink::robLink() : kinematics( NULL ){}
 
 robLink::robLink( const robLink& link ){
-  kinematics = link.kinematics->Clone();
+  kinematics = link.kinematics != NULL ? link.kinematics->Clone() : NULL;
   mass       = link.mass;
+}
+
+robLink & robLink::operator=( const robLink& link ){
+  if( this != &link ) {
+    // Clone before deleting the current object so a failure during cloning
+    // leaves this object unchanged.
+    robKinematics * newKinematics = link.kinematics != NULL
+      ? link.kinematics->Clone() : NULL;
+    delete kinematics;
+    kinematics = newKinematics;
+    mass       = link.mass;
+  }
+  return *this;
 }
 
 robLink::robLink( robKinematics* kinematics, const robMass& mass ) :

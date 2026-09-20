@@ -137,14 +137,6 @@ public:
     virtual int GetValue(void) const = 0; 
 };
 
-class mtsTestComponent
-{
-public:
-    std::map<std::string, mtsTestInterfaceProvidedBase *> TestInterfacesProvided;
-    std::map<std::string, mtsTestInterfaceRequiredBase *> TestInterfacesRequired;
-};
-
-
 //-----------------------------------------------------------------------------
 //  Provided Interface and Required Interface Definition
 //-----------------------------------------------------------------------------
@@ -324,13 +316,14 @@ public:
     }
 };
 
+
 //-----------------------------------------------------------------------------
 //  Periodic1: (P1:Periodic1:r1 - P2:Continuous1:p1), (P1:Periodic1:r2 - P2:Continuous1:p2)
 //  - provided interface: none
 //  - required interface: r1, r2
 //-----------------------------------------------------------------------------
 template <class _elementType>
-class mtsTestPeriodic1: public mtsTaskPeriodic, public mtsTestComponent
+class mtsTestPeriodic1: public mtsTaskPeriodic
 {
 public:
     typedef _elementType value_type;
@@ -342,7 +335,7 @@ public:
         mtsTaskPeriodic(name, 1.0 * cmn_ms),
         InterfaceProvided1(executionDelay)
     {
-        UseSeparateLogFileDefault();
+        //UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -371,10 +364,11 @@ public:
 };
 
 template <class _elementType>
-class CISST_EXPORT mtsTestDevice1: public mtsComponent, public mtsTestComponent
+class CISST_EXPORT mtsTestDevice1: public mtsComponent
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
+
     typedef _elementType value_type;
     mtsTestInterfaceProvided<value_type> InterfaceProvided1;
     mtsTestInterfaceRequired<value_type> InterfaceRequired1, InterfaceRequired2;
@@ -384,13 +378,12 @@ public:
         mtsComponent(name),
         InterfaceProvided1(executionDelay)
     {
-        UseSeparateLogFileDefault(false);
+        //UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
         if (provided) {
             InterfaceProvided1.PopulateExistingInterface(provided);
-            TestInterfacesProvided["p1"] = &InterfaceProvided1;
             AddStateTable(InterfaceProvided1.StateTable, true);
         }
 
@@ -398,12 +391,10 @@ public:
         required = AddInterfaceRequired("r1", MTS_OPTIONAL);
         if (required) {
             InterfaceRequired1.PopulateExistingInterface(required);
-            TestInterfacesRequired["r1"] = &InterfaceRequired1;
         }
         required = AddInterfaceRequired("r2", MTS_OPTIONAL);
         if (required) {
             InterfaceRequired2.PopulateExistingInterface(required);
-            TestInterfacesRequired["r2"] = &InterfaceRequired2;
         }
     }
 
@@ -422,7 +413,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestDevice1_mtsInt);
 //  - required interface: r1
 //-----------------------------------------------------------------------------
 template <class _elementType>
-class mtsTestContinuous1: public mtsTaskContinuous, public mtsTestComponent
+class mtsTestContinuous1: public mtsTaskContinuous
 {
 public:
     typedef _elementType value_type;
@@ -435,7 +426,7 @@ public:
         InterfaceProvided1(executionDelay),
         InterfaceProvided2(executionDelay)
     {
-        UseSeparateLogFileDefault(false);
+        //UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -467,7 +458,7 @@ public:
 
 
 template <class _elementType>
-class mtsTestDevice2: public mtsComponent, public mtsTestComponent
+class mtsTestDevice2: public mtsComponent
 {
 public:
     typedef _elementType value_type;
@@ -480,7 +471,7 @@ public:
         InterfaceProvided1(executionDelay),
         InterfaceProvided2(executionDelay)
     {
-        UseSeparateLogFileDefault(false);
+        //UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -510,7 +501,7 @@ public:
 //  - required interface: r1
 //-----------------------------------------------------------------------------
 template <class _elementType>
-class mtsTestFromCallback1: public mtsTaskFromCallback, public mtsTestComponent
+class mtsTestFromCallback1: public mtsTaskFromCallback
 {
 public:
     typedef _elementType value_type;
@@ -526,7 +517,7 @@ public:
         InterfaceProvided1(executionDelay),
         CounterCreateCall(0)
     {
-        UseSeparateLogFileDefault(false);
+        //UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -586,7 +577,7 @@ public:
 
 
 template <class _elementType>
-class mtsTestDevice3: public mtsComponent, public mtsTestComponent
+class mtsTestDevice3: public mtsComponent
 {
 public:
     typedef _elementType value_type;
@@ -598,7 +589,7 @@ public:
         mtsComponent(name),
         InterfaceProvided1(executionDelay)
     {
-        UseSeparateLogFileDefault(false);
+        //UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -619,7 +610,7 @@ public:
 
 
 template <class _elementType>
-class mtsTestFromSignal1: public mtsTaskFromSignal, public mtsTestComponent
+class mtsTestFromSignal1: public mtsTaskFromSignal
 {
 public:
     typedef _elementType value_type;
@@ -631,7 +622,7 @@ public:
         mtsTaskFromSignal(name),
         InterfaceProvided1(executionDelay)
     {
-        UseSeparateLogFileDefault(false);
+        //UseSeparateLogFileDefault(false);
 
         mtsInterfaceProvided * provided;
         provided = AddInterfaceProvided("p1");
@@ -701,7 +692,7 @@ public:
         CollectionRunning(false),
         SamplesCollected(0)
     {
-        UseSeparateLogFileDefault(false);
+        //UseSeparateLogFileDefault(false);
 
         mtsInterfaceRequired * required;
         required = AddInterfaceRequired("TestComponent");

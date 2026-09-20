@@ -1,3 +1,4 @@
+// [doc-example-start]
 // Take any fixed size vector as input parameter
 // Const or not, Reference or not
 template <unsigned int _size, int _stride, class _elementType,
@@ -49,3 +50,4 @@ FunctionFixedSizeE(vctFixedSizeConstVectorBase<_size, _stride1, _elementType,
 {
     std::cout << vector1.SumOfElements() + vector2.SumOfElements() << std::endl;
 }
+// [doc-example-end]

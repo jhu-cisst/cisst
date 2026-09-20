@@ -37,7 +37,7 @@ class clientQtComponent : public QObject, public mtsComponent
     clientQtComponent(const std::string & componentName);
     ~clientQtComponent(void) {};
 
-    void Configure(const std::string & CMN_UNUSED(filename)) {};
+    void Configure(const std::string & CMN_UNUSED(filename)) override {};
 
  protected:
     void EventVoidHandler(void);

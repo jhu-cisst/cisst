@@ -1,7 +1,7 @@
 # -*- Mode: CMAKE; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
 # ex: set filetype=cmake softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 #
-# (C) Copyright 2010-2024 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -16,7 +16,6 @@
 set (REQUIRED_CISST_LIBRARIES
      cisstCommon)
 
-cisst_set_directories (${REQUIRED_CISST_LIBRARIES})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
 # we intentionally don't link against cisstCommon to make sure we are

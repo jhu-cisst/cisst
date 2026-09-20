@@ -42,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 /********************************/
 
 svlWidgetQt4OpenGL::svlWidgetQt4OpenGL(QWidget* parent) :
-    QGLWidget(parent),
+    svlQtOpenGLWidgetBase(parent),
     Manager(0),
     WinID(0),
     ImageBuffer(0),
@@ -51,7 +51,7 @@ svlWidgetQt4OpenGL::svlWidgetQt4OpenGL(QWidget* parent) :
     WindowHeight(0),
     ByteOrderVersion(_RGB_VERSION_)
 {
-    QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(updateGL()));
+    QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(update()));
 }
 
 svlWidgetQt4OpenGL::~svlWidgetQt4OpenGL()
@@ -512,6 +512,5 @@ void svlWindowManagerQt4OpenGL::QSlotKeyPress(QKeyEvent* event, unsigned int win
         }
     }
 }
-
 
 

@@ -14,6 +14,10 @@
 IF(CISST_SVL_HAS_WEBGUI)
     ADD_EXECUTABLE(svlWebGUI webgui.cpp)
 
-    CISST_REQUIRES("svlWebGUI" "cisstCommon;cisstVector;cisstMultiTask;cisstOSAbstraction;cisstStereoVision")
+    target_link_libraries (svlWebGUI
+                           cisstCommon
+                           cisstVector
+                           cisstMultiTask
+                           cisstOSAbstraction
+                           cisstStereoVision)
 ENDIF(CISST_SVL_HAS_WEBGUI)
-

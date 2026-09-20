@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// [doc-example-start]
 void ExampleDynamic(void) {
     // define our prefered types
     typedef vctDynamicVector<double> VectorType;
@@ -80,4 +81,5 @@ void ExampleDynamic(void) {
 	std::cerr << "Exception occured: " << Exception.what() << std::endl;
     }
 }
+// [doc-example-end]
 

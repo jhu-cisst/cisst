@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2022 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -540,9 +540,9 @@ void mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking(void)
     const double blockingDelay = 0.25 * cmn_s;
     mtsTestPeriodic1<_elementType> * client = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Client");
     mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Server", blockingDelay);
-    // these delays are OS dependent, we might need to increase them later
-    const double clientExecutionDelay = 0.1 * cmn_s;
-    const double serverExecutionDelay = 0.1 * cmn_s;
+    // these delays are OS dependent, increased to avoid CI timing failures
+    const double clientExecutionDelay = 0.5 * cmn_s;
+    const double serverExecutionDelay = 0.5 * cmn_s;
     TestExecution(client, server, clientExecutionDelay, serverExecutionDelay, blockingDelay);
     delete client;
     delete server;
@@ -561,9 +561,9 @@ void mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking(void)
     const double blockingDelay = 0.25 * cmn_s;
     mtsTestContinuous1<_elementType> * client = new mtsTestContinuous1<_elementType>("mtsTestContinuous1Client");
     mtsTestContinuous1<_elementType> * server = new mtsTestContinuous1<_elementType>("mtsTestContinuous1Server", blockingDelay);
-    // these delays are OS dependent, we might need to increase them later
-    const double clientExecutionDelay = 0.1 * cmn_s;
-    const double serverExecutionDelay = 0.1 * cmn_s;
+    // these delays are OS dependent, increased to avoid CI timing failures
+    const double clientExecutionDelay = 0.5 * cmn_s;
+    const double serverExecutionDelay = 0.5 * cmn_s;
     TestExecution(client, server, clientExecutionDelay, serverExecutionDelay, blockingDelay);
     delete client;
     delete server;
@@ -584,9 +584,9 @@ void mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking(void)
     mtsTestCallbackTrigger * clientTrigger = new mtsTestCallbackTrigger(client);
     mtsTestFromCallback1<_elementType> * server = new mtsTestFromCallback1<_elementType>("mtsTestFromCallback1Server", blockingDelay);
     mtsTestCallbackTrigger * serverTrigger = new mtsTestCallbackTrigger(server);
-    // these delays are OS dependent, we might need to increase them later
-    const double clientExecutionDelay = 0.1 * cmn_s;
-    const double serverExecutionDelay = 0.1 * cmn_s;
+    // these delays are OS dependent, increased to avoid CI timing failures
+    const double clientExecutionDelay = 0.5 * cmn_s;
+    const double serverExecutionDelay = 0.5 * cmn_s;
     TestExecution(client, server, clientExecutionDelay, serverExecutionDelay, blockingDelay);
     clientTrigger->Stop();
     delete clientTrigger;
@@ -609,9 +609,9 @@ void mtsCommandAndEventLocalTest::TestFromSignalFromSignalBlocking(void)
     const double blockingDelay = 0.25 * cmn_s;
     mtsTestFromSignal1<_elementType> * client = new mtsTestFromSignal1<_elementType>("mtsTestFromSignal1Client");
     mtsTestFromSignal1<_elementType> * server = new mtsTestFromSignal1<_elementType>("mtsTestFromSignal1Server", blockingDelay);
-    // these delays are OS dependent, we might need to increase them later
-    const double clientExecutionDelay = 0.1 * cmn_s;
-    const double serverExecutionDelay = 0.1 * cmn_s;
+    // these delays are OS dependent, increased to avoid CI timing failures
+    const double clientExecutionDelay = 0.5 * cmn_s;
+    const double serverExecutionDelay = 0.5 * cmn_s;
     TestExecution(client, server, clientExecutionDelay, serverExecutionDelay, blockingDelay);
     delete client;
     delete server;

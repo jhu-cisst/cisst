@@ -5,7 +5,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-01-10
 
-  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -33,8 +33,10 @@ http://www.cisst.org/cisst/license.txt.
 %ignore ProductOf;
 %ignore operator==;
 
-%ignore vctFrameBase::Translation;
-%ignore vctFrameBase::Rotation;
+// Keep the non-const overloads (return mutable reference → numpy view sharing C++ memory).
+// Ignore only the const overloads to avoid SWIG overload ambiguity.
+%ignore vctFrameBase::Translation(void) const;
+%ignore vctFrameBase::Rotation(void) const;
 
 // instantiate the templated base class
 %include "cisstVector/vctFrameBase.h"

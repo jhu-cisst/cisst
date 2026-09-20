@@ -1,6 +1,7 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
 
+// [doc-handler-cpp-start]
 #include "CMyEventHandler.h"
 
 
@@ -79,4 +80,5 @@ void CMyEventHandler::OnUserEvent(unsigned int winid, bool ascii, unsigned int e
         }
     }
 }
+// [doc-handler-cpp-end]
 

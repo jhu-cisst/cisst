@@ -16,10 +16,6 @@ project (cisstVectorLibs)
 
 add_subdirectory (code)
 
-if (CISST_HAS_FLTK AND CISST_HAS_OPENGL)
-  add_subdirectory (codeFLTK)
-endif (CISST_HAS_FLTK AND CISST_HAS_OPENGL)
-
 cisst_offer_python (cisstVector)
 cisst_offer_tests_python (cisstVector)
 

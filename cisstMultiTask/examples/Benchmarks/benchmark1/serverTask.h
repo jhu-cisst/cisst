@@ -53,11 +53,10 @@ public:
     // populate the interface(s)
     serverTask(const std::string & taskName, double period);
     ~serverTask() {};
-    // all four methods are pure virtual in mtsTask
-    void Configure(const std::string & CMN_UNUSED(filename)) {};
-    void Startup(void);    // set some initial values
-    void Run(void);        // performed periodically
-    void Cleanup(void) {}; // user defined cleanup
+    void Configure(const std::string & CMN_UNUSED(filename)) override {};
+    void Startup(void) override;    // set some initial values
+    void Run(void) override;        // performed periodically
+    void Cleanup(void) override {}; // user defined cleanup
 
     bool BenchmarkDone(void) const;
 };

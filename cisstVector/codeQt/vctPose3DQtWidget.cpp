@@ -242,20 +242,19 @@ void vctPose3DQtWidgetView::paintGL(void)
         // scale to fit viewport without changing ratio
         Eigen::Vector3d sizeBB = mBB->diagonal();
         if ((sizeBB[mX] > 0.0) && (sizeBB[mY] > 0.0)) {
-            const double ratioX = mViewport.X() / sizeBB[mX];
-            const double ratioY = mViewport.Y() / sizeBB[mY];
+            const double ratioX = mViewport.x() / sizeBB[mX];
+            const double ratioY = mViewport.y() / sizeBB[mY];
             mViewportScale = (ratioY > ratioX ? ratioX : ratioY) * 0.98; // add some padding
         } else {
             mViewportScale = 1.0;
         }
         // take center of BB for display and scale to viewport
-        Eigen::Vector3d centerBB = mBB->center() * mViewportScale;
-        vct2 centerVP(mViewport);
-        centerVP.Divide(2.0);
-        mViewportTranslation.DifferenceOf(centerVP, vctDouble2(centerBB[mX], centerBB[mY]));
+        const Eigen::Vector3d centerBB = mBB->center() * mViewportScale;
+        const Eigen::Vector2d centerVP = mViewport / 2.0;
+        mViewportTranslation = centerVP - Eigen::Vector2d(centerBB[mX], centerBB[mY]);
     }
 
-    glTranslated(mViewportTranslation.X(), mViewportTranslation.Y(), 0.0);
+    glTranslated(mViewportTranslation.x(), mViewportTranslation.y(), 0.0);
     glScaled(mViewportScale, mViewportScale, 1.0);
     const PosesType::const_iterator end = mPoses->end();
     glColor3d(0.0, 0.0, 0.0);
@@ -299,15 +298,15 @@ void vctPose3DQtWidgetView::paintGL(void)
     painter.setFont(QFont("Helvetica", font_size));
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     painter.drawText(1, 1 + font_size,
-                     QString().asprintf("%c: %0.2f",
+                     QString::asprintf("%c: %0.2f",
                                        legend[mY],
                                        mBB->max()[mY] * mPrismaticFactor));
-    painter.drawText(1, mViewport.Y() - font_size,
-                     QString().asprintf("%0.2f/%0.2f",
+    painter.drawText(1, mViewport.y() - font_size,
+                     QString::asprintf("%0.2f/%0.2f",
                                        mBB->min()[mY] * mPrismaticFactor,
                                        mBB->min()[mX] * mPrismaticFactor));
-    painter.drawText(mViewport.X() - font_size * 10, mViewport.Y() - font_size,
-                     QString().asprintf("%c: %0.2f",
+    painter.drawText(mViewport.x() - font_size * 10, mViewport.y() - font_size,
+                     QString::asprintf("%c: %0.2f",
                                        legend[mX],
                                        mBB->max()[mX] * mPrismaticFactor));
     painter.end();
@@ -316,7 +315,7 @@ void vctPose3DQtWidgetView::paintGL(void)
 
 void vctPose3DQtWidgetView::resizeGL(int width, int height)
 {
-    mViewport.Assign(width, height);
+    mViewport = Eigen::Vector2d(width, height);
     GLsizei w = static_cast<GLsizei>(width);
     GLsizei h = static_cast<GLsizei>(height);
     glViewport(0 , 0, w , h); // set up viewport

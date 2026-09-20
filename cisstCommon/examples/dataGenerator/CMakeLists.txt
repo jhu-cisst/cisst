@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2009-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -13,8 +11,7 @@
 
 find_package (cisst COMPONENTS cisstCommon)
 
-if (cisst_FOUND_AS_REQUIRED)
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
   # create data type using the data generator
   cisst_data_generator (cmnExDataGenerator
@@ -29,7 +26,7 @@ if (cisst_FOUND_AS_REQUIRED)
                   ${cmnExDataGenerator_CISST_DG_SRCS}
                   main.cpp)
   set_property (TARGET cmnExDataGenerator PROPERTY FOLDER "cisstCommon/examples")
-  cisst_target_link_libraries (cmnExDataGenerator cisstCommon)
-else (cisst_FOUND_AS_REQUIRED)
+  target_link_libraries (cmnExDataGenerator cisstCommon)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires cisstCommon")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

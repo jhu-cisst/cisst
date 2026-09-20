@@ -5,7 +5,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
 
-  (C) Copyright 2009-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -35,7 +35,6 @@ void mtsComponentStateTest::tearDown(void)
 
 void mtsComponentStateTest::TestOrder(void)
 {
-
 }
 
 

@@ -33,11 +33,11 @@ CMN_IMPLEMENT_SERVICES(svlFilterImageOpenGLQtWidget);
 
 
 svlFilterImageOpenGLQtWidget::svlFilterImageOpenGLQtWidget(QWidget * parent):
-    QGLWidget(parent),
+    svlQtOpenGLWidgetBase(parent),
     svlFilterImageOpenGL(),
     ToolTipEnabled(false)
 {
-    QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(updateGL()));
+    QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(update()));
     setMouseTracking(true);  //enables mouse events if button is not pressed
 }
 

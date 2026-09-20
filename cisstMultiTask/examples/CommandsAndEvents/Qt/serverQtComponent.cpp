@@ -54,12 +54,18 @@ serverQtComponent::serverQtComponent(const std::string & componentName):
                      ServerWidget.WriteValue, SLOT(setNum(int)));
     QObject::connect(ServerWidget.ReadSlider, SIGNAL(valueChanged(int)),
                      this, SLOT(ReadQSlot(int)));
+    QObject::connect(ServerWidget.ReadSlider, SIGNAL(valueChanged(int)),
+                     ServerWidget.ReadValue, SLOT(setNum(int)));
     QObject::connect(ServerWidget.QualifiedReadSlider, SIGNAL(valueChanged(int)),
                      this, SLOT(QualifiedReadQSlot(int)));
+    QObject::connect(ServerWidget.QualifiedReadSlider, SIGNAL(valueChanged(int)),
+                     ServerWidget.QualifiedReadValue, SLOT(setNum(int)));
     QObject::connect(ServerWidget.EventVoidButton, SIGNAL(clicked()),
                      this, SLOT(EventVoidQSlot()));
     QObject::connect(ServerWidget.EventWriteSlider, SIGNAL(sliderMoved(int)),
                      this, SLOT(EventWriteQSlot(int)));
+    QObject::connect(ServerWidget.EventWriteSlider, SIGNAL(valueChanged(int)),
+                     ServerWidget.EventWriteValue, SLOT(setNum(int)));
 }
 
 

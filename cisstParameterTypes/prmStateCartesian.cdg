@@ -74,6 +74,27 @@ class {
     inline-header {
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+
+    public:
+        static inline bool ToPositionCartesianGet(const prmStateCartesian & _state,
+                                                  prmPositionCartesianGet & _position) {
+            _position.SetTimestamp(_state.Timestamp());
+            _position.SetReferenceFrame(_state.ReferenceFrame());
+            _position.SetMovingFrame(_state.MovingFrame());
+            _position.Position() = _state.Position();
+            _position.SetValid(_state.PositionIsValid());
+            return true;
+        }
+
+        static inline bool ToVelocityCartesianGet(const prmStateCartesian & _state,
+                                                  prmVelocityCartesianGet & _velocity) {
+            _velocity.SetTimestamp(_state.Timestamp());
+            _velocity.SetReferenceFrame(_state.ReferenceFrame());
+            _velocity.SetMovingFrame(_state.MovingFrame());
+            _velocity.SetVelocity(_state.Velocity());
+            _velocity.SetValid(_state.VelocityIsValid());
+            return true;
+        }
     }
 }
 

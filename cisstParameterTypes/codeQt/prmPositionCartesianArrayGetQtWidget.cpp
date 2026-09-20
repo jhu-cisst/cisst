@@ -36,6 +36,7 @@ prmPositionCartesianArrayGetQtWidget::prmPositionCartesianArrayGetQtWidget(const
     mtsComponent(componentName),
     TimerPeriodInMilliseconds(periodInSeconds)
 {
+    this->AddTag("UI");
     // Setup CISST Interface
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Controller");
     if (interfaceRequired) {

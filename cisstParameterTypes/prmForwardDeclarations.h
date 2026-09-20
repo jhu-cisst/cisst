@@ -5,7 +5,7 @@
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:   2008-03-03
 
-  (C) Copyright 2007-2024 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,6 +48,7 @@ class prmVelocityCartesianGet;
 class prmVelocityCartesianSet;
 class prmForceCartesianGet;
 class prmForceCartesianSet;
+class prmBaseFrame;
 
 class prmPositionJointGet;
 class prmPositionJointSet;

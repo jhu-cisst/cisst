@@ -5,7 +5,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -47,6 +47,14 @@ void mtsFunctionBase::InitCompletionCommand(const std::string &name)
     this->CompletionCommand->SetThreadSignal(this->ThreadSignal);
 }
 
+void mtsFunctionBase::DeleteCompletionCommand(void)
+{
+    if (this->CompletionCommand) {
+        delete this->CompletionCommand;
+        CompletionCommand = 0;
+    }
+}
+
 void mtsFunctionBase::SetThreadSignal(osaThreadSignal * threadSignal)
 {
     this->ThreadSignal = threadSignal;
@@ -64,18 +72,11 @@ void mtsFunctionBase::ThreadSignalWait(void) const
     }
 }
 
-mtsExecutionResult mtsFunctionBase::WaitForResult(mtsGenericObject &arg) const
+mtsExecutionResult mtsFunctionBase::WaitForResult() const
 {
-    mtsExecutionResult ret(mtsExecutionResult::INVALID_INPUT_TYPE);
-    if (CompletionCommand && CompletionCommand->Wait(arg))
-        ret = (arg.Valid() ? mtsExecutionResult::COMMAND_SUCCEEDED : mtsExecutionResult::METHOD_OR_FUNCTION_FAILED);
+    mtsExecutionResult ret(mtsExecutionResult::UNDEFINED);
+    if (CompletionCommand && CompletionCommand->Wait()) {
+        ret = CompletionCommand->IsArgValid() ? mtsExecutionResult::COMMAND_SUCCEEDED : mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;
+    }
     return ret;
-}
-
-mtsExecutionResult mtsFunctionBase::WaitForResult(void) const
-{
-    mtsExecutionResultProxy remoteResult;
-    if (CompletionCommand && CompletionCommand->Wait(remoteResult))
-        return remoteResult.GetData();
-    return mtsExecutionResult::INVALID_INPUT_TYPE;
 }

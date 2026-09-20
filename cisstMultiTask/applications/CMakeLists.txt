@@ -1,7 +1,6 @@
 #
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -17,7 +16,6 @@ project (cisstMultiTaskApplications)
 # Build applications if needed
 cisst_offer_application (cisstMultiTask ComponentGenerator OFF)
 cisst_offer_application (cisstMultiTask ComponentManager ON)
-cisst_offer_application (cisstMultiTask Logger ON)
 
 # Python dependent applications
 if (CISST_HAS_SWIG_PYTHON)

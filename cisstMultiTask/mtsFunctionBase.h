@@ -5,7 +5,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -64,18 +64,21 @@ public:
     /*! Initialize the completion command (mtsEventReceiverWrite), creating it if necessary. */
     virtual void InitCompletionCommand(const std::string &name);
 
+    /*! Delete the completion command (mtsEventReceiverWrite), if it exists. */
+    virtual void DeleteCompletionCommand(void);
+
     /*! Set the thread signal used for blocking commands */
     void SetThreadSignal(osaThreadSignal * threadSignal);
 
     /*! Wait for internal thread signal */
     void ThreadSignalWait(void) const;
 
-    /*! Wait for return value (read, qualified read, void return, write return) */
-    mtsExecutionResult WaitForResult(mtsGenericObject &arg) const;
-
-    /*! Wait for execution result (blocking void, blocking write) */
+    /*! Wait for return value. Note that return object is specified via CompletionCommand (PrepareToWait).
+        Return object contains:
+          - result  --  for read, qualified read, void return, write return
+          - execution result -- for blocking void, blocking write
+    */
     mtsExecutionResult WaitForResult(void) const;
-
 };
 
 

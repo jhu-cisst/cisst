@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -11,19 +9,16 @@
 #
 # --- end cisst license ---
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.16)
 
 # create a list of libraries needed for this project
 set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction
                               cisstMultiTask cisstStereoVision cisst3DUserInterface)
 
 # find cisst and make sure the required libraries have been compiled
-find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES} QUIET)
+find_package (cisst REQUIRED COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND_AS_REQUIRED)
-
-  # load cisst configuration
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
   include_directories (behaviors)
   add_subdirectory (behaviors)
@@ -60,6 +55,6 @@ if (cisst_FOUND_AS_REQUIRED)
     endif (sawIntuitiveDaVinci_FOUND)
   endif (CISST_UI3_HAS_ISI_BBAPI)
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

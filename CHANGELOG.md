@@ -1,6 +1,44 @@
 Change log
 ==========
 
+1.5.0 (2026-08-22)
+==================
+
+* API changes:
+  * cisstMultiTask:
+    * Removed `mtsManagerGlobal` (GCM) and consolidated the manager-component client/server classes into `mtsManagerComponent`; `mtsManagerLocal` now calls `mtsManagerComponent` for most actions; see [design documentation](https://cisst.readthedocs.io/en/devel/libraries/cisstMultiTask/design.html)
+    * Removed the `CISST_MTS_NEW` CMake option and the obsolete implementation it selected
+    * Removed internal list of component connections in favor of building connection list on demand
+    * `mtsComponent` methods `RemoveInterfaceRequired` and `RemoveInterfaceProvided` no longer have `skipDisconnect parameter`; now, interfaces will not be removed if there is still a connection
+    * Removed `mtsManagerLocal` methods for networked configurations (e.g., using GCM), including overloaded `GetInstance` methods, `GetConfiguration`, `IsGCMActive`, `SetInterfaceProvidedProxyAccessInfo`, and `GetGCMProcTimeSyncInfo`
+    * Removed `mtsManagerLocal` methods that tracked main thread: `PushCurrentMainTask`, `PopCurrentMainTask`, and `GetCurrentMainTask`
+  * cisstParameterTypes: renamed `prmBaseFrame::Valid` to `ValidDefinition`
+  * cisstMultiTaskQt: renamed the logger option in `mtsCommandLineOptionsQt` to avoid a conflict with dVRK
+* Deprecated features:
+  * Removed FLTK support
+  * CMake: removed the legacy cisst CMake macros; use target-based dependency propagation instead
+  * cisstMultiTask: `mtsManagerLocal::GetIPAddress` returns empty string and is marked as deprecated
+* New features:
+  * CMake:
+    * Requires CMake 3.16 or later
+    * Added Qt6 support and improved Qt, JSON, CppUnit, pkg-config, and exported-target configuration
+    * SI units are enabled by default
+  * cisstCommon: added data-function support for `std::set`
+  * cisstInteractive: added support for a Jupyter kernel started from embedded Python
+  * cisstMultiTask:
+    * Added a Qt component viewer using QtNodes and Graphviz for automatic layout
+    * Added interface and component tags for component-viewer filtering
+    * Added `mtsManagerLocal::DeleteInstance` to support sequential singleton lifetimes in test scenarios
+    * Added `mtsTaskContinuous::CreatesThread` and `DeleteCompletionCommand`
+    * `mtsDescriptionConnection` now includes the requesting component name
+  * Documentation:
+    * Migrated documentation from the GitHub wiki to [Read the Docs](https://cisst.readthedocs.io/en/devel/index.html)
+    * Added cisstMultiTask design documentation and an active SAW-component list
+* Bug fixes:
+  * cisstMultiTask: fixed races in `mtsFunction` classes and observer removal
+  * CMake: fixed package configuration, external-project include-directory creation, and cisstMesh example configuration
+  * Tests and CI: improved test diagnostics and reliability, including Python 3.13 and Windows support
+
 1.4.0 (2026-01-07)
 ==================
 

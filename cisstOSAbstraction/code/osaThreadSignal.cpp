@@ -491,7 +491,7 @@ void osaThreadSignal::Wait(void)
 #if 0
     ResetEvent(Internals->hEvent);
     //DWORD ret = WaitForSingleObject(Internals->hEvent, INFINITE);
-    HANDLE handles[1] = { INTERNALS(hEvent) };
+    HANDLE handles[1] = { Internals->hEvent };
     bool done = false;
     while (!done) {
         DWORD ret = MsgWaitForMultipleObjects(1, handles, FALSE, INFINITE, QS_ALLEVENTS);

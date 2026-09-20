@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleLUDynamicData(void) {
     // fill a matrix with random numbers
     vctDynamicMatrix<double> A(5, 7, VCT_COL_MAJOR);
@@ -18,3 +19,4 @@ void ExampleLUDynamicData(void) {
     std::cout << "A:\n" << A
               << "\nP * L * U:\n" << (P * L * U) << std::endl;
 }
+// [doc-example-end]

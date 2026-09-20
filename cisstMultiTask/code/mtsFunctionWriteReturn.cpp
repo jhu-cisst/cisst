@@ -5,7 +5,7 @@
   Author(s): Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -34,6 +34,7 @@ bool mtsFunctionWriteReturn::Detach(void)
 {
     if (this->IsValid()) {
         this->Command = 0;
+        DeleteCompletionCommand();
         return true;
     }
     return false;
@@ -67,10 +68,10 @@ mtsExecutionResult mtsFunctionWriteReturn::ExecuteGeneric(const mtsGenericObject
     }
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
-    CompletionCommand->PrepareToWait();
+    CompletionCommand->PrepareToWait(result);
     mtsExecutionResult executionResult = Command->Execute(argument, result, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
-        executionResult = WaitForResult(result);
+        executionResult = WaitForResult();
     CompletionCommand->ClearWait();
     return executionResult;
 }

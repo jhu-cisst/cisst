@@ -20,33 +20,41 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _counter_h
 #define _counter_h
 
+// [doc-task-header-start]
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 
 class counter: public mtsTaskPeriodic {
+// [doc-task-header-end]
 
     // used to control the log level, "Run Error" by default
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
  protected:
 
+    // [doc-state-table-members-start]
     // internal counter data
     double Counter;
 
     // increment used for the counter
     mtsStateTable ConfigurationStateTable;
     double Increment;
+    // [doc-state-table-members-end]
 
+    // [doc-event-members-start]
     // overflow event
     mtsFunctionVoid OverflowEvent;
 
     // event thrown if the increment value is invalid, sends current increment
     mtsFunctionWrite InvalidIncrementEvent;
+    // [doc-event-members-end]
 
     // internal method to configure this component
     void SetupInterfaces(void);
 
+    // [doc-command-methods-start]
     // internal methods used for the provided commands
     void SetIncrement(const double & increment);
     void Reset(void);
+    // [doc-command-methods-end]
 
  public:
     // provide a name for the task and define the frequency (time
@@ -57,10 +65,10 @@ class counter: public mtsTaskPeriodic {
     ~counter() {};
 
     // all four methods are pure virtual in mtsTask
-    void Configure(const std::string & CMN_UNUSED(filename)) {};
-    void Startup(void);    // set some initial values
-    void Run(void);        // performed periodically
-    void Cleanup(void) {}; // user defined cleanup
+    void Configure(const std::string & CMN_UNUSED(filename)) override {};
+    void Startup(void) override;    // set some initial values
+    void Run(void) override;        // performed periodically
+    void Cleanup(void) override {}; // user defined cleanup
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(counter);

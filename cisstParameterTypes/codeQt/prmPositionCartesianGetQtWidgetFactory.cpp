@@ -30,6 +30,7 @@ prmPositionCartesianGetQtWidgetFactory::prmPositionCartesianGetQtWidgetFactory(c
     mtsComponent(componentName),
     mNumberOfWidgets(0)
 {
+    this->AddTag("UI");
     mPrismaticFactor = cmn_mm;
     mRevoluteFactor = cmnPI_180;
     EnableDynamicComponentManagement();

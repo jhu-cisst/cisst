@@ -31,7 +31,6 @@ mtsInterface::mtsInterface(const std::string & interfaceName,
     Component(component)
 {
     Initialize();
-    AddTag("Generic");
 }
 
 

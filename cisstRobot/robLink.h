@@ -51,6 +51,9 @@ class CISST_EXPORT robLink {
   //! Copy constructor
   robLink( const robLink& link );
 
+  //! Copy assignment operator
+  robLink & operator=( const robLink& link );
+
   //! Overloaded constructor
   robLink( robKinematics* kinematics, const robMass& mass );
 

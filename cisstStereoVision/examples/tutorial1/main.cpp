@@ -10,6 +10,7 @@
 #include <cisstStereoVision/svlFilterImageUnsharpMask.h>
 #include <cisstStereoVision/svlFilterImageWindow.h>
 
+// [doc-simple-stream-start]
 void SimpleStream()
 {
     svlStreamManager stream;                        // 2. Instantiate SVL Stream
@@ -28,8 +29,10 @@ void SimpleStream()
 
     stream.Release();                               // 9. Release stream
 }
+// [doc-simple-stream-end]
 
 
+// [doc-processing-stream-start]
 void ProcessingStream()
 {
     svlStreamManager stream;                                      // 2. Instantiate SVL Stream
@@ -65,6 +68,7 @@ void ProcessingStream()
 
     stream.Release();                                             // 22. Release stream
 }
+// [doc-processing-stream-end]
 
 
 int main()

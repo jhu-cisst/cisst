@@ -152,7 +152,7 @@ std::string osaSocket::GetLocalhostIP(void)
         CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                           << "Failed to get network interfaces." 
                           << std::endl;
-        return 0;
+        return std::string();
     }
     
     std::string host_str;

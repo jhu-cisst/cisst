@@ -86,17 +86,18 @@ cisst_add_library (
 
 # for windows, needs WinSock
 if (WIN32)
-  target_link_libraries (cisstOSAbstraction ${CISST_WSOCK_LIBRARY})
+  target_link_libraries (cisstOSAbstraction
+    ${CISST_WSOCK_LIBRARY}
+    ${CISST_SOCKET_LIBRARY}
+    ${CISST_RT_LIBRARY})
 endif (WIN32)
 
 
 # QNX does not require rt library for clock_gettime (contained in libc)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   # QNX requires socket library
-  target_link_libraries (cisstOSAbstraction ${CISST_SOCKET_LIBRARY})
 else ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   if (UNIX AND NOT APPLE)
     # clock_gettime requires linking with librt
-    target_link_libraries (cisstOSAbstraction ${CISST_RT_LIBRARY})
   endif (UNIX AND NOT APPLE)
 endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")

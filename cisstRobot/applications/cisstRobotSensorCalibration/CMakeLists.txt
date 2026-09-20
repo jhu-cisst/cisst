@@ -1,8 +1,5 @@
 #
-# $Id: CMakeLists.txt 3331 2012-01-10 22:34:09Z adeguet1 $
-#
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -22,15 +19,12 @@ set (REQUIRED_CISST_LIBRARIES
 # find cisst and make sure the required libraries have been compiled
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND_AS_REQUIRED)
-
-  # load cisst configuration
-  include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
   add_executable (cisstRobotSensorCalibration RobotSensorCalibration.cpp)
   set_property (TARGET cisstRobotSensorCalibration PROPERTY FOLDER "cisstRobot/applications")
-  cisst_target_link_libraries (cisstRobotSensorCalibration ${REQUIRED_CISST_LIBRARIES})
+  target_link_libraries (cisstRobotSensorCalibration ${REQUIRED_CISST_LIBRARIES})
 
-else (cisst_FOUND_AS_REQUIRED)
+else (cisst_FOUND)
   message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES}")
-endif (cisst_FOUND_AS_REQUIRED)
+endif (cisst_FOUND)

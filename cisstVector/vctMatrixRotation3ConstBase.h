@@ -191,10 +191,10 @@ public:
       \param input The input rotation
       \return The output rotation
     */
-    inline ThisType
+    inline RotationValueType
     ApplyTo(const ThisType & input) const {
         CMN_ASSERT(input.Pointer() != this->Pointer());
-        ThisType result;
+        RotationValueType result;
         this->ApplyTo(input, result);
         return result;
     }
@@ -319,9 +319,9 @@ public:
       \param input The input rotation
       \return The output rotation
     */
-    inline ThisType ApplyInverseTo(const ThisType & input) const {
+    inline RotationValueType ApplyInverseTo(const ThisType & input) const {
         CMN_ASSERT(input.Pointer() != this->Pointer());
-        ThisType result;
+        RotationValueType result;
         this->ApplyInverseTo(input, result);
         return result;
     }
@@ -418,7 +418,7 @@ public:
       matrix type.  The latter returns a vctFixedSizeMatrix, while this version
       returns a specialized rotation matrix.
     */
-    ThisType operator * (const ThisType & input) const
+    RotationValueType operator * (const ThisType & input) const
     {
         return this->ApplyTo(input);
     }

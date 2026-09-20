@@ -44,14 +44,14 @@ http://www.cisst.org/cisst/license.txt.
 /**************************************/
 
 svlWidgetQt4OpenGLStereo::svlWidgetQt4OpenGLStereo(QWidget* parent) :
-    QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::StereoBuffers), parent),
+    svlQtOpenGLWidgetBase(parent),
     Manager(0),
     ImageBuffer(0),
     LatestImage(0),
     WindowWidth(0),
     WindowHeight(0)
 {
-    QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(updateGL()));
+    QObject::connect(this, SIGNAL(QSignalUpdateGL()), this, SLOT(update()));
 }
 
 svlWidgetQt4OpenGLStereo::~svlWidgetQt4OpenGLStereo()
@@ -478,4 +478,3 @@ void svlWindowManagerQt4OpenGLStereo::QSlotKeyPress(QKeyEvent* event)
         }
     }
 }
-

@@ -48,7 +48,7 @@ class CISST_EXPORT clockComponent: public mtsComponent {
  public:
     clockComponent(const std::string & componentName);
     ~clockComponent() {};
-    void Configure(const std::string & CMN_UNUSED(filename) = "") {};
+    void Configure(const std::string & CMN_UNUSED(filename) = "") override {};
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(clockComponent);

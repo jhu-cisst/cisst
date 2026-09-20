@@ -1,9 +1,7 @@
 #
-#
 # CMakeLists for cisstStereoVision
 #
-# (C) Copyright 2003-2011 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -14,9 +12,6 @@
 # --- end cisst license ---
 
 project (cisstStereoVisionQt)
-
-# set directories for this project
-cisst_set_directories (cisstQt)
 
 set (CMAKE_AUTOMOC ON)
 
@@ -83,9 +78,11 @@ cisst_add_library (LIBRARY cisstStereoVisionQt
                                 cisstVector
                                 cisstMultiTask
                                 cisstStereoVision
-                   SETTINGS     cisstQt
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES} svlExportQt.h)
 
-# link against Qt libraries
-target_link_libraries (cisstStereoVisionQt ${QT_LIBRARIES})
+target_link_libraries (cisstStereoVisionQt
+  ${CISST_QT_LIBRARIES}
+  ${CISST_OPENGL_LIBRARIES})
+if (CISST_HAS_OPENGL)
+endif ()

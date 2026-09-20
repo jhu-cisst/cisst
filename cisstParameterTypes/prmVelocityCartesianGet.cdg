@@ -19,17 +19,10 @@ class {
     }
 
     member {
-        name VelocityLinear;
-        type Eigen::Vector3d;
-        default Eigen::Vector3d::Zero();
-        description Linear velocity;
-    }
-
-    member {
-        name VelocityAngular;
-        type Eigen::Vector3d;
-        default Eigen::Vector3d::Zero();
-        description Angular velocity;
+        name Velocity;
+        type Eigen::Vector<double, 6>;
+        default Eigen::Vector<double, 6>::Zero();
+        description 6D velocity vector (linear xyz, angular xyz);
     }
 
     member {
@@ -57,14 +50,28 @@ class {
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     public:
-        inline void SetVelocity(const Eigen::Vector<double, 6>& newValue) {
-            mVelocityLinear = newValue.head<3>();
-            mVelocityAngular = newValue.tail<3>();
+        inline Eigen::Ref<Eigen::Vector3d> VelocityLinear(void) {
+            return mVelocity.head<3>();
         }
 
-        inline void GetVelocity(Eigen::Vector<double, 6>& placeHolder) const {
-            placeHolder.head<3>() = mVelocityLinear;
-            placeHolder.tail<3>() = mVelocityAngular;
+        inline Eigen::Ref<const Eigen::Vector3d> VelocityLinear(void) const {
+            return mVelocity.head<3>();
+        }
+
+        inline void SetVelocityLinear(const Eigen::Vector3d& v) {
+            VelocityLinear() = v;
+        }
+
+        inline Eigen::Ref<Eigen::Vector3d> VelocityAngular(void) {
+            return mVelocity.tail<3>();
+        }
+
+        inline Eigen::Ref<const Eigen::Vector3d> VelocityAngular(void) const {
+            return mVelocity.tail<3>();
+        }
+
+        inline void SetVelocityAngular(const Eigen::Vector3d& v) {
+            VelocityAngular() = v;
         }
     }
 }

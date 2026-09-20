@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleIsOrthonormal(void) {
     // fill a matrix with random numbers
     vctDynamicMatrix<double> A(5, 7);
@@ -18,3 +19,4 @@ void ExampleIsOrthonormal(void) {
         std::cout << "Vt is orthonormal" << std::endl;
     }
 }
+// [doc-example-end]

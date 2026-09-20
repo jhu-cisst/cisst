@@ -1,7 +1,5 @@
 #
-#
-# (C) Copyright 2006-2008 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2006-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 # 
@@ -19,12 +17,9 @@ find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
-  # load cisst configuration
-  include (${CISST_USE_FILE})
-
   IF(CISST_SVL_HAS_OPENCV2)
     add_executable (svlExCameraCalibration cameraCalibration.cpp)
-    cisst_target_link_libraries (svlExCameraCalibration ${REQUIRED_CISST_LIBRARIES})
+    target_link_libraries (svlExCameraCalibration ${REQUIRED_CISST_LIBRARIES})
   ENDIF(CISST_SVL_HAS_OPENCV2)
 
 else (cisst_FOUND)

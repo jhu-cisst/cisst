@@ -1,5 +1,6 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
+// [doc-main-start]
 #include "CMyFilter1.h"
 
 #include <cisstStereoVision/svlInitializer.h>
@@ -33,3 +34,4 @@ int main()
                                                      //
     return 0;                                        //
 }
+// [doc-main-end]

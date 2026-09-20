@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-11-17
 
-  (C) Copyright 2004-2013 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2026 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -542,6 +542,27 @@ void vctDynamicVectorRefTest::TestNormalizationFloat(void) {
     TestNormalization<float>();
 }
 
+template <class _elementType>
+void vctDynamicVectorRefTest::TestRandomTemporaryRef(void) {
+    enum {SIZE = 7, STRIDE1 = 3};
+    typedef _elementType value_type;
+    CREATE_STORAGE_AND_REF(1);
+    vector1.SetAll(value_type(100));
+
+    vctRandom(vctDynamicVectorRef<value_type>(SIZE, storage1, STRIDE1),
+              value_type(-10), value_type(10));
+
+    vctGenericContainerTest::TestElementsInRange(vector1, value_type(-10), value_type(10));
+}
+
+void vctDynamicVectorRefTest::TestRandomTemporaryRefDouble(void) {
+    TestRandomTemporaryRef<double>();
+}
+void vctDynamicVectorRefTest::TestRandomTemporaryRefFloat(void) {
+    TestRandomTemporaryRef<float>();
+}
+void vctDynamicVectorRefTest::TestRandomTemporaryRefInt(void) {
+    TestRandomTemporaryRef<int>();
+}
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctDynamicVectorRefTest);
-

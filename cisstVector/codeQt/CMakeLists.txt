@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2003-2025 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2003-2026 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #
@@ -11,13 +11,12 @@
 
 project (cisstVectorQt)
 
+find_package (Qt${CISST_QT_VERSION} COMPONENTS Core REQUIRED)
+
 # To include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 set (CMAKE_AUTOMOC ON)
-
-# set directories for this project
-cisst_set_directories (cisstQt)
 
 # add the Qt library
 cisst_add_library (
@@ -26,8 +25,6 @@ cisst_add_library (
   FOLDER cisstVector
   DEPENDENCIES cisstCommon
                cisstVector
-  SETTINGS     cisstQt
-               cisstOpenGL
   SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp
                vctQtWidgetDynamicVector.cpp
                vctQtWidgetDynamicMatrix.cpp
@@ -53,5 +50,6 @@ cisst_add_library (
                vctForceTorque3DQtWidget.h
                vctExportQt.h)
 
-# link against Qt libraries
-target_link_libraries (cisstVectorQt ${QT_LIBRARIES})
+target_link_libraries (cisstVectorQt
+                       ${CISST_QT_LIBRARIES}
+                       ${CISST_OPENGL_LIBRARIES})

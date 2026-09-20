@@ -1,3 +1,4 @@
+// [doc-example-start]
 void ExampleSVDUserOutputWorkspace(void) {
     const unsigned int size = 6;
     // fill a matrix with random numbers
@@ -22,6 +23,7 @@ void ExampleSVDUserOutputWorkspace(void) {
     std::cout << "U:\n" << U << "\nS:\n" << S << "\nV:\n"
               << Vt.TransposeRef() << std::endl;
 }
+// [doc-example-end]
 
 void ExampleSVDEconomyUserOutputWorkspace(void) {
     const unsigned int sizerows = 20;

@@ -1,5 +1,6 @@
 // See license at http://www.cisst.org/cisst/license.txt
 
+// [doc-main-start]
 #include "CMyFilter2.h"
 #include "CMyFilter3.h"
 
@@ -46,3 +47,4 @@ int main()
                                                                     //
     return 0;                                                       //
 }
+// [doc-main-end]

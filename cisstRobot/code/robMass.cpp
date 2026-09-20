@@ -84,9 +84,9 @@ robMass::Errno robMass::ReadMass( std::istream& is ) {
     return robMass::EFAILURE;
   }
   
-  vctDynamicVector<double> e1(3, x1, x2, x3);
-  vctDynamicVector<double> e2(3, y1, y2, y3);
-  vctDynamicVector<double> e3(3, z1, z2, z3);
+  vctFixedSizeVector<double, 3> e1(x1, x2, x3);
+  vctFixedSizeVector<double, 3> e2(y1, y2, y3);
+  vctFixedSizeVector<double, 3> e3(z1, z2, z3);
   V = vctMatrixRotation3<double>( e1, e2, e3, true, VCT_NORMALIZE );
 
   return robMass::ESUCCESS;
@@ -125,9 +125,9 @@ robMass::Errno robMass::ReadMass(const Json::Value &config)
       return robMass::EFAILURE;
     }
 
-    vctDynamicVector<double> e1(3, x1, x2, x3);
-    vctDynamicVector<double> e2(3, y1, y2, y3);
-    vctDynamicVector<double> e3(3, z1, z2, z3);
+    vctFixedSizeVector<double, 3> e1(x1, x2, x3);
+    vctFixedSizeVector<double, 3> e2(y1, y2, y3);
+    vctFixedSizeVector<double, 3> e3(z1, z2, z3);
     V = vctMatrixRotation3<double>( e1, e2, e3, true, VCT_NORMALIZE );
 
     return robMass::ESUCCESS;

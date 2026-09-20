@@ -1,0 +1,77 @@
+# Doxyfile for cisst — used by Sphinx/breathe to generate XML API docs.
+# Run automatically during `make html` via conf.py subprocess call.
+# Do NOT set GENERATE_HTML = YES here; breathe reads the XML.
+
+#---------------------------------------------------------------------------
+# Project info
+#---------------------------------------------------------------------------
+PROJECT_NAME           = "cisst"
+PROJECT_BRIEF          = "Component-based open-source software toolkit for computer-assisted interventional systems"
+PROJECT_NUMBER         =
+
+#---------------------------------------------------------------------------
+# Input — public headers only, no implementation (code/) or test dirs
+#---------------------------------------------------------------------------
+INPUT                  = ../cisstCommon \
+                         ../cisstVector \
+                         ../cisstNumerical \
+                         ../cisstOSAbstraction \
+                         ../cisstMultiTask \
+                         ../cisstRobot \
+                         ../cisstParameterTypes \
+                         ../cisstStereoVision
+
+# Only parse top-level headers; exclude code/, tests/, examples/, applications/
+EXCLUDE_PATTERNS       = */code/* \
+                         */tests/* \
+                         */examples/* \
+                         */applications/* \
+                         */codePython/* \
+                         */codeQt/* \
+                         */BH/* \
+                         *.i \
+                         *.i.h
+
+RECURSIVE              = NO
+FILE_PATTERNS          = *.h
+
+#---------------------------------------------------------------------------
+# Output — XML only (breathe reads it; no HTML needed)
+#---------------------------------------------------------------------------
+OUTPUT_DIRECTORY       = _build/doxygen
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_RTF           = NO
+GENERATE_MAN           = NO
+GENERATE_XML           = YES
+XML_PROGRAMLISTING     = NO
+
+#---------------------------------------------------------------------------
+# Extraction settings — public API only
+#---------------------------------------------------------------------------
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = NO
+HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_CLASSES     = YES
+
+#---------------------------------------------------------------------------
+# Parsing
+#---------------------------------------------------------------------------
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+PREDEFINED             = CISST_EXPORT= \
+                         CMN_DECLARE_SERVICES(x,y)= \
+                         CMN_DECLARE_SERVICES_EXPORT(x,y)=
+
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO
+
+#---------------------------------------------------------------------------
+# Dot / graphs — disabled to keep build fast
+#---------------------------------------------------------------------------
+HAVE_DOT               = NO
+CLASS_DIAGRAMS         = NO
