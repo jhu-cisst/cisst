@@ -42,6 +42,28 @@ http://www.cisst.org/cisst/license.txt.
 
 %include "swigrun.i"
 
+%include "eigen.i"
+
+%eigen_typemaps(Eigen::Vector2d)
+%apply Eigen::Vector2d { Eigen::Matrix<double, 2, 1> };
+
+%eigen_typemaps(Eigen::Vector3d)
+%apply Eigen::Vector3d { Eigen::Matrix<double, 3, 1> };
+
+%eigen_typemaps(Eigen::Vector<double, 6>)
+%apply Eigen::Vector<double, 6> { Eigen::Matrix<double, 6, 1> };
+
+%eigen_typemaps(Eigen::VectorXd)
+%apply Eigen::VectorXd { Eigen::Matrix<double, Eigen::Dynamic, 1> };
+
+%eigen_typemaps(Eigen::MatrixXd)
+%apply Eigen::MatrixXd { Eigen::Matrix<double, Eigen::Dynamic, Eogen::Dynamic> };
+
+%eigen_typemaps(Eigen::Matrix3Xd)
+%apply Eigen::Matrix3Xd { Eigen::Matrix<double, 3, Eigen::Dynamic> };
+
+%eigen_typemaps(Eigen::Matrix<double, 6, Eigen::Dynamic>)
+
 %header %{
 #include <cisstCommon/cmnPython.h>
 %}

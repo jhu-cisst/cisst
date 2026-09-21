@@ -42,8 +42,8 @@ http://www.cisst.org/cisst/license.txt.
     import_array() // numpy initialization
 %}
 
-%header %{
-#include <cisstParameterTypes/prmPython.h>
+%{
+  #include <cisstParameterTypes/prmPython.h>
 %}
 
 // Generate parameter documentation for IRE

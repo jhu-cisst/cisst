@@ -103,7 +103,7 @@ protected:
     size_t mX, mY;
 
     // viewport
-    vctDouble2 mViewportTranslation, mViewport;
+    Eigen::Vector2d mViewportTranslation, mViewport;
     double mViewportScale;
 };
 

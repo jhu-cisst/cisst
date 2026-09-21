@@ -6,6 +6,9 @@ inline-header {
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
+#include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstParameterTypes/prmVelocityCartesianGet.h>
+
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }

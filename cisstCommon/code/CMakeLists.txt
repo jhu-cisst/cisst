@@ -140,6 +140,8 @@ if (CISST_HAS_JSON)
   endif ()
 endif ()
 
+target_link_libraries(cisstCommon PUBLIC Eigen3::Eigen)
+
 if (CISST_HAS_LINUX_RTAI)
   target_include_directories (cisstCommon PUBLIC ${RTAI_INCLUDE_DIR})
   target_link_libraries (cisstCommon PUBLIC ${RTAI_LIBRARIES})

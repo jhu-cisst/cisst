@@ -13,6 +13,8 @@ project (cisstVectorQt)
 
 find_package (Qt${CISST_QT_VERSION} COMPONENTS Core REQUIRED)
 
+find_package (Eigen3 REQUIRED)
+
 # To include Qt generated files
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 

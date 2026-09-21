@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmPython_h
 
 #include <cisstCommon/cmnPython.h>
-#include <cisstVector/vctPython.h>
 #include <cisstMultiTask/mtsPython.h>
 
 #include <cisstParameterTypes/prmEventButton.h>

@@ -13,6 +13,9 @@
     },
     {
       "name": "cppunit"
+    },
+    {
+      "name": "eigen3"
     }
   ]
 }

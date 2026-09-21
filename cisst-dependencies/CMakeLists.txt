@@ -395,9 +395,7 @@ endif (CISST_HAS_JSON)
 
 # Required support for Eigen
 find_package (Eigen3 QUIET)
-if (EIGEN_FOUND)
-    cisst_set_package_settings (cisstCommon Eigen INCLUDE_DIRECTORIES EIGEN3_INCLUDE_DIR)
-else (EIGEN_FOUND)
+if (NOT EIGEN_FOUND)
   include(FetchContent)
   set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL "Don't check for updates once external project is downloaded")
   FetchContent_Declare(
@@ -407,5 +405,4 @@ else (EIGEN_FOUND)
     GIT_SHALLOW    TRUE
   )
   FetchContent_MakeAvailable(Eigen)
-  cisst_set_package_settings (cisstCommon Eigen INCLUDE_DIRECTORIES EIGEN3_INCLUDE_DIR)
-endif (EIGEN_FOUND)
+endif (NOT EIGEN_FOUND)

@@ -55,7 +55,6 @@ public:
 
     public:
         Signal(const std::string & name, size_t numberOfPoints);
-        ~Signal();
 
         /*! Insert point at last position and move last position
           forward.  If the circular buffer is full, this methods
@@ -163,7 +162,6 @@ public:
         VerticalLinesType VerticalLines;
 
         Scale(const std::string & name);
-        ~Scale();
 
         const std::string & GetName(void) const;
 
