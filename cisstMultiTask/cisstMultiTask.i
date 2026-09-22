@@ -590,7 +590,7 @@ http://www.cisst.org/cisst/license.txt.
 
   size_t i;
   for (i = 0; i < (*$1).size(); i++)
-      PyTuple_SetItem(required,i,PyString_FromString((*$1)[i].c_str()));
+      PyTuple_SetItem(required,i,PyUnicode_FromString((*$1)[i].c_str()));
 }
 
 %typemap(argout) std::vector<std::string> & namesOfInterfacesProvided {
@@ -599,7 +599,7 @@ http://www.cisst.org/cisst/license.txt.
 
   size_t i;
   for (i = 0; i < (*$1).size(); i++)
-      PyTuple_SetItem(provided,i,PyString_FromString((*$1)[i].c_str()));
+      PyTuple_SetItem(provided,i,PyUnicode_FromString((*$1)[i].c_str()));
 }
 
 %include "cisstMultiTask/mtsManagerComponentServices.h"
