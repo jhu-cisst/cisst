@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsCommandLineOptions::mtsCommandLineOptions(const std::string & options)
 {
+#if CISST_HAS_JSON
     if (options.find('m') != std::string::npos) {
         this->AddOptionMultipleValues("m", "component-manager",
                                       "JSON files to configure component manager",
@@ -34,10 +35,14 @@ mtsCommandLineOptions::mtsCommandLineOptions(const std::string & options)
                                       "json configuration files for data collection using cisstMultiTask state table collector",
                                       cmnCommandLineOptions::OPTIONAL_OPTION, &CollectionConfig);
     }
+#else
+    (void)options;
+#endif
 }
 
 void mtsCommandLineOptions::Apply(void)
 {
+#if CISST_HAS_JSON
     mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
     if (!ManagerConfig.empty()) {
         if (!componentManager->ConfigureJSON(ManagerConfig)) {
@@ -65,4 +70,11 @@ void mtsCommandLineOptions::Apply(void)
         }
         collectorFactory->Connect();
     }
+#else
+    if (!ManagerConfig.empty() || !CollectionConfig.empty()) {
+        std::cerr << "mtsCommandLineOptions::Apply: JSON configuration requires CISST_HAS_JSON"
+                  << std::endl;
+        exit(EXIT_FAILURE);
+    }
+#endif
 }
