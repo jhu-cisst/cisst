@@ -148,7 +148,7 @@ jobs:
           -DcisstNetlib_DIR="${{github.workspace}}/../cisstNetlib-install/share/cisstNetlib"
         cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
 
-    - name: Test downstream Qt dependency discovery
+    - name: Test downstream package discovery
       shell: pwsh
       run: |
         $source = "${{github.workspace}}/tests/cmake/qt-dependencies"
@@ -175,6 +175,12 @@ jobs:
               if ($LASTEXITCODE -ne 0) { throw "Qt dependency build failed: $tree/$mode" }
             }
           }
+          $binary = "${{github.workspace}}/data-generator-$tree"
+          $generatorOptions = $options | Where-Object { $_ -notlike '-DMODE=*' }
+          cmake -S "${{github.workspace}}/tests/cmake/data-generator" -B $binary @generatorOptions
+          if ($LASTEXITCODE -ne 0) { throw "Data generator configure failed: $tree" }
+          cmake --build $binary --config Release --parallel 2
+          if ($LASTEXITCODE -ne 0) { throw "Data generator build failed: $tree" }
         }
 
     - name: Run Tests

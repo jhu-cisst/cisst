@@ -78,6 +78,7 @@ set_property (TARGET cisstDataGenerator PROPERTY FOLDER "cisstCommon/application
 add_dependencies (cisstDataGenerator cisstRevision)
 
 install (TARGETS cisstDataGenerator
+         EXPORT cisst-targets
          COMPONENT cisstCommon
          RUNTIME DESTINATION bin)
 

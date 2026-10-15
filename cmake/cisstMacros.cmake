@@ -431,21 +431,31 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
   list (REMOVE_AT ARGV 0) # GENERATED_INCLUDE_DIRECTORY
   list (REMOVE_AT ARGV 0) # GENERATED_INCLUDE_SUB_DIRECTORY
 
-  # make sure cisstDataGenerator is being build and find it
-  # try to figure out if this is build along with cisst
-  if (CMAKE_CROSSCOMPILING)
-    find_program (CISST_DG_EXECUTABLE cisstDataGenerator)
-  else (CMAKE_CROSSCOMPILING)
-    # make sure the target exists
-    if (TARGET cisstDataGenerator)
-      # if the target exists, use its destination
-      cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
-      set (CISST_DG_EXECUTABLE "$<TARGET_FILE:cisstDataGenerator>")
-    else (TARGET cisstDataGenerator)
-      cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
+  # Honor explicit overrides.  Native builds use a target so multi-config
+  # generators select the matching executable (e.g. bin/Debug or bin/Release).
+  # Cross builds must use a host executable, never the target-platform binary.
+  set (_cisst_dg_target)
+  if (NOT CISST_DG_EXECUTABLE)
+    if (CMAKE_CROSSCOMPILING)
+      find_program (CISST_DG_EXECUTABLE cisstDataGenerator NO_CMAKE_FIND_ROOT_PATH)
+    elseif (TARGET cisstDataGenerator)
+      set (_cisst_dg_target cisstDataGenerator)
+    elseif (TARGET cisst::cisstDataGenerator)
+      set (_cisst_dg_target cisst::cisstDataGenerator)
+    else ()
+      # Compatibility with packages created before the generator was exported.
       find_program (CISST_DG_EXECUTABLE cisstDataGenerator HINTS "${CISST_BINARY_DIR}/bin")
-    endif (TARGET cisstDataGenerator)
-  endif (CMAKE_CROSSCOMPILING)
+    endif ()
+  endif ()
+  if (_cisst_dg_target)
+    set (CISST_DG_EXECUTABLE "$<TARGET_FILE:${_cisst_dg_target}>")
+    set (_cisst_dg_dependency ${_cisst_dg_target})
+  else ()
+    set (_cisst_dg_dependency "${CISST_DG_EXECUTABLE}")
+  endif ()
+  if (NOT CISST_DG_EXECUTABLE)
+    message (FATAL_ERROR "cisst_data_generator: cisstDataGenerator was not found. Set CISST_DG_EXECUTABLE to a runnable host executable.")
+  endif ()
   cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator executable found: ${CISST_DG_EXECUTABLE}")
 
   # loop over input files
@@ -476,7 +486,8 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
       --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
       --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}_cdg.cpp
       MAIN_DEPENDENCY ${input}
-      DEPENDS "${CISST_DG_EXECUTABLE}"
+      DEPENDS "${_cisst_dg_dependency}"
+      VERBATIM
       COMMENT "cisstDataGenerator for ${INPUT_WE}")
   endforeach(input)
 
