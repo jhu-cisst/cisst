@@ -144,9 +144,38 @@ jobs:
           "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
           "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
           -DVCPKG_MANIFEST_INSTALL=OFF ^
-          -Dcisst_DIR="${{github.workspace}}/cisst-install/share/cisst-1.4/cmake" ^
+          -Dcisst_DIR="${{github.workspace}}/cisst-install/share/cisst-1.5/cmake" ^
           -DcisstNetlib_DIR="${{github.workspace}}/../cisstNetlib-install/share/cisstNetlib"
         cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
+
+    - name: Test downstream Qt dependency discovery
+      shell: pwsh
+      run: |
+        $source = "${{github.workspace}}/tests/cmake/qt-dependencies"
+        $installedConfig = Get-ChildItem "${{github.workspace}}/cisst-install/share/cisst-*/cmake/cisst-config.cmake" | Select-Object -First 1
+        if (-not $installedConfig) { throw "Installed cisst package configuration not found" }
+        $packages = @{ build = "${{github.workspace}}/build"; install = $installedConfig.DirectoryName }
+        foreach ($tree in @('build', 'install')) {
+          foreach ($mode in @('core', 'qt', 'repeated', 'all')) {
+            $binary = "${{github.workspace}}/qt-dependencies-$tree-$mode"
+            $options = @(
+              "-Dcisst_DIR=$($packages[$tree])", "-DMODE=$mode",
+              "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake",
+              "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed",
+              '-DVCPKG_MANIFEST_INSTALL=OFF',
+              "-DCisstNetlib_DIR=${{github.workspace}}/../cisstNetlib-install/share/cisstNetlib"
+            )
+            if ($mode -eq 'core') {
+              $options += '-DCMAKE_DISABLE_FIND_PACKAGE_Qt5=ON', '-DCMAKE_DISABLE_FIND_PACKAGE_Qt6=ON'
+            }
+            cmake -S $source -B $binary @options
+            if ($LASTEXITCODE -ne 0) { throw "Qt dependency configure failed: $tree/$mode" }
+            if ($mode -ne 'all') {
+              cmake --build $binary --config Release --parallel 2
+              if ($LASTEXITCODE -ne 0) { throw "Qt dependency build failed: $tree/$mode" }
+            }
+          }
+        }
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build
