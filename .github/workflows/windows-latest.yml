@@ -162,7 +162,7 @@ jobs:
               "-Dcisst_DIR=$($packages[$tree])", "-DMODE=$mode",
               "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake",
               "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed",
-              '-DVCPKG_MANIFEST_INSTALL=OFF',
+              '-DVCPKG_MANIFEST_INSTALL=OFF', '-DCMAKE_DISABLE_FIND_PACKAGE_SWIG=ON',
               "-DCisstNetlib_DIR=${{github.workspace}}/../cisstNetlib-install/share/cisstNetlib"
             )
             if ($mode -eq 'core') {

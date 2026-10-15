@@ -205,10 +205,6 @@ if (CISST_HAS_SWIG_PYTHON OR "@CISST_cisstInteractive@")
   set (PYTHON_ALL_LIBRARIES ${Python_LIBRARIES})
 endif ()
 
-if (CISST_HAS_SWIG_PYTHON)
-  find_dependency (SWIG @CISST_SWIG_REQUIRED_VERSION@)
-endif ()
-
 list (FIND CISST_LIBRARIES cisstCommonXML _cisst_common_xml_index)
 if (NOT ${_cisst_common_xml_index} EQUAL -1 AND CISST_XML_LIB STREQUAL "LibXml2")
   find_dependency (LibXml2)
