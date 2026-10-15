@@ -25,6 +25,32 @@ function (cisst_cmake_debug ...)
 endfunction (cisst_cmake_debug)
 
 
+# Internal helper for component-aware Qt discovery in cisst-config.cmake.
+# Follow transitive usage requirements, including all configurations.  Qt
+# targets need not exist yet.  Extract target names from generator expressions
+# too, e.g. $<LINK_ONLY:Qt6::Core>, without treating LINK_ONLY as a namespace.
+function (_cisst_requires_qt result)
+  set (_pending ${ARGN})
+  set (_visited)
+  while (_pending)
+    list (POP_FRONT _pending _target)
+    if (_target MATCHES "^Qt[56]::")
+      set (${result} TRUE PARENT_SCOPE)
+      return ()
+    endif ()
+    if (TARGET ${_target} AND NOT _target IN_LIST _visited)
+      list (APPEND _visited ${_target})
+      get_target_property (_links ${_target} INTERFACE_LINK_LIBRARIES)
+      if (_links)
+        string (REGEX MATCHALL "[A-Za-z0-9_.+-]+(::[A-Za-z0-9_.+-]+)*" _dependencies "${_links}")
+        list (APPEND _pending ${_dependencies})
+      endif ()
+    endif ()
+  endwhile ()
+  set (${result} FALSE PARENT_SCOPE)
+endfunction ()
+
+
 # The macro adds a library to a CISST-related project by processing the
 # following parameters
 #

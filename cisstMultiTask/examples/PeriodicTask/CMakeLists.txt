@@ -20,6 +20,13 @@ find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES})
 
 if (cisst_FOUND)
 
+  # Discover Qt in the same directory scope as the imported cisst targets.
+  # The Qt example uses additional components beyond the core example.
+  if (CISST_HAS_QT)
+    find_package (cisst REQUIRED COMPONENTS ${REQUIRED_CISST_LIBRARIES}
+                  cisstCommonQt cisstVectorQt cisstMultiTaskQt)
+  endif ()
+
   # shared components used by either example
   include_directories (${CMAKE_CURRENT_SOURCE_DIR})
   add_subdirectory (components)
