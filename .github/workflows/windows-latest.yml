@@ -1,7 +1,7 @@
 name: Windows Latest
 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Build pushes to the main and development branches.
   push:
     branches: [ main, devel ]
 
@@ -33,27 +33,33 @@ jobs:
         mkdir -p "$GITHUB_WORKSPACE/vcpkg_cache"
         echo "VCPKG_DEFAULT_BINARY_CACHE=$GITHUB_WORKSPACE/vcpkg_cache" >> "$GITHUB_ENV"
 
-    - name: Cache vcpkg binary artifacts
-      uses: actions/cache@v4
+    # vcpkg's per-package ABI hashes validate compiler/toolchain compatibility.
+    # Use a fresh archive key so newly built packages can always be saved.
+    - name: Restore vcpkg binary artifacts
+      id: vcpkg-cache
+      uses: actions/cache/restore@v4
       with:
         path: ${{ github.workspace }}/vcpkg_cache
-        key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json', '.github/workflows/vcpkg-triplets/x64-windows.cmake') }}
+        key: ${{ runner.os }}-vcpkg-bin-v3-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', '.github/workflows/vcpkg-triplets/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
         restore-keys: |
-          ${{ runner.os }}-vcpkg-bin-
-
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
+          ${{ runner.os }}-vcpkg-bin-v3-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', '.github/workflows/vcpkg-triplets/**') }}-
+          ${{ runner.os }}-vcpkg-bin-v3-
 
     - name: Install dependencies via vcpkg
-      working-directory: ${{github.workspace}}/build
       run: |
         C:\vcpkg\vcpkg install --triplet x64-windows --overlay-triplets="${{github.workspace}}/.github/workflows/vcpkg-triplets" --x-install-root="${{github.workspace}}/build/vcpkg_installed"
 
+    # Preserve successful dependency builds even if a later build or test fails.
+    - name: Save vcpkg binary artifacts
+      if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ github.workspace }}/vcpkg_cache
+        key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
+
     - name: Configure CMake smoke test
       run: |
-        cmake -E make_directory ${{github.workspace}}/build-configure-check
-        cd ${{github.workspace}}/build-configure-check
-        cmake "${{github.workspace}}" `
+        cmake -S . -B build-configure-check `
           -DCMAKE_BUILD_TYPE=Release `
           "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" `
           "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" `
@@ -76,15 +82,19 @@ jobs:
     - name: Build cisstNetlib
       if: steps.cache-cisstnetlib.outputs.cache-hit != 'true'
       run: |
-        cmake -E make_directory ${{github.workspace}}/../cisstNetlib-build
-        cd ${{github.workspace}}/../cisstNetlib-build
-        cmake ${{github.workspace}}/../cisstNetlib-source -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/../cisstNetlib-install
-        cmake --build . --config Release --parallel $env:NUMBER_OF_PROCESSORS
-        cmake --build . --target install
+        cmake -S ../cisstNetlib-source -B ../cisstNetlib-build "-DCMAKE_INSTALL_PREFIX=${{github.workspace}}/../cisstNetlib-install"
+        cmake --build ../cisstNetlib-build --config Release --parallel $env:NUMBER_OF_PROCESSORS
+        cmake --install ../cisstNetlib-build --config Release
 
     - name: Configure CMake
-      working-directory: ${{github.workspace}}/build
-      run: cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" -DVCPKG_MANIFEST_INSTALL=OFF "-DCisstNetlib_DIR=${{github.workspace}}/../cisstNetlib-install/share/cisstNetlib" -C "${{github.workspace}}/.github/workflows/cmake-windows-cache.cmake"
+      run: |
+        cmake -S . -B build `
+          -DCMAKE_BUILD_TYPE=Release `
+          "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" `
+          "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" `
+          -DVCPKG_MANIFEST_INSTALL=OFF `
+          "-DCisstNetlib_DIR=${{github.workspace}}/../cisstNetlib-install/share/cisstNetlib" `
+          -C .github/workflows/cmake-windows-cache.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}/build
@@ -94,9 +104,8 @@ jobs:
         cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
 
     - name: Configure CMake examples
-      working-directory: ${{github.workspace}}/build
       run: |
-        cmake "${{github.workspace}}" `
+        cmake -S . -B build `
           -DCISST_BUILD_EXAMPLES=ON `
           -DCISST_cisstCommon_EXAMPLES=ON `
           -DCISST_cisstVector_EXAMPLES=ON `
@@ -117,36 +126,29 @@ jobs:
     - name: Test exported targets against build tree
       shell: cmd
       run: |
-        mkdir "${{github.workspace}}\test_export_build_tree_build"
-        cd "${{github.workspace}}\test_export_build_tree_build"
-        cmake "${{github.workspace}}/cisstMultiTask/examples/PeriodicTask" ^
+        cmake -S cisstMultiTask/examples/PeriodicTask -B test_export_build_tree_build ^
           -DCMAKE_BUILD_TYPE=Release ^
           "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
           "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
           -DVCPKG_MANIFEST_INSTALL=OFF ^
           -Dcisst_DIR="${{github.workspace}}/build" ^
           -DcisstNetlib_DIR="${{github.workspace}}/../cisstNetlib-install/share/cisstNetlib"
-        cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
+        cmake --build test_export_build_tree_build --config Release --parallel %NUMBER_OF_PROCESSORS%
 
     - name: Install cisst
-      working-directory: ${{github.workspace}}/build
-      shell: cmd
-      run: |
-        cmake --install . --prefix ${{github.workspace}}/cisst-install
+      run: cmake --install build --config Release --prefix cisst-install
 
     - name: Test exported targets against install tree
       shell: cmd
       run: |
-        mkdir "${{github.workspace}}\test_export_install_tree_build"
-        cd "${{github.workspace}}\test_export_install_tree_build"
-        cmake "${{github.workspace}}/cisstMultiTask/examples/PeriodicTask" ^
+        cmake -S cisstMultiTask/examples/PeriodicTask -B test_export_install_tree_build ^
           -DCMAKE_BUILD_TYPE=Release ^
           "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
           "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
           -DVCPKG_MANIFEST_INSTALL=OFF ^
           -Dcisst_DIR="${{github.workspace}}/cisst-install/share/cisst-1.5/cmake" ^
           -DcisstNetlib_DIR="${{github.workspace}}/../cisstNetlib-install/share/cisstNetlib"
-        cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
+        cmake --build test_export_install_tree_build --config Release --parallel %NUMBER_OF_PROCESSORS%
 
     - name: Test downstream package discovery
       shell: pwsh

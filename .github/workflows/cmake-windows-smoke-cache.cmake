@@ -4,7 +4,7 @@
 # cisstNetlib-dependent libraries disabled.  The full Windows build uses
 # cmake-windows-cache.cmake instead.
 
-# Use external projects, mostly to get recent version of libcpp on Ubuntu 16.04
+# Verify configuration with external dependency builds disabled.
 set (CISST_USE_EXTERNAL OFF CACHE BOOL "")
 
 # Compile for shared libraries
