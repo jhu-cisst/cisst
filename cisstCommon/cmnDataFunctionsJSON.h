@@ -50,58 +50,58 @@ public:
 };
 
 template <>
-void CISST_EXPORT cmnDataJSON<double>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<double, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<double>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<double, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
-void CISST_EXPORT cmnDataJSON<float>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<float, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<float>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<float, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
-void CISST_EXPORT cmnDataJSON<char>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<char, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<char>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<char, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
-void CISST_EXPORT cmnDataJSON<int>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<int, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<int, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
-void CISST_EXPORT cmnDataJSON<unsigned int>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<unsigned int, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<unsigned int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<unsigned int, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
-void CISST_EXPORT cmnDataJSON<long int>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<long int, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<long int, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
-void CISST_EXPORT cmnDataJSON<unsigned long int>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<unsigned long int, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<unsigned long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<unsigned long int, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
-void CISST_EXPORT cmnDataJSON<unsigned long long int>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<unsigned long long int, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<unsigned long long int>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<unsigned long long int, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
-void CISST_EXPORT cmnDataJSON<bool>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<bool, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<bool>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<bool, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 template <>
-void CISST_EXPORT cmnDataJSON<std::string>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<std::string, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<std::string>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<std::string, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 // fake support for cmnData<Json::Value>
 template <>
-class cmnData<Json::Value> {
+class cmnData<Json::Value, void> {
 public:
     static std::string HumanReadable(Json::Value const&) { return ""; };
 
@@ -127,9 +127,9 @@ public:
 };
 
 template <>
-void CISST_EXPORT cmnDataJSON<Json::Value>::SerializeText(const DataType & data, Json::Value & jsonValue);
+void CISST_EXPORT cmnDataJSON<Json::Value, void>::SerializeText(const DataType & data, Json::Value & jsonValue);
 template <>
-void CISST_EXPORT cmnDataJSON<Json::Value>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+void CISST_EXPORT cmnDataJSON<Json::Value, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 
 template <class _elementType>

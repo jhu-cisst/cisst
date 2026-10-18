@@ -26,7 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <QApplication>
 #include <QMainWindow>
 
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 int main(int argc, char** argv)
 {

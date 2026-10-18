@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "configuration.h"
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 CMN_IMPLEMENT_SERVICES(clientTask);

@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 #include <cisstNumerical/nmrGaussJordanInverse.h>
-#include <cisstVector/vctFixedSizeMatrix.h>
+#include <cisstVectorQt/vctFixedSizeMatrix.h>
 
 template<class _elementType, bool _rowMajorIn, bool _rowMajorOut>
 void nmrGaussJordanInverse2x2(

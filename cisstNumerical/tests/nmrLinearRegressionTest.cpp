@@ -17,7 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
 
 #include "nmrLinearRegressionTest.h"
 

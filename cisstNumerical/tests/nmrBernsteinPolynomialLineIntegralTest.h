@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <cisstCommon/cmnRandomSequence.h>
-#include <cisstVector/vctDynamicVector.h>
+#include <cisstVectorQt/vctDynamicVector.h>
 #include <cisstNumerical/nmrBernsteinPolynomialLineIntegral.h>
 #include <cisstNumerical/nmrBernsteinPolynomial.h>
 

@@ -42,10 +42,9 @@ MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBool, mtsQtWidgetBoolRead, mt
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsDouble, mtsQtWidgetDoubleRead, mtsQtWidgetDoubleWrite);
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsStdString, mtsQtWidgetStdStringRead, mtsQtWidgetStdStringWrite);
 
-#include <cisstMultiTask/mtsQtWidgetVectorTypes.h>
-#include <cisstMultiTask/mtsVector.h>
-MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsDoubleVec, mtsQtWidgetDoubleVecRead, mtsQtWidgetDoubleVecWrite);
-MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBoolVec, mtsQtWidgetBoolVecRead, mtsQtWidgetBoolVecWrite);
+// TODO?
+// MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsDoubleVec, mtsQtWidgetDoubleVecRead, mtsQtWidgetDoubleVecWrite);
+// MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBoolVec, mtsQtWidgetBoolVecRead, mtsQtWidgetBoolVecWrite);
 
 #include <cisstMultiTask/mtsStateIndex.h>
 MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsStateIndex, mtsQtWidgetStateIndexRead, mtsQtWidgetStateIndexWrite);

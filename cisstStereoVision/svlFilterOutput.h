@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterOutput_h
 #define _svlFilterOutput_h
 
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstStereoVision/svlForwardDeclarations.h>
 #include <cisstStereoVision/svlTypes.h>

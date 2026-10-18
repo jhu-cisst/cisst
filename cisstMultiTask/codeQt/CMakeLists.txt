@@ -39,7 +39,6 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                    DEPENDENCIES cisstCommon
                                 cisstCommonQt
                                 cisstOSAbstraction
-                                cisstVector
                                 cisstVectorQt
                                 cisstMultiTask
                    SOURCE_FILES mtsClassServicesQt.cpp
@@ -54,7 +53,6 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFactory.cpp
                                 mtsQtWidgetGenericObject.cpp
                                 mtsQtWidgetGenericObjectProxy.cpp
-                                mtsQtWidgetVectorTypes.cpp
                                 mtsQtWidgetComponent.cpp
                                 mtsQtWidgetInterfaceRequired.cpp
                                 mtsQtWidgetFunction.cpp
@@ -73,7 +71,6 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtWidgetFactory.h
                                 mtsQtWidgetGenericObject.h
                                 mtsQtWidgetGenericObjectProxy.h
-                                mtsQtWidgetVectorTypes.h
                                 mtsQtWidgetComponent.h
                                 mtsQtWidgetInterfaceRequired.h
                                 mtsQtWidgetFunction.h

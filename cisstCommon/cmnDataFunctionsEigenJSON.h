@@ -34,8 +34,12 @@ public:
 
     static void SerializeText(const DataType& matrix, Json::Value& jsonValue) {
         for (int row = 0; row < matrix.rows(); ++row) {
-            for (int col = 0; col < matrix.cols(); ++col) {
-                cmnDataJSON<typename DataType::Scalar>::SerializeText(matrix(row, col), jsonValue[row][col]);
+            if (matrix.cols() > 1) {
+                for (int col = 0; col < matrix.cols(); ++col) {
+                    cmnDataJSON<typename DataType::Scalar>::SerializeText(matrix(row, col), jsonValue[row][col]);
+                }
+            } else {
+                cmnDataJSON<typename DataType::Scalar>::SerializeText(matrix(row), jsonValue[row]);
             }
         }
     }
@@ -45,7 +49,8 @@ public:
     {
         // get the matrix size from JSON and resize
         const size_t rows = jsonValue.size();
-        const size_t cols = (rows > 0) ? jsonValue[0].size() : 0;
+        const bool is_matrix = jsonValue[0].isArray();
+        const size_t cols = (rows == 0) ? 0 : (is_matrix ? jsonValue[0].size() : 1);
         if (DataType::RowsAtCompileTime != Eigen::Dynamic && rows != (size_t)DataType::RowsAtCompileTime) {
             cmnThrow("cmnDataJSON<Eigen::PlainObjectBase>::DeSerializeText: rows doesn't match compile time size");
         }
@@ -57,13 +62,21 @@ public:
         matrix.resize(rows, cols);
 
         for (int row = 0; row < matrix.rows(); row++) {
-            // make sure both rows have same size
-            if (cols != jsonValue[row].size()) {
-                cmnThrow("cmnDataJSON<Eigen::PlainObjectBase>::DeSerializeText: row sizes don't match");
-            }
+            if (is_matrix) {
+                // make sure both rows have same size
+                if (!jsonValue[row].isArray() || (cols != jsonValue[row].size())) {
+                    cmnThrow("cmnDataJSON<Eigen::PlainObjectBase>::DeSerializeText: row sizes don't match");
+                }
 
-            for (int col = 0; col < matrix.cols(); col++) {
-                cmnDataJSON<typename DataType::Scalar>::DeSerializeText(matrix(row, col), jsonValue[row][col]);
+                for (int col = 0; col < matrix.cols(); col++) {
+                    cmnDataJSON<typename DataType::Scalar>::DeSerializeText(matrix(row, col), jsonValue[row][col]);
+                }
+            } else {
+                if (jsonValue[row].isArray()) {
+                    cmnThrow("cmnDataJSON<Eigen::PlainObjectBase>::DeSerializeText: type is vector, but json is matrix");
+                }
+
+                cmnDataJSON<typename DataType::Scalar>::DeSerializeText(matrix(row), jsonValue[row]);
             }
         }
     }

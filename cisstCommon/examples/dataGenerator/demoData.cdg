@@ -7,10 +7,10 @@
 // Inline code that will be placed in the generated header file
 inline-header {
 #include <cisstCommon/cmnDataFunctionsArray.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctDataFunctionsDynamicVector.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctDataFunctionsFixedSizeVector.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDataFunctionsDynamicVector.h>
 #include <vector>
 
 // You can place external typedef at the global scope but

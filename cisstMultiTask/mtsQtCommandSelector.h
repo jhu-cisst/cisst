@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QTreeWidget>
 
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 // Always include last

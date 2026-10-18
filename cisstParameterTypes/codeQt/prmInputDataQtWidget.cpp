@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QLabel>
 
 #include <cisstOSAbstraction/osaTimeServer.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 

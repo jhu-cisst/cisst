@@ -12,7 +12,6 @@
 # List cisst libraries needed
 set (REQUIRED_CISST_LIBRARIES cisstCommon
                               cisstCommonQt
-                              cisstVector
                               cisstVectorQt
                               cisstOSAbstraction
                               cisstMultiTask

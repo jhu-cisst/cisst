@@ -24,8 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmInputData.h>
-#include <cisstVector/vctPlot2DOpenGLQtWidget.h>
-#include <cisstVector/vctQtWidgetDynamicVector.h>
+#include <cisstVectorQt/vctPlot2DOpenGLQtWidget.h>
+#include <cisstVectorQt/vctQtWidgetDynamicVector.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExportQt.h>

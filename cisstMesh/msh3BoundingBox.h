@@ -38,7 +38,7 @@
 #define _msh3BoundingBox_h
 
 // for (some) backward compatibility
-#include <cisstVector/vctBoundingBox3.h>
+#include <cisstVectorQt/vctBoundingBox3.h>
 typedef vctBoundingBox3 msh3BoundingBox;
 
 #endif // _msh3BoundingBox_h

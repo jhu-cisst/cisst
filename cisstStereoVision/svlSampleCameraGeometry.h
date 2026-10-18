@@ -23,8 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlSampleCameraGeometry_h
 
 #include <cisstStereoVision/svlSample.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 #include <ostream>
 
 // Always include last!

@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlRenderTargets_h
 
 #include <cisstStereoVision/svlStreamManager.h>
-#include <cisstVector/vctDynamicVector.h>
+#include <cisstVectorQt/vctDynamicVector.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>

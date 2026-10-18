@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <map>
 
 // cisst includes
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
 
 // Class for the two data sets
 class DataSet {

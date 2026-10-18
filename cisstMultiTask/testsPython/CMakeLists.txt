@@ -12,7 +12,7 @@
 # CMakeLists.txt for cisstMultiTask wrapping tests
 
 # List of cisst libraries needed
-set (CISST_LIBRARIES_NEEDED cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+set (CISST_LIBRARIES_NEEDED cisstCommon cisstOSAbstraction cisstMultiTask)
 
 # Keep a list all tests for ctest
 set (CTEST_TEST_FILE ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile-cisstMultiTaskPython.txt)
@@ -35,7 +35,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 # We are using C++ code
 cisst_add_swig_module (MODULE cisstMultiTaskPythonTest
                        FOLDER "cisstMultiTask/tests"
-                       MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstMultiTaskPythonTest)
+                       MODULE_LINK_LIBRARIES cisstCommon cisstMultiTaskPythonTest)
 
 # Copy the .py file generated to wherever the libraries are
 add_custom_command (TARGET cisstMultiTaskPythonTestPython
@@ -76,10 +76,8 @@ set_property (TARGET cisstMultiTask_CREATE_PYTHON_TESTS_LIST PROPERTY FOLDER "ci
 
 add_dependencies (cisstMultiTask_CREATE_PYTHON_TESTS_LIST
                   cisstCommon
-                  cisstVector
                   cisstMultiTask
                   cisstCommonPython
-                  cisstVectorPython
                   cisstOSAbstractionPython
                   cisstMultiTaskPython
                   cisstMultiTaskPythonTest

@@ -18,7 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsIntervalStatistics.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
 
@@ -38,7 +39,7 @@ mtsIntervalStatistics::mtsIntervalStatistics():
     mCallback(0)
 {
     // Get a pointer to the time server
-    mTimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
+    mTimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
     // then reset (order is important, Reset need the time server)
     Reset();
 }

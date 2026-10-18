@@ -20,9 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "nmrGaussJordanInverseTest.h"
 
-#include <cisstVector/vctFixedSizeMatrix.h>
-#include <cisstVector/vctRandomFixedSizeVector.h>
-#include <cisstVector/vctRandomFixedSizeMatrix.h>
+#include <cisstVectorQt/vctFixedSizeMatrix.h>
+#include <cisstVectorQt/vctRandomFixedSizeVector.h>
+#include <cisstVectorQt/vctRandomFixedSizeMatrix.h>
 
 
 const double nmrGaussJordanInverseTest::ToleranceScale = 50;

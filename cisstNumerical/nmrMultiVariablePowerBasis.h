@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _nmrMultiVariablePowerBasis_h
 
 #include <cisstNumerical/nmrPolynomialTermPowerIndex.h>
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 #include <cisstNumerical/nmrExport.h>
 
 /*!  This class represents the set of variables and variable powers that is

@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _nmrFminSolver_h
 
 
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 #include <cisstNumerical/nmrCallBack.h>
 
 #include <cnetlib.h>

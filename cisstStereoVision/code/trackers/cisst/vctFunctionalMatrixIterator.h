@@ -52,7 +52,7 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #define _vctFunctionalMatrixIterator_h
 
 #include <iterator>
-#include <cisstVector/vctContainerTraits.h>
+#include <cisstVectorQt/vctContainerTraits.h>
 
 
 /*!

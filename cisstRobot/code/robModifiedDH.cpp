@@ -13,104 +13,96 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnConstants.h>
+#include <cisstCommon/cmnJointType.h>
 #include <cisstRobot/robModifiedDH.h>
 
-#include <iomanip>
+#include <Eigen/Geometry>
 #include <iostream>
+#include <string>
 
-robModifiedDH::robModifiedDH() :
-  robKinematics( robKinematics::MODIFIED_DH ){
-  alpha = a = theta = d = 0.0;
+robModifiedDH::robModifiedDH(
+    double alpha,
+    double a,
+    double theta,
+    double d,
+    cmnJointType joint_type,
+    double joint_offset,
+    bool active
+)
+    : robLinkKinematics(joint_type, joint_offset, active),
+      alpha(alpha),
+      a(a),
+      theta(theta),
+      d(d)
+{
 }
 
-robModifiedDH::robModifiedDH( double alpha,
-			      double a,
-			      double theta,
-			      double d,
-			      const robJoint& joint ) :
-  robKinematics( joint, robKinematics::MODIFIED_DH ),
-  alpha( alpha ),
-  a( a ),
-  theta( theta ),
-  d( d ){}
-
-robModifiedDH::~robModifiedDH(){}
-
-robKinematics* robModifiedDH::Clone() const
-{ return (robKinematics*) new robModifiedDH( *this ); }
-
-vctFixedSizeVector<double,3> robModifiedDH::PStar() const
-{ return vctFixedSizeVector<double,3>( a, -d*sin(alpha), d*cos(alpha) ); }
-
-vctFrame4x4<double> robModifiedDH::ForwardKinematics( double q ) const {
-
-  double d = this->d;           // copy the prismatic value
-  double theta = this->theta;   // copy the revolute value
-
-  // Add the position offset to the joint value
-  switch( GetType() ){
-  case cmnJointType::CMN_JOINT_REVOLUTE:
-    theta = theta + PositionOffset() + q; // add the joint offset to the joint angle
-    break;
-  case cmnJointType::CMN_JOINT_PRISMATIC:
-    d = d + PositionOffset() + q;     // add the joint offset to the joint length
-    break;
-  default:
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Unsupported joint type."
-		      << std::endl;
-  }
-
-  // should be computed once
-  double ca = cos(this->alpha); double sa = sin(this->alpha);
-  double ct = cos(theta);       double st = sin(theta);
-
-  // modified DH transformation
-  vctMatrixRotation3<double> R( ct,    -st,     0,
-				st*ca,  ct*ca, -sa,
-				st*sa,  ct*sa,  ca );
-  vctFixedSizeVector<double,3> t( a, -sa*d, ca*d );
-
-  return vctFrame4x4<double>( R, t );
-
+Eigen::Vector3d robModifiedDH::JointAxis() const
+{
+    // X is common normal, so joint axis x component is zero
+    // alpha describes YZ rotation of joint axis relative to previous link's
+    // frame, but is measured clockwise about +X, so we negate it (or
+    // equivalently negate just sin(alpha))
+    return Eigen::Vector3d(0.0, -std::sin(alpha), std::cos(alpha));
 }
 
-vctMatrixRotation3<double> robModifiedDH::Orientation( double q ) const {
-  vctFrame4x4<double> Rt = ForwardKinematics( q );
-  return vctMatrixRotation3<double>( Rt[0][0], Rt[0][1], Rt[0][2],
-				     Rt[1][0], Rt[1][1], Rt[1][2],
-				     Rt[2][0], Rt[2][1], Rt[2][2] );
+Eigen::Vector3d robModifiedDH::JointOrigin() const
+{
+    // Joint origin is on common normal
+    return Eigen::Vector3d(a, 0.0, 0.0);
 }
 
-void robModifiedDH::ReadParameters( std::istream& is ) {
-  is >> this->alpha  // read the stuff from the stream
-     >> this->a
-     >> this->theta
-     >> this->d;
+Eigen::Isometry3d robModifiedDH::LinkFrame() const
+{
+    const double theta = (joint_type == cmnJointType::CMN_JOINT_REVOLUTE)
+                             ? this->theta + joint_offset
+                             : this->theta;
+    const double d = (joint_type == cmnJointType::CMN_JOINT_PRISMATIC)
+                         ? this->d + joint_offset
+                         : this->d;
 
-  // just make sure we're accureate
-  if( this->alpha == -1.5708 ) this->alpha = -cmnPI_2;
-  if( this->alpha ==  1.5708 ) this->alpha =  cmnPI_2;
+    Eigen::Isometry3d T_alpha(Eigen::AngleAxisd(alpha, Eigen::Vector3d::UnitX())
+    );
+    Eigen::Isometry3d T_a(Eigen::Translation3d(a, 0.0, 0.0));
+    Eigen::Isometry3d T_theta(Eigen::AngleAxisd(theta, Eigen::Vector3d::UnitZ())
+    );
+    Eigen::Isometry3d T_d(Eigen::Translation3d(0.0, 0.0, d));
+
+    return T_alpha * T_a * T_theta * T_d;
 }
 
 #if CISST_HAS_JSON
-void robModifiedDH::ReadParameters(const Json::Value &config)
+std::optional<robModifiedDH> robModifiedDH::Read(const Json::Value& config)
 {
-    this->alpha = config.get("alpha", "0.00").asDouble();
-    this->a = config.get("A", "0.00").asDouble();
-    this->theta = config.get("theta", "0.00").asDouble();
-    this->d = config.get("D", "0.00").asDouble();
+    const double alpha = fixUpAngle(config.get("alpha", "0.00").asDouble());
+    const double a = config.get("A", "0.00").asDouble();
+    const double theta = fixUpAngle(config.get("theta", "0.00").asDouble());
+    const double d = config.get("D", "0.00").asDouble();
 
-    // just make sure we're accureate
-    if( this->alpha == -1.5708 ) this->alpha = -cmnPI_2;
-    if( this->alpha ==  1.5708 ) this->alpha =  cmnPI_2;
+    const double joint_offset = config.get("offset", "0.0").asDouble();
+
+    std::string mode = config.get("mode", "active").asString();
+    std::transform(mode.begin(), mode.end(), mode.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+    if (mode != "active" && mode != "passive") {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << ": unknown joint mode. Got "
+                           << mode << ", expected 'active' or 'passive'"
+                           << std::endl;
+        return {};
+    }
+
+    const bool active = mode == "active";
+
+    const auto joint_type =
+        jointTypeFromString(config.get("type", "").asString());
+    if (!joint_type) {
+        CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS << ": Expected a joint type. Got "
+                           << config.get("type", "") << " instead" << std::endl;
+        return {};
+    }
+
+    return robModifiedDH(alpha, a, theta, d, *joint_type, joint_offset, active);
 }
 #endif
-
-void robModifiedDH::WriteParameters( std::ostream& os ) const {
-  os << std::setw(15) << "MODIFIED DH"
-     << std::setw(10) << alpha
-     << std::setw(10) << a
-     << std::setw(10) << theta
-     << std::setw(10) << d;
-}

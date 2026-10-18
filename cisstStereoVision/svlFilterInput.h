@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterInput_h
 #define _svlFilterInput_h
 
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstStereoVision/svlForwardDeclarations.h>
 #include <cisstStereoVision/svlTypes.h>

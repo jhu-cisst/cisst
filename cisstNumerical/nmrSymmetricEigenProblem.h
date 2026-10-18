@@ -14,7 +14,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstNumerical/nmrNetlib.h>
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 
 // Always include last!
 #include <cisstNumerical/nmrExport.h>

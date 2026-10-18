@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #include "nmrLUSolverTest.h"
 
 #include <cisstCommon/cmnRandomSequence.h>
-#include <cisstVector/vctRandomFixedSizeMatrix.h>
-#include <cisstVector/vctRandomDynamicMatrix.h>
+#include <cisstVectorQt/vctRandomFixedSizeMatrix.h>
+#include <cisstVectorQt/vctRandomDynamicMatrix.h>
 
 template <class _matrixType>
 void nmrLUSolverTest::GenericTest(_matrixType & input) {

@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstVector/vctForwardDeclarations.h>
+#include <cisstVectorQt/vctForwardDeclarations.h>
 
 // Always the last file to include!
 #include <cisstNumerical/nmrExport.h>

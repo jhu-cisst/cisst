@@ -56,14 +56,6 @@ if (CISST_cisstCommon)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}-Co)
 endif (CISST_cisstCommon)
 
-if (CISST_cisstVector)
-  set (BUILDNAME_TMP ${BUILDNAME_TMP}Ve)
-endif (CISST_cisstVector)
-
-if (CISST_cisstNumerical)
-  set (BUILDNAME_TMP ${BUILDNAME_TMP}Nu)
-endif (CISST_cisstNumerical)
-
 if (CISST_cisstInteractive)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}In)
 endif (CISST_cisstInteractive)

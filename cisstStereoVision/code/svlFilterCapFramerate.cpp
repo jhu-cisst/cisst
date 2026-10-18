@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 CMN_IMPLEMENT_SERVICES_DERIVED(svlFilterCapFramerate, svlFilterBase)

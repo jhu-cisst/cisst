@@ -4,8 +4,8 @@
 inline-header {
 
 #include <cisstCommon/cmnDataFunctionsArray.h>
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
-#include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
+#include <cisstVectorQt/vctFixedSizeMatrixTypes.h>
+#include <cisstVectorQt/vctDataFunctionsFixedSizeMatrix.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstStereoVision/svlTypes.h>
 

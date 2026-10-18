@@ -21,11 +21,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstVector/vctDynamicVector.h>
+
+#include <vector>
 
 #include "osaTripleBufferTest.h"
 
-typedef vctDynamicVector<size_t> value_type;
+typedef std::vector<size_t> value_type;
 typedef osaTripleBuffer<value_type> buffer_type;
 
 // sizes must be large enough to have a chance to find a problem but
@@ -54,7 +55,7 @@ void * osaTripleBufferTestWriteThread(buffer_type * buffer)
         {
             value_type * currentVector = buffer->GetWritePointer();
             for (size_t i = 0; i < TestVectorSize; i++) {
-                currentVector->Element(i) = iteration + i;
+                currentVector->at(i) = iteration + i;
             }
         }
         buffer->EndWrite();
@@ -77,7 +78,7 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
         buffer->BeginRead();
         {
             const value_type * currentVector = buffer->GetReadPointer();
-            size_t newFirstElement = currentVector->Element(0);
+            size_t newFirstElement = currentVector->at(0);
             if (newFirstElement < firstElement) {
                 buffer->ToStream(std::cerr);
                 ErrorFoundInRead = true;
@@ -88,7 +89,7 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
             if (newFirstElement != firstElement) {
                 firstElement = newFirstElement;
                 for (size_t i = 0; i < TestVectorSize; i++) {
-                    element = currentVector->Element(i);
+                    element = currentVector->at(i);
                     if (element != (firstElement + i)) {
                         buffer->ToStream(std::cerr);
                         ErrorFoundInRead = true;
@@ -110,9 +111,7 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
 
 void osaTripleBufferTest::TestMultiThreading(void)
 {
-    value_type referenceVector;
-    referenceVector.SetSize(TestVectorSize);
-    referenceVector.SetAll(0);
+    value_type referenceVector(TestVectorSize, 0);
 
     osaTripleBuffer<value_type > tripleBuffer(referenceVector);
     CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.LastWriteNode->Pointer->size());

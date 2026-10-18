@@ -21,10 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <cisstMultiTask/mtsStateData.h>
-
-#include <string>
-
 class mtsStateTableTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(mtsStateTableTest);

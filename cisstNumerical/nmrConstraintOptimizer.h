@@ -19,8 +19,8 @@
 #ifndef _nmrConstraintOptimizer_h
 #define _nmrConstraintOptimizer_h
 
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDynamicMatrixTypes.h>
 #include <cisstNumerical/nmrLSqLin.h>
 
 // Always include last!

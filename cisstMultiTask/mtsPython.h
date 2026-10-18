@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsPython_h
 
 #include <cisstCommon/cmnPython.h>
-#include <cisstVector/vctPython.h>
 #include <cisstOSAbstraction/osaPython.h>
 
 #include <cisstMultiTask/mtsCommandBase.h>
@@ -52,16 +51,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 #include <cisstMultiTask/mtsCollectorBase.h>
 #include <cisstMultiTask/mtsCollectorState.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
-#include <cisstMultiTask/mtsTransformationTypes.h>
-
-#include <cisstMultiTask/mtsVector.h>
-#include <cisstMultiTask/mtsMatrix.h>
 
 #endif // _mtsPython_h

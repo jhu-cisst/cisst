@@ -388,7 +388,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Get a pointer on the provided interface that has been
       connected to a given required interface (defined by its name).
       This method will return a null pointer if the required interface
-      has not been connected.  See mtsTaskManager::Connect. */
+      has not been connected.  See mtsManagerLocal::Connect. */
     const mtsInterfaceProvided * GetInterfaceProvidedFor(const std::string & interfaceRequiredName);
 
     /*! Get a required interface identified by its name */

@@ -23,7 +23,6 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                    FOLDER cisstParameterTypes
                    DEPENDENCIES cisstCommon
                                 cisstOSAbstraction
-                                cisstVector
                                 cisstVectorQt
                                 cisstMultiTask
                                 cisstParameterTypes

@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 #include <cisst3DUserInterface.h>
 // Always include last!

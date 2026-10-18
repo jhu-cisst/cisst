@@ -69,6 +69,40 @@ class {
     }
 
     inline-header {
+    public:
+        // Return concatenation of this with other
+        inline prmConfigurationJoint append(const prmConfigurationJoint& other) const {
+            prmConfigurationJoint combined = *this; // make copy
+
+            combined.Name().insert(combined.Name().end(), other.Name().begin(), other.Name().end());
+            combined.Type().insert(combined.Type().end(), other.Type().begin(), other.Type().end());
+
+            combined.PositionMin() = Eigen::VectorXd(PositionMin().size() + other.PositionMin().size());
+            combined.PositionMin() << PositionMin(), other.PositionMin();
+
+            combined.PositionMax() = Eigen::VectorXd(PositionMax().size() + other.PositionMax().size());
+            combined.PositionMax() << PositionMax(), other.PositionMax();
+
+            combined.VelocityMin() = Eigen::VectorXd(VelocityMin().size() + other.VelocityMin().size());
+            combined.VelocityMin() << VelocityMin(), other.VelocityMin();
+
+            combined.VelocityMax() = Eigen::VectorXd(VelocityMax().size() + other.VelocityMax().size());
+            combined.VelocityMax() << VelocityMax(), other.VelocityMax();
+
+            combined.AccelerationMin() = Eigen::VectorXd(AccelerationMin().size() + other.AccelerationMin().size());
+            combined.AccelerationMin() << AccelerationMin(), other.AccelerationMin();
+
+            combined.AccelerationMax() = Eigen::VectorXd(AccelerationMax().size() + other.AccelerationMax().size());
+            combined.AccelerationMax() << AccelerationMax(), other.AccelerationMax();
+
+            combined.EffortMin() = Eigen::VectorXd(EffortMin().size() + other.EffortMin().size());
+            combined.EffortMin() << EffortMin(), other.EffortMin();
+
+            combined.EffortMax() = Eigen::VectorXd(EffortMax().size() + other.EffortMax().size());
+            combined.EffortMax() << EffortMax(), other.EffortMax();
+
+            return combined;
+        }
     private:
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     }

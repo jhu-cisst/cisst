@@ -149,8 +149,6 @@ set (HEADER_FILES
      mtsEventReceiver.h
      mtsExport.h
 
-     mtsFixedSizeVector.h
-     mtsFixedSizeVectorTypes.h
      mtsFunctionBase.h
      mtsFunctionQualifiedRead.h
      mtsFunctionRead.h
@@ -178,7 +176,6 @@ set (HEADER_FILES
      mtsManagerComponent.h
      mtsManagerComponentServices.h
      mtsManagerLocal.h
-     mtsMatrix.h
      mtsMulticastCommandVoid.h
      mtsMulticastCommandWrite.h
      mtsMulticastCommandWriteBase.h
@@ -193,7 +190,6 @@ set (HEADER_FILES
 
      mtsStateArray.h
      mtsStateArrayBase.h
-     mtsStateData.h
      mtsStateIndex.h
      mtsStateTable.h
      mtsStateTableFilter.h
@@ -203,14 +199,9 @@ set (HEADER_FILES
      mtsTaskFromCallback.h
      mtsTaskFromSignal.h
      mtsTaskPeriodic.h
-     mtsTaskManager.h    # to be deleted
 
      mtsWatchdogClient.h
      mtsWatchdogServer.h
-
-     mtsTransformationTypes.h
-
-     mtsVector.h
      )
 
 # Header files in code directory
@@ -250,7 +241,7 @@ set (ADDITIONAL_HEADER_FILES ${ADDITIONAL_HEADER_FILES} ${CISST_MTS_CONFIG_FILE}
 # Finally add the library
 cisst_add_library (LIBRARY cisstMultiTask
                    FOLDER cisstMultiTask
-                   DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction
+                   DEPENDENCIES cisstCommon cisstOSAbstraction
                    SOURCE_FILES ${SOURCE_FILES}
                    HEADER_FILES ${HEADER_FILES}
                    ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES}

@@ -36,7 +36,7 @@
 #ifndef PointProjectionRoutines_h
 #define PointProjectionRoutines_h
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
 
 vct2 ProjectOnLineSegment(const vct2& x, const vct2& a, const vct2& b, double *pLambda = NULL);
 

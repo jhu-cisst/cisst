@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _nmrHFTISolver_h
 #define _nmrHFTISolver_h
 
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 #include <cisstNumerical/nmrNetlib.h>
 
 // forward declaration of fortran routine for very old cisstNetlib

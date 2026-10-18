@@ -20,6 +20,5 @@ cisst_add_swig_module (MODULE cisstParameterTypes
                        MODULE_LINK_LIBRARIES cisstParameterTypes
                                              cisstMultiTask
                                              cisstOSAbstraction
-                                             cisstVector
                                              cisstCommon
                        INSTALL_FILES 1)

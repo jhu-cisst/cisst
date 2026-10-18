@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _nmrSVDRSSolver_h
 
 
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 #include <cisstNumerical/nmrNetlib.h>
 
 

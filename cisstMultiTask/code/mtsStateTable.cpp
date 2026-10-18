@@ -19,7 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnAssert.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsStateTable.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorState.h>
 
 #include <iostream>
@@ -70,7 +71,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     this->DataCollection.BatchRange.SetAutomaticTimestamp(false);
 
     // Get a pointer to the time server
-    TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
+    TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
 
     // Add Tic and Toc to the StateTable. We add Toc first, to make things easier
     // in mtsStateTable::Advance.  Do not change this.

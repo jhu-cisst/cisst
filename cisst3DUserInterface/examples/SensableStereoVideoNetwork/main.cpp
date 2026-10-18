@@ -57,16 +57,16 @@ int main(int argc, char * argv[])
     cmnClassRegister::SetLoD("ui3BehaviorBase", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("ui3Manager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsManagerLocal", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("devKeyboard", CMN_LOG_LOD_VERY_VERBOSE);
 
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
 
     devSensableHDMasterSlave * sensable = new devSensableHDMasterSlave("Omni", "Omni1", "Omni2");
     taskManager->AddTask(sensable);
     //taskManager->SetGlobalTaskManagerIP(globalTaskManagerIP);
     //taskManager->SetServerTaskIP(serverTaskIP);
-    //taskManager->SetTaskManagerType(mtsTaskManager::TASK_MANAGER_CLIENT);
+    //taskManager->SetTaskManagerType(mtsManagerLocal::TASK_MANAGER_CLIENT);
 
     ui3Manager guiManager;
 

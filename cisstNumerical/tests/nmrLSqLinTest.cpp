@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "nmrLSqLinTest.h"
 
 #include <cisstCommon/cmnConstants.h>
-#include <cisstVector/vctRandom.h>
+#include <cisstVectorQt/vctRandom.h>
 #include <cisstNumerical/nmrIsOrthonormal.h>
 #include <cisstNumerical/nmrLSqLin.h>
 

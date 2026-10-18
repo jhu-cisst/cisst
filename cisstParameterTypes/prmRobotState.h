@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 //basic includes
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsMacros.h>
-#include <cisstMultiTask/mtsVector.h>
 
 #include <Eigen/Dense>
 #include <Eigen/Geometry>

@@ -37,7 +37,7 @@
 #ifndef _msh2BoundingBox_h
 #define _msh2BoundingBox_h
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
 
 // Always include last!
 #include <cisstMesh/mshExport.h>

@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QGridLayout>
 #include <QLabel>
 #include <QWidget>
-#include <cisstVector/vctPlot2DOpenGLQtWidget.h>
+#include <cisstVectorQt/vctPlot2DOpenGLQtWidget.h>
 
 
 class displayQtWidget: public QWidget

@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "configuration.h"
 
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))

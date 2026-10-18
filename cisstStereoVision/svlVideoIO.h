@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlVideoIO_h
 
 #include <cisstMultiTask/mtsComponent.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
 #include <string>
 

@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlBufferMemory_h
 #define _svlBufferMemory_h
 
-#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstVectorQt/vctDynamicMatrixTypes.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
 

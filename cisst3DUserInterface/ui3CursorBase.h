@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _ui3CursorBase_h
 
 
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VisibleObject.h>

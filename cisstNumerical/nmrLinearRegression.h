@@ -30,9 +30,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <vector>
 #include <cisstCommon/cmnTypeTraits.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctForwardDeclarations.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctForwardDeclarations.h>
 
 // Always the last file to include!
 // (Not really needed since everything is templated)

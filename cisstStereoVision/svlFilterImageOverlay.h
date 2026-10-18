@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterBase.h>
 #include <cisstStereoVision/svlFilterImageOverlayTypes.h>
 #include <cisstStereoVision/svlOverlayObjects.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
 #include <map>
 
 // Always include last!

@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterToolTracker_h
 
 #include <cisstStereoVision/svlFilterBase.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>

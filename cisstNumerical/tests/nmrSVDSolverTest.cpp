@@ -21,8 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "nmrSVDSolverTest.h"
 
-#include <cisstVector/vctRandomFixedSizeMatrix.h>
-#include <cisstVector/vctRandomDynamicMatrix.h>
+#include <cisstVectorQt/vctRandomFixedSizeMatrix.h>
+#include <cisstVectorQt/vctRandomDynamicMatrix.h>
 #include <cisstNumerical/nmrIsOrthonormal.h>
 
 

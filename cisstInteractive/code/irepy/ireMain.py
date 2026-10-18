@@ -129,7 +129,6 @@ class ireMain(wx.Frame):
     ID_LOAD_CISSTCOMMON = wx.NewId()
     ID_LOAD_CISSTOSABSTRACTION = wx.NewId()
     ID_LOAD_CISSTVECTOR = wx.NewId()
-    ID_LOAD_CISSTNUMERICAL = wx.NewId()
     ID_LOAD_CISSTMULTITASK = wx.NewId()
     ID_LOAD_CISSTPARAMETERTYPES = wx.NewId()
 
@@ -213,7 +212,6 @@ class ireMain(wx.Frame):
         menu.Append(self.ID_LOAD_CISSTCOMMON, "Import cisst&Common", "Import cisstCommon")
         menu.Append(self.ID_LOAD_CISSTOSABSTRACTION, "Import cisst&OSAbstraction", "Import cisstOSAbstraction")
         menu.Append(self.ID_LOAD_CISSTVECTOR, "Import cisst&Vector", "Import cisstVector")
-        menu.Append(self.ID_LOAD_CISSTNUMERICAL, "Import cisst&Numerical", "Import cisstNumerical")
         menu.Append(self.ID_LOAD_CISSTMULTITASK, "Import cisst&MultiTask", "Import cisstMultiTask")
         menu.Append(self.ID_LOAD_CISSTPARAMETERTYPES, "Import cisst&ParameterTypes", "Import cisstParameterTypes")
 
@@ -262,7 +260,6 @@ class ireMain(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnImportCisstCommon, id=self.ID_LOAD_CISSTCOMMON)
         self.Bind(wx.EVT_MENU, self.OnImportCisstOSAbstraction, id=self.ID_LOAD_CISSTOSABSTRACTION)
         self.Bind(wx.EVT_MENU, self.OnImportCisstVector, id=self.ID_LOAD_CISSTVECTOR)
-        self.Bind(wx.EVT_MENU, self.OnImportCisstNumerical, id=self.ID_LOAD_CISSTNUMERICAL)
         self.Bind(wx.EVT_MENU, self.OnImportCisstMultiTask, id=self.ID_LOAD_CISSTMULTITASK)
         self.Bind(wx.EVT_MENU, self.OnImportCisstParameterTypes, id=self.ID_LOAD_CISSTPARAMETERTYPES)
 
@@ -284,7 +281,6 @@ class ireMain(wx.Frame):
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_TASKTREE)
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTCOMMON)
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTVECTOR)
-        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTNUMERICAL)
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTMULTITASK)
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateMenu, id=self.ID_LOAD_CISSTPARAMETERTYPES)
         #self.Bind(wx.EVT_UPDATE_UI, self.OnTruncateHistory, id=self.ID_TRUNCATEHISTORY)
@@ -475,12 +471,6 @@ class ireMain(wx.Frame):
     def ImportCisstVector(self):
         print('importing cisstVector')
         self.Shell.push("import cisstVectorPython as cisstVector")
-
-    def OnImportCisstNumerical(self, event):
-        self.ImportCisstNumerical()
-    def ImportCisstNumerical(self):
-        print('importing cisstNumerical')
-        self.Shell.push("import cisstNumericalPython as cisstNumerical")
 
     def OnImportCisstMultiTask(self, event):
         self.ImportCisstMultiTask()
@@ -976,8 +966,6 @@ class ireMain(wx.Frame):
                 event.Enable(ModuleAvailable('cisstOSAbstractionPython'))
             elif id == self.ID_LOAD_CISSTVECTOR:
                 event.Enable(ModuleAvailable('cisstVectorPython'))
-            elif id == self.ID_LOAD_CISSTNUMERICAL:
-                event.Enable(ModuleAvailable('cisstNumericalPython'))
             elif id == self.ID_LOAD_CISSTMULTITASK:
                 event.Enable(ModuleAvailable('cisstMultiTaskPython'))
             elif id == self.ID_LOAD_CISSTPARAMETERTYPES:

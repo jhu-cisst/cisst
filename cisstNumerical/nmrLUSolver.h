@@ -29,10 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 #define _nmrLUSolver_h
 
 
-#include <cisstVector/vctFixedSizeVector.h>
-#include <cisstVector/vctFixedSizeMatrix.h>
-#include <cisstVector/vctDynamicVector.h>
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctFixedSizeVector.h>
+#include <cisstVectorQt/vctFixedSizeMatrix.h>
+#include <cisstVectorQt/vctDynamicVector.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 
 #include <cisstNumerical/nmrNetlib.h>
 

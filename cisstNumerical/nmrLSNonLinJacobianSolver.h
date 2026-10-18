@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _nmrLSNonLinJacobianSolver_h
 
 
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 
 #include <cnetlib.h>
 

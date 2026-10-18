@@ -21,8 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "nmrIsOrthonormalTest.h"
 
-#include <cisstVector/vctTransformationTypes.h>
-#include <cisstVector/vctRandomTransformations.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
+#include <cisstVectorQt/vctRandomTransformations.h>
 
 void nmrIsOrthonormalTest::TestRotationMatrix(void) {
     vctMatRot3 matrix;

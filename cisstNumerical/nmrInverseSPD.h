@@ -30,8 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _nmrInverseSPD_h
 
 #include <cisstCommon/cmnThrow.h>
-#include <cisstVector/vctFixedSizeMatrix.h>
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctFixedSizeMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 #include <cisstNumerical/nmrNetlib.h>
 
 

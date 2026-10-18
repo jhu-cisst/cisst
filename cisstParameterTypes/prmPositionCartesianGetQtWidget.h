@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmPositionCartesianGetQtWidget_h
 
 #include <QWidget>
-#include <cisstVector/vctQtWidgetFrame.h>
+#include <cisstVectorQt/vctQtWidgetFrame.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 // Always include last

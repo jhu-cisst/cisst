@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _ui3ImagePlane_h
 
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 #include <cisstStereoVision/svlTypes.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VisibleObject.h>

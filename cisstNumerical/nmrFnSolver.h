@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _nmrFnSolver_h
 #define _nmrFnSolver_h
 
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 
 #include <cnetlib.h>
 

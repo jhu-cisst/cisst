@@ -17,7 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnLogger.h>
-#include <cisstVector/vctDeterminant.h>
+#include <cisstVectorQt/vctDeterminant.h>
 #include <cisstNumerical/nmrSVD.h>
 #include <cisstNumerical/nmrRegistrationRigid.h>
 

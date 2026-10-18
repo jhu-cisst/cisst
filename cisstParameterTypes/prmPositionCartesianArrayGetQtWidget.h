@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmPositionCartesianArrayGetQtWidget_h
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstVector/vctForwardDeclarationsQt.h>
+#include <cisstVectorQt/vctForwardDeclarationsQt.h>
 #include <cisstMultiTask/mtsComponent.h>
 
 #include <QWidget>

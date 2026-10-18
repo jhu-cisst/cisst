@@ -41,7 +41,7 @@ Or even better a templated class with a static method:
 .. code:: c++
 
    template <>
-   class cmnData<double> {
+   class cmnData<double, void> {
      public:
        static std::string HumanReadable(double & data) {
          return someStringBasedOnDataValue;
@@ -221,7 +221,7 @@ For all new existing type to support (``externalType``), you will need to declar
 .. code:: c++
 
    template <>
-   class cmnData<externalType>
+   class cmnData<externalType, void>
    {
    public:
        typedef externalType DataType;

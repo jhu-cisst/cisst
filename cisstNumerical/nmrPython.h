@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _ntmPython_h
 
 #include <cisstCommon/cmnPython.h>
-#include <cisstVector/vctPython.h>
+#include <cisstVectorQt/vctPython.h>
 
 #include <cisstNumerical/nmrNetlib.h>
 

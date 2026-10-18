@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _nmrRegistrationRigid_h
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstVector/vctTypes.h>
+#include <cisstVectorQt/vctTypes.h>
 
 // Always include last
 #include <cisstNumerical/nmrExport.h>

@@ -34,9 +34,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctionsString.h>
 #include <cisstCommon/cmnDataFunctionsVector.h>
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctDataFunctionsFixedSizeVector.h>
-
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 
@@ -46,7 +43,6 @@ http://www.cisst.org/cisst/license.txt.
 typedef std::vector<std::string> stdStringVec;
 typedef std::vector<double> stdDoubleVec;
 typedef std::vector<char> stdCharVec;
-typedef std::vector<vct3> stdVct3Vec;
 
 typedef std::list<std::string> stdStringList;
 
@@ -817,9 +813,6 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDoubleVecProxy);
 typedef mtsGenericObjectProxy<stdCharVec> mtsStdCharVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdCharVecProxy);
 
-typedef mtsGenericObjectProxy<stdVct3Vec> mtsStdVct3VecProxy;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdVct3VecProxy);
-
 typedef mtsGenericObjectProxy<stdStringList> mtsStdStringListProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringListProxy);
 
@@ -827,315 +820,44 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringListProxy);
 typedef mtsGenericObjectProxy<cmnJointType> cmnJointTypeProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(cmnJointTypeProxy);
 
-// Now, define proxies for cisstVector classes (see also
-// mtsFixedSizeVectorTypes.h, which uses multiple inheritance,
-// rather than proxies).
-typedef mtsGenericObjectProxy<vct1> mtsVct1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct1)
-typedef mtsGenericObjectProxy<vct2> mtsVct2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct2)
-typedef mtsGenericObjectProxy<vct3> mtsVct3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct3)
-typedef mtsGenericObjectProxy<vct4> mtsVct4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct4)
-typedef mtsGenericObjectProxy<vct5> mtsVct5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct5)
-typedef mtsGenericObjectProxy<vct6> mtsVct6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct6)
-typedef mtsGenericObjectProxy<vct7> mtsVct7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct7)
-typedef mtsGenericObjectProxy<vct8> mtsVct8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct8)
-typedef mtsGenericObjectProxy<vct9> mtsVct9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct9)
+// Various Eigen types
+typedef mtsGenericObjectProxy<Eigen::Vector<double, 1>> eigenvec1d;
+CMN_DECLARE_SERVICES_INSTANTIATION(eigenvec1d)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Vector2d>)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Vector3d>)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Vector4d>)
+typedef mtsGenericObjectProxy<Eigen::Vector<double, 5>> eigenvec5d;
+CMN_DECLARE_SERVICES_INSTANTIATION(eigenvec5d)
+typedef mtsGenericObjectProxy<Eigen::Vector<double, 6>> eigenvec6d;
+CMN_DECLARE_SERVICES_INSTANTIATION(eigenvec6d)
 
-typedef mtsGenericObjectProxy<vctFloat1> mtsVctFloat1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat1)
-typedef mtsGenericObjectProxy<vctFloat2> mtsVctFloat2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat2)
-typedef mtsGenericObjectProxy<vctFloat3> mtsVctFloat3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat3)
-typedef mtsGenericObjectProxy<vctFloat4> mtsVctFloat4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat4)
-typedef mtsGenericObjectProxy<vctFloat5> mtsVctFloat5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat5)
-typedef mtsGenericObjectProxy<vctFloat6> mtsVctFloat6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat6)
-typedef mtsGenericObjectProxy<vctFloat7> mtsVctFloat7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat7)
-typedef mtsGenericObjectProxy<vctFloat8> mtsVctFloat8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat8)
-typedef mtsGenericObjectProxy<vctFloat9> mtsVctFloat9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloat9)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::VectorXd>)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Quaterniond>)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::AngleAxisd>)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Isometry3d>)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Affine3d>)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Matrix2d>)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Matrix3d>)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::MatrixXd>)
+typedef mtsGenericObjectProxy<Eigen::Matrix<double, 6, Eigen::Dynamic>> eigenmatrix6Xd;
+CMN_DECLARE_SERVICES_INSTANTIATION(eigenmatrix6Xd)
 
-typedef mtsGenericObjectProxy<vctLong1> mtsVctLong1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong1)
-typedef mtsGenericObjectProxy<vctLong2> mtsVctLong2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong2)
-typedef mtsGenericObjectProxy<vctLong3> mtsVctLong3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong3)
-typedef mtsGenericObjectProxy<vctLong4> mtsVctLong4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong4)
-typedef mtsGenericObjectProxy<vctLong5> mtsVctLong5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong5)
-typedef mtsGenericObjectProxy<vctLong6> mtsVctLong6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong6)
-typedef mtsGenericObjectProxy<vctLong7> mtsVctLong7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong7)
-typedef mtsGenericObjectProxy<vctLong8> mtsVctLong8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong8)
-typedef mtsGenericObjectProxy<vctLong9> mtsVctLong9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLong9)
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::ArrayXd>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array2d>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array3d>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array4d>);
 
-typedef mtsGenericObjectProxy<vctULong1> mtsVctULong1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong1)
-typedef mtsGenericObjectProxy<vctULong2> mtsVctULong2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong2)
-typedef mtsGenericObjectProxy<vctULong3> mtsVctULong3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong3)
-typedef mtsGenericObjectProxy<vctULong4> mtsVctULong4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong4)
-typedef mtsGenericObjectProxy<vctULong5> mtsVctULong5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong5)
-typedef mtsGenericObjectProxy<vctULong6> mtsVctULong6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong6)
-typedef mtsGenericObjectProxy<vctULong7> mtsVctULong7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong7)
-typedef mtsGenericObjectProxy<vctULong8> mtsVctULong8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong8)
-typedef mtsGenericObjectProxy<vctULong9> mtsVctULong9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULong9)
+typedef mtsGenericObjectProxy<Eigen::Array<double, 6, 1>> eigenarray6d;
+CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray6d);
 
-typedef mtsGenericObjectProxy<vctInt1> mtsVctInt1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt1)
-typedef mtsGenericObjectProxy<vctInt2> mtsVctInt2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt2)
-typedef mtsGenericObjectProxy<vctInt3> mtsVctInt3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt3)
-typedef mtsGenericObjectProxy<vctInt4> mtsVctInt4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt4)
-typedef mtsGenericObjectProxy<vctInt5> mtsVctInt5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt5)
-typedef mtsGenericObjectProxy<vctInt6> mtsVctInt6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt6)
-typedef mtsGenericObjectProxy<vctInt7> mtsVctInt7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt7)
-typedef mtsGenericObjectProxy<vctInt8> mtsVctInt8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt8)
-typedef mtsGenericObjectProxy<vctInt9> mtsVctInt9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctInt9)
-
-typedef mtsGenericObjectProxy<vctUInt1> mtsVctUInt1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt1)
-typedef mtsGenericObjectProxy<vctUInt2> mtsVctUInt2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt2)
-typedef mtsGenericObjectProxy<vctUInt3> mtsVctUInt3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt3)
-typedef mtsGenericObjectProxy<vctUInt4> mtsVctUInt4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt4)
-typedef mtsGenericObjectProxy<vctUInt5> mtsVctUInt5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt5)
-typedef mtsGenericObjectProxy<vctUInt6> mtsVctUInt6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt6)
-typedef mtsGenericObjectProxy<vctUInt7> mtsVctUInt7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt7)
-typedef mtsGenericObjectProxy<vctUInt8> mtsVctUInt8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt8)
-typedef mtsGenericObjectProxy<vctUInt9> mtsVctUInt9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUInt9)
-
-typedef mtsGenericObjectProxy<vctShort1> mtsVctShort1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort1)
-typedef mtsGenericObjectProxy<vctShort2> mtsVctShort2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort2)
-typedef mtsGenericObjectProxy<vctShort3> mtsVctShort3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort3)
-typedef mtsGenericObjectProxy<vctShort4> mtsVctShort4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort4)
-typedef mtsGenericObjectProxy<vctShort5> mtsVctShort5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort5)
-typedef mtsGenericObjectProxy<vctShort6> mtsVctShort6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort6)
-typedef mtsGenericObjectProxy<vctShort7> mtsVctShort7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort7)
-typedef mtsGenericObjectProxy<vctShort8> mtsVctShort8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort8)
-typedef mtsGenericObjectProxy<vctShort9> mtsVctShort9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShort9)
-
-typedef mtsGenericObjectProxy<vctUShort1> mtsVctUShort1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort1)
-typedef mtsGenericObjectProxy<vctUShort2> mtsVctUShort2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort2)
-typedef mtsGenericObjectProxy<vctUShort3> mtsVctUShort3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort3)
-typedef mtsGenericObjectProxy<vctUShort4> mtsVctUShort4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort4)
-typedef mtsGenericObjectProxy<vctUShort5> mtsVctUShort5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort5)
-typedef mtsGenericObjectProxy<vctUShort6> mtsVctUShort6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort6)
-typedef mtsGenericObjectProxy<vctUShort7> mtsVctUShort7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort7)
-typedef mtsGenericObjectProxy<vctUShort8> mtsVctUShort8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort8)
-typedef mtsGenericObjectProxy<vctUShort9> mtsVctUShort9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShort9)
-
-typedef mtsGenericObjectProxy<vctChar1> mtsVctChar1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar1)
-typedef mtsGenericObjectProxy<vctChar2> mtsVctChar2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar2)
-typedef mtsGenericObjectProxy<vctChar3> mtsVctChar3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar3)
-typedef mtsGenericObjectProxy<vctChar4> mtsVctChar4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar4)
-typedef mtsGenericObjectProxy<vctChar5> mtsVctChar5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar5)
-typedef mtsGenericObjectProxy<vctChar6> mtsVctChar6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar6)
-typedef mtsGenericObjectProxy<vctChar7> mtsVctChar7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar7)
-typedef mtsGenericObjectProxy<vctChar8> mtsVctChar8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar8)
-typedef mtsGenericObjectProxy<vctChar9> mtsVctChar9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctChar9)
-
-typedef mtsGenericObjectProxy<vctUChar1> mtsVctUChar1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar1)
-typedef mtsGenericObjectProxy<vctUChar2> mtsVctUChar2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar2)
-typedef mtsGenericObjectProxy<vctUChar3> mtsVctUChar3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar3)
-typedef mtsGenericObjectProxy<vctUChar4> mtsVctUChar4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar4)
-typedef mtsGenericObjectProxy<vctUChar5> mtsVctUChar5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar5)
-typedef mtsGenericObjectProxy<vctUChar6> mtsVctUChar6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar6)
-typedef mtsGenericObjectProxy<vctUChar7> mtsVctUChar7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar7)
-typedef mtsGenericObjectProxy<vctUChar8> mtsVctUChar8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar8)
-typedef mtsGenericObjectProxy<vctUChar9> mtsVctUChar9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUChar9)
-
-typedef mtsGenericObjectProxy<vctBool1> mtsVctBool1;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool1)
-typedef mtsGenericObjectProxy<vctBool2> mtsVctBool2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool2)
-typedef mtsGenericObjectProxy<vctBool3> mtsVctBool3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool3)
-typedef mtsGenericObjectProxy<vctBool4> mtsVctBool4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool4)
-typedef mtsGenericObjectProxy<vctBool5> mtsVctBool5;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool5)
-typedef mtsGenericObjectProxy<vctBool6> mtsVctBool6;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool6)
-typedef mtsGenericObjectProxy<vctBool7> mtsVctBool7;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool7)
-typedef mtsGenericObjectProxy<vctBool8> mtsVctBool8;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool8)
-typedef mtsGenericObjectProxy<vctBool9> mtsVctBool9;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBool9)
-
-// Define a few fixed size matrices
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
-#include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
-typedef mtsGenericObjectProxy<vct2x2> mtsVct2x2;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct2x2)
-typedef mtsGenericObjectProxy<vct3x3> mtsVct3x3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct3x3)
-typedef mtsGenericObjectProxy<vct4x4> mtsVct4x4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct4x4)
-
-// Transformation types (see also mtsTransformationTypes.h,
-// which uses multiple inheritance).
-#include <cisstVector/vctTransformationTypes.h>
-#include <cisstVector/vctDataFunctionsTransformations.h>
-typedef mtsGenericObjectProxy<vctMatRot3> mtsVctMatRot3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctMatRot3)
-typedef mtsGenericObjectProxy<vctFrm3> mtsVctFrm3;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFrm3)
-typedef mtsGenericObjectProxy<vctFrm4x4> mtsVctFrm4x4;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFrm4x4)
-
-// Dynamic vectors (see also mtsVector.h, which uses
-// multiple inheritance)
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctDataFunctionsDynamicVector.h>
-typedef mtsGenericObjectProxy<vctDoubleVec> mtsVctDoubleVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctDoubleVec)
-typedef mtsGenericObjectProxy<vctFloatVec> mtsVctFloatVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloatVec)
-typedef mtsGenericObjectProxy<vctIntVec> mtsVctIntVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctIntVec)
-typedef mtsGenericObjectProxy<vctUIntVec> mtsVctUIntVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUIntVec)
-typedef mtsGenericObjectProxy<vctCharVec> mtsVctCharVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctCharVec)
-typedef mtsGenericObjectProxy<vctUCharVec> mtsVctUCharVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUCharVec)
-typedef mtsGenericObjectProxy<vctBoolVec> mtsVctBoolVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctBoolVec)
-typedef mtsGenericObjectProxy<vctShortVec> mtsVctShortVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctShortVec)
-typedef mtsGenericObjectProxy<vctUShortVec> mtsVctUShortVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctUShortVec)
-typedef mtsGenericObjectProxy<vctLongVec> mtsVctLongVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctLongVec)
-typedef mtsGenericObjectProxy<vctULongVec> mtsVctULongVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctULongVec)
-
-// Dynamic matrices (see also mtsMatrix.h, which uses
-// multiple inheritance)
-#include <cisstVector/vctDynamicMatrixTypes.h>
-#include <cisstVector/vctDataFunctionsDynamicMatrix.h>
-typedef mtsGenericObjectProxy<vctDoubleMat> mtsVctDoubleMat;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctDoubleMat)
-typedef mtsGenericObjectProxy<vctFloatMat> mtsVctFloatMat;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctFloatMat)
-typedef mtsGenericObjectProxy<vctIntMat> mtsVctIntMat;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVctIntMat)
-
-// // Various Eigen types
-// typedef mtsGenericObjectProxy<Eigen::Vector<double, 1>> eigenvec1d;
-// CMN_DECLARE_SERVICES_INSTANTIATION(eigenvec1d)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Vector2d>)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Vector3d>)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Vector4d>)
-// typedef mtsGenericObjectProxy<Eigen::Vector<double, 5>> eigenvec5d;
-// CMN_DECLARE_SERVICES_INSTANTIATION(eigenvec5d)
-// typedef mtsGenericObjectProxy<Eigen::Vector<double, 6>> eigenvec6d;
-// CMN_DECLARE_SERVICES_INSTANTIATION(eigenvec6d)
-
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::VectorXd>)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Quaterniond>)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::AngleAxisd>)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Isometry3d>)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Affine3d>)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Matrix2d>)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Matrix3d>)
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::MatrixXd>)
-// typedef mtsGenericObjectProxy<Eigen::Matrix<double, 6, Eigen::Dynamic>> eigenmatrix6Xd;
-// CMN_DECLARE_SERVICES_INSTANTIATION(eigenmatrix6Xd)
-
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::ArrayXd>);
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array2d>);
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array3d>);
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array4d>);
-
-// typedef mtsGenericObjectProxy<Eigen::Array<double, 6, 1>> eigenarray6d;
-// CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray6d);
-
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::ArrayX<bool>>);
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array2<bool>>);
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array3<bool>>);
-// CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array4<bool>>);
-// typedef mtsGenericObjectProxy<Eigen::Array<bool, 5, 1>> eigenarray5b;
-// CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray5b);
-// typedef mtsGenericObjectProxy<Eigen::Array<bool, 6, 1>> eigenarray6b;
-// CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray6b);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::ArrayX<bool>>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array2<bool>>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array3<bool>>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<Eigen::Array4<bool>>);
+typedef mtsGenericObjectProxy<Eigen::Array<bool, 5, 1>> eigenarray5b;
+CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray5b);
+typedef mtsGenericObjectProxy<Eigen::Array<bool, 6, 1>> eigenarray6b;
+CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray6b);
 
 // Default implementation if not explicitly provided
 
@@ -1148,7 +870,7 @@ public:
     using EnableType = typename std::enable_if_t<std::is_base_of_v<Eigen::PlainObjectBase<EigenDerived>, EigenDerived>>;
     using ProxyType = mtsGenericObjectProxy<EigenDerived, EnableType>;
     using IntermediateType = mtsGenericObjectProxyIntermediate<EigenDerived>;
-    
+
     // inherit all constructors and all copy assignment overloads
     using IntermediateType::IntermediateType;
     using IntermediateType::operator=;

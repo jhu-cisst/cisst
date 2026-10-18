@@ -40,21 +40,23 @@
   * added typemaps for std::vector containers
   * updated to use the new numpy API for full python3 support
  Brendan Burkhart:
-  * added out typemaps for some Eigen::Ref usage
+  * added out typemaps for const&, *, const*, and some Eigen::Ref usage,
  */
 
 %{
-  #define SWIG_FILE_WITH_INIT
-  #include "Eigen/Core"
+  #include <Eigen/Core>
   #include <vector>
+  #include <numpy/arrayobject.h>
 %}
 
 %include "numpy.i"
 
+#ifndef NO_IMPORT_ARRAY
 %init
 %{
   import_array();
 %}
+#endif
 
 %fragment("Eigen_Fragments", "header",  fragment="NumPy_Fragments")
 %{
@@ -298,23 +300,27 @@
   if (!ConvertFromEigenToNumPyMatrix<CLASS >(&$result, $1))
     SWIG_fail;
 }
-// Out: & (not yet implemented)
-%typemap(out, fragment="Eigen_Fragments") CLASS &
+// Out: &
+%typemap(out, noblock="1", optimal="1", fragment="Eigen_Fragments") CLASS& (CLASS temp)
 {
-  PyErr_SetString(PyExc_ValueError, "The output typemap for non-const reference is not yet implemented. Please report this problem to the developer.");
-  SWIG_fail;
+  if (!ConvertFromEigenToNumPyMatrix(&$result, $1)) {
+    SWIG_fail;
+  }
 }
+
 // Out: const* (not yet implemented)
 %typemap(out, fragment="Eigen_Fragments") CLASS const*
 {
-  PyErr_SetString(PyExc_ValueError, "The output typemap for const pointer is not yet implemented. Please report this problem to the developer.");
-  SWIG_fail;
+  if (!ConvertFromEigenToNumPyMatrix(&$result, *$1)) {
+    SWIG_fail;
+  }
 }
 // Out: * (not yet implemented)
 %typemap(out, fragment="Eigen_Fragments") CLASS *
 {
-  PyErr_SetString(PyExc_ValueError, "The output typemap for non-const pointer is not yet implemented. Please report this problem to the developer.");
-  SWIG_fail;
+  if (!ConvertFromEigenToNumPyMatrix(&$result, *$1)) {
+    SWIG_fail;
+  }
 }
 
 %typemap(out, fragment="Eigen_Fragments") std::vector<CLASS >

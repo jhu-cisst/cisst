@@ -11,7 +11,6 @@
 
 # List cisst libraries needed
 set (REQUIRED_CISST_LIBRARIES cisstCommon
-                              cisstVector
                               cisstOSAbstraction
                               cisstMultiTask)
 

@@ -24,11 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 // system includes
 #include <iostream>
 
-#include <cisstVector/vctFixedSizeVector.h>
-#include <cisstVector/vctFixedSizeMatrix.h>
-#include <cisstVector/vctDynamicVector.h>
-#include <cisstVector/vctDynamicMatrix.h>
-#include <cisstVector/vctRandom.h>
+#include <cisstVectorQt/vctFixedSizeVector.h>
+#include <cisstVectorQt/vctFixedSizeMatrix.h>
+#include <cisstVectorQt/vctDynamicVector.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctRandom.h>
 
 #include <cisstNumerical/nmrSVD.h>
 #include <cisstNumerical/nmrSVDEconomy.h>

@@ -17,12 +17,6 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstParameterTypes/prmActuatorParameters.h>
-CMN_IMPLEMENT_SERVICES(prmActuatorParameters);
-
-#include <cisstParameterTypes/prmActuatorState.h>
-CMN_IMPLEMENT_SERVICES(prmActuatorState);
-
 #include <cisstParameterTypes/prmEventButton.h>
 CMN_IMPLEMENT_SERVICES(prmEventButton);
 

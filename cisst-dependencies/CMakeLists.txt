@@ -393,11 +393,12 @@ if (CISST_HAS_JSON)
 
 endif (CISST_HAS_JSON)
 
+include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL "Don't check for updates once external project is downloaded")
+
 # Required support for Eigen
 find_package (Eigen3 QUIET)
 if (NOT EIGEN_FOUND)
-  include(FetchContent)
-  set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL "Don't check for updates once external project is downloaded")
   FetchContent_Declare(
     Eigen
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
@@ -406,3 +407,6 @@ if (NOT EIGEN_FOUND)
   )
   FetchContent_MakeAvailable(Eigen)
 endif (NOT EIGEN_FOUND)
+
+# Required support for Orocos-KDL
+find_package (orocos_kdl REQUIRED)

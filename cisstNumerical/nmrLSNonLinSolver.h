@@ -29,8 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _nmrLSNonLinSolver_h
 
 
-#include <cisstVector/vctDynamicVector.h>
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicVector.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 
 #include <cisstNumerical/nmrCallBack.h>
 

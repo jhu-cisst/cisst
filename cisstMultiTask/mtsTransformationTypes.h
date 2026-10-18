@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsTransformationTypes_h
 
 // see vctTransformationTypes for naming conventions
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsMacros.h>
 

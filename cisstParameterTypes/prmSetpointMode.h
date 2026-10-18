@@ -51,12 +51,12 @@ inline std::ostream & operator << (std::ostream & output,
 }
 
 template <>
-inline void CISST_EXPORT cmnDataJSON<prmSetpointMode>::SerializeText(const DataType & data, Json::Value & jsonValue) {
+inline void CISST_EXPORT cmnDataJSON<prmSetpointMode, void>::SerializeText(const DataType & data, Json::Value & jsonValue) {
     jsonValue = static_cast<uint8_t>(data);
 }
 
 template <>
-inline void CISST_EXPORT cmnDataJSON<prmSetpointMode>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
+inline void CISST_EXPORT cmnDataJSON<prmSetpointMode, void>::DeSerializeText(DataType & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     if (jsonValue.empty()) {
         cmnThrow("cmnDataJSON<prmSetpointMode>::DeSerializeText: empty JSON value");
     }
@@ -72,7 +72,7 @@ inline void CISST_EXPORT cmnDataJSON<prmSetpointMode>::DeSerializeText(DataType 
 }
 
 template <>
-class cmnData<prmSetpointMode> {
+class cmnData<prmSetpointMode, void> {
 public:
     enum {IS_SPECIALIZED = 1};
 

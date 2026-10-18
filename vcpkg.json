@@ -16,6 +16,9 @@
     },
     {
       "name": "eigen3"
+    },
+    {
+      "name": "orocos-kdl"
     }
   ]
 }

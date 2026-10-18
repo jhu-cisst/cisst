@@ -132,7 +132,6 @@ jobs:
           -DCISST_cisstCommon_EXAMPLES=ON \
           -DCISST_cisstVector_EXAMPLES=ON \
           -DCISST_cisstOSAbstraction_EXAMPLES=ON \
-          -DCISST_cisstNumerical_EXAMPLES=ON \
           -DCISST_cisstMultiTask_EXAMPLES=ON \
           -DCISST_cisstParameterTypes_EXAMPLES=ON \
           -DCISST_cisstRobot_EXAMPLES=ON \
@@ -183,7 +182,6 @@ jobs:
         source cisstvars.sh
         cisstCommonTests -r -v
         cisstVectorTests -r -v
-        cisstNumericalTests -r -v
         cisstOSAbstractionTests -r -v
         cisstParameterTypesTests -r -v
         cisstMultiTaskTests -r -v

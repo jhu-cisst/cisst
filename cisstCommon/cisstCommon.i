@@ -24,6 +24,10 @@ http://www.cisst.org/cisst/license.txt.
 
 %module cisstCommonPython
 
+%{
+#define SWIG_FILE_WITH_INIT
+%}
+
 %include "std_streambuf.i"
 %include "std_iostream.i"
 
@@ -38,7 +42,6 @@ http://www.cisst.org/cisst/license.txt.
 
 // We define __setitem__ and __getitem__
 %ignore *::operator[];
-
 
 %include "swigrun.i"
 

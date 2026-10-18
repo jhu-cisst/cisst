@@ -40,8 +40,8 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 
 #include <cisstMesh/mshForwardDeclarations.h>
 #include <cisstMesh/msh3BoundingBox.h>

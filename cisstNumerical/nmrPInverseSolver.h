@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _nmrPInverseSolver_h
 #define _nmrPInverseSolver_h
 
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 #include <cisstNumerical/nmrSVDSolver.h>
 
 

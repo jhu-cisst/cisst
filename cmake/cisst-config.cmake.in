@@ -118,7 +118,6 @@ set (CISST_USE_SI_UNITS @CISST_USE_SI_UNITS@)
 
 # Feature metadata for optional cisstNumerical code
 set (CISST_HAS_CISSTNETLIB @CISST_HAS_CISSTNETLIB@)
-set (CISST_NMR_COMPILE_POLYNOMIALS @CISST_NMR_COMPILE_POLYNOMIALS@)
 
 # Feature metadata for optional cisstStereoVision code
 set (CISST_SVL_HAS_CISSTNETLIB @CISST_SVL_HAS_CISSTNETLIB@)
@@ -203,6 +202,7 @@ if (CISST_HAS_OPENGL)
 endif (CISST_HAS_OPENGL)
 
 find_dependency (Eigen3)
+find_dependency (orocos_kdl)
 
 if (CISST_HAS_SWIG_PYTHON OR "@CISST_cisstInteractive@")
   set (CISST_PYTHON_VERSION_REQUIRED "@CISST_PYTHON_VERSION_REQUIRED@")
@@ -245,16 +245,6 @@ endif ()
 
 if (CISST_HAS_CISSTNETLIB)
   find_dependency (CisstNetlib)
-  if (TARGET cisst::cisstNumerical)
-    get_target_property (_aliased_target cisst::cisstNumerical ALIASED_TARGET)
-    if (_aliased_target)
-      set_property (TARGET ${_aliased_target} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CISSTNETLIB_INCLUDE_DIR}")
-      set_property (TARGET ${_aliased_target} APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${CISSTNETLIB_LIBRARIES}")
-    else ()
-      set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CISSTNETLIB_INCLUDE_DIR}")
-      set_property (TARGET cisst::cisstNumerical APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${CISSTNETLIB_LIBRARIES}")
-    endif ()
-  endif ()
 endif ()
 
 find_file (_cisstSettings_file

@@ -36,8 +36,8 @@
 
 #include <cisstMesh/msh3Utilities.h>
 
-#include <cisstVector/vctDeterminant.h>
-#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstVectorQt/vctDeterminant.h>
+#include <cisstVectorQt/vctDynamicMatrixTypes.h>
 
 #include <cisstNumerical/nmrSVD.h>
 #include <cisstNumerical/nmrInverse.h>

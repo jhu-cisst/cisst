@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "nmrPolynomialTermPowerIndexTest.h"
 
 #include <math.h>
-#include <cisstVector/vctRandom.h>
+#include <cisstVectorQt/vctRandom.h>
 
 const nmrPolynomialBaseTest::VariableIndexType nmrPolynomialBaseTest::DefaultNumVariables = 4;
 const nmrPolynomialBaseTest::VariableType nmrPolynomialBaseTest::VariableValueMax = 10;

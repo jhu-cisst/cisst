@@ -5,7 +5,7 @@
     "-DCISSTNETLIB_USE_LOCAL_INSTALL=ON",
     "-DCISST_HAS_CISSTNETLIB=ON",
     "-DCISST_USE_EXTERNAL=ON",
-    "-DCISST_cisstMesh=ON",
+    "-DCISST_cisstMesh=OFF",
     "-DCISST_cisstRobot=ON",
     "-DCISST_cisstInteractive=ON",
     "-DCISST_HAS_OPENGL=ON",

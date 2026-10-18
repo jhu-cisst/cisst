@@ -31,16 +31,21 @@ http://www.cisst.org/cisst/license.txt.
 
 %import "cisstConfig.h"
 
+%{
+// Rely on cisstCommon.i for Numpy initialization
+#define NO_IMPORT_ARRAY
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
+%}
+
 // cmnJointType is imported through cisstCommon and encountered again through
 // generated parameter headers; SWIG reports the harmless duplicate enum.
 %warnfilter(302) cmnJointType;
 %import "cisstCommon/cisstCommon.i"
-%import "cisstVector/cisstVector.i"
 %import "cisstMultiTask/cisstMultiTask.i"
 
-%init %{
-    import_array() // numpy initialization
-%}
+%include "cisstCommon/cmnDataFunctions.h"
+%include "cisstCommon/cmnDataFunctionsJSON.h"
 
 %{
   #include <cisstParameterTypes/prmPython.h>
@@ -122,7 +127,6 @@ CISST_IGNORE_DEPRECATED_MOTION_ACCESSORS(prmForceTorqueJointSet)
 %include "cisstParameterTypes/prmStateJoint.h"
 %include "cisstParameterTypes/prmConfigurationJoint.h"
 %include "cisstParameterTypes/prmOperatingState.h"
-%include "cisstParameterTypes/prmActuatorState.h"
 
 %include "cisstParameterTypes/prmStateCartesian.h"
 %include "cisstParameterTypes/prmBaseFrame.h"

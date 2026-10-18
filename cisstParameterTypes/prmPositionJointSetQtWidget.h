@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QPushButton>
 
-#include <cisstVector/vctQtWidgetDynamicVector.h>
+#include <cisstVectorQt/vctQtWidgetDynamicVector.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmStateJoint.h>
 

@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlSampleImageCustom_h
 #define _svlSampleImageCustom_h
 
-#include <cisstVector/vctDynamicMatrixRef.h>
+#include <cisstVectorQt/vctDynamicMatrixRef.h>
 #include <cisstStereoVision/svlTypeCheckers.h>
 #include <cisstStereoVision/svlProcInfo.h>
 #include <cisstStereoVision/svlSampleImage.h>

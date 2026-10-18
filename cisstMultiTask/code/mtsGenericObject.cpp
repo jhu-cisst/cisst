@@ -128,7 +128,7 @@ std::string mtsGenericObject::ScalarDescription(const size_t index, const std::s
 
 
 template <>
-void cmnData<mtsGenericObject>::Copy(mtsGenericObject & data, const mtsGenericObject & source)
+void cmnData<mtsGenericObject, void>::Copy(mtsGenericObject & data, const mtsGenericObject & source)
 {
     data.Timestamp() = source.Timestamp();
     data.AutomaticTimestamp() = source.AutomaticTimestamp();
@@ -137,7 +137,7 @@ void cmnData<mtsGenericObject>::Copy(mtsGenericObject & data, const mtsGenericOb
 
 
 template <>
-void cmnData<mtsGenericObject>::SerializeBinary(const mtsGenericObject & data, std::ostream & outputStream)
+void cmnData<mtsGenericObject, void>::SerializeBinary(const mtsGenericObject & data, std::ostream & outputStream)
     CISST_THROW(std::runtime_error)
 {
     cmnData<double>::SerializeBinary(data.Timestamp(), outputStream);
@@ -147,7 +147,7 @@ void cmnData<mtsGenericObject>::SerializeBinary(const mtsGenericObject & data, s
 
 
 template <>
-void cmnData<mtsGenericObject>::DeSerializeBinary(mtsGenericObject & data,
+void cmnData<mtsGenericObject, void>::DeSerializeBinary(mtsGenericObject & data,
                                                   std::istream & inputStream,
                                                   const cmnDataFormat & localFormat,
                                                   const cmnDataFormat & remoteFormat)
@@ -160,7 +160,7 @@ void cmnData<mtsGenericObject>::DeSerializeBinary(mtsGenericObject & data,
 
 
 template <>
-void cmnData<mtsGenericObject>::SerializeText(const mtsGenericObject & data, std::ostream & outputStream, const char delimiter)
+void cmnData<mtsGenericObject, void>::SerializeText(const mtsGenericObject & data, std::ostream & outputStream, const char delimiter)
     CISST_THROW(std::runtime_error)
 {
     cmnData<double>::SerializeText(data.Timestamp(), outputStream, delimiter);
@@ -186,7 +186,7 @@ std::string cmnData<mtsGenericObject>::SerializeDescription(const mtsGenericObje
 
 
 template <>
-void cmnData<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, std::istream & inputStream, const char delimiter)
+void cmnData<mtsGenericObject, void>::DeSerializeText(mtsGenericObject & data, std::istream & inputStream, const char delimiter)
     CISST_THROW(std::runtime_error)
 {
     cmnData<double>::DeSerializeText(data.Timestamp(), inputStream, delimiter);
@@ -225,21 +225,21 @@ std::string cmnData<mtsGenericObject>::HumanReadable(const mtsGenericObject & da
 
 
 template <>
-bool cmnData<mtsGenericObject>::ScalarNumberIsFixed(const mtsGenericObject & CMN_UNUSED(data))
+bool cmnData<mtsGenericObject, void>::ScalarNumberIsFixed(const mtsGenericObject & CMN_UNUSED(data))
 {
     return true;
 }
 
 
 template <>
-size_t cmnData<mtsGenericObject>::ScalarNumber(const mtsGenericObject & CMN_UNUSED(data))
+size_t cmnData<mtsGenericObject, void>::ScalarNumber(const mtsGenericObject & CMN_UNUSED(data))
 {
     return 3;
 }
 
 
 template <>
-double cmnData<mtsGenericObject>::Scalar(const mtsGenericObject & data, const size_t index)
+double cmnData<mtsGenericObject, void>::Scalar(const mtsGenericObject & data, const size_t index)
     CISST_THROW(std::out_of_range)
 {
     if (index >= data.ScalarNumber()) {
@@ -276,14 +276,14 @@ std::string cmnData<mtsGenericObject>::ScalarDescription(const mtsGenericObject 
 
 #if CISST_HAS_JSON
 template <>
-void cmnDataJSON<mtsGenericObject>::SerializeText(const mtsGenericObject & data, Json::Value & jsonValue) {
+void cmnDataJSON<mtsGenericObject, void>::SerializeText(const mtsGenericObject & data, Json::Value & jsonValue) {
     cmnDataJSON<double>::SerializeText(data.Timestamp(), jsonValue["Timestamp"]);
     cmnDataJSON<bool>::SerializeText(data.AutomaticTimestamp(), jsonValue["AutomaticTimestamp"]);
     cmnDataJSON<bool>::SerializeText(data.Valid(), jsonValue["Valid"]);
 }
 
 template <>
-void cmnDataJSON<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
+void cmnDataJSON<mtsGenericObject, void>::DeSerializeText(mtsGenericObject & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {
     Json::Value field;
     field = jsonValue["Timestamp"];
     if (!field.empty()) {

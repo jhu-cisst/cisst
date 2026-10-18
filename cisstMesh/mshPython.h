@@ -26,6 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mshPython_h
 
 #include <cisstCommon/cmnPython.h>
-#include <cisstVector/vctPython.h>
+#include <cisstVectorQt/vctPython.h>
 
 #endif // _mshPython_h

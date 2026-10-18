@@ -21,12 +21,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "nmrPInverseTest.h"
 
-#include <cisstVector/vctRandomFixedSizeMatrix.h>
-#include <cisstVector/vctRandomDynamicMatrix.h>
+#include <cisstVectorQt/vctRandomFixedSizeMatrix.h>
+#include <cisstVectorQt/vctRandomDynamicMatrix.h>
 #include <cisstNumerical/nmrPInverse.h>
 
 #include <cisstCommon/cmnPrintf.h>
-#include <cisstVector/vctPrintf.h>
+#include <cisstVectorQt/vctPrintf.h>
 
 #include <iostream>
 

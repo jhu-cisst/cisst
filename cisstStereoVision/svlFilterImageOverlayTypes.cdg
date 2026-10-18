@@ -2,8 +2,8 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
-#include <cisstVector/vctDataFunctionsFixedSizeMatrix.h>
+#include <cisstVectorQt/vctFixedSizeMatrixTypes.h>
+#include <cisstVectorQt/vctDataFunctionsFixedSizeMatrix.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 // Always include last

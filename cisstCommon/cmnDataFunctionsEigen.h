@@ -446,7 +446,122 @@ public:
     static double Scalar(const DataType & data, const size_t index)
         CISST_THROW(std::out_of_range)
     {
-        return cmnData<Eigen::Vector4<Scalar_>>(data.coeffs(), index);
+        return cmnData<Eigen::Vector4<Scalar_>>::Scalar(data.coeffs(), index);
+    }
+};
+
+// Implement cmnData<Eigen::AngleAxis>.
+//
+// Note: `cmnData<>` must be specialized for `Derived::Scalar`, and must have
+// fixed scalar number.
+template <typename Scalar_>
+class cmnData<Eigen::AngleAxis<Scalar_>>
+{
+public:
+    enum {IS_SPECIALIZED = 1};
+
+    using DataType = Eigen::AngleAxis<Scalar_>;
+
+    static void Copy(DataType & data, const DataType & source)
+    {
+        data = source;
+    }
+
+    static std::string HumanReadable(const DataType & data)
+    {
+        std::stringstream ss;
+        ss << "theta: " << data.angle() << ", "
+           << "ax: " << data.axis().x() << ", "
+           << "ay: " << data.axis().y() << ", "
+           << "az: " << data.axis().z();
+        return ss.str();
+    }
+
+    static void SerializeText(const DataType & data,
+                          std::ostream & outputStream,
+                          const char delimiter) CISST_THROW(std::runtime_error)
+    {
+        cmnData<Scalar_>::SerializeText(data.angle(), outputStream, delimiter);
+        cmnData<Eigen::Vector3<Scalar_>>::SerializeText(data.axis(), outputStream, delimiter);
+    }
+
+    static void DeSerializeText(DataType & data,
+                                std::istream & inputStream,
+                                const char delimiter) CISST_THROW(std::runtime_error)
+    {
+        cmnData<Scalar_>::DeSerializeText(data.angle(), inputStream, delimiter);
+        cmnData<Eigen::Vector3<Scalar_>>::DeSerializeText(data.axis(), inputStream, delimiter);
+    }
+
+    static std::string SerializeDescription(const DataType& CMN_UNUSED(data),
+                                            const char delimiter,
+                                            const std::string & userDescription = "axang")
+    {
+        std::string prefix = userDescription.empty() ? "axang" : userDescription;
+
+        std::stringstream ss;
+        ss << userDescription << ".theta" << delimiter
+           << userDescription << ".x" << delimiter
+           << userDescription << ".y" << delimiter
+           << userDescription << ".z" << delimiter;
+        return ss.str();
+    }
+
+    static void SerializeBinary(const DataType & data, std::ostream & outputStream)
+        CISST_THROW(std::runtime_error)
+    {
+        cmnData<Scalar_>::SerializeBinary(data.angle(), outputStream);
+        cmnData<Eigen::Vector3<Scalar_>>::SerializeBinary(data.axis(), outputStream);
+    }
+
+    static void DeSerializeBinary(DataType & data,
+                                  std::istream & inputStream,
+                                  const cmnDataFormat & localFormat,
+                                  const cmnDataFormat & remoteFormat)
+        CISST_THROW(std::runtime_error)
+    {
+        cmnData<Scalar_>::DeSerializeBinary(data.angle(), inputStream, localFormat, remoteFormat);
+        cmnData<Eigen::Vector3<Scalar_>>::DeSerializeBinary(data.axis(), inputStream, localFormat, remoteFormat);
+    }
+
+    static bool ScalarNumberIsFixed(const DataType & CMN_UNUSED(data))
+    {
+        return true;
+    }
+
+    static size_t ScalarNumber(const DataType & CMN_UNUSED(data))
+    {
+        return 4;
+    }
+
+    static std::string ScalarDescription(const DataType & CMN_UNUSED(data), const size_t index,
+                                         const std::string & userDescription = "axang")
+        CISST_THROW(std::out_of_range)
+    {
+        std::string prefix = userDescription.empty() ? "axang" : userDescription;
+
+        switch (index) {
+        case 0:
+            return prefix + ".theta";
+        case 1:
+            return prefix + ".x";
+        case 2:
+            return prefix + ".y";
+        case 3:
+            return prefix + ".z";
+        default:
+            throw std::out_of_range("ScalarDescription index out of range");
+        }
+    }
+
+    static double Scalar(const DataType & data, const size_t index)
+        CISST_THROW(std::out_of_range)
+    {
+        if (index == 0) {
+            return data.angle();
+        } else {
+            return cmnData<Eigen::Vector3<Scalar_>>::Scalar(data.axis(), index - 1);
+        }
     }
 };
 

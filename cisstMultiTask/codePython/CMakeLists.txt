@@ -24,7 +24,7 @@ cisst_add_swig_module (MODULE cisstMultiTask
                        INTERFACE_DIRECTORY ..
                        FOLDER cisstMultiTask
                        HEADER_FILES ../mtsPython.h
-                       MODULE_LINK_LIBRARIES cisstMultiTask cisstOSAbstraction cisstVector cisstCommon
+                       MODULE_LINK_LIBRARIES cisstMultiTask cisstOSAbstraction cisstCommon
                        INSTALL_FILES 1)
 
 if (WIN32 AND CMAKE_CL_64)

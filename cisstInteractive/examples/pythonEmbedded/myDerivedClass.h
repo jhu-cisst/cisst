@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnGenericObject.h>
-#include <cisstVector/vctTypes.h>
+#include <cisstVectorQt/vctTypes.h>
 
 
 // code required for the DLL generation

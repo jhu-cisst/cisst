@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _nmrLSMinNorm_h
 
 #include <cisstNumerical/nmrNetlib.h>
-#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVectorQt/vctDynamicMatrix.h>
 
 #include <cisstNumerical/nmrExport.h>
 

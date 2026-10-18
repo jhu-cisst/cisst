@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#include "mtsGenericObjectProxy.h"
 %module cisstMultiTaskPython
 
 
@@ -31,14 +32,19 @@ http://www.cisst.org/cisst/license.txt.
 
 %import "cisstConfig.h"
 
+%{
+// Rely on cisstCommon.i for Numpy initialization
+#define NO_IMPORT_ARRAY
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
+%}
+
 %import "cisstCommon/cisstCommon.i"
-%import "cisstVector/cisstVector.i"
 %import "cisstOSAbstraction/cisstOSAbstraction.i"
 %import "cisstMultiTask/mtsConfig.h"
 
-%init %{
-    import_array() // numpy initialization
-%}
+%import "cisstCommon/cmnDataFunctions.h"
+%import "cisstCommon/cmnDataFunctionsJSON.h"
 
 %header %{
 #include <cisstMultiTask/mtsPython.h>
@@ -629,8 +635,11 @@ http://www.cisst.org/cisst/license.txt.
     // ignore the operator &
     %ignore mtsGenericObjectProxy<elementType>::operator value_type&;
     %ignore mtsGenericObjectProxy<elementType>::operator const value_type&;
+    %ignore mtsGenericObjectProxyIntermediate<elementType>::operator value_type&;
+    %ignore mtsGenericObjectProxyIntermediate<elementType>::operator const value_type&;
     // Instantiate the template
     %template(name ## Base) mtsGenericObjectProxyBase<elementType>;
+    %template(name ## Intermediate) mtsGenericObjectProxyIntermediate<elementType>;
     %template(name) mtsGenericObjectProxy<elementType>;
     // Type addition for dynamic type checking
     %{
@@ -664,146 +673,6 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdStringVecProxy, stdStringVec);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdDoubleVecProxy, stdDoubleVec);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdCharVecProxy, stdCharVec);
 
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct1, vct1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct2, vct2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct3, vct3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct4, vct4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct5, vct5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct6, vct6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct7, vct7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct8, vct8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct9, vct9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloat1, vctFloat1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloat2, vctFloat2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloat3, vctFloat3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloat4, vctFloat4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloat5, vctFloat5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloat6, vctFloat6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloat7, vctFloat7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloat8, vctFloat8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloat9, vctFloat9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLong1, vctLong1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLong2, vctLong2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLong3, vctLong3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLong4, vctLong4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLong5, vctLong5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLong6, vctLong6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLong7, vctLong7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLong8, vctLong8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLong9, vctLong9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULong1, vctULong1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULong2, vctULong2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULong3, vctULong3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULong4, vctULong4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULong5, vctULong5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULong6, vctULong6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULong7, vctULong7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULong8, vctULong8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULong9, vctULong9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctInt1, vctInt1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctInt2, vctInt2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctInt3, vctInt3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctInt4, vctInt4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctInt5, vctInt5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctInt6, vctInt6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctInt7, vctInt7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctInt8, vctInt8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctInt9, vctInt9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUInt1, vctUInt1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUInt2, vctUInt2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUInt3, vctUInt3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUInt4, vctUInt4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUInt5, vctUInt5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUInt6, vctUInt6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUInt7, vctUInt7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUInt8, vctUInt8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUInt9, vctUInt9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShort1, vctShort1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShort2, vctShort2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShort3, vctShort3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShort4, vctShort4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShort5, vctShort5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShort6, vctShort6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShort7, vctShort7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShort8, vctShort8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShort9, vctShort9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShort1, vctUShort1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShort2, vctUShort2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShort3, vctUShort3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShort4, vctUShort4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShort5, vctUShort5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShort6, vctUShort6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShort7, vctUShort7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShort8, vctUShort8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShort9, vctUShort9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctChar1, vctChar1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctChar2, vctChar2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctChar3, vctChar3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctChar4, vctChar4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctChar5, vctChar5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctChar6, vctChar6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctChar7, vctChar7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctChar8, vctChar8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctChar9, vctChar9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUChar1, vctUChar1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUChar2, vctUChar2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUChar3, vctUChar3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUChar4, vctUChar4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUChar5, vctUChar5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUChar6, vctUChar6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUChar7, vctUChar7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUChar8, vctUChar8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUChar9, vctUChar9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBool1, vctBool1);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBool2, vctBool2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBool3, vctBool3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBool4, vctBool4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBool5, vctBool5);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBool6, vctBool6);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBool7, vctBool7);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBool8, vctBool8);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBool9, vctBool9);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct2x2, vct2x2);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct3x3, vct3x3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVct4x4, vct4x4);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctMatRot3, vctMatRot3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFrm3, vctFrm3);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFrm4x4, vctFrm4x4);
-
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctDoubleVec, vctDoubleVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloatVec, vctFloatVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctIntVec, vctIntVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUIntVec, vctUIntVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctCharVec, vctCharVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUCharVec, vctUCharVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctBoolVec, vctBoolVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctShortVec, vctShortVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctUShortVec, vctUShortVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctLongVec, vctLongVec);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctULongVec, vctULongVec);
-
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctDoubleMat, vctDoubleMat);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctFloatMat, vctFloatMat);
-MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsVctIntMat, vctIntMat);
-
-// Extend mtsGenericObjectProxy<vctMatRot3> to support construction from numpy array (using cisstVector
-// typemaps that convert between numpy array and vctDynamicMatrix). This enables vctMatRot3 to be used
-// as a parameter in cisstMultiTask commands (e.g., mtsCommandWrite).
-// Note that it is not necessary for Python to know about the vctMatRot3 data type, but this could be
-// implemented by adding Swig wrapping of this type in cisstVector.
-%extend mtsGenericObjectProxy<vctMatRot3> {
-    mtsGenericObjectProxy<vctMatRot3>(const vctDynamicMatrix<double> &matrixRot) throw(std::runtime_error) {
-        if ((matrixRot.rows() != 3) || (matrixRot.cols() != 3))
-            cmnThrow(std::runtime_error("mtsGenericObjectProxy<vctMatRot3>: Input is not 3x3 matrix"));
-        vctMatRot3 rot;
-        rot.From(matrixRot[0][0], matrixRot[0][1], matrixRot[0][2],
-                 matrixRot[1][0], matrixRot[1][1], matrixRot[1][2],
-                 matrixRot[2][0], matrixRot[2][1], matrixRot[2][2]);
-        mtsGenericObjectProxy<vctMatRot3> * result = new mtsGenericObjectProxy<vctMatRot3>(rot);
-        return result;
-    }
-}
-
 %include "cisstMultiTask/mtsParameterTypes.h"
 %template(mtsDescriptionConnectionVec) std::vector<mtsDescriptionConnection>;
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVecProxy, mtsDescriptionConnectionVec);
@@ -826,79 +695,7 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsInterfaceRequiredDescriptionProxy, mtsIn
 %template(mtsEventsVoidDescription)            std::vector<mtsEventVoidDescription>;
 %template(mtsEventsWriteDescription)           std::vector<mtsEventWriteDescription>;
 
-// Wrap mtsVector
-%import "cisstMultiTask/mtsVector.h"
-
-// define macro
-%define MTS_INSTANTIATE_VECTOR(name, elementType)
-    // suppress warning about base class not known
-    %warnfilter(401) mtsVector<elementType>;
-    // force instantiation and define name for SWIG
-    %template(name) mtsVector<elementType>;
-    %{
-         typedef mtsVector<elementType> name;
-    %}
-    typedef mtsVector<elementType> name;
-    %types(name *);
-    // add two methods to retrieve the vector
-    %extend mtsVector<elementType>{
-        inline VectorType & Data(void) {
-            return *self;
-        }
-        inline const VectorType & Data(void) const {
-            return *self;
-        }
-   }
-%enddef
-
-// instantiate for types also instantiated in cisstVector wrappers
-MTS_INSTANTIATE_VECTOR(mtsDoubleVec, double);
-MTS_INSTANTIATE_VECTOR(mtsFloatVec, float);
-MTS_INSTANTIATE_VECTOR(mtsLongVec, long);
-MTS_INSTANTIATE_VECTOR(mtsULongVec, unsigned long);
-MTS_INSTANTIATE_VECTOR(mtsIntVec, int);
-MTS_INSTANTIATE_VECTOR(mtsUIntVec, unsigned int);
-MTS_INSTANTIATE_VECTOR(mtsShortVec, short);
-MTS_INSTANTIATE_VECTOR(mtsUShortVec, unsigned short);
-MTS_INSTANTIATE_VECTOR(mtsCharVec, char);
-MTS_INSTANTIATE_VECTOR(mtsUCharVec, unsigned char);
-MTS_INSTANTIATE_VECTOR(mtsBoolVec, bool);
-MTS_INSTANTIATE_VECTOR(mtsStdStringVec, std::string);
-
-// Wrap mtsMatrix
-%import "cisstMultiTask/mtsMatrix.h"
-
-// define macro
-%define MTS_INSTANTIATE_MATRIX(name, elementType)
-    // suppress warning about base class not known
-    %warnfilter(401) mtsMatrix<elementType>;
-    // force instantiation and define name for SWIG
-    %template(name) mtsMatrix<elementType>;
-    %{
-        typedef mtsMatrix<elementType> name;
-    %}
-    typedef mtsMatrix<elementType> name;
-    %types(name *);
-    // add two methods to retrieve the matrix
-    %extend mtsMatrix<elementType>{
-        inline MatrixType & Data(void) {
-            return *self;
-        }
-        inline const MatrixType & Data(void) const {
-            return *self;
-        }
-    }
-%enddef
-
-// instantiate for types also instantiated in cisstVector wrappers
-MTS_INSTANTIATE_MATRIX(mtsDoubleMat, double);
-MTS_INSTANTIATE_MATRIX(mtsIntMat, int);
-MTS_INSTANTIATE_MATRIX(mtsShortMat, short);
-MTS_INSTANTIATE_MATRIX(mtsLongMat, long);
-
 %import "cisstMultiTask/mtsMacros.h"
-%import "cisstVector/vctTransformationTypes.h"
-%include "cisstMultiTask/mtsTransformationTypes.h"
 
 // Wrap mtsStateIndex
 %ignore mtsStateIndex::operator--;

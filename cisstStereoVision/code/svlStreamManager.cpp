@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaCriticalSection.h>
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 /*************************************/
