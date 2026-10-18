@@ -57,6 +57,9 @@ jobs:
         path: ${{ github.workspace }}/vcpkg_cache
         key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
 
+    - name: Test CppUnit finder
+      run: cmake -S tests/cmake/cppunit-discovery -B cppunit-discovery-check
+
     - name: Configure CMake smoke test
       run: |
         cmake -S . -B build-configure-check `

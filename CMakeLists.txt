@@ -361,11 +361,10 @@ include_directories (${CISST_INCLUDE_DIR})
 
 # Build test driver if needed
 if (CISST_BUILD_TESTS)
-  find_package (CppUnit REQUIRED)
-  # Config packages such as vcpkg export the unnamespaced target.
-  if (TARGET CppUnit AND NOT TARGET CppUnit::CppUnit)
-    add_library (CppUnit::CppUnit INTERFACE IMPORTED)
-    set_target_properties (CppUnit::CppUnit PROPERTIES INTERFACE_LINK_LIBRARIES CppUnit)
+  if (CISST_USE_EXTERNAL)
+    find_package (CppUnit MODULE QUIET)
+  else ()
+    find_package (CppUnit MODULE REQUIRED)
   endif ()
   if (NOT CPPUNIT_FOUND)
     # Try to build as external project
