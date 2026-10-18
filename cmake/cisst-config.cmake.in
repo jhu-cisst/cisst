@@ -233,7 +233,9 @@ else ()
 endif ()
 
 if (CISST_HAS_QT)
-  # Without COMPONENTS, retain the historical request for all available libraries.
+  # Determine whether the requested components need Qt before loading the Qt
+  # export set.  The core export set is separate so core-only consumers do not
+  # need Qt targets merely because the cisst installation includes Qt builds.
   set (_cisst_needs_qt TRUE)
   if (cisst_FIND_COMPONENTS)
     set (_cisst_requested_targets)
@@ -251,6 +253,15 @@ if (CISST_HAS_QT)
       list (APPEND CISST_QT_LIBRARIES Qt${CISST_QT_VERSION}::${_cisst_qt_component})
     endforeach ()
     unset (_cisst_qt_component)
+
+    find_file (_cisstQtTargets_file
+               cisst-qt-targets.cmake
+               PATHS ${CISST_CMAKE_DIRS} ${CISST_BINARY_DIR}
+               NO_DEFAULT_PATH)
+    if (EXISTS ${_cisstQtTargets_file})
+      include (${_cisstQtTargets_file})
+    endif ()
+    unset (_cisstQtTargets_file CACHE)
   endif ()
   unset (_cisst_needs_qt)
 endif ()

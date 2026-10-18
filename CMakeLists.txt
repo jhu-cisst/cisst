@@ -577,6 +577,17 @@ install (EXPORT cisst-targets
          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
          COMPONENT cisstCommon)
 
+if (CISST_HAS_QT)
+  export (EXPORT cisst-qt-targets
+          FILE "${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-qt-targets.cmake"
+          NAMESPACE cisst::)
+  install (EXPORT cisst-qt-targets
+           FILE cisst-qt-targets.cmake
+           NAMESPACE cisst::
+           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+           COMPONENT cisstCommon)
+endif ()
+
 # CMake use cisst file
 set (CISST_CMAKE_FILES_TO_COPY
      Usecisst.cmake cisstSettings.cmake cisstMacros.cmake

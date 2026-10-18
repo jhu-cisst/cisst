@@ -38,6 +38,10 @@ function (_cisst_requires_qt result)
       set (${result} TRUE PARENT_SCOPE)
       return ()
     endif ()
+    if (_target MATCHES "^cisst::.*Qt$")
+      set (${result} TRUE PARENT_SCOPE)
+      return ()
+    endif ()
     if (TARGET ${_target} AND NOT _target IN_LIST _visited)
       list (APPEND _visited ${_target})
       get_target_property (_links ${_target} INTERFACE_LINK_LIBRARIES)
@@ -174,13 +178,19 @@ macro (cisst_add_library ...)
     LIBRARY_NAME_FOR_CISST_REGISTER="${LIBRARY}")
 
   # Install the library
+  if (LIBRARY MATCHES "Qt$")
+    set (_cisst_export_set cisst-qt-targets)
+  else ()
+    set (_cisst_export_set cisst-targets)
+  endif ()
   install (TARGETS ${LIBRARY}
-           EXPORT cisst-targets
+           EXPORT ${_cisst_export_set}
            COMPONENT ${LIBRARY}
            RUNTIME DESTINATION bin
            LIBRARY DESTINATION lib
            ARCHIVE DESTINATION lib
            INCLUDES DESTINATION include)
+  unset (_cisst_export_set)
 
   # Add dependencies for linking, also check BUILD_xxx for dependencies
   if (DEPENDENCIES)
