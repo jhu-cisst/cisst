@@ -172,7 +172,16 @@ if (NOT _cisst_tests_driver_index EQUAL -1)
   # Without COMPONENTS, consumers link all available libraries, including the
   # test driver and its public CppUnit dependency.
   if (NOT cisst_FIND_COMPONENTS OR NOT _cisst_tests_driver_requested EQUAL -1)
-    find_dependency (CppUnit)
+    if (NOT TARGET CppUnit::CppUnit)
+      if (NOT TARGET CppUnit)
+        find_dependency (CppUnit)
+      endif ()
+      # Config packages such as vcpkg export the unnamespaced target.
+      if (TARGET CppUnit AND NOT TARGET CppUnit::CppUnit)
+        add_library (CppUnit::CppUnit INTERFACE IMPORTED)
+        set_target_properties (CppUnit::CppUnit PROPERTIES INTERFACE_LINK_LIBRARIES CppUnit)
+      endif ()
+    endif ()
   endif ()
   unset (_cisst_tests_driver_requested)
 endif ()
