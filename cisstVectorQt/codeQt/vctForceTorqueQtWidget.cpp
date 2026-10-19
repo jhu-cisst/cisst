@@ -110,6 +110,7 @@ void vctForceTorqueQtWidget::ShowContextMenu(const QPoint & pos)
     }
 
     QAction * selectedItem = menu.exec(globalPos);
+
     if (selectedItem) {
         if (selectedItem == text) {
             SetDisplayMode(TEXT_WIDGET);
@@ -119,6 +120,10 @@ void vctForceTorqueQtWidget::ShowContextMenu(const QPoint & pos)
             SetDisplayMode(PLOT_3D_WIDGET);
         }
     }
+
+    delete text;
+    delete plot2D;
+    delete plot3D;
 }
 
 void vctForceTorqueQtWidget::UpdateCurrentWidget(void)

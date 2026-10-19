@@ -633,16 +633,16 @@ public:
 
     Note that if you know the template argument to the Base class, you can
     instead use:
-       cmnIsDerivedFrom<cmnDouble, cmnGenericObjectProxy<double> >::IS_DERIVED
+       cmnIsDerivedFrom<cmnDouble, cmnGenericObjectProxy<double, void> >::IS_DERIVED
 
 */
-template <typename T, template <typename> class Base>
+template <typename T, template <typename...> class Base>
 class cmnIsDerivedFromTemplated {
 private:
     typedef char One;
     typedef struct { char a[2]; } Two;
-    template <typename C> static One Test(Base<C> *obj);
-    template <typename C> static One Test(const Base<C> *obj);
+    template <typename... Cs> static One Test(Base<Cs...> *obj);
+    template <typename... Cs> static One Test(const Base<Cs...> *obj);
     static Two Test(...);
 public:
     enum { IS_DERIVED = sizeof(Test(static_cast<T*>(0))) == sizeof(One)};

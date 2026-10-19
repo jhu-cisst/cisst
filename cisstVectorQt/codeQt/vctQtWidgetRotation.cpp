@@ -323,6 +323,13 @@ void vctQtWidgetRotationDoubleRead::ShowContextMenu(const QPoint & pos)
             SetDisplayMode(OPENGL_WIDGET);
         }
     }
+
+    delete matrix;
+    delete axisAngle;
+    delete quaternion;
+    delete eulerZYZ;
+    delete eulerZYX;
+    delete openGL;
 }
 
 void vctQtWidgetRotationDoubleRead::UpdateCurrentWidget(void)

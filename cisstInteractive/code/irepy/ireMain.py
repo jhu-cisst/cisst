@@ -312,7 +312,6 @@ class ireMain(wx.Frame):
 
         #ToolBar.AddSeparator()
         # Could add other tools here, such as ones for loading cisstCommon,
-        # cisstVector, cisstNumerical, ...
 
         ToolBar.Realize()
 
