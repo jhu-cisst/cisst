@@ -127,7 +127,7 @@ void svlWebPublisher::Stop()
     if (ServerThread) {
         // Stop server
 std::cerr<<"0"<<std::endl;
-        PyObject* n = PyString_FromString("svlWebPublisherPython");
+        PyObject* n = PyUnicode_FromString("svlWebPublisherPython");
 std::cerr<<"1"<<std::endl;
         PyObject* m = PyImport_Import(n);
 std::cerr<<"2"<<std::endl;
