@@ -81,14 +81,8 @@ Reminder, you need a C++ compiler (Visual Studio) and CMake (http://www.cmake.or
 1. Click *Configure* and turn ON the desired libraries; e.g.:
 
 -  ``CISST_cisstMultiTask = ON``
--  ``CISST_cisstNumerical = ON``
 -  ``CISST_cisstOSAbstraction = ON``
 -  ``CISST_cisstParameterTypes = ON``
--  ``CISST_HAS_CISSTNETLIB = ON``
-
-1. Click *Configure* and set:
-
--  ``CISSTNETLIB_DOWNLOAD_NOW = ON``
 
 1. Click *Configure* and click *Generate*
 2. Open ``cisst-saw.sln`` under cisst build directory.
@@ -98,18 +92,6 @@ Optional External Dependencies
 ==============================
 
 The following external dependencies are optional. The cisst libraries can be compiled without them, but with less functionality.
-
-cisstNetLib
------------
-
-cisstNetLib is a customized binary distribution of some elements from the Netlib repository (which is Fortran code). The binary files can be downloaded and extracted (https://github.com/jhu-cisst/cisstNetlib), though it is more convenient to use CMake to download it, as follows (assuming you have an Internet connection):
-
-1. Select the ``BUILD_LIBS_cisstNumerical`` option, then press ``Configure``
-2. Two new CMake entries will appear: ``CISSTNETLIB_DIR`` and ``CISSTNETLIB_DOWNLOAD_NOW``
-3. Select ``CISSTNETLIB_DOWNLOAD_NOW`` and press ``Configure`` again
-4. Depending on your OS, you may be prompted for additional information, such as 32 vs. 64 bits
-5. CMake will automatically download the cisstNetLib libraries to your build tree and set the paths
-
 
 Python
 ------

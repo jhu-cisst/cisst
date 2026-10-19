@@ -6,9 +6,7 @@ Naming conventions
    -  All global symbols of a library start with the library specific symbol:
 
       -  ``cisstCommon`` uses ``cmn``
-      -  ``cisstVector`` uses ``vct``
       -  ``cisstOSAbstraction`` uses ``osa``
-      -  ``cisstNumerical`` uses ``nmr``
       -  ``cisstInteractive`` uses ``ire``
       -  ``cisstMultiTask`` uses ``mts``
       -  ``cisstParameterTypes`` uses ``prm``

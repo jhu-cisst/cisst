@@ -14,17 +14,6 @@ To clone ``cisst`` and most of the ``saw`` components, use: ``sh git clone https
 External packages
 -----------------
 
--  **cisstNetlib** (recommended): this library is a set of numerical routines that can mostly be found on netlib.org. These routines are originally written in Fortran but an equivalent in C is available. On Linux, since it is easy to install a fortran compiler we use the Fortran version. On other OSs, we use the C version by default. You can compile the *cisst* libraries without cisstNetlib but it is recommended to keep ``CISST_HAS_CISSTNETLIB`` turned ``ON`` as many features depend on these numerical routines. cisstNetlib is one of the git sub-modules in the cisst-saw repository. You should build and install cisstNetlib before compiling cisst and the SAW components:
-
-   .. code:: bash
-
-      git clone https://github.com/jhu-cisst/cisst-saw --recursive
-      mkdir build-cisstNetlib
-      cd build-cisstNetlib 
-      cmake ../cisst-saw/cisstNetlib -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=Release
-      make -j install
-      cd ..
-
 -  **Qt** (recommended): some Qt widgets are provided with the cisst libraries as well as most examples with a GUI. If you don’t already have Qt installed and don’t intend to write a Qt application, you can leave ``CISST_HAS_QT`` as ``OFF``. On Linux, you should use your package manager to install Qt. On Windows and Mac OS, you should download the latest Qt version from their web site (see also :doc:`install FAQ </getting-started/faq>`)). We support both Qt 5 and 6.
 
 -  **Python and numpy**: most features from cisst and SAW can be used from a Python interpreter. If you plan to use Python, you will need SWIG (Python wrapper generator) along with the Python development libraries and numpy. You can change the variable ``CISST_HAS_SWIG_PYTHON`` to set your preference. On Linux, you should use your package manager to install Python, SWIG and numpy. On Mac OS, Python is already installed but you will need SWIG. MacPort provides a package but you should check the different “variants” to avoid re-installing all possible interpreters (include Python). You can alternatively download SWIG’s source and compile it. For Windows, SWIG provides a very convenient binary distribution on their web page (see also :doc:`install FAQ </getting-started/faq>`).
@@ -238,7 +227,6 @@ More examples
 
 Please note that all *cisst* examples come with their own ``CMakeLists.txt`` and can be copied to be compiled outside the *cisst* source tree. See more complex examples:
 
--  An example with a test to make sure cisstNetlib has been compiled: `cisstNumerical tutorial example <https://github.com/jhu-cisst/cisst/blob/main/cisstNumerical/examples/tutorial/CMakeLists.txt>`__
 -  An example with Qt: `cisstCommon logger Qt example <https://github.com/jhu-cisst/cisst/blob/main/cisstCommon/examples/LoggerQt/CMakeLists.txt>`__
 -  An example with SWIG and Python: `cisstInteractive pythonEmbedded example <https://github.com/jhu-cisst/cisst/blob/main/cisstInteractive/examples/pythonEmbedded/CMakeLists.txt>`__ - please note the use of ``cisstPython`` and ``cisst_add_swig_module``
 

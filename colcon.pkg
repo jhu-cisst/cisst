@@ -1,9 +1,6 @@
 {
   "name": "cisst",
-  "dependencies": ["cisstNetlib"],
   "cmake-args": [
-    "-DCISSTNETLIB_USE_LOCAL_INSTALL=ON",
-    "-DCISST_HAS_CISSTNETLIB=ON",
     "-DCISST_USE_EXTERNAL=ON",
     "-DCISST_cisstMesh=OFF",
     "-DCISST_cisstRobot=ON",

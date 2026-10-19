@@ -13,8 +13,6 @@ PROJECT_NUMBER         =
 # Input — public headers only, no implementation (code/) or test dirs
 #---------------------------------------------------------------------------
 INPUT                  = ../cisstCommon \
-                         ../cisstVector \
-                         ../cisstNumerical \
                          ../cisstOSAbstraction \
                          ../cisstMultiTask \
                          ../cisstRobot \

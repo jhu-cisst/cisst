@@ -116,9 +116,6 @@ set (CISST_HAS_JSON @CISST_HAS_JSON@)
 set (CISST_CATKIN_BUILT @CISST_CATKIN_BUILT@)
 set (CISST_USE_SI_UNITS @CISST_USE_SI_UNITS@)
 
-# Feature metadata for optional cisstNumerical code
-set (CISST_HAS_CISSTNETLIB @CISST_HAS_CISSTNETLIB@)
-
 # Feature metadata for optional cisstStereoVision code
 set (CISST_SVL_HAS_CISSTNETLIB @CISST_SVL_HAS_CISSTNETLIB@)
 set (CISST_SVL_HAS_JPEG @CISST_SVL_HAS_JPEG@)
@@ -241,10 +238,6 @@ else ()
     include (${_cisstTargets_file})
   endif ()
   unset (_cisstTargets_file CACHE)
-endif ()
-
-if (CISST_HAS_CISSTNETLIB)
-  find_dependency (CisstNetlib)
 endif ()
 
 find_file (_cisstSettings_file

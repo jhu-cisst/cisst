@@ -246,11 +246,6 @@ endif ()
 find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl REQUIRED)
 
-# Extra link flag if for Apple
-if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
-  set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -single_module")
-endif (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
-
 # Check on Linux only
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 

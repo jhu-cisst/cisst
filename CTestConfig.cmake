@@ -85,12 +85,6 @@ if (CISST_HAS_SWIG_PYTHON)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}-Py)
 endif (CISST_HAS_SWIG_PYTHON)
 
-# Tells if cisstNetlib was used
-if (CISST_HAS_CISSTNETLIB)
-  set (BUILDNAME_TMP ${BUILDNAME_TMP}-CiNe)
-endif (CISST_HAS_CISSTNETLIB)
-
-
 # Save to cache
 set (BUILDNAME ${BUILDNAME_TMP}
     CACHE STRING "Full name of build configuration." FORCE)

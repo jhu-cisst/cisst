@@ -71,35 +71,6 @@ jobs:
     - name: ccache stats (before)
       run: ccache -s
 
-    - name: Download cisstNetlib
-      shell: bash
-      run: |
-        git clone --depth 1 -b devel https://github.com/jhu-cisst/cisstNetlib $CISST_WS/../cisstNetlib-source
-        echo "CISSTNETLIB_HASH=$(git -C $CISST_WS/../cisstNetlib-source rev-parse HEAD)" >> $GITHUB_ENV
-
-    - name: Cache cisstNetlib build
-      id: cache-cisstnetlib
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.CISST_WS }}/../cisstNetlib-install
-        key: ${{ runner.os }}-cisstnetlib-${{ env.CISSTNETLIB_HASH }}
-
-    - name: Build cisstNetlib
-      if: steps.cache-cisstnetlib.outputs.cache-hit != 'true'
-      env:
-        CCACHE_BASEDIR: ${{ env.CISST_WS }}
-        CCACHE_NOHASHDIR: "true"
-        CCACHE_COMPRESS: "true"
-      run: |
-        mkdir -p $CISST_WS/../cisstNetlib-build
-        cd $CISST_WS/../cisstNetlib-build
-        cmake $CISST_WS/../cisstNetlib-source \
-          -DCMAKE_INSTALL_PREFIX=$CISST_WS/../cisstNetlib-install \
-          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        cmake --build . --config Release --parallel $(nproc)
-        cmake --build . --target install
-
     - name: Create Build Environment
       run: mkdir -p build
 
@@ -115,7 +86,6 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -DCisstNetlib_DIR=$CISST_WS/../cisstNetlib-install/share/cisstNetlib \
           -C ../.github/workflows/cmake-ubuntu-cache.cmake
 
     - name: Build
@@ -151,8 +121,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -Dcisst_DIR=$CISST_WS/build \
-          -DcisstNetlib_DIR=$CISST_WS/../cisstNetlib-install/share/cisstNetlib
+          -Dcisst_DIR=$CISST_WS/build
         cmake --build . --config Release --parallel $(nproc)
 
     - name: Install cisst
@@ -171,8 +140,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -Dcisst_DIR="$CISST_DIR_PATH" \
-          -DcisstNetlib_DIR=$CISST_WS/../cisstNetlib-install/share/cisstNetlib
+          -Dcisst_DIR="$CISST_DIR_PATH"
         cmake --build . --config Release --parallel $(nproc)
 
     - name: Test
