@@ -59,8 +59,8 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     bool curlyOpenExpected = false;
     size_t curlyCounter = 0; // for inline code, need to balance {};
     // global initialization
+    this->Global = std::make_shared<cdgGlobal>(lineNumber);
     cdgScope::Stack scopes; // scope being parsed
-    this->Global = new cdgGlobal(lineNumber);
     scopes.push_back(this->Global);
     keyword.clear();
     value.clear();
@@ -360,8 +360,7 @@ void cdgFile::GenerateCode(std::ostream & outputStream) const
 
 void cdgFile::DisplaySyntax(std::ostream & outputStream) const
 {
-    cdgGlobal * global = new cdgGlobal(0);
+    std::unique_ptr<cdgGlobal> global = std::make_unique<cdgGlobal>(0);
     outputStream << "File syntax:" << std::endl;
     global->DisplaySyntax(outputStream, 0, true, true); // no offset, recursive and hide top scope
-    delete global;
 }

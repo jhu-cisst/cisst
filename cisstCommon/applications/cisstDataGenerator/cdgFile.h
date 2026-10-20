@@ -23,13 +23,14 @@
 #define _cdgFile_h
 
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #include "cdgGlobal.h"
 
 class cdgFile {
-
-    cdgGlobal * Global;
+private:
+    std::shared_ptr<cdgGlobal> Global;
 
 public:
     void SetHeader(const std::string & header);

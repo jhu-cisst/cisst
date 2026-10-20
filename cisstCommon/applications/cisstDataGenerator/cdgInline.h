@@ -35,7 +35,7 @@ public:
     typedef enum {CDG_INLINE_HEADER, CDG_INLINE_CODE} InlineType;
     cdgInline(size_t lineNumber, InlineType type);
     cdgScope::Type GetScope(void) const override;
-    cdgScope * Create(size_t lineNumber) const override;
+    std::shared_ptr<cdgScope> Create(size_t lineNumber) const override;
     bool Validate(std::string & errorMessage) override;
     void GenerateHeader(std::ostream & outputStream) const override;
     void GenerateCode(std::ostream & outputStream) const override;

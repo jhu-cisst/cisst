@@ -55,9 +55,9 @@ cdgScope::Type cdgEnumValue::GetScope(void) const
 }
 
 
-cdgScope * cdgEnumValue::Create(size_t lineNumber) const
+std::shared_ptr<cdgScope> cdgEnumValue::Create(size_t lineNumber) const
 {
-    return new cdgEnumValue(lineNumber);
+    return std::make_shared<cdgEnumValue>(lineNumber);
 }
 
 

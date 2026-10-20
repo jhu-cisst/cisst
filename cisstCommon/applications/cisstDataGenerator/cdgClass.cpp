@@ -90,43 +90,40 @@ cdgScope::Type cdgClass::GetScope(void) const
 }
 
 
-cdgScope * cdgClass::Create(size_t lineNumber) const
+std::shared_ptr<cdgScope> cdgClass::Create(size_t lineNumber) const
 {
-    return new cdgClass(lineNumber);
+    return std::make_shared<cdgClass>(lineNumber);
 }
 
 
 bool cdgClass::Validate(std::string & CMN_UNUSED(errorMessage))
 {
-    cdgMember * memberPtr;
-    cdgBaseClass * baseClassPtr;
-    cdgTypedef * typedefPtr;
-    cdgEnum * enumPtr;
-    const ScopesContainer::iterator end = Scopes.end();
-    ScopesContainer::iterator iter;
-    for (iter = Scopes.begin();
-         iter != end;
-         ++iter) {
-        memberPtr = dynamic_cast<cdgMember *>(*iter);
+    for (const auto& item : Scopes) {
+        cdgMember* memberPtr = dynamic_cast<cdgMember*>(item.get());
         if (memberPtr) {
             Members.push_back(memberPtr);
-        } else {
-            baseClassPtr = dynamic_cast<cdgBaseClass *>(*iter);
-            if (baseClassPtr) {
-                BaseClasses.push_back(baseClassPtr);
-            } else {
-                typedefPtr = dynamic_cast<cdgTypedef *>(*iter);
-                if (typedefPtr) {
-                    Typedefs.push_back(typedefPtr);
-                } else {
-                    enumPtr = dynamic_cast<cdgEnum *>(*iter);
-                    if (enumPtr) {
-                        Enums.push_back(enumPtr);
-                    }
-                }
-            }
+            continue;
+        }
+    
+        cdgBaseClass* baseClassPtr = dynamic_cast<cdgBaseClass*>(item.get());
+        if (baseClassPtr) {
+            BaseClasses.push_back(baseClassPtr);
+            continue;
+        }
+
+        cdgTypedef* typedefPtr = dynamic_cast<cdgTypedef*>(item.get());
+        if (typedefPtr) {
+            Typedefs.push_back(typedefPtr);
+            continue;
+        }
+
+        cdgEnum* enumPtr = dynamic_cast<cdgEnum*>(item.get());
+        if (enumPtr) {
+            Enums.push_back(enumPtr);
+            continue;
         }
     }
+
     for (size_t index = 0; index < Members.size(); index++) {
         Members[index]->ClassName = this->ClassWithNamespace();
     }

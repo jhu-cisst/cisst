@@ -46,7 +46,7 @@ class cdgGlobal: public cdgScope
 public:
     cdgGlobal(size_t lineNumber);
     cdgScope::Type GetScope(void) const override;
-    cdgScope * Create(size_t lineNumber) const override;
+    std::shared_ptr<cdgScope> Create(size_t lineNumber) const override;
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool Validate(std::string & errorMessage) override;

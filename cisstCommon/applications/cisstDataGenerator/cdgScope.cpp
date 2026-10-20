@@ -40,22 +40,19 @@ const std::string & cdgScope::GetScopeName(void) const
 
 cdgField * cdgScope::AddField(const std::string & fieldName, const std::string & defaultValue, const bool required, const std::string & description)
 {
-    if (this->Fields.FindItem(fieldName)) {
+    if (Fields.find(fieldName) != Fields.end()) {
         CMN_LOG_CLASS_INIT_ERROR << "AddField: field name \"" << fieldName << "\" already defined." << std::endl;
         return 0;
     }
-    cdgField * result = new cdgField(fieldName, defaultValue, required, description);
-    Fields.AddItem(fieldName, result);
-    return result;
+    std::shared_ptr<cdgField> result = std::make_shared<cdgField>(fieldName, defaultValue, required, description);
+    Fields[fieldName] = result;
+    return result.get();
 }
 
 
 bool cdgScope::HasField(const std::string & fieldName) const
 {
-    if (Fields.FindItem(fieldName)) {
-        return true;
-    }
-    return false;
+    return Fields.find(fieldName) != Fields.end();
 }
 
 
@@ -64,10 +61,11 @@ bool cdgScope::SetFieldValue(const std::string & fieldName,
                              std::string & errorMessage,
                              const bool & allowOverwrite)
 {
-    cdgField * field = this->Fields.GetItem(fieldName);
-    if (field) {
-        return field->SetValue(value, errorMessage, allowOverwrite);
+    const auto& field = Fields.find(fieldName);
+    if (field != Fields.end()) {
+        return field->second->SetValue(value, errorMessage, allowOverwrite);
     }
+
     errorMessage = "unhandled field name \"" + fieldName + "\"";
     return false;
 }
@@ -75,10 +73,11 @@ bool cdgScope::SetFieldValue(const std::string & fieldName,
 
 std::string cdgScope::GetFieldValue(const std::string & fieldName) const
 {
-    cdgField * field = this->Fields.GetItem(fieldName);
-    if (field) {
-        return field->GetValue();
+    const auto& field = Fields.find(fieldName);
+    if (field != Fields.end()) {
+        return field->second->GetValue();
     }
+
     return std::string("can't find field name \"") + fieldName + "\" in scope \"" + this->GetScopeName() + "\"";
 }
 
@@ -120,14 +119,14 @@ void cdgScope::FillInDefaults(void)
 bool cdgScope::AddKnownScope(const cdgScope & newScope)
 {
 	const std::string newScopeName = newScope.GetScopeName();
-    if (this->KnownScopes.FindItem(newScopeName)) {
+    if (KnownScopes.find(newScopeName) != KnownScopes.end()) {
         return false;
     }
 	// add a dummy pointer to make sure we don't enter an infinite loop
-	this->KnownScopes.AddItem(newScopeName, this);
-    cdgScope * copy = newScope.Create(0);
-	this->KnownScopes.RemoveItem(newScopeName);
-    this->KnownScopes.AddItem(copy->GetScopeName(), copy);
+	KnownScopes[newScopeName] = nullptr;
+    std::shared_ptr<cdgScope> copy = newScope.Create(0);
+	KnownScopes.erase(newScopeName);
+    KnownScopes[copy->GetScopeName()] = copy;
 	return true;
 }
 
@@ -158,8 +157,8 @@ bool cdgScope::HasSubScope(const std::string & keyword,
          iter != this->SubScopes.equal_range(this->GetScopeName()).second;
          ++iter) {
         if (iter->second == keyword) {
-            cdgScope * subScopeFactory = this->KnownScopes.GetItem(keyword);
-            cdgScope * newScope = subScopeFactory->Create(lineNumber);
+            cdgScope* subScopeFactory = KnownScopes.at(keyword).get();
+            std::shared_ptr<cdgScope> newScope = subScopeFactory->Create(lineNumber);
             scopes.push_back(newScope);
             Scopes.push_back(newScope);
             return true;
@@ -201,7 +200,7 @@ void cdgScope::DisplaySyntax(std::ostream & outputStream, size_t offset, bool re
         for (iter = this->SubScopes.equal_range(this->GetScopeName()).first;
              iter != this->SubScopes.equal_range(this->GetScopeName()).second;
              ++iter) {
-            cdgScope * subScope = KnownScopes.GetItem(iter->second);
+            cdgScope* subScope = KnownScopes.at(iter->second).get();
             if (subScope) {
                 subScope->DisplaySyntax(outputStream, offset + cdgScope::DISPLAY_OFFSET, true);
             }

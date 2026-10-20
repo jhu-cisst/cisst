@@ -33,7 +33,7 @@ class cdgEnumValue: public cdgScope
 public:
     cdgEnumValue(size_t lineNumber);
     cdgScope::Type GetScope(void) const override;
-    cdgScope * Create(size_t lineNumber) const override;
+    std::shared_ptr<cdgScope> Create(size_t lineNumber) const override;
     bool Validate(std::string & errorMessage) override;
     void GenerateHeader(std::ostream & outputStream) const override;
     void GenerateCode(std::ostream & outputStream) const override;
