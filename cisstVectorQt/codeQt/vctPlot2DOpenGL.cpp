@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnPortability.h>
+#include <iostream>
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
@@ -100,42 +101,43 @@ void vctPlot2DOpenGL::Render(const vctPlot2DBase::VerticalLine * line)
 
 void vctPlot2DOpenGL::Render(const vctPlot2DBase::Signal * signal)
 {
-    if (signal->Visible) {
-        glColor3d(signal->Color.x(),
-                  signal->Color.y(),
-                  signal->Color.z());
-        glLineWidth(static_cast<GLfloat>(signal->LineWidth));
-        const double * data = signal->data.data();
-        size_t size = signal->data.cols();
-        if (signal->IndexFirst >= signal->IndexLast) {
-            // circular buffer is full/split in two
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(2, GL_DOUBLE, 0, data);
-            // draw first part
-            glDrawArrays(GL_LINE_STRIP,
-                         static_cast<GLint>(signal->IndexFirst),
-                         static_cast<GLsizei>(size - signal->IndexFirst));
-            // draw second part
-            glDrawArrays(GL_LINE_STRIP,
-                         0,
-                         static_cast<GLsizei>(signal->IndexLast + 1));
-            glDisableClientState(GL_VERTEX_ARRAY);
-            // draw between end of buffer and beginning
-            glBegin(GL_LINE_STRIP);
-            glVertex2d(signal->data.col(size - 1).x(),
-                       signal->data.col(size - 1).y());
-            glVertex2d(signal->data.col(0).x(),
-                       signal->data.col(0).y());
-            glEnd();
-        } else {
-            // simpler case, all points contiguous
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(2, GL_DOUBLE, 0, data);
-            glDrawArrays(GL_LINE_STRIP,
-                         0,
-                         static_cast<GLsizei>(signal->IndexLast + 1));
-            glDisableClientState(GL_VERTEX_ARRAY);
-        }
+    if (!signal->Visible) { return; }
+
+    glColor3d(signal->Color.x(),
+                signal->Color.y(),
+                signal->Color.z());
+    glLineWidth(static_cast<GLfloat>(signal->LineWidth));
+    const double * data = signal->data.data();
+    size_t size = signal->data.cols();
+
+    if (signal->IndexFirst >= signal->IndexLast) {
+        // circular buffer is full/split in two
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_DOUBLE, 0, data);
+        // draw first part
+        glDrawArrays(GL_LINE_STRIP,
+                        static_cast<GLint>(signal->IndexFirst),
+                        static_cast<GLsizei>(size - signal->IndexFirst));
+        // draw second part
+        glDrawArrays(GL_LINE_STRIP,
+                        0,
+                        static_cast<GLsizei>(signal->IndexLast + 1));
+        glDisableClientState(GL_VERTEX_ARRAY);
+        // draw between end of buffer and beginning
+        glBegin(GL_LINE_STRIP);
+        glVertex2d(signal->data.col(size - 1).x(),
+                    signal->data.col(size - 1).y());
+        glVertex2d(signal->data.col(0).x(),
+                    signal->data.col(0).y());
+        glEnd();
+    } else {
+        // simpler case, all points contiguous
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_DOUBLE, 0, data);
+        glDrawArrays(GL_LINE_STRIP,
+                        static_cast<GLint>(signal->IndexFirst),
+                        static_cast<GLsizei>(signal->IndexLast + 1 - signal->IndexFirst));
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 }
 

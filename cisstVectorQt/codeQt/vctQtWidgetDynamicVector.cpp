@@ -210,7 +210,7 @@ void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetFormat(const char f
 template <class _elementType>
 typename vctQtWidgetDynamicVectorWriteFloating<_elementType>::value_type
 vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMinimum(const size_t index) const {
-    if ((Eigen::Index)index <= Minimums.size()) {
+    if ((Eigen::Index)index < Minimums.size()) {
         return Minimums(index);
     }
     return Minimum;
@@ -219,7 +219,7 @@ vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMinimum(const size_t ind
 template <class _elementType>
 typename vctQtWidgetDynamicVectorWriteFloating<_elementType>::value_type
 vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMaximum(const size_t index) const {
-    if ((Eigen::Index)index <= Maximums.size()) {
+    if ((Eigen::Index)index < Maximums.size()) {
         return Maximums(index);
     }
     return Maximum;

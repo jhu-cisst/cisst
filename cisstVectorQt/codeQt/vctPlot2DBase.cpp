@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 vctPlot2DBase::Scale::Scale(const std::string & name):
     ExpandYMin(std::numeric_limits<double>::max()),
-    ExpandYMax(std::numeric_limits<double>::min())
+    ExpandYMax(std::numeric_limits<double>::lowest())
 {
     this->Translation.setZero();
     this->ScaleValue.setOnes();
@@ -137,7 +137,7 @@ bool vctPlot2DBase::Scale::ComputeDataRangeX(double & min, double & max, bool as
     }
 
     min = std::numeric_limits<double>::max();
-    max = std::numeric_limits<double>::min();
+    max = std::numeric_limits<double>::lowest();
 
     for (const auto& signal : Signals) {
         if (signal.second->IsVisible()) {
@@ -160,7 +160,7 @@ bool vctPlot2DBase::Scale::ComputeDataRangeY(double & min, double & max)
     }
 
     min = std::numeric_limits<double>::max();
-    max = std::numeric_limits<double>::min();
+    max = std::numeric_limits<double>::lowest();
 
     for (const auto& signal : Signals) {
         if (signal.second->IsVisible()) {
@@ -183,13 +183,13 @@ bool vctPlot2DBase::Scale::ComputeDataRangeXY(Eigen::Vector2d& min, Eigen::Vecto
     }
 
     min.fill(std::numeric_limits<double>::max());
-    max.fill(std::numeric_limits<double>::min());
+    max.fill(std::numeric_limits<double>::lowest());
 
     for (const auto& signal : Signals) {
         if (signal.second->IsVisible()) {
             Eigen::Vector2d signal_min, signal_max;
 
-            signal.second->ComputeDataRangeXY(min, max);
+            signal.second->ComputeDataRangeXY(signal_min, signal_max);
             min = min.cwiseMin(signal_min);
             max = max.cwiseMax(signal_max);
         }
@@ -343,6 +343,8 @@ void vctPlot2DBase::Signal::AppendPoint(const Eigen::Vector2d& point)
         if (IndexFirst == IndexLast) {
             IndexFirst = (IndexFirst + 1) % data.cols();
         }
+    } else {
+        this->Empty = false;
     }
 
     data.col(IndexLast) = point;
@@ -388,25 +390,14 @@ bool vctPlot2DBase::Signal::GetFreeze(void) const
 
 void vctPlot2DBase::Signal::ComputeDataRangeXY(Eigen::Vector2d& min, Eigen::Vector2d& max) const
 {
-    min.fill(std::numeric_limits<double>::min());
-    max.fill(std::numeric_limits<double>::max());
+    min.fill(std::numeric_limits<double>::max());
+    max.fill(std::numeric_limits<double>::lowest());
 
-    if (IndexFirst <= IndexLast) {
-        for (Eigen::Index idx = IndexFirst; idx < IndexLast; idx++) {
-            min = min.cwiseMin(data.col(idx));
-            max = max.cwiseMax(data.col(idx));
-        }
-    } else {
-        for (Eigen::Index idx = 0; idx < IndexLast; idx++) {
-            min = min.cwiseMin(data.col(idx));
-            max = max.cwiseMax(data.col(idx));
-        }
+    // Points can be appended but not removed, so either buffer is partially full
+    // and 0 = IndexFirst <= IndexLast, or buffer is full and IndexLast < IndexFirst
 
-        for (Eigen::Index idx = IndexFirst; idx < data.cols(); idx++) {
-            min = min.cwiseMin(data.col(idx));
-            max = max.cwiseMax(data.col(idx));
-        }
-    }
+    min = data.leftCols(IndexLast + 1).rowwise().minCoeff();
+    max = data.leftCols(IndexLast + 1).rowwise().maxCoeff();
 }
 
 void vctPlot2DBase::Signal::ComputeDataRangeX(double & min, double & max,  bool assumesDataSorted) const
@@ -417,48 +408,17 @@ void vctPlot2DBase::Signal::ComputeDataRangeX(double & min, double & max,  bool 
         return;
     }
 
-    min = std::numeric_limits<double>::min();
-    max = std::numeric_limits<double>::max();
-
-    if (IndexFirst <= IndexLast) {
-        for (Eigen::Index idx = IndexFirst; idx < IndexLast; idx++) {
-            min = std::min(min, data.col(idx).x());
-            max = std::max(max, data.col(idx).x());
-        }
-    } else {
-        for (Eigen::Index idx = 0; idx < IndexLast; idx++) {
-            min = std::min(min, data.col(idx).x());
-            max = std::max(max, data.col(idx).x());
-        }
-
-        for (Eigen::Index idx = IndexFirst; idx < data.cols(); idx++) {
-            min = std::min(min, data.col(idx).x());
-            max = std::max(max, data.col(idx).x());
-        }
-    }
+    min = data.row(0).head(IndexLast + 1).minCoeff();
+    max = data.row(0).head(IndexLast + 1).maxCoeff();
 }
 
 void vctPlot2DBase::Signal::ComputeDataRangeY(double & min, double & max) const
 {
-    min = std::numeric_limits<double>::min();
-    max = std::numeric_limits<double>::max();
+    min = std::numeric_limits<double>::max();
+    max = std::numeric_limits<double>::lowest();
 
-    if (IndexFirst <= IndexLast) {
-        for (Eigen::Index idx = IndexFirst; idx < IndexLast; idx++) {
-            min = std::min(min, data.col(idx).y());
-            max = std::max(max, data.col(idx).y());
-        }
-    } else {
-        for (Eigen::Index idx = 0; idx < IndexLast; idx++) {
-            min = std::min(min, data.col(idx).y());
-            max = std::max(max, data.col(idx).y());
-        }
-
-        for (Eigen::Index idx = IndexFirst; idx < data.cols(); idx++) {
-            min = std::min(min, data.col(idx).y());
-            max = std::max(max, data.col(idx).y());
-        }
-    }
+    min = data.row(1).head(IndexLast + 1).minCoeff();
+    max = data.row(1).head(IndexLast + 1).maxCoeff();
 }
 
 size_t vctPlot2DBase::Signal::GetSize(void) const
@@ -469,7 +429,7 @@ size_t vctPlot2DBase::Signal::GetSize(void) const
 size_t vctPlot2DBase::Signal::GetNumberOfPoints() const
 {
     size_t numberOfPoints = 0;
-    if (this->IndexFirst < this->IndexLast) {
+    if (this->IndexFirst <= this->IndexLast) {
         numberOfPoints = this->IndexLast - this->IndexFirst + 1;
     } else {
         numberOfPoints = data.cols() - this->IndexFirst + this->IndexLast + 1;
