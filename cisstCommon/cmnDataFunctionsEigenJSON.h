@@ -98,7 +98,18 @@ public:
     static void DeSerializeText(DataType& transform, const Json::Value & jsonValue)
         CISST_THROW(std::runtime_error)
     {
-        cmnDataJSON<typename DataType::MatrixType>::DeSerializeText(transform.matrix(), jsonValue);
+        if (jsonValue.isObject()) {
+            typename DataType::LinearMatrixType linear;
+            cmnDataJSON<typename DataType::LinearMatrixType>::DeSerializeText(linear, jsonValue["Rotation"]);
+
+            typename DataType::VectorType translation;
+            cmnDataJSON<typename DataType::VectorType>::DeSerializeText(translation, jsonValue["Translation"]);
+
+            transform.linear() = linear;
+            transform.translation() = translation;
+        } else {
+            cmnDataJSON<typename DataType::MatrixType>::DeSerializeText(transform.matrix(), jsonValue);
+        }
     }
 };
 
