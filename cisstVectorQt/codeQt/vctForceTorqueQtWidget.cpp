@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstConfig.h>
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnAssert.h>
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
@@ -179,6 +180,7 @@ void vctForceTorqueQtWidget::SetDisplayMode(const DisplayModeType displayMode)
         CurrentWidget = Plot3DWidget;
         break;
     default:
+        CMN_ASSERT(false);
         break;
     }
     Layout->addWidget(CurrentWidget);

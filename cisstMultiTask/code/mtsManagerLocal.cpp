@@ -40,6 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
+#include <cisstCommon/cmnAssert.h>
 
 // Time server used by all tasks
 osaTimeServer TimeServer;
@@ -885,7 +886,9 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
             if (mtsManagerComponentBase::IsManagerComponent(*iterator))
                 continue;
-            mtsComponent *component = services->ComponentGet(*iterator);
+            mtsComponent* component = services->ComponentGet(*iterator);
+            CMN_ASSERT(component != nullptr);
+            
             // compute how much time do we have left based on when we started
             double timeLeft = timeEnd - TimeServer.GetRelativeTime();
             // skip in 2 cases, manager components and tasks with ExecIn
@@ -970,7 +973,9 @@ void mtsManagerLocal::StartAll(void)
     for (; iterator != end; ++iterator) {
         if (mtsManagerComponentBase::IsManagerComponent(*iterator))
             continue;
-        mtsComponent *component = services->ComponentGet(*iterator);
+        mtsComponent* component = services->ComponentGet(*iterator);
+        CMN_ASSERT(component != nullptr);
+
         // look for component
         mtsTask *componentTask = dynamic_cast<mtsTask*>(component);
         if (componentTask) {
