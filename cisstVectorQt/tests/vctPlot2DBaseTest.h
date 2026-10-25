@@ -34,25 +34,23 @@ class vctPlot2DBaseTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(vctPlot2DBaseTest);
     {
-        CPPUNIT_TEST(TestBufferManipulating);
+        CPPUNIT_TEST(TestBufferManipulation);
         CPPUNIT_TEST(TestRangeComputation);
         CPPUNIT_TEST(TestAddScaleSignalLine);
     }
     CPPUNIT_TEST_SUITE_END();
 
 public:
-    void setUp(void) {
-    }
+    void setUp() override {}
 
-    void tearDown(void) {
-    }
+    void tearDown() override {}
 
     /*! Test the Prepend, Append, SetPoint methods. */
-    void TestBufferManipulating(void);
+    void TestBufferManipulation();
 
     /*! Test range computation, min, max, ... */
-    void TestRangeComputation(void);
+    void TestRangeComputation();
 
     /*! Test API to add and remove scales, signals and lines. */
-    void TestAddScaleSignalLine(void);
+    void TestAddScaleSignalLine();
 };

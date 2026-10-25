@@ -12,12 +12,11 @@
 # --- end cisst license ---
 
 # All cisstVector libraries
-project (cisstVectorLibs)
+project (cisstVectorQtLibs)
 
 if (CISST_HAS_QT AND CISST_HAS_OPENGL)
   add_subdirectory (codeQt)
 endif (CISST_HAS_QT AND CISST_HAS_OPENGL)
 
 # build examples and tests, add an option to skip them
-#cisst_offer_examples (cisstVector)
-#cisst_offer_tests (cisstVector)
+cisst_offer_tests (cisstVectorQt)

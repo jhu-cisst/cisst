@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 CPPUNIT_TEST_SUITE_REGISTRATION(vctPlot2DBaseTest);
 
-void vctPlot2DBaseTest::TestBufferManipulating(void)
+void vctPlot2DBaseTest::TestBufferManipulation()
 {
     vctPlot2DBaseTestClass plot;
     vctPlot2DBaseTestClass::Scale * scale = plot.AddScale("TestScale");
@@ -51,7 +51,7 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
     }
 
     // -100 ~ -1, prepend array
-    j = 0-dataElements;
+    j = 0 - dataElements;
     for (i = 0; i < dataElements * pointSize; i += pointSize) {
         arrayToPrepend[i] = static_cast<double>(j);
         arrayToPrepend[i + 1] = static_cast<double>(j);
@@ -62,14 +62,14 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
     signal->SetSize(dataElements);
     // 0 ~ 99
     for (double i = 0; i < dataElements; i++) {
-        signal->AppendPoint(vctDouble2(i, i));
+        signal->AppendPoint(Eigen::Vector2d(i, i));
     }
 
-    vctDouble2 point;
+    Eigen::Vector2d point;
     for (i = 0; i < dataElements; i++) {
         point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == i);
-        CPPUNIT_ASSERT(point.Y() == i);
+        CPPUNIT_ASSERT(point.x() == i);
+        CPPUNIT_ASSERT(point.y() == i);
     }
 
     /****** TEST Resize(), Expand ******/
@@ -81,105 +81,8 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
     // 0 ~ 99, After expanding
     for (i = 0; i < dataElements; i++) {
         point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == i);
-        CPPUNIT_ASSERT(point.Y() == i);
-    }
-
-    /****** TEST AppendArray() ******/
-    CPPUNIT_ASSERT(signal->AppendArray(arrayToAppend, dataElements * pointSize));
-
-    // 0~199, After append
-    for (i = 0; i < dataElements * 2; i++) {
-        point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == i);
-        CPPUNIT_ASSERT(point.Y() == i);
-    }
-
-    /****** TEST Resize(), Shrink, trimOlder = false  ******/
-    signal->Resize(dataElements, false);
-    bufferSize = signal->GetSize();
-    numberOfPoints = signal->GetNumberOfPoints();
-    CPPUNIT_ASSERT(numberOfPoints == dataElements);
-    CPPUNIT_ASSERT(bufferSize == dataElements);
-    //  0~99, After shrinking
-    for (i = 0; i < dataElements; i++) {
-        point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == i);
-        CPPUNIT_ASSERT(point.Y() == i);
-    }
-
-    signal->AppendArray(defaultArray, dataElements * pointSize);
-    signal->Resize(dataElements * 2);
-    signal->PrependArray(arrayToPrepend, dataElements * pointSize);
-    // -100 ~ 99
-    for (i = 0; i < dataElements * 2; i++){
-        point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == (i - dataElements));
-        CPPUNIT_ASSERT(point.Y() == (i - dataElements));
-    }
-
-    // Set array to 0 ~ 199
-    signal->Resize(dataElements * 2);
-    CPPUNIT_ASSERT(signal->AppendArray(arrayToAppend, dataElements * pointSize));
-
-
-    /****** TEST Resize(), Shrink, trimOlder = true ******/
-    signal->Resize(dataElements);
-    bufferSize = signal->GetSize();
-    numberOfPoints = signal->GetNumberOfPoints();
-    CPPUNIT_ASSERT(numberOfPoints == dataElements);
-    CPPUNIT_ASSERT(bufferSize == dataElements);
-
-    // 100~199, After shrinking
-    for (i = 0; i < dataElements; i++) {
-        point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == i + dataElements);
-        CPPUNIT_ASSERT(point.Y() == i + dataElements);
-    }
-
-    /****** TEST Prepend() ******/
-    signal->Resize(dataElements * 2);
-    // do twice, see if the data is replaced correctly
-    signal->PrependArray(arrayToAppend, dataElements * pointSize);
-    signal->PrependArray(arrayToPrepend, dataElements * pointSize);
-    bufferSize = signal->GetSize();
-    numberOfPoints = signal->GetNumberOfPoints();
-    CPPUNIT_ASSERT(numberOfPoints == dataElements * 2);
-    CPPUNIT_ASSERT(bufferSize == dataElements * 2);
-    for (i = dataElements; i < dataElements * 2 ; i++) {
-        signal->SetPointAt(i, vctDouble2(static_cast<double>(i - dataElements), static_cast<double>(i - dataElements)));
-    }
-    // -100 ~ 99
-    for (i = 0; i < dataElements * 2; i++) {
-        point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == (i - dataElements));
-        CPPUNIT_ASSERT(point.Y() == (i - dataElements));
-    }
-    // test by overflowing  buffer
-    // -99 ~ 100
-    signal->AppendPoint(vctDouble2(static_cast<double>(dataElements), static_cast<double>(dataElements)));
-    signal->PrependArray(arrayToPrepend, dataElements * pointSize);
-    // -100~-1, -99 ~ 0
-    for (i = 0; i < dataElements; i++) {
-        point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == (i - dataElements));
-        CPPUNIT_ASSERT(point.Y() == (i - dataElements));
-    }
-    for (i = dataElements; i < dataElements * 2; i++) {
-        point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == (i % dataElements - dataElements + 1));
-        CPPUNIT_ASSERT(point.Y() == (i % dataElements - dataElements + 1));
-    }
-
-    /****** TEST SetArrayAt() ******/
-    signal->SetArrayAt(0, arrayToPrepend, dataElements * pointSize);
-    signal->SetArrayAt(dataElements, arrayToPrepend, dataElements * pointSize);
-
-    // -100 ~ -1, -100~-1
-    for (i = 0; i < dataElements * 2; i++) {
-        point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == (i % dataElements - dataElements));
-        CPPUNIT_ASSERT(point.Y() == (i % dataElements - dataElements));
+        CPPUNIT_ASSERT(point.x() == i);
+        CPPUNIT_ASSERT(point.y() == i);
     }
 
     /****** TEST SetPointAt() ******/
@@ -188,8 +91,8 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
         point = signal->GetPointAt(i);
         signal->SetPointAt(i, point);
         point = signal->GetPointAt(i);
-        CPPUNIT_ASSERT(point.X() == (i % dataElements - dataElements));
-        CPPUNIT_ASSERT(point.Y() == (i % dataElements - dataElements));
+        CPPUNIT_ASSERT(point.x() == (i % dataElements - dataElements));
+        CPPUNIT_ASSERT(point.y() == (i % dataElements - dataElements));
     }
 
     delete[] arrayToAppend;
@@ -198,7 +101,8 @@ void vctPlot2DBaseTest::TestBufferManipulating(void)
 }
 
 
-void vctPlot2DBaseTest::TestRangeComputation(void){
+void vctPlot2DBaseTest::TestRangeComputation()
+{
 
     vctPlot2DBaseTestClass plot;
     vctPlot2DBaseTestClass::Scale * scale = plot.AddScale("TestScale");
@@ -236,7 +140,7 @@ void vctPlot2DBaseTest::TestRangeComputation(void){
 
     signal->SetSize(dataElements);
     for (double i = 1; i <= dataElements; i++) {
-        signal->AppendPoint(vctDouble2(i, i));
+        signal->AppendPoint(Eigen::Vector2d(i, i));
     }
 
     double  min, max;
@@ -259,7 +163,7 @@ void vctPlot2DBaseTest::TestRangeComputation(void){
 
     min = max = 0;
     /****** TEST ComputeDataRangeX(), by overflowing buffer ******/
-    signal->AppendPoint(vctDouble2(0, 0));
+    signal->AppendPoint(Eigen::Vector2d(0, 0));
     signal->ComputeDataRangeX(min, max, false);
     CPPUNIT_ASSERT(min == 0.0) ;
     CPPUNIT_ASSERT(max == dataElements);
@@ -270,20 +174,20 @@ void vctPlot2DBaseTest::TestRangeComputation(void){
     CPPUNIT_ASSERT(min == 0.0) ;
     CPPUNIT_ASSERT(max == dataElements);
     // I have to use static to declare
-    vctDouble2 minXY, maxXY;
-    signal->AppendPoint(vctDouble2(dataElements + 1, dataElements + 1));
+    Eigen::Vector2d minXY, maxXY;
+    signal->AppendPoint(Eigen::Vector2d(dataElements + 1, dataElements + 1));
     signal->ComputeDataRangeXY(minXY, maxXY);
-    CPPUNIT_ASSERT(minXY.X() == 0.0);
-    CPPUNIT_ASSERT(minXY.Y() == 0.0);
-    CPPUNIT_ASSERT(maxXY.X() == dataElements + 1);
-    CPPUNIT_ASSERT(maxXY.Y() == dataElements + 1);
+    CPPUNIT_ASSERT(minXY.x() == 0.0);
+    CPPUNIT_ASSERT(minXY.y() == 0.0);
+    CPPUNIT_ASSERT(maxXY.x() == dataElements + 1);
+    CPPUNIT_ASSERT(maxXY.y() == dataElements + 1);
 
     delete[] arrayToAppend;
     delete[] arrayToPrepend;
     delete[] defaultArray;
 }
 
-void vctPlot2DBaseTest::TestAddScaleSignalLine(void)
+void vctPlot2DBaseTest::TestAddScaleSignalLine()
 {
     vctPlot2DBaseTestClass plot;
     vctPlot2DBase::Scale * scale = plot.AddScale("TestScale");

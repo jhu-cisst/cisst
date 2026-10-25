@@ -105,7 +105,6 @@ jobs:
         cmake .. \
           -DCISST_BUILD_EXAMPLES=ON \
           -DCISST_cisstCommon_EXAMPLES=ON \
-          -DCISST_cisstVector_EXAMPLES=ON \
           -DCISST_cisstOSAbstraction_EXAMPLES=ON \
           -DCISST_cisstMultiTask_EXAMPLES=ON \
           -DCISST_cisstParameterTypes_EXAMPLES=ON \

@@ -77,7 +77,6 @@ jobs:
         cmake "${{github.workspace}}" `
           -DCISST_BUILD_EXAMPLES=ON `
           -DCISST_cisstCommon_EXAMPLES=ON `
-          -DCISST_cisstVector_EXAMPLES=ON `
           -DCISST_cisstOSAbstraction_EXAMPLES=ON `
           -DCISST_cisstMultiTask_EXAMPLES=ON `
           -DCISST_cisstParameterTypes_EXAMPLES=ON `
@@ -129,7 +128,7 @@ jobs:
       run: |
         call cisstvars.bat Release
         bin\Release\cisstCommonTests.exe -r -v
-        bin\Release\cisstVectorTests.exe -r -v
+        bin\Release\cisstVectorQtTests.exe -r -v
         bin\Release\cisstOSAbstractionTests.exe -r -v
         bin\Release\cisstParameterTypesTests.exe -r -v
         bin\Release\cisstMultiTaskTests.exe -r -v
