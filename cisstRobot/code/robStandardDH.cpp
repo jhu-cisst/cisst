@@ -75,12 +75,12 @@ Eigen::Isometry3d robStandardDH::LinkFrame() const
 #if CISST_HAS_JSON
 std::optional<robStandardDH> robStandardDH::Read(const Json::Value& config)
 {
-    const double alpha = fixUpAngle(config.get("alpha", "0.00").asDouble());
-    const double a = config.get("A", "0.00").asDouble();
-    const double theta = fixUpAngle(config.get("theta", "0.00").asDouble());
-    const double d = config.get("D", "0.00").asDouble();
+    const double alpha = fixUpAngle(config.get("alpha", 0.0).asDouble());
+    const double a = config.get("A", 0.0).asDouble();
+    const double theta = fixUpAngle(config.get("theta", 0.0).asDouble());
+    const double d = config.get("D", 0.0).asDouble();
 
-    const double joint_offset = config.get("offset", "0.0").asDouble();
+    const double joint_offset = config.get("offset", 0.0).asDouble();
 
     std::string mode = config.get("mode", "active").asString();
     std::transform(mode.begin(), mode.end(), mode.begin(), [](unsigned char c) {
