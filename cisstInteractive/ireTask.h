@@ -59,9 +59,9 @@ public:
     /*! Destructor. */
     virtual ~ireTask();
 
-    void Startup(void);
-    void Run(void);
-    void Cleanup(void);
+    void Startup(void) override;
+    void Run(void) override;
+    void Cleanup(void) override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ireTask)

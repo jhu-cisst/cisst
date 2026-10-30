@@ -428,26 +428,27 @@ size_t mtsComponent::GetNumberOfInterfacesInput(void) const
 
 bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequiredName)
 {
-    mtsInterfaceRequired * interfaceRequired = GetInterfaceRequired(interfaceRequiredName);
+    std::string interface_name = interfaceRequiredName; // copy for after we delete the interface
+    mtsInterfaceRequired * interfaceRequired = GetInterfaceRequired(interface_name);
     if (!interfaceRequired) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: no required interface found: \""
-                                << interfaceRequiredName << "\"" << std::endl;
+                                << interface_name << "\"" << std::endl;
         return false;
     }
     const mtsInterfaceProvided * connectedInterface = interfaceRequired->GetConnectedInterface();
     if (connectedInterface) {
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: cannot remove interface " << interfaceRequiredName
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: cannot remove interface " << interface_name
                                 << " because it is connected to " << connectedInterface->GetFullName() << std::endl;
         return false;
     }
-    if (!InterfacesRequired.RemoveItem(interfaceRequiredName)) {
+    if (!InterfacesRequired.RemoveItem(interface_name)) {
         CMN_LOG_CLASS_RUN_WARNING << "RemoveInterfaceRequired: failed to remove interface "
-                                  << interfaceRequiredName << std::endl;
+                                  << interface_name << std::endl;
         return false;
     }
     delete interfaceRequired;
     CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceRequired: removed required interface \""
-                              << interfaceRequiredName << "\"" << std::endl;
+                              << interface_name << "\"" << std::endl;
     return true;
 }
 
