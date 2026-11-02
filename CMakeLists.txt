@@ -359,7 +359,11 @@ include_directories (${CISST_INCLUDE_DIR})
 
 # Build test driver if needed
 if (CISST_BUILD_TESTS)
-  find_package (CppUnit REQUIRED)
+  if (CISST_USE_EXTERNAL)
+    find_package (CppUnit MODULE QUIET)
+  else ()
+    find_package (CppUnit MODULE REQUIRED)
+  endif ()
   if (NOT CPPUNIT_FOUND)
     # Try to build as external project
     if (CISST_USE_EXTERNAL)
@@ -568,6 +572,17 @@ install (EXPORT cisst-targets
          NAMESPACE cisst::
          DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
          COMPONENT cisstCommon)
+
+if (CISST_HAS_QT)
+  export (EXPORT cisst-qt-targets
+          FILE "${CISST_PACKAGE_CONFIG_DIRECTORY}/cisst-qt-targets.cmake"
+          NAMESPACE cisst::)
+  install (EXPORT cisst-qt-targets
+           FILE cisst-qt-targets.cmake
+           NAMESPACE cisst::
+           DESTINATION ${CISST_CMAKE_INSTALL_SUFFIX}
+           COMPONENT cisstCommon)
+endif ()
 
 # CMake use cisst file
 set (CISST_CMAKE_FILES_TO_COPY

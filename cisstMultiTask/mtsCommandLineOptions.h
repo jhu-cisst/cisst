@@ -24,6 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsCommandLineOptions: public cmnCommandLineOptions {
 public:
+    /*! Add manager ('m') and collector ('c') JSON options when
+        CISST_HAS_JSON is enabled.  Without JSON support, these options
+        are unavailable and Apply rejects nonempty configuration lists. */
     mtsCommandLineOptions(const std::string & options = "mc");
     virtual ~mtsCommandLineOptions() {}
     virtual void Apply(void);

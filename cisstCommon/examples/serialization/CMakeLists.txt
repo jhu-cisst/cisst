@@ -14,6 +14,7 @@ find_package (cisst COMPONENTS cisstCommon)
 if (cisst_FOUND)
 
   add_library (cmnExSerializationClasses STATIC classes.h classes.cpp)
+  target_link_libraries (cmnExSerializationClasses PUBLIC cisst::cisstCommon)
   set_property (TARGET cmnExSerializationClasses PROPERTY FOLDER "cisstCommon/examples")
 
   add_executable (cmnExSerializationWrite write.cpp)

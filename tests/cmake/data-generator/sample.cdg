@@ -1,0 +1,9 @@
+class {
+    name DownstreamSample;
+    member {
+        name Value;
+        type double;
+        default 0.0;
+        description Downstream data generator test value;
+    }
+}

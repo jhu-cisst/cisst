@@ -25,6 +25,36 @@ function (cisst_cmake_debug ...)
 endfunction (cisst_cmake_debug)
 
 
+# Internal helper for component-aware Qt discovery in cisst-config.cmake.
+# Follow transitive usage requirements, including all configurations.  Qt
+# targets need not exist yet.  Extract target names from generator expressions
+# too, e.g. $<LINK_ONLY:Qt6::Core>, without treating LINK_ONLY as a namespace.
+function (_cisst_requires_qt result)
+  set (_pending ${ARGN})
+  set (_visited)
+  while (_pending)
+    list (POP_FRONT _pending _target)
+    if (_target MATCHES "^Qt[56]::")
+      set (${result} TRUE PARENT_SCOPE)
+      return ()
+    endif ()
+    if (_target MATCHES "^cisst::.*Qt$")
+      set (${result} TRUE PARENT_SCOPE)
+      return ()
+    endif ()
+    if (TARGET ${_target} AND NOT _target IN_LIST _visited)
+      list (APPEND _visited ${_target})
+      get_target_property (_links ${_target} INTERFACE_LINK_LIBRARIES)
+      if (_links)
+        string (REGEX MATCHALL "[A-Za-z0-9_.+-]+(::[A-Za-z0-9_.+-]+)*" _dependencies "${_links}")
+        list (APPEND _pending ${_dependencies})
+      endif ()
+    endif ()
+  endwhile ()
+  set (${result} FALSE PARENT_SCOPE)
+endfunction ()
+
+
 # The macro adds a library to a CISST-related project by processing the
 # following parameters
 #
@@ -148,13 +178,19 @@ macro (cisst_add_library ...)
     LIBRARY_NAME_FOR_CISST_REGISTER="${LIBRARY}")
 
   # Install the library
+  if (LIBRARY MATCHES "Qt$")
+    set (_cisst_export_set cisst-qt-targets)
+  else ()
+    set (_cisst_export_set cisst-targets)
+  endif ()
   install (TARGETS ${LIBRARY}
-           EXPORT cisst-targets
+           EXPORT ${_cisst_export_set}
            COMPONENT ${LIBRARY}
            RUNTIME DESTINATION bin
            LIBRARY DESTINATION lib
            ARCHIVE DESTINATION lib
            INCLUDES DESTINATION include)
+  unset (_cisst_export_set)
 
   # Add dependencies for linking, also check BUILD_xxx for dependencies
   if (DEPENDENCIES)
@@ -249,16 +285,14 @@ function (cisst_add_swig_module ...)
   cisst_cmake_debug ("cisst_add_swig_module: looking for interface file ${SWIG_INTERFACE_FILE}")
 
   if (EXISTS ${SWIG_INTERFACE_FILE})
-    if (SWIG_USE_FILE)
-      include (${SWIG_USE_FILE})
-    endif ()
+    # SWIG is a build tool for this wrapper, not a dependency of consumers of
+    # the already-built cisst libraries.  Discover it only when actually used.
+    find_package (SWIG ${CISST_SWIG_REQUIRED_VERSION} REQUIRED)
+    include (UseSWIG)
     # create a directory in build tree
     file (MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE_DIRECTORY}")
     # we are using C++ code
     set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES CPLUSPLUS ON)
-    # make sure the runtime code is not included
-    set_source_files_properties (${SWIG_INTERFACE_FILE}
-                                 PROPERTIES SWIG_FLAGS "-v;-fvirtual")
     # make sure source file is not used before libraries are build
     set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES DEPENDS "${MODULE_LINK_LIBRARIES}")
     # finally create the swig project using CMake command
@@ -267,6 +301,9 @@ function (cisst_add_swig_module ...)
     swig_add_library (${MODULE_NAME}
       LANGUAGE python
       SOURCES ${SWIG_INTERFACE_FILE})
+    set_target_properties (${MODULE_NAME} PROPERTIES
+                           SWIG_COMPILE_OPTIONS "-v;-fvirtual"
+                           SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
 
     # SWIG generates function-pointer casts for some standard stream
     # conversions.  These are part of the generated wrapper runtime rather
@@ -405,21 +442,31 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
   list (REMOVE_AT ARGV 0) # GENERATED_INCLUDE_DIRECTORY
   list (REMOVE_AT ARGV 0) # GENERATED_INCLUDE_SUB_DIRECTORY
 
-  # make sure cisstDataGenerator is being build and find it
-  # try to figure out if this is build along with cisst
-  if (CMAKE_CROSSCOMPILING)
-    find_program (CISST_DG_EXECUTABLE cisstDataGenerator)
-  else (CMAKE_CROSSCOMPILING)
-    # make sure the target exists
-    if (TARGET cisstDataGenerator)
-      # if the target exists, use its destination
-      cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator has been compiled within this project")
-      set (CISST_DG_EXECUTABLE "$<TARGET_FILE:cisstDataGenerator>")
-    else (TARGET cisstDataGenerator)
-      cisst_cmake_debug ("cisst_data_generator: looking for cisstDataGenerator in ${CISST_BINARY_DIR}/bin")
+  # Honor explicit overrides.  Native builds use a target so multi-config
+  # generators select the matching executable (e.g. bin/Debug or bin/Release).
+  # Cross builds must use a host executable, never the target-platform binary.
+  set (_cisst_dg_target)
+  if (NOT CISST_DG_EXECUTABLE)
+    if (CMAKE_CROSSCOMPILING)
+      find_program (CISST_DG_EXECUTABLE cisstDataGenerator NO_CMAKE_FIND_ROOT_PATH)
+    elseif (TARGET cisstDataGenerator)
+      set (_cisst_dg_target cisstDataGenerator)
+    elseif (TARGET cisst::cisstDataGenerator)
+      set (_cisst_dg_target cisst::cisstDataGenerator)
+    else ()
+      # Compatibility with packages created before the generator was exported.
       find_program (CISST_DG_EXECUTABLE cisstDataGenerator HINTS "${CISST_BINARY_DIR}/bin")
-    endif (TARGET cisstDataGenerator)
-  endif (CMAKE_CROSSCOMPILING)
+    endif ()
+  endif ()
+  if (_cisst_dg_target)
+    set (CISST_DG_EXECUTABLE "$<TARGET_FILE:${_cisst_dg_target}>")
+    set (_cisst_dg_dependency ${_cisst_dg_target})
+  else ()
+    set (_cisst_dg_dependency "${CISST_DG_EXECUTABLE}")
+  endif ()
+  if (NOT CISST_DG_EXECUTABLE)
+    message (FATAL_ERROR "cisst_data_generator: cisstDataGenerator was not found. Set CISST_DG_EXECUTABLE to a runnable host executable.")
+  endif ()
   cisst_cmake_debug ("cisst_data_generator: cisstDataGenerator executable found: ${CISST_DG_EXECUTABLE}")
 
   # loop over input files
@@ -450,7 +497,8 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
       --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
       --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}_cdg.cpp
       MAIN_DEPENDENCY ${input}
-      DEPENDS "${CISST_DG_EXECUTABLE}"
+      DEPENDS "${_cisst_dg_dependency}"
+      VERBATIM
       COMMENT "cisstDataGenerator for ${INPUT_WE}")
   endforeach(input)
 

@@ -3,8 +3,9 @@
 # This pass runs before cisstNetlib is downloaded/built, so keep
 # cisstNetlib-dependent libraries disabled.  The full Windows build uses
 # cmake-windows-cache.cmake instead.
+# TODO: Do we still need this now that cisstNetlib is not more?
 
-# Use external projects, mostly to get recent version of libcpp on Ubuntu 16.04
+# Verify configuration with external dependency builds disabled.
 set (CISST_USE_EXTERNAL OFF CACHE BOOL "")
 
 # Compile for shared libraries

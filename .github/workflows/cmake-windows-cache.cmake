@@ -1,4 +1,4 @@
-# initial CMake cache values for travis.ci builds
+# Initial CMake cache values for the full Windows CI build.
 
 # Use external projects for dependencies not provided by the Windows runner.
 set (CISST_USE_EXTERNAL ON CACHE BOOL "")

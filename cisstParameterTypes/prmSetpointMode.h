@@ -6,7 +6,10 @@
 
 #include <cstdint>
 #include <iostream>
+#include <cisstCommon/cmnDataFunctions.h>
+#if CISST_HAS_JSON
 #include <cisstCommon/cmnDataFunctionsJSON.h>
+#endif
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -50,6 +53,7 @@ inline std::ostream & operator << (std::ostream & output,
     return output << mode_name;
 }
 
+#if CISST_HAS_JSON
 template <>
 inline void CISST_EXPORT cmnDataJSON<prmSetpointMode, void>::SerializeText(const DataType & data, Json::Value & jsonValue) {
     jsonValue = static_cast<uint8_t>(data);
@@ -70,6 +74,7 @@ inline void CISST_EXPORT cmnDataJSON<prmSetpointMode, void>::DeSerializeText(Dat
 
     data = static_cast<prmSetpointMode>(raw_data);
 }
+#endif
 
 template <>
 class cmnData<prmSetpointMode, void> {
