@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlRequiredInterfaces_h
 #define _svlRequiredInterfaces_h
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeMatrixTypes.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>

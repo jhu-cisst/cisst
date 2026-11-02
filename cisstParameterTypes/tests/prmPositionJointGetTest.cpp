@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "prmTestGenericObjectConstructor.h"
 #include "prmSetAndTestGenericObjectSerialization.h"
 
-#include <cisstVector/vctRandom.h>
 #include <cisstParameterTypes/prmPositionJointGet.h>
 
 
@@ -34,46 +33,47 @@ void prmPositionJointGetTest::TestConstructors(void)
 
     // modify some values and then use copy constructor
     prmTestGenericObjectConstructorSwapValues(position);
-    vctRandom(position.Position(), -10.0, 10.0);
+    position.Position() = Eigen::VectorXd::Random(position.Position().size()) * 10.0;
     prmPositionJointGet positionCopy(position);
     prmTestGenericObjectCopyConstructor(position, positionCopy);
-    CPPUNIT_ASSERT(position.Position().Equal(positionCopy.Position()));
+    CPPUNIT_ASSERT(position.Position() == positionCopy.Position());
 }
 
 
 void prmPositionJointGetTest::TestSerialize(void)
 {
-    prmPositionJointGet initial, final;
+    prmPositionJointGet initial, final_;
     initial.SetSize(8);
     // test part inherited from mtsGenericObject
     prmSetAndTestGenericObjectSerialization(initial);
+    initial.Position() = Eigen::VectorXd::Random(initial.Position().size()) * 10.0;
 
-    vctRandom(initial.Position(), -10.0, 10.0);
     std::stringstream serializationStream;
     initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.Position().Equal(initial.Position()));
+    final_.DeSerializeRaw(serializationStream);
+    CPPUNIT_ASSERT_EQUAL(final_.Position().size(), initial.Position().size());
+    CPPUNIT_ASSERT(final_.Position() == initial.Position());
 }
 
 void prmPositionJointGetTest::TestTimestamps(void)
 {
     prmPositionJointGet initial, final;
     initial.SetSize(10);
-    initial.Timestamps().SetAll(1.0);
-    CPPUNIT_ASSERT(initial.Timestamps().Equal(1.0));
+    initial.Timestamps().fill(1.0);
+    CPPUNIT_ASSERT(initial.Timestamps() == Eigen::VectorXd::Ones(10));
 
     // set message timestamp shouldn't change all timestamps
     initial.SetTimestamp(5.0);
     CPPUNIT_ASSERT_EQUAL(5.0, initial.Timestamp());
-    CPPUNIT_ASSERT(initial.Timestamps().Equal(1.0));
+    CPPUNIT_ASSERT(initial.Timestamps() == Eigen::VectorXd::Ones(10));
 
-    // set pre axis timestamp shouldn't change message timestamp
-    initial.Timestamps().SetAll(10.0);
+    // set per axis timestamp shouldn't change message timestamp
+    initial.Timestamps().fill(10.0);
     CPPUNIT_ASSERT_EQUAL(5.0, initial.Timestamp());
-    CPPUNIT_ASSERT(initial.Timestamps().Equal(10.0));
+    CPPUNIT_ASSERT(initial.Timestamps() == 10.0 * Eigen::VectorXd::Ones(10));
 
     // copy
     final = initial;
     CPPUNIT_ASSERT_EQUAL(initial.Timestamp(), final.Timestamp());
-    CPPUNIT_ASSERT(final.Timestamps().Equal(initial.Timestamps()));
+    CPPUNIT_ASSERT(final.Timestamps() == initial.Timestamps());
 }

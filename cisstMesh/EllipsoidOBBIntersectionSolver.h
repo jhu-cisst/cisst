@@ -37,9 +37,9 @@
 #ifndef _EllipsoidOBBIntersectionSolver_h
 #define _EllipsoidOBBIntersectionSolver_h
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeMatrixTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 
 #include <cisstMesh/msh3BoundingBox.h>
 

@@ -179,7 +179,7 @@ if (CISST_CATKIN_BUILT)
   set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
   set (LIBRARY_OUTPUT_PATH    "${CATKIN_DEVEL_PREFIX}/lib")
   # Options defaults
-  set (CISST_cisstMesh         ON  CACHE BOOL "")
+  set (CISST_cisstMesh         OFF  CACHE BOOL "")
   set (CISST_cisstInteractive  ON  CACHE BOOL "")
   set (CISST_HAS_JSON          ON  CACHE BOOL "")
   set (CISST_HAS_SWIG_PYTHON   ON  CACHE BOOL "" FORCE)
@@ -243,10 +243,8 @@ if (CISST_HAS_OPENGL)
   endif ()
 endif ()
 
-# Extra link flag if for Apple
-if (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
-  set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -single_module")
-endif (CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)
+find_package(Eigen3 REQUIRED)
+find_package(orocos_kdl REQUIRED)
 
 # Check on Linux only
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -419,9 +417,8 @@ endif (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 # Which libraries to build
 set (CISST_LIBRARIES_DEFAULT
      cisstCommon
-     cisstVector
+     cisstVectorQt
      cisstOSAbstraction
-     cisstNumerical
      cisstMultiTask
      cisstParameterTypes
      cisstRobot
@@ -447,7 +444,6 @@ endif (CISST_BUILD_TESTS)
 # Which librairies have Qt Widgets
 set (CISST_LIBS_WITH_QT
      cisstCommon
-     cisstVector
      cisstMultiTask
      cisstParameterTypes
      cisstStereoVision)
@@ -657,13 +653,11 @@ set (CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)
 # Dependencies should be done automatically (don't really need to specify
 # cisstCommon dependency because it is a required component)
 set (CPACK_COMPONENT_CISSTCOMMONXML_DEPENDS       cisstCommon)
-set (CPACK_COMPONENT_CISSTVECTOR_DEPENDS          cisstCommon)
-set (CPACK_COMPONENT_CISSTNUMERICAL_DEPENDS       cisstCommon cisstVector)
 set (CPACK_COMPONENT_CISSTOSABSTRACTION_DEPENDS   cisstCommon)
-set (CPACK_COMPONENT_CISSTMULTITASK_DEPENDS       cisstCommon cisstVector cisstOSAbstraction)
-set (CPACK_COMPONENT_CISSTSTEREOVISION_DEPENDS    cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
-set (CPACK_COMPONENT_CISSTPARAMETERTYPES_DEPENDS  cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
-set (CPACK_COMPONENT_CISSTROBOT_DEPENDS           cisstCommon cisstVector cisstNumerical)
+set (CPACK_COMPONENT_CISSTMULTITASK_DEPENDS       cisstCommon cisstVectorQt cisstOSAbstraction)
+set (CPACK_COMPONENT_CISSTSTEREOVISION_DEPENDS    cisstCommon cisstVectorQt cisstOSAbstraction cisstMultiTask)
+set (CPACK_COMPONENT_CISSTPARAMETERTYPES_DEPENDS  cisstCommon cisstVectorQtcisstOSAbstraction cisstMultiTask)
+set (CPACK_COMPONENT_CISSTROBOT_DEPENDS           cisstCommon cisstVectorQt)
 if (WIN32)
   set(CPACK_NSIS_MODIFY_PATH ON)
 endif (WIN32)

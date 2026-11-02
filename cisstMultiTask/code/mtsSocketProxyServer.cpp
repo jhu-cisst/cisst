@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsSocketProxyServer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsSocketProxyCommon.h>
 #include <cisstMultiTask/mtsCommandQueuedVoidReturn.h>
@@ -301,10 +302,10 @@ FinishedEventList::FinishedEventList(size_t size, mtsMailBox *mbox, size_t mbox_
     for (size_t i = 0; i < size; i++) {
         mtsCallableQualifiedReadBase *callable = new mtsCallableQualifiedReadMethodGeneric<FinishedEventEntry>(&FinishedEventEntry::SerializeFilter, &List[i]);
         // mtsCommandQualifiedRead, input is arg, output is mtsStdString
-        sprintf(buf, "FinishedEventEntryFilter%ld", i);
+        sprintf(buf, "FinishedEventEntryFilter%zu", i);
         mtsCommandQualifiedRead *filter = new mtsCommandQualifiedRead(callable, buf, 0, &stringPrototype);
         // mtsCommandQueuedWrite, input is mtsStdString
-        sprintf(buf, "FinishedEventEntry%ld", i);
+        sprintf(buf, "FinishedEventEntry%zu", i);
         mtsCommandWriteBase *cmd = new mtsCommandWrite<FinishedEventEntry, mtsStdString>(&FinishedEventEntry::Method, &List[i], buf, stringPrototype);
         Cmd[i] = new mtsCommandFilteredQueuedWrite(mailBox, filter, cmd, mailBoxSize);
     }

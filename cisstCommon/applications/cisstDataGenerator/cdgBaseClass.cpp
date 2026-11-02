@@ -53,9 +53,9 @@ cdgScope::Type cdgBaseClass::GetScope(void) const
 }
 
 
-cdgScope * cdgBaseClass::Create(size_t lineNumber) const
+std::shared_ptr<cdgScope> cdgBaseClass::Create(size_t lineNumber) const
 {
-    return new cdgBaseClass(lineNumber);
+    return std::make_shared<cdgBaseClass>(lineNumber);
 }
 
 

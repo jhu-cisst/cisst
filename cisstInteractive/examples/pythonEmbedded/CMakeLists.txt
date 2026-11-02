@@ -11,7 +11,7 @@
 
 project (pythonEmbedded)
 
-set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector)
+set (REQUIRED_CISST_LIBRARIES cisstCommon)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND AND CISST_HAS_SWIG_PYTHON)

@@ -47,7 +47,6 @@ class mtsStateArray :public mtsStateArrayBase
 {
 public:
     typedef _elementType value_type;
-    // PK: why not use vctDynamicVector or mtsVector instead of std::vector?
     typedef std::vector<value_type> VectorType;
     typedef typename VectorType::iterator iterator;
     typedef typename VectorType::const_iterator const_iterator;

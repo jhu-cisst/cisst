@@ -67,6 +67,7 @@ set (HEADER_FILES
      cmnDataFunctionsSet.h
      cmnDataFunctionsVectorHelpers.h
      cmnDataFunctionsMatrixHelpers.h
+     cmnDataFunctionsEigen.h
      cmnDataFormat.h
      cmnDeSerializer.h
      cmnExport.h
@@ -105,7 +106,8 @@ if (CISST_HAS_JSON)
        cmnDataFunctionsJSON.cpp)
   set (HEADER_FILES
        ${HEADER_FILES}
-       cmnDataFunctionsJSON.h)
+       cmnDataFunctionsJSON.h
+       cmnDataFunctionsEigenJSON.h)
 endif (CISST_HAS_JSON)
 
 cisst_add_library (
@@ -137,6 +139,8 @@ if (CISST_HAS_JSON)
     add_dependencies (cisstCommon cisstJSONExternal)
   endif ()
 endif ()
+
+target_link_libraries(cisstCommon PUBLIC Eigen3::Eigen)
 
 if (CISST_HAS_LINUX_RTAI)
   target_include_directories (cisstCommon PUBLIC ${RTAI_INCLUDE_DIR})

@@ -36,6 +36,7 @@ set (SOURCE_FILES
      cmnCommandLineOptionsTest.cpp
      cmnDataFunctionsTest.cpp
      cmnDataFunctionsVectorTest.cpp
+     cmnDataFunctionsEigenTest.cpp
      cmnDataGeneratorTest.cpp
      cmnLoggerTest.cpp
      cmnLogLoDTest.cpp
@@ -53,6 +54,7 @@ set (HEADER_FILES
      cmnCommandLineOptionsTest.h
      cmnDataFunctionsTest.h
      cmnDataFunctionsVectorTest.h
+     cmnDataFunctionsEigenTest.h
      cmnDataGeneratorTest.h
      cmnLoggerTest.h
      cmnLogLoDTest.h

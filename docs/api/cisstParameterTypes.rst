@@ -43,10 +43,6 @@ Key classes
    :project: cisst
    :members:
 
-.. doxygenclass:: prmActuatorParameters
-   :project: cisst
-   :members:
-
 .. doxygenclass:: prmRobotState
    :project: cisst
    :members:

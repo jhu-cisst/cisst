@@ -18,5 +18,5 @@ cisst_add_swig_module (MODULE cisstRobot
                        INTERFACE_DIRECTORY ..
                        FOLDER cisstRobot
                        HEADER_FILES ../robPython.h
-                       MODULE_LINK_LIBRARIES cisstRobot cisstNumerical cisstVector cisstCommon
+                       MODULE_LINK_LIBRARIES cisstRobot cisstCommon
                        INSTALL_FILES 1)

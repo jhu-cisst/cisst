@@ -18,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstNumerical/nmrRegistrationRigid.h>
 #include <cisstParameterTypes/prmPositionJointGet.h>
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
 #include <cisst3DUserInterface/ui3VisibleAxes.h>

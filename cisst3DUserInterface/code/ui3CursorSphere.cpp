@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisstVector/vctRandom.h>
+#include <cisstVectorQt/vctRandom.h>
 
 #include <cisst3DUserInterface/ui3CursorSphere.h>
 #include <cisst3DUserInterface/ui3VisibleList.h>

@@ -2,8 +2,8 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):	Rajesh Kumar, Anton Deguet
-  Created on:	2008-04-10
+  Author(s):  Rajesh Kumar, Anton Deguet
+  Created on: 2008-04-10
 
   (C) Copyright 2008-2023 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -27,8 +27,9 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmVelocityJointGet_h
 
 // basic includes
-#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+#include <Eigen/Dense>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -60,7 +61,7 @@ public:
     void SetSize(size_type size);
 
     /*! constructor with all possible parameters */
-    inline explicit prmVelocityJointGet(const vctDoubleVec & velocity):
+    inline explicit prmVelocityJointGet(const Eigen::VectorXd& velocity):
         BaseType(),
         VelocityMember(velocity)
      {}
@@ -70,7 +71,7 @@ public:
 
     /*! Set and Get methods for the the velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Velocity);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(Eigen::VectorXd, Velocity);
     //@}
 
 public:

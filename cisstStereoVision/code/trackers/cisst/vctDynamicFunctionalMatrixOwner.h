@@ -62,7 +62,7 @@ Later...
   \brief Declaration of vctDynamicFunctionalMatrixOwner
 */
 
-#include <cisstVector/vctContainerTraits.h>
+#include <cisstVectorQt/vctContainerTraits.h>
 #include "vctFunctionalMatrixIterator.h"
 
 /*! 

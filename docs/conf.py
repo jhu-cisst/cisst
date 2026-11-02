@@ -84,8 +84,6 @@ rst_prolog = """
 .. |cisst| replace:: *cisst*
 .. |SAW| replace:: *SAW*
 .. |cisstCommon| replace:: *cisstCommon*
-.. |cisstVector| replace:: *cisstVector*
-.. |cisstNumerical| replace:: *cisstNumerical*
 .. |cisstOSAbstraction| replace:: *cisstOSAbstraction*
 .. |cisstMultiTask| replace:: *cisstMultiTask*
 .. |cisstRobot| replace:: *cisstRobot*

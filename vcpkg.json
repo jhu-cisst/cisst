@@ -13,6 +13,12 @@
     },
     {
       "name": "cppunit"
+    },
+    {
+      "name": "eigen3"
+    },
+    {
+      "name": "orocos-kdl"
     }
   ]
 }

@@ -2,9 +2,10 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstParameterTypes/prmVelocityCartesianGet.h>
 
@@ -36,8 +37,8 @@ class {
 
     member {
         name Position;
-        type vctFrm3;
-        default vctFrm3(); // identity
+        type Eigen::Isometry3d;
+        default Eigen::Isometry3d::Identity();
     }
 
     member {
@@ -49,8 +50,8 @@ class {
 
     member {
         name Velocity;
-        type vct6;
-        default 0.0;
+        type Eigen::Vector<double, 6>;
+        default Eigen::Vector<double, 6>::Zero();
     }
 
     member {
@@ -62,8 +63,8 @@ class {
 
     member {
         name Force;
-        type vct6;
-        default 0.0;
+        type Eigen::Vector<double, 6>;
+        default Eigen::Vector<double, 6>::Zero();
     }
 
     member {
@@ -83,7 +84,7 @@ class {
             _position.SetTimestamp(_state.Timestamp());
             _position.SetReferenceFrame(_state.ReferenceFrame());
             _position.SetMovingFrame(_state.MovingFrame());
-            _position.Position().Assign(_state.Position());
+            _position.Position() = _state.Position();
             _position.SetValid(_state.PositionIsValid());
             return true;
         }

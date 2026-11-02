@@ -16,6 +16,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <istream>
+#include <iterator>
+
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceOutput.h>
@@ -23,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 
@@ -424,26 +428,27 @@ size_t mtsComponent::GetNumberOfInterfacesInput(void) const
 
 bool mtsComponent::RemoveInterfaceRequired(const std::string & interfaceRequiredName)
 {
-    mtsInterfaceRequired * interfaceRequired = GetInterfaceRequired(interfaceRequiredName);
+    std::string interface_name = interfaceRequiredName; // copy for after we delete the interface
+    mtsInterfaceRequired * interfaceRequired = GetInterfaceRequired(interface_name);
     if (!interfaceRequired) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: no required interface found: \""
-                                << interfaceRequiredName << "\"" << std::endl;
+                                << interface_name << "\"" << std::endl;
         return false;
     }
     const mtsInterfaceProvided * connectedInterface = interfaceRequired->GetConnectedInterface();
     if (connectedInterface) {
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: cannot remove interface " << interfaceRequiredName
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceRequired: cannot remove interface " << interface_name
                                 << " because it is connected to " << connectedInterface->GetFullName() << std::endl;
         return false;
     }
-    if (!InterfacesRequired.RemoveItem(interfaceRequiredName)) {
+    if (!InterfacesRequired.RemoveItem(interface_name)) {
         CMN_LOG_CLASS_RUN_WARNING << "RemoveInterfaceRequired: failed to remove interface "
-                                  << interfaceRequiredName << std::endl;
+                                  << interface_name << std::endl;
         return false;
     }
     delete interfaceRequired;
     CMN_LOG_CLASS_RUN_VERBOSE << "RemoveInterfaceRequired: removed required interface \""
-                              << interfaceRequiredName << "\"" << std::endl;
+                              << interface_name << "\"" << std::endl;
     return true;
 }
 

@@ -22,7 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmPositionCartesianSet.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisst3DUserInterface/ui3Widget3D.h>
 #include <cisst3DUserInterface/ui3Manager.h>
 #include <cisst3DUserInterface/ui3SlaveArm.h> // bad, ui3 should not have slave arm to start with (adeguet1)

@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _configuration_h
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstVector/vctDynamicVector.h>
+#include <cisstVectorQt/vctDynamicVector.h>
 
 const double confClientPeriod = 1.0 * cmn_ms;
 const double confServerPeriod = 1.0 * cmn_ms;

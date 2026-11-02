@@ -46,25 +46,22 @@ cdgScope::Type cdgGlobal::GetScope(void) const
 }
 
 
-cdgScope * cdgGlobal::Create(size_t lineNumber) const
+std::shared_ptr<cdgScope> cdgGlobal::Create(size_t lineNumber) const
 {
-    return new cdgGlobal(lineNumber);
+    return std::make_shared<cdgGlobal>(lineNumber);
 }
 
 
 bool cdgGlobal::Validate(std::string & CMN_UNUSED(errorMessage))
 {
-    cdgEnum * enumPtr;
-    const ScopesContainer::iterator end = Scopes.end();
-    ScopesContainer::iterator iter;
-    for (iter = Scopes.begin();
-         iter != end;
-         ++iter) {
-        enumPtr = dynamic_cast<cdgEnum *>(*iter);
-        if (enumPtr) {
-            Enums.push_back(enumPtr);
+    for (const auto& item : Scopes) {
+        cdgEnum* enum_ptr = dynamic_cast<cdgEnum*>(item.get());
+
+        if (enum_ptr) {
+            Enums.push_back(enum_ptr);
         }
     }
+
     return true;
 }
 

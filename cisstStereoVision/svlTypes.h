@@ -24,11 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogger.h>
 #include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctDynamicMatrixTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeMatrixTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDynamicMatrixTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 #include <cisstStereoVision/svlDefinitions.h>
 #include <cisstStereoVision/svlConfig.h>
 

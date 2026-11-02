@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "prmTestGenericObjectConstructor.h"
 #include "prmSetAndTestGenericObjectSerialization.h"
 
-#include <cisstVector/vctRandom.h>
 #include <cisstParameterTypes/prmVelocityJointGet.h>
 
 
@@ -34,10 +33,10 @@ void prmVelocityJointGetTest::TestConstructors(void)
 
     // modify some values and then use copy constructor
     prmTestGenericObjectConstructorSwapValues(velocity);
-    vctRandom(velocity.Velocity(), -10.0, 10.0);
+    velocity.Velocity() = Eigen::VectorXd::Random(velocity.Velocity().size()) * 10.0;;
     prmVelocityJointGet velocityCopy(velocity);
     prmTestGenericObjectCopyConstructor(velocity, velocityCopy);
-    CPPUNIT_ASSERT(velocity.Velocity().Equal(velocityCopy.Velocity()));
+    CPPUNIT_ASSERT(velocity.Velocity() == velocityCopy.Velocity());
 }
 
 
@@ -47,11 +46,11 @@ void prmVelocityJointGetTest::TestSerialize(void)
     initial.SetSize(8);
     // test part inherited from mtsGenericObject
     prmSetAndTestGenericObjectSerialization(initial);
+    initial.Velocity() = Eigen::VectorXd::Random(initial.Velocity().size()) * 10.0;;
 
-    vctRandom(initial.Velocity(), -10.0, 10.0);
     std::stringstream serializationStream;
     initial.SerializeRaw(serializationStream);
     final.DeSerializeRaw(serializationStream);
     
-    CPPUNIT_ASSERT(final.Velocity().Equal(initial.Velocity()));
+    CPPUNIT_ASSERT(final.Velocity() == initial.Velocity());
 }

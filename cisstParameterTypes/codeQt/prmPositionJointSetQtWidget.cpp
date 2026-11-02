@@ -80,21 +80,24 @@ void prmPositionJointSetQtWidget::SlotRead(void)
         if (!executionResult) {
             return;
         }
-        if (configuration.Type().size() == state.Position().size()) {
-            mFactors.SetSize(configuration.Type().size());
+        if (configuration.Type().size() == (size_t)state.Position().size()) {
             cmnJointTypeToFactor(configuration.Type(), mPrismaticFactor, mRevoluteFactor, mFactors);
+
             // temp vectors
-            mTemp1.SetSize(state.Position().size());
-            mTemp2.SetSize(state.Position().size());
+            mTemp1.resize(state.Position().size());
+            mTemp2.resize(state.Position().size());
+
             // set position first to resize vector widget
-            mTemp1.SetAll(0.0);
+            mTemp1.fill(0.0);
             QVWPosition->SetValue(mTemp1);
+
             // set range
-            mTemp1.ElementwiseProductOf(mFactors, configuration.PositionMin());
-            mTemp2.ElementwiseProductOf(mFactors, configuration.PositionMax());
+            mTemp1.array() = mFactors.array().cwiseProduct(configuration.PositionMin());
+            mTemp2.array() = mFactors.array().cwiseProduct(configuration.PositionMax());
             QVWPosition->SetRange(mTemp1, mTemp2);
+
             // set position again but this time with actual values
-            mTemp1.ElementwiseProductOf(mFactors, state.Position());
+            mTemp1.array() = mFactors.array().cwiseProduct(state.Position().array());
             QVWPosition->SetValue(mTemp1);
             QPBMove->setEnabled(true);
         }
@@ -110,15 +113,15 @@ void prmPositionJointSetQtWidget::SlotSetPositionGoalJoint(void)
         return;
     }
     // get the values from the widget
-    mTemp1.SetSize(QVWPosition->columnCount());
+    mTemp1.resize(QVWPosition->columnCount());
     QVWPosition->GetValue(mTemp1);
     // prepare goal with proper units
     prmPositionJointSet goal;
-    goal.Goal().SetSize(mTemp1.size());
+    goal.Goal().resize(mTemp1.size());
     if (mNeedsConversion) {
-        goal.Goal().ElementwiseRatioOf(mTemp1, mFactors);
+        goal.Goal().array() = mTemp1.array().cwiseQuotient(mFactors.array());
     } else {
-        goal.Goal().Assign(mTemp1);
+        goal.Goal() = mTemp1;
     }
     (*move_jp)(goal);
 }

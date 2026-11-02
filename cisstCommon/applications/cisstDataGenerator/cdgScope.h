@@ -19,6 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cdgScope_h
 #define _cdgScope_h
 
+#include <map>
+#include <memory>
+
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstCommon/cmnNamedMap.h>
@@ -39,13 +42,13 @@ public:
                CDG_ENUMVALUE,
                CDG_CODE};
 
-    typedef std::vector<cdgScope *> ScopesContainer;
+    typedef std::vector<std::shared_ptr<cdgScope>> ScopesContainer;
     typedef ScopesContainer Stack; // for parser to manage nested scopes
 
-    typedef cmnNamedMap<cdgField> FieldsContainer;
+    typedef std::map<std::string, std::shared_ptr<cdgField>> FieldsContainer;
 
     // To store the possible scopes and subscopes
-    typedef cmnNamedMap<cdgScope> KnownScopesContainer;
+    typedef std::map<std::string, std::shared_ptr<cdgScope>> KnownScopesContainer;
     typedef std::multimap<std::string, std::string> SubScopesContainer;
 
     cdgScope(const std::string & name, size_t lineNumber);
@@ -81,7 +84,7 @@ public:
 
     // Dynamic creation of a new scope, should return an object of
     // "this" type.
-    virtual cdgScope * Create(size_t lineNumber) const = 0;
+    virtual std::shared_ptr<cdgScope> Create(size_t lineNumber) const = 0;
 
 protected:
     // List of possible fields and value

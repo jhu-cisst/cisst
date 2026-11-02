@@ -42,7 +42,7 @@
 
 #include <cisstMesh/mshForwardDeclarations.h>
 
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 #include <cisstMesh/msh2BoundingBox.h>
 
 //#define DebugDirPDTree2D

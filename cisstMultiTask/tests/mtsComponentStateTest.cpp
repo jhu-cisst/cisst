@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsComponentStateTest.h"
 
 #include "mtsTestComponents.h"
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 mtsComponentStateTest::mtsComponentStateTest(void)

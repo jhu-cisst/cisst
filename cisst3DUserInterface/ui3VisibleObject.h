@@ -26,8 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstCommon/cmnAccessorMacros.h>
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>

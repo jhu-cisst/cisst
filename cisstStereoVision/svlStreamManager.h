@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlStreamManager_h
 #define _svlStreamManager_h
 
-#include <cisstVector/vctDynamicVector.h>
+#include <cisstVectorQt/vctDynamicVector.h>
 #include <cisstMultiTask/mtsComponent.h>
 
 // Always include last!

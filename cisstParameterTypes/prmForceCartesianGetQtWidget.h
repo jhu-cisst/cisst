@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmForceCartesianGetQtWidget_h
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstVector/vctQtWidgetFrame.h>
+#include <cisstVectorQt/vctQtWidgetFrame.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmForceCartesianGet.h>
 

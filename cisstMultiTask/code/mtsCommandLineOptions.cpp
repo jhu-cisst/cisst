@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsCommandLineOptions.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorFactory.h>
 #include <cisstCommon/cmnPath.h>

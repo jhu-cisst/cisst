@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlQtWidgetFramerate_h
 
 #include <cisstCommon/cmnGenericObject.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
 
 #include <QObject>
 #include <QString>

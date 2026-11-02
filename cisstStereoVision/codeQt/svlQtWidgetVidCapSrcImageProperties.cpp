@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlQtObjectFactory.h>
 #include <cisstStereoVision/svlQtDialog.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <ui_svlQtWidgetVidCapSrcImageProperties.h>

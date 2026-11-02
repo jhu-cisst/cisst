@@ -92,16 +92,15 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
     if (newValue.Position().size() != 0) {
         QWPosition->show();
         if (mNeedsConversion
-            && (mConfiguration.Type().size() == newValue.Position().size())) {
+            && (mConfiguration.Type().size() == (size_t)newValue.Position().size())) {
             // update scaling factors if needed based on vector size
             if (newValue.Position().size() != mPositionFactors.size()) {
                 if (mConfiguration.Type().size() != 0) {
-                    mPositionFactors.SetSize(mConfiguration.Type().size());
                     cmnJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mPositionFactors);
                 }
             }
-            mTempVector.SetSize(newValue.Position().size());
-            mTempVector.ElementwiseProductOf(mPositionFactors, newValue.Position());
+            mTempVector.resize(newValue.Position().size());
+            mTempVector.array() = mPositionFactors.array().cwiseProduct(newValue.Position().array());
             QVRPosition->SetValue(mTempVector);
         } else {
             QVRPosition->SetValue(newValue.Position());
@@ -114,16 +113,15 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
     if (newValue.Velocity().size() != 0) {
         QWVelocity->show();
         if (mNeedsConversion
-            && (mConfiguration.Type().size() == newValue.Velocity().size())) {
+            && (mConfiguration.Type().size() == (size_t)newValue.Velocity().size())) {
             // update scaling factors if needed based on vector size
             if (newValue.Velocity().size() != mVelocityFactors.size()) {
                 if (mConfiguration.Type().size() != 0) {
-                    mVelocityFactors.SetSize(mConfiguration.Type().size());
                     cmnJointTypeToFactor(mConfiguration.Type(), mPrismaticFactor, mRevoluteFactor, mVelocityFactors);
                 }
             }
-            mTempVector.SetSize(newValue.Velocity().size());
-            mTempVector.ElementwiseProductOf(mVelocityFactors, newValue.Velocity());
+            mTempVector.resize(newValue.Velocity().size());
+            mTempVector.array() = mVelocityFactors.array().cwiseProduct(newValue.Velocity().array());
             QVRVelocity->SetValue(mTempVector);
         } else {
             QVRVelocity->SetValue(newValue.Velocity());

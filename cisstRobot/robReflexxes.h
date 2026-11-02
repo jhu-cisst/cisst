@@ -1,5 +1,6 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
-/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
+ */
 
 /*
   Author(s):  Anton Deguet, Zerui Wang
@@ -19,13 +20,14 @@
 #ifndef _robReflexxes_h
 #define _robReflexxes_h
 
+#include <Eigen/Core>
+#include <memory>
+
 // forward declarations for Reflexxes types
 class ReflexxesAPI;
 class RMLPositionInputParameters;
 class RMLPositionOutputParameters;
 class RMLPositionFlags;
-
-#include <cisstVector/vctDynamicVectorTypes.h>
 
 // Always include last
 #include <cisstRobot/robExport.h>
@@ -37,50 +39,55 @@ class RMLPositionFlags;
 
   \ingroup cisstRobot
 */
-class CISST_EXPORT robReflexxes {
-
+class CISST_EXPORT robReflexxes
+{
 public:
-    typedef enum {Reflexxes_NONE, Reflexxes_TIME, Reflexxes_PHASE} SynchronizationType;
-    typedef enum {Reflexxes_UNDEFINDED, Reflexxes_WORKING,
-                  Reflexxes_FINAL_STATE_REACHED, Reflexxes_ERROR} ResultType;
+    enum class SynchronizationType { NONE, TIME, PHASE };
+
+    enum class ResultType { UNDEFINED, WORKING, FINAL_STATE_REACHED, ERROR };
 
 protected:
-    bool mIsSet;                          /*!< To ensure we don't evaluate if the parameters are not set */
-    size_t mDimension;                    /*!< Number of degrees of freedom */
+    bool mIsSet; /*!< To ensure we don't evaluate if the parameters are not set
+                  */
+    Eigen::Index mDimension;              /*!< Number of degrees of freedom */
     SynchronizationType mSynchronization; /*!< synchronization type we can set*/
 
-    ReflexxesAPI * RML;
-    RMLPositionInputParameters * IP;
-    RMLPositionOutputParameters * OP;
-    RMLPositionFlags * mFlags;
+    std::unique_ptr<ReflexxesAPI> RML;
+    std::unique_ptr<RMLPositionInputParameters> IP;
+    std::unique_ptr<RMLPositionOutputParameters> OP;
+    std::unique_ptr<RMLPositionFlags> mFlags;
+
     ResultType mResultValue;
     double mTime;
-    vctDoubleVec mCurrentAcceleration;
+    Eigen::VectorXd mCurrentAcceleration;
 
 public:
     robReflexxes(void);
-    robReflexxes(const vctDoubleVec & MaxVelocity,
-                 const vctDoubleVec & MaxAcceleration,
-                 const double CycleTime,
-                 const SynchronizationType synchronization = Reflexxes_NONE);
-    robReflexxes(const vctDoubleVec & MaxVelocity,
-                 const vctDoubleVec & MaxAcceleration,
-                 const vctDoubleVec & MaxJerk,
-                 const double CycleTime,
-                 const SynchronizationType synchronization = Reflexxes_NONE);
-
+    robReflexxes(
+        const Eigen::VectorXd& MaxVelocity,
+        const Eigen::VectorXd& MaxAcceleration,
+        const double CycleTime,
+        const SynchronizationType synchronization = SynchronizationType::NONE
+    );
+    robReflexxes(
+        const Eigen::VectorXd& MaxVelocity,
+        const Eigen::VectorXd& MaxAcceleration,
+        const Eigen::VectorXd& MaxJerk,
+        const double CycleTime,
+        const SynchronizationType synchronization = SynchronizationType::NONE
+    );
     ~robReflexxes();
 
     void Init(void);
 
-    const ResultType & ResultValue(void) const;
+    const ResultType& ResultValue(void) const;
 
-    /*! Returns expected time left after last Evaluate call. */ 
+    /*! Returns expected time left after last Evaluate call. */
     double Duration(void) const;
-    
-    const double & Time(void) const;
-    void SetTime(const double & time);
-    
+
+    const double& Time(void) const;
+    void SetTime(const double& time);
+
     /*!  \brief Set target positions and velocities as well as desired
       maximum velocities and accelerations. All vectors must match the
       target position size.
@@ -88,16 +95,20 @@ public:
       \param maximum velocities
       \param maximum acceleration
     */
-    void Set(const vctDoubleVec & MaxVelocity,
-             const vctDoubleVec & MaxAcceleration,
-             const double CycleTime,
-             const SynchronizationType synchronization = Reflexxes_NONE);
+    void Set(
+        const Eigen::VectorXd& MaxVelocity,
+        const Eigen::VectorXd& MaxAcceleration,
+        const double CycleTime,
+        const SynchronizationType synchronization = SynchronizationType::NONE
+    );
 
-    void Set(const vctDoubleVec & MaxVelocity,
-             const vctDoubleVec & MaxAcceleration,
-             const vctDoubleVec & MaxJerk,
-             const double CycleTime,
-             const SynchronizationType synchronization = Reflexxes_NONE);
+    void Set(
+        const Eigen::VectorXd& MaxVelocity,
+        const Eigen::VectorXd& MaxAcceleration,
+        const Eigen::VectorXd& MaxJerk,
+        const double CycleTime,
+        const SynchronizationType synchronization = SynchronizationType::NONE
+    );
 
     /*
       \param current position
@@ -105,10 +116,12 @@ public:
       \param target position
       \param target velocities
     */
-    void Evaluate(vctDoubleVec & CurrentPosition,
-                  vctDoubleVec & CurrentVelocity,
-                  const vctDoubleVec & TargetPosition,
-                  const vctDoubleVec & TargetVelocity);
+    void Evaluate(
+        Eigen::VectorXd& CurrentPosition,
+        Eigen::VectorXd& CurrentVelocity,
+        const Eigen::VectorXd& TargetPosition,
+        const Eigen::VectorXd& TargetVelocity
+    );
 };
 
-#endif // _robReflexxes_h
+#endif

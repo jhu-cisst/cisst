@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmPython_h
 
 #include <cisstCommon/cmnPython.h>
-#include <cisstVector/vctPython.h>
 #include <cisstMultiTask/mtsPython.h>
 
 #include <cisstParameterTypes/prmEventButton.h>
@@ -44,19 +43,18 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmVelocityJointGet.h>
 #include <cisstParameterTypes/prmVelocityJointSet.h>
 
-#include "cisstParameterTypes/prmForceTorqueJointSet.h"
-#include "cisstParameterTypes/prmCartesianImpedance.h"
-#include "cisstParameterTypes/prmForwardKinematicsRequest.h"
-#include "cisstParameterTypes/prmForwardKinematicsResponse.h"
-#include "cisstParameterTypes/prmInverseKinematicsRequest.h"
-#include "cisstParameterTypes/prmInverseKinematicsResponse.h"
+#include <cisstParameterTypes/prmForceTorqueJointSet.h>
+#include <cisstParameterTypes/prmCartesianImpedance.h>
+#include <cisstParameterTypes/prmForwardKinematicsRequest.h>
+#include <cisstParameterTypes/prmForwardKinematicsResponse.h>
+#include <cisstParameterTypes/prmInverseKinematicsRequest.h>
+#include <cisstParameterTypes/prmInverseKinematicsResponse.h>
 
 #include <cisstParameterTypes/prmRobotState.h>
 
 #include <cisstParameterTypes/prmStateJoint.h>
 #include <cisstParameterTypes/prmConfigurationJoint.h>
 #include <cisstParameterTypes/prmOperatingState.h>
-#include <cisstParameterTypes/prmActuatorState.h>
 
 #include <cisstParameterTypes/prmStateCartesian.h>
 #include <cisstParameterTypes/prmBaseFrame.h>

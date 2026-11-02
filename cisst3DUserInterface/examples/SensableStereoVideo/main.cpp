@@ -29,7 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstCommon.h>
 #include <cisstStereoVision.h>
 
@@ -48,9 +49,9 @@ int main()
     cmnClassRegister::SetLoD("ui3BehaviorBase", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("ui3Manager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsManagerLocal", CMN_LOG_LOD_VERY_VERBOSE);
 
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
 
     //devSensableHD * sensable = new devSensableHD("Omni", "Omni1", "Omni2" /* name in driver, see Preferences in Sensable Driver */);
     devSensableHD * sensable = new devSensableHD("Omni", "Omni1");

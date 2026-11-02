@@ -38,7 +38,7 @@
 #define _msh2Edges_h
 
 #include <cisstMesh/msh2Edge.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
 
 // Always include last!
 #include <cisstMesh/mshExport.h>

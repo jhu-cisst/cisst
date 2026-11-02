@@ -11,7 +11,7 @@
 
 project (pythonEmbeddedIRE)
 
-set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstInteractive)
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask cisstInteractive)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND AND CISST_HAS_SWIG_PYTHON)

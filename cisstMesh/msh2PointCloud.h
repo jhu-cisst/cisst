@@ -45,8 +45,8 @@
 #include "ply_io.h"
 #endif
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
 
 // Always include last!
 #include <cisstMesh/mshExport.h>

@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsManagerComponent.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
@@ -28,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstCommon/cmnUnits.h>
+#include <iterator>
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponent, mtsManagerComponentBase);
 
@@ -79,7 +81,7 @@ void mtsManagerComponent::Cleanup(void)
 }
 
 std::string mtsManagerComponent::GetInterfaceUID(
-      const std::string & processName, const std::string & componentName, const std::string & interfaceName)
+    const std::string& processName, const std::string & componentName, const std::string & interfaceName)
 {
     return (processName.empty()) ? (componentName + ":" + interfaceName)
                                  : processName + ":" + componentName + ":" + interfaceName;
@@ -470,14 +472,14 @@ void mtsManagerComponent::GetNamesOfProcesses(std::vector<std::string> & names) 
     names.clear();
     names.push_back("");
 }
-void mtsManagerComponent::GetNamesOfComponents(const std::string & processName,
+void mtsManagerComponent::GetNamesOfComponents(const std::string& CMN_UNUSED(processName),
                                                std::vector<std::string> & names) const
 {
     // PK TODO: could check processName
     ComponentMap.GetNames(names);
 }
 
-void mtsManagerComponent::GetDescriptionsOfComponents(const std::string & processName,
+void mtsManagerComponent::GetDescriptionsOfComponents(const std::string& CMN_UNUSED(processName),
                                                       std::vector<mtsDescriptionComponent> & descriptions) const
 {
     descriptions.clear();
@@ -594,7 +596,7 @@ void mtsManagerComponent::GetListOfConnections(std::vector<mtsDescriptionConnect
     std::sort(listOfConnections.begin(), listOfConnections.end());
 }
 
-void mtsManagerComponent::GetListOfComponentClasses(const std::string &processName,
+void mtsManagerComponent::GetListOfComponentClasses(const std::string& CMN_UNUSED(processName),
                           std::vector <mtsDescriptionComponentClass> & listOfComponentClasses) const
 {
     // PK TODO: check processName
@@ -725,7 +727,7 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
 {
     std::vector<std::string> options;
     std::stringstream allOptions;
-    std::ostream_iterator< std::string > output(allOptions, ", ");
+    std::ostream_iterator<std::string> output(allOptions, ", ");
 
     mtsComponent * clientComponent = GetComponent(clientComponentName);
     if (!clientComponent) {

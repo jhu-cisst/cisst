@@ -25,7 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <QCoreApplication>
 
 // cisst
-#include <cisstVector/vctPose3DQtWidget.h>
+#include <cisstCommon/cmnConstants.h>
+#include <cisstVectorQt/vctPose3DQtWidget.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstParameterTypes/prmPositionCartesianArrayGet.h>
 #include <cisstParameterTypes/prmPositionCartesianArrayGetQtWidget.h>

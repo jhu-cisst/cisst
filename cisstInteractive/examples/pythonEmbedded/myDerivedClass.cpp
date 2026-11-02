@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include "myDerivedClass.h"
-#include <cisstVector/vctRandom.h>
+#include <cisstVectorQt/vctRandom.h>
 
 CMN_IMPLEMENT_SERVICES(myDerivedClass);
 

@@ -20,7 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisst3DUserInterface/ui3CursorSphere.h>
 
 #include <sawSensablePhantom/mtsSensableHD.h>
@@ -41,7 +42,7 @@ int main()
 	cmnLogger::SetMaskClassMatching("ui3", CMN_LOG_ALLOW_ALL);
 	cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
 
-    mtsTaskManager * componentManager = mtsTaskManager::GetInstance();
+    mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
 
     mtsSensableHD * sensable = new mtsSensableHD("Omni", "Omni1"); //, "Omni2" /* name in driver, see Preferences in Sensable Driver */);
     componentManager->AddComponent(sensable);

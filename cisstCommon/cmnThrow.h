@@ -73,7 +73,7 @@ http://www.cisst.org/cisst/license.txt.
   std::exception but this is not a requirement.
  */
 template <class _exceptionType>
-inline void cmnThrow(const _exceptionType & except, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_ERROR) {
+[[noreturn]] inline void cmnThrow(const _exceptionType & except, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_ERROR) {
     // try to create an std::exception pointer
     const std::exception * stdExcept = dynamic_cast<const std::exception *>(&except);
     if (stdExcept) {

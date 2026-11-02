@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsCollectorStateTest.h"
 
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorState.h>
 

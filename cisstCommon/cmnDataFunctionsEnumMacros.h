@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #define CMN_DATA_SPECIALIZATION_FOR_ENUM_USER_HUMAN_READABLE(_enum, _promotedType, _humanReadableFunction) \
 template <>                                                             \
-class cmnData<_enum> {                                                  \
+class cmnData<_enum, void> {                                                  \
 public:                                                                 \
  enum {IS_SPECIALIZED = 1};                                             \
  typedef _enum DataType;                                                \
@@ -95,20 +95,20 @@ public:                                                                 \
 
 
 #define CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(_enum) \
-    template <> void cmnDataJSON<_enum>::SerializeText(const _enum & data, Json::Value & jsonValue); \
-    template <> void cmnDataJSON<_enum>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+    template <> void cmnDataJSON<_enum, void>::SerializeText(const _enum & data, Json::Value & jsonValue); \
+    template <> void cmnDataJSON<_enum, void>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 #define CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM_EXPORT(_enum) \
-    template <> void CISST_EXPORT cmnDataJSON<_enum>::SerializeText(const _enum & data, Json::Value & jsonValue); \
-    template <> void CISST_EXPORT cmnDataJSON<_enum>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+    template <> void CISST_EXPORT cmnDataJSON<_enum, void>::SerializeText(const _enum & data, Json::Value & jsonValue); \
+    template <> void CISST_EXPORT cmnDataJSON<_enum, void>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 
 #define CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM(_enum, _promotedType) \
-    template <> void cmnDataJSON<_enum>::SerializeText(const _enum & data, Json::Value & jsonValue) { \
+    template <> void cmnDataJSON<_enum, void>::SerializeText(const _enum & data, Json::Value & jsonValue) { \
         CMN_ASSERT(sizeof(_promotedType) >= sizeof(_enum));             \
         const _promotedType dataPromoted = static_cast<_promotedType>(data); \
         cmnDataJSON<_promotedType>::SerializeText(dataPromoted, jsonValue); \
     }                                                                   \
-    template <> void cmnDataJSON<_enum>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) { \
+    template <> void cmnDataJSON<_enum, void>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) { \
         CMN_ASSERT(sizeof(_promotedType) >= sizeof(_enum));             \
         _promotedType dataPromoted;                                     \
         cmnDataJSON<_promotedType>::DeSerializeText(dataPromoted, jsonValue); \
@@ -116,11 +116,11 @@ public:                                                                 \
     }
 
 #define CMN_IMPLEMENT_DATA_FUNCTIONS_JSON_FOR_ENUM_AS_STRING(_enum, _to_string, _from_string) \
-    template <> void cmnDataJSON<_enum>::SerializeText(const _enum & data, Json::Value & jsonValue) { \
+    template <> void cmnDataJSON<_enum, void>::SerializeText(const _enum & data, Json::Value & jsonValue) { \
         const std::string _s = _to_string(data);                        \
         cmnDataJSON<std::string>::SerializeText(_s, jsonValue);         \
     }                                                                   \
-    template <> void cmnDataJSON<_enum>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) { \
+    template <> void cmnDataJSON<_enum, void>::DeSerializeText(_enum & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) { \
         std::string _s;                                                 \
         cmnDataJSON<std::string>::DeSerializeText(_s, jsonValue);       \
         data = _from_string(_s);                                        \

@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsDelayedConnections.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 void mtsDelayedConnections::Add(const std::string & clientComponentName,

@@ -37,8 +37,8 @@
 #ifndef _msh2Utilities_h
 #define _msh2Utilities_h
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeMatrixTypes.h>
 
 // Always include last!
 #include <cisstMesh/mshExport.h>

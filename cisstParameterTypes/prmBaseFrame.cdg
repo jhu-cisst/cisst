@@ -2,8 +2,7 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctTransformationTypes.h>
-#include <cisstVector/vctFixedSizeVectorRef.h>
+#include <Eigen/Geometry>
 #include <cisstParameterTypes/prmStateCartesian.h>
 
 // Always include last
@@ -34,8 +33,8 @@ class {
 
     member {
         name transform;
-        type vctFrm4x4;
-        default vctFrm4x4::Identity();
+        type Eigen::Isometry3d;
+        default Eigen::Isometry3d::Identity();
         description Homogeneous transform from local frame to base frame;
     }
 
@@ -59,12 +58,9 @@ class {
 
     public:
         inline bool ValidDefinition(void) const {
-            return (((!reference_frame().empty())
-                     && component().empty()
-                     && interface().empty())
-                    || (reference_frame().empty()
-                        && (transform() == vctFrm4x4::Identity())
-                        && !component().empty()
+            return ((Fixed() && !Dynamic() && interface().empty())
+                    || (!Fixed() && Dynamic()
+                        && (transform().isApprox(Eigen::Isometry3d::Identity(), 0.0))
                         && !interface().empty()));
         }
 
@@ -86,9 +82,8 @@ class {
                 cmnThrow("prmBaseFrame::ApplyTo: only fixed base frames can be applied directly");
             }
 
-            vctFrm3 fixedTransform;
-            fixedTransform.From(transform());
-            const vctRot3 & rotation = fixedTransform.Rotation();
+            Eigen::Isometry3d fixedTransform = transform();
+            const Eigen::Matrix3d& rotation = fixedTransform.rotation();
             withBase.ReferenceFrame() = reference_frame();
 
             if (local.PositionIsValid()) {
@@ -97,22 +92,14 @@ class {
             }
 
             if (local.VelocityIsValid()) {
-                const vctFixedSizeConstVectorRef<double, 3, 1> localLinear(local.Velocity().XYZ());
-                const vctFixedSizeConstVectorRef<double, 3, 1> localAngular(local.Velocity().Pointer(3));
-                vctFixedSizeVectorRef<double, 3, 1> withBaseLinear(withBase.Velocity().XYZ());
-                vctFixedSizeVectorRef<double, 3, 1> withBaseAngular(withBase.Velocity().Pointer(3));
-                rotation.ApplyTo(localLinear, withBaseLinear);
-                rotation.ApplyTo(localAngular, withBaseAngular);
+                withBase.Velocity().head<3>() = rotation * local.Velocity().head<3>();
+                withBase.Velocity().tail<3>() = rotation * local.Velocity().tail<3>();
                 withBase.VelocityIsValid() = true;
             }
 
             if (local.ForceIsValid()) {
-                const vctFixedSizeConstVectorRef<double, 3, 1> localForce(local.Force().XYZ());
-                const vctFixedSizeConstVectorRef<double, 3, 1> localTorque(local.Force().Pointer(3));
-                vctFixedSizeVectorRef<double, 3, 1> withBaseForce(withBase.Force().XYZ());
-                vctFixedSizeVectorRef<double, 3, 1> withBaseTorque(withBase.Force().Pointer(3));
-                rotation.ApplyTo(localForce, withBaseForce);
-                rotation.ApplyTo(localTorque, withBaseTorque);
+                withBase.Force().head<3>() = rotation * local.Force().head<3>();
+                withBase.Force().tail<3>() = rotation * local.Force().tail<3>();
                 withBase.ForceIsValid() = true;
             }
         }

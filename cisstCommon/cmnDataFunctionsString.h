@@ -50,7 +50,7 @@ void CISST_EXPORT cmnDataDeSerializeText(std::string & data,
 
 
 template <>
-class cmnData<std::string>
+class cmnData<std::string, void>
 {
 public:
     typedef std::string DataType;

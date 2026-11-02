@@ -3,6 +3,7 @@
 # This pass runs before cisstNetlib is downloaded/built, so keep
 # cisstNetlib-dependent libraries disabled.  The full Windows build uses
 # cmake-windows-cache.cmake instead.
+# TODO: Do we still need this now that cisstNetlib is not more?
 
 # Verify configuration with external dependency builds disabled.
 set (CISST_USE_EXTERNAL OFF CACHE BOOL "")
@@ -30,10 +31,6 @@ set (CISST_cisstMesh_TESTS OFF CACHE BOOL "")
 
 # Build examples
 set (CISST_BUILD_EXAMPLES OFF CACHE BOOL "")
-
-# cisstNetlib
-set (CISSTNETLIB_USE_LOCAL_INSTALL OFF CACHE BOOL "")
-set (CISST_HAS_CISSTNETLIB OFF CACHE BOOL "")
 
 # Qt
 set (CISST_QT_VERSION 5 CACHE STRING "")

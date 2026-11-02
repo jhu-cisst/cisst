@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
-#include <cisstVector/vctDynamicVector.h>
+#include <cisstVectorQt/vctDynamicVector.h>
 #include <string>
 
 // Always include last!

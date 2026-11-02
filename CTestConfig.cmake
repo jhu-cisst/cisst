@@ -56,14 +56,6 @@ if (CISST_cisstCommon)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}-Co)
 endif (CISST_cisstCommon)
 
-if (CISST_cisstVector)
-  set (BUILDNAME_TMP ${BUILDNAME_TMP}Ve)
-endif (CISST_cisstVector)
-
-if (CISST_cisstNumerical)
-  set (BUILDNAME_TMP ${BUILDNAME_TMP}Nu)
-endif (CISST_cisstNumerical)
-
 if (CISST_cisstInteractive)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}In)
 endif (CISST_cisstInteractive)
@@ -92,12 +84,6 @@ endif (CISST_cisstStereoVision)
 if (CISST_HAS_SWIG_PYTHON)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}-Py)
 endif (CISST_HAS_SWIG_PYTHON)
-
-# Tells if cisstNetlib was used
-if (CISST_HAS_CISSTNETLIB)
-  set (BUILDNAME_TMP ${BUILDNAME_TMP}-CiNe)
-endif (CISST_HAS_CISSTNETLIB)
-
 
 # Save to cache
 set (BUILDNAME ${BUILDNAME_TMP}

@@ -39,10 +39,10 @@
 
 #include <cisstMesh/mshConfig.h>
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeMatrixTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 
 #if CISST_MSH_HAS_RPLY
   #include <ply_io.h>

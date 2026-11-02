@@ -2,9 +2,8 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctTransformationTypes.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -15,29 +14,29 @@ class {
     attribute CISST_EXPORT;
     member {
         name P;
-        type vct3;
-        default 0.0;
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         visibility public;
         description P gain, aka stiffness, applied to difference in position;
     }
     member {
         name D;
-        type vct3;
-        default 0.0;
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         visibility public;
         description D gain, aka dumping, applied velocity;
     }
     member {
         name Bias;
-        type vct3;
-        default 0.0;
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         visibility public;
         description Constant force added in this half-plane;
     }
     member {
         name Deadband;
-        type vct3;
-        default 0.0;
+        type Eigen::Vector3d;
+        default Eigen::Vector3d::Zero();
         visibility public;
         description Deadband on position error, subtracted from difference on position;
     }
@@ -55,21 +54,21 @@ class {
 
     member {
         name ForceOrientation;
-        type vctMatRot3;
+        type Eigen::Matrix3d;
         visibility public;
         description Force orientation matrix;
     }
 
     member {
         name ForcePosition;
-        type vct3;
+        type Eigen::Vector3d;
         visibility public;
         description Force position vector;
     }
 
     member {
         name TorqueOrientation;
-        type vctMatRot3;
+        type Eigen::Matrix3d;
         visibility public;
         description Torque orientation matrix;
     }

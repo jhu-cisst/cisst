@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterInput.h>
 
 #include <cisstOSAbstraction/osaSleep.h>  // PK TEMP
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 svlFilterOutput::svlFilterOutput(svlFilterBase* filter, bool trunk, const std::string &name) :

@@ -147,32 +147,32 @@ public:
     std::string ScalarDescription(const size_t index, const std::string & userDescription = "") const CISST_THROW(std::out_of_range);
 };
 
-template <> void CISST_EXPORT cmnData<mtsGenericObject>::Copy(mtsGenericObject & data, const mtsGenericObject & source);
+template <> void CISST_EXPORT cmnData<mtsGenericObject, void>::Copy(mtsGenericObject & data, const mtsGenericObject & source);
 
-template <> void CISST_EXPORT cmnData<mtsGenericObject>::SerializeBinary(const mtsGenericObject & data, std::ostream & outputStream) CISST_THROW(std::runtime_error);
+template <> void CISST_EXPORT cmnData<mtsGenericObject, void>::SerializeBinary(const mtsGenericObject & data, std::ostream & outputStream) CISST_THROW(std::runtime_error);
 
-template <> void CISST_EXPORT cmnData<mtsGenericObject>::DeSerializeBinary(mtsGenericObject & data, std::istream & inputStream,
+template <> void CISST_EXPORT cmnData<mtsGenericObject, void>::DeSerializeBinary(mtsGenericObject & data, std::istream & inputStream,
                                                                            const cmnDataFormat & localFormat, const cmnDataFormat & remoteFormat) CISST_THROW(std::runtime_error);
 
-template <> void CISST_EXPORT cmnData<mtsGenericObject>::SerializeText(const mtsGenericObject & data, std::ostream & outputStream, const char delimiter) CISST_THROW(std::runtime_error);
+template <> void CISST_EXPORT cmnData<mtsGenericObject, void>::SerializeText(const mtsGenericObject & data, std::ostream & outputStream, const char delimiter) CISST_THROW(std::runtime_error);
 
 template <> std::string CISST_EXPORT cmnData<mtsGenericObject>::SerializeDescription(const mtsGenericObject & data, const char delimiter, const std::string & userDescription);
 
-template <> void CISST_EXPORT cmnData<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, std::istream & inputStream, const char delimiter) CISST_THROW(std::runtime_error);
+template <> void CISST_EXPORT cmnData<mtsGenericObject, void>::DeSerializeText(mtsGenericObject & data, std::istream & inputStream, const char delimiter) CISST_THROW(std::runtime_error);
 
 template <> std::string CISST_EXPORT cmnData<mtsGenericObject>::HumanReadable(const mtsGenericObject & data);
 
-template <> bool CISST_EXPORT cmnData<mtsGenericObject>::ScalarNumberIsFixed(const mtsGenericObject & data);
+template <> bool CISST_EXPORT cmnData<mtsGenericObject, void>::ScalarNumberIsFixed(const mtsGenericObject & data);
 
-template <> size_t CISST_EXPORT cmnData<mtsGenericObject>::ScalarNumber(const mtsGenericObject & data);
+template <> size_t CISST_EXPORT cmnData<mtsGenericObject, void>::ScalarNumber(const mtsGenericObject & data);
 
-template <> double CISST_EXPORT cmnData<mtsGenericObject>::Scalar(const mtsGenericObject & data, const size_t index) CISST_THROW(std::out_of_range);
+template <> double CISST_EXPORT cmnData<mtsGenericObject, void>::Scalar(const mtsGenericObject & data, const size_t index) CISST_THROW(std::out_of_range);
 
 template <> std::string CISST_EXPORT cmnData<mtsGenericObject>::ScalarDescription(const mtsGenericObject & data, const size_t index, const std::string & userDescription) CISST_THROW(std::out_of_range);
 
 #if CISST_HAS_JSON
-template <> void CISST_EXPORT cmnDataJSON<mtsGenericObject>::SerializeText(const mtsGenericObject & data, Json::Value & jsonValue);
-template <> void CISST_EXPORT cmnDataJSON<mtsGenericObject>::DeSerializeText(mtsGenericObject & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
+template <> void CISST_EXPORT cmnDataJSON<mtsGenericObject, void>::SerializeText(const mtsGenericObject & data, Json::Value & jsonValue);
+template <> void CISST_EXPORT cmnDataJSON<mtsGenericObject, void>::DeSerializeText(mtsGenericObject & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);
 #endif // CISST_HAS_JSON
 
 #endif // _mtsGenericObject_h

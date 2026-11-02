@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmForceCartesianGetQtWidget.h>
 
-#include <cisstVector/vctForceTorqueQtWidget.h>
+#include <cisstVectorQt/vctForceTorqueQtWidget.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include <QVBoxLayout>

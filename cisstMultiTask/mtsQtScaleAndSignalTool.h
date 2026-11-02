@@ -24,8 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 #include <QTreeWidget>
 
-#include <cisstVector/vctPlot2DOpenGLQtWidget.h>
+#include <cisstVectorQt/vctPlot2DOpenGLQtWidget.h>
 
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 // Always include last

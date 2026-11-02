@@ -20,7 +20,7 @@ add_library (cisstMultiTaskTestsLib
              mtsTestComponents.h
              mtsTestComponents.cpp)
 set_property (TARGET cisstMultiTaskTestsLib PROPERTY FOLDER "cisstMultiTask/tests")
-target_link_libraries (cisstMultiTaskTestsLib cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstTestsDriver)
+target_link_libraries (cisstMultiTaskTestsLib cisstCommon cisstOSAbstraction cisstMultiTask cisstTestsDriver)
 
 # all source files
 set (SOURCE_FILES
@@ -31,11 +31,7 @@ set (SOURCE_FILES
      mtsStateTableTest.cpp
      mtsTaskTest.cpp
      mtsTypesTest.cpp
-     mtsVectorTest.cpp
-     mtsFixedSizeVectorTest.cpp
      mtsMacrosTest.cpp
-     mtsMatrixTest.cpp
-     mtsSerializationTest.cpp
      mtsSocketProxyTest.cpp
      mtsManagerLocalTest.cpp
      )
@@ -49,11 +45,7 @@ set (HEADER_FILES
      mtsStateTableTest.h
      mtsTaskTest.h
      mtsTypesTest.h
-     mtsVectorTest.h
-     mtsFixedSizeVectorTest.h
      mtsMacrosTest.h
-     mtsMatrixTest.h
-     mtsSerializationTest.h
      mtsSocketProxyTest.h
      mtsManagerLocalTest.h
     )
@@ -68,7 +60,6 @@ target_link_libraries (cisstMultiTaskTests
   cisstTestsDriver
   cisstMultiTaskTestsLib
   cisstCommon
-  cisstVector
   cisstOSAbstraction
   cisstMultiTask)
 

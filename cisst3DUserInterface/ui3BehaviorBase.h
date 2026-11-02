@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
-#include <cisstMultiTask/mtsStateData.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstParameterTypes/prmEventButton.h>
 #include <cisstStereoVision/svlFilterBase.h>

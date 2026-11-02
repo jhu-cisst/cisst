@@ -6,10 +6,6 @@ cisst Libraries overview
 +======================+=================================================================================================================+==========+
 | cisstCommon          | Common infrastructure such as logging, class and object registries, serialization and de-serialization, etc.    | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
-| cisstVector          | Basic linear algebra and spatial transformations in two dimensions (2D) and three dimensions (3D)               | Stable   |
-+----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
-| cisstNumerical       | Thread-safe numerical methods (relies on LAPACK)                                                                | Stable   |
-+----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
 | cisstInteractive     | C++ classes and Python scripts for the Interactive Research Environment (IRE)                                   | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
 | cisstOSAbstraction   | Operating system services (e.g., threads, mutual exclusion, etc.) for Windows, Linux, Mac OS X, RTAI/Linux, ... | Stable   |

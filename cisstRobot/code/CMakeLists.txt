@@ -10,140 +10,86 @@
 # --- end cisst license ---
 
 # set dependencies
-set (DEPENDENCIES cisstCommon cisstVector cisstNumerical)
+set (DEPENDENCIES cisstCommon)
 
-if (CISST_HAS_CISSTNETLIB)
+set (SOURCE_FILES
+      kdl_utilities.cpp
 
-  set (SOURCE_FILES
-       robFunction.cpp
-       robFunctionSO3.cpp
-       robFunctionSE3.cpp
-       robFunctionRn.cpp
+      robJacobian.cpp
+      robLinkDynamics.cpp
+      robLinkKinematics.cpp
+      robModifiedDH.cpp
+      robStandardDH.cpp
+    )
 
-       robLinearRn.cpp
-       robQuintic.cpp
-       robQLQRn.cpp
+# all header files
+set (HEADER_FILES
+      robExport.h
 
-       robSLERP.cpp
-       robCubicSO3.cpp
+      kdl_utilities.h
 
-       robLinearSE3.cpp
-       #  robCSCSO3.cpp
+      robJacobian.h
+      robLinkDynamics.h
+      robLinkKinematics.h
+      robModifiedDH.h
+      robStandardDH.h
+    )
 
-       robLSPB.cpp
+option (CISST_ROB_HAS_REFLEXXES_TYPEII "Compile cisstRobot with TypeIIRML wrappers" ON)
 
-       robJoint.cpp
-       robMass.cpp
+if (CISST_ROB_HAS_REFLEXXES_TYPEII)
+  include (ExternalProject)
 
-       robKinematics.cpp
-       robDH.cpp
-       robHayati.cpp
-       robModifiedDH.cpp
-       robModifiedHayati.cpp
-       robLink.cpp
-       robManipulator.cpp
+  # download and build options
+  set (cisstReflexxesTypeII_PREFIX Reflexxes)
+  set (cisstReflexxesTypeII_GIT_REPOSITORY https://github.com/jhu-cisst-external/ReflexxesTypeII.git)
+  set (cisstReflexxesTypeII_GIT_TAG 1.2.6.p2)
 
-#    robComputedTorque.cpp
-#    robPD.cpp
-
-      )
-
-  # all header files
-  set (HEADER_FILES
-       robExport.h
-
-       robFunction.h
-       robFunctionRn.h
-       robFunctionSE3.h
-       robFunctionSO3.h
-
-       robLinearRn.h
-       robLinearSE3.h
-       robQuintic.h
-       robQLQRn.h
-       robSLERP.h
-       robCubicSO3.h
-       #  robCSCSO3.h
-
-       robLSPB.h
-
-       robMass.h
-       robJoint.h
-
-       robKinematics.h
-       robDH.h
-       robHayati.h
-       robModifiedDH.h
-       robModifiedHayati.h
-       robLink.h
-       robManipulator.h
-
-#    robControllerJoints.h
-#    robComputedTorque.h
-#    robPD.h
-
-      )
-
-  option (CISST_ROB_HAS_REFLEXXES_TYPEII "Compile cisstRobot with TypeIIRML wrappers" ON)
-
-  if (CISST_ROB_HAS_REFLEXXES_TYPEII)
-    include (ExternalProject)
-
-    # download and build options
-    set (cisstReflexxesTypeII_PREFIX Reflexxes)
-    set (cisstReflexxesTypeII_GIT_REPOSITORY https://github.com/jhu-cisst-external/ReflexxesTypeII.git)
-    set (cisstReflexxesTypeII_GIT_TAG 1.2.6.p2)
-
-    ExternalProject_Add (cisstReflexxesTypeIIExternal
-                         PREFIX ${cisstReflexxesTypeII_PREFIX}
-                         GIT_REPOSITORY    ${cisstReflexxesTypeII_GIT_REPOSITORY}
-                         GIT_TAG           ${cisstReflexxesTypeII_GIT_TAG}
-                         CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
-                                          -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
-                                          -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
-                                          -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                                          -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_TOOLCHAIN_FILE}
-                                          -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstReflexxesTypeII
-                                          -DLIBRARY_OUTPUT_PATH:FILEPATH=${LIBRARY_OUTPUT_PATH}
-                         INSTALL_DIR ${cisst_BINARY_DIR}/cisstReflexxesTypeII
-                         UPDATE_COMMAND ""
-                         )
-    # set all cisstReflexxesTypeII variables based on install directory
-    set (cisstReflexxesTypeII_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstReflexxesTypeII/include/ReflexxesTypeII")
-    set (cisstReflexxesTypeII_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib")
-    file (MAKE_DIRECTORY "${cisstReflexxesTypeII_INCLUDE_DIR}")
-    set (cisstReflexxesTypeII_LIBRARIES ReflexxesTypeII)
-    # add wrappers to cisstRobot
-    set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
-    set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
-    # install for CPack
-    if (WIN32)
-      install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/$<CONFIG>/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
-               COMPONENT cisstRobot
-               DESTINATION lib
-               OPTIONAL)
-    else ()
-      install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
-               COMPONENT cisstRobot
-               DESTINATION lib
-               OPTIONAL)
-    endif ()
+  ExternalProject_Add (cisstReflexxesTypeIIExternal
+                        PREFIX ${cisstReflexxesTypeII_PREFIX}
+                        GIT_REPOSITORY    ${cisstReflexxesTypeII_GIT_REPOSITORY}
+                        GIT_TAG           ${cisstReflexxesTypeII_GIT_TAG}
+                        CMAKE_CACHE_ARGS -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
+                                        -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
+                                        -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
+                                        -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                                        -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_TOOLCHAIN_FILE}
+                                        -DCMAKE_INSTALL_PREFIX:FILEPATH=${cisst_BINARY_DIR}/cisstReflexxesTypeII
+                                        -DLIBRARY_OUTPUT_PATH:FILEPATH=${LIBRARY_OUTPUT_PATH}
+                        INSTALL_DIR ${cisst_BINARY_DIR}/cisstReflexxesTypeII
+                        UPDATE_COMMAND ""
+                        )
+  # set all cisstReflexxesTypeII variables based on install directory
+  set (cisstReflexxesTypeII_INCLUDE_DIR "${cisst_BINARY_DIR}/cisstReflexxesTypeII/include/ReflexxesTypeII")
+  set (cisstReflexxesTypeII_LIBRARY_DIRS "${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib")
+  file (MAKE_DIRECTORY "${cisstReflexxesTypeII_INCLUDE_DIR}")
+  set (cisstReflexxesTypeII_LIBRARIES ReflexxesTypeII)
+  # add wrappers to cisstRobot
+  set (SOURCE_FILES ${SOURCE_FILES} robReflexxes.cpp)
+  set (HEADER_FILES ${HEADER_FILES} robReflexxes.h)
+  # install for CPack
+  if (WIN32)
+    install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/$<CONFIG>/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
+              COMPONENT cisstRobot
+              DESTINATION lib
+              OPTIONAL)
+  else ()
+    install (FILES ${cisst_BINARY_DIR}/cisstReflexxesTypeII/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ReflexxesTypeII${CMAKE_SHARED_LIBRARY_SUFFIX}
+              COMPONENT cisstRobot
+              DESTINATION lib
+              OPTIONAL)
   endif ()
+endif ()
 
-  cisst_add_library (LIBRARY cisstRobot
-                     FOLDER cisstRobot
-                     DEPENDENCIES ${DEPENDENCIES}
-                     SOURCE_FILES ${SOURCE_FILES}
-                     HEADER_FILES ${HEADER_FILES})
+cisst_add_library (LIBRARY cisstRobot
+                    FOLDER cisstRobot
+                    DEPENDENCIES ${DEPENDENCIES}
+                    SOURCE_FILES ${SOURCE_FILES}
+                    HEADER_FILES ${HEADER_FILES})
 
-  if (CISST_ROB_HAS_REFLEXXES_TYPEII)
-    add_dependencies (cisstRobot cisstReflexxesTypeIIExternal)
-    target_include_directories (cisstRobot PRIVATE ${cisstReflexxesTypeII_INCLUDE_DIR})
-    target_link_directories (cisstRobot PRIVATE ${cisstReflexxesTypeII_LIBRARY_DIRS})
-    target_link_libraries (cisstRobot ${cisstReflexxesTypeII_LIBRARIES})
-  endif ()
-
-else (CISST_HAS_CISSTNETLIB)
-  message ("cisstRobot requires cisstNumerical to be compiled with the option CISST_HAS_CISSTNETLIB")
-  set (CISST_cisstRobot OFF CACHE BOOL "Build cisstRobot" FORCE)
-endif (CISST_HAS_CISSTNETLIB)
+if (CISST_ROB_HAS_REFLEXXES_TYPEII)
+  add_dependencies (cisstRobot cisstReflexxesTypeIIExternal)
+  target_include_directories (cisstRobot PRIVATE ${cisstReflexxesTypeII_INCLUDE_DIR})
+  target_link_directories (cisstRobot PRIVATE ${cisstReflexxesTypeII_LIBRARY_DIRS})
+  target_link_libraries (cisstRobot ${cisstReflexxesTypeII_LIBRARIES})
+endif ()

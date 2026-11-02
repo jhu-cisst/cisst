@@ -13,11 +13,8 @@
 project (cisstRobotLibs)
 
 add_subdirectory (code)
-add_subdirectory (applications)
+
+target_link_libraries(cisstRobot Eigen3::Eigen orocos-kdl)
 
 # SWIG Python wrappers
 cisst_offer_python (cisstRobot)
-
-# build examples and tests, add an option to skip them
-cisst_offer_examples (cisstRobot)
-cisst_offer_tests (cisstRobot)

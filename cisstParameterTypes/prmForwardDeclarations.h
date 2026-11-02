@@ -34,6 +34,8 @@ typedef enum Blocking {
 } prmBlocking;
 
 #include <cisstCommon/cmnDataFunctionsEnumMacros.h>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
+
 CMN_DATA_SPECIALIZATION_FOR_ENUM(Blocking, int);
 #if CISST_HAS_JSON
 CMN_DECLARE_DATA_FUNCTIONS_JSON_FOR_ENUM(Blocking);

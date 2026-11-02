@@ -2,8 +2,7 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctTransformationTypes.h>
-#include <cisstVector/vctFixedSizeVectorRef.h>
+#include <Eigen/Dense>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -21,8 +20,8 @@ class {
 
     member {
         name Velocity;
-        type vct6;
-        default vct6(0.0);
+        type Eigen::Vector<double, 6>;
+        default Eigen::Vector<double, 6>::Zero();
         description 6D velocity vector (linear xyz, angular xyz);
     }
 
@@ -51,23 +50,28 @@ class {
         CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     public:
-        inline vctFixedSizeVectorRef<double, 3, 1> VelocityLinear(void) {
-            return vctFixedSizeVectorRef<double, 3, 1>(mVelocity.Pointer(0));
+        inline Eigen::Ref<Eigen::Vector3d> VelocityLinear(void) {
+            return mVelocity.head<3>();
         }
-        inline vctFixedSizeConstVectorRef<double, 3, 1> VelocityLinear(void) const {
-            return vctFixedSizeConstVectorRef<double, 3, 1>(mVelocity.Pointer(0));
+
+        inline Eigen::Ref<const Eigen::Vector3d> VelocityLinear(void) const {
+            return mVelocity.head<3>();
         }
-        inline void SetVelocityLinear(const vct3 & v) {
-            VelocityLinear().Assign(v);
+
+        inline void SetVelocityLinear(const Eigen::Vector3d& v) {
+            VelocityLinear() = v;
         }
-        inline vctFixedSizeVectorRef<double, 3, 1> VelocityAngular(void) {
-            return vctFixedSizeVectorRef<double, 3, 1>(mVelocity.Pointer(3));
+
+        inline Eigen::Ref<Eigen::Vector3d> VelocityAngular(void) {
+            return mVelocity.tail<3>();
         }
-        inline vctFixedSizeConstVectorRef<double, 3, 1> VelocityAngular(void) const {
-            return vctFixedSizeConstVectorRef<double, 3, 1>(mVelocity.Pointer(3));
+
+        inline Eigen::Ref<const Eigen::Vector3d> VelocityAngular(void) const {
+            return mVelocity.tail<3>();
         }
-        inline void SetVelocityAngular(const vct3 & v) {
-            VelocityAngular().Assign(v);
+
+        inline void SetVelocityAngular(const Eigen::Vector3d& v) {
+            VelocityAngular() = v;
         }
     }
 }

@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _ui3MenuButton_h
 
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
 

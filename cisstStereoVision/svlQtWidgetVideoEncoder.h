@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlRequiredInterfaces.h>
 #include <cisstStereoVision/svlVideoIO.h>
 #include <cisstMultiTask/mtsComponent.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
 
 #include <QObject>
 

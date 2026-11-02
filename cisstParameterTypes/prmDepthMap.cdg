@@ -2,9 +2,10 @@
 // ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 
 inline-header {
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctDynamicNArray.h>
 #include <cisstMultiTask/mtsGenericObject.h>
+
+#include <Eigen/Dense>
+
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 }
@@ -33,12 +34,12 @@ class {
 
     member {
         name Points;
-        type vctDynamicVector<float>;
+        type Eigen::VectorXf;
     }
 
     member {
         name Color;
-        type vctDynamicVector<char>;
+        type Eigen::VectorX<char>;
     }
 
     member {

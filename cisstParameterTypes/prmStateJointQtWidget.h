@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QWidget>
 
-#include <cisstVector/vctQtWidgetDynamicVector.h>
+#include <cisstVectorQt/vctQtWidgetDynamicVector.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmStateJoint.h>
 #include <cisstParameterTypes/prmConfigurationJoint.h>
@@ -70,7 +70,7 @@ protected:
     prmConfigurationJoint mConfiguration;
     double mPrismaticFactor, mRevoluteFactor;
     bool mNeedsConversion;
-    vctDoubleVec mPositionFactors, mVelocityFactors, mTempVector;
+    Eigen::VectorXd mPositionFactors, mVelocityFactors, mTempVector;
 };
 
 #endif // _prmStateJointQtWidget_h

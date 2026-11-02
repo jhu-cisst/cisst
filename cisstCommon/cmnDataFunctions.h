@@ -45,8 +45,11 @@ http://www.cisst.org/cisst/license.txt.
   overloading the required cmnData class.
 
   Error handling is based on standard exceptions using std::runtime_error.
+
+  Note: the extra default-void template parameter is not normally used but
+  added to support SFINAE-based template deduction, e.g. for Eigen types.
 */
-template <typename _elementType>
+template <typename _elementType, typename = void>
 class cmnData
 {
 public:

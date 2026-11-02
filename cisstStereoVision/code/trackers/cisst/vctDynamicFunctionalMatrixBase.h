@@ -65,11 +65,11 @@ Later:
 */
 
 #include <cisstCommon/cmnTypeTraits.h>
-#include <cisstVector/vctContainerTraits.h>
-#include <cisstVector/vctDynamicVectorRef.h>
-#include <cisstVector/vctDynamicConstVectorRef.h>
-#include <cisstVector/vctDynamicVector.h>
-#include <cisstVector/vctDynamicMatrixLoopEngines.h>
+#include <cisstVectorQt/vctContainerTraits.h>
+#include <cisstVectorQt/vctDynamicVectorRef.h>
+#include <cisstVectorQt/vctDynamicConstVectorRef.h>
+#include <cisstVectorQt/vctDynamicVector.h>
+#include <cisstVectorQt/vctDynamicMatrixLoopEngines.h>
 
 #include <iostream>
 #include <iomanip>

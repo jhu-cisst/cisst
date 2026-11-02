@@ -28,11 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _robPython_h
 
 #include <cisstCommon/cmnPython.h>
-#include <cisstVector/vctPython.h>
 
-#include <cisstRobot/robManipulator.h>
-#include <cisstRobot/robDH.h>
+#include <cisstRobot/robLinkDynamics.h>
 #include <cisstRobot/robModifiedDH.h>
-#include <cisstRobot/robHayati.h>
 
 #endif // _robPython_h

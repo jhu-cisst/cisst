@@ -90,43 +90,40 @@ cdgScope::Type cdgClass::GetScope(void) const
 }
 
 
-cdgScope * cdgClass::Create(size_t lineNumber) const
+std::shared_ptr<cdgScope> cdgClass::Create(size_t lineNumber) const
 {
-    return new cdgClass(lineNumber);
+    return std::make_shared<cdgClass>(lineNumber);
 }
 
 
 bool cdgClass::Validate(std::string & CMN_UNUSED(errorMessage))
 {
-    cdgMember * memberPtr;
-    cdgBaseClass * baseClassPtr;
-    cdgTypedef * typedefPtr;
-    cdgEnum * enumPtr;
-    const ScopesContainer::iterator end = Scopes.end();
-    ScopesContainer::iterator iter;
-    for (iter = Scopes.begin();
-         iter != end;
-         ++iter) {
-        memberPtr = dynamic_cast<cdgMember *>(*iter);
+    for (const auto& item : Scopes) {
+        cdgMember* memberPtr = dynamic_cast<cdgMember*>(item.get());
         if (memberPtr) {
             Members.push_back(memberPtr);
-        } else {
-            baseClassPtr = dynamic_cast<cdgBaseClass *>(*iter);
-            if (baseClassPtr) {
-                BaseClasses.push_back(baseClassPtr);
-            } else {
-                typedefPtr = dynamic_cast<cdgTypedef *>(*iter);
-                if (typedefPtr) {
-                    Typedefs.push_back(typedefPtr);
-                } else {
-                    enumPtr = dynamic_cast<cdgEnum *>(*iter);
-                    if (enumPtr) {
-                        Enums.push_back(enumPtr);
-                    }
-                }
-            }
+            continue;
+        }
+    
+        cdgBaseClass* baseClassPtr = dynamic_cast<cdgBaseClass*>(item.get());
+        if (baseClassPtr) {
+            BaseClasses.push_back(baseClassPtr);
+            continue;
+        }
+
+        cdgTypedef* typedefPtr = dynamic_cast<cdgTypedef*>(item.get());
+        if (typedefPtr) {
+            Typedefs.push_back(typedefPtr);
+            continue;
+        }
+
+        cdgEnum* enumPtr = dynamic_cast<cdgEnum*>(item.get());
+        if (enumPtr) {
+            Enums.push_back(enumPtr);
+            continue;
         }
     }
+
     for (size_t index = 0; index < Members.size(); index++) {
         Members[index]->ClassName = this->ClassWithNamespace();
     }
@@ -524,7 +521,7 @@ void cdgClass::GenerateDataFunctionsHeader(std::ostream & outputStream) const
     const std::string name = this->ClassWithNamespace();
     const std::string attribute = this->GetFieldValue("attribute");
     outputStream << "/* data functions */" << std::endl
-                 << "template <> class cmnData<" << name << " > {" << std::endl
+                 << "template <> class cmnData<" << name << " , void> {" << std::endl
                  << "public: " << std::endl
                  << "    enum {IS_SPECIALIZED = 1};" << std::endl
                  << "    typedef " << name << " DataType;" << std::endl
@@ -567,8 +564,8 @@ void cdgClass::GenerateDataFunctionsHeader(std::ostream & outputStream) const
                  << "    return outputStream;" << std::endl
                  << "}" << std::endl
                  << "#if CISST_HAS_JSON" << std::endl
-                 << "template <> void " << attribute << " cmnDataJSON<" << name << " >::SerializeText(const " << name << " & data, Json::Value & jsonValue);" << std::endl
-                 << "template <> void " << attribute << " cmnDataJSON<" << name << " >::DeSerializeText(" << name << " & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);" << std::endl
+                 << "template <> void " << attribute << " cmnDataJSON<" << name << " , void>::SerializeText(const " << name << " & data, Json::Value & jsonValue);" << std::endl
+                 << "template <> void " << attribute << " cmnDataJSON<" << name << " , void>::DeSerializeText(" << name << " & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error);" << std::endl
                  << "#endif // CISST_HAS_JSON" << std::endl;
 }
 
@@ -866,7 +863,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
 
     outputStream << "#if CISST_HAS_JSON" << std::endl
                  << "template <>" << std::endl
-                 << "void cmnDataJSON<" << className << " >::SerializeText(const " << className << " & data, Json::Value & jsonValue) {" << std::endl
+                 << "void cmnDataJSON<" << className << " , void>::SerializeText(const " << className << " & data, Json::Value & jsonValue) {" << std::endl
                  << "    data.SerializeTextJSON(jsonValue);" << std::endl
                  << "}" << std::endl
                  << "void " << className << "::SerializeTextJSON(Json::Value & " << CMN_UNUSED_wrapped("jsonValue") << ") const {" << std::endl;
@@ -886,7 +883,7 @@ void cdgClass::GenerateDataFunctionsCode(std::ostream & outputStream) const
     }
     outputStream << "}" << std::endl
                  << "template<>" << std::endl
-                 << "void cmnDataJSON<" << className << " >::DeSerializeText(" << className << " & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {" << std::endl
+                 << "void cmnDataJSON<" << className << ",  void>::DeSerializeText(" << className << " & data, const Json::Value & jsonValue) CISST_THROW(std::runtime_error) {" << std::endl
                  << "    data.DeSerializeTextJSON(jsonValue);" << std::endl
                  << "}" << std::endl
                  << "void " << className << "::DeSerializeTextJSON(const Json::Value & " << CMN_UNUSED_wrapped("jsonValue") << ") CISST_THROW(std::runtime_error) {" << std::endl;

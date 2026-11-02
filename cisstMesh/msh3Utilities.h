@@ -40,10 +40,10 @@
 #include <string>
 #include <regex>
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
-#include <cisstVector/vctDynamicVectorTypes.h>
-#include <cisstVector/vctTransformationTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctFixedSizeMatrixTypes.h>
+#include <cisstVectorQt/vctDynamicVectorTypes.h>
+#include <cisstVectorQt/vctTransformationTypes.h>
 
 // get current working directory
 std::string getcwd_str();

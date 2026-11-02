@@ -23,9 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlTypes.h>
 #include <cisstStereoVision/svlTypes.h>
-#include <cisstVector/vctFixedSizeMatrixTypes.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstVectorQt/vctFixedSizeMatrixTypes.h>
+#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
+#include <cisstVectorQt/vctDynamicMatrixTypes.h>
 #include <string>
 
 #if CISST_SVL_HAS_CISSTNETLIB

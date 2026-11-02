@@ -44,7 +44,6 @@ set_property (TARGET cisstParameterTypesTests PROPERTY FOLDER "cisstParameterTyp
 target_link_libraries (cisstParameterTypesTests
   cisstTestsDriver
   cisstParameterTypes
-  cisstVector
   cisstCommon
   cisstMultiTask)
 

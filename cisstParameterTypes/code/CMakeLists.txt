@@ -60,9 +60,7 @@ set (SOURCE_FILES
   prmForceCartesianGet.cpp
   prmForceCartesianSet.cpp
 
-  prmActuatorState.cpp
   prmRobotState.cpp
-  prmActuatorParameters.cpp
 
   prmInputDataConverter.cpp
   prmOperatingState.cpp
@@ -85,9 +83,7 @@ set (HEADER_FILES
   prmForceCartesianSet.h
 
   prmMaskedVector.h
-  prmActuatorState.h
   prmRobotState.h
-  prmActuatorParameters.h
   prmGainParameters.h
 
   prmJointType.h
@@ -99,7 +95,7 @@ set (HEADER_FILES
 cisst_add_library (
   LIBRARY cisstParameterTypes
   FOLDER cisstParameterTypes
-  DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask
+  DEPENDENCIES cisstCommon cisstOSAbstraction cisstMultiTask
   SOURCE_FILES ${SOURCE_FILES}
   HEADER_FILES ${HEADER_FILES}
   ADDITIONAL_SOURCE_FILES ${cisstParameterTypes_CISST_DG_SRCS}

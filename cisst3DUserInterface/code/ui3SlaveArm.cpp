@@ -20,7 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisst3DUserInterface/ui3SlaveArm.h>
 
-#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisst3DUserInterface/ui3Manager.h>
 

@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGetChar.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsComponentViewer.h>
 

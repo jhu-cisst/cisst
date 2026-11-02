@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlPython_h
 
 #include <cisstCommon/cmnPython.h>
-#include <cisstVector/vctPython.h>
+#include <cisstVectorQt/vctPython.h>
 #include <cisstMultiTask/mtsPython.h>
 
 #include <cisstStereoVision/svlInitializer.h>
@@ -50,7 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 //#include <cisstStereoVision/svlFilterRGBSwapper.h>
 
 #include <cisstStereoVision/svlSampleImage.h>
-#include <cisstVector/vctDynamicMatrixRef.h>
+#include <cisstVectorQt/vctDynamicMatrixRef.h>
 #include <cisstStereoVision/svlSampleImageCustom.h>
 #include <cisstStereoVision/svlImageProcessing.h>
 #include "code/svlImageProcessingHelper.h"
