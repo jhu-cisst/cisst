@@ -13,7 +13,6 @@
 
 # all source files
 set (SOURCE_FILES
-     osaMutexTest.cpp
      osaPipeExecTest.cpp
      osaSocketTest.cpp
      osaTimeServerTest.cpp
@@ -24,7 +23,6 @@ set (SOURCE_FILES
 
 # all header files
 set (HEADER_FILES
-     osaMutexTest.h
      osaPipeExecTest.h
      osaSocketTest.h
      osaTimeServerTest.h

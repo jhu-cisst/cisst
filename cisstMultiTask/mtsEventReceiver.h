@@ -83,9 +83,10 @@ http://www.cisst.org/cisst/license.txt.
   interface mailbox.
 */
 
+#include <mutex>
+
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstOSAbstraction/osaForwardDeclarations.h>
-#include <cisstOSAbstraction/osaMutex.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -128,7 +129,7 @@ protected:
     //      attempt to change WaitState from EVENT_RECEIVER_PREPARING to EVENT_RECEIVER_SIGNALED.
     enum WaitStates { EVENT_RECEIVER_IDLE, EVENT_RECEIVER_PREPARING, EVENT_RECEIVER_WAITING, EVENT_RECEIVER_SIGNALED };
     WaitStates WaitState;
-    osaMutex WaitMutex;
+    std::mutex WaitMutex;
 
     bool CheckRequired() const;
     void CheckEventSignal();

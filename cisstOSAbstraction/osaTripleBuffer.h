@@ -19,10 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#include <mutex>
+
 #include <cisstConfig.h> // to define CISST_OS and CISST_COMPILER
 
 #include <cisstCommon/cmnAssert.h>
-#include <cisstOSAbstraction/osaMutex.h>
 
 /*!  Triple buffer to implement a thread safe, lock free, single
   reader single writer container.  This relies on a LIFO circular
@@ -40,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
   on valid memory slots or allocate the memory itself (see
   constructors).
 
-  The implementation relies on a mutex (using osaMutex) to make sure
+  The implementation relies on a mutex to make sure
   the BeginRead, EndRead, BeginWrite and EndWrite methods are thread
   safe.  The mutex is used for very brief
   operations so there shouldn't be any long wait times.
@@ -83,7 +84,7 @@ class osaTripleBuffer
     bool LastCompare;
 
     // to make sure the ReadNode is thread safe
-    osaMutex Mutex;
+    std::mutex Mutex;
 
 
 public:
@@ -190,16 +191,14 @@ public:
     /*! Method used to find and lock the read node in the triple
       buffer.  To access the actual memory, use GetReadPointer. */
     inline void BeginRead(void) {
-        Mutex.Lock(); {
-            this->ReadNode = this->LastWriteNode;
-        } Mutex.Unlock();
+        std::scoped_lock lock(Mutex);
+        this->ReadNode = this->LastWriteNode;
     }
 
     /*! Method to unlock the read node. */
     inline void EndRead(void) {
-        Mutex.Lock(); {
-            this->ReadNode = 0;
-        } Mutex.Unlock();
+        std::scoped_lock lock(Mutex);
+        this->ReadNode = 0;
     }
 
 
@@ -207,12 +206,11 @@ public:
       buffer.  To access the actual memory, use GetReadPointer. */
     inline void BeginWrite(void) {
         this->WriteNode = this->LastWriteNode->Next;
-        Mutex.Lock(); {
-            LastCompare = (this->WriteNode == this->ReadNode);
-            if (LastCompare) {
-                this->WriteNode = this->WriteNode->Next;
-            }
-        } Mutex.Unlock();
+        std::scoped_lock lock(Mutex);
+        LastCompare = (this->WriteNode == this->ReadNode);
+        if (LastCompare) {
+            this->WriteNode = this->WriteNode->Next;
+        }
     }
 
 

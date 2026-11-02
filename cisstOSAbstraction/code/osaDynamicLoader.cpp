@@ -18,17 +18,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 
+#include <cisstConfig.h>
+
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
-
-#if (CISST_OS == CISST_WINDOWS)
-const char DOS_SEP = '\\';  // path separator for DOS/Windows
-#endif
-
-const char UNIX_SEP = '/';  // path separator for UNIX
-
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
@@ -38,7 +33,6 @@ inline void CloseLibrary(void *handle)
        { FreeLibrary((HMODULE)handle); }
 inline int GetTheError()
        { return GetLastError(); }
-const char CURRENT_SEP = DOS_SEP;
 
 #else
 // Everything else (hopefully) uses the dlopen interface. This is
@@ -51,34 +45,22 @@ inline void CloseLibrary(void *handle)
        { dlclose(handle); }
 inline const char *GetTheError()
        { return dlerror(); }
-const char CURRENT_SEP = UNIX_SEP;
 #endif
 
-bool osaDynamicLoader::Load(const char *file, const char *path)
+bool osaDynamicLoader::Load(const std::string& file, const std::filesystem::path& path)
 {
     // Don't call reset in case any objects created with the previous library still exist.
     // Reset();
-    std::string fullpath;
+    std::filesystem::path fullpath;
     // if the file exists, use it as is...
-    if (cmnPath::Exists(file)) {
+    if (std::filesystem::exists(file)) {
         fullpath = file;
     } else {
-        // check if a path has been provided
-        if (path) {
-            fullpath = path;
-            // Add trailing separator if not already specified.
-            if (fullpath[fullpath.size()-1] != CURRENT_SEP)
-                fullpath.append(1, CURRENT_SEP);
-        }
-        fullpath.append(CISST_SHARED_LIBRARY_PREFIX);
-        fullpath.append(file);
-        fullpath.append(CISST_SHARED_LIBRARY_SUFFIX);
+        // Add prefix + .so/.dll extension, append to path (which may be empty)
+        std::string library_name = cmnPath::SharedLibrary(file);
+        fullpath = path / library_name;
     }
-#if (CISST_OS == CISST_WINDOWS)
-    // Microsoft claims that LoadLibrary() requires backslashes, so make sure we have them
-    // even though it seems to work with forward slashes.
-    replace(fullpath.begin(), fullpath.end(), UNIX_SEP, CURRENT_SEP);
-#endif
+
     handle = OpenLibrary(fullpath.c_str());
     if (!handle) {
         CMN_LOG_INIT_ERROR << "osaDynamicLoader: cannot open library " << fullpath << ", error = " << GetTheError() << std::endl;

@@ -25,11 +25,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsTask_h
 #define _mtsTask_h
 
+#include <mutex>
 #include <stdexcept>
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaThread.h>
-#include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsStateTable.h>
@@ -82,7 +82,7 @@ protected:
 
     /*! Mutex used when changing task states. Do not change this directly, use the
         ChangeState method instead. */
-    osaMutex StateChange;
+    std::mutex StateChange;
 
     /*! Signal for caller to wait on task state changes. */
     osaThreadSignal StateChangeSignal;

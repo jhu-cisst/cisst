@@ -21,7 +21,6 @@ set (SOURCE_FILES
      osaDynamicLoader.cpp
      osaDynamicLoaderAndFactory.cpp
      osaGetTime.cpp
-     osaMutex.cpp
      osaPipeExec.cpp
      osaSerialPort.cpp
      osaSleep.cpp
@@ -43,7 +42,6 @@ set (HEADER_FILES
      osaDynamicLoaderAndFactory.h
      osaExport.h
      osaGetTime.h
-     osaMutex.h
      osaPipeExec.h
      osaSerialPort.h
      osaSleep.h

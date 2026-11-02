@@ -212,9 +212,10 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     if (!(ExecIn && ExecIn->GetConnectedInterface()))
         ChangeStateEvent(mtsComponentState(newState));
 
-    StateChange.Lock();
-    this->State = newState;
-    StateChange.Unlock();
+    {
+        std::scoped_lock lock(StateChange);
+        this->State = newState;
+    }
 
     StateChangeSignal.Raise();
 
@@ -229,50 +230,48 @@ bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
     if (this->State == desiredState) {
         return true;
     }
+
     if (CheckForOwnThread()) {
         // This shouldn't happen
         CMN_LOG_CLASS_INIT_WARNING << "WaitForState(" << desiredState << "): called from self for task \""
                                    << this->GetName() << "\"" << std::endl;
-    } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waiting for task \"" << this->GetName() << "\" to enter state \""
-                                   << desiredState << "\"" << std::endl;
-        double curTime = osaGetTime();
-        double startTime = curTime;
-        double endTime = startTime + timeout;
-        while (timeout > 0) {
+        return false;
+    }
+    
+    CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waiting for task \"" << this->GetName() << "\" to enter state \""
+                                << desiredState << "\"" << std::endl;
+    double curTime = osaGetTime();
+    double startTime = curTime;
+    double endTime = startTime + timeout;
+    while (timeout > 0) {
 #if (CISST_OS == CISST_LINUX_XENOMAI)
-            osaSleep(1 * cmn_ms);
+        osaSleep(1 * cmn_ms);
 #endif
-            StateChangeSignal.Wait(timeout);
-            curTime = osaGetTime();
-            if (this->State == desiredState) {
-                break;
-            }
-            timeout = endTime - curTime;
-        }
-
-        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+        StateChangeSignal.Wait(timeout);
+        curTime = osaGetTime();
         if (this->State == desiredState) {
-            if (LCM->IsLogAllowed()) {
-                CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
-                                        << " seconds." << std::endl;
-            }
-        } else {
-            if (LCM->IsLogAllowed()) {
-                // some cases are not really errors
-                if ((desiredState == mtsComponentState::READY) && (this->State == mtsComponentState::ACTIVE)) {
-                    CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: task \"" << this->GetName()
-                                               << "\" did not reach state \"" << desiredState
-                                               << "\", current state is \"" << this->State << "\"" << std::endl;
+            break;
+        }
+        timeout = endTime - curTime;
+    }
 
-                } else {
-                    CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task \"" << this->GetName()
-                                             << "\" did not reach state \"" << desiredState
-                                             << "\", current state is \"" << this->State << "\"" << std::endl;
-                }
-            }
+    if (this->State == desiredState) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
+                                << " seconds." << std::endl;
+    } else {
+        // some cases are not really errors
+        if ((desiredState == mtsComponentState::READY) && (this->State == mtsComponentState::ACTIVE)) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: task \"" << this->GetName()
+                                        << "\" did not reach state \"" << desiredState
+                                        << "\", current state is \"" << this->State << "\"" << std::endl;
+
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task \"" << this->GetName()
+                                        << "\" did not reach state \"" << desiredState
+                                        << "\", current state is \"" << this->State << "\"" << std::endl;
         }
     }
+
     return (this->State == desiredState);
 }
 
@@ -429,16 +428,14 @@ void mtsTask::ProcessManagerCommandsIfNotActive()
 {
     if (InterfaceProvidedToManager) {
         // Lock the StateChange mutex so that the task state does not change
-        StateChange.Lock();
+        std::scoped_lock lock(StateChange);
         if (!IsRunning()) {
             CMN_LOG_CLASS_INIT_VERBOSE << "Task " << this->GetName() << " not active, processing internal mailbox" << std::endl;
             InterfaceProvidedToManager->ProcessMailBoxes();
-        }
-        else { // Wake up the thread just in case (e.g., for mtsTaskFromSignal)
+        } else { // Wake up the thread just in case (e.g., for mtsTaskFromSignal)
             CMN_LOG_CLASS_INIT_VERBOSE << "Task " << this->GetName() << " active, not processing internal mailbox" << std::endl;
             this->Thread.Wakeup();
         }
-        StateChange.Unlock();
     }
 }
 

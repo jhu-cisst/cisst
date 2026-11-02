@@ -11,10 +11,6 @@ Key classes
    :project: cisst
    :members:
 
-.. doxygenclass:: osaMutex
-   :project: cisst
-   :members:
-
 .. doxygenclass:: osaCriticalSection
    :project: cisst
    :members:

@@ -22,21 +22,15 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaCriticalSection_h
 #define _osaCriticalSection_h
 
+#include <mutex>
 
 #include <cisstCommon/cmnPortability.h>
-
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-#include <cisstOSAbstraction/osaMutex.h>
-#endif
-
 
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
 class CISST_EXPORT osaCriticalSection
 {
-    friend class osaMutexTest;
-
 #if (CISST_OS == CISST_WINDOWS)
     // for Windows only, hide critical section handle in internals
     enum {INTERNALS_SIZE = 64};
@@ -44,7 +38,7 @@ class CISST_EXPORT osaCriticalSection
 #endif
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     enum {INTERNALS_SIZE = 0};
-    osaMutex Mutex;
+    std::mutex Mutex;
 #endif
 
     /*! Return the size of the actual object used by the OS.  This is

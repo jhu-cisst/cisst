@@ -66,26 +66,12 @@ unsigned int osaCriticalSection::SizeOfInternals(void)
 #endif
 }
 
-
-/*
-  bool osaCriticalSection::TryEnter()
-  {
-  #if (CISST_OS == CISST_WINDOWS)
-  if (::TryEnterCriticalSection(&csHandle) != 0) return true;
-  #endif
-  #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-  if (Mutex.TryLock(0) == osaMutex::SUCCESS) return true;
-  #endif
-  return false;
-  }
-*/
-
 void osaCriticalSection::Enter()
 {
 #if (CISST_OS == CISST_WINDOWS)
     ::EnterCriticalSection(&INTERNALS(CriticalSectionHandle));
 #elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-    Mutex.Lock();
+    Mutex.lock();
 #endif
 }
 
@@ -94,7 +80,6 @@ void osaCriticalSection::Leave()
 #if (CISST_OS == CISST_WINDOWS)
     ::LeaveCriticalSection(&INTERNALS(CriticalSectionHandle));
 #elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-    Mutex.Unlock();
+    Mutex.unlock();
 #endif
 }
-

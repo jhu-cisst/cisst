@@ -27,16 +27,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaThreadedLogFile_h
 #define _osaThreadedLogFile_h
 
-#include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaThread.h>
-#include <cisstOSAbstraction/osaMutex.h>
-
 #include <list>
-#include <algorithm>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 #include <fstream>
 
+#include <cisstCommon/cmnPortability.h>
+#include <cisstOSAbstraction/osaThread.h>
 
 /*! \brief
   
@@ -97,7 +95,7 @@ private:
     std::string FilePrefix;
 
     /*! Mutex used to protect ChannelContainer. */
-    osaMutex Mutex;
+    std::mutex Mutex;
 
     /*! The actual container that stores channel addresses. */
     ChannelContainerType ChannelContainer;
@@ -114,14 +112,13 @@ template<class _element, class _trait>
 int osaThreadedLogFileStreambuf<_element, _trait>::sync(void)
 {
     const osaThreadId threadId = osaGetCurrentThreadId();
-    Mutex.Lock();
+
+    std::scoped_lock lock(Mutex);
     iterator it = FindChannel(threadId);
     if (it != ChannelContainer.end()) {
-        Mutex.Unlock();
         return it->second->pubsync();
     }
     ChannelType * channel = AddChannelForThread(threadId);
-    Mutex.Unlock();
     return channel->pubsync();
 }
 
@@ -131,14 +128,12 @@ std::streamsize
 osaThreadedLogFileStreambuf<_element, _trait>::xsputn(const _element *s, std::streamsize n)
 {
     const osaThreadId threadId = osaGetCurrentThreadId();
-    Mutex.Lock();
+    std::scoped_lock lock(Mutex);
     const iterator it = FindChannel(threadId);
     if (it != ChannelContainer.end()) {
-        Mutex.Unlock();
         return it->second->sputn(s, n);
     }
     ChannelType * channel = AddChannelForThread(threadId);
-    Mutex.Unlock();
     return channel->sputn(s, n);
 }
 
@@ -152,14 +147,12 @@ osaThreadedLogFileStreambuf<_element, _trait>::overflow(int_type c)
         return (_trait::not_eof(c));
 
     const osaThreadId threadId = osaGetCurrentThreadId();
-    Mutex.Lock();
+    std::scoped_lock lock(Mutex);
     const iterator it = FindChannel(threadId);
     if (it != ChannelContainer.end()) {
-        Mutex.Unlock();
         return it->second->sputc( _trait::to_char_type(c) );
     }
     ChannelType * channel = AddChannelForThread(threadId);
-    Mutex.Unlock();
     return channel->sputc( _trait::to_char_type(c) );
 }
 
