@@ -34,10 +34,6 @@ Using XCode on Mac OS X Leopard
 
 -  Installation on more recent Mac OS X should be similar.
 
--  For cisstStereoVision only: If you plan to use *OpenCV*, you need to install it. We recommend using MacPort
-
--  For cisstStereoVision only: If you plan to use the svlImageWindow filter or other modules with *X11* dependency, you need to install XQuartz (https://xquartz.macosforge.org).
-
 -  You may use *XCode* for editing, compiling and debugging. However command line applications have to be executed from the *Terminal* because *XCode* does not open a command line for them by default. (Although there might be a way to force it somehow.)
 
 1. Do the following commands to get the source from the *cisst* github repository

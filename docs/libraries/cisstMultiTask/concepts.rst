@@ -13,7 +13,7 @@ Component Model
 .. image:: images/mtsComponent.png
    :alt: cisstMultiTask component
 
-A cisstMultiTask component can include "provided interfaces", "required interfaces", "input interfaces", and "output interfaces". The base component class ``mtsComponent`` provides all the base implementation to add interfaces but doesn't manage any thread nor thread safety mechanism. If a thread is needed for a given component, this component should be derived from one of the ``mtsTask`` derived classes (``mtsTaskContinuous``, ``mtsTaskPeriodic``, ``mtsTaskFromSignal``, ``mtsTaskFromCallback``, ...). Libraries based on cisstMultiTask can also define their own base component type (e.g. cisstStereoVision filters are components derived from ``svlFilterBase``). Internally, a component may contain "state tables" to manage important component data. The component may have a state associated with it (e.g., initialized, paused, started). Note that every component contains at least two provided interface: (1) an internal interface that is connected to the "component manager", and (2) an ``ExecOut`` interface that can be used to provide the execution thread to other components.
+A cisstMultiTask component can include "provided interfaces", "required interfaces", "input interfaces", and "output interfaces". The base component class ``mtsComponent`` provides all the base implementation to add interfaces but doesn't manage any thread nor thread safety mechanism. If a thread is needed for a given component, this component should be derived from one of the ``mtsTask`` derived classes (``mtsTaskContinuous``, ``mtsTaskPeriodic``, ``mtsTaskFromSignal``, ``mtsTaskFromCallback``, ...). Libraries based on cisstMultiTask can also define their own base component type. Internally, a component may contain "state tables" to manage important component data. The component may have a state associated with it (e.g., initialized, paused, started). Note that every component contains at least two provided interface: (1) an internal interface that is connected to the "component manager", and (2) an ``ExecOut`` interface that can be used to provide the execution thread to other components.
 
 .. _components-in-use:
 
@@ -59,8 +59,6 @@ All components can have multiple *output interfaces* (``mtsInterfaceOutput``). A
 
 All components can have multiple *input interfaces* (``mtsInterfaceInput``). An input interface is used to accept data, such as a video image. It is created and added to a component using ``AddInterfaceInput("name")``.
 
-For further details, see the :doc:`cisstStereoVision Tutorials </libraries/cisstStereoVision/tutorials/index>`.
-
 .. _technical-concepts:
 
 Technical concepts
@@ -99,8 +97,6 @@ As mentioned in the introduction, cisstMultiTask provides different base compone
    -  ``mtsTaskPeriodic``: base class for a task running at a given periodicity (e.g., the ``Run`` method is called every 100 milliseconds). The jitter (variation between actual and desired period) depends on the operating system. Best performances are achieved using a real time operating system (Linux RTAI, Xenomai, QNX, ...).
    -  ``mtsTaskFromSignal``: base class for a task that should run only upon receipt of a command. This task is appropriate for event based applications -- the ``Run`` method gets called only when a command is queued.
    -  ``mtsTaskFromCallback``: base class for a task using an external trigger to start any computation. The ``Run`` method is used as a callback attached to an external library, driver, ...
-
--  ``svlFilterBase``: this class is defined in the :doc:`cisstStereoVision (SVL) library </libraries/cisstStereoVision/tutorials/index>`; it is the base class for all SVL filters. It does not contain a thread, but is intended to be added to an SVL "stream" that is managed by the ``svlStreamManager`` component. The ``svlStreamManager`` provides the execution thread (or thread pool). See the :doc:`cisstStereoVision Tutorials </libraries/cisstStereoVision/tutorials/index>` for further details.
 
 All tasks derived from ``mtsTask`` must define the following methods which are pure virtual in the base type:
 
