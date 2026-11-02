@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSocket.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
-#include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -39,7 +38,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
-#include <cisstMultiTask/mtsLODMultiplexerStreambuf.h>
 #include <cisstCommon/cmnAssert.h>
 
 // Time server used by all tasks
@@ -48,25 +46,11 @@ bool TimeServerOriginSet = false;
 
 mtsManagerLocal * mtsManagerLocal::Instance = 0;
 
-// System-wide logging: Define logger-related variables here so that
-// the logger doesn't have to call GetInstance() everytime it receives
-// log messages. {{
-mtsLODMultiplexerStreambuf * SystemLogMultiplexer = 0;
-bool           LogForwardEnabled = false;
-bool           LogDisabled = false;
-osaMutex       LogMutex;
-
-typedef std::list<mtsLogMessage> LogQueueType;
-LogQueueType   LogQueue;
-
 // }}
 
 class ManagerLocalComponent : public mtsComponent {
 
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-
-protected:
-    mtsFunctionWrite FunctionPrintLog;
 
 public:
     /*! Default constructor. */
@@ -74,9 +58,6 @@ public:
 
     /*! Default destructor. Does nothing. */
     virtual ~ManagerLocalComponent() { }
-
-    void PrintLog(const mtsLogMessage &log) const
-    { FunctionPrintLog(log); }
 };
 
 ManagerLocalComponent::ManagerLocalComponent() :
@@ -84,16 +65,6 @@ ManagerLocalComponent::ManagerLocalComponent() :
 {
     EnableDynamicComponentManagement();
     AddInterfaceInternal(true);
-
-    // Add an interface to PrintLog
-    std::string logInterfaceRequired = mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired;
-    mtsInterfaceRequired *requiredLog = AddInterfaceRequired(logInterfaceRequired);
-    if (requiredLog) {
-        requiredLog->AddFunction(mtsManagerComponentBase::CommandNames::PrintLog, FunctionPrintLog);
-    }
-    else {
-        CMN_LOG_CLASS_INIT_WARNING << "ManagerLocalComponent: failed to add Logger interface" << std::endl;
-    }
 }
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ManagerLocalComponent)
@@ -121,10 +92,6 @@ void mtsManagerLocal::Initialize(void)
     TimeServer.SetTimeOrigin();
     TimeServerOriginSet = true;
 
-    // 6/2026: set up logger only if enabled
-    //         (see SetLogForwarding)
-    // SetupSystemLogger();
-
     ValidComponentTags.clear();
     ValidComponentTags.insert("ROS");
     ValidComponentTags.insert("UI");
@@ -137,15 +104,7 @@ void mtsManagerLocal::Initialize(void)
     // Leave ProcessName empty
 }
 
-void mtsManagerLocal::Cleanup(void)
-{
-    if (SystemLogMultiplexer) {
-        if (LogThreadFinishWaiting) return;
-        LogThreadFinishWaiting = true;
-        LogThreadFinished.Wait();
-        //LogThread.Delete();
-    }
-}
+void mtsManagerLocal::Cleanup(void) {}
 
 bool mtsManagerLocal::CreateManagerComponent(void)
 {
@@ -253,11 +212,6 @@ const mtsManagerComponentServices * mtsManagerLocal::GetManagerComponentServices
     return LocalComponent->ManagerComponentServices;
 }
 
-const ManagerLocalComponent * mtsManagerLocal::GetLoggerServices() const
-{
-    return LocalComponent;
-}
-
 void mtsManagerLocal::GetInterfaceProvidedDescription(
     const std::string & componentName, const std::string & interfaceName,
     mtsInterfaceProvidedDescription & interfaceProvidedDescription)
@@ -270,23 +224,6 @@ void mtsManagerLocal::GetInterfaceRequiredDescription(
     mtsInterfaceRequiredDescription & interfaceRequiredDescription)
 {
     interfaceRequiredDescription = GetManagerComponentServices()->GetInterfaceRequiredDescription(componentName, interfaceName);
-}
-
-void mtsManagerLocal::SetupSystemLogger(void)
-{
-    LogThreadFinishWaiting = false;
-    LogThread.Create<mtsManagerLocal, void *>(this, &mtsManagerLocal::LogDispatchThread);
-
-    SystemLogMultiplexer = new mtsLODMultiplexerStreambuf();
-    if (!cmnLogger::GetMultiplexer()->AddMultiplexer(SystemLogMultiplexer)) {
-        CMN_LOG_INIT_ERROR << "Failed to add mts system logger" << std::endl;
-    }
-
-    // Connect logger interface to MCS
-    if (!Connect(LocalComponent->GetName(), mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
-                 ManagerComponent->GetName(), mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided)) {
-        CMN_LOG_CLASS_INIT_WARNING << "SetupSystemLogger: failed to connect provided/required log interfaces" << std::endl;
-    }
 }
 
 //*************************** Public Methods ****************************************
@@ -310,26 +247,6 @@ void mtsManagerLocal::DeleteInstance(void)
 {
     if (Instance) {
         Instance->Cleanup();
-    }
-
-    if (SystemLogMultiplexer) {
-        if (Instance) {
-            // Remove LCM connection to MCS logger
-            if (!Instance->Disconnect(mtsManagerComponentBase::ComponentNames::ManagerLocal,
-                           mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
-                           mtsManagerComponentBase::ComponentNames::ManagerComponent,
-                           mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided)) {
-                CMN_LOG_RUN_WARNING << "DeleteInstance: failed to disconnect logger from LCM to MCS" << std::endl;
-            }
-        }
-        // Remove log multiplexer and cleanup
-        cmnLogger::GetMultiplexer()->RemoveMultiplexer(SystemLogMultiplexer);
-        SystemLogMultiplexer->RemoveAllChannels();
-        delete SystemLogMultiplexer;
-        SystemLogMultiplexer = 0;
-    }
-
-    if (Instance) {
         Instance->DestroyManagerComponent();
 
         delete Instance;
@@ -1049,10 +966,6 @@ void mtsManagerLocal::KillAll(void)
                                     << (*iterator) << "\"" << std::endl;
         }
     }
-
-    // Block further logs
-    LogDisabled = true;
-    SetLogForwarding(false);
 }
 
 
@@ -1147,7 +1060,7 @@ std::vector<mtsDescriptionConnection> mtsManagerLocal::GetListOfConnections(void
     return GetManagerComponentServices()->GetListOfConnections();
 }
 
-std::vector<mtsDescriptionComponentClass> mtsManagerLocal::GetListOfComponentClasses(const std::string & processName) const
+std::vector<mtsDescriptionComponentClass> mtsManagerLocal::GetListOfComponentClasses(const std::string & CMN_UNUSED(processName)) const
 {
     return GetManagerComponentServices()->GetListOfComponentClasses();
 }
@@ -1541,120 +1454,6 @@ std::vector<std::string> mtsManagerLocal::GetIPAddressList(void)
 void mtsManagerLocal::GetIPAddressList(std::vector<std::string> & ipAddresses)
 {
     osaSocket::GetLocalhostIP(ipAddresses);
-}
-
-bool mtsManagerLocal::IsLogAllowed(void) {
-    return !LogDisabled;
-}
-
-bool mtsManagerLocal::IsLogForwardingEnabled(void) {
-    return LogForwardEnabled;
-}
-
-void mtsManagerLocal::SetLogForwarding(bool activate) {
-    if (activate && !SystemLogMultiplexer) {
-        if (Instance) {
-            Instance->SetupSystemLogger();
-        }
-        else {
-            CMN_LOG_INIT_ERROR << "SetLogForwarding: LCM instance not yet created" << std::endl;
-        }
-    }
-    LogForwardEnabled = activate;
-}
-
-void mtsManagerLocal::GetLogForwardingState(bool & state) {
-    state = IsLogForwardingEnabled();
-}
-
-bool mtsManagerLocal::GetLogForwardingState(void) {
-    return IsLogForwardingEnabled();
-}
-
-void mtsManagerLocal::LogDispatcher(const char * str, int len)
-{
-    if (!LogForwardEnabled) return;
-
-    bool deadlockAvoidance = false;
-    if (Instance) {
-        if (LogMutex.IsLocker()) {
-            deadlockAvoidance = true;
-        }
-    }
-
-    if (!deadlockAvoidance) {
-        LogMutex.Lock();
-    }
-
-    if (len == 1 && str[0] == '\n') {
-        if (!deadlockAvoidance) {
-            LogMutex.Unlock();
-        }
-        return;
-    }
-
-    // MJ TODO: Deal with cases that len > 1000
-    mtsLogMessage log(str, len);
-    // Timestamping (as early as possible)
-    if (TimeServerOriginSet) {
-        log.SetTimestamp(TimeServer.GetAbsoluteTimeInSeconds());
-        log.SetValid(true);
-    } else {
-        log.SetTimestamp(0);
-        log.SetValid(false);
-    }
-    log.ProcessName = "";
-
-    if (!deadlockAvoidance) {
-        // Queue log message and return immediately
-        LogQueue.push_back(log);
-    } else {
-        // If current thread locked this mutex earlier, forward the log immediately
-        // to avoid deadlock.  Note that all validity checks are already done
-        // in the log dispatch thread in this case.
-        Instance->GetLoggerServices()->PrintLog(log);
-    }
-
-    if (!deadlockAvoidance) {
-        LogMutex.Unlock();
-    }
-}
-
-void * mtsManagerLocal::LogDispatchThread(void * CMN_UNUSED(arg))
-{
-    int count = 0;
-
-    while (!LogThreadFinishWaiting) {
-        if (LogQueue.size() == 0) {
-            osaSleep(1.0 * cmn_ms);
-            continue;
-        }
-
-        // Wait for MCC to be ready (activated and connected) before starting log fowarding
-        if (!ManagerComponent || !ManagerComponent->IsRunning()) {
-            osaSleep(100.0 * cmn_ms);
-            continue;
-        }
-
-        LogMutex.Lock();
-        count = 0;
-        for (LogQueueType::iterator it = LogQueue.begin();
-             it != LogQueue.end();
-             ++count)
-        {
-            Instance->GetLoggerServices()->PrintLog(*it++);
-            LogQueue.pop_front(); // FIFO
-            // MJ: after 30 log messages forwarded, give other threads a chance to queue
-            // logs by releasing the lock (30 is arbitrary)
-            if (count == 30)
-                break;
-        }
-        LogMutex.Unlock();
-    }
-
-    LogThreadFinished.Raise();
-
-    return 0;
 }
 
 bool mtsManagerLocal::IsValidComponentTag(const std::string & tag) const {

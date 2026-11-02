@@ -43,14 +43,6 @@ ireTask::ireTask(const ireTaskConstructorArg &arg) :
 void ireTask::Initialize(void)
 {
     EnableDynamicComponentManagement();
-    // For receiving system-wide logs
-    mtsInterfaceRequired * required = AddInterfaceRequired(
-        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired,
-        MTS_OPTIONAL);
-    if (required) {
-        required->AddEventHandlerWrite(&ireTask::Log, this, 
-                                       mtsManagerComponentBase::EventNames::PrintLog);
-    }
     SetInitializationDelay(10.0);  // Allow up to 10 seconds for it to start
 }
 
@@ -105,9 +97,4 @@ void ireTask::Run(void)
 void ireTask::Cleanup(void)
 {
     cmnObjectRegister::Remove(this->GetName());
-}
-
-void ireTask::Log(const mtsLogMessage & log)
-{
-    ireFramework::PrintLog(log.Message, log.Length);
 }

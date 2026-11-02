@@ -47,17 +47,6 @@ mtsManagerComponent::mtsManagerComponent()
     // Add provided interface for dynamic component management
     AddInterfaceComponent();
 
-    // Add provided interface for system-wide thread-safe logging
-    mtsInterfaceProvided * provided = AddInterfaceProvided(
-        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided);
-    if (provided) {
-        provided->AddCommandWrite(&mtsManagerComponent::LogInterface::PrintLog,
-                                  &(this->Logger), mtsManagerComponentBase::CommandNames::PrintLog);
-        provided->AddEventWrite(Logger.EventPrintLog,
-                                mtsManagerComponentBase::EventNames::PrintLog,
-                                mtsLogMessage());
-    }
-
     // Add this component to the map
     ComponentMap.AddItem(mtsManagerComponentBase::ComponentNames::ManagerComponent, this);
 }
@@ -699,24 +688,6 @@ void mtsManagerComponent::GetInterfaceRequiredDescription(const mtsDescriptionIn
 mtsComponent * mtsManagerComponent::GetComponent(const std::string &componentName) const
 {
     return ComponentMap.GetItem(componentName);
-}
- 
-//***************************************** System-wide Logging ********************************************
-
-void mtsManagerComponent::LogInterface::PrintLog(const mtsLogMessage & log)
-{
-    std::string now;
-    osaGetDateTimeString(now, ':');
-
-    std::string msg(log.Message, log.Length);
-    std::stringstream ss;
-    ss << "|" << now << " " << log.ProcessName << "| " << msg;
-
-    mtsLogMessage _log(ss.str().c_str(), ss.str().size());
-    _log.ProcessName = log.ProcessName;
-
-    // Generate system-wide thread-safe logging event
-    EventPrintLog(_log);
 }
 
 //********************************** Connect/Disconnect Internal *************************************************

@@ -224,8 +224,6 @@ CMN_IMPLEMENT_SERVICES(mtsEventHandlerList);
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDescriptionLoadLibraryProxy);
 
-CMN_IMPLEMENT_SERVICES(mtsLogMessage);
-
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsMessageProxy);
 
 CMN_IMPLEMENT_SERVICES(mtsComponentConstructorArg);

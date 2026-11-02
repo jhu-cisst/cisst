@@ -34,7 +34,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 #include <set>
-#include <stack>
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnPath.h>
@@ -113,9 +112,6 @@ protected:
          const std::string & componentName,
          const std::string & interfaceName,
          mtsInterfaceRequiredDescription & interfaceRequiredDescription);
-
-    /*! Set up system logger that allows collecting system-wide logs across network */
-    void SetupSystemLogger(void);
 
 public:
 
@@ -452,21 +448,6 @@ public:
     /*! Check if further logs are allowed (used in mtsTask); this could be
         moved to cmnLogger. */
     static bool CISST_DEPRECATED IsLogAllowed(void);
-
-    /*! Is system-wide thread-safe logging enabled? */
-    static bool IsLogForwardingEnabled(void);
-
-    /*! Enable or disable system-wide thread-safe logging.
-        As of 6/2026, system-wide logging will only be initialized on first call
-        to this method. */
-    static void SetLogForwarding(bool activate);
-
-    /*! Get whether system-wide logging is enabled or not */
-    static void GetLogForwardingState(bool & state);
-    static bool GetLogForwardingState(void);
-
-    /*! Callback function for system-wide thread-safe logging */
-    static void LogDispatcher(const char * str, int len);
 
     // TODO: should the following be moved somewhere else?
     bool IsValidComponentTag(const std::string & tag) const;

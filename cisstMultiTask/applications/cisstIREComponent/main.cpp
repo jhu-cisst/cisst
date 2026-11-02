@@ -30,11 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 
 int main(int argc, char * argv[])
 {
-#if 0
-    // Enable system-wide thread-safe Logger
-    mtsManagerLocal::SetLogForwarding(true);
-#endif
-
     // Get the componentManager instance and set operation mode
     mtsManagerLocal * componentManager = mtsManagerLocal::GetInstance();
 
