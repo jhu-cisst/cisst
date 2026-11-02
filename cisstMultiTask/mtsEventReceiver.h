@@ -184,18 +184,17 @@ inline std::ostream & operator << (std::ostream & output,
 
 class CISST_EXPORT mtsEventReceiverVoid : public mtsEventReceiverBase {
 protected:
-    mtsCommandVoid * Command;      // Command object for calling EventHandler method
-    mtsCommandVoid * UserHandler;  // User supplied event handler
+    std::unique_ptr<mtsCommandVoid> Command;  // Command object for calling EventHandler method
+    mtsCommandVoid* UserHandler;              // User supplied event handler (non-owning pointer)
 
     // This one always gets added non-queued
     void EventHandler(void);
 
 public:
     mtsEventReceiverVoid();
-    ~mtsEventReceiverVoid();
 
-    /*! Called from mtsInterfaceRequired::BindCommandsAndEvents */
-    mtsCommandVoid * GetCommand(void);
+    /*! Access non-owning pointer - Called from mtsInterfaceRequired::BindCommandsAndEvents */
+    mtsCommandVoid* GetCommand(void);
 
     /*! Called from mtsInterfaceRequired::AddEventHandlerVoid */
     void SetHandlerCommand(mtsCommandVoid * commandHandler);
@@ -221,19 +220,18 @@ public:
 
 class CISST_EXPORT mtsEventReceiverWrite : public mtsEventReceiverBase {
 protected:
-    mtsCommandWriteBase *Command;      // Command object for calling EventHandler method
-    mtsCommandWriteBase *UserHandler;  // User supplied event handler
-    mtsGenericObject *ArgPtr;
+    std::unique_ptr<mtsCommandWriteBase> Command;  // Command object for calling EventHandler method
+    mtsCommandWriteBase* UserHandler;              // User supplied event handler (non-owning pointer)
+    mtsGenericObject *ArgPtr;                      // (non-owning pointer)
 
     // This one always gets added non-queued
     void EventHandler(const mtsGenericObject &arg);
 
 public:
     mtsEventReceiverWrite();
-    ~mtsEventReceiverWrite();
 
-    /*! Called from mtsInterfaceRequired::BindCommandsAndEvents */
-    mtsCommandWriteBase *GetCommand();
+    /*! Access non-owning pointer - Called from mtsInterfaceRequired::BindCommandsAndEvents */
+    mtsCommandWriteBase* GetCommand();
 
     /*! Called from mtsInterfaceRequired::AddEventHandlerWrite */
     void SetHandlerCommand(mtsCommandWriteBase * commandHandler);

@@ -21,7 +21,12 @@ http://www.cisst.org/cisst/license.txt.
 
 //************************************* mtsEventReceiverBase ***************************************************
 
-mtsEventReceiverBase::mtsEventReceiverBase() : Name("UnknownEventReceiver"), Required(0), EventSignal(0), OwnEventSignal(false), WaitState(EVENT_RECEIVER_IDLE)
+mtsEventReceiverBase::mtsEventReceiverBase()
+    : Name("UnknownEventReceiver"),
+      Required(nullptr),
+      EventSignal(nullptr),
+      OwnEventSignal(false),
+      WaitState(EVENT_RECEIVER_IDLE)
 {}
 
 mtsEventReceiverBase::~mtsEventReceiverBase()
@@ -35,7 +40,7 @@ void mtsEventReceiverBase::SetRequired(const std::string & name, mtsInterfaceReq
 {
     SetName(name);
     Required = interfaceRequired;
-    EventSignal = 0;
+    EventSignal = nullptr;
     if (Required && (Required->MailBox)) {
         SetThreadSignal(Required->GetThreadSignal());
     }
@@ -48,11 +53,11 @@ void mtsEventReceiverBase::SetThreadSignal(osaThreadSignal *signal)
 
 bool mtsEventReceiverBase::CheckRequired() const
 {
-    if (Required == 0) {
+    if (Required == nullptr) {
         CMN_LOG_INIT_WARNING << "mtsEventReceiverBase: required interface not initialized. "
                              << "Please add event receiver to required interface before calling SetHandler." << std::endl;
     }
-    return (Required != 0);
+    return Required != nullptr;
 }
 
 void mtsEventReceiverBase::CheckEventSignal()
@@ -111,6 +116,8 @@ bool mtsEventReceiverBase::Wait()
         }
     }
 
+    // TODO - seems like there's a race condition where event is signaled after above check but before Wait()
+    // Using std::condition_variable instead of EventSignal should fix this
     if (WaitState == EVENT_RECEIVER_WAITING) {
         EventSignal->Wait();
     }
@@ -149,24 +156,24 @@ bool mtsEventReceiverBase::WaitWithTimeout(double timeoutInSec)
 void mtsEventReceiverBase::Detach()
 {
     // PK: to be implemented
+    // TODO
 }
 
 //************************************* mtsEventReceiverVoid ***************************************************
 
-mtsEventReceiverVoid::mtsEventReceiverVoid() : mtsEventReceiverBase(), Command(0), UserHandler(0)
+mtsEventReceiverVoid::mtsEventReceiverVoid() : mtsEventReceiverBase(), Command(nullptr), UserHandler(nullptr)
 {}
 
-mtsEventReceiverVoid::~mtsEventReceiverVoid()
-{
-    delete Command;
-}
-
-mtsCommandVoid * mtsEventReceiverVoid::GetCommand(void)
+mtsCommandVoid* mtsEventReceiverVoid::GetCommand(void)
 {
     if (!Command) {
-        Command = new mtsCommandVoid(new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this), Name);
+        Command = std::make_unique<mtsCommandVoid>(
+            new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this),
+            Name
+        );
     }
-    return Command;
+
+    return Command.get();
 }
 
 void mtsEventReceiverVoid::EventHandler(void)
@@ -192,7 +199,7 @@ void mtsEventReceiverVoid::EventHandler(void)
 void mtsEventReceiverVoid::SetHandlerCommand(mtsCommandVoid * commandHandler)
 {
     if (commandHandler != UserHandler) {
-        if ((UserHandler != 0) && (commandHandler != 0)) {
+        if ((UserHandler != nullptr) && (commandHandler != nullptr)) {
             CMN_LOG_INIT_WARNING << "SetHandlerCommand: changing event handler for void event \"" << GetName() << "\"" << std::endl;
         }
         UserHandler = commandHandler;
@@ -213,19 +220,16 @@ void mtsEventReceiverVoid::ToStream(std::ostream & outputStream) const
 
 //************************************* mtsEventReceiverWrite ***************************************************
 
-mtsEventReceiverWrite::mtsEventReceiverWrite() : mtsEventReceiverBase(), Command(0), UserHandler(0), ArgPtr(0)
+mtsEventReceiverWrite::mtsEventReceiverWrite() : mtsEventReceiverBase(), Command(nullptr), UserHandler(nullptr), ArgPtr(nullptr)
 {}
 
-mtsEventReceiverWrite::~mtsEventReceiverWrite()
+mtsCommandWriteBase* mtsEventReceiverWrite::GetCommand()
 {
-    delete Command;
-}
+    if (!Command) {
+        Command = std::make_unique<mtsCommandWriteGeneric<mtsEventReceiverWrite>>(&mtsEventReceiverWrite::EventHandler, this, Name, nullptr);
+    }
 
-mtsCommandWriteBase *mtsEventReceiverWrite::GetCommand()
-{
-    if (!Command)
-        Command = new mtsCommandWriteGeneric<mtsEventReceiverWrite>(&mtsEventReceiverWrite::EventHandler, this, Name, 0);
-    return Command;
+    return Command.get();
 }
 
 void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
@@ -235,7 +239,7 @@ void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
     if (ArgPtr && !ArgPtr->Services()->Create(ArgPtr, arg)) {
         CMN_LOG_RUN_ERROR << "mtsEventReceiverWrite: could not copy from " << arg.Services()->GetName()
                           << " to " << ArgPtr->Services()->GetName() << std::endl;
-        ArgPtr = 0; // Set this to signal an error
+        ArgPtr = nullptr; // Set this to signal an error
     }
     if (UserHandler) {
         UserHandler->Execute(arg, MTS_NOT_BLOCKING);
@@ -258,7 +262,7 @@ void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
 void mtsEventReceiverWrite::SetHandlerCommand(mtsCommandWriteBase *cmdHandler)
 {
     if (cmdHandler != UserHandler) {
-        if ((UserHandler != 0) && (cmdHandler != 0)) {
+        if ((UserHandler != 0) && (cmdHandler != nullptr)) {
             CMN_LOG_INIT_WARNING << "SetHandlerCommand: changing event handler for write event " << GetName() << std::endl;
         }
         UserHandler = cmdHandler;
@@ -278,12 +282,12 @@ bool mtsEventReceiverWrite::PrepareToWait(mtsGenericObject &obj)
 // is invalid. Note that the return object was specified in PrepareToWait.
 bool mtsEventReceiverWrite::Wait()
 {
-    if (ArgPtr == 0) {
+    if (ArgPtr == nullptr) {
         CMN_LOG_RUN_WARNING << "mtsEventReceverWrite::Wait -- null ArgPtr (should first call PrepareToWait)" << std::endl;
         // Wait anyway, but will return false
     }
     bool ret = mtsEventReceiverBase::Wait();
-    if (ArgPtr == 0) ret = false;
+    if (ArgPtr == nullptr) ret = false;
     return ret;
 }
 
@@ -291,19 +295,19 @@ bool mtsEventReceiverWrite::Wait()
 // is invalid. Note that the return object was specified in PrepareToWait.
 bool mtsEventReceiverWrite::WaitWithTimeout(double timeoutInSec)
 {
-    if (ArgPtr == 0) {
+    if (ArgPtr == nullptr) {
         CMN_LOG_RUN_WARNING << "mtsEventReceverWrite::WaitWithTimeout -- null ArgPtr (should first call PrepareToWait)" << std::endl;
         // Wait anyway, but will return false
     }
     bool ret = mtsEventReceiverBase::WaitWithTimeout(timeoutInSec);
-    if (ArgPtr == 0) ret = false;
+    if (ArgPtr == nullptr) ret = false;
     return ret;
 }
 
 void mtsEventReceiverWrite::ClearWait()
 {
     mtsEventReceiverBase::ClearWait();
-    ArgPtr = 0;
+    ArgPtr = nullptr;
 }
 
 bool mtsEventReceiverWrite::RemoveHandler(void)
