@@ -78,7 +78,7 @@ mtsInterfaceRequired::~mtsInterfaceRequired()
 }
 
 
-osaThreadSignal * mtsInterfaceRequired::GetThreadSignal(void)
+osaThreadSignal* mtsInterfaceRequired::GetThreadSignal(void)
 {
     return &ThreadSignalForBlockingCommands;
 }

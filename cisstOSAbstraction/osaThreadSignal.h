@@ -27,44 +27,47 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaThreadSignal_h
 #define _osaThreadSignal_h
 
-#include <cisstCommon/cmnPortability.h>
+#include <condition_variable>
+#include <mutex>
 
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
 class osaThreadId;
 
-/* forward declaration for OS dependent internals */
-struct osaThreadSignalInternals;
-
 class CISST_EXPORT osaThreadSignal
 {
 public:
-    osaThreadSignal();
-    ~osaThreadSignal();
-
-    void Wait(void);
+    void Wait();
     bool Wait(double timeoutInSec);
-    void Raise(void);
+    void Raise();
+    void Clear();
 
-    static void SetWaitCallbacks(const osaThreadId &threadId, void (*pre)(void), void (*post)(void));
+    bool raised();
+
+    // When Wait is called from the specified thread, the pre/post callbacks will be invoked
+    // before/after the wait respectively. This is not thread-safe.
+    // TODO: revisit later - can we replace need for this from the SWIG side?
+    static void SetWaitCallbacks(const osaThreadId& thread_id, void (*pre)(void), void (*post)(void));
 
     /*! Print to stream */
     void ToStream(std::ostream & outputStream) const;
 
 private:
-    /*! Internals that are OS-dependent in some way */
-    osaThreadSignalInternals * Internals;
+    std::condition_variable cond;
 
-    static void (*PreCallback)(void);
-    static void (*PostCallback)(void);
+    mutable std::mutex state_mutex;
+    bool state = false;
+
+    static osaThreadId callback_thread_id;
+    static void (*pre_wait_callback)(void);
+    static void (*post_wait_callback)(void);
 };
 
-/*! Stream operator for a thread Id, see osaThreadId. */
 inline
-std::ostream & operator << (std::ostream & output,
-                            const osaThreadSignal & threadSignal) {
-    threadSignal.ToStream(output);
+std::ostream& operator<< (std::ostream& output,
+                          const osaThreadSignal& signal) {
+    signal.ToStream(output);
     return output;
 }
 

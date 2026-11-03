@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
-#include <cisstOSAbstraction/osaThreadSignal.h>   // PK TEMP
 
 CMN_IMPLEMENT_SERVICES(ireTaskConstructorArg)
 

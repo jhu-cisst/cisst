@@ -35,7 +35,7 @@ public:
     osaThreadSignal * ThreadSignal;
     osaStopwatch TimerWait;
     osaStopwatch TimerBlock;
-    unsigned int NumberOfIterations;
+    int iterations;
     double DelayToStart;
     double DelayToUnlock;
     double DelayToLock;
@@ -46,21 +46,23 @@ class ThreadSignalMethodHolder {
 public:
 	ThreadSignalMethodHolder(void) {}
 	~ThreadSignalMethodHolder(void) {}
+
 	void * Method(ThreadSignalMethodArguments * argument) {
-        unsigned int index;
         osaSleep(argument->DelayToStart);
-        for (index = 0;
-             index < argument->NumberOfIterations;
-             index++) {
+
+        for (int iter = 0; iter < argument->iterations; iter++) {
             argument->TimerWait.Start();
             argument->ThreadSignal->Wait();
             argument->TimerWait.Stop();
+
             argument->TimerBlock.Start();
             osaSleep(argument->DelayToUnlock);
             argument->TimerBlock.Stop();
+
             argument->ThreadSignal->Raise();
             osaSleep(argument->DelayToLock);
         }
+
         return 0;
     }
 };
@@ -81,7 +83,7 @@ void osaThreadSignalTest::TestWaitBlocks(void) {
     arguments1.ThreadSignal = &threadSignal;
     arguments1.TimerWait.Reset();
     arguments1.TimerBlock.Reset();
-    arguments1.NumberOfIterations = nbIterations;
+    arguments1.iterations = nbIterations;
     arguments1.DelayToStart = 0 * cmn_ms;
     arguments1.DelayToUnlock = delayToUnlock;
     arguments1.DelayToLock = 20 * cmn_ms;
@@ -93,7 +95,7 @@ void osaThreadSignalTest::TestWaitBlocks(void) {
     arguments2.ThreadSignal = &threadSignal;
     arguments2.TimerWait.Reset();
     arguments2.TimerBlock.Reset();
-    arguments2.NumberOfIterations = nbIterations;
+    arguments2.iterations = nbIterations;
     arguments2.DelayToStart = 20 * cmn_ms;
     arguments2.DelayToUnlock = delayToUnlock;
     arguments2.DelayToLock = 10 * cmn_ms;
@@ -112,17 +114,16 @@ void osaThreadSignalTest::TestWaitBlocks(void) {
     overallTimer.Stop();
 
     double totalTimeMeasured = overallTimer.GetElapsedTime();
-    double margeOfError = totalTimeMeasured / 2.0; // large as we can't trust all OSs to be accurate
+    double marginOfError = totalTimeMeasured / 2.0; // large as we can't trust all OSs to be accurate
 
     double totalTimeExpected = 2 * nbIterations * delayToUnlock; // 2 threads
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(totalTimeExpected, totalTimeMeasured, margeOfError);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(totalTimeExpected, totalTimeMeasured, marginOfError);
 
     double timeSpent1 = arguments1.TimerWait.GetElapsedTime() + arguments1.TimerBlock.GetElapsedTime();
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(timeSpent1, totalTimeMeasured, margeOfError);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(timeSpent1, totalTimeMeasured, marginOfError);
 
     double timeSpent2 = arguments2.TimerWait.GetElapsedTime() + arguments2.TimerBlock.GetElapsedTime();
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(timeSpent2, totalTimeMeasured, margeOfError);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(timeSpent2, totalTimeMeasured, marginOfError);
 }
-
 
 CPPUNIT_TEST_SUITE_REGISTRATION(osaThreadSignalTest);

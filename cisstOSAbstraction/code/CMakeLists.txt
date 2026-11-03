@@ -51,8 +51,8 @@ set (HEADER_FILES
      osaThread.h
      osaThreadAdapter.h
      osaThreadBuddy.h
-     osaThreadedLogFile.h
      osaThreadSignal.h
+     osaThreadedLogFile.h
      osaTimeServer.h
      osaTripleBuffer.h
      )

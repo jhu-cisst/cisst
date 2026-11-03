@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsStateTable.h>
@@ -86,6 +87,9 @@ protected:
 
     /*! Signal for caller to wait on task state changes. */
     osaThreadSignal StateChangeSignal;
+
+    /*! Signal used for WaitForWakeup */
+    osaThreadSignal TaskWaitSignal;
 
     /*! The state data table object to store the states of the task. */
     mtsStateTable StateTable;
@@ -279,12 +283,13 @@ public:
 
     /*! Suspend this task until the Wakeup method is called. */
     inline virtual void WaitForWakeup(void) {
-        Thread.WaitForWakeup();
+        TaskWaitSignal.Wait();
+        TaskWaitSignal.Clear();
     }
 
     /*! Wakeup the task. */
     inline virtual void Wakeup(void) {
-        Thread.Wakeup();
+        TaskWaitSignal.Raise();
     }
 
     /*! Conditionally process internal mailbox */
