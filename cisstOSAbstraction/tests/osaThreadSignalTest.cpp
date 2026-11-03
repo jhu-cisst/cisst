@@ -20,16 +20,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnPrintf.h>
-#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstOSAbstraction/osaThread.h>
 
 #include "osaThreadSignalTest.h"
 
 #include <cisstOSAbstraction/osaThreadSignal.h>
 
-#include <string.h>
-
+using namespace std::chrono_literals;
 
 class ThreadSignalMethodArguments {
 public:

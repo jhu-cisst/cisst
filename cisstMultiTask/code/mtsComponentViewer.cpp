@@ -17,11 +17,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstOSAbstraction/osaPipeExec.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsComponentViewer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
+#include <cisstOSAbstraction/osaPipeExec.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, double CMN_UNUSED(timeoutInSec))
 {
@@ -159,8 +159,11 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
         // Create reader thread.
         ReaderThread.Create<mtsComponentViewer, int>(this, &mtsComponentViewer::ReadFromUDrawGraph, 0);
         // Wait for initial OK
-        for (int i = 0; (i < 100) && (UDrawResponse == ""); i++)
-            osaSleep(0.01);
+        for (int i = 0; (i < 100) && (UDrawResponse == ""); i++) {
+            using namespace std::chrono_literals;
+            osaSleep(10ms);
+        }
+
         ProcessResponse();
         if (WaitingForResponse) {
             CMN_LOG_CLASS_RUN_ERROR << "ConnectToUDrawGraph: Failed to receive response" << std::endl;

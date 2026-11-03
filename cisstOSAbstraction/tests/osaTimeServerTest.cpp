@@ -16,10 +16,11 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <thread>
+
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnPrintf.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaCPUAffinity.h>
 
@@ -29,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string.h>
 
+using namespace std::chrono_literals;
 
 void osaTimeServerTest::TestInternalsSize(void) {
     CPPUNIT_ASSERT(osaTimeServer::INTERNALS_SIZE >= osaTimeServer::SizeOfInternals());
@@ -128,7 +130,7 @@ void * osaTimeServerTestRun(osaTimeServerTestThreadData * data)
             data->TimeServer.SetTimeOrigin();
             data->SetTimeOriginFlag = false;
         }
-        osaSleep(0.1 * cmn_ms);
+        osaSleep(0.1ms);
     }
     return 0;
 }
@@ -177,7 +179,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
         threadData = threadsData[index];
         threadData->SetTimeOriginFlag = true;
         while (threadData->SetTimeOriginFlag) {
-            osaSleep(0.1 * cmn_ms);
+            osaSleep(0.1ms);
         }
     }
 #else
@@ -185,7 +187,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
     threadData = threadsData[0];
     threadData->SetTimeOriginFlag = true;
     while (threadData->SetTimeOriginFlag) {
-        osaSleep(0.1 * cmn_ms);
+        osaSleep(0.1ms);
     }
 
     for (index = 1;
@@ -212,7 +214,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
          ++index) {
         threadData = threadsData[index];
         while (threadData->GetTimeFlag) {
-            osaSleep(0.1 * cmn_ms);
+            osaSleep(0.1ms);
         }
     }
 

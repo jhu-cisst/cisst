@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "clientTask.h"
+#include "configuration.h"
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
@@ -48,18 +49,12 @@ clientTask::clientTask(const std::string & taskName, double period):
     this->TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
     
     // Allocates space for samples
-    this->Samples.SetSize(confNumberOfSamples);
+    this->Samples = Eigen::VectorXd::Zero(confNumberOfSamples);
 }
 
+void clientTask::Configure(const std::string & CMN_UNUSED(filename)) {}
 
-void clientTask::Configure(const std::string & CMN_UNUSED(filename))
-{}
-
-
-void clientTask::Startup(void) 
-{
-}
-
+void clientTask::Startup(void) {}
 
 void clientTask::EventWriteHandler(const value_type & data)
 {
@@ -69,16 +64,15 @@ void clientTask::EventWriteHandler(const value_type & data)
         } else {
             double originalTime = data.Timestamp();
             double currentTime = TimeServer->GetRelativeTime();
-            this->Samples.Element(this->SamplesCollected) = (currentTime - originalTime);
+            this->Samples(this->SamplesCollected) = (currentTime - originalTime);
             this->SamplesCollected++;
         }
     }
     if (this->SamplesCollected == confNumberOfSamples) {
         this->BenchmarkDoneMember = true;
-        double average = Samples.SumOfElements() / Samples.size();
-        double min = 0.0;
-        double max = 0.0;
-        Samples.MinAndMaxElement(min, max);
+        double average = Samples.sum() / Samples.size();
+        double min = Samples.minCoeff();
+        double max = Samples.maxCoeff();
         std::cout << "csc: client->server->client: client write data (queued), server triggers event (queued)" << std::endl
                   << "csc: Client period (ms): " << cmnInternalTo_ms(confClientPeriod) << std::endl
                   << "csc: Server period (ms): " << cmnInternalTo_ms(confServerPeriod) << std::endl
@@ -91,7 +85,6 @@ void clientTask::EventWriteHandler(const value_type & data)
         this->SamplesCollected++; // just to avoid printing results again
     }
 }
-
 
 void clientTask::Run(void)
 {
@@ -107,7 +100,6 @@ void clientTask::Run(void)
     parameter.SetTimestamp(time);
     this->TriggerEvent(parameter);
 }
-
 
 bool clientTask::BenchmarkDone(void) const
 {

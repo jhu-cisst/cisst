@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsQtApplication.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include <QApplication>
 #include <QBasicTimer>
@@ -175,12 +176,12 @@ void mtsQtApplication::Startup(void)
     Timer->start(50, TimerHandler);  // Start 50 milliseconds second timer
 }
 
-#include <cisstOSAbstraction/osaSleep.h>
-
 void mtsQtApplication::Run(void)
 {
+    using namespace std::chrono_literals;
+
     QtApp->exec();
-    osaSleep(1.0 * cmn_s);
+    osaSleep(1s);
     Timer->stop();
     Kill();
 }

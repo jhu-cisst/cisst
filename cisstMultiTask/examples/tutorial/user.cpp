@@ -20,10 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "user.h"
 
+#include <thread>
+
 #include <cisstCommon/cmnKbHit.h>
 #include <cisstCommon/cmnGetChar.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+
+using namespace std::chrono_literals;
 
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES_DERIVED(user, mtsTaskContinuous);
@@ -106,7 +109,7 @@ void user::Run(void)
         // sleep just a bit to not hog resources.  Since this is a
         // continuous task, the Run method will get called again and
         // again
-        osaSleep(10.0 * cmn_ms);
+        osaSleep(10ms);
         return;
     }
 

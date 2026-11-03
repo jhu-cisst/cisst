@@ -16,6 +16,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <iterator>
+
+#include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
@@ -25,11 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaDynamicLoader.h>
-#include <cisstCommon/cmnUnits.h>
-#include <iterator>
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponent, mtsManagerComponentBase);
 
@@ -389,8 +390,7 @@ void mtsManagerComponent::ComponentStart(const mtsComponentStatusControl & arg)
                 component->Create();
                 // Wait for internal thread to be created
                 osaSleep(arg.DelayInSecond);
-            }
-            else {
+            } else {
                 // If the component does not create its own thread, then we do not create (or start) it
                 // because otherwise it would capture the current (MCS) thread.
                 CMN_LOG_CLASS_RUN_WARNING << "ComponentStart: not starting component (task) " << arg.ComponentName

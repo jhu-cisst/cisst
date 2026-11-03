@@ -27,6 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaSleep_h
 #define _osaSleep_h
 
+#include <chrono>
+
 // Include cmnUnits to have constants available
 #include <cisstCommon/cmnUnits.h>
 
@@ -38,19 +40,24 @@ http://www.cisst.org/cisst/license.txt.
   \brief Define osaSleep
 
   \ingroup cisstOSAbstraction
- 
+
   Execute a wait or sleep. This is intended for general purpose use; no time
   guarantees are made on any OS.  Within a thread, it is preferable to call
   osaThread::Sleep.  The mtsTask class provides mtsTask::Sleep, which invokes
   osaThread::Sleep.
 
-  On some platforms, osaSleep might block the calling thread and not relinquish
-  the processor to other threads. In particular, there are reports that
-  calling osaSleep in RTAI may lead to stack overflows.
-     
-  \param time Time in seconds to sleep */
-void CISST_EXPORT osaSleep(double timeInSeconds);
+  \param duration_in_seconds Time in seconds to sleep */
+void CISST_EXPORT osaSleep(double duration_in_seconds);
 
+/*!
+  \brief Overload of osaSleep
+
+  \ingroup cisstOSAbstraction
+*/
+template<class Rep, class Period>
+void CISST_EXPORT osaSleep(const std::chrono::duration<Rep, Period>& sleep_duration) {
+    const double seconds = std::chrono::duration<double>(sleep_duration).count();
+    osaSleep(seconds);
+}
 
 #endif // _osaSleep_h
-

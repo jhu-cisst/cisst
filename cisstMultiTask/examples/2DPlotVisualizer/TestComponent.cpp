@@ -23,7 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cmath>
 
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 

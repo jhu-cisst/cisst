@@ -18,9 +18,9 @@
 
 #include <cisstCommon/cmnExport.h>
 #include <cisstCommon/cmnPortability.h>
+#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaGetTime.h>
 
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
@@ -245,7 +245,8 @@ bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
     double endTime = startTime + timeout;
     while (timeout > 0) {
 #if (CISST_OS == CISST_LINUX_XENOMAI)
-        osaSleep(1 * cmn_ms);
+        using namespace std::chrono_literals;
+        osaSleep(1ms);
 #endif
         StateChangeSignal.Wait(timeout);
         curTime = osaGetTime();

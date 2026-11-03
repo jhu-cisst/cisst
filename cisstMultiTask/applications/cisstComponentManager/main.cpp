@@ -22,12 +22,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <fstream>
 
 #include <cisstCommon/cmnTokenizer.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstOSAbstraction/osaSleep.h>
+
+using namespace std::chrono_literals;
 
 class MainDispatcher : public mtsTaskMain
 {
@@ -37,7 +39,7 @@ public:
         mtsTaskMain(name), Shell(shell) {}
     ~MainDispatcher() {}
     void Run(void) {
-        osaSleep(0.1);
+        osaSleep(0.1s);
         if (Shell->IsTerminated())
             Kill();
     }
@@ -640,11 +642,14 @@ bool shellTask::ExecuteFile(const std::string &fileName) const
 bool shellTask::Sleep(const std::string &time) const
 {
     double dtime;
-    if (sscanf(time.c_str(), "%lf", &dtime) == 1) {
-        osaSleep(dtime);
-        return true;
+    const int matched = sscanf(time.c_str(), "%lf", &dtime);
+    if (matched != 1) {
+        return false;
     }
-    return false;
+
+    osaSleep(dtime);
+
+    return true;
 }
 
 // This is provided for user convenience.  The final "sleep" command is needed on Windows

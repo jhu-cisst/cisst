@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorState.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include "mtsTestComponents.h"
 
@@ -111,7 +112,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     // now try to stop
     executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking(0.0);
     CPPUNIT_ASSERT(executionResult.IsOK());
-    // see previous comment re. osaSleep
+    // see previous comment re. sleep
     osaSleep(serverExecutionDelay);
     // collection will not send the stop event until the next state table advance
     executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
@@ -126,7 +127,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     // now collect 300 elements so we can test replay
     executionResult = stateCollectorTestDevice->CollectorState.StartCollection.ExecuteBlocking(0.0);
     CPPUNIT_ASSERT(executionResult.IsOK());
-    // see previous comment re. osaSleep
+    // see previous comment re. sleep
     osaSleep(serverExecutionDelay);
     for (size_t index = 0;
          index < 300;
@@ -138,7 +139,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     // stop collection
     executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking(0.0);
     CPPUNIT_ASSERT(executionResult.IsOK());
-    // see previous comment re. osaSleep
+    // see previous comment re. sleep
     osaSleep(serverExecutionDelay);
     // collection will not send the stop event until the next state table advance
     executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();

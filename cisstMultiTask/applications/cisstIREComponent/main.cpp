@@ -19,10 +19,12 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnObjectRegister.h>
-#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstInteractive/ireTask.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
-#include <cisstInteractive/ireTask.h>
+#include <cisstOSAbstraction/osaSleep.h>
+
+using namespace std::chrono_literals;
 
 // Syntax:
 //   cisstIREComponent         -- starts IRE using wxPython
@@ -46,8 +48,9 @@ int main(int argc, char * argv[])
     componentManager->StartAll();
 
     // Loop until IRE is exited
-    while (!ire->IsTerminated())
-        osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds
+    while (!ire->IsTerminated()) {
+        osaSleep(0.5s);  // Wait 0.5 seconds
+    }
 
     componentManager->Cleanup();
     return 0;

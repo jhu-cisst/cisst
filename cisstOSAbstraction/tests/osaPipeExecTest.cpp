@@ -21,9 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
 #include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaSleep.h>
+#include <thread>
 
 #include "osaPipeExecTest.h"
+
+using namespace std::chrono_literals;
 
 void osaPipeExecTest::TestPipeInternalsSize(void)
 {
@@ -176,7 +178,7 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
 #else
     /* On other platforms, wait a little for forked child process to exit. */
-    osaSleep(0.1);
+    osaSleep(0.1s);
 #endif
     bool isRunning = pipe1.IsProcessRunning();
     CPPUNIT_ASSERT_EQUAL(false, isRunning);

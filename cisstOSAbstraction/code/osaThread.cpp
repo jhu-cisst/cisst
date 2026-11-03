@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnAssert.h>
-#include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaThread.h>
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     #include <pthread.h>

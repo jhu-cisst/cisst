@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
-#include <cisstOSAbstraction/osaSleep.h>
 
 
 void * mtsTaskPeriodic::RunInternal(void *data)

@@ -20,14 +20,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaTripleBuffer.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThread.h>
-#include <cisstOSAbstraction/osaSleep.h>
 
+#include <thread>
 #include <vector>
 
 #include "osaTripleBufferTest.h"
 
 typedef std::vector<size_t> value_type;
 typedef osaTripleBuffer<value_type> buffer_type;
+
+using namespace std::chrono_literals;
 
 // sizes must be large enough to have a chance to find a problem but
 // short enough so that unit tests don't timeout.
@@ -125,7 +127,7 @@ void osaTripleBufferTest::TestMultiThreading(void)
     writeThread.Create(osaTripleBufferTestWriteThread, &tripleBuffer);
 
     while (!(ReadThreadDone && WriteThreadDone)) {
-        osaSleep(1.0 * cmn_ms);
+        osaSleep(1ms);
     }
     CPPUNIT_ASSERT(!ErrorFoundInRead);
 }

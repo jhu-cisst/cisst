@@ -158,7 +158,7 @@ protected:
 
     /*! Delay the task by the specified amount. This is a protected member
         function because it should only be called from within the task.
-        Otherwise, use osaSleep. */
+        Otherwise, use a standard sleep. */
     void Sleep(double timeInSeconds);
 
     /*! Return the current tick count. */
