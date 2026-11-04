@@ -48,7 +48,6 @@ void mtsManagerLocalTest::tearDown(void)
 
 void mtsManagerLocalTest::TestInitialize(void)
 {
-    // Add __os_init() test if needed.
 }
 
 void mtsManagerLocalTest::TestConstructor(void)

@@ -82,9 +82,8 @@ void mtsComponentViewer::Cleanup(void)
         if (!ReaderThreadFinished) {
             ReaderThreadFinished = true;
             CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for reader thread to finish" << std::endl;
-            ReaderThread.Wait();
+            ReaderThread.join();
         }
-        ReaderThread.Delete();
         UDrawPipe.Close();
         UDrawPipeConnected = false;
         CMN_LOG_CLASS_RUN_WARNING << "Exited" << std::endl;
@@ -157,7 +156,8 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
         WaitingForResponse = true;
         UDrawResponse = "";
         // Create reader thread.
-        ReaderThread.Create<mtsComponentViewer, int>(this, &mtsComponentViewer::ReadFromUDrawGraph, 0);
+        ReaderThread = std::thread([this](){ ReadFromUDrawGraph(); });
+
         // Wait for initial OK
         for (int i = 0; (i < 100) && (UDrawResponse == ""); i++) {
             using namespace std::chrono_literals;
@@ -206,7 +206,7 @@ void mtsComponentViewer::ActivateMenuItems(void)
     WriteString(UDrawPipe, buffer);
 }
 
-void *mtsComponentViewer::ReadFromUDrawGraph(int)
+void mtsComponentViewer::ReadFromUDrawGraph()
 {
     ReaderThreadFinished = false;
     while (!ReaderThreadFinished) {
@@ -231,7 +231,7 @@ void *mtsComponentViewer::ReadFromUDrawGraph(int)
             PostCommandQueuedMethod();
         }
     }
-    return 0;
+    return;
 }
 
 // This function does not handle embedded quotes (i.e., \")

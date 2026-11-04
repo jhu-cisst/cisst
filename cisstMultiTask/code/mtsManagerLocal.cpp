@@ -38,6 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstCommon/cmnAssert.h>
+#include <thread>
 
 // Time server used by all tasks
 osaTimeServer TimeServer;
@@ -81,13 +82,10 @@ mtsManagerLocal::mtsManagerLocal(void) : Name(mtsManagerComponentBase::Component
 mtsManagerLocal::~mtsManagerLocal()
 {
     Cleanup();
-    __os_exit();
 }
 
 void mtsManagerLocal::Initialize(void)
 {
-    __os_init();
-
     TimeServer.SetTimeOrigin();
     TimeServerOriginSet = true;
 
@@ -231,7 +229,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(void)
 {
     if (!Instance) {
         Instance = new mtsManagerLocal;
-        Instance->MainThreadId = osaGetCurrentThreadId();
+        Instance->MainThreadId = std::this_thread::get_id();
 
         // Create manager component
         if (!Instance->CreateManagerComponent()) {
@@ -873,7 +871,7 @@ void mtsManagerLocal::StartAll(void)
 {
     // Get the current thread id in order to check if any task will use the current thread.
     // If so, start that task last.
-    const osaThreadId threadId = osaGetCurrentThreadId();
+    const std::thread::id threadId = std::this_thread::get_id();
     if (threadId != this->MainThreadId) {
         CMN_LOG_CLASS_RUN_WARNING << "StartAll: current thread is not main thread." << std::endl;
     }
@@ -896,7 +894,7 @@ void mtsManagerLocal::StartAll(void)
         mtsTask *componentTask = dynamic_cast<mtsTask*>(component);
         if (componentTask) {
             // Check if the task will use the current thread.
-            if (componentTask->Thread.GetId() == threadId) {
+            if (componentTask->Thread.get_id() == threadId) {
                 if (dynamic_cast<mtsTaskFromCallback*>(componentTask)) {
                     CMN_LOG_CLASS_INIT_VERBOSE << "StartAll: component \"" << (*iterator)
                                                << "\" uses current thread, but is a callback task;"
@@ -919,7 +917,7 @@ void mtsManagerLocal::StartAll(void)
                 }
             } else {
                 CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << (*iterator) << "\"" << std::endl;
-                if (componentTask->Thread.GetId() == MainThreadId) {
+                if (componentTask->Thread.get_id() == MainThreadId) {
                     if (dynamic_cast<mtsTaskContinuous *>(componentTask)) {
                         CMN_LOG_CLASS_INIT_WARNING << "StartAll: is the main task really " << (*iterator) << "???" << std::endl;
                     }

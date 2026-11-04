@@ -18,15 +18,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <thread>
+
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnPrintf.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
-#include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 
 #include "osaThreadSignalTest.h"
 
-#include <cisstOSAbstraction/osaThreadSignal.h>
 
 using namespace std::chrono_literals;
 
@@ -56,11 +57,11 @@ public:
             argument->TimerWait.Stop();
 
             argument->TimerBlock.Start();
-            osaSleep(argument->DelayToUnlock);
+            std::this_thread::sleep_for(std::chrono::duration<double>(argument->DelayToUnlock));
             argument->TimerBlock.Stop();
 
             argument->ThreadSignal->Raise();
-            osaSleep(argument->DelayToLock);
+            std::this_thread::sleep_for(std::chrono::duration<double>(argument->DelayToLock));
         }
 
         return 0;
@@ -77,7 +78,6 @@ void osaThreadSignalTest::TestWaitBlocks(void) {
     osaThreadSignal threadSignal;
     const unsigned int nbIterations = 10;
     const double delayToUnlock = 300 * cmn_ms; // ms
-    osaThread thread1;
     ThreadSignalMethodHolder methodHolder1;
     ThreadSignalMethodArguments arguments1;
     arguments1.ThreadSignal = &threadSignal;
@@ -89,7 +89,6 @@ void osaThreadSignalTest::TestWaitBlocks(void) {
     arguments1.DelayToLock = 20 * cmn_ms;
     arguments1.Name = "1";
 
-    osaThread thread2;
     ThreadSignalMethodHolder methodHolder2;
     ThreadSignalMethodArguments arguments2;
     arguments2.ThreadSignal = &threadSignal;
@@ -105,11 +104,11 @@ void osaThreadSignalTest::TestWaitBlocks(void) {
     // make sure one thread's wait will not block
     threadSignal.Raise();
 
-    thread1.Create<ThreadSignalMethodHolder, ThreadSignalMethodArguments *>(&methodHolder1, &ThreadSignalMethodHolder::Method, &arguments1, arguments1.Name.c_str());
-    thread2.Create<ThreadSignalMethodHolder, ThreadSignalMethodArguments *>(&methodHolder2, &ThreadSignalMethodHolder::Method, &arguments2, arguments2.Name.c_str());
+    std::thread thread1([&]() { methodHolder1.Method(&arguments1); });
+    std::thread thread2([&]() { methodHolder2.Method(&arguments2); });
 
-    thread1.Wait();
-    thread2.Wait();
+    thread1.join();
+    thread2.join();
 
     overallTimer.Stop();
 

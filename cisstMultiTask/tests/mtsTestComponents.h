@@ -546,36 +546,32 @@ public:
 
 class mtsTestCallbackTrigger
 {
-    osaThread Thread;
     mtsTaskFromCallback * Task;
-    bool Running;
+    std::atomic<bool> Running;
+    std::thread Thread;
+
 public:
     mtsTestCallbackTrigger(mtsTaskFromCallback * task):
         Task(task),
-        Running(true)
-    {
-        Thread.Create<mtsTestCallbackTrigger, int>(this, &mtsTestCallbackTrigger::Run,
-                                                   0, "TstCb");
-    }
+        Running(true),
+        Thread([&](){ return Run(); })
+    { }
 
     ~mtsTestCallbackTrigger() {
-        Thread.Wait();
+        Thread.join();
     }
 
     void Stop(void) {
-        this->Running = false;
+        Running = false;
     }
 
-    void * Run(int CMN_UNUSED(data)) {
-        while (this->Running) {
+    void Run() {
+        while (Running) {
             Task->DoCallback(0);
 
             using namespace std::chrono_literals;
             osaSleep(1ms);
         }
-        // stop the thread
-        osaCurrentThreadYield();
-        return 0;
     }
 };
 

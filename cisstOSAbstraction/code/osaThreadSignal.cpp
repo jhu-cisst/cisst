@@ -21,14 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadSignal.h>
 
 #include <chrono>
+#include <thread>
 
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaThread.h>
-
-osaThreadId osaThreadSignal::callback_thread_id;
-void (*osaThreadSignal::pre_wait_callback)(void) = nullptr;
-void (*osaThreadSignal::post_wait_callback)(void) = nullptr;
 
 void osaThreadSignal::Raise()
 {
@@ -48,7 +44,7 @@ void osaThreadSignal::Wait(void)
 bool osaThreadSignal::Wait(double timeoutInSec)
 {
     bool do_callback = false;
-    if (pre_wait_callback && post_wait_callback && (osaGetCurrentThreadId() == callback_thread_id)) {
+    if (pre_wait_callback && post_wait_callback && (std::this_thread::get_id() == callback_thread_id)) {
         do_callback = true;
     }
 
@@ -92,7 +88,7 @@ void osaThreadSignal::ToStream(std::ostream & outputStream) const
     outputStream << "osaThreadSignal: state=" << state;
 }
 
-void osaThreadSignal::SetWaitCallbacks(const osaThreadId& thread_id, void (*pre)(void), void (*post)(void))
+void osaThreadSignal::SetWaitCallbacks(const std::thread::id& thread_id, void (*pre)(void), void (*post)(void))
 {
     callback_thread_id = thread_id;
     pre_wait_callback = pre;

@@ -64,7 +64,7 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 void mtsTaskPeriodic::StartupInternal(void) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal (periodic) for " << Name << std::endl;
     // user defined initialization, find commands from associated resource interfaces
-    ThreadBuddy.Create(GetName().c_str(), AbsoluteTimePeriod); // convert to nano seconds
+    ThreadBuddy.Create(AbsoluteTimePeriod); // convert to nano seconds
 
     // Call base class StartupInternal, which also calls user-supplied Startup.
     // If all goes well, this changes the state to READY.
@@ -89,12 +89,9 @@ void mtsTaskPeriodic::CleanupInternal() {
     if (IsHardRealTime) {
         ThreadBuddy.MakeSoftRealTime();
     }
-    ThreadBuddy.UnlockStack();
 
-    //If the task was waiting on a queue, i.e. semaphore, mailbox,
-    //etc, it is removed from such a queue and messaging tasks
-    //pending on its message queue are unblocked with an error return.
-    ThreadBuddy.Delete();
+    // Just in case thread was suspended
+    ThreadBuddy.Resume();
 
     BaseType::CleanupInternal();
 }
@@ -110,7 +107,7 @@ mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInS
                                  bool isHardRealTime, unsigned int sizeStateTable,
                                  bool newThread):
     mtsTaskContinuous(name, sizeStateTable, newThread),
-    ThreadBuddy(),
+    ThreadBuddy(Thread),
     Period(periodicityInSeconds),
     IsHardRealTime(isHardRealTime)
 {
@@ -124,7 +121,7 @@ mtsTaskPeriodic::mtsTaskPeriodic( const std::string & name,
                                   unsigned int sizeStateTable,
                                   bool newThread ):
     mtsTaskContinuous(name, sizeStateTable, newThread),
-    ThreadBuddy(),
+    ThreadBuddy(Thread),
     Period(period.ToSeconds()),
     AbsoluteTimePeriod(period),
     IsHardRealTime(isHardRealTime)
@@ -134,7 +131,7 @@ mtsTaskPeriodic::mtsTaskPeriodic( const std::string & name,
 
 mtsTaskPeriodic::mtsTaskPeriodic(const mtsTaskPeriodicConstructorArg &arg):
     mtsTaskContinuous(arg.Name, arg.StateTableSize, true),
-    ThreadBuddy(),
+    ThreadBuddy(Thread),
     Period(arg.Period),
     IsHardRealTime(arg.IsHardRealTime)
 {

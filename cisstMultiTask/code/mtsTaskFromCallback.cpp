@@ -17,8 +17,11 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstCommon/cmnPortability.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
+
+#include <thread>
+
+#include <cisstCommon/cmnPortability.h>
 
 
 /********************* Methods that call user methods *****************/
@@ -54,9 +57,9 @@ void * mtsTaskFromCallback::RunInternal(void * CMN_UNUSED(data)) {
 
 void mtsTaskFromCallback::StartupInternal(void)
 {
-    if (!Thread.IsValid()) {
+    if (!Thread.joinable()) {
         CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: initializing thread for callback task " << this->GetName() << std::endl;
-        Thread.CreateFromCurrentThread();
+        ThreadId = std::this_thread::get_id();
     }
     BaseType::StartupInternal();
 }

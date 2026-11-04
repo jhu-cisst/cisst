@@ -29,11 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <condition_variable>
 #include <mutex>
+#include <thread>
 
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
-
-class osaThreadId;
 
 class CISST_EXPORT osaThreadSignal
 {
@@ -47,8 +46,7 @@ public:
 
     // When Wait is called from the specified thread, the pre/post callbacks will be invoked
     // before/after the wait respectively. This is not thread-safe.
-    // TODO: revisit later - can we replace need for this from the SWIG side?
-    static void SetWaitCallbacks(const osaThreadId& thread_id, void (*pre)(void), void (*post)(void));
+    static void SetWaitCallbacks(const std::thread::id& thread_id, void (*pre)(void), void (*post)(void));
 
     /*! Print to stream */
     void ToStream(std::ostream & outputStream) const;
@@ -59,9 +57,9 @@ private:
     mutable std::mutex state_mutex;
     bool state = false;
 
-    static osaThreadId callback_thread_id;
-    static void (*pre_wait_callback)(void);
-    static void (*post_wait_callback)(void);
+    inline static std::thread::id callback_thread_id;
+    inline static void (*pre_wait_callback)(void) = nullptr;
+    inline static void (*post_wait_callback)(void) = nullptr;
 };
 
 inline

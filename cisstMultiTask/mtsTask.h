@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <stdexcept>
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
@@ -72,7 +71,11 @@ protected:
     /************************ Protected task data  *********************/
 
     /*! The OS independent thread object. */
-    osaThread Thread;
+    std::thread Thread;
+
+    /*! ID of run thread. Stored separately from Thread so we can refer
+        to a thread we don't have ownership of (while leaving Thread empty) */
+    std::thread::id ThreadId;
 
     /*! Delay given for the task to start.  During initialization the
       task thread will wait for the specified delay (set by default to
@@ -160,11 +163,6 @@ protected:
 
     /**************** Methods for managing task timing ********************/
 
-    /*! Delay the task by the specified amount. This is a protected member
-        function because it should only be called from within the task.
-        Otherwise, use a standard sleep. */
-    void Sleep(double timeInSeconds);
-
     /*! Return the current tick count. */
     mtsStateIndex::TimeTicksType GetTick(void) const;
 
@@ -196,10 +194,7 @@ public:
         \param sizeStateTable The history size of the state table
 
         \note The full string name is maintained in the class member data
-              (in mtsComponent base class).  But, be aware that when a thread and/or
-              thread buddy is created, only the first 6 characters of this name
-              are used with the thread or thread buddy.  This is an artifact
-              of the 6 character limit imposed by RTAI/Linux.
+              (in mtsComponent base class).
 
         \sa mtsComponent, mtsTaskContinuous, mtsTaskPeriodic, mtsTaskFromCallback, mtsTaskFromSignal
      */

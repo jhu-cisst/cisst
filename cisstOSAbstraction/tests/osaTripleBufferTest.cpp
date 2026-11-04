@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaTripleBuffer.h>
 #include <cisstCommon/cmnUnits.h>
-#include <cisstOSAbstraction/osaThread.h>
 
 #include <thread>
 #include <vector>
@@ -36,19 +35,11 @@ using namespace std::chrono_literals;
 const size_t TestVectorSize = 5000; // 5,000 elements * 500,000 iterations takes about a minute on a decent core 2 duo laptop
 const size_t NumberOfIterations = 100000;
 
-bool WriteThreadDone;
-bool ReadThreadDone;
 bool ErrorFoundInRead;
 
+void osaTripleBufferTest::setUp(void) {}
 
-void osaTripleBufferTest::setUp(void)
-{
-    WriteThreadDone = false;;
-    ReadThreadDone = false;
-}
-
-
-void * osaTripleBufferTestWriteThread(buffer_type * buffer)
+void osaTripleBufferTestWriteThread(buffer_type * buffer)
 {
     for (size_t iteration = 1;
          iteration <= NumberOfIterations;
@@ -62,16 +53,14 @@ void * osaTripleBufferTestWriteThread(buffer_type * buffer)
         }
         buffer->EndWrite();
         if (ErrorFoundInRead) {
-            WriteThreadDone = true;
-            return 0;
+            return;
         }
     }
-    WriteThreadDone = true;
-    return 0;
+    return;
 }
 
 
-void * osaTripleBufferTestReadThread(buffer_type * buffer)
+void osaTripleBufferTestReadThread(buffer_type * buffer)
 {
     ErrorFoundInRead = false;
     size_t firstElement = 0;
@@ -86,7 +75,6 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
                 ErrorFoundInRead = true;
                 std::cerr << "osaTripleBufferTestReadThread: unexpected first element "
                           << newFirstElement << ", should be higher than " << firstElement << std::endl;
-                ReadThreadDone = true;
             }
             if (newFirstElement != firstElement) {
                 firstElement = newFirstElement;
@@ -98,7 +86,6 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
                         std::cerr << "osaTripleBufferTestReadThread: error while reading iteration "
                                   << firstElement << " at element " << i << ", expected " << firstElement + i << ", got "
                                   << element << std::endl;
-                        ReadThreadDone = true;
                         i = TestVectorSize;
                     }
                 }
@@ -106,8 +93,7 @@ void * osaTripleBufferTestReadThread(buffer_type * buffer)
         }
         buffer->EndRead();
     }
-    ReadThreadDone = true;
-    return 0;
+    return;
 }
 
 
@@ -120,15 +106,13 @@ void osaTripleBufferTest::TestMultiThreading(void)
     CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.LastWriteNode->Next->Pointer->size());
     CPPUNIT_ASSERT_EQUAL(TestVectorSize, tripleBuffer.LastWriteNode->Next->Next->Pointer->size());
 
-    osaThread readThread;
-    readThread.Create(osaTripleBufferTestReadThread, &tripleBuffer);
+    std::thread read_thread(osaTripleBufferTestReadThread, &tripleBuffer);
+    std::thread write_thread(osaTripleBufferTestWriteThread, &tripleBuffer);
 
-    osaThread writeThread;
-    writeThread.Create(osaTripleBufferTestWriteThread, &tripleBuffer);
+    // Wait for read/write to finish
+    read_thread.join();
+    write_thread.join();
 
-    while (!(ReadThreadDone && WriteThreadDone)) {
-        osaSleep(1ms);
-    }
     CPPUNIT_ASSERT(!ErrorFoundInRead);
 }
 

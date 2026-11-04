@@ -53,7 +53,7 @@ ireTask::~ireTask()
 void ireTask::Startup(void)
 {
     // PK TEMP: Set callbacks for osaThreadSignal::Wait
-    osaThreadSignal::SetWaitCallbacks(Thread.GetId(), &ireFramework::UnblockThreads, &ireFramework::BlockThreads);
+    osaThreadSignal::SetWaitCallbacks(Thread.get_id(), &ireFramework::UnblockThreads, &ireFramework::BlockThreads);
 
     cmnObjectRegister::Register(GetName(), this);
     std::stringstream startup;

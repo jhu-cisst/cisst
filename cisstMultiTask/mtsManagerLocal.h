@@ -34,10 +34,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 #include <set>
+#include <thread>
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnPath.h>
-#include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsComponent.h>
@@ -62,7 +63,7 @@ private:
 
     /*! Thread ID of thread that called GetInstance(). In the future,
         we will support multiple threads. */
-    osaThreadId MainThreadId;
+    std::thread::id MainThreadId;
 
     /*! Process name (for a multi-process system).
      */
@@ -76,7 +77,7 @@ private:
     mtsManagerComponent *ManagerComponent;
 
     /*! Internal thread to buffer log messages */
-    osaThread       LogThread;
+    std::thread     LogThread;
     osaThreadSignal LogThreadFinished;
     bool            LogThreadFinishWaiting;
     void*           LogDispatchThread(void * arg);
@@ -382,15 +383,15 @@ public:
     /*! Set main thread id based on the current thread. In most situations, it is not
         necessary to call this function because the main thread id is initialized
         in GetInstance. */
-    void SetMainThreadId(void) { MainThreadId = osaGetCurrentThreadId(); }
+    void SetMainThreadId(void) { MainThreadId = std::this_thread::get_id(); }
 
     /*! Set main thread id based on the passed parameter. In most situations, it is not
         necessary to call this function because the main thread id is initialized
         in GetInstance. */
-    void SetMainThreadId(const osaThreadId &threadId) { MainThreadId = threadId; }
+    void SetMainThreadId(const std::thread::id& threadId) { MainThreadId = threadId; }
 
     /*! Return main thread id. */
-    osaThreadId GetMainThreadId(void) const { return MainThreadId; }
+    std::thread::id GetMainThreadId(void) const { return MainThreadId; }
 
     //---------------------------------------------------------------------------------------------
 

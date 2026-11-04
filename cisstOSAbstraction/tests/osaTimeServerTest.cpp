@@ -20,9 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnPrintf.h>
-#include <cisstOSAbstraction/osaStopwatch.h>
-#include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaCPUAffinity.h>
+#include <cisstOSAbstraction/osaStopwatch.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include "osaTimeServerTest.h"
 
@@ -107,7 +107,7 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
 struct osaTimeServerTestThreadData
 {
     size_t ThreadIndex;
-    osaThread * Thread;
+    std::thread Thread;
 
     bool * QuitFlag;
 
@@ -142,7 +142,6 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
     size_t index;
     osaTimeServerTestThreadData * threadsData[numberOfServers];
     osaTimeServerTestThreadData * threadData;
-    osaThread * thread;
     bool quitFlag = false;
 
     osaStopwatch stopwatch;
@@ -164,11 +163,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
         threadData->SetTimeOriginFlag = false;
         threadData->GetTimeFlag = false;
 
-        thread = new osaThread;
-        threadData->Thread = thread;
-
-        thread->Create<osaTimeServerTestThreadData*>(&osaTimeServerTestRun,
-                                                     threadsData[index]);
+        threadData->Thread = std::thread(osaTimeServerTestRun, threadsData[index]);
     }
 
 
@@ -250,8 +245,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
     for (index = 0;
          index < numberOfServers;
          ++index) {
-        threadsData[index]->Thread->Wait();
-        delete threadsData[index]->Thread;
+        threadsData[index]->Thread.join();
         delete threadsData[index];
     }
 }

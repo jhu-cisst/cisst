@@ -18,8 +18,6 @@
 
 #include <cisstCommon/cmnExport.h>
 #include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
 #include <cisstMultiTask/mtsTask.h>
@@ -29,7 +27,9 @@
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 
 std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
@@ -73,10 +73,9 @@ void mtsTask::DoRunInternal(void)
 void mtsTask::RunEventHandler(void)
 {
     RunEventCalled = false;
-    if (this->State == mtsComponentState::INITIALIZING && !Thread.IsValid()) {
+    if (this->State == mtsComponentState::INITIALIZING && !Thread.joinable()) {
         CMN_LOG_CLASS_RUN_VERBOSE << "RunEventHandler: initializing thread for " << this->GetName() << std::endl;
         // This is only executed once, to produce same behavior as RunInternal
-        Thread.CreateFromCurrentThread();
         StartupInternal();
     }
     else if (this->State == mtsComponentState::ACTIVE)
@@ -178,16 +177,6 @@ void mtsTask::CleanupInternal() {
 
 /**************** Methods for managing task timing ********************/
 
-void mtsTask::Sleep(double timeInSeconds)
-{
-    if (Thread.IsValid()) {
-        Thread.Sleep(timeInSeconds);
-    } else {
-        osaSleep(timeInSeconds);
-    }
-}
-
-
 mtsStateIndex::TimeTicksType mtsTask::GetTick(void) const {
     return StateTable.GetIndexWriter().Ticks();
 }
@@ -240,25 +229,23 @@ bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
     
     CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waiting for task \"" << this->GetName() << "\" to enter state \""
                                 << desiredState << "\"" << std::endl;
-    double curTime = osaGetTime();
-    double startTime = curTime;
-    double endTime = startTime + timeout;
+
+    const auto wait_start = std::chrono::steady_clock::now();
+    const auto wait_deadline = wait_start + std::chrono::duration<double>(timeout);
+    auto current_time = wait_start;
+
     while (timeout > 0) {
-#if (CISST_OS == CISST_LINUX_XENOMAI)
-        using namespace std::chrono_literals;
-        osaSleep(1ms);
-#endif
         StateChangeSignal.Wait(timeout);
-        curTime = osaGetTime();
         if (this->State == desiredState) {
             break;
         }
-        timeout = endTime - curTime;
+        current_time = std::chrono::steady_clock::now();
+        timeout = (wait_deadline - current_time).count();
     }
 
     if (this->State == desiredState) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
-                                << " seconds." << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << (current_time - wait_start).count()
+                                   << " seconds." << std::endl;
     } else {
         // some cases are not really errors
         if ((desiredState == mtsComponentState::READY) && (this->State == mtsComponentState::ACTIVE)) {
@@ -281,14 +268,11 @@ bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
 mtsTask::mtsTask(const std::string & name,
                  unsigned int sizeStateTable) :
     mtsComponent(name),
-    Thread(),
     InitializationDelay(3.0 * cmn_s), // if this value is modified, update documentation in header file
-    StateChange(),
-    StateChangeSignal(),
     StateTable(sizeStateTable, "StateTable"),
     OverranPeriod(false),
-    ThreadStartData(0),
-    ReturnValue(0),
+    ThreadStartData(nullptr),
+    ReturnValue(nullptr),
     RunEventCalled(false)
 {
     this->AddStateTable(&this->StateTable);
@@ -416,10 +400,10 @@ bool mtsTask::WaitToTerminate(double timeout)
     }
 
     // If task state is finished, we wait for the thread to be destroyed
-    if ((this->State == mtsComponentState::FINISHED) && Thread.IsValid()) {
+    if ((this->State == mtsComponentState::FINISHED) && Thread.joinable()) {
         CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: waiting for task \"" << this->GetName()
                                    << "\" thread to exit." << std::endl;
-        Thread.Wait();
+        Thread.join();
     }
     return ret;
 }
@@ -435,14 +419,14 @@ void mtsTask::ProcessManagerCommandsIfNotActive()
             InterfaceProvidedToManager->ProcessMailBoxes();
         } else { // Wake up the thread just in case (e.g., for mtsTaskFromSignal)
             CMN_LOG_CLASS_INIT_VERBOSE << "Task " << this->GetName() << " active, not processing internal mailbox" << std::endl;
-            this->Thread.Wakeup();
+            TaskWaitSignal.Raise();
         }
     }
 }
 
 bool mtsTask::CheckForOwnThread(void) const
 {
-    return (osaGetCurrentThreadId() == Thread.GetId());
+    return std::this_thread::get_id() == ThreadId;
 }
 
 

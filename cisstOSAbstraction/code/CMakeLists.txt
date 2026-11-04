@@ -27,7 +27,6 @@ set (SOURCE_FILES
      osaSocket.cpp
      osaSocketServer.cpp
      osaStopwatch.cpp
-     osaThread.cpp
      osaThreadBuddy.cpp
      osaThreadSignal.cpp
      osaTimeServer.cpp
@@ -48,7 +47,6 @@ set (HEADER_FILES
      osaSocket.h
      osaSocketServer.h
      osaStopwatch.h
-     osaThread.h
      osaThreadAdapter.h
      osaThreadBuddy.h
      osaThreadSignal.h
