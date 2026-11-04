@@ -20,7 +20,7 @@
 #include <cisstOSAbstraction/osaPipeExec.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <string.h>
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 #if (CISST_OS == CISST_QNX)
 #include <errno.h>
 #else
@@ -41,7 +41,7 @@ enum {READ_END = 0, WRITE_END = 1};
 
 struct osaPipeExecInternals {
     /*! OS dependent variables */
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     int pid;
 #elif (CISST_OS == CISST_WINDOWS)
     HANDLE hProcess;
@@ -65,7 +65,7 @@ osaPipeExec::osaPipeExec(const std::string & name):
     // Initialize to invalid values
     ToProgram[READ_END] = ToProgram[WRITE_END] = -1;
     FromProgram[READ_END] = FromProgram[WRITE_END] = -1;
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     INTERNALS(pid) = -1;
 #elif (CISST_OS == CISST_WINDOWS)
     INTERNALS(hProcess) = 0;
@@ -81,7 +81,7 @@ int osaPipeExec::DoClose(int &n)
 {
     int ret = 0;
     if (n >= 0) {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
         int ret = close(n);
 #elif (CISST_OS == CISST_WINDOWS)
         int ret = _close(n);
@@ -202,7 +202,7 @@ bool osaPipeExec::Open(const std::string & executable,
         }
     }
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     if (pipe(ToProgram) == -1) {
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\" ("
                            << strerror(errno) << ")" << std::endl;
@@ -416,7 +416,7 @@ bool osaPipeExec::Close(bool killProcess)
     ReadFlag = WriteFlag = false;
 
     if (killProcess) {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
         if (INTERNALS(pid) > 0) {
             ret = true;
             if (IsProcessRunning()) {
@@ -448,7 +448,7 @@ bool osaPipeExec::Close(bool killProcess)
 
 int osaPipeExec::Read(char *buffer, int maxLength) const
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     ssize_t bytesRead = -1;
 #elif (CISST_OS == CISST_WINDOWS)
     int bytesRead = -1;
@@ -457,7 +457,7 @@ int osaPipeExec::Read(char *buffer, int maxLength) const
     /* Check for ReadFlag before opening. This is unnecessary on Unix but it
        prevents a debug assertion error on Windows */
     if (Connected && ReadFlag) {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
         bytesRead = read(FromProgram[READ_END], buffer, maxLength*sizeof(char));
 #elif (CISST_OS == CISST_WINDOWS)
         bytesRead = _read(FromProgram[READ_END], buffer, maxLength*sizeof(char));
@@ -648,14 +648,14 @@ std::string osaPipeExec::ReadString(int length, double timeoutSec) const
 
 int osaPipeExec::Write(const char * buffer, int n)
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     ssize_t bytesWritten = -1;
 #elif (CISST_OS == CISST_WINDOWS)
     int bytesWritten = -1;
 #endif
 
     if (Connected && WriteFlag) {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
         bytesWritten = write(ToProgram[WRITE_END], buffer, n*sizeof(char));
 #elif (CISST_OS == CISST_WINDOWS)
         bytesWritten = _write(ToProgram[WRITE_END], buffer, n*sizeof(char));
@@ -695,7 +695,7 @@ bool osaPipeExec::IsConnected(void) const
 
 bool osaPipeExec::IsProcessRunning(void) const
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     if (INTERNALS_CONST(pid) < 0)
         return false;
     return (waitpid(INTERNALS_CONST(pid), 0, WNOHANG) == 0);

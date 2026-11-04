@@ -24,19 +24,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaGetTime.h>
 
-#if (CISST_OS == CISST_LINUX_RTAI)
-#include <rtai_lxrt.h>
-#include <unistd.h>
-#endif // CISST_LINUX_RTAI
-
 #if (CISST_OS == CISST_LINUX_XENOMAI)
 #include <native/timer.h>
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN)
 #include <sys/time.h>
 #include <unistd.h>
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
+#endif // CISST_LINUX || CISST_DARWIN
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
@@ -49,14 +44,11 @@ http://www.cisst.org/cisst/license.txt.
 
 double osaGetTime(void)
 {
-#if (CISST_OS == CISST_LINUX_RTAI)
-    return rt_get_time_ns() * cmn_ns;
-
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_XENOMAI)
 
     return rt_timer_read() * cmn_ns;
 
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN)
     struct timeval currentTime;
     gettimeofday(&currentTime, NULL);
     return ((double) currentTime.tv_sec) + ((double)currentTime.tv_usec) * cmn_us;

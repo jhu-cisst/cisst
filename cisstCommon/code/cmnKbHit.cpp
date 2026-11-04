@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnKbHit.h>
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 #include <stdio.h>
 #include <termios.h>
 #include <sys/ioctl.h>
@@ -60,7 +60,7 @@ int cmnKbHit(void)
 
   return result;
 }
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_RTAI || CISST_QNX
+#endif // CISST_LINUX || CISST_DARWIN || CISST_QNX
 
 
 #if (CISST_OS == CISST_WINDOWS)

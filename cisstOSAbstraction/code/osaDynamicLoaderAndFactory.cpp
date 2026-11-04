@@ -31,7 +31,7 @@ inline void *GetSymbolAddr(void *handle, const char *name)
 
 #else
 // Everything else (hopefully) uses the dlopen interface. This is
-// true for Linux, RTAI, and Mac OS X 10.3 or higher. For older Macs,
+// true for Linux, and Mac OS X 10.3 or higher. For older Macs,
 // the dlopen interface is available if the dlcompat package is installed.
 #include <dlfcn.h>
 inline void *GetSymbolAddr(void *handle, const char *name)

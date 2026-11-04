@@ -60,9 +60,6 @@ http://www.cisst.org/cisst/license.txt.
 // Do we have isfinite global function
 #cmakedefine01 CISST_HAS_ISFINITE
 
-// RTAI Realtime extension for Linux
-#cmakedefine01 CISST_HAS_LINUX_RTAI
-
 // Xenomai Realtime extension for Linux
 #cmakedefine01 CISST_HAS_LINUX_XENOMAI
 

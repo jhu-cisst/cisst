@@ -250,13 +250,6 @@ endif()
 
 # Check on Linux only
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-  # Check for RTAI
-  option (CISST_HAS_LINUX_RTAI "Use the RTAI real time extensions for Linux." OFF)
-  if (CISST_HAS_LINUX_RTAI)
-    find_package (RTAI)
-  endif (CISST_HAS_LINUX_RTAI)
-
   # Check for Xenomai
   option (CISST_HAS_LINUX_XENOMAI "Use the Xenomai real time extensions for Linux." OFF)
   if (CISST_HAS_LINUX_XENOMAI)

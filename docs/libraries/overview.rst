@@ -8,7 +8,7 @@ cisst Libraries overview
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
 | cisstInteractive     | C++ classes and Python scripts for the Interactive Research Environment (IRE)                                   | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
-| cisstOSAbstraction   | Operating system services (e.g., threads, mutual exclusion, etc.) for Windows, Linux, Mac OS X, RTAI/Linux, ... | Stable   |
+| cisstOSAbstraction   | Operating system services (e.g., threads, mutual exclusion, etc.) for Windows, Linux, Mac OS X, ...             | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
 | cisstMultiTask       | Component-based framework for defining tasks and devices, provided and required interfaces, and command objects | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+

@@ -142,11 +142,6 @@ endif ()
 
 target_link_libraries(cisstCommon PUBLIC Eigen3::Eigen)
 
-if (CISST_HAS_LINUX_RTAI)
-  target_include_directories (cisstCommon PUBLIC ${RTAI_INCLUDE_DIR})
-  target_link_libraries (cisstCommon PUBLIC ${RTAI_LIBRARIES})
-endif ()
-
 if (CISST_HAS_LINUX_XENOMAI)
   target_include_directories (cisstCommon PUBLIC ${CISST_XENOMAI_INCLUDE_DIRECTORIES})
   target_link_libraries (cisstCommon PUBLIC ${CISST_XENOMAI_LIBRARIES})
