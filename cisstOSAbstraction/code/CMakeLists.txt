@@ -47,7 +47,6 @@ set (HEADER_FILES
      osaSocket.h
      osaSocketServer.h
      osaStopwatch.h
-     osaThreadAdapter.h
      osaThreadBuddy.h
      osaThreadSignal.h
      osaThreadedLogFile.h
