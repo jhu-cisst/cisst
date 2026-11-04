@@ -2,12 +2,12 @@
   "name": "cisst",
   "cmake-args": [
     "-DCISST_USE_EXTERNAL=ON",
-    "-DCISST_cisstMesh=OFF",
     "-DCISST_cisstRobot=ON",
     "-DCISST_cisstInteractive=ON",
     "-DCISST_HAS_OPENGL=ON",
     "-DCISST_HAS_QT=ON",
     "-DCISST_HAS_JSON=ON",
+    "-DCISST_HAS_KDL=ON",
     "-DCISST_HAS_SWIG_PYTHON=ON",
     "-DCISST_BUILD_SHARED_LIBS=ON",
     "-DCISST_HAS_QTNODES=ON",

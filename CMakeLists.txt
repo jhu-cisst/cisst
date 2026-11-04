@@ -179,7 +179,6 @@ if (CISST_CATKIN_BUILT)
   set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
   set (LIBRARY_OUTPUT_PATH    "${CATKIN_DEVEL_PREFIX}/lib")
   # Options defaults
-  set (CISST_cisstMesh         OFF  CACHE BOOL "")
   set (CISST_cisstInteractive  ON  CACHE BOOL "")
   set (CISST_HAS_JSON          ON  CACHE BOOL "")
   set (CISST_HAS_SWIG_PYTHON   ON  CACHE BOOL "" FORCE)
@@ -244,7 +243,10 @@ if (CISST_HAS_OPENGL)
 endif ()
 
 find_package(Eigen3 REQUIRED)
-find_package(orocos_kdl REQUIRED)
+
+IF (CISST_HAS_KDL)
+  find_package(orocos_kdl REQUIRED)
+endif()
 
 # Check on Linux only
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
