@@ -57,8 +57,12 @@ bool osaThreadSignal::Wait(double timeoutInSec)
     bool success = false;
     {
         std::unique_lock lock(state_mutex);
-        cond.wait_for(lock, std::chrono::milliseconds(millisec), [&](){ return this->state; });
-        success = this->state;
+        if (this->state) {
+            success = true;
+        } else {
+            cond.wait_for(lock, std::chrono::milliseconds(millisec), [&](){ return this->state; });
+            success = this->state;
+        }
     }
 
     if (do_callback) {
@@ -75,7 +79,7 @@ void osaThreadSignal::Clear() {
     }
 }
 
-bool osaThreadSignal::raised() {
+bool osaThreadSignal::raised() const {
     {
         std::unique_lock lock(state_mutex);
         return state;

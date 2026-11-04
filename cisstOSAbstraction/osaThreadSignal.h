@@ -34,15 +34,19 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
+// BB: Could be replaced by binary semaphore in C++20
+
 class CISST_EXPORT osaThreadSignal
 {
 public:
     void Wait();
     bool Wait(double timeoutInSec);
     void Raise();
+
+    // Must be called after Raise, or subsequent Wait()'s will return immediately
     void Clear();
 
-    bool raised();
+    bool raised() const;
 
     // When Wait is called from the specified thread, the pre/post callbacks will be invoked
     // before/after the wait respectively. This is not thread-safe.
