@@ -51,7 +51,6 @@ set (HEADER_FILES
      osaThreadSignal.h
      osaThreadedLogFile.h
      osaTimeServer.h
-     osaTripleBuffer.h
      )
 
 # Create the config file
