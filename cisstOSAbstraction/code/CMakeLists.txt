@@ -17,7 +17,6 @@ project (cisstOSAbstraction)
 set (SOURCE_FILES
      osaClassServices.cpp
      osaCPUAffinity.cpp
-     osaCriticalSection.cpp
      osaDynamicLoader.cpp
      osaDynamicLoaderAndFactory.cpp
      osaGetTime.cpp
@@ -36,7 +35,6 @@ set (SOURCE_FILES
 set (HEADER_FILES
      osaForwardDeclarations.h
      osaCPUAffinity.h
-     osaCriticalSection.h
      osaDynamicLoader.h
      osaDynamicLoaderAndFactory.h
      osaExport.h
