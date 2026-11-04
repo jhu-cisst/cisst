@@ -41,15 +41,14 @@ protected:
     /*! Default constructor. */
     mtsFunctionBase();
 
-    /*! Destructor. */
-    virtual ~mtsFunctionBase();
+    virtual ~mtsFunctionBase() = default;
 
     /*! Reference to an existing thread signal used to block the execution. */
-    osaThreadSignal * ThreadSignal;
+    osaThreadSignal* ThreadSignal;
 
     /*! Event receiver for events containing return value or indication that
       blocking command has finished. */
-    mtsEventReceiverWrite *CompletionCommand;
+    std::unique_ptr<mtsEventReceiverWrite> CompletionCommand;
 
 public:
     /*! Detach the function from the command used.  Internally, sets the command pointer to 0 */
@@ -68,17 +67,17 @@ public:
     virtual void DeleteCompletionCommand(void);
 
     /*! Set the thread signal used for blocking commands */
-    void SetThreadSignal(osaThreadSignal * threadSignal);
+    void SetThreadSignal(osaThreadSignal* threadSignal);
 
     /*! Wait for internal thread signal */
     void ThreadSignalWait(void) const;
 
-    /*! Wait for return value. Note that return object is specified via CompletionCommand (PrepareToWait).
+    /*! Wait for return value.
         Return object contains:
           - result  --  for read, qualified read, void return, write return
           - execution result -- for blocking void, blocking write
     */
-    mtsExecutionResult WaitForResult(void) const;
+    mtsExecutionResult WaitForResult(mtsGenericObject& return_obj) const;
 };
 
 

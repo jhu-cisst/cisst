@@ -18,14 +18,15 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <thread>
 
 // include what is needed from cisst
 #include <cisstOSAbstraction/osaSerialPort.h>
-#include <cisstOSAbstraction/osaSleep.h>
 
 // system includes
 #include <iostream>
 
+using namespace std::chrono_literals;
 
 // main function
 int main(void) {
@@ -53,7 +54,7 @@ int main(void) {
 
     // get serial/model
     serialPort.Write("\ex1_", 4);
-    osaSleep(1.0 * cmn_s);
+    osaSleep(1s);
     bytesRead = serialPort.Read(buffer, 512);
     std::cout << "bytes read: " << bytesRead << std::endl;
     buffer[bytesRead] = '\0';
@@ -66,7 +67,7 @@ int main(void) {
 
     while (true) {
         serialPort.Write("\eP", 2);
-        osaSleep(0.2 * cmn_s);
+        osaSleep(0.2s);
         bytesRead = serialPort.Read(buffer, 512);
         std::cout << "bytes read: " << bytesRead << std::endl;
         buffer[bytesRead] = '\0';
@@ -74,4 +75,3 @@ int main(void) {
     }
     return 0;
 }
-

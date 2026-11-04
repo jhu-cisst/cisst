@@ -21,7 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 
 //************************************* mtsEventReceiverBase ***************************************************
 
-mtsEventReceiverBase::mtsEventReceiverBase() : Name("UnknownEventReceiver"), Required(0), EventSignal(0), OwnEventSignal(false), WaitState(EVENT_RECEIVER_IDLE)
+mtsEventReceiverBase::mtsEventReceiverBase()
+    : Name("UnknownEventReceiver"),
+      Required(nullptr),
+      EventSignal(nullptr),
+      OwnEventSignal(false)
 {}
 
 mtsEventReceiverBase::~mtsEventReceiverBase()
@@ -35,24 +39,24 @@ void mtsEventReceiverBase::SetRequired(const std::string & name, mtsInterfaceReq
 {
     SetName(name);
     Required = interfaceRequired;
-    EventSignal = 0;
+    EventSignal = nullptr;
     if (Required && (Required->MailBox)) {
         SetThreadSignal(Required->GetThreadSignal());
     }
 }
 
-void mtsEventReceiverBase::SetThreadSignal(osaThreadSignal *signal)
+void mtsEventReceiverBase::SetThreadSignal(osaThreadSignal* signal)
 {
     EventSignal = signal;
 }
 
 bool mtsEventReceiverBase::CheckRequired() const
 {
-    if (Required == 0) {
+    if (Required == nullptr) {
         CMN_LOG_INIT_WARNING << "mtsEventReceiverBase: required interface not initialized. "
                              << "Please add event receiver to required interface before calling SetHandler." << std::endl;
     }
-    return (Required != 0);
+    return Required != nullptr;
 }
 
 void mtsEventReceiverBase::CheckEventSignal()
@@ -67,7 +71,7 @@ void mtsEventReceiverBase::CheckEventSignal()
 bool mtsEventReceiverBase::WaitCommon()
 {
     CheckEventSignal();
-    if (WaitState == EVENT_RECEIVER_WAITING) {
+    if (is_waiting) {
         // Cannot call from multiple threads (not thread-safe).
         CMN_LOG_RUN_WARNING << "mtsEventReceiverBase: already waiting on event " << Name << std::endl;
         return false;
@@ -77,86 +81,47 @@ bool mtsEventReceiverBase::WaitCommon()
 
 void mtsEventReceiverBase::ClearWait()
 {
-    WaitState = EVENT_RECEIVER_IDLE;
-}
-
-bool mtsEventReceiverBase::PrepareToWait()
-{
-    CheckEventSignal();
-    // Not locking mutex because other thread should not yet be involved
-    if (WaitState == EVENT_RECEIVER_IDLE)
-        WaitState = EVENT_RECEIVER_PREPARING;
-    else {
-        // Cannot call from multiple threads (not thread-safe). Of course, we do not know if
-        // this has been called from multiple threads (programmer could have accidentally called
-        // PrepareToWait twice from same thread), but anyway that should be discouraged.
-        CMN_LOG_RUN_WARNING << "mtsEventReceiverBase: already waiting on event " << Name
-                            << ", state = " << WaitState << std::endl;
-        return false;
-    }
-    return true;
+    is_waiting = false;
+    EventSignal->Clear();
 }
 
 bool mtsEventReceiverBase::Wait()
 {
-    bool ret = WaitCommon();
-    if (ret) {
-        WaitMutex.Lock();
-        // WaitCommon already checked if WaitState is equal to EVENT_RECEIVER_WAITING, so following is
-        // equivalent to checking whether WaitState is EVENT_RECEIVER_IDLE or EVENT_RECEIVER_PREPARING
-        if (WaitState != EVENT_RECEIVER_SIGNALED)
-            WaitState = EVENT_RECEIVER_WAITING;
-        WaitMutex.Unlock();
-        if (WaitState == EVENT_RECEIVER_WAITING)
-            EventSignal->Wait();
-        WaitState = EVENT_RECEIVER_IDLE;
-    }
-    return ret;
+    if (!WaitCommon()) { return false; }
+
+    EventSignal->Wait();
+    return EventSignal->raised();
 }
 
 bool mtsEventReceiverBase::WaitWithTimeout(double timeoutInSec)
 {
-    bool ret = WaitCommon();
-    if (ret) {
-        WaitMutex.Lock();
-        // WaitCommon already checked if WaitState is equal to EVENT_RECEIVER_WAITING, so following is
-        // equivalent to checking whether WaitState is EVENT_RECEIVER_IDLE or EVENT_RECEIVER_PREPARING
-        if (WaitState != EVENT_RECEIVER_SIGNALED)
-            WaitState = EVENT_RECEIVER_WAITING;
-        WaitMutex.Unlock();
-        if (WaitState == EVENT_RECEIVER_WAITING) {
-            ret = EventSignal->Wait(timeoutInSec);
-            // If timed out, can check if event may have been raised (and missed)
-            // either just before or just after the call to Wait.
-            if (!ret && (WaitState == EVENT_RECEIVER_SIGNALED))
-                ret = true;
-        }
-        WaitState = EVENT_RECEIVER_IDLE;
-    }
-    return ret;
+    if (!WaitCommon()) { return false; }
+
+    EventSignal->Wait(timeoutInSec);
+    return EventSignal->raised();
 }
 
 void mtsEventReceiverBase::Detach()
 {
     // PK: to be implemented
+    // TODO
 }
 
 //************************************* mtsEventReceiverVoid ***************************************************
 
-mtsEventReceiverVoid::mtsEventReceiverVoid() : mtsEventReceiverBase(), Command(0), UserHandler(0)
+mtsEventReceiverVoid::mtsEventReceiverVoid() : mtsEventReceiverBase(), Command(nullptr), UserHandler(nullptr)
 {}
 
-mtsEventReceiverVoid::~mtsEventReceiverVoid()
-{
-    delete Command;
-}
-
-mtsCommandVoid * mtsEventReceiverVoid::GetCommand(void)
+mtsCommandVoid* mtsEventReceiverVoid::GetCommand(void)
 {
     if (!Command) {
-        Command = new mtsCommandVoid(new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this), Name);
+        Command = std::make_unique<mtsCommandVoid>(
+            new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this),
+            Name
+        );
     }
-    return Command;
+
+    return Command.get();
 }
 
 void mtsEventReceiverVoid::EventHandler(void)
@@ -164,19 +129,14 @@ void mtsEventReceiverVoid::EventHandler(void)
     if (UserHandler) {
         UserHandler->Execute(MTS_NOT_BLOCKING);
     }
-    WaitMutex.Lock();
-    WaitStates oldWaitState = WaitState;
-    if ((WaitState == EVENT_RECEIVER_PREPARING) || (WaitState == EVENT_RECEIVER_WAITING))
-        WaitState = EVENT_RECEIVER_SIGNALED;
-    WaitMutex.Unlock();
-    if (oldWaitState == EVENT_RECEIVER_WAITING)
-        EventSignal->Raise();
+
+    EventSignal->Raise();
 }
 
 void mtsEventReceiverVoid::SetHandlerCommand(mtsCommandVoid * commandHandler)
 {
     if (commandHandler != UserHandler) {
-        if ((UserHandler != 0) && (commandHandler != 0)) {
+        if ((UserHandler != nullptr) && (commandHandler != nullptr)) {
             CMN_LOG_INIT_WARNING << "SetHandlerCommand: changing event handler for void event \"" << GetName() << "\"" << std::endl;
         }
         UserHandler = commandHandler;
@@ -197,19 +157,21 @@ void mtsEventReceiverVoid::ToStream(std::ostream & outputStream) const
 
 //************************************* mtsEventReceiverWrite ***************************************************
 
-mtsEventReceiverWrite::mtsEventReceiverWrite() : mtsEventReceiverBase(), Command(0), UserHandler(0), ArgPtr(0)
+mtsEventReceiverWrite::mtsEventReceiverWrite() : mtsEventReceiverBase(), Command(nullptr), UserHandler(nullptr), ArgPtr(nullptr)
 {}
 
-mtsEventReceiverWrite::~mtsEventReceiverWrite()
+mtsCommandWriteBase* mtsEventReceiverWrite::GetCommand()
 {
-    delete Command;
-}
+    if (!Command) {
+        Command = std::make_unique<mtsCommandWriteGeneric<mtsEventReceiverWrite>>(
+            &mtsEventReceiverWrite::EventHandler,
+            this,
+            Name,
+            nullptr
+        );
+    }
 
-mtsCommandWriteBase *mtsEventReceiverWrite::GetCommand()
-{
-    if (!Command)
-        Command = new mtsCommandWriteGeneric<mtsEventReceiverWrite>(&mtsEventReceiverWrite::EventHandler, this, Name, 0);
-    return Command;
+    return Command.get();
 }
 
 void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
@@ -219,68 +181,49 @@ void mtsEventReceiverWrite::EventHandler(const mtsGenericObject &arg)
     if (ArgPtr && !ArgPtr->Services()->Create(ArgPtr, arg)) {
         CMN_LOG_RUN_ERROR << "mtsEventReceiverWrite: could not copy from " << arg.Services()->GetName()
                           << " to " << ArgPtr->Services()->GetName() << std::endl;
-        ArgPtr = 0; // Set this to signal an error
+        ArgPtr = nullptr; // Set this to signal an error
     }
-    if (UserHandler)
+    if (UserHandler) {
         UserHandler->Execute(arg, MTS_NOT_BLOCKING);
-    WaitMutex.Lock();
-    WaitStates oldWaitState = WaitState;
-    if ((WaitState == EVENT_RECEIVER_PREPARING) || (WaitState == EVENT_RECEIVER_WAITING))
-        WaitState = EVENT_RECEIVER_SIGNALED;
-    WaitMutex.Unlock();
-    if (oldWaitState == EVENT_RECEIVER_WAITING)
-        EventSignal->Raise();
+    }
+
+    EventSignal->Raise();
 }
 
 void mtsEventReceiverWrite::SetHandlerCommand(mtsCommandWriteBase *cmdHandler)
 {
     if (cmdHandler != UserHandler) {
-        if ((UserHandler != 0) && (cmdHandler != 0)) {
+        if ((UserHandler != 0) && (cmdHandler != nullptr)) {
             CMN_LOG_INIT_WARNING << "SetHandlerCommand: changing event handler for write event " << GetName() << std::endl;
         }
         UserHandler = cmdHandler;
     }
 }
 
-bool mtsEventReceiverWrite::PrepareToWait(mtsGenericObject &obj)
-{
-    bool ret = mtsEventReceiverBase::PrepareToWait();
-    if (ret) {
-        ArgPtr = &obj;
-    }
-    return ret;
-}
-
 // Here, a false return value could mean that the wait failed, or that the wait succeeded but the return object
-// is invalid. Note that the return object was specified in PrepareToWait.
-bool mtsEventReceiverWrite::Wait()
+// is invalid.
+bool mtsEventReceiverWrite::Wait(mtsGenericObject& arg)
 {
-    if (ArgPtr == 0) {
-        CMN_LOG_RUN_WARNING << "mtsEventReceverWrite::Wait -- null ArgPtr (should first call PrepareToWait)" << std::endl;
-        // Wait anyway, but will return false
-    }
+    ArgPtr = &arg;
     bool ret = mtsEventReceiverBase::Wait();
-    if (ArgPtr == 0) ret = false;
+    if (ArgPtr == nullptr) ret = false;
     return ret;
 }
 
 // Here, a false return value could mean that the wait failed, or that the wait succeeded but the return object
-// is invalid. Note that the return object was specified in PrepareToWait.
-bool mtsEventReceiverWrite::WaitWithTimeout(double timeoutInSec)
+// is invalid.
+bool mtsEventReceiverWrite::WaitWithTimeout(mtsGenericObject& arg, double timeoutInSec)
 {
-    if (ArgPtr == 0) {
-        CMN_LOG_RUN_WARNING << "mtsEventReceverWrite::WaitWithTimeout -- null ArgPtr (should first call PrepareToWait)" << std::endl;
-        // Wait anyway, but will return false
-    }
+    ArgPtr = &arg;
     bool ret = mtsEventReceiverBase::WaitWithTimeout(timeoutInSec);
-    if (ArgPtr == 0) ret = false;
+    if (ArgPtr == nullptr) ret = false;
     return ret;
 }
 
 void mtsEventReceiverWrite::ClearWait()
 {
     mtsEventReceiverBase::ClearWait();
-    ArgPtr = 0;
+    ArgPtr = nullptr;
 }
 
 bool mtsEventReceiverWrite::RemoveHandler(void)

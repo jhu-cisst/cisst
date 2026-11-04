@@ -27,44 +27,49 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaThreadSignal_h
 #define _osaThreadSignal_h
 
-#include <cisstCommon/cmnPortability.h>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
-class osaThreadId;
-
-/* forward declaration for OS dependent internals */
-struct osaThreadSignalInternals;
+// BB: Could be replaced by binary semaphore in C++20
 
 class CISST_EXPORT osaThreadSignal
 {
 public:
-    osaThreadSignal();
-    ~osaThreadSignal();
-
-    void Wait(void);
+    void Wait();
     bool Wait(double timeoutInSec);
-    void Raise(void);
+    void Raise();
 
-    static void SetWaitCallbacks(const osaThreadId &threadId, void (*pre)(void), void (*post)(void));
+    // Must be called after Raise, or subsequent Wait()'s will return immediately
+    void Clear();
+
+    bool raised() const;
+
+    // When Wait is called from the specified thread, the pre/post callbacks will be invoked
+    // before/after the wait respectively. This is not thread-safe.
+    static void SetWaitCallbacks(const std::thread::id& thread_id, void (*pre)(void), void (*post)(void));
 
     /*! Print to stream */
     void ToStream(std::ostream & outputStream) const;
 
 private:
-    /*! Internals that are OS-dependent in some way */
-    osaThreadSignalInternals * Internals;
+    std::condition_variable cond;
 
-    static void (*PreCallback)(void);
-    static void (*PostCallback)(void);
+    mutable std::mutex state_mutex;
+    bool state = false;
+
+    inline static std::thread::id callback_thread_id;
+    inline static void (*pre_wait_callback)(void) = nullptr;
+    inline static void (*post_wait_callback)(void) = nullptr;
 };
 
-/*! Stream operator for a thread Id, see osaThreadId. */
 inline
-std::ostream & operator << (std::ostream & output,
-                            const osaThreadSignal & threadSignal) {
-    threadSignal.ToStream(output);
+std::ostream& operator<< (std::ostream& output,
+                          const osaThreadSignal& signal) {
+    signal.ToStream(output);
     return output;
 }
 

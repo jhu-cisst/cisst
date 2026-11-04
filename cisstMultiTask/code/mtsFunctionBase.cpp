@@ -30,29 +30,23 @@ http://www.cisst.org/cisst/license.txt.
 
 
 mtsFunctionBase::mtsFunctionBase():
-    ThreadSignal(0),
-    CompletionCommand(0)
+    ThreadSignal(nullptr),
+    CompletionCommand(nullptr)
 {}
-
-mtsFunctionBase::~mtsFunctionBase()
-{
-    delete CompletionCommand;
-}
 
 void mtsFunctionBase::InitCompletionCommand(const std::string &name)
 {
-    if (!this->CompletionCommand)
-        this->CompletionCommand = new mtsEventReceiverWrite;
-    this->CompletionCommand->SetName(name);
-    this->CompletionCommand->SetThreadSignal(this->ThreadSignal);
+    if (!CompletionCommand) {
+        CompletionCommand = std::make_unique<mtsEventReceiverWrite>();
+    }
+
+    CompletionCommand->SetName(name);
+    CompletionCommand->SetThreadSignal(ThreadSignal);
 }
 
 void mtsFunctionBase::DeleteCompletionCommand(void)
 {
-    if (this->CompletionCommand) {
-        delete this->CompletionCommand;
-        CompletionCommand = 0;
-    }
+    CompletionCommand = nullptr;
 }
 
 void mtsFunctionBase::SetThreadSignal(osaThreadSignal * threadSignal)
@@ -62,7 +56,7 @@ void mtsFunctionBase::SetThreadSignal(osaThreadSignal * threadSignal)
         this->CompletionCommand->SetThreadSignal(this->ThreadSignal);
 }
 
-
+// TODO BB: deprecate/delete?
 void mtsFunctionBase::ThreadSignalWait(void) const
 {
     if (this->ThreadSignal) {
@@ -72,10 +66,10 @@ void mtsFunctionBase::ThreadSignalWait(void) const
     }
 }
 
-mtsExecutionResult mtsFunctionBase::WaitForResult() const
+mtsExecutionResult mtsFunctionBase::WaitForResult(mtsGenericObject& return_obj) const
 {
     mtsExecutionResult ret(mtsExecutionResult::UNDEFINED);
-    if (CompletionCommand && CompletionCommand->Wait()) {
+    if (CompletionCommand && CompletionCommand->Wait(return_obj)) {
         ret = CompletionCommand->IsArgValid() ? mtsExecutionResult::COMMAND_SUCCEEDED : mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;
     }
     return ret;

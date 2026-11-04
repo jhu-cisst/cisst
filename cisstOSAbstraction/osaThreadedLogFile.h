@@ -27,16 +27,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaThreadedLogFile_h
 #define _osaThreadedLogFile_h
 
-#include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaThread.h>
-#include <cisstOSAbstraction/osaMutex.h>
-
-#include <list>
-#include <algorithm>
-#include <iostream>
-#include <sstream>
 #include <fstream>
+#include <iostream>
+#include <list>
+#include <mutex>
+#include <sstream>
+#include <thread>
 
+#include <cisstCommon/cmnPortability.h>
 
 /*! \brief
   
@@ -51,7 +49,7 @@ public:
 
     typedef std::basic_streambuf<_element, _trait> ChannelType;
 
-    typedef std::pair<osaThreadId, ChannelType *> ElementType;
+    typedef std::pair<std::thread::id, ChannelType *> ElementType;
   
     /*! Type of internal data structure storing the channels. */
     typedef std::list<ElementType> ChannelContainerType;
@@ -67,7 +65,7 @@ public:
     {}
 
     /*! Create a file for the current thread and add its buffer to the list of channels. */
-    ChannelType * AddChannelForThread(const osaThreadId & threadId);
+    ChannelType * AddChannelForThread(const std::thread::id & threadId);
 
 
 // Here we provide basic_streambuf namesame methods for multiplexing.
@@ -97,7 +95,7 @@ private:
     std::string FilePrefix;
 
     /*! Mutex used to protect ChannelContainer. */
-    osaMutex Mutex;
+    std::mutex Mutex;
 
     /*! The actual container that stores channel addresses. */
     ChannelContainerType ChannelContainer;
@@ -105,7 +103,7 @@ private:
     /*! Find a channel in the container and return the container's
       iterator for the element with that channel.
      */
-    iterator FindChannel(const osaThreadId & threadId);
+    iterator FindChannel(const std::thread::id& threadId);
 };
 
 
@@ -113,15 +111,14 @@ private:
 template<class _element, class _trait>
 int osaThreadedLogFileStreambuf<_element, _trait>::sync(void)
 {
-    const osaThreadId threadId = osaGetCurrentThreadId();
-    Mutex.Lock();
+    const std::thread::id threadId = std::this_thread::get_id();
+
+    std::scoped_lock lock(Mutex);
     iterator it = FindChannel(threadId);
     if (it != ChannelContainer.end()) {
-        Mutex.Unlock();
         return it->second->pubsync();
     }
     ChannelType * channel = AddChannelForThread(threadId);
-    Mutex.Unlock();
     return channel->pubsync();
 }
 
@@ -130,15 +127,13 @@ template<class _element, class _trait>
 std::streamsize
 osaThreadedLogFileStreambuf<_element, _trait>::xsputn(const _element *s, std::streamsize n)
 {
-    const osaThreadId threadId = osaGetCurrentThreadId();
-    Mutex.Lock();
+    const std::thread::id threadId = std::this_thread::get_id();
+    std::scoped_lock lock(Mutex);
     const iterator it = FindChannel(threadId);
     if (it != ChannelContainer.end()) {
-        Mutex.Unlock();
         return it->second->sputn(s, n);
     }
     ChannelType * channel = AddChannelForThread(threadId);
-    Mutex.Unlock();
     return channel->sputn(s, n);
 }
 
@@ -151,22 +146,20 @@ osaThreadedLogFileStreambuf<_element, _trait>::overflow(int_type c)
     if (_trait::eq_int_type(_trait::eof(), c))
         return (_trait::not_eof(c));
 
-    const osaThreadId threadId = osaGetCurrentThreadId();
-    Mutex.Lock();
+    const std::thread::id threadId = std::this_thread::get_id();
+    std::scoped_lock lock(Mutex);
     const iterator it = FindChannel(threadId);
     if (it != ChannelContainer.end()) {
-        Mutex.Unlock();
         return it->second->sputc( _trait::to_char_type(c) );
     }
     ChannelType * channel = AddChannelForThread(threadId);
-    Mutex.Unlock();
     return channel->sputc( _trait::to_char_type(c) );
 }
 
 
 template<class _element, class _trait>
 typename osaThreadedLogFileStreambuf<_element, _trait>::iterator
-osaThreadedLogFileStreambuf<_element, _trait>::FindChannel(const osaThreadId & threadId)
+osaThreadedLogFileStreambuf<_element, _trait>::FindChannel(const std::thread::id& threadId)
 {
     iterator it = ChannelContainer.begin();
     while (it != ChannelContainer.end()) {
@@ -180,7 +173,7 @@ osaThreadedLogFileStreambuf<_element, _trait>::FindChannel(const osaThreadId & t
 
 template<class _element, class _trait>
 typename osaThreadedLogFileStreambuf<_element, _trait>::ChannelType *
-osaThreadedLogFileStreambuf<_element, _trait>::AddChannelForThread(const osaThreadId & threadId)
+osaThreadedLogFileStreambuf<_element, _trait>::AddChannelForThread(const std::thread::id& threadId)
 {
     std::stringstream fileName;
     fileName << this->FilePrefix << this->ChannelContainer.size() << ".txt";

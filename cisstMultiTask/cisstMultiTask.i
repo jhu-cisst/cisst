@@ -17,6 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#include "mtsCollectorBase.h"
 #include "mtsGenericObjectProxy.h"
 %module cisstMultiTaskPython
 
@@ -626,6 +627,8 @@ http://www.cisst.org/cisst/license.txt.
     %}
 }
 
+%immutable mtsCollectorBase::CollectionStartedEventTrigger;
+%immutable mtsCollectorBase::ProgressEventTrigger;
 %include "cisstMultiTask/mtsCollectorBase.h"
 %include "cisstMultiTask/mtsCollectorState.h"
 

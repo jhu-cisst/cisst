@@ -17,11 +17,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstOSAbstraction/osaPipeExec.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsComponentViewer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
+#include <cisstOSAbstraction/osaPipeExec.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s, double CMN_UNUSED(timeoutInSec))
 {
@@ -82,9 +82,8 @@ void mtsComponentViewer::Cleanup(void)
         if (!ReaderThreadFinished) {
             ReaderThreadFinished = true;
             CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for reader thread to finish" << std::endl;
-            ReaderThread.Wait();
+            ReaderThread.join();
         }
-        ReaderThread.Delete();
         UDrawPipe.Close();
         UDrawPipeConnected = false;
         CMN_LOG_CLASS_RUN_WARNING << "Exited" << std::endl;
@@ -157,10 +156,14 @@ bool mtsComponentViewer::ConnectToUDrawGraph(void)
         WaitingForResponse = true;
         UDrawResponse = "";
         // Create reader thread.
-        ReaderThread.Create<mtsComponentViewer, int>(this, &mtsComponentViewer::ReadFromUDrawGraph, 0);
+        ReaderThread = std::thread([this](){ ReadFromUDrawGraph(); });
+
         // Wait for initial OK
-        for (int i = 0; (i < 100) && (UDrawResponse == ""); i++)
-            osaSleep(0.01);
+        for (int i = 0; (i < 100) && (UDrawResponse == ""); i++) {
+            using namespace std::chrono_literals;
+            osaSleep(10ms);
+        }
+
         ProcessResponse();
         if (WaitingForResponse) {
             CMN_LOG_CLASS_RUN_ERROR << "ConnectToUDrawGraph: Failed to receive response" << std::endl;
@@ -203,7 +206,7 @@ void mtsComponentViewer::ActivateMenuItems(void)
     WriteString(UDrawPipe, buffer);
 }
 
-void *mtsComponentViewer::ReadFromUDrawGraph(int)
+void mtsComponentViewer::ReadFromUDrawGraph()
 {
     ReaderThreadFinished = false;
     while (!ReaderThreadFinished) {
@@ -228,7 +231,7 @@ void *mtsComponentViewer::ReadFromUDrawGraph(int)
             PostCommandQueuedMethod();
         }
     }
-    return 0;
+    return;
 }
 
 // This function does not handle embedded quotes (i.e., \")

@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <string.h>
 #endif
 
 /* MJUNG: For detailed information about serial/parallel devices on QNX, please refer

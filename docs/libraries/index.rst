@@ -6,8 +6,5 @@ Libraries and Components
 
    overview
    cisstCommon/index
-   cisstVector/index
-   cisstNumerical/index
    cisstMultiTask/index
    cisstRobot/index
-   cisstStereoVision/index

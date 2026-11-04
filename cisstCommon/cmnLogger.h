@@ -35,7 +35,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLODMultiplexerStreambuf.h>
 
 #include <string>
-#include <vector>
 #include <fstream>
 
 #include <cisstCommon/cmnExport.h>

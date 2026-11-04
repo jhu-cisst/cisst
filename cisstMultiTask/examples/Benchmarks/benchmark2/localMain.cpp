@@ -18,13 +18,16 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#include <thread>
+
 #include "serverTask.h"
 #include "clientTask.h"
 #include "configuration.h"
 
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+
+using namespace std::chrono_literals;
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
@@ -51,7 +54,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     taskManager->StartAll();
 
     while(!client->IsBenchmarkCompleted()) {
-        osaSleep(10.0 * cmn_ms);
+        osaSleep(10ms);
     }
 
     // cleanup
@@ -59,7 +62,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     taskManager->KillAll();
 
     // To prevent crash due to CMN_LOG_CLASS (cmnLODOutputMultiplexer).
-    osaSleep(0.5 * cmn_s);
+    osaSleep(0.5s);
 
     return 0;
 }

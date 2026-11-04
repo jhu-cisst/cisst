@@ -179,7 +179,6 @@ if (CISST_CATKIN_BUILT)
   set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
   set (LIBRARY_OUTPUT_PATH    "${CATKIN_DEVEL_PREFIX}/lib")
   # Options defaults
-  set (CISST_cisstMesh         OFF  CACHE BOOL "")
   set (CISST_cisstInteractive  ON  CACHE BOOL "")
   set (CISST_HAS_JSON          ON  CACHE BOOL "")
   set (CISST_HAS_SWIG_PYTHON   ON  CACHE BOOL "" FORCE)
@@ -244,7 +243,10 @@ if (CISST_HAS_OPENGL)
 endif ()
 
 find_package(Eigen3 REQUIRED)
-find_package(orocos_kdl REQUIRED)
+
+IF (CISST_HAS_KDL)
+  find_package(orocos_kdl REQUIRED)
+endif()
 
 # Check on Linux only
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -425,10 +427,7 @@ set (CISST_LIBRARIES_DEFAULT
      )
 
 set (CISST_LIBRARIES_OPTIONAL
-     cisstMesh
      cisstInteractive
-     cisstStereoVision
-     cisst3DUserInterface
      )
 
 # All libraries
@@ -446,7 +445,7 @@ set (CISST_LIBS_WITH_QT
      cisstCommon
      cisstMultiTask
      cisstParameterTypes
-     cisstStereoVision)
+)
 
 # Build by default
 foreach (lib ${CISST_LIBRARIES_DEFAULT})
@@ -655,9 +654,8 @@ set (CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)
 set (CPACK_COMPONENT_CISSTCOMMONXML_DEPENDS       cisstCommon)
 set (CPACK_COMPONENT_CISSTOSABSTRACTION_DEPENDS   cisstCommon)
 set (CPACK_COMPONENT_CISSTMULTITASK_DEPENDS       cisstCommon cisstVectorQt cisstOSAbstraction)
-set (CPACK_COMPONENT_CISSTSTEREOVISION_DEPENDS    cisstCommon cisstVectorQt cisstOSAbstraction cisstMultiTask)
 set (CPACK_COMPONENT_CISSTPARAMETERTYPES_DEPENDS  cisstCommon cisstVectorQtcisstOSAbstraction cisstMultiTask)
-set (CPACK_COMPONENT_CISSTROBOT_DEPENDS           cisstCommon cisstVectorQt)
+set (CPACK_COMPONENT_CISSTROBOT_DEPENDS           cisstCommon)
 if (WIN32)
   set(CPACK_NSIS_MODIFY_PATH ON)
 endif (WIN32)

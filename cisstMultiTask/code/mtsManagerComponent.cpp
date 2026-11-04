@@ -16,6 +16,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <iterator>
+
+#include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
@@ -25,11 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaDynamicLoader.h>
-#include <cisstCommon/cmnUnits.h>
-#include <iterator>
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponent, mtsManagerComponentBase);
 
@@ -46,17 +47,6 @@ mtsManagerComponent::mtsManagerComponent()
 
     // Add provided interface for dynamic component management
     AddInterfaceComponent();
-
-    // Add provided interface for system-wide thread-safe logging
-    mtsInterfaceProvided * provided = AddInterfaceProvided(
-        mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided);
-    if (provided) {
-        provided->AddCommandWrite(&mtsManagerComponent::LogInterface::PrintLog,
-                                  &(this->Logger), mtsManagerComponentBase::CommandNames::PrintLog);
-        provided->AddEventWrite(Logger.EventPrintLog,
-                                mtsManagerComponentBase::EventNames::PrintLog,
-                                mtsLogMessage());
-    }
 
     // Add this component to the map
     ComponentMap.AddItem(mtsManagerComponentBase::ComponentNames::ManagerComponent, this);
@@ -400,8 +390,7 @@ void mtsManagerComponent::ComponentStart(const mtsComponentStatusControl & arg)
                 component->Create();
                 // Wait for internal thread to be created
                 osaSleep(arg.DelayInSecond);
-            }
-            else {
+            } else {
                 // If the component does not create its own thread, then we do not create (or start) it
                 // because otherwise it would capture the current (MCS) thread.
                 CMN_LOG_CLASS_RUN_WARNING << "ComponentStart: not starting component (task) " << arg.ComponentName
@@ -699,24 +688,6 @@ void mtsManagerComponent::GetInterfaceRequiredDescription(const mtsDescriptionIn
 mtsComponent * mtsManagerComponent::GetComponent(const std::string &componentName) const
 {
     return ComponentMap.GetItem(componentName);
-}
- 
-//***************************************** System-wide Logging ********************************************
-
-void mtsManagerComponent::LogInterface::PrintLog(const mtsLogMessage & log)
-{
-    std::string now;
-    osaGetDateTimeString(now, ':');
-
-    std::string msg(log.Message, log.Length);
-    std::stringstream ss;
-    ss << "|" << now << " " << log.ProcessName << "| " << msg;
-
-    mtsLogMessage _log(ss.str().c_str(), ss.str().size());
-    _log.ProcessName = log.ProcessName;
-
-    // Generate system-wide thread-safe logging event
-    EventPrintLog(_log);
 }
 
 //********************************** Connect/Disconnect Internal *************************************************

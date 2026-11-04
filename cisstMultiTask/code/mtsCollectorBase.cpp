@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorBase.h>
 
 #include <cisstCommon/cmnPath.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 

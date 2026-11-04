@@ -15,7 +15,6 @@ set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "")
 set (CISST_USE_SI_UNITS ON CACHE BOOL "")
 
 # Keep the smoke test independent from cisstNetlib
-set (CISST_cisstMesh OFF CACHE BOOL "")
 set (CISST_cisstRobot OFF CACHE BOOL "")
 
 # XML parsing
@@ -26,8 +25,6 @@ set (CISST_HAS_JSON ON CACHE BOOL "")
 
 # Unit tests
 set (CISST_BUILD_TESTS ON CACHE BOOL "")
-set (CISST_cisstRobot_TESTS OFF CACHE BOOL "")
-set (CISST_cisstMesh_TESTS OFF CACHE BOOL "")
 
 # Build examples
 set (CISST_BUILD_EXAMPLES OFF CACHE BOOL "")
@@ -35,3 +32,6 @@ set (CISST_BUILD_EXAMPLES OFF CACHE BOOL "")
 # Qt
 set (CISST_QT_VERSION 5 CACHE STRING "")
 set (CISST_HAS_QTNODES ON CACHE BOOL "")
+
+# KDL
+set (CISST_HAS_KDL ON CACHE BOOL "")

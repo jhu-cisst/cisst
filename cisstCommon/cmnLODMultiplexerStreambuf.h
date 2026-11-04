@@ -34,7 +34,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <list>
-#include <algorithm>
 #include <fstream>
 
 /*! \brief A Streambuffer class that allows output to multiple

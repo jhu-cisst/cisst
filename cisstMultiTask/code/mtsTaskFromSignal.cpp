@@ -52,7 +52,7 @@ void mtsTaskFromSignal::Init(void)
 
 
 void mtsTaskFromSignal::PostCommandQueuedMethod(void) {
-    this->Thread.Wakeup();
+    Wakeup();
 }
 
 
@@ -83,7 +83,7 @@ void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
         if (this->State == mtsComponentState::ACTIVE) {
             DoRunInternal();
             // put the task to sleep until next signal
-            Thread.WaitForWakeup();
+            WaitForWakeup();
         }
         currentState = this->State;
     }
@@ -102,7 +102,7 @@ void mtsTaskFromSignal::Kill(void)
     CMN_LOG_CLASS_INIT_VERBOSE << "Kill: task \"" << this->GetName() << "\", current state \"" << this->State << "\"" << std::endl;
     mtsTask::Kill();
     // only difference is that we need to wake up the thread to make sure it processes the request
-    this->Thread.Wakeup();
+    Wakeup();
 }
 
 

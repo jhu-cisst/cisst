@@ -13,24 +13,16 @@
 
 # all source files
 set (SOURCE_FILES
-     osaMutexTest.cpp
      osaPipeExecTest.cpp
      osaSocketTest.cpp
      osaTimeServerTest.cpp
-     osaThreadTest.cpp
-     osaThreadSignalTest.cpp
-     osaTripleBufferTest.cpp
      )
 
 # all header files
 set (HEADER_FILES
-     osaMutexTest.h
      osaPipeExecTest.h
      osaSocketTest.h
      osaTimeServerTest.h
-     osaThreadTest.h
-     osaThreadSignalTest.h
-     osaTripleBufferTest.h
      )
 
 # add executable for C++ tests

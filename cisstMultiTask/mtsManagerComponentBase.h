@@ -83,9 +83,6 @@ public:
         const static std::string InterfaceInternalRequired;
         const static std::string InterfaceComponentProvided;
         const static std::string InterfaceComponentRequired;
-        // Interface for system-wide thread-safe logging
-        const static std::string InterfaceSystemLoggerProvided;
-        const static std::string InterfaceSystemLoggerRequired;
         // Interfaces for sharing execution threads between tasks
         const static std::string InterfaceExecIn;
         const static std::string InterfaceExecOut;

@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include "mtsTestComponents.h"
 
@@ -163,6 +164,7 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
         CPPUNIT_ASSERT(executionResult.IsOK()); // queued or succeeded
         stopTime = timeServer.GetRelativeTime();
         CPPUNIT_ASSERT((stopTime - startTime) <= queueingDelay); // make sure execution is fast
+
         osaSleep(serverExecutionDelay + blockingDelay); // time to dequeue and let command execute
         CPPUNIT_ASSERT_EQUAL(0,  server->InterfaceProvided1.GetValue()); // reset
         CPPUNIT_ASSERT_EQUAL(-1, client->InterfaceRequired1.GetValue()); // unchanged

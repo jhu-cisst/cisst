@@ -18,9 +18,7 @@
 
 #include <cisstCommon/cmnExport.h>
 #include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaGetTime.h>
 
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
@@ -29,7 +27,9 @@
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 
 std::runtime_error mtsTask::UnknownException("Unknown mtsTask exception");
@@ -73,10 +73,9 @@ void mtsTask::DoRunInternal(void)
 void mtsTask::RunEventHandler(void)
 {
     RunEventCalled = false;
-    if (this->State == mtsComponentState::INITIALIZING && !Thread.IsValid()) {
+    if (this->State == mtsComponentState::INITIALIZING && !Thread.joinable()) {
         CMN_LOG_CLASS_RUN_VERBOSE << "RunEventHandler: initializing thread for " << this->GetName() << std::endl;
         // This is only executed once, to produce same behavior as RunInternal
-        Thread.CreateFromCurrentThread();
         StartupInternal();
     }
     else if (this->State == mtsComponentState::ACTIVE)
@@ -178,16 +177,6 @@ void mtsTask::CleanupInternal() {
 
 /**************** Methods for managing task timing ********************/
 
-void mtsTask::Sleep(double timeInSeconds)
-{
-    if (Thread.IsValid()) {
-        Thread.Sleep(timeInSeconds);
-    } else {
-        osaSleep(timeInSeconds);
-    }
-}
-
-
 mtsStateIndex::TimeTicksType mtsTask::GetTick(void) const {
     return StateTable.GetIndexWriter().Ticks();
 }
@@ -212,9 +201,10 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     if (!(ExecIn && ExecIn->GetConnectedInterface()))
         ChangeStateEvent(mtsComponentState(newState));
 
-    StateChange.Lock();
-    this->State = newState;
-    StateChange.Unlock();
+    {
+        std::scoped_lock lock(StateChange);
+        this->State = newState;
+    }
 
     StateChangeSignal.Raise();
 
@@ -229,50 +219,47 @@ bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
     if (this->State == desiredState) {
         return true;
     }
+
     if (CheckForOwnThread()) {
         // This shouldn't happen
         CMN_LOG_CLASS_INIT_WARNING << "WaitForState(" << desiredState << "): called from self for task \""
                                    << this->GetName() << "\"" << std::endl;
-    } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waiting for task \"" << this->GetName() << "\" to enter state \""
-                                   << desiredState << "\"" << std::endl;
-        double curTime = osaGetTime();
-        double startTime = curTime;
-        double endTime = startTime + timeout;
-        while (timeout > 0) {
-#if (CISST_OS == CISST_LINUX_XENOMAI)
-            osaSleep(1 * cmn_ms);
-#endif
-            StateChangeSignal.Wait(timeout);
-            curTime = osaGetTime();
-            if (this->State == desiredState) {
-                break;
-            }
-            timeout = endTime - curTime;
-        }
+        return false;
+    }
+    
+    CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waiting for task \"" << this->GetName() << "\" to enter state \""
+                                << desiredState << "\"" << std::endl;
 
-        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+    const auto wait_start = std::chrono::steady_clock::now();
+    const auto wait_deadline = wait_start + std::chrono::duration<double>(timeout);
+    auto current_time = wait_start;
+
+    while (timeout > 0) {
+        StateChangeSignal.Wait(timeout);
         if (this->State == desiredState) {
-            if (LCM->IsLogAllowed()) {
-                CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
-                                        << " seconds." << std::endl;
-            }
-        } else {
-            if (LCM->IsLogAllowed()) {
-                // some cases are not really errors
-                if ((desiredState == mtsComponentState::READY) && (this->State == mtsComponentState::ACTIVE)) {
-                    CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: task \"" << this->GetName()
-                                               << "\" did not reach state \"" << desiredState
-                                               << "\", current state is \"" << this->State << "\"" << std::endl;
+            break;
+        }
+        current_time = std::chrono::steady_clock::now();
+        timeout = (wait_deadline - current_time).count();
+    }
 
-                } else {
-                    CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task \"" << this->GetName()
-                                             << "\" did not reach state \"" << desiredState
-                                             << "\", current state is \"" << this->State << "\"" << std::endl;
-                }
-            }
+    if (this->State == desiredState) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << (current_time - wait_start).count()
+                                   << " seconds." << std::endl;
+    } else {
+        // some cases are not really errors
+        if ((desiredState == mtsComponentState::READY) && (this->State == mtsComponentState::ACTIVE)) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: task \"" << this->GetName()
+                                        << "\" did not reach state \"" << desiredState
+                                        << "\", current state is \"" << this->State << "\"" << std::endl;
+
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task \"" << this->GetName()
+                                        << "\" did not reach state \"" << desiredState
+                                        << "\", current state is \"" << this->State << "\"" << std::endl;
         }
     }
+
     return (this->State == desiredState);
 }
 
@@ -281,14 +268,11 @@ bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
 mtsTask::mtsTask(const std::string & name,
                  unsigned int sizeStateTable) :
     mtsComponent(name),
-    Thread(),
     InitializationDelay(3.0 * cmn_s), // if this value is modified, update documentation in header file
-    StateChange(),
-    StateChangeSignal(),
     StateTable(sizeStateTable, "StateTable"),
     OverranPeriod(false),
-    ThreadStartData(0),
-    ReturnValue(0),
+    ThreadStartData(nullptr),
+    ReturnValue(nullptr),
     RunEventCalled(false)
 {
     this->AddStateTable(&this->StateTable);
@@ -416,10 +400,10 @@ bool mtsTask::WaitToTerminate(double timeout)
     }
 
     // If task state is finished, we wait for the thread to be destroyed
-    if ((this->State == mtsComponentState::FINISHED) && Thread.IsValid()) {
+    if ((this->State == mtsComponentState::FINISHED) && Thread.joinable()) {
         CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: waiting for task \"" << this->GetName()
                                    << "\" thread to exit." << std::endl;
-        Thread.Wait();
+        Thread.join();
     }
     return ret;
 }
@@ -429,22 +413,20 @@ void mtsTask::ProcessManagerCommandsIfNotActive()
 {
     if (InterfaceProvidedToManager) {
         // Lock the StateChange mutex so that the task state does not change
-        StateChange.Lock();
+        std::scoped_lock lock(StateChange);
         if (!IsRunning()) {
             CMN_LOG_CLASS_INIT_VERBOSE << "Task " << this->GetName() << " not active, processing internal mailbox" << std::endl;
             InterfaceProvidedToManager->ProcessMailBoxes();
-        }
-        else { // Wake up the thread just in case (e.g., for mtsTaskFromSignal)
+        } else { // Wake up the thread just in case (e.g., for mtsTaskFromSignal)
             CMN_LOG_CLASS_INIT_VERBOSE << "Task " << this->GetName() << " active, not processing internal mailbox" << std::endl;
-            this->Thread.Wakeup();
+            TaskWaitSignal.Raise();
         }
-        StateChange.Unlock();
     }
 }
 
 bool mtsTask::CheckForOwnThread(void) const
 {
-    return (osaGetCurrentThreadId() == Thread.GetId());
+    return std::this_thread::get_id() == ThreadId;
 }
 
 

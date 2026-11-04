@@ -16,8 +16,7 @@ INPUT                  = ../cisstCommon \
                          ../cisstOSAbstraction \
                          ../cisstMultiTask \
                          ../cisstRobot \
-                         ../cisstParameterTypes \
-                         ../cisstStereoVision
+                         ../cisstParameterTypes
 
 # Only parse top-level headers; exclude code/, tests/, examples/, applications/
 EXCLUDE_PATTERNS       = */code/* \

@@ -22,10 +22,11 @@ http://www.cisst.org/cisst/license.txt.
 #include "TestComponent.h"
 
 #include <sstream>
+#include <thread>
 
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
+using namespace std::chrono_literals;
 
 CMN_IMPLEMENT_SERVICES(TestComponent);
 
@@ -69,7 +70,7 @@ void TestComponent::CommandWriteReturnBool(const mtsBool & in, mtsStdString & ou
     ss << "The value you wrote was "
        << std::boolalpha
        << in.GetData();
-    osaSleep(10.0);
+    osaSleep(10s);
     mtsStdString newStr(ss.str());
     out.Assign(newStr);
 }

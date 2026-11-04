@@ -45,7 +45,7 @@ protected:
     bool BenchmarkDoneMember;
     unsigned int NumberOfskippedElement;
     unsigned int SamplesCollected;
-    vctDynamicVector<double> Samples;
+    Eigen::VectorXd Samples;
 
 public:
     // provide a name for the task and define the frequency (time

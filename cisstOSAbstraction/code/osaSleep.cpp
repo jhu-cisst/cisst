@@ -27,83 +27,66 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+#if (CISST_OS == CISST_WINDOWS)
+    #include <windows.h>
+#else
     #include <sys/time.h>
     #include <unistd.h>
-#elif (CISST_OS == CISST_LINUX_RTAI)
-    #include <rtai_lxrt.h>
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-
-#include <native/task.h>
-#include <native/timer.h>
-
-#elif (CISST_OS == CISST_WINDOWS)
-    #include <windows.h>
-#elif (CISST_OS == CISST_QNX)
-    #include <time.h>
 #endif
 
+constexpr int64_t NSEC_PER_SEC = 1'000'000'000LL;
 
-const long nSecInSec =  1000 * 1000 * 1000;
-
-void osaSleep(double timeInSeconds) 
+void osaSleep(double duration_in_seconds) 
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-
-    struct timespec ts;
-    ts.tv_sec = static_cast<long> (timeInSeconds);
-    ts.tv_nsec = static_cast<long> ( (timeInSeconds-ts.tv_sec) * nSecInSec );
-    nanosleep(&ts, NULL);
-
-#elif (CISST_OS == CISST_LINUX_RTAI)
-    // check if this called by a real time task or not
-    if (rt_is_hard_real_time(rt_buddy())) {
-        rt_sleep(nano2count(static_cast<long> (timeInSeconds * nSecInSec)));
-    } else {
-        struct timespec ts;
-        ts.tv_sec = static_cast<long> (timeInSeconds);
-        ts.tv_nsec = static_cast<long> ( (timeInSeconds-ts.tv_sec) * nSecInSec );
-        nanosleep(&ts, NULL);
-    }
-
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-
-    if( rt_task_self() != NULL ){
-        RTIME ns = RTIME( timeInSeconds * 1000000000 );
-        int retval = 0;
-        retval = rt_task_sleep( rt_timer_ns2ticks( ns ) );
-        if( retval != 0 ){
-            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                              << "rt_task_sleep failed. "
-                              << strerror(retval) << ": " << retval
-                              << std::endl;
-        }
-    }
-    else{
-        struct timespec ts;
-        ts.tv_sec = static_cast<long> (timeInSeconds);
-        ts.tv_nsec = static_cast<long> ( (timeInSeconds-ts.tv_sec) * nSecInSec );
-        nanosleep(&ts, NULL);
-    }
-
-#elif (CISST_OS == CISST_WINDOWS)
+#if (CISST_OS == CISST_WINDOWS)
     // A waitable timer seems to be better than the Windows Sleep().
-    HANDLE WaitTimer;
-    LARGE_INTEGER dueTime;
-    timeInSeconds *= -10.0 * 1000.0 * 1000.0;
-    dueTime.QuadPart = static_cast<LONGLONG>(timeInSeconds); //dueTime is in 100ns
-    // We don't name the timer (third parameter) because CreateWaitableTimer will fail if the name
-    // matches an existing name (e.g., if two threads call osaSleep).
-    WaitTimer = CreateWaitableTimer(NULL, true, NULL);
-    SetWaitableTimer(WaitTimer, &dueTime, 0, NULL, NULL, 0);
-    WaitForSingleObject(WaitTimer, INFINITE);
-    CloseHandle(WaitTimer);
+    HANDLE timer = CreateWaitableTimerExW(
+        NULL,
+        NULL,
+        CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, 
+        TIMER_ALL_ACCESS
+    );
+    if (!timer) {
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "CreateWaitableTimerExW failed: "
+                          << GetLastError()
+                          << std::endl;
+        return;
+    }
 
-#elif (CISST_OS == CISST_QNX)
+    LARGE_INTEGER due_time;
+    duration_in_seconds *= -10L * 1000L * 1000L; // Negative value to specify relative time
+    dueTime.QuadPart = static_cast<LONGLONG>(duration_in_seconds); // dueTime is in 100ns
+    BOOL success = SetWaitableTimer(timer, &dueTime, (LONG)0, NULL, NULL, FALSE);
+    if (!success) {
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "SetWaitableTimer failed: "
+                          << GetLastError()
+                          << std::endl;
+        CloseHandle(timer);
+        return;
+    }
+
+    // No need to loop, will ignore signals
+    WaitForSingleObject(timer, INFINITE);
+    CloseHandle(timer);
+#else
     struct timespec ts;
-    _uint64 nsec = (_uint64) (timeInSeconds * 1000.0 * 1000.0 * 1000.0);
-    nsec2timespec(&ts, nsec);
-    nanosleep(&ts, NULL);
-#endif
-}
+    ts.tv_sec = static_cast<long>(duration_in_seconds);
+    ts.tv_nsec = static_cast<long>((duration_in_seconds-ts.tv_sec) * NSEC_PER_SEC);
 
+    int result = EINTR;
+    while (result == EINTR) {
+        result = clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL);
+    }
+
+    if (result != 0) {
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "clock_nanosleep failed with error: "
+                          << result
+                          << std::endl;
+        return;
+    }
+#endif
+
+}

@@ -43,7 +43,7 @@ clientTask::clientTask(const std::string & taskName, double period):
     TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
 
 	// Reserve memory space for results
-    Results.SetSize(confNumberOfSamples);
+    Results = Eigen::VectorXd::Zero(confNumberOfSamples);
 }
 
 
@@ -72,7 +72,7 @@ void clientTask::Run(void)
 
     // Obtain the elapsed time and keep it.
 	const double elapsedTime = TimeServer->GetRelativeTime() - previousTic;
-    Results.Element(NumberOfSamplesCollected++) = elapsedTime;
+    Results(NumberOfSamplesCollected++) = elapsedTime;
 
 	if (NumberOfSamplesCollected == confNumberOfSamples) {        
         ShowResults();
@@ -91,10 +91,9 @@ bool clientTask::IsBenchmarkCompleted(void) const
 
 void clientTask::ShowResults()
 {
-    double average = Results.SumOfElements() / Results.size();
-    double min = 0.0;
-    double max = 0.0;
-    Results.MinAndMaxElement(min, max);
+    double average = Results.sum() / Results.size();
+    double min = Results.minCoeff();
+    double max = Results.maxCoeff();
 
     std::cout << std::endl << std::endl
               << "--------------------------------------------------------------------" << std::endl

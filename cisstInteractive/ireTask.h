@@ -48,7 +48,6 @@ class CISST_EXPORT ireTask : public mtsTaskContinuous {
     std::string StartupCommands;  // startup string
 
     void Initialize(void);
-    void Log(const mtsLogMessage & log);
 
 public:
     ireTask(const std::string &name = "IRE",
@@ -59,9 +58,9 @@ public:
     /*! Destructor. */
     virtual ~ireTask();
 
-    void Startup(void) override;
-    void Run(void) override;
-    void Cleanup(void) override;
+    void Startup() override;
+    void Run() override;
+    void Cleanup() override;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ireTask)
