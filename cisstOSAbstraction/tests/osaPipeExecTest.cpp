@@ -16,12 +16,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <chrono>
+#include <thread>
+
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
 #include <cisstOSAbstraction/osaGetTime.h>
-#include <thread>
 
 #include "osaPipeExecTest.h"
 

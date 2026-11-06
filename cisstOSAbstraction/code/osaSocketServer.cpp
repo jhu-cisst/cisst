@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSocketServer.h>
 
 #if (CISST_OS == CISST_WINDOWS)
+
+#include <chrono>
 #include <thread>
 using namespace std::chrono_literals;
 
@@ -28,7 +30,9 @@ using namespace std::chrono_literals;
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #define WINSOCKVERSION MAKEWORD(2,2)
+
 #else
+
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -41,6 +45,7 @@ using namespace std::chrono_literals;
 #endif
 #endif
 
+#include <cisstOSAbstraction/osaSleep.h>
 
 osaSocketServer::osaSocketServer(void)
 {

@@ -16,6 +16,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstOSAbstraction/osaDynamicLoader.h>
+
+#include <filesystem>
 #include <string>
 
 #include <cisstConfig.h>
@@ -23,12 +26,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnPath.h>
-#include <cisstOSAbstraction/osaDynamicLoader.h>
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
-inline void *OpenLibrary(const char *libname)
-       { return (void *)LoadLibrary(libname); }
+inline void *OpenLibrary(const wchar_t* libname)
+       { return (void *)LoadLibraryW(libname); }
 inline void CloseLibrary(void *handle)
        { FreeLibrary((HMODULE)handle); }
 inline int GetTheError()

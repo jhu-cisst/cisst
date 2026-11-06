@@ -90,9 +90,9 @@ osaThreadBuddyInternals::osaThreadBuddyInternals() {
 
 osaThreadBuddyInternals::~osaThreadBuddyInternals() {
 #if (CISST_OS == CISST_WINDOWS)
-    if (Data->WaitTimer != NULL) {
-        CloseHandle(Data->WaitTimer);
-        Data->WaitTimer = NULL;
+    if (WaitTimer != NULL) {
+        CloseHandle(WaitTimer);
+        WaitTimer = NULL;
     }
 #endif
 }
@@ -102,7 +102,7 @@ void osaThreadBuddyInternals::setTimerPeriod(double period_in_seconds) {
     LARGE_INTEGER DueTime;
     DueTime.QuadPart = 0LL; // start timer immediately
     period_ms = static_cast<LONG>(period_in_seconds * 1000.0);
-    BOOL success = SetWaitableTimer(WaitTimer, &dueTime, (LONG)period_ms, NULL, NULL, FALSE);
+    BOOL success = SetWaitableTimer(WaitTimer, &DueTime, (LONG)period_ms, NULL, NULL, FALSE);
 
     if (!success) {
         CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -120,7 +120,7 @@ void osaThreadBuddyInternals::setTimerPeriod(double period_in_seconds) {
 void osaThreadBuddyInternals::waitForTimer() {
 #if (CISST_OS == CISST_WINDOWS)
     if (period_ms == 0) { return; }
-    WaitForSingleObject(Data->WaitTimer, INFINITE);
+    WaitForSingleObject(WaitTimer, INFINITE);
 #else
     posix_timespec_add_ns(due_time, period_ns);
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &due_time, NULL);

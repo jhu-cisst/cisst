@@ -28,15 +28,10 @@ class mtsCollectorStateTest: public CppUnit::TestFixture
 private:
     CPPUNIT_TEST_SUITE(mtsCollectorStateTest);
     {
-        CPPUNIT_TEST(TestDevice_mtsInt);
         CPPUNIT_TEST(TestDevice_int);
-        CPPUNIT_TEST(TestPeriodic_mtsInt);
         CPPUNIT_TEST(TestPeriodic_int);
-        CPPUNIT_TEST(TestContinuous_mtsInt);
         CPPUNIT_TEST(TestContinuous_int);
-        CPPUNIT_TEST(TestFromCallback_mtsInt);
         CPPUNIT_TEST(TestFromCallback_int);
-        CPPUNIT_TEST(TestFromSignal_mtsInt);
         CPPUNIT_TEST(TestFromSignal_int);
     }
     CPPUNIT_TEST_SUITE_END();
@@ -51,22 +46,17 @@ public:
     void TestExecution(_serverType * server, double serverExecutionDelay);
 
     template <class _elementType> void TestDevice(void);
-    void TestDevice_mtsInt(void);
     void TestDevice_int(void);
 
     template <class _elementType> void TestPeriodic(void);
-    void TestPeriodic_mtsInt(void);
     void TestPeriodic_int(void);
 
     template <class _elementType> void TestContinuous(void);
-    void TestContinuous_mtsInt(void);
     void TestContinuous_int(void);
 
     template <class _elementType> void TestFromCallback(void);
-    void TestFromCallback_mtsInt(void);
     void TestFromCallback_int(void);
 
     template <class _elementType> void TestFromSignal(void);
-    void TestFromSignal_mtsInt(void);
     void TestFromSignal_int(void);
 };

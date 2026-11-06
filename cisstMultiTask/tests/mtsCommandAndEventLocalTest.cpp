@@ -443,9 +443,6 @@ void mtsCommandAndEventLocalTest::TestDeviceDevice(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventLocalTest::TestDeviceDevice_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestDeviceDevice<mtsInt>();
-}
 void mtsCommandAndEventLocalTest::TestDeviceDevice_int(void) {
     mtsCommandAndEventLocalTest::TestDeviceDevice<int>();
 }
@@ -463,9 +460,6 @@ void mtsCommandAndEventLocalTest::TestPeriodicPeriodic(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventLocalTest::TestPeriodicPeriodic_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestPeriodicPeriodic<mtsInt>();
-}
 void mtsCommandAndEventLocalTest::TestPeriodicPeriodic_int(void) {
     mtsCommandAndEventLocalTest::TestPeriodicPeriodic<int>();
 }
@@ -482,9 +476,6 @@ void mtsCommandAndEventLocalTest::TestContinuousContinuous(void)
     TestExecution(client, server, clientExecutionDelay, serverExecutionDelay);
     delete client;
     delete server;
-}
-void mtsCommandAndEventLocalTest::TestContinuousContinuous_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestContinuousContinuous<mtsInt>();
 }
 void mtsCommandAndEventLocalTest::TestContinuousContinuous_int(void) {
     mtsCommandAndEventLocalTest::TestContinuousContinuous<int>();
@@ -509,9 +500,6 @@ void mtsCommandAndEventLocalTest::TestFromCallbackFromCallback(void)
     delete serverTrigger;
     delete server;
 }
-void mtsCommandAndEventLocalTest::TestFromCallbackFromCallback_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestFromCallbackFromCallback<mtsInt>();
-}
 void mtsCommandAndEventLocalTest::TestFromCallbackFromCallback_int(void) {
     mtsCommandAndEventLocalTest::TestFromCallbackFromCallback<int>();
 }
@@ -528,9 +516,6 @@ void mtsCommandAndEventLocalTest::TestFromSignalFromSignal(void)
     TestExecution(client, server, clientExecutionDelay, serverExecutionDelay);
     delete client;
     delete server;
-}
-void mtsCommandAndEventLocalTest::TestFromSignalFromSignal_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestFromSignalFromSignal<mtsInt>();
 }
 void mtsCommandAndEventLocalTest::TestFromSignalFromSignal_int(void) {
     mtsCommandAndEventLocalTest::TestFromSignalFromSignal<int>();
@@ -550,9 +535,6 @@ void mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking<mtsInt>();
-}
 void mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking_int(void) {
     mtsCommandAndEventLocalTest::TestPeriodicPeriodicBlocking<int>();
 }
@@ -570,9 +552,6 @@ void mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking(void)
     TestExecution(client, server, clientExecutionDelay, serverExecutionDelay, blockingDelay);
     delete client;
     delete server;
-}
-void mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking<mtsInt>();
 }
 void mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking_int(void) {
     mtsCommandAndEventLocalTest::TestContinuousContinuousBlocking<int>();
@@ -598,9 +577,6 @@ void mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking(void)
     delete serverTrigger;
     delete server;
 }
-void mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking<mtsInt>();
-}
 void mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking_int(void) {
     mtsCommandAndEventLocalTest::TestFromCallbackFromCallbackBlocking<int>();
 }
@@ -618,9 +594,6 @@ void mtsCommandAndEventLocalTest::TestFromSignalFromSignalBlocking(void)
     TestExecution(client, server, clientExecutionDelay, serverExecutionDelay, blockingDelay);
     delete client;
     delete server;
-}
-void mtsCommandAndEventLocalTest::TestFromSignalFromSignalBlocking_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestFromSignalFromSignalBlocking<mtsInt>();
 }
 void mtsCommandAndEventLocalTest::TestFromSignalFromSignalBlocking_int(void) {
     mtsCommandAndEventLocalTest::TestFromSignalFromSignalBlocking<int>();
@@ -704,9 +677,6 @@ void mtsCommandAndEventLocalTest::TestArgumentPrototypes(void)
     CPPUNIT_ASSERT(manager->RemoveComponent(server));
     delete client;
     delete server;
-}
-void mtsCommandAndEventLocalTest::TestArgumentPrototypes_mtsInt(void) {
-    mtsCommandAndEventLocalTest::TestArgumentPrototypes<mtsInt>();
 }
 void mtsCommandAndEventLocalTest::TestArgumentPrototypes_int(void) {
     mtsCommandAndEventLocalTest::TestArgumentPrototypes<int>();

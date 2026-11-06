@@ -127,9 +127,9 @@ http://www.cisst.org/cisst/license.txt.
 
 // Microsoft compilers
 #ifdef _WIN32  // see msdn.microsoft.com
-// we require Windows 2000, XP or more
+// we require Windows 10, 11, or higher
 #ifndef _WIN32_WINNT
-  #define _WIN32_WINNT 0x0500
+  #define _WIN32_WINNT 0x0A00
 #endif
   #define CISST_OS CISST_WINDOWS
 

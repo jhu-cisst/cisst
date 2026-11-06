@@ -26,7 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
 
-#include <list>
+#include <string>
+#include <vector>
 
 class cdgField: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);

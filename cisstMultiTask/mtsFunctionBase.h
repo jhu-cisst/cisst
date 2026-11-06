@@ -40,8 +40,7 @@ class CISST_EXPORT mtsFunctionBase {
 protected:
     /*! Default constructor. */
     mtsFunctionBase();
-
-    virtual ~mtsFunctionBase() = default;
+    virtual ~mtsFunctionBase();
 
     /*! Reference to an existing thread signal used to block the execution. */
     osaThreadSignal* ThreadSignal;

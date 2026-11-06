@@ -23,12 +23,17 @@ http://www.cisst.org/cisst/license.txt.
 // in osaSleep.h. The extra function call (rather than inlining) will add a little delay
 // to functions such as GetCurrentTime(), but this should be tolerable.
 
+#include <cisstOSAbstraction/osaSleep.h>
+
+#include <cstdint>
+
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
-#include <cisstOSAbstraction/osaSleep.h>
 
 #if (CISST_OS == CISST_WINDOWS)
     #include <windows.h>
+    #include <winnt.h>
+    #include <synchapi.h>
 #else
     #include <sys/time.h>
     #include <unistd.h>
@@ -36,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 
 constexpr int64_t NSEC_PER_SEC = 1'000'000'000LL;
 
-void osaSleep(double duration_in_seconds) 
+void osaSleep(double duration_in_seconds)
 {
 #if (CISST_OS == CISST_WINDOWS)
     // A waitable timer seems to be better than the Windows Sleep().
@@ -56,8 +61,8 @@ void osaSleep(double duration_in_seconds)
 
     LARGE_INTEGER due_time;
     duration_in_seconds *= -10L * 1000L * 1000L; // Negative value to specify relative time
-    dueTime.QuadPart = static_cast<LONGLONG>(duration_in_seconds); // dueTime is in 100ns
-    BOOL success = SetWaitableTimer(timer, &dueTime, (LONG)0, NULL, NULL, FALSE);
+    due_time.QuadPart = static_cast<LONGLONG>(duration_in_seconds); // due_time is in 100ns
+    BOOL success = SetWaitableTimer(timer, &due_time, (LONG)0, NULL, NULL, FALSE);
     if (!success) {
         CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
                           << "SetWaitableTimer failed: "

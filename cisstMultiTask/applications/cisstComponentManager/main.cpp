@@ -232,9 +232,9 @@ class shellTask : public mtsTaskContinuous
     char **argv;
 
     // Comparison operator for std::set
-    struct CmdListLess: public std::binary_function<const CommandEntryBase*, const CommandEntryBase*, bool>
+    struct CmdListLess
     {
-        result_type operator()(first_argument_type p1, second_argument_type p2) const
+        bool operator()(const CommandEntryBase* p1, const CommandEntryBase* p2) const
         {
             if (p1->GetCommand() == p2->GetCommand()) {
                 if ((p1->GetNumArgs() == -1) || (p2->GetNumArgs() == -1))

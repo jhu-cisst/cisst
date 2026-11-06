@@ -34,6 +34,9 @@ mtsFunctionBase::mtsFunctionBase():
     CompletionCommand(nullptr)
 {}
 
+// Define once definition of mtsEventReceiverWrite is available
+mtsFunctionBase::~mtsFunctionBase() = default;
+
 void mtsFunctionBase::InitCompletionCommand(const std::string &name)
 {
     if (!CompletionCommand) {

@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsTestComponents_h
 #define _mtsTestComponents_h
 
+#include <Eigen/Core>
+
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -101,10 +103,6 @@ bool TestV3Conversion(const Eigen::Vector<_elementType, 3> &input, _elementType 
 // Not sure why following is needed
 CMN_DATA_SPECIALIZE_ALL_NO_BYTE_SWAP(mtsInt, mtsI);
 
-typedef Eigen::Vector<mtsInt, 3> vct3mtsInt;
-typedef mtsGenericObjectProxy<vct3mtsInt> mtsVct3mtsInt;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct3mtsInt)
-
 //-----------------------------------------------------------------------------
 //  Base class for all test components
 //-----------------------------------------------------------------------------
@@ -168,7 +166,7 @@ public:
         Value = -1;   // initial value = -1;
         StateValue = 0;
         StateValueFilteredGeneric.Init();
-        StateValueFilteredV3.SetAll(0);
+        StateValueFilteredV3.setZero();
         Argument1Prototype = Argument1PrototypeDefault;
         Argument2Prototype = Argument2PrototypeDefault;
     }
@@ -219,7 +217,7 @@ public:
         StateTable->Start();
         StateValue++;
         StateValueFilteredGeneric.Increment();
-        StateValueFilteredV3.SetAll(StateValue);
+        StateValueFilteredV3.fill(StateValue);
         StateTable->Advance();
     }
 
@@ -401,12 +399,6 @@ public:
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") override {}
 };
-
-typedef mtsTestDevice1<int> mtsTestDevice1_int;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestDevice1_int);
-
-typedef mtsTestDevice1<mtsInt> mtsTestDevice1_mtsInt;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestDevice1_mtsInt);
 
 //-----------------------------------------------------------------------------
 //  Continuous1: (P1:Continuous1:r1 - P2:Continuous1:p2)

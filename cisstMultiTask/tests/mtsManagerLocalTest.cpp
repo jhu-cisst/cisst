@@ -71,7 +71,7 @@ void mtsManagerLocalTest::TestAddComponent(void)
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
     // Test with mtsComponent type components
-    mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
+    mtsTestDevice2<int> * device2 = new mtsTestDevice2<int>;
 
     // Invalid argument test
     CPPUNIT_ASSERT(!localManager->AddComponent(NULL));
@@ -81,7 +81,7 @@ void mtsManagerLocalTest::TestAddComponent(void)
     CPPUNIT_ASSERT(localManager->FindComponent(device2->GetName()));
 
     // Test with mtsTask type components
-    mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
+    mtsTestContinuous1<int> * continuous1 = new mtsTestContinuous1<int>;
 
     // Invalid argument test
     CPPUNIT_ASSERT(!localManager->AddComponent(NULL));
@@ -97,7 +97,7 @@ void mtsManagerLocalTest::TestFindComponent(void)
 {
     mtsManagerLocal *localManager = mtsManagerLocal::GetInstance();
 
-    mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
+    mtsTestDevice1<int> * device1 = new mtsTestDevice1<int>;
     const std::string componentName = device1->GetName();
 
     CPPUNIT_ASSERT(!localManager->FindComponent(componentName));
@@ -114,7 +114,7 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
 {
     mtsManagerLocal *localManager = mtsManagerLocal::GetInstance();
 
-    mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
+    mtsTestDevice1<int> * device1 = new mtsTestDevice1<int>;
     const std::string componentName1 = device1->GetName();
 
     // Invalid argument test
@@ -126,13 +126,13 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
     CPPUNIT_ASSERT(localManager->RemoveComponent(componentName1));
     CPPUNIT_ASSERT(!localManager->FindComponent(componentName1));
 
-    device1 = new mtsTestDevice1<mtsInt>;
+    device1 = new mtsTestDevice1<int>;
     CPPUNIT_ASSERT(localManager->AddComponent(device1));
     CPPUNIT_ASSERT(localManager->FindComponent(componentName1));
     CPPUNIT_ASSERT(localManager->RemoveComponent(device1));
     CPPUNIT_ASSERT(!localManager->FindComponent(componentName1));
 
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
+    mtsTestPeriodic1<int> * periodic1 = new mtsTestPeriodic1<int>;
     const std::string componentName2 = periodic1->GetName();
 
     CPPUNIT_ASSERT(localManager->AddComponent(periodic1));
@@ -140,7 +140,7 @@ void mtsManagerLocalTest::TestRemoveComponent(void)
     CPPUNIT_ASSERT(localManager->RemoveComponent(componentName2));
     CPPUNIT_ASSERT(!localManager->FindComponent(componentName2));
 
-    periodic1 = new mtsTestPeriodic1<mtsInt>;
+    periodic1 = new mtsTestPeriodic1<int>;
     CPPUNIT_ASSERT(localManager->AddComponent(periodic1));
     CPPUNIT_ASSERT(localManager->FindComponent(componentName2));
     CPPUNIT_ASSERT(localManager->RemoveComponent(periodic1));
@@ -153,9 +153,9 @@ void mtsManagerLocalTest::TestGetComponent(void)
 {
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
-    mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
-    mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
-    mtsTestDevice3<mtsInt> * device3 = new mtsTestDevice3<mtsInt>;
+    mtsTestDevice1<int> * device1 = new mtsTestDevice1<int>;
+    mtsTestDevice2<int> * device2 = new mtsTestDevice2<int>;
+    mtsTestDevice3<int> * device3 = new mtsTestDevice3<int>;
     mtsComponent * nullComponent = 0;
 
     CPPUNIT_ASSERT_EQUAL(nullComponent, localManager->GetComponent(device1->GetName()));
@@ -178,9 +178,9 @@ void mtsManagerLocalTest::TestGetNamesOfComponents(void)
 {
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
-    mtsTestDevice1<mtsInt> * device1 = new mtsTestDevice1<mtsInt>;
-    mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
-    mtsTestDevice3<mtsInt> * device3 = new mtsTestDevice3<mtsInt>;
+    mtsTestDevice1<int> * device1 = new mtsTestDevice1<int>;
+    mtsTestDevice2<int> * device2 = new mtsTestDevice2<int>;
+    mtsTestDevice3<int> * device3 = new mtsTestDevice3<int>;
 
     CPPUNIT_ASSERT(localManager->AddComponent(device1));
     CPPUNIT_ASSERT(localManager->AddComponent(device2));
@@ -249,10 +249,10 @@ void mtsManagerLocalTest::TestConnectDisconnect(void)
     // Local connection test
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
-    mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
-    mtsTestFromCallback1<mtsInt> * fromCallback1 = new mtsTestFromCallback1<mtsInt>;
-    mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
+    mtsTestPeriodic1<int> * periodic1 = new mtsTestPeriodic1<int>;
+    mtsTestContinuous1<int> * continuous1 = new mtsTestContinuous1<int>;
+    mtsTestFromCallback1<int> * fromCallback1 = new mtsTestFromCallback1<int>;
+    mtsTestDevice2<int> * device2 = new mtsTestDevice2<int>;
 
     CPPUNIT_ASSERT(localManager->AddComponent(periodic1));
     CPPUNIT_ASSERT(localManager->AddComponent(continuous1));
@@ -290,8 +290,8 @@ void mtsManagerLocalTest::TestConnectLocally(void)
 {
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 
-    mtsTestDevice1<mtsInt> * client = new mtsTestDevice1<mtsInt>;
-    mtsTestDevice2<mtsInt> * server = new mtsTestDevice2<mtsInt>;
+    mtsTestDevice1<int> * client = new mtsTestDevice1<int>;
+    mtsTestDevice2<int> * server = new mtsTestDevice2<int>;
 
 #define FAIL    false
 #define SUCCESS true

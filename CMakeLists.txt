@@ -242,10 +242,10 @@ if (CISST_HAS_OPENGL)
   endif ()
 endif ()
 
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 CONFIG REQUIRED)
 
 IF (CISST_HAS_KDL)
-  find_package(orocos_kdl REQUIRED)
+  find_package(orocos_kdl CONFIG REQUIRED)
 endif()
 
 # Check on Linux only

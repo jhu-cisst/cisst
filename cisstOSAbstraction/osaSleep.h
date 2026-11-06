@@ -55,7 +55,7 @@ void CISST_EXPORT osaSleep(double duration_in_seconds);
   \ingroup cisstOSAbstraction
 */
 template<class Rep, class Period>
-void CISST_EXPORT osaSleep(const std::chrono::duration<Rep, Period>& sleep_duration) {
+void osaSleep(const std::chrono::duration<Rep, Period>& sleep_duration) {
     const double seconds = std::chrono::duration<double>(sleep_duration).count();
     osaSleep(seconds);
 }

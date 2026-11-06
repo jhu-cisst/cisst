@@ -17,8 +17,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <chrono>
 #include <thread>
 
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaSocket.h>
 #include <cisstOSAbstraction/osaSocketServer.h>
 

@@ -208,9 +208,6 @@ void mtsCollectorStateTest::TestDevice(void)
     TestExecution(server, 0.0 /* no execution delay for a device */);
     delete server;
 }
-void mtsCollectorStateTest::TestDevice_mtsInt(void) {
-    mtsCollectorStateTest::TestDevice<mtsInt>();
-}
 void mtsCollectorStateTest::TestDevice_int(void) {
     mtsCollectorStateTest::TestDevice<int>();
 }
@@ -224,9 +221,6 @@ void mtsCollectorStateTest::TestPeriodic(void)
     TestExecution(server, serverExecutionDelay);
     delete server;
 }
-void mtsCollectorStateTest::TestPeriodic_mtsInt(void) {
-    mtsCollectorStateTest::TestPeriodic<mtsInt>();
-}
 void mtsCollectorStateTest::TestPeriodic_int(void) {
     mtsCollectorStateTest::TestPeriodic<int>();
 }
@@ -239,9 +233,6 @@ void mtsCollectorStateTest::TestContinuous(void)
     const double serverExecutionDelay = 0.1 * cmn_s;
     TestExecution(server, serverExecutionDelay);
     delete server;
-}
-void mtsCollectorStateTest::TestContinuous_mtsInt(void) {
-    mtsCollectorStateTest::TestContinuous<mtsInt>();
 }
 void mtsCollectorStateTest::TestContinuous_int(void) {
     mtsCollectorStateTest::TestContinuous<int>();
@@ -259,9 +250,6 @@ void mtsCollectorStateTest::TestFromCallback(void)
     delete serverTrigger;
     delete server;
 }
-void mtsCollectorStateTest::TestFromCallback_mtsInt(void) {
-    mtsCollectorStateTest::TestFromCallback<mtsInt>();
-}
 void mtsCollectorStateTest::TestFromCallback_int(void) {
     mtsCollectorStateTest::TestFromCallback<int>();
 }
@@ -274,9 +262,6 @@ void mtsCollectorStateTest::TestFromSignal(void)
     const double serverExecutionDelay = 0.1 * cmn_s;
     TestExecution(server, serverExecutionDelay);
     delete server;
-}
-void mtsCollectorStateTest::TestFromSignal_mtsInt(void) {
-    mtsCollectorStateTest::TestFromSignal<mtsInt>();
 }
 void mtsCollectorStateTest::TestFromSignal_int(void) {
     mtsCollectorStateTest::TestFromSignal<int>();

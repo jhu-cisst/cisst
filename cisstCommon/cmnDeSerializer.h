@@ -35,10 +35,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnThrow.h>
 #include <cisstCommon/cmnAssert.h>
 
-#include <string>
+#include <cstddef>
 #include <fstream>
 #include <map>
-#include <cstddef>
+#include <string>
+#include <vector>
 
 #include <cisstCommon/cmnExport.h>
 
