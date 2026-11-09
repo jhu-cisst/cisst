@@ -155,11 +155,6 @@ public:
      */
     const mtsManagerComponentServices * GetManagerComponentServices() const;
 
-    /*! Return the logger services.
-        This is a method so that we can later add thread-safety.
-     */
-    const ManagerLocalComponent * GetLoggerServices() const;
-
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
@@ -439,16 +434,9 @@ public:
                                       const std::string & requiredInterfaceName,
                                       const std::string & eventHandlerName);
 
-    /*! Return IP address of this process */
-    inline std::string CISST_DEPRECATED GetIPAddress(void) const { return ""; }
-
     /*! Return a list of all IP addresses detected on this machine. */
     static std::vector<std::string> GetIPAddressList(void);
     static void GetIPAddressList(std::vector<std::string> & ipAddresses);
-
-    /*! Check if further logs are allowed (used in mtsTask); this could be
-        moved to cmnLogger. */
-    static bool CISST_DEPRECATED IsLogAllowed(void);
 
     // TODO: should the following be moved somewhere else?
     bool IsValidComponentTag(const std::string & tag) const;

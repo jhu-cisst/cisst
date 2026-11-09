@@ -105,4 +105,3 @@ cisst_add_library (
 install (
   FILES ${cisstParameterTypes_CISST_DG_HDRS_FULLPATH}
   DESTINATION "include/cisstParameterTypes")
-       

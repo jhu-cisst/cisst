@@ -253,11 +253,6 @@ public:
                                               "StateTableFilteredReadGenericVR");
         provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredGeneric, &TestClassConversion<value_type>,
                                               "StateTableFilteredReadGenericCF");
-#if 0
-        // Compiler fails to deduce template argument
-        provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredV3, &vector3_type::SumOfElements,
-                                              "StateTableFilteredReadV3VR");
-#endif
         provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredV3, &TestV3Conversion<value_type>,
                                               "StateTableFilteredReadV3CF");
         provided->AddCommandVoid(&mtsTestInterfaceProvided::StateTableAdvance,
@@ -365,7 +360,7 @@ public:
 template <class _elementType>
 class CISST_EXPORT mtsTestDevice1: public mtsComponent
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
 
     typedef _elementType value_type;
@@ -399,6 +394,9 @@ public:
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") override {}
 };
+
+typedef mtsTestDevice1<int> mtsTestDevice1_int;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestDevice1_int);
 
 //-----------------------------------------------------------------------------
 //  Continuous1: (P1:Continuous1:r1 - P2:Continuous1:p2)

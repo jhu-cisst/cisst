@@ -122,66 +122,6 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->BatchReadyEventCounter);
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->SamplesCollected);
 
-#if 0
-
-    // now collect 300 elements so we can test replay
-    executionResult = stateCollectorTestDevice->CollectorState.StartCollection.ExecuteBlocking(0.0);
-    CPPUNIT_ASSERT(executionResult.IsOK());
-    // see previous comment re. sleep
-    osaSleep(serverExecutionDelay);
-    for (size_t index = 0;
-         index < 300;
-         index++) {
-        executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
-        CPPUNIT_ASSERT(executionResult.IsOK());
-        CPPUNIT_ASSERT(stateCollectorTestDevice->CollectionRunning);
-    }
-    // stop collection
-    executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking(0.0);
-    CPPUNIT_ASSERT(executionResult.IsOK());
-    // see previous comment re. sleep
-    osaSleep(serverExecutionDelay);
-    // collection will not send the stop event until the next state table advance
-    executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
-    CPPUNIT_ASSERT(executionResult.IsOK());
-    // since we had to do one advance, the collector should send a range event
-    CPPUNIT_ASSERT_EQUAL(11u, stateCollectorTestDevice->BatchReadyEventCounter);
-    CPPUNIT_ASSERT_EQUAL(300u, stateCollectorTestDevice->SamplesCollected);
-
-    // create a new component of the same type for replay
-    _serverType * replayComponent = new _serverType("replay-component");
-    CPPUNIT_ASSERT(manager->AddComponent(replayComponent));
-    // should fail since we are not in replay mode
-    CPPUNIT_ASSERT(!replayComponent->SetReplayData(stateTableName, filename));
-    CPPUNIT_ASSERT(replayComponent->SetReplayMode());
-    // shouldn't find that "dummy" state table
-    CPPUNIT_ASSERT(!replayComponent->SetReplayData("dummy", filename));
-    std::string dataReplayFile = filename + ".csv";
-    CPPUNIT_ASSERT(replayComponent->SetReplayData(stateTableName, dataReplayFile));
-
-    // create and connect component to read from replay state table
-    typedef typename _serverType::value_type value_type;
-    mtsTestDevice1<value_type> * replayReader = new mtsTestDevice1<value_type>("replay-reader");
-    CPPUNIT_ASSERT(manager->AddComponent(replayReader));
-    CPPUNIT_ASSERT(manager->Connect(replayReader->GetName(), "r1",
-                                    replayComponent->GetName(), "p1"));
-
-    replayComponent->Start();
-    replayReader->Start();
-    replayComponent->Create();
-    replayReader->Create();
-
-    value_type data;
-    for (size_t index = 0;
-         index < 300;
-         index++) {
-        CPPUNIT_ASSERT(replayComponent->InterfaceProvided1.StateTable->ReplayAdvance());
-        replayReader->InterfaceRequired1.FunctionStateTableRead(data);
-        std::cerr << index << " -> " << data << std::endl;
-    }
-
-#endif
-
     // stop all and cleanup
     manager->KillAll();
     CPPUNIT_ASSERT(manager->WaitForStateAll(mtsComponentState::FINISHED, StateTransitionMaximumDelay));

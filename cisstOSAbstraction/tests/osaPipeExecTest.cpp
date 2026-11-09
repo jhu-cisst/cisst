@@ -22,8 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnRandomSequence.h>
-#include <cisstOSAbstraction/osaPipeExec.h>
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaPipeExec.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include "osaPipeExecTest.h"
 

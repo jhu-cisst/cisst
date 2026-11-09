@@ -20,7 +20,4 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsTestComponents.h"
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestClassGeneric_int)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestClassGeneric_mtsInt)
-
-// CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestDevice1_int)
-// CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestDevice1_mtsInt)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTestDevice1_int)

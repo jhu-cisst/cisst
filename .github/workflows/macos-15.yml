@@ -30,7 +30,7 @@ jobs:
         HOMEBREW_NO_AUTO_UPDATE: "1"
         HOMEBREW_NO_INSTALL_CLEANUP: "1"
       run: |
-        brew install graphviz jsoncpp qt pkg-config cppunit ccache
+        brew install graphviz jsoncpp qt pkg-config cppunit ccache eigen orocos-kdl
         # Ensure homebrew bin is in path for subsequent steps
         echo "/opt/homebrew/bin" >> $GITHUB_PATH
 
