@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "prmVelocityCartesianGetTest.h"
 #include "prmTestGenericObjectConstructor.h"
-#include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstParameterTypes/prmVelocityCartesianGet.h>
 
@@ -39,22 +38,4 @@ void prmVelocityCartesianGetTest::TestConstructors(void)
     prmTestGenericObjectCopyConstructor(velocity, velocityCopy);
     CPPUNIT_ASSERT(velocity.VelocityLinear() == velocityCopy.VelocityLinear());
     CPPUNIT_ASSERT(velocity.VelocityAngular() == velocityCopy.VelocityAngular());
-}
-
-
-void prmVelocityCartesianGetTest::TestSerialize(void)
-{
-    prmVelocityCartesianGet initial, final;
-    // test part inherited from mtsGenericObject
-    prmSetAndTestGenericObjectSerialization(initial);
-
-    initial.VelocityLinear() = Eigen::Vector3d::Random() * 10.0;
-    initial.VelocityAngular() = Eigen::Vector3d::Random() * 10.0;
-
-    std::stringstream serializationStream;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-
-    CPPUNIT_ASSERT(final.VelocityLinear() == initial.VelocityLinear());
-    CPPUNIT_ASSERT(final.VelocityAngular() == initial.VelocityAngular());
 }

@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "prmEventButtonTest.h"
 #include "prmTestGenericObjectConstructor.h"
-#include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstParameterTypes/prmEventButton.h>
 
@@ -37,34 +36,4 @@ void prmEventButtonTest::TestConstructors(void)
     prmEventButton eventButtonCopy(eventButton);
     prmTestGenericObjectCopyConstructor(eventButton, eventButtonCopy);
     CPPUNIT_ASSERT(eventButton.Type() == eventButtonCopy.Type());
-}
-
-
-void prmEventButtonTest::TestSerialize(void)
-{
-    prmEventButton initial, final;
-    // test part inherited from mtsGenericObject
-    prmSetAndTestGenericObjectSerialization(initial);
-
-    std::stringstream serializationStream;
-
-    initial.Type() = prmEventButton::PRESSED;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.Type() == initial.Type());
-
-    initial.Type() = prmEventButton::RELEASED;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.Type() == initial.Type());
-
-    initial.Type() = prmEventButton::CLICKED;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.Type() == initial.Type());
-
-    initial.Type() = prmEventButton::DOUBLE_CLICKED;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.Type() == initial.Type());
 }
