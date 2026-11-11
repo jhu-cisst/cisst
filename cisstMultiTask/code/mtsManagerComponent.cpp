@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
-#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponent, mtsManagerComponentBase);

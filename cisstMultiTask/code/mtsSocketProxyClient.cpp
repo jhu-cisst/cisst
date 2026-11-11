@@ -36,6 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsSocketProxyCommon.h>
 
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <chrono>
 
 #include "mtsProxySerializer.h"
 
@@ -939,12 +940,12 @@ bool mtsSocketProxyClient::WaitForResponse(double timeoutInSec)
     if (!LocalWaiting) {
         CMN_LOG_CLASS_RUN_WARNING << "WaitForResponse, LocalWaiting is false on entry" << std::endl;
     }
-    double startTime = osaGetTime();
-    double endTime = startTime + timeoutInSec;
+    const auto start_time = std::chrono::steady_clock::now();
+    const auto end_time = start_time + std::chrono::duration<double>(timeoutInSec);
     double timeout = timeoutInSec;
     while (LocalWaiting && (timeout > 0)) {
         CheckForEvents(timeout);
-        timeout = endTime - osaGetTime();
+        timeout = (end_time - std::chrono::steady_clock::now()).count();
     }
     if (LocalWaiting) {
         CMN_LOG_CLASS_RUN_ERROR << "WaitForResponse timed out, timeout = " << timeoutInSec << std::endl;

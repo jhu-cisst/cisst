@@ -17,12 +17,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <chrono>
-#include <thread>
 
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnRandomSequence.h>
-#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
@@ -38,7 +37,6 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
 void osaPipeExecTest::TestPipeCommon(bool noWindow)
 {
     osaPipeExec pipe1, pipe2;
-    double startTime, measuredTime;
 
     /* Build search path to find the test utility */
     cmnPath path;
@@ -125,17 +123,18 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     CPPUNIT_ASSERT_EQUAL(std::string("ef"), resultString);
 
     /* Test ReadUntil with timeout */
-    startTime = osaGetTime();
+    auto stopwatch = osaStopwatch<std::chrono::steady_clock>();
+    stopwatch.Start();
     // No characters written, should time out
     resultString = pipe1.ReadUntil(6, 'a', 2.0);
-    measuredTime = osaGetTime()-startTime;
+    double measuredTime = stopwatch.GetElapsedTime().count();
     CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, measuredTime, 0.2);
     CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(resultString.length()));
     charsWrittenInt = pipe1.Write("12345", 5);
     CPPUNIT_ASSERT_EQUAL(5, charsWrittenInt);
-    startTime = osaGetTime();
+    stopwatch.Reset();
     resultString = pipe1.ReadUntil(5, '3');
-    measuredTime = osaGetTime()-startTime;
+    measuredTime = stopwatch.GetElapsedTime().count();
     // No timeout, so should be significantly less than 0.5 seconds
     CPPUNIT_ASSERT(measuredTime < 0.5);
     CPPUNIT_ASSERT_EQUAL(std::string("123"), resultString);
@@ -216,9 +215,10 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     charsWrittenInt = pipe1.Write("abc0d", 5);
     CPPUNIT_ASSERT_EQUAL(5, charsWrittenInt);
     /* Try to read 5 characters, specifying a 2 second timeout. */
-    startTime = osaGetTime();
+    auto stopwatch_pipeline = osaStopwatch<std::chrono::steady_clock>();
+    stopwatch_pipeline.Start();
     returnString = pipe1.ReadUntil(5, 'd', 2.0);
-    measuredTime = osaGetTime()-startTime;
+    measuredTime = stopwatch_pipeline.GetElapsedTime().count();
     CPPUNIT_ASSERT(measuredTime < 2.1);
 
     isRunning = pipe1.IsProcessRunning();

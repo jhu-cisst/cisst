@@ -17,12 +17,12 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsInterfaceCommon.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
+#include <chrono>
 
 CMN_IMPLEMENT_SERVICES(mtsComponentPointer)
 CMN_IMPLEMENT_SERVICES(mtsManagerComponentServices)
@@ -696,26 +696,26 @@ bool mtsManagerComponentServices::CheckAndWait(const std::vector<std::string> &l
                                                mtsEventReceiverWrite &eventReceiver)
 {
     std::vector<std::string>::const_iterator it = std::find(list.begin(), list.end(), key);
-    if (it == list.end()) {
-        if (timeoutInSec == 0.0)
-            return false;
-        double curTime = osaGetTime();
-        if (timeoutInSec < 0.0) {
-            // Timeout less than 0 means wait indefinitely. Internally, however, we wait with a timeout
-            // just in case we miss the event (e.g., due to a race condition).
-            CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for " << key << std::endl;
-            eventReceiver.WaitWithTimeout(3.0);  // still poll 3 seconds
-        }
-        else {
-            CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for " << key << ", timeout = " << timeoutInSec << std::endl;
-            eventReceiver.WaitWithTimeout(timeoutInSec);
-            timeoutInSec -= (osaGetTime() - curTime);
-            if (timeoutInSec < 0.0)
-                timeoutInSec = 0.0;
-        }
-        return false;
+    // Already in list
+    if (it != list.end()) { return true; }
+
+    if (timeoutInSec == 0.0) { return false; }
+
+    const auto curTime = std::chrono::steady_clock::now();
+    if (timeoutInSec < 0.0) {
+        // Timeout less than 0 means wait indefinitely. Internally, however, we wait with a timeout
+        // just in case we miss the event (e.g., due to a race condition).
+        CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for " << key << std::endl;
+        eventReceiver.WaitWithTimeout(3.0);  // still poll 3 seconds
     }
-    return true;
+    else {
+        CMN_LOG_CLASS_RUN_VERBOSE << "Waiting for " << key << ", timeout = " << timeoutInSec << std::endl;
+        eventReceiver.WaitWithTimeout(timeoutInSec);
+        timeoutInSec -= (std::chrono::steady_clock::now() - curTime).count();
+
+        if (timeoutInSec < 0.0) { timeoutInSec = 0.0; }
+    }
+    return false;
 }
 
 bool mtsManagerComponentServices::WaitFor(const std::string & processName, double timeoutInSec)

@@ -18,8 +18,9 @@
 
 #include <cisstCommon/cmnAssert.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
-#include <cisstOSAbstraction/osaGetTime.h>
 #include <string.h>
+#include <chrono>
+
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 #if (CISST_OS == CISST_QNX)
 #include <errno.h>
@@ -183,7 +184,7 @@ bool osaPipeExec::Open(const std::string & executable, const std::string & mode,
 bool osaPipeExec::Open(const std::string & executable,
                        const std::vector<std::string> & arguments,
                        const std::string & mode,
-                       bool noWindow)
+                       [[maybe_unused]] bool noWindow)
 {
     if (Connected) {
         return false;
@@ -493,7 +494,8 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
     int charsRead = 0;
     int result;
     char lastChar = stopChar+1; // dummy value that's not stopChar
-    double endTime = (timeoutSec > 0.0) ? (osaGetTime() + timeoutSec) : 0.0;
+    const auto timeout_duration = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(timeoutSec));
+    const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now() + timeout_duration;
     // Normally, the Read method is blocking, which makes it difficult to support a timeout
     // (i.e., a call to Read can block well beyond the timeout period).
 
@@ -511,7 +513,7 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
     // handle so that we can detect whether the child process has exited.
     bool nonblocking = false;
     DWORD saved_pipe_mode;
-    if (endTime > 0.0) {
+    if (timeoutSec > 0.0) {
         if (GetNamedPipeHandleState(INTERNALS_CONST(readHandle), &saved_pipe_mode, NULL, NULL, NULL, NULL, 0)) {
             if (saved_pipe_mode == PIPE_NOWAIT) {
                 nonblocking = true;
@@ -537,8 +539,10 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
 #if (CISST_OS == CISST_WINDOWS)
         // On Windows, we first try to read from the (non-blocking) pipe, then poll for messages.
         // See comment above for further details.
-        if (nonblocking && (osaGetTime() > endTime))
+        if (nonblocking && (std::chrono::steady_clock::now() > end_time)) {
             break;  // timeout
+        }
+
         result = Read(s, 1);
         if (nonblocking && (result <= 0)) {
             // No bytes read; sleep a little and poll for events
@@ -549,7 +553,7 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
                                     << " bytes after child process ended" << std::endl;
                 break;
             }
-            double timeLeft = endTime-osaGetTime();
+            double timeLeft = (end_time-std::chrono::steady_clock::now()).count();
             DWORD timeout_msec = static_cast<DWORD>(1000.0*timeLeft/100.0 + 0.5);
             DWORD ret = MsgWaitForMultipleObjects(1, handles, FALSE, timeout_msec, QS_ALLEVENTS);
             if (ret == WAIT_OBJECT_0) {
@@ -564,7 +568,7 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
                     // If it is a quit message, exit.
                     if (msg.message == WM_QUIT) {
                         CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil got quit message" << std::endl;
-                        endTime = osaGetTime();  // force a timeout
+                        end_time = std::chrono::steady_clock::now();  // force a timeout
                     }
                     else {
                         // Otherwise, dispatch the message.
@@ -578,15 +582,20 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
 #else
         // On Linux (and other platforms), it is much easier because the select call can be used to
         // check whether any characters are available in the (blocking) pipe.
-        if (endTime > 0.0) {
+        if (timeoutSec > 0.0) {
             fd_set readfds;
             FD_ZERO(&readfds);
             FD_SET(FromProgram[READ_END], &readfds);
             int nfds = FromProgram[READ_END]+1;
-            double timeLeft = endTime-osaGetTime();
-            time_t sec = static_cast<time_t>(floor(timeLeft));
-            suseconds_t usec = static_cast<suseconds_t>((timeLeft - sec) * 1e6);
-            timeval timeout = { sec , usec };
+            const auto time_left = end_time - std::chrono::steady_clock::now();
+            const auto sec = std::chrono::floor<std::chrono::seconds>(time_left);
+            const auto usec = std::chrono::duration_cast<std::chrono::microseconds>(time_left - sec);
+
+            timeval timeout;
+            timeout.tv_sec = static_cast<decltype(timeout.tv_sec)>(sec.count());
+            timeout.tv_usec = static_cast<decltype(timeout.tv_usec)>(usec.count());
+            if (timeout.tv_sec < 0) { break; /* timeout */ }
+
             int retval = select(nfds, &readfds, NULL, NULL, &timeout);
             if (retval == -1) {
                 CMN_LOG_RUN_WARNING << "osaPipeExec::ReadUntil select failed after " << charsRead
