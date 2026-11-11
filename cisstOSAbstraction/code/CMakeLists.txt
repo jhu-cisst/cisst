@@ -16,7 +16,6 @@ project (cisstOSAbstraction)
 # all source files
 set (SOURCE_FILES
      osaClassServices.cpp
-     osaCPUAffinity.cpp
      osaDynamicLoader.cpp
      osaDynamicLoaderAndFactory.cpp
      osaGetTime.cpp
@@ -33,7 +32,6 @@ set (SOURCE_FILES
 # all header files
 set (HEADER_FILES
      osaForwardDeclarations.h
-     osaCPUAffinity.h
      osaDynamicLoader.h
      osaDynamicLoaderAndFactory.h
      osaExport.h

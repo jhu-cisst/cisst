@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnPrintf.h>
-#include <cisstOSAbstraction/osaCPUAffinity.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
@@ -40,8 +39,6 @@ void osaTimeServerTest::TestInternalsSize(void) {
 
 void osaTimeServerTest::TestMultipleServersSingleThread(void)
 {
-    osaCPUSetAffinity(OSA_CPU1);
-
     const size_t numberOfServers = 20;
     osaTimeServer * servers[numberOfServers];
 
