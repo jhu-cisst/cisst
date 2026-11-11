@@ -69,10 +69,10 @@ void mtsFunctionBase::ThreadSignalWait(void) const
     }
 }
 
-mtsExecutionResult mtsFunctionBase::WaitForResult(mtsGenericObject& return_obj) const
+mtsExecutionResult mtsFunctionBase::WaitForResult() const
 {
     mtsExecutionResult ret(mtsExecutionResult::UNDEFINED);
-    if (CompletionCommand && CompletionCommand->Wait(return_obj)) {
+    if (CompletionCommand && CompletionCommand->Wait()) {
         ret = CompletionCommand->IsArgValid() ? mtsExecutionResult::COMMAND_SUCCEEDED : mtsExecutionResult::METHOD_OR_FUNCTION_FAILED;
     }
     return ret;

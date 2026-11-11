@@ -74,10 +74,10 @@ mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
     mtsExecutionResultProxy remoteResult(mtsExecutionResult::UNDEFINED);
-    CompletionCommand->ClearWait();
+    CompletionCommand->PrepareWait(remoteResult);
     mtsExecutionResult executionResult = Command->Execute(MTS_BLOCKING, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
-        executionResult = WaitForResult(remoteResult);
+        executionResult = WaitForResult();
         if (executionResult.GetResult() == mtsExecutionResult::COMMAND_SUCCEEDED) {
             executionResult = remoteResult.GetData();
         }
@@ -90,7 +90,6 @@ mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
         CMN_LOG_RUN_WARNING << "mtsFunctionVoid::ExecuteBlocking: execution result = "
                             << executionResult << std::endl;
     }
-    CompletionCommand->ClearWait();
     return executionResult;
 }
 

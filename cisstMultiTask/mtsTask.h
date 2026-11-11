@@ -88,6 +88,9 @@ protected:
         ChangeState method instead. */
     std::mutex StateChange;
 
+    /*! Serialize state-event writes from concurrent ChangeState callers. */
+    std::mutex StateChangeEventMutex;
+
     /*! Signal for caller to wait on task state changes. */
     osaThreadSignal StateChangeSignal;
 

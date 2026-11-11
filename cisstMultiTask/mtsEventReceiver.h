@@ -105,11 +105,8 @@ protected:
     osaThreadSignal* EventSignal;
     bool OwnEventSignal;                   // true if we created our own thread signal
 
-    bool is_waiting = false;
-
     bool CheckRequired() const;
     void CheckEventSignal();
-    bool WaitCommon();
 
 public:
     mtsEventReceiverBase();
@@ -226,6 +223,9 @@ public:
     // Note that we are using the Wait and WaitWithTimeout member functions from the base class.
     using mtsEventReceiverBase::Wait;
     using mtsEventReceiverBase::WaitWithTimeout;
+
+    /*! Set the destination before a blocking command can complete. */
+    void PrepareWait(mtsGenericObject & arg);
 
     /*! Wait for event to be issued. If successful, object specified in arg is valid.
         \returns true if successful, false if failed (including case where wait succeeded but return value obj

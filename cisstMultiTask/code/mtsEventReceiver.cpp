@@ -24,8 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 mtsEventReceiverBase::mtsEventReceiverBase()
     : Name("UnknownEventReceiver"),
       Required(nullptr),
-      EventSignal(nullptr),
-      OwnEventSignal(false)
+      EventSignal(new osaThreadSignal()),
+      OwnEventSignal(true)
 {}
 
 mtsEventReceiverBase::~mtsEventReceiverBase()
@@ -39,7 +39,6 @@ void mtsEventReceiverBase::SetRequired(const std::string & name, mtsInterfaceReq
 {
     SetName(name);
     Required = interfaceRequired;
-    EventSignal = nullptr;
     if (Required && (Required->MailBox)) {
         SetThreadSignal(Required->GetThreadSignal());
     }
@@ -47,7 +46,12 @@ void mtsEventReceiverBase::SetRequired(const std::string & name, mtsInterfaceReq
 
 void mtsEventReceiverBase::SetThreadSignal(osaThreadSignal* signal)
 {
+    if (OwnEventSignal) {
+        delete EventSignal;
+    }
+
     EventSignal = signal;
+    OwnEventSignal = false;
 }
 
 bool mtsEventReceiverBase::CheckRequired() const
@@ -59,46 +63,19 @@ bool mtsEventReceiverBase::CheckRequired() const
     return Required != nullptr;
 }
 
-void mtsEventReceiverBase::CheckEventSignal()
-{
-    if (!EventSignal) {
-        CMN_LOG_RUN_WARNING << "mtsEventReceiverBase: Creating local thread signal for event " << Name << std::endl;
-        EventSignal = new osaThreadSignal;
-        OwnEventSignal = true;
-    }
-}
-
-bool mtsEventReceiverBase::WaitCommon()
-{
-    CheckEventSignal();
-    if (is_waiting) {
-        // Cannot call from multiple threads (not thread-safe).
-        CMN_LOG_RUN_WARNING << "mtsEventReceiverBase: already waiting on event " << Name << std::endl;
-        return false;
-    }
-    return true;
-}
-
 void mtsEventReceiverBase::ClearWait()
 {
-    is_waiting = false;
     EventSignal->Clear();
 }
 
 bool mtsEventReceiverBase::Wait()
 {
-    if (!WaitCommon()) { return false; }
-
-    EventSignal->Wait();
-    return EventSignal->raised();
+    return EventSignal->Wait();
 }
 
 bool mtsEventReceiverBase::WaitWithTimeout(double timeoutInSec)
 {
-    if (!WaitCommon()) { return false; }
-
-    EventSignal->Wait(timeoutInSec);
-    return EventSignal->raised();
+    return EventSignal->Wait(timeoutInSec);
 }
 
 void mtsEventReceiverBase::Detach()
@@ -200,6 +177,12 @@ void mtsEventReceiverWrite::SetHandlerCommand(mtsCommandWriteBase *cmdHandler)
     }
 }
 
+
+void mtsEventReceiverWrite::PrepareWait(mtsGenericObject & arg)
+{
+    mtsEventReceiverBase::ClearWait();
+    ArgPtr = &arg;
+}
 // Here, a false return value could mean that the wait failed, or that the wait succeeded but the return object
 // is invalid.
 bool mtsEventReceiverWrite::Wait(mtsGenericObject& arg)

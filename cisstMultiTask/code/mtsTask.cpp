@@ -210,6 +210,7 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
 
     // Inform the manager component client of the state change
     if (InterfaceProvidedToManager) {
+        std::scoped_lock lock(StateChangeEventMutex);
         EventGeneratorChangeState(mtsComponentStateChange("", this->GetName(), this->State));
     }
 }
@@ -305,6 +306,10 @@ mtsTask::~mtsTask()
         //It is safe to call CleanupInternal() more than once.
         //Should we call the user-supplied Cleanup()?
         CleanupInternal();
+    }
+
+    if (Thread.joinable()) {
+        Thread.join();
     }
 }
 

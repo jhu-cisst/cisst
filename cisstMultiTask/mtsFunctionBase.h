@@ -71,12 +71,8 @@ public:
     /*! Wait for internal thread signal */
     void ThreadSignalWait(void) const;
 
-    /*! Wait for return value.
-        Return object contains:
-          - result  --  for read, qualified read, void return, write return
-          - execution result -- for blocking void, blocking write
-    */
-    mtsExecutionResult WaitForResult(mtsGenericObject& return_obj) const;
+    /*! Wait for return value. */
+    mtsExecutionResult WaitForResult() const;
 };
 
 
