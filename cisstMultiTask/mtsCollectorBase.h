@@ -30,7 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 
 #include <string>
-#include <stdexcept>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>

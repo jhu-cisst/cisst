@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstOSAbstraction/osaPipeExec.h>
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 

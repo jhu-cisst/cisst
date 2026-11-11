@@ -15,6 +15,7 @@
 set (SOURCE_FILES
      osaPipeExecTest.cpp
      osaSocketTest.cpp
+     osaThreadSignalTest.cpp
      osaTimeServerTest.cpp
      )
 
@@ -22,6 +23,7 @@ set (SOURCE_FILES
 set (HEADER_FILES
      osaPipeExecTest.h
      osaSocketTest.h
+     osaThreadSignalTest.h
      osaTimeServerTest.h
      )
 

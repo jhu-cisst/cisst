@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCallableVoidBase.h>
-#include <string>
 
 
 /*!

@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCallableVoidFunction_h
 #define _mtsCallableVoidFunction_h
 
+#include <cisstMultiTask/mtsCallableVoidBase.h>
+
 /*!
   \file
   \brief Defines a command with no argument

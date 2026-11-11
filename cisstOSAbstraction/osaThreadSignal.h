@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT osaThreadSignal
 {
 public:
-    void Wait();
+    bool Wait();
     bool Wait(double timeoutInSec);
     void Raise();
 
