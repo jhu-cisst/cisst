@@ -39,7 +39,7 @@ class CISST_EXPORT clockComponent: public mtsComponent {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION_ONEARG, CMN_LOG_LOD_RUN_ERROR);
 
  protected:
-    osaStopwatch Timer;  // this is the actual component (wrapped)
+    osaStopwatch<std::chrono::steady_clock> Timer;  // this is the actual component (wrapped)
     void GetTime(mtsDouble & time) const;  // used by the command "GetTime"
 
     // internal method to configure this component

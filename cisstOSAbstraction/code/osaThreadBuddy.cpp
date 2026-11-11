@@ -144,8 +144,7 @@ void osaThreadBuddy::Create(double period)
 
 void osaThreadBuddy::Create(const osaAbsoluteTime& tv)
 {
-    Period = tv.sec*1000000000 + tv.nsec;
-    Create(Period);
+    Create(tv.ToSeconds());
 }
 
 void osaThreadBuddy::WaitForRemainingPeriod(void)

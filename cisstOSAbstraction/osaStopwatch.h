@@ -20,50 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaStopwatch_h
 #define _osaStopwatch_h
 
-#include <iostream>
+#include <chrono>
+
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnLogger.h>
-
-#if (CISST_OS == CISST_WINDOWS)
-    #include <Windows.h>
-#elif (CISST_OS == CISST_QNX)
-    #include <time.h>
-    #ifndef timersub
-    #define timersub(a, b, res)                         \
-    do {                                                \
-        (res)->tv_sec = (a)->tv_sec - (b)->tv_sec;      \
-        (res)->tv_nsec = (a)->tv_nsec - (b)->tv_nsec;   \
-        if ((res)->tv_nsec < 0)                         \
-        {                                               \
-            (res)->tv_sec--;                            \
-            (res)->tv_nsec += 1000000000L;              \
-        }                                               \
-    } while (0)
-    #endif /*timersub*/
-
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-
-#include <native/timer.h>
-
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN)
-    #include <sys/time.h>
-    #if (CISST_OS == CISST_SOLARIS) || (CISST_COMPILER == CISST_GCC)
-    #ifndef timersub
-    #define timersub(a, b, res)                         \
-    do {                                                \
-        (res)->tv_sec = (a)->tv_sec - (b)->tv_sec;      \
-        (res)->tv_usec = (a)->tv_usec - (b)->tv_usec;   \
-        if ((res)->tv_usec < 0)                         \
-        {                                               \
-            (res)->tv_sec--;                            \
-            (res)->tv_usec += 1000000;                  \
-        }                                               \
-        } while (0)
-    #endif /*timersub*/
-    #endif
-#endif
-
 
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
@@ -76,204 +37,77 @@ http://www.cisst.org/cisst/license.txt.
   may sometimes invoke a context switch, and use them only when needed
   to interfere the least with the normal performance of the program.
 
-  To reduce overhead (for more efficient time polling), all the
-  methods are inlined.
+  osaStopWatch makes use of a clock_t type that should satisfy the
+  C++ Clock requirements, such as std::chrono::steady_clock. On some
+  operating systems, such as Xenomai, using std::chrono::steady_clock
+  will trigger a domain switch, so a custom Clock should be used instead. 
+
+  Note: *not* thread safe.
 */
+template <typename clock_t>
 class osaStopwatch
 {
 public:
-    typedef unsigned long MillisecondsCounter;
-    typedef double SecondsCounter;
-
-    osaStopwatch(void)
-#if (CISST_OS == CISST_WINDOWS)
-        :
-        HasHighPerformanceCounter(false)
-#endif
+    osaStopwatch()
     {
-#if (CISST_OS == CISST_WINDOWS)
-    static LARGE_INTEGER frequency = { 0, 0 };
-    HasHighPerformanceCounter = (::QueryPerformanceFrequency( &frequency )) ? true : false;
-    if (HasHighPerformanceCounter) {
-        this->TimeGranularity = 1.0 / static_cast<double>(frequency.QuadPart); // this value should be in seconds
-        CMN_LOG_INIT_WARNING << "Class osaStopwatch: Can use HighPerformance Counter, time granularity is: "
-                             << TimeGranularity * cmn_ms << " ms" << std::endl;
-    } else {
-        this->TimeGranularity = 1.0e-3; // 1 millisecond
-        CMN_LOG_INIT_WARNING << "Class osaStopwatch: Can NOT use HighPerformance Counter, time granularity is about: "
-                             << TimeGranularity * cmn_ms << " ms" << std::endl;
-    }
-
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-
-    this->TimeGranularity = 1.0e-9; // 1 microsecond
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
-    this->TimeGranularity = 1.0e-6; // 1 microsecond
-#endif
         Reset();
     }
 
-    /*! Return the granularity of time in the system, in seconds.  The fraction part is
-      the fraction of second that the system time granularity supports */
-    double CISST_EXPORT GetTimeGranularity(void) const;
-
     /*! Reset all the counters to zero, and stop the watch */
-    void Reset(void)
+    void Reset()
     {
-        RunningFlag = false;
-        AccumulatedTime = 0;
-#if (CISST_OS == CISST_WINDOWS)
-        StartTicks = 0;
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-
-        StartTicks = 0;
-
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN)
-        StartTimeOfDay.tv_sec = 0;
-        StartTimeOfDay.tv_usec = 0;
-#elif (CISST_OS == CISST_QNX)
-        StartTimeOfDay.tv_sec = 0;
-        StartTimeOfDay.tv_nsec = 0;
-#endif
+        is_running = false;
+        accumulated = std::chrono::duration<double>(0);
     }
 
     /*! Start the stopwatch from its current counter state.  If the watch is already
       running, do nothing */
-    inline void Start(void)
+    void Start()
     {
         if (IsRunning()) {
             return;
         }
 
-#if (CISST_OS == CISST_WINDOWS)
-        if (HasHighPerformanceCounter) {
-            LARGE_INTEGER ticks;
-            ::QueryPerformanceCounter(&ticks);
-            StartTicks = GetTimeGranularity() * static_cast<double>(ticks.QuadPart);
-        }
-        else {
-            StartTicks = ::GetTickCount();
-        }
-
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-
-        StartTicks = rt_timer_read();
-
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN)
-        gettimeofday(&StartTimeOfDay, 0);
-#elif (CISST_OS == CISST_QNX)
-        if (clock_gettime(CLOCK_REALTIME, &StartTimeOfDay) == -1) {
-            CMN_LOG_INIT_ERROR << "Stopwatch start failed" << std::endl;
-        }
-#endif
-        RunningFlag = true;
+        start_time = clock_t::now();
+        is_running = true;
     }
-
 
     /*! Stop the stopwatch so that its counter state is kept until a Start or a Reset */
-    inline void Stop(void)
+    void Stop()
     {
-        if (!IsRunning())
+        if (!IsRunning()) {
             return;
-        RunningFlag = false;
-        AccumulatedTime += GetLastTimeInterval();
-    }
+        }
 
+        is_running = false;
+        accumulated += GetLastTimeInterval();
+    }
 
     /*! Returns true if the stopwatch is running and counting continues (i.e., if Start
       was called last).  Returns false if the watch is stopped, i.e., if Stop or Reset
       was called last. */
-    inline bool IsRunning(void) const
-    {
-        return RunningFlag;
-    }
-
+    bool IsRunning() const { return is_running; }
 
     /*! Return the current read of the stopwatch without changing the
-      running state.  This method is now deprecated as it returns a
-      time interval in milliseconds (integer).  Use GetElapsedTime()
-      instead. */
-    inline MillisecondsCounter CISST_DEPRECATED GetCurrentRead(void) const
+      running state.  Return a time interval in seconds */
+    std::chrono::duration<double> GetElapsedTime() const
     {
         if (!IsRunning()) {
-            return static_cast<MillisecondsCounter>(AccumulatedTime * 1000.0);
+            return accumulated;
         }
-        return static_cast<MillisecondsCounter>((AccumulatedTime + GetLastTimeInterval()) * 1000.0);
-    }
 
-    /*! Return the current read of the stopwatch without changing the
-      running state.  Return a time interval in seconds using a
-      "double" precision floating point number. */
-    inline SecondsCounter GetElapsedTime(void) const
-    {
-        if (!IsRunning()) {
-            return AccumulatedTime;
-        }
-        return AccumulatedTime + GetLastTimeInterval();
+        return accumulated + GetLastTimeInterval();
     }
 
 private:
-
-    inline SecondsCounter GetLastTimeInterval(void) const
+    std::chrono::duration<double> GetLastTimeInterval() const
     {
-#if (CISST_OS == CISST_WINDOWS)
-        SecondsCounter endTicks;
-        SecondsCounter totalSeconds;
-        if (HasHighPerformanceCounter) {
-            LARGE_INTEGER ticks;
-            QueryPerformanceCounter(&ticks);
-            endTicks = GetTimeGranularity() * static_cast<double>(ticks.QuadPart);
-            totalSeconds = endTicks - StartTicks;
-        } else {
-            endTicks = ::GetTickCount();
-            totalSeconds = static_cast<double>(endTicks - StartTicks) / 1000.0;
-        }
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-
-        SecondsCounter totalSeconds = (rt_timer_read() - StartTicks) * cmn_ns;
-
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN)
-        timeval endTimeOfDay;
-        timeval diffTime;
-        gettimeofday(&endTimeOfDay, 0);
-        timersub(&endTimeOfDay, &StartTimeOfDay, &diffTime);
-        SecondsCounter totalSeconds = diffTime.tv_sec + diffTime.tv_usec / 1000000.0;
-#elif (CISST_OS == CISST_QNX)
-        struct timespec endTimeOfDay;
-        struct timespec diffTime;
-        SecondsCounter totalSeconds = 0;
-        if (clock_gettime(CLOCK_REALTIME, &endTimeOfDay) == -1) {
-            CMN_LOG_RUN_ERROR << "GetLastTimeInterval failed" << std::endl;
-        } else {
-            timersub(&endTimeOfDay, &StartTimeOfDay, &diffTime);
-            totalSeconds = diffTime.tv_sec + diffTime.tv_nsec * cmn_ns;
-        }
-#endif
-        return totalSeconds;
+        return clock_t::now() - start_time;
     }
 
-    bool RunningFlag;
-    SecondsCounter AccumulatedTime;
-
-#if (CISST_OS == CISST_WINDOWS)
-    bool HasHighPerformanceCounter;
-#endif
-	double TimeGranularity;
-
-#if (CISST_OS == CISST_WINDOWS)
-    SecondsCounter StartTicks;
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-
-    RTIME StartTicks;
-
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN)
-    timeval StartTimeOfDay;
-#elif (CISST_OS == CISST_QNX)
-    struct timespec StartTimeOfDay;
-#endif
-
+    bool is_running;
+    std::chrono::duration<double> accumulated;
+    typename clock_t::time_point start_time;
 };
 
-
 #endif  // _osaStopwatch_h
-

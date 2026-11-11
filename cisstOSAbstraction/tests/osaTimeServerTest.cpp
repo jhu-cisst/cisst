@@ -16,6 +16,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <chrono>
 #include <thread>
 
 #include <cisstCommon/cmnPortability.h>
@@ -45,7 +46,7 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
     osaTimeServer * servers[numberOfServers];
 
     size_t index;
-    osaStopwatch stopwatch;
+    osaStopwatch<std::chrono::steady_clock> stopwatch;
     double currentTime[numberOfServers];
 
     double currentTimeMax;
@@ -100,7 +101,7 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
         }
     }
 
-    CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime() + 5.0 * cmn_ms)); // add 5 ms to be generous
+    CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime().count() + 5.0 * cmn_ms)); // add 5 ms to be generous
 }
 
 
@@ -144,10 +145,9 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
     osaTimeServerTestThreadData * threadData;
     bool quitFlag = false;
 
-    osaStopwatch stopwatch;
+    osaStopwatch<std::chrono::steady_clock> stopwatch;
     double currentTimeMax;
     double currentTimeMin;
-
 
     for (index = 0;
          index < numberOfServers;
@@ -237,7 +237,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
         }
     }
 
-    CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime() + 5.0 * cmn_ms)); // add 5 ms to be generous
+    CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime().count() + 5.0 * cmn_ms)); // add 5 ms to be generous
 
     quitFlag = true;
 

@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <chrono>
 #include <thread>
 
 #include <cisstCommon/cmnPortability.h>
@@ -34,8 +35,8 @@ using namespace std::chrono_literals;
 class ThreadSignalMethodArguments {
 public:
     osaThreadSignal * ThreadSignal;
-    osaStopwatch TimerWait;
-    osaStopwatch TimerBlock;
+    osaStopwatch<std::chrono::steady_clock> TimerWait;
+    osaStopwatch<std::chrono::steady_clock> TimerBlock;
     int iterations;
     double DelayToStart;
     double DelayToUnlock;
@@ -55,6 +56,7 @@ public:
             argument->TimerWait.Start();
             argument->ThreadSignal->Wait();
             argument->TimerWait.Stop();
+            argument->ThreadSignal->Clear();
 
             argument->TimerBlock.Start();
             std::this_thread::sleep_for(std::chrono::duration<double>(argument->DelayToUnlock));
@@ -71,7 +73,7 @@ public:
 
 void osaThreadSignalTest::TestWaitBlocks(void) {
     // all time intervals are in milli seconds!
-    osaStopwatch overallTimer;
+    osaStopwatch<std::chrono::steady_clock> overallTimer;
     overallTimer.Reset();
     overallTimer.Start();
 
@@ -112,16 +114,16 @@ void osaThreadSignalTest::TestWaitBlocks(void) {
 
     overallTimer.Stop();
 
-    double totalTimeMeasured = overallTimer.GetElapsedTime();
+    double totalTimeMeasured = overallTimer.GetElapsedTime().count();
     double marginOfError = totalTimeMeasured / 2.0; // large as we can't trust all OSs to be accurate
 
     double totalTimeExpected = 2 * nbIterations * delayToUnlock; // 2 threads
     CPPUNIT_ASSERT_DOUBLES_EQUAL(totalTimeExpected, totalTimeMeasured, marginOfError);
 
-    double timeSpent1 = arguments1.TimerWait.GetElapsedTime() + arguments1.TimerBlock.GetElapsedTime();
+    double timeSpent1 = arguments1.TimerWait.GetElapsedTime().count() + arguments1.TimerBlock.GetElapsedTime().count();
     CPPUNIT_ASSERT_DOUBLES_EQUAL(timeSpent1, totalTimeMeasured, marginOfError);
 
-    double timeSpent2 = arguments2.TimerWait.GetElapsedTime() + arguments2.TimerBlock.GetElapsedTime();
+    double timeSpent2 = arguments2.TimerWait.GetElapsedTime().count() + arguments2.TimerBlock.GetElapsedTime().count();
     CPPUNIT_ASSERT_DOUBLES_EQUAL(timeSpent2, totalTimeMeasured, marginOfError);
 }
 

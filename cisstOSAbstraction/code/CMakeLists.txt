@@ -25,7 +25,6 @@ set (SOURCE_FILES
      osaSleep.cpp
      osaSocket.cpp
      osaSocketServer.cpp
-     osaStopwatch.cpp
      osaThreadBuddy.cpp
      osaThreadSignal.cpp
      osaTimeServer.cpp
