@@ -31,7 +31,6 @@ set (SOURCE_FILES
 
 # all header files
 set (HEADER_FILES
-     osaForwardDeclarations.h
      osaDynamicLoader.h
      osaDynamicLoaderAndFactory.h
      osaExport.h

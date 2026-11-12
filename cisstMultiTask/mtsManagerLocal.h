@@ -38,10 +38,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnPath.h>
-#include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsComponent.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
 
 #include <cisstMultiTask/mtsExport.h>
 

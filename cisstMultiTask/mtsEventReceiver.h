@@ -86,7 +86,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstOSAbstraction/osaForwardDeclarations.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>

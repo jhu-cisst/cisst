@@ -26,9 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsFunctionBase_h
 #define _mtsFunctionBase_h
 
-#include <cisstOSAbstraction/osaForwardDeclarations.h>
 #include <cisstMultiTask/mtsExecutionResult.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
