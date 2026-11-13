@@ -22,12 +22,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <fstream>
 
 #include <cisstCommon/cmnTokenizer.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstOSAbstraction/osaSleep.h>
+
+using namespace std::chrono_literals;
 
 class MainDispatcher : public mtsTaskMain
 {
@@ -37,7 +39,7 @@ public:
         mtsTaskMain(name), Shell(shell) {}
     ~MainDispatcher() {}
     void Run(void) {
-        osaSleep(0.1);
+        osaSleep(0.1s);
         if (Shell->IsTerminated())
             Kill();
     }
@@ -230,9 +232,9 @@ class shellTask : public mtsTaskContinuous
     char **argv;
 
     // Comparison operator for std::set
-    struct CmdListLess: public std::binary_function<const CommandEntryBase*, const CommandEntryBase*, bool>
+    struct CmdListLess
     {
-        result_type operator()(first_argument_type p1, second_argument_type p2) const
+        bool operator()(const CommandEntryBase* p1, const CommandEntryBase* p2) const
         {
             if (p1->GetCommand() == p2->GetCommand()) {
                 if ((p1->GetNumArgs() == -1) || (p2->GetNumArgs() == -1))
@@ -640,11 +642,14 @@ bool shellTask::ExecuteFile(const std::string &fileName) const
 bool shellTask::Sleep(const std::string &time) const
 {
     double dtime;
-    if (sscanf(time.c_str(), "%lf", &dtime) == 1) {
-        osaSleep(dtime);
-        return true;
+    const int matched = sscanf(time.c_str(), "%lf", &dtime);
+    if (matched != 1) {
+        return false;
     }
-    return false;
+
+    osaSleep(dtime);
+
+    return true;
 }
 
 // This is provided for user convenience.  The final "sleep" command is needed on Windows
@@ -689,8 +694,6 @@ int main(int argc, char * argv[])
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskFunction(CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskDefaultLog(CMN_LOG_ALLOW_ALL); // for cisstLog.txt
-    // Enable system-wide thread-safe Logger
-    mtsManagerLocal::SetLogForwarding(true);
 
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
 

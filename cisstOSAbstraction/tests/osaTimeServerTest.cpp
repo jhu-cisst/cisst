@@ -16,12 +16,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <chrono>
+#include <thread>
+
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnPrintf.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaThread.h>
-#include <cisstOSAbstraction/osaCPUAffinity.h>
 
 #include "osaTimeServerTest.h"
 
@@ -29,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string.h>
 
+using namespace std::chrono_literals;
 
 void osaTimeServerTest::TestInternalsSize(void) {
     CPPUNIT_ASSERT(osaTimeServer::INTERNALS_SIZE >= osaTimeServer::SizeOfInternals());
@@ -37,13 +39,11 @@ void osaTimeServerTest::TestInternalsSize(void) {
 
 void osaTimeServerTest::TestMultipleServersSingleThread(void)
 {
-    osaCPUSetAffinity(OSA_CPU1);
-
     const size_t numberOfServers = 20;
     osaTimeServer * servers[numberOfServers];
 
     size_t index;
-    osaStopwatch stopwatch;
+    osaStopwatch<std::chrono::steady_clock> stopwatch;
     double currentTime[numberOfServers];
 
     double currentTimeMax;
@@ -98,14 +98,14 @@ void osaTimeServerTest::TestMultipleServersSingleThread(void)
         }
     }
 
-    CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime() + 5.0 * cmn_ms)); // add 5 ms to be generous
+    CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime().count() + 5.0 * cmn_ms)); // add 5 ms to be generous
 }
 
 
 struct osaTimeServerTestThreadData
 {
     size_t ThreadIndex;
-    osaThread * Thread;
+    std::thread Thread;
 
     bool * QuitFlag;
 
@@ -128,7 +128,7 @@ void * osaTimeServerTestRun(osaTimeServerTestThreadData * data)
             data->TimeServer.SetTimeOrigin();
             data->SetTimeOriginFlag = false;
         }
-        osaSleep(0.1 * cmn_ms);
+        osaSleep(0.1ms);
     }
     return 0;
 }
@@ -140,13 +140,11 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
     size_t index;
     osaTimeServerTestThreadData * threadsData[numberOfServers];
     osaTimeServerTestThreadData * threadData;
-    osaThread * thread;
     bool quitFlag = false;
 
-    osaStopwatch stopwatch;
+    osaStopwatch<std::chrono::steady_clock> stopwatch;
     double currentTimeMax;
     double currentTimeMin;
-
 
     for (index = 0;
          index < numberOfServers;
@@ -162,11 +160,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
         threadData->SetTimeOriginFlag = false;
         threadData->GetTimeFlag = false;
 
-        thread = new osaThread;
-        threadData->Thread = thread;
-
-        thread->Create<osaTimeServerTestThreadData*>(&osaTimeServerTestRun,
-                                                     threadsData[index]);
+        threadData->Thread = std::thread(osaTimeServerTestRun, threadsData[index]);
     }
 
 
@@ -177,7 +171,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
         threadData = threadsData[index];
         threadData->SetTimeOriginFlag = true;
         while (threadData->SetTimeOriginFlag) {
-            osaSleep(0.1 * cmn_ms);
+            osaSleep(0.1ms);
         }
     }
 #else
@@ -185,7 +179,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
     threadData = threadsData[0];
     threadData->SetTimeOriginFlag = true;
     while (threadData->SetTimeOriginFlag) {
-        osaSleep(0.1 * cmn_ms);
+        osaSleep(0.1ms);
     }
 
     for (index = 1;
@@ -212,7 +206,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
          ++index) {
         threadData = threadsData[index];
         while (threadData->GetTimeFlag) {
-            osaSleep(0.1 * cmn_ms);
+            osaSleep(0.1ms);
         }
     }
 
@@ -240,7 +234,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
         }
     }
 
-    CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime() + 5.0 * cmn_ms)); // add 5 ms to be generous
+    CPPUNIT_ASSERT((currentTimeMax - currentTimeMin) < (stopwatch.GetElapsedTime().count() + 5.0 * cmn_ms)); // add 5 ms to be generous
 
     quitFlag = true;
 
@@ -248,8 +242,7 @@ void osaTimeServerTest::TestMultipleServersMultiThreads(void)
     for (index = 0;
          index < numberOfServers;
          ++index) {
-        threadsData[index]->Thread->Wait();
-        delete threadsData[index]->Thread;
+        threadsData[index]->Thread.join();
         delete threadsData[index];
     }
 }

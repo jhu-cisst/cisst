@@ -29,9 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
-
 #include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaSleep.h>
+
 
 mtsComponent::mtsComponent(const std::string & componentName):
     Name(componentName),

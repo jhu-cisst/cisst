@@ -17,11 +17,14 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsCommandLineOptions.h>
+
+#include <filesystem>
+
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorFactory.h>
-#include <cisstCommon/cmnPath.h>
-#include <cstdlib>
+#include <cisstCommon/cmnSearchPath.h>
+
 
 mtsCommandLineOptions::mtsCommandLineOptions(const std::string & options)
 {
@@ -54,12 +57,13 @@ void mtsCommandLineOptions::Apply(void)
         mtsCollectorFactory * collectorFactory = new mtsCollectorFactory("collectors");
         componentManager->AddComponent(collectorFactory);
         for (const auto & config : CollectionConfig) {
-            if (!cmnPath::Exists(config)) {
-                cmnPath path;
-                path.Add(cmnPath::GetWorkingDirectory());
-                std::string fullPath = path.Find(config);
+            std::filesystem::path config_file = pathFromUTF8(config);
+            if (!std::filesystem::exists(config_file)) {
+                cmnSearchPath path;
+                path.Add(std::filesystem::current_path());
+                std::filesystem::path fullPath = path.Find(config);
                 if (fullPath != "") {
-                    collectorFactory->Configure(fullPath);
+                    collectorFactory->Configure(pathToUTF8(fullPath));
                 } else {
                     std::cerr << "mtsCommandLineOptions::Apply: unable to find configuration file \""
                               << config << "\"" << std::endl;

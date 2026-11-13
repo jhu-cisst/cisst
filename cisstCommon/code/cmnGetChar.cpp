@@ -24,24 +24,24 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnGetChar.h>
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 #include <stdio.h>
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_RTAI || CISST_QNX
+#endif // CISST_LINUX || CISST_DARWIN || CISST_QNX
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <conio.h>
 #endif // CISST_WINDOWS
 
 struct cmnGetCharEnvironmentInternals {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     struct  termios OldSettings;
     struct  termios NewSettings;
     int     Keyboard;
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_RTAI || CISST_QNX
+#endif // CISST_LINUX || CISST_DARWIN || CISST_QNX
 };
 
 
@@ -67,7 +67,7 @@ cmnGetCharEnvironment::~cmnGetCharEnvironment(void)
 }
 
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 bool cmnGetCharEnvironment::Activate(void)
 {
     if (!this->Activated) {
@@ -82,7 +82,7 @@ bool cmnGetCharEnvironment::Activate(void)
     }
     return false;
 }
-#endif // CISST_LINUX || CISST_SOLARIS || CISST_RTAI || CISST_QNX
+#endif
 
 #if (CISST_OS == CISST_DARWIN)
 bool cmnGetCharEnvironment::Activate(void)
@@ -113,7 +113,7 @@ bool cmnGetCharEnvironment::Activate(void)
 #endif // CISST_WINDOWS
 
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 bool cmnGetCharEnvironment::DeActivate(void)
 {
     if (this->Activated) {
@@ -124,7 +124,7 @@ bool cmnGetCharEnvironment::DeActivate(void)
     }
     return false;
 }
-#endif // CISST_LINUX || CISST_SOLARIS || CISST_RTAI || CISST_QNX
+#endif // CISST_LINUX || CISST_QNX
 
 #if (CISST_OS == CISST_DARWIN)
 bool cmnGetCharEnvironment::DeActivate(void)
@@ -151,7 +151,7 @@ bool cmnGetCharEnvironment::DeActivate(void)
 #endif // CISST_WINDOWS
 
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 int cmnGetCharEnvironment::GetChar(void)
 {
     if (this->Activated) {
@@ -159,7 +159,7 @@ int cmnGetCharEnvironment::GetChar(void)
     }
     return 0;
 }
-#endif // CISST_LINUX || CISST_DARWIN ||CISST_SOLARIS || CISST_RTAI || CISST_QNX
+#endif // CISST_LINUX || CISST_DARWIN || CISST_QNX
 
 #if (CISST_OS == CISST_WINDOWS)
 int cmnGetCharEnvironment::GetChar(void)

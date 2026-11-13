@@ -353,6 +353,7 @@ void cdgFile::GenerateCode(std::ostream & outputStream) const
                  << "#include <cisstCommon/cmnDataFunctionsList.h>" << std::endl
                  << "#include <cisstCommon/cmnDataFunctionsEigen.h>" << std::endl
                  << "#include <cisstCommon/cmnDataFunctionsSet.h>" << std::endl
+                 << "#include <cisstCommon/cmnDataFunctionsPath.h>" << std::endl
                  << std::endl;
     this->Global->GenerateCode(outputStream);
 }

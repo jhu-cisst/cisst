@@ -34,14 +34,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 #include <set>
-#include <stack>
+#include <thread>
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstCommon/cmnPath.h>
-#include <cisstOSAbstraction/osaThread.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsComponent.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -63,7 +64,7 @@ private:
 
     /*! Thread ID of thread that called GetInstance(). In the future,
         we will support multiple threads. */
-    osaThreadId MainThreadId;
+    std::thread::id MainThreadId;
 
     /*! Process name (for a multi-process system).
      */
@@ -77,7 +78,7 @@ private:
     mtsManagerComponent *ManagerComponent;
 
     /*! Internal thread to buffer log messages */
-    osaThread       LogThread;
+    std::thread     LogThread;
     osaThreadSignal LogThreadFinished;
     bool            LogThreadFinishWaiting;
     void*           LogDispatchThread(void * arg);
@@ -113,9 +114,6 @@ protected:
          const std::string & componentName,
          const std::string & interfaceName,
          mtsInterfaceRequiredDescription & interfaceRequiredDescription);
-
-    /*! Set up system logger that allows collecting system-wide logs across network */
-    void SetupSystemLogger(void);
 
 public:
 
@@ -158,11 +156,6 @@ public:
      */
     const mtsManagerComponentServices * GetManagerComponentServices() const;
 
-    /*! Return the logger services.
-        This is a method so that we can later add thread-safety.
-     */
-    const ManagerLocalComponent * GetLoggerServices() const;
-
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
@@ -191,7 +184,7 @@ public:
       each element found.  The path is used to locate extra
       configuration files potentially used by Configure methods for
       newly created components. */
-    bool ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath);
+    bool ConfigureJSON(const Json::Value & configuration, const cmnSearchPath & configPath);
 
     /*! Create, configure and add component based on Json::Value.
       Fields used are "shared-library", "class-name",
@@ -199,7 +192,7 @@ public:
       arg) and "configure-parameter".  The method will test if the
       configure-parameter corresponds to a file in the configPath.  If
       it is, it will try to configure using the full path name. */
-    bool ConfigureComponentJSON(const Json::Value & componentConfiguration, const cmnPath & configPath);
+    bool ConfigureComponentJSON(const Json::Value & componentConfiguration, const cmnSearchPath & configPath);
 
     /*! Connect two components based on Json::Value.  Fields used are
       "required": { "component", interface" } and "provided": {
@@ -386,15 +379,15 @@ public:
     /*! Set main thread id based on the current thread. In most situations, it is not
         necessary to call this function because the main thread id is initialized
         in GetInstance. */
-    void SetMainThreadId(void) { MainThreadId = osaGetCurrentThreadId(); }
+    void SetMainThreadId(void) { MainThreadId = std::this_thread::get_id(); }
 
     /*! Set main thread id based on the passed parameter. In most situations, it is not
         necessary to call this function because the main thread id is initialized
         in GetInstance. */
-    void SetMainThreadId(const osaThreadId &threadId) { MainThreadId = threadId; }
+    void SetMainThreadId(const std::thread::id& threadId) { MainThreadId = threadId; }
 
     /*! Return main thread id. */
-    osaThreadId GetMainThreadId(void) const { return MainThreadId; }
+    std::thread::id GetMainThreadId(void) const { return MainThreadId; }
 
     //---------------------------------------------------------------------------------------------
 
@@ -442,31 +435,9 @@ public:
                                       const std::string & requiredInterfaceName,
                                       const std::string & eventHandlerName);
 
-    /*! Return IP address of this process */
-    inline std::string CISST_DEPRECATED GetIPAddress(void) const { return ""; }
-
     /*! Return a list of all IP addresses detected on this machine. */
     static std::vector<std::string> GetIPAddressList(void);
     static void GetIPAddressList(std::vector<std::string> & ipAddresses);
-
-    /*! Check if further logs are allowed (used in mtsTask); this could be
-        moved to cmnLogger. */
-    static bool CISST_DEPRECATED IsLogAllowed(void);
-
-    /*! Is system-wide thread-safe logging enabled? */
-    static bool IsLogForwardingEnabled(void);
-
-    /*! Enable or disable system-wide thread-safe logging.
-        As of 6/2026, system-wide logging will only be initialized on first call
-        to this method. */
-    static void SetLogForwarding(bool activate);
-
-    /*! Get whether system-wide logging is enabled or not */
-    static void GetLogForwardingState(bool & state);
-    static bool GetLogForwardingState(void);
-
-    /*! Callback function for system-wide thread-safe logging */
-    static void LogDispatcher(const char * str, int len);
 
     // TODO: should the following be moved somewhere else?
     bool IsValidComponentTag(const std::string & tag) const;

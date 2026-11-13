@@ -19,8 +19,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsGenericObjectProxy_h
 #define _mtsGenericObjectProxy_h
 
-#include "cisstCommon/cmnClassRegisterMacros.h"
-#include "cisstCommon/cmnClassServicesBase.h"
+#include <filesystem>
+#include <list>
+#include <string>
+#include <vector>
+
+#include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstCommon/cmnClassServicesBase.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnSerializer.h>
@@ -32,6 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctionsEigen.h>
 #include <cisstCommon/cmnDataFunctionsList.h>
 #include <cisstCommon/cmnDataFunctionsString.h>
+#include <cisstCommon/cmnDataFunctionsPath.h>
 #include <cisstCommon/cmnDataFunctionsVector.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
@@ -802,6 +808,9 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsSizeT);
 
 typedef mtsGenericObjectProxy<std::string> mtsStdString;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdString);
+
+typedef mtsGenericObjectProxy<std::filesystem::path> mtsStdPath;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdPath);
 
 // Add Proxy to name to distinguish this from mtsVector<std::string>
 typedef mtsGenericObjectProxy<stdStringVec> mtsStdStringVecProxy;

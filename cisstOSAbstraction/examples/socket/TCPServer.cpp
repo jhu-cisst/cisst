@@ -17,11 +17,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <string.h>
+#include <thread>
+
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnUnits.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaSocketServer.h>
+
+using namespace std::chrono_literals;
 
 int main(void)
 {
@@ -47,7 +49,7 @@ int main(void)
     }
     while (!socketServer.AssignPort(port)) {
         std::cout << "Will try again in 5 seconds" << std::endl;
-        osaSleep(5.0 * cmn_s);
+        osaSleep(5s);
     }
     isServerConnected=socketServer.Listen();
 
@@ -64,7 +66,7 @@ int main(void)
 
     while (isServerConnected) {
         socket = socketServer.Accept();
-        osaSleep(100.0 * cmn_ms);
+        osaSleep(100ms);
         if (socket != 0) {
             socket->Send("Server has accepted your request");
         }
@@ -101,7 +103,7 @@ int main(void)
 #endif // OSA_SOCKET_WITH_STREAM
                 }
             }
-            osaSleep(100.0 * cmn_ms);
+            osaSleep(100ms);
             //socket->Send("");
         }
         //No connection so there is no need for this socket anymore.

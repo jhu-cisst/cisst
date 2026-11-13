@@ -22,11 +22,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
-#include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
 
 #include <iostream>
 #include <fstream>
@@ -218,7 +218,7 @@ void mtsCollectorState::Run(void)
 }
 
 
-void mtsCollectorState::StartCollection(const double & delay)
+void mtsCollectorState::StartCollection(double delay)
 {
     mtsExecutionResult result = this->StateTableStartCollection(delay);
     if (!result.IsOK()) {
@@ -229,7 +229,7 @@ void mtsCollectorState::StartCollection(const double & delay)
 }
 
 
-void mtsCollectorState::StopCollection(const double & delay)
+void mtsCollectorState::StopCollection(double delay)
 {
     mtsExecutionResult result = this->StateTableStopCollection(delay);
     if (!result.IsOK()) {

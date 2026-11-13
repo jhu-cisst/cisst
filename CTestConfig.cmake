@@ -76,10 +76,6 @@ if (CISST_cisstMultiTask)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Mt)
 endif (CISST_cisstMultiTask)
 
-if (CISST_cisstStereoVision)
-  set (BUILDNAME_TMP ${BUILDNAME_TMP}Sv)
-endif (CISST_cisstStereoVision)
-
 # Tells if Python was used
 if (CISST_HAS_SWIG_PYTHON)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}-Py)

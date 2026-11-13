@@ -51,11 +51,6 @@ const std::string cmnCompilersStrings[] = {"Undefined",
 };
 
 
-#if (CISST_OS == CISST_SOLARIS)
-#include <ieeefp.h>
-#endif // CISST_SOLARIS
-
-
 #if CISST_HAS_STD_ISFINITE
 
 #include <cmath>

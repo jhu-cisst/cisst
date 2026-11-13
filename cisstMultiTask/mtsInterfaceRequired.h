@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterface.h>
 
 #include <cisstCommon/cmnNamedMap.h>
-#include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 
 #include <cisstMultiTask/mtsCommandBase.h>
 
@@ -120,7 +120,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     osaThreadSignal ThreadSignalForBlockingCommands;
 
     /*! For event receiver. */
-    osaThreadSignal * GetThreadSignal(void);
+    osaThreadSignal* GetThreadSignal(void);
 
  public:
 

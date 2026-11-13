@@ -238,12 +238,12 @@ public:
        duration will be at least 0.25 seconds and at most 0.5 seconds.
 
      * On Mac OS, the implementation doesn't use the
-       breakLengthInSeconds. To provide a similar runtime, osaSleep is
+       breakLengthInSeconds. To provide a similar runtime, a sleep is
        used internaly.  As the default duration on MacOS it 0.4
        seconds, the actual sleep time is breakLengthInSeconds - 0.4.
 
      * On Windows, this method is implemented using SetCommBreak,
-       osaSleep and ClearCommBreak.
+       a sleep and ClearCommBreak.
 
      */
     bool WriteBreak(double breakLengthInSeconds);

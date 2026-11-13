@@ -36,7 +36,7 @@ protected:
 	unsigned int NumberOfSamplesCollected;
     bool BenchmarkCompleted;
 
-    vctDynamicVector<double> Results;
+    Eigen::VectorXd Results;
 
 public:
     // see sineTask.h documentation

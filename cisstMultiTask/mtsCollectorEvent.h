@@ -205,8 +205,8 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
       collection with delay.  For the event collector, these methods
       will enable/disable all event observers. */
     //@{
-    void StartCollection(const double & delayInSeconds) override;
-    void StopCollection(const double & delayInSeconds) override;
+    void StartCollection(double delayInSeconds) override;
+    void StopCollection(double delayInSeconds) override;
     //@}
 
  protected:

@@ -18,12 +18,15 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstOSAbstraction/osaSleep.h>
+#include <thread>
+
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 #include "serverTask.h"
 #include "clientTask.h"
+
+using namespace std::chrono_literals;
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
@@ -51,7 +54,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 
     // run while the benchmarks are not over
     while (!(client->BenchmarkDone()) || !(server->BenchmarkDone())) {
-        osaSleep(10.0 * cmn_ms);
+        osaSleep(10ms);
     }
 
     // cleanup

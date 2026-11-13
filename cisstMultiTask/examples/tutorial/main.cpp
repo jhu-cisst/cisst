@@ -17,12 +17,15 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#include <thread>
+
 #include "counter.h"
 #include "user.h"
 
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+
+using namespace std::chrono_literals;
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
@@ -60,7 +63,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 
     // loop until the user tells us to quit
     while (!userPointer->Quit) {
-        osaSleep(100.0 * cmn_ms);
+        osaSleep(100ms);
     }
 
     // cleanup

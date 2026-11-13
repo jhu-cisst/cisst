@@ -45,12 +45,12 @@ void mtsComponentStateTest::TestTransitions(void)
     mtsManagerLocal * manager = mtsManagerLocal::GetInstance();
     manager->RemoveAllUserComponents();
 
-    mtsTestPeriodic1<mtsInt> * periodic1 = new mtsTestPeriodic1<mtsInt>;
-    mtsTestContinuous1<mtsInt> * continuous1 = new mtsTestContinuous1<mtsInt>;
-    mtsTestFromCallback1<mtsInt> * fromCallback1 = new mtsTestFromCallback1<mtsInt>;
+    mtsTestPeriodic1<int> * periodic1 = new mtsTestPeriodic1<int>;
+    mtsTestContinuous1<int> * continuous1 = new mtsTestContinuous1<int>;
+    mtsTestFromCallback1<int> * fromCallback1 = new mtsTestFromCallback1<int>;
     mtsTestCallbackTrigger * callbackTrigger = new mtsTestCallbackTrigger(fromCallback1);
-    mtsTestFromSignal1<mtsInt> * fromSignal1 = new mtsTestFromSignal1<mtsInt>;
-    mtsTestDevice2<mtsInt> * device2 = new mtsTestDevice2<mtsInt>;
+    mtsTestFromSignal1<int> * fromSignal1 = new mtsTestFromSignal1<int>;
+    mtsTestDevice2<int> * device2 = new mtsTestDevice2<int>;
 
     CPPUNIT_ASSERT(periodic1->GetState() == mtsComponentState::CONSTRUCTED);
     CPPUNIT_ASSERT(continuous1->GetState() == mtsComponentState::CONSTRUCTED);

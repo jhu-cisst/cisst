@@ -19,7 +19,6 @@ import numpy
 import time
 
 import cisstCommonPython as cisstCommon
-import cisstVectorPython as cisstVector
 import cisstMultiTaskPython as cisstMultiTask
 import cisstMultiTaskPythonTestPython as cisstMultiTaskPythonTest # contains test classes
 

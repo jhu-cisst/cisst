@@ -19,15 +19,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorEvent.h>
 
+#include <iostream>
+
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
-#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <iostream>
-#include <fstream>
+#include <cisstOSAbstraction/osaGetTime.h>
 
 
 mtsCollectorEvent::CollectorEventVoid::CollectorEventVoid(const std::string & componentName,
@@ -571,7 +571,7 @@ void mtsCollectorEvent::PrintHeader(const CollectorFileFormat & fileFormat)
 }
 
 
-void mtsCollectorEvent::StartCollection(const double & delay)
+void mtsCollectorEvent::StartCollection(double delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
     if (delay == 0.0) {
@@ -584,7 +584,7 @@ void mtsCollectorEvent::StartCollection(const double & delay)
 }
 
 
-void mtsCollectorEvent::StopCollection(const double & delay)
+void mtsCollectorEvent::StopCollection(double delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
     if (delay == 0.0) {

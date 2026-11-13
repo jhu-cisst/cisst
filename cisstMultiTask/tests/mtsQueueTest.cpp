@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsQueueTest.h"
 #include "mtsMacrosTestClasses.h"
-#include <cisstVectorQt/vctRandom.h>
 
 void mtsQueueTest::TestQueue_mtsDouble(void)
 {

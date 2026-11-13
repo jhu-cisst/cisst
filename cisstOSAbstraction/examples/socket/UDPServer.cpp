@@ -17,11 +17,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <string.h>
+#include <thread>
+
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnUnits.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaSocket.h>
+
+using namespace std::chrono_literals;
 
 int main(void)
 {
@@ -46,7 +48,7 @@ int main(void)
     }
     while (!socket.AssignPort(port)) {
         std::cout << "Will try again in 5 seconds" << std::endl;
-        osaSleep(5.0 * cmn_s);
+        osaSleep(5s);
     }
     isServerConnected = true;
 
@@ -72,7 +74,7 @@ int main(void)
             // send
             socket.Send(buffer);
         }
-        osaSleep(100.0 * cmn_ms);
+        osaSleep(100ms);
     }
     socket.Close();
 

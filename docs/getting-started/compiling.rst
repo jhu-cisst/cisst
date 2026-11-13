@@ -172,8 +172,8 @@ recommended current workflow.  The examples below provide additional detail
 for projects using cisst libraries.
 
 When building against the cisst libraries, specify the libraries your project
-needs as components (for example, ``cisstCommon``, ``cisstVector``, or
-``cisstStereoVision``).  CMake loads the generated ``cisst-config.cmake``
+needs as components (for example, ``cisstCommon``, or ``cisstMultiTash``).
+CMake loads the generated ``cisst-config.cmake``
 configuration file using ``find_package``.  Require cisst 1.5 or newer and use
 the imported ``cisst::`` targets to link your code.
 

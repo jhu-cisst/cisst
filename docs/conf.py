@@ -87,6 +87,5 @@ rst_prolog = """
 .. |cisstOSAbstraction| replace:: *cisstOSAbstraction*
 .. |cisstMultiTask| replace:: *cisstMultiTask*
 .. |cisstRobot| replace:: *cisstRobot*
-.. |cisstStereoVision| replace:: *cisstStereoVision*
 .. |cisstParameterTypes| replace:: *cisstParameterTypes*
 """

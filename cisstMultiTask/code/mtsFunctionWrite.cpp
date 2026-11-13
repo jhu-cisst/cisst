@@ -68,7 +68,7 @@ mtsExecutionResult mtsFunctionWrite::ExecuteBlockingGeneric(const mtsGenericObje
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
     mtsExecutionResultProxy remoteResult(mtsExecutionResult::UNDEFINED);
-    CompletionCommand->PrepareToWait(remoteResult);
+    CompletionCommand->PrepareWait(remoteResult);
     mtsExecutionResult executionResult = Command->Execute(argument, MTS_BLOCKING, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
         executionResult = WaitForResult();
@@ -84,7 +84,6 @@ mtsExecutionResult mtsFunctionWrite::ExecuteBlockingGeneric(const mtsGenericObje
         CMN_LOG_RUN_WARNING << "mtsFunctionWrite::ExecuteBlockingGeneric: execution result = "
                             << executionResult << std::endl;
     }
-    CompletionCommand->ClearWait();
     return executionResult;
 }
 

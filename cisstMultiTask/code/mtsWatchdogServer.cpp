@@ -35,8 +35,8 @@ void mtsWatchdogServer::AddToProvidedInterface(mtsInterfaceProvided &provInt, mt
 }
 bool mtsWatchdogServer::CheckAndUpdate(void) {
 
-    if (!IsOK)
-        return false;
+    if (!IsOK) { return false; }
+
     //check if variable on the this end is false - i.e. it has been update by the client
     //if it is OK reset watchdogtimer and set the state to True so that client sees that we are alive
 
@@ -44,8 +44,9 @@ bool mtsWatchdogServer::CheckAndUpdate(void) {
         Reset();
         return true;
     }
+
     //else check if time has exceeded timeout, if not return true, else return false;
-    else if (StopWatch.GetElapsedTime() > Timeout) {
+    else if (StopWatch.GetElapsedTime().count() > Timeout) {
             IsOK = false;
             return false;
     }
@@ -63,4 +64,3 @@ void mtsWatchdogServer::Reset(void) {
 void mtsWatchdogServer::Start(void) {
     Reset();
 }
-

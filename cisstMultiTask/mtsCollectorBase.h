@@ -29,8 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 
+#include <filesystem>
 #include <string>
-#include <stdexcept>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -112,11 +112,11 @@ protected:
     double TimeOfLastProgressEvent;
 
     /*! Output file name, including working directory. */
-    std::string OutputFileName;
-    std::string OutputHeaderFileName;
+    std::filesystem::path OutputFileName;
+    std::filesystem::path OutputHeaderFileName;
 
     /*! Current directory to save data */
-    std::string WorkingDirectoryMember;
+    std::filesystem::path WorkingDirectoryMember;
 
     /*! Pointer on output stream, can be create and managed by this
       class or provided by a user. */
@@ -172,7 +172,7 @@ protected:
     inline void StopCollectionCommand(const double & delayInSeconds) {
         this->StopCollection(delayInSeconds);
     }
-    inline void SetWorkingDirectoryCommand(const std::string & directory) {
+    inline void SetWorkingDirectoryCommand(const std::filesystem::path& directory) {
         this->SetWorkingDirectory(directory);
     }
     inline void SetOutputToDefaultCommand(void) {
@@ -202,7 +202,7 @@ public:
 
     /*! Define the output file and format.  If a file is already in
       use, this method will close the current one. */
-    void SetOutput(const std::string & fileName, const CollectorFileFormat fileFormat);
+    void SetOutput(const std::filesystem::path& fileName, const CollectorFileFormat fileFormat);
 
     /*! Define the output using an existing ostream, the collector
       will not open nor close the stream. */
@@ -233,7 +233,7 @@ public:
     void CloseOutput(void);
 
     /*! Get the name of log file currently being written. */
-    inline const std::string & GetOutputFileName(void) const {
+    inline const std::filesystem::path& GetOutputFileName(void) const {
         return this->OutputFileName;
     }
 
@@ -243,11 +243,11 @@ public:
 
     /*! Begin collecting data. Data collection will begin after delayedStart
     second(s). If it is zero (by default), it means 'start now'. */
-    virtual void StartCollection(const double & delayInSeconds) = 0;
+    virtual void StartCollection(double delayInSeconds) = 0;
 
     /*! End collecting data. Data collection will end after delayedStop
     second(s). If it is zero (by default), it means 'stop now'. */
-    virtual void StopCollection(const double & delayInSeconds) = 0;
+    virtual void StopCollection(double delayInSeconds) = 0;
 
     /*! Function used to trigger Collection Started event. */
     mtsFunctionWrite CollectionStartedEventTrigger;
@@ -256,26 +256,26 @@ public:
     mtsFunctionWrite ProgressEventTrigger;
 
     /*! Set working directory, usable with commands as well */
-    virtual void SetWorkingDirectory(const std::string & directory);
+    virtual void SetWorkingDirectory(const std::filesystem::path& directory);
 
     /*! Get working directory, usable with commands as well */
-    void GetWorkingDirectory(std::string & placeHolder) const;
+    void GetWorkingDirectory(std::filesystem::path& placeHolder) const;
 
     /*! Set floating point notation for the output stream.  This
       setting will apply to all future files opened. */
-    void SetOutputStreamFloatingNotation(const CollectorFileFloatingNotation floatingNotation);
+    void SetOutputStreamFloatingNotation(CollectorFileFloatingNotation floatingNotation);
 
     /*! Set precision value for the output file.  This setting will
       apply to all future files. */
-    void SetOutputStreamPrecision(const int precision);
+    void SetOutputStreamPrecision(int precision);
 
     /*! Set width value for the output file.  This setting will
       apply to all future files. */
-    void SetOutputStreamWidth(const int width);
+    void SetOutputStreamWidth(int width);
 
     /*! Set fill character for the output file. This setting will
       apply to all future files. */
-    void SetOutputStreamFill(const char fillCharacter);
+    void SetOutputStreamFill(char fillCharacter);
 
     /*! Connect to all the components and interfaces used to collect
       data. */

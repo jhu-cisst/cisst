@@ -12,9 +12,10 @@
 # All cisstRobot libraries
 project (cisstRobotLibs)
 
-add_subdirectory (code)
-
-target_link_libraries(cisstRobot Eigen3::Eigen orocos-kdl)
+if (CISST_HAS_KDL)
+  add_subdirectory (code)
+  target_link_libraries(cisstRobot Eigen3::Eigen orocos-kdl)
+endif (CISST_HAS_KDL)
 
 # SWIG Python wrappers
 cisst_offer_python (cisstRobot)

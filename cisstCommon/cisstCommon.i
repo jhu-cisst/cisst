@@ -223,8 +223,8 @@ CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnBool, bool);
 %ignore cmnLogger::GetLoD;
 %include "cisstCommon/cmnLogger.h"
 
-// Wrap cmnPath
-%include "cisstCommon/cmnPath.h"
+// Wrap cmnSearchPath
+%include "cisstCommon/cmnSearchPath.h"
 
 // Wrap and instantiate useful type traits
 %include "cisstCommon/cmnTypeTraits.h"

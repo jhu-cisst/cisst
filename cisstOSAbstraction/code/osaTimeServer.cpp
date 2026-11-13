@@ -25,19 +25,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaTimeServer.h>
 
-#if (CISST_OS == CISST_LINUX_RTAI)
-#include <rtai_lxrt.h>
-#include <unistd.h>
-#endif // CISST_LINUX_RTAI
-
 #if (CISST_OS == CISST_LINUX_XENOMAI)
 #include <native/timer.h>         // xenomai native timer service
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN)
 #include <sys/time.h>
 #include <unistd.h>
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
+#endif // CISST_LINUX || CISST_DARWIN
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <cmath>
@@ -77,10 +72,10 @@ const unsigned long OSA_100NSEC_PER_SEC = 10000000UL;
 
 
 struct osaTimeServerInternals {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_XENOMAI)
     struct timespec TimeOrigin;
     RTIME CounterOrigin;
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_QNX)
     struct timespec TimeOrigin;
 #elif (CISST_OS == CISST_DARWIN)
     struct timeval TimeOrigin;
@@ -200,26 +195,17 @@ void osaTimeServer::Synchronize(void)
 }
 #endif // CISST_WINDOWS
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_XENOMAI)
 // PK: although this synchronization seems to work, on some machines it seems that the CPU
 //     time-stamp counter (TSC) is poorly calibrated and so the reading (from rt_get_time_ns)
 //     will drift significantly with respect to the absolute time returned by clock_gettime.
 void osaTimeServer::Synchronize(void)
 {
-#if (CISST_OS == CISST_LINUX_RTAI)
-    RTIME counterPre, counterPost, counterAvg, timediff;
-    struct timespec curTime;
-
-    counterPre = rt_get_time_ns();
-    int rc = clock_gettime(CLOCK_REALTIME, &curTime);
-    counterPost = rt_get_time_ns();
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
     SRTIME counterPre, counterPost, counterAvg, timediff;
     struct timespec curTime;
     counterPre = rt_timer_tsc2ns( rt_timer_tsc() );
     int rc = clock_gettime(CLOCK_REALTIME, &curTime);
     counterPost = rt_timer_tsc2ns( rt_timer_tsc() );
-#endif
 
     counterAvg = (counterPost + counterPre + 1)/2;
     if (rc == 0) {
@@ -233,9 +219,9 @@ void osaTimeServer::Synchronize(void)
     CMN_LOG_CLASS_INIT_VERBOSE << "Synchronize: counterAvg = " << counterAvg
                                << ", timediff = " << timediff << std::endl;
 }
-#endif // CISST_LINUX_RTAI
+#endif // CISST_LINUX_XENOMAI
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
 void osaTimeServer::Synchronize(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Synchronize: no synchronization provided/required for this OS" << std::endl;
@@ -246,7 +232,7 @@ void osaTimeServer::Synchronize(void)
 osaTimeServer::osaTimeServer()
 {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
     struct timespec ts;
     clock_getres(CLOCK_REALTIME, &ts);
     CMN_LOG_CLASS_INIT_VERBOSE << "constructor: clock resolution is " << ts.tv_nsec << " nsec." << std::endl;
@@ -255,7 +241,7 @@ osaTimeServer::osaTimeServer()
     }
     INTERNALS(TimeOrigin).tv_sec = 0L;
     INTERNALS(TimeOrigin).tv_nsec = 0L;
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_XENOMAI)
     INTERNALS(CounterOrigin) = 0LL;
 #endif
 #elif (CISST_OS == CISST_DARWIN)
@@ -310,14 +296,14 @@ unsigned int osaTimeServer::SizeOfInternals(void) {
 
 void osaTimeServer::SetTimeOrigin(void)
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_XENOMAI)
     if (clock_gettime(CLOCK_REALTIME, &INTERNALS(TimeOrigin)) == 0) {
         // On RTAI, synchronize rt_get_time_ns with clock_gettime
         this->Synchronize();
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "SetTimeOrigin: error return from clock_gettime." << std::endl;
     }
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_QNX)
     if (clock_gettime(CLOCK_REALTIME, &INTERNALS(TimeOrigin)) != 0) {
         CMN_LOG_CLASS_INIT_ERROR << "SetTimeOrigin: error return from clock_gettime." << std::endl;
     }
@@ -344,7 +330,7 @@ void osaTimeServer::SetTimeOriginFrom(const osaTimeServer *other)
     osaTimeServerInternals *thisInternals = reinterpret_cast<osaTimeServerInternals*>(this->Internals);
     const osaTimeServerInternals *otherInternals = reinterpret_cast<const osaTimeServerInternals*>(other->Internals);
     thisInternals->TimeOrigin = otherInternals->TimeOrigin;
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_XENOMAI)
     thisInternals->CounterOrigin = otherInternals->CounterOrigin;
 #elif (CISST_OS == CISST_WINDOWS)
     // The counter frequency and resolution should be set in the constructor
@@ -357,7 +343,7 @@ void osaTimeServer::SetTimeOriginFrom(const osaTimeServer *other)
 
 bool osaTimeServer::GetTimeOrigin(osaAbsoluteTime & origin) const
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)|| (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_QNX)|| (CISST_OS == CISST_LINUX_XENOMAI)
     origin.sec = INTERNALS_CONST(TimeOrigin).tv_sec;
     origin.nsec = INTERNALS_CONST(TimeOrigin).tv_nsec;
     return (origin.sec != 0) || (origin.nsec != 0);
@@ -386,13 +372,10 @@ bool osaTimeServer::GetTimeOrigin(osaAbsoluteTime & origin) const
 double osaTimeServer::GetRelativeTime(void) const
 {
     double answer;
-#if (CISST_OS == CISST_LINUX_RTAI)
-    RTIME time = rt_get_time_ns();  // RTIME is long long (64 bits)
-    answer = static_cast<double>(time-INTERNALS_CONST(CounterOrigin))*cmn_ns;
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX_XENOMAI)
     RTIME time = rt_timer_tsc2ns( rt_timer_tsc() );
     answer = static_cast<double>(time-INTERNALS_CONST(CounterOrigin))*cmn_ns;
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_QNX)
     struct timespec currentTime;
     clock_gettime(CLOCK_REALTIME, &currentTime);
     answer = (currentTime.tv_sec-INTERNALS_CONST(TimeOrigin).tv_sec) + (currentTime.tv_nsec-INTERNALS_CONST(TimeOrigin).tv_nsec)*cmn_ns;

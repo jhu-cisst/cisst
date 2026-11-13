@@ -16,14 +16,18 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <chrono>
+
 #include <cisstCommon/cmnAssert.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstCommon/cmnRandomSequence.h>
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
-#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
 #include "osaPipeExecTest.h"
+
+using namespace std::chrono_literals;
 
 void osaPipeExecTest::TestPipeInternalsSize(void)
 {
@@ -33,15 +37,13 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
 void osaPipeExecTest::TestPipeCommon(bool noWindow)
 {
     osaPipeExec pipe1, pipe2;
-    double startTime, measuredTime;
 
     /* Build search path to find the test utility */
-    cmnPath path;
-    path.AddFromEnvironment("PATH", cmnPath::TAIL);
-    path.Add(std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES, cmnPath::HEAD);
-    std::string command = path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX, cmnPath::EXECUTE);
-    bool utilityFound = (command != "");
-    CPPUNIT_ASSERT(utilityFound);
+    cmnSearchPath path;
+    path.AddFromEnvironment("PATH", cmnSearchPath::Position::TAIL);
+    path.Add(std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES);
+    std::filesystem::path command = path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX);
+    CPPUNIT_ASSERT(!command.empty());
 
     /* Test opening twice, make sure it fails the second time */
     bool opened = pipe1.Open(command, "rw", noWindow);
@@ -120,17 +122,18 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     CPPUNIT_ASSERT_EQUAL(std::string("ef"), resultString);
 
     /* Test ReadUntil with timeout */
-    startTime = osaGetTime();
+    auto stopwatch = osaStopwatch<std::chrono::steady_clock>();
+    stopwatch.Start();
     // No characters written, should time out
     resultString = pipe1.ReadUntil(6, 'a', 2.0);
-    measuredTime = osaGetTime()-startTime;
+    double measuredTime = stopwatch.GetElapsedTime().count();
     CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, measuredTime, 0.2);
     CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(resultString.length()));
     charsWrittenInt = pipe1.Write("12345", 5);
     CPPUNIT_ASSERT_EQUAL(5, charsWrittenInt);
-    startTime = osaGetTime();
+    stopwatch.Reset();
     resultString = pipe1.ReadUntil(5, '3');
-    measuredTime = osaGetTime()-startTime;
+    measuredTime = stopwatch.GetElapsedTime().count();
     // No timeout, so should be significantly less than 0.5 seconds
     CPPUNIT_ASSERT(measuredTime < 0.5);
     CPPUNIT_ASSERT_EQUAL(std::string("123"), resultString);
@@ -176,7 +179,7 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
 #else
     /* On other platforms, wait a little for forked child process to exit. */
-    osaSleep(0.1);
+    osaSleep(0.1s);
 #endif
     bool isRunning = pipe1.IsProcessRunning();
     CPPUNIT_ASSERT_EQUAL(false, isRunning);
@@ -211,9 +214,10 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     charsWrittenInt = pipe1.Write("abc0d", 5);
     CPPUNIT_ASSERT_EQUAL(5, charsWrittenInt);
     /* Try to read 5 characters, specifying a 2 second timeout. */
-    startTime = osaGetTime();
+    auto stopwatch_pipeline = osaStopwatch<std::chrono::steady_clock>();
+    stopwatch_pipeline.Start();
     returnString = pipe1.ReadUntil(5, 'd', 2.0);
-    measuredTime = osaGetTime()-startTime;
+    measuredTime = stopwatch_pipeline.GetElapsedTime().count();
     CPPUNIT_ASSERT(measuredTime < 2.1);
 
     isRunning = pipe1.IsProcessRunning();

@@ -17,6 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <ctime>
+#include <iomanip>
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnUnits.h>
@@ -24,177 +26,97 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaGetTime.h>
 
-#if (CISST_OS == CISST_LINUX_RTAI)
-#include <rtai_lxrt.h>
-#include <unistd.h>
-#endif // CISST_LINUX_RTAI
 
-#if (CISST_OS == CISST_LINUX_XENOMAI)
-#include <native/timer.h>
-#endif
-
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-#include <sys/time.h>
-#include <unistd.h>
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
-
-#if (CISST_OS == CISST_WINDOWS)
-#include <windows.h>
-#include <time.h>
-#endif // CISST_WINDOWS
-
-#if (CISST_OS == CISST_QNX)
-#include <time.h>
-#endif // CISST_QNX
-
-double osaGetTime(void)
+void osaGetDateTimeString(std::string& output, char delimiter)
 {
-#if (CISST_OS == CISST_LINUX_RTAI)
-    return rt_get_time_ns() * cmn_ns;
-
-#elif (CISST_OS == CISST_LINUX_XENOMAI)
-
-    return rt_timer_read() * cmn_ns;
-
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-    struct timeval currentTime;
-    gettimeofday(&currentTime, NULL);
-    return ((double) currentTime.tv_sec) + ((double)currentTime.tv_usec) * cmn_us;
-
-#elif (CISST_OS == CISST_WINDOWS)
-    LARGE_INTEGER liTimerFrequency, liTimeNow;
-    double timerFrequency, time;
-    if (QueryPerformanceCounter(&liTimeNow) ==0 )    {
-        CMN_LOG_INIT_ERROR << "No performance counter available" << std::endl;
-    }
-    if (QueryPerformanceFrequency(&liTimerFrequency) ==    0) {
-        CMN_LOG_INIT_ERROR << "No performance counter available" << std::endl;
-    }
-    timerFrequency = (double)liTimerFrequency.QuadPart;
-    time = (double)liTimeNow.QuadPart/timerFrequency;
-    return time;
-
-#elif (CISST_OS == CISST_QNX)
-    struct timespec currentTime;
-    if (clock_gettime(CLOCK_REALTIME, &currentTime) == -1) {
-        CMN_LOG_INIT_ERROR << "osaGetTime() failed" << std::endl;
-        return 0;
-    }
-    return ((double)currentTime.tv_sec) + ((double)currentTime.tv_nsec) * cmn_ns;
-
-#endif
+    const auto now = std::chrono::system_clock::now();
+    osaGetDateTimeString(output, now, delimiter);
 }
 
-void osaGetDateTimeString(std::string & str, const char delimiter)
+void osaGetDateTimeString(std::string& output, std::chrono::system_clock::time_point time, char delimiter)
 {
-    time_t tim = time(0);
-    tm * now = localtime(&tim);
-    char buffer[50];
+    const std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(time);
+    const std::tm* tm = std::localtime(&time_t);
+    const int ms = std::chrono::duration_cast<std::chrono::milliseconds>(time - seconds).count();
 
+    std::ostringstream oss;
     if (delimiter == ':') {
-        sprintf(buffer, "%d-%02d-%02d %02d:%02d:%02d",
-                now->tm_year + 1900,
-                now->tm_mon + 1,
-                now->tm_mday,
-                now->tm_hour,
-                now->tm_min,
-                now->tm_sec);
-    }  else {
-        sprintf(buffer, "%d%c%02d%c%02d%c%02d%c%02d%c%02d",
-                now->tm_year + 1900,
-                delimiter,
-                now->tm_mon + 1,
-                delimiter,
-                now->tm_mday,
-                delimiter,
-                now->tm_hour,
-                delimiter,
-                now->tm_min,
-                delimiter,
-                now->tm_sec);
+        oss << std::put_time(tm, "%Y")
+            << "-"
+            << std::put_time(tm, "%m")
+            << "-"
+            << std::put_time(tm, "%d")
+            << " "
+            << std::put_time(tm, "%H")
+            << ":"
+            << std::put_time(tm, "%M")
+            << ":"
+            << std::put_time(tm, "%S")
+            << ":"
+            << std::setfill('0') << std::setw(3) << ms;
+    } else {
+        oss << std::put_time(tm, "%Y")
+            << delimiter
+            << std::put_time(tm, "%m")
+            << delimiter
+            << std::put_time(tm, "%d")
+            << delimiter
+            << std::put_time(tm, "%H")
+            << delimiter
+            << std::put_time(tm, "%M")
+            << delimiter
+            << std::put_time(tm, "%S")
+            << delimiter
+            << std::setfill('0') << std::setw(3) << ms;
     }
-    str = buffer;
+
+    output = oss.str();
 }
 
-void osaGetDateTimeString(std::string & str, double time, const char delimiter){
-
-    time_t tim = static_cast<time_t>(time);
-    tm * now = localtime(&tim);
-    char buffer[50];
-
-    int ms = static_cast<int>( (double)( time - static_cast<int>(time)) * 1000);
-
-    if (delimiter == ':') {
-           sprintf(buffer, "%d-%02d-%02d %02d:%02d:%02d:%03d",
-                   now->tm_year + 1900,
-                   now->tm_mon + 1,
-                   now->tm_mday,
-                   now->tm_hour,
-                   now->tm_min,
-                   now->tm_sec,
-                   ms);
-       } else {
-           sprintf(buffer, "%d%c%02d%c%02d%c%02d%c%02d%c%02d%c%03d",
-                   now->tm_year + 1900,
-                   delimiter,
-                   now->tm_mon + 1,
-                   delimiter,
-                   now->tm_mday,
-                   delimiter,
-                   now->tm_hour,
-                   delimiter,
-                   now->tm_min,
-                   delimiter,
-                   now->tm_sec,
-                   delimiter,
-                   ms);
-       }
-       str = buffer;
-}
-
-void osaGetTimeString(std::string & str, double time, const char delimiter){
-
-    time_t tim = static_cast<time_t>(time);
-    tm * now = localtime(&tim);
-    char buffer[50];
-
-    int ms = static_cast<int>( (double)( time - static_cast<int>(time)) * 1000);
-    sprintf(buffer, "%02d%c%02d%c%02d%c%03d",
-                   now->tm_hour,
-                   delimiter,
-                   now->tm_min,
-                   delimiter,
-                   now->tm_sec,
-                   delimiter,
-                   ms);
-
-   str = buffer;
-}
-
-void osaGetDateString(std::string & str, double time, const char delimiter){
-
-    time_t tim = static_cast<time_t>(time);
-    tm * now = localtime(&tim);
-    char buffer[50];
-
-    sprintf(buffer, "%d%c%02d%c%02d",
-                      now->tm_year + 1900,
-                      delimiter,
-                      now->tm_mon + 1,
-                      delimiter,
-                      now->tm_mday);
-          str = buffer;
-}
-
-
-void osaGetTimeString(std::string & str)
+void osaGetDateString(std::string& output, std::chrono::system_clock::time_point time, char delimiter)
 {
-    time_t tim = time(0);
-    tm * now = localtime(&tim);
-    char buffer[50];
-    sprintf(buffer, "%02d%s%02d%s%02d",
-            now->tm_hour, ":",
-            now->tm_min, ":",
-            now->tm_sec);
-    str = buffer;
+    const std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    const std::tm* tm = std::localtime(&time_t);
+
+    std::ostringstream oss;
+    oss << std::put_time(tm, "%y")
+        << delimiter
+        << std::put_time(tm, "%m")
+        << delimiter
+        << std::put_time(tm, "%d");
+
+    output = oss.str();
+}
+
+void osaGetTimeString(std::string& output, std::chrono::system_clock::time_point time, char delimiter)
+{
+    const std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(time);
+    const std::tm* tm = std::localtime(&time_t);
+    const int ms = std::chrono::duration_cast<std::chrono::milliseconds>(time - seconds).count();
+
+    std::ostringstream oss;
+    oss << std::put_time(tm, "%H")
+        << delimiter
+        << std::put_time(tm, "%M")
+        << delimiter
+        << std::put_time(tm, "%S")
+        << delimiter
+        << std::setfill('0') << std::setw(3) << ms;
+
+    output = oss.str();
+}
+
+void osaGetTimeString(std::string& output)
+{
+    const auto now = std::chrono::system_clock::now();
+    const auto now_t = std::chrono::system_clock::to_time_t(now);
+    const std::tm* tm = std::localtime(&now_t);
+
+    const std::string format = "%H:%M:%S";
+
+    std::ostringstream oss;
+    oss << std::put_time(tm, format.c_str()); 
+    output = oss.str();
 }

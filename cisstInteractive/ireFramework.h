@@ -248,10 +248,10 @@ public:
         This is provided to facililate relaunching of the IRE. */
     static void Reset();
 
-    /*! Release the global interpreter lock. This is intended to be used as a callback (e.g., in osaThreadSignal) */
+    /*! Release the global interpreter lock. This is intended to be used as a callback */
     static void UnblockThreads();
 
-    /*! Re-acquire the global interpreter lock. This is intended to be used as a callback (e.g., in osaThreadSignal) */
+    /*! Re-acquire the global interpreter lock. This is intended to be used as a callback */
     static void BlockThreads();
 
     /*! Write a string to the logger window */

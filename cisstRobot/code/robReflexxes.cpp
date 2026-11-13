@@ -116,9 +116,9 @@ void robReflexxes::Set(
     mCurrentAcceleration = Eigen::VectorXd::Zero(mDimension);
 
     // Creating all relevant objects of the Reflexxes Motion Library
-    RML = std::make_unique<ReflexxesAPI>(mDimension, CycleTime);
-    IP = std::make_unique<RMLPositionInputParameters>(mDimension);
-    OP = std::make_unique<RMLPositionOutputParameters>(mDimension);
+    RML = std::make_unique<ReflexxesAPI>((unsigned int)mDimension, CycleTime);
+    IP = std::make_unique<RMLPositionInputParameters>((unsigned int)mDimension);
+    OP = std::make_unique<RMLPositionOutputParameters>((unsigned int)mDimension);
     mFlags = std::make_unique<RMLPositionFlags>();
 
     // reset RML state

@@ -8,19 +8,13 @@ cisst Libraries overview
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
 | cisstInteractive     | C++ classes and Python scripts for the Interactive Research Environment (IRE)                                   | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
-| cisstOSAbstraction   | Operating system services (e.g., threads, mutual exclusion, etc.) for Windows, Linux, Mac OS X, RTAI/Linux, ... | Stable   |
+| cisstOSAbstraction   | Operating system services (e.g., threads, mutual exclusion, etc.) for Windows, Linux, Mac OS X, ...             | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
 | cisstMultiTask       | Component-based framework for defining tasks and devices, provided and required interfaces, and command objects | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
-| cisstMesh            | Mesh and point cloud classes for 2D and 3D datasets                                                             | Stable   |
-+----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
-| cisstStereoVision    | Mono and stereo video acquisition, processing, and display                                                      | Stable   |
-+----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
 | cisstParameterTypes  | Standard data types used by command objects in component-based framework                                        | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
-| cisstRobot           | Robot control elements, including cooperative control, trajectory control, etc.                                 | Stable   |
-+----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
-| cisst3DUserInterface | Support for 3D user interfaces (3D input and 3D display)                                                        | Obsolete |
+| cisstRobot           | Small utilities provided along side Orocos KDL                                                                  | Stable   |
 +----------------------+-----------------------------------------------------------------------------------------------------------------+----------+
 
 Most libraries also come with examples and test programs.

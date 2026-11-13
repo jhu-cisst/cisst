@@ -17,13 +17,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstOSAbstraction/osaSleep.h>
+#include <thread>
+
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorEvent.h>
 #include <cisstMultiTask/mtsCollectorState.h>
 
 #include <components/sineTask.h>
+
+using namespace std::chrono_literals;
 
 int main(void)
 {
@@ -76,7 +79,7 @@ int main(void)
     eventCollector->StartCollection(0.0);
 
     // run for 10 seconds
-    osaSleep(10.0 * cmn_s);
+    osaSleep(10s);
 
     // stop the collection, this is important.  If not stop properly,
     // you will miss the last batch of data collection.
@@ -84,7 +87,7 @@ int main(void)
     eventCollector->StopCollection(0.0);
 
     // leave some time for the data collection to be finalized
-    osaSleep(2.0 * cmn_s);
+    osaSleep(2s);
 
     // kill all tasks and perform cleanup
     componentManager->KillAll();

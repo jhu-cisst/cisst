@@ -33,16 +33,6 @@ int main (void) {
 #elif (CISST_OS == CISST_LINUX)
     std::cout << "Running Linux" << std::endl;
 #elif (CISST_OS == CISST_RTLINUX)
-    std::cout << "Running RT-Linux" << std::endl;
-#elif (CISST_OS == CISST_IRIX)
-    std::cout << "Running SGI Irix" << std::endl;
-#elif (CISST_OS == CISST_SOLARIS)
-    std::cout << "Running SUN Solaris" << std::endl;
-#elif (CISST_OS == CISST_LINUX_RTAI)
-    std::cout << "Running RTAI Linux" << std::endl;
-#elif (CISST_OS == CISST_CYGWIN)
-    std::cout << "Running Cygwin" << std::endl;
-#elif (CISST_OS == CISST_DARWIN)
     std::cout << "Running Mac OS X" << std::endl;
 #elif (CISST_OS == CISST_QNX)
     std::cout << "Running QNX" << std::endl;
@@ -50,10 +40,6 @@ int main (void) {
 
 #if (CISST_COMPILER == CISST_GCC)
     std::cout << "Compiling with gcc" << std::endl;
-#elif (CISST_COMPILER == CISST_SGI_CC)
-    std::cout << "Compiling with SGI CC" << std::endl;
-#elif (CISST_COMPILER == CISST_SUN_CC)
-    std::cout << "Compiling with SUN CC" << std::endl;
 #elif (CISST_COMPILER == CISST_INTEL_CC)
     std::cout << "Compiling with Intel CC" << std::endl;
 #elif (CISST_COMPILER == CISST_DOTNET2003)

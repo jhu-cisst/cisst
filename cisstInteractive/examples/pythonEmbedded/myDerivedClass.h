@@ -24,10 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 #include <iostream>
 #include <string>
-
+#include <Eigen/Core>
 
 #include <cisstCommon/cmnGenericObject.h>
-#include <cisstVectorQt/vctTypes.h>
 
 
 // code required for the DLL generation
@@ -42,8 +41,8 @@ class CISST_EXPORT myDerivedClass: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
 protected:
-    vctDouble3 FixedSizeVectorMember;
-    vctDoubleVec DynamicVectorMember;
+    Eigen::Vector3d FixedSizeVectorMember;
+    Eigen::VectorXd DynamicVectorMember;
     
 public:
 
@@ -57,19 +56,19 @@ public:
         this->DynamicVectorMember += 5.0;
     }
 
-    inline vctDouble3 & FixedSizeVector(void) {
+    inline Eigen::Vector3d& FixedSizeVector(void) {
         return this->FixedSizeVectorMember;
     }
 
-    inline const vctDouble3 & FixedSizeVector(void) const {
+    inline const Eigen::Vector3d& FixedSizeVector(void) const {
         return this->FixedSizeVectorMember;
     }
 
-    inline vctDoubleVec & DynamicVector(void) {
+    inline Eigen::VectorXd& DynamicVector(void) {
         return this->DynamicVectorMember;
     }
 
-    inline const vctDoubleVec & DynamicVector(void) const {
+    inline const Eigen::VectorXd& DynamicVector(void) const {
         return this->DynamicVectorMember;
     }
 

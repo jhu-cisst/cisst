@@ -21,19 +21,18 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsEventReceiver.h>
 
 
-mtsFunctionQualifiedRead::mtsFunctionQualifiedRead(void):
-    Command(0)
+mtsFunctionQualifiedRead::mtsFunctionQualifiedRead(void)
+    : Command(nullptr)
 {}
 
 
-mtsFunctionQualifiedRead::~mtsFunctionQualifiedRead()
-{}
+mtsFunctionQualifiedRead::~mtsFunctionQualifiedRead() {}
 
 
 // documented in base class
 bool mtsFunctionQualifiedRead::Detach(void) {
     if (this->IsValid()) {
-        Command = 0;
+        Command = nullptr;
         DeleteCompletionCommand();
         return true;
     }
@@ -42,7 +41,7 @@ bool mtsFunctionQualifiedRead::Detach(void) {
 
 
 bool mtsFunctionQualifiedRead::IsValid(void) const {
-    return (this->Command != 0);
+    return Command != nullptr;
 }
 
 
@@ -51,7 +50,7 @@ bool mtsFunctionQualifiedRead::Bind(CommandType * command) {
     if (this->Command) {
         InitCompletionCommand(this->Command->GetName() + "Result");
     }
-    return (command != 0);
+    return command != nullptr;
 }
 
 
@@ -63,11 +62,11 @@ mtsExecutionResult mtsFunctionQualifiedRead::ExecuteGeneric(const mtsGenericObje
     }
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
-    CompletionCommand->PrepareToWait(argument);
+    CompletionCommand->PrepareWait(argument);
     mtsExecutionResult executionResult = Command->Execute(qualifier, argument, CompletionCommand->GetCommand());
-    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED)
+    if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
         executionResult = WaitForResult();
-    CompletionCommand->ClearWait();
+    }
     return executionResult;
 }
 
@@ -79,24 +78,22 @@ mtsFunctionQualifiedRead::CommandType * mtsFunctionQualifiedRead::GetCommand(voi
 
 const mtsGenericObject * mtsFunctionQualifiedRead::GetArgument1Prototype(void) const
 {
-    if (this->Command) {
-        return this->Command->GetArgument1Prototype();
-    }
-    return 0;
+    if (!Command) { return nullptr; }
+
+    return this->Command->GetArgument1Prototype();
 }
 
 
 const mtsGenericObject * mtsFunctionQualifiedRead::GetArgument2Prototype(void) const
 {
-    if (this->Command) {
-        return this->Command->GetArgument2Prototype();
-    }
-    return 0;
+    if (!Command) { return nullptr; }
+
+    return this->Command->GetArgument2Prototype();
 }
 
 
 void mtsFunctionQualifiedRead::ToStream(std::ostream & outputStream) const {
-    if (this->Command != 0) {
+    if (Command) {
         outputStream << "mtsFunctionQualifiedRead for " << *Command;
     } else {
         outputStream << "mtsFunctionQualifiedRead not initialized";

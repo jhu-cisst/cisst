@@ -28,9 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 #define cisst_VERSION "${cisst_VERSION}"
 
 // Deprecated paths/macros
-#define CISST_SOURCE_ROOT CISST_SOURCE_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
-#define CISST_BUILD_ROOT CISST_BUILD_ROOT_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
-#define CISST_BUILD_LINK_DIRECTORIES CISST_BUILD_LINK_DIRECTORIES_is_deprecated_use_CISST_ROOT_and_cmnPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
+#define CISST_SOURCE_ROOT CISST_SOURCE_ROOT_is_deprecated_use_CISST_ROOT_and_cmnSearchPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
+#define CISST_BUILD_ROOT CISST_BUILD_ROOT_is_deprecated_use_CISST_ROOT_and_cmnSearchPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
+#define CISST_BUILD_LINK_DIRECTORIES CISST_BUILD_LINK_DIRECTORIES_is_deprecated_use_CISST_ROOT_and_cmnSearchPath_instead__See_https_trac_dot_lcsr_dot_jhu_dot_edu_slash_cisst_slash_wiki_slash_UsingCMake
 
 // shared library prefix/suffix
 #define CISST_SHARED_LIBRARY_PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
@@ -59,9 +59,6 @@ http://www.cisst.org/cisst/license.txt.
 
 // Do we have isfinite global function
 #cmakedefine01 CISST_HAS_ISFINITE
-
-// RTAI Realtime extension for Linux
-#cmakedefine01 CISST_HAS_LINUX_RTAI
 
 // Xenomai Realtime extension for Linux
 #cmakedefine01 CISST_HAS_LINUX_XENOMAI
@@ -100,6 +97,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef CISST_SKIP_JSON // for cisst data generator
 #cmakedefine01 CISST_HAS_JSON
 #endif
+
+#cmakedefine01 CISST_HAS_KDL
 
 // Using SI units (ie meters) or mm for distances
 #cmakedefine01 CISST_USE_SI_UNITS

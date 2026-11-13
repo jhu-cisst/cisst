@@ -20,8 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 #include "cmnXMLPathTest.h"
 
 #include <limits>
+#include <string>
 
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
+
+using namespace std::string_literals;
 
 #if CISST_HAS_QT_XML
   #include <QCoreApplication>
@@ -59,10 +62,10 @@ void cmnXMLPathTest::tearDown(void)
 void cmnXMLPathTest::TestReadExistingFile(void)
 {
     // find original file and test
-    cmnPath filePath;
+    cmnSearchPath filePath;
     filePath.Add(std::string(CISST_SOURCE_DIR) + "/cisstCommon/tests");
-    std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
-    std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
+    std::filesystem::path testFile = filePath.Find("cmnXMLPathTestFile1.xml"s);
+    std::filesystem::path schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd"s);
     CPPUNIT_ASSERT(!(testFile == ""));
     CPPUNIT_ASSERT(!(schemaFile == ""));
 
@@ -76,10 +79,10 @@ void cmnXMLPathTest::TestReadExistingFile(void)
 void cmnXMLPathTest::TestCopyReadExistingFile(void)
 {
     // find original file
-    cmnPath filePath;
+    cmnSearchPath filePath;
     filePath.Add(std::string(CISST_SOURCE_DIR) + "/cisstCommon/tests");
-    std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
-    std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
+    std::filesystem::path testFile = filePath.Find("cmnXMLPathTestFile1.xml"s);
+    std::filesystem::path schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd"s);
     CPPUNIT_ASSERT(!(testFile == ""));
     CPPUNIT_ASSERT(!(schemaFile == ""));
     // read file
@@ -212,10 +215,10 @@ void cmnXMLPathTest::TestExistingFile1(cmnXMLPath & xmlPath, const std::string &
 void cmnXMLPathTest::TestWrite(void)
 {
     // find original file and test
-    cmnPath filePath;
+    cmnSearchPath filePath;
     filePath.Add(std::string(CISST_SOURCE_DIR) + "/cisstCommon/tests");
-    std::string testFile = filePath.Find("cmnXMLPathTestFile1.xml");
-    std::string schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd");
+    std::filesystem::path testFile = filePath.Find("cmnXMLPathTestFile1.xml"s);
+    std::filesystem::path schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd"s);
     CPPUNIT_ASSERT(!(testFile == ""));
     CPPUNIT_ASSERT(!(schemaFile == ""));
 

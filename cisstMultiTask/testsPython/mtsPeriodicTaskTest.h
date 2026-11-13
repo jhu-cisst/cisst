@@ -36,7 +36,7 @@ class CISST_EXPORT mtsPeriodicTaskTest: public mtsTaskPeriodic {
     // double
     mtsDouble Double;
     // vector
-    mtsDoubleVec Vector;
+    Eigen::VectorXd Vector;
 
     void AddDouble(const mtsDouble & addend); // method used for write command
     void ZeroAll(void); // method used for void command

@@ -25,13 +25,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsComponentViewer_h
 #define _mtsComponentViewer_h
 
+#include <thread>
 
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
-#include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 
 // Always include last!
 #include <cisstMultiTask/mtsExport.h>
@@ -56,10 +57,10 @@ protected:
 
     // Use a separate reader thread because osaPipeExec::Read is blocking.
     // This could be eliminated if a non-blocking Read is implemented.
-    osaThread ReaderThread;
+    std::thread ReaderThread;
     osaThreadSignal ReadyToRead;
-    void *ReadFromUDrawGraph(int);
-    bool ReaderThreadFinished;
+    void ReadFromUDrawGraph();
+    bool ReaderThreadFinished; // TODO BB: should be atomic
     bool WaitingForResponse;
     static void ParseArgs(const std::string &input, std::string &arg1, std::string &arg2);
     static bool ParseProcessAndComponent(const std::string &input, std::string &processName,

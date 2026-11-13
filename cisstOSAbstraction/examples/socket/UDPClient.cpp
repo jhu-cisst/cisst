@@ -19,8 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnUnits.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaSocket.h>
+#include <thread>
+
+using namespace std::chrono_literals;
 
 int main(void)
 {
@@ -73,7 +75,7 @@ int main(void)
 
         // receive
         do {
-            osaSleep(100.0 * cmn_ms);
+            osaSleep(100ms);
             bytesRead = socket.Receive(buffer, sizeof(buffer));
         } while (bytesRead <= 0);
         buffer[bytesRead] = 0;

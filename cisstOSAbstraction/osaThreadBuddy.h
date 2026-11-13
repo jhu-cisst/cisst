@@ -27,26 +27,17 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaThreadBuddy_h
 #define _osaThreadBuddy_h
 
+#include <atomic>
+#include <thread>
+
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
-#include <cisstOSAbstraction/osaThread.h>
 
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
-/*! \ingroup cisstOSAbstraction
-  The OS dependent initialization that is
-  to be executed for real-time support. This is called from the
-  constructor of TaskManager, which is implemented as singleton. */
-CISST_EXPORT void __os_init(void);
-
-/*! \ingroup cisstOSAbstraction
-  The OS dependent cleanup that is to be executed for real-time support.
-  This is called from the destructor of TaskManager. */
-CISST_EXPORT void __os_exit(void);
-
-
-struct osaThreadBuddyInternals;
+// PIMPL
+class osaThreadBuddyInternals;
 
 /*!  \brief Implementation of the Thread Proxy object in an OS
   independent manner.
@@ -61,46 +52,36 @@ struct osaThreadBuddyInternals;
   it easy to provide Soft Real Time tasks in Vanila Linux flavor.
  */
 class CISST_EXPORT osaThreadBuddy {
+private:
+    std::unique_ptr<osaThreadBuddyInternals> internals;
 
-    osaThreadBuddyInternals* Data;
+    std::thread* thread;
 
     /*! Thread period (if > 0) */
-    double Period;
+    double Period = 0;
+
+    std::atomic<bool> IsSuspended = false;
 
 public:
-    /*! Constructor. Allocates internal data. */
-    osaThreadBuddy();
+    /*! The thread we are buddying to must outlive the buddy*/
+    osaThreadBuddy(std::thread& thread);
 
-    /*! Destructor. */
     ~osaThreadBuddy();
 
-    /*! Create a thread buddy with a name 'name' 
-    
-    \param name Name of thread buddy, the thread will also be referred
-    using the same name.
-    
+    /*! Create a thread buddy
     \param period The period of the thread (in nanosecond)
-    
-    \param stack_size The stack size allocated to the thread. A
-      default value of 8Kb is used. */
-    void Create(const char *name, double period, int stack_size = 1024*256);
-    void Create(const char *name, const osaAbsoluteTime& tv, int stack_size = 1024*256 );
-
-    /*! Delete the thread buddy. */
-    void Delete();
+    */
+    void Create(double period);
+    void Create(const osaAbsoluteTime& tv);
 
     /*! Return true if thread is periodic.  Currently, returns true if
       the thread was created with a period > 0. */
     bool IsPeriodic() const { return Period > 0; }
 
-    /*! Suspend the execution of the real time thread until the next
-      period is reached. */
-    void WaitForPeriod(void);
-
     /*! Suspend the execution of the real time thread for the
       remainder of the current period. */
     void WaitForRemainingPeriod(void);
-    
+
     /*! Make a thread hard real time. */
     void MakeHardRealTime(void);
 
@@ -112,12 +93,6 @@ public:
 
     /*! Suspend execution of the thread. */
     void Suspend(void);
-
-    /*! Lock stack growth */
-    void LockStack();
-
-    /*! Unlock stack */
-    void UnlockStack();
 };
 
 

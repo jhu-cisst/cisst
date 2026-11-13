@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "prmOperatingStateTest.h"
 #include "prmTestGenericObjectConstructor.h"
-#include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstParameterTypes/prmOperatingState.h>
 
@@ -42,33 +41,4 @@ void prmOperatingStateTest::TestConstructors(void)
     prmOperatingState operatingStateCopy(operatingState);
     prmTestGenericObjectCopyConstructor(operatingState, operatingStateCopy);
     CPPUNIT_ASSERT(operatingState.State() == operatingStateCopy.State());
-}
-
-void prmOperatingStateTest::TestSerialize(void)
-{
-    prmOperatingState initial, final;
-    // test part inherited from mtsGenericObject
-    prmSetAndTestGenericObjectSerialization(initial);
-
-    std::stringstream serializationStream;
-
-    initial.State() = prmOperatingState::DISABLED;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.State() == initial.State());
-
-    initial.State() = prmOperatingState::ENABLED;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.State() == initial.State());
-
-    initial.State() = prmOperatingState::PAUSED;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.State() == initial.State());
-
-    initial.State() = prmOperatingState::FAULT;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.State() == initial.State());
 }

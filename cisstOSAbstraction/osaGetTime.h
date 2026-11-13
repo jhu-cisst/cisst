@@ -27,39 +27,21 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaGetTime_h
 #define _osaGetTime_h
 
-#include <cisstOSAbstraction/osaExport.h>
+#include <chrono>
 #include <string>
 
-/*! Return the most accurate time available on the system.
-  \return A double representing time in seconds
-*/
-double CISST_EXPORT osaGetTime(void);
+#include <cisstOSAbstraction/osaExport.h>
 
-#if 0
-#include <ctime>  // for struct timeval and other useful functions
+/*! Convert current local datetime to string */
+void CISST_EXPORT osaGetDateTimeString(std::string& output, char delimiter = '-');
+/*! Convert datetime to string */
+void CISST_EXPORT osaGetDateTimeString(std::string& output, std::chrono::system_clock::time_point time, char delimiter = '-');
+/*! Convert date to (y:m:d) string */
+void CISST_EXPORT osaGetDateString(std::string& output, std::chrono::system_clock::time_point time, char delimiter = ':');
+/*! Convert time to (h:m:s:ms) string */
+void CISST_EXPORT osaGetTimeString(std::string& output, std::chrono::system_clock::time_point time, char delimiter = ':');
 
-struct osaAbsoluteTime {
-    long sec;   // seconds
-    long nsec;  // nano-seconds
-};
-
-void CISST_EXPORT osaGetAbsoluteTime(osaAbsoluteTime & now);
-// Note that time can be printed using ctime(now.sec);
-#endif
-
-/*! Retrieve the current local date and time. */
-void CISST_EXPORT osaGetDateTimeString(std::string & str, const char delimiter = '-');
-/*! Convert from (epoch) absolute time in seconds to date and time string */
-void CISST_EXPORT osaGetDateTimeString(std::string & str, double time, const char delimiter = '-');
-/*! Convert from (epoch) absolute time in seconds to date  (y:m:d) string */
-void CISST_EXPORT osaGetDateString(std::string & str, double time, const char delimiter = ':');
-/*! Convert from (epoch) absolute time in seconds to time  (h:m:s:ms) string */
-void CISST_EXPORT osaGetTimeString(std::string & str, double time, const char delimiter = ':');
-
-
-
-
-/*! Retrieve the current local time. */
-void CISST_EXPORT osaGetTimeString(std::string & str);
+/*! Convert current local time to string */
+void CISST_EXPORT osaGetTimeString(std::string& output);
 
 #endif // _osaGetTime_h
