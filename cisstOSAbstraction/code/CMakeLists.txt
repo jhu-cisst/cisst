@@ -17,7 +17,6 @@ project (cisstOSAbstraction)
 set (SOURCE_FILES
      osaClassServices.cpp
      osaDynamicLoader.cpp
-     osaDynamicLoaderAndFactory.cpp
      osaGetTime.cpp
      osaPipeExec.cpp
      osaSerialPort.cpp
@@ -32,7 +31,6 @@ set (SOURCE_FILES
 # all header files
 set (HEADER_FILES
      osaDynamicLoader.h
-     osaDynamicLoaderAndFactory.h
      osaExport.h
      osaGetTime.h
      osaPipeExec.h
