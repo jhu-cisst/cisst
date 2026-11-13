@@ -571,7 +571,7 @@ void mtsCollectorEvent::PrintHeader(const CollectorFileFormat & fileFormat)
 }
 
 
-void mtsCollectorEvent::StartCollection(const double & delay)
+void mtsCollectorEvent::StartCollection(double delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
     if (delay == 0.0) {
@@ -584,7 +584,7 @@ void mtsCollectorEvent::StartCollection(const double & delay)
 }
 
 
-void mtsCollectorEvent::StopCollection(const double & delay)
+void mtsCollectorEvent::StopCollection(double delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
     if (delay == 0.0) {

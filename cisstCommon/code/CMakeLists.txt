@@ -64,6 +64,7 @@ set (HEADER_FILES
      cmnDataFunctionsVector.h
      cmnDataFunctionsArray.h
      cmnDataFunctionsList.h
+     cmnDataFunctionsPath.h
      cmnDataFunctionsSet.h
      cmnDataFunctionsVectorHelpers.h
      cmnDataFunctionsMatrixHelpers.h

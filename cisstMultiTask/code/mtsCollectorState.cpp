@@ -218,7 +218,7 @@ void mtsCollectorState::Run(void)
 }
 
 
-void mtsCollectorState::StartCollection(const double & delay)
+void mtsCollectorState::StartCollection(double delay)
 {
     mtsExecutionResult result = this->StateTableStartCollection(delay);
     if (!result.IsOK()) {
@@ -229,7 +229,7 @@ void mtsCollectorState::StartCollection(const double & delay)
 }
 
 
-void mtsCollectorState::StopCollection(const double & delay)
+void mtsCollectorState::StopCollection(double delay)
 {
     mtsExecutionResult result = this->StateTableStopCollection(delay);
     if (!result.IsOK()) {

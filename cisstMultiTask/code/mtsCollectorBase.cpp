@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorBase.h>
 
+#include <filesystem>
+
 #include <cisstCommon/cmnPath.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
@@ -44,13 +46,13 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     Serializer(0)
 {
     // set working directory
-    this->WorkingDirectoryMember = cmnPath::GetWorkingDirectory();
+    WorkingDirectoryMember = std::filesystem::current_path();
 
     // add the control interface
-    this->SetupControlInterface();
+    SetupControlInterface();
 
-    this->mTags.clear();
-    this->AddTag("System");
+    mTags.clear();
+    AddTag("System");
 
     Init();
 }
@@ -65,8 +67,8 @@ mtsCollectorBase::~mtsCollectorBase()
 void mtsCollectorBase::SetupControlInterface(void)
 {
     // add a control interface to start and stop the data collection
-    this->ControlInterface = AddInterfaceProvided("Control");
-    if (this->ControlInterface) {
+    ControlInterface = AddInterfaceProvided("Control");
+    if (ControlInterface) {
         // commands controlling the output
         ControlInterface->AddCommandVoid(&mtsCollectorBase::SetOutputToDefaultCommand, this,
                                          "SetOutputToDefault");
@@ -80,15 +82,15 @@ void mtsCollectorBase::SetupControlInterface(void)
         ControlInterface->AddCommandWrite(&mtsCollectorBase::StopCollectionCommand, this,
                                           "StopCollection");
         // events
-        ControlInterface->AddEventWrite(this->CollectionStartedEventTrigger,
+        ControlInterface->AddEventWrite(CollectionStartedEventTrigger,
                                         "CollectionStarted", false);
-        ControlInterface->AddEventWrite(this->ProgressEventTrigger,
+        ControlInterface->AddEventWrite(ProgressEventTrigger,
                                         "Progress", size_t(0));
     }
 }
 
 
-void mtsCollectorBase::SetOutput(const std::string & fileName,
+void mtsCollectorBase::SetOutput(const std::filesystem::path& fileName,
                                  const CollectorFileFormat fileFormat)
 {
     CMN_LOG_CLASS_INIT_DEBUG << "SetOutput: file \"" << fileName
@@ -117,12 +119,9 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
     this->SampleCounterForEvent = 0;
 
     // currently doesn't store fullpath if not using the default naming.
-    std::string headerFileName;
-    size_t pos = fileName.find_last_of(".");
-    if (pos != std::string::npos) {
-        headerFileName = fileName.substr(0,pos) + ".desc";
-    } else {
-        headerFileName = fileName + ".desc";
+    OutputHeaderFileName = fileName;
+    OutputHeaderFileName.replace_extension(".desc");
+    if (!fileName.has_extension()) {
         std::string ext;
         switch (fileFormat) {
         case COLLECTOR_FILE_FORMAT_CSV:
@@ -135,9 +134,8 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
             ext = ".cdat";
             break;
         }
-        this->OutputFileName = fileName + ext;
+        this->OutputFileName.replace_extension(ext);
     }
-    this->OutputHeaderFileName = headerFileName;
 
     // initialize serializer
     if (FileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
@@ -224,16 +222,10 @@ void mtsCollectorBase::SetOutputToDefault(const CollectorFileFormat fileFormat)
         suffix = "cdat"; // for cisst dat
     }
 
-    std::string fileName =
-        this->WorkingDirectoryMember
-        + cmnPath::DirectorySeparator()
-        + this->GetDefaultOutputName() + "." + suffix;
+    std::filesystem::path file_name = WorkingDirectoryMember / (GetDefaultOutputName() + "." + suffix);
     // add header file name
-    this->OutputHeaderFileName =  this->WorkingDirectoryMember
-        + cmnPath::DirectorySeparator()
-        + this->GetDefaultOutputName() + ".desc" ;
-
-    this->SetOutput(fileName, fileFormat);
+    OutputHeaderFileName = file_name.replace_extension(".desc");
+    SetOutput(file_name, fileFormat);
 }
 
 
@@ -302,15 +294,15 @@ void mtsCollectorBase::SetDelimiter(void)
 }
 
 
-void mtsCollectorBase::SetWorkingDirectory(const std::string & directory)
+void mtsCollectorBase::SetWorkingDirectory(const std::filesystem::path& directory)
 {
-    this->WorkingDirectoryMember = directory;
+    WorkingDirectoryMember = directory;
 }
 
 
-void mtsCollectorBase::GetWorkingDirectory(std::string & placeHolder) const
+void mtsCollectorBase::GetWorkingDirectory(std::filesystem::path& placeHolder) const
 {
-    placeHolder = this->WorkingDirectoryMember;
+    placeHolder = WorkingDirectoryMember;
 }
 
 void mtsCollectorBase::SetOutputStreamParams(void)
@@ -338,7 +330,7 @@ void mtsCollectorBase::SetOutputStreamParams(void)
     this->OutputStream->fill(this->FillCharacter);
 }
 
-void mtsCollectorBase::SetOutputStreamFloatingNotation(const CollectorFileFloatingNotation floatingNotation)
+void mtsCollectorBase::SetOutputStreamFloatingNotation(CollectorFileFloatingNotation floatingNotation)
 {
     this->FloatingNotation = floatingNotation;
     if (this->Status == COLLECTOR_COLLECTING) {
@@ -349,7 +341,7 @@ void mtsCollectorBase::SetOutputStreamFloatingNotation(const CollectorFileFloati
     }
 }
 
-void mtsCollectorBase::SetOutputStreamPrecision(const int precision)
+void mtsCollectorBase::SetOutputStreamPrecision(int precision)
 {
     this->Precision = precision;
     if (this->Status == COLLECTOR_COLLECTING) {
@@ -360,7 +352,7 @@ void mtsCollectorBase::SetOutputStreamPrecision(const int precision)
     }
 }
 
-void mtsCollectorBase::SetOutputStreamWidth(const int width)
+void mtsCollectorBase::SetOutputStreamWidth(int width)
 {
     this->Width = width;
     if (this->Status == COLLECTOR_COLLECTING) {
@@ -371,7 +363,7 @@ void mtsCollectorBase::SetOutputStreamWidth(const int width)
     }
 }
 
-void mtsCollectorBase::SetOutputStreamFill(const char fillCharacter)
+void mtsCollectorBase::SetOutputStreamFill(char fillCharacter)
 {
     this->FillCharacter = fillCharacter;
     if (this->Status == COLLECTOR_COLLECTING) {

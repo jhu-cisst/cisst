@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _osaDynamicLoader_h
 
 #include <filesystem>
-#include <string>
 
 #include <cisstOSAbstraction/osaExport.h>
 
@@ -67,11 +66,10 @@ public:
     virtual ~osaDynamicLoader() {};
 
     /*! Dynamically load the specified shared library.
-        \param file Name of shared library file to load (do not include extension)
-        \param path Path to file (0 -> use default library load paths)
-        \return true if file successfully loaded; false otherwise
+        \param library_file Path of file
+        \return true if library successfully loaded; false otherwise
     */
-    bool Load(const std::string& file, const std::filesystem::path& path = "");
+    bool Load(const std::filesystem::path& library_file);
 
     /*! Unload the shared library file (if supported by operating system). */
     void UnLoad();

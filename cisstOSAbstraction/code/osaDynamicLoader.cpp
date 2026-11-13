@@ -49,33 +49,31 @@ inline const char *GetTheError()
        { return dlerror(); }
 #endif
 
-bool osaDynamicLoader::Load(const std::string& file, const std::filesystem::path& path)
+bool osaDynamicLoader::Load(const std::filesystem::path& library_file)
 {
-    // Don't call reset in case any objects created with the previous library still exist.
-    // Reset();
-    std::filesystem::path fullpath;
+    std::filesystem::path full_path;
     // if the file exists, use it as is...
-    if (std::filesystem::exists(file)) {
-        fullpath = file;
+    if (std::filesystem::exists(library_file)) {
+        full_path = library_file;
     } else {
         // Add prefix + .so/.dll extension, append to path (which may be empty)
-        std::string library_name = cmnPath::SharedLibrary(file);
-        fullpath = path / library_name;
+        std::string library_name = cmnPath::SharedLibrary(pathToUTF8(library_file));
+        full_path = pathFromUTF8(library_name);
     }
 
-    handle = OpenLibrary(fullpath.c_str());
+    handle = OpenLibrary(library_file.c_str());
     if (!handle) {
-        CMN_LOG_INIT_ERROR << "osaDynamicLoader: cannot open library " << fullpath << ", error = " << GetTheError() << std::endl;
+        CMN_LOG_INIT_ERROR << "osaDynamicLoader: cannot open library " << full_path << ", error = " << GetTheError() << std::endl;
         return false;
     }
 
 #if (CISST_OS == CISST_WINDOWS)
-    char fullname[120];
-    GetModuleFileName((HMODULE)handle, (LPTSTR)fullname, sizeof(fullname)-1);
-    fullname[sizeof(fullname)-1] = 0;  // Make sure null-terminated
-    CMN_LOG_INIT_VERBOSE << "osaDynamicLoader: loading " << fullname << std::endl;
+    wchar_t module_name[MAX_PATH];
+    GetModuleFileNameW((HMODULE)handle, (LPWSTR)module_name, MAX_PATH);
+    std::filesystem::path module_path(module_name);
+    CMN_LOG_INIT_VERBOSE << "osaDynamicLoader: loading " << pathToUTF8(module_path) << std::endl;
 #else
-    CMN_LOG_INIT_VERBOSE << "osaDynamicLoader: loading " << fullpath << std::endl;
+    CMN_LOG_INIT_VERBOSE << "osaDynamicLoader: loading " << full_path << std::endl;
 #endif
     return true;
 }

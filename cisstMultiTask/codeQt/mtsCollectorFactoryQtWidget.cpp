@@ -86,7 +86,7 @@ mtsCollectorFactoryQtWidget::mtsCollectorFactoryQtWidget(const std::string & com
     FileDialog = new QPushButton("Change directory", this);
     FileLayout->addWidget(FileDialog);
     FileDirectory = new QLabel(this);
-    FileDirectory->setText(cmnPath::GetWorkingDirectory().c_str());
+    FileDirectory->setText(pathToUTF8(std::filesystem::current_path()).c_str());
     FileLayout->addWidget(FileDirectory);
     FileNew = new QPushButton("Start new file(s)", this);
     FileLayout->addWidget(FileNew);

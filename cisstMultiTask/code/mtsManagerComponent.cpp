@@ -452,7 +452,7 @@ void mtsManagerComponent::ComponentGetState(const mtsDescriptionComponent &arg,
 void mtsManagerComponent::LoadLibrary(const mtsDescriptionLoadLibrary &lib, bool &result) const
 {
     osaDynamicLoader dl;
-    result = dl.Load(lib.LibraryName.c_str());
+    result = dl.Load(pathFromUTF8(lib.LibraryName));
 }
 
 void mtsManagerComponent::GetNamesOfProcesses(std::vector<std::string> & names) const

@@ -54,68 +54,68 @@ public:
     typedef mtsGenericObject BaseType;
 
     /*! The measured period average. */
-    inline const double & PeriodAvg(void) const {
+    double PeriodAvg() const {
         return mPeriodAvg;
     }
 
     /*! The measured standard deviation for period average. */
-    inline const double & PeriodStdDev(void) const {
+    double PeriodStdDev() const {
         return mPeriodStdDev;
     }
 
     /*! The measured minimum period of the task */
-    inline const double & PeriodMin(void) const {
+    double PeriodMin() const {
         return mPeriodMin;
     }
 
     /*! The measured maximum period of the task */
-    inline const double & PeriodMax(void) const {
+    double PeriodMax() const {
         return mPeriodMax;
     }
 
     /*! The measured compute time average. */
-    inline const double & ComputeTimeAvg(void) const {
+    double ComputeTimeAvg() const {
         return mComputeTimeAvg;
     }
 
     /*! The measured standard deviation for compute time average. */
-    inline const double & ComputeTimeStdDev(void) const {
+    double ComputeTimeStdDev() const {
         return mComputeTimeStdDev;
     }
 
     /*! Get minimum compute time. */
-    inline const double & ComputeTimeMin(void) const {
+    double ComputeTimeMin() const {
         return mComputeTimeMin;
     }
 
     /*! Get maximum compute time. */
-    inline const double & ComputeTimeMax(void) const {
+    double ComputeTimeMax() const {
         return mComputeTimeMax;
     }
 
     /*! Get number of samples used for time window */
-    inline const unsigned int & NumberOfSamples(void) const {
+    unsigned int NumberOfSamples() const {
         return mNumberOfSamples;
     }
 
     /*! Get number of overruns, i.e. compute time greater than average
       period in previous interval. */
-    inline const unsigned int & NumberOfOverruns(void) const {
+    unsigned int NumberOfOverruns() const {
         return mNumberOfOverruns;
     }
 
     /*! Time period between period statistics calculations */
-    inline void SetStatisticsInterval(const double & time) {
+    inline void SetStatisticsInterval(double time) {
         mStatisticsInterval = time;
     }
 
     /*! Get time period between period statistics calculations */
-    inline const double & StatisticsInterval(void) const {
+    double StatisticsInterval() const {
         return mStatisticsInterval;
     }
 
     /*! Add one sample to compute statistics */
-    void Update(const double sample, const double computeTime);
+    void Update(double sample, double computeTime);
 
     /*! Set callback to act on updated statistics */
     inline void SetCallback(mtsCallableVoidBase * callback) {
@@ -123,24 +123,24 @@ public:
     }
 
     template <class __classType>
-    inline void SetCallback(void (__classType::*method)(void),
+    inline void SetCallback(void (__classType::*method)(),
                             __classType * classInstantiation) {
         this->SetCallback(new mtsCallableVoidMethod<__classType>(method, classInstantiation));
     }
 
-    void Reset(void);
+    void Reset();
 
-    inline void SetFromExisting(const double periodAvg,
-                                const double periodStdDev,
-                                const double periodMin,
-                                const double periodMax,
-                                const double computeTimeAvg,
-                                const double computeTimeStdDev,
-                                const double computeTimeMin,
-                                const double computeTimeMax,
-                                const unsigned int numberOfSamples,
-                                const unsigned int numberOfOverruns,
-                                const double statisticsInterval) {
+    inline void SetFromExisting(double periodAvg,
+                                double periodStdDev,
+                                double periodMin,
+                                double periodMax,
+                                double computeTimeAvg,
+                                double computeTimeStdDev,
+                                double computeTimeMin,
+                                double computeTimeMax,
+                                unsigned int numberOfSamples,
+                                unsigned int numberOfOverruns,
+                                double statisticsInterval) {
         mPeriodAvg = periodAvg;
         mPeriodStdDev = periodStdDev;
         mPeriodMin = periodMin;
@@ -153,7 +153,7 @@ public:
         mNumberOfOverruns = numberOfOverruns;
         mStatisticsInterval = statisticsInterval;
     }
-    
+
 private:
 
     /*! Internal variables for statistics calculations */
@@ -191,15 +191,13 @@ private:
     mtsCallableVoidBase * mCallback;
 
 public:
-
     mtsIntervalStatistics();
-    inline ~mtsIntervalStatistics() {};
 
     /*! Human readable text output */
     void ToStream(std::ostream & outputStream) const override;
 
     /*! Machine reabable text output */
-    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+    void ToStreamRaw(std::ostream & outputStream, char delimiter = ' ',
                      bool headerOnly = false, const std::string & headerPrefix = "") const override;
 
     /*! Serialize the content of the object without any extra

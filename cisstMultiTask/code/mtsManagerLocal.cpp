@@ -19,6 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
+#include <filesystem>
+#include <thread>
+
 #include <cisstCommon/cmnThrow.h>
 #include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnPortability.h>
@@ -38,7 +41,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstCommon/cmnAssert.h>
-#include <thread>
 
 // Time server used by all tasks
 osaTimeServer TimeServer;
@@ -385,7 +387,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 #if CISST_HAS_JSON
 bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
 {
-    cmnPath configPath(cmnPath::GetWorkingDirectory());
+    cmnPath configPath(std::filesystem::current_path());
     // make sure the file exists
     std::string fullname = configPath.Find(filename);
     if (fullname == "") {
@@ -601,10 +603,10 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
     if (!sharedLibrary.empty()) {
         // create load and path based on LD_LIBRARY_PATH (or PATH on Windows)
         osaDynamicLoader loader;
-        std::string fullPath;
+        std::filesystem::path full_path;
         // check if the file already exists, i.e. use provided a full path
-        if (cmnPath::Exists(sharedLibrary)) {
-            fullPath = sharedLibrary;
+        if (std::filesystem::exists(pathFromUTF8(sharedLibrary))) {
+            full_path = pathFromUTF8(sharedLibrary);
         } else {
             cmnPath path;
 #if (CISST_OS == CISST_WINDOWS)
@@ -612,9 +614,9 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
 #else
             path.AddFromEnvironment("LD_LIBRARY_PATH");
 #endif
-            fullPath = path.Find(cmnPath::SharedLibrary(sharedLibrary));
-            if (fullPath.empty())  {
-                fullPath = sharedLibrary;
+            full_path = path.Find(cmnPath::SharedLibrary(sharedLibrary));
+            if (full_path.empty())  {
+                full_path = pathFromUTF8(sharedLibrary);
                 CMN_LOG_CLASS_INIT_WARNING << "CreateComponentDynamicallyJSON: using path: "
                                            << path << ", couldn't find \""
                                            << cmnPath::SharedLibrary(sharedLibrary)
@@ -622,10 +624,10 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
             } else {
                 CMN_LOG_CLASS_INIT_VERBOSE << "CreateComponentDynamicallyJSON: using path: "
                                            << path << ", found full path name \""
-                                           << fullPath << "\"" << std::endl;;
+                                           << full_path << "\"" << std::endl;;
             }
         }
-        if (!loader.Load(fullPath)) {
+        if (!loader.Load(full_path)) {
             CMN_LOG_CLASS_INIT_ERROR << "CreateComponentDynamicallyJSON: failed to load shared library "
                                      << sharedLibrary << std::endl;
             return 0;

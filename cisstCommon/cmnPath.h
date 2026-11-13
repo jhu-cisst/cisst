@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnTokenizer.h>
 
+#include <filesystem>
 #include <string>
 #include <list>
 #include <sstream>
@@ -47,6 +48,36 @@ http://www.cisst.org/cisst/license.txt.
 #  include <unistd.h>
 #endif
 
+/* Safely converts a UTF-8 encoded std::string/std::string_view to std::filesystem::path
+ *
+ * Since std::filesystem::path is UTF16 on Windows, if the local code page active
+   on Windows is not UTF8 (default is Windows-1252), the implicit conversion of
+   std::string to std::filesystem::path will assume the string is in the local
+   code page rather than UTF8, and garble the path.
+ */ 
+inline std::filesystem::path pathFromUTF8(std::string_view utf8_str) {
+#if defined(__cpp_lib_char8_t)
+    // C++20 and later: construct using std::u8string_view
+    return std::filesystem::path(
+        std::u8string_view(reinterpret_cast<const char8_t*>(utf8_str.data()), utf8_str.size())
+    );
+#else
+    // C++17: use std::filesystem::u8path
+    return std::filesystem::u8path(utf8_str);
+#endif
+}
+
+// Safely converts a std::filesystem::path back to a UTF-8 std::string
+inline std::string pathToUTF8(const std::filesystem::path& p) {
+#if defined(__cpp_lib_char8_t)
+    // C++20: u8string() returns std::u8string
+    const std::u8string u8str = p.u8string();
+    return std::string(reinterpret_cast<const char*>(u8str.data()), u8str.size());
+#else
+    // C++17: u8string() returns std::string directly
+    return p.u8string();
+#endif
+}
 
 /*!  \brief Search path to find a file.  This class contains a list of
   directories used to locate a file.
@@ -138,7 +169,7 @@ public:
     /*! Find the full name for a given file.
       \return The full path including the filename or an empty string.
     */
-    std::string Find(const std::string & filename, short mode = READ) const;
+    std::filesystem::path Find(const std::string & filename, short mode = READ) const;
 
     /*! Find the full name for a given file using all directories in
       path as well as given "sub directory" in each directory.  E.g if
@@ -149,7 +180,7 @@ public:
 
       \return The full path including the filename or an empty string.
     */
-    std::string FindWithSubdirectory(const std::string & filename,
+    std::filesystem::path FindWithSubdirectory(const std::string & filename,
                                      const std::string & subdirectory,
                                      short mode = READ) const;
 
@@ -162,33 +193,12 @@ public:
     /*! Write the path to a stream. */
     void ToStream(std::ostream & outputStream) const override;
 
-    /*! A platform-independent string for separating subdirectory or file
-      name from the parent directory name.  It's equal to "/" on Linux, "\\"
-      on Windows, etc.
-    */
-    static const std::string & DirectorySeparator(void);
-
-    /*! Get working directory */
-    static std::string GetWorkingDirectory(void);
-
     /*! Get CISST_ROOT from the environment variable */
     static bool GetCisstRoot(std::string & result);
 
     /*! Get cisst shared directory based on CISST_ROOT from the
       environment variable */
     static bool GetCisstShare(std::string & result);
-
-    /*! Check if a file exists assuming the path provided is either
-      relative or absolute, this function doesn't use any search
-      path. */
-    static bool Exists(const std::string & fullPath, short more = READ);
-
-    /*! Delete file.  This function doesn't use any search path. */
-    static bool DeleteFile(const std::string & fullPath);
-
-    /*! Rename file.  This function doesn't use any search path. */
-    static bool RenameFile(const std::string & fullPathOld,
-                           const std::string & fullPathNew);
 
     /*! Construct the shared library name based on OS prefix and
       suffix.  For example, the return value for "MyLib" would be

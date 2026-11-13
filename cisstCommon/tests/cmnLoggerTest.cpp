@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnPath.h>
+#include <filesystem>
 
 void cmnLoggerTest::TestLoggerFileName(void)
 {
@@ -34,10 +35,13 @@ void cmnLoggerTest::TestLoggerFileName(void)
     }
     else {
         std::cout << std::endl << "TestLoggerFileName: Case 2: log file not created before test" << std::endl;
-        if (cmnPath::Exists("testLog.txt")) {
-            cmnPath::DeleteFile("testLog.txt");
-            CPPUNIT_ASSERT(!cmnPath::Exists("testLog.txt"));
+        const std::filesystem::path test_file = "testLog.txt";
+        if (std::filesystem::exists(test_file)) {
+            std::filesystem::remove(test_file);
         }
+        
+        CPPUNIT_ASSERT(!std::filesystem::exists(test_file));
+
         CPPUNIT_ASSERT_EQUAL(true, cmnLogger::SetDefaultLogFileName("testLog.txt"));
         setDefaultLogFileName = true;
 
@@ -45,7 +49,7 @@ void cmnLoggerTest::TestLoggerFileName(void)
         // Following call will create log file
         CMN_LOG_RUN_VERBOSE << "TestLoggerFileName: Creating log file" << std::endl;
         CPPUNIT_ASSERT_EQUAL(true, cmnLogger::IsCreated());
-        CPPUNIT_ASSERT_EQUAL(true, cmnPath::Exists("testLog.txt"));
+        CPPUNIT_ASSERT_EQUAL(true, std::filesystem::exists(test_file));
     }
 
     if (setDefaultLogFileName) {

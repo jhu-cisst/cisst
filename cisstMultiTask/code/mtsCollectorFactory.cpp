@@ -94,14 +94,16 @@ mtsCollectorFactory::mtsCollectorFactory(const std::string & componentName):
 
 void mtsCollectorFactory::Configure(const std::string & configuration)
 {
+    std::filesystem::path config_file = pathFromUTF8(configuration);
+
     // first see if this is a file name
-    if (!cmnPath::Exists(configuration)) {
+    if (!std::filesystem::exists(config_file)) {
         CMN_LOG_CLASS_INIT_ERROR << "Configure: can't find file \"" << configuration << "\"" << std::endl;
         return;
     }
 #if CISST_HAS_JSON
     std::ifstream jsonStream;
-    jsonStream.open(configuration.c_str());
+    jsonStream.open(config_file);
 
     Json::Value jsonConfig;
     Json::Reader jsonReader;
@@ -357,7 +359,7 @@ void mtsCollectorFactory::GetCollectorsNames(std::list<std::string> & collectors
 }
 
 
-void mtsCollectorFactory::StartCollection(const double & delayInSeconds)
+void mtsCollectorFactory::StartCollection(double delayInSeconds)
 {
     for (auto collector : mAllCollectors) {
         collector->StartCollection(delayInSeconds);
@@ -365,7 +367,7 @@ void mtsCollectorFactory::StartCollection(const double & delayInSeconds)
 }
 
 
-void mtsCollectorFactory::StopCollection(const double & delayInSeconds)
+void mtsCollectorFactory::StopCollection(double delayInSeconds)
 {
     for (auto collector : mAllCollectors) {
         collector->StopCollection(delayInSeconds);
@@ -373,7 +375,7 @@ void mtsCollectorFactory::StopCollection(const double & delayInSeconds)
 }
 
 
-void mtsCollectorFactory::SetWorkingDirectory(const std::string & directory)
+void mtsCollectorFactory::SetWorkingDirectory(const std::filesystem::path& directory)
 {
     for (auto collector : mAllCollectors) {
         collector->SetWorkingDirectory(directory);
@@ -382,7 +384,7 @@ void mtsCollectorFactory::SetWorkingDirectory(const std::string & directory)
 }
 
 
-void mtsCollectorFactory::SetOutputToDefault(void)
+void mtsCollectorFactory::SetOutputToDefault()
 {
     for (auto collector : mAllCollectors) {
         collector->SetOutputToDefault();
@@ -390,13 +392,13 @@ void mtsCollectorFactory::SetOutputToDefault(void)
 }
 
 
-void mtsCollectorFactory::CollectionStartedEventHandler(const bool & started)
+void mtsCollectorFactory::CollectionStartedEventHandler(const bool& started)
 {
     CollectionStartedEventTrigger(started);
 }
 
 
-void mtsCollectorFactory::ProgressEventHandler(const size_t & count)
+void mtsCollectorFactory::ProgressEventHandler(const size_t& count)
 {
     ProgressEventTrigger(count);
 }

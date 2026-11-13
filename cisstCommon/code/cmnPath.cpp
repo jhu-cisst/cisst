@@ -133,15 +133,17 @@ bool cmnPath::AddRelativeToCisstShare(const std::string & relativePath, bool hea
 }
 
 
-std::string cmnPath::Find(const std::string & filename, short mode) const
+std::filesystem::path cmnPath::Find(const std::string & filename, short mode) const
 {
-    return this->FindWithSubdirectory(filename, "", mode);
+    return FindWithSubdirectory(filename, "", mode);
 }
 
 
-std::string cmnPath::FindWithSubdirectory(const std::string & filename,
-                                          const std::string & subdirectory,
-                                          short mode) const
+std::filesystem::path cmnPath::FindWithSubdirectory(
+    const std::string & filename,
+    const std::string & subdirectory,
+    short mode
+) const
 {
     std::string fullName("");
     const_iterator iter = Path.begin();
@@ -227,40 +229,11 @@ void cmnPath::ToStream(std::ostream & outputStream) const {
     }
 }
 
-const std::string &
-cmnPath::DirectorySeparator()
-{
-#if (CISST_OS == CISST_WINDOWS)
-    static const std::string separator = "\\";
-#else
-    static const std::string separator = "/";
-#endif
-    return separator;
-}
-
 #if (CISST_OS == CISST_WINDOWS)
     #include <direct.h> // for _getcwd
 #else
     #include <unistd.h> // for getcwd
 #endif
-
-std::string cmnPath::GetWorkingDirectory(void)
-{
-    char * buffer = 0;
-    // use getcwd without a buffer, getcwd will allocate memory for us
-#if (CISST_OS == CISST_WINDOWS)
-    buffer = _getcwd(0, 0);
-#else
-    buffer = getcwd(0, 0);
-#endif
-    std::string result(buffer);
-    // remember to free buffer
-    if (buffer) {
-        free(buffer);
-    }
-    return result;
-}
-
 
 bool cmnPath::GetCisstRoot(std::string & result)
 {
@@ -283,34 +256,6 @@ bool cmnPath::GetCisstShare(std::string & result)
         std::stringstream tmp;
         tmp << result << "/share/cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR;
         result = tmp.str();
-        return true;
-    }
-    return false;
-}
-
-
-bool cmnPath::Exists(const std::string & fullPath, short mode)
-{
-    if (access(fullPath.c_str(), mode) == 0) {
-        return true;
-    }
-    return false;
-}
-
-
-bool cmnPath::DeleteFile(const std::string & fullPath)
-{
-    if (remove(fullPath.c_str()) == 0) {
-        return true;
-    }
-    return false;
-}
-
-
-bool cmnPath::RenameFile(const std::string & fullPathOld,
-                         const std::string & fullPathNew)
-{
-    if (rename(fullPathOld.c_str(), fullPathNew.c_str()) == 0) {
         return true;
     }
     return false;
