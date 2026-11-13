@@ -40,11 +40,10 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
 
     /* Build search path to find the test utility */
     cmnPath path;
-    path.AddFromEnvironment("PATH", cmnPath::TAIL);
-    path.Add(std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES, cmnPath::HEAD);
-    std::string command = path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX, cmnPath::EXECUTE);
-    bool utilityFound = (command != "");
-    CPPUNIT_ASSERT(utilityFound);
+    path.AddFromEnvironment("PATH", cmnPath::Position::TAIL);
+    path.Add(std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES);
+    std::filesystem::path command = path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX);
+    CPPUNIT_ASSERT(!command.empty());
 
     /* Test opening twice, make sure it fails the second time */
     bool opened = pipe1.Open(command, "rw", noWindow);

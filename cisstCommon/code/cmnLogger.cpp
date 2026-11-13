@@ -18,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <string.h>
 #include <fstream>
 
 #include <cisstRevision.h>
@@ -54,7 +53,7 @@ cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     cmnLogger::InstanceCreated = true;
     LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), CMN_LOG_ALLOW_DEFAULT);
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " " << CISST_FULL_REVISION << std::endl;
-    std::string result = "undefined";
+    std::filesystem::path result = "undefined";
     cmnPath::GetCisstRoot(result);
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " CISST_ROOT: " << result << std::endl;
     result = "undefined";
@@ -150,21 +149,6 @@ bool cmnLogger::SetMaskClassAll(cmnLogMask mask)
 bool cmnLogger::SetMaskClassMatching(const std::string & stringToMatch, cmnLogMask mask)
 {
     return cmnClassRegister::SetLogMaskClassMatching(stringToMatch, mask);
-}
-
-const char * cmnLogger::ExtractFileName(const char * file)
-{
-    const char * p1 = strrchr(file, '/');
-#if (CISST_OS == CISST_WINDOWS)
-    const char * p2 = strrchr(file, '\\');
-    if (p2 > p1) {
-        return p2 + 1;
-    }
-#endif
-    if (p1) {
-        return p1 + 1;
-    }
-    return file;
 }
 
 

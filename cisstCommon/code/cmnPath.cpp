@@ -19,184 +19,197 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnPath.h>
-#if (CISST_OS == CISST_WINDOWS)
-#include <algorithm>   // for std::replace
-#endif
-#include <cstdio>
 
-cmnPath::cmnPath() {
-    ConfigureTokenizer();
-    Path.clear();
-}
+cmnPath::cmnPath() {}
 
-
-cmnPath::cmnPath(const std::string & path) {
-    ConfigureTokenizer();
+cmnPath::cmnPath(const std::filesystem::path& path) {
     Set(path);
 }
 
-
-void cmnPath::ConfigureTokenizer(void) {
-    Tokenizer.SetDelimiters(";");
-    Tokenizer.SetEscapeMarkers("");
-}
+cmnPath::cmnPath(const std::string& path) : cmnPath(pathFromUTF8(path)) {}
 
 
-std::string cmnPath::FromNative(const std::string & nativePath) {
-    std::string internalPath = nativePath;
+/* On Windows, paths in a environment variable are separated by ';',
+   while UNIX-like separates with ':'*/
+std::list<std::filesystem::path> splitEnvVar(const std::string& value) {
+    std::list<std::filesystem::path> paths;
+    std::stringstream ss(value);
+    std::string item;
+
 #if (CISST_OS == CISST_WINDOWS)
-
+    char delimiter = ';';
 #else
-    // Could instead use std::replace
-    const std::string::iterator end = internalPath.end();
-    std::string::iterator iterator;
-    for (iterator = internalPath.begin();
-         iterator != end;
-         iterator++) {
-        if (*iterator == ':') {
-            *iterator = ';';
+    char delimiter = ':';
+#endif
+
+    while (std::getline(ss, item, delimiter)) {
+        if (!item.empty()) {
+            paths.push_back(pathFromUTF8(item));
         }
     }
-#endif
-    return internalPath;
+
+    return paths;
 }
 
-void cmnPath::Set(const std::string & path) {
-    Path.clear();
+
+void cmnPath::Set(const std::filesystem::path& path) {
+    Paths.clear();
     Add(path);
 }
 
 
-void cmnPath::Add(const std::string & path, bool head) {
-    Tokenizer.Parse(path);
+void cmnPath::Set(const std::string& path) {
+    Set(pathFromUTF8(path));
+}
+
+
+void cmnPath::Add(const std::filesystem::path& path, Position position) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding the following \""
                                << path << "\" at the "
-                               << (head ? "beginning" : "end") << std::endl;
-    const char* const* tokens = Tokenizer.GetTokensArray();
-    iterator position = head ? Path.begin() : Path.end();
-    while (*tokens != NULL) {
-        Path.insert(position, std::string(*tokens));
-        // std::cout << *tokens << std::endl;
-        tokens++;
-    }
+                               << ((position == Position::HEAD) ? "beginning" : "end") << std::endl;
+    const_iterator iter = (position == Position::HEAD) ? Paths.begin() : Paths.end();
+    Paths.insert(iter, path);
     CMN_LOG_CLASS_INIT_VERBOSE << "Path is now set to: " << ToString() << std::endl;
 }
 
 
-bool cmnPath::AddFromEnvironment(const std::string & variableName, bool head) {
+void cmnPath::Add(const std::string& path, Position position) {
+    Add(pathFromUTF8(path), position);
+}
+
+
+bool cmnPath::AddFromEnvironment(const std::string& variableName, Position position) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path defined by the environment variable \""
                                << variableName << "\" at the "
-                               << (head ? "beginning" : "end") << std::endl;
-    char * environmentVariable = 0;
-    environmentVariable = getenv(variableName.c_str());
-    if (environmentVariable) {
-        std::string path = environmentVariable;
+                               << ((position == Position::HEAD) ? "beginning" : "end") << std::endl;
+    std::filesystem::path variable;
 #if (CISST_OS == CISST_WINDOWS)
-        std::replace(path.begin(), path.end(), '\\', '/');
+    const wchar_t* value = _wgetenv(pathFromUTF8(variableName).c_str());
+#else
+    const char* value = getenv(variableName.c_str());
 #endif
-        this->Add(FromNative(path), head);
-        return true;
+
+    if (value) {
+        variable = std::filesystem::path(value);
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "The environment variable \"" << variableName
+                                 << "\" doesn't seem to be defined" << std::endl;
+        return false;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "The environment variable \"" << variableName
-                             << "\" doesn't seem to be defined" << std::endl;
-    return false;
+
+    const auto paths = splitEnvVar(pathToUTF8(value));
+    for (const auto& path : paths) {
+        Add(path, position);
+    }
+
+    return true;
 }
 
 
-bool cmnPath::AddRelativeToCisstRoot(const std::string & relativePath, bool head) {
+bool cmnPath::AddRelativeToCisstRoot(const std::filesystem::path& relativePath, Position position) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
                                << relativePath << "\" relative to CISST_ROOT at the "
-                               << (head ? "beginning" : "end") << std::endl;
-    std::string path;
-    if (cmnPath::GetCisstRoot(path)) {
-        path = path + "/" + relativePath;
-        this->Add(FromNative(path), head);
-        return true;
+                               << ((position == Position::HEAD) ? "beginning" : "end") << std::endl;
+    std::filesystem::path path;
+    if (!cmnPath::GetCisstRoot(path)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddRelativeToCisstRoot: the environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
+        return false;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "AddRelativeToCisstRoot: the environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
-    return false;
+    path = path / relativePath;
+    Add(path, position);
+    return true;
 }
 
 
-bool cmnPath::AddRelativeToCisstShare(const std::string & relativePath, bool head) {
+bool cmnPath::AddRelativeToCisstRoot(const std::string& relativePath, Position position) {
+    return AddRelativeToCisstRoot(pathFromUTF8(relativePath), position);
+}
+
+
+bool cmnPath::AddRelativeToCisstShare(const std::filesystem::path& relativePath, Position position) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding path \""
                                << relativePath << "\" relative to CISST_ROOT/share/cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR << "/ at the "
-                               << (head ? "beginning" : "end") << std::endl;
-    std::string path;
-    if (cmnPath::GetCisstShare(path)) {
-        path = path + "/" + relativePath;
-        this->Add(FromNative(path), head);
-        return true;
+                               << ((position == Position::HEAD) ? "beginning" : "end") << std::endl;
+    std::filesystem::path path;
+    if (!cmnPath::GetCisstShare(path)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddRelativeToCisstShare: the environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
+        return false;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "AddRelativeToCisstShare: the environment variable \"CISST_ROOT\" doesn't seem to be defined" << std::endl;
-    return false;
+
+    path = path / relativePath;
+    Add(path, position);
+    return true;
 }
 
 
-std::filesystem::path cmnPath::Find(const std::string & filename, short mode) const
+bool cmnPath::AddRelativeToCisstShare(const std::string& relativePath, Position position) {
+    return AddRelativeToCisstShare(pathFromUTF8(relativePath), position);
+}
+
+
+std::filesystem::path cmnPath::Find(const std::filesystem::path& filename) const
 {
-    return FindWithSubdirectory(filename, "", mode);
+    return FindWithSubdirectory(pathToUTF8(filename), "");
+}
+
+
+std::filesystem::path cmnPath::Find(const std::string& filename) const
+{
+    return Find(pathFromUTF8(filename));
 }
 
 
 std::filesystem::path cmnPath::FindWithSubdirectory(
-    const std::string & filename,
-    const std::string & subdirectory,
-    short mode
+    const std::string& filename,
+    const std::string& subdirectory
 ) const
 {
-    std::string fullName("");
-    const_iterator iter = Path.begin();
-    const const_iterator end = Path.end();
+    std::filesystem::path path = pathFromUTF8(filename);
+
     if (filename.empty()) {
         CMN_LOG_CLASS_RUN_WARNING << "FindWithSubdirectory called with empty filename" << std::endl;
-        return filename;
+        return path;
     }
-    bool isAbsolute = false;
-#if (CISST_OS == CISST_WINDOWS)
-    size_t offset = 0;
-    // First, check for drive letter (e.g., "C:")
-    if ((filename.size() > 2) && (filename[1] == ':'))
-        offset = 2;
-    if ((filename[offset] == '/') || (filename[offset] == '\\'))
-        isAbsolute = true;
-#else
-    if (filename[0] == '/')
-        isAbsolute = true;
-#endif
+
     // first check if this file exists as absolute path
-    if (isAbsolute
-        && (access(filename.c_str(), mode) == 0)) {
+    if (path.is_absolute()
+        && std::filesystem::exists(path)) {
         CMN_LOG_CLASS_RUN_VERBOSE << "Found \"" << filename << "\", it seems to be a valid absolute file name" << std::endl;
-        return filename;
+        return path;
     }
-    while (iter != end) {
+
+    std::filesystem::path fullName("");
+    bool found = false;
+    for (const auto& location : Paths) {
         if (subdirectory != "") {
-            fullName = (*iter) + "/" + subdirectory + "/" + filename;
-            if (access(fullName.c_str(), mode) == 0) {
+            fullName = location / subdirectory / path;
+            if (std::filesystem::exists(fullName)) {
+                found = true;
                 break;
             }
         }
-        fullName = (*iter) + "/" + filename;
-        if (access(fullName.c_str(), mode) == 0) {
+        fullName = location / path;
+        if (std::filesystem::exists(fullName)) {
+            found = true;
             break;
         }
-        ++iter;
     }
-    if (iter == end) {
+
+    if (!found) {
         CMN_LOG_CLASS_RUN_WARNING << "Couldn't find file \"" << filename << "\" in path " << ToString() << std::endl;
         return "";
     }
+
     CMN_LOG_CLASS_RUN_VERBOSE << "Found \"" << fullName << "\" in path " << ToString() << std::endl;
     return fullName;
 }
 
 
-bool cmnPath::Remove(const std::string & directory) {
+bool cmnPath::Remove(const std::filesystem::path& directory) {
     iterator iter;
-    iter = std::find(Path.begin(), Path.end(), directory);
-    if (iter != Path.end()) {
-        Path.erase(iter);
+    iter = std::find(Paths.begin(), Paths.end(), directory);
+    if (iter != Paths.end()) {
+        Paths.erase(iter);
         CMN_LOG_CLASS_INIT_VERBOSE << "Directory " << directory << " found and removed from current path. "
                                    << "Path is now set to: " << ToString() << std::endl;
         return true;
@@ -206,22 +219,29 @@ bool cmnPath::Remove(const std::string & directory) {
 }
 
 
-bool cmnPath::Has(const std::string & directory) const {
+bool cmnPath::Remove(const std::string& directory) {
+    return Remove(pathFromUTF8(directory));
+}
+
+
+bool cmnPath::Has(const std::filesystem::path& directory) const {
     const_iterator iter;
-    iter = std::find(Path.begin(), Path.end(), directory);
-    if (iter != Path.end()) {
+    iter = std::find(Paths.begin(), Paths.end(), directory);
+    if (iter != Paths.end()) {
         return true;
     }
     return false;
 }
 
+bool cmnPath::Has(const std::string& directory) const {
+    return Has(pathFromUTF8(directory));
+}
 
-void cmnPath::ToStream(std::ostream & outputStream) const {
-    const size_t size = Path.size();
-    size_t index;
-    const_iterator iter = Path.begin();
-    for (index = 0; index < size; index++) {
-        outputStream << *iter;
+void cmnPath::ToStream(std::ostream& outputStream) const {
+    const size_t size = Paths.size();
+    const_iterator iter = Paths.begin();
+    for (size_t index = 0; index < size; index++) {
+        outputStream << pathToUTF8(*iter);
         if (index < (size - 1)) {
             outputStream << ";";
         }
@@ -229,34 +249,34 @@ void cmnPath::ToStream(std::ostream & outputStream) const {
     }
 }
 
-#if (CISST_OS == CISST_WINDOWS)
-    #include <direct.h> // for _getcwd
-#else
-    #include <unistd.h> // for getcwd
-#endif
 
-bool cmnPath::GetCisstRoot(std::string & result)
+bool cmnPath::GetCisstRoot(std::filesystem::path& result)
 {
-    char * environmentVariable = 0;
-    environmentVariable = getenv("CISST_ROOT");
-    if (environmentVariable) {
-        result = environmentVariable;
 #if (CISST_OS == CISST_WINDOWS)
-        std::replace(result.begin(), result.end(), '\\', '/');
+    #include <wchar.h>
+    const whcar_t* value = _wgetenv("CISST_ROOT");
+    if (!value) { return false; }
+
+    result = std::filesystem::path(value);
+    return true;
+#else
+    const char* value = getenv("CISST_ROOT");
+    if (!value) { return false; }
+
+    result = std::filesystem::path(value);
+    return true;
 #endif
-        return true;
-    }
-    return false;
 }
 
 
-bool cmnPath::GetCisstShare(std::string & result)
+bool cmnPath::GetCisstShare(std::filesystem::path& result)
 {
-    if (cmnPath::GetCisstRoot(result)) {
-        std::stringstream tmp;
-        tmp << result << "/share/cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR;
-        result = tmp.str();
-        return true;
-    }
-    return false;
+    std::filesystem::path root;
+    if (!cmnPath::GetCisstRoot(root)) { return false; }
+
+    std::stringstream dir_name;
+    dir_name << "cisst-" << cisst_VERSION_MAJOR << "." << cisst_VERSION_MINOR;
+
+    result = root / "share" / dir_name.str();
+    return true;
 }

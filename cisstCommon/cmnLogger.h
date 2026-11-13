@@ -183,8 +183,7 @@ if (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod)) ; e
   to quickly find the origin of the message in the source code.
 */
 #define CMN_LOG_DETAILS \
-    "File: " << cmnLogger::ExtractFileName(__FILE__) << " Line: " << __LINE__ << " - "
-
+    "File: " << pathFromUTF8(__FILE__).filename() << " Line: " << __LINE__ << " - "
 
 
 /*!  \brief Class to glue the class register, the output multiplexer
@@ -472,8 +471,6 @@ class CISST_EXPORT cmnLogger {
     static inline void RemoveChannel(std::ostream & outputStream) {
         Instance()->RemoveChannelInstance(outputStream);
     }
-
-    static const char * ExtractFileName(const char * file);
 
     /*! Kill the logger.  Set all masks to disable logs and remove all
       output streams. */

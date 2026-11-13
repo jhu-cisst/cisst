@@ -30,54 +30,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnGenericObject.h>
-#include <cisstCommon/cmnTokenizer.h>
 
 #include <filesystem>
 #include <string>
 #include <list>
-#include <sstream>
 #include <iostream>
 
 // Always the last cisst include
 #include <cisstCommon/cmnExport.h>
-
-
-#if (CISST_OS == CISST_WINDOWS)
-#  include <io.h>
-#else
-#  include <unistd.h>
-#endif
-
-/* Safely converts a UTF-8 encoded std::string/std::string_view to std::filesystem::path
- *
- * Since std::filesystem::path is UTF16 on Windows, if the local code page active
-   on Windows is not UTF8 (default is Windows-1252), the implicit conversion of
-   std::string to std::filesystem::path will assume the string is in the local
-   code page rather than UTF8, and garble the path.
- */ 
-inline std::filesystem::path pathFromUTF8(std::string_view utf8_str) {
-#if defined(__cpp_lib_char8_t)
-    // C++20 and later: construct using std::u8string_view
-    return std::filesystem::path(
-        std::u8string_view(reinterpret_cast<const char8_t*>(utf8_str.data()), utf8_str.size())
-    );
-#else
-    // C++17: use std::filesystem::u8path
-    return std::filesystem::u8path(utf8_str);
-#endif
-}
-
-// Safely converts a std::filesystem::path back to a UTF-8 std::string
-inline std::string pathToUTF8(const std::filesystem::path& p) {
-#if defined(__cpp_lib_char8_t)
-    // C++20: u8string() returns std::u8string
-    const std::u8string u8str = p.u8string();
-    return std::string(reinterpret_cast<const char*>(u8str.data()), u8str.size());
-#else
-    // C++17: u8string() returns std::string directly
-    return p.u8string();
-#endif
-}
 
 /*!  \brief Search path to find a file.  This class contains a list of
   directories used to locate a file.
@@ -88,18 +48,15 @@ inline std::string pathToUTF8(const std::filesystem::path& p) {
   list.  This class doesn't check weither the directories in the path
   actually exist, mostly to allow a portable program (e.g. one program
   can add both "/usr/local/bin" and "C:\Program Files").
-
-  As a convention, the separator between subdirectories should be a
-  "/" (slash) and the separation between two directories in the path
-  is ";" (semi-colon).  For example, "/bin;/usr/bin" will add both
-  "/bin" and "/usr/bin".
 */
+
+// TODO BB: why is this a cmnGenericObject?
 class CISST_EXPORT cmnPath: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     /*! Container used to store the directories. */
-    typedef std::list<std::string> ContainerType;
+    typedef std::list<std::filesystem::path> ContainerType;
 
     /*! STL like iterators. */
     //@{
@@ -108,68 +65,52 @@ public:
     //@}
 
 private:
-    ContainerType Path;
-    cmnTokenizer Tokenizer;
-
-    /*! Private method called by each constructor to configure the
-      tokenizer. */
-    void ConfigureTokenizer(void);
-
-    /*! Private methods to convert from native format to internal
-      format, i.e. convert directory separator from ":" to ";" */
-    static std::string FromNative(const std::string & nativePath);
+    ContainerType Paths;
 
 public:
-    /*! Defines how to add a path to the search list. */
-    enum {HEAD = true,
-          TAIL = false
+    enum class Position {
+        HEAD,
+        TAIL
     };
 
-    /*! Defines the mode to be used for a given file. */
-#if (CISST_OS == CISST_WINDOWS)
-    enum {EXIST = 00,
-          WRITE = 02,
-          READ = 04,
-          EXECUTE = 04
-    };
-#else
-    enum {READ = R_OK,
-          WRITE = W_OK,
-          EXECUTE = X_OK,
-          EXIST = F_OK
-    };
-#endif
+    /*! Create an empty search path */
+    cmnPath();
 
-    cmnPath(void);
+    /*! Create a search path from a std::filesystem::path */
+    cmnPath(const std::filesystem::path& path);
 
-    /*! Create a search path from a string. */
-    cmnPath(const std::string & path);
+    /*! Create a search path from a string */
+    cmnPath(const std::string& path);
 
-    /*! Destructor */
-    virtual ~cmnPath(void) {}
+    /*! Set the path from a std::filesystem::path. */
+    void Set(const std::filesystem::path& path);
 
     /*! Set the path from a string. */
-    void Set(const std::string & path);
+    void Set(const std::string& path);
 
-    /*! Add one or more directories to the path. */
-    void Add(const std::string & path, bool head = HEAD);
+    /*! Add a directory to the path. */
+    void Add(const std::string& path, Position position = Position::HEAD);
+    void Add(const std::filesystem::path& path, Position position = Position::HEAD);
 
     /*! Add one or more directories to the path using an environment variable. */
-    bool AddFromEnvironment(const std::string & variableName, bool head = HEAD);
+    bool AddFromEnvironment(const std::string& variableName, Position position = Position::HEAD);
 
     /*! Add path relative to the CISST_ROOT environment variable.
       This can be useful to find shared libraries.  To find data
       files, use AddRelativeToCisstShare. */
-    bool AddRelativeToCisstRoot(const std::string & relativePath, bool head = HEAD);
+    bool AddRelativeToCisstRoot(const std::filesystem::path& relativePath, Position position = Position::HEAD);
+    bool AddRelativeToCisstRoot(const std::string& relativePath, Position position = Position::HEAD);
 
     /*! Add path relative to the shared cisst directory,
       i.e. CISST_ROOT/share/cisst-<version>. */
-    bool AddRelativeToCisstShare(const std::string & relativePath, bool head = HEAD);
+    bool AddRelativeToCisstShare(const std::filesystem::path& relativePath, Position position = Position::HEAD);
+    bool AddRelativeToCisstShare(const std::string& relativePath, Position position = Position::HEAD);
 
     /*! Find the full name for a given file.
       \return The full path including the filename or an empty string.
     */
-    std::filesystem::path Find(const std::string & filename, short mode = READ) const;
+    std::filesystem::path Find(const std::filesystem::path& filename) const;
+    std::filesystem::path Find(const std::string& filename) const;
 
     /*! Find the full name for a given file using all directories in
       path as well as given "sub directory" in each directory.  E.g if
@@ -180,31 +121,34 @@ public:
 
       \return The full path including the filename or an empty string.
     */
-    std::filesystem::path FindWithSubdirectory(const std::string & filename,
-                                     const std::string & subdirectory,
-                                     short mode = READ) const;
+    std::filesystem::path FindWithSubdirectory(
+        const std::string& filename,
+        const std::string& subdirectory
+    ) const;
 
     /*! Remove the first occurence of a directory from the search list. */
-    bool Remove(const std::string & directory);
+    bool Remove(const std::filesystem::path& directory);
+    bool Remove(const std::string& directory);
 
     /*! Indicates if a given directory is in the search list. */
-    bool Has(const std::string & directory) const;
+    bool Has(const std::filesystem::path& directory) const;
+    bool Has(const std::string& directory) const;
 
     /*! Write the path to a stream. */
     void ToStream(std::ostream & outputStream) const override;
 
     /*! Get CISST_ROOT from the environment variable */
-    static bool GetCisstRoot(std::string & result);
+    static bool GetCisstRoot(std::filesystem::path& result);
 
     /*! Get cisst shared directory based on CISST_ROOT from the
       environment variable */
-    static bool GetCisstShare(std::string & result);
+    static bool GetCisstShare(std::filesystem::path& result);
 
     /*! Construct the shared library name based on OS prefix and
       suffix.  For example, the return value for "MyLib" would be
       "libMyLib.so" on most Unix systems and "MyLib.dll" on Windows.  Prefix
       and suffix are based on CMake and saved in cisstConfig.h. */
-    inline static std::string SharedLibrary(const std::string & name) {
+    static std::string SharedLibrary(const std::string & name) {
         return CISST_SHARED_LIBRARY_PREFIX + name + CISST_SHARED_LIBRARY_SUFFIX;
     }
 
@@ -212,7 +156,7 @@ public:
       the return value for "MyProgram" would be "MyProgram" on most Unix
       systems and "MyProgram.exe" on Windows.  Suffix is based on CMake
       and saved in cisstConfig.h. */
-    inline static std::string Executable(const std::string & name) {
+    static std::string Executable(const std::string & name) {
         return name + CISST_EXECUTABLE_SUFFIX;
     }
 };

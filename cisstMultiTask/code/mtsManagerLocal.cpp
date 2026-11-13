@@ -398,7 +398,7 @@ bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
     }
     // extract path of main json config file to search other files relative to it
     std::string configDir = fullname.substr(0, fullname.find_last_of('/'));
-    configPath.Add(configDir, cmnPath::HEAD);
+    configPath.Add(configDir, cmnPath::Position::HEAD);
 
     // open json file
     std::ifstream jsonStream;

@@ -506,6 +506,39 @@ bool CISST_EXPORT cmnIsFinite(const double & value);
 #endif
 
 
+#include <filesystem>
+/* Safely converts a UTF-8 encoded std::string/std::string_view to std::filesystem::path
+ *
+ * Since std::filesystem::path is UTF16 on Windows, if the local code page active
+   on Windows is not UTF8 (default is Windows-1252), the implicit conversion of
+   std::string to std::filesystem::path will assume the string is in the local
+   code page rather than UTF8, and garble the path.
+ */
+inline std::filesystem::path pathFromUTF8(std::string_view utf8_str) {
+#if defined(__cpp_lib_char8_t)
+    // C++20 and later: construct using std::u8string_view
+    return std::filesystem::path(
+        std::u8string_view(reinterpret_cast<const char8_t*>(utf8_str.data()), utf8_str.size())
+    );
+#else
+    // C++17: use std::filesystem::u8path
+    return std::filesystem::u8path(utf8_str);
+#endif
+}
+
+// Safely converts a std::filesystem::path back to a UTF-8 std::string
+inline std::string pathToUTF8(const std::filesystem::path& p) {
+#if defined(__cpp_lib_char8_t)
+    // C++20: u8string() returns std::u8string
+    const std::u8string u8str = p.u8string();
+    return std::string(reinterpret_cast<const char*>(u8str.data()), u8str.size());
+#else
+    // C++17: u8string() returns std::string directly
+    return p.u8string();
+#endif
+}
+
+
 /*! Older versions of SWIG don't support the keywords override (and final)
   properly. https://www.swig.org/Doc4.1/SWIGDocumentation.html#CPlusPlus11_explicit_overrides_final.  */
 #ifdef SWIG_VERSION
