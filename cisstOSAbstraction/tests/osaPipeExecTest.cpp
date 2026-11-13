@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <chrono>
 
 #include <cisstCommon/cmnAssert.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
@@ -39,8 +39,8 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     osaPipeExec pipe1, pipe2;
 
     /* Build search path to find the test utility */
-    cmnPath path;
-    path.AddFromEnvironment("PATH", cmnPath::Position::TAIL);
+    cmnSearchPath path;
+    path.AddFromEnvironment("PATH", cmnSearchPath::Position::TAIL);
     path.Add(std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES);
     std::filesystem::path command = path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX);
     CPPUNIT_ASSERT(!command.empty());

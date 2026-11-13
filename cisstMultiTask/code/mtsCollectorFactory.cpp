@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorEvent.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 
 #if CISST_HAS_JSON
   #include <json/json.h>

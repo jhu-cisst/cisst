@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "cmnLoggerTest.h"
 
 #include <cisstCommon/cmnLogger.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <filesystem>
 
 void cmnLoggerTest::TestLoggerFileName(void)

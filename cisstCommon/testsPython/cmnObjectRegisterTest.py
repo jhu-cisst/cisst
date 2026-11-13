@@ -19,16 +19,16 @@ import unittest
 import cisstCommonPython
 from cisstCommonPython import cmnObjectRegister
 from cisstCommonPython import cmnGenericObject;
-from cisstCommonPython import cmnPath;
+from cisstCommonPython import cmnSearchPath;
 
 
 class ObjectRegisterTest(unittest.TestCase):
     def setUp(self):
         """Call before every test case."""
         self.objectRegister = cisstCommonPython.cmnObjectRegister.Instance()
-        self.path1 = cmnPath()
+        self.path1 = cmnSearchPath()
         self.objectRegister.Register("path1", self.path1);
-        self.path2 = cmnPath()
+        self.path2 = cmnSearchPath()
         self.objectRegister.Register("path2", self.path2);
 
     def tearDown(self):

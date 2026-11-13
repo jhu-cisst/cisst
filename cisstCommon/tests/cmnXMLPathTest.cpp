@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <limits>
 #include <string>
 
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 
 using namespace std::string_literals;
 
@@ -62,7 +62,7 @@ void cmnXMLPathTest::tearDown(void)
 void cmnXMLPathTest::TestReadExistingFile(void)
 {
     // find original file and test
-    cmnPath filePath;
+    cmnSearchPath filePath;
     filePath.Add(std::string(CISST_SOURCE_DIR) + "/cisstCommon/tests");
     std::filesystem::path testFile = filePath.Find("cmnXMLPathTestFile1.xml"s);
     std::filesystem::path schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd"s);
@@ -79,7 +79,7 @@ void cmnXMLPathTest::TestReadExistingFile(void)
 void cmnXMLPathTest::TestCopyReadExistingFile(void)
 {
     // find original file
-    cmnPath filePath;
+    cmnSearchPath filePath;
     filePath.Add(std::string(CISST_SOURCE_DIR) + "/cisstCommon/tests");
     std::filesystem::path testFile = filePath.Find("cmnXMLPathTestFile1.xml"s);
     std::filesystem::path schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd"s);
@@ -215,7 +215,7 @@ void cmnXMLPathTest::TestExistingFile1(cmnXMLPath & xmlPath, const std::string &
 void cmnXMLPathTest::TestWrite(void)
 {
     // find original file and test
-    cmnPath filePath;
+    cmnSearchPath filePath;
     filePath.Add(std::string(CISST_SOURCE_DIR) + "/cisstCommon/tests");
     std::filesystem::path testFile = filePath.Find("cmnXMLPathTestFile1.xml"s);
     std::filesystem::path schemaFile = filePath.Find("cmnXMLPathTestFile1.xsd"s);

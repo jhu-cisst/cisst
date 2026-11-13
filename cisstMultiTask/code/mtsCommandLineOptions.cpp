@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorFactory.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 
 
 mtsCommandLineOptions::mtsCommandLineOptions(const std::string & options)
@@ -59,7 +59,7 @@ void mtsCommandLineOptions::Apply(void)
         for (const auto & config : CollectionConfig) {
             std::filesystem::path config_file = pathFromUTF8(config);
             if (!std::filesystem::exists(config_file)) {
-                cmnPath path;
+                cmnSearchPath path;
                 path.Add(std::filesystem::current_path());
                 std::filesystem::path fullPath = path.Find(config);
                 if (fullPath != "") {

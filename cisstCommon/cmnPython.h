@@ -33,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnTypeTraits.h>
 #include <cisstCommon/cmnCallbackStreambuf.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstCommon/cmnJointType.h>
 
 #endif // _cmnPython_h

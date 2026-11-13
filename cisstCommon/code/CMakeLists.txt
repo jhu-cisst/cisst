@@ -37,10 +37,10 @@ set (SOURCE_FILES
      cmnOutputMultiplexer.cpp
      cmnPortability.cpp
      cmnRandomSequence.cpp
+     cmnSearchPath.cpp
      cmnSerializer.cpp
      cmnStreamRawParser.cpp
      cmnStrings.cpp
-     cmnPath.cpp
      cmnPrintf.cpp
      cmnTokenizer.cpp
      cmnTypeTraits.cpp
@@ -91,10 +91,10 @@ set (HEADER_FILES
      cmnPrintf.h
      cmnRandomSequence.h
      cmnRequiresDeepCopy.h
+     cmnSearchPath.h
      cmnSerializer.h
      cmnStreamRawParser.h
      cmnStrings.h
-     cmnPath.h
      cmnThrow.h
      cmnTokenizer.h
      cmnTypeTraits.h

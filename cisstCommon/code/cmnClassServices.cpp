@@ -36,8 +36,8 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(cmnChar);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(cmnUChar);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(cmnBool);
 
-#include <cisstCommon/cmnPath.h>
-CMN_IMPLEMENT_SERVICES(cmnPath);
+#include <cisstCommon/cmnSearchPath.h>
+CMN_IMPLEMENT_SERVICES(cmnSearchPath);
 
 #include <cisstCommon/cmnSerializer.h>
 CMN_IMPLEMENT_SERVICES(cmnSerializer);

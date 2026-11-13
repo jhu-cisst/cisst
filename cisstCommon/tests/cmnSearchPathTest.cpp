@@ -19,45 +19,45 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include "cmnPathTest.h"
+#include "cmnSearchPathTest.h"
 
 #include <string>
 using namespace std::string_literals;
 
-void cmnPathTest::TestAdd(void) {
-    cmnPath path1, path2, path3, path4;
+void cmnSearchPathTest::TestAdd(void) {
+    cmnSearchPath path1, path2, path3, path4;
     path1.Set("/val1"s);
-    path1.Add("/val2"s, cmnPath::Position::TAIL);
-    path1.Add("/val3"s, cmnPath::Position::TAIL);
+    path1.Add("/val2"s, cmnSearchPath::Position::TAIL);
+    path1.Add("/val3"s, cmnSearchPath::Position::TAIL);
     path2.Set("/val3"s);
-    path2.Add("/val2"s, cmnPath::Position::HEAD);
-    path2.Add("/val1"s, cmnPath::Position::HEAD);
+    path2.Add("/val2"s, cmnSearchPath::Position::HEAD);
+    path2.Add("/val1"s, cmnSearchPath::Position::HEAD);
 
     CPPUNIT_ASSERT(path1.ToString() == path2.ToString());
 }
 
 
-void cmnPathTest::TestFind(void) {
+void cmnSearchPathTest::TestFind(void) {
     // CISST_SOURCE_DIR should not be used for regular code, only defined for test programs!
-    cmnPath path("/this/directory/is/not/valid"s);
+    cmnSearchPath path("/this/directory/is/not/valid"s);
     path.Add("/this/one/either/but/it/helps"s);
-    path.Add(CISST_SOURCE_DIR"cisstCommon"s, cmnPath::Position::TAIL);
+    path.Add(CISST_SOURCE_DIR"cisstCommon"s, cmnSearchPath::Position::TAIL);
     // test a file that should exist
     std::string fullName(CISST_SOURCE_DIR);
-    fullName += "cisstCommon/cmnPath.h";
-    CPPUNIT_ASSERT(fullName == path.Find("cmnPath.h"s));
+    fullName += "cisstCommon/cmnSearchPath.h";
+    CPPUNIT_ASSERT(fullName == path.Find("cmnSearchPath.h"s));
     // test with a file that shouldn't exist
     std::string thisFileCantExist = "/aBadPath/QwErTy.hohoho";
     CPPUNIT_ASSERT("" == path.Find(thisFileCantExist));
 }
 
 
-void cmnPathTest::TestRemove(void) {
-    cmnPath path;
-    path.Add("/val1"s, cmnPath::Position::TAIL);
-    path.Add("/val2"s, cmnPath::Position::TAIL);
-    path.Add("/val3"s, cmnPath::Position::TAIL);
-    path.Add("/val1"s, cmnPath::Position::TAIL);
+void cmnSearchPathTest::TestRemove(void) {
+    cmnSearchPath path;
+    path.Add("/val1"s, cmnSearchPath::Position::TAIL);
+    path.Add("/val2"s, cmnSearchPath::Position::TAIL);
+    path.Add("/val3"s, cmnSearchPath::Position::TAIL);
+    path.Add("/val1"s, cmnSearchPath::Position::TAIL);
     CPPUNIT_ASSERT(std::string("/val1;/val2;/val3;/val1") == path.ToString());
     CPPUNIT_ASSERT(path.Has("/val1"s) && path.Has("/val2"s) && path.Has("/val3"s));
     path.Remove("/val1"s);

@@ -22,11 +22,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "cisstCommon/cmnPath.h"
+#include "cisstCommon/cmnSearchPath.h"
 
-class cmnPathTest : public CppUnit::TestFixture
+class cmnSearchPathTest : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(cmnPathTest);
+    CPPUNIT_TEST_SUITE(cmnSearchPathTest);
     CPPUNIT_TEST(TestAdd);
     CPPUNIT_TEST(TestFind);
     CPPUNIT_TEST(TestRemove);
@@ -51,5 +51,5 @@ class cmnPathTest : public CppUnit::TestFixture
 };
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION(cmnPathTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(cmnSearchPathTest);
 

@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <thread>
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsComponent.h>
@@ -184,7 +184,7 @@ public:
       each element found.  The path is used to locate extra
       configuration files potentially used by Configure methods for
       newly created components. */
-    bool ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath);
+    bool ConfigureJSON(const Json::Value & configuration, const cmnSearchPath & configPath);
 
     /*! Create, configure and add component based on Json::Value.
       Fields used are "shared-library", "class-name",
@@ -192,7 +192,7 @@ public:
       arg) and "configure-parameter".  The method will test if the
       configure-parameter corresponds to a file in the configPath.  If
       it is, it will try to configure using the full path name. */
-    bool ConfigureComponentJSON(const Json::Value & componentConfiguration, const cmnPath & configPath);
+    bool ConfigureComponentJSON(const Json::Value & componentConfiguration, const cmnSearchPath & configPath);
 
     /*! Connect two components based on Json::Value.  Fields used are
       "required": { "component", interface" } and "provided": {

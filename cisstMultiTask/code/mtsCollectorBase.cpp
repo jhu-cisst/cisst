@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <filesystem>
 
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 //-------------------------------------------------------

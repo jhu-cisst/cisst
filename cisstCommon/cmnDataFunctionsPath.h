@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <filesystem>
 
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnDataFunctionsString.h>
 

@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
@@ -57,7 +57,7 @@ bool osaDynamicLoader::Load(const std::filesystem::path& library_file)
         full_path = library_file;
     } else {
         // Add prefix + .so/.dll extension, append to path (which may be empty)
-        std::string library_name = cmnPath::SharedLibrary(pathToUTF8(library_file));
+        std::string library_name = cmnSearchPath::SharedLibrary(pathToUTF8(library_file));
         full_path = pathFromUTF8(library_name);
     }
 

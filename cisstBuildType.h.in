@@ -36,7 +36,7 @@ http://www.cisst.org/cisst/license.txt.
   (where!).  CMake creates sub-directories using the build type
   strings (e.g. Debug, Release, RelWithDebInfo, ...) for most IDE
   (Visual Studio, Xcode, ...).  To find an executable, one can use
-  cmnPath to look in CISST_ROOT/bin/CISST_BUILD_SUFFIX.
+  cmnSearchPath to look in CISST_ROOT/bin/CISST_BUILD_SUFFIX.
 
   For other generators, changing the build type doesn't change the
   build destination (e.g. for GNU Make, executables go in

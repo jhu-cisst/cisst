@@ -20,13 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Declaration of cmnPath
+  \brief Declaration of cmnSearchPath
   \ingroup cisstCommon
 */
 #pragma once
 
-#ifndef _cmnPath_h
-#define _cmnPath_h
+#ifndef _cmnSearchPath_h
+#define _cmnSearchPath_h
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnGenericObject.h>
@@ -51,7 +51,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 // TODO BB: why is this a cmnGenericObject?
-class CISST_EXPORT cmnPath: public cmnGenericObject {
+class CISST_EXPORT cmnSearchPath: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
@@ -74,13 +74,13 @@ public:
     };
 
     /*! Create an empty search path */
-    cmnPath();
+    cmnSearchPath();
 
     /*! Create a search path from a std::filesystem::path */
-    cmnPath(const std::filesystem::path& path);
+    cmnSearchPath(const std::filesystem::path& path);
 
     /*! Create a search path from a string */
-    cmnPath(const std::string& path);
+    cmnSearchPath(const std::string& path);
 
     /*! Set the path from a std::filesystem::path. */
     void Set(const std::filesystem::path& path);
@@ -163,7 +163,7 @@ public:
 
 
 // Add services instantiation
-CMN_DECLARE_SERVICES_INSTANTIATION(cmnPath)
+CMN_DECLARE_SERVICES_INSTANTIATION(cmnSearchPath)
 
 
-#endif // _cmnPath_h
+#endif // _cmnSearchPath_h

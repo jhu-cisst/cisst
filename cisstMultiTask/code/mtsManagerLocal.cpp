@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <thread>
 
 #include <cisstCommon/cmnThrow.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaSocket.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
@@ -387,7 +387,7 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamically(const std::string & c
 #if CISST_HAS_JSON
 bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
 {
-    cmnPath configPath(std::filesystem::current_path());
+    cmnSearchPath configPath(std::filesystem::current_path());
     // make sure the file exists
     std::string fullname = configPath.Find(filename);
     if (fullname == "") {
@@ -398,7 +398,7 @@ bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
     }
     // extract path of main json config file to search other files relative to it
     std::string configDir = fullname.substr(0, fullname.find_last_of('/'));
-    configPath.Add(configDir, cmnPath::Position::HEAD);
+    configPath.Add(configDir, cmnSearchPath::Position::HEAD);
 
     // open json file
     std::ifstream jsonStream;
@@ -435,7 +435,7 @@ bool mtsManagerLocal::ConfigureJSON(const std::list<std::string> & filenames)
     return result;
 }
 
-bool mtsManagerLocal::ConfigureJSON(const Json::Value & configuration, const cmnPath & configPath)
+bool mtsManagerLocal::ConfigureJSON(const Json::Value & configuration, const cmnSearchPath & configPath)
 {
     const Json::Value components = configuration["components"];
     for (unsigned int index = 0;
@@ -460,7 +460,7 @@ bool mtsManagerLocal::ConfigureJSON(const Json::Value & configuration, const cmn
     return true;
 }
 
-bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfiguration, const cmnPath & configPath)
+bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfiguration, const cmnSearchPath & configPath)
 {
     std::string sharedLibrary, className, constructorArgJSON;
     Json::Value jsonValue;
@@ -608,18 +608,18 @@ mtsComponent * mtsManagerLocal::CreateComponentDynamicallyJSON(const std::string
         if (std::filesystem::exists(pathFromUTF8(sharedLibrary))) {
             full_path = pathFromUTF8(sharedLibrary);
         } else {
-            cmnPath path;
+            cmnSearchPath path;
 #if (CISST_OS == CISST_WINDOWS)
             path.AddFromEnvironment("PATH");
 #else
             path.AddFromEnvironment("LD_LIBRARY_PATH");
 #endif
-            full_path = path.Find(cmnPath::SharedLibrary(sharedLibrary));
+            full_path = path.Find(cmnSearchPath::SharedLibrary(sharedLibrary));
             if (full_path.empty())  {
                 full_path = pathFromUTF8(sharedLibrary);
                 CMN_LOG_CLASS_INIT_WARNING << "CreateComponentDynamicallyJSON: using path: "
                                            << path << ", couldn't find \""
-                                           << cmnPath::SharedLibrary(sharedLibrary)
+                                           << cmnSearchPath::SharedLibrary(sharedLibrary)
                                            << "\"" << std::endl;;
             } else {
                 CMN_LOG_CLASS_INIT_VERBOSE << "CreateComponentDynamicallyJSON: using path: "

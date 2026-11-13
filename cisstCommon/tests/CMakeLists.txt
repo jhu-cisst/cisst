@@ -41,7 +41,7 @@ set (SOURCE_FILES
      cmnLoggerTest.cpp
      cmnLogLoDTest.cpp
      cmnObjectRegisterTest.cpp
-     cmnPathTest.cpp
+     cmnSearchPathTest.cpp
      cmnPortabilityTest.cpp
      cmnPrintfTest.cpp
      cmnRequiresDeepCopyTest.cpp
@@ -59,7 +59,7 @@ set (HEADER_FILES
      cmnLoggerTest.h
      cmnLogLoDTest.h
      cmnObjectRegisterTest.h
-     cmnPathTest.h
+     cmnSearchPathTest.h
      cmnPortabilityTest.h
      cmnPortabilityTestCMake.h.in
      cmnPrintfTest.h

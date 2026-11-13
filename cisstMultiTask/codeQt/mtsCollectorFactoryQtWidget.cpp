@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
 
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include <QGroupBox>
