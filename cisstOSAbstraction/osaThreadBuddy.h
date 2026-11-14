@@ -72,7 +72,6 @@ public:
     \param period The period of the thread (in nanosecond)
     */
     void Create(double period);
-    void Create(const osaAbsoluteTime& tv);
 
     /*! Return true if thread is periodic.  Currently, returns true if
       the thread was created with a period > 0. */

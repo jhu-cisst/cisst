@@ -44,4 +44,10 @@ void CISST_EXPORT osaGetTimeString(std::string& output, std::chrono::system_cloc
 /*! Convert current local time to string */
 void CISST_EXPORT osaGetTimeString(std::string& output);
 
+template <class Rep, class Period=std::ratio<1>>
+double durationToSeconds(std::chrono::duration<Rep, Period> duration) {
+    using seconds_d = std::chrono::duration<double>;
+    return std::chrono::duration_cast<seconds_d>(duration).count();
+}
+
 #endif // _osaGetTime_h

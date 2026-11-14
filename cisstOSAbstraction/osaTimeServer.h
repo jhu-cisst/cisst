@@ -26,28 +26,12 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaTimeServer_h
 #define _osaTimeServer_h
 
+#include <chrono>
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegister.h>
 
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
-
-// PKAZ: move this to osaGetTime.h
-struct CISST_EXPORT osaAbsoluteTime {
-    long sec;   // seconds
-    long nsec;  // nano-seconds
-
-    osaAbsoluteTime() : sec(0L), nsec(0L) {}
-    osaAbsoluteTime(long seconds, long nanoseconds) : sec(seconds), nsec(nanoseconds) {}
-    ~osaAbsoluteTime() {}
-
-    /*! Returns absolute time in seconds relative to Jan 1, 1970. */
-    double ToSeconds(void) const;
-
-    /*! Set from time in seconds using floating point double */
-    void FromSeconds(double timeInSeconds);
-};
-
 
 /*!
   \brief Class for relative time
@@ -70,29 +54,51 @@ struct CISST_EXPORT osaAbsoluteTime {
   This class has significant overlap with osaStopwatch.
 */
 
+
+class CISST_EXPORT SynchronizedMonotonicClock {
+public:
+    // Definitions for C++ Clock named requirement
+    using rep = long long;
+    using period = std::nano;
+    using duration = std::chrono::duration<rep, period>;
+    using time_point = std::chrono::time_point<SynchronizedMonotonicClock>;
+    static constexpr bool is_steady = true;
+
+    static duration fromSeconds(double seconds) {
+        const auto seconds_d = std::chrono::duration<double>(seconds);
+        return std::chrono::duration_cast<duration>(seconds_d);
+    }
+
+    static time_point now() noexcept {
+        auto steady_now = std::chrono::steady_clock::now();
+        auto elapsed_steady = steady_now - last_steady_time_;
+        
+        // Apply the slew rate factor (e.g., 1.0 + slew_ppm / 1e6)
+        double scaled_ticks = elapsed_steady.count() * rate_multiplier_;
+        virtual_time_ += duration(static_cast<rep>(scaled_ticks));
+        last_steady_time_ = steady_now;
+        
+        return time_point{virtual_time_};
+    }
+
+private:
+    static std::chrono::steady_clock::time_point last_steady_time_;
+    static duration virtual_time_;
+    static double rate_multiplier_;
+};
+
 class CISST_EXPORT osaTimeServer: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
-
-    friend class osaTimeServerTest;
-
-    /*! Internals that are OS-dependent in some way */
-    enum {INTERNALS_SIZE = 32};
-    char Internals[INTERNALS_SIZE];
-
-    /*! Return the size of the actual object used by the OS.  This is
-        used for testing only. */
-    static unsigned int SizeOfInternals(void);
 
     /*! Synchronize, method used to synchronize high performance
         counter with time of day. */
     void Synchronize(void);
 
+    SynchronizedMonotonicClock::time_point epoch;
+
 public:
-    /*! Default constructor. */
     osaTimeServer();
-    /*! Destructor */
-    ~osaTimeServer();
 
     /*! Set the time origin for the relative time measurements to "now".
         Subsequent calls to GetRelativeTime will return the number of
@@ -107,19 +113,23 @@ public:
     /*! Get the time origin that is in effect for the relative time
         measurements.
         \param origin Returns the current origin */
-    bool GetTimeOrigin(osaAbsoluteTime & origin) const;
+    bool GetTimeOrigin(SynchronizedMonotonicClock::time_point& origin) const;
 
     /*! Get the number of seconds that have elapsed since the time origin.
         \returns The number of seconds */
-    double GetRelativeTime(void) const;
+    SynchronizedMonotonicClock::duration GetRelativeTime(void) const;
 
-   /*! Get the number of seconds that have elapsed since 1970.
+    /*! Get the number of seconds that have elapsed since the time origin.
+        \returns The number of seconds */
+    double GetRelativeTimeInSeconds(void) const;
+
+   /*! Get the number of seconds that have elapsed since *the clock's epoch* ~1970~.
      \returns The number of seconds */
     double GetAbsoluteTimeInSeconds(void) const;
 
-      /*! Get the absolute time since 1970.
+      /*! Get the absolute time since *the clock's epoch*   ~1970~. // TODO: do we need 1970 epoch?
      \returns The number of seconds */
-    osaAbsoluteTime GetAbsoluteTime(void) const;
+    SynchronizedMonotonicClock::time_point GetAbsoluteTime(void) const;
 
     /*! Estimate drift between synchronized clocks (Windows only) */
     double EstimateDrift(void) const;
@@ -129,14 +139,14 @@ public:
         \param relative The relative time value in seconds (input)
         \param absolute The absolute time value (output)
     */
-    void RelativeToAbsolute(double relative, osaAbsoluteTime & absolute) const;
+    SynchronizedMonotonicClock::time_point RelativeToAbsolute(SynchronizedMonotonicClock::duration relative) const;
 
     /*! Convert the specified absolute time to a relative time
         by subtracting from the time origin and converting to seconds.
         \param absolute The absolute time value (input)
         \returns The relative time value in seconds
     */
-    double AbsoluteToRelative(const osaAbsoluteTime & absolute) const;
+    SynchronizedMonotonicClock::duration AbsoluteToRelative(SynchronizedMonotonicClock::time_point absolute) const;
 };
 
 

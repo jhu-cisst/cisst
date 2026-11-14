@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include "cisstOSAbstraction/osaTimeServer.h"
 
 CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
 
@@ -35,7 +36,10 @@ mtsIntervalStatistics::mtsIntervalStatistics():
     mComputeTimeMax(0.0),
     mNumberOfSamples(0),
     mNumberOfOverruns(0),
-    mStatisticsInterval(1.0),
+    mStatisticsInterval(
+        std::chrono::duration_cast<SynchronizedMonotonicClock::duration>(
+            std::chrono::duration<double>(1.0)
+        )),
     mCallback(0)
 {
     // Get a pointer to the time server
@@ -58,7 +62,7 @@ void mtsIntervalStatistics::ToStream(std::ostream & outputStream) const
                  << " ComputeTimeMax: " << mComputeTimeMax
                  << " NumberOfSamples: " << mNumberOfSamples // 10
                  << " NumberOfOverruns: " << mNumberOfOverruns
-                 << " StatisticsInterval: " << mStatisticsInterval;
+                 << " StatisticsInterval: " << StatisticsInterval();
 }
 
 
@@ -92,7 +96,7 @@ void mtsIntervalStatistics::ToStreamRaw(std::ostream & outputStream, const char 
                      << this->mComputeTimeMax << delimiter
                      << this->mNumberOfSamples << delimiter // 10
                      << this->mNumberOfOverruns << delimiter
-                     << this->mStatisticsInterval;
+                     << StatisticsInterval();
     }
 }
 
@@ -167,7 +171,7 @@ void mtsIntervalStatistics::Update(const double period, const double computeTime
 
     // check to see if the statistics need to be to be updated
     // reset the counters and save the data
-    const double currentTime = mTimeServer->GetRelativeTime();
+    const auto currentTime = mTimeServer->GetAbsoluteTime();
     if (currentTime > (mLastUpdateTime + mStatisticsInterval)) {
         // save counters
         mNumberOfSamples = mRunningNumberOfSamples;
@@ -192,7 +196,7 @@ void mtsIntervalStatistics::Update(const double period, const double computeTime
 
         // timestamp this data
         this->Valid() = true;
-        this->Timestamp() = currentTime;
+        this->Timestamp() = mTimeServer->GetAbsoluteTimeInSeconds();
 
         // finally call user code to act on updated data
         if (mCallback) {
@@ -216,5 +220,5 @@ void mtsIntervalStatistics::Reset(void)
     mComputeTimeSumSquares = 0.0;
     mComputeTimeRunningMin = cmnTypeTraits<double>::MaxPositiveValue();
     mComputeTimeRunningMax = cmnTypeTraits<double>::MinPositiveValue();
-    mLastUpdateTime = mTimeServer->GetRelativeTime();
+    mLastUpdateTime = mTimeServer->GetAbsoluteTime();
 }

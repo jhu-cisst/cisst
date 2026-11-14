@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <filesystem>
 #include <string>
+#include "cisstOSAbstraction/osaTimeServer.h"
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -106,10 +107,10 @@ protected:
     size_t SampleCounterForEvent;
 
     /*! Interval between two progress events (in seconds) */
-    double TimeIntervalForProgressEvent;
+    SynchronizedMonotonicClock::duration TimeIntervalForProgressEvent;
 
     /*! Time of last progress event */
-    double TimeOfLastProgressEvent;
+    SynchronizedMonotonicClock::time_point TimeOfLastProgressEvent;
 
     /*! Output file name, including working directory. */
     std::filesystem::path OutputFileName;

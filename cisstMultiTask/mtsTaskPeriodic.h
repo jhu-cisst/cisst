@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -56,7 +55,7 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
 
     /*! The period of the task, in seconds. */
     double Period;
-    osaAbsoluteTime AbsoluteTimePeriod;
+    SynchronizedMonotonicClock::duration Period_d;
 
     /*! True if the task is hard real time. It is always false for non-real
       time systems. */
@@ -98,12 +97,6 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
     */
     mtsTaskPeriodic(const std::string & name,
                     double periodicityInSeconds,
-                    bool isHardRealTime = false,
-                    unsigned int sizeStateTable = 256,
-                    bool newThread = true);
-
-    mtsTaskPeriodic(const std::string & name,
-                    const osaAbsoluteTime& periodicity,
                     bool isHardRealTime = false,
                     unsigned int sizeStateTable = 256,
                     bool newThread = true);

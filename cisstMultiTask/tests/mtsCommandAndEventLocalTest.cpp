@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
 #include "mtsTestComponents.h"
@@ -159,10 +160,10 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     unsigned int index;
     for (index = 0; index < 3; index++) {
         // test void command non blocking
-        startTime = timeServer.GetRelativeTime();
+        startTime = durationToSeconds(timeServer.GetRelativeTime());
         executionResult = client->InterfaceRequired1.FunctionVoid();
         CPPUNIT_ASSERT(executionResult.IsOK()); // queued or succeeded
-        stopTime = timeServer.GetRelativeTime();
+        stopTime = durationToSeconds(timeServer.GetRelativeTime());
         CPPUNIT_ASSERT((stopTime - startTime) <= queueingDelay); // make sure execution is fast
 
         osaSleep(serverExecutionDelay + blockingDelay); // time to dequeue and let command execute
@@ -170,20 +171,20 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
         CPPUNIT_ASSERT_EQUAL(-1, client->InterfaceRequired1.GetValue()); // unchanged
 
         // test write command
-        startTime = timeServer.GetRelativeTime();
+        startTime = durationToSeconds(timeServer.GetRelativeTime());
         executionResult = client->InterfaceRequired1.FunctionWrite(valueWrite);
         CPPUNIT_ASSERT(executionResult.IsOK()); // queued or succeeded
-        stopTime = timeServer.GetRelativeTime();
+        stopTime = durationToSeconds(timeServer.GetRelativeTime());
         CPPUNIT_ASSERT((stopTime - startTime) <= queueingDelay); // make sure execution is fast
         osaSleep(serverExecutionDelay + blockingDelay);  // time to dequeue and let command execute
         CPPUNIT_ASSERT(valueWrite == server->InterfaceProvided1.GetValue()); // set to new value
         CPPUNIT_ASSERT(-1 == client->InterfaceRequired1.GetValue()); // unchanged
 
         // test filtered write command
-        startTime = timeServer.GetRelativeTime();
+        startTime = durationToSeconds(timeServer.GetRelativeTime());
         executionResult = client->InterfaceRequired1.FunctionFilteredWrite(valueWrite);
         CPPUNIT_ASSERT(executionResult.IsOK()); // queued or succeeded
-        stopTime = timeServer.GetRelativeTime();
+        stopTime = durationToSeconds(timeServer.GetRelativeTime());
         CPPUNIT_ASSERT((stopTime - startTime) <= queueingDelay); // make sure execution is fast
         osaSleep(serverExecutionDelay + blockingDelay);  // time to dequeue and let command execute
         CPPUNIT_ASSERT((valueWrite + 1) == server->InterfaceProvided1.GetValue()); // set to new value + 1 (filter)
@@ -191,9 +192,9 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
 
         // test void command blocking
         if (blockingDelay > 0.0) {
-            startTime = timeServer.GetRelativeTime();
+            startTime = durationToSeconds(timeServer.GetRelativeTime());
             executionResult = client->InterfaceRequired1.FunctionVoid.ExecuteBlocking();
-            stopTime = timeServer.GetRelativeTime();
+            stopTime = durationToSeconds(timeServer.GetRelativeTime());
             {
                 std::stringstream message;
                 message << "Execution result expected was COMMAND_SUCCEEDED, got: "
@@ -224,9 +225,9 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
 
         // test write command blocking
         if (blockingDelay > 0.0) {
-            startTime = timeServer.GetRelativeTime();
+            startTime = durationToSeconds(timeServer.GetRelativeTime());
             executionResult = client->InterfaceRequired1.FunctionWrite.ExecuteBlocking(valueWrite);
-            stopTime = timeServer.GetRelativeTime();
+            stopTime = durationToSeconds(timeServer.GetRelativeTime());
             {
                 std::stringstream message;
                 message << "Execution result expected was COMMAND_SUCCEEDED, got: "
@@ -257,9 +258,9 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
 
         // test filtered write command blocking
         if (blockingDelay > 0.0) {
-            startTime = timeServer.GetRelativeTime();
+            startTime = durationToSeconds(timeServer.GetRelativeTime());
             executionResult = client->InterfaceRequired1.FunctionFilteredWrite.ExecuteBlocking(valueWrite);
-            stopTime = timeServer.GetRelativeTime();
+            stopTime = durationToSeconds(timeServer.GetRelativeTime());
             {
                 std::stringstream message;
                 message << "Execution result expected was COMMAND_SUCCEEDED, got: "
@@ -290,9 +291,9 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
 
         // test void return command (always blocking)
         if (blockingDelay > 0.0) {
-            startTime = timeServer.GetRelativeTime();
+            startTime = durationToSeconds(timeServer.GetRelativeTime());
             executionResult = client->InterfaceRequired1.FunctionVoidReturn(valueRead);
-            stopTime = timeServer.GetRelativeTime();
+            stopTime = durationToSeconds(timeServer.GetRelativeTime());
             {
                 std::stringstream message;
                 message << "Execution result expected was COMMAND_SUCCEEDED, got: "
@@ -325,9 +326,9 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
         // call write return to change sign of value back
         valueWritePlusOne = valueWrite + 1;
         if (blockingDelay > 0.0) {
-            startTime = timeServer.GetRelativeTime();
+            startTime = durationToSeconds(timeServer.GetRelativeTime());
             executionResult = client->InterfaceRequired1.FunctionWriteReturn(valueWritePlusOne, valueRead);
-            stopTime = timeServer.GetRelativeTime();
+            stopTime = durationToSeconds(timeServer.GetRelativeTime());
             {
                 std::stringstream message;
                 message << "Execution result expected was COMMAND_SUCCEEDED, got: "

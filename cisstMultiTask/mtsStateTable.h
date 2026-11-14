@@ -37,8 +37,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 
 
-#include <vector>
 #include <iostream>
+#include <optional>
+#include <vector>
+#include "cisstMultiTask/mtsGenericObjectProxy.h"
+#include "cisstOSAbstraction/osaTimeServer.h"
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -100,12 +103,12 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         /*! Delay in second before data collection should start.  This
           is measured in seconds based on the state table Tic and Toc.
           0 means that there is no defined start time. */
-        double StartTime;
+        std::optional<SynchronizedMonotonicClock::time_point> StartTime;
 
         /*! Delay in second before data collection should stop.  This
           is measured in seconds based on the state table Tic and
           Toc. 0 means that there is no defined stop time. */
-        double StopTime;
+        std::optional<SynchronizedMonotonicClock::time_point> StopTime;
 
         /*! Range for the batch */
         mtsStateTable::IndexRange BatchRange;
@@ -120,10 +123,10 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         size_t CounterForEvent;
 
         /*! Interval between two progress events (in seconds) */
-        double TimeIntervalForProgressEvent;
+        SynchronizedMonotonicClock::duration TimeIntervalForProgressEvent;
 
         /*! Time of last progress event */
-        double TimeOfLastProgressEvent;
+        SynchronizedMonotonicClock::time_point TimeOfLastProgressEvent;
 
         /*! Function used to trigger event sent to state collector
           when the data collection is needed.  The payload is the
@@ -144,8 +147,6 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         /*! Default constructors */
         inline DataCollectionInfo(void):
             Collecting(false),
-            StartTime(0.0),
-            StopTime(0.0),
             BatchSize(0),
             BatchCounter(0),
             CounterForEvent(0)
@@ -286,13 +287,14 @@ public:
     const osaTimeServer * TimeServer;
 
 public:
-
-    /* The start/end times for the current row of data. */
-    mtsDouble Tic, Toc;
+    /* The start/end times for the current row of data. Since we can't
+       direction put a std::chrono time_point into the state vector,
+       we use the internal rep count instead. */
+    mtsLongLong Tic, Toc;
 
     /*! The measured task period (difference between current Tic and
         previous Tic). */
-    mtsDouble Period;
+    mtsLongLong Period;
 
    /*! Periodicist Statistics */
     mtsIntervalStatistics PeriodStats;
@@ -331,7 +333,7 @@ public:
       methods, that can be called from a reader and writer. */
     mtsStateIndex GetIndexReader(void) const;
 
-    inline void GetIndexReader(mtsStateIndex & timeIndex) const {
+    void GetIndexReader(mtsStateIndex & timeIndex) const {
         timeIndex = GetIndexReader();
     }
 
@@ -344,18 +346,18 @@ public:
     size_t SetDelay(size_t newDelay);
 
     /*! Verifies if the data is valid. */
-    inline bool ValidateReadIndex(const mtsStateIndex &timeIndex) const {
+    bool ValidateReadIndex(const mtsStateIndex &timeIndex) const {
         return (Ticks[timeIndex.Index()] == timeIndex.Ticks());
     }
 
     /*! Get method for auto advance flag. See AutomaticAdvanceFlag */
-    inline const bool & AutomaticAdvance(void) const {
-        return this->AutomaticAdvanceFlag;
+    const bool & AutomaticAdvance(void) const {
+        return AutomaticAdvanceFlag;
     }
 
     /*! Set method for auto advance flag.  See AutoAdvanceFlag. */
-    inline void SetAutomaticAdvance(bool automaticAdvance) {
-        this->AutomaticAdvanceFlag = automaticAdvance;
+    void SetAutomaticAdvance(bool automaticAdvance) {
+        AutomaticAdvanceFlag = automaticAdvance;
     }
 
     /*! Check if the signal has been registered. */
@@ -378,7 +380,7 @@ public:
       This element is the same type as the state data table entry. */
     template <class _elementType>
     _elementType * GetStateDataElement(mtsStateDataId id) const {
-        return StateVectorElements[id]; // WEIRD???
+        return StateVectorElements[id]; // WEIRD??? TODO BB: why does it say weird?
     }
 
 
@@ -388,14 +390,14 @@ public:
 
     /*! Return pointer to accessor functions for the state data element.
       \param element Pointer to state data element (i.e., working copy)
-      \returns Pointer to accessor class (0 if not found)
+      \returns Pointer to accessor class (nullptr if not found)
     */
     template<class _elementType>
     mtsStateTable::AccessorBase * GetAccessorByInstance(const _elementType & element) const;
 
     /*! Return pointer to accessor functions for the state data element.
       \param name Name of state data element
-      \returns Pointer to accessor class (0 if not found)
+      \returns Pointer to accessor class (nullptr if not found)
     */
     //@{
     mtsStateTable::AccessorBase * GetAccessorByName(const std::string & name) const;
@@ -404,7 +406,7 @@ public:
 
     /*! Return pointer to accessor functions for the state data element.
       \param id Id of state data element
-      \returns Pointer to accessor class (0 if not found)
+      \returns Pointer to accessor class (nullptr if not found)
     */
     mtsStateTable::AccessorBase * GetAccessorById(const size_t id) const;
 
@@ -460,12 +462,14 @@ public:
     /*! Cleanup called when the task is being stopped. */
     void Cleanup(void);
 
-    inline double GetTic(void) const {
-        return this->Tic.Data;
+    SynchronizedMonotonicClock::time_point GetTic(void) const {
+        using Clock = SynchronizedMonotonicClock;
+        return Clock::time_point{Clock::duration{static_cast<Clock::rep>(Tic)}};
     }
 
-    inline double GetToc(void) const {
-        return this->Toc.Data;
+    SynchronizedMonotonicClock::time_point GetToc(void) const {
+        using Clock = SynchronizedMonotonicClock;
+        return Clock::time_point{Clock::duration{static_cast<Clock::rep>(Toc)}};
     }
 
     inline size_t GetHistoryLength(void) const {

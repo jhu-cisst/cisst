@@ -142,11 +142,6 @@ void osaThreadBuddy::Create(double period)
     IsSuspended = false;
 }
 
-void osaThreadBuddy::Create(const osaAbsoluteTime& tv)
-{
-    Create(tv.ToSeconds());
-}
-
 void osaThreadBuddy::WaitForRemainingPeriod(void)
 {
     if (!IsPeriodic()) { return; }

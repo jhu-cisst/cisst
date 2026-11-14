@@ -105,42 +105,44 @@ public:
     }
 
     /*! Time period between period statistics calculations */
-    inline void SetStatisticsInterval(double time) {
-        mStatisticsInterval = time;
+    void SetStatisticsInterval(double time) {
+        const std::chrono::duration<double> interval(time);
+        mStatisticsInterval = std::chrono::duration_cast<SynchronizedMonotonicClock::duration>(interval);
     }
 
     /*! Get time period between period statistics calculations */
     double StatisticsInterval() const {
-        return mStatisticsInterval;
+        using seconds_t = std::chrono::duration<double>;
+        return std::chrono::duration_cast<seconds_t>(mStatisticsInterval).count();
     }
 
     /*! Add one sample to compute statistics */
     void Update(double sample, double computeTime);
 
     /*! Set callback to act on updated statistics */
-    inline void SetCallback(mtsCallableVoidBase * callback) {
+    void SetCallback(mtsCallableVoidBase * callback) {
         mCallback = callback;
     }
 
     template <class __classType>
-    inline void SetCallback(void (__classType::*method)(),
+    void SetCallback(void (__classType::*method)(void),
                             __classType * classInstantiation) {
         this->SetCallback(new mtsCallableVoidMethod<__classType>(method, classInstantiation));
     }
 
     void Reset();
 
-    inline void SetFromExisting(double periodAvg,
-                                double periodStdDev,
-                                double periodMin,
-                                double periodMax,
-                                double computeTimeAvg,
-                                double computeTimeStdDev,
-                                double computeTimeMin,
-                                double computeTimeMax,
-                                unsigned int numberOfSamples,
-                                unsigned int numberOfOverruns,
-                                double statisticsInterval) {
+    void SetFromExisting(double periodAvg,
+                         double periodStdDev,
+                         double periodMin,
+                         double periodMax,
+                         double computeTimeAvg,
+                         double computeTimeStdDev,
+                         double computeTimeMin,
+                         double computeTimeMax,
+                         unsigned int numberOfSamples,
+                         unsigned int numberOfOverruns,
+                         SynchronizedMonotonicClock::duration statisticsInterval) {
         mPeriodAvg = periodAvg;
         mPeriodStdDev = periodStdDev;
         mPeriodMin = periodMin;
@@ -167,7 +169,7 @@ private:
     double mComputeTimeRunningMax;
     unsigned int mRunningNumberOfSamples;
     unsigned int mRunningNumberOfOverruns;
-    double mLastUpdateTime;
+    SynchronizedMonotonicClock::time_point mLastUpdateTime;
 
     /*! The time server used to provide absolute and relative times. */
     const osaTimeServer * mTimeServer;
@@ -185,7 +187,7 @@ private:
     unsigned int mNumberOfOverruns;
 
     /*! configuration. */
-    double mStatisticsInterval;
+    SynchronizedMonotonicClock::duration mStatisticsInterval;
 
     /*! optional callback */
     mtsCallableVoidBase * mCallback;

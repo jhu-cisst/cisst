@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnThrow.h>
 #include <cisstCommon/cmnSearchPath.h>
 #include <cisstCommon/cmnPortability.h>
+#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSocket.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
@@ -47,8 +48,6 @@ osaTimeServer TimeServer;
 bool TimeServerOriginSet = false;
 
 mtsManagerLocal * mtsManagerLocal::Instance = 0;
-
-// }}
 
 class ManagerLocalComponent : public mtsComponent {
 
@@ -796,8 +795,8 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         std::vector<std::string> componentNames = GetNamesOfComponents();
         std::vector<std::string>::const_iterator iterator = componentNames.begin();
         const std::vector<std::string>::const_iterator end = componentNames.end();
-        double timeStartedAll = TimeServer.GetRelativeTime();
-        double timeEnd = timeStartedAll + timeout;
+        SynchronizedMonotonicClock::time_point timeStartedAll = TimeServer.GetAbsoluteTime();
+        SynchronizedMonotonicClock::time_point timeEnd = timeStartedAll + SynchronizedMonotonicClock::fromSeconds(timeout);
         bool timedOut = false;
         for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
             if (mtsManagerComponentBase::IsManagerComponent(*iterator))
@@ -806,7 +805,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
             CMN_ASSERT(component != nullptr);
             
             // compute how much time do we have left based on when we started
-            double timeLeft = timeEnd - TimeServer.GetRelativeTime();
+            double timeLeft = durationToSeconds(timeEnd - TimeServer.GetAbsoluteTime());
             // skip in 2 cases, manager components and tasks with ExecIn
             mtsManagerComponentBase * isManager = dynamic_cast<mtsManagerComponentBase *>(component);
             bool isIndependent = true;
@@ -822,7 +821,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
                                              << desiredState << "\"" << std::endl;
                 }
             }
-            if (TimeServer.GetRelativeTime() > timeEnd) {
+            if (TimeServer.GetAbsoluteTime() > timeEnd) {
                 // looks like we don't have any time left to start the remaining components.
                 timedOut = true;
                 allAtState = false;
@@ -833,7 +832,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         // report results
         if (allAtState && !timedOut) {
             CMN_LOG_CLASS_INIT_VERBOSE << "WaitForStateAll: all components reached state \""
-                                       << desiredState << "\" in " << (TimeServer.GetRelativeTime() - timeStartedAll) << " seconds" << std::endl;
+                                       << desiredState << "\" in " << durationToSeconds(TimeServer.GetAbsoluteTime() - timeStartedAll) << " seconds" << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: failed to reached state \""
                                      << desiredState << "\" for all components" << std::endl;

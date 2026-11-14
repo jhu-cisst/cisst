@@ -32,11 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 
 using namespace std::chrono_literals;
 
-void osaTimeServerTest::TestInternalsSize(void) {
-    CPPUNIT_ASSERT(osaTimeServer::INTERNALS_SIZE >= osaTimeServer::SizeOfInternals());
-}
-
-
 void osaTimeServerTest::TestMultipleServersSingleThread(void)
 {
     const size_t numberOfServers = 20;

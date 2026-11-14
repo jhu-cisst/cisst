@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
+#include "cisstOSAbstraction/osaTimeServer.h"
 
 // forward declarations for internal types
 class mtsComponentAddLatencyDelayedRead;
@@ -136,7 +137,7 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
                               mtsInterfaceProvided * interfaceProvided,
                               const std::string & eventProvidedName = "");
 
-    double Latency;
+    SynchronizedMonotonicClock::duration Latency;
     mtsStateTable LatencyStateTable;
 
  private:

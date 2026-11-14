@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 
 #include <iostream>
 #include <fstream>
@@ -381,9 +380,6 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
     std::string currentDateTime;
     std::ostringstream out;
     osaGetDateTimeString(currentDateTime);
-    const osaTimeServer & timeServer = mtsManagerLocal::GetInstance()->GetTimeServer();
-    osaAbsoluteTime origin;
-    timeServer.GetTimeOrigin(origin);
     out.precision(20);
     if (this->OutputHeaderStream) {
         this->OutputHeaderStream->precision(20);
@@ -421,8 +417,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
         // File Name
         *(this->OutputHeaderStream) << this->OutputFileName << std::endl;
         // Date
-        *(this->OutputHeaderStream) << currentDateTime << " ";
-        *(this->OutputHeaderStream) << origin.ToSeconds() << std::endl;
+        *(this->OutputHeaderStream) << currentDateTime << std::endl;
         // Format
         if (fileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
             *(this->OutputHeaderStream) << "Text" << std::endl ;

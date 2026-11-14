@@ -25,27 +25,20 @@ class osaTimeServerTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(osaTimeServerTest);
     {
-        CPPUNIT_TEST(TestInternalsSize);
         CPPUNIT_TEST(TestMultipleServersSingleThread);
         CPPUNIT_TEST(TestMultipleServersMultiThreads);
     }
     CPPUNIT_TEST_SUITE_END();
 
 public:
-    void setUp(void) {
-    }
-
-    void tearDown(void) {
-    }
-
-    /*! Test that structure for internal size is large enough */
-    void TestInternalsSize(void);
+    void setUp() {}
+    void tearDown() {}
 
     /*! Check that multiple server on a single thread have more or
       less the same origin */
-    void TestMultipleServersSingleThread(void);
+    void TestMultipleServersSingleThread();
 
     /*! Check that multiple server on multiple threads have more or
       less the same origin */
-    void TestMultipleServersMultiThreads(void);
+    void TestMultipleServersMultiThreads();
 };
