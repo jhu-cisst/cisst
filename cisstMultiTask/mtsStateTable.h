@@ -78,6 +78,8 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
     friend class mtsCollectorBaseTest;
 
  public:
+    using Clock = SynchronizedMonotonicClock;
+
     /*! Collection is performed by batches, this requires to save
       the state indices for begin/end. */
     class CISST_EXPORT IndexRange: public mtsGenericObject
@@ -103,12 +105,12 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         /*! Delay in second before data collection should start.  This
           is measured in seconds based on the state table Tic and Toc.
           0 means that there is no defined start time. */
-        std::optional<SynchronizedMonotonicClock::time_point> StartTime;
+        std::optional<Clock::time_point> StartTime;
 
         /*! Delay in second before data collection should stop.  This
           is measured in seconds based on the state table Tic and
           Toc. 0 means that there is no defined stop time. */
-        std::optional<SynchronizedMonotonicClock::time_point> StopTime;
+        std::optional<Clock::time_point> StopTime;
 
         /*! Range for the batch */
         mtsStateTable::IndexRange BatchRange;
@@ -123,10 +125,10 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         size_t CounterForEvent;
 
         /*! Interval between two progress events (in seconds) */
-        SynchronizedMonotonicClock::duration TimeIntervalForProgressEvent;
+        Clock::duration TimeIntervalForProgressEvent;
 
         /*! Time of last progress event */
-        SynchronizedMonotonicClock::time_point TimeOfLastProgressEvent;
+        Clock::time_point TimeOfLastProgressEvent;
 
         /*! Function used to trigger event sent to state collector
           when the data collection is needed.  The payload is the
@@ -289,12 +291,12 @@ public:
 public:
     /* The start/end times for the current row of data. Since we can't
        direction put a std::chrono time_point into the state vector,
-       we use the internal rep count instead. */
-    mtsLongLong Tic, Toc;
+       we use a proxy instead. TODO: remove once mtsStateTable uses proxys instead */
+    mtsGenericObjectProxy<Clock::time_point> Tic, Toc;
 
     /*! The measured task period (difference between current Tic and
         previous Tic). */
-    mtsLongLong Period;
+    mtsGenericObjectProxy<Clock::duration> Period;
 
    /*! Periodicist Statistics */
     mtsIntervalStatistics PeriodStats;
@@ -462,14 +464,12 @@ public:
     /*! Cleanup called when the task is being stopped. */
     void Cleanup(void);
 
-    SynchronizedMonotonicClock::time_point GetTic(void) const {
-        using Clock = SynchronizedMonotonicClock;
-        return Clock::time_point{Clock::duration{static_cast<Clock::rep>(Tic)}};
+    Clock::time_point GetTic(void) const {
+        return Tic;
     }
 
-    SynchronizedMonotonicClock::time_point GetToc(void) const {
-        using Clock = SynchronizedMonotonicClock;
-        return Clock::time_point{Clock::duration{static_cast<Clock::rep>(Toc)}};
+    Clock::time_point GetToc(void) const {
+        return Toc;
     }
 
     inline size_t GetHistoryLength(void) const {

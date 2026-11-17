@@ -59,6 +59,7 @@ void mtsCommandAndEventLocalTest::TestExecution(_clientType * client, _serverTyp
     // -1, void command set to 0
     value_type valueWrite, valueWritePlusOne, valueRead;
     valueWrite = 4;
+    valueWritePlusOne = valueWrite + 1;
 
     // test functions not connected
     CPPUNIT_ASSERT(!client->InterfaceRequired1.FunctionVoid.IsValid());

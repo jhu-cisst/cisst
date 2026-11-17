@@ -49,7 +49,7 @@ public:
 
     static size_t SerializeBinary(const DataType& data,
                                   char * buffer, size_t bufferSize) {
-        return cmnDataSerializeBinary(pathToUTF8(data), buffer, bufferSize);
+        return cmnData<std::string>::SerializeBinary(pathToUTF8(data), buffer, bufferSize);
     }
 
     static size_t DeSerializeBinary(DataType& data, const char * buffer, size_t bufferSize,
@@ -57,7 +57,7 @@ public:
                                     const cmnDataFormat & remoteFormat)
     {
         std::string output;
-        size_t result = cmnDataDeSerializeBinary(output, buffer, bufferSize, localFormat, remoteFormat);
+        size_t result = cmnData<std::string>::DeSerializeBinary(output, buffer, bufferSize, localFormat, remoteFormat);
         data = pathFromUTF8(output);
         return result;
     }
@@ -66,7 +66,7 @@ public:
                                 std::ostream & outputStream)
         CISST_THROW(std::runtime_error)
     {
-        cmnDataSerializeBinary(pathToUTF8(data), outputStream);
+        cmnData<std::string>::SerializeBinary(pathToUTF8(data), outputStream);
     }
 
     static void DeSerializeBinary(DataType& data,
@@ -76,7 +76,7 @@ public:
         CISST_THROW(std::runtime_error)
     {
         std::string output;
-        cmnDataDeSerializeBinary(output, inputStream, localFormat, remoteFormat);
+        cmnData<std::string>::DeSerializeBinary(output, inputStream, localFormat, remoteFormat);
         data = pathFromUTF8(output);
     }
 
@@ -85,7 +85,7 @@ public:
                               const char delimiter = ',')
         CISST_THROW(std::runtime_error)
     {
-        cmnDataSerializeText(pathToUTF8(data), outputStream, delimiter);
+        cmnData<std::string>::SerializeText(pathToUTF8(data), outputStream, delimiter);
     }
 
     static void DeSerializeText(DataType& data,
@@ -94,7 +94,7 @@ public:
         CISST_THROW(std::runtime_error)
     {
         std::string output;
-        cmnDataDeSerializeText(output, inputStream, delimiter);
+        cmnData<std::string>::DeSerializeText(output, inputStream, delimiter);
         data = pathFromUTF8(output);
     }
 

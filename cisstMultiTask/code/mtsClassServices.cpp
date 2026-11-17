@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsInterfaceCommon.h>
 #include "cisstCommon/cmnClassRegisterMacros.h"
+#include "cisstOSAbstraction/osaTimeServer.h"
 
 // If not using MingW, compile as a single file.
 #if (CISST_OS != CISST_WINDOWS) || (CISST_COMPILER != CISST_GCC)
@@ -182,6 +183,12 @@ typedef mtsGenericObjectProxy<Eigen::Array<bool, 5, 1>> eigenarray5b;
 CMN_IMPLEMENT_SERVICES_TEMPLATED(eigenarray5b);
 typedef mtsGenericObjectProxy<Eigen::Array<bool, 6, 1>> eigenarray6b;
 CMN_IMPLEMENT_SERVICES_TEMPLATED(eigenarray6b);
+
+typedef mtsGenericObjectProxy<SynchronizedMonotonicClock::time_point> mtsTimePoint;
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsTimePoint);
+typedef mtsGenericObjectProxy<SynchronizedMonotonicClock::duration> mtsDuration;
+CMN_IMPLEMENT_SERVICES_TEMPLATED(mtsDuration);
+
 
 #endif  // MTS_CLASS_SERVICES_PART2
 

@@ -41,6 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctionsVector.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsDataFunctionsChrono.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 
 // Always include last!
@@ -867,6 +868,10 @@ typedef mtsGenericObjectProxy<Eigen::Array<bool, 5, 1>> eigenarray5b;
 CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray5b);
 typedef mtsGenericObjectProxy<Eigen::Array<bool, 6, 1>> eigenarray6b;
 CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray6b);
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<SynchronizedMonotonicClock::time_point>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<SynchronizedMonotonicClock::duration>);
+
 
 // Default implementation if not explicitly provided
 

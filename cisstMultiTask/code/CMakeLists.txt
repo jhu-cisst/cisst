@@ -143,6 +143,8 @@ set (HEADER_FILES
      mtsComponentGeneratorMacros.h
      mtsComponentViewer.h
 
+     mtsDataFunctionsChrono.h
+
      mtsDelayedConnections.h
      mtsEventReceiver.h
      mtsExport.h
