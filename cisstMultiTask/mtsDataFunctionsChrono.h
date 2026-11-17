@@ -25,13 +25,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 
 // always include last
 #include <cisstMultiTask/mtsExport.h>
 
-using time_point_t = std::chrono::time_point<SynchronizedMonotonicClock>;
-using duration_t = std::chrono::duration<long long, std::nano>;
+using Clock_t = std::chrono::steady_clock;
+using time_point_t = std::chrono::time_point<Clock_t>;
+using duration_t = Clock_t::duration;
 
 template <>
 class cmnData<duration_t, void>
@@ -48,12 +48,12 @@ public:
     }
 
     static size_t SerializeBinaryByteSize(const DataType& data) {
-        return cmnData<SynchronizedMonotonicClock::rep>::SerializeBinaryByteSize(data.count());
+        return cmnData<Clock_t::rep>::SerializeBinaryByteSize(data.count());
     }
 
     static size_t SerializeBinary(const DataType& data,
                                   char * buffer, size_t bufferSize) {
-        return cmnData<SynchronizedMonotonicClock::rep>::SerializeBinary(
+        return cmnData<Clock_t::rep>::SerializeBinary(
             data.count(),
             buffer,
             bufferSize
@@ -64,15 +64,15 @@ public:
                                     const cmnDataFormat & localFormat,
                                     const cmnDataFormat & remoteFormat)
     {
-        SynchronizedMonotonicClock::rep ticks;
-        size_t ret = cmnData<SynchronizedMonotonicClock::rep>::DeSerializeBinary(
+        Clock_t::rep ticks;
+        size_t ret = cmnData<Clock_t::rep>::DeSerializeBinary(
             ticks,
             buffer,
             bufferSize,
             localFormat,
             remoteFormat
         );
-        data = duration_t{SynchronizedMonotonicClock::duration{ticks}};
+        data = duration_t{Clock_t::duration{ticks}};
         return ret;
     }
 
@@ -80,7 +80,7 @@ public:
                                 std::ostream & outputStream)
         CISST_THROW(std::runtime_error)
     {
-        cmnData<SynchronizedMonotonicClock::rep>::SerializeBinary(data.count(), outputStream);
+        cmnData<Clock_t::rep>::SerializeBinary(data.count(), outputStream);
     }
 
     static void DeSerializeBinary(DataType& data,
@@ -89,9 +89,9 @@ public:
                                   const cmnDataFormat & remoteFormat)
         CISST_THROW(std::runtime_error)
     {
-        SynchronizedMonotonicClock::rep value;
-        cmnData<SynchronizedMonotonicClock::rep>::DeSerializeBinary(value, inputStream, localFormat, remoteFormat);
-        data = SynchronizedMonotonicClock::duration{value};
+        Clock_t::rep value;
+        cmnData<Clock_t::rep>::DeSerializeBinary(value, inputStream, localFormat, remoteFormat);
+        data = Clock_t::duration{value};
     }
 
     static void SerializeText(const DataType& data,
@@ -99,7 +99,7 @@ public:
                               const char delimiter = ',')
         CISST_THROW(std::runtime_error)
     {
-        cmnData<SynchronizedMonotonicClock::rep>::SerializeText(data.count(), outputStream, delimiter);
+        cmnData<Clock_t::rep>::SerializeText(data.count(), outputStream, delimiter);
     }
 
     static void DeSerializeText(DataType& data,
@@ -107,9 +107,9 @@ public:
                                 const char delimiter = ',')
         CISST_THROW(std::runtime_error)
     {
-        SynchronizedMonotonicClock::rep value;
-        cmnData<SynchronizedMonotonicClock::rep>::DeSerializeText(value, inputStream, delimiter);
-        data = SynchronizedMonotonicClock::duration{value};
+        Clock_t::rep value;
+        cmnData<Clock_t::rep>::DeSerializeText(value, inputStream, delimiter);
+        data = Clock_t::duration{value};
     }
 
     static bool ScalarNumberIsFixed([[maybe_unused]] const DataType& data) {
@@ -196,7 +196,7 @@ public:
     {
         duration_t value;
         cmnData<duration_t>::DeSerializeBinary(value, inputStream, localFormat, remoteFormat);
-        data = SynchronizedMonotonicClock::time_point{value};
+        data = Clock_t::time_point{value};
     }
 
     static void SerializeText(const DataType& data,
@@ -214,7 +214,7 @@ public:
     {
         duration_t value;
         cmnData<duration_t>::DeSerializeText(value, inputStream, delimiter);
-        data = SynchronizedMonotonicClock::time_point{value};
+        data = Clock_t::time_point{value};
     }
 
     static bool ScalarNumberIsFixed([[maybe_unused]] const DataType& data) {

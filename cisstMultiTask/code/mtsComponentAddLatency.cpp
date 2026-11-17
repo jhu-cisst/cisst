@@ -23,10 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
-#include "cisstOSAbstraction/osaTimeServer.h"
 
-typedef std::list<std::pair<SynchronizedMonotonicClock::time_point, mtsGenericObject *> > mtsComponentAddLatencyWriteHistoryType;
-typedef std::list<SynchronizedMonotonicClock::time_point> mtsComponentAddLatencyVoidHistoryType;
+typedef std::list<std::pair<std::chrono::steady_clock::time_point, mtsGenericObject *> > mtsComponentAddLatencyWriteHistoryType;
+typedef std::list<std::chrono::steady_clock::time_point> mtsComponentAddLatencyVoidHistoryType;
 
 class mtsComponentAddLatencyDelayedRead
 {
@@ -96,7 +95,7 @@ public:
         History.clear();
     }
 
-    inline mtsExecutionResult ProcessQueuedCommands(SynchronizedMonotonicClock::time_point time) {
+    inline mtsExecutionResult ProcessQueuedCommands(std::chrono::steady_clock::time_point time) {
         mtsExecutionResult executionResult;
         mtsComponentAddLatencyVoidHistoryType::iterator iter = History.begin();
         // look in history for all commands with timestamp lower than time
@@ -114,7 +113,7 @@ public:
     }
 
     inline void Method(void) {
-        const auto time = mtsComponentManager::GetInstance()->GetTimeServer().GetAbsoluteTime();
+        const auto time = std::chrono::steady_clock::now();
         History.push_back(time);
     }
 
@@ -149,7 +148,7 @@ public:
         }
     }
 
-    inline mtsExecutionResult ProcessQueuedCommands(SynchronizedMonotonicClock::time_point time) {
+    inline mtsExecutionResult ProcessQueuedCommands(std::chrono::steady_clock::time_point time) {
         mtsExecutionResult executionResult;
         mtsComponentAddLatencyWriteHistoryType::iterator iter = History.begin();
         // look in history for all commands with timestamp lower than time
@@ -169,7 +168,7 @@ public:
     }
 
     inline void Method(const mtsGenericObject & data) {
-        const auto time = mtsComponentManager::GetInstance()->GetTimeServer().GetAbsoluteTime();
+        const auto time = std::chrono::steady_clock::now();
         // push copy of parameter to history
         mtsGenericObject * parameter = dynamic_cast<mtsGenericObject *>(data.Services()->Create(data));
         if (parameter) {
@@ -275,7 +274,7 @@ void mtsComponentAddLatency::Run(void)
     this->LatencyStateTable.Advance();
 
     // see if we have some old void/write commands
-    const auto time = mtsComponentManager::GetInstance()->GetTimeServer().GetAbsoluteTime() - this->Latency;
+    const auto time = std::chrono::steady_clock::now() - this->Latency;
     DelayedVoidList::iterator voidIterator = DelayedVoids.begin();
     const DelayedVoidList::iterator voidEnd = DelayedVoids.end();
     this->LatencyStateTable.Start();
@@ -413,7 +412,7 @@ double mtsComponentAddLatency::SetLatency(double latencyInSeconds)
     using seconds_d = std::chrono::duration<double>;
 
     const seconds_d new_latency(latencyInSeconds);
-    this->Latency = std::chrono::duration_cast<SynchronizedMonotonicClock::duration>(new_latency);
+    this->Latency = std::chrono::duration_cast<std::chrono::steady_clock::duration>(new_latency);
     const size_t latencyInPeriods = static_cast<size_t>(latencyInSeconds / this->GetPeriodicity());
     LatencyStateTable.SetDelay(latencyInPeriods);
     return std::chrono::duration_cast<seconds_d>(previousLatency).count();

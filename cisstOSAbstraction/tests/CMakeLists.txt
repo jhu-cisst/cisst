@@ -16,7 +16,6 @@ set (SOURCE_FILES
      osaPipeExecTest.cpp
      osaSocketTest.cpp
      osaThreadSignalTest.cpp
-     osaTimeServerTest.cpp
      )
 
 # all header files
@@ -24,7 +23,6 @@ set (HEADER_FILES
      osaPipeExecTest.h
      osaSocketTest.h
      osaThreadSignalTest.h
-     osaTimeServerTest.h
      )
 
 # add executable for C++ tests

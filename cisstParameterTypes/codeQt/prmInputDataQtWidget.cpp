@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmInputDataQtWidget.h>
 
+#include <chrono>
 #include <QSpinBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -27,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 
 
 prmInputDataQtWidget::prmInputDataQtWidget(const std::string & name):
@@ -129,7 +129,7 @@ void prmInputDataQtWidgetComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
         return;
     }
     // use local timestamp to prevent strange plotting in past if older data show up
-    mInputData.Timestamp() = durationToSeconds(mtsComponentManager::GetInstance()->GetTimeServer().GetRelativeTime());
+    mInputData.Timestamp() = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch());
     SetValue(mInputData);
 }
 

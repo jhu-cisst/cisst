@@ -41,7 +41,6 @@ protected:
     value_type ReadValue;
 
     // time benchmarking
-    const osaTimeServer * TimeServer;
     bool BenchmarkDoneMember;
     unsigned int NumberOfskippedElement;
     unsigned int SamplesCollected;

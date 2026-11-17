@@ -19,11 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <atomic>
+#include <cstring>
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnLogger.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 
 #if (CISST_OS == CISST_WINDOWS)
 

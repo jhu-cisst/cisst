@@ -869,8 +869,8 @@ CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray5b);
 typedef mtsGenericObjectProxy<Eigen::Array<bool, 6, 1>> eigenarray6b;
 CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray6b);
 
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<SynchronizedMonotonicClock::time_point>);
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<SynchronizedMonotonicClock::duration>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<std::chrono::steady_clock::time_point>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<std::chrono::steady_clock::duration>);
 
 
 // Default implementation if not explicitly provided

@@ -48,6 +48,12 @@ http://www.cisst.org/cisst/license.txt.
   list.  This class doesn't check weither the directories in the path
   actually exist, mostly to allow a portable program (e.g. one program
   can add both "/usr/local/bin" and "C:\Program Files").
+
+  Most functions are overload to accept both std::filesystem::path or
+  std::string,  the std::string overload assumes UTF8 encoding and does
+  a safe conversion to the native filepath encoding (e.g. UTF16) on
+  Windows, versus the implicit std::string to std::filesystem::path
+  conversion, which will garble UTF8 strings on Windows.
 */
 
 // TODO BB: why is this a cmnGenericObject?

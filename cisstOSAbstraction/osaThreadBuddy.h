@@ -31,7 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <thread>
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
@@ -65,7 +64,6 @@ private:
 public:
     /*! The thread we are buddying to must outlive the buddy*/
     osaThreadBuddy(std::thread& thread);
-
     ~osaThreadBuddy();
 
     /*! Create a thread buddy

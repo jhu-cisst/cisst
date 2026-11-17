@@ -24,9 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandVoid.h>
 #include <cisstMultiTask/mtsStateTable.h>
 
+#include <chrono>
 #include <optional>
 #include <string>
-#include "cisstOSAbstraction/osaTimeServer.h"
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -119,17 +119,14 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
     bool Collecting;
 
     /*! Scheduled start */
-    std::optional<SynchronizedMonotonicClock::time_point> ScheduledStartTime;
+    std::optional<std::chrono::steady_clock::time_point> ScheduledStartTime;
 
     /*! Scheduled stop */
-    std::optional<SynchronizedMonotonicClock::time_point> ScheduledStopTime;
+    std::optional<std::chrono::steady_clock::time_point> ScheduledStopTime;
 
     /*! Update and return the collecting status based on the scheduled
       start/stop time and current time. */
     bool CheckCollectingStatus(void);
-
-    /*! Pointer on manager's time server */
-    const osaTimeServer * TimeServer;
 
  public:
     /*! Thread-related methods */
@@ -210,7 +207,7 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
     //@}
 
  protected:
-    void SetCollecting(bool collecting, SynchronizedMonotonicClock::time_point currentTime);
+    void SetCollecting(bool collecting, std::chrono::steady_clock::time_point currentTime);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorEvent)

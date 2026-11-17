@@ -19,11 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorBase.h>
 
+#include <chrono>
 #include <filesystem>
 
 #include <cisstCommon/cmnSearchPath.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 
 using namespace std::chrono_literals;
 
@@ -36,7 +36,7 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     mtsTaskFromSignal(collectorName),
     FileFormat(fileFormat),
     ConnectedFlag(false),
-    TimeIntervalForProgressEvent(std::chrono::duration_cast<SynchronizedMonotonicClock::duration>(1.0ms)),
+    TimeIntervalForProgressEvent(std::chrono::duration_cast<std::chrono::steady_clock::duration>(1.0ms)),
     OutputStream(0),
     OutputFile(0),
     OutputHeaderStream(0),

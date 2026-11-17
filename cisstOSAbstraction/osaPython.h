@@ -30,7 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPython.h>
 
-#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaSerialPort.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 

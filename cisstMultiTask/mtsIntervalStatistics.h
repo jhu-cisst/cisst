@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsCallableVoidMethod.h>
@@ -52,6 +51,8 @@ public:
 
     /*! Base type */
     typedef mtsGenericObject BaseType;
+
+    using Clock_t = std::chrono::steady_clock;
 
     /*! The measured period average. */
     double PeriodAvg() const {
@@ -107,7 +108,7 @@ public:
     /*! Time period between period statistics calculations */
     void SetStatisticsInterval(double time) {
         const std::chrono::duration<double> interval(time);
-        mStatisticsInterval = std::chrono::duration_cast<SynchronizedMonotonicClock::duration>(interval);
+        mStatisticsInterval = std::chrono::duration_cast<Clock_t::duration>(interval);
     }
 
     /*! Get time period between period statistics calculations */
@@ -142,7 +143,7 @@ public:
                          double computeTimeMax,
                          unsigned int numberOfSamples,
                          unsigned int numberOfOverruns,
-                         SynchronizedMonotonicClock::duration statisticsInterval) {
+                         Clock_t::duration statisticsInterval) {
         mPeriodAvg = periodAvg;
         mPeriodStdDev = periodStdDev;
         mPeriodMin = periodMin;
@@ -169,10 +170,7 @@ private:
     double mComputeTimeRunningMax;
     unsigned int mRunningNumberOfSamples;
     unsigned int mRunningNumberOfOverruns;
-    SynchronizedMonotonicClock::time_point mLastUpdateTime;
-
-    /*! The time server used to provide absolute and relative times. */
-    const osaTimeServer * mTimeServer;
+    Clock_t::time_point mLastUpdateTime;
 
     /*! Members that can be accessed after computation, actual stats */
     double mPeriodAvg;
@@ -187,7 +185,7 @@ private:
     unsigned int mNumberOfOverruns;
 
     /*! configuration. */
-    SynchronizedMonotonicClock::duration mStatisticsInterval;
+    Clock_t::duration mStatisticsInterval;
 
     /*! optional callback */
     mtsCallableVoidBase * mCallback;

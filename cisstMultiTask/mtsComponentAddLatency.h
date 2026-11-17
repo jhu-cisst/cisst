@@ -20,12 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsComponentAddLatency_h
 #define _mtsComponentAddLatency_h
 
+#include <chrono>
+
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-#include "cisstOSAbstraction/osaTimeServer.h"
 
 // forward declarations for internal types
 class mtsComponentAddLatencyDelayedRead;
@@ -137,7 +138,7 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
                               mtsInterfaceProvided * interfaceProvided,
                               const std::string & eventProvidedName = "");
 
-    SynchronizedMonotonicClock::duration Latency;
+    std::chrono::steady_clock::duration Latency;
     mtsStateTable LatencyStateTable;
 
  private:

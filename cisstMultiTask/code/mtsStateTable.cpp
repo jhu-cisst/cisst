@@ -16,17 +16,18 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstCommon/cmnAssert.h>
 #include <cisstMultiTask/mtsStateTable.h>
-#include <cisstMultiTask/mtsForwardDeclarations.h>
-#include <cisstMultiTask/mtsManagerLocal.h>
-#include <cisstMultiTask/mtsCollectorState.h>
-#include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 
+#include <cisstCommon/cmnAssert.h>
+#include <cisstMultiTask/mtsCollectorState.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstOSAbstraction/osaGetTime.h>
+
+#include <chrono>
 #include <iostream>
 #include <string>
-#include "cisstMultiTask/mtsGenericObjectProxy.h"
 
 using namespace std::chrono_literals;
 
@@ -51,7 +52,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     StateVector(0),
     StateVectorDataNames(0),
     Ticks(size, mtsStateIndex::TimeTicksType(0)),
-    Period(Clock::duration::zero()),
+    Period(Clock_t::duration::zero()),
     SumOfPeriods(0.0),
     AveragePeriod(0.0),
     Name(name)
@@ -68,12 +69,9 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
         DataCollection.BatchSize = 1;
     }
 
-    DataCollection.TimeIntervalForProgressEvent = std::chrono::duration_cast<Clock::duration>(1.0ms);
+    DataCollection.TimeIntervalForProgressEvent = std::chrono::duration_cast<Clock_t::duration>(1.0ms);
     DataCollection.BatchRange.SetValid(true);
     DataCollection.BatchRange.SetAutomaticTimestamp(false);
-
-    // Get a pointer to the time server
-    TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
 
     // Add Tic and Toc to the StateTable. We add Toc first, to make things easier
     // in mtsStateTable::Advance.  Do not change this.
@@ -189,14 +187,14 @@ bool mtsStateTable::Write(mtsStateDataId id, const mtsGenericObject & object) {
 
 
 void mtsStateTable::Start(void) {
-    if (TimeServer) {
-        Tic = TimeServer->GetAbsoluteTime(); // in seconds
-        // Since IndexReader and IndexWriter are initialized to 0,
-        // the first period will be 0
-        mtsGenericObjectProxy<Clock::time_point> old_tic_count;
-        StateVector[TicId]->Get(IndexReader, old_tic_count);
-        Period = Tic.Data - old_tic_count.Data;
-    }
+    Tic = Clock_t::now();
+
+    // Since IndexReader and IndexWriter are initialized to 0,
+    // the first period will be 0
+    mtsGenericObjectProxy<Clock_t::time_point> old_tic_count;
+    StateVector[TicId]->Get(IndexReader, old_tic_count);
+    Period = Tic.Data - old_tic_count.Data;
+
     // update "started" status
     mStarted = true;
 }
@@ -215,10 +213,10 @@ void mtsStateTable::Advance(void) {
     size_t newIndexWriter = (IndexWriter + 1) % HistoryLength;
 
     // Update SumOfPeriods (add newest and subtract oldest)
-    SumOfPeriods += durationToSeconds(Clock::duration{Period});
+    SumOfPeriods += durationToSeconds(Clock_t::duration{Period});
     // If the table is full (all entries valid), subtract the oldest one
     if (Ticks[IndexWriter] == (Ticks[newIndexWriter] + HistoryLength - 1)) {
-        mtsGenericObjectProxy<SynchronizedMonotonicClock::duration> oldPeriod;
+        mtsGenericObjectProxy<Clock_t::duration> oldPeriod;
         StateVector[PeriodId]->Get(newIndexWriter, oldPeriod);
         SumOfPeriods -= durationToSeconds(oldPeriod.Data);
         AveragePeriod = SumOfPeriods / (HistoryLength-1);
@@ -313,12 +311,10 @@ void mtsStateTable::Advance(void) {
     }
 
     // Get the Toc value and write it to the state table.
-    if (TimeServer) {
-        Toc = TimeServer->GetAbsoluteTime(); // in seconds
-    }
+    Toc = Clock_t::now(); // in seconds
 
     // Update Period Statistics (last time interval, current compute time)
-    PeriodStats.Update(durationToSeconds(Clock::duration{Period.Data}), durationToSeconds(Toc.Data - Tic.Data));
+    PeriodStats.Update(durationToSeconds(Clock_t::duration{Period.Data}), durationToSeconds(Toc.Data - Tic.Data));
 
     Write(TocId, Toc);
     // now increment the IndexWriter and set its Tick value
@@ -500,7 +496,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: received request to start data collection in "
                             << delay.Data << " seconds" << std::endl;
     // set start time based on current time and delay
-    const auto startTime = this->TimeServer->GetAbsoluteTime() + Clock::fromSeconds(delay);
+    const auto startTime = Clock_t::now() + durationFromSeconds<Clock_t>(delay);
     // if we are not yet collection
     if (!DataCollection.Collecting) {
         // if there is no collection scheduled
@@ -549,7 +545,7 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
                             << delay.Data << " seconds for state table \""
                             << this->GetName() << "\"" << std::endl;
     // set stop time based on current time and delay
-    const auto stopTime = TimeServer->GetAbsoluteTime() + Clock::fromSeconds(delay);
+    const auto stopTime = Clock_t::now() + durationFromSeconds<Clock_t>(delay);
     // check is there is already a stop time scheduled
     if (DataCollection.StopTime.has_value()) {
         CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "

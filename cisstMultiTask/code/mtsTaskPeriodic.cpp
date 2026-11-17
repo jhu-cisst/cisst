@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include "cisstOSAbstraction/osaTimeServer.h"
 
 
 void * mtsTaskPeriodic::RunInternal(void *data)
@@ -106,7 +105,7 @@ mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInS
     mtsTaskContinuous(name, sizeStateTable, newThread),
     ThreadBuddy(Thread),
     Period(periodicityInSeconds),
-    Period_d(SynchronizedMonotonicClock::fromSeconds(periodicityInSeconds)),
+    Period_d(durationFromSeconds<std::chrono::steady_clock>(periodicityInSeconds)),
     IsHardRealTime(isHardRealTime)
 {
     CMN_ASSERT(GetPeriodicity() > 0);
@@ -116,7 +115,7 @@ mtsTaskPeriodic::mtsTaskPeriodic(const mtsTaskPeriodicConstructorArg &arg):
     mtsTaskContinuous(arg.Name, arg.StateTableSize, true),
     ThreadBuddy(Thread),
     Period(arg.Period),
-    Period_d(SynchronizedMonotonicClock::fromSeconds(arg.Period)),
+    Period_d(durationFromSeconds<std::chrono::steady_clock>(arg.Period)),
     IsHardRealTime(arg.IsHardRealTime)
 {
     CMN_ASSERT(GetPeriodicity() > 0);

@@ -50,4 +50,10 @@ double durationToSeconds(std::chrono::duration<Rep, Period> duration) {
     return std::chrono::duration_cast<seconds_d>(duration).count();
 }
 
+template <typename clock_t>
+static typename clock_t::duration durationFromSeconds(double seconds) {
+    const auto seconds_d = std::chrono::duration<double>(seconds);
+    return std::chrono::duration_cast<typename clock_t::duration>(seconds_d);
+}
+
 #endif // _osaGetTime_h

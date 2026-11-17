@@ -45,9 +45,6 @@ clientTask::clientTask(const std::string & taskName, double period):
         required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite");
     }
     
-    // Get a pointer to the time server
-    this->TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
-    
     // Allocates space for samples
     this->Samples = Eigen::VectorXd::Zero(confNumberOfSamples);
 }
@@ -63,7 +60,7 @@ void clientTask::EventWriteHandler(const value_type & data)
             this->NumberOfskippedElement++;
         } else {
             double originalTime = data.Timestamp();
-            double currentTime = TimeServer->GetRelativeTime();
+            double currentTime = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch());
             this->Samples(this->SamplesCollected) = (currentTime - originalTime);
             this->SamplesCollected++;
         }
@@ -95,8 +92,7 @@ void clientTask::Run(void)
     this->WriteServer(parameter);
 
     // create an event to measure the loop client->server->client
-    double time;
-    time = this->TimeServer->GetRelativeTime();
+    double time = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch());
     parameter.SetTimestamp(time);
     this->TriggerEvent(parameter);
 }

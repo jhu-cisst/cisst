@@ -45,6 +45,5 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_EXPORT
 #define CISST_DEPRECATED
 
-%include "cisstOSAbstraction/osaTimeServer.h"
 %include "cisstOSAbstraction/osaSerialPort.h"
 %include "cisstOSAbstraction/osaDynamicLoader.h"

@@ -25,7 +25,6 @@ set (SOURCE_FILES
      osaSocketServer.cpp
      osaThreadBuddy.cpp
      osaThreadSignal.cpp
-     osaTimeServer.cpp
      )
 
 # all header files
@@ -42,7 +41,6 @@ set (HEADER_FILES
      osaThreadBuddy.h
      osaThreadSignal.h
      osaThreadedLogFile.h
-     osaTimeServer.h
      )
 
 # Create the config file

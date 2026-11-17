@@ -36,18 +36,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 
-
+#include <chrono>
 #include <iostream>
 #include <optional>
 #include <vector>
 #include "cisstMultiTask/mtsGenericObjectProxy.h"
-#include "cisstOSAbstraction/osaTimeServer.h"
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
-// Forward declaration
-class osaTimeServer;
 
 
 /*! mtsStateDataId.  Unique identifier for the columns of the State
@@ -78,7 +74,7 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
     friend class mtsCollectorBaseTest;
 
  public:
-    using Clock = SynchronizedMonotonicClock;
+    using Clock_t = std::chrono::steady_clock;
 
     /*! Collection is performed by batches, this requires to save
       the state indices for begin/end. */
@@ -105,12 +101,12 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         /*! Delay in second before data collection should start.  This
           is measured in seconds based on the state table Tic and Toc.
           0 means that there is no defined start time. */
-        std::optional<Clock::time_point> StartTime;
+        std::optional<Clock_t::time_point> StartTime;
 
         /*! Delay in second before data collection should stop.  This
           is measured in seconds based on the state table Tic and
           Toc. 0 means that there is no defined stop time. */
-        std::optional<Clock::time_point> StopTime;
+        std::optional<Clock_t::time_point> StopTime;
 
         /*! Range for the batch */
         mtsStateTable::IndexRange BatchRange;
@@ -125,10 +121,10 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         size_t CounterForEvent;
 
         /*! Interval between two progress events (in seconds) */
-        Clock::duration TimeIntervalForProgressEvent;
+        Clock_t::duration TimeIntervalForProgressEvent;
 
         /*! Time of last progress event */
-        Clock::time_point TimeOfLastProgressEvent;
+        Clock_t::time_point TimeOfLastProgressEvent;
 
         /*! Function used to trigger event sent to state collector
           when the data collection is needed.  The payload is the
@@ -285,18 +281,15 @@ public:
     mtsStateDataId TicId, TocId;
     mtsStateDataId PeriodId;
 
-    /*! The time server used to provide absolute and relative times. */
-    const osaTimeServer * TimeServer;
-
 public:
     /* The start/end times for the current row of data. Since we can't
        direction put a std::chrono time_point into the state vector,
        we use a proxy instead. TODO: remove once mtsStateTable uses proxys instead */
-    mtsGenericObjectProxy<Clock::time_point> Tic, Toc;
+    mtsGenericObjectProxy<Clock_t::time_point> Tic, Toc;
 
     /*! The measured task period (difference between current Tic and
         previous Tic). */
-    mtsGenericObjectProxy<Clock::duration> Period;
+    mtsGenericObjectProxy<Clock_t::duration> Period;
 
    /*! Periodicist Statistics */
     mtsIntervalStatistics PeriodStats;
@@ -464,11 +457,11 @@ public:
     /*! Cleanup called when the task is being stopped. */
     void Cleanup(void);
 
-    Clock::time_point GetTic(void) const {
+    Clock_t::time_point GetTic(void) const {
         return Tic;
     }
 
-    Clock::time_point GetToc(void) const {
+    Clock_t::time_point GetToc(void) const {
         return Toc;
     }
 

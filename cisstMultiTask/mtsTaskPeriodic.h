@@ -25,6 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsTaskPeriodic_h
 #define _mtsTaskPeriodic_h
 
+#include <chrono>
+
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 
@@ -45,6 +47,7 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
 
  public:
     typedef mtsTaskContinuous BaseType;
+    using Clock = std::chrono::steady_clock;
 
  protected:
     /************************ Protected task data  *********************/
@@ -55,7 +58,7 @@ class CISST_EXPORT mtsTaskPeriodic : public mtsTaskContinuous
 
     /*! The period of the task, in seconds. */
     double Period;
-    SynchronizedMonotonicClock::duration Period_d;
+    Clock::duration Period_d;
 
     /*! True if the task is hard real time. It is always false for non-real
       time systems. */

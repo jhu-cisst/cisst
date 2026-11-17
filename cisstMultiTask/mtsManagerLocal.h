@@ -42,7 +42,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -368,9 +367,6 @@ public:
                                     const std::string & componentName, const std::string & interfaceName) const;
     mtsInterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & componentName, const std::string & interfaceName) const
     { return GetInterfaceRequiredDescription("", componentName, interfaceName); }
-
-    /*! Return a reference to the time server. */
-    const osaTimeServer & GetTimeServer(void) const;
 
     //---------------------------------------------------------------------------------------------
     // Methods to track the "main" thread, which actually is the thread in which the Instance

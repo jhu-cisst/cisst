@@ -41,7 +41,6 @@ protected:
     void EventWriteHandler(const value_type & value);
 
     // time benchmarking
-    const osaTimeServer * TimeServer;
     bool BenchmarkDoneMember;
     unsigned int NumberOfskippedElement;
     unsigned int SamplesCollected;

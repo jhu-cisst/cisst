@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
+#include <chrono>
 #include <filesystem>
 #include <thread>
 
@@ -27,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSocket.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 
 #include <cisstMultiTask/mtsConfig.h>
@@ -43,9 +43,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstCommon/cmnAssert.h>
 
-// Time server used by all tasks
-osaTimeServer TimeServer;
-bool TimeServerOriginSet = false;
 
 mtsManagerLocal * mtsManagerLocal::Instance = 0;
 
@@ -87,9 +84,6 @@ mtsManagerLocal::~mtsManagerLocal()
 
 void mtsManagerLocal::Initialize(void)
 {
-    TimeServer.SetTimeOrigin();
-    TimeServerOriginSet = true;
-
     ValidComponentTags.clear();
     ValidComponentTags.insert("ROS");
     ValidComponentTags.insert("UI");
@@ -795,8 +789,8 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         std::vector<std::string> componentNames = GetNamesOfComponents();
         std::vector<std::string>::const_iterator iterator = componentNames.begin();
         const std::vector<std::string>::const_iterator end = componentNames.end();
-        SynchronizedMonotonicClock::time_point timeStartedAll = TimeServer.GetAbsoluteTime();
-        SynchronizedMonotonicClock::time_point timeEnd = timeStartedAll + SynchronizedMonotonicClock::fromSeconds(timeout);
+        std::chrono::steady_clock::time_point timeStartedAll = std::chrono::steady_clock::now();
+        std::chrono::steady_clock::time_point timeEnd = timeStartedAll + durationFromSeconds<std::chrono::steady_clock>(timeout);
         bool timedOut = false;
         for (; (iterator != end) && allAtState && !timedOut; ++iterator) {
             if (mtsManagerComponentBase::IsManagerComponent(*iterator))
@@ -805,7 +799,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
             CMN_ASSERT(component != nullptr);
             
             // compute how much time do we have left based on when we started
-            double timeLeft = durationToSeconds(timeEnd - TimeServer.GetAbsoluteTime());
+            double timeLeft = durationToSeconds(timeEnd - std::chrono::steady_clock::now());
             // skip in 2 cases, manager components and tasks with ExecIn
             mtsManagerComponentBase * isManager = dynamic_cast<mtsManagerComponentBase *>(component);
             bool isIndependent = true;
@@ -821,7 +815,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
                                              << desiredState << "\"" << std::endl;
                 }
             }
-            if (TimeServer.GetAbsoluteTime() > timeEnd) {
+            if (std::chrono::steady_clock::now() > timeEnd) {
                 // looks like we don't have any time left to start the remaining components.
                 timedOut = true;
                 allAtState = false;
@@ -832,7 +826,7 @@ bool mtsManagerLocal::WaitForStateAll(mtsComponentState desiredState, double tim
         // report results
         if (allAtState && !timedOut) {
             CMN_LOG_CLASS_INIT_VERBOSE << "WaitForStateAll: all components reached state \""
-                                       << desiredState << "\" in " << durationToSeconds(TimeServer.GetAbsoluteTime() - timeStartedAll) << " seconds" << std::endl;
+                                       << desiredState << "\" in " << durationToSeconds(std::chrono::steady_clock::now() - timeStartedAll) << " seconds" << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "WaitForStateAll: failed to reached state \""
                                      << desiredState << "\" for all components" << std::endl;
@@ -1073,11 +1067,6 @@ mtsInterfaceRequiredDescription mtsManagerLocal::GetInterfaceRequiredDescription
                                 const std::string & componentName, const std::string & interfaceName) const
 {
     return GetManagerComponentServices()->GetInterfaceRequiredDescription(processName, componentName, interfaceName);
-}
-
-const osaTimeServer & mtsManagerLocal::GetTimeServer(void) const
-{
-    return TimeServer;
 }
 
 void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
