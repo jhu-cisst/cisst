@@ -80,8 +80,7 @@ bool mtsEventReceiverBase::WaitWithTimeout(double timeoutInSec)
 
 void mtsEventReceiverBase::Detach()
 {
-    // PK: to be implemented
-    // TODO
+    // TODO PK: to be implemented
 }
 
 //************************************* mtsEventReceiverVoid ***************************************************

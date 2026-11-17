@@ -82,7 +82,7 @@ http://www.cisst.org/cisst/license.txt.
   introduce an std::condition_variable member to mtsComponent and use that instead of the one in the required
   interface mailbox.
 
-  // TODO: should we add std::condition_variable to mtsComponent as described above?
+  // TODO BB: should we add std::condition_variable to mtsComponent as described above?
 */
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>

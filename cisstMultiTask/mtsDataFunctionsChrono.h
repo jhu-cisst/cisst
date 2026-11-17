@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsDataFunctionsChrono_h
 
 #include <chrono>
-#include <ratio>
 
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstOSAbstraction/osaTime.h>

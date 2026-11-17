@@ -284,7 +284,7 @@ public:
 public:
     /* The start/end times for the current row of data. Since we can't
        direction put a std::chrono time_point into the state vector,
-       we use a proxy instead. TODO: remove once mtsStateTable uses proxys instead */
+       we use a proxy instead. TODO BB: remove once mtsStateTable uses proxys instead */
     mtsGenericObjectProxy<Clock_t::time_point> Tic, Toc;
 
     /*! The measured task period (difference between current Tic and

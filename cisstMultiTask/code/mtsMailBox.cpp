@@ -80,7 +80,7 @@ bool mtsMailBox::ExecuteNext(void)
    mtsGenericObject *resultPointer = 0;
    mtsCommandWriteBase *finishedEvent = 0;
 
-   // TODO: yikes! replace with RAII
+   // TODO BB: yikes! replace with RAII
    bool isBlocking = false;
    try {
        if (!(*command)->Returns()) {

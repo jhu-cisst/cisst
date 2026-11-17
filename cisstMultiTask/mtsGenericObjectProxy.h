@@ -58,7 +58,7 @@ template <class _elementType> class mtsGenericObjectProxyBase;
 /*
   Note: the extra default-void template parameter is not normally used but
   added to support SFINAE-based template deduction, e.g. for Eigen types.
-  TODO: would we ever need it on the ProxyBase/ProxyRef types?
+  TODO BB: would we ever need it on the ProxyBase/ProxyRef types?
 */
 template <class _elementType, typename=void> class mtsGenericObjectProxy;
 template <class _elementType> class mtsGenericObjectProxyRef;
