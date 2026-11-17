@@ -44,6 +44,9 @@ void CISST_EXPORT osaGetTimeString(std::string& output, std::chrono::system_cloc
 /*! Convert current local time to string */
 void CISST_EXPORT osaGetTimeString(std::string& output);
 
+// Convert time point to decimal timestamp in seconds since clock's epoch
+double CISST_EXPORT getTimestamp(std::chrono::steady_clock::time_point time_point);
+
 template <class Rep, class Period=std::ratio<1>>
 double durationToSeconds(std::chrono::duration<Rep, Period> duration) {
     using seconds_d = std::chrono::duration<double>;
@@ -51,7 +54,7 @@ double durationToSeconds(std::chrono::duration<Rep, Period> duration) {
 }
 
 template <typename clock_t>
-static typename clock_t::duration durationFromSeconds(double seconds) {
+typename clock_t::duration durationFromSeconds(double seconds) {
     const auto seconds_d = std::chrono::duration<double>(seconds);
     return std::chrono::duration_cast<typename clock_t::duration>(seconds_d);
 }

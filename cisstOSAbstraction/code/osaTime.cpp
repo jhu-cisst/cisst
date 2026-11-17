@@ -119,3 +119,8 @@ void osaGetTimeString(std::string& output)
     oss << std::put_time(tm, format.c_str()); 
     output = oss.str();
 }
+
+double getTimestamp(std::chrono::steady_clock::time_point time_point)
+{
+    return durationToSeconds(time_point.time_since_epoch());
+}
