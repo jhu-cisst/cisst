@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnThrow.h>
 #include <cisstCommon/cmnSearchPath.h>
 #include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaTime.h>
 #include <cisstOSAbstraction/osaSocket.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 

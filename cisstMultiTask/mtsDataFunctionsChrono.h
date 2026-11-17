@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <ratio>
 
 #include <cisstCommon/cmnDataFunctions.h>
-#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaTime.h>
 
 // always include last
 #include <cisstMultiTask/mtsExport.h>

@@ -17,7 +17,6 @@ project (cisstOSAbstraction)
 set (SOURCE_FILES
      osaClassServices.cpp
      osaDynamicLoader.cpp
-     osaGetTime.cpp
      osaPipeExec.cpp
      osaSerialPort.cpp
      osaSleep.cpp
@@ -25,13 +24,13 @@ set (SOURCE_FILES
      osaSocketServer.cpp
      osaThreadBuddy.cpp
      osaThreadSignal.cpp
+     osaTime.cpp
      )
 
 # all header files
 set (HEADER_FILES
      osaDynamicLoader.h
      osaExport.h
-     osaGetTime.h
      osaPipeExec.h
      osaSerialPort.h
      osaSleep.h
@@ -41,6 +40,7 @@ set (HEADER_FILES
      osaThreadBuddy.h
      osaThreadSignal.h
      osaThreadedLogFile.h
+     osaTime.h
      )
 
 # Create the config file

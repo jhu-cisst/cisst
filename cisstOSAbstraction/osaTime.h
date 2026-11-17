@@ -21,11 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Declaration of osaGetTime
+  \brief Declaration of osaTime
  */
 
-#ifndef _osaGetTime_h
-#define _osaGetTime_h
+#ifndef _osaTime_h
+#define _osaTime_h
 
 #include <chrono>
 #include <string>
@@ -56,4 +56,4 @@ static typename clock_t::duration durationFromSeconds(double seconds) {
     return std::chrono::duration_cast<typename clock_t::duration>(seconds_d);
 }
 
-#endif // _osaGetTime_h
+#endif // _osaTime_h

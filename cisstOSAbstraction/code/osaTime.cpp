@@ -24,8 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnLogger.h>
 
-#include <cisstOSAbstraction/osaGetTime.h>
-
+#include <cisstOSAbstraction/osaTime.h>
 
 void osaGetDateTimeString(std::string& output, char delimiter)
 {

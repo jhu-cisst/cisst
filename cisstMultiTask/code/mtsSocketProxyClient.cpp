@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
 #include <cisstMultiTask/mtsSocketProxyCommon.h>
 
-#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaTime.h>
 #include <chrono>
 
 #include "mtsProxySerializer.h"

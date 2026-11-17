@@ -374,7 +374,7 @@ class {
 inline-code {
     #include <chrono>
     #include <cisstMultiTask/mtsForwardDeclarations.h>
-    #include <cisstOSAbstraction/osaGetTime.h>
+    #include <cisstOSAbstraction/osaTime.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
     void mtsMessage::SetMessage(const std::string & message) {
         Timestamp = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch());
