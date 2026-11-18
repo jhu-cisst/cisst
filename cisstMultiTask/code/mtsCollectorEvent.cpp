@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <chrono>
 #include <iostream>
 
-#include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>

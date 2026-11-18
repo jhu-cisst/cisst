@@ -177,39 +177,6 @@ http://www.cisst.org/cisst/license.txt.
     %}
 }
 
-// These operators have no useful Python method representation.
-%ignore cmnGenericObjectProxy::operator=;
-%ignore cmnGenericObjectProxy::operator const value_type&;
-
-// Wrap some basic types
-%include "cisstCommon/cmnGenericObjectProxy.h"
-%define CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(name, elementType)
-    // ignore the operator &
-    %ignore cmnGenericObjectProxy<elementType>::operator value_type&;
-    // assignment and conversion operators are not representable as Python
-    // methods and are intentionally not wrapped
-    %ignore cmnGenericObjectProxy<elementType>::operator=;
-    %ignore cmnGenericObjectProxy<elementType>::operator const value_type&;
-    // Instantiate the template
-    %template(name) cmnGenericObjectProxy<elementType>;
-    // Type addition for dynamic type checking
-    %{
-        typedef cmnGenericObjectProxy<elementType> name;
-    %}
-    typedef cmnGenericObjectProxy<elementType> name;
-    %types(name *);
-%enddef
-
-CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnDouble, double);
-CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnInt, int);
-CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnUInt, unsigned int);
-CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnShort, short);
-CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnUShort, unsigned short);
-CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnLong, long);
-CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnULong, unsigned long);
-CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnBool, bool);
-
-
 // Wrap stream code related to the logging system
 %template() std::basic_streambuf<char,std::char_traits<char > >;
 %include "cisstCommon/cmnLODMultiplexerStreambuf.h"
